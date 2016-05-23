@@ -3293,54 +3293,18 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		TempoMap& map (_editor->session()->tempo_map());
 		/* get current state */
 		before_state = &map.get_state();
+
 		if (!_copy) {
 			_editor->begin_reversible_command (_("move tempo mark"));
+
 		} else {
+			const framepos_t frame = adjusted_current_frame (event) + 1;
+
 			_editor->begin_reversible_command (_("copy tempo mark"));
-			framepos_t frame;
-			bool use_snap = false;
-
-			if (!_editor->snap_musical()) {
-				frame = adjusted_current_frame (event);
-			} else {
-				frame = adjusted_current_frame (event, false);
-				if (ArdourKeyboard::indicates_snap (event->button.state)) {
-					if (_editor->snap_mode() == Editing::SnapOff) {
-						use_snap = true;
-					} else {
-						use_snap = false;
-					}
-				} else {
-					if (_editor->snap_mode() == Editing::SnapOff) {
-						use_snap = false;
-					} else {
-						use_snap = true;
-					}
-				}
-			}
-
-			Timecode::BBT_Time bbt;
-			map.bbt_time (frame, bbt);
-
-			/* add new tempo section to map, ensuring we don't refer to existing tempos for snap */
 
 			if (_real_section->position_lock_style() == MusicTime) {
-				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (bbt, -1, (frame > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
-				} else if (use_snap) {
-					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
-				}
-				double const pulse = map.predict_tempo_position (_real_section, bbt).first;
-				_real_section = map.add_tempo (_marker->tempo(), pulse, 0, _real_section->type(), MusicTime);
+				_real_section = map.add_tempo (_marker->tempo(), map.pulse_at_frame (frame), 0, _real_section->type(), MusicTime);
 			} else {
-				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (bbt, -1, (frame > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
-				} else if (use_snap) {
-					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
-				}
-				if (use_snap) {
-					frame = map.predict_tempo_position (_real_section, bbt).second;
-				}
 				_real_section = map.add_tempo (_marker->tempo(), 0.0, frame, _real_section->type(), AudioTime);
 			}
 		}
@@ -3359,45 +3323,34 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_text (strs.str());
 
 	} else if (_movable && !_real_section->locked_to_meter()) {
+		TempoMap& map (_editor->session()->tempo_map());
+		const bool was_music = _real_section->position_lock_style() == MusicTime;
+
+		pf = adjusted_current_frame (event);
 
 		if (!_editor->snap_musical()) {
-			/* snap normally (this is not self-referential).*/
-			pf = adjusted_current_frame (event);
+
+			if (was_music) {
+				_real_section->set_position_lock_style (AudioTime);
+			}
+
+			map.gui_move_tempo (_real_section, pf);
+
+			if (was_music) {
+				_real_section->set_position_lock_style (MusicTime);
+			}
 
 		} else {
-			/* but this is.
-			   we can't use the map for anything related to tempo,
-			   so we round bbt using meters, which have no dependency
-			   on pulse for this kind of thing.
-			*/
-			TempoMap& map (_editor->session()->tempo_map());
-			Timecode::BBT_Time when;
-			bool use_snap;
 
-			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (_editor->snap_mode() == Editing::SnapOff) {
-					use_snap = true;
-				} else {
-					use_snap = false;
-				}
-			} else {
-				if (_editor->snap_mode() == Editing::SnapOff) {
-					use_snap = false;
-				} else {
-					use_snap = true;
-				}
+			if (!was_music) {
+				_real_section->set_position_lock_style (MusicTime);
 			}
 
-			pf = adjusted_current_frame (event);
-			map.bbt_time (pf, when);
+			map.gui_move_tempo (_real_section, pf);
 
-			if (use_snap && _editor->snap_type() == SnapToBar) {
-				map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
-
+			if (!was_music) {
+				_real_section->set_position_lock_style (AudioTime);
 			}
-			const pair<double, framepos_t> future_pos = map.predict_tempo_position (_real_section, when);
-			map.gui_move_tempo (_real_section, future_pos);
-
 		}
 
 		show_verbose_cursor_time (_real_section->frame());

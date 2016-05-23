@@ -399,7 +399,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 
-	void gui_move_tempo (TempoSection*, const std::pair<double, framepos_t>& pulse);
+	void gui_move_tempo (TempoSection*, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);

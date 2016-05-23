@@ -2395,7 +2395,7 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 }
 
 void
-TempoMap::gui_move_tempo (TempoSection* ts, const pair<double, framepos_t>& pulse)
+TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame)
 {
 	Metrics future_map;
 
@@ -2403,8 +2403,9 @@ TempoMap::gui_move_tempo (TempoSection* ts, const pair<double, framepos_t>& puls
 		{
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-			if (solve_map_pulse (future_map, tempo_copy, pulse.first)) {
-				solve_map_pulse (_metrics, ts, pulse.first);
+			const double pulse = pulse_at_frame_locked (future_map, frame);
+			if (solve_map_pulse (future_map, tempo_copy, pulse)) {
+				solve_map_pulse (_metrics, ts, pulse);
 				recompute_meters (_metrics);
 			}
 		}
@@ -2414,8 +2415,8 @@ TempoMap::gui_move_tempo (TempoSection* ts, const pair<double, framepos_t>& puls
 		{
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-			if (solve_map_frame (future_map, tempo_copy, pulse.second)) {
-				solve_map_frame (_metrics, ts, pulse.second);
+			if (solve_map_frame (future_map, tempo_copy, frame)) {
+				solve_map_frame (_metrics, ts, frame);
 				recompute_meters (_metrics);
 			}
 		}
