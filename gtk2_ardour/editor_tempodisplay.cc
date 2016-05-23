@@ -129,7 +129,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		TempoMarker* tempo_marker;
 
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / (max_tempo - min_tempo));
+			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
 		}
 	}
 }

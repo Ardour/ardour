@@ -110,13 +110,13 @@ TempoCurve::the_item() const
 void
 TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 {
+	const double tempo_delta = max (10.0, _max_tempo - _min_tempo);
+
 	unit_position = editor.sample_to_pixel (frame);
 	group->set_x_position (unit_position);
 	frame_position = frame;
 	_end_frame = end_frame;
 
-	const double tempo_delta = max (10.0, _max_tempo - _min_tempo);
-	double max_y = 0.0;
 
 	points->clear();
 
@@ -126,8 +126,6 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 	if (end_frame == UINT32_MAX) {
 		const double tempo_at = _tempo.tempo_at_frame (frame, editor.session()->frame_rate()) * _tempo.note_type();
 		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
-
-		max_y = y_pos;
 
 		points->push_back (ArdourCanvas::Duple (0.0, y_pos));
 		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y_pos));
@@ -142,9 +140,9 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 
 			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_frame - frame), y_pos));
 
-			max_y = max (y_pos, max_y);
 			current_frame += frame_step;
 		}
+
 		const double tempo_at = _tempo.tempo_at_frame (end_frame, editor.session()->frame_rate()) * _tempo.note_type();
 		const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
 
