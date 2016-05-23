@@ -649,7 +649,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	_frame_rate = fr;
 	BBT_Time start (1, 1, 0);
 
-	TempoSection *t = new TempoSection (0.0, 0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Constant, AudioTime);
+	TempoSection *t = new TempoSection (0.0, 0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Ramp, AudioTime);
 	MeterSection *m = new MeterSection (0.0, 0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor(), AudioTime);
 
 	t->set_movable (false);
@@ -999,9 +999,10 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 			first_t.set_frame (first.frame());
 			first_t.set_pulse (0.0);
 			first_t.set_position_lock_style (AudioTime);
+			recompute_map (_metrics);
 		}
-		recompute_map (_metrics);
 	}
+
 	PropertyChanged (PropertyChange ());
 }
 
