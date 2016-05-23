@@ -44,7 +44,6 @@ void
 ControlGroup::set_active (bool yn)
 {
 	_active = yn;
-	std::cerr << " CG for " << enum_2_string ((AutomationType) _parameter.type()) << " now active ? " << _active << std::endl;
 }
 
 void

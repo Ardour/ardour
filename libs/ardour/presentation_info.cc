@@ -54,13 +54,15 @@ PresentationInfo::parse (string const& str)
 	/* new school, segmented string "NNN:TYPE" */
 	string f;
 	char c;
+
 	s >> _order;
 	/* skip colon */
 	s >> c;
 	/* grab flags */
 	s >> f;
+
 	_flags = Flag (string_2_enum (f, _flags)|GroupOrderSet);
-	std::cerr << "Parsed [" << str << "] as " << _order << " + " << enum_2_string (_flags) << std::endl;
+
 	return 0;
 }
 
