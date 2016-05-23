@@ -647,6 +647,17 @@ if test -n "$MIXBUS"; then
 	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
 		$APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
 	chmod +x $APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
+
+	echo "Adding Harrison Vamp Plugins"
+
+	curl -s -S --fail -# \
+		-z "${CACHEDIR}/harrison_vamp.${HARCH}.so" \
+		-o "${CACHEDIR}/harrison_vamp.${HARCH}.so" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${HARCH}.so"
+
+	cp "${CACHEDIR}/harrison_vamp.${HARCH}.so" \
+		$APPLIB/harrison_vamp.so
+	chmod +x $APPLIB/harrison_vamp.so
 fi
 
 if test x$WITH_X42_LV2 != x ; then

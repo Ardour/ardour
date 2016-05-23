@@ -295,6 +295,16 @@ if test -n "$MIXBUS"; then
 
 	cp "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/${HARRISONCHANNELSTRIP}.dll"
+
+	echo "Deploying Harrison Vamp Plugins"
+	mkdir -p $ALIBDIR/vamp
+	curl -s -S --fail -# \
+		-z "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
+		-o "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${WARCH}.dll"
+
+	cp "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
+		"$ALIBDIR/vamp/harrison_vamp.dll"
 fi
 
 ( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt

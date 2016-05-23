@@ -703,7 +703,7 @@ if test x$WITH_X42_LV2 != x ; then
 fi
 
 if test -n "$MIXBUS"; then
-	echo "deploying harrison tools for $OSX_BENSID"
+	echo "deploying harrison channelstrip for $OSX_BENSID"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
 
@@ -714,6 +714,16 @@ if test -n "$MIXBUS"; then
 
 	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/${HARRISONCHANNELSTRIP}.so"
+
+	echo "deploying harrison vamp plugins for $OSX_BENSID"
+
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
+		-o "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${OSX_BENSID}.dylib"
+
+	cp "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
+		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/harrison_vamp.dylib"
 fi
 ################################################################################
 
