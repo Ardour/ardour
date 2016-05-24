@@ -3918,6 +3918,7 @@ Editor::freeze_route ()
 		gtk_main_iteration ();
 	}
 
+	pthread_join (itt.thread, 0);
 	current_interthread_info = 0;
 }
 
