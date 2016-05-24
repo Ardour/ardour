@@ -109,7 +109,7 @@ RouteUI::~RouteUI()
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
-        delete record_menu;
+	delete record_menu;
 	delete comment_window;
 	delete input_selector;
 	delete output_selector;
@@ -126,20 +126,21 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
-        record_menu = 0;
+	record_menu = 0;
 	_invert_menu = 0;
 	pre_fader_mute_check = 0;
 	post_fader_mute_check = 0;
 	listen_mute_check = 0;
 	main_mute_check = 0;
-        solo_safe_check = 0;
-        solo_isolated_check = 0;
-        solo_isolated_led = 0;
-        solo_safe_led = 0;
+	solo_safe_check = 0;
+	solo_isolated_check = 0;
+	solo_isolated_led = 0;
+	solo_safe_led = 0;
 	_solo_release = 0;
 	_mute_release = 0;
 	denormal_menu_item = 0;
-        step_edit_item = 0;
+	step_edit_item = 0;
+	rec_safe_item = 0;
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
@@ -886,28 +887,29 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 void
 RouteUI::build_record_menu ()
 {
-	if (record_menu) {
-		return;
-	}
-
-	/* no rec-button context menu for non-MIDI tracks
-	 */
-
-	if (is_midi_track()) {
+	if (!record_menu) {
 		record_menu = new Menu;
 		record_menu->set_name ("ArdourContextMenu");
-
 		using namespace Menu_Helpers;
 		MenuList& items = record_menu->items();
 
-		items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-		step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+		items.push_back (CheckMenuElem (_("Rec-Safe"), sigc::mem_fun (*this, &RouteUI::toggle_rec_safe)));
+		rec_safe_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-		if (_route->record_enabled()) {
-			step_edit_item->set_sensitive (false);
+		if (is_midi_track()) {
+			items.push_back (SeparatorElem());
+			items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+			step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		}
+	}
 
+	if (step_edit_item) {
+		step_edit_item->set_sensitive (!_route->record_enabled());
 		step_edit_item->set_active (midi_track()->step_editing());
+	}
+	if (rec_safe_item) {
+		rec_safe_item->set_sensitive (!_route->record_enabled());
+		rec_safe_item->set_active (_route->record_safe());
 	}
 }
 
@@ -919,6 +921,18 @@ RouteUI::toggle_step_edit ()
 	}
 
 	midi_track()->set_step_editing (step_edit_item->get_active());
+}
+
+void
+RouteUI::toggle_rec_safe ()
+{
+	if (_route->record_enabled()) {
+		return;
+	}
+	DisplaySuspender ds;
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (_route);
+	_session->set_record_safe (rl, rec_safe_item->get_active (), Session::rt_cleanup);
 }
 
 void
@@ -1927,24 +1941,16 @@ RouteUI::check_rec_enable_sensitivity ()
 
 	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
-	} else if (_route && _route->record_safe ()) {
+	} else if (is_audio_track ()  && track()->freeze_state() == AudioTrack::Frozen) {
 		rec_enable_button->set_sensitive (false);
 	} else {
-		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
-		if (at) {
-			switch (at->freeze_state()) {
-				case AudioTrack::Frozen:
-					rec_enable_button->set_sensitive (false);
-					break;
-				default:
-					rec_enable_button->set_sensitive (true);
-					break;
-			}
-		} else {
-			rec_enable_button->set_sensitive (true);
-		}
+		rec_enable_button->set_sensitive (true);
 	}
-
+	if (_route && _route->record_safe ()) {
+		rec_enable_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
+	} else {
+		rec_enable_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+	}
 	update_monitoring_display ();
 }
 

@@ -109,6 +109,23 @@ EditorRoutes::EditorRoutes (Editor* e)
 	rec_state_column->set_expand(false);
 	rec_state_column->set_fixed_width(column_width);
 
+
+	// Record safe toggle
+	CellRendererPixbufMulti* rec_safe_renderer = manage (new CellRendererPixbufMulti ());
+
+	rec_safe_renderer->set_pixbuf (0, ::get_icon("rec-safe-disabled"));
+	rec_safe_renderer->set_pixbuf (1, ::get_icon("rec-safe-enabled"));
+	rec_safe_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_rec_safe_toggled));
+
+	TreeViewColumn* rec_safe_column = manage (new TreeViewColumn(_("RS"), *rec_safe_renderer));
+	rec_safe_column->add_attribute(rec_safe_renderer->property_state(), _columns.rec_safe);
+	rec_safe_column->add_attribute(rec_safe_renderer->property_visible(), _columns.is_track);
+	rec_safe_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	rec_safe_column->set_alignment(ALIGN_CENTER);
+	rec_safe_column->set_expand(false);
+	rec_safe_column->set_fixed_width(column_width);
+
+
 	// MIDI Input Active
 
 	CellRendererPixbufMulti* input_active_col_renderer = manage (new CellRendererPixbufMulti());
@@ -196,6 +213,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	_display.append_column (*input_active_column);
 	_display.append_column (*rec_state_column);
+	_display.append_column (*rec_safe_column);
 	_display.append_column (*mute_state_column);
 	_display.append_column (*solo_state_column);
 	_display.append_column (*solo_isolate_state_column);
@@ -211,10 +229,11 @@ EditorRoutes::EditorRoutes (Editor* e)
 		{ 2, S_("Active|A"),    _("Track/Bus active ?") },
 		{ 3, S_("MidiInput|I"), _("MIDI input enabled") },
 		{ 4, S_("Rec|R"),       _("Record enabled") },
-		{ 5, S_("Mute|M"),      _("Muted") },
-		{ 6, S_("Solo|S"),      _("Soloed") },
-		{ 7, S_("SoloIso|SI"),  _("Solo Isolated") },
-		{ 8, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
+		{ 5, S_("Rec|RS"),      _("Record Safe") },
+		{ 6, S_("Mute|M"),      _("Muted") },
+		{ 7, S_("Solo|S"),      _("Soloed") },
+		{ 8, S_("SoloIso|SI"),  _("Solo Isolated") },
+		{ 9, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
 		{ -1, 0, 0 }
 	};
 
@@ -396,7 +415,6 @@ EditorRoutes::on_input_active_changed (std::string const & path_string)
 void
 EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 {
-	DisplaySuspender ds;
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
@@ -404,9 +422,26 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv && rtv->track()) {
+		DisplaySuspender ds;
 		boost::shared_ptr<RouteList> rl (new RouteList);
+		// TODO check rec-safe and ...
 		rl->push_back (rtv->route());
 		_session->set_record_enabled (rl, !rtv->track()->record_enabled(), Session::rt_cleanup);
+	}
+}
+
+void
+EditorRoutes::on_tv_rec_safe_toggled (std::string const & path_string)
+{
+	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
+	TimeAxisView* tv = row[_columns.tv];
+	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (rtv && rtv->track() && !rtv->track()->record_enabled()) {
+		DisplaySuspender ds;
+		boost::shared_ptr<RouteList> rl (new RouteList);
+		rl->push_back (rtv->route());
+		_session->set_record_safe (rl, !rtv->track()->record_safe(), Session::rt_cleanup);
 	}
 }
 
@@ -1625,9 +1660,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 				(*i)[_columns.rec_state] = 0;
 			}
 
-			// TODO figure out how to make this Cell insensitive
-			// and see RouteUI::check_rec_enable_sensitivity()
-
+			(*i)[_columns.rec_safe] = route->record_safe () ? 1 : 0;
 			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}
 	}

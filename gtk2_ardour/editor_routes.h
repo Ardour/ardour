@@ -69,6 +69,7 @@ private:
 	void redisplay_real ();
 	void on_input_active_changed (std::string const &);
 	void on_tv_rec_enable_changed (std::string const &);
+	void on_tv_rec_safe_toggled (std::string const &);
 	void on_tv_mute_enable_toggled (std::string const &);
 	void on_tv_solo_enable_toggled (std::string const &);
 	void on_tv_solo_isolate_toggled (std::string const &);
@@ -119,6 +120,7 @@ private:
 			add (text);
 			add (visible);
 			add (rec_state);
+			add (rec_safe);
 			add (mute_state);
 			add (solo_state);
 			add (solo_visible);
@@ -136,6 +138,7 @@ private:
 		Gtk::TreeModelColumn<std::string>    text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
+		Gtk::TreeModelColumn<uint32_t>       rec_safe;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		/** true if the solo buttons are visible for this route, otherwise false */

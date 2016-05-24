@@ -2024,13 +2024,14 @@ MixerStrip::drop_send ()
 	set_invert_sensitive (true);
 	meter_point_button.set_sensitive (true);
 	mute_button->set_sensitive (true);
-	solo_button->set_sensitive (!_route || !_route->solo_safe());
+	solo_button->set_sensitive (true);
 	solo_isolated_led->set_sensitive (true);
 	solo_safe_led->set_sensitive (true);
 	monitor_input_button->set_sensitive (true);
 	monitor_disk_button->set_sensitive (true);
 	_comment_button.set_sensitive (true);
 	RouteUI::check_rec_enable_sensitivity ();
+	set_button_names (); // update solo button visual state
 }
 
 void
