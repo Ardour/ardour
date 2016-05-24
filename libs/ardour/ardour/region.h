@@ -209,7 +209,7 @@ class LIBARDOUR_API Region
 	void set_position (framepos_t);
 	void set_initial_position (framepos_t);
 	void special_set_position (framepos_t);
-	virtual void update_after_tempo_map_change ();
+	virtual void update_after_tempo_map_change (bool send_change = true);
 	void nudge_position (frameoffset_t);
 
 	bool at_natural_position () const;

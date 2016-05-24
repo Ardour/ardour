@@ -140,7 +140,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	void model_automation_state_changed (Evoral::Parameter const &);
 
 	void set_start_beats_from_start_frames ();
-	void update_after_tempo_map_change ();
+	void update_after_tempo_map_change (bool send_change = true);
 
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;

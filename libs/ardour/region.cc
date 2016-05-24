@@ -546,21 +546,24 @@ Region::set_position_lock_style (PositionLockStyle ps)
 }
 
 void
-Region::update_after_tempo_map_change ()
+Region::update_after_tempo_map_change (bool send)
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (!pl || _position_lock_style != MusicTime) {
 		return;
 	}
-	TempoMap& map (_session.tempo_map());
-	framepos_t pos = map.frame_at_beat (_beat);
+
+	const framepos_t pos = _session.tempo_map().frame_at_beat (_beat);
 	set_position_internal (pos, false);
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
 	*/
-	send_change (Properties::position);
+
+	if (send) {
+		send_change (Properties::position);
+	}
 }
 
 void

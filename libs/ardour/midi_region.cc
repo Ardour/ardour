@@ -196,14 +196,20 @@ MidiRegion::set_length_internal (framecnt_t len)
 }
 
 void
-MidiRegion::update_after_tempo_map_change ()
+MidiRegion::update_after_tempo_map_change (bool /* send */)
 {
-	Region::update_after_tempo_map_change ();
+	Region::update_after_tempo_map_change (false);
 
 	/* _position has now been updated for the new tempo map */
 	_start = _position - _session.tempo_map().framepos_minus_beats (_position, _start_beats);
+	_length = _session.tempo_map().framepos_plus_beats (_position, _length_beats) - _position;
 
-	send_change (Properties::start);
+	PropertyChange s_and_l;
+	s_and_l.add (Properties::start);
+	s_and_l.add (Properties::length);
+	s_and_l.add (Properties::position);
+
+	send_change (s_and_l);
 }
 
 void
