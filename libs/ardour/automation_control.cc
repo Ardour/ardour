@@ -124,8 +124,9 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 
 	AutomationType at = (AutomationType) _parameter.type();
 
-	std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value 
-	          << " (was " << old_value << ") @ " << this << std::endl;
+	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value 
+	//<< " (was " << old_value << ") @ " << this << std::endl;
+
 	Changed (true, gcd);
 }
 
