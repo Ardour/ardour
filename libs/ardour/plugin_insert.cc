@@ -1330,6 +1330,30 @@ PluginInsert::check_inplace ()
 			inplace_ok = false;
 		}
 	}
+
+	if (inplace_ok) {
+		/* check if every output is fed by the corresponding input
+		 *
+		 * this prevents  in-port 1 -> sink-pin 2  ||  source-pin 1 -> out port 1, source-pin 2 -> out port 2
+		 * (with in-place,  source-pin 1 -> out port 1 overwrites in-port 1)
+		 *
+		 * but allows     in-port 1 -> sink-pin 2  ||  source-pin 2 -> out port 1
+		 */
+		ChanMapping in_map (input_map ());
+		const ChanMapping::Mappings out_m (output_map ().mappings ());
+		for (ChanMapping::Mappings::const_iterator t = out_m.begin (); t != out_m.end () && inplace_ok; ++t) {
+			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
+				/* src-pin: c->first, out-port: c->second */
+				bool valid;
+				uint32_t in_port = in_map.get (t->first, c->first, &valid);
+				if (valid && in_port != c->second) {
+					inplace_ok = false;
+					break;
+				}
+			}
+		}
+	}
+
 	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: %2\n", name(), inplace_ok ? "In-Place" : "No Inplace Processing"));
 	return !inplace_ok; // no-inplace
 }
