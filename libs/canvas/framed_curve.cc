@@ -188,11 +188,12 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		Points::size_type right = n_samples;
 
 		for (Points::size_type idx = 0; idx < n_samples - 1; ++idx) {
-			left = idx;
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
 			if (window_space.x >= draw.x0) break;
+			left = idx;
 		}
-		for (Points::size_type idx = n_samples; idx > left + 1; --idx) {
+
+		for (Points::size_type idx = n_samples; idx > left; --idx) {
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
 			if (window_space.x <= draw.x1) break;
 			right = idx;
