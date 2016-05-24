@@ -44,15 +44,15 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Container& parent, guint
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 1));
 #ifdef CANVAS_DEBUG
-	group->name = string_compose ("Marker::group for %1", _tempo.beats_per_minute());
+	group->name = string_compose ("TempoCurve::group for %1", _tempo.beats_per_minute());
 #endif
 
 	_curve = new ArdourCanvas::FramedCurve (group);
 #ifdef CANVAS_DEBUG
-	_curve->name = string_compose ("TempoCurve::_curve for %1", _tempo.beats_per_minute());
+	_curve->name = string_compose ("TempoCurve::curve for %1", _tempo.beats_per_minute());
 #endif
 	_curve->set_fill_mode (ArdourCanvas::FramedCurve::Inside);
-	_curve->set_points_per_segment (31);
+	_curve->set_points_per_segment (3);
 
 	points = new ArdourCanvas::Points ();
 	points->push_back (ArdourCanvas::Duple (0.0, 0.0));
@@ -110,13 +110,10 @@ TempoCurve::the_item() const
 void
 TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 {
-	const double tempo_delta = max (10.0, _max_tempo - _min_tempo);
-
 	unit_position = editor.sample_to_pixel (frame);
 	group->set_x_position (unit_position);
 	frame_position = frame;
 	_end_frame = end_frame;
-
 
 	points->clear();
 
@@ -125,18 +122,18 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 
 	if (end_frame == UINT32_MAX) {
 		const double tempo_at = _tempo.tempo_at_frame (frame, editor.session()->frame_rate()) * _tempo.note_type();
-		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
+		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
 		points->push_back (ArdourCanvas::Duple (0.0, y_pos));
 		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y_pos));
 
 	} else {
-		const framepos_t frame_step = ((end_frame - 1) - frame) / 29;
+		const framepos_t frame_step = (end_frame - frame) / 5;
 		framepos_t current_frame = frame;
 
 		while (current_frame < (end_frame - frame_step)) {
 			const double tempo_at = _tempo.tempo_at_frame (current_frame, editor.session()->frame_rate()) * _tempo.note_type();
-			const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
+			const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
 			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_frame - frame), y_pos));
 
@@ -144,7 +141,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		}
 
 		const double tempo_at = _tempo.tempo_at_frame (end_frame, editor.session()->frame_rate()) * _tempo.note_type();
-		const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
+		const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
 		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel ((end_frame - 1) - frame), y_pos));
 	}
@@ -178,7 +175,7 @@ void
 TempoCurve::set_color_rgba (uint32_t c)
 {
 	_color = c;
-	_curve->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
+	_curve->set_fill_color (UIConfiguration::instance().color_mod ("color 62", "selection rect"));
 	_curve->set_outline_color (_color);
 
 }

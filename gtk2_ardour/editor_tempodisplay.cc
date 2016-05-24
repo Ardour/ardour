@@ -103,13 +103,21 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			max_tempo = max (max_tempo, ts->beats_per_minute());
 			min_tempo = min (min_tempo, ts->beats_per_minute());
 
-			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("range drag rect"),
+			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("color 62"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
 			metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
 								 *(const_cast<TempoSection*>(ts))));
 
 		}
 
+	}
+
+	const double min_tempo_range = 5.0;
+	const double tempo_delta = fabs (max_tempo - min_tempo);
+
+	if (tempo_delta < min_tempo_range) {
+		max_tempo += min_tempo_range - tempo_delta;
+		min_tempo += tempo_delta - min_tempo_range;
 	}
 
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
@@ -202,6 +210,14 @@ Editor::marker_position_changed ()
 	}
 
 	tempo_curves.sort (CurveComparator());
+
+	const double min_tempo_range = 5.0;
+	const double tempo_delta = fabs (max_tempo - min_tempo);
+
+	if (tempo_delta < min_tempo_range) {
+		max_tempo += min_tempo_range - tempo_delta;
+		min_tempo += tempo_delta - min_tempo_range;
+	}
 
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
 		Curves::iterator tmp = x;
