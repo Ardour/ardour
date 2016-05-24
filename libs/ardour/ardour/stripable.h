@@ -104,7 +104,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<GainControl> trim_control() const = 0;
 
 	virtual boost::shared_ptr<MonitorControl> monitoring_control() const = 0;
-	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<AutomationControl> rec_enable_control() const { return boost::shared_ptr<AutomationControl>(); }
 
 	/* "well-known" controls for panning. Any or all of these may return
          * null.

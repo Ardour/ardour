@@ -3464,7 +3464,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 
 	case ControllableDescriptor::Recenable:
-		c = s->recenable_control ();
+		c = s->rec_enable_control ();
 		break;
 
 	case ControllableDescriptor::PanDirection:

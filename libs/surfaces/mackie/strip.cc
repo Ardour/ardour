@@ -215,11 +215,11 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_stripable->gain_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
-	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_stripable);
+	boost::shared_ptr<AutomationControl> rec_enable_control = _stripable->rec_enable_control ();
 
-	if (trk) {
-		_recenable->set_control (trk->rec_enable_control());
-		trk->rec_enable_control()->Changed .connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
+	if (rec_enable_control) {
+		_recenable->set_control (rec_enable_control);
+		rec_enable_control->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
 	}
 
 	// TODO this works when a currently-banked stripable is made inactive, but not
