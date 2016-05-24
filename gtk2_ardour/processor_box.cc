@@ -1124,6 +1124,9 @@ ProcessorEntry::RoutingIcon::can_coalesce () const {
 	if (_fed_by && _f_out != _f_sources) {
 		return false;
 	}
+	if (_fed_by && !_f_out_map.is_identity () && !_in_map.is_identity ()) {
+		return false;
+	}
 	if (_input && _sinks == _in && (!_fed_by || _f_out == _in)) {
 		return true;
 	}
@@ -2881,9 +2884,9 @@ ProcessorBox::setup_routing_feeds ()
 			}
 		} else {
 			(*i)->output_routing_icon.set_terminal(false);
-			if (!(*i)->routing_icon.out_identity ()
-					&& !(*i)->routing_icon.in_identity ()
-					&& (*i)->routing_icon.can_coalesce ()) {
+			if (   !(*i)->routing_icon.out_identity ()
+					&& !(*next)->routing_icon.in_identity ()
+					&&  (*next)->routing_icon.can_coalesce ()) {
 				(*i)->output_routing_icon.hide();
 			} else if (!(*i)->routing_icon.out_identity ()) {
 				(*i)->output_routing_icon.show();
