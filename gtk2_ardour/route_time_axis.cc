@@ -191,8 +191,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			gm.set_fader_name ("AudioTrackFader");
                 }
 
-		rec_enable_button->set_sensitive (_session->writable());
-
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
@@ -1825,13 +1823,12 @@ RouteTimeAxisView::map_frozen ()
 	switch (track()->freeze_state()) {
 	case Track::Frozen:
 		playlist_button.set_sensitive (false);
-		rec_enable_button->set_sensitive (false);
 		break;
 	default:
 		playlist_button.set_sensitive (true);
-		rec_enable_button->set_sensitive (true);
 		break;
 	}
+	RouteUI::map_frozen ();
 }
 
 void

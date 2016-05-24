@@ -711,6 +711,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
 			t->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+			t->RecordSafeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
 		if ((*x)->is_midi_track()) {
@@ -1623,6 +1624,9 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 			} else {
 				(*i)[_columns.rec_state] = 0;
 			}
+
+			// TODO figure out how to make this Cell insensitive
+			// and see RouteUI::check_rec_enable_sensitivity()
 
 			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}

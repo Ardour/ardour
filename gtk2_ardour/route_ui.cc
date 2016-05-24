@@ -267,6 +267,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->listen_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	if (is_track()) {
+		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
 		track()->TrackModeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::track_mode_changed, this), gui_context());
 		track_mode_changed();
 	}
@@ -281,6 +282,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
+		t->RecordSafeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 
 		rec_enable_button->show();
 		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -329,6 +331,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		blink_rec_display(true); // set initial rec-en button state
 	}
 
+	check_rec_enable_sensitivity ();
 	maybe_add_route_print_mgr ();
 	route_color_changed();
 }
@@ -1307,7 +1310,6 @@ RouteUI::blink_rec_display (bool blinkOn)
                 }
 	}
 
-
 	check_rec_enable_sensitivity ();
 }
 
@@ -1841,14 +1843,7 @@ RouteUI::map_frozen ()
 	AudioTrack* at = dynamic_cast<AudioTrack*>(_route.get());
 
 	if (at) {
-		switch (at->freeze_state()) {
-		case AudioTrack::Frozen:
-			rec_enable_button->set_sensitive (false);
-			break;
-		default:
-			rec_enable_button->set_sensitive (true);
-			break;
-		}
+		check_rec_enable_sensitivity ();
 	}
 }
 
@@ -1921,10 +1916,33 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
+	if (!rec_enable_button) {
+		assert (0); // This should not happen
+		return;
+	}
+	if (!_session->writable()) {
+		rec_enable_button->set_sensitive (false);
+		return;
+	}
+
 	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
+	} else if (_route && _route->record_safe ()) {
+		rec_enable_button->set_sensitive (false);
 	} else {
-		rec_enable_button->set_sensitive (true);
+		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+		if (at) {
+			switch (at->freeze_state()) {
+				case AudioTrack::Frozen:
+					rec_enable_button->set_sensitive (false);
+					break;
+				default:
+					rec_enable_button->set_sensitive (true);
+					break;
+			}
+		} else {
+			rec_enable_button->set_sensitive (true);
+		}
 	}
 
 	update_monitoring_display ();

@@ -583,7 +583,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_track ()) {
 
 		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, ARDOUR::Profile->get_mixbus() ? 1 : 2);
-		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
 		if (ARDOUR::Profile->get_mixbus()) {
@@ -1838,6 +1837,7 @@ MixerStrip::map_frozen ()
 	} else {
 		processor_box.set_sensitive (true);
 	}
+	RouteUI::map_frozen ();
 }
 
 void
@@ -2024,13 +2024,13 @@ MixerStrip::drop_send ()
 	set_invert_sensitive (true);
 	meter_point_button.set_sensitive (true);
 	mute_button->set_sensitive (true);
-	solo_button->set_sensitive (true);
-	rec_enable_button->set_sensitive (true);
+	solo_button->set_sensitive (!_route || !_route->solo_safe());
 	solo_isolated_led->set_sensitive (true);
 	solo_safe_led->set_sensitive (true);
 	monitor_input_button->set_sensitive (true);
 	monitor_disk_button->set_sensitive (true);
 	_comment_button.set_sensitive (true);
+	RouteUI::check_rec_enable_sensitivity ();
 }
 
 void

@@ -288,12 +288,13 @@ class RouteUI : public virtual AxisView
 	void route_gui_changed (std::string);
 	virtual void route_color_changed () {}
 
+	void check_rec_enable_sensitivity ();
+
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	static std::string program_port_prefix;
 
   private:
-	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
 	void track_mode_changed ();
