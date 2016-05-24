@@ -50,7 +50,8 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 
 	set_default_size (200, 100);
 	show_all ();
-        hide ();
+	hide ();
+	_interthread_info->cancel = false; // override on_hide
 
 	Glib::signal_timeout().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::update), 100);
 }
@@ -58,7 +59,8 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 void
 InterthreadProgressWindow::on_hide ()
 {
-	if (!_interthread_info->done) {
+	if (_interthread_info && !_interthread_info->done) {
+		//catch user pressing 'esc' or WM close
 		_interthread_info->cancel = true;
 	}
 }
