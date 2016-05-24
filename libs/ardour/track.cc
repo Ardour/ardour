@@ -332,6 +332,10 @@ Track::set_record_safe (bool yn, Controllable::GroupControlDisposition group_ove
 		return;
 	}
 
+	if (record_enabled ()) {
+		return;
+	}
+
 	if (use_group (group_override, &RouteGroup::is_recenable)) {
 		_route_group->apply (&Track::set_record_safe, yn, Controllable::NoGroup);
 		return;
