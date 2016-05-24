@@ -5919,7 +5919,6 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 	}
 
 	unblock_processing ();
-	itt.done = true;
 
 	return result;
 }
