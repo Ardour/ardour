@@ -418,6 +418,7 @@ private:
 	{
 		delete _drag_icon;
 		_drag_icon = 0;
+		_drag_source = 0;
 
 		_drag_child = 0;
 		remove_placeholder ();
