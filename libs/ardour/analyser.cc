@@ -19,6 +19,7 @@
 
 #include "ardour/analyser.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session_event.h"
 #include "ardour/transient_detector.h"
 
@@ -110,6 +111,7 @@ Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
 
 	try {
 		TransientDetector td (src->sample_rate());
+		td.set_sensitivity (3, Config->get_transient_sensitivity()); // "General purpose"
 		if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
 			src->set_been_analysed (true);
 		} else {

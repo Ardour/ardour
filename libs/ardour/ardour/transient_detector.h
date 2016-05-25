@@ -37,10 +37,7 @@ public:
 	static std::string operational_identifier();
 
 	void set_threshold (float);
-	void set_sensitivity (float);
-
-	float get_threshold () const;
-	float get_sensitivity () const;
+	void set_sensitivity (uint32_t, float);
 
 	int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
 	void update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& results);
