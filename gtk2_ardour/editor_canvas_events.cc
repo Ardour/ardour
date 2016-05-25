@@ -677,10 +677,14 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 	AudioRegionGainLine* gl;
 	if ((gl = dynamic_cast<AudioRegionGainLine*> (al)) != 0) {
 		type = GainLineItem;
-		clicked_regionview = &gl->region_view ();
+		if (event->type == GDK_BUTTON_PRESS) {
+			clicked_regionview = &gl->region_view ();
+		}
 	} else {
 		type = AutomationLineItem;
-		clicked_regionview = 0;
+		if (event->type == GDK_BUTTON_PRESS) {
+			clicked_regionview = 0;
+		}
 	}
 
 	clicked_control_point = 0;
