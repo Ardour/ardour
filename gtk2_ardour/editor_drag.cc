@@ -3194,8 +3194,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 
-	setup_pointer_frame_offset ();
-
 	/* fake marker meeds to stay under the mouse, unlike the real one. */
 	_marker->set_position (adjusted_current_frame (event, false));
 
