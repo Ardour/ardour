@@ -482,9 +482,11 @@ bool
 ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 {
 	return config.format->normalize() == other_config.format->normalize() &&
+		config.format->normalize_loudness () == other_config.format->normalize_loudness() &&
 		(
 		 (!config.format->normalize_loudness () && config.format->normalize_dbfs() == other_config.format->normalize_dbfs())
 		 ||
+		 // FIXME: allow simultaneous export of two formats with different loundness normalization settings
 		 (config.format->normalize_loudness () /* lufs/dbtp is a result option, not an instantaion option */)
 		);
 }
