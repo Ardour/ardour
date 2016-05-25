@@ -108,7 +108,7 @@ PortExportChannelSelector::sync_with_manager ()
 	 * fill_route_list () -> update_channel_count () -> set_channel_count () -> update_config()
 	 * will call config->clear_channels(); and clear the config
 	 */
-	channel_view.set_config (0);
+	channel_view.set_config (ChannelConfigPtr ());
 	fill_route_list ();
 	channel_view.set_config (state->config);
 }
