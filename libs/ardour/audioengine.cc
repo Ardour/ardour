@@ -412,7 +412,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 #else
 	if (_session->silent()) {
-		PortManager::silence (nframes);
+		PortManager::silence (nframes, _session);
 	}
 #endif
 

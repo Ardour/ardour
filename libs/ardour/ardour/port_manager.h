@@ -39,6 +39,7 @@ namespace ARDOUR {
 
 class PortEngine;
 class AudioBackend;
+class Session;
 
 class LIBARDOUR_API PortManager
 {
@@ -147,7 +148,7 @@ class LIBARDOUR_API PortManager
 	boost::shared_ptr<Ports> _cycle_ports;
 
 	void fade_out (gain_t, gain_t, pframes_t);
-	void silence (pframes_t nframes);
+	void silence (pframes_t nframes, Session *s = 0);
 	void silence_outputs (pframes_t nframes);
 	void check_monitoring ();
 	/** Signal the start of an audio cycle.

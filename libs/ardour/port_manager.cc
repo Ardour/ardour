@@ -28,6 +28,7 @@
 #include "ardour/midiport_manager.h"
 #include "ardour/port_manager.h"
 #include "ardour/profile.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -665,9 +666,18 @@ PortManager::cycle_end (pframes_t nframes)
 }
 
 void
-PortManager::silence (pframes_t nframes)
+PortManager::silence (pframes_t nframes, Session *s)
 {
 	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
+		if (s && i->second == s->mtc_output_port ()) {
+			continue;
+		}
+		if (s && i->second == s->midi_clock_output_port ()) {
+			continue;
+		}
+		if (s && i->second == s->ltc_output_port ()) {
+			continue;
+		}
 		if (i->second->sends_output()) {
 			i->second->get_buffer(nframes).silence(nframes);
 		}
