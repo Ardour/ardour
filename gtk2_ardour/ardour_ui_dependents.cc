@@ -309,7 +309,11 @@ ARDOUR_UI::setup_windows ()
 		assert (act);
 		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
 		action_script_call_btn[i].set_related_action (act);
-		action_script_call_btn[i].set_sensitive (act->get_sensitive ());
+		if (act->get_sensitive ()) {
+			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
+		} else {
+			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
+		}
 		const int row = i % 3;
 		const int col = i / 3;
 		action_script_table.attach (action_script_call_btn[i], col, col + 1, row, row + 1, EXPAND, EXPAND, 1, 1);
