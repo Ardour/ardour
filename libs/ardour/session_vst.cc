@@ -40,6 +40,35 @@ using namespace ARDOUR;
 
 #define SHOW_CALLBACK(MSG) DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose (MSG " val = %1 idx = %2\n", index, value))
 
+static double
+vst_ppq (const TempoMetric& tm, const Timecode::BBT_Time& bbt, double& ppqBar)
+{
+
+	/* PPQ = pulse per quarter
+	 * VST's "pulse" is our "division".
+	 *
+	 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+	 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+	 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+	 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+	 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+	 *
+	 * general: divs_per_bar / (note_type / 4.0)
+	 */
+	const double ppq_scaling =  tm.meter().note_divisor() / 4.0;
+
+	/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
+	ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
+	double ppqBeat = double(bbt.beats - 1);
+	double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
+
+	ppqBar *= ppq_scaling;
+	ppqBeat *= ppq_scaling;
+	ppqTick *= ppq_scaling;
+
+	return ppqBar + ppqBeat + ppqTick;
+}
+
 int Session::vst_current_loading_id = 0;
 const char* Session::vst_can_do_strings[] = {
 	X_("supplyIdle"),
@@ -63,20 +92,24 @@ intptr_t Session::vst_callback (
 	float opt
 	)
 {
-	static VstTimeInfo _timeInfo;
 	VSTPlugin* plug;
 	Session* session;
+	static VstTimeInfo _timeinfo; // only uses as fallback
+	VstTimeInfo* timeinfo;
+	int32_t newflags = 0;
 
 	if (effect && effect->user) {
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4, plugin = \"%5\" ",
+		timeinfo = plug->timeinfo ();
+		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4, plugin = \"%5\"\n",
 					std::hex, (void*) DEBUG_THREAD_SELF,
 					std::dec, opcode, plug->name()));
 	} else {
 		plug = 0;
 		session = 0;
-		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4",
+		timeinfo = &_timeinfo;
+		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4\n",
 					std::hex, (void*) DEBUG_THREAD_SELF,
 					std::dec, opcode));
 	}
@@ -163,67 +196,45 @@ intptr_t Session::vst_callback (
 
 	case audioMasterGetTime:
 		SHOW_CALLBACK ("audioMasterGetTime");
-		// returns const VstTimeInfo* (or 0 if not supported)
-		// <value> should contain a mask indicating which fields are required
-		// (see valid masks above), as some items may require extensive
-		// conversions
-		_timeInfo.flags = 0;
+		newflags = kVstNanosValid | kVstAutomationWriting | kVstAutomationReading;
+
+		timeinfo->nanoSeconds = g_get_monotonic_time () * 1000;
 
 		if (session) {
 			framepos_t now = session->transport_frame();
 
-			_timeInfo.samplePos = now;
-			_timeInfo.sampleRate = session->frame_rate();
+			timeinfo->samplePos = now;
+			timeinfo->sampleRate = session->frame_rate();
 
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
 				const Tempo& t (tm.tempo());
-				_timeInfo.tempo = t.beats_per_minute ();
-				_timeInfo.flags |= (kVstTempoValid);
+				timeinfo->tempo = t.beats_per_minute ();
+				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
 				const Meter& m (tm.meter());
-				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
-				_timeInfo.timeSigDenominator = m.note_divisor ();
-				_timeInfo.flags |= (kVstTimeSigValid);
+				timeinfo->timeSigNumerator = m.divisions_per_bar ();
+				timeinfo->timeSigDenominator = m.note_divisor ();
+				newflags |= (kVstTimeSigValid);
 			}
 			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
 				Timecode::BBT_Time bbt;
 
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
-
-					/* PPQ = pulse per quarter
-					 * VST's "pulse" is our "division".
-					 *
-					 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
-					 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
-					 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
-					 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
-					 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
-					 *
-					 * general: divs_per_bar / (note_type / 4.0)
-					 */
-					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
-
-					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
-					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
-					double ppqBeat = double(bbt.beats - 1);
-					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-
-					ppqBar *= ppq_scaling;
-					ppqBeat *= ppq_scaling;
-					ppqTick *= ppq_scaling;
+					double ppqBar;
+					double ppqPos = vst_ppq (tm, bbt, ppqBar);
 
 					if (value & (kVstPpqPosValid)) {
-						_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
-						_timeInfo.flags |= (kVstPpqPosValid);
+						timeinfo->ppqPos = ppqPos;
+						newflags |= kVstPpqPosValid;
 					}
 
 					if (value & (kVstBarsValid)) {
-						_timeInfo.barStartPos = ppqBar;
-						_timeInfo.flags |= (kVstBarsValid);
+						timeinfo->barStartPos = ppqBar;
+						newflags |= kVstBarsValid;
 					}
 
 				} catch (...) {
@@ -236,54 +247,73 @@ intptr_t Session::vst_callback (
 
 				session->timecode_time (now, t);
 
-				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) +
+				timeinfo->smpteOffset = (t.hours * t.rate * 60.0 * 60.0) +
 					(t.minutes * t.rate * 60.0) +
 					(t.seconds * t.rate) +
 					(t.frames) +
 					(t.subframes);
 
-				_timeInfo.smpteOffset *= 80.0; /* VST spec is 1/80th frames */
+				timeinfo->smpteOffset *= 80.0; /* VST spec is 1/80th frames */
 
 				if (session->timecode_drop_frames()) {
 					if (session->timecode_frames_per_second() == 30.0) {
-						_timeInfo.smpteFrameRate = 5;
+						timeinfo->smpteFrameRate = 5;
 					} else {
-						_timeInfo.smpteFrameRate = 4; /* 29.97 assumed, thanks VST */
+						timeinfo->smpteFrameRate = 4; /* 29.97 assumed, thanks VST */
 					}
 				} else {
 					if (session->timecode_frames_per_second() == 24.0) {
-						_timeInfo.smpteFrameRate = 0;
+						timeinfo->smpteFrameRate = 0;
 					} else if (session->timecode_frames_per_second() == 24.975) {
-						_timeInfo.smpteFrameRate = 2;
+						timeinfo->smpteFrameRate = 2;
 					} else if (session->timecode_frames_per_second() == 25.0) {
-						_timeInfo.smpteFrameRate = 1;
+						timeinfo->smpteFrameRate = 1;
 					} else {
-						_timeInfo.smpteFrameRate = 3; /* 30 fps */
+						timeinfo->smpteFrameRate = 3; /* 30 fps */
 					}
 				}
-				_timeInfo.flags |= (kVstSmpteValid);
+				newflags |= (kVstSmpteValid);
 			}
 
-			//ToDo: 
-			//if this is found to be burdensome to plugins,
-			//we should cache the previous state at a global level,
-			//and only set this flag when the transport changes state
-			_timeInfo.flags |= (kVstTransportChanged);
-
-			if (session->transport_speed() != 0.0f) {
-				_timeInfo.flags |= (kVstTransportPlaying);
+			if (session->actively_recording ()) {
+				newflags |= kVstTransportRecording;
 			}
 
-			if (session->get_play_loop()) {
-				_timeInfo.flags |= (kVstTransportCycleActive);
+			if (session->transport_speed () != 0.0f) {
+				newflags |= kVstTransportPlaying;
+			}
+
+			if (session->get_play_loop ()) {
+				newflags |= kVstTransportCycleActive;
+				Location * looploc = session->locations ()->auto_loop_location ();
+				if (looploc) try {
+					double ppqBar;
+					Timecode::BBT_Time bbt;
+
+					session->tempo_map().bbt_time_rt (looploc->start (), bbt);
+					timeinfo->cycleStartPos = vst_ppq (tm, bbt, ppqBar);
+
+					session->tempo_map().bbt_time_rt (looploc->end (), bbt);
+					timeinfo->cycleEndPos = vst_ppq (tm, bbt, ppqBar);
+
+					newflags |= kVstCyclePosValid;
+				} catch (...) { }
 			}
 
 		} else {
-			_timeInfo.samplePos = 0;
-			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
+			timeinfo->samplePos = 0;
+			timeinfo->sampleRate = AudioEngine::instance()->sample_rate();
 		}
 
-		return (intptr_t) &_timeInfo;
+		if ((timeinfo->flags & (kVstTransportPlaying | kVstTransportRecording | kVstTransportCycleActive))
+		    !=
+		    (newflags        & (kVstTransportPlaying | kVstTransportRecording | kVstTransportCycleActive)))
+		{
+			newflags |= kVstTransportChanged;
+		}
+
+		timeinfo->flags = newflags;
+		return (intptr_t) timeinfo;
 
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("audioMasterProcessEvents");

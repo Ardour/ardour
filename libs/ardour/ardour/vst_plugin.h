@@ -29,6 +29,8 @@ typedef struct _VSTHandle VSTHandle;
 struct _VSTState;
 typedef struct _VSTState VSTState;
 
+#include "ardour/vestige/aeffectx.h"
+
 namespace ARDOUR {
 
 class PluginInsert;
@@ -86,6 +88,8 @@ public:
 	void set_insert (PluginInsert* pi, uint32_t num) { _pi = pi; _num = num; }
 	PluginInsert* plugin_insert () const { return _pi; }
 	uint32_t plugin_number () const { return _num; }
+	VstTimeInfo* timeinfo () { return &_timeInfo; }
+
 
 protected:
 	void set_plugin (AEffect *);
@@ -107,6 +111,7 @@ protected:
 	uint32_t      _num;
 
 	MidiBuffer* _midi_out_buf;
+	VstTimeInfo _timeInfo;
 };
 
 }

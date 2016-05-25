@@ -138,6 +138,7 @@ struct RemoteVstPlugin;
 #define kVstTransportChanged 1
 #define kVstTransportPlaying (1 << 1)
 #define kVstTransportCycleActive (1 << 2)
+#define kVstTransportRecording (1 << 3)
 
 #define kVstAutomationWriting (1 << 6)
 #define kVstAutomationReading (1 << 7)

@@ -47,7 +47,7 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _pi (0)
 	, _num (0)
 {
-
+	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
 
 VSTPlugin::~VSTPlugin ()
