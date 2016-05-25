@@ -3311,8 +3311,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	}
 
-	framepos_t pf;
-
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
 		/* use vertical movement to alter tempo .. should be log */
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
@@ -3326,7 +3324,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		TempoMap& map (_editor->session()->tempo_map());
 		const bool was_music = _real_section->position_lock_style() == MusicTime;
 
-		pf = adjusted_current_frame (event);
+		const framepos_t pf = adjusted_current_frame (event);
 
 		if (!_editor->snap_musical()) {
 
@@ -3359,7 +3357,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	/* this has moved the bar lines themselves, so recalibrate the offset */
 	setup_pointer_frame_offset();
 
-	_marker->set_position (pf);
+	_marker->set_position (adjusted_current_frame (event, false));
 }
 
 void
