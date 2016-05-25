@@ -387,8 +387,21 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	framepos_t mtc_tc;
 	timecode_to_sample(timecode, mtc_tc, true, false);
 	outbound_mtc_timecode_frame = mtc_tc;
-
 	transmitting_timecode_time = timecode;
+
+	LatencyRange mtc_out_latency; // TODO cache this, update on engine().GraphReordered()
+	_midi_ports->mtc_output_port ()->get_connected_latency_range (ltc_out_latency, true);
+	frameoffset_t mtc_offset = worst_playback_latency() - mtc_out_latency.max;
+
+	// only if rolling.. ?
+	outbound_mtc_timecode_frame += mtc_offset;
+
+	// outbound_mtc_timecode_frame needs to be >= _transport_frame
+	// or a new full timecode will be queued next cycle.
+	while (outbound_mtc_timecode_frame < t) {
+		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
+		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
+	}
 
 	double const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) / 4.0;
 	if (ceil((t - mtc_tc) / quarter_frame_duration) > 0) {
@@ -396,7 +409,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
 	}
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("Full MTC TC %1\n", outbound_mtc_timecode_frame));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("Full MTC TC %1 (off %2)\n", outbound_mtc_timecode_frame, mtc_offset));
 
 	// I don't understand this bit yet.. [DR]
 	// I do [rg]:
@@ -407,21 +420,6 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
 	}
 
-#if 0 // compensate for audio latency  -- disabled [rg]
-	/* this needs more thought and work.
-	 * the proper solution will be to just offset MTC by the MIDI port's latency.
-	 *
-	 * using worst_playback_latency() is wrong when the generated MTC is used to sync
-	 * clients which send audio to Ardour for recording.
-	 * worst_capture_latency() vs. worst_playback_latency()
-	 *
-	 * NB. similarly to session_ltc, the offset should be subtracted from the timecode to send,
-	 * instead of being added to timestamp when to send the timecode.
-	 * Otherwise the timestamp may not fall into the jack-cycle of the current _transport frame.
-	 * and no MTC QF will be sent.
-	 */
-	outbound_mtc_timecode_frame += worst_playback_latency();
-#endif
 	next_quarter_frame_to_send = 0;
 
 	// Sync slave to the same Timecode time as we are on
@@ -456,11 +454,18 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 int
 Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, ARDOUR::pframes_t nframes)
 {
+	// start_frame == start_frame  for normal cycles
+	// start_frame > _transport_frame  for split cycles
 	if (_engine.freewheeling() || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
 	if (_slave && !_slave->locked()) {
+		return 0;
+	}
+
+	if (_transport_speed < 0) {
+		// we don't support rolling backwards
 		return 0;
 	}
 
@@ -483,7 +488,12 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 				next_quarter_frame_to_send, quarter_frame_duration));
 
 	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
+		// send full timecode and set outbound_mtc_timecode_frame, next_quarter_frame_to_send
 		send_full_time_code (_transport_frame, nframes);
+	}
+
+	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < start_frame) {
+		// no QF for this cycle
 		return 0;
 	}
 
@@ -555,8 +565,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 			// Increment timecode time twice
 			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
-			// Re-calculate timing of first quarter frame
-			//timecode_to_sample( transmitting_timecode_time, outbound_mtc_timecode_frame, true /* use_offset */, false );
+			// Increment timing of first quarter frame
 			outbound_mtc_timecode_frame += 2.0 * _frames_per_timecode_frame;
 		}
 	}
