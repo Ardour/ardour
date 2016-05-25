@@ -3196,7 +3196,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	setup_pointer_frame_offset ();
 
-	/* marker meeds to stay under the mouse, unlike the real section. */
+	/* fake marker meeds to stay under the mouse, unlike the real one. */
 	_marker->set_position (adjusted_current_frame (event, false));
 
 	show_verbose_cursor_time (_real_section->frame());
