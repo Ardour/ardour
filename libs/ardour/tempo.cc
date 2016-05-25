@@ -1704,7 +1704,7 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 
 	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_pulses = remaining_bars * prev_m->divisions_per_bar() / prev_m->note_divisor();
-	const double ret = remaining_pulses + prev_m->pulse();
+	const double ret = remaining_pulses + prev_m->pulse() + (((bbt.beats - 1) + (bbt.ticks / BBT_Time::ticks_per_beat)) / prev_m->note_divisor());
 
 	return ret;
 }
