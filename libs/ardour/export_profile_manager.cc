@@ -180,9 +180,14 @@ ExportProfileManager::load_preset (ExportPresetPtr preset)
 	if (!preset) { return false; }
 
 	XMLNode const * state;
+	/* local state is saved in instant.xml and contains timespan
+	 * and channel config for per session.
+	 * It may not be present for a given preset/session combination
+	 * and is never preset for system-wide presets, but that's OK.
+	 */
 	if ((state = preset->get_local_state())) {
 		set_local_state (*state);
-	} else { ok = false; }
+	}
 
 	if ((state = preset->get_global_state())) {
 		if (!set_global_state (*state)) {
