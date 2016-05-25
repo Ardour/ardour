@@ -104,6 +104,11 @@ PortExportChannelSelector::sync_with_manager ()
 	split_checkbox.set_active (state->config->get_split());
 	channels_spinbutton.set_value (state->config->get_n_chans());
 
+	/* when loading presets, config is ready set here (shared ptr)
+	 * fill_route_list () -> update_channel_count () -> set_channel_count () -> update_config()
+	 * will call config->clear_channels(); and clear the config
+	 */
+	channel_view.set_config (0);
 	fill_route_list ();
 	channel_view.set_config (state->config);
 }
@@ -217,6 +222,7 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 
 	if (config == c) { return; }
 	config = c;
+	if (!config) { return; }
 
 	uint32_t i = 1;
 	ExportChannelConfiguration::ChannelList chan_list = config->get_channels();
