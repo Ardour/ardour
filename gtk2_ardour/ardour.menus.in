@@ -388,10 +388,10 @@
         <menuitem action='region-fill-track'/>
       </menu>
       <menuitem action='export-region'/>
+      <menuitem action='bounce-regions-unprocessed'/>
 #ifndef MIXBUS
       <menuitem action='bounce-regions-processed'/>
 #endif
-      <menuitem action='bounce-regions-unprocessed'/>
       <separator/>
       <menuitem action='remove-region'/>
     </menu>
@@ -803,10 +803,10 @@
       <menuitem action='region-fill-track'/>
     </menu>
     <menuitem action='export-region'/>
+    <menuitem action='bounce-regions-unprocessed'/>
 #ifndef MIXBUS
     <menuitem action='bounce-regions-processed'/>
 #endif
-    <menuitem action='bounce-regions-unprocessed'/>
     <menuitem action='loudness-analyze-region'/>
     <menuitem action='spectral-analyze-region'/>
     <separator/>
