@@ -263,7 +263,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 		float dB = detection_threshold_adjustment.get_value();
 		float coeff = dB > -80.0f ? pow (10.0f, dB * 0.05f) : 0.0f;
 		t.set_threshold (coeff);
-		t.set_sensitivity (sensitivity_adjustment.get_value());
+		t.set_sensitivity (4, sensitivity_adjustment.get_value());
 
 		if (t.run ("", readable.get(), i, these_results)) {
 			continue;
