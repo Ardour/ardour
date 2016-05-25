@@ -3195,7 +3195,10 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 
 	setup_pointer_frame_offset ();
-	_marker->set_position (pf);
+
+	/* marker meeds to stay under the mouse, unlike the real section. */
+	_marker->set_position (adjusted_current_frame (event, false));
+
 	show_verbose_cursor_time (_real_section->frame());
 }
 
