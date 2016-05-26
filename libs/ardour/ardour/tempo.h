@@ -327,44 +327,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void get_grid (std::vector<BBTPoint>&,
 	               framepos_t start, framepos_t end);
 
-	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
-
-	   bbt_time(), beat_at_frame(), frame_at_beat(), tick_at_frame(),
-	   frame_at_tick(),frame_time() and bbt_duration_at()
-	   are all sensitive to tempo and meter, and will give answers
-	   that align with the grid formed by tempo and meter sections.
-
-	   They SHOULD NOT be used to determine the position of events
-	   whose location is canonically defined in beats.
-	*/
-
-	void bbt_time (framepos_t when, Timecode::BBT_Time&);
-
-	double beat_at_frame (const framecnt_t& frame) const;
-	framecnt_t frame_at_beat (const double& beat) const;
-
-	framepos_t frame_time (const Timecode::BBT_Time&);
-	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
-
-	/* TEMPO-SENSITIVE FUNCTIONS
-
-	   These next 4 functions will all take tempo in account and should be
-	   used to determine position (and in the last case, distance in beats)
-	   when tempo matters but meter does not.
-
-	   They SHOULD be used to determine the position of events
-	   whose location is canonically defined in beats.
-	*/
-
-	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
-	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
-	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
-
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	const Tempo tempo_at (const framepos_t& frame) const;
 	double frames_per_beat_at (const framepos_t&, const framecnt_t& sr) const;
 
 	const Meter& meter_at (framepos_t) const;
@@ -396,16 +361,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, const framepos_t& frame
 			    , PositionLockStyle pls);
-
-	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
-
-	void gui_move_tempo (TempoSection*, const framepos_t& frame);
-	void gui_move_meter (MeterSection*, const framepos_t& frame);
-
-	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
-	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
-
-	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -441,17 +396,61 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	framecnt_t frame_rate () const { return _frame_rate; }
 
-	double beat_at_bbt (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time bbt_at_beat (const double& beats);
+	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
-	double pulse_at_bbt (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time bbt_at_pulse (const double& pulse);
+	   bbt_time(), beat_at_frame(), frame_at_beat(), frame_time()
+	   and bbt_duration_at()
+	   are all sensitive to tempo and meter, and will give answers
+	   that align with the grid formed by tempo and meter sections.
+
+	   They SHOULD NOT be used to determine the position of events
+	   whose location is canonically defined in beats.
+	*/
+
+	double beat_at_frame (const framecnt_t& frame) const;
+	framecnt_t frame_at_beat (const double& beat) const;
 
 	double pulse_at_beat (const double& beat) const;
 	double beat_at_pulse (const double& pulse) const;
 
 	double pulse_at_frame (const framecnt_t& frame) const;
 	framecnt_t frame_at_pulse (const double& pulse) const;
+
+	const Tempo tempo_at_frame (const framepos_t& frame) const;
+
+	double beat_at_bbt (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time bbt_at_beat (const double& beats);
+
+	double pulse_at_bbt (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time bbt_at_pulse (const double& pulse);
+
+	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
+
+	void bbt_time (framepos_t when, Timecode::BBT_Time&);
+	framepos_t frame_time (const Timecode::BBT_Time&);
+	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
+
+	/* TEMPO-SENSITIVE FUNCTIONS
+
+	   These next 4 functions will all take tempo in account and should be
+	   used to determine position (and in the last case, distance in beats)
+	   when tempo matters but meter does not.
+
+	   They SHOULD be used to determine the position of events
+	   whose location is canonically defined in beats.
+	*/
+
+	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
+	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
+	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
+	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+
+	void gui_move_tempo (TempoSection*, const framepos_t& frame);
+	void gui_move_meter (MeterSection*, const framepos_t& frame);
+	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
+	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
+
+	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	PBD::Signal0<void> MetricPositionChanged;
 
@@ -471,12 +470,13 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
+	const Tempo tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
+
 	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
 	const TempoSection& tempo_section_at_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	const TempoSection& tempo_section_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
-	const Tempo tempo_at_locked (const Metrics& metrics, const framepos_t& frame) const;
 
 	const MeterSection& meter_section_at_locked (const Metrics& metrics, framepos_t frame) const;
 	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;

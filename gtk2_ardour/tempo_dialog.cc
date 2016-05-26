@@ -46,7 +46,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when;
-	Tempo tempo (map.tempo_at (frame));
+	Tempo tempo (map.tempo_at_frame (frame));
 	map.bbt_time (frame, when);
 
 	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);

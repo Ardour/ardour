@@ -3418,7 +3418,7 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	ostringstream sstr;
 
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at (raw_grab_frame()));
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at (adjusted_current_frame (event)).beats_per_minute() << "\n";
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).beats_per_minute() << "\n";
 	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
 	show_verbose_cursor_text (sstr.str());
 	finished (event, false);
@@ -3461,7 +3461,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_pulse (_pulse), pf, _pulse);
 	}
 	ostringstream sstr;
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at (pf).beats_per_minute() << "\n";
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).beats_per_minute() << "\n";
 	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }

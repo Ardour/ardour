@@ -316,7 +316,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	if (pulse > 0.0) {
 		XMLNode &before = map.get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
-		map.add_tempo (map.tempo_at (frame), pulse, 0, TempoSection::Ramp, MusicTime);
+		map.add_tempo (map.tempo_at_frame (frame), pulse, 0, TempoSection::Ramp, MusicTime);
 
 		XMLNode &after = map.get_state();
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));

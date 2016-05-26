@@ -547,7 +547,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 
 			const framepos_t pos = e.pixel_to_sample(before_x);
 			const Meter& meter = map.meter_at (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate())
+			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()) );
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -563,7 +563,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 
 			const framepos_t pos = e.pixel_to_sample(after_x);
 			const Meter& meter = map.meter_at (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate())
+			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 

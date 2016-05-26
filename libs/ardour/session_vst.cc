@@ -357,7 +357,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterTempoAt");
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
 		if (session) {
-			const Tempo& t (session->tempo_map().tempo_at (value));
+			const Tempo& t (session->tempo_map().tempo_at_frame (value));
 			return t.beats_per_minute() * 1000;
 		} else {
 			return 0;
