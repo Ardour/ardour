@@ -88,6 +88,7 @@ Pane::add_divider ()
 	d->signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_motion_event), d), false);
 	d->set_parent (*this);
 	d->show ();
+	d->fract = 0.5;
 	dividers.push_back (d);
 }
 
