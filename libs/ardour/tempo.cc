@@ -1415,6 +1415,7 @@ TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame)
 	}
 	const double beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
 
+	/* audio locked meters fake their beat */
 	if (next_m && next_m->beat() < beat) {
 		return next_m->beat();
 	}
@@ -1433,20 +1434,10 @@ TempoMap::frame_at_beat (const double& beat) const
 framecnt_t
 TempoMap::frame_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
-	const TempoSection& prev_t = tempo_section_at_beat_locked (metrics, beat);
-	MeterSection* prev_m = 0;
+	const TempoSection* prev_t = &tempo_section_at_beat_locked (metrics, beat);
+	const MeterSection* prev_m = &meter_section_at_beat_locked (metrics, beat);
 
-	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		MeterSection* m;
-		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_m && m->beat() > beat) {
-				break;
-			}
-			prev_m = m;
-		}
-	}
-
-	return prev_t.frame_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse(), _frame_rate);
+	return prev_t->frame_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse(), _frame_rate);
 }
 
 Tempo
@@ -1461,9 +1452,7 @@ TempoMap::tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 {
 	TempoSection* prev_t = 0;
 
-	Metrics::const_iterator i;
-
-	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			if (!t->active()) {
@@ -1556,20 +1545,9 @@ TempoMap::pulse_at_beat (const double& beat) const
 double
 TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
-	MeterSection* prev_m = 0;
+	const MeterSection* prev_m = &meter_section_at_beat_locked (metrics, beat);
 
-	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		MeterSection* m;
-		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_m && m->beat() > beat) {
-				break;
-			}
-			prev_m = m;
-		}
-
-	}
-	double const ret = prev_m->pulse() + ((beat - prev_m->beat()) / prev_m->note_divisor());
-	return ret;
+	return prev_m->pulse() + ((beat - prev_m->beat()) / prev_m->note_divisor());
 }
 
 double
