@@ -1941,7 +1941,7 @@ TempoMap::check_solved (const Metrics& metrics) const
 				/* gradient limit - who knows what it should be?
 				   things are also ok (if a little chaotic) without this
 				*/
-				if (fabs (prev_t->c_func()) > 200.0) {
+				if (fabs (prev_t->c_func()) > 1000.0) {
 					//std::cout << "c : " << prev_t->c_func() << std::endl;
 					return false;
 				}
