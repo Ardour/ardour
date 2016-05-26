@@ -94,7 +94,7 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at (absolute_time());
+	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at_frame (absolute_time());
 	PublicEditor::instance().edit_tempo_section (&ts);
 }
 
@@ -102,7 +102,7 @@ void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::MeterSection ms = PublicEditor::instance().session()->tempo_map().meter_section_at (absolute_time());
+	ARDOUR::MeterSection ms = PublicEditor::instance().session()->tempo_map().meter_section_at_frame (absolute_time());
 	PublicEditor::instance().edit_meter_section (&ms);
 }
 

@@ -6501,7 +6501,7 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 
 	*/
 
-	const TempoSection& t (_session->tempo_map().tempo_section_at (start));
+	const TempoSection& t (_session->tempo_map().tempo_section_at_frame (start));
 
 	bool do_global = false;
 
