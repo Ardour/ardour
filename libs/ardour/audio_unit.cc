@@ -1765,9 +1765,10 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	tmap.bbt_time (_session.transport_frame() + input_offset, bbt);
 
 	if (outCurrentBeat) {
+		const double ppq_scaling = metric.meter().note_divisor() / 4.0;
 		float beat;
-		beat = metric.meter().divisions_per_bar() * bbt.bars;
-		beat += bbt.beats;
+		beat = metric.meter().divisions_per_bar() * (bbt.bars - 1) * ppq_scaling;
+		beat += (bbt.beats - 1) * ppq_scaling;;
 		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
 		*outCurrentBeat = beat;
 	}
