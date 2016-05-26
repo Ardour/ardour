@@ -394,7 +394,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
-	   bbt_time(), beat_at_frame(), frame_at_beat(), frame_time()
+	   bbt_at_frame(), frame_at_bbt(), beat_at_frame(), frame_at_beat()
 	   and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
@@ -445,12 +445,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
 	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
-	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	void gui_move_tempo (TempoSection*, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
 
+	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	PBD::Signal0<void> MetricPositionChanged;

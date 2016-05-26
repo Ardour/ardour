@@ -1926,6 +1926,7 @@ TempoMap::check_solved (const Metrics& metrics) const
 				continue;
 			}
 			if (prev_t) {
+				/* check ordering */
 				if ((t->frame() <= prev_t->frame()) || (t->pulse() <= prev_t->pulse())) {
 					return false;
 				}
@@ -1935,6 +1936,14 @@ TempoMap::check_solved (const Metrics& metrics) const
 					if (!t->locked_to_meter()) {
 						return false;
 					}
+				}
+
+				/* gradient limit - who knows what it should be?
+				   things are also ok (if a little chaotic) without this
+				*/
+				if (fabs (prev_t->c_func()) > 200.0) {
+					//std::cout << "c : " << prev_t->c_func() << std::endl;
+					return false;
 				}
 			}
 			prev_t = t;
