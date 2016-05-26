@@ -2781,26 +2781,29 @@ Route::state(bool full_state)
 		node->add_child_nocopy (_pannable->state (full_state));
 	}
 
-	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		if (!full_state) {
-			/* template save: do not include internal sends functioning as
-			   aux sends because the chance of the target ID
-			   in the session where this template is used
-			   is not very likely.
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			if (!full_state) {
+				/* template save: do not include internal sends functioning as
+					 aux sends because the chance of the target ID
+					 in the session where this template is used
+					 is not very likely.
 
-			   similarly, do not save listen sends which connect to
-			   the monitor section, because these will always be
-			   added if necessary.
-			*/
-			boost::shared_ptr<InternalSend> is;
+					 similarly, do not save listen sends which connect to
+					 the monitor section, because these will always be
+					 added if necessary.
+					 */
+				boost::shared_ptr<InternalSend> is;
 
-			if ((is = boost::dynamic_pointer_cast<InternalSend> (*i)) != 0) {
-				if (is->role() == Delivery::Listen) {
-					continue;
+				if ((is = boost::dynamic_pointer_cast<InternalSend> (*i)) != 0) {
+					if (is->role() == Delivery::Listen) {
+						continue;
+					}
 				}
 			}
+			node->add_child_nocopy((*i)->state (full_state));
 		}
-		node->add_child_nocopy((*i)->state (full_state));
 	}
 
 	if (_extra_xml) {
