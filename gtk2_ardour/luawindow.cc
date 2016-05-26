@@ -34,6 +34,7 @@
 #include "pbd/md5.h"
 
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/pane.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
@@ -155,9 +156,9 @@ LuaWindow::LuaWindow ()
 	vbox->pack_start (*scrollin, true, true, 0);
 	vbox->pack_start (*hbox, false, false, 2);
 
-	Gtk::VPaned *vpane = manage (new Gtk::VPaned ());
-	vpane->pack1 (*vbox, true, false);
-	vpane->pack2 (scrollout, false, true);
+	Gtkmm2ext::VPane *vpane = manage (new Gtkmm2ext::VPane ());
+	vpane->add (*vbox);
+	vpane->add (scrollout);
 
 	vpane->show_all ();
 	add (*vpane);

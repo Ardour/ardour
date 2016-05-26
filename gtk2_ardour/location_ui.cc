@@ -803,7 +803,7 @@ LocationUI::LocationUI ()
 	table->attach (loc_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
-	loc_range_panes.pack1 (*table, true, false);
+	loc_range_panes.add (*table);
 
 	table = manage (new Table (3, 2));
 	table->set_spacings (2);
@@ -835,7 +835,7 @@ LocationUI::LocationUI ()
 	table->attach (range_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
-	loc_range_panes.pack2 (*table, true, false);
+	loc_range_panes.add (*table);
 
 	HBox* add_button_box = manage (new HBox);
 	add_button_box->pack_start (add_location_button, true, true);

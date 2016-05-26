@@ -27,7 +27,6 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
-#include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
@@ -36,6 +35,8 @@
 #include "pbd/signals.h"
 
 #include "ardour/ardour.h"
+
+#include <gtkmm2ext/pane.h>
 
 #include "ardour_window.h"
 #include "processor_box.h"
@@ -81,7 +82,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	Gtk::Notebook            notebook;
 	Gtk::Frame		 input_frame;
 	Gtk::Frame		 output_frame;
-	Gtk::HPaned		 redir_hpane;
+	Gtkmm2ext::HPane	 redir_hpane;
 
 	Gtk::Frame		 route_select_frame;
 
@@ -90,9 +91,9 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 
 	ProcessorBox*            insert_box;
 
-	Gtk::HPaned		 list_hpane;
+	Gtkmm2ext::HPane	 list_hpane;
 
-	Gtk::HPaned		 right_hpane;
+	Gtkmm2ext::HPane	 right_hpane;
 
 	Gtk::Frame		 route_choice_frame;
 

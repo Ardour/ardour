@@ -234,30 +234,6 @@ static const gchar *_rb_opt_strings[] = {
 
 #define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
 
-static void
-pane_size_watcher (Paned* pane)
-{
-	/* if the handle of a pane vanishes into (at least) the tabs of a notebook,
-	   it is:
-
-	      X: hard to access
-	      Quartz: impossible to access
-
-	   so stop that by preventing it from ever getting too narrow. 35
-	   pixels is basically a rough guess at the tab width.
-
-	   ugh.
-	*/
-
-	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 35;
-
-	gint pos = pane->get_position ();
-
-	if (pos > max_width_of_lhs) {
-		pane->set_position (max_width_of_lhs);
-	}
-}
-
 Editor::Editor ()
 	: PublicEditor (global_hpacker)
 	, editor_mixer_strip_width (Wide)
@@ -685,7 +661,17 @@ Editor::Editor ()
 
 	_notebook_shrunk = false;
 
-	editor_summary_pane.pack1(edit_packer);
+
+	/* Pick up some settings we need to cache, early */
+
+	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
+	XMLProperty* prop;
+
+	if (settings && (prop = settings->property ("notebook-shrunk"))) {
+		_notebook_shrunk = string_is_affirmative (prop->value ());
+	}
+
+	editor_summary_pane.add (edit_packer);
 
 	Button* summary_arrows_left_left = manage (new Button);
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
@@ -726,22 +712,29 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	if (!ARDOUR::Profile->get_trx()) {
-		editor_summary_pane.pack2 (_summary_hbox);
+		editor_summary_pane.add (_summary_hbox);
 	}
 
-	edit_pane.pack1 (editor_summary_pane, true, true);
+	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
-		edit_pane.pack2 (_the_notebook, false, true);
+		edit_pane.add (_the_notebook);
 	}
 
-	editor_summary_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&editor_summary_pane)));
 
-	/* XXX: editor_summary_pane might need similar to the edit_pane */
+	if (!settings || (prop = settings->property ("edit-horizontal-pane-pos")) == 0) {
+		/* initial allocation is 90% to canvas, 10% to notebook */
+		edit_pane.set_divider (0, 0.90);
+	} else {
+		edit_pane.set_divider (0, atof (prop->value()));
+	}
 
-	edit_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
+	if (!settings || (prop = settings->property ("edit-vertical-pane-pos")) == 0) {
+		/* initial allocation is 90% to canvas, 10% to summary */
+		editor_summary_pane.set_divider (0, 0.90);
+	} else {
 
-	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
-	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
+		editor_summary_pane.set_divider (0, atof (prop->value()));
+	}
 
 	top_hbox.pack_start (toolbar_frame);
 
@@ -2587,10 +2580,10 @@ Editor::get_state ()
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (edit_pane, false));
+	snprintf(buf,sizeof(buf), "%f", edit_pane.get_divider ());
 	node->add_property("edit-horizontal-pane-pos", string(buf));
 	node->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (editor_summary_pane, true));
+	snprintf(buf,sizeof(buf), "%f", editor_summary_pane.get_divider());
 	node->add_property("edit-vertical-pane-pos", string(buf));
 
 	maybe_add_mixer_strip_width (*node);
@@ -3926,85 +3919,6 @@ Editor::cycle_zoom_focus ()
 	case ZoomFocusEdit:
 		set_zoom_focus (ZoomFocusLeft);
 		break;
-	}
-}
-
-void
-Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
-{
-	/* recover or initialize pane positions. do this here rather than earlier because
-	   we don't want the positions to change the child allocations, which they seem to do.
-
-	   See comments in mixer_ui.cc about how this works.
-	 */
-
-	float pos;
-	XMLProperty* prop;
-	XMLNode* geometry = ARDOUR_UI::instance()->editor_settings();
-
-	enum Pane {
-		Horizontal = 0x1,
-		Vertical = 0x2
-	};
-
-	static Pane done;
-
-	if (which == static_cast<Paned*> (&edit_pane)) {
-
-		if (done & Horizontal) {
-			return;
-		}
-
-		if (geometry && (prop = geometry->property ("notebook-shrunk"))) {
-			_notebook_shrunk = string_is_affirmative (prop->value ());
-		}
-
-		if (!geometry || (prop = geometry->property ("edit-horizontal-pane-pos")) == 0) {
-			/* initial allocation is 90% to canvas, 10% to notebook */
-			pos = (int) floor (alloc.get_width() * 0.90f);
-		} else {
-			pos = atof (prop->value());
-		}
-
-		if (pos > 1.0f) {
-			/* older versions of Ardour stored absolute position */
-			if (alloc.get_width() > pos) {
-				edit_pane.set_position (pos);
-				done = (Pane) (done | Horizontal);
-			}
-		} else {
-			if (alloc.get_width() > 1.0/pos) {
-				paned_set_position_as_fraction (edit_pane, pos, false);
-				done = (Pane) (done | Horizontal);
-			}
-		}
-
-	} else if (which == static_cast<Paned*> (&editor_summary_pane)) {
-
-		if (done & Vertical) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property ("edit-vertical-pane-pos")) == 0) {
-			/* initial allocation is 90% to canvas, 10% to summary */
-			pos = (int) floor (alloc.get_height() * 0.90f);
-		} else {
-
-			pos = atof (prop->value());
-		}
-
-		if (pos > 1.0f) {
-			/* older versions of Ardour stored absolute position */
-			if (alloc.get_height() > pos) {
-				editor_summary_pane.set_position (pos);
-				done = (Pane) (done | Vertical);
-			}
-		} else {
-			if (alloc.get_height() > 1.0/pos) {
-				paned_set_position_as_fraction (editor_summary_pane, pos, true);
-				done = (Pane) (done | Vertical);
-			}
-		}
 	}
 }
 
@@ -5950,16 +5864,16 @@ Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
 
 		if (_notebook_shrunk) {
 			if (pre_notebook_shrink_pane_width) {
-				edit_pane.set_position (*pre_notebook_shrink_pane_width);
+				edit_pane.set_divider (0, *pre_notebook_shrink_pane_width);
 			}
 			_notebook_shrunk = false;
 		} else {
-			pre_notebook_shrink_pane_width = edit_pane.get_position();
+			pre_notebook_shrink_pane_width = edit_pane.get_divider();
 
 			/* this expands the LHS of the edit pane to cover the notebook
 			   PAGE but leaves the tabs visible.
 			 */
-			edit_pane.set_position (edit_pane.get_position() + page->get_width());
+			edit_pane.set_divider (0, edit_pane.get_divider() + page->get_width());
 			_notebook_shrunk = true;
 		}
 	}

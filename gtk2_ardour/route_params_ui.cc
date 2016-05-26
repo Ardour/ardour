@@ -125,12 +125,14 @@ RouteParams_UI::RouteParams_UI ()
 	route_vpacker.pack_start (route_hpacker, true, true);
 
 
-	list_hpane.pack1 (list_vpacker);
-	list_hpane.add2 (route_vpacker);
+	list_hpane.add (list_vpacker);
+	list_hpane.add (route_vpacker);
 
-	list_hpane.set_position(110);
+	/// XXX PANE
+	//list_hpane.set_position(110);
 
-	redir_hpane.set_position(110);
+	/// XXX PANE
+	//redir_hpane.set_position(110);
 
 	//global_vpacker.pack_start (list_hpane, true, true);
 	//get_vbox()->pack_start (global_vpacker);
@@ -250,7 +252,7 @@ RouteParams_UI::setup_processor_boxes()
 		if (at) {
 			at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&RouteParams_UI::map_frozen, this), gui_context());
 		}
-		redir_hpane.pack1 (*insert_box);
+		redir_hpane.add (*insert_box);
 
 		insert_box->ProcessorSelected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));  //note:  this indicates a double-click activation, not just a "selection"
 		insert_box->ProcessorUnselected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));
@@ -546,7 +548,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		send->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = send_ui;
 
-		redir_hpane.add2 (*_active_view);
+		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (proc)) != 0) {
@@ -557,7 +559,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		retrn->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = return_ui;
 
-		redir_hpane.add2 (*_active_view);
+		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
 	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (proc)) != 0) {
@@ -569,7 +571,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		plugin_ui->start_updating (0);
 		_active_view = plugin_ui;
 
-		redir_hpane.pack2 (*_active_view);
+		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (proc)) != 0) {
@@ -580,7 +582,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		port_insert->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)), gui_context());
 		_active_view = portinsert_ui;
 
-		redir_hpane.pack2 (*_active_view);
+		redir_hpane.add (*_active_view);
 		portinsert_ui->redisplay();
 		redir_hpane.show_all();
 	}

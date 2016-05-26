@@ -236,10 +236,10 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
 	favorite_plugins_frame.add (favorite_plugins_scroller);
 
-	rhs_pane1.pack1 (favorite_plugins_frame, false, true);
-	rhs_pane1.pack2 (track_display_frame);
-	rhs_pane2.pack1 (rhs_pane1);
-	rhs_pane2.pack2 (group_display_frame);
+	rhs_pane1.add (favorite_plugins_frame);
+	rhs_pane1.add (track_display_frame);
+	rhs_pane2.add (rhs_pane1);
+	rhs_pane2.add (group_display_frame);
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
@@ -252,23 +252,14 @@ Mixer_UI::Mixer_UI ()
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 
-	inner_pane.pack1 (scroller);
-	inner_pane.pack2 (vca_scroller);
+	inner_pane.add (scroller);
+	inner_pane.add (vca_scroller);
 
 	global_hpacker.pack_start (inner_pane, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
-	list_hpane.pack1(list_vpacker, false, true);
-	list_hpane.pack2(global_hpacker, true, false);
-
-	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
-							static_cast<Gtk::Paned*> (&rhs_pane1)));
-	rhs_pane2.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
-							static_cast<Gtk::Paned*> (&rhs_pane2)));
-	list_hpane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
-							 static_cast<Gtk::Paned*> (&list_hpane)));
-	inner_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
-							 static_cast<Gtk::Paned*> (&inner_pane)));
+	list_hpane.add (list_vpacker);
+	list_hpane.add (global_hpacker);
 
 	_content.pack_start (list_hpane, true, true);
 
@@ -1628,10 +1619,11 @@ Mixer_UI::show_mixer_list (bool yn)
 		list_vpacker.show ();
 
 		//if user wants to show the pane, we should make sure that it is wide enough to be visible
-		int width = list_hpane.get_position();
-		if (width < 40) {
-			list_hpane.set_position(40);
-		}
+		/// XXX PANE
+		// float width = list_hpane.get_position();
+		//if (width < 40) {
+		// list_hpane.set_position(40);
+		//}
 	} else {
 		list_vpacker.hide ();
 	}
@@ -1910,13 +1902,13 @@ Mixer_UI::get_state ()
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (rhs_pane1, true));
+	snprintf(buf,sizeof(buf), "%f", rhs_pane1.get_divider());
 	node->add_property(X_("mixer-rhs-pane1-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (rhs_pane2, true));
+	snprintf(buf,sizeof(buf), "%f", rhs_pane2.get_divider());
 	node->add_property(X_("mixer-rhs_pane2-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (list_hpane, false));
+	snprintf(buf,sizeof(buf), "%f", list_hpane.get_divider());
 	node->add_property(X_("mixer-list-hpane-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (inner_pane, false));
+	snprintf(buf,sizeof(buf), "%f", inner_pane.get_divider());
 	node->add_property(X_("mixer-inner-pane-pos"), string(buf));
 
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
@@ -1939,149 +1931,6 @@ Mixer_UI::get_state ()
 	node->add_child_nocopy (*plugin_order);
 
 	return *node;
-}
-
-void
-Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
-{
-	float pos;
-	XMLProperty* prop = 0;
-	XMLNode* geometry = ARDOUR_UI::instance()->mixer_settings();
-	int height = default_height;
-	static bool done[4] = { false, false, false, false };
-
-	/* Gtk::Paned behaves very oddly and rather undesirably. Setting the
-	 * position is a crapshoot if you time it incorrectly with the overall
-	 * sizing of the Paned. For example, if you might retrieve the size with
-	 * ::get_position() and then later call ::set_position() on a Paned at
-	 * a time when its allocation is different than it was when you retrieved
-	 * the position. The position will be interpreted as the size of the
-	 * first (top or left) child widget. If packing/size allocation later
-	 * resizes the Paned to a (final) smaller size, the position will be
-	 * used in ways that mean that the Paned ends up NOT in the same state
-	 * that it was in when you originally saved the position.
-	 *
-	 * Concrete example: Paned is 800 pixels wide, position is 400
-	 * (halfway).  Save position as 400. During program restart, set
-	 * position to 400, before Paned has been allocated any space. Paned
-	 * ends up initially sized to 1200 pixels.  Position is now 1/3 of the
-	 * way across/down.  Subsequent resizes will leave the position 1/3 of
-	 * the way across, rather than leaving it as a fixed pixel
-	 * position. Eventually, the Paned ends up 800 pixels wide/high again,
-	 * but the position is now 267, not 400.
-	 *
-	 * So ...
-	 *
-	 * We deal with this by using two strategies:
-	 *
-	 * 1) only set the position if the allocated size of the Paned is at
-	 * least as big as it needs to be for the position to make sense.
-	 *
-	 * 2) in recent versions of Ardour, save the position as a fraction,
-	 * and restore it using that fraction.
-	 *
-	 * So, we will only call ::set_position() AFTER the Paned is of a
-	 * sensible size, and then in addition, we will set the position in a
-	 * way that will be maintained as/when/if the Paned is resized.
-	 *
-	 * Once we've called ::set_position() on a Paned, we don't do it
-	 * again.
-	 */
-
-	if (which == static_cast<Gtk::Paned*> (&rhs_pane1)) {
-
-		if (done[0]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("mixer-rhs-pane1-pos")) == 0) {
-			pos = height / 3;
-		} else {
-			pos = atof (prop->value());
-		}
-
-		if (pos > 1.0f) {
-			/* older versions of Ardour stored absolute position */
-			if ((done[0] = (allocation.get_height() > pos))) {
-				rhs_pane1.set_position (pos);
-			}
-		} else {
-			if ((done[0] = (allocation.get_height() > 1.0/pos))) {
-				paned_set_position_as_fraction (rhs_pane1, pos, true);
-			}
-		}
-	}
-
-	if (which == static_cast<Gtk::Paned*> (&rhs_pane2)) {
-
-		if (done[1]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("mixer-rhs-pane2-pos")) == 0) {
-			pos = 2 * height / 3;
-		} else {
-			pos = atof (prop->value());
-		}
-
-		if (pos > 1.0f) {
-			/* older versions of Ardour stored absolute position */
-			if ((done[1] = (allocation.get_height() > pos))) {
-				rhs_pane2.set_position (pos);
-			}
-		} else {
-			if ((done[1] = (allocation.get_height() > 1.0/pos))) {
-				paned_set_position_as_fraction (rhs_pane2, pos, true);
-			}
-		}
-	}
-
-	if (which == static_cast<Gtk::Paned*> (&list_hpane)) {
-
-		if (done[2]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
-			pos = std::max ((float)100, rintf ((float) 125 * UIConfiguration::instance().get_ui_scale()));
-		} else {
-			pos = max (0.1, atof (prop->value ()));
-		}
-
-		if (pos > 1.0f) {
-			if ((done[2] = (allocation.get_width() > pos))) {
-				list_hpane.set_position (pos);
-			}
-		} else {
-			if ((done[2] = (allocation.get_width() > 1.0/pos))) {
-				paned_set_position_as_fraction (list_hpane, pos, false);
-			}
-		}
-	}
-
-	if (which == static_cast<Gtk::Paned*> (&inner_pane)) {
-
-		if (done[3]) {
-			return;
-		}
-
-		if (!geometry || (prop = geometry->property("mixer-inner-pane-pos")) == 0) {
-			pos = std::max ((float)100, rintf ((float) 125 * UIConfiguration::instance().get_ui_scale()));
-		} else {
-			pos = max (0.1, atof (prop->value ()));
-		}
-
-		if (pos > 1.0f) {
-			/* older versions of Ardour stored absolute position */
-			if ((done[3] = (allocation.get_width() > pos))) {
-				inner_pane.set_position (pos);
-			}
-		} else {
-			if ((done[3] = (allocation.get_width() > 1.0/pos))) {
-				paned_set_position_as_fraction (inner_pane, pos, false);
-			}
-		}
-	}
 }
 
 void

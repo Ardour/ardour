@@ -28,7 +28,6 @@
 #include <gtkmm/label.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
-#include <gtkmm/paned.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/liststore.h>
@@ -42,8 +41,8 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 
-
 #include "gtkmm2ext/dndtreeview.h"
+#include <gtkmm2ext/pane.h>
 #include "gtkmm2ext/treeutils.h"
 
 #include "gtkmm2ext/tabbable.h"
@@ -143,21 +142,19 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::Frame            track_display_frame;
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
-	Gtk::VPaned           rhs_pane1;
-	Gtk::VPaned           rhs_pane2;
-	Gtk::HPaned           inner_pane;
+	Gtkmm2ext::VPane      rhs_pane1;
+	Gtkmm2ext::VPane      rhs_pane2;
+	Gtkmm2ext::HPane      inner_pane;
 	Gtk::HBox             strip_packer;
 	Gtk::ScrolledWindow   vca_scroller;
 	Gtk::HBox             vca_packer;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	Gtk::HPaned           list_hpane;
+	Gtkmm2ext::HPane      list_hpane;
 
 	MixerGroupTabs* _group_tabs;
 
 	bool on_scroll_event (GdkEventScroll*);
-
-	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	std::list<MixerStrip *> strips;
 

@@ -34,11 +34,12 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/layout.h>
 
-#include "gtkmm2ext/selector.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
+#include "gtkmm2ext/pane.h"
+#include "gtkmm2ext/selector.h"
 #include "gtkmm2ext/stateful_button.h"
-#include "gtkmm2ext/bindings.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -610,17 +611,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void update_join_object_range_location (double);
 
-	boost::optional<int>  pre_notebook_shrink_pane_width;
-
-	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
+	boost::optional<float>  pre_notebook_shrink_pane_width;
 
 	Gtk::Notebook _the_notebook;
 	bool _notebook_shrunk;
 	void add_notebook_page (std::string const &, Gtk::Widget &);
 	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
 
-	Gtk::HPaned   edit_pane;
-	Gtk::VPaned   editor_summary_pane;
+	Gtkmm2ext::HPane   edit_pane;
+	Gtkmm2ext::VPane   editor_summary_pane;
 
 	Gtk::EventBox meter_base;
 	Gtk::HBox     meter_box;

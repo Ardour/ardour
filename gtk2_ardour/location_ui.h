@@ -26,13 +26,14 @@
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
-#include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 
 #include "pbd/signals.h"
 
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
+
+#include <gtkmm2ext/pane.h>
 
 #include "ardour_button.h"
 #include "ardour_window.h"
@@ -178,7 +179,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	LocationEditRow      punch_edit_row;
 	Gtk::VBox loop_punch_box;
 
-	Gtk::VPaned loc_range_panes;
+	Gtkmm2ext::VPane loc_range_panes;
 
 	Gtk::VBox  loc_frame_box;
 	Gtk::Button add_location_button;

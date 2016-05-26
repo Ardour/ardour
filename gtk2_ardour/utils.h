@@ -39,7 +39,6 @@ namespace PBD {
 namespace Gtk {
 	class Window;
 	class ComboBoxText;
-	class Paned;
         class Adjustment;
 }
 
