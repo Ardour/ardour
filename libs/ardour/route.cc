@@ -172,14 +172,9 @@ Route::init ()
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
 
-#if 0 // not used - just yet
-	if (!is_master() && !is_monitor() && !is_auditioner()) {
-		_delayline.reset (new DelayLine (_session, _name));
-		add_processor (_delayline, PreFader);
-	}
-#endif
-
-	/* add amp processor  */
+	/* add the amp/fader processor.
+	 * it should be the first processor to be added on every route.
+	 */
 
 	_gain_control = boost::shared_ptr<GainControllable> (new GainControllable (_session, GainAutomation, shared_from_this ()));
 	add_control (_gain_control);
@@ -190,6 +185,13 @@ Route::init ()
 	if (is_monitor ()) {
 		_amp->set_display_name (_("Monitor"));
 	}
+
+#if 0 // not used - just yet
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		_delayline.reset (new DelayLine (_session, _name));
+		add_processor (_delayline, PreFader);
+	}
+#endif
 
 	/* and input trim */
 
@@ -5051,12 +5053,13 @@ Route::setup_invisible_processors ()
 
 	/* find the amp */
 
-	ProcessorList::iterator amp = new_processors.begin ();
-	while (amp != new_processors.end() && *amp != _amp) {
-		++amp;
-	}
+	ProcessorList::iterator amp = find (new_processors.begin(), new_processors.end(), _amp);
 
-	assert (amp != new_processors.end ());
+	if (amp == new_processors.end ()) {
+		error << string_compose (_("Amp/Fader on Route '%1' went AWOL. Re-added."), name()) << endmsg;
+		new_processors.push_front (_amp);
+		amp = find (new_processors.begin(), new_processors.end(), _amp);
+	}
 
 	/* and the processor after the amp */
 
