@@ -68,9 +68,10 @@ public:
 	    s->bbt_time (this->frame, *this);
 
 	    const TempoMap& tempo = s->tempo_map();
+	    const Meter& meter = tempo.meter_at_frame (frame);
 
-	    const double divisions   = tempo.meter_at(frame).divisions_per_bar();
-	    const double divisor     = tempo.meter_at(frame).note_divisor();
+	    const double divisions   = meter.divisions_per_bar();
+	    const double divisor     = meter.note_divisor();
 	    const double qnote_scale = divisor * 0.25f;
 	    double mb;
 

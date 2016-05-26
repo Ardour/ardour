@@ -3023,7 +3023,7 @@ TempoMap::meter_section_at_beat (double beat) const
 }
 
 const Meter&
-TempoMap::meter_at (framepos_t frame) const
+TempoMap::meter_at_frame (framepos_t frame) const
 {
 	TempoMetric m (metric_at (frame));
 	return m.meter();

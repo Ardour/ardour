@@ -4105,7 +4105,7 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 		return Evoral::Beats(1.0);
 	case SnapToBar:
 		if (_session) {
-			return Evoral::Beats(_session->tempo_map().meter_at (position).divisions_per_bar());
+			return Evoral::Beats(_session->tempo_map().meter_at_frame (position).divisions_per_bar());
 		}
 		break;
 	default:

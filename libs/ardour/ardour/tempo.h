@@ -332,8 +332,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	double frames_per_beat_at (const framepos_t&, const framecnt_t& sr) const;
 
-	const Meter& meter_at (framepos_t) const;
-
 	const TempoSection& tempo_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
@@ -417,6 +415,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framecnt_t frame_at_pulse (const double& pulse) const;
 
 	const Tempo tempo_at_frame (const framepos_t& frame) const;
+	const Meter& meter_at_frame (framepos_t) const;
 
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);
 	Timecode::BBT_Time bbt_at_beat (const double& beats);

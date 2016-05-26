@@ -115,7 +115,7 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
-		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
+		const Meter& m = _mtv.session()->tempo_map().meter_at_frame (step_edit_insert_position);
 		const Tempo& t = _mtv.session()->tempo_map().tempo_at_frame (step_edit_insert_position);
 
 		double baf = _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position);

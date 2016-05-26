@@ -6476,7 +6476,7 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 {
 	framepos_t length = end - start;
 
-	const Meter& m (_session->tempo_map().meter_at (start));
+	const Meter& m (_session->tempo_map().meter_at_frame (start));
 
 	/* length = 1 bar */
 

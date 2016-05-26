@@ -422,7 +422,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 {
 	Timecode::BBT_Time when;
 	frame = map.round_to_bar(frame, RoundNearest);
-	Meter meter (map.meter_at(frame));
+	Meter meter (map.meter_at_frame (frame));
 
 	map.bbt_time (frame, when);
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, MusicTime);
