@@ -219,14 +219,14 @@ TempoSection::tempo_at_frame (const framepos_t& f, const framecnt_t& frame_rate)
 
 /** returns the zero-based frame (relative to session)
    where the tempo in whole pulses per minute occurs in this section.
-   beat b is only used for constant tempos.
+   pulse p is only used for constant tempos.
    note that the tempo map may have multiple such values.
 */
 framepos_t
-TempoSection::frame_at_tempo (const double& ppm, const double& b, const framecnt_t& frame_rate) const
+TempoSection::frame_at_tempo (const double& ppm, const double& p, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant || _c_func == 0.0) {
-		return ((b - pulse())  * frames_per_pulse (frame_rate))  + frame();
+		return ((p - pulse()) * frames_per_pulse (frame_rate))  + frame();
 	}
 
 	return minute_to_frame (time_at_pulse_tempo (ppm), frame_rate) + frame();
@@ -1612,7 +1612,8 @@ TempoMap::tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 	return ret_tempo;
 }
 
-/** returns the frame at which the supplied tempo occurs, or 0.
+/** returns the frame at which the supplied tempo occurs, or
+ *  the frame of the last tempo section (search exhausted)
  *  only the position of the first occurence will be returned
  *  (extend me)
 */
@@ -1628,25 +1629,37 @@ framepos_t
 TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const
 {
 	TempoSection* prev_t = 0;
+	const double tempo_ppm = tempo.beats_per_minute() / tempo.note_type();
 
 	Metrics::const_iterator i;
 
 	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
 			if (!t->active()) {
 				continue;
 			}
-			if ((prev_t) && t->beats_per_minute() / t->note_type() > tempo.beats_per_minute() / tempo.note_type()) {
-				/* t has a greater tempo */
-				const framepos_t ret_frame = prev_t->frame_at_tempo (tempo.beats_per_minute() / tempo.note_type(), 1.0, _frame_rate);
-				return ret_frame;
+
+			const double t_ppm = t->beats_per_minute() / t->note_type();
+
+			if (t_ppm == tempo_ppm) {
+				return t->frame();
+			}
+
+			if (prev_t) {
+				const double prev_t_ppm = prev_t->beats_per_minute() / prev_t->note_type();
+
+				if ((t_ppm > tempo_ppm && prev_t_ppm < tempo_ppm) || (t_ppm < tempo_ppm && prev_t_ppm > tempo_ppm)) {
+					const framepos_t ret_frame = prev_t->frame_at_tempo (tempo_ppm, prev_t->pulse(), _frame_rate);
+					return ret_frame;
+				}
 			}
 			prev_t = t;
 		}
 	}
 
-	return 0;
+	return prev_t->frame();
 }
 
 
