@@ -64,7 +64,6 @@ vst_ppq (const TempoMetric& tm, const Timecode::BBT_Time& bbt, double& ppqBar)
 
 	ppqBar *= ppq_scaling;
 	ppqBeat *= ppq_scaling;
-	ppqTick *= ppq_scaling;
 
 	return ppqBar + ppqBeat + ppqTick;
 }
