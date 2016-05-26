@@ -2372,6 +2372,13 @@ TempoMap::copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSe
 	return ret;
 }
 
+/** answers the question "is this a valid beat position for this tempo section?".
+ *  it returns true if the tempo section can be moved to the requested bbt position,
+ *  leaving the tempo map in a solved state.
+ * @param section the tempo section to be moved
+ * @param bbt the requested new position for the tempo section
+ * @return true if the tempo section can be moved to the position, otherwise false.
+ */
 bool
 TempoMap::can_solve_bbt (TempoSection* ts, const BBT_Time& bbt)
 {
