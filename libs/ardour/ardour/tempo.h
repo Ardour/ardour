@@ -394,7 +394,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
-	   bbt_at_frame(), frame_at_bbt(), beat_at_frame(), frame_at_beat()
+	   bbt_at_frame(), frame_at_bbt(), beat_at_frame(), frame_at_beat(), tempo_at_beat()
 	   and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
@@ -408,6 +408,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	Tempo tempo_at_frame (const framepos_t& frame) const;
 	framepos_t frame_at_tempo (const Tempo& tempo) const;
+
+	Tempo tempo_at_beat (const double& beat) const;
 
 	const Meter& meter_at_frame (framepos_t) const;
 

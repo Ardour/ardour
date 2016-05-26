@@ -1535,6 +1535,17 @@ TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 	return prev_t->frame();
 }
 
+Tempo
+TempoMap::tempo_at_beat (const double& beat) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	const MeterSection* prev_m = &meter_section_at_beat_locked (_metrics, beat);
+	const TempoSection* prev_t = &tempo_section_at_beat_locked (_metrics, beat);
+	const double note_type = prev_t->note_type();
+
+	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()) * note_type, note_type);
+}
+
 double
 TempoMap::pulse_at_beat (const double& beat) const
 {
