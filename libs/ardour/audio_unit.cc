@@ -1767,10 +1767,10 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	if (outCurrentBeat) {
 		const double ppq_scaling = metric.meter().note_divisor() / 4.0;
 		float beat;
-		beat = metric.meter().divisions_per_bar() * (bbt.bars - 1) * ppq_scaling;
-		beat += (bbt.beats - 1) * ppq_scaling;;
+		beat = metric.meter().divisions_per_bar() * (bbt.bars - 1);
+		beat += (bbt.beats - 1);
 		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
-		*outCurrentBeat = beat;
+		*outCurrentBeat = beat * ppq_scaling;
 	}
 
 	if (outCurrentTempo) {
