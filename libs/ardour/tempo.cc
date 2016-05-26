@@ -1612,6 +1612,43 @@ TempoMap::tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 	return ret_tempo;
 }
 
+/** returns the frame at which the supplied tempo occurs, or 0.
+ *  only the position of the first occurence will be returned
+ *  (extend me)
+*/
+framepos_t
+TempoMap::frame_at_tempo (const Tempo& tempo) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return frame_at_tempo_locked (_metrics, tempo);
+}
+
+
+framepos_t
+TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const
+{
+	TempoSection* prev_t = 0;
+
+	Metrics::const_iterator i;
+
+	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (!t->active()) {
+				continue;
+			}
+			if ((prev_t) && t->beats_per_minute() / t->note_type() > tempo.beats_per_minute() / tempo.note_type()) {
+				/* t has a greater tempo */
+				const framepos_t ret_frame = prev_t->frame_at_tempo (tempo.beats_per_minute() / tempo.note_type(), 1.0, _frame_rate);
+				return ret_frame;
+			}
+			prev_t = t;
+		}
+	}
+
+	return 0;
+}
+
 
 double
 TempoMap::beat_at_bbt (const Timecode::BBT_Time& bbt)
@@ -1805,7 +1842,7 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
 	return ret;
 }
 
-const BBT_Time
+BBT_Time
 TempoMap::bbt_at_frame (framepos_t frame)
 {
 	if (frame < 0) {
@@ -1837,7 +1874,7 @@ TempoMap::bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) 
 	return bbt_at_beat_locked (metrics, beat);
 }
 
-const framepos_t
+framepos_t
 TempoMap::frame_at_bbt (const BBT_Time& bbt)
 {
 	if (bbt.bars < 1) {
