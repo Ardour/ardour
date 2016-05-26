@@ -1829,8 +1829,8 @@ TempoMap::check_solved (const Metrics& metrics) const
 					return false;
 				}
 
-				/* precision check ensures pulses and frames align.*/
-				if (t->frame() != prev_t->frame_at_pulse (t->pulse(), _frame_rate)) {
+				/* precision check ensures tempo and frames align.*/
+				if (t->frame() != prev_t->frame_at_tempo (t->pulses_per_minute(), t->pulse(), _frame_rate)) {
 					if (!t->locked_to_meter()) {
 						return false;
 					}
