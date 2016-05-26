@@ -330,12 +330,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
+	/* because tempos may be ramped, this is only valid for the instant requested.*/
 	double frames_per_beat_at (const framepos_t&, const framecnt_t& sr) const;
 
 	const TempoSection& tempo_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
-
 
 	/** add a tempo section locked to pls. ignored values will be set in recompute_tempos()
 	 * @param pulse pulse position of new section. ignored if pls == AudioTime
@@ -365,8 +365,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 
 	void set_length (framepos_t frames);
-
-	void fix_legacy_session();
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -417,6 +415,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const Tempo tempo_at_frame (const framepos_t& frame) const;
 	const Meter& meter_at_frame (framepos_t) const;
 
+	const Timecode::BBT_Time bbt_at_frame (framepos_t when);
+	const framepos_t frame_at_bbt (const Timecode::BBT_Time&);
+
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);
 	Timecode::BBT_Time bbt_at_beat (const double& beats);
 
@@ -425,8 +426,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 
-	void bbt_time (framepos_t when, Timecode::BBT_Time&);
-	framepos_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	/* TEMPO-SENSITIVE FUNCTIONS
@@ -452,6 +451,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	PBD::Signal0<void> MetricPositionChanged;
+	void fix_legacy_session();
 
 private:
 	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
@@ -469,9 +469,10 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	const Tempo tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
+	Timecode::BBT_Time bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
+	framepos_t frame_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
-	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
+	const Tempo tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
 
 	const TempoSection& tempo_section_at_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;

@@ -728,7 +728,7 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 
 	switch (ARDOUR_UI::instance()->secondary_clock->mode ()) {
 	case AudioClock::BBT:
-		_session->tempo_map().bbt_time (pos, bbt);
+		bbt = _session->tempo_map().bbt_at_frame (pos);
 		if (onoff) {
 			snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		} else {

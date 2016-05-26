@@ -2310,7 +2310,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					if (_session.transport_frame() != _next_cycle_start ||
 					    _session.transport_speed() != _next_cycle_speed) {
 						// Transport has changed, write position at cycle start
-						tmap.bbt_time(_session.transport_frame(), bbt);
+						bbt = tmap.bbt_at_frame (_session.transport_frame());
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, _session.transport_speed(),
 						               _session.transport_frame(), 0);

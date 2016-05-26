@@ -45,9 +45,8 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Timecode::BBT_Time when;
 	Tempo tempo (map.tempo_at_frame (frame));
-	map.bbt_time (frame, when);
+	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 
 	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
@@ -63,8 +62,7 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Timecode::BBT_Time when;
-	map.bbt_time (section.frame(), when);
+	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
 	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable(), section.position_lock_style());
 }
 
@@ -420,19 +418,18 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Meter"))
 {
-	Timecode::BBT_Time when;
 	frame = map.round_to_bar(frame, RoundNearest);
+	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 	Meter meter (map.meter_at_frame (frame));
 
-	map.bbt_time (frame, when);
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, MusicTime);
 }
 
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
-	Timecode::BBT_Time when;
-	map.bbt_time (section.frame(), when);
+	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
+
 	init (when, section.divisions_per_bar(), section.note_divisor(), section.movable(), section.position_lock_style());
 }
 

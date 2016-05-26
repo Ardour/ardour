@@ -1805,25 +1805,40 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
 	return ret;
 }
 
-void
-TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
+const BBT_Time
+TempoMap::bbt_at_frame (framepos_t frame)
 {
-
 	if (frame < 0) {
+		BBT_Time bbt;
 		bbt.bars = 1;
 		bbt.beats = 1;
 		bbt.ticks = 0;
 		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
-		return;
+		return bbt;
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const double beat = beat_at_frame_locked (_metrics, frame);
 
-	bbt = bbt_at_beat_locked (_metrics, beat);
+	return bbt_at_frame_locked (_metrics, frame);
 }
 
-framepos_t
-TempoMap::frame_time (const BBT_Time& bbt)
+Timecode::BBT_Time
+TempoMap::bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const
+{
+	if (frame < 0) {
+		BBT_Time bbt;
+		bbt.bars = 1;
+		bbt.beats = 1;
+		bbt.ticks = 0;
+		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
+		return bbt;
+	}
+	const double beat = beat_at_frame_locked (metrics, frame);
+
+	return bbt_at_beat_locked (metrics, beat);
+}
+
+const framepos_t
+TempoMap::frame_at_bbt (const BBT_Time& bbt)
 {
 	if (bbt.bars < 1) {
 		warning << string_compose (_("tempo map asked for frame time at bar < 1  (%1)\n"), bbt) << endmsg;
@@ -1835,12 +1850,12 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return frame_time_locked (_metrics, bbt);
+	return frame_at_bbt_locked (_metrics, bbt);
 }
 
-/* meter section based */
+/* meter & tempo section based */
 framepos_t
-TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
+TempoMap::frame_at_bbt_locked (const Metrics& metrics, const BBT_Time& bbt) const
 {
 	/* HOLD THE READER LOCK */
 
@@ -2802,22 +2817,22 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 			/* find bar previous to 'frame' */
 			bbt.beats = 1;
 			bbt.ticks = 0;
-			return frame_time_locked (_metrics, bbt);
+			return frame_at_bbt_locked (_metrics, bbt);
 
 		} else if (dir > 0) {
 			/* find bar following 'frame' */
 			++bbt.bars;
 			bbt.beats = 1;
 			bbt.ticks = 0;
-			return frame_time_locked (_metrics, bbt);
+			return frame_at_bbt_locked (_metrics, bbt);
 		} else {
 			/* true rounding: find nearest bar */
-			framepos_t raw_ft = frame_time_locked (_metrics, bbt);
+			framepos_t raw_ft = frame_at_bbt_locked (_metrics, bbt);
 			bbt.beats = 1;
 			bbt.ticks = 0;
-			framepos_t prev_ft = frame_time_locked (_metrics, bbt);
+			framepos_t prev_ft = frame_at_bbt_locked (_metrics, bbt);
 			++bbt.bars;
-			framepos_t next_ft = frame_time_locked (_metrics, bbt);
+			framepos_t next_ft = frame_at_bbt_locked (_metrics, bbt);
 
 			if ((raw_ft - prev_ft) > (next_ft - prev_ft) / 2) { 
 				return next_ft;
@@ -3354,7 +3369,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 				tempo = t;
 				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " beat = " << (*i)->pulse() <<endl;
 			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
-				bbt_time (m->frame(), bbt);
+				bbt = bbt_at_frame_locked (_metrics, m->frame());
 
 				// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
 
@@ -3493,7 +3508,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	}
 	pos_bbt.bars += op.bars;
 
-	return frame_time_locked (_metrics, pos_bbt);
+	return frame_at_bbt_locked (_metrics, pos_bbt);
 }
 
 /** Count the number of beats that are equivalent to distance when going forward,

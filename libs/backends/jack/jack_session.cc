@@ -121,7 +121,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 	TempoMetric metric (tempo_map.metric_at (tf));
 
 	try {
-		tempo_map.bbt_time (tf, bbt);
+		bbt = tempo_map.bbt_at_frame (tf);
 
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;

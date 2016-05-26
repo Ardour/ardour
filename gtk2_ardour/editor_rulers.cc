@@ -1275,7 +1275,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 				next_beat.beats = (*i).beat;
 				next_beat.bars = (*i).bar;
 				next_beat.ticks = tick;
-				pos = _session->tempo_map().frame_time (next_beat);
+				pos = _session->tempo_map().frame_at_bbt (next_beat);
 
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
@@ -1345,7 +1345,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 				next_beat.beats = (*i).beat;
 				next_beat.bars = (*i).bar;
 				next_beat.ticks = tick;
-				pos = _session->tempo_map().frame_time (next_beat);
+				pos = _session->tempo_map().frame_at_bbt (next_beat);
 
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
@@ -1421,7 +1421,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
 
 				next_beat.ticks = tick;
-				pos = _session->tempo_map().frame_time (next_beat);
+				pos = _session->tempo_map().frame_at_bbt (next_beat);
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
 				}

@@ -1258,12 +1258,12 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
-			_session->tempo_map().bbt_time (when, BBT);
+			BBT = _session->tempo_map().bbt_at_frame (when);
 			BBT.bars--;
 			BBT.beats--;
 		}
 	} else {
-		_session->tempo_map().bbt_time (when, BBT);
+		BBT = _session->tempo_map().bbt_at_frame (when);
 	}
 
 	if (negative) {

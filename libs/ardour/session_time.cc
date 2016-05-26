@@ -46,7 +46,7 @@ using namespace PBD;
 void
 Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
 {
-	_tempo_map->bbt_time (when, bbt);
+	bbt = _tempo_map->bbt_at_frame (when);
 }
 
 /* Timecode TIME */
@@ -226,7 +226,7 @@ Session::convert_to_frames (AnyTime const & position)
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_time (position.bbt);
+		return _tempo_map->frame_at_bbt (position.bbt);
 		break;
 
 	case AnyTime::Timecode:

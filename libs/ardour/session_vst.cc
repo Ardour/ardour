@@ -223,7 +223,7 @@ intptr_t Session::vst_callback (
 				Timecode::BBT_Time bbt;
 
 				try {
-					session->tempo_map().bbt_time (now, bbt);
+					bbt = session->tempo_map().bbt_at_frame (now);
 
 					/* PPQ = pulse per quarter
 					 * VST's "pulse" is our "division".

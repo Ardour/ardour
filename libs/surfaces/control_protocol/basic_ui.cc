@@ -402,9 +402,8 @@ BasicUI::jump_by_seconds (double secs)
 void
 BasicUI::jump_by_bars (double bars)
 {
-	Timecode::BBT_Time bbt;
 	TempoMap& tmap (session->tempo_map());
-	tmap.bbt_time (session->transport_frame(), bbt);
+	Timecode::BBT_Time bbt (tmap.bbt_at_frame (session->transport_frame()));
 
 	bars += bbt.bars;
 	if (bars < 0) bars = 0;
