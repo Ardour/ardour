@@ -123,8 +123,8 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 {
 	Children::size_type n = 0;
         int remaining;
-        int xpos = 0;
-        int ypos = 0;
+        int xpos = alloc.get_x();
+        int ypos = alloc.get_y();
         float fract;
 
         if (children.empty()) {

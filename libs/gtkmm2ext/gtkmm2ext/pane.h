@@ -28,8 +28,7 @@
 #include <gtkmm/container.h>
 #include <gtkmm/eventbox.h>
 
-//#include "gtkmm2ext/visibility.h"
-#define LIBGTKMM2EXT_API
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtk {
 	class Widget;
@@ -45,7 +44,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
   public:
 	Pane (bool horizontal);
 	void set_divider (std::vector<float>::size_type divider, float fract);
-	float get_divider (std::vector<float>::size_type divider);
+	float get_divider (std::vector<float>::size_type divider = 0);
 
 	GType child_type_vfunc() const;
 
