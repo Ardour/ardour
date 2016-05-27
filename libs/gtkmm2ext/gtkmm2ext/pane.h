@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 
+#include <gdkmm/cursor.h>
 #include <gtkmm/container.h>
 #include <gtkmm/eventbox.h>
 
@@ -47,8 +48,9 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	float get_divider (std::vector<float>::size_type divider = 0);
 
 	GType child_type_vfunc() const;
+	void set_drag_cursor (Gdk::Cursor);
 
-
+  protected:
 	bool horizontal;
 
 	void on_add (Gtk::Widget*);
@@ -60,10 +62,15 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	bool handle_press_event (GdkEventButton*, Divider*);
 	bool handle_release_event (GdkEventButton*, Divider*);
 	bool handle_motion_event (GdkEventMotion*, Divider*);
+	bool handle_enter_event (GdkEventCrossing*, Divider*);
+	bool handle_leave_event (GdkEventCrossing*, Divider*);
 
 	void forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer callback_data);
 
   private:
+	Gdk::Cursor drag_cursor;
+	bool did_move;
+
 	void reallocate (Gtk::Allocation const &);
 
 	typedef std::list<Gtk::Widget*> Children;
@@ -76,11 +83,9 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 		bool dragging;
 
 		bool on_expose_event (GdkEventExpose* ev);
-		bool on_enter_notify_event (GdkEventCrossing*);
-		bool on_leave_notify_event (GdkEventCrossing*);
 	};
 
-	typedef std::vector<Divider*> Dividers;
+	typedef std::list<Divider*> Dividers;
 	Dividers dividers;
 	int divider_width;
 	void add_divider ();

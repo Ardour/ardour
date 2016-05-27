@@ -17,6 +17,7 @@
 
 */
 
+#include <gdkmm/cursor.h>
 #include "gtkmm2ext/pane.h"
 
 #include "i18n.h"
@@ -28,10 +29,25 @@ using namespace std;
 
 Pane::Pane (bool h)
 	: horizontal (h)
+	, did_move (false)
 	, divider_width (5)
 {
+	using namespace Gdk;
+
 	set_name ("Pane");
 	set_has_window (false);
+
+	if (horizontal) {
+		drag_cursor = Cursor (SB_H_DOUBLE_ARROW);
+	} else {
+		drag_cursor = Cursor (SB_H_DOUBLE_ARROW);
+	}
+}
+
+void
+Pane::set_drag_cursor (Gdk::Cursor c)
+{
+	drag_cursor = c;
 }
 
 void
@@ -41,11 +57,11 @@ Pane::on_size_request (GtkRequisition* req)
 
 	/* iterate over all children, get their size requests */
 
-	/* horizontal pane is as high as its tallest child, but has no width
-	 * requirement.
+	/* horizontal pane is as high as its tallest child, including the dividers.
+	 * Its width is the sum of the children plus the dividers.
 	 *
-	 * vertical pane is as wide as its widest child, but has no height
-	 * requirement.
+	 * vertical pane is as wide as its widest child, including the dividers.
+	 * Its height is the sum of the children plus the dividers.
 	 */
 
 	if (horizontal) {
@@ -76,6 +92,7 @@ Pane::on_size_request (GtkRequisition* req)
 GType
 Pane::child_type_vfunc() const
 {
+	/* We accept any number of any types of widgets */
 	return Gtk::Widget::get_type();
 }
 
@@ -86,6 +103,8 @@ Pane::add_divider ()
 	d->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_press_event), d), false);
 	d->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_release_event), d), false);
 	d->signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_motion_event), d), false);
+	d->signal_enter_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_enter_event), d), false);
+	d->signal_leave_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_leave_event), d), false);
 	d->set_parent (*this);
 	d->show ();
 	d->fract = 0.5;
@@ -121,7 +140,6 @@ Pane::on_size_allocate (Gtk::Allocation& alloc)
 void
 Pane::reallocate (Gtk::Allocation const & alloc)
 {
-	Children::size_type n = 0;
         int remaining;
         int xpos = alloc.get_x();
         int ypos = alloc.get_y();
@@ -132,6 +150,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
         }
 
         if (children.size() == 1) {
+	        /* only child gets the full allocation */
 	        children.front()->size_allocate (alloc);
 	        return;
         }
@@ -146,7 +165,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
         Children::iterator next;
         Dividers::iterator div;
 
-        for (child = children.begin(), div = dividers.begin(); child != children.end(); ++n) {
+        for (child = children.begin(), div = dividers.begin(); child != children.end(); ) {
 
 	        Gtk::Allocation child_alloc;
 	        next = child;
@@ -155,12 +174,12 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        child_alloc.set_x (xpos);
 	        child_alloc.set_y (ypos);
 
-	        if (n >= dividers.size()) {
-		        /* the next child gets all the remaining space */
+	        if (next == children.end()) {
+		        /* last child gets all the remaining space */
 		        fract = 1.0;
 	        } else {
-		        /* the next child gets the fraction of the remaining space given by the divider that follows it */
-		        fract = dividers[n]->fract;
+		        /* child gets the fraction of the remaining space given by the divider that follows it */
+		        fract = (*div)->fract;
 	        }
 
 	        Gtk::Requisition cr;
@@ -213,14 +232,15 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 bool
 Pane::on_expose_event (GdkEventExpose* ev)
 {
-	Children::size_type n = 0;
+	Children::iterator child;
+	Dividers::iterator div;
 
-	for (Children::iterator child = children.begin(); child != children.end(); ++child, ++n) {
+	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child, ++div) {
 
 		propagate_expose (**child, ev);
 
-		if (n < dividers.size()) {
-			propagate_expose (*dividers[n], ev);
+		if (div != dividers.end()) {
+			propagate_expose (**div, ev);
 		}
         }
 
@@ -240,7 +260,11 @@ bool
 Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 {
 	d->dragging = false;
-	children.front()->queue_resize ();
+
+	if (did_move) {
+		children.front()->queue_resize ();
+		did_move = false;
+	}
 
 	return false;
 }
@@ -248,6 +272,8 @@ Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 bool
 Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 {
+	did_move = true;
+
 	if (!d->dragging) {
 		return true;
 	}
@@ -305,12 +331,20 @@ Pane::set_divider (Dividers::size_type div, float fract)
 {
 	bool redraw = false;
 
-	while (dividers.size() <= div) {
-		add_divider ();
+	Dividers::iterator d = dividers.begin();
+
+	while (div--) {
+		++d;
+		if (d == dividers.end()) {
+			/* caller is trying to set divider that does not exist
+			 * yet.
+			 */
+			return;
+		}
 	}
 
-	if (fract != dividers[div]->fract) {
-		dividers[div]->fract = fract;
+	if (fract != (*d)->fract) {
+		(*d)->fract = fract;
 		redraw = true;
 	}
 
@@ -324,23 +358,41 @@ Pane::set_divider (Dividers::size_type div, float fract)
 float
 Pane::get_divider (Dividers::size_type div)
 {
-	if (div >= dividers.size()) {
-		return -1;
+	Dividers::iterator d = dividers.begin();
+
+	while (div--) {
+		++d;
+		if (d == dividers.end()) {
+			/* caller is trying to set divider that does not exist
+			 * yet.
+			 */
+			return -1.0f;
+		}
 	}
 
-	return dividers[div]->fract;
+	return (*d)->fract;
 }
 
 void
 Pane::forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer callback_data)
 {
-	for (Children::iterator w = children.begin(); w != children.end(); ++w) {
+	/* since the callback could modify the child list(s), make sure we keep
+	 * the iterators safe;
+	 */
+
+	for (Children::iterator w = children.begin(); w != children.end(); ) {
+		Children::iterator next = w;
+		++next;
 		callback ((*w)->gobj(), callback_data);
+		w = next;
 	}
 
 	if (include_internals) {
-		for (Dividers::iterator d = dividers.begin(); d != dividers.end(); ++d) {
+		for (Dividers::iterator d = dividers.begin(); d != dividers.end(); ) {
+			Dividers::iterator next = d;
+			++next;
 			callback (GTK_WIDGET((*d)->gobj()), callback_data);
+			d = next;
 		}
 	}
 }
@@ -372,15 +424,17 @@ Pane::Divider::on_expose_event (GdkEventExpose* ev)
 }
 
 bool
-Pane::Divider::on_enter_notify_event (GdkEventCrossing*)
+Pane::handle_enter_event (GdkEventCrossing*, Divider* d)
 {
-	set_state (Gtk::STATE_SELECTED);
+	d->get_window()->set_cursor (drag_cursor);
+	d->set_state (Gtk::STATE_SELECTED);
 	return true;
 }
 
 bool
-Pane::Divider::on_leave_notify_event (GdkEventCrossing*)
+Pane::handle_leave_event (GdkEventCrossing*, Divider* d)
 {
-	set_state (Gtk::STATE_NORMAL);
+	d->get_window()->set_cursor ();
+	d->set_state (Gtk::STATE_NORMAL);
 	return true;
 }
