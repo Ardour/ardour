@@ -1524,6 +1524,9 @@ TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 	return prev_t->frame();
 }
 
+/** more precise than doing tempo_at_frame (frame_at_beat (b)),
+ *  as there is no intermediate frame rounding.
+ */
 Tempo
 TempoMap::tempo_at_beat (const double& beat) const
 {
@@ -1987,6 +1990,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 	TempoSection* section_prev = 0;
 	framepos_t first_m_frame = 0;
 
+	/* can't move a tempo before the first meter */
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
@@ -2140,10 +2144,8 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 		}
 	}
 
-	/* it would make sense to bail out if there is no audio-locked meter,
-	   however it may be desirable to move a music-locked meter by frame at some point.
-	*/
 	TempoSection* meter_locked_tempo = 0;
+
 	for (Metrics::const_iterator ii = imaginary.begin(); ii != imaginary.end(); ++ii) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*ii)) != 0) {
@@ -2197,7 +2199,10 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 							return false;
 						}
 					} else {
-						/* all is ok. set section's tempo */
+						/* all is ok. set section's locked tempo if allowed.
+						   possibly disallowed if there is an adjacent audio-locked tempo.
+						   XX this check could possibly go. its never actually happened here.
+						*/
 						MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_frame_locked (future_map, section->frame()));
 						meter_copy->set_frame (frame);
 
