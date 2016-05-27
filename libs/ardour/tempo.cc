@@ -589,17 +589,20 @@ MeterSection::get_state() const
   Tempo is the rate of the musical pulse.
   Meters divide the pulses into measures and beats.
 
+  TempoSections - provide pulses in the form of beats_per_minute() and note_type() where note_type is the division of a whole pulse,
+  and beats_per_minute is the number of note_types in one minute (unlike what its name suggests).
   Note that Tempo::beats_per_minute() has nothing to do with musical beats.
-  It should rather be thought of as tempo note divisions per minute.
 
-  TempoSections, which are nice to think of in whole pulses per minute,
-  and MeterSecions which divide tempo pulses into measures (via divisions_per_bar)
-  and beats (via note_divisor) are used to form a tempo map.
+  MeterSecions - divide pulses into measures (via divisions_per_bar) and beats (via note_divisor).
+
+  Both tempos and meters have a pulse position and a frame position.
+  Meters also have a beat position, which is always 0.0 for the first meter.
   TempoSections and MeterSections may be locked to either audio or music (position lock style).
-  We construct the tempo map by first using the frame or pulse position (depending on position lock style) of each tempo.
-  We then use this pulse/frame layout to find the beat & pulse or frame position of each meter (again depending on lock style).
+  The lock style determines the 'true' position of the section wich is used to calculate the other postion parameters of the section.
 
-  Having done this, we can now find any one of tempo, beat, frame or pulse if a beat, frame, pulse or tempo is known.
+  The first tempo and first meter are special. they must move together, and must be locked to audio.
+  Audio locked tempos which lie before the first meter are made inactive.
+  They will be re-activated if the first meter is again placed before them.
 
   With tepo sections potentially being ramped, meters provide a way of mapping beats to whole pulses without
   referring to the tempo function(s) involved as the distance in whole pulses between a meter and a subsequent beat is
@@ -614,18 +617,13 @@ MeterSection::get_state() const
   Remembering that ramped tempo sections interact, it is important to avoid referring to any other tempos when moving tempo sections,
   Here, beats (meters) are used to determine the new pulse (see predict_tempo_position())
 
-  The first tempo and first meter are special. they must move together, and must be locked to audio.
-  Audio locked tempos which lie before the first meter are made inactive.
-  They will be re-activated if the first meter is again placed before them.
-
-  Both tempos and meters have a pulse position and a frame position.
-  Meters also have a beat position, which is always 0.0 for the first meter.
-
-  A tempo locked to music is locked to musical pulses.
-  A meter locked to music is locked to beats.
-
-  Recomputing the tempo map is the process where the 'missing' position
+  Recomputing the map is the process where the 'missing' position
   (tempo pulse or meter pulse & beat in the case of AudioTime, frame for MusicTime) is calculated.
+  We construct the tempo map by first using the frame or pulse position (depending on position lock style) of each tempo.
+  We then use this tempo map (really just the tempos) to find the pulse or frame position of each meter (again depending on lock style).
+
+  Having done this, we can now find any musical duration by selecting the tempo and meter covering the position (or tempo) in question
+  and querying its appropriate meter/tempo.
 
   It is important to keep the _metrics in an order that makes sense.
   Because ramped MusicTime and AudioTime tempos can interact with each other,
