@@ -3184,9 +3184,12 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 						       , beat, bbt, map.frame_at_bbt (bbt), _real_section->position_lock_style());
 
 		}
-		/* only snap to bars */
-		_editor->set_snap_to (SnapToBar);
-		_editor->set_snap_mode (SnapNormal);	}
+		/* only snap to bars. leave snap mode alone for audio locked meters.*/
+		if (_real_section->position_lock_style() != AudioTime) {
+			_editor->set_snap_to (SnapToBar);
+			_editor->set_snap_mode (SnapNormal);
+		}
+	}
 
 	framepos_t pf = adjusted_current_frame (event);
 
