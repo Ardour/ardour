@@ -389,7 +389,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	outbound_mtc_timecode_frame = mtc_tc;
 	transmitting_timecode_time = timecode;
 
-	LatencyRange mtc_out_latency; // TODO cache this, update on engine().GraphReordered()
+	LatencyRange mtc_out_latency = {0, 0}; // TODO cache this, update on engine().GraphReordered()
 	_midi_ports->mtc_output_port ()->get_connected_latency_range (ltc_out_latency, true);
 	frameoffset_t mtc_offset = worst_playback_latency() - mtc_out_latency.max;
 

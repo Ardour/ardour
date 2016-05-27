@@ -3210,6 +3210,7 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 			case NewPlaylist:
 				rename_playlist = true;
 				break;
+			default:
 			case CopyPlaylist:
 			case SharePlaylist:
 				rename_playlist = false;
