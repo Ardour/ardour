@@ -718,9 +718,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MinsecRulerItem:
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
-			&& !Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier())) {
+			&& !Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier())) {
+		} else if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 			_drags->set (new BBTRulerDrag (this, item), event);
 		}
 		return true;
