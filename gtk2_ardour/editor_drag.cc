@@ -3115,8 +3115,9 @@ TrimDrag::setup_pointer_frame_offset ()
 }
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i),
-	  _copy (c)
+	: Drag (e, i)
+	, _copy (c)
+	, _old_snap_type (e->snap_type())
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
@@ -3143,7 +3144,6 @@ void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-
 		// create a dummy marker to catch events, then hide it.
 
 		char name[64];
@@ -3183,6 +3183,8 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 						       , beat, bbt, map.frame_at_bbt (bbt), _real_section->position_lock_style());
 
 		}
+		/* only snap to bars */
+		_editor->set_snap_to (SnapToBar);
 	}
 
 	framepos_t pf = adjusted_current_frame (event);
@@ -3209,6 +3211,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 		return;
 	}
+
+	/* reinstate old snap setting */
+	_editor->set_snap_to (_old_snap_type);
 
 	TempoMap& map (_editor->session()->tempo_map());
 

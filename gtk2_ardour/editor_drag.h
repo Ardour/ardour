@@ -709,6 +709,7 @@ private:
 	ARDOUR::MeterSection* _real_section;
 
 	bool _copy;
+	Editing::SnapType _old_snap_type;
 	XMLNode* before_state;
 };
 
