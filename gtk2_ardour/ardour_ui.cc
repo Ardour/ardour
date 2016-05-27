@@ -85,6 +85,7 @@
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/recent_sessions.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
@@ -2099,7 +2100,7 @@ ARDOUR_UI::trx_record_enable_all_tracks ()
 	}
 
 	if (none_record_enabled) {
-		_session->set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), 1.0, Controllable::NoGroup);
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), 1.0, Controllable::NoGroup);
 	}
 
 	return none_record_enabled;
@@ -5576,7 +5577,7 @@ ARDOUR_UI::cancel_solo ()
 {
 	if (_session) {
 		if (_session) {
-			_session->set_controls (route_list_to_control_list (_session->get_routes(), &Route::solo_control), 0.0, Controllable::NoGroup);
+			_session->set_controls (route_list_to_control_list (_session->get_routes(), &Stripable::solo_control), 0.0, Controllable::NoGroup);
 		}
 		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
 	}

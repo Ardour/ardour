@@ -1247,7 +1247,7 @@ MonitorSection::cancel_isolate (GdkEventButton*)
 {
 	if (_session) {
 		boost::shared_ptr<RouteList> rl (_session->get_routes ());
-		_session->set_controls (route_list_to_control_list (rl, &Route::solo_isolate_control), 0.0, Controllable::NoGroup);
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), 0.0, Controllable::NoGroup);
 	}
 
 	return true;

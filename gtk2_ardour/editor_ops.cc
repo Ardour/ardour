@@ -5754,7 +5754,7 @@ Editor::toggle_mute ()
 		rl->push_back (rtav->route());
 	}
 
-	_session->set_controls (route_list_to_control_list (rl, &Route::mute_control), new_state, Controllable::UseGroup);
+	_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), new_state, Controllable::UseGroup);
 }
 
 void

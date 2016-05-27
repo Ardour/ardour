@@ -29,6 +29,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audio_track.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"

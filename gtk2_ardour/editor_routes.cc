@@ -425,10 +425,10 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 
 	TimeAxisView* tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac = rtv->route()->rec_enable_control();
 
-	if (rtv && rtv->track()) {
-		// TODO check rec-safe and ...
-		_session->set_control (rtv->track()->rec_enable_control(), !rtv->track()->rec_enable_control()->get_value(), Controllable::UseGroup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -438,12 +438,10 @@ EditorRoutes::on_tv_rec_safe_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 	TimeAxisView* tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac (rtv->route()->rec_safe_control());
 
-	if (rtv && rtv->track() && !rtv->track()->record_enabled()) {
-		DisplaySuspender ds;
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (rtv->route());
-		_session->set_record_safe (rl, !rtv->track()->record_safe(), Session::rt_cleanup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -455,9 +453,10 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac (rtv->route()->mute_control());
 
-	if (rtv != 0) {
-		_session->set_control (rtv->route()->mute_control(), rtv->route()->mute_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -469,9 +468,10 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_control());
 
-	if (rtv != 0) {
-		rtv->route()->solo_control()->set_value (rtv->route()->soloed() ? 0.0 : 1.0, Controllable::UseGroup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -483,9 +483,10 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_isolate_control());
 
-	if (rtv) {
-		rtv->route()->solo_isolate_control()->set_value (rtv->route()->solo_isolate_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -497,9 +498,10 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_safe_control());
 
-	if (rtv) {
-		rtv->route()->solo_safe_control()->set_value (rtv->route()->solo_safe_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
+	if (ac) {
+		ac->set_value (!ac->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -1261,14 +1263,14 @@ EditorRoutes::key_press (GdkEventKey* ev)
 
 		case 'm':
 			if (get_relevant_routes (rl)) {
-				_session->set_controls (route_list_to_control_list (rl, &Route::mute_control), rl->front()->muted() ? 0.0 : 1.0, Controllable::NoGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), rl->front()->muted() ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 			return true;
 			break;
 
 		case 's':
 			if (get_relevant_routes (rl)) {
-				_session->set_controls (route_list_to_control_list (rl, &Route::solo_control), rl->front()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), rl->front()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 			return true;
 			break;
@@ -1278,7 +1280,7 @@ EditorRoutes::key_press (GdkEventKey* ev)
 				for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 					boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
 					if (t) {
-						_session->set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), !t->rec_enable_control()->get_value(), Controllable::NoGroup);
+						_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !t->rec_enable_control()->get_value(), Controllable::NoGroup);
 						break;
 					}
 				}
@@ -1663,7 +1665,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 				(*i)[_columns.rec_state] = 0;
 			}
 
-			(*i)[_columns.rec_safe] = !trk->rec_safe_control()->get_value();
+			(*i)[_columns.rec_safe] = trk->rec_safe_control()->get_value();
 			(*i)[_columns.name_editable] = !trk->rec_enable_control()->get_value();
 		}
 	}
