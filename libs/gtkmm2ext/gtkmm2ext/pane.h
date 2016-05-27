@@ -48,9 +48,8 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	GType child_type_vfunc() const;
 
-  protected:
+
 	bool horizontal;
-	bool dragging;
 
 	void on_add (Gtk::Widget*);
 	void on_remove (Gtk::Widget*);
@@ -72,8 +71,13 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	struct Divider : public Gtk::EventBox {
 		Divider ();
+
 		float fract;
+		bool dragging;
+
 		bool on_expose_event (GdkEventExpose* ev);
+		bool on_enter_notify_event (GdkEventCrossing*);
+		bool on_leave_notify_event (GdkEventCrossing*);
 	};
 
 	typedef std::vector<Divider*> Dividers;

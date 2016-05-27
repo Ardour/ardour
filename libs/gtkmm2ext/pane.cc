@@ -28,9 +28,9 @@ using namespace std;
 
 Pane::Pane (bool h)
 	: horizontal (h)
-	, dragging (false)
 	, divider_width (5)
 {
+	set_name ("Pane");
 	set_has_window (false);
 }
 
@@ -228,24 +228,27 @@ Pane::on_expose_event (GdkEventExpose* ev)
 }
 
 bool
-Pane::handle_press_event (GdkEventButton* ev, Divider*)
+Pane::handle_press_event (GdkEventButton* ev, Divider* d)
 {
-	dragging = true;
+	d->dragging = true;
+	d->queue_draw ();
+
 	return false;
 }
 
 bool
-Pane::handle_release_event (GdkEventButton* ev, Divider*)
+Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 {
+	d->dragging = false;
 	children.front()->queue_resize ();
-	dragging = false;
+
 	return false;
 }
 
 bool
 Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 {
-	if (!dragging) {
+	if (!d->dragging) {
 		return true;
 	}
 
@@ -344,19 +347,40 @@ Pane::forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer c
 
 Pane::Divider::Divider ()
 	: fract (0.0)
+	, dragging (false)
 {
-	set_events (Gdk::EventMask (Gdk::BUTTON_PRESS|Gdk::BUTTON_RELEASE|Gdk::MOTION_NOTIFY));
+	set_events (Gdk::EventMask (Gdk::BUTTON_PRESS|
+	                            Gdk::BUTTON_RELEASE|
+	                            Gdk::MOTION_NOTIFY|
+	                            Gdk::ENTER_NOTIFY|
+	                            Gdk::LEAVE_NOTIFY));
 }
 
 bool
 Pane::Divider::on_expose_event (GdkEventExpose* ev)
 {
-	Widget::on_expose_event (ev);
+	Gdk::Color c = (dragging ? get_style()->get_fg (Gtk::STATE_ACTIVE) :
+	                get_style()->get_fg (get_state()));
 
 	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
         draw_context->clip_preserve ();
-        draw_context->set_source_rgba (1.0, 0.0, 0.0, 0.6);
+        draw_context->set_source_rgba (c.get_red_p(), c.get_green_p(), c.get_blue_p(), 1.0);
         draw_context->fill ();
+
+        return true;
+}
+
+bool
+Pane::Divider::on_enter_notify_event (GdkEventCrossing*)
+{
+	set_state (Gtk::STATE_SELECTED);
+	return true;
+}
+
+bool
+Pane::Divider::on_leave_notify_event (GdkEventCrossing*)
+{
+	set_state (Gtk::STATE_NORMAL);
 	return true;
 }
