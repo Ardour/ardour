@@ -1942,7 +1942,7 @@ void
 Session::set_all_tracks_record_enabled (bool enable )
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
-	set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), enable, Controllable::NoGroup);
+	set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), enable, Controllable::NoGroup);
 }
 
 void
@@ -6182,7 +6182,7 @@ Session::solo_control_mode_changed ()
 		   the session's saved solo state). So just explicitly turn
 		   them all off.
 		*/
-		set_controls (route_list_to_control_list (get_routes(), &Route::solo_control), 0.0, Controllable::NoGroup);
+		set_controls (route_list_to_control_list (get_routes(), &Stripable::solo_control), 0.0, Controllable::NoGroup);
 	}
 }
 

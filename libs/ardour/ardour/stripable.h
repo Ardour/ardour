@@ -44,6 +44,8 @@ class SoloIsolateControl;
 class SoloSafeControl;
 class MonitorControl;
 class MonitorProcessor;
+class RecordEnableControl;
+class RecordSafeControl;
 
 /* This is a virtual base class for any object that needs to be potentially
  * represented by a control-centric user interface using the general model of a
@@ -104,7 +106,9 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<GainControl> trim_control() const = 0;
 
 	virtual boost::shared_ptr<MonitorControl> monitoring_control() const = 0;
+
 	virtual boost::shared_ptr<AutomationControl> rec_enable_control() const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<AutomationControl> rec_safe_control() const { return boost::shared_ptr<AutomationControl>(); }
 
 	/* "well-known" controls for panning. Any or all of these may return
          * null.

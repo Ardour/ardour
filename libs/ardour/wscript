@@ -178,6 +178,7 @@ libardour_sources = [
         'rc_configuration.cc',
         'recent_sessions.cc',
         'record_enable_control.cc',
+        'record_safe_control.cc',
         'region_factory.cc',
         'resampled_source.cc',
         'region.cc',

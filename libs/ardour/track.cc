@@ -28,6 +28,7 @@
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/record_enable_control.h"
+#include "ardour/record_safe_control.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
@@ -67,9 +68,7 @@ Track::init ()
 	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
 	add_control (_record_enable_control);
 
-	_record_safe_control.reset (new AutomationControl (_session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
-	                                                   boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (RecSafeAutomation))),
-	                                                   X_("recsafe")));
+	_record_safe_control.reset (new RecordSafeControl (_session, X_("recsafe"), *this));
 	add_control (_record_safe_control);
 
 	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
@@ -241,27 +240,15 @@ Track::record_safe_changed (bool, Controllable::GroupControlDisposition)
 }
 
 bool
-Track::record_safe () const
+Track::can_be_record_safe ()
 {
-	return _diskstream && _diskstream->record_safe ();
+	return !_record_enable_control->get_value() && _diskstream && _session.writable() && (_freeze_record.state != Frozen);
 }
 
-void
-Track::set_record_safe (bool yn, Controllable::GroupControlDisposition group_override)
+bool
+Track::can_be_record_enabled ()
 {
-	if (!_session.writable()) {
-		return;
-	}
-
-	if (_freeze_record.state == Frozen) {
-		return;
-	}
-
-	if (record_enabled ()) {
-		return;
-	}
-
-	_rec_safe_control->set_value (yn, group_override);
+	return !_record_safe_control->get_value() && _diskstream && !_diskstream->record_safe() && _session.writable() && (_freeze_record.state != Frozen);
 }
 
 void

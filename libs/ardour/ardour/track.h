@@ -36,6 +36,8 @@ class Region;
 class Diskstream;
 class IO;
 class MonitorControl;
+class RecordEnableControl;
+class RecordSafeControl;
 
 /** A track is an route (bus) with a recordable diskstream and
  * related objects relevant to tracking, playback and editing.

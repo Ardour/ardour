@@ -101,46 +101,45 @@ class LIBARDOUR_API VCA : public Stripable,
 	static uint32_t get_next_vca_number ();
 	static void set_next_vca_number (uint32_t);
 
-	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
-	virtual boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
-	virtual boost::shared_ptr<MuteControl> mute_control() const { return _mute_control; }
-	virtual boost::shared_ptr<AutomationControl> rec_enable_control() const { return _recenable_control; }
-	virtual boost::shared_ptr<MonitorControl>    monitoring_control() const { return _monitor_control; }
+	boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
+	boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
+	boost::shared_ptr<MuteControl> mute_control() const { return _mute_control; }
 
 	/* null Stripable API, because VCAs don't have any of this */
 
-	virtual boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const { return boost::shared_ptr<SoloIsolateControl>(); }
-	virtual boost::shared_ptr<SoloSafeControl> solo_safe_control() const { return boost::shared_ptr<SoloSafeControl>(); }
-	virtual boost::shared_ptr<PeakMeter>         peak_meter() { return boost::shared_ptr<PeakMeter>(); }
-	virtual boost::shared_ptr<const PeakMeter>   peak_meter() const { return boost::shared_ptr<PeakMeter>(); }
-	virtual boost::shared_ptr<PhaseControl>      phase_control() const { return boost::shared_ptr<PhaseControl>(); }
-	virtual boost::shared_ptr<GainControl>       trim_control() const { return boost::shared_ptr<GainControl>(); }
-	virtual boost::shared_ptr<AutomationControl> pan_azimuth_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> pan_elevation_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> pan_width_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> pan_frontback_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> pan_lfe_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual uint32_t eq_band_cnt () const { return 0; }
-	virtual std::string eq_band_name (uint32_t) const { return std::string(); }
-	virtual boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> eq_hpf_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_threshold_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_speed_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_mode_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_makeup_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> comp_redux_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual std::string comp_mode_name (uint32_t mode) const { return std::string(); }
-	virtual std::string comp_speed_name (uint32_t mode) const { return std::string(); }
-	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
-	virtual std::string send_name (uint32_t n) const { return std::string(); }
-	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const { return boost::shared_ptr<SoloIsolateControl>(); }
+	boost::shared_ptr<SoloSafeControl> solo_safe_control() const { return boost::shared_ptr<SoloSafeControl>(); }
+	boost::shared_ptr<PeakMeter>         peak_meter() { return boost::shared_ptr<PeakMeter>(); }
+	boost::shared_ptr<const PeakMeter>   peak_meter() const { return boost::shared_ptr<PeakMeter>(); }
+	boost::shared_ptr<PhaseControl>      phase_control() const { return boost::shared_ptr<PhaseControl>(); }
+	boost::shared_ptr<GainControl>       trim_control() const { return boost::shared_ptr<GainControl>(); }
+	boost::shared_ptr<AutomationControl> pan_azimuth_control() const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> pan_elevation_control() const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> pan_width_control() const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> pan_frontback_control() const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> pan_lfe_control() const { return boost::shared_ptr<AutomationControl>(); }
+	uint32_t eq_band_cnt () const { return 0; }
+	std::string eq_band_name (uint32_t) const { return std::string(); }
+	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_hpf_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_threshold_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_speed_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_mode_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_redux_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	std::string comp_mode_name (uint32_t mode) const { return std::string(); }
+	std::string comp_speed_name (uint32_t mode) const { return std::string(); }
+	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
+	std::string send_name (uint32_t n) const { return std::string(); }
+	boost::shared_ptr<AutomationControl> master_send_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return boost::shared_ptr<MonitorProcessor>(); }
+	boost::shared_ptr<MonitorControl> monitoring_control() const { return boost::shared_ptr<MonitorControl>(); }
 
   private:
 	uint32_t _number;
@@ -148,9 +147,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
-	boost::shared_ptr<AutomationControl> _recenable_control;
-	// boost::shared_ptr<AutomationControl> _record_safe_control;
-	boost::shared_ptr<MonitorControl> _monitor_control;
+
 
 	static uint32_t next_number;
 	static Glib::Threads::Mutex number_lock;

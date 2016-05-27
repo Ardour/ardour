@@ -176,22 +176,10 @@ LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& di
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
-template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Route::*get_control)() const) {
+template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Stripable::*get_control)() const) {
 	boost::shared_ptr<ControlList> cl (new ControlList);
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 		boost::shared_ptr<AutomationControl> ac = ((*r).get()->*get_control)();
-		if (ac) {
-			cl->push_back (ac);
-		}
-	}
-	return cl;
-}
-
-template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Track::*get_control)() const) {
-	boost::shared_ptr<ControlList> cl (new ControlList);
-	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
-		boost::shared_ptr<AutomationControl> ac = (t.get()->*get_control)();
 		if (ac) {
 			cl->push_back (ac);
 		}
