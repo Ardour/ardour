@@ -3468,7 +3468,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("dilate tempo"));
 	}
 
-	framepos_t const pf = adjusted_current_frame (event);
+	framepos_t const pf = adjusted_current_frame (event, false);
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 		/* adjust previous tempo to match pointer frame */
