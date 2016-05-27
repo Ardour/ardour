@@ -3118,6 +3118,7 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
 	, _old_snap_type (e->snap_type())
+	, _old_snap_mode (e->snap_mode())
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
@@ -3185,7 +3186,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 		/* only snap to bars */
 		_editor->set_snap_to (SnapToBar);
-	}
+		_editor->set_snap_mode (SnapNormal);	}
 
 	framepos_t pf = adjusted_current_frame (event);
 
@@ -3214,6 +3215,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* reinstate old snap setting */
 	_editor->set_snap_to (_old_snap_type);
+	_editor->set_snap_mode (_old_snap_mode);
 
 	TempoMap& map (_editor->session()->tempo_map());
 
@@ -3233,6 +3235,8 @@ MeterMarkerDrag::aborted (bool moved)
 	if (moved) {
 		/* reinstate old snap setting */
 		_editor->set_snap_to (_old_snap_type);
+		_editor->set_snap_mode (_old_snap_mode);
+
 		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
