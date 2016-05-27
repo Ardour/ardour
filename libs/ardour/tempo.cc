@@ -2050,11 +2050,15 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 		}
 	}
 
+#if (0)
 	recompute_tempos (imaginary);
 
 	if (check_solved (imaginary)) {
 		return true;
+	} else {
+		dunp (imaginary, std::cout);
 	}
+#endif
 
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
@@ -2111,11 +2115,15 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 		section->set_frame (section_prev->frame_at_pulse (pulse, _frame_rate));
 	}
 
+#if (0)
 	recompute_tempos (imaginary);
 
 	if (check_solved (imaginary)) {
 		return true;
+	} else {
+		dunp (imaginary, std::cout);
 	}
+#endif
 
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
