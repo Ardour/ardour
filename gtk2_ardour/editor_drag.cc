@@ -3231,6 +3231,8 @@ MeterMarkerDrag::aborted (bool moved)
 {
 	_marker->set_position (_marker->meter().frame ());
 	if (moved) {
+		/* reinstate old snap setting */
+		_editor->set_snap_to (_old_snap_type);
 		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
