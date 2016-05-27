@@ -754,7 +754,20 @@ static const MIDISequence s5[] = { // channel1, CCs only
 	{ 5.00, 3, {0xff,  255, 0xff} }, // sentinel
 };
 
-static const MIDISequence s6[] = { // channel1, nonsense
+
+static const MIDISequence s6[] = { // Keypressure, Aftertouch
+	{ 0.00, 3, {0x90,  64, 0x7f} },
+	{ 0.25, 3, {0xa0,  64, 0x40} },
+	{ 0.50, 3, {0xa0,  64, 0x60} },
+	{ 0.75, 3, {0xa0,  64, 0x7f} },
+	{ 1.00, 3, {0xa0,  64, 0x7f} },
+	{ 1.25, 3, {0xa0,  64, 0x00} },
+	{ 1.50, 3, {0x80,  64, 0x00} },
+	{ 2.00, 3, {0xff, 255, 0xff} }, // sentinel
+};
+
+
+static const MIDISequence s7[] = { // channel1, nonsense
 	{ 0.00, 3, {0x90,   64, 0x7f} }, // note-on
 	{ 0.50, 3, {0x90,   64, 0x7f} }, // duplicate note-on
 	{ 1.00, 3, {0x80,   64, 0x00} }, // note-off
@@ -767,7 +780,7 @@ static const MIDISequence s6[] = { // channel1, nonsense
 };
 
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4, s5, s6
+	s0, s1, s2, s3, s4, s5, s6, s7
 };
 
 static const char *sequence_names[] = {
@@ -777,6 +790,7 @@ static const char *sequence_names[] = {
 	"Velocity Sweep, chan 1",
 	"Sustain Pedal Test",
 	"CCs only",
+	"Aftertouch",
 	"Nonsense, Dups"
 };
 
