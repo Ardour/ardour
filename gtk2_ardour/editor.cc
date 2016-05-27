@@ -715,6 +715,9 @@ Editor::Editor ()
 		editor_summary_pane.add (_summary_hbox);
 	}
 
+	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
+
 	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
 		edit_pane.add (_the_notebook);
@@ -5970,6 +5973,9 @@ Editor::ui_parameter_changed (string parameter)
 		}
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		_cursor_stack.push_back(_cursors->grabber);
+		edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
+
 	} else if (parameter == "draggable-playhead") {
 		if (_verbose_cursor) {
 			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
