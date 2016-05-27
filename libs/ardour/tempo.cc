@@ -2673,14 +2673,16 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 		   constant to constant is straightforward, as the tempo prev to prev_t has constant slope.
 		*/
 		double contribution = 0.0;
-		double start_pulse = prev_t->pulse_at_frame (frame, _frame_rate);
 
 		if (next_t && prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
 			contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (next_t->frame() - prev_to_prev_t->frame());
 		}
 
-		frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
-		double end_pulse = prev_t->pulse_at_frame (end_frame, _frame_rate);
+		const frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
+
+		const double start_pulse = prev_t->pulse_at_frame (frame, _frame_rate);
+		const double end_pulse = prev_t->pulse_at_frame (end_frame, _frame_rate);
+
 		double new_bpm;
 
 		if (prev_t->type() == TempoSection::Constant || prev_t->c_func() == 0.0) {

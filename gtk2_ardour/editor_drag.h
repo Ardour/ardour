@@ -767,7 +767,6 @@ public:
 
 private:
 	double _pulse;
-	double _beat;
 	ARDOUR::TempoSection* _tempo;
 	XMLNode* before_state;
 };

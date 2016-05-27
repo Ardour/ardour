@@ -3415,7 +3415,6 @@ TempoMarkerDrag::aborted (bool moved)
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _pulse (0.0)
-	, _beat (0.0)
 	, _tempo (0)
 	, before_state (0)
 {
@@ -3427,11 +3426,10 @@ void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-
 	TempoMap& map (_editor->session()->tempo_map());
+	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 	ostringstream sstr;
 
-	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).beats_per_minute() << "\n";
 	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
 	show_verbose_cursor_text (sstr.str());
@@ -3444,17 +3442,22 @@ BBTRulerDrag::setup_pointer_frame_offset ()
 	TempoMap& map (_editor->session()->tempo_map());
 	const double beat_at_frame = map.beat_at_frame (raw_grab_frame());
 	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
+	double beat = 0.0;
+
 	if (divisions > 0) {
-		_beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * divisions)) / divisions);
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * divisions)) / divisions);
 	} else {
 		/* while it makes some sense for the user to determine the division to 'grab',
 		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
 		   and the result over steep tempo curves. Use sixteenths.
 		*/
-		_beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
 	}
-	_pulse = map.pulse_at_beat (_beat);
-	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (_beat);
+
+	_pulse = map.pulse_at_beat (beat);
+
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_pulse (_pulse);
+
 }
 
 void
@@ -3468,7 +3471,13 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("dilate tempo"));
 	}
 
-	framepos_t const pf = adjusted_current_frame (event, false);
+	framepos_t pf;
+
+	if (_editor->snap_musical()) {
+		pf = adjusted_current_frame (event, false);
+	} else {
+		pf = adjusted_current_frame (event);
+	}
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 		/* adjust previous tempo to match pointer frame */
