@@ -294,7 +294,7 @@ intptr_t Session::vst_callback (
 					bbt = session->tempo_map ().bbt_at_frame_rt (looploc->start ());
 					timeinfo->cycleStartPos = vst_ppq (tm, bbt, ppqBar);
 
-					bbt = session->tempo_map ().bbt_at_frame (looploc->end ());
+					bbt = session->tempo_map ().bbt_at_frame_rt (looploc->end ());
 					timeinfo->cycleEndPos = vst_ppq (tm, bbt, ppqBar);
 
 					newflags |= kVstCyclePosValid;
