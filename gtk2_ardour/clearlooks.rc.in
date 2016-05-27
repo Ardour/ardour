@@ -1005,6 +1005,13 @@ style "settings_notebook" = "big_text"
 
 }
 
+style "pane"
+{
+      fg[NORMAL] = lighter(@background)
+      fg[SELECTED] = @foreground
+      fg[ACTIVE] = @somewhat_bright_indicator
+}
+
 class "GtkWidget" style:highest "default"
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
@@ -1195,3 +1202,5 @@ widget "*processor fader" style:highest "processor"
 widget "*processor postfader" style:highest "processor"
 widget "*MonitorSectionLabel" style:highest "small_text"
 widget "*ooltip*" style:highest "tooltip"
+widget "*Pane" style:highest "pane"
+widget "*Pane*" style:highest "pane"
