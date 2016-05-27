@@ -47,6 +47,7 @@
 #include "ardour/monitor_processor.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/stripable.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"

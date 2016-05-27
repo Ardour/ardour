@@ -22,6 +22,7 @@
 
 #include "ardour/gain_control.h"
 #include "ardour/session.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
 #include "ardour/meter.h"

@@ -20,6 +20,7 @@
 #include "boost/lambda/lambda.hpp"
 
 #include "ardour/route.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 
@@ -40,12 +41,11 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Route> r, lo_address a)
 
 	_route->PropertyChanged.connect (name_changed_connection, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 
-	if (boost::dynamic_pointer_cast<AudioTrack>(_route) || boost::dynamic_pointer_cast<MidiTrack>(_route)) {
-
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(r);
-		boost::shared_ptr<Controllable> rec_controllable = boost::dynamic_pointer_cast<Controllable>(track->rec_enable_control());
-
-		rec_controllable->Changed.connect (rec_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/rec"), track->rec_enable_control()), OSC::instance());
+	boost::shared_ptr<AutomationControl> rc = _route->rec_enable_control();
+	if (rc) {
+		// XXX BIND ALERT: boost::shared_ptr to record enable control
+		// bound to functor.
+		rc->Changed.connect (rec_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/rec"), rc), OSC::instance());
 	}
 
 	boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(_route->mute_control());

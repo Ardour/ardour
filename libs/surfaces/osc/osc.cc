@@ -43,6 +43,7 @@
 #include "ardour/panner.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/send.h"
 
 #include "osc.h"
@@ -470,7 +471,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_page", "f", scroll_up_1_page);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_page", "f", scroll_dn_1_page);
 
-		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
+		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
 		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
@@ -971,11 +972,10 @@ OSC::routes_list (lo_message msg)
 			/* XXX Can only use group ID at this point */
 			lo_message_add_int32 (reply, r->presentation_info().group_order());
 
-			if (boost::dynamic_pointer_cast<AudioTrack>(r)
-					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
+			boost::shared_ptr<AutomationControl> rc = r->rec_enable_control();
 
-				boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-				lo_message_add_int32 (reply, (int32_t) t->rec_enable_control()->get_value());
+			if (rc) {
+				lo_message_add_int32 (reply, (int32_t) rc->get_value());
 			}
 
 			//Automatically listen to routes listed
