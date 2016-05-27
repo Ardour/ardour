@@ -422,6 +422,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/* bbt - it's nearly always better to use beats.*/
 	Timecode::BBT_Time bbt_at_frame (framepos_t when);
+	Timecode::BBT_Time bbt_at_frame_rt (framepos_t when);
 	framepos_t frame_at_bbt (const Timecode::BBT_Time&);
 
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);

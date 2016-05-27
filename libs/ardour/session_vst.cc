@@ -223,29 +223,10 @@ intptr_t Session::vst_callback (
 				Timecode::BBT_Time bbt;
 
 				try {
-					bbt = session->tempo_map().bbt_at_frame (now);
+					bbt = session->tempo_map().bbt_at_frame_rt (now);
 
-					/* PPQ = pulse per quarter
-					 * VST's "pulse" is our "division".
-					 *
-					 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
-					 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
-					 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
-					 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
-					 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
-					 *
-					 * general: divs_per_bar / (note_type / 4.0)
-					 */
-					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
-
-					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
-					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
-					double ppqBeat = double(bbt.beats - 1);
-					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-
-					ppqBar *= ppq_scaling;
-					ppqBeat *= ppq_scaling;
-					ppqTick *= ppq_scaling;
+					double ppqBar;
+					double ppqPos = vst_ppq (tm, bbt, ppqBar);
 
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
@@ -310,10 +291,10 @@ intptr_t Session::vst_callback (
 					double ppqBar;
 					Timecode::BBT_Time bbt;
 
-					session->tempo_map().bbt_time_rt (looploc->start (), bbt);
+					bbt = session->tempo_map ().bbt_at_frame_rt (looploc->start ());
 					timeinfo->cycleStartPos = vst_ppq (tm, bbt, ppqBar);
 
-					session->tempo_map().bbt_time_rt (looploc->end (), bbt);
+					bbt = session->tempo_map ().bbt_at_frame (looploc->end ());
 					timeinfo->cycleEndPos = vst_ppq (tm, bbt, ppqBar);
 
 					newflags |= kVstCyclePosValid;
@@ -568,4 +549,3 @@ intptr_t Session::vst_callback (
 
 	return 0;
 }
-

@@ -1860,6 +1860,18 @@ TempoMap::bbt_at_frame (framepos_t frame)
 	return bbt_at_frame_locked (_metrics, frame);
 }
 
+BBT_Time
+TempoMap::bbt_at_frame_rt (framepos_t frame)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		throw std::logic_error ("TempoMap::bbt_time_rt() could not lock tempo map");
+	}
+
+	return bbt_at_frame_locked (_metrics, frame);
+}
+
 Timecode::BBT_Time
 TempoMap::bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const
 {
