@@ -56,6 +56,7 @@
 #include "monitor_section.h"
 #include "plugin_selector.h"
 #include "public_editor.h"
+#include "mouse_cursors.h"
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "utils.h"
@@ -285,6 +286,11 @@ Mixer_UI::Mixer_UI ()
 	} else {
 		inner_pane.set_divider (0, atof (prop->value()));
 	}
+
+	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
+	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
+	list_hpane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
+	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 
 	_content.pack_start (list_hpane, true, true);
 
