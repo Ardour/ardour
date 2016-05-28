@@ -26,6 +26,7 @@
 #include "evoral/midi_util.h"
 #include "evoral/Note.hpp"
 
+#include "ardour/amp.h"
 #include "ardour/beats_frames_converter.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
@@ -301,9 +302,9 @@ MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Proc
 	//    option
 	// */
 
-	// if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
-	// 	return;
-	// }
+	if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
+		return;
+	}
 
 	using namespace Menu_Helpers;
 	ProcessorAutomationInfo *rai;
