@@ -721,7 +721,7 @@ Editor::Editor ()
 	}
 
 	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
-	edit_pane.set_child_minsize (1, 30); /* rough guess at width of notebook tabs */
+	edit_pane.set_child_minsize (_the_notebook, 30); /* rough guess at width of notebook tabs */
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	if (!settings || (prop = settings->property ("edit-horizontal-pane-pos")) == 0) {
