@@ -261,6 +261,31 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.add (list_vpacker);
 	list_hpane.add (global_hpacker);
 
+
+	XMLNode const * settings = ARDOUR_UI::instance()->mixer_settings();
+	XMLProperty const * prop;
+
+	if (!settings || ((prop = settings->property ("mixer-rhs-pane1-pos")) == 0)) {
+		rhs_pane1.set_divider (0, 0.6f);
+	} else {
+		rhs_pane1.set_divider (0, atof (prop->value()));
+	}
+	if (!settings || ((prop = settings->property ("mixer-rhs-pane2-pos")) == 0)) {
+		rhs_pane2.set_divider (0, 0.7f);
+	} else {
+		rhs_pane2.set_divider (0, atof (prop->value()));
+	}
+	if (!settings || ((prop = settings->property ("mixer-list-hpane-pos")) == 0)) {
+		list_hpane.set_divider (0, 0.2f);
+	} else {
+		list_hpane.set_divider (0, atof (prop->value()));
+	}
+	if (!settings || ((prop = settings->property ("mixer-inner-pos")) == 0)) {
+		inner_pane.set_divider (0, 0.8f);
+	} else {
+		inner_pane.set_divider (0, atof (prop->value()));
+	}
+
 	_content.pack_start (list_hpane, true, true);
 
 	update_title ();
