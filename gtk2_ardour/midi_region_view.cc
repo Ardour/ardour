@@ -3826,9 +3826,6 @@ MidiRegionView::color_handler ()
 void
 MidiRegionView::enable_display (bool yn)
 {
-	if (_enable_display == yn) {
-		return;
-	}
 
 	RegionView::enable_display (yn);
 	if (yn) {
