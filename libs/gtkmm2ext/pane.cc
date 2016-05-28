@@ -45,6 +45,21 @@ Pane::Pane (bool h)
 }
 
 void
+Pane::set_child_minsize (Children::size_type n, int32_t minsize)
+{
+	Children::iterator c = children.begin();
+
+	while (n--) {
+		if (c == children.end()) {
+			return;
+		}
+		++c;
+	}
+
+	c->minsize = minsize;
+}
+
+void
 Pane::set_drag_cursor (Gdk::Cursor c)
 {
 	drag_cursor = c;
@@ -75,7 +90,7 @@ Pane::on_size_request (GtkRequisition* req)
 	for (Children::iterator child = children.begin(); child != children.end(); ++child) {
 		GtkRequisition r;
 
-		(*child)->size_request (r);
+		child->w->size_request (r);
 
 		if (horizontal) {
 			largest.height = max (largest.height, r.height);
@@ -114,7 +129,7 @@ Pane::add_divider ()
 void
 Pane::on_add (Widget* w)
 {
-	children.push_back (w);
+	children.push_back (Child (w, 0));
 
 	w->set_parent (*this);
 
@@ -127,7 +142,13 @@ void
 Pane::on_remove (Widget* w)
 {
 	w->unparent ();
-	children.remove (w);
+
+	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		if (c->w == w) {
+			children.erase (c);
+			break;
+		}
+	}
 }
 
 void
@@ -151,7 +172,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 
         if (children.size() == 1) {
 	        /* only child gets the full allocation */
-	        children.front()->size_allocate (alloc);
+	        children.front().w->size_allocate (alloc);
 	        return;
         }
 
@@ -183,7 +204,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        }
 
 	        Gtk::Requisition cr;
-	        (*child)->size_request (cr);
+	        child->w->size_request (cr);
 
 	        if (horizontal) {
 		        child_alloc.set_width ((gint) floor (remaining * fract));
@@ -197,7 +218,15 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		        ypos += child_alloc.get_height ();
 	        }
 
-	        (*child)->size_allocate (child_alloc);
+	        if (child->minsize) {
+		        if (horizontal) {
+			        child_alloc.set_width (max (child_alloc.get_width(), child->minsize));
+		        } else {
+			        child_alloc.set_height (max (child_alloc.get_height(), child->minsize));
+		        }
+	        }
+
+	        child->w->size_allocate (child_alloc);
 	        ++child;
 
 	        if (child == children.end()) {
@@ -237,10 +266,12 @@ Pane::on_expose_event (GdkEventExpose* ev)
 
 	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child, ++div) {
 
-		propagate_expose (**child, ev);
+		if (child->w->is_visible()) {
+			propagate_expose (*(child->w), ev);
+		}
 
 		if (div != dividers.end()) {
-			propagate_expose (**div, ev);
+			propagate_expose (*(child->w), ev);
 		}
         }
 
@@ -262,7 +293,7 @@ Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 	d->dragging = false;
 
 	if (did_move) {
-		children.front()->queue_resize ();
+		children.front().w->queue_resize ();
 		did_move = false;
 	}
 
@@ -380,11 +411,11 @@ Pane::forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer c
 	 * the iterators safe;
 	 */
 
-	for (Children::iterator w = children.begin(); w != children.end(); ) {
-		Children::iterator next = w;
+	for (Children::iterator c = children.begin(); c != children.end(); ) {
+		Children::iterator next = c;
 		++next;
-		callback ((*w)->gobj(), callback_data);
-		w = next;
+		callback (c->w->gobj(), callback_data);
+		c = next;
 	}
 
 	if (include_internals) {

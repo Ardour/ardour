@@ -42,10 +42,22 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
   private:
 	class Divider;
 
+
   public:
+	struct Child
+	{
+		Gtk::Widget* w;
+		int32_t minsize;
+
+		Child (Gtk::Widget* widget, uint32_t ms) : w (widget), minsize (ms) {}
+	};
+
+	typedef std::list<Child> Children;
+
 	Pane (bool horizontal);
 	void set_divider (std::vector<float>::size_type divider, float fract);
 	float get_divider (std::vector<float>::size_type divider = 0);
+	void set_child_minsize (Children::size_type n, int32_t);
 
 	GType child_type_vfunc() const;
 	void set_drag_cursor (Gdk::Cursor);
@@ -73,7 +85,6 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	void reallocate (Gtk::Allocation const &);
 
-	typedef std::list<Gtk::Widget*> Children;
 	Children children;
 
 	struct Divider : public Gtk::EventBox {
