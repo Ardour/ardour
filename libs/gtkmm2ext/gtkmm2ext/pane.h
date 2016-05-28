@@ -57,7 +57,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	Pane (bool horizontal);
 	void set_divider (std::vector<float>::size_type divider, float fract);
 	float get_divider (std::vector<float>::size_type divider = 0);
-	void set_child_minsize (Children::size_type n, int32_t);
+	void set_child_minsize (Gtk::Widget const &, int32_t);
 
 	GType child_type_vfunc() const;
 	void set_drag_cursor (Gdk::Cursor);

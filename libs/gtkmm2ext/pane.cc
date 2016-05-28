@@ -45,18 +45,14 @@ Pane::Pane (bool h)
 }
 
 void
-Pane::set_child_minsize (Children::size_type n, int32_t minsize)
+Pane::set_child_minsize (Gtk::Widget const& w, int32_t minsize)
 {
-	Children::iterator c = children.begin();
-
-	while (n--) {
-		if (c == children.end()) {
-			return;
+	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		if (c->w == &w) {
+			c->minsize = minsize;
+			break;
 		}
-		++c;
 	}
-
-	c->minsize = minsize;
 }
 
 void
