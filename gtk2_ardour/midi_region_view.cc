@@ -1191,10 +1191,9 @@ MidiRegionView::redisplay_model()
 
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 
-				cne->validate ();
-				update_note (cne);
-
 				if (visible) {
+					cne->validate ();
+					update_note (cne);
 					cne->show ();
 				} else {
 					cne->hide ();
@@ -3827,6 +3826,10 @@ MidiRegionView::color_handler ()
 void
 MidiRegionView::enable_display (bool yn)
 {
+	if (_enable_display == yn) {
+		return;
+	}
+
 	RegionView::enable_display (yn);
 	if (yn) {
 		redisplay_model ();
