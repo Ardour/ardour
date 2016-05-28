@@ -2705,8 +2705,8 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 			} else {
 				/* AudioTime */
 				if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-					new_bpm = prev_t->beats_per_minute() * ((frame - prev_t->frame())
-										/ (double) ((frame + prev_t_frame_contribution) - prev_t->frame()));
+					new_bpm = prev_t->beats_per_minute() * ((frame - prev_to_prev_t->frame())
+										/ (double) ((end_frame) - prev_to_prev_t->frame()));
 				} else {
 					/* prev_to_prev_t is irrelevant */
 
