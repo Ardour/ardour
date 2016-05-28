@@ -715,14 +715,14 @@ Editor::Editor ()
 		editor_summary_pane.add (_summary_hbox);
 	}
 
-	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
-	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
-
 	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
 		edit_pane.add (_the_notebook);
 	}
 
+	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+	edit_pane.set_child_minsize (1, 30); /* rough guess at width of notebook tabs */
+	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	if (!settings || (prop = settings->property ("edit-horizontal-pane-pos")) == 0) {
 		/* initial allocation is 90% to canvas, 10% to notebook */
