@@ -254,9 +254,15 @@ inline int64_t abs(int64_t val) throw()
 #if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 extern  double round(double x);
 
-// log2().... MSVC doesn't offer the C99 function 'log2()'
-// so let's emulate it.
-extern  double log2(double x);
+// Emulate some C99 math functions which MSVC itself didn't
+// implement until later in life.
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
+extern  double expm1(double x);
+extern  double log1p(double x);
+#endif
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+extern  double log2 (double x);
+#endif
 #endif
 
 #endif /* __ardour_msvc_extensions_h__ */

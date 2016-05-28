@@ -262,6 +262,47 @@ trunc(double x)
 	return (floor(x));
 }
 
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
+//***************************************************************
+//
+//	expm1()
+//
+// Emulates C99 expm1() using exp().
+//
+//	Returns:
+//
+//    On Success: (('e' raised to the power of 'x') - 1)
+//                (e.g. expm1(1) == 1.7182818).
+//    On Failure: None, except that calling exp(x) should generate
+//                an appropriate error for us (such as INF etc).
+//
+LIBPBD_API double PBD_APICALLTYPE
+expm1(double x)
+{
+	return (exp(x) - (double)1.0);
+}
+
+//***************************************************************
+//
+//	log1p()
+//
+// Emulates C99 log1p() using log().
+//
+//	Returns:
+//
+//    On Success: The natural logarithm of (1 + x)
+//                (e.g. log1p(1) == 0.69314718).
+//    On Failure: None, except that calling log(x) should generate
+//                an appropriate error for us (such as ERANGE etc).
+//
+LIBPBD_API double PBD_APICALLTYPE
+log1p(double x)
+{
+	return (log(x + (double)1.0));
+}
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 //***************************************************************
 //
 //	log2()
@@ -280,6 +321,7 @@ log2(double x)
 {
 	return (log(x) / log((double)2.0));
 }
+#endif
 
 namespace PBD {
 

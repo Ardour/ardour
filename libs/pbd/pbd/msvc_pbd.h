@@ -232,7 +232,15 @@ LIBPBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t 
 LIBPBD_API int				PBD_APICALLTYPE poll(struct pollfd *fds, nfds_t nfds, int timeout);
 LIBPBD_API double			PBD_APICALLTYPE round(double x);
 LIBPBD_API double			PBD_APICALLTYPE trunc(double x);
-LIBPBD_API double			PBD_APICALLTYPE log2(double x);
+
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
+LIBPBD_API double			PBD_APICALLTYPE expm1(double x);
+LIBPBD_API double			PBD_APICALLTYPE log1p(double x);
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+LIBPBD_API double			PBD_APICALLTYPE log2 (double x);
+#endif
 
 namespace PBD {
 
