@@ -1617,13 +1617,6 @@ Mixer_UI::show_mixer_list (bool yn)
 {
 	if (yn) {
 		list_vpacker.show ();
-
-		//if user wants to show the pane, we should make sure that it is wide enough to be visible
-		/// XXX PANE
-		// float width = list_hpane.get_position();
-		//if (width < 40) {
-		// list_hpane.set_position(40);
-		//}
 	} else {
 		list_vpacker.hide ();
 	}
