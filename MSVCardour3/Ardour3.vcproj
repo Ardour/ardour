@@ -1164,6 +1164,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\tempo_curve.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\tempo_dialog.cc"
 				>
 			</File>
@@ -2223,6 +2227,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\tape_region_view.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\tempo_curve.h"
 				>
 			</File>
 			<File
