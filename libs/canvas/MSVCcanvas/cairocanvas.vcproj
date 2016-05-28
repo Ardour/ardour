@@ -267,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\framed_curve.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\image.cc"
 				>
 			</File>
@@ -402,6 +406,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\flag.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\framed_curve.h"
 				>
 			</File>
 			<File
