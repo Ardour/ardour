@@ -30,7 +30,7 @@ using namespace std;
 Pane::Pane (bool h)
 	: horizontal (h)
 	, did_move (false)
-	, divider_width (5)
+	, divider_width (2)
 {
 	using namespace Gdk;
 
