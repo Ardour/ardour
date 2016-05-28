@@ -40,7 +40,7 @@ Pane::Pane (bool h)
 	if (horizontal) {
 		drag_cursor = Cursor (SB_H_DOUBLE_ARROW);
 	} else {
-		drag_cursor = Cursor (SB_H_DOUBLE_ARROW);
+		drag_cursor = Cursor (SB_V_DOUBLE_ARROW);
 	}
 }
 
