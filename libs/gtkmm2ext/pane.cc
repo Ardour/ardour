@@ -266,8 +266,8 @@ Pane::on_expose_event (GdkEventExpose* ev)
 			propagate_expose (*(child->w), ev);
 		}
 
-		if (div != dividers.end()) {
-			propagate_expose (*(child->w), ev);
+		if ((div != dividers.end()) && (*div)->is_visible()) {
+			propagate_expose (**div, ev);
 		}
         }
 
