@@ -55,7 +55,7 @@ FramedCurve::set_points_per_segment (uint32_t n)
 	   just need to schedule a redraw rather than notify the parent of any
 	   changes
 	*/
-	points_per_segment = n;
+	points_per_segment = max (n, (uint32_t) 3);
 	interpolate ();
 	redraw ();
 }
@@ -187,13 +187,13 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		Points::size_type left = 0;
 		Points::size_type right = n_samples;
 
-		for (Points::size_type idx = 0; idx < n_samples; ++idx) {
+		for (Points::size_type idx = 0; idx < n_samples - 1; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
 			if (window_space.x >= draw.x0) break;
 			left = idx;
 		}
 
-		for (Points::size_type idx = n_samples; idx > left + 2; --idx) {
+		for (Points::size_type idx = n_samples; idx > left + 1; --idx) {
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
 			if (window_space.x <= draw.x1) break;
 			right = idx;
