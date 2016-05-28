@@ -1123,7 +1123,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			// Time
 			Timecode::BBT_Time row_bbt;
-			_session->tempo_map().bbt_time(row_frame, row_bbt);
+			_session->bbt_time(row_frame, row_bbt);
 			stringstream ss;
 			print_padded(ss, row_bbt);
 			row[columns.time] = ss.str();
