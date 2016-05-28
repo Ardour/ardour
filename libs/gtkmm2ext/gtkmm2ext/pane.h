@@ -100,6 +100,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	Dividers dividers;
 	int divider_width;
 	void add_divider ();
+	void handle_child_visibility ();
 };
 
 class LIBGTKMM2EXT_API HPane : public Pane

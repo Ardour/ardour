@@ -123,11 +123,20 @@ Pane::add_divider ()
 }
 
 void
+Pane::handle_child_visibility ()
+{
+	reallocate (get_allocation());
+}
+
+void
 Pane::on_add (Widget* w)
 {
 	children.push_back (Child (w, 0));
 
 	w->set_parent (*this);
+
+	w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
+	w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
 
 	while (dividers.size() < (children.size() - 1)) {
 		add_divider ();
@@ -137,14 +146,14 @@ Pane::on_add (Widget* w)
 void
 Pane::on_remove (Widget* w)
 {
-	w->unparent ();
-
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		if (c->w == w) {
 			children.erase (c);
 			break;
 		}
 	}
+
+	w->unparent ();
 }
 
 void
@@ -182,11 +191,30 @@ Pane::reallocate (Gtk::Allocation const & alloc)
         Children::iterator next;
         Dividers::iterator div;
 
-        for (child = children.begin(), div = dividers.begin(); child != children.end(); ) {
+        child = children.begin();
+
+        /* skip initial hidden children */
+
+        while (child != children.end()) {
+	        if (child->w->is_visible()) {
+		        break;
+	        }
+	        ++child;
+        }
+
+        for (div = dividers.begin(); child != children.end(); ) {
 
 	        Gtk::Allocation child_alloc;
+
 	        next = child;
-	        ++next;
+
+	        /* Move on to next *visible* child */
+
+	        while (++next != children.end()) {
+		        if (next->w->is_visible()) {
+			        break;
+		        }
+	        }
 
 	        child_alloc.set_x (xpos);
 	        child_alloc.set_y (ypos);
@@ -223,12 +251,13 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        }
 
 	        child->w->size_allocate (child_alloc);
-	        ++child;
 
-	        if (child == children.end()) {
+	        if (next == children.end()) {
 		        /* done, no more children, no need for a divider */
 		        break;
 	        }
+
+	        child = next;
 
 	        /* add a divider between children */
 
@@ -250,6 +279,14 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        }
 
 	        (*div)->size_allocate (divider_allocation);
+	        (*div)->show ();
+	        ++div;
+        }
+
+        /* hide all remaining dividers */
+
+        while (div != dividers.end()) {
+	        (*div)->hide ();
 	        ++div;
         }
 }
