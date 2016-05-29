@@ -267,8 +267,6 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
-	std::cerr << "\n\n\nLoading COLOR " << color_file.get() << std::endl;
-
 	if (allow_own) {
 		basename = "my-";
 		basename += color_file.get();
