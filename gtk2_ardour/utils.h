@@ -72,6 +72,7 @@ bool emulate_key_event (unsigned int);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
 std::vector<std::string> get_icon_sets ();
+std::vector<std::string> get_color_themes ();
 std::string get_icon_path (const char*, std::string icon_set = std::string(), bool is_image = true);
 Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*, std::string icon_set = std::string());
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;

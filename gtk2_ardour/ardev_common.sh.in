@@ -15,6 +15,7 @@ export ARDOUR_PANNER_PATH=$libs/panners
 export ARDOUR_DATA_PATH=$TOP:$TOP/build:$TOP/gtk2_ardour:$TOP/build/gtk2_ardour:.
 export ARDOUR_MIDIMAPS_PATH=$TOP/midi_maps:.
 export ARDOUR_EXPORT_FORMATS_PATH=$TOP/export:.
+export ARDOUR_THEMES_PATH=$TOP/themes:.
 export ARDOUR_BACKEND_PATH=$libs/backends/jack:$libs/backends/wavesaudio:$libs/backends/dummy:$libs/backends/alsa:$libs/backends/coreaudio:$libs/backends/portaudio:$libs/backends/asio
 export ARDOUR_TEST_PATH=$TOP/libs/ardour/test/data
 export PBD_TEST_PATH=$TOP/libs/pbd/test

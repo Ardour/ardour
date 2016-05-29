@@ -50,6 +50,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/search_paths.h"
 #include "ardour/utils.h"
 
 #include "ui_config.h"
@@ -65,6 +66,7 @@ static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
 
 static const double hue_width = 18.0;
+std::string UIConfiguration::color_file_suffix = X_(".colors");
 
 UIConfiguration&
 UIConfiguration::instance ()
@@ -265,21 +267,23 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
+	std::cerr << "\n\n\nLoading COLOR " << color_file.get() << std::endl;
+
 	if (allow_own) {
 		basename = "my-";
 		basename += color_file.get();
-		basename += ".colors";
+		basename += color_file_suffix;
 
-		if (find_file (ardour_config_search_path(), basename, cfile)) {
+		if (find_file (theme_search_path(), basename, cfile)) {
 			found = true;
 		}
 	}
 
 	if (!found) {
 		basename = color_file.get();
-		basename += ".colors";
+		basename += color_file_suffix;
 
-		if (find_file (ardour_config_search_path(), basename, cfile)) {
+		if (find_file (theme_search_path(), basename, cfile)) {
 			found = true;
 		}
 	}
@@ -346,7 +350,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + ".colors"));
+	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + color_file_suffix));
 
 	tree.set_root (root);
 
@@ -749,5 +753,3 @@ UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
 }
-
-

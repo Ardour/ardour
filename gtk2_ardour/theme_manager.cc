@@ -73,10 +73,13 @@ ThemeManager::ThemeManager()
 	, transients_follow_front (_("Transient windows follow front window."))
 	, floating_monitor_section (_("Float detached monitor-section window"))
 	, icon_set_label (_("Icon Set"))
+	, color_theme_label (_("Color Theme"))
 	, palette_viewport (*palette_scroller.get_hadjustment(), *palette_scroller.get_vadjustment())
 	, palette_group (0)
 	, palette_window (0)
 {
+	Gtk::HBox* hbox;
+
 	/* Now the alias list */
 
 	alias_list = TreeStore::create (alias_columns);
@@ -108,9 +111,20 @@ ThemeManager::ThemeManager()
 	theme_selection_hbox.pack_start (light_button);
 
 	set_homogeneous (false);
-#if 0 // disable light/dark theme choice. until the 'light theme gets some attention.
-	pack_start (theme_selection_hbox, PACK_SHRINK);
-#endif
+
+	vector<string> color_themes = ::get_color_themes ();
+
+	if (color_themes.size() > 1) {
+		Gtkmm2ext::set_popdown_strings (color_theme_dropdown, color_themes);
+		color_theme_dropdown.set_active_text (UIConfiguration::instance().get_color_file());
+
+		hbox = Gtk::manage (new Gtk::HBox());
+		hbox->set_spacing (6);
+		hbox->pack_start (color_theme_label, false, false);
+		hbox->pack_start (color_theme_dropdown, true, false);
+		pack_start (*hbox, PACK_SHRINK);
+	}
+
 	pack_start (reset_button, PACK_SHRINK);
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
@@ -124,8 +138,6 @@ ThemeManager::ThemeManager()
 	pack_start (region_color_button, PACK_SHRINK);
 	pack_start (show_clipping_button, PACK_SHRINK);
 
-	Gtk::HBox* hbox;
-
 	vector<string> icon_sets = ::get_icon_sets ();
 
 	if (icon_sets.size() > 1) {
@@ -135,10 +147,9 @@ ThemeManager::ThemeManager()
 		hbox = Gtk::manage (new Gtk::HBox());
 		hbox->set_spacing (6);
 		hbox->pack_start (icon_set_label, false, false);
-		hbox->pack_start (icon_set_dropdown, true, true);
+		hbox->pack_start (icon_set_dropdown, true, false);
 		pack_start (*hbox, PACK_SHRINK);
 	}
-
 
 	hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
@@ -190,6 +201,7 @@ ThemeManager::ThemeManager()
 	transients_follow_front.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_transients_follow_front_toggled));
 	floating_monitor_section.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_floating_monitor_section_toggled));
 	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
+	color_theme_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_color_theme_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs,
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
@@ -345,6 +357,13 @@ ThemeManager::on_icon_set_changed ()
 }
 
 void
+ThemeManager::on_color_theme_changed ()
+{
+	string new_theme = color_theme_dropdown.get_active_text();
+	UIConfiguration::instance().set_color_file (new_theme);
+}
+
+void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
@@ -400,7 +419,7 @@ ThemeManager::reset_canvas_colors()
 
 	basename = "my-";
 	basename += UIConfiguration::instance().get_color_file();
-	basename += ".colors";
+	basename += UIConfiguration::color_file_suffix;
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
 		string backup = cfile + string (X_(".old"));

@@ -36,11 +36,13 @@
 #include <gtk/gtkpaned.h>
 #include <boost/algorithm/string.hpp>
 
+#include "pbd/basename.h"
 #include "pbd/file_utils.h"
 
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/search_paths.h"
 
 #include "canvas/item.h"
 #include "canvas/utils.h"
@@ -417,6 +419,36 @@ ARDOUR_UI_UTILS::get_xpm (std::string name)
 }
 
 vector<string>
+ARDOUR_UI_UTILS::get_color_themes ()
+{
+	Searchpath spath(ARDOUR::theme_search_path());
+	vector<string> r;
+
+	for (vector<string>::iterator s = spath.begin(); s != spath.end(); ++s) {
+
+		vector<string> entries;
+
+		find_files_matching_pattern (entries, *s, string ("*") + UIConfiguration::color_file_suffix);
+
+		for (vector<string>::iterator e = entries.begin(); e != entries.end(); ++e) {
+
+			XMLTree tree;
+
+			tree.read ((*e).c_str());
+			XMLNode* root = tree.root();
+
+			if (!root || root->name() != X_("Ardour")) {
+				continue;
+			}
+
+			r.push_back (Glib::filename_to_utf8 (basename_nosuffix(*e)));
+		}
+	}
+
+	return r;
+}
+
+vector<string>
 ARDOUR_UI_UTILS::get_icon_sets ()
 {
 	Searchpath spath(ARDOUR::ardour_data_search_path());
@@ -669,7 +701,7 @@ ARDOUR_UI_UTILS::escape_underscores (string const & s)
 Gdk::Color
 ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors)
 {
-  	Gdk::Color newcolor;
+	Gdk::Color newcolor;
 
 	while (1) {
 

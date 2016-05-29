@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ardour>
+  <Colors>
+    <Color name="color 1" value="0x20b2b2ff"/>
+    <Color name="color 10" value="0xf0f0f0ff"/>
+    <Color name="color 100" value="0xe49c9cff"/>
+    <Color name="color 101" value="0xa06000ff"/>
+    <Color name="color 103" value="0x1e7753ff"/>
+    <Color name="color 104" value="0x7f7f7fff"/>
+    <Color name="color 11" value="0x9496a3ff"/>
+    <Color name="color 12" value="0xfdc705ff"/>
+    <Color name="color 13" value="0xffffffff"/>
+    <Color name="color 14" value="0x55ccccff"/>
+    <Color name="color 15" value="0x282b49ff"/>
+    <Color name="color 16" value="0x4e8099ff"/>
+    <Color name="color 17" value="0x00ffdfff"/>
+    <Color name="color 18" value="0x001affff"/>
+    <Color name="color 19" value="0xff0000ff"/>
+    <Color name="color 2" value="0x595959ff"/>
+    <Color name="color 20" value="0x684d4dff"/>
+    <Color name="color 21" value="0x969696ff"/>
+    <Color name="color 22" value="0xe5e5e5ff"/>
+    <Color name="color 23" value="0xff0000ff"/>
+    <Color name="color 24" value="0x9fbca2ff"/>
+    <Color name="color 25" value="0x444444ff"/>
+    <Color name="color 26" value="0xc7c9d8ff"/>
+    <Color name="color 27" value="0x191919ff"/>
+    <Color name="color 28" value="0x5d3e7cff"/>
+    <Color name="color 29" value="0x202020ff"/>
+    <Color name="color 3" value="0x738299ff"/>
+    <Color name="color 30" value="0xe500cfff"/>
+    <Color name="color 31" value="0xddddd8ff"/>
+    <Color name="color 32" value="0xeddc3d77"/>
+    <Color name="color 33" value="0x9e9e9eff"/>
+    <Color name="color 34" value="0x8d8d8dff"/>
+    <Color name="color 35" value="0x4250d0ff"/>
+    <Color name="color 36" value="0x7f7a73ff"/>
+    <Color name="color 37" value="0x00fff6ff"/>
+    <Color name="color 38" value="0x1ee8acff"/>
+    <Color name="color 39" value="0xcececeff"/>
+    <Color name="color 4" value="0x000000ff"/>
+    <Color name="color 40" value="0xb5b2b1ff"/>
+    <Color name="color 41" value="0x497a5dff"/>
+    <Color name="color 42" value="0x404145ff"/>
+    <Color name="color 43" value="0x000424ff"/>
+    <Color name="color 44" value="0x004f3cff"/>
+    <Color name="color 45" value="0xa29e9eff"/>
+    <Color name="color 46" value="0x8d8d8dff"/>
+    <Color name="color 47" value="0x008852ff"/>
+    <Color name="color 48" value="0xddddddff"/>
+    <Color name="color 49" value="0xdbd4d4ff"/>
+    <Color name="color 5" value="0x9dadc4ff"/>
+    <Color name="color 50" value="0xeeeeecff"/>
+    <Color name="color 51" value="0x383d37ff"/>
+    <Color name="color 52" value="0xbba34cff"/>
+    <Color name="color 53" value="0xf2c37dff"/>
+    <Color name="color 54" value="0xf48352ff"/>
+    <Color name="color 55" value="0xf85813ff"/>
+    <Color name="color 56" value="0x8ec794ff"/>
+    <Color name="color 57" value="0x7ea854ff"/>
+    <Color name="color 58" value="0x696e64ff"/>
+    <Color name="color 59" value="0xb2baffff"/>
+    <Color name="color 6" value="0xe11111ff"/>
+    <Color name="color 60" value="0x50545aff"/>
+    <Color name="color 61" value="0x383333ff"/>
+    <Color name="color 62" value="0xffa500ff"/>
+    <Color name="color 63" value="0xfdc705ff"/>
+    <Color name="color 64" value="0xa7acd4ff"/>
+    <Color name="color 65" value="0xb8cca3ff"/>
+    <Color name="color 66" value="0x4f2f00ff"/>
+    <Color name="color 67" value="0x121212ff"/>
+    <Color name="color 68" value="0xc57805ff"/>
+    <Color name="color 69" value="0x030207ff"/>
+    <Color name="color 7" value="0x515151ff"/>
+    <Color name="color 70" value="0x304057ff"/>
+    <Color name="color 71" value="0x5f5a58ff"/>
+    <Color name="color 72" value="0xe58b05ff"/>
+    <Color name="color 73" value="0x3240c0ff"/>
+    <Color name="color 74" value="0xff4c15ff"/>
+    <Color name="color 75" value="0xe6bb3bff"/>
+    <Color name="color 76" value="0x6c6e6aff"/>
+    <Color name="color 77" value="0x7aadf9ff"/>
+    <Color name="color 78" value="0x2e769cff"/>
+    <Color name="color 79" value="0x6b806dff"/>
+    <Color name="color 8" value="0xe70b18ff"/>
+    <Color name="color 80" value="0x704d4dff"/>
+    <Color name="color 81" value="0xa5a5a5ff"/>
+    <Color name="color 82" value="0x0f4ab8ff"/>
+    <Color name="color 83" value="0xa80000ff"/>
+    <Color name="color 84" value="0x7b354aff"/>
+    <Color name="color 85" value="0xffa3bfff"/>
+    <Color name="color 86" value="0xcc2828ff"/>
+    <Color name="color 87" value="0x505050ff"/>
+    <Color name="color 88" value="0xc6c6c6ff"/>
+    <Color name="color 89" value="0xb6e8fdff"/>
+    <Color name="color 9" value="0xff6100ff"/>
+    <Color name="color 90" value="0x2c2121ff"/>
+    <Color name="color 91" value="0xf36363ff"/>
+    <Color name="color 92" value="0x8cd8f8ff"/>
+    <Color name="color 93" value="0x51578aff"/>
+    <Color name="color 94" value="0x636363ff"/>
+    <Color name="color 95" value="0xe4f4d3ff"/>
+    <Color name="color 96" value="0x24e59cff"/>
+    <Color name="color 97" value="0xccccccff"/>
+    <Color name="color 98" value="0x9e00ffff"/>
+    <Color name="color 99" value="0x8d8d8dff"/>
+    <Color name="meter color0" value="0x05ff6bff"/>
+    <Color name="meter color1" value="0x39ff00ff"/>
+    <Color name="meter color2" value="0x29ff17ff"/>
+    <Color name="meter color3" value="0xb2ff52ff"/>
+    <Color name="meter color4" value="0xe3ff00ff"/>
+    <Color name="meter color5" value="0xfff000ff"/>
+    <Color name="meter color6" value="0xff8800ff"/>
+    <Color name="meter color7" value="0xff8800ff"/>
+    <Color name="meter color8" value="0xff0000ff"/>
+    <Color name="meter color9" value="0xff0000ff"/>
+  </Colors>
+  <ColorAliases>
+    <ColorAlias name="active crossfade" alias="color 1"/>
+    <ColorAlias name="arrange base" alias="color 34"/>
+    <ColorAlias name="audio automation track fill" alias="color 70"/>
+    <ColorAlias name="audio bus base" alias="color 3"/>
+    <ColorAlias name="audio master bus base" alias="color 4"/>
+    <ColorAlias name="audio track base" alias="color 77"/>
+    <ColorAlias name="automation line" alias="color 23"/>
+    <ColorAlias name="automation track outline" alias="color 7"/>
+    <ColorAlias name="big clock active: background" alias="color 4"/>
+    <ColorAlias name="big clock active: cursor" alias="color 8"/>
+    <ColorAlias name="big clock active: edited text" alias="color 8"/>
+    <ColorAlias name="big clock active: text" alias="color 9"/>
+    <ColorAlias name="big clock: background" alias="color 67"/>
+    <ColorAlias name="big clock: cursor" alias="color 8"/>
+    <ColorAlias name="big clock: edited text" alias="color 8"/>
+    <ColorAlias name="big clock: text" alias="color 10"/>
+    <ColorAlias name="border color" alias="color 4"/>
+    <ColorAlias name="cd marker bar" alias="color 87"/>
+    <ColorAlias name="clipped waveform" alias="color 9"/>
+    <ColorAlias name="clock: background" alias="color 67"/>
+    <ColorAlias name="clock: cursor" alias="color 8"/>
+    <ColorAlias name="clock: edited text" alias="color 8"/>
+    <ColorAlias name="clock: text" alias="color 12"/>
+    <ColorAlias name="control point fill" alias="color 97"/>
+    <ColorAlias name="control point outline" alias="meter color8"/>
+    <ColorAlias name="control point selected fill" alias="color 13"/>
+    <ColorAlias name="control point selected outline" alias="color 91"/>
+    <ColorAlias name="covered region" alias="color 87"/>
+    <ColorAlias name="crossfade editor base" alias="color 15"/>
+    <ColorAlias name="crossfade editor line" alias="color 4"/>
+    <ColorAlias name="crossfade editor line shading" alias="color 16"/>
+    <ColorAlias name="crossfade editor point fill" alias="color 17"/>
+    <ColorAlias name="crossfade editor point outline" alias="color 18"/>
+    <ColorAlias name="crossfade editor wave" alias="color 13"/>
+    <ColorAlias name="crossfade line" alias="color 4"/>
+    <ColorAlias name="edit point" alias="color 18"/>
+    <ColorAlias name="entered automation line" alias="color 19"/>
+    <ColorAlias name="entered gain line" alias="color 19"/>
+    <ColorAlias name="entered marker" alias="color 19"/>
+    <ColorAlias name="feedback alert: fill" alias="color 63"/>
+    <ColorAlias name="feedback alert: fill active" alias="color 9"/>
+    <ColorAlias name="feedback alert: led active" alias="color 4"/>
+    <ColorAlias name="frame handle" alias="color 23"/>
+    <ColorAlias name="gain line" alias="color 6"/>
+    <ColorAlias name="gain line inactive" alias="color 24"/>
+    <ColorAlias name="generic button: fill" alias="color 33"/>
+    <ColorAlias name="generic button: fill active" alias="color 9"/>
+    <ColorAlias name="generic button: led active" alias="color 18"/>
+    <ColorAlias name="ghost track base" alias="color 46"/>
+    <ColorAlias name="ghost track midi outline" alias="color 4"/>
+    <ColorAlias name="ghost track wave" alias="color 29"/>
+    <ColorAlias name="ghost track wave clip" alias="color 29"/>
+    <ColorAlias name="ghost track wave fill" alias="color 29"/>
+    <ColorAlias name="ghost track zero line" alias="color 30"/>
+    <ColorAlias name="gtk_arm" alias="color 9"/>
+    <ColorAlias name="gtk_audio_bus" alias="color 42"/>
+    <ColorAlias name="gtk_audio_track" alias="color 46"/>
+    <ColorAlias name="gtk_automation_track_header" alias="color 42"/>
+    <ColorAlias name="gtk_background" alias="color 7"/>
+    <ColorAlias name="gtk_bases" alias="color 7"/>
+    <ColorAlias name="gtk_bg_selected" alias="color 99"/>
+    <ColorAlias name="gtk_bg_tooltip" alias="color 52"/>
+    <ColorAlias name="gtk_bright_color" alias="color 74"/>
+    <ColorAlias name="gtk_bright_indicator" alias="color 9"/>
+    <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
+    <ColorAlias name="gtk_control_base" alias="color 104"/>
+    <ColorAlias name="gtk_control_text" alias="color 26"/>
+    <ColorAlias name="gtk_control_text2" alias="color 83"/>
+    <ColorAlias name="gtk_darkest" alias="color 67"/>
+    <ColorAlias name="gtk_fg_selected" alias="color 67"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="color 29"/>
+    <ColorAlias name="gtk_foreground" alias="color 50"/>
+    <ColorAlias name="gtk_light_text_on_dark" alias="color 31"/>
+    <ColorAlias name="gtk_lightest" alias="color 13"/>
+    <ColorAlias name="gtk_midi_channel_selector" alias="color 44"/>
+    <ColorAlias name="gtk_midi_track" alias="color 46"/>
+    <ColorAlias name="gtk_monitor" alias="color 8"/>
+    <ColorAlias name="gtk_mono" alias="color 95"/>
+    <ColorAlias name="gtk_mute" alias="color 52"/>
+    <ColorAlias name="gtk_not_so_bright_indicator" alias="color 32"/>
+    <ColorAlias name="gtk_processor_fader" alias="color 94"/>
+    <ColorAlias name="gtk_processor_fader_frame" alias="color 104"/>
+    <ColorAlias name="gtk_processor_frame_selected" alias="color 32"/>
+    <ColorAlias name="gtk_processor_postfader" alias="color 79"/>
+    <ColorAlias name="gtk_processor_postfader_frame" alias="color 103"/>
+    <ColorAlias name="gtk_processor_prefader" alias="color 69"/>
+    <ColorAlias name="gtk_processor_prefader_frame" alias="color 69"/>
+    <ColorAlias name="gtk_send_bg" alias="color 38"/>
+    <ColorAlias name="gtk_send_fg" alias="color 24"/>
+    <ColorAlias name="gtk_solo" alias="color 91"/>
+    <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
+    <ColorAlias name="gtk_texts" alias="color 4"/>
+    <ColorAlias name="gtk_track_header_inactive" alias="color 34"/>
+    <ColorAlias name="gtk_track_header_selected" alias="color 40"/>
+    <ColorAlias name="image track" alias="color 31"/>
+    <ColorAlias name="inactive crossfade" alias="color 32"/>
+    <ColorAlias name="inactive fade handle" alias="color 33"/>
+    <ColorAlias name="inactive group tab" alias="color 34"/>
+    <ColorAlias name="invert button: fill active" alias="color 35"/>
+    <ColorAlias name="invert button: led active" alias="color 37"/>
+    <ColorAlias name="location cd marker" alias="color 38"/>
+    <ColorAlias name="location loop" alias="color 39"/>
+    <ColorAlias name="location marker" alias="color 32"/>
+    <ColorAlias name="location punch" alias="color 40"/>
+    <ColorAlias name="location range" alias="color 41"/>
+    <ColorAlias name="lock button: fill active" alias="color 42"/>
+    <ColorAlias name="lock button: led active" alias="color 4"/>
+    <ColorAlias name="marker bar" alias="color 2"/>
+    <ColorAlias name="marker bar separator" alias="color 27"/>
+    <ColorAlias name="marker drag line" alias="color 44"/>
+    <ColorAlias name="marker label" alias="color 4"/>
+    <ColorAlias name="marker track" alias="color 31"/>
+    <ColorAlias name="master monitor section button active: fill" alias="color 40"/>
+    <ColorAlias name="master monitor section button active: fill active" alias="color 54"/>
+    <ColorAlias name="master monitor section button normal: fill active" alias="color 42"/>
+    <ColorAlias name="measure line bar" alias="color 4"/>
+    <ColorAlias name="measure line beat" alias="color 94"/>
+    <ColorAlias name="meter background bottom" alias="color 4"/>
+    <ColorAlias name="meter background top" alias="color 4"/>
+    <ColorAlias name="meter bar" alias="color 7"/>
+    <ColorAlias name="meter color BBC" alias="color 8"/>
+    <ColorAlias name="meter marker" alias="color 19"/>
+    <ColorAlias name="meterbridge label: fill" alias="color 34"/>
+    <ColorAlias name="meterbridge label: fill active" alias="color 46"/>
+    <ColorAlias name="meterbridge label: led" alias="color 9"/>
+    <ColorAlias name="meterbridge label: led active" alias="color 9"/>
+    <ColorAlias name="meterbridge peakindicator: fill" alias="color 34"/>
+    <ColorAlias name="meterbridge peakindicator: fill active" alias="color 9"/>
+    <ColorAlias name="meterbridge peakindicator: led" alias="color 9"/>
+    <ColorAlias name="meterbridge peakindicator: led active" alias="color 9"/>
+    <ColorAlias name="meterbridge peaklabel" alias="color 9"/>
+    <ColorAlias name="meterstrip dpm bg" alias="color 27"/>
+    <ColorAlias name="meterstrip dpm fg" alias="color 31"/>
+    <ColorAlias name="meterstrip ppm bg" alias="color 27"/>
+    <ColorAlias name="meterstrip ppm fg" alias="color 31"/>
+    <ColorAlias name="meterstrip vu bg" alias="color 32"/>
+    <ColorAlias name="meterstrip vu fg" alias="color 4"/>
+    <ColorAlias name="midi automation track fill" alias="color 58"/>
+    <ColorAlias name="midi bus base" alias="color 4"/>
+    <ColorAlias name="midi device: fill" alias="color 25"/>
+    <ColorAlias name="midi device: fill active" alias="color 42"/>
+    <ColorAlias name="midi device: led active" alias="color 17"/>
+    <ColorAlias name="midi frame base" alias="color 87"/>
+    <ColorAlias name="midi input button: fill active" alias="color 48"/>
+    <ColorAlias name="midi input button: led active" alias="color 4"/>
+    <ColorAlias name="midi meter color0" alias="color 52"/>
+    <ColorAlias name="midi meter color1" alias="color 53"/>
+    <ColorAlias name="midi meter color2" alias="color 53"/>
+    <ColorAlias name="midi meter color3" alias="color 54"/>
+    <ColorAlias name="midi meter color4" alias="color 54"/>
+    <ColorAlias name="midi meter color5" alias="color 55"/>
+    <ColorAlias name="midi meter color6" alias="color 55"/>
+    <ColorAlias name="midi meter color7" alias="color 56"/>
+    <ColorAlias name="midi meter color8" alias="color 56"/>
+    <ColorAlias name="midi meter color9" alias="meter color3"/>
+    <ColorAlias name="midi note inactive channel" alias="color 4"/>
+    <ColorAlias name="midi note max" alias="color 8"/>
+    <ColorAlias name="midi note mid" alias="color 91"/>
+    <ColorAlias name="midi note min" alias="color 49"/>
+    <ColorAlias name="midi note selected" alias="color 80"/>
+    <ColorAlias name="midi note selected outline" alias="color 67"/>
+    <ColorAlias name="midi note velocity text" alias="color 32"/>
+    <ColorAlias name="midi patch change fill" alias="color 60"/>
+    <ColorAlias name="midi patch change outline" alias="color 26"/>
+    <ColorAlias name="midi select rect outline" alias="color 63"/>
+    <ColorAlias name="midi sysex fill" alias="color 32"/>
+    <ColorAlias name="midi sysex outline" alias="color 64"/>
+    <ColorAlias name="midi track base" alias="color 39"/>
+    <ColorAlias name="mixer strip button: fill active" alias="color 8"/>
+    <ColorAlias name="mixer strip button: led active" alias="color 8"/>
+    <ColorAlias name="mixer strip name button: fill active" alias="color 67"/>
+    <ColorAlias name="mixer strip name button: led active" alias="color 8"/>
+    <ColorAlias name="monitor button: fill active" alias="color 68"/>
+    <ColorAlias name="monitor button: led active" alias="color 9"/>
+    <ColorAlias name="monitor section dim: fill" alias="color 71"/>
+    <ColorAlias name="monitor section dim: fill active" alias="color 72"/>
+    <ColorAlias name="monitor section dim: led active" alias="color 37"/>
+    <ColorAlias name="monitor section knob" alias="color 60"/>
+    <ColorAlias name="monitor section knob: arc end" alias="color 9"/>
+    <ColorAlias name="monitor section knob: arc start" alias="meter color6"/>
+    <ColorAlias name="monitor section mono: fill" alias="color 71"/>
+    <ColorAlias name="monitor section mono: fill active" alias="color 73"/>
+    <ColorAlias name="monitor section mono: led active" alias="color 37"/>
+    <ColorAlias name="monitor section processors present: fill" alias="color 20"/>
+    <ColorAlias name="monitor section processors toggle: fill active" alias="color 42"/>
+    <ColorAlias name="monitor section solo model: fill" alias="color 71"/>
+    <ColorAlias name="monitor section solo model: fill active" alias="color 42"/>
+    <ColorAlias name="monitor section solo model: led active" alias="color 8"/>
+    <ColorAlias name="monitor section solo option: fill" alias="color 71"/>
+    <ColorAlias name="monitor section solo option: fill active" alias="color 42"/>
+    <ColorAlias name="monitor section solo option: led active" alias="color 8"/>
+    <ColorAlias name="mono panner bg" alias="color 67"/>
+    <ColorAlias name="mono panner fill" alias="color 74"/>
+    <ColorAlias name="mono panner outline" alias="color 70"/>
+    <ColorAlias name="mono panner position fill" alias="color 11"/>
+    <ColorAlias name="mono panner position outline" alias="color 70"/>
+    <ColorAlias name="mono panner text" alias="color 4"/>
+    <ColorAlias name="mouse mode button: fill active" alias="color 12"/>
+    <ColorAlias name="mouse mode button: led active" alias="color 8"/>
+    <ColorAlias name="mute button: fill active" alias="color 75"/>
+    <ColorAlias name="mute button: led active" alias="color 4"/>
+    <ColorAlias name="name highlight fill" alias="color 18"/>
+    <ColorAlias name="name highlight outline" alias="color 23"/>
+    <ColorAlias name="nudge button: fill" alias="color 63"/>
+    <ColorAlias name="nudge button: fill active" alias="color 42"/>
+    <ColorAlias name="nudge button: led active" alias="color 8"/>
+    <ColorAlias name="nudge clock: background" alias="color 67"/>
+    <ColorAlias name="nudge clock: cursor" alias="color 8"/>
+    <ColorAlias name="nudge clock: edited text" alias="color 8"/>
+    <ColorAlias name="nudge clock: text" alias="color 12"/>
+    <ColorAlias name="piano roll black" alias="color 76"/>
+    <ColorAlias name="piano roll black outline" alias="color 33"/>
+    <ColorAlias name="piano roll white" alias="color 45"/>
+    <ColorAlias name="play head" alias="color 9"/>
+    <ColorAlias name="plugin bypass button: led active" alias="color 8"/>
+    <ColorAlias name="pluginlist filter button: fill active" alias="color 14"/>
+    <ColorAlias name="pluginlist hide button: led active" alias="color 14"/>
+    <ColorAlias name="processor automation line" alias="color 77"/>
+    <ColorAlias name="processor control button: fill" alias="color 29"/>
+    <ColorAlias name="processor control button: fill active" alias="color 46"/>
+    <ColorAlias name="processor control button: led active" alias="color 62"/>
+    <ColorAlias name="processor fader: fill" alias="color 87"/>
+    <ColorAlias name="processor fader: fill active" alias="color 21"/>
+    <ColorAlias name="processor fader: led active" alias="color 9"/>
+    <ColorAlias name="processor postfader: fill" alias="color 58"/>
+    <ColorAlias name="processor postfader: fill active" alias="color 79"/>
+    <ColorAlias name="processor postfader: led active" alias="color 9"/>
+    <ColorAlias name="processor prefader: fill" alias="color 40"/>
+    <ColorAlias name="processor prefader: fill active" alias="color 80"/>
+    <ColorAlias name="processor prefader: led active" alias="color 9"/>
+    <ColorAlias name="processor stub: fill" alias="color 46"/>
+    <ColorAlias name="processor stub: fill active" alias="color 46"/>
+    <ColorAlias name="punch button: fill" alias="color 63"/>
+    <ColorAlias name="punch button: fill active" alias="color 9"/>
+    <ColorAlias name="punch button: led active" alias="color 4"/>
+    <ColorAlias name="punch clock: background" alias="color 67"/>
+    <ColorAlias name="punch clock: cursor" alias="color 9"/>
+    <ColorAlias name="punch clock: edited text" alias="color 9"/>
+    <ColorAlias name="punch clock: text" alias="color 12"/>
+    <ColorAlias name="punch line" alias="color 83"/>
+    <ColorAlias name="range drag bar rect" alias="color 21"/>
+    <ColorAlias name="range drag rect" alias="color 56"/>
+    <ColorAlias name="range marker bar" alias="color 34"/>
+    <ColorAlias name="record enable button: fill active" alias="color 83"/>
+    <ColorAlias name="record enable button: led active" alias="color 85"/>
+    <ColorAlias name="recording rect" alias="color 86"/>
+    <ColorAlias name="recording waveform fill" alias="color 13"/>
+    <ColorAlias name="recording waveform outline" alias="color 43"/>
+    <ColorAlias name="region list automatic" alias="color 53"/>
+    <ColorAlias name="region list missing source" alias="color 9"/>
+    <ColorAlias name="region list whole file" alias="color 1"/>
+    <ColorAlias name="route button: fill active" alias="color 67"/>
+    <ColorAlias name="route button: led active" alias="color 8"/>
+    <ColorAlias name="rubber band rect" alias="color 88"/>
+    <ColorAlias name="rude audition: fill" alias="color 63"/>
+    <ColorAlias name="rude audition: fill active" alias="color 86"/>
+    <ColorAlias name="rude audition: led active" alias="color 4"/>
+    <ColorAlias name="rude isolate: fill" alias="color 42"/>
+    <ColorAlias name="rude isolate: fill active" alias="color 89"/>
+    <ColorAlias name="rude isolate: led active" alias="color 4"/>
+    <ColorAlias name="rude solo: fill" alias="color 63"/>
+    <ColorAlias name="rude solo: fill active" alias="color 82"/>
+    <ColorAlias name="rude solo: led active" alias="color 4"/>
+    <ColorAlias name="ruler base" alias="color 25"/>
+    <ColorAlias name="ruler text" alias="color 4"/>
+    <ColorAlias name="secondary clock: background" alias="color 67"/>
+    <ColorAlias name="secondary clock: cursor" alias="color 8"/>
+    <ColorAlias name="secondary clock: edited text" alias="color 8"/>
+    <ColorAlias name="secondary clock: text" alias="color 88"/>
+    <ColorAlias name="secondary delta clock: background" alias="color 67"/>
+    <ColorAlias name="secondary delta clock: cursor" alias="color 9"/>
+    <ColorAlias name="secondary delta clock: edited text" alias="color 9"/>
+    <ColorAlias name="secondary delta clock: text" alias="color 92"/>
+    <ColorAlias name="selected midi note frame" alias="color 4"/>
+    <ColorAlias name="selected region base" alias="meter color5"/>
+    <ColorAlias name="selected time axis frame" alias="color 86"/>
+    <ColorAlias name="selected waveform fill" alias="color 94"/>
+    <ColorAlias name="selected waveform outline" alias="color 67"/>
+    <ColorAlias name="selection" alias="color 13"/>
+    <ColorAlias name="selection clock: background" alias="color 67"/>
+    <ColorAlias name="selection clock: cursor" alias="color 9"/>
+    <ColorAlias name="selection clock: edited text" alias="color 9"/>
+    <ColorAlias name="selection clock: text" alias="color 12"/>
+    <ColorAlias name="selection rect" alias="color 37"/>
+    <ColorAlias name="send alert button: fill" alias="color 71"/>
+    <ColorAlias name="send alert button: fill active" alias="color 38"/>
+    <ColorAlias name="send alert button: led active" alias="color 4"/>
+    <ColorAlias name="send bg" alias="color 38"/>
+    <ColorAlias name="shuttle" alias="color 12"/>
+    <ColorAlias name="silence" alias="color 98"/>
+    <ColorAlias name="silence text" alias="color 10"/>
+    <ColorAlias name="solo button: fill active" alias="color 82"/>
+    <ColorAlias name="solo button: led active" alias="color 4"/>
+    <ColorAlias name="solo isolate: fill" alias="color 25"/>
+    <ColorAlias name="solo isolate: fill active" alias="color 42"/>
+    <ColorAlias name="solo isolate: led active" alias="color 9"/>
+    <ColorAlias name="solo safe: fill" alias="color 25"/>
+    <ColorAlias name="solo safe: fill active" alias="color 42"/>
+    <ColorAlias name="solo safe: led active" alias="color 9"/>
+    <ColorAlias name="stereo panner bg" alias="color 67"/>
+    <ColorAlias name="stereo panner fill" alias="color 74"/>
+    <ColorAlias name="stereo panner inverted bg" alias="color 61"/>
+    <ColorAlias name="stereo panner inverted fill" alias="color 100"/>
+    <ColorAlias name="stereo panner inverted outline" alias="color 83"/>
+    <ColorAlias name="stereo panner inverted text" alias="color 4"/>
+    <ColorAlias name="stereo panner mono bg" alias="color 67"/>
+    <ColorAlias name="stereo panner mono fill" alias="color 54"/>
+    <ColorAlias name="stereo panner mono outline" alias="color 101"/>
+    <ColorAlias name="stereo panner mono text" alias="color 4"/>
+    <ColorAlias name="stereo panner outline" alias="color 70"/>
+    <ColorAlias name="stereo panner rule" alias="color 70"/>
+    <ColorAlias name="stereo panner text" alias="color 4"/>
+    <ColorAlias name="sync mark" alias="color 75"/>
+    <ColorAlias name="tempo bar" alias="color 46"/>
+    <ColorAlias name="tempo marker" alias="color 19"/>
+    <ColorAlias name="time axis frame" alias="color 4"/>
+    <ColorAlias name="time axis view item base" alias="color 94"/>
+    <ColorAlias name="time stretch fill" alias="color 100"/>
+    <ColorAlias name="time stretch outline" alias="color 94"/>
+    <ColorAlias name="tracknumber label: fill" alias="color 34"/>
+    <ColorAlias name="tracknumber label: fill active" alias="color 46"/>
+    <ColorAlias name="tracknumber label: led active" alias="color 9"/>
+    <ColorAlias name="transport active option button: fill active" alias="color 48"/>
+    <ColorAlias name="transport active option button: led active" alias="color 8"/>
+    <ColorAlias name="transport button: fill active" alias="color 12"/>
+    <ColorAlias name="transport button: led active" alias="color 4"/>
+    <ColorAlias name="transport clock: background" alias="color 67"/>
+    <ColorAlias name="transport clock: cursor" alias="color 8"/>
+    <ColorAlias name="transport clock: edited text" alias="color 8"/>
+    <ColorAlias name="transport clock: text" alias="color 9"/>
+    <ColorAlias name="transport delta clock: background" alias="color 67"/>
+    <ColorAlias name="transport delta clock: cursor" alias="color 9"/>
+    <ColorAlias name="transport delta clock: edited text" alias="color 9"/>
+    <ColorAlias name="transport delta clock: text" alias="color 92"/>
+    <ColorAlias name="transport drag rect" alias="color 21"/>
+    <ColorAlias name="transport loop rect" alias="color 48"/>
+    <ColorAlias name="transport marker bar" alias="color 25"/>
+    <ColorAlias name="transport option button: fill active" alias="color 42"/>
+    <ColorAlias name="transport option button: led active" alias="color 8"/>
+    <ColorAlias name="transport punch rect" alias="color 62"/>
+    <ColorAlias name="transport recenable button: fill" alias="color 20"/>
+    <ColorAlias name="transport recenable button: fill active" alias="color 83"/>
+    <ColorAlias name="transport recenable button: led active" alias="color 4"/>
+    <ColorAlias name="trim handle" alias="color 18"/>
+    <ColorAlias name="trim handle locked" alias="color 86"/>
+    <ColorAlias name="trim knob" alias="color 60"/>
+    <ColorAlias name="trim knob: arc end" alias="meter color6"/>
+    <ColorAlias name="trim knob: arc start" alias="color 9"/>
+    <ColorAlias name="verbose canvas cursor" alias="color 32"/>
+    <ColorAlias name="video timeline bar" alias="color 46"/>
+    <ColorAlias name="waveform fill" alias="color 13"/>
+    <ColorAlias name="waveform outline" alias="color 4"/>
+    <ColorAlias name="zero line" alias="color 104"/>
+    <ColorAlias name="zoom button: fill active" alias="color 48"/>
+    <ColorAlias name="zoom button: led active" alias="color 8"/>
+  </ColorAliases>
+  <Modifiers>
+    <Modifier name="audio bus base" modifier="= alpha:0.3"/>
+    <Modifier name="audio track base" modifier="= alpha:0.32"/>
+    <Modifier name="automation track fill" modifier="= alpha:0.3"/>
+    <Modifier name="covered region base" modifier="= alpha:0.680625"/>
+    <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
+    <Modifier name="dragging region" modifier="= alpha:0.92"/>
+    <Modifier name="editable region" modifier="= alpha:0"/>
+    <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
+    <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
+    <Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
+    <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
+    <Modifier name="loop rectangle" modifier="= alpha:0.5"/>
+    <Modifier name="marker bar" modifier="= alpha:0.5"/>
+    <Modifier name="measure line beat" modifier="= alpha:1"/>
+    <Modifier name="midi frame base" modifier="= alpha:0.720606"/>
+    <Modifier name="midi note" modifier="= alpha:0.8"/>
+    <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
+    <Modifier name="midi patch change fill" modifier="= alpha:0.6274"/>
+    <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
+    <Modifier name="midi track base" modifier="= alpha:0.3"/>
+    <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
+    <Modifier name="opaque region base" modifier="= alpha:0.75"/>
+    <Modifier name="panner fill" modifier="= alpha:0.7882"/>
+    <Modifier name="piano roll black" modifier="= alpha:0.2"/>
+    <Modifier name="piano roll white" modifier="= alpha:0.2"/>
+    <Modifier name="recording rect" modifier="= alpha:0.275106"/>
+    <Modifier name="selected midi note" modifier="= alpha:0.7529"/>
+    <Modifier name="selection rect" modifier="= alpha:0.791048"/>
+    <Modifier name="silence" modifier="= alpha:0.4784"/>
+    <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
+    <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
+    <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
+    <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
+    <Modifier name="transparent region base" modifier="= alpha:0.693"/>
+    <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
+  </Modifiers>
+</Ardour>

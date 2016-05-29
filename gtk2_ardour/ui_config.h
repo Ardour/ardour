@@ -46,6 +46,8 @@ private:
     public:
 	static UIConfiguration& instance();
 
+	static std::string color_file_suffix;
+
 	void load_rc_file (bool themechange, bool allow_own = true);
 
 	int load_state ();
@@ -144,4 +146,3 @@ private:
 };
 
 #endif /* __ardour_ui_configuration_h__ */
-

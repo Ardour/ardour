@@ -62,6 +62,7 @@ class ThemeManager : public Gtk::VBox
 	void on_transients_follow_front_toggled ();
 	void on_floating_monitor_section_toggled ();
 	void on_icon_set_changed ();
+	void on_color_theme_changed ();
 
   private:
 	Gtk::Notebook notebook;
@@ -97,6 +98,8 @@ class ThemeManager : public Gtk::VBox
 	Gtk::CheckButton gradient_waveforms;
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
+	Gtk::Label color_theme_label;
+	Gtk::ComboBoxText color_theme_dropdown;
 
 	/* handls response from color dialog when it is used to
 	   edit a derived color.
@@ -176,4 +179,3 @@ class ThemeManager : public Gtk::VBox
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */
-
