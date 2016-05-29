@@ -3571,7 +3571,9 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 Evoral::Beats
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
-	return Evoral::Beats (beat_at_frame (pos + distance) - beat_at_frame (pos));
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return Evoral::Beats (beat_at_frame_locked (_metrics, pos + distance) - beat_at_frame_locked (_metrics, pos));
 }
 
 struct bbtcmp {
