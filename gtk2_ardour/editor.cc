@@ -724,19 +724,21 @@ Editor::Editor ()
 	edit_pane.set_child_minsize (_the_notebook, 30); /* rough guess at width of notebook tabs */
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
-	if (!settings || (prop = settings->property ("edit-horizontal-pane-pos")) == 0) {
+	float fract;
+
+	if (!settings || ((prop = settings->property ("edit-horizontal-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
 		/* initial allocation is 90% to canvas, 10% to notebook */
 		edit_pane.set_divider (0, 0.90);
 	} else {
-		edit_pane.set_divider (0, atof (prop->value()));
+		edit_pane.set_divider (0, fract);
 	}
 
-	if (!settings || (prop = settings->property ("edit-vertical-pane-pos")) == 0) {
+	if (!settings || ((prop = settings->property ("edit-vertical-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
 		/* initial allocation is 90% to canvas, 10% to summary */
 		editor_summary_pane.set_divider (0, 0.90);
 	} else {
 
-		editor_summary_pane.set_divider (0, atof (prop->value()));
+		editor_summary_pane.set_divider (0, fract);
 	}
 
 	top_hbox.pack_start (toolbar_frame);
