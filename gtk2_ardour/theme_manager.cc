@@ -79,7 +79,7 @@ ThemeManager::ThemeManager()
 	, palette_window (0)
 {
 	Gtk::HBox* hbox;
-
+	
 	/* Now the alias list */
 
 	alias_list = TreeStore::create (alias_columns);
@@ -119,9 +119,12 @@ ThemeManager::ThemeManager()
 		color_theme_dropdown.set_active_text (UIConfiguration::instance().get_color_file());
 
 		hbox = Gtk::manage (new Gtk::HBox());
+		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
+		align->set (0, 0.5);
+		align->add (color_theme_dropdown);
 		hbox->set_spacing (6);
 		hbox->pack_start (color_theme_label, false, false);
-		hbox->pack_start (color_theme_dropdown, true, false);
+		hbox->pack_start (*align, true, true);
 		pack_start (*hbox, PACK_SHRINK);
 	}
 
@@ -146,8 +149,11 @@ ThemeManager::ThemeManager()
 
 		hbox = Gtk::manage (new Gtk::HBox());
 		hbox->set_spacing (6);
+		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
+		align->set (0, 0.5);
+		align->add (icon_set_dropdown);
 		hbox->pack_start (icon_set_label, false, false);
-		hbox->pack_start (icon_set_dropdown, true, false);
+		hbox->pack_start (*align, true, true);
 		pack_start (*hbox, PACK_SHRINK);
 	}
 
