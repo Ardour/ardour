@@ -38,6 +38,7 @@ namespace {
 	const char * const backend_env_variable_name = "ARDOUR_BACKEND_PATH";
 	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
 	const char * const export_env_variable_name = "ARDOUR_EXPORT_FORMATS_PATH";
+	const char * const theme_env_variable_name = "ARDOUR_THEMES_PATH";
 	const char * const ladspa_env_variable_name = "LADSPA_PATH";
 	const char * const midi_patch_env_variable_name = "ARDOUR_MIDI_PATCH_PATH";
 	const char * const panner_env_variable_name = "ARDOUR_PANNER_PATH";
@@ -66,6 +67,16 @@ control_protocol_search_path ()
 	spath.add_subdirectory_to_paths (surfaces_dir_name);
 
 	spath += Searchpath(Glib::getenv(surfaces_env_variable_name));
+	return spath;
+}
+
+Searchpath
+theme_search_path ()
+{
+	Searchpath spath(user_config_directory ());
+	spath.add_subdirectory_to_paths (theme_dir_name);
+
+	spath += Searchpath(Glib::getenv(theme_env_variable_name));
 	return spath;
 }
 

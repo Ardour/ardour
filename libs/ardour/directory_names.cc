@@ -37,6 +37,7 @@ const char* const templates_dir_name = X_("templates");
 const char* const route_templates_dir_name = X_("route_templates");
 const char* const surfaces_dir_name = X_("surfaces");
 const char* const ladspa_dir_name = X_("ladspa");
+const char* const theme_dir_name = X_("themes");
 const char* const panner_dir_name = X_("panners");
 const char* const backend_dir_name = X_("backends");
 const char* const automation_dir_name = X_("automation");

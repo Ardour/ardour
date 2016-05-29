@@ -79,10 +79,20 @@ namespace ARDOUR {
 	 *
 	 * If ARDOUR_MIDI_PATCH_PATH is defined then the Searchpath returned
 	 * will contain only those directories specified in it, otherwise it will
-	 * contain the user and system directories which may contain control
-	 * surface plugins.
+	 * contain the user and system directories.
 	 */
 	LIBARDOUR_API PBD::Searchpath midi_patch_search_path ();
+
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * theme files.
+	 *
+	 * If ARDOUR_THEMES_PATH is defined then the Searchpath returned
+	 * will contain only those directories specified in it, otherwise it will
+	 * contain the user and system directories
+	 */
+	LIBARDOUR_API PBD::Searchpath theme_search_path ();
+
 
 	/**
 	 * return a Searchpath containing directories in which to look for
@@ -90,8 +100,8 @@ namespace ARDOUR {
 	 *
 	 * If ARDOUR_PANNER_PATH is defined then the Searchpath returned
 	 * will contain only those directories specified in it, otherwise it will
-	 * contain the user and system directories which may contain control
-	 * surface plugins.
+	 * contain the user and system directories which may contain panner
+	 * plugins.
 	 */
 	LIBARDOUR_API PBD::Searchpath panner_search_path ();
 
