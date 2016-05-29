@@ -212,15 +212,24 @@ LuaProc::load_script ()
 		}
 	}
 
-	luabridge::LuaRef lua_dsp_midi_in = luabridge::getGlobal (L, "dsp_midi_input");
-	if (lua_dsp_midi_in.type () == LUA_TFUNCTION) {
+	// query midi i/o
+	luabridge::LuaRef lua_dsp_has_midi_in = luabridge::getGlobal (L, "dsp_has_midi_input");
+	if (lua_dsp_has_midi_in.type () == LUA_TFUNCTION) {
 		try {
-			_has_midi_input = lua_dsp_midi_in ();
+			_has_midi_input = lua_dsp_has_midi_in ();
 		} catch (luabridge::LuaException const& e) {
 			;
 		}
 	}
-	lpi->_is_instrument = _has_midi_input;
+
+	luabridge::LuaRef lua_dsp_has_midi_out = luabridge::getGlobal (L, "dsp_has_midi_output");
+	if (lua_dsp_has_midi_out.type () == LUA_TFUNCTION) {
+		try {
+			_has_midi_output = lua_dsp_has_midi_out ();
+		} catch (luabridge::LuaException const& e) {
+			;
+		}
+	}
 
 	_ctrl_params.clear ();
 
@@ -352,10 +361,10 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	bool found = false;
 	bool exact_match = false;
 	const int32_t audio_in = in.n_audio ();
-	int32_t midi_out = 0; // TODO handle  _has_midi_output
+	int32_t midi_out = _has_midi_output ? 1 : 0;
 
 	// preferred setting (provided by plugin_insert)
-	assert (out.n_audio () > 0);
+	assert (out.n_audio () > 0 || midi_out > 0);
 	const int preferred_out = out.n_audio ();
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
@@ -406,8 +415,17 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		int possible_out = io["audio_out"];
 
 		if (possible_out == 0) {
+			if (possible_in == 0) {
+				if (_has_midi_output && audio_in == 0) {
+					// special case midi filters & generators
+					audio_out = 0;
+					found = true;
+					break;
+				}
+			}
 			continue;
 		}
+
 		if (possible_in == 0) {
 			/* no inputs, generators & instruments */
 			if (possible_out == -1) {
@@ -527,6 +545,15 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			int possible_in = io["audio_in"];
 			int possible_out = io["audio_out"];
 
+			if (possible_out == 0 && possible_in == 0 && _has_midi_output) {
+				assert (audio_in > 0); // no input is handled above
+				// TODO hide audio input from plugin
+				imprecise->set (DataType::AUDIO, 0);
+				audio_out = 0;
+				found = true;
+				continue;
+			}
+
 			assert (possible_in > 0); // all other cases will have been matched above
 			assert (possible_out !=0 || possible_in !=0); // already handled above
 
@@ -550,10 +577,10 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	}
 
 	if (exact_match) {
-		out.set (DataType::MIDI, midi_out); // currently always zero
+		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, preferred_out);
 	} else {
-		out.set (DataType::MIDI, midi_out); // currently always zero
+		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, audio_out);
 	}
 	return true;
@@ -651,7 +678,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				}
 			}
 
-			luabridge::LuaRef lua_midi_tbl (luabridge::newTable (L));
+			luabridge::LuaRef lua_midi_src_tbl (luabridge::newTable (L));
 			int e = 1; // > 1 port, we merge events (unsorted)
 			for (uint32_t mp = 0; mp < midi_in; ++mp) {
 				bool valid;
@@ -668,20 +695,52 @@ LuaProc::connect_and_run (BufferSet& bufs,
 						luabridge::LuaRef lua_midi_event (luabridge::newTable (L));
 						lua_midi_event["time"] = 1 + (*m).time();
 						lua_midi_event["data"] = lua_midi_data;
-						lua_midi_tbl[e] = lua_midi_event;
+						lua_midi_src_tbl[e] = lua_midi_event;
 					}
 				}
 			}
 
 			if (_has_midi_input) {
 				// XXX TODO This needs a better solution than global namespace
-				luabridge::push (L, lua_midi_tbl);
-				lua_setglobal (L, "mididata");
+				luabridge::push (L, lua_midi_src_tbl);
+				lua_setglobal (L, "midiin");
 			}
 
+			luabridge::LuaRef lua_midi_sink_tbl (luabridge::newTable (L));
+			if (_has_midi_output) {
+				luabridge::push (L, lua_midi_sink_tbl);
+				lua_setglobal (L, "midiout");
+			}
 
 			// run the DSP function
 			(*_lua_dsp)(in_map, out_map, nframes);
+
+			// copy back midi events
+			if (_has_midi_output && lua_midi_sink_tbl.isTable ()) {
+				bool valid;
+				const uint32_t idx = out.get(DataType::MIDI, 0, &valid);
+				if (valid && bufs.count().n_midi() > idx) {
+					MidiBuffer& mbuf = bufs.get_midi(idx);
+					mbuf.silence(0, 0);
+					for (luabridge::Iterator i (lua_midi_sink_tbl); !i.isNil (); ++i) {
+						if (!i.key ().isNumber ()) { continue; }
+						if (!i.value ()["time"].isNumber ()) { continue; }
+						if (!i.value ()["data"].isTable ()) { continue; }
+						luabridge::LuaRef data_tbl (i.value ()["data"]);
+						framepos_t tme = i.value ()["time"];
+						if (tme < 1 || tme > nframes) { continue; }
+						uint8_t data[64];
+						size_t size = 0;
+						for (luabridge::Iterator di (data_tbl); !di.isNil () && size < sizeof(data); ++di, ++size) {
+							data[size] = di.value ();
+						}
+						if (size > 0 && size < 64) {
+							mbuf.push_back(tme - 1, size, data);
+						}
+					}
+
+				}
+			}
 		}
 	} catch (luabridge::LuaException const& e) {
 		PBD::error << "LuaException: " << e.what () << "\n";

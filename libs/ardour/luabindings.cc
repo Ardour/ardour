@@ -171,6 +171,7 @@ CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(Evoral::Beats);
+CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(void);
@@ -459,6 +460,8 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <Port> ("Port")
+		.addCast<MidiPort> ("to_midiport")
+		.addCast<AudioPort> ("to_audioport")
 		.addFunction ("name", &Port::name)
 		.addFunction ("pretty_name", &Port::pretty_name)
 		.addFunction ("receives_input", &Port::receives_input)
@@ -471,6 +474,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("connected_to", (bool (Port::*)(Port*)const)&Port::connected_to)
 		.addFunction ("connect", (int (Port::*)(Port*))&Port::connect)
 		.addFunction ("disconnect", (int (Port::*)(Port*))&Port::disconnect)
+		//.addStaticFunction ("port_offset", &Port::port_offset) // static
 		.endClass ()
 
 		.deriveWSPtrClass <AudioPort, Port> ("AudioPort")
@@ -479,6 +483,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <MidiPort, Port> ("MidiPort")
 		.addFunction ("input_active", &MidiPort::input_active)
 		.addFunction ("set_input_active", &MidiPort::set_input_active)
+		.addFunction ("get_midi_buffer", &MidiPort::get_midi_buffer) // DSP only
 		.endClass ()
 
 		.beginWSPtrClass <PortSet> ("PortSet")
@@ -956,6 +961,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_output_device_name", &AudioBackend::set_output_device_name)
 		.endClass()
 
+		.beginClass <PortEngine> ("PortEngine")
+		.endClass()
+
 		.beginClass <PortManager> ("PortManager")
 		.addFunction ("port_engine", &PortManager::port_engine)
 		.addFunction ("connected", &PortManager::connected)
@@ -1107,8 +1115,10 @@ LuaBindings::dsp (lua_State* L)
 		.beginClass <MidiBuffer> ("MidiBuffer")
 		.addEqualCheck ()
 		.addFunction ("silence", &MidiBuffer::silence)
-		.addFunction ("empty", &MidiBuffer::empty)
+		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::MIDIEvent<framepos_t>&))&MidiBuffer::push_back)
+		.addFunction ("push_back", (bool (MidiBuffer::*)(framepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
 		// TODO iterators..
+		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::MIDIEvent<framepos_t>, MidiBuffer>)
 		.endClass()
 
 		.beginClass <BufferSet> ("BufferSet")
@@ -1135,8 +1145,8 @@ LuaBindings::dsp (lua_State* L)
 		// add Ctor?
 		.addFunction ("type", &Evoral::MIDIEvent<framepos_t>::type)
 		.addFunction ("channel", &Evoral::MIDIEvent<framepos_t>::channel)
-		.addFunction ("set_type", &Evoral::MIDIEvent<framepos_t>::type)
-		.addFunction ("set_channel", &Evoral::MIDIEvent<framepos_t>::channel)
+		.addFunction ("set_type", &Evoral::MIDIEvent<framepos_t>::set_type)
+		.addFunction ("set_channel", &Evoral::MIDIEvent<framepos_t>::set_channel)
 		.endClass ()
 		.endNamespace ();
 

@@ -21,7 +21,7 @@ function dsp_ioconfig ()
 	}
 end
 
-function dsp_midi_input ()
+function dsp_has_midi_input ()
 	return true
 end
 
@@ -70,8 +70,8 @@ function dsp_run (ins, outs, n_samples)
 
 	local tme = 1
 	-- parse midi messages
-	assert (type(mididata) == "table") -- global table of midi events (for now)
-	for _,b in pairs (mididata) do 
+	assert (type(midiin) == "table") -- global table of midi events (for now)
+	for _,b in pairs (midiin) do
 		local t = b["time"] -- t = [ 1 .. n_samples ]
 
 		-- synth sound until event
