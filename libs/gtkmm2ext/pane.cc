@@ -393,8 +393,6 @@ Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 void
 Pane::set_divider (Dividers::size_type div, float fract)
 {
-	bool redraw = false;
-
 	Dividers::iterator d = dividers.begin();
 
 	while (div--) {
@@ -407,12 +405,10 @@ Pane::set_divider (Dividers::size_type div, float fract)
 		}
 	}
 
+	fract = max (0.0f, min (1.0f, fract));
+
 	if (fract != (*d)->fract) {
 		(*d)->fract = fract;
-		redraw = true;
-	}
-
-	if (redraw) {
 		/* our size hasn't changed, but our internal allocations have */
 		reallocate (get_allocation());
 		queue_draw ();
