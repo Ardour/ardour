@@ -3530,14 +3530,18 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 framepos_t
 TempoMap::framepos_plus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	return frame_at_beat (beat_at_frame (pos) + beats.to_double());
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, pos) + beats.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
 TempoMap::framepos_minus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	return frame_at_beat (beat_at_frame (pos) - beats.to_double());
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, pos) - beats.to_double());
 }
 
 /** Add the BBT interval op to pos and return the result */
