@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Ardour>
+<Ardour theme-name="Blueberry Milk">
   <Colors>
     <Color name="color 1" value="0x20b2b2ff"/>
     <Color name="color 10" value="0xe3dedeff"/>
