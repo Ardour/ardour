@@ -301,8 +301,11 @@ def enoify (major, minor):
             return "\\n\\\"Evening Star\\\""
         elif minor == 7:
             return "\\n\\\"Cluster and Eno\\\""
-        elif minor == 8:
+    elif major == 5:
+        if minor == 0:
             return "\\n\\\"Before and After Science\\\""
+        elif minor == 1:
+            return "\\n\\\"After the Heat\\\""
     return "\\\"\\\""
 
 def options(opt):
