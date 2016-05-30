@@ -32,26 +32,27 @@
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
-#include "pbd/gstdio_compat.h"
-#include "pbd/unwind.h"
 #include <glibmm/miscutils.h>
 
 #include <gtkmm/settings.h>
 
 #include "pbd/convert.h"
-#include "pbd/failed_constructor.h"
-#include "pbd/xml++.h"
-#include "pbd/file_utils.h"
-#include "pbd/locale_guard.h"
 #include "pbd/error.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/file_utils.h"
+#include "pbd/gstdio_compat.h"
+#include "pbd/locale_guard.h"
 #include "pbd/stacktrace.h"
-
-#include "gtkmm2ext/rgb_macros.h"
-#include "gtkmm2ext/gtk_ui.h"
+#include "pbd/unwind.h"
+#include "pbd/xml++.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/search_paths.h"
+#include "ardour/revision.h"
 #include "ardour/utils.h"
+
+#include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "ui_config.h"
 
@@ -256,11 +257,39 @@ UIConfiguration::load_defaults ()
 	return ret;
 }
 
+std::string
+UIConfiguration::color_file_name (bool use_my, bool with_program, bool with_version) const
+{
+	string basename;
+
+	if (use_my) {
+		basename += "my-";
+	}
+
+	basename = color_file.get();  //this is the overall theme file, e.g. "dark"
+
+	if (with_program) {
+		basename += '-';
+		basename += downcase (PROGRAM_NAME);
+	}
+
+	std::string rev (revision);
+	std::size_t pos = rev.find_first_of("-");
+
+	if (with_version && pos != string::npos && pos > 0) {
+		basename += "-";
+		basename += rev.substr (0, pos); // COLORFILE_VERSION - program major.minor
+	}
+
+	basename += color_file_suffix;
+
+	return basename;
+}
+
 int
 UIConfiguration::load_color_theme (bool allow_own)
 {
 	std::string cfile;
-	string basename;
 	bool found = false;
 	/* ColorsChanged() will trigger a  parameter_changed () which
 	 * in turn calls save_state()
@@ -268,21 +297,44 @@ UIConfiguration::load_color_theme (bool allow_own)
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
 	if (allow_own) {
-		basename = "my-";
-		basename += color_file.get();
-		basename += color_file_suffix;
 
-		if (find_file (theme_search_path(), basename, cfile)) {
+		PBD::Searchpath sp (user_config_directory());
+
+		if (find_file (sp, color_file_name (true, true, true), cfile)) {
 			found = true;
 		}
+
+
+		if (!found) {
+			if (find_file (sp, color_file_name (true, true, false), cfile)) {
+				found = true;
+			}
+		}
+
+		if (!found) {
+			if (find_file (sp, color_file_name (true, false, false), cfile)) {
+				found = true;
+			}
+		}
+
 	}
 
 	if (!found) {
-		basename = color_file.get();
-		basename += color_file_suffix;
 
-		if (find_file (theme_search_path(), basename, cfile)) {
+		if (find_file (theme_search_path(), color_file_name (false, true, true), cfile)) {
 			found = true;
+		}
+
+		if (!found) {
+			if (find_file (theme_search_path(), color_file_name (false, true, false), cfile)) {
+				found = true;
+			}
+		}
+
+		if (!found) {
+			if (find_file (theme_search_path(), color_file_name (false, false, false), cfile)) {
+				found = true;
+			}
 		}
 	}
 
@@ -304,7 +356,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 
 		ColorsChanged ();
 	} else {
-		warning << string_compose (_("Color file %1 not found"), basename) << endmsg;
+		warning << string_compose (_("Color file for %1 not found"), color_file.get()) << endmsg;
 	}
 
 	return 0;
@@ -348,7 +400,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + color_file_suffix));
+	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true, true));;
 
 	tree.set_root (root);
 

@@ -418,11 +418,10 @@ ARDOUR_UI_UTILS::get_xpm (std::string name)
 	return xpm_map[name];
 }
 
-vector<string>
-ARDOUR_UI_UTILS::get_color_themes ()
+void
+ARDOUR_UI_UTILS::get_color_themes (map<std::string,std::string>& themes)
 {
 	Searchpath spath(ARDOUR::theme_search_path());
-	vector<string> r;
 
 	for (vector<string>::iterator s = spath.begin(); s != spath.end(); ++s) {
 
@@ -441,11 +440,15 @@ ARDOUR_UI_UTILS::get_color_themes ()
 				continue;
 			}
 
-			r.push_back (Glib::filename_to_utf8 (basename_nosuffix(*e)));
+			XMLProperty const* prop = root->property (X_("theme-name"));
+
+			if (!prop) {
+				continue;
+			}
+
+			themes.insert (make_pair (prop->value(), Glib::filename_to_utf8 (basename_nosuffix(*e))));
 		}
 	}
-
-	return r;
 }
 
 vector<string>

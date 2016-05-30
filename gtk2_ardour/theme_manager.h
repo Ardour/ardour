@@ -67,15 +67,18 @@ class ThemeManager : public Gtk::VBox
   private:
 	Gtk::Notebook notebook;
 
-	struct BasicColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-		BasicColorDisplayModelColumns() {
+	struct ColorThemeModelColumns : public Gtk::TreeModel::ColumnRecord {
+		ColorThemeModelColumns() {
 			add (name);
-			add (gdkcolor);
+			add (path);
 		}
 
 		Gtk::TreeModelColumn<std::string>  name;
-		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
+		Gtk::TreeModelColumn<std::string>  path;
 	};
+
+	ColorThemeModelColumns color_theme_columns;
+	Glib::RefPtr<Gtk::TreeStore> theme_list;
 
 	Gtk::ColorSelectionDialog color_dialog;
 	sigc::connection color_dialog_connection;
@@ -99,7 +102,7 @@ class ThemeManager : public Gtk::VBox
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
 	Gtk::Label color_theme_label;
-	Gtk::ComboBoxText color_theme_dropdown;
+	Gtk::ComboBox color_theme_dropdown;
 
 	/* handls response from color dialog when it is used to
 	   edit a derived color.

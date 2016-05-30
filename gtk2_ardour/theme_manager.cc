@@ -79,7 +79,7 @@ ThemeManager::ThemeManager()
 	, palette_window (0)
 {
 	Gtk::HBox* hbox;
-	
+
 	/* Now the alias list */
 
 	alias_list = TreeStore::create (alias_columns);
@@ -112,11 +112,33 @@ ThemeManager::ThemeManager()
 
 	set_homogeneous (false);
 
-	vector<string> color_themes = ::get_color_themes ();
+	std::map<string,string> color_themes;
+
+	get_color_themes (color_themes);
 
 	if (color_themes.size() > 1) {
-		Gtkmm2ext::set_popdown_strings (color_theme_dropdown, color_themes);
-		color_theme_dropdown.set_active_text (UIConfiguration::instance().get_color_file());
+		theme_list = TreeStore::create (color_theme_columns);
+
+		TreeModel::iterator selected_iter = theme_list->children().end();
+
+		for (std::map<string,string>::iterator c = color_themes.begin(); c != color_themes.end(); ++c) {
+			TreeModel::Row row;
+
+			row = *(theme_list->append());
+			row[color_theme_columns.name] = c->first;
+			row[color_theme_columns.path] = c->second;
+
+			if (UIConfiguration::instance().get_color_file() == c->first) {
+				selected_iter = row;
+			}
+		}
+
+		color_theme_dropdown.set_model (theme_list);
+		color_theme_dropdown.pack_start (color_theme_columns.name);
+
+		if (selected_iter != theme_list->children().end()) {
+			color_theme_dropdown.set_active (selected_iter);
+		}
 
 		hbox = Gtk::manage (new Gtk::HBox());
 		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
@@ -126,6 +148,7 @@ ThemeManager::ThemeManager()
 		hbox->pack_start (color_theme_label, false, false);
 		hbox->pack_start (*align, true, true);
 		pack_start (*hbox, PACK_SHRINK);
+		hbox->show_all ();
 	}
 
 	pack_start (reset_button, PACK_SHRINK);
@@ -365,8 +388,16 @@ ThemeManager::on_icon_set_changed ()
 void
 ThemeManager::on_color_theme_changed ()
 {
-	string new_theme = color_theme_dropdown.get_active_text();
-	UIConfiguration::instance().set_color_file (new_theme);
+	Gtk::TreeModel::iterator iter = color_theme_dropdown.get_active();
+
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+
+		if (row) {
+			string new_theme = row[color_theme_columns.path];
+			UIConfiguration::instance().set_color_file (new_theme);
+		}
+	}
 }
 
 void
@@ -423,9 +454,7 @@ ThemeManager::reset_canvas_colors()
 	string cfile;
 	string basename;
 
-	basename = "my-";
-	basename += UIConfiguration::instance().get_color_file();
-	basename += UIConfiguration::color_file_suffix;
+	basename = UIConfiguration::instance().color_file_name (true, true, true);
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
 		string backup = cfile + string (X_(".old"));
