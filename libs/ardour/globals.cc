@@ -304,7 +304,7 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		return -1;
 	}
 
-	if (old_version == 3) {
+	if (old_version >= 3) {
 
 		old_name = Glib::build_filename (old_dir, X_("recent"));
 		new_name = Glib::build_filename (new_dir, X_("recent"));
