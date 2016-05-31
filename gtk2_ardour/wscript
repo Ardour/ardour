@@ -814,8 +814,12 @@ def build(bld):
 
     # Default UI configuration
     bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
-    # Color Themes
-    bld.install_files(os.path.join(bld.env['CONFDIR'], 'themes'), bld.path.ant_glob('themes/*.colors'))
+    # Color Themes. Find each color file for this program, strip the program name
+    # and install.
+    print "Colors: ", bld.path.ant_glob('themes/*-' + Options.options.program_name.lower() + '.colors')
+    for colors in bld.path.ant_glob ('themes/*-' + Options.options.program_name.lower() + '.colors'):
+            install_name = os.path.basename (colors.srcpath().replace ('-' + Options.options.program_name.lower(), ''))
+            bld.install_as (os.path.join(bld.env['CONFDIR'], 'themes', install_name), colors)
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))
