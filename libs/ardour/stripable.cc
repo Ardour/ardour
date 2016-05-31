@@ -57,8 +57,10 @@ Stripable::set_presentation_info (PresentationInfo pi, bool notify_class_listene
 {
 	if (pi != presentation_info()) {
 
+#ifndef __APPLE__
+		/* clang can't deal with the operator<< (ostream&,PresentationInfo&) method. not sure why yet. */
 		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set presentation info to %2\n", name(), pi));
-
+#endif
 		if (is_master()) {
 			_presentation_info = PresentationInfo (0, PresentationInfo::MasterOut);
 		} else if (is_monitor()) {
