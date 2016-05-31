@@ -4,6 +4,7 @@
     <Option name="auto-connect-standard-busses" value="1"/>
     <Option name="output-auto-connect" value="2"/>
     <Option name="input-auto-connect" value="1"/>
+    <Option name="strict-io" value="1"/>
     <Option name="tracks-auto-naming" value="1"/>
     <Option name="trace-midi-input" value="0"/>
     <Option name="trace-midi-output" value="0"/>
@@ -39,6 +40,7 @@
     <Option name="midi-track-buffer-seconds" value="1"/>
     <Option name="disk-choice-space-threshold" value="57600000"/>
     <Option name="auto-analyse-audio" value="0"/>
+    <Option name="transient-sensitivity" value="50"/>
     <Option name="osc-port" value="3819"/>
     <Option name="use-osc" value="0"/>
     <Option name="layer-model" value="1"/>
@@ -72,12 +74,14 @@
     <Option name="click-sound" value=""/>
     <Option name="click-emphasis-sound" value=""/>
     <Option name="click-gain" value="1"/>
+    <Option name="use-click-emphasis" value="1"/>
     <Option name="skip-playback" value="1"/>
     <Option name="plugins-stop-with-transport" value="0"/>
     <Option name="stop-recording-on-xrun" value="0"/>
     <Option name="create-xrun-marker" value="1"/>
     <Option name="stop-at-session-end" value="0"/>
     <Option name="seamless-loop" value="0"/>
+    <Option name="preroll-seconds" value="1"/>
     <Option name="loop-is-mode" value="0"/>
     <Option name="preroll" value="0"/>
     <Option name="postroll" value="0"/>
@@ -94,6 +98,7 @@
     <Option name="meter-type-master" value="16"/>
     <Option name="meter-type-track" value="4"/>
     <Option name="meter-type-bus" value="4"/>
+    <Option name="try-autostart-engine" value="0"/>
     <Option name="auditioner-output-left" value="default"/>
     <Option name="auditioner-output-right" value="default"/>
     <Option name="replicate-missing-region-channels" value="0"/>
@@ -123,6 +128,8 @@
     <Option name="verbose-plugin-scan" value="1"/>
     <Option name="vst-scan-timeout" value="600"/>
     <Option name="discover-audio-units" value="0"/>
+    <Option name="ask-replace-instrument" value="1"/>
+    <Option name="ask-setup-instrument" value="1"/>
     <Option name="plugin-path-vst" value="@default@"/>
     <Option name="plugin-path-lxvst" value="@default@"/>
     <Option name="denormal-protection" value="0"/>
@@ -136,6 +143,8 @@
     <Option name="video-server-docroot" value="/"/>
     <Option name="show-video-export-info" value="1"/>
     <Option name="show-video-server-dialog" value="0"/>
+    <Option name="export-preroll" value="10"/>
+    <Option name="export-silence-threshold" value="-inf"/>
   </Config>
   <Metadata/>
   <ControlProtocols/>
