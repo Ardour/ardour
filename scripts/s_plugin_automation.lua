@@ -6,7 +6,7 @@ function factory () return function ()
 	local samplerate = Session:nominal_frame_rate ()
 
 	-- get Track/Bus with RID 3
-	local r = Session:route_by_remote_id(3)
+	local r = Session:get_remote_nth_route(3)
 	-- make sure the track object exists
 	assert (not r:isnil ())
 

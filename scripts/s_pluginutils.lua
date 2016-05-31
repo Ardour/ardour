@@ -15,7 +15,7 @@ function factory () return function ()
 
 	-------------------------------------------------------------------------------
 	-- load a plugin preset
-	route = Session:route_by_remote_id(2)
+	route = Session:get_remote_nth_route(2)
 	-- to 4th plugin (from top), ardour starts counting at zero
 	plugin = route:nth_plugin(3):to_insert():plugin(0)
 	ps = plugin:preset_by_label("cutbass") -- get preset by name

@@ -16,7 +16,7 @@ function factory () return function ()
 		r:add_processor_by_index(proc, 0, nil, true)
 	end
 
-	r = Session:route_by_remote_id(1)
+	r = Session:get_remote_nth_route(1)
 	checksetup (r)
 	pi = r:nth_plugin(0):to_insert()
 
