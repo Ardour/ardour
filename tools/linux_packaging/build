@@ -186,6 +186,7 @@ Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
 Backends=$APPLIB/backends
 
+Themes=$Shared/themes
 Templates=$Shared/templates
 ExportFormats=$Shared/export
 Locale=$Shared/locale
@@ -220,6 +221,7 @@ mkdir -p $APPBIN
 mkdir -p $APPLIB
 mkdir -p $Etc
 mkdir -p $Shared
+mkdir -p $Themes
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
@@ -589,12 +591,20 @@ cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 mkdir ${Shared}/icons
 mkdir ${Shared}/resources
 cp ../../system_config $Etc/system_config
-cp ../../gtk2_ardour/*.colors $Etc
 cp ../../instant.xml $Shared/instant.xml
 cp ../../gtk2_ardour/icons/*.png ${Shared}/icons
 cp -r ../../gtk2_ardour/icons/icons/cursor_* ${Shared}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
 cp ../../gtk2_ardour/resources/${APPNAME}-* ${Shared}/resources/
+
+# Themes. Grab only the ones for this program
+lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
+for colors in `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors`
+do
+    install_name=`echo $colors | sed "s/-$lower_case_appname//"`
+    install_name=`basename $install_name`
+    cp $colors $Themes/$install_name
+done    
 
 #
 # put sooper sekrit ingredients here and they will be copied
