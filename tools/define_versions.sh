@@ -8,7 +8,7 @@ else
     EXTENDED_RE=-r
 fi
 
-GIT_REV_REGEXP='([0-9][0-9]*)\.([0-9][0-9]*)\-?([prec][0-9]*)?-?([0-9][0-9]*)?(-g([a-f0-9]+))?'
+GIT_REV_REGEXP='([0-9][0-9]*)\.([0-9][0-9]*)\-?([pr][rc]e?[0-9]*)?-?([0-9][0-9]*)?(-g([a-f0-9]+))?'
 
 major_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\1/"`
 minor_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\2/"`
