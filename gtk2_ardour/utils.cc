@@ -38,6 +38,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/utils.h>
 

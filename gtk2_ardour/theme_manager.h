@@ -50,8 +50,6 @@ class ThemeManager : public Gtk::VBox
 	int save (std::string path);
 	void reset_canvas_colors();
 
-	void on_dark_theme_button_toggled ();
-	void on_light_theme_button_toggled ();
 	void on_flat_buttons_toggled ();
 	void on_blink_rec_arm_toggled ();
         void on_region_color_toggled ();
@@ -83,9 +81,6 @@ class ThemeManager : public Gtk::VBox
 	Gtk::ColorSelectionDialog color_dialog;
 	sigc::connection color_dialog_connection;
 
-	Gtk::HBox theme_selection_hbox;
-	Gtk::RadioButton dark_button;
-	Gtk::RadioButton light_button;
 	Gtk::Button reset_button;
 	Gtk::CheckButton flat_buttons;
 	Gtk::CheckButton blink_rec_button;

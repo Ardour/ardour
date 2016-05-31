@@ -58,9 +58,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 ThemeManager::ThemeManager()
-        : dark_button (_("Dark Theme"))
-	, light_button (_("Light Theme"))
-	, reset_button (_("Restore Defaults"))
+	: reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
 	, blink_rec_button (_("Blink Rec-Arm buttons"))
 	, region_color_button (_("Color regions using their track's color"))
@@ -104,12 +102,6 @@ ThemeManager::ThemeManager()
 
 	/* various buttons */
 
-	RadioButton::Group group = dark_button.get_group();
-	light_button.set_group(group);
-	theme_selection_hbox.set_homogeneous(false);
-	theme_selection_hbox.pack_start (dark_button);
-	theme_selection_hbox.pack_start (light_button);
-
 	set_homogeneous (false);
 
 	std::map<string,string> color_themes;
@@ -128,7 +120,11 @@ ThemeManager::ThemeManager()
 			row[color_theme_columns.name] = c->first;
 			row[color_theme_columns.path] = c->second;
 
-			if (UIConfiguration::instance().get_color_file() == c->first) {
+			/* match second (path; really basename) since that is
+			   what we store/restore.
+			*/
+
+			if (UIConfiguration::instance().get_color_file() == c->second) {
 				selected_iter = row;
 			}
 		}
@@ -217,8 +213,6 @@ ThemeManager::ThemeManager()
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
-	dark_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
-	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
 	blink_rec_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_blink_rec_arm_toggled));
@@ -401,39 +395,8 @@ ThemeManager::on_color_theme_changed ()
 }
 
 void
-ThemeManager::on_dark_theme_button_toggled()
-{
-	if (!dark_button.get_active()) return;
-
-	UIConfiguration* uic (&UIConfiguration::instance());
-
-        uic->set_color_file("dark");
-}
-
-void
-ThemeManager::on_light_theme_button_toggled()
-{
-	if (!light_button.get_active()) return;
-
-	UIConfiguration* uic (&UIConfiguration::instance());
-
-        uic->set_color_file("light");
-}
-
-void
 ThemeManager::set_ui_to_state()
 {
-	/* there is no way these values can change individually
-	 * by themselves (w/o user-interaction)
-	 * hence a common combined update function suffices
-	 */
-
-	if (UIConfiguration::instance().get_color_file() == "light") {
-		light_button.set_active(true);
-	} else {
-		dark_button.set_active(true);
-	}
-
 	/* there is no need to block signal handlers, here,
 	 * all elements check if the value has changed and ignore NOOPs
 	 */
