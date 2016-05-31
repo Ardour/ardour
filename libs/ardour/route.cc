@@ -84,8 +84,8 @@ PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Rout
 
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType default_type)
-	: GraphNode (sess._process_graph)
-	, Stripable (sess, name, PresentationInfo (flag))
+	: Stripable (sess, name, PresentationInfo (flag))
+	, GraphNode (sess._process_graph)
 	, Muteable (sess, name)
 	, Automatable (sess)
 	, _active (true)

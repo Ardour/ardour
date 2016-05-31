@@ -84,8 +84,8 @@ class SoloIsolateControl;
 class PhaseControl;
 class MonitorControl;
 
-class LIBARDOUR_API Route : public GraphNode,
-                            public Stripable,
+class LIBARDOUR_API Route : public Stripable,
+                            public GraphNode,
                             public Soloable,
                             public Muteable,
                             public Monitorable,
