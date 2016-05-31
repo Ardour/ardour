@@ -87,6 +87,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	const bool do_reset_dpm = _reset_dpm;
 	_reset_max = false;
 	_reset_dpm = false;
+	_combined_peak = 0;
 
 	// cerr << "meter " << name() << " runs with " << bufs.available() << " inputs\n";
 
@@ -364,7 +365,6 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			break;
 		case MeterMCP:
 			mcptmp = _combined_peak;
-			_combined_peak = 0;
 			return accurate_coefficient_to_dB(mcptmp);
 		case MeterMaxSignal:
 			assert(0);
