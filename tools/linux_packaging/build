@@ -599,10 +599,7 @@ cp ../../gtk2_ardour/resources/${APPNAME}-* ${Shared}/resources/
 
 # Themes: only install those named for this app
 lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
-for colors in `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors`
-do
-    cp `basename $colors` $Themes
-done    
+cp `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors` $Themes
 
 #
 # put sooper sekrit ingredients here and they will be copied
