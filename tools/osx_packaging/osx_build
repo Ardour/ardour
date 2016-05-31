@@ -492,13 +492,12 @@ cp -r ../../gtk2_ardour/icons/cursor_* ${Resources}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
 cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 
-# Themes. Grab only the ones for this program
+
+# Themes: only install those named for this app
 lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 for colors in `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors`
 do
-    install_name=`echo $colors | sed "s/-$lower_case_appname//"`
-    install_name=`basename $install_name`
-    cp $colors $Themes/$install_name
+    cp `basename $colors` $Themes
 done    
 
 
