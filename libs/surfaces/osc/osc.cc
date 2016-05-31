@@ -38,17 +38,19 @@
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/monitor_control.h"
 #include "ardour/dB.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/record_enable_control.h"
+#include "ardour/presentation_info.h"
 #include "ardour/send.h"
 
 #include "osc.h"
 #include "osc_controllable.h"
 #include "osc_route_observer.h"
+#include "osc_global_observer.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -234,6 +236,12 @@ OSC::start ()
 
 	BaseUI::run ();
 
+	// start timers for metering, timecode and heartbeat.
+	// timecode and metering run at 100
+	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
+	periodic_timeout->attach (main_loop()->get_context());
+
 	return 0;
 }
 
@@ -304,6 +312,7 @@ OSC::stop ()
 		::g_unlink (_osc_url_file.c_str() );
 	}
 
+	periodic_connection.disconnect ();
 	// Delete any active route observers
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
 
@@ -316,6 +325,7 @@ OSC::stop ()
 			++x;
 		}
 	}
+// Should maybe do global_observers too
 
 	return 0;
 }
@@ -340,152 +350,154 @@ OSC::register_callbacks()
 
 #define REGISTER_CALLBACK(serv,path,types, function) lo_server_add_method (serv, path, types, OSC::_ ## function, this)
 
-		REGISTER_CALLBACK (serv, "/routes/list", "", routes_list);
-		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
-		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
-		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/loop_location", "ii", loop_location);
-		REGISTER_CALLBACK (serv, "/ardour/goto_start", "", goto_start);
-		REGISTER_CALLBACK (serv, "/ardour/goto_end", "", goto_end);
-		REGISTER_CALLBACK (serv, "/ardour/rewind", "", rewind);
-		REGISTER_CALLBACK (serv, "/ardour/ffwd", "", ffwd);
-		REGISTER_CALLBACK (serv, "/ardour/transport_stop", "", transport_stop);
-		REGISTER_CALLBACK (serv, "/ardour/transport_play", "", transport_play);
-		REGISTER_CALLBACK (serv, "/ardour/transport_frame", "", transport_frame);
-		REGISTER_CALLBACK (serv, "/ardour/transport_speed", "", transport_speed);
-		REGISTER_CALLBACK (serv, "/ardour/record_enabled", "", record_enabled);
-		REGISTER_CALLBACK (serv, "/ardour/set_transport_speed", "f", set_transport_speed);
-		REGISTER_CALLBACK (serv, "/ardour/locate", "ii", locate);
-		REGISTER_CALLBACK (serv, "/ardour/save_state", "", save_state);
-		REGISTER_CALLBACK (serv, "/ardour/prev_marker", "", prev_marker);
-		REGISTER_CALLBACK (serv, "/ardour/next_marker", "", next_marker);
-		REGISTER_CALLBACK (serv, "/ardour/undo", "", undo);
-		REGISTER_CALLBACK (serv, "/ardour/redo", "", redo);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_in", "", toggle_punch_in);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
-		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
-		REGISTER_CALLBACK (serv, "/ardour/all_tracks_rec_in", "f", all_tracks_rec_in);
-		REGISTER_CALLBACK (serv, "/ardour/all_tracks_rec_out", "f", all_tracks_rec_out);
-		REGISTER_CALLBACK (serv, "/ardour/remove_marker", "", remove_marker_at_playhead);
-		REGISTER_CALLBACK (serv, "/ardour/jump_bars", "f", jump_by_bars);
-		REGISTER_CALLBACK (serv, "/ardour/jump_seconds", "f", jump_by_seconds);
-		REGISTER_CALLBACK (serv, "/ardour/mark_in", "", mark_in);
-		REGISTER_CALLBACK (serv, "/ardour/mark_out", "", mark_out);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_click", "", toggle_click);
-		REGISTER_CALLBACK (serv, "/ardour/midi_panic", "", midi_panic);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_roll", "", toggle_roll);
-		REGISTER_CALLBACK (serv, "/ardour/stop_forget", "", stop_forget);
-		REGISTER_CALLBACK (serv, "/ardour/set_punch_range", "", set_punch_range);
-		REGISTER_CALLBACK (serv, "/ardour/set_loop_range", "", set_loop_range);
-		REGISTER_CALLBACK (serv, "/ardour/set_session_range", "", set_session_range);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_mute", "", toggle_monitor_mute);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_dim", "", toggle_monitor_dim);
-		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_mono", "", toggle_monitor_mono);
-		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_switch", "", quick_snapshot_switch);
-		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_stay", "", quick_snapshot_stay);
-		REGISTER_CALLBACK (serv, "/ardour/fit_1_track", "", fit_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/fit_2_tracks", "", fit_2_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/fit_4_tracks", "", fit_4_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/fit_8_tracks", "", fit_8_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/fit_16_tracks", "", fit_16_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/fit_32_tracks", "", fit_32_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/fit_all_tracks", "", fit_all_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_100_ms", "", zoom_100_ms);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_1_sec", "", zoom_1_sec);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_10_sec", "", zoom_10_sec);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_1_min", "", zoom_1_min);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_5_min", "", zoom_5_min);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_10_min", "", zoom_10_min);
-		REGISTER_CALLBACK (serv, "/ardour/zoom_to_session", "", zoom_to_session);
-		REGISTER_CALLBACK (serv, "/ardour/temporal_zoom_in", "f", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/ardour/temporal_zoom_out", "f", temporal_zoom_out);
-		REGISTER_CALLBACK (serv, "/ardour/scroll_up_1_track", "f", scroll_up_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/scroll_dn_1_track", "f", scroll_dn_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/scroll_up_1_page", "f", scroll_up_1_page);
-		REGISTER_CALLBACK (serv, "/ardour/scroll_dn_1_page", "f", scroll_dn_1_page);
+		// Some controls have optional "f" for feedback or touchosc
+		// http://hexler.net/docs/touchosc-controls-reference
+
+		REGISTER_CALLBACK (serv, "/set_surface", "iiii", set_surface);
+		REGISTER_CALLBACK (serv, "/set_surface/feedback", "i", set_surface_feedback);
+		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
+		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
+		REGISTER_CALLBACK (serv, "/add_marker", "f", add_marker);
+		REGISTER_CALLBACK (serv, "/access_action", "s", access_action);
+		REGISTER_CALLBACK (serv, "/loop_toggle", "", loop_toggle);
+		REGISTER_CALLBACK (serv, "/loop_toggle", "f", loop_toggle);
+		REGISTER_CALLBACK (serv, "/loop_location", "ii", loop_location);
+		REGISTER_CALLBACK (serv, "/goto_start", "", goto_start);
+		REGISTER_CALLBACK (serv, "/goto_start", "f", goto_start);
+		REGISTER_CALLBACK (serv, "/goto_end", "", goto_end);
+		REGISTER_CALLBACK (serv, "/goto_end", "f", goto_end);
+		REGISTER_CALLBACK (serv, "/rewind", "", rewind);
+		REGISTER_CALLBACK (serv, "/rewind", "f", rewind);
+		REGISTER_CALLBACK (serv, "/ffwd", "", ffwd);
+		REGISTER_CALLBACK (serv, "/ffwd", "f", ffwd);
+		REGISTER_CALLBACK (serv, "/transport_stop", "", transport_stop);
+		REGISTER_CALLBACK (serv, "/transport_stop", "f", transport_stop);
+		REGISTER_CALLBACK (serv, "/transport_play", "", transport_play);
+		REGISTER_CALLBACK (serv, "/transport_play", "f", transport_play);
+		REGISTER_CALLBACK (serv, "/transport_frame", "", transport_frame);
+		REGISTER_CALLBACK (serv, "/transport_speed", "", transport_speed);
+		REGISTER_CALLBACK (serv, "/record_enabled", "", record_enabled);
+		REGISTER_CALLBACK (serv, "/set_transport_speed", "f", set_transport_speed);
+		// locate ii is position and bool roll
+		REGISTER_CALLBACK (serv, "/locate", "ii", locate);
+		REGISTER_CALLBACK (serv, "/save_state", "", save_state);
+		REGISTER_CALLBACK (serv, "/save_state", "f", save_state);
+		REGISTER_CALLBACK (serv, "/prev_marker", "", prev_marker);
+		REGISTER_CALLBACK (serv, "/prev_marker", "f", prev_marker);
+		REGISTER_CALLBACK (serv, "/next_marker", "", next_marker);
+		REGISTER_CALLBACK (serv, "/next_marker", "f", next_marker);
+		REGISTER_CALLBACK (serv, "/undo", "", undo);
+		REGISTER_CALLBACK (serv, "/undo", "f", undo);
+		REGISTER_CALLBACK (serv, "/redo", "", redo);
+		REGISTER_CALLBACK (serv, "/redo", "f", redo);
+		REGISTER_CALLBACK (serv, "/toggle_punch_in", "", toggle_punch_in);
+		REGISTER_CALLBACK (serv, "/toggle_punch_in", "f", toggle_punch_in);
+		REGISTER_CALLBACK (serv, "/toggle_punch_out", "", toggle_punch_out);
+		REGISTER_CALLBACK (serv, "/toggle_punch_out", "f", toggle_punch_out);
+		REGISTER_CALLBACK (serv, "/rec_enable_toggle", "", rec_enable_toggle);
+		REGISTER_CALLBACK (serv, "/rec_enable_toggle", "f", rec_enable_toggle);
+		REGISTER_CALLBACK (serv, "/toggle_all_rec_enables", "", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/toggle_all_rec_enables", "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/all_tracks_rec_in", "f", all_tracks_rec_in);
+		REGISTER_CALLBACK (serv, "/all_tracks_rec_out", "f", all_tracks_rec_out);
+		REGISTER_CALLBACK (serv, "/remove_marker", "", remove_marker_at_playhead);
+		REGISTER_CALLBACK (serv, "/remove_marker", "f", remove_marker_at_playhead);
+		REGISTER_CALLBACK (serv, "/jump_bars", "f", jump_by_bars);
+		REGISTER_CALLBACK (serv, "/jump_seconds", "f", jump_by_seconds);
+		REGISTER_CALLBACK (serv, "/mark_in", "", mark_in);
+		REGISTER_CALLBACK (serv, "/mark_in", "f", mark_in);
+		REGISTER_CALLBACK (serv, "/mark_out", "", mark_out);
+		REGISTER_CALLBACK (serv, "/mark_out", "f", mark_out);
+		REGISTER_CALLBACK (serv, "/toggle_click", "", toggle_click);
+		REGISTER_CALLBACK (serv, "/toggle_click", "f", toggle_click);
+		REGISTER_CALLBACK (serv, "/midi_panic", "", midi_panic);
+		REGISTER_CALLBACK (serv, "/midi_panic", "f", midi_panic);
+		REGISTER_CALLBACK (serv, "/toggle_roll", "", toggle_roll);
+		REGISTER_CALLBACK (serv, "/toggle_roll", "f", toggle_roll);
+		REGISTER_CALLBACK (serv, "/stop_forget", "", stop_forget);
+		REGISTER_CALLBACK (serv, "/stop_forget", "f", stop_forget);
+		REGISTER_CALLBACK (serv, "/set_punch_range", "", set_punch_range);
+		REGISTER_CALLBACK (serv, "/set_punch_range", "f", set_punch_range);
+		REGISTER_CALLBACK (serv, "/set_loop_range", "", set_loop_range);
+		REGISTER_CALLBACK (serv, "/set_loop_range", "f", set_loop_range);
+		REGISTER_CALLBACK (serv, "/set_session_range", "", set_session_range);
+		REGISTER_CALLBACK (serv, "/set_session_range", "f", set_session_range);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "f", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "f", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_mono", "", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, "/toggle_monitor_mono", "f", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, "/quick_snapshot_switch", "", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, "/quick_snapshot_switch", "f", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, "/quick_snapshot_stay", "", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, "/quick_snapshot_stay", "f", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, "/fit_1_track", "", fit_1_track);
+		REGISTER_CALLBACK (serv, "/fit_1_track", "f", fit_1_track);
+		REGISTER_CALLBACK (serv, "/fit_2_tracks", "", fit_2_tracks);
+		REGISTER_CALLBACK (serv, "/fit_2_tracks", "f", fit_2_tracks);
+		REGISTER_CALLBACK (serv, "/fit_4_tracks", "", fit_4_tracks);
+		REGISTER_CALLBACK (serv, "/fit_4_tracks", "f", fit_4_tracks);
+		REGISTER_CALLBACK (serv, "/fit_8_tracks", "", fit_8_tracks);
+		REGISTER_CALLBACK (serv, "/fit_8_tracks", "f", fit_8_tracks);
+		REGISTER_CALLBACK (serv, "/fit_16_tracks", "", fit_16_tracks);
+		REGISTER_CALLBACK (serv, "/fit_16_tracks", "f", fit_16_tracks);
+		REGISTER_CALLBACK (serv, "/fit_32_tracks", "", fit_32_tracks);
+		REGISTER_CALLBACK (serv, "/fit_32_tracks", "f", fit_32_tracks);
+		REGISTER_CALLBACK (serv, "/fit_all_tracks", "", fit_all_tracks);
+		REGISTER_CALLBACK (serv, "/fit_all_tracks", "f", fit_all_tracks);
+		REGISTER_CALLBACK (serv, "/zoom_100_ms", "", zoom_100_ms);
+		REGISTER_CALLBACK (serv, "/zoom_100_ms", "f", zoom_100_ms);
+		REGISTER_CALLBACK (serv, "/zoom_1_sec", "", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/zoom_1_sec", "f", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/zoom_10_sec", "", zoom_10_sec);
+		REGISTER_CALLBACK (serv, "/zoom_10_sec", "f", zoom_10_sec);
+		REGISTER_CALLBACK (serv, "/zoom_1_min", "", zoom_1_min);
+		REGISTER_CALLBACK (serv, "/zoom_1_min", "f", zoom_1_min);
+		REGISTER_CALLBACK (serv, "/zoom_5_min", "", zoom_5_min);
+		REGISTER_CALLBACK (serv, "/zoom_5_min", "f", zoom_5_min);
+		REGISTER_CALLBACK (serv, "/zoom_10_min", "", zoom_10_min);
+		REGISTER_CALLBACK (serv, "/zoom_10_min", "f", zoom_10_min);
+		REGISTER_CALLBACK (serv, "/zoom_to_session", "", zoom_to_session);
+		REGISTER_CALLBACK (serv, "/zoom_to_session", "f", zoom_to_session);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "f", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "f", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "f", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "f", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, "/scroll_up_1_track", "f", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, "/scroll_dn_1_track", "f", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, "/scroll_up_1_page", "f", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "f", scroll_dn_1_page);
+		REGISTER_CALLBACK (serv, "/bank_up", "", bank_up);
+		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_up);
+		REGISTER_CALLBACK (serv, "/bank_down", "", bank_down);
+		REGISTER_CALLBACK (serv, "/bank_down", "f", bank_down);
+		REGISTER_CALLBACK (serv, "/master/gain", "f", master_set_gain);
+		REGISTER_CALLBACK (serv, "/master/fader", "i", master_set_fader);
+		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
+		REGISTER_CALLBACK (serv, "/master/trimdB", "f", master_set_trim);
+		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
+		REGISTER_CALLBACK (serv, "/monitor/fader", "i", monitor_set_fader);
 
 
-		/*
-		 * NOTE: these messages are provided for (arguably broken) apps
-		 *   that MUST send float args ( TouchOSC and Lemur ).
-		 * Normally these ardour transport messages don't require an argument,
-		 * so we're providing redundant calls with vestigial "float" args.
-		 *
-		 * These controls are active on 1.0 only (to prevent duplicate action on
-		 * press "/button 1", and release "/button 0")
-		 * http://hexler.net/docs/touchosc-controls-reference
-		 */
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/loop_toggle", "f", loop_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/add_marker", "f", add_marker);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_start", "f", goto_start);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_end", "f", goto_end);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rewind", "f", rewind);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/ffwd", "f", ffwd);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/transport_stop", "f", transport_stop);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/transport_play", "f", transport_play);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/save_state", "f", save_state);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/prev_marker", "f", prev_marker);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/next_marker", "f", next_marker);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/undo", "f", undo);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/redo", "f", redo);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_in", "f", toggle_punch_in);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_out", "f", toggle_punch_out);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rec_enable_toggle", "f", rec_enable_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_all_rec_enables", "f", toggle_all_rec_enables);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/all_tracks_rec_in", "f", all_tracks_rec_in);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/all_tracks_rec_out", "f", all_tracks_rec_out);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/remove_marker", "f", remove_marker_at_playhead);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_click", "f", toggle_click);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/midi_panic", "f", midi_panic);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_roll", "f", toggle_roll);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/stop_forget", "f", stop_forget);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_punch_range", "f", set_punch_range);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_loop_range", "f", set_loop_range);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_session_range", "f", set_session_range);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_mute", "f", toggle_monitor_mute);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_dim", "f", toggle_monitor_dim);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_mono", "f", toggle_monitor_mono);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_switch", "f", quick_snapshot_switch);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_stay", "f", quick_snapshot_stay);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_1_track", "f", fit_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_2_tracks", "f", fit_2_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_4_tracks", "f", fit_4_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_8_tracks", "f", fit_8_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_16_tracks", "f", fit_16_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_32_tracks", "f", fit_32_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_all_tracks", "f", fit_all_tracks);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_100_ms", "f", zoom_100_ms);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_sec", "f", zoom_1_sec);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_sec", "f", zoom_10_sec);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_min", "f", zoom_1_min);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_5_min", "f", zoom_5_min);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_min", "f", zoom_10_min);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_to_session", "f", zoom_to_session);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/temporal_zoom_in", "f", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/temporal_zoom_out", "f", temporal_zoom_out);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_track", "f", scroll_up_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_track", "f", scroll_dn_1_track);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_page", "f", scroll_up_1_page);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_page", "f", scroll_dn_1_page);
-
-		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
-		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
-		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
-		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
-		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
-		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
-		REGISTER_CALLBACK (serv, "/ardour/routes/gainfader", "if", route_set_gain_fader);
-		REGISTER_CALLBACK (serv, "/ardour/routes/trimabs", "if", route_set_trim_abs);
-		REGISTER_CALLBACK (serv, "/ardour/routes/trimdB", "if", route_set_trim_dB);
-		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_position", "if", route_set_pan_stereo_position);
-		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_width", "if", route_set_pan_stereo_width);
-		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter", "iiif", route_plugin_parameter);
-		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter/print", "iii", route_plugin_parameter_print);
-		REGISTER_CALLBACK (serv, "/ardour/routes/send/gainabs", "iif", route_set_send_gain_abs);
-		REGISTER_CALLBACK (serv, "/ardour/routes/send/gaindB", "iif", route_set_send_gain_dB);
+		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
+		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
+		REGISTER_CALLBACK (serv, "/strip/solo", "ii", route_solo);
+		REGISTER_CALLBACK (serv, "/strip/recenable", "ii", route_recenable);
+		REGISTER_CALLBACK (serv, "/strip/record_safe", "ii", route_recsafe);
+		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
+		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
+		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
+		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
+		REGISTER_CALLBACK (serv, "/strip/trimabs", "if", route_set_trim_abs);
+		REGISTER_CALLBACK (serv, "/strip/trimdB", "if", route_set_trim_dB);
+		REGISTER_CALLBACK (serv, "/strip/pan_stereo_position", "if", route_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, "/strip/pan_stereo_width", "if", route_set_pan_stereo_width);
+		REGISTER_CALLBACK (serv, "/strip/plugin/parameter", "iiif", route_plugin_parameter);
+		REGISTER_CALLBACK (serv, "/strip/plugin/parameter/print", "iii", route_plugin_parameter_print);
+		REGISTER_CALLBACK (serv, "/strip/send/gainabs", "iif", route_set_send_gain_abs);
+		REGISTER_CALLBACK (serv, "/strip/send/gaindB", "iif", route_set_send_gain_dB);
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -549,7 +561,7 @@ OSC::get_unix_server_url()
 }
 
 void
-OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
+OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 {
 	/* avoid duplicate listens */
 
@@ -559,24 +571,27 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 
 		if ((ro = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
 
-			int res = strcmp(lo_address_get_hostname(ro->address()), lo_address_get_hostname(addr));
+			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(addr));
 
-			if (ro->route() == route && res == 0) {
+			if (ro->strip() == strip && res == 0) {
 				return;
 			}
 		}
 	}
 
-	OSCRouteObserver* o = new OSCRouteObserver (route, addr);
+	OSCSurface *s = get_surface(addr);
+	uint32_t sid = get_sid (strip->presentation_info().group_order(), addr);
+	// above is zero based add 1
+	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, sid + 1, s->gainmode, s->feedback);
 	route_observers.push_back (o);
 
-	route->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
+	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Stripable> (strip)), this);
 }
 
 void
-OSC::drop_route (boost::weak_ptr<Route> wr)
+OSC::drop_route (boost::weak_ptr<Stripable> wr)
 {
-	boost::shared_ptr<Route> r = wr.lock ();
+	boost::shared_ptr<Stripable> r = wr.lock ();
 
 	if (!r) {
 		return;
@@ -588,7 +603,7 @@ OSC::drop_route (boost::weak_ptr<Route> wr)
 
 		if ((rc = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
 
-			if (rc->route() == r) {
+			if (rc->strip() == r) {
 				delete *x;
 				x = route_observers.erase (x);
 			} else {
@@ -601,7 +616,7 @@ OSC::drop_route (boost::weak_ptr<Route> wr)
 }
 
 void
-OSC::end_listen (boost::shared_ptr<Route> r, lo_address addr)
+OSC::end_listen (boost::shared_ptr<Stripable> r, lo_address addr)
 {
 	RouteObservers::iterator x;
 
@@ -612,9 +627,9 @@ OSC::end_listen (boost::shared_ptr<Route> r, lo_address addr)
 
 		if ((ro = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
 
-			int res = strcmp(lo_address_get_hostname(ro->address()), lo_address_get_hostname(addr));
+			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(addr));
 
-			if (ro->route() == r && res == 0) {
+			if (ro->strip() == r && res == 0) {
 				delete *x;
 				x = route_observers.erase (x);
 			}
@@ -665,7 +680,7 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 			lo_message_add_string (reply, "not found");
 		} else {
 
-			if (strcmp (path, "/routes/state") == 0) {
+			if (strcmp (path, "/strip/state") == 0) {
 
 				if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
 					lo_message_add_string (reply, "AT");
@@ -681,11 +696,11 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 				lo_message_add_int32 (reply, r->muted());
 				lo_message_add_int32 (reply, r->soloed());
 
-			} else if (strcmp (path, "/routes/mute") == 0) {
+			} else if (strcmp (path, "/strip/mute") == 0) {
 
 				lo_message_add_int32 (reply, (float) r->muted());
 
-			} else if (strcmp (path, "/routes/solo") == 0) {
+			} else if (strcmp (path, "/strip/solo") == 0) {
 
 				lo_message_add_int32 (reply, r->soloed());
 			}
@@ -719,7 +734,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
 
-	} else if (strcmp (path, "/routes/listen") == 0) {
+	} else if (strcmp (path, "/strip/listen") == 0) {
 
 		cerr << "set up listener\n";
 
@@ -749,7 +764,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 
-	} else if (strcmp (path, "/routes/ignore") == 0) {
+	} else if (strcmp (path, "/strip/ignore") == 0) {
 
 		for (int n = 0; n < argc; ++n) {
 
@@ -762,31 +777,51 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else if (argc == 1 && types[0] == 'f') { // single float -- probably TouchOSC
-		if (!strncmp (path, "/ardour/routes/gainabs/", 23) && strlen (path) > 23) {
-			int rid = atoi (&path[23]);
-			// use some power-scale mapping??
-			route_set_gain_abs (rid, argv[0]->f);
+		if (!strncmp (path, "/strip/gain/", 12) && strlen (path) > 12) {
+			// in dB
+			int ssid = atoi (&path[12]);
+			route_set_gain_dB (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/ardour/routes/trimabs/", 23) && strlen (path) > 23) {
-			int rid = atoi (&path[23]);
-			// normalize 0..1 ?
-			route_set_trim_abs (rid, argv[0]->f);
+		else if (!strncmp (path, "/strip/fader/", 13) && strlen (path) > 13) {
+			// in fader position
+			int ssid = atoi (&path[13]);
+			route_set_gain_fader (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/ardour/routes/mute/", 20) && strlen (path) > 20) {
-			int rid = atoi (&path[20]);
-			route_mute (rid, argv[0]->f == 1.0);
+		else if (!strncmp (path, "/strip/trimdB/", 14) && strlen (path) > 14) {
+			int ssid = atoi (&path[14]);
+			route_set_trim_dB (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/ardour/routes/solo/", 20) && strlen (path) > 20) {
-			int rid = atoi (&path[20]);
-			route_solo (rid, argv[0]->f == 1.0);
+		else if (!strncmp (path, "/strip/mute/", 12) && strlen (path) > 12) {
+			int ssid = atoi (&path[12]);
+			route_mute (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/ardour/routes/recenable/", 25) && strlen (path) > 25) {
-			int rid = atoi (&path[25]);
-			route_recenable (rid, argv[0]->f == 1.0);
+		else if (!strncmp (path, "/strip/solo/", 12) && strlen (path) > 12) {
+			int ssid = atoi (&path[12]);
+			route_solo (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/monitor_input/", 21) && strlen (path) > 21) {
+			int ssid = atoi (&path[21]);
+			route_monitor_input (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/monitor_disk/", 20) && strlen (path) > 20) {
+			int ssid = atoi (&path[20]);
+			route_monitor_disk (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/recenable/", 17) && strlen (path) > 17) {
+			int ssid = atoi (&path[17]);
+			route_recenable (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/record_safe/", 19) && strlen (path) > 19) {
+			int ssid = atoi (&path[19]);
+			route_recsafe (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
 	}
@@ -972,10 +1007,11 @@ OSC::routes_list (lo_message msg)
 			/* XXX Can only use group ID at this point */
 			lo_message_add_int32 (reply, r->presentation_info().group_order());
 
-			boost::shared_ptr<AutomationControl> rc = r->rec_enable_control();
+			if (boost::dynamic_pointer_cast<AudioTrack>(r)
+					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
 
-			if (rc) {
-				lo_message_add_int32 (reply, (int32_t) rc->get_value());
+				boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
+				lo_message_add_int32 (reply, (int32_t) t->rec_enable_control()->get_value());
 			}
 
 			//Automatically listen to routes listed
@@ -998,6 +1034,207 @@ OSC::routes_list (lo_message msg)
 	lo_message_free (reply);
 }
 
+int
+OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo_message msg)
+{
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	s->bank_size = b_size;
+	s->strip_types = strips;
+	s->feedback = fb;
+	s->gainmode = gm;
+	// set bank and strip feedback
+	set_bank(s->bank, msg);
+
+	global_feedback (s->feedback, msg, s->gainmode);
+	return 0;
+}
+
+int
+OSC::set_surface_feedback (uint32_t fb, lo_message msg)
+{
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	s->feedback = fb;
+	// set bank and strip feedback
+	set_bank(s->bank, msg);
+
+	// Set global/master feedback
+	// global_feedback should include s->feedback in whole.
+	global_feedback (s->feedback, msg, s->gainmode);
+	return 0;
+}
+
+OSC::OSCSurface *
+OSC::get_surface (lo_address addr)
+{
+	string r_url;
+	char * rurl;
+	rurl = lo_address_get_url (addr);
+	r_url = rurl;
+	free (rurl);
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		//find setup for this server
+		if (!_surface[it].remote_url.find(r_url)){
+			return &_surface[it];
+		}
+	}
+	// No surface create one with default values
+	OSCSurface s;
+	s.remote_url = r_url;
+	s.bank = 1;
+	s.bank_size = 0;
+	s.strip_types = 31; // 31 is tracks, busses, and VCAs (no master/monitor)
+	s.feedback = 0;
+	s.gainmode = 0;
+	//get sorted should go here
+	_surface.push_back (s);
+	return &_surface[_surface.size() - 1];
+}
+
+// setup global feedback for a surface
+void
+OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
+{
+	// first destroy global observer for this surface
+	GlobalObservers::iterator x;
+
+	for (x = global_observers.begin(); x != global_observers.end();) {
+
+		OSCGlobalObserver* ro;
+
+		if ((ro = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
+
+			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(lo_message_get_source (msg)));
+
+			if (res == 0) {
+				delete *x;
+				x = global_observers.erase (x);
+			} else {
+				++x;
+			}
+		} else {
+			++x;
+		}
+	}
+	if (feedback[4] || feedback[3] || feedback[5] || feedback[6]) {
+		// create a new Global Observer for this surface
+		//OSCSurface *s = get_surface (lo_message_get_source (msg));
+		OSCGlobalObserver* o = new OSCGlobalObserver (*session, lo_message_get_source (msg), gainmode, /*s->*/feedback);
+		global_observers.push_back (o);
+	}
+}
+
+/*
+ * This gets called not only when bank changes but also:
+ *  - bank size change
+ *  - feedback change
+ *  - strip types changes
+ *  - fadermode changes
+ *  - stripable creation/deletion/flag
+ *  - to refresh what is "displayed"
+ * Basically any time the bank needs to be rebuilt
+ */
+int
+OSC::set_bank (uint32_t bank_start, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	//StripableList strips;
+	//session->get_stripables (strips);
+	// no nstripables yet
+	if (!session->nroutes()) {
+		return -1;
+	}
+	// don't include monitor or master in count for now
+	uint32_t nstrips;
+	if (session->monitor_out ()) {
+		nstrips = session->nroutes() - 2;
+	} else {
+		nstrips = session->nroutes() - 1;
+	}
+	// undo all listeners for this url
+	for (int n = 1; n <= (int) nstrips; ++n) {
+
+		boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n, PresentationInfo::Route);
+
+		if (stp) {
+			end_listen (stp, lo_message_get_source (msg));
+		}
+	}
+
+	OSCSurface *s = get_surface (lo_message_get_source (msg));
+	uint32_t b_size;
+
+	if (!s->bank_size) {
+		// no banking
+		b_size = nstrips;
+	} else {
+		b_size = s->bank_size;
+	}
+
+	// Do limits checking - high end still not quite right
+	if (bank_start < 1) bank_start = 1;
+	if (b_size >= nstrips)  {
+		bank_start = 1;
+	} else if ((bank_start > nstrips)) {
+		bank_start = (uint32_t)((nstrips - b_size) + 1);
+	}
+	//save bank in case we have had to change it
+	s->bank = bank_start;
+
+	if (s->feedback[0] || s->feedback[1]) {
+		for (int n = bank_start; n < (int) (b_size + bank_start); ++n) {
+			// this next will eventually include strip types
+			boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n, PresentationInfo::Route);
+
+			if (stp) {
+			listen_to_route(stp, lo_message_get_source (msg));
+			}
+		}
+	}
+	return 0;
+}
+
+int
+OSC::bank_up (lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	set_bank (s->bank + s->bank_size, msg);
+	return 0;
+}
+
+int
+OSC::bank_down (lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	if (s->bank < s->bank_size) {
+		set_bank (1, msg);
+	} else {
+		set_bank (s->bank - s->bank_size, msg);
+	}
+	return 0;
+}
+
+uint32_t
+OSC::get_sid (uint32_t rid, lo_address addr)
+{
+	OSCSurface *s = get_surface(addr);
+	return rid - s->bank + 1;
+}
+
+uint32_t
+OSC::get_rid (uint32_t sid, lo_address addr)
+{
+	OSCSurface *s = get_surface(addr);
+	return sid + s->bank - 1;
+}
+
 void
 OSC::transport_frame (lo_message msg)
 {
@@ -1009,7 +1246,7 @@ OSC::transport_frame (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_int64 (reply, pos);
 
-	lo_send_message (lo_message_get_source (msg), "/ardour/transport_frame", reply);
+	lo_send_message (lo_message_get_source (msg), "/transport_frame", reply);
 
 	lo_message_free (reply);
 }
@@ -1025,7 +1262,7 @@ OSC::transport_speed (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_double (reply, ts);
 
-	lo_send_message (lo_message_get_source (msg), "/ardour/transport_speed", reply);
+	lo_send_message (lo_message_get_source (msg), "/transport_speed", reply);
 
 	lo_message_free (reply);
 }
@@ -1041,119 +1278,305 @@ OSC::record_enabled (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_int32 (reply, re);
 
-	lo_send_message (lo_message_get_source (msg), "/ardour/record_enabled", reply);
+	lo_send_message (lo_message_get_source (msg), "/record_enabled", reply);
 
 	lo_message_free (reply);
 }
 
-
+// master and monitor calls
 int
-OSC::route_mute (int rid, int yn)
+OSC::master_set_gain (float dB)
 {
 	if (!session) return -1;
-
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
-
-	if (r) {
-		r->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-	}
-
-	return 0;
-}
-
-int
-OSC::route_solo (int rid, int yn)
-{
-	if (!session) return -1;
-
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
-
-	if (r) {
-		r->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-	}
-
-	return 0;
-}
-
-int
-OSC::route_recenable (int rid, int yn)
-{
-	if (!session) return -1;
-
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
-
-	if (r) {
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
-		if (trk) {
-			trk->rec_enable_control()->set_value (yn, PBD::Controllable::UseGroup);
+	boost::shared_ptr<Stripable> s = session->master_out();
+	if (s) {
+		if (dB < -192) {
+			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
+		} else {
+			s->gain_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
 		}
 	}
-
 	return 0;
 }
 
 int
-OSC::route_set_gain_abs (int rid, float level)
+OSC::master_set_fader (uint32_t position)
 {
 	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->master_out();
+	if (s) {
+		if ((position > 799.5) && (position < 800.5)) {
+			s->gain_control()->set_value (1.0, PBD::Controllable::NoGroup);
+		} else {
+			s->gain_control()->set_value (slider_position_to_gain_with_max (((float)position/1023), 2.0), PBD::Controllable::NoGroup);
+		}
+	}
+	return 0;
+}
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+int
+OSC::master_set_trim (float dB)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->master_out();
 
-	if (r) {
-		r->gain_control()->set_value (level, PBD::Controllable::NoGroup);
+	if (s) {
+		s->trim_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
 	}
 
 	return 0;
 }
 
 int
-OSC::route_set_gain_dB (int rid, float dB)
+OSC::master_set_pan_stereo_position (float position)
 {
+	if (!session) return -1;
+
+	boost::shared_ptr<Stripable> s = session->master_out();
+
+	if (s) {
+		if (s->pan_azimuth_control()) {
+			s->pan_azimuth_control()->set_value (position, PBD::Controllable::NoGroup);
+		}
+		/*boost::shared_ptr<PBD::Controllable> panner = s->pan_azimuth_control();
+		if (panner) {
+			panner->set_value (position, PBD::Controllable::NoGroup);
+		}*/
+	}
+
+	return 0;
+}
+
+int
+OSC::master_set_mute (uint32_t state)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Stripable> s = session->master_out();
+
+	if (s) {
+		s->mute_control()->set_value (state, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::monitor_set_gain (float dB)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->monitor_out();
+
+	if (s) {
+		if (dB < -192) {
+			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
+		} else {
+			s->gain_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
+		}
+	}
+	return 0;
+}
+
+int
+OSC::monitor_set_fader (uint32_t position)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->monitor_out();
+	if (s) {
+		if ((position > 799.5) && (position < 800.5)) {
+			s->gain_control()->set_value (1.0, PBD::Controllable::NoGroup);
+		} else {
+			s->gain_control()->set_value (slider_position_to_gain_with_max (((float)position/1023), 2.0), PBD::Controllable::NoGroup);
+		}
+	}
+	return 0;
+}
+
+// strip calls
+int
+OSC::route_mute (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::route_solo (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::route_recenable (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		if (s->rec_enable_control()) {
+			s->rec_enable_control()->set_value (yn, PBD::Controllable::UseGroup);
+			if (s->rec_enable_control()->get_value()) {
+				return 0;
+			}
+		}
+	}
+	// hmm, not set for whatever reason tell surface
+	return route_send_fail ("/strip/recenable", ssid, msg);
+}
+
+int
+OSC::route_recsafe (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	if (s) {
+		if (s->rec_safe_control()) {
+			s->rec_safe_control()->set_value (yn, PBD::Controllable::UseGroup);
+			if (s->rec_safe_control()->get_value()) {
+				return 0;
+			}
+		}
+	}
+	// hmm, not set for whatever reason tell surface
+	return route_send_fail ("/strip/record_safe", ssid, msg);
+}
+
+int
+OSC::route_monitor_input (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (track) {
+			track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+		} else {
+			route_send_fail ("/strip/monitor_input", ssid, msg);
+		}
+
+	}
+
+	return 0;
+}
+
+int
+OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (track) {
+			track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
+		} else {
+			route_send_fail ("/strip/monitor_disk", ssid, msg);
+		}
+
+	}
+
+	return 0;
+}
+
+int
+OSC::route_set_gain_abs (int rid, float level, lo_message msg)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		s->gain_control()->set_value (level, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 	if (dB < -192) {
-		return route_set_gain_abs (rid, 0.0);
+		return route_set_gain_abs (rid, 0.0, msg);
 	}
-	return route_set_gain_abs (rid, dB_to_coefficient (dB));
+	return route_set_gain_abs (rid, dB_to_coefficient (dB), msg);
 }
 
 int
-OSC::route_set_gain_fader (int rid, float pos)
-{
-	return route_set_gain_abs (rid, slider_position_to_gain_with_max (pos, 2.0));
-}
-
-
-int
-OSC::route_set_trim_abs (int rid, float level)
+OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 {
 	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+	if ((pos > 799.5) && (pos < 800.5)) {
+		return route_set_gain_abs (rid, 1.0, msg);
+	} else {
+		return route_set_gain_abs (rid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
+	}
+}
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
-	if (r) {
-		r->set_trim (level, PBD::Controllable::NoGroup);
+int
+OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		if (s->trim_control()) {
+			s->trim_control()->set_value (level, PBD::Controllable::NoGroup);
+		}
+
 	}
 
 	return 0;
 }
 
 int
-OSC::route_set_trim_dB (int rid, float dB)
+OSC::route_set_trim_dB (int ssid, float dB, lo_message msg)
 {
-	return route_set_trim_abs(rid, dB_to_coefficient (dB));
+	return route_set_trim_abs(ssid, dB_to_coefficient (dB), msg);
 }
 
 
 int
-OSC::route_set_pan_stereo_position (int rid, float pos)
+OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 {
 	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
-	if (r) {
-		boost::shared_ptr<Panner> panner = r->panner();
-		if (panner) {
-			panner->set_position (pos);
+	if (s) {
+		if(s->pan_azimuth_control()) {
+			s->pan_azimuth_control()->set_value (pos, PBD::Controllable::NoGroup);
 		}
 	}
 
@@ -1162,16 +1585,16 @@ OSC::route_set_pan_stereo_position (int rid, float pos)
 }
 
 int
-OSC::route_set_pan_stereo_width (int rid, float pos)
+OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 {
 	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
-	if (r) {
-		boost::shared_ptr<Panner> panner = r->panner();
-		if (panner) {
-			panner->set_width (pos);
+	if (s) {
+		if (s->pan_width_control()) {
+			s->pan_width_control()->set_value (pos, PBD::Controllable::NoGroup);
 		}
 	}
 
@@ -1180,15 +1603,16 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 }
 
 int
-OSC::route_set_send_gain_abs (int rid, int sid, float val)
+OSC::route_set_send_gain_abs (int ssid, int sid, float val, lo_message msg)
 {
 	if (!session) {
 		return -1;
 	}
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
-	if (!r) {
+	if (!s) {
 		return -1;
 	}
 
@@ -1198,56 +1622,25 @@ OSC::route_set_send_gain_abs (int rid, int sid, float val)
 		--sid;
 	}
 
-	boost::shared_ptr<Processor> p = r->nth_send (sid);
-
-	if (p) {
-		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
-		boost::shared_ptr<Amp> a = s->amp();
-
-		if (a) {
-			a->gain_control()->set_value (val, PBD::Controllable::NoGroup);
-		}
+	if (s->send_level_controllable (sid)) {
+		s->send_level_controllable (sid)->set_value (val, PBD::Controllable::NoGroup);
 	}
+
 	return 0;
 }
 
 int
-OSC::route_set_send_gain_dB (int rid, int sid, float val)
+OSC::route_set_send_gain_dB (int ssid, int sid, float val, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
-
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
-
-	if (!r) {
-		return -1;
-	}
-
-	/* revert to zero-based counting */
-
-	if (sid > 0) {
-		--sid;
-	}
-
-	boost::shared_ptr<Processor> p = r->nth_send (sid);
-
-	if (p) {
-		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
-		boost::shared_ptr<Amp> a = s->amp();
-
-		if (a) {
-			a->gain_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
-		}
-	}
-	return 0;
+	return route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
 }
 
 int
-OSC::route_plugin_parameter (int rid, int piid, int par, float val)
+OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message msg)
 {
 	if (!session)
 		return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
@@ -1302,11 +1695,12 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 }
 
 int
-OSC::route_plugin_parameter_print (int rid, int piid, int par)
+OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 {
 	if (!session) {
 		return -1;
 	}
+	int rid = get_rid (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
@@ -1346,6 +1740,50 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 		cerr << "upper value:   " << pd.upper << "\n";
 	}
 
+	return 0;
+}
+
+// timer callbacks
+bool
+OSC::periodic (void)
+{
+	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end(); x++) {
+
+		OSCGlobalObserver* go;
+
+		if ((go = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
+			go->tick();
+		}
+	}
+	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end(); x++) {
+
+		OSCRouteObserver* ro;
+
+		if ((ro = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+			ro->tick();
+		}
+	}
+
+	return true;
+}
+
+int
+OSC::route_send_fail (string path, uint32_t ssid, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+
+	lo_message reply = lo_message_new ();
+	if (sur->feedback[2]) {
+		ostringstream os;
+		os << path << "/" << ssid;
+		path = os.str();
+	} else {
+		lo_message_add_int32 (reply, ssid);
+	}
+	lo_message_add_float (reply, (float) 0);
+
+	lo_send_message (lo_message_get_source (msg), path.c_str(), reply);
+	lo_message_free (reply);
 	return 0;
 }
 

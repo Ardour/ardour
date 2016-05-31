@@ -17,11 +17,10 @@
 
 */
 
-#ifndef __osc_oscrouteobserver_h__
-#define __osc_oscrouteobserver_h__
+#ifndef __osc_oscglobalobserver_h__
+#define __osc_oscglobalobserver_h__
 
 #include <string>
-#include <bitset>
 #include <boost/shared_ptr.hpp>
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
@@ -30,37 +29,37 @@
 #include "pbd/stateful.h"
 #include "ardour/types.h"
 
-class OSCRouteObserver
+class OSCGlobalObserver
 {
 
   public:
-	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t sid, uint32_t gainmode, std::bitset<32> feedback);
-	~OSCRouteObserver ();
+	OSCGlobalObserver (ARDOUR::Session& s, lo_address addr, uint32_t gainmode, std::bitset<32> feedback);
+	~OSCGlobalObserver ();
 
-	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
 
   private:
-	boost::shared_ptr<ARDOUR::Stripable> _strip;
 
 	PBD::ScopedConnectionList strip_connections;
+	PBD::ScopedConnectionList session_connections;
+
 
 	lo_address addr;
 	std::string path;
-	uint32_t ssid;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
+	ARDOUR::Session* session;
+	framepos_t _last_frame;
+	uint32_t _heartbeat;
 	float _last_meter;
 
-
-	void name_changed (const PBD::PropertyChange& what_changed);
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	std::string set_path (std::string path);
-	void clear_strip (std::string path, float val);
+	void send_transport_state_changed(void);
+	void send_record_state_changed (void);
+	void send_session_saved (std::string name);
 };
 
-#endif /* __osc_oscrouteobserver_h__ */
+#endif /* __osc_oscglobalobserver_h__ */

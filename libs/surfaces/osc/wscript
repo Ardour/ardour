@@ -18,6 +18,7 @@ def build(bld):
             osc.cc
             osc_controllable.cc
             osc_route_observer.cc
+            osc_global_observer.cc
             interface.cc
             osc_gui.cc
     '''
