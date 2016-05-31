@@ -356,7 +356,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 
 		ColorsChanged ();
 	} else {
-		warning << string_compose (_("Color file for %1 not found"), color_file.get()) << endmsg;
+		warning << string_compose (_("Color file for %1 not found along %2"), color_file.get(), theme_search_path().to_string()) << endmsg;
 	}
 
 	return 0;
