@@ -73,7 +73,7 @@ control_protocol_search_path ()
 Searchpath
 theme_search_path ()
 {
-	Searchpath spath(user_config_directory ());
+	Searchpath spath (ardour_data_search_path ());
 	spath.add_subdirectory_to_paths (theme_dir_name);
 
 	spath += Searchpath(Glib::getenv(theme_env_variable_name));
