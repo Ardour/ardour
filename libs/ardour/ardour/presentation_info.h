@@ -136,7 +136,7 @@ class LIBARDOUR_API PresentationInfo
 		Hidden = 0x8000,
 
 		/* single bit indicates that the group order is set */
-		GroupOrderSet = 0x100000000,
+		GroupOrderSet = 0x10000000,
 
 		/* Masks */
 
