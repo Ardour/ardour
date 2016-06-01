@@ -425,6 +425,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/set_loop_range", "f", set_loop_range);
 		REGISTER_CALLBACK (serv, "/set_session_range", "", set_session_range);
 		REGISTER_CALLBACK (serv, "/set_session_range", "f", set_session_range);
+		// /toggle_monitor_* not working (comented out)
 		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "", toggle_monitor_mute);
 		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "f", toggle_monitor_mute);
 		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "", toggle_monitor_dim);
@@ -464,13 +465,17 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/zoom_to_session", "", zoom_to_session);
 		REGISTER_CALLBACK (serv, "/zoom_to_session", "f", zoom_to_session);
 		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "f", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "f", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "f", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "", temporal_zoom_out);
 		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "f", temporal_zoom_out);
 		REGISTER_CALLBACK (serv, "/scroll_up_1_track", "f", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, "/scroll_up_1_track", "", scroll_up_1_track);
 		REGISTER_CALLBACK (serv, "/scroll_dn_1_track", "f", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, "/scroll_dn_1_track", "", scroll_dn_1_track);
 		REGISTER_CALLBACK (serv, "/scroll_up_1_page", "f", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, "/scroll_up_1_page", "", scroll_up_1_page);
 		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "f", scroll_dn_1_page);
+		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "", scroll_dn_1_page);
 		REGISTER_CALLBACK (serv, "/bank_up", "", bank_up);
 		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_up);
 		REGISTER_CALLBACK (serv, "/bank_down", "", bank_down);
