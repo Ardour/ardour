@@ -32,12 +32,13 @@
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
 class VCA;
 
-class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 {
      public:
 	VCAManager (ARDOUR::Session&);
