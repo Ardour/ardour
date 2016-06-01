@@ -1244,6 +1244,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\vca_master_strip.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\vca_time_axis.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\verbose_cursor.cc"
 				>
 			</File>
@@ -2311,6 +2319,14 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\utils_videotl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\vca_master_strip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\vca_time_axis.h"
 				>
 			</File>
 			<File
