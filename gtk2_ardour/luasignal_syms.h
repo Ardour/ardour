@@ -39,6 +39,9 @@ STATIC(StartTimeChanged, &ARDOUR::Session::StartTimeChanged, 1)
 STATIC(EndTimeChanged, &ARDOUR::Session::EndTimeChanged, 1)
 STATIC(Exported, &ARDOUR::Session::Exported, 2)
 
+// stripable static globals
+STATIC(PresentationInfoChange, &Stripable::PresentationInfoChange, 0)
+
 // session specific (re-subscribe when session changes)
 SESSION(SessionConfigChanged, config.ParameterChanged, 1)
 SESSION(TransportStateChange, TransportStateChange, 0)
