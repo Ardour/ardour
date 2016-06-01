@@ -42,6 +42,7 @@
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
+#include "ardour/phase_control.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -53,6 +54,8 @@
 #include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
+#include "ardour/solo_isolate_control.h"
+#include "ardour/solo_safe_control.h"
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/tempo.h"
@@ -144,7 +147,7 @@ namespace Cairo {
 CLASSKEYS(Cairo::Context);
 CLASSKEYS(std::vector<double>);
 CLASSKEYS(std::list<ArdourMarker*>);
-CLASSKEYS(std::bitset<45ul>); // LuaSignal::LAST_SIGNAL
+CLASSKEYS(std::bitset<46ul>); // LuaSignal::LAST_SIGNAL
 CLASSKEYS(ArdourMarker*);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::LuaProc);
@@ -235,6 +238,8 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (std::string)> ()
 		.addFunction ("to_s", &PBD::ID::to_s) // TODO special case LUA __tostring ?
 		.endClass ()
+
+		.beginStdVector <PBD::ID> ("IdVector").endClass ()
 
 		.beginClass <XMLNode> ("XMLNode")
 		.addFunction ("name", &XMLNode::name)
@@ -523,6 +528,15 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("is_monitor", &Stripable::is_monitor)
 		.addFunction ("is_hidden", &Stripable::is_hidden)
 		.addFunction ("is_selected", &Stripable::is_selected)
+		.addFunction ("gain_control", &Stripable::gain_control)
+		.addFunction ("solo_control", &Stripable::solo_control)
+		.addFunction ("solo_isolate_control", &Stripable::solo_isolate_control)
+		.addFunction ("solo_safe_control", &Stripable::solo_safe_control)
+		.addFunction ("mute_control", &Stripable::mute_control)
+		.addFunction ("phase_control", &Stripable::phase_control)
+		.addFunction ("trim_control", &Stripable::trim_control)
+		.addFunction ("rec_enable_control", &Stripable::rec_enable_control)
+		.addFunction ("rec_safe_control", &Stripable::rec_safe_control)
 		.endClass ()
 
 		.deriveWSPtrClass <Route, Stripable> ("Route")
@@ -697,8 +711,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("active", &Processor::active)
 		.addFunction ("activate", &Processor::activate)
 		.addFunction ("deactivate", &Processor::deactivate)
-		.addFunction ("control", (boost::shared_ptr<Evoral::Control>(Evoral::ControlSet::*)(const Evoral::Parameter&, bool))&Evoral::ControlSet::control)
-		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
 		.endClass ()
 
 		.deriveWSPtrClass <IOProcessor, Processor> ("IOProcessor")
@@ -755,7 +767,43 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("alist", &AutomationControl::alist)
 		.endClass ()
 
-		.deriveWSPtrClass <GainControl, AutomationControl> ("GainControl")
+		.deriveWSPtrClass <SlavableAutomationControl, AutomationControl> ("SlavableAutomationControl,")
+		.addFunction ("add_master", &SlavableAutomationControl::add_master)
+		.addFunction ("remove_master", &SlavableAutomationControl::remove_master)
+		.addFunction ("clear_masters", &SlavableAutomationControl::clear_masters)
+		.addFunction ("slaved_to", &SlavableAutomationControl::slaved_to)
+		.addFunction ("slaved", &SlavableAutomationControl::slaved)
+		.addFunction ("get_masters_value", &SlavableAutomationControl::get_masters_value)
+		.addFunction ("get_boolean_masters", &SlavableAutomationControl::get_boolean_masters)
+		//.addFunction ("masters", &SlavableAutomationControl::masters) // not implemented
+		.endClass ()
+
+		.deriveWSPtrClass <PhaseControl, AutomationControl> ("PhaseControl")
+		.addFunction ("set_phase_invert", (void(PhaseControl::*)(uint32_t, bool))&PhaseControl::set_phase_invert)
+		.addFunction ("inverted", &PhaseControl::inverted)
+		.endClass ()
+
+		.deriveWSPtrClass <GainControl, SlavableAutomationControl> ("GainControl")
+		.endClass ()
+
+		.deriveWSPtrClass <SoloControl, SlavableAutomationControl> ("SoloControl")
+		.addFunction ("can_solo", &SoloControl::can_solo)
+		.addFunction ("soloed", &SoloControl::soloed)
+		.addFunction ("self_soloed", &SoloControl::self_soloed)
+		.endClass ()
+
+		.deriveWSPtrClass <MuteControl, SlavableAutomationControl> ("MuteControl")
+		.addFunction ("muted", &MuteControl::muted)
+		.addFunction ("muted_by_self", &MuteControl::muted_by_self)
+		.endClass ()
+
+		.deriveWSPtrClass <SoloIsolateControl, SlavableAutomationControl> ("SoloIsolateControl")
+		.addFunction ("solo_isolated", &SoloIsolateControl::solo_isolated)
+		.addFunction ("self_solo_isolated", &SoloIsolateControl::self_solo_isolated)
+		.endClass ()
+
+		.deriveWSPtrClass <SoloSafeControl, SlavableAutomationControl> ("SoloSafeControl")
+		.addFunction ("solo_safe", &SoloSafeControl::solo_safe)
 		.endClass ()
 
 		.deriveWSPtrClass <Amp, Processor> ("Amp")
@@ -845,6 +893,24 @@ LuaBindings::common (lua_State* L)
 		.beginClass <TempoMap> ("TempoMap")
 		.addFunction ("add_tempo", &TempoMap::add_tempo)
 		.addFunction ("add_meter", &TempoMap::add_meter)
+		.addFunction ("tempo_section_at_frame", &TempoMap::tempo_section_at_frame)
+		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_frame)
+		.addFunction ("meter_section_at_beat", &TempoMap::meter_section_at_beat)
+		.endClass ()
+
+		.beginClass <MetricSection> ("MetricSection")
+		.addFunction ("pulse", &MetricSection::pulse)
+		.addFunction ("set_pulse", &MetricSection::set_pulse)
+		.endClass ()
+
+		.deriveClass <TempoSection, MetricSection> ("TempoSection")
+		.addFunction ("c_func", (double(TempoSection::*)()const)&TempoSection::c_func)
+		.endClass ()
+
+		.deriveClass <MeterSection, MetricSection> ("MeterSection")
+		.addCast<Meter> ("to_meter")
+		.addFunction ("set_pulse", &MeterSection::set_pulse)
+		.addFunction ("set_beat", (void(MeterSection::*)(double))&MeterSection::set_beat)
 		.endClass ()
 
 		.beginClass <ChanCount> ("ChanCount")
@@ -876,6 +942,25 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Lua", ARDOUR::PluginType(Lua))
 		.endNamespace ()
 
+		.beginNamespace ("PresentationInfo")
+		.beginNamespace ("Flag")
+		.addConst ("AudioTrack", ARDOUR::PresentationInfo::Flag(PresentationInfo::AudioTrack))
+		.addConst ("MidiTrack", ARDOUR::PresentationInfo::Flag(PresentationInfo::MidiTrack))
+		.addConst ("AudioBus", ARDOUR::PresentationInfo::Flag(PresentationInfo::AudioBus))
+		.addConst ("MidiBus", ARDOUR::PresentationInfo::Flag(PresentationInfo::MidiBus))
+		.addConst ("VCA", ARDOUR::PresentationInfo::Flag(PresentationInfo::VCA))
+		.addConst ("MasterOut", ARDOUR::PresentationInfo::Flag(PresentationInfo::MasterOut))
+		.addConst ("MonitorOut", ARDOUR::PresentationInfo::Flag(PresentationInfo::MonitorOut))
+		.addConst ("Auditioner", ARDOUR::PresentationInfo::Flag(PresentationInfo::Auditioner))
+		.addConst ("Selected", ARDOUR::PresentationInfo::Flag(PresentationInfo::Selected))
+		.addConst ("Hidden", ARDOUR::PresentationInfo::Flag(PresentationInfo::Hidden))
+		.addConst ("GroupOrderSet", ARDOUR::PresentationInfo::Flag(PresentationInfo::GroupOrderSet))
+		.addConst ("GroupMask", ARDOUR::PresentationInfo::Flag(PresentationInfo::GroupMask))
+		.addConst ("SpecialMask", ARDOUR::PresentationInfo::Flag(PresentationInfo::SpecialMask))
+		.addConst ("StatusMask", ARDOUR::PresentationInfo::Flag(PresentationInfo::StatusMask))
+		.endNamespace ()
+		.endNamespace ()
+
 		.beginNamespace ("AutoStyle")
 		.addConst ("Absolute", ARDOUR::AutoStyle(Absolute))
 		.addConst ("Trim", ARDOUR::AutoStyle(Trim))
@@ -889,9 +974,16 @@ LuaBindings::common (lua_State* L)
 		.endNamespace ()
 
 		.beginNamespace ("AutomationType")
+		.addConst ("GainAutomation", ARDOUR::AutomationType(GainAutomation))
 		.addConst ("PluginAutomation", ARDOUR::AutomationType(PluginAutomation))
-		.addConst ("PluginAutomation", ARDOUR::AutomationType(GainAutomation))
-		.addConst ("PluginAutomation", ARDOUR::AutomationType(TrimAutomation))
+		.addConst ("SoloAutomation", ARDOUR::AutomationType(SoloAutomation))
+		.addConst ("SoloIsolateAutomation", ARDOUR::AutomationType(SoloIsolateAutomation))
+		.addConst ("SoloSafeAutomation", ARDOUR::AutomationType(SoloSafeAutomation))
+		.addConst ("MuteAutomation", ARDOUR::AutomationType(MuteAutomation))
+		.addConst ("RecEnableAutomation", ARDOUR::AutomationType(RecEnableAutomation))
+		.addConst ("RecSafeAutomation", ARDOUR::AutomationType(RecSafeAutomation))
+		.addConst ("TrimAutomation", ARDOUR::AutomationType(TrimAutomation))
+		.addConst ("PhaseAutomation", ARDOUR::AutomationType(PhaseAutomation))
 		.endNamespace ()
 
 		.beginNamespace ("SrcQuality")
@@ -916,6 +1008,20 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Start", ARDOUR::RegionPoint(Start))
 		.addConst ("End", ARDOUR::RegionPoint(End))
 		.addConst ("SyncPoint", ARDOUR::RegionPoint(SyncPoint))
+		.endNamespace ()
+
+		.beginNamespace ("TempoSection")
+		.beginNamespace ("PositionLockStyle")
+		.addConst ("AudioTime", ARDOUR::PositionLockStyle(AudioTime))
+		.addConst ("MusicTime", ARDOUR::PositionLockStyle(MusicTime))
+		.endNamespace ()
+		.endNamespace ()
+
+		.beginNamespace ("TempoSection")
+		.beginNamespace ("Type")
+		.addConst ("Ramp", ARDOUR::TempoSection::Type(TempoSection::Ramp))
+		.addConst ("Constant", ARDOUR::TempoSection::Type(TempoSection::Constant))
+		.endNamespace ()
 		.endNamespace ()
 
 		.beginNamespace ("TrackMode")
