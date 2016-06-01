@@ -250,16 +250,20 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	pre_remove_master (m);
 
-
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 		current_value = get_value_locked ();
 		erased = _masters.erase (m->id());
-		if (erased) {
+		if (erased && !_session.deletion_in_progress()) {
 			recompute_masters_ratios (current_value);
 		}
 		masters_left = _masters.size ();
 		new_value = get_value_locked ();
+	}
+
+	if (_session.deletion_in_progress()) {
+		/* no reason to care about new values or sending signals */
+		return;
 	}
 
 	if (erased) {
