@@ -237,6 +237,18 @@ log_vprintf(LV2_Log_Handle /*handle*/,
 {
 	char* str = NULL;
 	const int ret = g_vasprintf(&str, fmt, args);
+	/* strip trailing whitespace */
+	while (strlen (str) > 0
+	       && (   str[strlen (str) - 1] == '\n'
+	           || str[strlen (str) - 1] == '\r'
+	           || str[strlen (str) - 1] == ' '
+	           || str[strlen (str) - 1] == '\t')) {
+		str[strlen (str) - 1] = '\0';
+	}
+	if (strlen (str) == 0) {
+		return 0;
+	}
+
 	if (type == URIMap::instance().urids.log_Error) {
 		error << str << endmsg;
 	} else if (type == URIMap::instance().urids.log_Warning) {
