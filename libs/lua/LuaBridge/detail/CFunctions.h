@@ -379,6 +379,29 @@ struct CFunc
   };
 
 
+  template <class T, class R>
+  struct CastClass
+  {
+    static int f (lua_State* L)
+    {
+      T * const t = Userdata::get <T> (L, 1, false );
+      Stack <R*>::push (L, dynamic_cast<R*>(t));
+      return 1;
+    }
+  };
+
+  template <class T, class R>
+  struct CastConstClass
+  {
+    static int f (lua_State* L)
+    {
+      T const* const t = Userdata::get <T> (L, 1, true);
+      Stack <R const*>::push (L, dynamic_cast<R const*>(t));
+      return 1;
+    }
+  };
+
+
   template <class T>
   struct PtrNullCheck
   {

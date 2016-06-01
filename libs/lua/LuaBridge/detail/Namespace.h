@@ -1048,6 +1048,22 @@ private:
       return *this;
     }
 
+    template <class U>
+    Class <T>& addCast (char const* name)
+    {
+      PRINTDOC("Cast", _name << name,
+          type_name< U >(),
+          type_name< U >() << " (" << type_name< T >() << "::*)()")
+
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::CastClass <T, U>::f, 0);
+      rawsetfield (L, -3, name); // class table
+
+      lua_pushcclosure (L, &CFunc::CastConstClass <T, U>::f, 0);
+      rawsetfield (L, -4, name); // const table
+      return *this;
+    }
+
   };
 
   /** C Array to/from table */

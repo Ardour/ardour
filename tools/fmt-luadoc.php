@@ -384,6 +384,7 @@ foreach ($doc as $b) {
 			'cand' => canonical_decl ($b)
 		);
 		break;
+	case "Cast":
 	case "Weak/Shared Pointer Cast":
 		checkclass ($b);
 		$classlist[luafn2class ($b['lua'])]['cast'][] = array (
