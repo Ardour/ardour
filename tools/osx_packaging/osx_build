@@ -181,6 +181,7 @@ mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
+mkdir -p $Themes
 
 # maybe set variables
 env=""
@@ -495,7 +496,7 @@ cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 
 # Themes: only install those named for this app
 lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
-cp `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors` $Themes
+cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
