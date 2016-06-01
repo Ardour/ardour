@@ -912,15 +912,15 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 	const double x1 = width   * .8;
 
 	const double y0 = height  * .25;
-	const double y1= height   * .75;
+	const double y1 = height  * .75;
 
-	const double ym= height   * .5;
+	const double ym = height  * .5;
 
 	// arrow
-	const double xa0= height  * .39;
-	const double xa1= height  * .61;
-	const double ya0= height  * .35;
-	const double ya1= height  * .65;
+	const double xa0= width  * .39;
+	const double xa1= width  * .61;
+	const double ya0= height * .35;
+	const double ya1= height * .65;
 
 	ardour_icon_set_source_rgba (cr, fg_color);
 	cairo_set_line_width (cr, 1);
