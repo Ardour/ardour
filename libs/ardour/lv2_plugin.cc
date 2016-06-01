@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cctype>
 #include <string>
 #include <vector>
 #include <limits>
@@ -238,11 +239,7 @@ log_vprintf(LV2_Log_Handle /*handle*/,
 	char* str = NULL;
 	const int ret = g_vasprintf(&str, fmt, args);
 	/* strip trailing whitespace */
-	while (strlen (str) > 0
-	       && (   str[strlen (str) - 1] == '\n'
-	           || str[strlen (str) - 1] == '\r'
-	           || str[strlen (str) - 1] == ' '
-	           || str[strlen (str) - 1] == '\t')) {
+	while (strlen (str) > 0 && isspace (str[strlen (str) - 1])) {
 		str[strlen (str) - 1] = '\0';
 	}
 	if (strlen (str) == 0) {
