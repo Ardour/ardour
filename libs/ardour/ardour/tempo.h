@@ -149,9 +149,6 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 
 	XMLNode& get_state() const;
 
-	void set_pulse (double w) {
-		MetricSection::set_pulse (w);
-	}
 	void set_beat (std::pair<double, Timecode::BBT_Time>& w) {
 		_beat = w.first;
 		_bbt = w.second;
