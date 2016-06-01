@@ -61,6 +61,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void change_revision_value ();
 
 	void open_browse_dialog ();
+	void open_folder ();
 
 	boost::shared_ptr<ARDOUR::ExportFilename> filename;
 
@@ -85,6 +86,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Entry        path_entry;
 	Gtk::Button       browse_button;
 	Gtk::Label        example_filename_label;
+	Gtk::Button       open_button;
 
 	/* Date combo */
 

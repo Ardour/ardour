@@ -20,6 +20,7 @@
 
 #include <gtkmm/messagedialog.h>
 
+#include "pbd/openuri.h"
 #include "export_filename_selector.h"
 
 #include "i18n.h"
@@ -36,6 +37,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 
 	path_label (_("Folder:"), Gtk::ALIGN_LEFT),
 	browse_button (_("Browse")),
+	open_button (_("Open Folder")),
 
 	example_filename_label ("", Gtk::ALIGN_LEFT),
 	_require_timespan (false)
@@ -61,6 +63,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	path_hbox.pack_start (path_label, false, false, 3);
 	path_hbox.pack_start (path_entry, true, true, 3);
 	path_hbox.pack_start (browse_button, false, false, 3);
+	path_hbox.pack_start (open_button, false, false, 3); // maybe Mixbus only ?
 
 	path_entry.set_activates_default ();
 
@@ -104,6 +107,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	revision_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_revision_value));
 
 	browse_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFilenameSelector::open_browse_dialog));
+	open_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFilenameSelector::open_folder));
 }
 
 ExportFilenameSelector::~ExportFilenameSelector ()
@@ -364,6 +368,18 @@ ExportFilenameSelector::change_revision_value ()
 
 	filename->set_revision ((uint32_t) revision_spinbutton.get_value_as_int());
 	CriticalSelectionChanged();
+}
+
+void
+ExportFilenameSelector::open_folder ()
+{
+	const std::string& dir (path_entry.get_text());
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+		Gtk::MessageDialog msg (string_compose (_("%1: this is not a valid directory/folder."), dir));
+		msg.run ();
+		return;
+	}
+	PBD::open_folder (dir);
 }
 
 void
