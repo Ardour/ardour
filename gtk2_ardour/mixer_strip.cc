@@ -99,6 +99,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
+	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
@@ -1578,6 +1579,18 @@ MixerStrip::show_passthru_color ()
 	reset_strip_style ();
 }
 
+
+void
+MixerStrip::help_count_plugins (boost::weak_ptr<Processor> p)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor || !processor->display_to_user()) {
+		return;
+	}
+	if (boost::dynamic_pointer_cast<PluginInsert> (processor)) {
+		++_plugin_insert_cnt;
+	}
+}
 void
 MixerStrip::build_route_ops_menu ()
 {
@@ -1618,7 +1631,9 @@ MixerStrip::build_route_ops_menu ()
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
 	}
 
-	if (1 /* TODO IFF >= 1 plugin-insert */) {
+	_plugin_insert_cnt = 0;
+	_route->foreach_processor (sigc::mem_fun (*this, &MixerStrip::help_count_plugins));
+	if (_plugin_insert_cnt > 0) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
