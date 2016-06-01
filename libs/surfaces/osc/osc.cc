@@ -355,6 +355,9 @@ OSC::register_callbacks()
 
 		REGISTER_CALLBACK (serv, "/set_surface", "iiii", set_surface);
 		REGISTER_CALLBACK (serv, "/set_surface/feedback", "i", set_surface_feedback);
+		REGISTER_CALLBACK (serv, "/set_surface/bank_size", "i", set_surface_bank_size);
+		REGISTER_CALLBACK (serv, "/set_surface/gainmode", "i", set_surface_gainmode);
+		REGISTER_CALLBACK (serv, "/set_surface/strip_types", "i", set_surface_strip_types);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
 		REGISTER_CALLBACK (serv, "/add_marker", "f", add_marker);
@@ -1050,15 +1053,54 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo
 }
 
 int
+OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
+{
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	s->bank_size = bs;
+
+	// set bank and strip feedback
+	set_bank(s->bank, msg);
+	return 0;
+}
+
+
+int
+OSC::set_surface_strip_types (uint32_t st, lo_message msg)
+{
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	s->strip_types = st;
+
+	// set bank and strip feedback
+	set_bank(s->bank, msg);
+	return 0;
+}
+
+
+int
 OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 {
 	OSCSurface *s = get_surface(lo_message_get_source (msg));
 	s->feedback = fb;
+
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
 
 	// Set global/master feedback
-	// global_feedback should include s->feedback in whole.
+	global_feedback (s->feedback, msg, s->gainmode);
+	return 0;
+}
+
+
+int
+OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
+{
+	OSCSurface *s = get_surface(lo_message_get_source (msg));
+	s->gainmode = gm;
+
+	// set bank and strip feedback
+	set_bank(s->bank, msg);
+
+	// Set global/master feedback
 	global_feedback (s->feedback, msg, s->gainmode);
 	return 0;
 }

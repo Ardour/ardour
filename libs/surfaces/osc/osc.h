@@ -318,7 +318,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0;						\
 	}
 
+	PATH_CALLBACK1_MSG(set_surface_bank_size,i);
+	PATH_CALLBACK1_MSG(set_surface_strip_types,i);
 	PATH_CALLBACK1_MSG(set_surface_feedback,i);
+	PATH_CALLBACK1_MSG(set_surface_gainmode,i);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -412,7 +415,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int bank_up (lo_message msg);
 	int bank_down (lo_message msg);
 	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, lo_message msg);
+	int set_surface_bank_size (uint32_t bs, lo_message msg);
+	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
+	int set_surface_gainmode (uint32_t gm, lo_message msg);
 
 	int master_set_gain (float dB);
 	int master_set_fader (uint32_t position);
