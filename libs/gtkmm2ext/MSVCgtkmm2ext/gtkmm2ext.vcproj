@@ -382,6 +382,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pane.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\paths_dialog.cc"
 				>
 			</File>
@@ -605,6 +609,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\keyboard.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\pane.h"
 				>
 			</File>
 			<File
