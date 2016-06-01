@@ -32,6 +32,7 @@
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
+#include "ardour/debug.h"
 
 #include "i18n.h"
 

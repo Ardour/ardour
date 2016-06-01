@@ -64,7 +64,7 @@ static inline bool floateq (float a, float b, int max_ulps_diff)
     }
 
     // Find the difference in ULPs.
-    int ulps_diff = abs (ua.i - ub.i);
+    int ulps_diff = ua.i > ub.i ? ua.i - ub.i : ub.i - ua.i;
 
     if (ulps_diff <= max_ulps_diff) {
         return true;

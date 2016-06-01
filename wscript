@@ -568,6 +568,8 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
+    linker_flags.append('-lexecinfo')
+
     if conf.env['DEBUG_RT_ALLOC']:
         compiler_flags.append('-DDEBUG_RT_ALLOC')
         linker_flags.append('-ldl')
@@ -940,7 +942,10 @@ def configure(conf):
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
         if Options.options.dist_target != 'msvc':
-            conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+            if re.search ("freebsd", sys.platform) != None:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', uselib_store='DL')
+            else:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
         conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
