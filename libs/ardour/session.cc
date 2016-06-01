@@ -90,6 +90,7 @@
 #include "ardour/recent_sessions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/revision.h"
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -315,6 +316,8 @@ Session::Session (AudioEngine &eng,
 	, _vca_manager (new VCAManager (*this))
 {
 	uint32_t sr = 0;
+
+	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
 	pthread_cond_init (&_rt_emit_cond, 0);

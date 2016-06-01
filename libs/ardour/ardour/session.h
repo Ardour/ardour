@@ -2007,6 +2007,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	VCAManager* _vca_manager;
 
 	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
+
+	std::string created_with;
 };
 
 

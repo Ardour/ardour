@@ -106,6 +106,7 @@
 #include "ardour/proxy_controllable.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
+#include "ardour/revision.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
@@ -1051,6 +1052,12 @@ Session::state (bool full_state)
 	snprintf(buf, sizeof(buf), "%d", CURRENT_SESSION_FILE_VERSION);
 	node->add_property("version", buf);
 
+	child = node->add_child ("ProgramVersion");
+	child->add_property("created-with", created_with);
+
+	std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
+	child->add_property("modified-with", modified_with);
+
 	/* store configuration settings */
 
 	if (full_state) {
@@ -1340,6 +1347,13 @@ Session::set_state (const XMLNode& node, int version)
 			if (r.get_value_or (0)) {
 				goto out;
 			}
+		}
+	}
+
+	created_with = "unknown";
+	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
+		if ((prop = child->property (X_("created-with"))) != 0) {
+			created_with = prop->value ();
 		}
 	}
 
