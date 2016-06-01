@@ -295,10 +295,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\controllable_descriptor.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\convert.cc"
 				>
 			</File>
