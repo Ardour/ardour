@@ -280,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\osc_global_observer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\osc_gui.cc"
 				>
 			</File>
@@ -299,6 +303,10 @@
 			</File>
 			<File
 				RelativePath="..\osc_controllable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\osc_global_observer.h"
 				>
 			</File>
 			<File
