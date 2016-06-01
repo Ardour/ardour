@@ -428,7 +428,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\control_group.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\control_protocol_manager.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\controllable_descriptor.cc"
 				>
 			</File>
 			<File
@@ -768,6 +776,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\monitor_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\monitor_processor.cc"
 				>
 			</File>
@@ -780,7 +792,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\mute_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\mute_master.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\muteable.cc"
 				>
 			</File>
 			<File
@@ -824,6 +844,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\phase_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\playlist.cc"
 				>
 			</File>
@@ -864,6 +888,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\presentation_info.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\process_thread.cc"
 				>
 			</File>
@@ -892,6 +920,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\record_enable_control.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\record_safe_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\region.cc"
 				>
 			</File>
@@ -917,10 +953,6 @@
 			</File>
 			<File
 				RelativePath="..\route.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\route_controls.cc"
 				>
 			</File>
 			<File
@@ -1220,6 +1252,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\slavable.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\slavable_automation_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\slave.cc"
 				>
 			</File>
@@ -1237,6 +1277,18 @@
 			</File>
 			<File
 				RelativePath="..\sndfilesource.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\solo_control.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\solo_isolate_control.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\solo_safe_control.cc"
 				>
 			</File>
 			<File
@@ -1265,6 +1317,10 @@
 			</File>
 			<File
 				RelativePath="..\strip_silence.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\stripable.cc"
 				>
 			</File>
 			<File
@@ -1325,6 +1381,14 @@
 			</File>
 			<File
 				RelativePath="..\utils.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\vca.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\vca_manager.cc"
 				>
 			</File>
 			<File
@@ -1546,7 +1610,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\control_group_member.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\control_protocol_manager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\controllable_descriptor.h"
 				>
 			</File>
 			<File
@@ -2050,6 +2122,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\presentation_info.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\process_thread.h"
 				>
 			</File>
@@ -2098,6 +2174,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\record_safe_control.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\region.h"
 				>
 			</File>
@@ -2143,10 +2223,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\route_group_specialized.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\route_sorters.h"
 				>
 			</File>
 			<File
@@ -2230,6 +2306,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\slavable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\slavable_automation_control.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\slave.h"
 				>
 			</File>
@@ -2287,6 +2371,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\strip_silence.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\stripable.h"
 				>
 			</File>
 			<File
@@ -2375,6 +2463,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\variant.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\vca.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\vca_manager.h"
 				>
 			</File>
 			<File
