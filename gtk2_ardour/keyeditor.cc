@@ -520,16 +520,6 @@ KeyEditor::search_string_updated (const std::string& filter)
 void
 KeyEditor::print () const
 {
-	char templ[14];
-
-	snprintf (templ, sizeof (templ), "akprintXXXXXX");
-
-	int fd = mkstemp (templ);
-	ofstream f;
-	//f.open (fd);
-
+	// use Glib::file_open_tmp() if needed
 	Bindings::save_all_bindings_as_html (cerr);
-
-	f.close ();
-	close (fd);
 }
