@@ -363,7 +363,7 @@ VCAMasterStrip::solo_changed ()
 }
 
 void
-VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
+VCAMasterStrip::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
 {
 	boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (n);
 
@@ -423,7 +423,7 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 		}
 
 		items.push_back (CheckMenuElem ((*v)->name()));
-		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
+		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		if (_vca->gain_control()->slaved_to ((*v)->gain_control())) {
 			item->set_active (true);
 		}

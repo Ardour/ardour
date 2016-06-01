@@ -2488,7 +2488,7 @@ MixerStrip::set_meter_type (MeterType t)
 }
 
 void
-MixerStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
+MixerStrip::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
 {
 	if (!_route) {
 		return;
@@ -2569,7 +2569,7 @@ MixerStrip::vca_button_release (GdkEventButton* ev)
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 		items.push_back (CheckMenuElem ((*v)->name()));
-		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
+		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		if (_route->slaved_to (*v)) {
 			item->set_active (true);
 		}
