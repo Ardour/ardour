@@ -1977,7 +1977,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	GraphEdges _current_route_graph;
 
-	void ensure_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
+	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;

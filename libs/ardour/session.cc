@@ -2924,15 +2924,18 @@ Session::reconnect_mmc_ports(bool inputs)
 #endif
 
 void
-Session::ensure_presentation_info_gap (PresentationInfo::order_t first_new_order, uint32_t how_many)
+Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new_order, uint32_t how_many)
 {
 	if (first_new_order == PresentationInfo::max_order) {
 		/* adding at end, no worries */
 		return;
 	}
 
-	/* create a gap in the existing route order keys to accomodate new routes.*/
+	/* create a gap in the presentation info to accomodate @param how_many
+	 * new objects.
+	 */
 	boost::shared_ptr <RouteList> rd = routes.reader();
+
 	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
 		boost::shared_ptr<Route> rt (*ri);
 
@@ -3073,8 +3076,6 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	RouteList ret;
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
-
-	ensure_presentation_info_gap (order, how_many);
 
 	while (how_many) {
 		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, use_number)) {
@@ -3394,7 +3395,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("ensure order gap starting at %1 for %2\n", order, new_routes.size()));
-	ensure_presentation_info_gap (order, new_routes.size());
+	ensure_route_presentation_info_gap (order, new_routes.size());
 
 	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
