@@ -551,6 +551,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	static Glib::RefPtr<Gtk::Action> rename_action;
 	static Glib::RefPtr<Gtk::Action> delete_action;
+	static Glib::RefPtr<Gtk::Action> backspace_action;
 	static Glib::RefPtr<Gtk::Action> manage_pins_action;
 	static Glib::RefPtr<Gtk::Action> edit_action;
 	static Glib::RefPtr<Gtk::Action> edit_generic_action;

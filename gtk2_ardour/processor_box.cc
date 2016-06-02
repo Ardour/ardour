@@ -109,6 +109,7 @@ RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::copy_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
+RefPtr<Action> ProcessorBox::backspace_action;
 RefPtr<Action> ProcessorBox::manage_pins_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
@@ -2122,6 +2123,7 @@ ProcessorBox::show_processor_menu (int arg)
 	cut_action->set_sensitive (sensitive && can_cut ());
 	copy_action->set_sensitive (sensitive);
 	delete_action->set_sensitive (sensitive || stub_processor_selected ());
+	backspace_action->set_sensitive (sensitive || stub_processor_selected ());
 
 	edit_action->set_sensitive (one_processor_can_be_edited ());
 	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
@@ -3638,10 +3640,13 @@ ProcessorBox::register_actions ()
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
 	delete_action = myactions.register_action (processor_box_actions, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
+	backspace_action = myactions.register_action (processor_box_actions, X_("backspace"), _("Delete"),
+	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (copy_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (delete_action);
+	ActionManager::plugin_selection_sensitive_actions.push_back (backspace_action);
 
 	paste_action = myactions.register_action (processor_box_actions, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));

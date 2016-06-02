@@ -1,5 +1,6 @@
 <Bindings name="Processor Box">
   <Press>
      <Binding key="Delete" action="ProcessorMenu/delete"/>
+     <Binding key="BackSpace" action="ProcessorMenu/backspace"/>
   </Press>
 </Bindings>
