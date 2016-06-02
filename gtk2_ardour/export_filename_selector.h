@@ -85,8 +85,8 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label        path_label;
 	Gtk::Entry        path_entry;
 	Gtk::Button       browse_button;
-	Gtk::Label        example_filename_label;
 	Gtk::Button       open_button;
+	Gtk::Label        example_filename_label;
 
 	/* Date combo */
 
