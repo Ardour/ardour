@@ -3261,6 +3261,10 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 						(*i)->add_property ("bitslot", buf);
 						(*i)->add_property ("name", name);
 					}
+					else if (type && type->value() == X_("intreturn")) {
+						(*i)->remove_property (X_("bitslot"));
+						(*i)->add_property ("ignore-bitslot", "1");
+					}
 					else if (type && type->value() == X_("return")) {
 						// Return::set_state() generates a new one
 						(*i)->remove_property (X_("bitslot"));
