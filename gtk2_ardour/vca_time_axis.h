@@ -39,6 +39,8 @@ class VCATimeAxisView : public TimeAxisView
 	VCATimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~VCATimeAxisView ();
 
+	ARDOUR::PresentationInfo const & presentation_info () const;
+
 	void set_vca (boost::shared_ptr<ARDOUR::VCA>);
 	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 

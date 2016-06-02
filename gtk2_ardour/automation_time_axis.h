@@ -73,6 +73,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 
+	ARDOUR::PresentationInfo const & presentation_info () const;
+
         void add_automation_event (GdkEvent *, framepos_t, double, bool with_guard_points);
 
 	void clear_lines ();

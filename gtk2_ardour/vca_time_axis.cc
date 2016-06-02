@@ -274,3 +274,9 @@ VCATimeAxisView::drop_release (GdkEventButton*)
 
 	return true;
 }
+
+PresentationInfo const &
+VCATimeAxisView::presentation_info () const
+{
+	return _vca->presentation_info();
+}

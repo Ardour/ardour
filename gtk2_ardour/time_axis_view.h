@@ -39,7 +39,9 @@
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
+#include "ardour/presentation_info.h"
 #include "ardour/region.h"
+
 #include "evoral/Parameter.hpp"
 
 #include "canvas/line.h"
@@ -101,6 +103,8 @@ class TimeAxisView : public virtual AxisView
 	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
 
 	static void setup_sizes ();
+
+	virtual ARDOUR::PresentationInfo const & presentation_info () const = 0;
 
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }

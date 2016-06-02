@@ -527,22 +527,7 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 
 struct PresentationInfoTimeAxisViewSorter {
 	bool operator() (TimeAxisView* a, TimeAxisView* b) {
-		RouteTimeAxisView* ra = dynamic_cast<RouteTimeAxisView*> (a);
-		RouteTimeAxisView* rb = dynamic_cast<RouteTimeAxisView*> (b);
-		/* anything not a route goes at the end */
-		if (!ra && rb) {
-			return false;
-		}
-		if (!rb && ra) {
-			return true;
-		}
-		if (!ra && !rb) {
-			/* XXXX pointer comparison. Should use
-			presentation_info in a time axis view
-			*/
-			return a < b;
-		}
-		return ra->route()->presentation_info () < rb->route()->presentation_info();
+		return a->presentation_info() < b->presentation_info();
 	}
 };
 

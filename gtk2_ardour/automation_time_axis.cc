@@ -1038,3 +1038,9 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 		}
 	}
 }
+
+PresentationInfo const &
+AutomationTimeAxisView::presentation_info () const
+{
+	return _route->presentation_info();
+}

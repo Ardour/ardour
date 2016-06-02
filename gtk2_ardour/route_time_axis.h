@@ -75,16 +75,18 @@ class ItemCounts;
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
 public:
- 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
- 	virtual ~RouteTimeAxisView ();
+	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
+	virtual ~RouteTimeAxisView ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
+
+	ARDOUR::PresentationInfo const & presentation_info () const;
 
 	void show_selection (TimeSelection&);
 	void set_button_names ();
 
 	void set_samples_per_pixel (double);
- 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
+	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
@@ -333,4 +335,3 @@ private:
 };
 
 #endif /* __ardour_route_time_axis_h__ */
-
