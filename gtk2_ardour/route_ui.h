@@ -248,7 +248,6 @@ class RouteUI : public virtual AxisView
 	void adjust_latency ();
 	bool process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir);
 	void save_as_template ();
-	void open_remote_control_id_dialog ();
 
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Stripable>);

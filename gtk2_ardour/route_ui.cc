@@ -2047,61 +2047,6 @@ RouteUI::page_gain_down ()
 }
 
 void
-RouteUI::open_remote_control_id_dialog ()
-{
-	ArdourDialog dialog (_("Remote Control ID"));
-	SpinButton* spin = 0;
-
-	dialog.get_vbox()->set_border_width (18);
-
-	if (Config->get_remote_model() == UserOrdered) {
-		uint32_t const limit = _session->ntracks() + _session->nbusses () + 4;
-
-		HBox* hbox = manage (new HBox);
-		hbox->set_spacing (6);
-		hbox->pack_start (*manage (new Label (_("Remote control ID:"))));
-		spin = manage (new SpinButton);
-		spin->set_digits (0);
-		spin->set_increments (1, 10);
-		spin->set_range (0, limit);
-		spin->set_value (_route->presentation_info().group_order());
-		hbox->pack_start (*spin);
-		dialog.get_vbox()->pack_start (*hbox);
-
-		dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
-	} else {
-		Label* l = manage (new Label());
-		if (_route->is_master() || _route->is_monitor()) {
-			l->set_markup (string_compose (_("The remote control ID of %1 is: %2\n\n\n"
-							 "The remote control ID of %3 cannot be changed."),
-						       Gtkmm2ext::markup_escape_text (_route->name()),
-			                               _route->presentation_info().group_order(),
-						       (_route->is_master() ? _("the master bus") : _("the monitor bus"))));
-		} else {
-			l->set_markup (string_compose (_("The remote control ID of %5 is: %2\n\n\n"
-							 "Remote Control IDs are currently determined by track/bus ordering in %6.\n\n"
-							 "%3Use the User Interaction tab of the Preferences window if you want to change this%4"),
-						       (is_track() ? _("track") : _("bus")),
-			                               _route->presentation_info().group_order(),
-						       "<span size=\"small\" style=\"italic\">",
-						       "</span>",
-						       Gtkmm2ext::markup_escape_text (_route->name()),
-						       PROGRAM_NAME));
-		}
-		dialog.get_vbox()->pack_start (*l);
-		dialog.add_button (Stock::OK, RESPONSE_CANCEL);
-	}
-
-	dialog.show_all ();
-	int const r = dialog.run ();
-
-	if (r == RESPONSE_ACCEPT && spin) {
-		_route->set_presentation_group_order_explicit (spin->get_value_as_int ());
-	}
-}
-
-void
 RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */

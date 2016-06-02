@@ -590,11 +590,6 @@ RouteTimeAxisView::build_display_menu ()
 	}
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
-
-	items.push_back (SeparatorElem());
-
-	items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
-	items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
 	items.push_back (SeparatorElem());
 
 	// Hook for derived classes to add type specific stuff
