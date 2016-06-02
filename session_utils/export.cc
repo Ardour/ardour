@@ -152,7 +152,7 @@ static void usage (int status) {
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
   -n, --normalize            normalize signal level (to 0dBFS)\n\
-  -o, --output  <file>       set expected [initial] framerate\n\
+  -o, --output  <file>       export output file name\n\
   -s, --samplerate <rate>    samplerate to use (default: 48000)\n\
   -V, --version              print version information and exit\n\
 \n");
