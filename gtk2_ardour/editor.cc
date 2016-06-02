@@ -2579,6 +2579,7 @@ Editor::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Editor"));
 	char buf[32];
+	LocaleGuard lg;
 
 	id().print (buf, sizeof (buf));
 	node->add_property ("id", buf);

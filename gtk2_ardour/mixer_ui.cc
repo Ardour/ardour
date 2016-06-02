@@ -1924,6 +1924,7 @@ Mixer_UI::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Mixer"));
 	char buf[128];
+	LocaleGuard lg;
 
 	node->add_child_nocopy (Tabbable::get_state());
 
