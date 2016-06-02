@@ -2574,7 +2574,7 @@ Editor::play_from_edit_point_and_return ()
 void
 Editor::play_selection ()
 {
- 	framepos_t start, end;
+	framepos_t start, end;
 	if (!get_selection_extents ( start, end))
 		return;
 
@@ -3043,62 +3043,63 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
+		if (!rtv) {
+			continue;
+		}
 
-			if (rtv->is_track()) {
+		if (!rtv->is_track()) {
+			continue;
+		}
 
-				/* no edits to destructive tracks */
+		/* no edits to destructive tracks */
 
-				if (rtv->track()->destructive()) {
-					continue;
-				}
+		if (rtv->track()->destructive()) {
+			continue;
+		}
 
-				if ((playlist = rtv->playlist()) != 0) {
+		if ((playlist = rtv->playlist()) != 0) {
 
-					playlist->clear_changes ();
+			playlist->clear_changes ();
 
-					/* XXX need to consider musical time selections here at some point */
+			/* XXX need to consider musical time selections here at some point */
 
-					double speed = rtv->track()->speed();
+			double speed = rtv->track()->speed();
 
+			for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 
-					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
+				sigc::connection c = rtv->view()->RegionViewAdded.connect (
+					sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-						sigc::connection c = rtv->view()->RegionViewAdded.connect (
-								sigc::mem_fun(*this, &Editor::collect_new_region_view));
+				latest_regionviews.clear ();
 
-						latest_regionviews.clear ();
+				playlist->partition ((framepos_t)((*t).start * speed),
+				                     (framepos_t)((*t).end * speed), false);
 
-						playlist->partition ((framepos_t)((*t).start * speed),
-								(framepos_t)((*t).end * speed), false);
+				c.disconnect ();
 
-						c.disconnect ();
+				if (!latest_regionviews.empty()) {
 
-						if (!latest_regionviews.empty()) {
+					rtv->view()->foreach_regionview (sigc::bind (
+						                                 sigc::ptr_fun (add_if_covered),
+						                                 &(*t), &new_selection));
 
-							rtv->view()->foreach_regionview (sigc::bind (
-										sigc::ptr_fun (add_if_covered),
-										&(*t), &new_selection));
-
-							if (!in_command) {
-								begin_reversible_command (_("separate"));
-								in_command = true;
-							}
-
-							/* pick up changes to existing regions */
-
-							vector<Command*> cmds;
-							playlist->rdiff (cmds);
-							_session->add_commands (cmds);
-
-							/* pick up changes to the playlist itself (adds/removes)
-							 */
-
-							_session->add_command(new StatefulDiffCommand (playlist));
-						}
+					if (!in_command) {
+						begin_reversible_command (_("separate"));
+						in_command = true;
 					}
+
+					/* pick up changes to existing regions */
+
+					vector<Command*> cmds;
+					playlist->rdiff (cmds);
+					_session->add_commands (cmds);
+
+					/* pick up changes to the playlist itself (adds/removes)
+					 */
+
+					_session->add_command(new StatefulDiffCommand (playlist));
 				}
 			}
 		}
@@ -3218,7 +3219,7 @@ Editor::separate_under_selected_regions ()
 
 	        if (!playlist) {
 			// is this check necessary?
-	        	continue;
+			continue;
 	        }
 
 		vector<PlaylistState>::iterator i;
@@ -3293,17 +3294,18 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 
 	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
+		if (!rtv) {
+			continue;
+		}
 
-			boost::shared_ptr<Track> t = rtv->track();
+		boost::shared_ptr<Track> t = rtv->track();
 
-			if (t != 0 && ! t->destructive()) {
+		if (t != 0 && ! t->destructive()) {
 
-				if ((playlist = rtv->playlist()) != 0) {
-					playlists.push_back (playlist);
-				}
+			if ((playlist = rtv->playlist()) != 0) {
+				playlists.push_back (playlist);
 			}
 		}
 	}
@@ -3392,7 +3394,7 @@ Editor::region_fill_track ()
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 		framepos_t const position = end_frame + (r->first_frame() - start_frame + 1);
- 		playlist = (*i)->region()->playlist();
+		playlist = (*i)->region()->playlist();
 		playlist->clear_changes ();
 		playlist->duplicate_until (r, position, gap, end);
 		_session->add_command(new StatefulDiffCommand (playlist));
@@ -3957,9 +3959,9 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
-		RouteTimeAxisView* rtv;
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*i)) == 0) {
+		if (!rtv) {
 			continue;
 		}
 
@@ -4384,7 +4386,7 @@ Editor::remove_selected_regions ()
 
 	        if (!playlist) {
 			// is this check necessary?
-	        	continue;
+			continue;
 	        }
 
 		/* get_regions_from_selection_and_entered() guarantees that
@@ -4788,7 +4790,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 		framepos_t const position = end_frame + (r->first_frame() - start_frame + 1);
- 		playlist = (*i)->region()->playlist();
+		playlist = (*i)->region()->playlist();
 		playlist->clear_changes ();
 		playlist->duplicate (r, position, gap, times);
 		_session->add_command(new StatefulDiffCommand (playlist));

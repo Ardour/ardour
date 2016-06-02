@@ -425,6 +425,11 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 
 	TimeAxisView* tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac = rtv->route()->rec_enable_control();
 
 	if (ac) {
@@ -438,6 +443,11 @@ EditorRoutes::on_tv_rec_safe_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 	TimeAxisView* tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac (rtv->route()->rec_safe_control());
 
 	if (ac) {
@@ -453,6 +463,11 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac (rtv->route()->mute_control());
 
 	if (ac) {
@@ -468,6 +483,11 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_control());
 
 	if (ac) {
@@ -483,6 +503,11 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_isolate_control());
 
 	if (ac) {
@@ -498,6 +523,11 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (!rtv) {
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_safe_control());
 
 	if (ac) {

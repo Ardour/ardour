@@ -200,12 +200,12 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	// subscribe to route_active_changed, ...
 	if (rtv && rtv->is_audio_track()) {
 		blank0->set_name ("AudioTrackControlsBaseUnselected");
-	}
-	else if (rtv && rtv->is_midi_track()) {
+	} else if (rtv && rtv->is_midi_track()) {
 		blank0->set_name ("MidiTrackControlsBaseUnselected");
-	}
-	else {
+	} else if (rtv) {
 		blank0->set_name ("AudioBusControlsBaseUnselected");
+	} else {
+		blank0->set_name ("UnknownControlsBaseUnselected");
 	}
 	blank0->set_size_request (-1, -1);
 	blank1->set_size_request (1, 0);

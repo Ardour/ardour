@@ -529,7 +529,19 @@ struct PresentationInfoTimeAxisViewSorter {
 	bool operator() (TimeAxisView* a, TimeAxisView* b) {
 		RouteTimeAxisView* ra = dynamic_cast<RouteTimeAxisView*> (a);
 		RouteTimeAxisView* rb = dynamic_cast<RouteTimeAxisView*> (b);
-		assert (ra && rb);
+		/* anything not a route goes at the end */
+		if (!ra && rb) {
+			return false;
+		}
+		if (!rb && ra) {
+			return true;
+		}
+		if (!ra && !rb) {
+			/* XXXX pointer comparison. Should use
+			presentation_info in a time axis view
+			*/
+			return a < b;
+		}
 		return ra->route()->presentation_info () < rb->route()->presentation_info();
 	}
 };
@@ -846,7 +858,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		if (!rtv || !rtv->is_track()) {
-			/* ignore busses early on. we can't move any regions on them */
+			/* ignore non-tracks early on. we can't move any regions on them */
 		} else if (_last_pointer_time_axis_view < 0) {
 			/* Was in the drop-zone, now over a track.
 			 * Hence it must be an upward move (from the bottom)

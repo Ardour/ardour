@@ -1409,7 +1409,10 @@ GhostRegion*
 AudioRegionView::add_ghost (TimeAxisView& tv)
 {
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
-	assert(rtv);
+
+	if (!rtv) {
+		return 0;
+	}
 
 	double unit_position = _region->position () / samples_per_pixel;
 	AudioGhostRegion* ghost = new AudioGhostRegion (*this, tv, trackview, unit_position);

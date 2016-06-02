@@ -2096,7 +2096,7 @@ Editor::visible_order_range (int* low, int* high) const
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
-		if (!rtv->hidden()) {
+		if (rtv && !rtv->hidden()) {
 
 			if (*high < rtv->order()) {
 				*high = rtv->order ();
@@ -2309,7 +2309,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 
-	if (rtv == 0 || !rtv->is_track()) {
+	if (!rtv || !rtv->is_track()) {
 		return;
 	}
 
