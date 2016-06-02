@@ -22,6 +22,7 @@
 #include "pbd/replace_all.h"
 
 #include "ardour/boost_debug.h"
+#include "ardour/session.h"
 #include "ardour/slavable.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -93,6 +94,8 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 
 	VCAAdded (vcal); /* EMIT SIGNAL */
 
+	_session.set_dirty ();
+
 	return 0;
 }
 
@@ -108,6 +111,8 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 	/* this should cause deassignment and deletion */
 
 	vca->DropReferences ();
+
+	_session.set_dirty ();
 }
 
 boost::shared_ptr<VCA>
