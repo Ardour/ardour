@@ -143,7 +143,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
 
-	name_label.set_name ("TrackLabel");
+	name_label.set_name (X_("TrackNameEditor"));
 	name_label.set_alignment (0.0, 0.5);
 	name_label.set_width_chars (12);
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));

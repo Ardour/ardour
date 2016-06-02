@@ -1154,7 +1154,6 @@ widget "*BlackSeparator" style:highest "black_separator"
 
 widget "*MetricLabel" style:highest "medium_text"
 widget "*ChoiceWindow" style:highest "default_generic"
-widget "*TrackLabel" style:highest "medium_text"
 widget "*TrackParameterName" style:highest "small_italic_text"
 widget "*AddRouteDialog*" style:highest "medium_text"
 widget "*AddRouteDialogSpinner" style:highest "medium_bold_entry"
