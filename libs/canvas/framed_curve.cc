@@ -176,8 +176,6 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				context->fill ();
 				break;
 		}
-		context->restore ();
-
 	} else {
 
 		/* curve of at least 3 points */
@@ -251,8 +249,8 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				context->fill ();
 				break;
 		}
-		context->restore ();
 	}
+	context->restore ();
 
 #if 0
 	/* add points */
