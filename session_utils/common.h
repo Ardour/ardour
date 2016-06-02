@@ -16,7 +16,7 @@ class TestReceiver : public Receiver
 namespace SessionUtils {
 
 	/** initialize libardour */
-	void init ();
+	void init (bool print_log = true);
 
 	/** clean up, stop Processing Engine
 	 * @param s Session to close (may me NULL)

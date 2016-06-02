@@ -86,7 +86,7 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 static MyEventLoop *event_loop;
 
 void
-SessionUtils::init ()
+SessionUtils::init (bool print_log)
 {
 	if (!ARDOUR::init (false, true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
@@ -97,10 +97,12 @@ SessionUtils::init ()
 	EventLoop::set_event_loop_for_thread (event_loop);
 	SessionEvent::create_per_thread_pool ("util", 512);
 
-	test_receiver.listen_to (error);
-	test_receiver.listen_to (info);
-	test_receiver.listen_to (fatal);
-	test_receiver.listen_to (warning);
+	if (print_log) {
+		test_receiver.listen_to (error);
+		test_receiver.listen_to (info);
+		test_receiver.listen_to (fatal);
+		test_receiver.listen_to (warning);
+	}
 }
 
 // TODO return NULL, rather than exit() ?!
@@ -112,6 +114,9 @@ static Session * _load_session (string dir, string state)
 		std::cerr << "Cannot create Audio/MIDI engine\n";
 		::exit (EXIT_FAILURE);
 	}
+
+	engine->set_input_channels (256);
+	engine->set_output_channels (256);
 
 	float sr;
 	SampleFormat sf;
