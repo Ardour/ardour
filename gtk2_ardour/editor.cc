@@ -726,19 +726,23 @@ Editor::Editor ()
 
 	float fract;
 
-	if (!settings || ((prop = settings->property ("edit-horizontal-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
-		/* initial allocation is 90% to canvas, 10% to notebook */
-		edit_pane.set_divider (0, 0.90);
-	} else {
-		edit_pane.set_divider (0, fract);
-	}
+	{
+		LocaleGuard lg;
 
-	if (!settings || ((prop = settings->property ("edit-vertical-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
-		/* initial allocation is 90% to canvas, 10% to summary */
-		editor_summary_pane.set_divider (0, 0.90);
-	} else {
+		if (!settings || ((prop = settings->property ("edit-horizontal-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
+			/* initial allocation is 90% to canvas, 10% to notebook */
+			edit_pane.set_divider (0, 0.90);
+		} else {
+			edit_pane.set_divider (0, fract);
+		}
 
-		editor_summary_pane.set_divider (0, fract);
+		if (!settings || ((prop = settings->property ("edit-vertical-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
+			/* initial allocation is 90% to canvas, 10% to summary */
+			editor_summary_pane.set_divider (0, 0.90);
+		} else {
+
+			editor_summary_pane.set_divider (0, fract);
+		}
 	}
 
 	top_hbox.pack_start (toolbar_frame);
