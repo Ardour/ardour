@@ -497,5 +497,6 @@ Pane::handle_leave_event (GdkEventCrossing*, Divider* d)
 {
 	d->get_window()->set_cursor ();
 	d->set_state (Gtk::STATE_NORMAL);
+	d->queue_draw ();
 	return true;
 }
