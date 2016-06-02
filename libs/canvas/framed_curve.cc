@@ -108,6 +108,32 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 	 * with this.
 	 */
 
+	/* x-axis limits of the curve, in window space coordinates */
+
+	Duple w1 = item_to_window (Duple (_points.front().x, 0.0));
+	Duple w2 = item_to_window (Duple (_points.back().x, 0.0));
+
+	/* clamp actual draw to area bound by points, rather than our bounding box which is slightly different */
+
+	context->save ();
+	context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+	context->clip ();
+
+	/* expand drawing area by several pixels on each side to avoid cairo stroking effects at the boundary.
+	   they will still occur, but cairo's clipping will hide them.
+	*/
+
+	draw = draw.expand (4.0);
+
+	/* now clip it to the actual points in the curve */
+
+	if (draw.x0 < w1.x) {
+		draw.x0 = w1.x;
+	}
+
+	if (draw.x1 >= w2.x) {
+		draw.x1 = w2.x;
+	}
 
 	setup_outline_context (context);
 
@@ -120,9 +146,9 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		window_space = item_to_window (*it);
 		context->move_to (window_space.x, window_space.y);
 		++it;
-		window_space = item_to_window (*it);
+		window_space = item_to_window (*it, false);
 		context->line_to (window_space.x, window_space.y);
-		window_space = item_to_window (_points.back());
+		window_space = item_to_window (_points.back(), false);
 		context->line_to (window_space.x, window_space.y);
 
 		switch (curve_fill) {
@@ -133,7 +159,7 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				context->stroke_preserve ();
 				window_space = item_to_window (Duple(_points.back().x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (Duple(_points.back().x, draw.height()));
+				window_space = item_to_window (Duple(_points.front().x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
@@ -150,62 +176,50 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				context->fill ();
 				break;
 		}
+		context->restore ();
 
 	} else {
 
 		/* curve of at least 3 points */
 
-		/* x-axis limits of the curve, in window space coordinates */
-
-		Duple w1 = item_to_window (Duple (_points.front().x, 0.0));
-		Duple w2 = item_to_window (Duple (_points.back().x, 0.0));
-
-		/* clamp actual draw to area bound by points, rather than our bounding box which is slightly different */
-
-		context->save ();
-		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-		context->clip ();
-
-		/* expand drawing area by several pixels on each side to avoid cairo stroking effects at the boundary.
-		   they will still occur, but cairo's clipping will hide them.
-		 */
-
-		draw = draw.expand (4.0);
-
-		/* now clip it to the actual points in the curve */
-
-		if (draw.x0 < w1.x) {
-			draw.x0 = w1.x;
-		}
-
-		if (draw.x1 >= w2.x) {
-			draw.x1 = w2.x;
-		}
-
 		/* find left and right-most sample */
 		Duple window_space;
 		Points::size_type left = 0;
-		Points::size_type right = n_samples;
+		Points::size_type right = n_samples - 1;
 
 		for (Points::size_type idx = 0; idx < n_samples - 1; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
-			if (window_space.x >= draw.x0) break;
+			if (window_space.x >= draw.x0) {
+				break;
+			}
 			left = idx;
 		}
 
-		for (Points::size_type idx = n_samples - 1; idx > left + 1; --idx) {
+		for (Points::size_type idx = left; idx < n_samples - 1; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, 0.0));
-			if (window_space.x <= draw.x1) break;
-			right = idx;
+			if (window_space.x > draw.x1) {
+				right = idx;
+				break;
+			}
 		}
 
-		window_space = item_to_window (*_points.begin());
-		context->move_to (window_space.x, window_space.y);
-		/* draw line between samples */
-		window_space = item_to_window (Duple (samples[left].x, samples[left].y));
-		context->line_to (window_space.x, window_space.y);
+		/* a redraw may have been requested between the last sample and the last point.*/
 
-		for (uint32_t idx = left; idx < right; ++idx) {
+		Duple last_point = Duple (samples[right].x, samples[right].y);
+		Duple first_point = Duple (samples[left].x, samples[left].y);
+
+		if (draw.x1 > last_point.x) {
+			last_point = Duple (_points.back().x, _points.back().y);
+		}
+		if (draw.x0 < first_point.x) {
+			first_point = Duple (_points.front().x, _points.front().y);
+		}
+
+		window_space = item_to_window (first_point);
+		context->move_to (window_space.x, window_space.y);
+
+		/* draw line between samples */
+		for (uint32_t idx = left + 1; idx <= right; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y), false);
 			context->line_to (window_space.x, window_space.y);
 		}
@@ -216,19 +230,21 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				break;
 			case Inside:
 				context->stroke_preserve ();
-				window_space = item_to_window (Duple (samples[right-1].x, draw.height()));
+
+				window_space = item_to_window (Duple (last_point.x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (Duple (samples[left].x, draw.height()));
+				window_space = item_to_window (Duple (first_point.x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
+
 				context->close_path();
 				setup_fill_context(context);
 				context->fill ();
 				break;
 			case Outside:
 				context->stroke_preserve ();
-				window_space = item_to_window (Duple (samples[right-1].x, 0.0));
+				window_space = item_to_window (last_point);
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (Duple (samples[left].x, 0.0));
+				window_space = item_to_window (first_point);
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
