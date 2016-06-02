@@ -527,7 +527,7 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 bool
 Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can_save)
 {
-	if (is_registered(op, action_name)) {
+	if (is_registered (op, action_name)) {
 		return false;
 	}
 
