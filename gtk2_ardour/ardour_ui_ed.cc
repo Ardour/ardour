@@ -134,7 +134,6 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (main_menu_actions, X_("MixerMenu"), _("Mixer"));
 	global_actions.register_action (main_menu_actions, X_("EditorMenu"), _("Editor"));
 	global_actions.register_action (main_menu_actions, X_("PrefsMenu"), _("Preferences"));
-	global_actions.register_action (main_menu_actions, X_("MastersMenu"), _("Master Faders"));
 	global_actions.register_action (main_menu_actions, X_("DetachMenu"), _("Detach"));
 	global_actions.register_action (main_menu_actions, X_("Help"), _("Help"));
 	global_actions.register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
