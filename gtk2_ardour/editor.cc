@@ -2345,6 +2345,7 @@ Editor::set_state (const XMLNode& node, int version)
 	XMLProperty const * prop;
 	set_id (node);
 	PBD::Unwinder<bool> nsi (no_save_instant, true);
+	LocaleGuard lg;
 
 	Tabbable::set_state (node, version);
 

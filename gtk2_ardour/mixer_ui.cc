@@ -1857,6 +1857,7 @@ int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
 	XMLProperty const * prop;
+	LocaleGuard lg;
 
 	Tabbable::set_state (node, version);
 
