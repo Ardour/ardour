@@ -430,10 +430,8 @@ RouteTimeAxisView::update_track_number_visibility ()
 		if (tnw & 1) --tnw;
 		number_label.set_size_request(tnw, -1);
 		number_label.show ();
-		name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, -1); // -2 = cellspacing
 	} else {
 		number_label.hide ();
-		name_hbox.set_size_request(TimeAxisView::name_width_px, -1);
 	}
 }
 

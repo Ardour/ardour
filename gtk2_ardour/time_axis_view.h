@@ -230,7 +230,6 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox              time_axis_vbox;
 	Gtk::HBox              time_axis_hbox;
 	Gtk::Frame             time_axis_frame;
-	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
 	Gtk::Label             name_label;
 	Gtk::Fixed             scroomer_placeholder;

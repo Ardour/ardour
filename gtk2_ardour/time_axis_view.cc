@@ -148,20 +148,19 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_width_chars (12);
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
-	Gtk::Entry* an_entry = new Gtkmm2ext::FocusEntry;
-	an_entry->set_name ("EditorTrackNameDisplay");
-	Gtk::Requisition req;
-	an_entry->size_request (req);
-	name_label.set_size_request (-1, req.height);
-	name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	delete an_entry;
+	{
+		std::auto_ptr<Gtk::Entry> an_entry (new Gtkmm2ext::FocusEntry);
+		an_entry->set_name (X_("TrackNameEditor"));
+		Gtk::Requisition req;
+		an_entry->size_request (req);
 
-	name_hbox.pack_end (name_label, true, true);
+		name_label.set_size_request (-1, req.height);
+		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	}
 
 	// set min. track-header width if fader is not visible
-	name_hbox.set_size_request(name_width_px, -1);
+	name_label.set_size_request(name_width_px, -1);
 
-	name_hbox.show ();
 	name_label.show ();
 
 	controls_table.set_row_spacings (2);
@@ -169,10 +168,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_border_width (2);
 
 	if (ARDOUR::Profile->get_mixbus() ) {
-		controls_table.attach (name_hbox, 4, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+		controls_table.attach (name_label, 4, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	} else {
-		controls_table.attach (name_hbox, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+		controls_table.attach (name_label, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	}
+
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 

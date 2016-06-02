@@ -173,7 +173,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	//name label isn't editable on an automation track; remove the tooltip
 	set_tooltip (name_label, X_(""));
 
-	/* repack the name label */
+	/* repack the name label, which TimeAxisView has already attached to
+	 * the controls_table
+	 */
 
 	if (name_label.get_parent()) {
 		name_label.get_parent()->remove (name_label);
@@ -186,7 +188,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* add the buttons */
 	controls_table.set_border_width (1);
-	controls_table.remove (name_hbox);
 	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
 	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
