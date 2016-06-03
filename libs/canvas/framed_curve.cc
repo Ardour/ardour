@@ -201,21 +201,26 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 			}
 		}
 
-		/* a redraw may have been requested between the last sample and the last point.*/
+		const Duple first_sample = Duple (samples[left].x, samples[left].y);
 
-		const Duple first_point = Duple (samples[left].x, samples[left].y);
-		Duple last_point = Duple (samples[right].x, samples[right].y);
-
-		if (draw.x1 > last_point.x) {
-			last_point = Duple (_points.back().x, _points.back().y);
-		}
-
-		window_space = item_to_window (first_point);
+		/* move to the first sample's x and the draw height */
+		window_space = item_to_window (Duple (first_sample.x, draw.height()));
 		context->move_to (window_space.x, window_space.y);
 
-		/* draw line between samples */
-		for (uint32_t idx = left + 1; idx <= right; ++idx) {
+		/* draw line to first sample and then between samples */
+		for (uint32_t idx = left; idx <= right; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y), false);
+			context->line_to (window_space.x, window_space.y);
+		}
+
+		/* a redraw may have been requested between the last sample and the last point.
+		   if so, draw a line to the last _point.
+		*/
+		Duple last_sample = Duple (samples[right].x, samples[right].y);
+
+		if (draw.x1 > last_sample.x) {
+			last_sample = Duple (_points.back().x, _points.back().y);
+			window_space = item_to_window (last_sample, false);
 			context->line_to (window_space.x, window_space.y);
 		}
 
@@ -225,21 +230,20 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				break;
 			case Inside:
 				context->stroke_preserve ();
-
-				window_space = item_to_window (Duple (last_point.x, draw.height()));
+				/* close the frame, possibly using the last _point's x rather than samples[right].x */
+				window_space = item_to_window (Duple (last_sample.x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (Duple (first_point.x, draw.height()));
+				window_space = item_to_window (Duple (first_sample.x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
-
 				context->close_path();
 				setup_fill_context(context);
 				context->fill ();
 				break;
 			case Outside:
 				context->stroke_preserve ();
-				window_space = item_to_window (last_point);
+				window_space = item_to_window (last_sample);
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (first_point);
+				window_space = item_to_window (first_sample);
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
