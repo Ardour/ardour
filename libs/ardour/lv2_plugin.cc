@@ -2472,11 +2472,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								// -> add automation event..
 								AutomationCtrlPtr c = get_automation_control (p);
 								if (c && c->ac->automation_state() == Touch) {
+									framepos_t when = std::max ((framepos_t) 0, _session.transport_frame() + frames - _current_latency);
+									assert (_session.transport_frame() + frames - _current_latency >= 0);
 									if (c->guard) {
 										c->guard = false;
-										c->ac->list()->add (_session.transport_frame() + frames, v, true, true);
+										c->ac->list()->add (when, v, true, true);
 									} else {
-										c->ac->set_double (v, _session.transport_frame() + frames, true);
+										c->ac->set_double (v, when, true);
 									}
 								}
 							}
@@ -2501,7 +2503,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
 								AutomationCtrlPtr c = get_automation_control (p);
 								if (c) {
-									c->ac->start_touch (_session.transport_frame());
+									c->ac->start_touch (std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
 									c->guard = true;
 								}
 							}
@@ -2515,7 +2517,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
 								AutomationCtrlPtr c = get_automation_control (p);
 								if (c) {
-									c->ac->stop_touch (true, _session.transport_frame());
+									c->ac->stop_touch (true, std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
 								}
 							}
 						}
