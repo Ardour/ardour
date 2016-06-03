@@ -294,6 +294,7 @@ TimeAxisView::hide ()
 * @param y y position.
 * @param nth index for this TimeAxisView, increased if this view has children.
 * @param parent parent component.
+*
 * @return height of this TimeAxisView.
 */
 guint32
