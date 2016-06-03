@@ -203,14 +203,11 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 
 		/* a redraw may have been requested between the last sample and the last point.*/
 
+		const Duple first_point = Duple (samples[left].x, samples[left].y);
 		Duple last_point = Duple (samples[right].x, samples[right].y);
-		Duple first_point = Duple (samples[left].x, samples[left].y);
 
 		if (draw.x1 > last_point.x) {
 			last_point = Duple (_points.back().x, _points.back().y);
-		}
-		if (draw.x0 < first_point.x) {
-			first_point = Duple (_points.front().x, _points.front().y);
 		}
 
 		window_space = item_to_window (first_point);
