@@ -26,7 +26,7 @@ namespace SessionUtils {
 	/** @param dir Session directory.
 	 *  @param state Session state file, without .ardour suffix.
 	 */
-	ARDOUR::Session * load_session (std::string dir, std::string state);
+	ARDOUR::Session * load_session (std::string dir, std::string state, bool exit_at_failure = true);
 
 	/** close session and stop engine
 	 * @param s Session to close (may me NULL)

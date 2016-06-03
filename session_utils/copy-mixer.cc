@@ -1,8 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <getopt.h>
+#include <glibmm.h>
 
+#include "pbd/basename.h"
 #include "pbd/stateful.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/send.h"
 #include "ardour/track.h"
 
@@ -13,6 +16,11 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace SessionUtils;
+
+static bool opt_debug_dump = false;
+static bool opt_copy_busses = false;
+static bool opt_verbose = false;
+static bool opt_log = false;
 
 /* this is copied from  Session::new_route_from_template */
 static void
@@ -84,7 +92,9 @@ copy_mixer_settings (Session*s, boost::shared_ptr<Route> dst, XMLNode& state)
 	trim_state_for_mixer_copy (s, state);
 	state.remove_nodes_and_delete ("Diskstream");
 	state.remove_nodes_and_delete ("Automation");
-	state.dump (cerr);
+	if (opt_debug_dump) {
+		state.dump (cout);
+	}
 
 	dst->set_state (state, PBD::Stateful::loading_state_version);
 }
@@ -94,17 +104,17 @@ copy_session_routes (
 		const std::string& src_path, const std::string& src_name,
 		const std::string& dst_path, const std::string& dst_load, const std::string& dst_save)
 {
-	SessionUtils::init (false);
+	SessionUtils::init (opt_log);
 	Session* s = 0;
 
 	typedef std::map<std::string,XMLNode*> StateMap;
 	StateMap routestate;
 	StateMap buslist;
 
-	s = SessionUtils::load_session (src_path, src_name);
+	s = SessionUtils::load_session (src_path, src_name, false);
 
 	if (!s) {
-		printf ("Cannot load source session %s/%s.\n", src_path.c_str (), src_name.c_str ());
+		fprintf (stderr, "Cannot load source session %s/%s.\n", src_path.c_str (), src_name.c_str ());
 		SessionUtils::cleanup ();
 		return -1;
 	}
@@ -130,20 +140,21 @@ copy_session_routes (
 	/* open target session */
 	s = SessionUtils::load_session (dst_path, dst_load);
 	if (!s) {
-		printf ("Cannot load target session %s/%s.\n", dst_path.c_str (), dst_load.c_str ());
+		fprintf (stderr, "Cannot load target session %s/%s.\n", dst_path.c_str (), dst_load.c_str ());
 		SessionUtils::cleanup ();
 		return -1;
 	}
 
 	/* iterate over all busses in the src session, add missing ones to target */
-	// TODO: make optional
-	rl = s->get_routes ();
-	for (StateMap::const_iterator i = buslist.begin (); i != buslist.end (); ++i) {
-		if (s->route_by_name (i->first)) {
-			continue;
+	if (opt_copy_busses) {
+		rl = s->get_routes ();
+		for (StateMap::const_iterator i = buslist.begin (); i != buslist.end (); ++i) {
+			if (s->route_by_name (i->first)) {
+				continue;
+			}
+			XMLNode& rs (*(i->second));
+			s->new_route_from_template (1, rs, rs.property (X_("name"))->value (), NewPlaylist);
 		}
-		XMLNode& rs (*(i->second));
-		s->new_route_from_template (1, rs, rs.property (X_("name"))->value (), NewPlaylist);
 	}
 
 	/* iterate over all *busses* in the target session.
@@ -162,10 +173,14 @@ copy_session_routes (
 		/* find matching route by name */
 		std::map<std::string,XMLNode*>::iterator it = routestate.find (r->name ());
 		if (it == routestate.end ()) {
-			printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+			if (opt_verbose) {
+				printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+			}
 			continue;
 		}
-		printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+		if (opt_verbose) {
+			printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+		}
 		XMLNode *state = it->second;
 		// copy state
 		copy_mixer_settings (s, r, *state);
@@ -186,10 +201,14 @@ copy_session_routes (
 		/* find matching route by name */
 		std::map<std::string,XMLNode*>::iterator it = routestate.find (r->name ());
 		if (it == routestate.end ()) {
-			printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+			if (opt_verbose) {
+				printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+			}
 			continue;
 		}
-		printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+		if (opt_verbose) {
+			printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+		}
 		XMLNode *state = it->second;
 		/* copy state */
 		copy_mixer_settings (s, r, *state);
@@ -213,14 +232,24 @@ copy_session_routes (
 
 static void usage (int status) {
 	// help2man compatible format (standard GNU help-text)
-	printf ("copy-mixer - copy mixer settings from one session to another.\n\n");
-	printf ("Usage: copy-mixer [ OPTIONS ] <src-path> <name> <dst-path> <name> [name]\n\n");
+	printf (UTILNAME " - copy mixer settings from one session to another.\n\n");
+	printf ("Usage: " UTILNAME " [ OPTIONS ] <src> <dst>\n\n");
+
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
+  -b, --bus-copy             add busses present in src to dst\n\
+  -d, --debug                print pre-processed XML for each route\n\
+  -l, --log-messages         display libardour log messages\n\
+  -s, --snapshot <name>      create a new snapshot in dst\n\
+  -v, --verbose              show perfomed copy opeations\n\
   -V, --version              print version information and exit\n\
 \n");
+
 	printf ("\n\
-.. not yet documented..\n\
+This utility copies mixer-settings from the src-session to the dst-session.\n\
+Both <src> and <dst> are paths to .ardour session files.\n\
+If --snapshot is not given, the <dst> session file is overwritten.\n\
+When --snapshot is set, a new snaphot in the <dst> session is created.\n\
 \n");
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
@@ -228,32 +257,60 @@ static void usage (int status) {
 	::exit (status);
 }
 
+static bool ends_with (std::string const& value, std::string const& ending)
+{
+	if (ending.size() > value.size()) return false;
+	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
 
 int main (int argc, char* argv[])
 {
-	const char *optstring = "hV";
-
-	// TODO add some arguments. (save snapshot, copy busses...)
+	const char *optstring = "bhls:Vv";
 
 	const struct option longopts[] = {
-		{ "help",       0, 0, 'h' },
-		{ "version",    0, 0, 'V' },
+		{ "bus-copy",     required_argument, 0, 'b' },
+		{ "debug",        no_argument,       0, 'd' },
+		{ "help",         no_argument,       0, 'h' },
+		{ "log-messages", no_argument,       0, 'l' },
+		{ "snapshot",     no_argument,       0, 's' },
+		{ "version",      no_argument,       0, 'V' },
+		{ "vebose",       no_argument,       0, 'v' },
 	};
 
 	int c = 0;
+	std::string dst_snapshot_name = "";
 
 	while (EOF != (c = getopt_long (argc, argv,
 					optstring, longopts, (int *) 0))) {
 		switch (c) {
+			case 'b':
+				opt_copy_busses = true;
+				break;
 
-			case 'V':
-				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
-				printf ("Copyright (C) GPL 2015 Robin Gareus <robin@gareus.org>\n");
-				exit (0);
+			case 'd':
+				opt_debug_dump = true;
 				break;
 
 			case 'h':
 				usage (0);
+				break;
+
+			case 'l':
+				opt_log = true;
+				break;
+
+			case 's':
+				dst_snapshot_name = optarg;
+				break;
+
+			case 'V':
+				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
+				printf ("Copyright (C) GPL 2016 Robin Gareus <robin@gareus.org>\n");
+				exit (0);
+				break;
+
+			case 'v':
+				opt_verbose = true;
 				break;
 
 			default:
@@ -264,12 +321,40 @@ int main (int argc, char* argv[])
 
 	// TODO parse path/name  from a single argument.
 
-	if (optind + 4 > argc) {
+	if (optind + 2 > argc) {
 		usage (EXIT_FAILURE);
 	}
 
+	std::string src = argv[optind];
+	std::string dst = argv[optind + 1];
+
+	// statefile_suffix
+
+	if (!ends_with (src, statefile_suffix)) {
+		fprintf (stderr, "source is not a .ardour session file.\n");
+		exit (1);
+	}
+	if (!ends_with (dst, statefile_suffix)) {
+		fprintf (stderr, "target is not a .ardour session file.\n");
+		exit (1);
+	}
+	if (!Glib::file_test (src, Glib::FILE_TEST_IS_REGULAR)) {
+		fprintf (stderr, "source is not a regular file.\n");
+		exit (1);
+	}
+	if (!Glib::file_test (dst, Glib::FILE_TEST_IS_REGULAR)) {
+		fprintf (stderr, "target is not a regular file.\n");
+		exit (1);
+	}
+
+	std::string src_path = Glib::path_get_dirname (src);
+	std::string src_name = PBD::basename_nosuffix (src);
+	std::string dst_path = Glib::path_get_dirname (dst);
+	std::string dst_name = PBD::basename_nosuffix (dst);
+
+	// TODO check if src != dst ..
 	return copy_session_routes (
-			argv[optind], argv[optind + 1],
-			argv[optind + 2], argv[optind + 3],
-			(optind + 4 < argc) ? argv[optind + 4] : "");
+			src_path, src_name,
+			dst_path, dst_name,
+			dst_snapshot_name);
 }

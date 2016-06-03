@@ -125,18 +125,18 @@ static Session * _load_session (string dir, string state)
 	if (Session::get_info_from_path (s, sr, sf) == 0) {
 		if (engine->set_sample_rate (sr)) {
 			std::cerr << "Cannot set session's samplerate.\n";
-			::exit (EXIT_FAILURE);
+			return 0;
 		}
 	} else {
 		std::cerr << "Cannot get samplerate from session.\n";
-		::exit (EXIT_FAILURE);
+		return 0;
 	}
 
 	init_post_engine ();
 
 	if (engine->start () != 0) {
 		std::cerr << "Cannot start Audio/MIDI engine\n";
-		::exit (EXIT_FAILURE);
+		return 0;
 	}
 
 	Session* session = new Session (*engine, dir, state);
@@ -145,7 +145,7 @@ static Session * _load_session (string dir, string state)
 }
 
 Session *
-SessionUtils::load_session (string dir, string state)
+SessionUtils::load_session (string dir, string state, bool exit_at_failure)
 {
 	Session* s = 0;
 	try {
@@ -161,6 +161,9 @@ SessionUtils::load_session (string dir, string state)
 		::exit (EXIT_FAILURE);
 	} catch (...) {
 		cerr << "unknown exception.\n";
+		::exit (EXIT_FAILURE);
+	}
+	if (!s && exit_at_failure) {
 		::exit (EXIT_FAILURE);
 	}
 	return s;

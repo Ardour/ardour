@@ -147,8 +147,8 @@ static int export_session (Session *session,
 
 static void usage (int status) {
 	// help2man compatible format (standard GNU help-text)
-	printf ("export - export an ardour session from the commandline.\n\n");
-	printf ("Usage: export [ OPTIONS ] <session-dir> <session-name>\n\n");
+	printf (UTILNAME " - export an ardour session from the commandline.\n\n");
+	printf ("Usage: " UTILNAME " [ OPTIONS ] <session-dir> <session/snapshot-name>\n\n");
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
   -n, --normalize            normalize signal level (to 0dBFS)\n\
