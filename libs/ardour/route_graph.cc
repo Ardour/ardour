@@ -198,8 +198,8 @@ struct RouteRecEnabledComparator
 	{
 		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(r1));
 		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(r2));
-		PresentationInfo::global_order_t r1o = r1->presentation_info().global_order();
-		PresentationInfo::global_order_t r2o = r2->presentation_info().global_order();
+		PresentationInfo::order_t r1o = r1->presentation_info().order();
+		PresentationInfo::order_t r2o = r2->presentation_info().order();
 
 		if (!t1) {
 			if (!t2) {

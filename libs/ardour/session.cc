@@ -2308,7 +2308,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 presentation order %2\n", (*i)->name(), (*i)->presentation_info().global_order()));
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 presentation order %2\n", (*i)->name(), (*i)->presentation_info().order()));
 		}
 #endif
 
@@ -2943,8 +2943,8 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 			continue;
 		}
 
-		if (rt->presentation_info().group_order () >= first_new_order) {
-			rt->set_presentation_group_order (rt->presentation_info().group_order () + how_many);
+		if (rt->presentation_info().order () >= first_new_order) {
+			rt->set_presentation_group_order (rt->presentation_info().order () + how_many);
 		}
 	}
 }
@@ -3440,7 +3440,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 			/* presentation info order may already have been set from XML */
 
-			if (r->presentation_info().unordered()) {
+			if (!r->presentation_info().order_set()) {
 
 				if (order == PresentationInfo::max_order) {
 					/* just add to the end */
@@ -3451,14 +3451,13 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to %1 + %2 = %3\n", order, added, order + added));
 				}
 			} else {
-				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order already set to %1\n", r->presentation_info().group_order()));
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order already set to %1\n", r->presentation_info().order()));
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 global order %3 type %4 (summary: %5)\n",
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 type %3 (summary: %4)\n",
 		                                               r->name(),
-		                                               r->presentation_info().group_order(),
-		                                               r->presentation_info().global_order(),
+		                                               r->presentation_info().order(),
 		                                               enum_2_string (r->presentation_info().flags()),
 		                                               r->presentation_info().to_string()));
 
@@ -4272,11 +4271,11 @@ struct PresentationOrderSorter {
 		if (a->presentation_info().special() && !b->presentation_info().special()) {
 			/* a is not ordered, b is; b comes before a */
 			return false;
-		} else if (b->presentation_info().unordered() && !a->presentation_info().unordered()) {
+		} else if (!b->presentation_info().order_set() && a->presentation_info().order_set()) {
 			/* b is not ordered, a is; a comes before b */
 			return true;
 		} else {
-			return a->presentation_info().global_order() < b->presentation_info().global_order();
+			return a->presentation_info().order() < b->presentation_info().order();
 		}
 	}
 };

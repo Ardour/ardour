@@ -136,7 +136,7 @@ Stripable::set_state (XMLNode const& node, int version)
 
 		if (!_presentation_info.special()) {
 			if ((prop = node.property (X_("order-key"))) != 0) {
-				_presentation_info.set_group_order (atol (prop->value()));
+				_presentation_info.set_order (atol (prop->value()));
 			}
 		}
 	}
