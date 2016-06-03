@@ -241,9 +241,9 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				break;
 			case Outside:
 				context->stroke_preserve ();
-				window_space = item_to_window (last_sample);
+				window_space = item_to_window (Duple (last_sample.x, 0.0));
 				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (first_sample);
+				window_space = item_to_window (Duple (first_sample.x, 0.0));
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
