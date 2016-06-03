@@ -1044,3 +1044,9 @@ AutomationTimeAxisView::presentation_info () const
 {
 	return _route->presentation_info();
 }
+
+boost::shared_ptr<Stripable>
+AutomationTimeAxisView::stripable () const
+{
+	return _route;
+}

@@ -72,11 +72,13 @@
 #include "ardour/lmath.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
+#include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session_playlists.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
+#include "ardour/vca.h"
 
 #include "canvas/debug.h"
 #include "canvas/text.h"
@@ -1033,7 +1035,7 @@ Editor::control_select (PresentationInfo::global_order_t global_order, Selection
 	}
 
 	PresentationInfo pi (global_order, select_flags);
-	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (pi.group_order(), pi.flags());
+	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (pi.order(), pi.flags());
 
 	/* selected object may not be a Route */
 
@@ -5194,73 +5196,92 @@ Editor::resume_route_redisplay ()
 }
 
 void
-Editor::add_vcas (VCAList& vcas)
+Editor::add_vcas (VCAList& vlist)
 {
-	VCATimeAxisView* vtv;
-	list<VCATimeAxisView*> new_views;
+	StripableList sl;
 
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
-		vtv->set_vca (*v);
-		new_views.push_back (vtv);
+	for (VCAList::iterator v = vlist.begin(); v != vlist.end(); ++v) {
+		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
 	}
 
-	if (new_views.size() > 0) {
-		_routes->vcas_added (new_views);
-	}
+	add_stripables (sl);
 }
 
 void
-Editor::add_routes (RouteList& routes)
+Editor::add_routes (RouteList& rlist)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::handle_new_route, routes)
+	StripableList sl;
 
-	RouteTimeAxisView *rtv;
-	list<RouteTimeAxisView*> new_views;
+	for (RouteList::iterator r = rlist.begin(); r != rlist.end(); ++r) {
+		sl.push_back (*r);
+	}
+
+	add_stripables (sl);
+}
+
+void
+Editor::add_stripables (StripableList& sl)
+{
+	list<TimeAxisView*> new_views;
+	boost::shared_ptr<VCA> v;
+	boost::shared_ptr<Route> r;
 	TrackViewList new_selection;
 	bool from_scratch = (track_views.size() == 0);
 
-	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
-		boost::shared_ptr<Route> route = (*x);
+	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
-		if (route->is_auditioner() || route->is_monitor()) {
-			continue;
+		if ((v = boost::dynamic_pointer_cast<VCA> (*s)) != 0) {
+
+			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
+			vtv->set_vca (v);
+			new_views.push_back (vtv);
+
+		} else if ((r = boost::dynamic_pointer_cast<Route> (*s)) != 0) {
+
+			if (r->is_auditioner() || r->is_monitor()) {
+				continue;
+			}
+
+			RouteTimeAxisView* rtv;
+			DataType dt = r->input()->default_type();
+
+			if (dt == ARDOUR::DataType::AUDIO) {
+				rtv = new AudioTimeAxisView (*this, _session, *_track_canvas);
+				rtv->set_route (r);
+			} else if (dt == ARDOUR::DataType::MIDI) {
+				rtv = new MidiTimeAxisView (*this, _session, *_track_canvas);
+				rtv->set_route (r);
+			} else {
+				throw unknown_type();
+			}
+
+			new_views.push_back (rtv);
+			track_views.push_back (rtv);
+			new_selection.push_back (rtv);
+
+			rtv->effective_gain_display ();
+
+			rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
+			rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 		}
-
-		DataType dt = route->input()->default_type();
-
-		if (dt == ARDOUR::DataType::AUDIO) {
-			rtv = new AudioTimeAxisView (*this, _session, *_track_canvas);
-			rtv->set_route (route);
-		} else if (dt == ARDOUR::DataType::MIDI) {
-			rtv = new MidiTimeAxisView (*this, _session, *_track_canvas);
-			rtv->set_route (route);
-		} else {
-			throw unknown_type();
-		}
-
-		new_views.push_back (rtv);
-		track_views.push_back (rtv);
-		new_selection.push_back (rtv);
-
-		rtv->effective_gain_display ();
-
-		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
-		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}
 
 	if (new_views.size() > 0) {
-		_routes->routes_added (new_views);
-		_summary->routes_added (new_views);
+		_routes->time_axis_views_added (new_views);
+		//_summary->routes_added (new_selection); /* XXX requires RouteTimeAxisViewList */
 	}
 
-	if (!from_scratch) {
+	/* note: !new_selection.empty() means that we got some routes rather
+	 * than just VCAs
+	 */
+
+	if (!from_scratch && !new_selection.empty()) {
 		selection->tracks.clear();
 		selection->add (new_selection);
 		begin_selection_op_history();
 	}
 
-	if (show_editor_mixer_when_tracks_arrive) {
+	if (show_editor_mixer_when_tracks_arrive && !new_selection.empty()) {
 		show_editor_mixer (true);
 	}
 

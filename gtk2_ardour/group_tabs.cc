@@ -694,7 +694,7 @@ GroupTabs::collect (RouteGroup* g)
 	int coll = -1;
 	while (i != group_routes->end() && j != routes->end()) {
 
-		PresentationInfo::order_t const k = (*j)->presentation_info ().group_order();
+		PresentationInfo::order_t const k = (*j)->presentation_info ().order();
 
 		if (*i == *j) {
 

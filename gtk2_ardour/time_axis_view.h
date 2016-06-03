@@ -57,6 +57,7 @@ namespace ARDOUR {
 	class Session;
 	class RouteGroup;
 	class Playlist;
+	class Stripable;
 }
 
 namespace Gtk {
@@ -104,6 +105,7 @@ class TimeAxisView : public virtual AxisView
 
 	static void setup_sizes ();
 
+	virtual boost::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
 	virtual ARDOUR::PresentationInfo const & presentation_info () const = 0;
 
 	/** @return index of this TimeAxisView within its parent */

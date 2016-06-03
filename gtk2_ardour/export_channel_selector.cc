@@ -695,7 +695,7 @@ TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
 	row[track_cols.selected] = false;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
-	row[track_cols.order_key] = route->presentation_info().global_order();
+	row[track_cols.order_key] = route->presentation_info().order();
 }
 
 void

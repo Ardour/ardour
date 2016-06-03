@@ -3927,13 +3927,13 @@ ARDOUR_UI::translate_order (AddRouteDialog::InsertAt place)
 	if (place == AddRouteDialog::AfterSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.back());
 		if (rtav) {
-			order_hint = rtav->route()->presentation_info().group_order();
+			order_hint = rtav->route()->presentation_info().order();
 			order_hint++;
 		}
 	} else if (place == AddRouteDialog::BeforeSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.front());
 		if (rtav) {
-			order_hint = rtav->route()->presentation_info().group_order();
+			order_hint = rtav->route()->presentation_info().order();
 		}
 	} else if (place == AddRouteDialog::First) {
 		order_hint = 0;

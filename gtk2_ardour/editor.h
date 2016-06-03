@@ -772,6 +772,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void popup_note_context_menu (ArdourCanvas::Item *, GdkEvent *);
 	Gtk::Menu _note_context_menu;
 
+	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 	void add_vcas (ARDOUR::VCAList&);

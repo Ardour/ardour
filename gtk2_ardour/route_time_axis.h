@@ -80,6 +80,7 @@ public:
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
 
 	void show_selection (TimeSelection&);

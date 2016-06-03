@@ -58,8 +58,7 @@ public:
 
 	void redisplay ();
 	void update_visibility ();
-	void routes_added (std::list<RouteTimeAxisView*> routes);
-	void vcas_added (std::list<VCATimeAxisView*> routes);
+	void time_axis_views_added (std::list<TimeAxisView*>);
 	void route_removed (TimeAxisView *);
 	void hide_track_in_display (TimeAxisView &);
 	std::list<TimeAxisView*> views () const;

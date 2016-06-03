@@ -484,7 +484,7 @@ Mixer_UI::add_strips (RouteList& routes)
 
 		nroutes++;
 
-		if (r->presentation_info().group_order() == (routes.front()->presentation_info().group_order() + routes.size())) {
+		if (r->presentation_info().order() == (routes.front()->presentation_info().order() + routes.size())) {
 			insert_iter = it;
 			break;
 		}
@@ -670,7 +670,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			route->presentation_info().unset_flag (PresentationInfo::Hidden);
 		}
 
-		if (order != route->presentation_info().group_order()) {
+		if (order != route->presentation_info().order()) {
 			route->set_presentation_group_order_explicit (order);
 			change = true;
 		}
@@ -719,7 +719,7 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		if (route) {
-			max_route_order_key = max (route->presentation_info().group_order(), max_route_order_key);
+			max_route_order_key = max (route->presentation_info().order(), max_route_order_key);
 		}
 	}
 
@@ -732,7 +732,7 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 			 */
 			sorted.push_back (OrderKeys (old_order, max_route_order_key + ++vca_cnt));
 		} else {
-			sorted.push_back (OrderKeys (old_order, route->presentation_info().group_order()));
+			sorted.push_back (OrderKeys (old_order, route->presentation_info().order()));
 		}
 	}
 
@@ -1375,7 +1375,7 @@ Mixer_UI::strip_width_changed ()
 struct PresentationInfoRouteSorter
 {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->presentation_info().global_order () < b->presentation_info().global_order ();
+		return a->presentation_info().order () < b->presentation_info().order ();
 	}
 };
 

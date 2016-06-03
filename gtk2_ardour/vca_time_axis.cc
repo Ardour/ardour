@@ -280,3 +280,9 @@ VCATimeAxisView::presentation_info () const
 {
 	return _vca->presentation_info();
 }
+
+boost::shared_ptr<Stripable>
+VCATimeAxisView::stripable () const
+{
+	return _vca;
+}
