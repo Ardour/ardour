@@ -152,6 +152,8 @@ VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
 	/* VCA number never changes */
 	number_label.set_text (to_string (_vca->number(), std::dec));
 
+	set_height (preset_height (HeightNormal));
+
 	update_vca_name ();
 	set_button_names ();
 	update_solo_display ();
