@@ -588,7 +588,7 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 	}
 
 	OSCSurface *s = get_surface(addr);
-	uint32_t sid = get_sid (strip->presentation_info().group_order(), addr);
+	uint32_t sid = get_sid (strip->presentation_info().order(), addr);
 	// above is zero based add 1
 	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, sid + 1, s->gainmode, s->feedback);
 	route_observers.push_back (o);
@@ -1012,8 +1012,8 @@ OSC::routes_list (lo_message msg)
 			lo_message_add_int32 (reply, r->n_outputs().n_audio());
 			lo_message_add_int32 (reply, r->muted());
 			lo_message_add_int32 (reply, r->soloed());
-			/* XXX Can only use group ID at this point */
-			lo_message_add_int32 (reply, r->presentation_info().group_order());
+			/* XXX Can only use order at this point */
+			lo_message_add_int32 (reply, r->presentation_info().order());
 
 			if (boost::dynamic_pointer_cast<AudioTrack>(r)
 					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {

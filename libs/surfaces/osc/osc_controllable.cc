@@ -92,7 +92,7 @@ OSCRouteControllable::send_change_message ()
 
 	/* Can only send ID part of RID at present */
 
-	lo_message_add_int32 (msg, _route->presentation_info().group_order());
+	lo_message_add_int32 (msg, _route->presentation_info().order());
 	lo_message_add_float (msg, (float) controllable->get_value());
 
 	/* XXX thread issues */

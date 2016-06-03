@@ -2115,15 +2115,15 @@ MackieControlProtocol::select_range ()
 	for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 
 		if (main_modifier_state() == MODIFIER_SHIFT) {
-			/* XXX can only use numeric part of ID at present */
-			ToggleStripableSelection ((*s)->presentation_info ().global_order());
+			/* XXX can only use order part of PresentationInfo at present */
+			ToggleStripableSelection ((*s)->presentation_info ().order());
 		} else {
 			if (s == stripables.begin()) {
-				/* XXX can only use numeric part of ID at present */
-				SetStripableSelection ((*s)->presentation_info().global_order());
+				/* XXX can only use order part of PresentationInfo at present */
+				SetStripableSelection ((*s)->presentation_info().order());
 			} else {
-				/* XXX can only use numeric part of ID at present */
-				AddStripableToSelection ((*s)->presentation_info().global_order());
+				/* XXX can only use order part of PresentationInfo at present */
+				AddStripableToSelection ((*s)->presentation_info().order());
 			}
 		}
 	}
