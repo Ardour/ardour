@@ -2075,7 +2075,7 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 
 		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-				if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+				if ((*i)->processor->control((*ii)->what)->list()->size() > 0) {
 					(*ii)->menu_item->set_active (true);
 				}
 			}
