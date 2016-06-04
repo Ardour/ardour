@@ -40,6 +40,7 @@ class OSCRouteObserver
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
+	void send_select_status (void);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;

@@ -69,6 +69,7 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/strip/record_safe", _strip->rec_safe_control());
 		}
+		send_select_status ();
 	}
 
 	if (feedback[1]) { // level controls
@@ -119,6 +120,7 @@ OSCRouteObserver::~OSCRouteObserver ()
 		clear_strip ("/strip/record_safe", 0);
 		clear_strip ("/strip/monitor_input", 0);
 		clear_strip ("/strip/monitor_disk", 0);
+		clear_strip ("/strip/gui_select", 0);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {
@@ -358,4 +360,24 @@ OSCRouteObserver::clear_strip (string path, float val)
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 
+}
+
+void
+OSCRouteObserver::send_select_status ()
+{
+	// waiting for _strip->is_selected to start working
+	if (_strip) {
+		string path = "/strip/gui_select";
+
+		lo_message msg = lo_message_new ();
+		if (feedback[2]) {
+			path = set_path (path);
+		} else {
+			lo_message_add_int32 (msg, ssid);
+		}
+		//std::cout << "strip: " << ssid << " strip name: " << _strip->name() << " select: " << _strip->is_selected() << "\n";
+		lo_message_add_float (msg, _strip->is_selected());
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+	}
 }

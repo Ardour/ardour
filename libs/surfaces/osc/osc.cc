@@ -487,6 +487,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "i", monitor_set_fader);
+		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
+		REGISTER_CALLBACK (serv, "/select/record_safe", "ii", sel_recsafe);
 
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
@@ -496,6 +498,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/record_safe", "ii", route_recsafe);
 		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
 		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
+		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_select);
+		REGISTER_CALLBACK (serv, "/strip/gui_select", "ii", strip_gui_select);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
 		REGISTER_CALLBACK (serv, "/strip/trimabs", "if", route_set_trim_abs);
@@ -503,6 +507,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/pan_stereo_position", "if", route_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/strip/pan_stereo_width", "if", route_set_pan_stereo_width);
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter", "iiif", route_plugin_parameter);
+		// prints to cerr only
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter/print", "iii", route_plugin_parameter_print);
 		REGISTER_CALLBACK (serv, "/strip/send/gainabs", "iif", route_set_send_gain_abs);
 		REGISTER_CALLBACK (serv, "/strip/send/gaindB", "iif", route_set_send_gain_dB);
@@ -830,6 +835,16 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		else if (!strncmp (path, "/strip/record_safe/", 19) && strlen (path) > 19) {
 			int ssid = atoi (&path[19]);
 			route_recsafe (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
+			int ssid = atoi (&path[14]);
+			strip_select (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/strip/gui_select/", 18) && strlen (path) > 18) {
+			int ssid = atoi (&path[18]);
+			strip_gui_select (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
 	}
@@ -1385,10 +1400,6 @@ OSC::master_set_pan_stereo_position (float position)
 		if (s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (position, PBD::Controllable::NoGroup);
 		}
-		/*boost::shared_ptr<PBD::Controllable> panner = s->pan_azimuth_control();
-		if (panner) {
-			panner->set_value (position, PBD::Controllable::NoGroup);
-		}*/
 	}
 
 	return 0;
@@ -1471,6 +1482,13 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 }
 
 int
+OSC::sel_recenable (uint32_t yn, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	return route_recenable(sur->surface_sel, yn, msg);
+}
+
+int
 OSC::route_recenable (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
@@ -1488,6 +1506,13 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 	}
 	// hmm, not set for whatever reason tell surface
 	return route_send_fail ("/strip/recenable", ssid, msg);
+}
+
+int
+OSC::sel_recsafe (uint32_t yn, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	return route_recsafe(sur->surface_sel, yn, msg);
 }
 
 int
@@ -1546,6 +1571,54 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 			route_send_fail ("/strip/monitor_disk", ssid, msg);
 		}
 
+	}
+
+	return 0;
+}
+
+int
+OSC::strip_select (int ssid, int yn, lo_message msg)
+{
+	//ignore button release
+	if (!yn) return 0;
+
+	if (!session) {
+		route_send_fail ("/strip/select", ssid, msg);
+		return -1;
+	}
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	sur->surface_sel = ssid;
+
+	if (s) {
+		sur->sel = s;
+	} else {
+		route_send_fail ("/strip/select", ssid, msg);
+	}
+
+	return 0;
+}
+
+int
+OSC::strip_gui_select (int ssid, int yn, lo_message msg)
+{
+	//ignore button release
+	if (!yn) return 0;
+
+	if (!session) {
+		route_send_fail ("/strip/gui_select", ssid, msg);
+		return -1;
+	}
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	sur->surface_sel = ssid;
+
+	if (s) {
+		sur->sel = s;
+	} else {
+		route_send_fail ("/strip/gui_select", ssid, msg);
 	}
 
 	return 0;
@@ -1741,6 +1814,7 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 	return 0;
 }
 
+//prints to cerr only
 int
 OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 {

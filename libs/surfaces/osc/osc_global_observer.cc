@@ -37,85 +37,89 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 	: gainmode (gm)
 	,feedback (fb)
 {
+	if (feedback[4]) {
+		addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+		session = &s;
+		_last_frame = -1;
 
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
-	session = &s;
-	_last_frame = -1;
-	// connect to all the things we want to send feed back from
+		// connect to all the things we want to send feed back from
 
-	/*
-	 * 	Master (todo)
-	 * 		Pan width
-	 */
+		/*
+		* 	Master (todo)
+		* 		Pan width
+		*/
 
-	// Master channel first
-	boost::shared_ptr<Stripable> strip = session->master_out();
+		// Master channel first
+		boost::shared_ptr<Stripable> strip = session->master_out();
 
-	boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
-	mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
-	send_change_message ("/master/mute", strip->mute_control());
+		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
+		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
+		send_change_message ("/master/mute", strip->mute_control());
 
-	boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(strip->trim_control());
+		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(strip->trim_control());
 		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
 		send_trim_message ("/master/trimdB", strip->trim_control());
 
-	boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
+		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
 		pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
 		send_change_message ("/master/pan_stereo_position", strip->pan_azimuth_control());
 
-	boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-	if (gainmode) {
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/fader"), strip->gain_control()), OSC::instance());
-		send_gain_message ("/master/fader", strip->gain_control());
-	} else {
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/gain"), strip->gain_control()), OSC::instance());
-		send_gain_message ("/master/gain", strip->gain_control());
+		boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
+		if (gainmode) {
+			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/fader"), strip->gain_control()), OSC::instance());
+			send_gain_message ("/master/fader", strip->gain_control());
+		} else {
+			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/gain"), strip->gain_control()), OSC::instance());
+			send_gain_message ("/master/gain", strip->gain_control());
+		}
+
+		// monitor stuff next
+		/*
+		* 	Monitor (todo)
+		* 		Mute
+		* 		Dim
+		* 		Mono
+		* 		Rude Solo
+		* 		etc.
+		*/
+		strip = session->monitor_out();
+		if (strip) {
+
+			// Hmm, it seems the monitor mute is not at route->mute_control()
+			/*boost::shared_ptr<Controllable> mute_controllable2 = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
+			//mute_controllable = boost::dynamic_pointer_cast<Controllable>(r2->mute_control());
+			mute_controllable2->Changed.connect (monitor_mute_connection, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), strip->mute_control()), OSC::instance());
+			send_change_message ("/monitor/mute", strip->mute_control());
+			*/
+			gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
+			if (gainmode) {
+				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/fader"), strip->gain_control()), OSC::instance());
+				send_gain_message ("/monitor/fader", strip->gain_control());
+			} else {
+				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/gain"), strip->gain_control()), OSC::instance());
+				send_gain_message ("/monitor/gain", strip->gain_control());
+			}
+		}
+
+		/*
+		* 	Transport (todo)
+		* 		punchin/out
+		*/
+		//Transport feedback
+		session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
+		send_transport_state_changed ();
+		session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
+		session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
+		send_record_state_changed ();
+
+		// session feedback
+		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_session_saved, this, _1), OSC::instance());
+		send_session_saved (session->snap_name());
+
+		/*
+		* 	Maybe (many) more
+		*/
 	}
-
-	// monitor stuff next
-	/* 
-	 * 	Monitor (todo)
-	 * 		Mute
-	 * 		Dim
-	 * 		Mono
-	 * 		Rude Solo
-	 * 		etc.
-	 */
-	strip = session->monitor_out();
-
-	// Hmm, it seems the monitor mute is not at route->mute_control()
-	/*boost::shared_ptr<Controllable> mute_controllable2 = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
-	//mute_controllable = boost::dynamic_pointer_cast<Controllable>(r2->mute_control());
-	mute_controllable2->Changed.connect (monitor_mute_connection, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), strip->mute_control()), OSC::instance());
-	send_change_message ("/monitor/mute", strip->mute_control());
-	*/
-	gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-	if (gainmode) {
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/fader"), strip->gain_control()), OSC::instance());
-		send_gain_message ("/monitor/fader", strip->gain_control());
-	} else {
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/gain"), strip->gain_control()), OSC::instance());
-		send_gain_message ("/monitor/gain", strip->gain_control());
-	}
-
-	/*
-	 * 	Transport (todo)
-	 * 		punchin/out
-	 */
-	 //Transport feedback
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
-	send_transport_state_changed ();
-	session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
-	send_record_state_changed ();
-
-	// session feedback
-	session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_session_saved, this, _1), OSC::instance());
-	send_session_saved (session->snap_name());
-
-	/*
-	 * 	Maybe (many) more
-	 */
 }
 
 OSCGlobalObserver::~OSCGlobalObserver ()
