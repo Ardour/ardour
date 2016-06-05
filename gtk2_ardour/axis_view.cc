@@ -49,7 +49,6 @@ list<Gdk::Color> AxisView::used_colors;
 
 AxisView::AxisView ()
 {
-	_selected = false;
 }
 
 AxisView::~AxisView()
