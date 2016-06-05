@@ -31,8 +31,9 @@
 
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
-#include "ardour/session_event.h"
 #include "ardour/session.h"
+#include "ardour/session_event.h"
+#include "ardour/session_handle.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/track.h"
@@ -72,15 +73,12 @@ class RoutePinWindowProxy : public WM::ProxyBase
 	PBD::ScopedConnection going_away_connection;
 };
 
-class RouteUI : public virtual AxisView
+class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::trackable, public virtual PBD::ScopedConnectionList
 {
   public:
-	RouteUI(ARDOUR::Session*);
-	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session*);
+	RouteUI (ARDOUR::Session*);
 
 	virtual ~RouteUI();
-
-	Gdk::Color color () const;
 
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
@@ -96,8 +94,6 @@ class RouteUI : public virtual AxisView
 	boost::shared_ptr<ARDOUR::Track>      track() const;
 	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;
 	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track() const;
-
-	std::string name() const;
 
 	// protected: XXX sigh this should be here
 
