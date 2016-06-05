@@ -718,10 +718,6 @@ MackieControlProtocol::connect_session_signals()
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
 	Sorted sorted = get_sorted_stripables();
-
-	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		(*it)->PresentationInfoChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
-	}
 }
 
 void
@@ -1279,13 +1275,6 @@ MackieControlProtocol::notify_routes_added (ARDOUR::RouteList & rl)
 	refresh_current_bank();
 
 	// otherwise route added, but current bank needs no updating
-
-	// make sure presentation info changes in the new stripables are handled
-	typedef ARDOUR::RouteList ARS;
-
-	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->PresentationInfoChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
-	}
 }
 
 void
@@ -1313,7 +1302,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 }
 
 void
-MackieControlProtocol::notify_presentation_info_changed()
+MackieControlProtocol::notify_presentation_info_changed ()
 {
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
