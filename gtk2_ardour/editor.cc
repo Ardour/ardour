@@ -5219,6 +5219,21 @@ Editor::add_routes (RouteList& rlist)
 	add_stripables (sl);
 }
 
+struct PresentationInfoEditorSorter
+{
+	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+		if (a->is_master()) {
+			/* master before everything else */
+			return true;
+		} else if (b->is_master()) {
+			/* everything else before master */
+			return false;
+		}
+		return a->presentation_info().order () < b->presentation_info().order ();
+	}
+};
+
+
 void
 Editor::add_stripables (StripableList& sl)
 {
@@ -5227,6 +5242,8 @@ Editor::add_stripables (StripableList& sl)
 	boost::shared_ptr<Route> r;
 	TrackViewList new_selection;
 	bool from_scratch = (track_views.size() == 0);
+
+	sl.sort (PresentationInfoEditorSorter());
 
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
