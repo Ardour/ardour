@@ -104,8 +104,8 @@ static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
-	: AxisView(sess) // virtually inherited
-	, RouteTimeAxisView(ed, sess, canvas)
+	: SessionHandlePtr (sess)
+	, RouteTimeAxisView (ed, sess, canvas)
 	, _ignore_signals(false)
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
