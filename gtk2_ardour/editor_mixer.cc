@@ -179,9 +179,7 @@ Editor::ensure_all_elements_drawn ()
 void
 Editor::create_editor_mixer ()
 {
-	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
-					      _session,
-					      false);
+	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(), _session, false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
 
