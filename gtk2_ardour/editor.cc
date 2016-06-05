@@ -1010,7 +1010,7 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (PresentationInfo::global_order_t global_order, Selection::Operation op)
+Editor::control_select (PresentationInfo::order_t global_order, Selection::Operation op)
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
