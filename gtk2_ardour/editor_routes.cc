@@ -1440,20 +1440,6 @@ struct PresentationInfoRouteSorter
 	}
 };
 
-struct PresentationInfoEditorSorter
-{
-	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-		if (a->is_master()) {
-			/* master before everything else */
-			return true;
-		} else if (b->is_master()) {
-			/* everything else before master */
-			return false;
-		}
-		return a->presentation_info().order () < b->presentation_info().order ();
-	}
-};
-
 struct PresentationInfoVCASorter
 {
 	bool operator() (boost::shared_ptr<VCA> a, boost::shared_ptr<VCA> b) {
