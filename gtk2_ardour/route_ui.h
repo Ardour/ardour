@@ -105,7 +105,8 @@ class RouteUI : public virtual AxisView
 
 	void request_redraw ();
 
-	virtual void set_color (const Gdk::Color & c);
+	virtual void set_color (uint32_t c);
+	Gdk::Color route_color () const;
 	void choose_color ();
 
 	bool ignore_toggle;

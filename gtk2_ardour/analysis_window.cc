@@ -255,7 +255,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 
 				// std::cerr << "Analyzing ranges on track " << rui->route()->name() << std::endl;
 
-				FFTResult *res = fft_graph.prepareResult(rui->color(), rui->route()->name());
+				FFTResult *res = fft_graph.prepareResult(rui->route_color(), rui->route()->name());
 				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
 					int n;
@@ -290,7 +290,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 				Gtk::TreeModel::Row newrow = *(tlmodel)->append();
 				newrow[tlcols.trackname]   = rui->route()->name();
 				newrow[tlcols.visible]     = true;
-				newrow[tlcols.color]       = rui->color();
+				newrow[tlcols.color]       = rui->route_color ();
 				newrow[tlcols.graph]       = res;
 			}
 		} else if (source_selection_regions_rb.get_active()) {

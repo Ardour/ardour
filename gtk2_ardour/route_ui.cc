@@ -249,7 +249,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route = rp;
 
 	if (set_color_from_route()) {
-		set_color (unique_random_color());
+		set_color (gdk_color_to_rgba (AxisView::unique_random_color ()));
 	}
 
 	if (self_destruct) {
@@ -1596,10 +1596,11 @@ void
 RouteUI::choose_color ()
 {
 	bool picked;
-	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &_color);
+	Gdk::Color c (gdk_color_from_rgb (_route->presentation_info().color()));
+	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &c);
 
 	if (picked) {
-		set_color(color);
+		set_color (gdk_color_to_rgba (color));
 	}
 }
 
@@ -1607,21 +1608,9 @@ RouteUI::choose_color ()
  *  the route is in a group which shares its color with its routes.
  */
 void
-RouteUI::set_color (const Gdk::Color & c)
+RouteUI::set_color (uint32_t c)
 {
-	/* leave _color alone in the group case so that tracks can retain their
-	 * own pre-group colors.
-	 */
-
-	char buf[64];
-	_color = c;
-	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
-
-	/* note: we use the route state ID here so that color is the same for both
-	   the time axis view and the mixer strip
-	*/
-
-	gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
+	_route->presentation_info().set_color (c);
 	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
 
@@ -1635,20 +1624,6 @@ RouteUI::route_state_id () const
 int
 RouteUI::set_color_from_route ()
 {
-	const string str = gui_object_state().get_string (route_state_id(), X_("color"));
-
-	if (str.empty()) {
-		return 1;
-	}
-
-	int r, g, b;
-
-	sscanf (str.c_str(), "%d:%d:%d", &r, &g, &b);
-
-	_color.set_red (r);
-	_color.set_green (g);
-	_color.set_blue (b);
-
 	return 0;
 }
 
@@ -2230,18 +2205,20 @@ RouteUI::track_mode_changed (void)
 /** @return the color that this route should use; it maybe its own,
     or it maybe that of its route group.
 */
+
 Gdk::Color
-RouteUI::color () const
+RouteUI::route_color () const
 {
+	Gdk::Color c;
 	RouteGroup* g = _route->route_group ();
 
 	if (g && g->is_color()) {
-		Gdk::Color c;
 		set_color_from_rgba (c, GroupTabs::group_color (g));
-		return c;
+	} else {
+		set_color_from_rgba (c, _route->presentation_info().color());
 	}
 
-	return _color;
+	return c;
 }
 
 void
