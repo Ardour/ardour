@@ -129,6 +129,14 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 }
 
 void
+RouteTimeAxisView::route_property_changed (const PBD::PropertyChange& what_changed)
+{
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		label_view ();
+	}
+}
+
+void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
@@ -291,7 +299,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_y_position = -1;
 
 	_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
-	_route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::route_property_changed, this, _1), gui_context());
 
 	if (is_track()) {
 
@@ -454,14 +461,6 @@ RouteTimeAxisView::parameter_changed (string const & p)
 		} else {
 			gm.get_level_meter().set_max_audio_meter_count (0);
 		}
-	}
-}
-
-void
-RouteTimeAxisView::route_property_changed (const PropertyChange& what_changed)
-{
-	if (what_changed.contains (ARDOUR::Properties::name)) {
-		label_view ();
 	}
 }
 

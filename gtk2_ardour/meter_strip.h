@@ -133,7 +133,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 
 	LevelMeterHBox *level_meter;
 
-	void strip_property_changed (const PBD::PropertyChange&);
+	void route_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
 	void update_background (ARDOUR::MeterType);

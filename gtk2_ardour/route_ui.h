@@ -211,7 +211,7 @@ class RouteUI : public virtual AxisView
 	void manage_pins ();
 	void maybe_add_route_print_mgr ();
 
-	virtual void property_changed (const PBD::PropertyChange&);
+	virtual void route_property_changed (const PBD::PropertyChange&) = 0;
 	void route_removed ();
 
 	virtual void route_active_changed () {}

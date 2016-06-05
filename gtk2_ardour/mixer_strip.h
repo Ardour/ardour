@@ -275,7 +275,7 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	void route_color_changed ();
 	void show_passthru_color ();
 
-	void property_changed (const PBD::PropertyChange&);
+	void route_property_changed (const PBD::PropertyChange&);
 	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
 	void update_speed_display ();

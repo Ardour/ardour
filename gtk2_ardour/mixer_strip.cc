@@ -649,7 +649,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::setup_comment_button, this), gui_context());
-	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::property_changed, this, _1), gui_context());
 
 	_route->gain_control()->MasterStatusChange.connect (route_connections,
 	                                                    invalidator (*this),
@@ -1750,10 +1749,8 @@ MixerStrip::set_selected (bool yn)
 }
 
 void
-MixerStrip::property_changed (const PropertyChange& what_changed)
+MixerStrip::route_property_changed (const PropertyChange& what_changed)
 {
-	RouteUI::property_changed (what_changed);
-
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		name_changed ();
 	}
@@ -2624,6 +2621,16 @@ MixerStrip::update_track_number_visibility ()
 	} else {
 		number_label.hide ();
 	}
+}
+
+bool
+MixerStrip::is_selected () const
+{
+	if (!_route) {
+		return false;
+	}
+
+	return _route->presentation_info().selected();
 }
 
 Gdk::Color
