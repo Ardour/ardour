@@ -108,7 +108,7 @@ Mixer_UI::Mixer_UI ()
 	, _maximised (false)
 	, _show_mixer_list (true)
 {
-	Stripable::PresentationInfoChange.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
 
 	/* bindings was already set in MixerActor constructor */
 

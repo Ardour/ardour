@@ -318,7 +318,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_enable_search (false);
 
 	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
-	Stripable::PresentationInfoChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_presentation_info, this), gui_context());
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_presentation_info, this), gui_context());
 }
 
 bool
