@@ -126,6 +126,9 @@ public:
 	LilvNode* ev_EventPort;
 	LilvNode* ext_logarithmic;
 	LilvNode* ext_notOnGUI;
+	LilvNode* ext_expensive;
+	LilvNode* ext_causesArtifacts;
+	LilvNode* ext_notAutomatic;
 	LilvNode* lv2_AudioPort;
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
@@ -634,6 +637,17 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			throw failed_constructor();
 		}
 
+		if ((flags & PORT_INPUT) && (flags & PORT_CONTROL)) {
+			if (lilv_port_has_property(_impl->plugin, port, _world.ext_causesArtifacts)) {
+				flags |= PORT_NOAUTO;
+			}
+			if (lilv_port_has_property(_impl->plugin, port, _world.ext_notAutomatic)) {
+				flags |= PORT_NOAUTO;
+			}
+			if (lilv_port_has_property(_impl->plugin, port, _world.ext_expensive)) {
+				flags |= PORT_NOAUTO;
+			}
+		}
 #ifdef LV2_EXTENDED
 		if (lilv_port_has_property(_impl->plugin, port, _world.auto_automation_controlled)) {
 			if ((flags & PORT_INPUT) && (flags & PORT_CONTROL)) {
@@ -2800,6 +2814,9 @@ LV2World::LV2World()
 	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
 	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
 	ext_notOnGUI       = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
+	ext_expensive      = lilv_new_uri(world, LV2_PORT_PROPS__expensive);
+	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
+	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
@@ -2891,6 +2908,9 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
+	lilv_node_free(ext_notAutomatic);
+	lilv_node_free(ext_causesArtifacts);
+	lilv_node_free(ext_expensive);
 	lilv_node_free(ext_notOnGUI);
 	lilv_node_free(ext_logarithmic);
 	lilv_node_free(ev_EventPort);

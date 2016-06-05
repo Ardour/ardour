@@ -211,7 +211,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_PATCHMSG = 1 << 8,  ///< Event port supports patch:Message
 		PORT_AUTOCTRL = 1 << 9,  ///< Event port supports auto:AutomationControl
 		PORT_CTRLED   = 1 << 10, ///< Port prop auto:AutomationControlled (can be self controlled)
-		PORT_CTRLER   = 1 << 11  ///< Port prop auto:AutomationController (can be self set)
+		PORT_CTRLER   = 1 << 11, ///< Port prop auto:AutomationController (can be self set)
+		PORT_NOAUTO   = 1 << 12  ///< Port don't allow to automate
 	} PortFlag;
 
 	typedef unsigned PortFlags;
