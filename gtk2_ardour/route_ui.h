@@ -289,7 +289,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::tr
         void set_invert_sensitive (bool);
 	bool verify_new_route_name (const std::string& name);
 
-	void route_gui_changed (std::string);
+	void route_gui_changed (PBD::PropertyChange const&);
 	virtual void route_color_changed () {}
 
 	void check_rec_enable_sensitivity ();

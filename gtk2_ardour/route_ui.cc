@@ -285,9 +285,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_property_changed, this, _1), gui_context());
+	_route->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
-	_route->gui_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -1612,8 +1612,8 @@ RouteUI::choose_color ()
 void
 RouteUI::set_color (uint32_t c)
 {
+	cerr << "setting route color\n";
 	_route->presentation_info().set_color (c);
-	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
 
 /** @return GUI state ID for things that are common to the route in all its representations */
@@ -2165,9 +2165,9 @@ RouteUI::request_redraw ()
 
 /** The Route's gui_changed signal has been emitted */
 void
-RouteUI::route_gui_changed (string what_changed)
+RouteUI::route_gui_changed (PropertyChange const& what_changed)
 {
-	if (what_changed == "color") {
+	if (what_changed.contains (Properties::color)) {
 		if (set_color_from_route () == 0) {
 			route_color_changed ();
 		}

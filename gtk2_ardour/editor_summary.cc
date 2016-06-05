@@ -1050,8 +1050,8 @@ void
 EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 {
 	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
-		/* Connect to gui_changed() on the route so that we know when their colour has changed */
-		(*i)->route()->gui_changed.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
+		/* Connect to the relevant signal for the route so that we know when its colour has changed */
+		(*i)->route()->presentation_info().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> ((*i)->route ());
 		if (tr) {
 			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context ());
@@ -1062,9 +1062,9 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 }
 
 void
-EditorSummary::route_gui_changed (string c)
+EditorSummary::route_gui_changed (PBD::PropertyChange const& what_changed)
 {
-	if (c == "color") {
+	if (what_changed.contains (Properties::color)) {
 		set_background_dirty ();
 	}
 }

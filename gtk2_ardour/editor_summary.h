@@ -88,7 +88,7 @@ private:
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;
 	void set_cursor (Position);
-	void route_gui_changed (std::string);
+	void route_gui_changed (PBD::PropertyChange const&);
 	bool suspending_editor_updates () const;
 	double playhead_frame_to_position (framepos_t) const;
         framepos_t position_to_playhead_frame_to_position (double pos) const;

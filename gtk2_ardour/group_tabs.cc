@@ -860,7 +860,7 @@ GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 		return;
 	}
 
-	r->gui_changed (X_("color"), 0);
+	r->presentation_info().PropertyChanged (Properties::color);
 
 	set_dirty ();
 }
@@ -875,7 +875,7 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 		return;
 	}
 
-	r->gui_changed (X_("color"), 0);
+	r->presentation_info().PropertyChanged (Properties::color);
 
 	set_dirty ();
 }
