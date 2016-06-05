@@ -47,6 +47,7 @@
 
 #include "pbd/fastlog.h"
 
+#include "axis_view.h"
 #include "ardour_knob.h"
 #include "route_ui.h"
 #include "gain_meter.h"
@@ -74,13 +75,15 @@ class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
 
-class MixerStrip : public RouteUI, public Gtk::EventBox
+class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
   public:
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, bool in_mixer = true);
 	~MixerStrip ();
 
+	std::string name()  const;
+	Gdk::Color color () const;
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 

@@ -342,6 +342,15 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	CatchDeletion (this);
 }
 
+string
+RouteTimeAxisView::name() const
+{
+	if (_route) {
+		return _route->name();
+	}
+	return string();
+}
+
 void
 RouteTimeAxisView::post_construct ()
 {
@@ -2930,6 +2939,12 @@ boost::shared_ptr<Stripable>
 RouteTimeAxisView::stripable () const
 {
 	return _route;
+}
+
+Gdk::Color
+RouteTimeAxisView::color () const
+{
+	return route_color ();
 }
 
 bool

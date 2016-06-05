@@ -42,10 +42,12 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	~VCAMasterStrip ();
 
 	std::string name() const;
+	Gdk::Color color () const;
 	std::string state_id() const { return "VCAMasterStrip"; }
 	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
 	static PBD::Signal1<void,VCAMasterStrip*> CatchDeletion;
+
 
      private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;

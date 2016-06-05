@@ -967,3 +967,15 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 			break;
 	}
 }
+
+string
+MeterStrip::name () const
+{
+	return _route->name();
+}
+
+Gdk::Color
+MeterStrip::color () const
+{
+	return RouteUI::route_color ();
+}

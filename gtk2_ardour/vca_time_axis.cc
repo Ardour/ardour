@@ -288,3 +288,9 @@ VCATimeAxisView::stripable () const
 {
 	return _vca;
 }
+
+Gdk::Color
+VCATimeAxisView::color () const
+{
+	return gdk_color_from_rgb (_vca->presentation_info().color ());
+}

@@ -450,6 +450,15 @@ MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 	return false;
 }
 
+string
+MixerStrip::name() const
+{
+	if (_route) {
+		return _route->name();
+	}
+	return string();
+}
+
 void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
@@ -2616,6 +2625,13 @@ MixerStrip::update_track_number_visibility ()
 		number_label.hide ();
 	}
 }
+
+Gdk::Color
+MixerStrip::color () const
+{
+	return route_color ();
+}
+
 bool
 MixerStrip::marked_for_display () const
 {

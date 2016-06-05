@@ -78,6 +78,11 @@ public:
 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~RouteTimeAxisView ();
 
+	std::string name()  const;
+	Gdk::Color color () const;
+	bool marked_for_display () const;
+	bool set_marked_for_display (bool);
+
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
@@ -134,7 +139,6 @@ public:
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
-	std::string         name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* route_group() const;
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const;

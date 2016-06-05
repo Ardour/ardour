@@ -548,3 +548,9 @@ VCAMasterStrip::drop_button_press ()
 {
 	drop_all_slaves ();
 }
+
+Gdk::Color
+VCAMasterStrip::color () const
+{
+	return gdk_color_from_rgb (_vca->presentation_info().color ());
+}

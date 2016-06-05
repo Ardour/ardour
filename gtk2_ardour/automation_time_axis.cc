@@ -1050,3 +1050,9 @@ AutomationTimeAxisView::stripable () const
 {
 	return _route;
 }
+
+Gdk::Color
+AutomationTimeAxisView::color () const
+{
+	return gdk_color_from_rgb (_route->presentation_info().color());
+}

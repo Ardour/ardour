@@ -46,6 +46,7 @@ class VCATimeAxisView : public TimeAxisView
 	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
 	std::string name() const;
+	Gdk::Color color () const;
 	std::string state_id() const;
 
 	bool selectable() const { return false; }

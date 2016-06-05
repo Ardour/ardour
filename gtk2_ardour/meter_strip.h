@@ -43,12 +43,15 @@ namespace Gtk {
 	class Style;
 }
 
-class MeterStrip : public Gtk::VBox, public RouteUI
+class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 {
   public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 	MeterStrip (int, ARDOUR::MeterType);
 	~MeterStrip ();
+
+	std::string name() const;
+	Gdk::Color color () const;
 
 	void set_session (ARDOUR::Session* s);
 	void fast_update ();

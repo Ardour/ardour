@@ -72,6 +72,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	virtual void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
+	Gdk::Color color () const;
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
