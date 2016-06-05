@@ -380,21 +380,22 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	plist.add (Properties::name, string ((*iter)[_columns.text]));
 
 	bool val = (*iter)[_columns.gain];
-	plist.add (Properties::gain, val);
+	plist.add (Properties::group_gain, val);
 	val = (*iter)[_columns.gain_relative];
-	plist.add (Properties::relative, val);
+	plist.add (Properties::group_relative, val);
 	val = (*iter)[_columns.mute];
-	plist.add (Properties::mute, val);
+	plist.add (Properties::group_mute, val);
 	val = (*iter)[_columns.solo];
-	plist.add (Properties::solo, val);
+	plist.add (Properties::group_solo, val);
 	val = (*iter)[_columns.record];
-	plist.add (Properties::recenable, val);
+	plist.add (Properties::group_recenable, val);
 	val = (*iter)[_columns.monitoring];
-	plist.add (Properties::monitoring, val);
+	plist.add (Properties::group_monitoring, val);
 	val = (*iter)[_columns.select];
-	plist.add (Properties::select, val);
+	plist.add (Properties::group_select, val);
 	val = (*iter)[_columns.active_shared];
-	plist.add (Properties::route_active, val);
+	plist.add (Properties::group_route_active, val);
+
 	val = (*iter)[_columns.active_state];
 	plist.add (Properties::active, val);
 	val = (*iter)[_columns.is_visible];
@@ -563,7 +564,7 @@ EditorRouteGroups::set_session (Session* s)
 	}
 
 	PBD::PropertyChange pc;
-	pc.add (Properties::select);
+	pc.add (Properties::group_select);
 	pc.add (Properties::active);
 
 	groups_changed ();

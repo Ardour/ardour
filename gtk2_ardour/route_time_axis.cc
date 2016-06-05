@@ -313,8 +313,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	PropertyList* plist = new PropertyList();
 
-	plist->add (ARDOUR::Properties::mute, true);
-	plist->add (ARDOUR::Properties::solo, true);
+	plist->add (ARDOUR::Properties::group_mute, true);
+	plist->add (ARDOUR::Properties::group_solo, true);
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
@@ -1176,7 +1176,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
@@ -1231,7 +1231,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
@@ -1686,7 +1686,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
+	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
 		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
@@ -1730,7 +1730,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 
 	RouteGroup* rg = route_group();
 
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::select.property_id)) {
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		std::string group_string = "." + rg->name() + ".";
 
 		std::string take_name = pl->name();
@@ -1776,7 +1776,7 @@ void
 RouteTimeAxisView::update_playlist_tip ()
 {
 	RouteGroup* rg = route_group ();
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::select.property_id)) {
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
 		string group_string = "." + rg->name() + ".";
 
 		string take_name = track()->playlist()->name();

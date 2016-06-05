@@ -215,17 +215,17 @@ RouteGroupDialog::update ()
 {
 	PropertyList plist;
 
-	plist.add (Properties::gain, _gain.get_active());
-	plist.add (Properties::recenable, _rec_enable.get_active());
-	plist.add (Properties::mute, _mute.get_active());
-	plist.add (Properties::solo, _solo.get_active ());
-	plist.add (Properties::select, _select.get_active());
-	plist.add (Properties::route_active, _route_active.get_active());
-	plist.add (Properties::relative, _relative.get_active());
+	plist.add (Properties::group_gain, _gain.get_active());
+	plist.add (Properties::group_recenable, _rec_enable.get_active());
+	plist.add (Properties::group_mute, _mute.get_active());
+	plist.add (Properties::group_solo, _solo.get_active ());
+	plist.add (Properties::group_select, _select.get_active());
+	plist.add (Properties::group_route_active, _route_active.get_active());
+	plist.add (Properties::group_relative, _relative.get_active());
+	plist.add (Properties::group_color, _share_color.get_active());
+	plist.add (Properties::group_monitoring, _share_monitoring.get_active());
 	plist.add (Properties::active, _active.get_active());
 	plist.add (Properties::name, string (_name.get_text()));
-	plist.add (Properties::color, _share_color.get_active());
-	plist.add (Properties::monitoring, _share_monitoring.get_active());
 
 	_group->apply_changes (plist);
 

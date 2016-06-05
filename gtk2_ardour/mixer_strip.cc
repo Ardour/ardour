@@ -1537,9 +1537,9 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 
 			PropertyList* plist = new PropertyList();
 
-			plist->add (Properties::gain, true);
-			plist->add (Properties::mute, true);
-			plist->add (Properties::solo, true);
+			plist->add (Properties::group_gain, true);
+			plist->add (Properties::group_mute, true);
+			plist->add (Properties::group_solo, true);
 
 			group_menu = new RouteGroupMenu (_session, plist);
 		}
