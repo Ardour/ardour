@@ -1464,15 +1464,12 @@ EditorRoutes::initial_display ()
 		s.push_back (*ri);
 	}
 
-	_editor->add_routes (r);
-
 	VCAList v (_session->vca_manager().vcas());
 	for (VCAList::iterator vi = v.begin(); vi != v.end(); ++vi) {
 		s.push_back (*vi);
 	}
-	s.sort (PresentationInfoEditorSorter ());
 
-	_editor->add_vcas (v);
+	_editor->add_stripables (s);
 }
 
 void
