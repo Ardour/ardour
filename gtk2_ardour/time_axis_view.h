@@ -237,7 +237,6 @@ class TimeAxisView : public virtual AxisView
 	Gtk::HBox              time_axis_hbox;
 	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              top_hbox;
-	Gtk::Label             name_label;
 	Gtk::Fixed             scroomer_placeholder;
 	bool                  _name_editing;
 	uint32_t               height;  /* in canvas units */
