@@ -1358,7 +1358,8 @@ Mixer_UI::strip_width_changed ()
 	long order;
 
 	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-		MixerStrip* strip = (*i)[stripable_columns.strip];
+		AxisView* av = (*i)[stripable_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 
 		if (strip == 0) {
 			continue;
