@@ -81,6 +81,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, bool in_mixer = true);
 	~MixerStrip ();
 
+	bool marked_for_display () const;
+	bool set_marked_for_display (bool);
+
 	void set_width_enum (Width, void* owner);
 	Width get_width_enum () const { return _width; }
 	void* width_owner () const { return _width_owner; }

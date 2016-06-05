@@ -2616,3 +2616,15 @@ MixerStrip::update_track_number_visibility ()
 		number_label.hide ();
 	}
 }
+bool
+MixerStrip::marked_for_display () const
+{
+	return !_route->presentation_info().hidden();
+}
+
+bool
+MixerStrip::set_marked_for_display (bool yn)
+{
+	return RouteUI::mark_hidden (!yn);
+}
+

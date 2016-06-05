@@ -2931,3 +2931,15 @@ RouteTimeAxisView::stripable () const
 {
 	return _route;
 }
+
+bool
+RouteTimeAxisView::marked_for_display () const
+{
+	return !_route->presentation_info().hidden();
+}
+
+bool
+RouteTimeAxisView::set_marked_for_display (bool yn)
+{
+	return RouteUI::mark_hidden (!yn);
+}

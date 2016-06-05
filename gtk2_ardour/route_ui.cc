@@ -2356,3 +2356,13 @@ RouteUI::manage_pins ()
 		proxy->present();
 	}
 }
+
+bool
+RouteUI::mark_hidden (bool yn)
+{
+	if (yn != _route->presentation_info().hidden()) {
+		_route->presentation_info().set_hidden (yn);
+		return true; // things changed
+	}
+	return false;
+}

@@ -299,6 +299,8 @@ class RouteUI : public virtual AxisView
 
 	static std::string program_port_prefix;
 
+	bool mark_hidden (bool yn);
+
   private:
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
