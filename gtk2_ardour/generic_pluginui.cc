@@ -645,11 +645,17 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
+			if (mcontrol->flags () & Controllable::NotAutomatable) {
+				control_ui->automate_button.set_sensitive (false);
+				set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
+			} else {
+				control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
+				mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+			}
+
 			control_ui->button->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
 
 			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
-			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 			if (value > 0.5){
 				control_ui->button->set_active(true);
@@ -728,11 +734,16 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
+
+		if (mcontrol->flags () & Controllable::NotAutomatable) {
+			control_ui->automate_button.set_sensitive (false);
+			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
+		} else {
+			control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
+			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+		}
 
 		automation_state_changed (control_ui);
-
-		mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 		input_controls.push_back (control_ui);
 		input_controls_with_automation.push_back (control_ui);
