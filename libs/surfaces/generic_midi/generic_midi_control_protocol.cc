@@ -94,7 +94,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 	/* this one is cross-thread */
 
-	Stripable::PresentationInfoChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	/* Catch port connections and disconnections (cross-thread) */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR,
