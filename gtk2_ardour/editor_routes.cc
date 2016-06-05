@@ -1021,7 +1021,7 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 		cerr << "Would change PI go for " << stripable->name() << " to " << order << " currently " << stripable->presentation_info().order() << endl;
 
 		if (order != stripable->presentation_info().order()) {
-			stripable->set_presentation_group_order_explicit (order);
+			stripable->set_presentation_order_explicit (order);
 			change = true;
 		}
 
