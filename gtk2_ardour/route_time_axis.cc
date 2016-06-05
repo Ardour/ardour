@@ -1410,12 +1410,6 @@ RouteTimeAxisView::route_group () const
 	return _route->route_group();
 }
 
-string
-RouteTimeAxisView::name() const
-{
-	return _route->name();
-}
-
 boost::shared_ptr<Playlist>
 RouteTimeAxisView::playlist () const
 {
