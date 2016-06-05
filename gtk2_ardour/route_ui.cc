@@ -284,7 +284,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 
-	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::property_changed, this, _1), gui_context());
+	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_property_changed, this, _1), gui_context());
 
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
 	_route->gui_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
@@ -1695,14 +1695,6 @@ RouteUI::route_rename ()
 }
 
 void
-RouteUI::property_changed (const PropertyChange& what_changed)
-{
-	if (what_changed.contains (ARDOUR::Properties::name)) {
-		name_label.set_text (_route->name());
-	}
-}
-
-void
 RouteUI::toggle_comment_editor ()
 {
 //	if (ignore_toggle) {
@@ -1864,12 +1856,6 @@ bool
 RouteUI::has_audio_outputs () const
 {
 	return (_route->n_outputs().n_audio() > 0);
-}
-
-string
-RouteUI::name() const
-{
-	return _route->name();
 }
 
 void
@@ -2334,6 +2320,12 @@ RouteUI::manage_pins ()
 		proxy->get (true);
 		proxy->present();
 	}
+}
+
+void
+RouteUI::set_selected (bool yn)
+{
+	_route->presentation_info().set_selected (yn);
 }
 
 bool
