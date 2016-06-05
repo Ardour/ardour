@@ -139,6 +139,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	}
 
 	StripableSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1, true), this);
+	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
 
 	_instance = this;
 
