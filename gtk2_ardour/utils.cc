@@ -264,6 +264,22 @@ ARDOUR_UI_UTILS::get_font_for_style (string widgetname)
 	return Pango::FontDescription (pfd); /* make a copy */
 }
 
+Gdk::Color
+ARDOUR_UI_UTILS::gdk_color_from_rgb (uint32_t rgb)
+{
+	Gdk::Color c;
+	set_color_from_rgb (c, rgb);
+	return c;
+}
+
+Gdk::Color
+ARDOUR_UI_UTILS::gdk_color_from_rgba (uint32_t rgba)
+{
+	Gdk::Color c;
+	set_color_from_rgb (c, rgba);
+	return c;
+}
+
 void
 ARDOUR_UI_UTILS::set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
 {
