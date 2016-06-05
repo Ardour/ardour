@@ -95,8 +95,7 @@ using namespace std;
 using std::list;
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
-	: AxisView(sess)
-	, RouteUI(sess)
+	: RouteUI(sess)
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
 	, _view (0)
 	, parent_canvas (canvas)

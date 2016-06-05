@@ -48,7 +48,7 @@ using std::string;
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
-	: AxisView (s)
+	: SessionHandlePtr (s)
 	, _vca (v)
 	, gain_meter (s, 250)
 	, context_menu (0)

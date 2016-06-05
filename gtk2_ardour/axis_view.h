@@ -78,11 +78,6 @@ class AxisView : public virtual Selectable, public virtual PBD::ScopedConnection
 	static GUIObjectState& gui_object_state();
 	void clear_property_cache() { property_hashtable.clear(); }
 
-  protected:
-
-	AxisView (ARDOUR::Session* sess);
-	virtual ~AxisView();
-
 	/**
 	 * Generate a new random TrackView color, unique from those colors already used.
 	 *
@@ -90,7 +85,9 @@ class AxisView : public virtual Selectable, public virtual PBD::ScopedConnection
 	 */
 	static Gdk::Color unique_random_color();
 
-	Gdk::Color _color;
+  protected:
+	AxisView ();
+	virtual ~AxisView();
 
 	static std::list<Gdk::Color> used_colors;
 

@@ -62,8 +62,7 @@ PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 #define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
-	: AxisView(0)
-	, RouteUI(0)
+	: RouteUI ((Session*) 0)
 {
 	level_meter = 0;
 	_strip_type = 0;
@@ -117,7 +116,7 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 }
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
-	: AxisView(sess)
+	: SessionHandlePtr (sess)
 	, RouteUI(0)
 	, _route(rt)
 	, peak_display()

@@ -65,7 +65,7 @@ using namespace Gtk;
 using namespace Editing;
 
 AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
-	: AxisView(sess)
+	: SessionHandlePtr (sess)
 	, RouteTimeAxisView(ed, sess, canvas)
 {
 }

@@ -41,7 +41,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Canvas& canvas)
-	: AxisView (s)
+	: SessionHandlePtr (s)
 	, TimeAxisView (s, ed, (TimeAxisView*) 0, canvas)
 	, gain_meter (s, true, 75, 14) // XXX stupid magic numbers, match sizes in RouteTimeAxisView
 {

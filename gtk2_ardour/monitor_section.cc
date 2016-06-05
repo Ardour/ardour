@@ -63,7 +63,7 @@ Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 MonitorSection::MonitorSection (Session* s)
-	: AxisView (s)
+	: SessionHandlePtr (s)
 	, RouteUI (s)
 	, _tearoff (0)
 	, channel_table_viewport (*channel_table_scroller.get_hadjustment()
@@ -577,7 +577,7 @@ MonitorSection::update_processor_box ()
 void
 MonitorSection::set_session (Session* s)
 {
-	AxisView::set_session (s);
+	RouteUI::set_session (s);
 	_plugin_selector->set_session (_session);
 
 	if (_session) {

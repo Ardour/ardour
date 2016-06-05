@@ -83,8 +83,7 @@ boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 std::string RouteUI::program_port_prefix;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
-	: AxisView(sess)
-	, mute_menu(0)
+	: mute_menu(0)
 	, solo_menu(0)
 	, sends_menu(0)
 	, record_menu(0)

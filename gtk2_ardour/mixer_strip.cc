@@ -84,7 +84,7 @@ MixerStrip* MixerStrip::_entered_mixer_strip;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
-	: AxisView(sess)
+	: SessionHandlePtr (sess)
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)
@@ -116,7 +116,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 }
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, bool in_mixer)
-	: AxisView(sess)
+	: SessionHandlePtr (sess)
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)

@@ -84,7 +84,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	const string & nom,
 	const string & nomparent
 	)
-	: AxisView (s)
+	: SessionHandlePtr (s)
 	, TimeAxisView (s, e, &parent, canvas)
 	, _route (r)
 	, _control (c)
