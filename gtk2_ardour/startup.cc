@@ -103,6 +103,7 @@ ArdourStartup::ArdourStartup ()
 		set_default_icon_list (window_icons);
 	}
 
+	setup_prerelease_page ();
 	setup_new_user_page ();
 	setup_first_time_config_page ();
 	setup_monitoring_choice_page ();
@@ -136,6 +137,41 @@ ArdourStartup::required ()
 	}
 
 	return true;
+}
+
+void
+ArdourStartup::setup_prerelease_page ()
+{
+        VBox* vbox = manage (new VBox);
+        Label* label = manage (new Label);
+        label->set_markup (string_compose (_("<b>Welcome to this build of %1 %2</b>\n\n\
+There are still several issues and bugs to be worked on,\n\
+as well as general workflow improvements, before this can be considered\n\
+release software. So, a few guidelines:\n\
+\n\
+1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
+   though it may be so, depending on your workflow.\n\
+2) Please wait for a helpful writeup of new features.\n\
+3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
+4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
+   making sure to note the product version number as 3.0-beta.\n\
+5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
+6) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
+   can get there directly from within the program via the Help->Chat menu option.\n\
+\n\
+Full information on all the above can be found on the support page at\n\
+\n\
+                http://ardour.org/support\n\
+"), PROGRAM_NAME, VERSIONSTRING));
+
+        vbox->set_border_width (12);
+        vbox->pack_start (*label, false, false, 12);
+        vbox->show_all ();
+
+        append_page (*vbox);
+        set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
+        set_page_title (*vbox, _("This is a BETA RELEASE"));
+	set_page_complete (*vbox, true);
 }
 
 void

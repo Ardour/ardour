@@ -69,6 +69,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;
 
+	void setup_prerelease_page ();
 	void setup_new_user_page ();
 	Glib::RefPtr<Gdk::Pixbuf> splash_pixbuf;
 	Gtk::DrawingArea splash_area;
