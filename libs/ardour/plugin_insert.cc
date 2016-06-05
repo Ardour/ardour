@@ -409,31 +409,42 @@ PluginInsert::create_automatable_parameters ()
 {
 	assert (!_plugins.empty());
 
+	boost::shared_ptr<Plugin> plugin = _plugins.front();
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
-	for (set<Evoral::Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
-		if (i->type() == PluginAutomation) {
+	for (uint32_t i = 0; i < plugin->parameter_count(); ++i) {
+		if (!plugin->parameter_is_control (i) || !plugin->parameter_is_input (i)) {
+			continue;
+		}
+		Evoral::Parameter param (PluginAutomation, 0, i);
 
-			Evoral::Parameter param(*i);
+		ParameterDescriptor desc;
+		plugin->get_parameter_descriptor(i, desc);
 
-			ParameterDescriptor desc;
-			_plugins.front()->get_parameter_descriptor(i->id(), desc);
+		const bool automatable = a.find(param) != a.end();
 
+		if (automatable) {
 			can_automate (param);
-			boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
-			boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
-			add_control (c);
-			_plugins.front()->set_automation_control (i->id(), c);
-		} else if (i->type() == PluginPropertyAutomation) {
-			Evoral::Parameter param(*i);
-			const ParameterDescriptor& desc = _plugins.front()->get_property_descriptor(param.id());
-			if (desc.datatype != Variant::NOTHING) {
-				boost::shared_ptr<AutomationList> list;
-				if (Variant::type_is_numeric(desc.datatype)) {
-					list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
-				}
-				add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
+		}
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
+		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+		if (!automatable) {
+			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+		}
+		add_control (c);
+		plugin->set_automation_control (i, c);
+	}
+
+	const Plugin::PropertyDescriptors& pdl (plugin->get_supported_properties ());
+	for (Plugin::PropertyDescriptors::const_iterator p = pdl.begin(); p != pdl.end(); ++p) {
+		Evoral::Parameter param (PluginPropertyAutomation, 0, p->first);
+		const ParameterDescriptor& desc = plugin->get_property_descriptor(param.id());
+		if (desc.datatype != Variant::NOTHING) {
+			boost::shared_ptr<AutomationList> list;
+			if (Variant::type_is_numeric(desc.datatype)) {
+				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 			}
+			add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
 		}
 	}
 }

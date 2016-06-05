@@ -2067,7 +2067,7 @@ LV2Plugin::automatable() const
 	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		if (parameter_is_input(i) && parameter_is_control(i)) {
+		if (parameter_is_input(i) && parameter_is_control(i) && !(_port_flags[i] & PORT_NOAUTO)) {
 			ret.insert(ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 		}
 	}
