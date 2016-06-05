@@ -1012,13 +1012,7 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 			continue;
 		}
 
-		if (!visible) {
-			stripable->presentation_info().set_flag (PresentationInfo::Hidden);
-		} else {
-			stripable->presentation_info().unset_flag (PresentationInfo::Hidden);
-		}
-
-		cerr << "Would change PI go for " << stripable->name() << " to " << order << " currently " << stripable->presentation_info().order() << endl;
+		stripable->presentation_info().set_hidden (!visible);
 
 		if (order != stripable->presentation_info().order()) {
 			stripable->set_presentation_order_explicit (order);
