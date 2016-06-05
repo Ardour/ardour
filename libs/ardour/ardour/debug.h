@@ -54,6 +54,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits AudioPlayback;
 		LIBARDOUR_API extern DebugBits Panning;
 		LIBARDOUR_API extern DebugBits LV2;
+		LIBARDOUR_API extern DebugBits LV2Automate;
 		LIBARDOUR_API extern DebugBits CaptureAlignment;
 		LIBARDOUR_API extern DebugBits PluginManager;
 		LIBARDOUR_API extern DebugBits AudioUnits;

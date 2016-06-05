@@ -50,6 +50,7 @@ PBD::DebugBits PBD::DEBUG::Solo = PBD::new_debug_bit ("solo");
 PBD::DebugBits PBD::DEBUG::AudioPlayback = PBD::new_debug_bit ("audioplayback");
 PBD::DebugBits PBD::DEBUG::Panning = PBD::new_debug_bit ("panning");
 PBD::DebugBits PBD::DEBUG::LV2 = PBD::new_debug_bit ("lv2");
+PBD::DebugBits PBD::DEBUG::LV2Automate = PBD::new_debug_bit ("lv2automate");
 PBD::DebugBits PBD::DEBUG::CaptureAlignment = PBD::new_debug_bit ("capturealignment");
 PBD::DebugBits PBD::DEBUG::PluginManager = PBD::new_debug_bit ("pluginmanager");
 PBD::DebugBits PBD::DEBUG::AudioUnits = PBD::new_debug_bit ("audiounits");

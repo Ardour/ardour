@@ -94,6 +94,7 @@ typedef struct {
 #define LV2_AUTOMATE_URI__control LV2_AUTOMATE_URI_PREFIX "automationControl"
 /** lv2:portProperty */
 #define LV2_AUTOMATE_URI__controlled LV2_AUTOMATE_URI_PREFIX "automationControlled"
+#define LV2_AUTOMATE_URI__controller LV2_AUTOMATE_URI_PREFIX "automationController"
 
 /** atom messages */
 #define LV2_AUTOMATE_URI__event LV2_AUTOMATE_URI_PREFIX "event"

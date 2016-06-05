@@ -174,6 +174,7 @@ public:
 	LilvNode* auto_can_write_automatation; // lv2:optionalFeature
 	LilvNode* auto_automation_control; // atom:supports
 	LilvNode* auto_automation_controlled; // lv2:portProperty
+	LilvNode* auto_automation_controller; // lv2:portProperty
 #endif
 
 private:
@@ -637,6 +638,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		if (lilv_port_has_property(_impl->plugin, port, _world.auto_automation_controlled)) {
 			if ((flags & PORT_INPUT) && (flags & PORT_CONTROL)) {
 				flags |= PORT_CTRLED;
+			}
+		}
+		if (lilv_port_has_property(_impl->plugin, port, _world.auto_automation_controller)) {
+			if ((flags & PORT_INPUT) && (flags & PORT_CONTROL)) {
+				flags |= PORT_CTRLER;
 			}
 		}
 #endif
@@ -2063,7 +2069,8 @@ LV2Plugin::automatable() const
 void
 LV2Plugin::set_automation_control (uint32_t i, boost::shared_ptr<AutomationControl> c)
 {
-	if ((_port_flags[i] & PORT_CTRLED)) {
+	if ((_port_flags[i] & (PORT_CTRLED | PORT_CTRLER))) {
+		DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Ctrl Port %1\n", i));
 		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
 	}
 }
@@ -2470,8 +2477,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
 								const float v = ((const LV2_Atom_Float*)value)->body;
 								// -> add automation event..
+								DEBUG_TRACE(DEBUG::LV2Automate,
+										string_compose ("Event p: %1 t: %2 v: %3\n", p, frames, v));
 								AutomationCtrlPtr c = get_automation_control (p);
-								if (c && c->ac->automation_state() == Touch) {
+								if (c &&
+								     (c->ac->automation_state() == Touch || c->ac->automation_state() == Write)
+								   ) {
 									framepos_t when = std::max ((framepos_t) 0, _session.transport_frame() + frames - _current_latency);
 									assert (_session.transport_frame() + frames - _current_latency >= 0);
 									if (c->guard) {
@@ -2488,11 +2499,42 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							// writes automation for its own inputs
 							// -> put them in "touch" mode (preferably "exclusive plugin touch(TM)"
 							for (AutomationCtrlMap::iterator i = _ctrl_map.begin(); i != _ctrl_map.end(); ++i) {
-								i->second->ac->set_automation_state (Touch);
+								if (_port_flags[i->first] & PORT_CTRLED) {
+									DEBUG_TRACE(DEBUG::LV2Automate,
+										string_compose ("Setup p: %1\n", i->first));
+									i->second->ac->set_automation_state (Touch);
+								}
 							}
 						}
 						else if (obj->body.otype == _uri_map.urids.auto_finalize) {
 							// set [touched] parameters to "play" ??
+							// allow plugin to change its mode (from analyze to apply)
+							const LV2_Atom* parameter = NULL;
+							const LV2_Atom* value    = NULL;
+							lv2_atom_object_get(obj,
+							                    _uri_map.urids.auto_parameter, &parameter,
+							                    _uri_map.urids.auto_value,     &value,
+							                    0);
+							if (parameter && value) {
+								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
+								const float v = ((const LV2_Atom_Float*)value)->body;
+								AutomationCtrlPtr c = get_automation_control (p);
+								DEBUG_TRACE(DEBUG::LV2Automate,
+										string_compose ("Finalize p: %1 v: %2\n", p, v));
+								if (c && _port_flags[p] & PORT_CTRLER) {
+									c->ac->set_value(v, Controllable::NoGroup);
+								}
+							} else {
+								DEBUG_TRACE(DEBUG::LV2Automate, "Finalize\n");
+							}
+							for (AutomationCtrlMap::iterator i = _ctrl_map.begin(); i != _ctrl_map.end(); ++i) {
+								// guard will be false if an event was written
+								if ((_port_flags[i->first] & PORT_CTRLED) && !i->second->guard) {
+									DEBUG_TRACE(DEBUG::LV2Automate,
+										string_compose ("Thin p: %1\n", i->first));
+									i->second->ac->alist ()->thin (20);
+								}
+							}
 						}
 						else if (obj->body.otype == _uri_map.urids.auto_start) {
 							const LV2_Atom* parameter = NULL;
@@ -2502,6 +2544,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							if (parameter) {
 								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
 								AutomationCtrlPtr c = get_automation_control (p);
+								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Start Touch p: %1\n", p));
 								if (c) {
 									c->ac->start_touch (std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
 									c->guard = true;
@@ -2516,6 +2559,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							if (parameter) {
 								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
 								AutomationCtrlPtr c = get_automation_control (p);
+								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("End Touch p: %1\n", p));
 								if (c) {
 									c->ac->stop_touch (true, std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
 								}
@@ -2792,6 +2836,7 @@ LV2World::LV2World()
 	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
+	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
 #endif
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
@@ -2816,6 +2861,7 @@ LV2World::~LV2World()
 	lilv_node_free(auto_can_write_automatation);
 	lilv_node_free(auto_automation_control);
 	lilv_node_free(auto_automation_controlled);
+	lilv_node_free(auto_automation_controller);
 #endif
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
