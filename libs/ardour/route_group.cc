@@ -41,57 +41,56 @@ using namespace std;
 
 namespace ARDOUR {
 	namespace Properties {
-		PropertyDescriptor<bool> relative;
 		PropertyDescriptor<bool> active;
-		PropertyDescriptor<bool> gain;
-		PropertyDescriptor<bool> mute;
-		PropertyDescriptor<bool> solo;
-		PropertyDescriptor<bool> recenable;
-		PropertyDescriptor<bool> select;
-		PropertyDescriptor<bool> route_active;
-		PropertyDescriptor<bool> color;
-		PropertyDescriptor<bool> monitoring;
+		PropertyDescriptor<bool> group_relative;
+		PropertyDescriptor<bool> group_gain;
+		PropertyDescriptor<bool> group_mute;
+		PropertyDescriptor<bool> group_solo;
+		PropertyDescriptor<bool> group_recenable;
+		PropertyDescriptor<bool> group_select;
+		PropertyDescriptor<bool> group_route_active;
+		PropertyDescriptor<bool> group_color;
+		PropertyDescriptor<bool> group_monitoring;
 	}
 }
 
 void
 RouteGroup::make_property_quarks ()
 {
-	Properties::relative.property_id = g_quark_from_static_string (X_("relative"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n",	Properties::relative.property_id));
 	Properties::active.property_id = g_quark_from_static_string (X_("active"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n",	Properties::active.property_id));
-	Properties::hidden.property_id = g_quark_from_static_string (X_("hidden"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n",	Properties::hidden.property_id));
-	Properties::gain.property_id = g_quark_from_static_string (X_("gain"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n",	Properties::gain.property_id));
-	Properties::mute.property_id = g_quark_from_static_string (X_("mute"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n",	Properties::mute.property_id));
-	Properties::solo.property_id = g_quark_from_static_string (X_("solo"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n",	Properties::solo.property_id));
-	Properties::recenable.property_id = g_quark_from_static_string (X_("recenable"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n",	Properties::recenable.property_id));
-	Properties::select.property_id = g_quark_from_static_string (X_("select"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n",	Properties::select.property_id));
-	Properties::route_active.property_id = g_quark_from_static_string (X_("route-active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
-	Properties::color.property_id = g_quark_from_static_string (X_("color"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",       Properties::color.property_id));
-	Properties::monitoring.property_id = g_quark_from_static_string (X_("monitoring"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n",       Properties::monitoring.property_id));
+
+        Properties::group_relative.property_id = g_quark_from_static_string (X_("relative"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n",	Properties::group_relative.property_id));
+	Properties::group_gain.property_id = g_quark_from_static_string (X_("gain"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n",	Properties::group_gain.property_id));
+	Properties::group_mute.property_id = g_quark_from_static_string (X_("mute"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n",	Properties::group_mute.property_id));
+	Properties::group_solo.property_id = g_quark_from_static_string (X_("solo"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n",	Properties::group_solo.property_id));
+	Properties::group_recenable.property_id = g_quark_from_static_string (X_("recenable"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n",	Properties::group_recenable.property_id));
+	Properties::group_select.property_id = g_quark_from_static_string (X_("select"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n",	Properties::group_select.property_id));
+	Properties::group_route_active.property_id = g_quark_from_static_string (X_("route-active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::group_route_active.property_id));
+	Properties::group_color.property_id = g_quark_from_static_string (X_("color"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",       Properties::group_color.property_id));
+	Properties::group_monitoring.property_id = g_quark_from_static_string (X_("monitoring"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n",       Properties::group_monitoring.property_id));
 }
 
-#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, true) \
+#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::group_relative, true) \
 	, _active (Properties::active, true) \
 	, _hidden (Properties::hidden, false) \
-	, _gain (Properties::gain, true) \
-	, _mute (Properties::mute, true) \
-	, _solo (Properties::solo, true) \
-	, _recenable (Properties::recenable, true) \
-	, _select (Properties::select, true) \
-	, _route_active (Properties::route_active, true) \
-	, _color (Properties::color, true) \
-	, _monitoring (Properties::monitoring, true)
+	, _gain (Properties::group_gain, true) \
+	, _mute (Properties::group_mute, true) \
+	, _solo (Properties::group_solo, true) \
+	, _recenable (Properties::group_recenable, true) \
+	, _select (Properties::group_select, true) \
+	, _route_active (Properties::group_route_active, true) \
+	, _color (Properties::group_color, true) \
+	, _monitoring (Properties::group_monitoring, true)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
@@ -295,7 +294,7 @@ RouteGroup::set_gain (bool yn)
 	_gain = yn;
 	_gain_group->set_active (yn);
 
-	send_change (PropertyChange (Properties::gain));
+	send_change (PropertyChange (Properties::group_gain));
 }
 
 void
@@ -307,7 +306,7 @@ RouteGroup::set_mute (bool yn)
 	_mute = yn;
 	_mute_group->set_active (yn);
 
-	send_change (PropertyChange (Properties::mute));
+	send_change (PropertyChange (Properties::group_mute));
 }
 
 void
@@ -319,7 +318,7 @@ RouteGroup::set_solo (bool yn)
 	_solo = yn;
 	_solo_group->set_active (yn);
 
-	send_change (PropertyChange (Properties::solo));
+	send_change (PropertyChange (Properties::group_solo));
 }
 
 void
@@ -330,7 +329,7 @@ RouteGroup::set_recenable (bool yn)
 	}
 	_recenable = yn;
 	_rec_enable_group->set_active (yn);
-	send_change (PropertyChange (Properties::recenable));
+	send_change (PropertyChange (Properties::group_recenable));
 }
 
 void
@@ -340,7 +339,7 @@ RouteGroup::set_select (bool yn)
 		return;
 	}
 	_select = yn;
-	send_change (PropertyChange (Properties::select));
+	send_change (PropertyChange (Properties::group_select));
 }
 
 void
@@ -350,7 +349,7 @@ RouteGroup::set_route_active (bool yn)
 		return;
 	}
 	_route_active = yn;
-	send_change (PropertyChange (Properties::route_active));
+	send_change (PropertyChange (Properties::group_route_active));
 }
 
 void
@@ -361,7 +360,7 @@ RouteGroup::set_color (bool yn)
 	}
 	_color = yn;
 
-	send_change (PropertyChange (Properties::color));
+	send_change (PropertyChange (Properties::group_color));
 
 	/* This is a bit of a hack, but this might change
 	   our route's effective color, so emit gui_changed
@@ -383,7 +382,7 @@ RouteGroup::set_monitoring (bool yn)
 	_monitoring = yn;
 	_monitoring_group->set_active (yn);
 
-	send_change (PropertyChange (Properties::monitoring));
+	send_change (PropertyChange (Properties::group_monitoring));
 
 	_session.set_dirty ();
 }
@@ -407,7 +406,7 @@ RouteGroup::set_relative (bool yn, void* /*src*/)
 		return;
 	}
 	_relative = yn;
-	send_change (PropertyChange (Properties::relative));
+	send_change (PropertyChange (Properties::group_relative));
 	_session.set_dirty ();
 }
 

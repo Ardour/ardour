@@ -38,17 +38,17 @@
 namespace ARDOUR {
 
 namespace Properties {
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> relative;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_relative;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_gain;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_mute;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_solo;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_recenable;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_select;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_route_active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_color;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_monitoring;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> active;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> gain;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> mute;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> solo;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> recenable;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> select;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> route_active;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> color;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> monitoring;
-	/* we use this, but its declared in region.cc */
+	/* we use these declared in region.cc */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> hidden;
 };
 
