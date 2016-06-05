@@ -140,8 +140,8 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 
-	void set_selected(bool yn);
-	bool is_selected() {return _selected;}
+	void set_selected (bool yn);
+	bool is_selected() const;
 
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 

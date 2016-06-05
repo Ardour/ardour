@@ -105,6 +105,8 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::tr
 	Gdk::Color route_color () const;
 	void choose_color ();
 
+	void set_selected (bool);
+
 	bool ignore_toggle;
 	bool wait_for_release;
 	bool multiple_mute_change;
