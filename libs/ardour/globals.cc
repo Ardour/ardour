@@ -102,6 +102,7 @@
 #include "ardour/operations.h"
 #include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/presentation_info.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
@@ -442,6 +443,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	RouteGroup::make_property_quarks ();
         Playlist::make_property_quarks ();
         AudioPlaylist::make_property_quarks ();
+        PresentationInfo::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose

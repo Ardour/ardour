@@ -32,8 +32,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-PBD::Signal0<void> Stripable::PresentationInfoChange;
-
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
 	, _presentation_info (pi)
@@ -41,46 +39,19 @@ Stripable::Stripable (Session& s, string const & name, PresentationInfo const & 
 }
 
 void
-Stripable::set_presentation_group_order (PresentationInfo::order_t order, bool notify_class_listeners)
+Stripable::set_presentation_order (PresentationInfo::order_t order, bool notify_class_listeners)
 {
-	set_presentation_info (PresentationInfo (order, _presentation_info.flags()), notify_class_listeners);
-}
+	_presentation_info.set_order (order);
 
-void
-Stripable::set_presentation_group_order_explicit (PresentationInfo::order_t order)
-{
-	set_presentation_group_order (order, false);
-}
-
-void
-Stripable::set_presentation_info (PresentationInfo pi, bool notify_class_listeners)
-{
-	if (pi != presentation_info()) {
-
-#ifndef __APPLE__
-		/* clang can't deal with the operator<< (ostream&,PresentationInfo&) method. not sure why yet. */
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set presentation info to %2\n", name(), pi));
-#endif
-		if (is_master()) {
-			_presentation_info = PresentationInfo (0, PresentationInfo::MasterOut);
-		} else if (is_monitor()) {
-			_presentation_info = PresentationInfo (0, PresentationInfo::MonitorOut);
-		} else {
-			_presentation_info = pi;
-		}
-
-		PresentationInfoChanged ();
-
-		if (notify_class_listeners) {
-			PresentationInfoChange ();
-		}
+	if (notify_class_listeners) {
+		PresentationInfo::Change ();
 	}
 }
 
 void
-Stripable::set_presentation_info_explicit (PresentationInfo pi)
+Stripable::set_presentation_order_explicit (PresentationInfo::order_t order)
 {
-	set_presentation_info (pi, false);
+	_presentation_info.set_order (order);
 }
 
 int
@@ -96,10 +67,8 @@ Stripable::set_state (XMLNode const& node, int version)
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 			child = *niter;
 
-			if (child->name() == X_("PresentationInfo")) {
-				if ((prop = child->property (X_("value"))) != 0) {
-					_presentation_info = prop->value ();
-				}
+			if (child->name() == PresentationInfo::state_node_name) {
+				_presentation_info.set_state (*child, version);
 			}
 		}
 
@@ -142,12 +111,4 @@ Stripable::set_state (XMLNode const& node, int version)
 	}
 
 	return 0;
-}
-
-void
-Stripable::add_state (XMLNode& node) const
-{
-	XMLNode* remote_control_node = new XMLNode (X_("PresentationInfo"));
-	remote_control_node->add_property (X_("value"), _presentation_info.to_string());
-	node.add_child_nocopy (*remote_control_node);
 }

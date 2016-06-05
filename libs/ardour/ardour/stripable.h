@@ -76,16 +76,8 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	/* set just the order */
 
-	void  set_presentation_group_order (PresentationInfo::order_t, bool notify_class_listeners = true);
-	void  set_presentation_group_order_explicit (PresentationInfo::order_t);
-
-	/* for things concerned about *this* route's RID */
-
-	PBD::Signal0<void> PresentationInfoChanged;
-
-	/* for things concerned about *any* route's RID changes */
-
-	static PBD::Signal0<void> PresentationInfoChange;
+	void  set_presentation_order (PresentationInfo::order_t, bool notify_class_listeners = true);
+	void  set_presentation_order_explicit (PresentationInfo::order_t);
 
 	/***************************************************************
 	 * Pure interface begins here
@@ -182,16 +174,6 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
   protected:
 	PresentationInfo _presentation_info;
-
-	/* set the entire info. This should only be used in cases where the
-	 * derived could not supply the correct Flag and/or order information
-	 * in its constructor.
-	 */
-
-	void set_presentation_info (PresentationInfo id, bool notify_class_listeners = true);
-	void set_presentation_info_explicit (PresentationInfo);
-
-	void add_state (XMLNode&) const;
 };
 
 struct PresentationInfoSorter {

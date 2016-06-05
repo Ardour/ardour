@@ -110,7 +110,7 @@ VCA::get_state ()
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("number"), _number);
 
-	Stripable::add_state (*node);
+	node->add_child_nocopy (_presentation_info.get_state());
 
 	node->add_child_nocopy (_gain_control->get_state());
 	node->add_child_nocopy (_solo_control->get_state());

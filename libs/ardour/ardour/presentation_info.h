@@ -25,13 +25,25 @@
 
 #include <stdint.h>
 
+#include "pbd/signals.h"
+#include "pbd/stateful.h"
+#include "pbd/properties.h"
+
 #include "ardour/libardour_visibility.h"
 
 class XMLNode;
 
 namespace ARDOUR {
 
-class LIBARDOUR_API PresentationInfo
+namespace Properties {
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> order;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> color;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> selected;
+	/* we use this; declared in region.cc */
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> hidden;
+}
+
+class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 {
   public:
 
@@ -110,7 +122,7 @@ class LIBARDOUR_API PresentationInfo
 		Selected = 0x100,
 		Hidden = 0x200,
 		/* single bit indicates that the group order is set */
-		GroupOrderSet = 0x400,
+		OrderSet = 0x400,
 
 		/* special mask to delect out "state" bits */
 		StatusMask = (Selected|Hidden)
@@ -121,18 +133,24 @@ class LIBARDOUR_API PresentationInfo
 	static const Flag Bus;
 
 	typedef uint32_t order_t;
-	typedef uint64_t global_order_t;
+	typedef uint32_t color_t;
 
-	PresentationInfo (Flag f) : _order (0), _flags (Flag (f & ~GroupOrderSet)) { /* GroupOrderSet is not set */ }
-	PresentationInfo (order_t o, Flag f) : _order (o), _flags (Flag (f | GroupOrderSet)) { /* GroupOrderSet is set */ }
+	PresentationInfo (Flag f);
+	PresentationInfo (order_t o, Flag f);
+	PresentationInfo (PresentationInfo const &);
 
 	static const order_t max_order;
 
 	order_t  order() const { return _order; }
+	color_t  color() const { return _color; }
+
+	void set_color (color_t);
+	void set_selected (bool yn);
+	void set_hidden (bool yn);
 
 	PresentationInfo::Flag flags() const { return _flags; }
 
-	bool order_set() const { return _flags & GroupOrderSet; }
+	bool order_set() const { return _flags & OrderSet; }
 
 	bool hidden() const { return _flags & Hidden; }
 	bool selected() const { return _flags & Selected; }
@@ -182,19 +200,11 @@ class LIBARDOUR_API PresentationInfo
 		return f == _flags;
 	}
 
-	std::string to_string () const;
-
-	uint64_t to_integer () const {
-		return ((uint64_t) _flags << (8*sizeof(order_t))) | _order;
-	}
+	int set_state (XMLNode const&, int);
+	XMLNode& get_state ();
 
 	bool operator< (PresentationInfo const& other) const {
 		return order() < other.order();
-	}
-
-	PresentationInfo& operator= (std::string const& str) {
-		parse (str);
-		return *this;
 	}
 
 	bool match (PresentationInfo const& other) const {
@@ -209,19 +219,28 @@ class LIBARDOUR_API PresentationInfo
 		return (_order != other.order()) || (_flags != other.flags());
 	}
 
+	PresentationInfo& operator= (PresentationInfo const& other);
+
 	static Flag get_flags (XMLNode const& node);
+	static std::string state_node_name;
+
+	/* for things concerned about *any* PresentationInfo. This is emitted
+	 * only at the request of another object that has finished making some
+	 * changes (e.g. reordering things)
+	 */
+
+	static PBD::Signal0<void> Change;
+
+	static void make_property_quarks ();
 
   protected:
 	friend class Stripable;
-	void set_order (order_t order) { _order = order; _flags = Flag (_flags|GroupOrderSet); }
+	void set_order (order_t order);
 
   private:
 	order_t _order;
 	Flag    _flags;
-
-	PresentationInfo (std::string const & str);
-	int parse (std::string const&);
-	int parse (order_t, Flag f);
+	color_t _color;
 };
 
 }

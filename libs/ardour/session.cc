@@ -2944,7 +2944,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 		}
 
 		if (rt->presentation_info().order () >= first_new_order) {
-			rt->set_presentation_group_order (rt->presentation_info().order () + how_many);
+			rt->set_presentation_order (rt->presentation_info().order () + how_many);
 		}
 	}
 }
@@ -3444,10 +3444,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 				if (order == PresentationInfo::max_order) {
 					/* just add to the end */
-					r->set_presentation_group_order_explicit (n_routes + added);
+					r->set_presentation_order_explicit (n_routes + added);
 					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to NR %1 + %2 = %3\n", n_routes, added, n_routes + added));
 				} else {
-					r->set_presentation_group_order_explicit (order + added);
+					r->set_presentation_order (order + added);
 					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to %1 + %2 = %3\n", order, added, order + added));
 				}
 			} else {
@@ -3459,7 +3459,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		                                               r->name(),
 		                                               r->presentation_info().order(),
 		                                               enum_2_string (r->presentation_info().flags()),
-		                                               r->presentation_info().to_string()));
+		                                               r->presentation_info()));
 
 
 		if (input_auto_connect || output_auto_connect) {
@@ -3679,7 +3679,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		return;
 	}
 
-	Stripable::PresentationInfoChange(); /* EMIT SIGNAL */
+	PresentationInfo::Change(); /* EMIT SIGNAL */
 
 	/* save the new state of the world */
 
@@ -6719,7 +6719,7 @@ Session::notify_presentation_info_change ()
 		return;
 	}
 
-	Stripable::PresentationInfoChange (); /* EMIT SIGNAL */
+	PresentationInfo::Change (); /* EMIT SIGNAL */
 	reassign_track_numbers();
 
 #ifdef USE_TRACKS_CODE_FEATURES

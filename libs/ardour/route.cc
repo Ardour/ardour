@@ -2237,7 +2237,7 @@ Route::state(bool full_state)
 	node->add_property("default-type", _default_type.to_string());
 	node->add_property ("strict-io", _strict_io);
 
-	Stripable::add_state (*node);
+	node->add_child_nocopy (_presentation_info.get_state());
 
 	node->add_property("active", _active?"yes":"no");
 	string p;
