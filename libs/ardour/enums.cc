@@ -710,15 +710,14 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (PresentationInfo, MidiTrack);
 	REGISTER_CLASS_ENUM (PresentationInfo, AudioBus);
 	REGISTER_CLASS_ENUM (PresentationInfo, MidiBus);
+	REGISTER_CLASS_ENUM (PresentationInfo, VCA);
 	REGISTER_CLASS_ENUM (PresentationInfo, MasterOut);
 	REGISTER_CLASS_ENUM (PresentationInfo, MonitorOut);
-	REGISTER_CLASS_ENUM (PresentationInfo, VCA);
-	REGISTER_CLASS_ENUM (PresentationInfo, Bus);
-	REGISTER_CLASS_ENUM (PresentationInfo, Track);
-	REGISTER_CLASS_ENUM (PresentationInfo, Route);
+	REGISTER_CLASS_ENUM (PresentationInfo, Auditioner);
 	REGISTER_CLASS_ENUM (PresentationInfo, Selected);
 	REGISTER_CLASS_ENUM (PresentationInfo, Hidden);
-	REGISTER (_PresentationInfo_Flag);
+	REGISTER_CLASS_ENUM (PresentationInfo, OrderSet);
+	REGISTER_BITS (_PresentationInfo_Flag);
 }
 
 } /* namespace ARDOUR */
