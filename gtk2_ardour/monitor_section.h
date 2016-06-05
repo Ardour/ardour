@@ -167,6 +167,8 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 
 	void update_processor_box ();
 
+	void route_property_changed (const PBD::PropertyChange&) {}
+
 	ProcessorBox* insert_box;
 	PluginSelector* _plugin_selector;
 	RouteProcessorSelection _rr_selection;
