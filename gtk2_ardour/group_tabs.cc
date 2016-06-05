@@ -705,14 +705,14 @@ GroupTabs::collect (RouteGroup* g)
 				--diff;
 			}
 
-			(*j)->set_presentation_group_order_explicit (coll);
+			(*j)->set_presentation_order_explicit (coll);
 
 			++coll;
 			++i;
 
 		} else {
 
-			(*j)->set_presentation_group_order_explicit (k + diff);
+			(*j)->set_presentation_order_explicit (k + diff);
 
 		}
 
