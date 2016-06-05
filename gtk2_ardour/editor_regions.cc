@@ -95,38 +95,49 @@ EditorRegions::EditorRegions (Editor* e)
 	_model->set_sort_func (0, sigc::mem_fun (*this, &EditorRegions::sorter));
 	_model->set_sort_column (0, SORT_ASCENDING);
 
+	/* column widths */
+	int bbt_width, sync_width, check_width, height;
+
+	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
+	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
+
+	layout = _display.create_pango_layout (X_("Start "));
+	Gtkmm2ext::get_pixel_size (layout, sync_width, height);
+
+	check_width = 20;
+
 	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
 	col_name->set_fixed_width (120);
 	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_position = manage (new TreeViewColumn ("", _columns.position));
-	col_position->set_fixed_width (68);
+	col_position->set_fixed_width (bbt_width);
 	col_position->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_end = manage (new TreeViewColumn ("", _columns.end));
-	col_end->set_fixed_width (68);
+	col_end->set_fixed_width (bbt_width);
 	col_end->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_length = manage (new TreeViewColumn ("", _columns.length));
-	col_length->set_fixed_width (68);
+	col_length->set_fixed_width (bbt_width);
 	col_length->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_sync = manage (new TreeViewColumn ("", _columns.sync));
-	col_sync->set_fixed_width (38);
+	col_sync->set_fixed_width (sync_width);
 	col_sync->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_fadein = manage (new TreeViewColumn ("", _columns.fadein));
-	col_fadein->set_fixed_width (68);
+	col_fadein->set_fixed_width (bbt_width);
 	col_fadein->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_fadeout = manage (new TreeViewColumn ("", _columns.fadeout));
-	col_fadeout->set_fixed_width (68);
+	col_fadeout->set_fixed_width (bbt_width);
 	col_fadeout->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_locked = manage (new TreeViewColumn ("", _columns.locked));
-	col_locked->set_fixed_width (20);
+	col_locked->set_fixed_width (check_width);
 	col_locked->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_glued = manage (new TreeViewColumn ("", _columns.glued));
-	col_glued->set_fixed_width (20);
+	col_glued->set_fixed_width (check_width);
 	col_glued->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_muted = manage (new TreeViewColumn ("", _columns.muted));
-	col_muted->set_fixed_width (20);
+	col_muted->set_fixed_width (check_width);
 	col_muted->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_opaque = manage (new TreeViewColumn ("", _columns.opaque));
-	col_opaque->set_fixed_width (20);
+	col_opaque->set_fixed_width (check_width);
 	col_opaque->set_sizing (TREE_VIEW_COLUMN_FIXED);
 
 	_display.append_column (*col_name);
