@@ -37,9 +37,11 @@ class Selectable : public virtual sigc::trackable
 		}
 	}
 
-	bool get_selected() const {
+	virtual bool selected() const {
 		return _selected;
 	}
+
+	virtual void show_selected() {}
 
   protected:
 	bool _selected;

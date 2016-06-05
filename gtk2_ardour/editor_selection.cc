@@ -1566,7 +1566,7 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 
 	if (preserve_if_selected && op != Selection::Toggle) {
 		list<Selectable*>::iterator i = found.begin();
-		while (i != found.end() && (*i)->get_selected()) {
+		while (i != found.end() && (*i)->selected()) {
 			++i;
 		}
 

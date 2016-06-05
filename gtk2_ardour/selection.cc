@@ -951,7 +951,7 @@ Selection::selected (ArdourMarker* m)
 bool
 Selection::selected (TimeAxisView* tv)
 {
-	return tv->get_selected ();
+	return tv->selected ();
 }
 
 bool
@@ -997,7 +997,7 @@ Selection::toggle (ControlPoint* cp)
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 
-	cp->set_selected (!cp->get_selected ());
+	cp->set_selected (!cp->selected ());
 	PointSelection::iterator i = find (points.begin(), points.end(), cp);
 	if (i == points.end()) {
 		points.push_back (cp);
@@ -1147,7 +1147,7 @@ Selection::set (ControlPoint* cp)
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 
-	if (cp->get_selected () && points.size () == 1) {
+	if (cp->selected () && points.size () == 1) {
 		return;
 	}
 

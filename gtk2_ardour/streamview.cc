@@ -499,7 +499,7 @@ StreamView::num_selected_regionviews () const
 	uint32_t cnt = 0;
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->get_selected()) {
+		if ((*i)->selected()) {
 			++cnt;
 		}
 	}
@@ -518,7 +518,7 @@ void
 StreamView::foreach_selected_regionview (sigc::slot<void,RegionView*> slot)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->get_selected()) {
+		if ((*i)->selected()) {
 			slot (*i);
 		}
 	}

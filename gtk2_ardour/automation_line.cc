@@ -171,7 +171,7 @@ AutomationLine::update_visibility ()
 			}
 		} else if (_visible & SelectedControlPoints) {
 			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-				if ((*i)->get_selected()) {
+				if ((*i)->selected()) {
 					(*i)->show ();
 				} else {
 					(*i)->hide ();
@@ -470,9 +470,9 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
 
-	if (cp->get_selected ()) {
+	if (cp->selected ()) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			if (*i != cp && (*i)->get_selected()) {
+			if (*i != cp && (*i)->selected()) {
 				_drag_points.push_back (*i);
 			}
 		}

@@ -307,7 +307,7 @@ AudioTimeAxisView::update_control_names ()
 		}
 	}
 
-	if (get_selected()) {
+	if (selected()) {
 		controls_ebox.set_name (controls_base_selected_name);
 		time_axis_frame.set_name (controls_base_selected_name);
 	} else {
