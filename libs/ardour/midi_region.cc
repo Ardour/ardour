@@ -192,6 +192,10 @@ void
 MidiRegion::set_length_internal (framecnt_t len)
 {
 	Region::set_length_internal (len);
+	/* XX this seems wrong. we asked to set the length in 
+	   frames without requesting a new beat.
+	   may cause beat drift due to frame rounding.
+	*/
 	update_length_beats ();
 }
 
@@ -223,16 +227,13 @@ void
 MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
 	Region::set_position_internal (pos, allow_bbt_recompute);
-	/* zero length regions don't exist - so if _length_beats is zero, this object
-	   is under construction.
+
+	/* leave _length_beats alone, and change _length to reflect the state of things
+	   at the new position (tempo map may dictate a different number of frames
 	*/
-	if (_length_beats.val() == Evoral::Beats()) {
-		/* leave _length_beats alone, and change _length to reflect the state of things
-		   at the new position (tempo map may dictate a different number of frames
-		*/
-		BeatsFramesConverter converter (_session.tempo_map(), _position);
-		Region::set_length_internal (converter.to (_length_beats));
-	}
+	BeatsFramesConverter converter (_session.tempo_map(), _position);
+	Region::set_length_internal (converter.to (_length_beats));
+	send_change (Properties::length);
 }
 
 framecnt_t
