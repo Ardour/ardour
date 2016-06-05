@@ -4216,12 +4216,7 @@ ProcessorWindowProxy::show_the_right_window ()
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
-		get (true);
-		setup ();
-		assert (_window);
-		is_custom = want_custom;
 	}
-
 	toggle ();
 }
 
