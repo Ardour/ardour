@@ -47,6 +47,7 @@
 #include "ardour/presentation_info.h"
 #include "ardour/send.h"
 
+#include "osc_select_observer.h"
 #include "osc.h"
 #include "osc_controllable.h"
 #include "osc_route_observer.h"
@@ -326,6 +327,25 @@ OSC::stop ()
 		}
 	}
 // Should maybe do global_observers too
+	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end();) {
+
+		OSCGlobalObserver* gc;
+
+		if ((gc = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
+			delete *x;
+			x = global_observers.erase (x);
+		} else {
+			++x;
+		}
+	}
+// delete select observers
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		OSCSurface* sur = &_surface[it];
+		OSCSelectObserver* so;
+		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
+			delete so;
+		}
+	}
 
 	return 0;
 }
@@ -488,7 +508,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "i", monitor_set_fader);
 		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
-		REGISTER_CALLBACK (serv, "/select/record_safe", "ii", sel_recsafe);
+		REGISTER_CALLBACK (serv, "/select/record_safe", "i", sel_recsafe);
 
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
@@ -1063,6 +1083,8 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo
 	OSCSurface *s = get_surface(lo_message_get_source (msg));
 	s->bank_size = b_size;
 	s->strip_types = strips;
+	//next line could be a call that finds out how many strips there are
+	s->nstrips = session->nroutes(); // need to do this for strips
 	s->feedback = fb;
 	s->gainmode = gm;
 	// set bank and strip feedback
@@ -1089,6 +1111,8 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 {
 	OSCSurface *s = get_surface(lo_message_get_source (msg));
 	s->strip_types = st;
+	//next line could be a call that finds out how many strips there are
+	s->nstrips = session->nroutes(); // need to do this for strips
 
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
@@ -1143,12 +1167,14 @@ OSC::get_surface (lo_address addr)
 	OSCSurface s;
 	s.remote_url = r_url;
 	s.bank = 1;
-	s.bank_size = 0;
+	s.bank_size = 0; // need to find out how many strips there are
+	s.nstrips = session->nroutes(); // may need to do this after MARK below
 	s.strip_types = 31; // 31 is tracks, busses, and VCAs (no master/monitor)
 	s.feedback = 0;
 	s.gainmode = 0;
 	//get sorted should go here
 	_surface.push_back (s);
+	//MARK
 	return &_surface[_surface.size() - 1];
 }
 
@@ -1589,12 +1615,37 @@ OSC::strip_select (int ssid, int yn, lo_message msg)
 	int rid = get_rid (ssid, lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	sur->surface_sel = ssid;
+	delete sur->sel_obs;
 
 	if (s) {
-		sur->sel = s;
+		sur->surface_sel = ssid;
+		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, lo_message_get_source (msg), ssid, sur->gainmode, sur->feedback);
+		sur->sel_obs = sel_fb;
 	} else {
 		route_send_fail ("/strip/select", ssid, msg);
+	}
+	int b_s = sur->bank_size;
+	if (!b_s) { // bank size 0 means we need to know how many strips there are.
+		b_s = sur->nstrips;
+	}
+	for (int i = 1;  i <= b_s; i++) {
+			if (i==ssid) {
+				string path = "/strip/select";
+				lo_message reply = lo_message_new ();
+				if (sur->feedback[2]) {
+					ostringstream os;
+					os << path << "/" << ssid;
+					path = os.str();
+				} else {
+				lo_message_add_int32 (reply, ssid);
+				}
+				lo_message_add_float (reply, (float) 1);
+
+				lo_send_message (lo_message_get_source (msg), path.c_str(), reply);
+				lo_message_free (reply);
+			} else {
+				route_send_fail ("/strip/select", i, msg);
+			}
 	}
 
 	return 0;
@@ -1613,10 +1664,9 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	int rid = get_rid (ssid, lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	sur->surface_sel = ssid;
 
 	if (s) {
-		sur->sel = s;
+		sur->surface_sel = ssid;
 	} else {
 		route_send_fail ("/strip/gui_select", ssid, msg);
 	}
@@ -1884,7 +1934,13 @@ OSC::periodic (void)
 			ro->tick();
 		}
 	}
-
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		OSCSurface* sur = &_surface[it];
+		OSCSelectObserver* so;
+		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
+			so->tick();
+		}
+	}
 	return true;
 }
 

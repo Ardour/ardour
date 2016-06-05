@@ -44,6 +44,7 @@
 class OSCControllable;
 class OSCRouteObserver;
 class OSCGlobalObserver;
+class OSCSelectObserver;
 
 namespace ARDOUR {
 class Session;
@@ -98,14 +99,15 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
 	public:
-		std::string remote_url;						// the url these setting belong to
-		uint32_t bank;								// current bank
-		uint32_t bank_size;							// size of banks for this surface
-		std::bitset<32> strip_types;				// what strip types are a part of this bank
-		std::bitset<32> feedback;					// What is fed back? strips/meters/timecode/bar_beat/global
-		int gainmode;								// what kind of faders do we have Gain db or position 0 to 1023?
-		boost::shared_ptr<ARDOUR::Stripable> sel;	//
-		uint32_t surface_sel;						// which strip within the bank is locally selected
+		std::string remote_url;		// the url these setting belong to
+		uint32_t bank;				// current bank
+		uint32_t bank_size;			// size of banks for this surface
+		std::bitset<32> strip_types;// what strip types are a part of this bank
+		uint32_t nstrips;			// how many strips are there for strip_types
+		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
+		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1023?
+		uint32_t surface_sel;		// which strip within the bank is locally selected
+		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
 		//StripableList strips;	//list of stripables for the current bank
 	};
 		/*
