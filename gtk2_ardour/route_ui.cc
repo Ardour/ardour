@@ -99,7 +99,10 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 		boost::to_lower (lpn);
 		program_port_prefix = lpn + ":"; // e.g. "ardour:"
 	}
-	if (sess) init ();
+
+	if (sess) {
+		init ();
+	}
 }
 
 RouteUI::~RouteUI()
