@@ -399,13 +399,13 @@ Mixer_UI::show_window ()
 	parameter_changed ("show-group-tabs");
 
 	/* now reset each strips width so the right widgets are shown */
-	MixerStrip* ms;
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		ms = (*ri)[track_columns.strip];
+		AxisView* av = (*ri)[stripable_columns.strip];
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (av);
 		if (!ms) {
 			continue;
 		}
@@ -416,24 +416,6 @@ Mixer_UI::show_window ()
 
 	/* force focus into main area */
 	scroller_base.grab_focus ();
-}
-
-void
-Mixer_UI::add_masters (VCAList& vcas)
-{
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-
-		VCAMasterStrip* vms = new VCAMasterStrip (_session, *v);
-
-		TreeModel::Row row = *(track_model->append());
-		row[track_columns.text] = (*v)->name();
-		row[track_columns.visible] = true;
-		row[track_columns.vca] = vms;
-
-		vms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
-	}
-
-	redisplay_track_list ();
 }
 
 void
@@ -448,7 +430,7 @@ Mixer_UI::remove_master (VCAMasterStrip* vms)
 	TreeModel::Children::iterator ri;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		if ((*ri)[track_columns.vca] == vms) {
+		if ((*ri)[stripable_columns.strip] == vms) {
                         PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
@@ -470,28 +452,48 @@ Mixer_UI::masters_scroller_button_release (GdkEventButton* ev)
 }
 
 void
-Mixer_UI::add_strips (RouteList& routes)
+Mixer_UI::add_masters (VCAList& vlist)
+{
+	StripableList sl;
+
+	for (VCAList::iterator v = vlist.begin(); v != vlist.end(); ++v) {
+		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
+	}
+
+	add_stripables (sl);
+}
+
+void
+Mixer_UI::add_routes (RouteList& rlist)
+{
+	StripableList sl;
+
+	for (RouteList::iterator r = rlist.begin(); r != rlist.end(); ++r) {
+		sl.push_back (*r);
+	}
+
+	add_stripables (sl);
+}
+
+void
+Mixer_UI::add_stripables (StripableList& slist)
 {
 	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
 	uint32_t nroutes = 0;
 
 	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
-		boost::shared_ptr<Route> r = (*it)[track_columns.route];
+		boost::shared_ptr<Stripable> s = (*it)[stripable_columns.stripable];
 
-		if (!r) {
+		if (!s) {
 			continue;
 		}
 
 		nroutes++;
 
-		if (r->presentation_info().order() == (routes.front()->presentation_info().order() + routes.size())) {
+		if (s->presentation_info().order() == (slist.front()->presentation_info().order() + slist.size())) {
 			insert_iter = it;
 			break;
 		}
-	}
-
-	if (nroutes) {
-		_selection.clear_routes ();
 	}
 
 	MixerStrip* strip;
@@ -500,66 +502,84 @@ Mixer_UI::add_strips (RouteList& routes)
 		no_track_list_redisplay = true;
 		track_display.set_model (Glib::RefPtr<ListStore>());
 
-		for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
-			boost::shared_ptr<Route> route = (*x);
+		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
 
-			if (route->is_auditioner()) {
-				continue;
-			}
+			boost::shared_ptr<Route> route;
+			boost::shared_ptr<VCA> vca;
 
-			if (route->is_monitor()) {
+			if ((vca  = boost::dynamic_pointer_cast<VCA> (*s))) {
 
-				if (!_monitor_section) {
-					_monitor_section = new MonitorSection (_session);
+				VCAMasterStrip* vms = new VCAMasterStrip (_session, vca);
 
-					XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
-					if (mnode) {
-						_monitor_section->tearoff().set_state (*mnode);
-					}
+				TreeModel::Row row = *(track_model->append());
+
+				row[stripable_columns.text] = vca->name();
+				row[stripable_columns.visible] = !vca->presentation_info().hidden();
+				row[stripable_columns.strip] = vms;
+				row[stripable_columns.stripable] = vca;
+
+				vms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
+
+			} else if ((route = boost::dynamic_pointer_cast<Route> (*s))) {
+
+				if (route->is_auditioner()) {
+					continue;
 				}
 
-				out_packer.pack_end (_monitor_section->tearoff(), false, false);
-				_monitor_section->set_session (_session);
-				_monitor_section->tearoff().show_all ();
+				if (route->is_monitor()) {
 
-				_monitor_section->tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
-				_monitor_section->tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
+					if (!_monitor_section) {
+						_monitor_section = new MonitorSection (_session);
 
-				monitor_section_attached ();
+						XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
+						if (mnode) {
+							_monitor_section->tearoff().set_state (*mnode);
+						}
+					}
 
-				route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
+					out_packer.pack_end (_monitor_section->tearoff(), false, false);
+					_monitor_section->set_session (_session);
+					_monitor_section->tearoff().show_all ();
 
-				/* no regular strip shown for control out */
+					_monitor_section->tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
+					_monitor_section->tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
 
-				continue;
+					monitor_section_attached ();
+
+					route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
+
+					/* no regular strip shown for control out */
+
+					continue;
+				}
+
+				strip = new MixerStrip (*this, _session, route);
+				strips.push_back (strip);
+
+				UIConfiguration::instance().get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+
+				if (strip->width_owner() != strip) {
+					strip->set_width_enum (_strip_width, this);
+				}
+
+				show_strip (strip);
+
+				TreeModel::Row row = *(track_model->insert (insert_iter));
+
+				row[stripable_columns.text] = route->name();
+				row[stripable_columns.visible] = route->is_master() ? true : strip->marked_for_display();
+				row[stripable_columns.stripable] = route;
+				row[stripable_columns.strip] = strip;
+
+				if (nroutes != 0) {
+					_selection.add (strip);
+				}
+
+				route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
+
+				strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
+				strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 			}
-
-			strip = new MixerStrip (*this, _session, route);
-			strips.push_back (strip);
-
-			UIConfiguration::instance().get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
-
-			if (strip->width_owner() != strip) {
-				strip->set_width_enum (_strip_width, this);
-			}
-
-			show_strip (strip);
-
-			TreeModel::Row row = *(track_model->insert(insert_iter));
-			row[track_columns.text] = route->name();
-			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
-			row[track_columns.route] = route;
-			row[track_columns.strip] = strip;
-			row[track_columns.vca] = 0;
-
-			if (nroutes != 0) {
-				_selection.add (strip);
-			}
-
-			route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
-
-			strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
-			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 		}
 
 	} catch (const std::exception& e) {
@@ -624,7 +644,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	}
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		if ((*ri)[track_columns.strip] == strip) {
+		if ((*ri)[stripable_columns.strip] == strip) {
                         PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
@@ -652,26 +672,25 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	uint32_t order = 0;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		bool visible = (*ri)[track_columns.visible];
+		bool visible = (*ri)[stripable_columns.visible];
+		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
 
-
-		if (!route) {
+		if (!stripable) {
 			continue;
 		}
 
-		if (route->presentation_info().special()) {
+		/* Monitor and Auditioner do not get their presentation
+		 * info reset here.
+		 */
+
+		if (stripable->is_monitor() || stripable->is_auditioner()) {
 			continue;
 		}
 
-		if (!visible) {
-			route->presentation_info().set_flag (PresentationInfo::Hidden);
-		} else {
-			route->presentation_info().unset_flag (PresentationInfo::Hidden);
-		}
+		stripable->presentation_info().set_hidden (!visible);
 
-		if (order != route->presentation_info().order()) {
-			route->set_presentation_group_order_explicit (order);
+		if (order != stripable->presentation_info().order()) {
+			stripable->set_presentation_order_explicit (order);
 			change = true;
 		}
 
@@ -708,32 +727,10 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 	}
 
 	OrderingKeys sorted;
-	uint32_t vca_cnt = 0;
-	uint32_t max_route_order_key = 0;
-
-	/* count number of Routes in track_model (there may be some odd reason
-	   why this is not the same as the number in the session, but here we
-	   care about the track model.
-	*/
-
-	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
-		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		if (route) {
-			max_route_order_key = max (route->presentation_info().order(), max_route_order_key);
-		}
-	}
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
-		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		if (!route) {
-			/* VCAs need to sort after all routes. We don't display
-			 * them in the same place (March 2016), but we don't
-			 * want them intermixed in the track_model
-			 */
-			sorted.push_back (OrderKeys (old_order, max_route_order_key + ++vca_cnt));
-		} else {
-			sorted.push_back (OrderKeys (old_order, route->presentation_info().order()));
-		}
+		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
+		sorted.push_back (OrderKeys (old_order, stripable->presentation_info().order()));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -898,7 +895,7 @@ Mixer_UI::set_session (Session* sess)
 
 	initial_track_display ();
 
-	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_strips, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_routes, this, _1), gui_context());
 	_session->route_group_added.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_route_group, this, _1), gui_context());
 	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
@@ -960,9 +957,10 @@ Mixer_UI::track_visibility_changed (std::string const & path)
 	TreeIter iter;
 
 	if ((iter = track_model->get_iter (path))) {
-		MixerStrip* strip = (*iter)[track_columns.strip];
+		AxisView* av = (*iter)[stripable_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		if (strip) {
-			bool visible = (*iter)[track_columns.visible];
+			bool visible = (*iter)[stripable_columns.visible];
 
 			if (strip->set_marked_for_display (!visible)) {
 				update_track_visibility ();
@@ -981,9 +979,10 @@ Mixer_UI::update_track_visibility ()
 		Unwinder<bool> uw (no_track_list_redisplay, true);
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			MixerStrip *strip = (*i)[track_columns.strip];
+			AxisView* av = (*i)[stripable_columns.strip];
+			MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 			if (strip) {
-				(*i)[track_columns.visible] = strip->marked_for_display ();
+				(*i)[stripable_columns.visible] = strip->marked_for_display ();
 			}
 		}
 
@@ -1004,9 +1003,10 @@ Mixer_UI::show_strip (MixerStrip* ms)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
-		MixerStrip* strip = (*i)[track_columns.strip];
+		AxisView* av = (*i)[stripable_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		if (strip == ms) {
-			(*i)[track_columns.visible] = true;
+			(*i)[stripable_columns.visible] = true;
 			redisplay_track_list ();
 			break;
 		}
@@ -1021,9 +1021,10 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
-		MixerStrip* strip = (*i)[track_columns.strip];
+		AxisView* av = (*i)[stripable_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		if (strip == ms) {
-			(*i)[track_columns.visible] = false;
+			(*i)[stripable_columns.visible] = false;
 			redisplay_track_list ();
 			break;
 		}
@@ -1065,8 +1066,8 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 
-			TreeModel::Row row = (*i);
-			MixerStrip* strip = row[track_columns.strip];
+			AxisView* av = (*i)[stripable_columns.strip];
+			MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 
 			if (!strip) {
 				continue;
@@ -1076,7 +1077,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 				continue;
 			}
 
-			(*i)[track_columns.visible] = yn;
+			(*i)[stripable_columns.visible] = yn;
 		}
 	}
 
@@ -1094,8 +1095,9 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 		Unwinder<bool> uw (no_track_list_redisplay, true);
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			TreeModel::Row row = (*i);
-			MixerStrip* strip = row[track_columns.strip];
+
+			AxisView* av = (*i)[stripable_columns.strip];
+			MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 
 			if (!strip) {
 				continue;
@@ -1110,24 +1112,24 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 
 			switch (tracks) {
 			case 0:
-				(*i)[track_columns.visible] = yn;
+				(*i)[stripable_columns.visible] = yn;
 				break;
 
 			case 1:
 				if (at) { /* track */
-					(*i)[track_columns.visible] = yn;
+					(*i)[stripable_columns.visible] = yn;
 				}
 				break;
 
 			case 2:
 				if (!at && !mt) { /* bus */
-					(*i)[track_columns.visible] = yn;
+					(*i)[stripable_columns.visible] = yn;
 				}
 				break;
 
 			case 3:
 				if (mt) { /* midi-track */
-					(*i)[track_columns.visible] = yn;
+					(*i)[stripable_columns.visible] = yn;
 				}
 				break;
 			}
@@ -1215,7 +1217,8 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-		MixerStrip* strip = (*i)[track_columns.strip];
+		AxisView* av = (*i)[stripable_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 
 		if (!strip) {
 			/* we're in the middle of changing a row, don't worry */
@@ -1233,8 +1236,6 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 
 		if (strip->route()->slaved_to (vca)) {
 
-			strip->set_gui_property ("visible", true);
-
 			if (strip->packed()) {
 				strip_packer.reorder_child (*strip, -1); /* put at end */
 			} else {
@@ -1243,8 +1244,6 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 			}
 
 		} else {
-
-			strip->set_gui_property ("visible", false);
 
 			if (strip->packed()) {
 				strip_packer.remove (*strip);
@@ -1277,26 +1276,31 @@ Mixer_UI::redisplay_track_list ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
-		VCAMasterStrip* vms = (*i)[track_columns.vca];
+		AxisView* s = (*i)[stripable_columns.strip];
 
-		if (vms) {
+		if (!s) {
+			/* we're in the middle of changing a row, don't worry */
+			continue;
+		}
+
+		VCAMasterStrip* vms;
+
+		if ((vms = dynamic_cast<VCAMasterStrip*> (s))) {
 			vca_packer.pack_start (*vms, false, false);
 			vms->show ();
 			n_masters++;
 			continue;
 		}
 
-		MixerStrip* strip = (*i)[track_columns.strip];
+		MixerStrip* strip = dynamic_cast<MixerStrip*> (s);
 
 		if (!strip) {
-			/* we're in the middle of changing a row, don't worry */
 			continue;
 		}
 
-		bool const visible = (*i)[track_columns.visible];
+		bool const visible = (*i)[stripable_columns.visible];
 
 		if (visible) {
-			strip->set_gui_property ("visible", true);
 
 			if (strip->packed()) {
 
@@ -1318,8 +1322,6 @@ Mixer_UI::redisplay_track_list ()
 			}
 
 		} else {
-
-			strip->set_gui_property ("visible", false);
 
 			if (strip->route()->is_master() || strip->route()->is_monitor()) {
 				/* do nothing, these cannot be hidden */
@@ -1356,13 +1358,13 @@ Mixer_UI::strip_width_changed ()
 	long order;
 
 	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-		MixerStrip* strip = (*i)[track_columns.strip];
+		MixerStrip* strip = (*i)[stripable_columns.strip];
 
 		if (strip == 0) {
 			continue;
 		}
 
-		bool visible = (*i)[track_columns.visible];
+		bool visible = (*i)[stripable_columns.visible];
 
 		if (visible) {
 			strip->queue_draw();
@@ -1372,9 +1374,16 @@ Mixer_UI::strip_width_changed ()
 
 }
 
-struct PresentationInfoRouteSorter
+struct PresentationInfoMixerSorter
 {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+		if (a->is_master()) {
+			/* master after everything else */
+			return false;
+		} else if (b->is_master()) {
+			/* everything else before master */
+			return true;
+		}
 		return a->presentation_info().order () < b->presentation_info().order ();
 	}
 };
@@ -1382,20 +1391,31 @@ struct PresentationInfoRouteSorter
 void
 Mixer_UI::initial_track_display ()
 {
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-	RouteList copy (*routes);
-	PresentationInfoRouteSorter sorter;
+	StripableList sl;
 
-	copy.sort (sorter);
+	boost::shared_ptr<RouteList> routes = _session->get_routes();
+
+	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
+		sl.push_back (*r);
+	}
+
+	VCAList vcas = _session->vca_manager().vcas();
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
+	}
+
+	sl.sort (PresentationInfoMixerSorter());
 
 	{
+		/* These are also used inside ::add_stripables() but we need
+		 *  them here because we're going to clear the track_model also.
+		 */
 		Unwinder<bool> uw1 (no_track_list_redisplay, true);
 		Unwinder<bool> uw2 (ignore_reorder, true);
 
 		track_model->clear ();
-		VCAList vcas = _session->vca_manager().vcas();
-		add_masters (vcas);
-		add_strips (copy);
+		add_stripables (sl);
 	}
 
 	redisplay_track_list ();
@@ -1456,8 +1476,8 @@ Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[track_columns.strip] == mx) {
-			(*i)[track_columns.text] = mx->route()->name();
+		if ((*i)[stripable_columns.strip] == mx) {
+			(*i)[stripable_columns.text] = mx->route()->name();
 			return;
 		}
 	}
@@ -2054,10 +2074,10 @@ Mixer_UI::plugin_selector()
 void
 Mixer_UI::setup_track_display ()
 {
-	track_model = ListStore::create (track_columns);
+	track_model = ListStore::create (stripable_columns);
 	track_display.set_model (track_model);
-	track_display.append_column (_("Strips"), track_columns.text);
-	track_display.append_column (_("Show"), track_columns.visible);
+	track_display.append_column (_("Strips"), stripable_columns.text);
+	track_display.append_column (_("Show"), stripable_columns.visible);
 	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);

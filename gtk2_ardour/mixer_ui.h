@@ -55,6 +55,7 @@ namespace ARDOUR {
 	class RouteGroup;
 };
 
+class AxisView;
 class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
@@ -165,7 +166,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void scroll_right ();
         void toggle_midi_input_active (bool flip_others);
 
-	void add_strips (ARDOUR::RouteList&);
+	void add_stripables (ARDOUR::StripableList&);
+
+	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
 
 	void add_masters (ARDOUR::VCAList&);
@@ -265,49 +268,45 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	/* various treeviews */
 
-	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-		TrackDisplayModelColumns () {
+	struct StripableDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+		StripableDisplayModelColumns () {
 			add (text);
 			add (visible);
-			add (route);
+			add (stripable);
 			add (strip);
-			add (vca);
 		}
 		Gtk::TreeModelColumn<bool>         visible;
 		Gtk::TreeModelColumn<std::string>  text;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
-		/* if route is non-null, this must be non-null */
-		Gtk::TreeModelColumn<MixerStrip*>  strip;
-		/* if route is null, this may be non-null */
-		Gtk::TreeModelColumn<VCAMasterStrip*>  vca;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Stripable> > stripable;
+		Gtk::TreeModelColumn<AxisView*>    strip;
 	};
 
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    GroupDisplayModelColumns() {
-		    add (visible);
-		    add (text);
-		    add (group);
-	    }
-	    Gtk::TreeModelColumn<bool>					visible;
-	    Gtk::TreeModelColumn<std::string>			text;
-	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*>	group;
+		GroupDisplayModelColumns() {
+			add (visible);
+			add (text);
+			add (group);
+		}
+		Gtk::TreeModelColumn<bool>            visible;
+		Gtk::TreeModelColumn<std::string>         text;
+		Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
 	};
 
 	struct PluginsDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    PluginsDisplayModelColumns() {
-		    add (name);
-		    add (plugin);
-	    }
-	    Gtk::TreeModelColumn<std::string> name;
-			Gtk::TreeModelColumn<ARDOUR::PluginPresetPtr> plugin;
+		PluginsDisplayModelColumns() {
+			add (name);
+			add (plugin);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<ARDOUR::PluginPresetPtr> plugin;
 	};
 
 	ARDOUR::PluginInfoList favorite_order;
 	std::map<std::string, bool> favorite_ui_state;
 
-	TrackDisplayModelColumns    track_columns;
-	GroupDisplayModelColumns    group_columns;
-	PluginsDisplayModelColumns  favorite_plugins_columns;
+	StripableDisplayModelColumns stripable_columns;
+	GroupDisplayModelColumns     group_columns;
+	PluginsDisplayModelColumns   favorite_plugins_columns;
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;

@@ -61,7 +61,8 @@ MixerGroupTabs::compute_tabs () const
 	TreeModel::Children rows = _mixer->track_model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-		MixerStrip* s = (*i)[_mixer->track_columns.strip];
+		AxisView* av = (*i)[_mixer->stripable_columns.strip];
+		MixerStrip* s = dynamic_cast<MixerStrip*> (av);
 
 		if (!s) {
 			continue;
@@ -153,7 +154,8 @@ MixerGroupTabs::routes_for_tab (Tab const * t) const
 	TreeModel::Children rows = _mixer->track_model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-		MixerStrip* s = (*i)[_mixer->track_columns.strip];
+		AxisView* av = (*i)[_mixer->stripable_columns.strip];
+		MixerStrip* s = dynamic_cast<MixerStrip*> (av);
 
 		if (!s) {
 			continue;
