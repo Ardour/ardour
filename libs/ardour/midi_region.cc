@@ -91,9 +91,9 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
-	, _length_beats (Properties::length_beats, Evoral::Beats())
+	, _length_beats (Properties::length_beats, other->_length_beats)
 {
-	update_length_beats ();
+	//update_length_beats ();
 	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
@@ -105,14 +105,12 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
 	: Region (other, offset)
 	, _start_beats (Properties::start_beats, Evoral::Beats())
-	, _length_beats (Properties::length_beats, Evoral::Beats())
+	, _length_beats (Properties::length_beats, other->_length_beats)
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), other->_position);
 	Evoral::Beats const offset_beats = bfc.from (offset);
 
 	_start_beats = other->_start_beats.val() + offset_beats;
-	_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (other->length() - offset));
-
 	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
