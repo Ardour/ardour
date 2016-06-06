@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include "ardour/stripable.h"
+
 struct OrderKeys {
     uint32_t old_display_order;
     uint32_t new_display_order;
@@ -39,6 +41,12 @@ struct SortByNewDisplayOrder {
     bool operator() (const OrderKeys& a, const OrderKeys& b) {
 	    return a.new_display_order < b.new_display_order;
     }
+};
+
+struct StripablePresentationInfoSorter {
+	bool operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b) {
+		return a->presentation_info().order () < b->presentation_info().order ();
+	}
 };
 
 #endif /* __gtk2_ardour_route_sorter_h__ */

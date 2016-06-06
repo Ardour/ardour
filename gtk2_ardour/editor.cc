@@ -126,6 +126,7 @@
 #include "region_layering_order_editor.h"
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
+#include "route_sorter.h"
 #include "selection.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
@@ -5219,21 +5220,6 @@ Editor::add_routes (RouteList& rlist)
 	add_stripables (sl);
 }
 
-struct PresentationInfoEditorSorter
-{
-	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-		if (a->is_master()) {
-			/* master before everything else */
-			return true;
-		} else if (b->is_master()) {
-			/* everything else before master */
-			return false;
-		}
-		return a->presentation_info().order () < b->presentation_info().order ();
-	}
-};
-
-
 void
 Editor::add_stripables (StripableList& sl)
 {
@@ -5243,7 +5229,7 @@ Editor::add_stripables (StripableList& sl)
 	TrackViewList new_selection;
 	bool from_scratch = (track_views.size() == 0);
 
-	sl.sort (PresentationInfoEditorSorter());
+	sl.sort (StripablePresentationInfoSorter());
 
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 

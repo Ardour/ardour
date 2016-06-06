@@ -839,6 +839,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 	_display.set_model (_model);
 
 	/* now update route order keys from the treeview/track display order */
+
 	if (!from_scratch) {
 		sync_presentation_info_from_treeview ();
 	}

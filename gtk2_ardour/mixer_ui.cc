@@ -64,6 +64,7 @@
 #include "actions.h"
 #include "gui_thread.h"
 #include "mixer_group_tabs.h"
+#include "route_sorter.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "vca_master_strip.h"
@@ -479,7 +480,10 @@ void
 Mixer_UI::add_stripables (StripableList& slist)
 {
 	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
+	bool from_scratch = (track_model->children().size() == 0);
 	uint32_t nroutes = 0;
+
+	slist.sort (StripablePresentationInfoSorter());
 
 	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
 		boost::shared_ptr<Stripable> s = (*it)[stripable_columns.stripable];
@@ -589,8 +593,9 @@ Mixer_UI::add_stripables (StripableList& slist)
 	no_track_list_redisplay = false;
 	track_display.set_model (track_model);
 
-	sync_presentation_info_from_treeview ();
-	redisplay_track_list ();
+	if (!from_scratch) {
+		sync_presentation_info_from_treeview ();
+	}
 }
 
 void
@@ -686,6 +691,10 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		if (stripable->is_monitor() || stripable->is_auditioner()) {
 			continue;
 		}
+
+		/* Master also doesn't get set here but since the editor allows
+		 * it to be reordered, we need to preserve its ordering.
+		 */
 
 		stripable->presentation_info().set_hidden (!visible);
 
