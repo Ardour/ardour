@@ -329,6 +329,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(set_surface_gainmode,i);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
+	PATH_CALLBACK1_MSG(sel_mute,i);
+	PATH_CALLBACK1_MSG(sel_solo,i);
+	PATH_CALLBACK1_MSG(sel_monitor_input,i);
+	PATH_CALLBACK1_MSG(sel_monitor_disk,i);
+	PATH_CALLBACK1_MSG(sel_gain,f);
+	PATH_CALLBACK1_MSG(sel_fader,f);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -440,6 +446,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int monitor_set_fader (uint32_t position);
 	int sel_recenable (uint32_t state, lo_message msg);
 	int sel_recsafe (uint32_t state, lo_message msg);
+	int sel_mute (uint32_t state, lo_message msg);
+	int sel_solo (uint32_t state, lo_message msg);
+	int sel_monitor_input (uint32_t state, lo_message msg);
+	int sel_monitor_disk (uint32_t state, lo_message msg);
+	int sel_gain (float state, lo_message msg);
+	int sel_fader (float state, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
@@ -451,7 +463,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool periodic (void);
 	sigc::connection periodic_connection;
 
-	int route_send_fail (std::string path, uint32_t ssid, lo_message msg);
+	int route_send_fail (std::string path, uint32_t ssid, float val, lo_message msg);
 
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 
