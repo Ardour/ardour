@@ -4237,15 +4237,8 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	StripableList sl;
 	PresentationInfo::order_t match_cnt = 0;
 
-	/* API is one-based, so adjust n */
-
-	if (n) {
-		--n;
-	}
-
 	get_stripables (sl);
-	GlobalPresentationOrderSorter cmp;
-	sl.sort (cmp);
+	sl.sort (GlobalPresentationOrderSorter());
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
 		if ((*s)->presentation_info().flag_match (flags)) {
