@@ -44,6 +44,7 @@
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"
@@ -327,6 +328,15 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		_exit (0);
 	}
 
+
+	if (string (VERSIONSTRING).find (".pre") != string::npos) {
+		/* check this is not being run from ./ardev etc. */
+		gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
+		if (!x || string (x).find ("gtk2_ardour") == string::npos) {
+			pre_release_dialog ();
+		}
+	}
+
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
@@ -487,6 +497,40 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
+}
+
+void
+ARDOUR_UI::pre_release_dialog ()
+{
+	ArdourDialog d (_("Pre-Release Warning"), true, false);
+	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+        Label* label = manage (new Label);
+        label->set_markup (string_compose (_("<b>Welcome to this pre-release build of %1 %2</b>\n\n\
+There are still several issues and bugs to be worked on,\n\
+as well as general workflow improvements, before this can be considered\n\
+release software. So, a few guidelines:\n\
+\n\
+1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
+   though it may be so, depending on your workflow.\n\
+2) Please wait for a helpful writeup of new features.\n\
+3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
+4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
+   making sure to note the product version number as 5.0-pre.\n\
+5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
+6) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
+   can get there directly from within the program via the Help->Chat menu option.\n\
+\n\
+Full information on all the above can be found on the support page at\n\
+\n\
+                http://ardour.org/support\n\
+"), PROGRAM_NAME, VERSIONSTRING));
+
+        d.get_vbox()->set_border_width (12);
+        d.get_vbox()->pack_start (*label, false, false, 12);
+        d.get_vbox()->show_all ();
+
+        d.run ();
 }
 
 GlobalPortMatrixWindow*

@@ -885,6 +885,7 @@ private:
 	void step_down_through_tabs ();
 
 	void escape ();
+	void pre_release_dialog ();
 };
 
 #endif /* __ardour_gui_h__ */
