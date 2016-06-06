@@ -2375,6 +2375,8 @@ Editor::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property ("zoom-focus"))) {
 		zoom_focus_selection_done ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
+	} else {
+		zoom_focus_selection_done (zoom_focus);
 	}
 
 	if ((prop = node.property ("zoom"))) {
@@ -2392,6 +2394,8 @@ Editor::set_state (const XMLNode& node, int version)
 	if ((prop = node.property ("snap-to"))) {
 		snap_type_selection_done ((SnapType) string_2_enum (prop->value(), _snap_type));
 		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
+	} else {
+		set_snap_to (_snap_type);
 	}
 
 	if ((prop = node.property ("snap-mode"))) {
@@ -2401,6 +2405,8 @@ Editor::set_state (const XMLNode& node, int version)
 		 * which does not trigger set_text().
 		 */
 		set_snap_mode ((SnapMode) string_2_enum (prop->value(), _snap_mode));
+	} else {
+		set_snap_mode (_snap_mode);
 	}
 
 	if ((prop = node.property ("internal-snap-to"))) {
@@ -2453,6 +2459,8 @@ Editor::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property ("edit-point"))) {
 		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
+	} else {
+		set_edit_point_preference (_edit_point);
 	}
 
 	if ((prop = node.property ("show-measures"))) {
