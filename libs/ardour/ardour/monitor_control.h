@@ -39,7 +39,7 @@ class LIBARDOUR_API MonitorControl : public SlavableAutomationControl
 	MonitorControl (Session& session, std::string const & name, Monitorable& m);
 	~MonitorControl() {}
 
-	MonitorChoice monitoring_choice() const { return static_cast<MonitorChoice> (get_value()); }
+	MonitorChoice monitoring_choice() const { return static_cast<MonitorChoice> ((int)get_value()); }
 	MonitorState monitoring_state () const { return _monitorable.monitoring_state(); }
 
 	int set_state (XMLNode const&, int);
