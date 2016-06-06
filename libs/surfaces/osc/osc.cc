@@ -243,7 +243,7 @@ OSC::start ()
 	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
 	periodic_timeout->attach (main_loop()->get_context());
 
-	//StripableSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this, _1), this);
+	StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this, _1), this);
 
 	return 0;
 }
@@ -316,6 +316,7 @@ OSC::stop ()
 	}
 
 	periodic_connection.disconnect ();
+	session_connections.drop_connections ();
 	// Delete any active route observers
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
 
@@ -1552,7 +1553,7 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 		}
 	}
 	// hmm, not set for whatever reason tell surface
-	return route_send_fail ("recenable", ssid, 0, msg);
+	return route_send_fail ("recenable", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1578,7 +1579,7 @@ OSC::route_recsafe (int ssid, int yn, lo_message msg)
 		}
 	}
 	// hmm, not set for whatever reason tell surface
-	return route_send_fail ("record_safe", ssid, 0, msg);
+	return route_send_fail ("record_safe", ssid, 0,lo_message_get_source (msg));
 }
 
 int
@@ -1594,7 +1595,7 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 		if (track) {
 			track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 		} else {
-			route_send_fail ("monitor_input", ssid, 0, msg);
+			route_send_fail ("monitor_input", ssid, 0, lo_message_get_source (msg));
 		}
 
 	}
@@ -1622,7 +1623,7 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 		if (track) {
 			track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
 		} else {
-			route_send_fail ("monitor_disk", ssid, 0, msg);
+			route_send_fail ("monitor_disk", ssid, 0, lo_message_get_source (msg));
 		}
 
 	}
@@ -1643,21 +1644,27 @@ OSC::strip_select (int ssid, int yn, lo_message msg)
 	//ignore button release
 	if (!yn) return 0;
 
+	return _strip_select ( ssid, lo_message_get_source (msg));
+}
+
+int
+OSC::_strip_select (int ssid, lo_address addr)
+{
 	if (!session) {
-		route_send_fail ("select", ssid, 0, msg);
+		route_send_fail ("select", ssid, 0, addr);
 		return -1;
 	}
-	int rid = get_rid (ssid, lo_message_get_source (msg));
+	int rid = get_rid (ssid, addr);
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
-	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	OSCSurface *sur = get_surface(addr);
 	delete sur->sel_obs;
 
 	if (s) {
 		sur->surface_sel = ssid;
-		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, lo_message_get_source (msg), ssid, sur->gainmode, sur->feedback);
+		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, ssid, sur->gainmode, sur->feedback);
 		sur->sel_obs = sel_fb;
 	} else {
-		route_send_fail ("select", ssid, 0 , msg);
+		route_send_fail ("select", ssid, 0 , addr);
 	}
 	int b_s = sur->bank_size;
 	if (!b_s) { // bank size 0 means we need to know how many strips there are.
@@ -1676,10 +1683,10 @@ OSC::strip_select (int ssid, int yn, lo_message msg)
 				}
 				lo_message_add_float (reply, (float) 1);
 
-				lo_send_message (lo_message_get_source (msg), path.c_str(), reply);
+				lo_send_message (addr, path.c_str(), reply);
 				lo_message_free (reply);
 			} else {
-				route_send_fail ("select", i, 0, msg);
+				route_send_fail ("select", i, 0, addr);
 			}
 	}
 
@@ -1693,7 +1700,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	if (!yn) return 0;
 
 	if (!session) {
-		route_send_fail ("gui_select", ssid, 0, msg);
+		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
 		return -1;
 	}
 	int ret = strip_select (ssid, yn, msg);
@@ -1708,7 +1715,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 		//s->set_select();
 		//sur->surface_sel = ssid;
 	} else {
-		route_send_fail ("gui_select", ssid, 0, msg);
+		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
 	}
 
 	return 0;
@@ -1731,7 +1738,7 @@ int
 OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 {
 	if (!session) {
-		route_send_fail ("gain", ssid, -193, msg);
+		route_send_fail ("gain", ssid, -193, lo_message_get_source (msg));
 		return -1;
 	}
 	int ret;
@@ -1742,7 +1749,7 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 		ret = route_set_gain_abs (rid, dB_to_coefficient (dB), msg);
 	}
 	if (ret != 0) {
-		route_send_fail ("gain", ssid, 0, msg);
+		route_send_fail ("gain", ssid, 0, lo_message_get_source (msg));
 	}
 	return ret;
 }
@@ -1758,7 +1765,7 @@ int
 OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 {
 	if (!session) {
-		route_send_fail ("fader", ssid, 0, msg);
+		route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
 		return -1;
 	}
 	int ret;
@@ -1769,7 +1776,7 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 		ret = route_set_gain_abs (rid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
 	if (ret != 0) {
-		route_send_fail ("fader", ssid, 0, msg);
+		route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
 	}
 	return ret;
 }
@@ -1984,6 +1991,29 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 	return 0;
 }
 
+void
+OSC::gui_selection_changed (StripableNotificationListPtr stripables)
+{
+	boost::shared_ptr<Stripable> strip;
+
+	if (!stripables->empty()) {
+		strip = stripables->front().lock();
+	}
+	if (strip) {
+		for (uint32_t it = 0; it < _surface.size(); ++it) {
+			OSCSurface* sur = &_surface[it];
+			if(!sur->feedback[10]) {
+				uint32_t sel_strip = strip->presentation_info().order() + 1;
+				if (!(sel_strip < sur->bank) && !(sel_strip >= (sur->bank + sur->bank_size))) {
+					lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
+					_strip_select ((sel_strip - sur->bank + 1), addr);
+				}
+			}
+		}
+	}
+
+}
+
 // timer callbacks
 bool
 OSC::periodic (void)
@@ -2015,9 +2045,9 @@ OSC::periodic (void)
 }
 
 int
-OSC::route_send_fail (string path, uint32_t ssid, float val, lo_message msg)
+OSC::route_send_fail (string path, uint32_t ssid, float val, lo_address addr)
 {
-	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	OSCSurface *sur = get_surface(addr);
 
 	ostringstream os;
 	lo_message reply = lo_message_new ();
@@ -2030,7 +2060,7 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_message msg)
 	string str_pth = os.str();
 	lo_message_add_float (reply, (float) val);
 
-	lo_send_message (lo_message_get_source (msg), str_pth.c_str(), reply);
+	lo_send_message (addr, str_pth.c_str(), reply);
 	lo_message_free (reply);
 	if (sur->surface_sel == ssid) {
 		os.str("");
@@ -2038,7 +2068,7 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_message msg)
 		string sel_pth = os.str();
 		reply = lo_message_new ();
 		lo_message_add_float (reply, (float) val);
-		lo_send_message (lo_message_get_source (msg), sel_pth.c_str(), reply);
+		lo_send_message (addr, sel_pth.c_str(), reply);
 		lo_message_free (reply);
 	}
 

@@ -414,6 +414,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_monitor_input (int rid, int yn, lo_message msg);
 	int route_monitor_disk (int rid, int yn, lo_message msg);
 	int strip_select (int rid, int yn, lo_message msg);
+	int _strip_select (int rid, lo_address addr);
 	int strip_gui_select (int rid, int yn, lo_message msg);
 	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);
@@ -456,14 +457,16 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Stripable>);
+	void gui_selection_changed (ARDOUR::StripableNotificationListPtr stripables);
 
 	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
 
 	void update_clock ();
 	bool periodic (void);
 	sigc::connection periodic_connection;
+	PBD::ScopedConnectionList session_connections;
 
-	int route_send_fail (std::string path, uint32_t ssid, float val, lo_message msg);
+	int route_send_fail (std::string path, uint32_t ssid, float val, lo_address addr);
 
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 
