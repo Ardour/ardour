@@ -343,6 +343,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	set_master_sources (other->_master_sources);
 
 	_start = other->_start + offset;
+	_beat = _session.tempo_map().beat_at_frame (_position);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
