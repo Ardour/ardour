@@ -326,6 +326,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
+	, _beat (0.0)
 	, _layer (other->_layer)
 {
 	register_properties ();
@@ -333,7 +334,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	/* override state that may have been incorrectly inherited from the other region
 	 */
 
-	_position = 0;
+	_position = other->_position + offset;
 	_locked = false;
 	_whole_file = false;
 	_hidden = false;
@@ -644,19 +645,17 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	if (_position != pos) {
 		_position = pos;
 
+		if (allow_bbt_recompute) {
+			recompute_position_from_lock_style ();
+		}
 		/* check that the new _position wouldn't make the current
 		   length impossible - if so, change the length.
 
 		   XXX is this the right thing to do?
 		*/
-
 		if (max_framepos - _length < _position) {
 			_last_length = _length;
 			_length = max_framepos - _position;
-		}
-
-		if (allow_bbt_recompute) {
-			recompute_position_from_lock_style ();
 		}
 	}
 }
@@ -924,11 +923,6 @@ Region::trim_to_internal (framepos_t position, framecnt_t length)
 
 	PropertyChange what_changed;
 
-	if (_start != new_start) {
-		set_start_internal (new_start);
-		what_changed.add (Properties::start);
-	}
-
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
 	 *    (soon-to-be old) position
@@ -943,6 +937,11 @@ Region::trim_to_internal (framepos_t position, framecnt_t length)
 		}
 		set_position_internal (position, true);
 		what_changed.add (Properties::position);
+	}
+
+	if (_start != new_start) {
+		set_start_internal (new_start);
+		what_changed.add (Properties::start);
 	}
 
 	if (_length != length) {
