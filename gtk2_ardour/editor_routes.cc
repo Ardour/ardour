@@ -843,6 +843,8 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 	if (!from_scratch) {
 		sync_presentation_info_from_treeview ();
 	}
+
+	redisplay ();
 }
 
 void
