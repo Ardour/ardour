@@ -2516,24 +2516,6 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Audio"), dm);
 
-	add_option (_("Audio"), new OptionEditorHeading (_("Plugins")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "plugins-stop-with-transport",
-		     _("Silence plugins when the transport is stopped"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "new-plugins-active",
-		     _("Make new plugins active"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
-		     ));
-
 	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
 
 	add_option (_("Audio"),
@@ -2854,7 +2836,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
-	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
@@ -2870,7 +2851,30 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
 
+
 #endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
+
+	bo = new BoolOption (
+		"plugins-stop-with-transport",
+		_("Silence plugins when the transport is stopped"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
+		);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
+
+	bo = new BoolOption (
+		"new-plugins-active",
+			_("Make new plugins active"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins"), new OptionEditorHeading (_("VST")));
