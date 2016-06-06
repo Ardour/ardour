@@ -128,9 +128,10 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		StatusMask = (Selected|Hidden)
 	};
 
-	static const Flag Route;
-	static const Flag Track;
-	static const Flag Bus;
+	static const Flag AllRoutes; /* mask to use for any route include master+monitor, but not auditioner */
+	static const Flag Route;     /* mask for any route (bus or track */
+	static const Flag Track;     /* mask to use for any track */
+	static const Flag Bus;       /* mask to use for any bus */
 
 	typedef uint32_t order_t;
 	typedef uint32_t color_t;
@@ -193,11 +194,23 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 			return true;
 		}
 		if (f == Route && (_flags & Route)) {
-			/* any kind of route */
+			/* any kind of route, but not master, monitor in
+			   or auditioner.
+			 */
 			return true;
 		}
 
-		return f == _flags;
+		if (f == AllRoutes && (_flags & AllRoutes)) {
+			/* any kind of route, but not auditioner. Ask for that
+			   specifically.
+			*/
+			return true;
+		}
+
+		/* compare without status mask - we already checked that above 
+		 */
+
+		return (f &~ (StatusMask|OrderSet)) == (_flags &~ (StatusMask|OrderSet));
 	}
 
 	int set_state (XMLNode const&, int);
