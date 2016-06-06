@@ -972,15 +972,6 @@ EditorRoutes::show_track_in_display (TimeAxisView& tv)
 }
 
 void
-EditorRoutes::reset_remote_control_ids ()
-{
-	if (Config->get_remote_model() == UserOrdered || !_session || _session->deletion_in_progress()) {
-		return;
-	}
-
-	sync_presentation_info_from_treeview ();
-}
-void
 EditorRoutes::sync_presentation_info_from_treeview ()
 {
 	if (_ignore_reorder || !_session || _session->deletion_in_progress()) {

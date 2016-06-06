@@ -655,7 +655,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::sync_presentation_info_from_treeview ()
 {
-	if (ignore_reorder || !_session || _session->deletion_in_progress() || (Config->get_remote_model() != MixerOrdered)) {
+	if (ignore_reorder || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 

@@ -1711,10 +1711,6 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "show-region-gain") {
 		set_gain_envelope_visibility ();
-	} else if (p == "remote-model") {
-		if (_routes) {
-			_routes->reset_remote_control_ids ();
-		}
 	} else if (p == "skip-playback") {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
 

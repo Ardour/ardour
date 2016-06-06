@@ -2850,18 +2850,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions);
 
-	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
-		"remote-model",
-		_("Control surface remote ID"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_remote_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_remote_model)
-		);
-
-	rm->add (UserOrdered, _("assigned by user"));
-	rm->add (MixerOrdered, _("follows order of mixer"));
-
-	add_option (_("Control Surfaces"), rm);
-
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 

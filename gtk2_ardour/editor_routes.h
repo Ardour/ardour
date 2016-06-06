@@ -65,7 +65,6 @@ public:
 	void hide_all_tracks (bool);
 	void clear ();
 	void sync_presentation_info_from_treeview ();
-	void reset_remote_control_ids ();
 
 private:
 	void initial_display ();
