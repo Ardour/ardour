@@ -107,11 +107,11 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, Evoral::Beats())
 {
-	BeatsFramesConverter bfc (_session.tempo_map(), _position);
+	BeatsFramesConverter bfc (_session.tempo_map(), other->_position);
 	Evoral::Beats const offset_beats = bfc.from (offset);
 
-	_start_beats  = other->_start_beats.val() + offset_beats;
-	_length_beats = other->_length_beats.val() - offset_beats;
+	_start_beats = other->_start_beats.val() + offset_beats;
+	_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (other->length() - offset));
 
 	register_properties ();
 
@@ -223,6 +223,9 @@ void
 MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
 	Region::set_position_internal (pos, allow_bbt_recompute);
+
+	/* set _start to new position in tempo map */
+	_start = _position - _session.tempo_map().framepos_minus_beats (_position, _start_beats);
 
 	/* leave _length_beats alone, and change _length to reflect the state of things
 	   at the new position (tempo map may dictate a different number of frames).
