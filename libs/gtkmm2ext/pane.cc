@@ -402,14 +402,15 @@ Pane::set_divider (Dividers::size_type div, float fract)
 {
 	Dividers::iterator d = dividers.begin();
 
-	while (div--) {
-		++d;
-		if (d == dividers.end()) {
-			/* caller is trying to set divider that does not exist
-			 * yet.
-			 */
-			return;
-		}
+	for (d = dividers.begin(); d != dividers.end() && div != 0; ++d, --div) {
+		/* relax */
+	}
+
+	if (d == dividers.end()) {
+		/* caller is trying to set divider that does not exist
+		 * yet.
+		 */
+		return;
 	}
 
 	fract = max (0.0f, min (1.0f, fract));
@@ -427,14 +428,15 @@ Pane::get_divider (Dividers::size_type div)
 {
 	Dividers::iterator d = dividers.begin();
 
-	while (div--) {
-		++d;
-		if (d == dividers.end()) {
-			/* caller is trying to set divider that does not exist
-			 * yet.
-			 */
-			return -1.0f;
-		}
+	for (d = dividers.begin(); d != dividers.end() && div != 0; ++d, --div) {
+		/* relax */
+	}
+
+	if (d == dividers.end()) {
+		/* caller is trying to set divider that does not exist
+		 * yet.
+		 */
+		return -1.0f;
 	}
 
 	return (*d)->fract;
