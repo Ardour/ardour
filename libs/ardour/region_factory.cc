@@ -82,11 +82,12 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	if (ret) {
 		ret->set_name (new_region_name(ret->name()));
-		ret->set_position (region->position());
 
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
 			ret->set_position_lock_style (MusicTime);
 		}
+
+		ret->set_position (region->position());
 
 		/* pure copy constructor - no property list */
 		if (announce) {
