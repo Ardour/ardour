@@ -273,7 +273,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	/* override state that may have been incorrectly inherited from the other region
 	 */
 
-	_position = 0;
+	_position = other->_position;
 	_locked = false;
 	_whole_file = false;
 	_hidden = false;
@@ -284,7 +284,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_position_lock_style = other->_position_lock_style;
 	_first_edit = other->_first_edit;
 
-	_start = 0; // It seems strange _start is not inherited here?
+	_start = other->_start;
+	_beat = other->_beat;
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
