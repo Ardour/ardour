@@ -578,7 +578,19 @@ Region::set_position (framepos_t pos)
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
 	*/
-	send_change (Properties::position);
+	PropertyChange p_and_l;
+
+	p_and_l.add (Properties::position);
+	/* Currently length change due to position change is only implemented
+	   for MidiRegion (Region has no length in beats).
+	   Notify a length change regardless (its more efficient for MidiRegions),
+	   and when Region has a _length_beats we will need it here anyway).
+	*/
+	if (position_lock_style() == MusicTime) {
+		p_and_l.add (Properties::length);
+	}
+
+	send_change (p_and_l);
 
 }
 
