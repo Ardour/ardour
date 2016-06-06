@@ -674,33 +674,14 @@ if test x$WITH_X42_LV2 != x ; then
 	echo "bundling x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-meters.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
-		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
-	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
-
-	EQ_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-eq.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/osx/x42-eq-lv2-osx-${EQ_VERSION}.zip \
-		"$CACHEDIR/x42-eq-lv2-osx-${EQ_VERSION}.zip"
-	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"$CACHEDIR/x42-eq-lv2-osx-${EQ_VERSION}.zip"
-
-	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/setBfree.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
-		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
-	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
-
-	MIDIFILTER_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-midifilter.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
-		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
-	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+	done
 
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin

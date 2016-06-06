@@ -247,29 +247,13 @@ if test x$WITH_X42_LV2 != x ; then
 
 	echo "Adding x42 Plugins"
 
-	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/x42-meters.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
-		"${SRCCACHE}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
-
-	EQ_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/x42-eq.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/win/x42-eq-lv2-${WARCH}-${EQ_VERSION}.zip \
-		"${SRCCACHE}/x42-eq-lv2-${WARCH}-${EQ_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/x42-eq-lv2-${WARCH}-${EQ_VERSION}.zip"
-
-	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/setBfree.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/win/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip \
-		"${SRCCACHE}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
-
-	MIDIFILTER_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/x42-midifilter.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/win/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip \
-		"${SRCCACHE}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
+			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+		unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+	done
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then

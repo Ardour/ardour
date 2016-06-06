@@ -671,30 +671,17 @@ if test -n "$MIXBUS"; then
 fi
 
 if test x$WITH_X42_LV2 != x ; then
-	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/x42-meters.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/linux/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip \
-		"${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+	mkdir -p $APPLIB/LV2
 
-	EQ_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/x42-eq.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/linux/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip \
-		"${CACHEDIR}/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip"
+	echo "Adding x42 Plugins"
 
-	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/setBfree.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
-		"${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
-
-	MIDIFILTER_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/x42-midifilter.latest.txt)
-	rsync -a -q --partial \
-		rsync://x42-plugins.com/x42/linux/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip \
-		"${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
-
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/linux/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip \
+			"${CACHEDIR}/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip"
+		unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip"
+	done
 fi
 ################################################################################
 
