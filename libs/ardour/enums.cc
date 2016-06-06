@@ -74,7 +74,6 @@ setup_enum_writer ()
 	MonitorState _MonitorState;
 	PFLPosition _PFLPosition;
 	AFLPosition _AFLPosition;
-	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	LayerModel _LayerModel;
 	InsertMergePolicy _InsertMergePolicy;
@@ -323,9 +322,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (DenormalFTZDAZ);
 	REGISTER (_DenormalModel);
 
-	REGISTER_ENUM (UserOrdered);
-	REGISTER_ENUM (MixerOrdered);
-	REGISTER (_RemoteModel);
 	/*
 	 * EditorOrdered has been deprecated
 	 * since the removal of independent
@@ -850,19 +846,6 @@ std::ostream& operator<<(std::ostream& o, const AFLPosition& var)
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, RemoteModel& var)
-{
-	std::string s;
-	o >> s;
-	var = (RemoteModel) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const RemoteModel& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
 std::istream& operator>>(std::istream& o, EditMode& var)
 {
 	std::string s;

@@ -85,7 +85,6 @@ CONFIG_VARIABLE (float, ltc_output_volume, "ltc-output-volume", 0.125893)
 
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
-CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */
 
