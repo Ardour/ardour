@@ -67,16 +67,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	PluginSelector* plugin_selector() { return _plugin_selector; }
 
   private:
-	Gtk::HBox                global_hpacker;
-	Gtk::VBox                global_vpacker;
-	Gtk::ScrolledWindow      scroller;
-	Gtk::EventBox            scroller_base;
-	Gtk::HBox                scroller_hpacker;
-	Gtk::VBox                mixer_scroller_vpacker;
-
 	Gtk::VBox                list_vpacker;
-	Gtk::Label               route_list_button_label;
-	Gtk::Button              route_list_button;
 	Gtk::ScrolledWindow      route_select_scroller;
 
 	Gtk::Notebook            notebook;
@@ -94,8 +85,6 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	Gtkmm2ext::HPane	 list_hpane;
 
 	Gtkmm2ext::HPane	 right_hpane;
-
-	Gtk::Frame		 route_choice_frame;
 
 	Gtk::Frame		 route_param_frame;
 

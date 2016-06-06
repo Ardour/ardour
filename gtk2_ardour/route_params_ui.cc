@@ -124,20 +124,10 @@ RouteParams_UI::RouteParams_UI ()
 	route_vpacker.pack_start (title_label, false, false);
 	route_vpacker.pack_start (route_hpacker, true, true);
 
-
 	list_hpane.add (list_vpacker);
 	list_hpane.add (route_vpacker);
 
-	/// XXX PANE
-	//list_hpane.set_position(110);
-
-	/// XXX PANE
-	//redir_hpane.set_position(110);
-
-	//global_vpacker.pack_start (list_hpane, true, true);
-	//get_vbox()->pack_start (global_vpacker);
 	add (list_hpane);
-
 
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
