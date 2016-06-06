@@ -44,6 +44,13 @@ Pane::Pane (bool h)
 	}
 }
 
+Pane::~Pane ()
+{
+	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		c->w->unparent ();
+	}
+}
+
 void
 Pane::set_child_minsize (Gtk::Widget const& w, int32_t minsize)
 {
@@ -149,12 +156,11 @@ Pane::on_remove (Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		if (c->w == w) {
+			w->unparent ();
 			children.erase (c);
 			break;
 		}
 	}
-
-	w->unparent ();
 }
 
 void
