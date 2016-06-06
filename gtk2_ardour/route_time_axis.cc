@@ -2950,3 +2950,4 @@ RouteTimeAxisView::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
 }
+

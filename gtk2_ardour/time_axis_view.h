@@ -139,7 +139,6 @@ class TimeAxisView : public virtual AxisView
 	/** @return true if hidden, otherwise false */
 	bool hidden () const { return _hidden; }
 
-	void set_selected (bool);
 	virtual bool selectable() const { return true; }
 
 	/**
@@ -307,7 +306,10 @@ class TimeAxisView : public virtual AxisView
 
 	void build_size_menu ();
 
-private:
+  protected:
+	void show_selected ();
+
+  private:
 	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;

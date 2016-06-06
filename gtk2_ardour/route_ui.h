@@ -73,7 +73,7 @@ class RoutePinWindowProxy : public WM::ProxyBase
 	PBD::ScopedConnection going_away_connection;
 };
 
-class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::trackable, public virtual PBD::ScopedConnectionList
+class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectable, public virtual PBD::ScopedConnectionList
 {
   public:
 	RouteUI (ARDOUR::Session*);
@@ -105,6 +105,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::tr
 	Gdk::Color route_color () const;
 	void choose_color ();
 
+	bool selected () const;
 	void set_selected (bool);
 
 	bool ignore_toggle;
@@ -307,7 +308,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual sigc::tr
 
 	std::string route_state_id () const;
 
-protected:
+  protected:
 	struct SoloMuteRelease {
 	    SoloMuteRelease (bool was_active)
 	    : active (was_active)

@@ -1732,16 +1732,16 @@ MixerStrip::list_route_operations ()
 }
 
 void
-MixerStrip::set_selected (bool yn)
+MixerStrip::show_selected ()
 {
-	AxisView::set_selected (yn);
-	if (_selected) {
+	if (selected()) {
 		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		global_frame.set_name ("MixerStripSelectedFrame");
 	} else {
 		global_frame.set_shadow_type (Gtk::SHADOW_IN);
 		global_frame.set_name ("MixerStripFrame");
 	}
+
 	global_frame.queue_draw ();
 
 //	if (!yn)
@@ -2623,16 +2623,6 @@ MixerStrip::update_track_number_visibility ()
 	}
 }
 
-bool
-MixerStrip::is_selected () const
-{
-	if (!_route) {
-		return false;
-	}
-
-	return _route->presentation_info().selected();
-}
-
 Gdk::Color
 MixerStrip::color () const
 {
@@ -2650,4 +2640,3 @@ MixerStrip::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
 }
-

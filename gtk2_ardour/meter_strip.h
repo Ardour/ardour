@@ -75,6 +75,8 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	bool is_metric_display() { return _strip_type == 0; }
 	ARDOUR::MeterType meter_type();
 
+	bool selected() const { return false; }
+
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList meter_route_connections;

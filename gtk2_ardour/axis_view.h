@@ -43,7 +43,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public virtual Selectable, public virtual PBD::ScopedConnectionList, public virtual ARDOUR::SessionHandlePtr
+class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR::SessionHandlePtr, public virtual Selectable
 {
   public:
 	ARDOUR::Session* session() const { return _session; }
@@ -97,4 +97,3 @@ class AxisView : public virtual Selectable, public virtual PBD::ScopedConnection
 }; /* class AxisView */
 
 #endif /* __ardour_gtk_axis_view_h__ */
-

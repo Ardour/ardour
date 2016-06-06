@@ -815,53 +815,49 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 				_selection.add (strip);
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 
-				if (!_selection.selected(strip)) {
+				/* extend selection */
 
-					/* extend selection */
+				vector<MixerStrip*> tmp;
+				bool accumulate = false;
+				bool found_another = false;
 
-					vector<MixerStrip*> tmp;
-					bool accumulate = false;
-					bool found_another = false;
+				tmp.push_back (strip);
 
-					tmp.push_back (strip);
-
-					for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-						if ((*i) == strip) {
-							/* hit clicked strip, start accumulating till we hit the first
-							   selected strip
-							*/
-							if (accumulate) {
-								/* done */
-								break;
-							} else {
-								accumulate = true;
-							}
-						} else if (_selection.selected (*i)) {
-							/* hit selected strip. if currently accumulating others,
-							   we're done. if not accumulating others, start doing so.
-							*/
-							found_another = true;
-							if (accumulate) {
-								/* done */
-								break;
-							} else {
-								accumulate = true;
-							}
+				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+					if ((*i) == strip) {
+						/* hit clicked strip, start accumulating till we hit the first
+						   selected strip
+						*/
+						if (accumulate) {
+							/* done */
+							break;
 						} else {
-							if (accumulate) {
-								tmp.push_back (*i);
-							}
+							accumulate = true;
+						}
+					} else if (_selection.selected (*i)) {
+						/* hit selected strip. if currently accumulating others,
+						   we're done. if not accumulating others, start doing so.
+						*/
+						found_another = true;
+						if (accumulate) {
+							/* done */
+							break;
+						} else {
+							accumulate = true;
+						}
+					} else {
+						if (accumulate) {
+							tmp.push_back (*i);
 						}
 					}
-
-					if (found_another) {
-						for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-							_selection.add (*i);
-						}
-					} else
-						_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
 				}
 
+				if (found_another) {
+					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+						_selection.add (*i);
+					}
+				} else
+					_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
 			} else {
 				_selection.set (strip);
 			}

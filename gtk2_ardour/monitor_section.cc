@@ -1701,3 +1701,4 @@ MonitorSection::processors_changed (ARDOUR::RouteProcessorChange)
 {
 	update_processor_box ();
 }
+
