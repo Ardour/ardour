@@ -187,6 +187,12 @@ VCAMasterStrip::~VCAMasterStrip ()
 void
 VCAMasterStrip::self_delete ()
 {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+		/* cancel spill for this VCA */
+		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	}
+	/* Drop reference immediately, delete self when idle */
+	_vca.reset ();
 	delete_when_idle (this);
 }
 
