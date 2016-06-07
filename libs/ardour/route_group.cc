@@ -395,6 +395,9 @@ RouteGroup::set_active (bool yn, void* /*src*/)
 	}
 
 	_active = yn;
+
+	push_to_groups ();
+
 	send_change (PropertyChange (Properties::active));
 	_session.set_dirty ();
 }
@@ -539,11 +542,19 @@ RouteGroup::post_set (PBD::PropertyChange const &)
 void
 RouteGroup::push_to_groups ()
 {
-	_gain_group->set_active (_gain);
-	_solo_group->set_active (_solo);
-	_mute_group->set_active (_mute);
-	_rec_enable_group->set_active (_recenable);
-	_monitoring_group->set_active (_monitoring);
+	if (_active) {
+		_gain_group->set_active (is_gain());
+		_solo_group->set_active (is_solo());
+		_mute_group->set_active (is_mute());
+		_rec_enable_group->set_active (is_recenable());
+		_monitoring_group->set_active (is_monitoring());
+	} else {
+		_gain_group->set_active (false);
+		_solo_group->set_active (false);
+		_mute_group->set_active (false);
+		_rec_enable_group->set_active (false);
+		_monitoring_group->set_active (false);
+	}
 }
 
 void

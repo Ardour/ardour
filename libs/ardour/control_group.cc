@@ -155,6 +155,10 @@ ControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, dou
 
 	control->set_value (val, Controllable::ForGroup);
 
+	if (!_active) {
+		return;
+	}
+
 	/* now propagate across the group */
 
 	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
@@ -236,6 +240,10 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 	control->set_value (val, Controllable::ForGroup);
 
 	/* now propagate across the group */
+
+	if (!_active) {
+		return;
+	}
 
 	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
 
