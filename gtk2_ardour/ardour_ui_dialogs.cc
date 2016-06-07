@@ -336,6 +336,7 @@ void
 ARDOUR_UI::toggle_editor_and_mixer ()
 {
 	if (editor->tabbed() && mixer->tabbed()) {
+		/* both in the same window */
 		if (_tabs.get_current_page() == _tabs.page_num (editor->contents())) {
 			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
 		} else if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
@@ -346,32 +347,53 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 		return;
 	}
 
+
 	if (editor->tabbed() && !mixer->tabbed()) {
-		if (main_window_visibility && main_window_visibility->fully_visible()) {
-			if (_tabs.get_current_page() == _tabs.page_num (editor->contents())) {
+		/* editor is tabbed, mixer is not */
+
+		Gtk::Window* mwin = mixer->current_toplevel ();
+
+		if (!mwin) {
+			/* mixer's own window doesn't exist */
+			mixer->make_visible ();
+		} else if (!mwin->is_mapped ()) {
+			/* mixer's own window exists but isn't mapped */
+			mixer->make_visible ();
+		} else {
+			/* mixer window is mapped, editor is visible as tab */
+			Gtk::Widget* f = mwin->get_focus();
+			if (f && f->has_focus()) {
+				/* mixer has focus, switch to editor */
+				editor->make_visible ();
+			} else {
 				mixer->make_visible ();
 			}
-		} else {
-			_main_window.present ();
 		}
 		return;
 	}
 
-	if (mixer->tabbed () && !editor->tabbed()) {
-		if (main_window_visibility && main_window_visibility->fully_visible()) {
-			if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
+	if (!editor->tabbed() && mixer->tabbed()) {
+		/* mixer is tabbed, editor is not */
+
+		Gtk::Window* ewin = editor->current_toplevel ();
+
+		if (!ewin) {
+			/* mixer's own window doesn't exist */
+			editor->make_visible ();
+		} else if (!ewin->is_mapped ()) {
+			/* editor's own window exists but isn't mapped */
+			editor->make_visible ();
+		} else {
+			/* editor window is mapped, mixer is visible as tab */
+			Gtk::Widget* f = ewin->get_focus();
+			if (f && f->has_focus()) {
+				/* editor has focus, switch to mixer */
+				mixer->make_visible ();
+			} else {
 				editor->make_visible ();
 			}
-		} else {
-			_main_window.present ();
 		}
 		return;
-	}
-
-	if (editor->fully_visible()) {
-		mixer->make_visible ();
-	} else {
-		editor->make_visible ();
 	}
 }
 
