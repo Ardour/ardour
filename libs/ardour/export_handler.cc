@@ -339,8 +339,9 @@ ExportHandler::finish_timespan ()
 		}
 
 		if (!fmt->command().empty()) {
+			SessionMetadata const & metadata (*SessionMetadata::Metadata());
 
-#if 0			// would be nicer with C++11 initialiser...
+#if 0	// would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
 				{ 'f', filename },
 				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
@@ -351,11 +352,27 @@ ExportHandler::finish_timespan ()
 			export_status->active_job = ExportStatus::Command;
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
-			subs.insert (std::pair<char, std::string> ('f', filename));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
+
+			std::stringstream track_number;
+			track_number << metadata.track_number ();
+			std::stringstream year;
+			year << metadata.year ();
+
+			subs.insert (std::pair<char, std::string> ('a', metadata.artist ()));
 			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
-			subs.insert (std::pair<char, std::string> ('s', session.path ()));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
+			subs.insert (std::pair<char, std::string> ('f', filename));
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
+			subs.insert (std::pair<char, std::string> ('s', session.path ()));
+			subs.insert (std::pair<char, std::string> ('t', metadata.title ()));
+			subs.insert (std::pair<char, std::string> ('A', metadata.album ()));
+			subs.insert (std::pair<char, std::string> ('C', metadata.comment ()));
+			subs.insert (std::pair<char, std::string> ('E', metadata.engineer ()));
+			subs.insert (std::pair<char, std::string> ('G', metadata.genre ()));
+			subs.insert (std::pair<char, std::string> ('N', current_timespan->name())); // =?= config_map.begin()->first->name ()
+			subs.insert (std::pair<char, std::string> ('P', metadata.producer ()));
+			subs.insert (std::pair<char, std::string> ('T', track_number.str ()));
+			subs.insert (std::pair<char, std::string> ('Y', year.str ()));
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
