@@ -60,7 +60,8 @@ ArdourDialog::~ArdourDialog ()
                         spl->pop_front();
                 }
         }
-	WM::Manager::instance().remove (proxy);
+        Keyboard::the_keyboard().focus_out_window (0, this);
+        WM::Manager::instance().remove (proxy);
 }
 
 bool
