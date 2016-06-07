@@ -2926,7 +2926,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 				"plugin-path-lxvst",
 				_("Path:"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
-				':'));
+				0));
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
