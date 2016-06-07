@@ -187,6 +187,8 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 				act = Glib::wrap (_act, true);
 				break;
 			}
+
+			break;
 		}
 	}
 
@@ -282,4 +284,3 @@ ActionManager::set_toggle_action (const char* group, const char*action, bool yn)
 		}
 	}
 }
-
