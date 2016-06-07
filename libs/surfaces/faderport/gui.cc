@@ -519,7 +519,7 @@ FPGUI::build_mix_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
 	vector<pair<string,string> > actions;
 
-	actions.push_back (make_pair (string (_("Toggle Editor & Mixer Windows")), string (X_("Common/toggle-editor-mixer"))));
+	actions.push_back (make_pair (string (_("Toggle Editor & Mixer Windows")), string (X_("Common/toggle-editor-and-mixer"))));
 	actions.push_back (make_pair (string (_("Show/Hide Mixer list")), string (X_("Common/ToggleMixerList"))));
 	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
 	actions.push_back (make_pair (string (_("Show/Hide Editor mixer strip")), string (X_("Editor/show-editor-mixer"))));
