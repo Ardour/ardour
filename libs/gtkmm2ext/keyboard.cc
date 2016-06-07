@@ -477,6 +477,7 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 			current_window = 0;
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::Keyboard, "LEAVE window without event\n");
 		current_window = 0;
 	}
 
@@ -498,7 +499,9 @@ Keyboard::focus_out_window (GdkEventFocus * ev, Gtk::Window* win)
 		state.clear ();
 		current_window = 0;
 	}  else {
-		current_window = 0;
+		if (win == current_window) {
+			current_window = 0;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Foucusing out window, title = %1\n", win->get_title()));

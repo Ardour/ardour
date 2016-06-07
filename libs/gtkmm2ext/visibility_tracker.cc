@@ -23,6 +23,8 @@
 
 using namespace Gtkmm2ext;
 
+bool VisibilityTracker::_use_window_manager_visibility = true;
+
 VisibilityTracker::VisibilityTracker (Gtk::Window& win)
 	: _window (win)
 	, _visibility (GdkVisibilityState (0))
@@ -31,11 +33,16 @@ VisibilityTracker::VisibilityTracker (Gtk::Window& win)
 	_window.signal_visibility_notify_event().connect (sigc::mem_fun (*this, &VisibilityTracker::handle_visibility_notify_event));
 }
 
+void
+VisibilityTracker::set_use_window_manager_visibility (bool yn)
+{
+	_use_window_manager_visibility = yn;
+}
+
 bool
 VisibilityTracker::handle_visibility_notify_event (GdkEventVisibility* ev)
 {
 	_visibility = ev->state;
-	// std::cerr << "VT: " << _window.get_title() << " vis event, fv = " << fully_visible() << " pv = " << partially_visible() << " nv = " << not_visible() << std::endl;
 	return false;
 }
 
@@ -52,17 +59,29 @@ VisibilityTracker::cycle_visibility ()
 bool
 VisibilityTracker::fully_visible () const
 {
-	return _window.is_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED);
+	if (_use_window_manager_visibility) {
+		return _window.is_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED);
+	} else {
+		return _window.is_mapped();
+	}
 }
 
 bool
 VisibilityTracker::not_visible () const
 {
-	return !_window.is_mapped() || (_visibility == GDK_VISIBILITY_FULLY_OBSCURED);
+	if (_use_window_manager_visibility) {
+		return !_window.is_mapped() || (_visibility == GDK_VISIBILITY_FULLY_OBSCURED);
+	} else {
+		return !_window.is_mapped();
+	}
 }
 
 bool
 VisibilityTracker::partially_visible () const
 {
-	return _window.is_mapped() && ((_visibility == GDK_VISIBILITY_PARTIAL) || (_visibility == GDK_VISIBILITY_UNOBSCURED));
+	if (_use_window_manager_visibility) {
+		return _window.is_mapped() && ((_visibility == GDK_VISIBILITY_PARTIAL) || (_visibility == GDK_VISIBILITY_UNOBSCURED));
+	} else {
+		return _window.is_mapped();
+	}
 }

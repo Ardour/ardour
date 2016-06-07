@@ -96,6 +96,7 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	sigc::connection delete_connection;
 	sigc::connection configure_connection;
 
+
 	void save_pos_and_size ();
 	void set_pos_and_size ();
 	void set_pos ();

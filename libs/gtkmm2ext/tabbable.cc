@@ -304,6 +304,7 @@ Tabbable::show_tab ()
 			add_to_notebook (*_parent_notebook, _tab_title);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+		current_toplevel()->present ();
 	}
 }
 

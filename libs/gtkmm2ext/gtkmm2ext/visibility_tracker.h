@@ -35,6 +35,8 @@ class LIBGTKMM2EXT_API VisibilityTracker : public virtual sigc::trackable {
     VisibilityTracker (Gtk::Window&);
     virtual ~VisibilityTracker() {}
 
+    static void set_use_window_manager_visibility (bool);
+    static bool use_window_manager_visibility() { return _use_window_manager_visibility; }
     void cycle_visibility ();
 
     bool fully_visible() const;
@@ -46,6 +48,9 @@ class LIBGTKMM2EXT_API VisibilityTracker : public virtual sigc::trackable {
   private:
     Gtk::Window& _window;
     GdkVisibilityState _visibility;
+
+    static bool _use_window_manager_visibility;
+
     bool handle_visibility_notify_event (GdkEventVisibility*);
 };
 
