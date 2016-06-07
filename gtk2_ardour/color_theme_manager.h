@@ -147,6 +147,24 @@ class ColorThemeManager : public Gtk::VBox, public OptionEditorComponent
 
 	void colors_changed ();
 	void set_ui_to_state ();
+
+
+	struct ColorThemeModelColumns : public Gtk::TreeModel::ColumnRecord {
+		ColorThemeModelColumns() {
+			add (name);
+			add (path);
+		}
+
+		Gtk::TreeModelColumn<std::string>  name;
+		Gtk::TreeModelColumn<std::string>  path;
+	};
+
+	ColorThemeModelColumns color_theme_columns;
+	Glib::RefPtr<Gtk::TreeStore> theme_list;
+
+	Gtk::Label color_theme_label;
+	Gtk::ComboBox color_theme_dropdown;
+
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */

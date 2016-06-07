@@ -28,7 +28,6 @@
 #include <gtkmm/settings.h>
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/cell_renderer_color_selector.h"
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/file_utils.h"
@@ -70,7 +69,6 @@ ThemeManager::ThemeManager()
 	, transients_follow_front (_("Transient windows follow front window."))
 	, floating_monitor_section (_("Float detached monitor-section window"))
 	, icon_set_label (_("Icon Set"))
-	, color_theme_label (_("Color Theme"))
 {
 	Gtk::HBox* hbox;
 
@@ -78,48 +76,6 @@ ThemeManager::ThemeManager()
 
 	set_homogeneous (false);
 
-	std::map<string,string> color_themes;
-
-	get_color_themes (color_themes);
-
-	if (color_themes.size() > 1) {
-		theme_list = TreeStore::create (color_theme_columns);
-
-		TreeModel::iterator selected_iter = theme_list->children().end();
-
-		for (std::map<string,string>::iterator c = color_themes.begin(); c != color_themes.end(); ++c) {
-			TreeModel::Row row;
-
-			row = *(theme_list->append());
-			row[color_theme_columns.name] = c->first;
-			row[color_theme_columns.path] = c->second;
-
-			/* match second (path; really basename) since that is
-			   what we store/restore.
-			*/
-
-			if (UIConfiguration::instance().get_color_file() == c->second) {
-				selected_iter = row;
-			}
-		}
-
-		color_theme_dropdown.set_model (theme_list);
-		color_theme_dropdown.pack_start (color_theme_columns.name);
-
-		if (selected_iter != theme_list->children().end()) {
-			color_theme_dropdown.set_active (selected_iter);
-		}
-
-		hbox = Gtk::manage (new Gtk::HBox());
-		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
-		align->set (0, 0.5);
-		align->add (color_theme_dropdown);
-		hbox->set_spacing (6);
-		hbox->pack_start (color_theme_label, false, false);
-		hbox->pack_start (*align, true, true);
-		pack_start (*hbox, PACK_SHRINK);
-		hbox->show_all ();
-	}
 
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
@@ -166,13 +122,8 @@ ThemeManager::ThemeManager()
 	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 
-	color_dialog.get_colorsel()->set_has_opacity_control (true);
-	color_dialog.get_colorsel()->set_has_palette (true);
-
 	set_ui_to_state();
 
-	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
-	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
 	blink_rec_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_blink_rec_arm_toggled));
 	region_color_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_region_color_toggled));
@@ -183,7 +134,6 @@ ThemeManager::ThemeManager()
 	transients_follow_front.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_transients_follow_front_toggled));
 	floating_monitor_section.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_floating_monitor_section_toggled));
 	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
-	color_theme_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_color_theme_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs,
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
@@ -268,21 +218,6 @@ ThemeManager::on_icon_set_changed ()
 {
 	string new_set = icon_set_dropdown.get_active_text();
 	UIConfiguration::instance().set_icon_set (new_set);
-}
-
-void
-ThemeManager::on_color_theme_changed ()
-{
-	Gtk::TreeModel::iterator iter = color_theme_dropdown.get_active();
-
-	if (iter) {
-		Gtk::TreeModel::Row row = *iter;
-
-		if (row) {
-			string new_theme = row[color_theme_columns.path];
-			UIConfiguration::instance().set_color_file (new_theme);
-		}
-	}
 }
 
 void

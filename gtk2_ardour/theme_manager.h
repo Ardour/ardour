@@ -49,27 +49,8 @@ class ThemeManager : public Gtk::VBox
 	void on_transients_follow_front_toggled ();
 	void on_floating_monitor_section_toggled ();
 	void on_icon_set_changed ();
-	void on_color_theme_changed ();
 
   private:
-	Gtk::Notebook notebook;
-
-	struct ColorThemeModelColumns : public Gtk::TreeModel::ColumnRecord {
-		ColorThemeModelColumns() {
-			add (name);
-			add (path);
-		}
-
-		Gtk::TreeModelColumn<std::string>  name;
-		Gtk::TreeModelColumn<std::string>  path;
-	};
-
-	ColorThemeModelColumns color_theme_columns;
-	Glib::RefPtr<Gtk::TreeStore> theme_list;
-
-	Gtk::ColorSelectionDialog color_dialog;
-	sigc::connection color_dialog_connection;
-
 	Gtk::CheckButton flat_buttons;
 	Gtk::CheckButton blink_rec_button;
 	Gtk::CheckButton region_color_button;
@@ -84,9 +65,6 @@ class ThemeManager : public Gtk::VBox
 	Gtk::CheckButton gradient_waveforms;
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
-	Gtk::Label color_theme_label;
-	Gtk::ComboBox color_theme_dropdown;
-
 
 	void colors_changed ();
 	void set_ui_to_state ();

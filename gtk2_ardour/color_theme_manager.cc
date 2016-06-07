@@ -62,7 +62,53 @@ ColorThemeManager::ColorThemeManager ()
 	, palette_viewport (*palette_scroller.get_hadjustment(), *palette_scroller.get_vadjustment())
 	, palette_group (0)
 	, palette_window (0)
+	, color_theme_label (_("Color Theme"))
 {
+	set_spacing (12);
+
+	std::map<string,string> color_themes;
+
+	get_color_themes (color_themes);
+
+	if (color_themes.size() > 1) {
+		theme_list = TreeStore::create (color_theme_columns);
+
+		TreeModel::iterator selected_iter = theme_list->children().end();
+
+		for (std::map<string,string>::iterator c = color_themes.begin(); c != color_themes.end(); ++c) {
+			TreeModel::Row row;
+
+			row = *(theme_list->append());
+			row[color_theme_columns.name] = c->first;
+			row[color_theme_columns.path] = c->second;
+
+			/* match second (path; really basename) since that is
+			   what we store/restore.
+			*/
+
+			if (UIConfiguration::instance().get_color_file() == c->second) {
+				selected_iter = row;
+			}
+		}
+
+		color_theme_dropdown.set_model (theme_list);
+		color_theme_dropdown.pack_start (color_theme_columns.name);
+
+		if (selected_iter != theme_list->children().end()) {
+			color_theme_dropdown.set_active (selected_iter);
+		}
+
+		Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
+		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
+		align->set (0, 0.5);
+		align->add (color_theme_dropdown);
+		hbox->set_spacing (6);
+		hbox->pack_start (color_theme_label, false, false);
+		hbox->pack_start (*align, true, true);
+		pack_start (*hbox, PACK_SHRINK);
+		hbox->show_all ();
+	}
+
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ColorThemeManager::reset_canvas_colors));
 
 	/* Now the alias list */
@@ -100,9 +146,15 @@ ColorThemeManager::ColorThemeManager ()
 
 	notebook.set_size_request (400, 400);
 
-	set_spacing (12);
-	pack_start (reset_button, false, false);
 	pack_start (notebook, true, true);
+	pack_start (reset_button, false, false);
+
+	color_dialog.get_colorsel()->set_has_opacity_control (true);
+	color_dialog.get_colorsel()->set_has_palette (true);
+	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
+	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
+
+	color_theme_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ColorThemeManager::on_color_theme_changed));
 
 	/* no need to call setup_palette() here, it will be done when its size is allocated */
 	setup_aliases ();
@@ -551,3 +603,19 @@ ColorThemeManager::tip_widget()
 {
 	return reset_button; /* XXX need a better widget for this purpose */
 }
+
+void
+ColorThemeManager::on_color_theme_changed ()
+{
+	Gtk::TreeModel::iterator iter = color_theme_dropdown.get_active();
+
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+
+		if (row) {
+			string new_theme = row[color_theme_columns.path];
+			UIConfiguration::instance().set_color_file (new_theme);
+		}
+	}
+}
+
