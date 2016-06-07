@@ -503,6 +503,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_up);
 		REGISTER_CALLBACK (serv, "/bank_down", "", bank_down);
 		REGISTER_CALLBACK (serv, "/bank_down", "f", bank_down);
+
+		// controls for "special" strips
 		REGISTER_CALLBACK (serv, "/master/gain", "f", master_set_gain);
 		REGISTER_CALLBACK (serv, "/master/fader", "i", master_set_fader);
 		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
@@ -510,6 +512,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "i", monitor_set_fader);
+
+		// Controls for the Selected strip
 		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
 		REGISTER_CALLBACK (serv, "/select/record_safe", "i", sel_recsafe);
 		REGISTER_CALLBACK (serv, "/select/mute", "i", sel_mute);
@@ -1180,6 +1184,8 @@ OSC::get_surface (lo_address addr)
 	s.strip_types = 31; // 31 is tracks, busses, and VCAs (no master/monitor)
 	s.feedback = 0;
 	s.gainmode = 0;
+	s.sel_obs = 0;
+	s.surface_sel = 0;
 	//get sorted should go here
 	_surface.push_back (s);
 	//MARK
@@ -1248,6 +1254,8 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 	} else {
 		nstrips = session->nroutes() - 1;
 	}
+	// reset local select
+	_strip_select (0, lo_message_get_source (msg));
 	// undo all listeners for this url
 	for (int n = 0; n <= (int) nstrips; ++n) {
 
@@ -1287,6 +1295,7 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 			listen_to_route(stp, lo_message_get_source (msg));
 			}
 		}
+		// put in check for GUI_selects here.
 	}
 	return 0;
 }
@@ -1504,7 +1513,11 @@ int
 OSC::sel_mute (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_mute(sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_mute(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("mute", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1526,14 +1539,22 @@ int
 OSC::sel_solo (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_solo (sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_solo(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("solo", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
 OSC::sel_recenable (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_recenable(sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_recenable(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("recenable", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1560,7 +1581,11 @@ int
 OSC::sel_recsafe (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_recsafe(sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_recsafe(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("record_safe", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1597,7 +1622,6 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 		} else {
 			route_send_fail ("monitor_input", ssid, 0, lo_message_get_source (msg));
 		}
-
 	}
 
 	return 0;
@@ -1607,7 +1631,11 @@ int
 OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_monitor_input(sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_monitor_input(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("monitor_input", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1625,7 +1653,6 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 		} else {
 			route_send_fail ("monitor_disk", ssid, 0, lo_message_get_source (msg));
 		}
-
 	}
 
 	return 0;
@@ -1635,7 +1662,11 @@ int
 OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_monitor_disk(sur->surface_sel, yn, msg);
+	if (sur->surface_sel) {
+		return route_monitor_disk(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("monitor_disk", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1657,7 +1688,11 @@ OSC::_strip_select (int ssid, lo_address addr)
 	int rid = get_rid (ssid, addr);
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	OSCSurface *sur = get_surface(addr);
-	delete sur->sel_obs;
+	if (sur->sel_obs) {
+		delete sur->sel_obs;
+		sur->sel_obs = 0;
+	}
+		sur->surface_sel = 0;
 
 	if (s) {
 		sur->surface_sel = ssid;
@@ -1671,7 +1706,7 @@ OSC::_strip_select (int ssid, lo_address addr)
 		b_s = sur->nstrips;
 	}
 	for (int i = 1;  i <= b_s; i++) {
-			if (i==ssid) {
+			if (i==(int)sur->surface_sel) {
 				string path = "/strip/select";
 				lo_message reply = lo_message_new ();
 				if (sur->feedback[2]) {
@@ -1749,7 +1784,7 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 		ret = route_set_gain_abs (rid, dB_to_coefficient (dB), msg);
 	}
 	if (ret != 0) {
-		route_send_fail ("gain", ssid, 0, lo_message_get_source (msg));
+		route_send_fail ("gain", ssid, -193, lo_message_get_source (msg));
 	}
 	return ret;
 }
@@ -1758,7 +1793,11 @@ int
 OSC::sel_gain (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_set_gain_dB(sur->surface_sel, val, msg);
+	if (sur->surface_sel) {
+		return route_set_gain_dB(sur->surface_sel, val, msg);
+	} else { 
+		return route_send_fail ("gain", 0, -193, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -1785,7 +1824,11 @@ int
 OSC::sel_fader (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	return route_set_gain_fader(sur->surface_sel, val, msg);
+	if (sur->surface_sel) {
+		return route_set_gain_fader(sur->surface_sel, val, msg);
+	} else { 
+		return route_send_fail ("fader", 0, 0, lo_message_get_source (msg));
+	}
 }
 
 int
@@ -2050,18 +2093,21 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_address addr)
 	OSCSurface *sur = get_surface(addr);
 
 	ostringstream os;
-	lo_message reply = lo_message_new ();
-	if (sur->feedback[2]) {
-		os << "/strip/" << path << "/" << ssid;
-	} else {
-		os << "/strip/" << path;
-		lo_message_add_int32 (reply, ssid);
-	}
-	string str_pth = os.str();
-	lo_message_add_float (reply, (float) val);
+	lo_message reply;
+	if (ssid) {
+		reply = lo_message_new ();
+		if (sur->feedback[2]) {
+			os << "/strip/" << path << "/" << ssid;
+		} else {
+			os << "/strip/" << path;
+			lo_message_add_int32 (reply, ssid);
+		}
+		string str_pth = os.str();
+		lo_message_add_float (reply, (float) val);
 
-	lo_send_message (addr, str_pth.c_str(), reply);
-	lo_message_free (reply);
+		lo_send_message (addr, str_pth.c_str(), reply);
+		lo_message_free (reply);
+	}
 	if (sur->surface_sel == ssid) {
 		os.str("");
 		os << "/select/" << path;
