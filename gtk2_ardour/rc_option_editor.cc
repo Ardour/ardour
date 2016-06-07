@@ -111,7 +111,7 @@ public:
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
 		t->attach (_click_emphasis_browse_button, 2, 3, 3, 4, FILL);
 
-		_box->pack_start (*t, false, false);
+		_box->pack_start (*t, true, false);
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
@@ -1934,7 +1934,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
 
-	add_option (_("Misc"),
+	add_option (_("Misc/Click"),
 	     new FaderOption (
 		     "click-gain",
 		     _("Click gain level"),
