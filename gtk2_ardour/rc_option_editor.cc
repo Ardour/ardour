@@ -3046,6 +3046,14 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
+		     "use-wm-visibility",
+		     _("Use Window Manager/Desktop visibility information"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
+		     ));
+
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
 		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),

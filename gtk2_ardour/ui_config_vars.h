@@ -83,3 +83,4 @@ UI_CONFIG_VARIABLE (bool, open_gui_after_adding_plugin, "open-gui-after-adding-p
 UI_CONFIG_VARIABLE (bool, show_inline_display_by_default, "show-inline-display-by-default", true)
 UI_CONFIG_VARIABLE (bool, prefer_inline_over_gui, "prefer-inline-over-gui", true)
 UI_CONFIG_VARIABLE (uint32_t, action_table_columns, "action-table-columns", 0)
+UI_CONFIG_VARIABLE (bool, use_wm_visibility, "use-wm-visibility", true)
