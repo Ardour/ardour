@@ -1155,7 +1155,7 @@ LocationUI::clock_mode_from_session_instant_xml () const
 /*------------------------*/
 
 LocationUIWindow::LocationUIWindow ()
-	: ArdourWindow (_("Locations"))
+	: ArdourWindow (S_("Ranges|Locations"))
 {
 	set_wmclass(X_("ardour_locations"), PROGRAM_NAME);
 	set_name ("LocationWindow");
