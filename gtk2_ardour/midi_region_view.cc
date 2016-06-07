@@ -3875,7 +3875,9 @@ MidiRegionView::set_step_edit_cursor_width (Evoral::Beats beats)
 	_step_edit_cursor_width = beats;
 
 	if (_step_edit_cursor) {
-		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().sample_to_pixel (region_beats_to_region_frames (beats)));
+		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().sample_to_pixel (
+						   region_beats_to_region_frames (_step_edit_cursor_position + beats)
+						   - region_beats_to_region_frames (_step_edit_cursor_position)));
 	}
 }
 

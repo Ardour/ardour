@@ -324,6 +324,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 		_step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
 	}
 
+	step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+
 	return 0;
 }
 
