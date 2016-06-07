@@ -683,10 +683,10 @@ public:
 };
 
 /** The OptionEditor dialog base class */
-class OptionEditor : public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
+class OptionEditor : virtual public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
 {
 public:
-	OptionEditor (PBD::Configuration *, std::string const &);
+	OptionEditor (PBD::Configuration *);
 	~OptionEditor ();
 
 	void add_option (std::string const &, OptionEditorComponent *);
@@ -737,7 +737,7 @@ private:
 };
 
 /** The OptionEditor dialog-as-container base class */
-class OptionEditorWindow : public OptionEditor, public Gtk::Window
+class OptionEditorWindow : public OptionEditor, public ArdourWindow
 {
 public:
 	OptionEditorWindow (PBD::Configuration *, std::string const &);

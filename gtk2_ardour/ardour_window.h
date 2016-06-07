@@ -37,7 +37,7 @@ namespace WM {
  * method of connecting and disconnecting from a Session with
  * all other objects that have a handle on a Session.
  */
-class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
+class ArdourWindow : public Gtk::Window, public virtual ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
 public:
 	ArdourWindow (std::string title);

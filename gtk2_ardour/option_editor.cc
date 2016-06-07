@@ -470,7 +470,7 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
  *  @param o Configuration to edit.
  *  @param t Title for the dialog.
  */
-OptionEditor::OptionEditor (PBD::Configuration* c, std::string const & t)
+OptionEditor::OptionEditor (PBD::Configuration* c)
 	: _config (c)
 	, option_tree (TreeStore::create (option_columns))
 	, option_treeview (option_tree)
@@ -718,7 +718,7 @@ DirectoryOption::selection_changed ()
 /*--------------------------*/
 
 OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string const& str)
-	: OptionEditor (c, str)
+	: OptionEditor (c)
 {
 	set_border_width (4);
 	hpacker.pack_start (treeview(), false, false);
@@ -730,7 +730,8 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 }
 
 OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str)
-	: OptionEditor (c, str)
+	: OptionEditor (c)
+	, ArdourWindow (str)
 {
 	container.set_border_width (4);
 	hpacker.pack_start (treeview(), false, false);
