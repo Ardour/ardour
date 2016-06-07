@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2000-2016 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,10 +24,7 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/colorselection.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/button.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/rc.h>
 
 #include "canvas/types.h"
 #include "canvas/canvas.h"

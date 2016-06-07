@@ -24,10 +24,6 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/stock.h>
-#include <gtkmm/settings.h>
-
-#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 #include "gtkmm2ext/utils.h"
 

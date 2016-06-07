@@ -24,27 +24,20 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/stock.h>
 #include <gtkmm/settings.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
-#include "pbd/file_utils.h"
 #include "pbd/compose.h"
 
-#include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 
-#include "canvas/container.h"
-#include "canvas/rectangle.h"
-#include "canvas/scroll_group.h"
 #include "canvas/wave_view.h"
 
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "theme_manager.h"
-#include "rgb_macros.h"
 #include "ui_config.h"
 #include "utils.h"
 
