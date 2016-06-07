@@ -1930,9 +1930,9 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 1000, 1, 20
 		     ));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
+	add_option (_("Misc/Click"), new OptionEditorHeading (_("Click")));
 
-	add_option (_("Misc"), new ClickOptions (_rc_config));
+	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
 
 	add_option (_("Misc"),
 	     new FaderOption (
@@ -2337,10 +2337,10 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), rsas);
 	
-	add_option (_("Editor"), new OptionEditorHeading (_("Waveforms")));
+	add_option (_("Editor/Waveforms"), new OptionEditorHeading (_("Waveforms")));
 
 if (!Profile->get_mixbus()) {
-	add_option (_("Editor"),
+	add_option (_("Editor/Waveforms"),
 	     new BoolOption (
 		     "show-waveforms",
 		     _("Show waveforms in regions"),
@@ -2349,7 +2349,7 @@ if (!Profile->get_mixbus()) {
 		     ));
 }  // !mixbus
 
-	add_option (_("Editor"),
+	add_option (_("Editor/Waveforms"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
 		     _("Show waveforms for audio while it is being recorded"),
@@ -2367,7 +2367,7 @@ if (!Profile->get_mixbus()) {
 	wfs->add (Linear, _("linear"));
 	wfs->add (Logarithmic, _("logarithmic"));
 
-	add_option (_("Editor"), wfs);
+	add_option (_("Editor/Waveforms"), wfs);
 
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
@@ -2379,9 +2379,9 @@ if (!Profile->get_mixbus()) {
 	wfsh->add (Traditional, _("traditional"));
 	wfsh->add (Rectified, _("rectified"));
 
-	add_option (_("Editor"), wfsh);
+	add_option (_("Editor/Waveforms"), wfsh);
 
-	add_option (_("Editor"), new ClipLevelOptions ());
+	add_option (_("Editor/Waveforms"), new ClipLevelOptions ());
 
 
 	/* AUDIO */
@@ -2714,9 +2714,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Clock")));
+	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 		    new BoolOption (
 			    "send-midi-clock",
 			    _("Send MIDI Clock"),
@@ -2724,9 +2724,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
+	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 		    new BoolOption (
 			    "send-mtc",
 			    _("Send MIDI Time Code"),
@@ -2734,7 +2734,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 		    new SpinOption<int> (
 			    "mtc-qf-speed-tolerance",
 			    _("Percentage either side of normal transport speed to transmit MTC"),
@@ -2743,9 +2743,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    0, 20, 1, 5
 			    ));
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
+	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 		    new BoolOption (
 			    "mmc-control",
 			    _("Obey MIDI Machine Control commands"),
@@ -2753,7 +2753,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 		    new BoolOption (
 			    "send-mmc",
 			    _("Send MIDI Machine Control commands"),
@@ -2761,7 +2761,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 	     new SpinOption<uint8_t> (
 		     "mmc-receive-device-id",
 		     _("Inbound MMC device ID"),
@@ -2770,7 +2770,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     0, 128, 1, 10
 		     ));
 
-	add_option (_("MIDI"),
+	add_option (_("MIDI/Sync"),
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
@@ -2836,11 +2836,15 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
-
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
 
+#endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
@@ -2850,11 +2854,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
-
-
 #endif
-
-	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
 	bo = new BoolOption (
 		"plugins-stop-with-transport",
@@ -2877,7 +2877,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
-	add_option (_("Plugins"), new OptionEditorHeading (_("VST")));
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
 
 	bo = new BoolOption (
 			"discover-vst-on-start",
@@ -2885,7 +2885,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_vst_on_start),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_vst_on_start)
 			);
-	add_option (_("Plugins"), bo);
+	add_option (_("Plugins/VST"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
 
@@ -2897,31 +2897,31 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
 			);
-	add_option (_("Plugins"), bo);
+	add_option (_("Plugins/VST"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
 #endif
 
-	add_option (_("Plugins"), new VstTimeOutSliderOption (_rc_config));
+	add_option (_("Plugins/VST"), new VstTimeOutSliderOption (_rc_config));
 
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_cache),
 				_("VST Cache:")));
 
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_blacklist),
 				_("VST Blacklist:")));
 #endif
 
 #ifdef LXVST_SUPPORT
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Edit"),
 				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
 			_("Linux VST Path:")));
 
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcConfigDisplay (
 				"plugin-path-lxvst",
 				_("Path:"),
@@ -2930,7 +2930,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Edit"),
 				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 			_("Windows VST Path:")));
@@ -2943,7 +2943,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
-	add_option (_("Plugins"), new OptionEditorHeading (_("Audio Unit")));
+	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
 
 	bo = new BoolOption (
 			"discover-audio-units",
@@ -2955,12 +2955,12 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
 
-	add_option (_("Plugins"),
+	add_option (_("Plugins/Audio Unit"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_au_cache),
 				_("AU Cache:")));
 
-	add_option (_("Plugins"),
+	add_option (_("Plugins/Audio Unit"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_au_blacklist),
 				_("AU Blacklist:")));
@@ -2976,7 +2976,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
 		     ));
 
-#ifdef LV2_SUPPORT
+#if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 	add_option (_("Plugins"),
 	     new BoolOption (
 		     "show-inline-display-by-default",
