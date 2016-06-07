@@ -245,17 +245,32 @@ Mixer_UI::Mixer_UI ()
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
-	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	vca_scroller_base.set_name ("MixerWindow");
-	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
-	vca_packer.pack_end (vca_scroller_base, true, true);
+	string vca_text = _("Control Masters");
+	Gtk::HBox* vca_top_padding = manage (new Gtk::HBox);
+	vca_top_padding->set_size_request (-1, 2);
+	vca_vpacker.pack_start (*vca_top_padding, false, false);
+	
+	vca_label.set_text (vca_text);
+	vca_label_bar.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 
-	vca_scroller.add (vca_packer);
+	vca_label_bar.set_name (X_("VCALabelBar"));
+	vca_label_bar.add (vca_label);
+
+	vca_vpacker.pack_start (vca_label_bar, false, false);
+
+	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	vca_scroller_base.set_name (X_("MixerWindow"));
+	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
+	vca_hpacker.pack_end (vca_scroller_base, true, true);
+
+	vca_scroller.add (vca_hpacker);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 
+	vca_vpacker.pack_start (vca_scroller, true, true);
+
 	inner_pane.add (scroller);
-	inner_pane.add (vca_scroller);
+	inner_pane.add (vca_vpacker);
 
 	global_hpacker.pack_start (inner_pane, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
@@ -326,8 +341,12 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.show();
 	strip_packer.show();
 	inner_pane.show();
+	vca_top_padding->show ();
 	vca_scroller.show();
-	vca_packer.show();
+	vca_vpacker.show();
+	vca_hpacker.show();
+	vca_label_bar.show();
+	vca_label.show();
 	vca_scroller_base.show();
 	out_packer.show();
 	list_hpane.show();
@@ -1276,8 +1295,8 @@ Mixer_UI::redisplay_track_list ()
 	TreeModel::Children::iterator i;
 	uint32_t n_masters = 0;
 
-	container_clear (vca_packer);
-	vca_packer.pack_end (vca_scroller_base, true, true);
+	container_clear (vca_hpacker);
+	vca_hpacker.pack_end (vca_scroller_base, true, true);
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -1291,7 +1310,7 @@ Mixer_UI::redisplay_track_list ()
 		VCAMasterStrip* vms;
 
 		if ((vms = dynamic_cast<VCAMasterStrip*> (s))) {
-			vca_packer.pack_start (*vms, false, false);
+			vca_hpacker.pack_start (*vms, false, false);
 			vms->show ();
 			n_masters++;
 			continue;

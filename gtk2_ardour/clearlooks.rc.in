@@ -1012,6 +1012,12 @@ style "pane"
       fg[ACTIVE] = @somewhat_bright_indicator
 }
 
+style "vca_label_bar" = "medium_bold_text"
+{
+	bg[NORMAL] = @darkest
+	fg[NORMAL] = @lightest
+}
+
 class "GtkWidget" style:highest "default"
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
@@ -1203,3 +1209,6 @@ widget "*MonitorSectionLabel" style:highest "small_text"
 widget "*ooltip*" style:highest "tooltip"
 widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
+widget "*VCALabelBar" style:highest "vca_label_bar"
+widget "*VCALabelBar*" style:highest "vca_label_bar"
+

@@ -50,7 +50,7 @@ PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: SessionHandlePtr (s)
 	, _vca (v)
-	, gain_meter (s, 250)
+	, gain_meter (s, 254)
 	, context_menu (0)
 	, delete_dialog (0)
 {
@@ -77,9 +77,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
 
-	width_hide_box.pack_start (number_label, true, true);
-	width_hide_box.pack_end (hide_button, false, true);
-
 	solo_mute_box.set_spacing (2);
 	solo_mute_box.pack_start (mute_button, true, true);
 	solo_mute_box.pack_start (solo_button, true, true);
@@ -91,8 +88,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
-	bottom_padding.set_size_request (-1, 30); /* this one is a hack. there's no trivial way to compute it */
+	bottom_padding.set_size_request (-1, 32); /* this one is a hack. there's no trivial way to compute it */
 
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
@@ -110,8 +106,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 
-	global_vpacker.pack_start (top_padding, false, false);
-	global_vpacker.pack_start (width_hide_box, false, false);
+	global_vpacker.pack_start (number_label, false, false);
+	global_vpacker.pack_start (hide_button, false, false);
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false, 2);
@@ -132,7 +128,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.show ();
 	hide_button.show ();
 	number_label.show ();
-	width_hide_box.show ();
 	gain_meter.show ();
 	solo_mute_box.show_all ();
 	assign_button.show ();

@@ -57,7 +57,6 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	Gtk::VBox    global_vpacker;
 	Gtk::HBox    top_padding;
 	Gtk::HBox    bottom_padding;
-	Gtk::HBox    width_hide_box;
 	Gtk::HBox    solo_mute_box;
 	ArdourButton width_button;
 	ArdourButton color_button;
