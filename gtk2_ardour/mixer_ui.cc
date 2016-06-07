@@ -286,7 +286,7 @@ Mixer_UI::Mixer_UI ()
 		} else {
 			list_hpane.set_divider (0, fract);
 		}
-		if (!settings || ((prop = settings->property ("mixer-inner-pos")) == 0)  || ((fract = atof (prop->value())) > 1.0)) {
+		if (!settings || ((prop = settings->property ("mixer-inner-pane-pos")) == 0)  || ((fract = atof (prop->value())) > 1.0)) {
 			inner_pane.set_divider (0, 0.8f);
 		} else {
 			inner_pane.set_divider (0, atof (prop->value()));
