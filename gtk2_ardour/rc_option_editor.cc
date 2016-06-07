@@ -55,6 +55,7 @@
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "color_theme_manager.h"
 #include "gui_thread.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"
@@ -3331,6 +3332,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	ThemeManager* tm = manage (new ThemeManager);
 	add_page (_("Theme"), *tm);
+
+	add_option (_("Theme/Colors"), new ColorThemeManager);
 
 	//trigger some parameter-changed messages which affect widget-visibility or -sensitivity
 	parameter_changed ("send-ltc");
