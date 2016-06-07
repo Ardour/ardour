@@ -683,11 +683,11 @@ public:
 };
 
 /** The OptionEditor dialog base class */
-class OptionEditor : virtual public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
+class OptionEditor : virtual public sigc::trackable
 {
 public:
 	OptionEditor (PBD::Configuration *);
-	~OptionEditor ();
+	virtual ~OptionEditor ();
 
 	void add_option (std::string const &, OptionEditorComponent *);
 	void add_page (std::string const &, Gtk::Widget& page_widget);
