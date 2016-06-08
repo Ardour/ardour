@@ -102,8 +102,8 @@ void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::MeterSection ms = PublicEditor::instance().session()->tempo_map().meter_section_at_frame (absolute_time());
-	PublicEditor::instance().edit_meter_section (&ms);
+	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_frame (absolute_time()));
+	PublicEditor::instance().edit_meter_section (ms);
 }
 
 void
