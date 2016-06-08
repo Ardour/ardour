@@ -555,3 +555,10 @@ VCAMasterStrip::color () const
 {
 	return gdk_color_from_rgb (_vca->presentation_info().color ());
 }
+
+string
+VCAMasterStrip::state_id () const
+{
+	return string_compose (X_("vms-%1"), _vca->number());
+}
+
