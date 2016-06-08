@@ -67,6 +67,8 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;
 
+	void automation_run (framepos_t start, pframes_t nframes);
+
   protected:
 	void master_changed (bool, PBD::Controllable::GroupControlDisposition, boost::shared_ptr<AutomationControl>);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);

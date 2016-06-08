@@ -175,3 +175,20 @@ MuteControl::muted_by_others_soloing () const
 {
 	return _muteable.muted_by_others_soloing ();
 }
+
+void
+MuteControl::automation_run (framepos_t start, pframes_t)
+{
+	if (!list() || !automation_playback()) {
+		return;
+	}
+
+	bool        valid = false;
+	const float mute  = list()->rt_safe_eval (start, valid);
+
+	if (mute >= 0.5 && !muted()) {
+		set_value_unchecked (1.0);  // mute
+	} else if (mute < 0.5 && muted ()) {
+		set_value_unchecked (0.0);  // unmute
+	}
+}

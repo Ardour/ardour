@@ -317,6 +317,8 @@ Route::process_output_buffers (BufferSet& bufs,
 		return;
 	}
 
+	_mute_control->automation_run (start_frame, nframes);
+
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
