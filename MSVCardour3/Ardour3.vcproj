@@ -420,6 +420,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\color_theme_manager.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\configinfo.cc"
 				>
 			</File>
@@ -1447,6 +1451,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\color_aliases.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\color_theme_manager.h"
 				>
 			</File>
 			<File
