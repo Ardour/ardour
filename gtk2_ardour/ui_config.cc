@@ -266,7 +266,7 @@ UIConfiguration::color_file_name (bool use_my, bool with_program, bool with_vers
 		basename += "my-";
 	}
 
-	basename = color_file.get();  //this is the overall theme file, e.g. "dark"
+	basename += color_file.get();  //this is the overall theme file, e.g. "dark"
 
 	if (with_program) {
 		basename += '-';
