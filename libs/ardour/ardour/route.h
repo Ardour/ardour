@@ -368,10 +368,6 @@ public:
 	/** Emitted with the process lock held */
 	PBD::Signal0<void>       io_changed;
 
-	/* gui's call this for their own purposes. */
-
-	PBD::Signal2<void,std::string,void*> gui_changed;
-
 	/* stateful */
 
 	XMLNode& get_state();

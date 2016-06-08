@@ -79,10 +79,13 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	void  set_presentation_order (PresentationInfo::order_t, bool notify_class_listeners = true);
 	void  set_presentation_order_explicit (PresentationInfo::order_t);
 
+	/* gui's call this for their own purposes. */
+
+	PBD::Signal2<void,std::string,void*> gui_changed;
+
 	/***************************************************************
 	 * Pure interface begins here
 	 ***************************************************************/
-
 
 	virtual boost::shared_ptr<PeakMeter>       peak_meter() = 0;
 	virtual boost::shared_ptr<const PeakMeter> peak_meter() const = 0;
