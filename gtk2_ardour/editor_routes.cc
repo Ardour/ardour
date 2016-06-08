@@ -792,9 +792,14 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 
 		boost::weak_ptr<Stripable> ws (stripable);
 
-		if (rtav) {
-			rtav->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
-		}
+		/* for now, we need both of these. PropertyChanged covers on
+		 * pre-defined, "global" things of interest to a
+		 * UI. gui_changed covers arbitrary, un-enumerated, un-typed
+		 * changes that may only be of interest to a particular
+		 * UI (e.g. track-height is not of any relevant to OSC)
+		 */
+
+		stripable->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
 		stripable->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, ws), gui_context());
 
 		if (boost::dynamic_pointer_cast<Track> (stripable)) {
@@ -890,26 +895,27 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 void
 EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Stripable> s)
 {
-	if (!what_changed.contains (ARDOUR::Properties::name)) {
+	if (_adding_routes) {
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &EditorRoutes::route_name_changed, r)
+	if (what_changed.contains (ARDOUR::Properties::name)) {
 
-	boost::shared_ptr<Stripable> stripable = s.lock ();
+		boost::shared_ptr<Stripable> stripable = s.lock ();
 
-	if (!stripable) {
-		return;
-	}
+		if (!stripable) {
+			return;
+		}
 
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
+		TreeModel::Children rows = _model->children();
+		TreeModel::Children::iterator i;
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Stripable> ss = (*i)[_columns.stripable];
-		if (ss == stripable) {
-			(*i)[_columns.text] = stripable->name();
-			break;
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			boost::shared_ptr<Stripable> ss = (*i)[_columns.stripable];
+			if (ss == stripable) {
+				(*i)[_columns.text] = stripable->name();
+				break;
+			}
 		}
 	}
 }
