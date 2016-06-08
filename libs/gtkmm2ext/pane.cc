@@ -304,14 +304,17 @@ Pane::on_expose_event (GdkEventExpose* ev)
 	Children::iterator child;
 	Dividers::iterator div;
 
-	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child, ++div) {
+	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child) {
 
 		if (child->w->is_visible()) {
 			propagate_expose (*(child->w), ev);
 		}
 
-		if ((div != dividers.end()) && (*div)->is_visible()) {
-			propagate_expose (**div, ev);
+		if (div != dividers.end()) {
+			if ((*div)->is_visible()) {
+				propagate_expose (**div, ev);
+			}
+			++div;
 		}
         }
 
