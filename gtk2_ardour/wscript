@@ -857,7 +857,7 @@ def i18n_mo(bld):
 def appdata_i18n_pot(bld):
     potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
             'ardour.appdata.pot')
-    if bld.cmd == 'build':
+    if bld.cmd == 'i18n_pot':
         Logs.info('Generating pot file from Ardour appdata')
         itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
         adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
