@@ -164,7 +164,8 @@ public:
 	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
 	int                         paste (boost::shared_ptr<Playlist>, framepos_t position, float times);
 
-	const RegionListProperty& region_list () const { return regions; }
+	const RegionListProperty& region_list_property () const { return regions; }
+	boost::shared_ptr<RegionList> region_list();
 
 	boost::shared_ptr<RegionList> regions_at (framepos_t frame);
 	uint32_t                   count_regions_at (framepos_t) const;

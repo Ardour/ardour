@@ -1774,6 +1774,13 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
   **********************************************************************/
 
 boost::shared_ptr<RegionList>
+Playlist::region_list() {
+	RegionReadLock rlock (this);
+	boost::shared_ptr<RegionList> rlist (new RegionList (regions.rlist ()));
+	return rlist;
+}
+
+boost::shared_ptr<RegionList>
 Playlist::regions_at (framepos_t frame)
 {
 	RegionReadLock rlock (this);
@@ -3132,7 +3139,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	// (2) get all the original regions
 
-	const RegionList& rl (pl->region_list().rlist());
+	const RegionList& rl (pl->region_list_property().rlist());
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
 	frameoffset_t move_offset = 0;
 

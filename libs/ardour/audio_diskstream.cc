@@ -359,7 +359,7 @@ AudioDiskstream::use_destructive_playlist ()
 
 	boost::shared_ptr<Region> rp;
 	{
-		const RegionList& rl (_playlist->region_list().rlist());
+		const RegionList& rl (_playlist->region_list_property().rlist());
 		if (rl.size() > 0) {
 			assert((rl.size() == 1));
 			rp = rl.front();
@@ -2435,7 +2435,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 
 	boost::shared_ptr<Region> first;
 	{
-		const RegionList& rl (_playlist->region_list().rlist());
+		const RegionList& rl (_playlist->region_list_property().rlist());
 		assert((rl.size() == 1));
 		first = rl.front();
 

@@ -188,7 +188,7 @@ AudioPlaylistSource::n_channels () const
 		return 1;
 	}
 
-	boost::shared_ptr<Region> r = _playlist->region_list().front ();
+	boost::shared_ptr<Region> r = _playlist->region_list_property().front ();
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	return ar->audio_source()->n_channels ();
@@ -203,7 +203,7 @@ AudioPlaylistSource::sample_rate () const
 		_session.frame_rate ();
 	}
 
-	boost::shared_ptr<Region> r = _playlist->region_list().front ();
+	boost::shared_ptr<Region> r = _playlist->region_list_property().front ();
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	return ar->audio_source()->sample_rate ();

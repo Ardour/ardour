@@ -572,7 +572,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("data_type", &Playlist::data_type)
 		.addFunction ("n_regions", &Playlist::n_regions)
 		//.addFunction ("get_extent", &Playlist::get_extent) // pair<framepos_t, framepos_t>
-		//.addFunction ("region_list", &Playlist::region_list) // RegionListProperty&
+		.addFunction ("region_list", &Playlist::region_list)
 		.addFunction ("add_region", &Playlist::add_region)
 		.addFunction ("remove_region", &Playlist::remove_region)
 		.addFunction ("regions_at", &Playlist::regions_at)
