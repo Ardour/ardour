@@ -3273,7 +3273,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 TempoMarkerDrag::setup_pointer_frame_offset ()
 {
-	_pointer_frame_offset = raw_grab_frame() - _marker->tempo().frame();
+	_pointer_frame_offset = raw_grab_frame() - _real_section->frame();
 }
 
 void
@@ -3367,9 +3367,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		show_verbose_cursor_time (_real_section->frame());
 	}
-
-	/* this has moved the bar lines themselves, so recalibrate the offset */
-	setup_pointer_frame_offset();
 
 	_marker->set_position (adjusted_current_frame (event, false));
 }
