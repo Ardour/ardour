@@ -31,7 +31,7 @@ using namespace ARDOUR;
 void
 ControlSurfacesTest::instantiateAndTeardownTest ()
 {
-	_session->new_audio_track (1, 2, Normal, 0, 1, "Test");
+	_session->new_audio_track (1, 2, NULL, 1, "Test", PresentationInfo::max_order, Normal);
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {

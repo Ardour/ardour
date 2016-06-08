@@ -29,7 +29,7 @@ main (int argc, char* argv[])
 	assert (playlist);
 
 	/* And the region */
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (playlist->region_list().rlist().front());
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (playlist->region_list_property().rlist().front());
 	assert (region);
 
 	/* Duplicate it a lot */
