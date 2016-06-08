@@ -3340,29 +3340,19 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		const framepos_t pf = adjusted_current_frame (event);
 
-		if (!_editor->snap_musical()) {
+		/* cop-out : we really should set the musical position of music-locked tempo sections here, which generally works well.
+		   The problem is that when the mouse pointer's motion causes the location of the beat to change in a more-or-less
+		   chaotic way when cross-dragging tempo sections (the beat the pointer is now above could have changed without any pointer motion).
+		   Until there is a way to deal with this, just pretend the tempo section is audio-locked.
+		*/
+		if (was_music) {
+			_real_section->set_position_lock_style (AudioTime);
+		}
 
-			if (was_music) {
-				_real_section->set_position_lock_style (AudioTime);
-			}
+		map.gui_move_tempo (_real_section, pf);
 
-			map.gui_move_tempo (_real_section, pf);
-
-			if (was_music) {
-				_real_section->set_position_lock_style (MusicTime);
-			}
-
-		} else {
-
-			if (!was_music) {
-				_real_section->set_position_lock_style (MusicTime);
-			}
-
-			map.gui_move_tempo (_real_section, pf);
-
-			if (!was_music) {
-				_real_section->set_position_lock_style (AudioTime);
-			}
+		if (was_music) {
+			_real_section->set_position_lock_style (MusicTime);
 		}
 
 		show_verbose_cursor_time (_real_section->frame());
