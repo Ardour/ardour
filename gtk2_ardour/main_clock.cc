@@ -94,8 +94,8 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at_frame (absolute_time());
-	PublicEditor::instance().edit_tempo_section (&ts);
+	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_frame (absolute_time()));
+	PublicEditor::instance().edit_tempo_section (ts);
 }
 
 void
