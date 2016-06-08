@@ -2940,6 +2940,11 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 	if (cnt < 0.0) {
 		cnt = 0.0;
 	}
+
+	if (frame_at_beat_locked (_metrics, cnt) >= upper) {
+		return;
+	}
+
 	while (pos < upper) {
 		pos = frame_at_beat_locked (_metrics, cnt);
 		const TempoSection tempo = tempo_section_at_frame_locked (_metrics, pos);
