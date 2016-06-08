@@ -124,6 +124,7 @@ static const gchar * paypal_xpm[] = {
 #endif
 
 static const char* authors[] = {
+	N_("Fons Adriaensen"),
 	N_("Brian Ahr"),
 	N_("John Anderson"),
 	N_("Marcus Andersson"),
