@@ -2388,15 +2388,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\gtk2_ardour\win32\res\mixbus_icon_32px.ico"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\win32\res\mixbus_icon_48px.ico"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\win32\res\mixbus_icon_64px.ico"
+				RelativePath="..\gtk2_ardour\icons\ardour.ico"
 				>
 			</File>
 			<File
