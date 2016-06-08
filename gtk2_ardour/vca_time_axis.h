@@ -49,6 +49,8 @@ class VCATimeAxisView : public TimeAxisView
 	Gdk::Color color () const;
 	std::string state_id() const;
 
+	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
+
 	bool selectable() const { return false; }
 
  protected:

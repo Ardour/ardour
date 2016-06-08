@@ -296,3 +296,11 @@ VCATimeAxisView::color () const
 {
 	return gdk_color_from_rgb (_vca->presentation_info().color ());
 }
+
+void
+VCATimeAxisView::set_height (uint32_t h, TrackHeightMode m)
+{
+	TimeAxisView::set_height (h, m);
+	set_gui_property ("height", h);
+	_vca->gui_changed ("track_height", (void*) 0); /* EMIT SIGNAL */
+}
