@@ -172,19 +172,41 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 
 	Menu* menu = new Menu;
 	MenuList& items = menu->items();
+	bool slaved = false;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+
+		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
+		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
+
+		if (gcs == gcm) {
+			/* asked to slave to self. not ok */
+			continue;
+		}
+
+		if (gcm->slaved_to (gcs)) {
+			/* master is already slaved to slave */
+			continue;
+		}
+
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
-		if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
+
+		if (gcs->slaved_to (gcm)) {
 			item->set_active (true);
+			slaved = true;
 		}
+
 		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::vca_menu_toggle), item, (*v)->number()));
 	}
 
-	items.push_back (MenuElem (_("Unassign All"), sigc::mem_fun (*this, &ControlSlaveUI::unassign_all)));
+	if (slaved) {
+		items.push_back (MenuElem (_("Unassign All"), sigc::mem_fun (*this, &ControlSlaveUI::unassign_all)));
+	}
 
-	menu->popup (1, ev->time);
+	if (!items.empty()) {
+		menu->popup (1, ev->time);
+	}
 
 	return true;
 }

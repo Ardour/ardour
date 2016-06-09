@@ -26,6 +26,7 @@
 
 #include "ardour_button.h"
 #include "axis_view.h"
+#include "control_slave_ui.h"
 #include "gain_meter.h"
 
 namespace ARDOUR {
@@ -64,12 +65,12 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	ArdourButton number_label;
 	ArdourButton solo_button;
 	ArdourButton mute_button;
-	ArdourButton assign_button;
 	ArdourButton drop_button;
 	Gtk::Menu*   context_menu;
-	PBD::ScopedConnectionList vca_connections;
 	Gtk::MessageDialog* delete_dialog;
 	ArdourButton vertical_button;
+	ControlSlaveUI control_slave_ui;
+	PBD::ScopedConnectionList vca_connections;
 
 	void spill ();
 	void spill_change (boost::shared_ptr<ARDOUR::VCA>);
@@ -82,10 +83,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void set_solo_text ();
 	void solo_changed ();
 	void mute_changed ();
-	void vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n);
 	void unassign ();
-	bool vca_button_release (GdkEventButton*);
-	void update_vca_display ();
 	void start_name_edit ();
 	void finish_name_edit (std::string, int);
 	bool vertical_button_press (GdkEventButton*);

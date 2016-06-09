@@ -53,7 +53,10 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	, gain_meter (s, 254)
 	, context_menu (0)
 	, delete_dialog (0)
+	, control_slave_ui (s)
 {
+	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (v));
+
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
 	                         boost::shared_ptr<Amp>(),
@@ -70,10 +73,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	hide_button.set_icon (ArdourIcon::CloseCross);
 	set_tooltip (&hide_button, _("Hide this VCA strip"));
-
-	assign_button.set_name (X_("vca assign"));
-	set_tooltip (assign_button, _("Click to assign a VCA Master to this VCA"));
-	assign_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vca_button_release), false);
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
 
@@ -111,7 +110,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false, 2);
-	global_vpacker.pack_start (assign_button, false, false);
+	global_vpacker.pack_start (control_slave_ui, false, false);
 	global_vpacker.pack_start (drop_button, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
 
@@ -130,7 +129,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.show ();
 	gain_meter.show ();
 	solo_mute_box.show_all ();
-	assign_button.show ();
+	control_slave_ui.show ();
 	drop_button.show ();
 
 	/* force setting of visible selected status */
@@ -138,7 +137,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	_selected = true;
 	set_selected (false);
 	set_solo_text ();
-	update_vca_display ();
 	update_vca_name ();
 	solo_changed ();
 	mute_changed ();
@@ -147,19 +145,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
+	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
 
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
-	/* only need to connect to one of these to update VCA status */
-
-	_vca->gain_control()->MasterStatusChange.connect (vca_connections,
-	                                          invalidator (*this),
-	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
-	                                          gui_context());
-
-
-	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
 
 	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
@@ -217,31 +207,6 @@ VCAMasterStrip::set_button_names ()
 		solo_button.set_text (S_("Solo|S"));
 		set_tooltip (solo_button, _("Solo"));
 	}
-}
-
-void
-VCAMasterStrip::update_vca_display ()
-{
-	VCAList vcas (_session->vca_manager().vcas());
-	string label;
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (_vca->slaved_to (*v)) {
-			if (!label.empty()) {
-				label += ' ';
-			}
-			label += to_string ((*v)->number(), std::dec);
-		}
-	}
-
-	if (label.empty()) {
-		label = _("-vca-");
-		assign_button.set_active_state (Gtkmm2ext::Off);
-	} else {
-		assign_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	}
-
-	assign_button.set_text (label);
 }
 
 string
@@ -361,79 +326,6 @@ VCAMasterStrip::solo_changed ()
 	} else {
 		solo_button.set_active_state (Gtkmm2ext::Off);
 	}
-}
-
-void
-VCAMasterStrip::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
-{
-	boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (n);
-
-	if (!menuitem->get_active()) {
-		if (!vca) {
-			/* null VCA means drop all VCA assignments */
-			_vca->unassign (boost::shared_ptr<VCA>());
-
-		} else {
-			_vca->unassign (vca);
-		}
-	} else {
-		if (vca) {
-			_vca->assign (vca);
-		}
-	}
-}
-
-void
-VCAMasterStrip::unassign ()
-{
-	_vca->unassign (boost::shared_ptr<VCA>());
-}
-
-bool
-VCAMasterStrip::vca_button_release (GdkEventButton* ev)
-{
-	using namespace Gtk::Menu_Helpers;
-
-	if (!_session) {
-		return false;
-	}
-
-	/* primary click only */
-
-	if (ev->button != 1) {
-		return false;
-	}
-
-	VCAList vcas (_session->vca_manager().vcas());
-
-	if (vcas.empty()) {
-		/* XXX should probably show a message saying "No VCA masters" */
-		return true;
-	}
-
-	Menu* menu = new Menu;
-	MenuList& items = menu->items();
-
-	items.push_back (MenuElem (_("Unassign"), sigc::mem_fun (*this, &VCAMasterStrip::unassign)));
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-
-		if (*v == _vca) {
-			/* no self-mastering */
-			continue;
-		}
-
-		items.push_back (CheckMenuElem ((*v)->name()));
-		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
-		if (_vca->gain_control()->slaved_to ((*v)->gain_control())) {
-			item->set_active (true);
-		}
-		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::vca_menu_toggle), item, (*v)->number()));
-	}
-
-	menu->popup (1, ev->time);
-
-	return true;
 }
 
 bool
@@ -561,4 +453,3 @@ VCAMasterStrip::state_id () const
 {
 	return string_compose (X_("vms-%1"), _vca->number());
 }
-
