@@ -254,26 +254,28 @@ void
 MixerActor::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	set_route_targets_for_operation ();
-
+#if 0
 	BOOST_FOREACH(RouteUI* r, _route_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_assign (vca);
 		}
 	}
+#endif
 }
 
 void
 MixerActor::vca_unassign (boost::shared_ptr<VCA> vca)
 {
 	set_route_targets_for_operation ();
-
+#if 0
 	BOOST_FOREACH(RouteUI* r, _route_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);
 		}
 	}
+#endif
 }
 
 
