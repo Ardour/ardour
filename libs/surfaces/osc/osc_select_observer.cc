@@ -48,53 +48,53 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 		name_changed (ARDOUR::Properties::name);
 
-		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
+		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
 		send_change_message ("/select/mute", _strip->mute_control());
 
-		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
+		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
 		send_change_message ("/select/solo", _strip->solo_control());
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {
-		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
+		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
 		send_monitor_status (track->monitoring_control());
 		}
 
 		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
 		if (rec_controllable) {
-			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
+			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
 			send_change_message ("/select/recenable", _strip->rec_enable_control());
 		}
 		boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
 		if (rec_controllable) {
-			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
+			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/select/record_safe", _strip->rec_safe_control());
 		}
 	}
 
 	if (feedback[1]) { // level controls
 		if (gainmode) {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_gain_message, this, X_("/select/fader"), _strip->gain_control()), OSC::instance());
+			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain_message, this, X_("/select/fader"), _strip->gain_control()), OSC::instance());
 			send_gain_message ("/select/fader", _strip->gain_control());
 		} else {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_gain_message, this, X_("/select/gain"), _strip->gain_control()), OSC::instance());
+			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain_message, this, X_("/select/gain"), _strip->gain_control()), OSC::instance());
 			send_gain_message ("/select/gain", _strip->gain_control());
 		}
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 		if (trim_controllable) {
-			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
+			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
 			send_trim_message ("/select/trimdB", _strip->trim_control());
 		}
 
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			send_change_message ("/select/pan_stereo_position", _strip->pan_azimuth_control());
 		}
 		// detecting processor changes requires cast to route
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
-		r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
+		r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
 		send_init();
 	}
 	tick();
@@ -153,13 +153,13 @@ OSCSelectObserver::send_init()
 	do {
 		sends = false;
 		if (_strip->send_level_controllable (nsends)) {
-			_strip->send_level_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_gain, this, X_("/select/send_gain"), nsends, _strip->send_level_controllable(nsends)), OSC::instance());
+			_strip->send_level_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, X_("/select/send_gain"), nsends, _strip->send_level_controllable(nsends)), OSC::instance());
 			send_gain ("/select/send_gain", nsends, _strip->send_level_controllable(nsends));
 			sends = true;
 		}
 
 		if (_strip->send_enable_controllable (nsends)) {
-			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends, _strip->send_enable_controllable(nsends)), OSC::instance());
+			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends, _strip->send_enable_controllable(nsends)), OSC::instance());
 			send_enable ("/select/send_enable", nsends, _strip->send_enable_controllable(nsends));
 			sends = true;
 		} else if (sends) {
