@@ -45,6 +45,8 @@ class OSCSelectObserver
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
 
 	PBD::ScopedConnectionList strip_connections;
+	// sends need their own
+	PBD::ScopedConnectionList send_connections;
 
 	lo_address addr;
 	std::string path;
@@ -52,6 +54,7 @@ class OSCSelectObserver
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	float _last_meter;
+	uint32_t nsends;
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);
@@ -59,7 +62,14 @@ class OSCSelectObserver
 	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	std::string set_path (std::string path);
+	// sends stuff
+	void send_init (void);
+	void send_end (void);
+	void send_restart (int);
+	void send_gain (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_enable (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_rename (std::string path, uint32_t id, std::string name);
+	std::string set_path (std::string path, uint32_t id);
 	void clear_strip (std::string path, float val);
 };
 

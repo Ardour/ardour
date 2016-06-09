@@ -40,6 +40,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	,ssid (ss)
 	,gainmode (gm)
 	,feedback (fb)
+	,nsends (0)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 
@@ -91,6 +92,10 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			send_change_message ("/select/pan_stereo_position", _strip->pan_azimuth_control());
 		}
+		// detecting processor changes requires cast to route
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
+		r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
+		send_init();
 	}
 	tick();
 }
@@ -135,8 +140,103 @@ OSCSelectObserver::~OSCSelectObserver ()
 	}else if (feedback[8]) {
 		clear_strip ("/select/meter", 0);
 	}
+	send_end();
 
 	lo_address_free (addr);
+}
+
+void
+OSCSelectObserver::send_init()
+{
+	// we don't know how many there are, so find out.
+	bool sends;
+	do {
+		sends = false;
+		if (_strip->send_level_controllable (nsends)) {
+			_strip->send_level_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_gain, this, X_("/select/send_gain"), nsends, _strip->send_level_controllable(nsends)), OSC::instance());
+			send_gain ("/select/send_gain", nsends, _strip->send_level_controllable(nsends));
+			sends = true;
+		}
+
+		if (_strip->send_enable_controllable (nsends)) {
+			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends, _strip->send_enable_controllable(nsends)), OSC::instance());
+			send_enable ("/select/send_enable", nsends, _strip->send_enable_controllable(nsends));
+			sends = true;
+		} else if (sends) {
+			// not used by Ardour, just mixbus so in Ardour always true
+			lo_message msg = lo_message_new ();
+			path = "/select/send_enable";
+			if (feedback[2]) {
+				path = set_path (path, nsends + 1);
+			} else {
+				lo_message_add_int32 (msg, nsends + 1);
+			}
+			lo_message_add_int32 (msg, 1);
+			lo_send_message (addr, path.c_str(), msg);
+			lo_message_free (msg);
+			}
+
+		if (sends) { // if the gain control is there, this is too
+			send_rename ("/select/send_name", nsends, _strip->send_name(nsends));
+		}
+		// Send numbers are 0 based, OSC is 1 based so this gets incremented at the end
+		if (sends) {
+			nsends++;
+		}
+	} while (sends);
+}
+
+void
+OSCSelectObserver::send_end ()
+{
+	send_connections.drop_connections ();
+	for (uint32_t i = 1; i <= nsends; i++) {
+		lo_message msg = lo_message_new ();
+		string path = "/select/send_gain";
+		if (feedback[2]) {
+			path = set_path (path, i);
+		} else {
+			lo_message_add_int32 (msg, i);
+		}
+
+		if (gainmode) {
+			lo_message_add_int32 (msg, 0);
+		} else {
+			lo_message_add_float (msg, -193);
+		}
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+		// next enable
+		msg = lo_message_new ();
+		path = "/select/send_enable";
+		if (feedback[2]) {
+			path = set_path (path, i);
+		} else {
+			lo_message_add_int32 (msg, i);
+		}
+		lo_message_add_int32 (msg, 0);
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+		// next name
+		msg = lo_message_new ();
+		path = "/select/send_name";
+		if (feedback[2]) {
+			path = set_path (path, i);
+		} else {
+			lo_message_add_int32 (msg, i);
+		}
+		lo_message_add_string (msg, " ");
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+	}
+	nsends = 0;
+}
+
+void
+OSCSelectObserver::send_restart(int x)
+{
+	send_end();
+	send_init();
 }
 
 void
@@ -290,12 +390,73 @@ OSCSelectObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 	lo_message_free (msg);
 }
 
+void
+OSCSelectObserver::send_gain (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable)
+{
+	lo_message msg = lo_message_new ();
+
+	if (feedback[2]) {
+		path = set_path (path, id + 1);
+	} else {
+		lo_message_add_int32 (msg, id + 1);
+	}
+
+	if (gainmode) {
+		if (controllable->get_value() == 1) {
+			lo_message_add_int32 (msg, 800);
+		} else {
+			lo_message_add_int32 (msg, gain_to_slider_position (controllable->get_value()) * 1023);
+		}
+	} else {
+		if (controllable->get_value() < 1e-15) {
+			lo_message_add_float (msg, -200);
+		} else {
+			lo_message_add_float (msg, accurate_coefficient_to_dB (controllable->get_value()));
+		}
+	}
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
+{
+	lo_message msg = lo_message_new ();
+	if (feedback[2]) {
+		path = set_path (path, id + 1);
+	} else {
+		lo_message_add_int32 (msg, id + 1);
+	}
+
+	lo_message_add_float (msg, (float) controllable->get_value());
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::send_rename (string path, uint32_t id, string name)
+{
+	lo_message msg = lo_message_new ();
+	if (feedback[2]) {
+		path = set_path (path, id + 1);
+	} else {
+		lo_message_add_int32 (msg, id + 1);
+	}
+
+	lo_message_add_string (msg, name.c_str());
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
 string
-OSCSelectObserver::set_path (string path)
+OSCSelectObserver::set_path (string path, uint32_t id)
 {
 	if (feedback[2]) {
   ostringstream os;
-  os << path << "/" << ssid;
+  os << path << "/" << id;
   path = os.str();
 	}
 	return path;

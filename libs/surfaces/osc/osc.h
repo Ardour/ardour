@@ -335,6 +335,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_monitor_disk,i);
 	PATH_CALLBACK1_MSG(sel_gain,f);
 	PATH_CALLBACK1_MSG(sel_fader,f);
+	PATH_CALLBACK1_MSG(sel_trim,f);
+	PATH_CALLBACK1_MSG(sel_pan_position,f);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -404,6 +406,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_width,i,f);
 	PATH_CALLBACK3(route_set_send_gain_abs,i,i,f);
 	PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
+	PATH_CALLBACK3(route_set_send_fader,i,i,f);
 	PATH_CALLBACK4(route_plugin_parameter,i,i,i,f);
 	PATH_CALLBACK3(route_plugin_parameter_print,i,i,i);
 
@@ -425,6 +428,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_pan_stereo_width (int rid, float percent, lo_message msg);
 	int route_set_send_gain_abs (int rid, int sid, float val, lo_message msg);
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
+	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
 	int route_plugin_parameter (int rid, int piid,int par, float val, lo_message msg);
 	int route_plugin_parameter_print (int rid, int piid,int par, lo_message msg);
 
@@ -453,6 +457,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_monitor_disk (uint32_t state, lo_message msg);
 	int sel_gain (float state, lo_message msg);
 	int sel_fader (float state, lo_message msg);
+	int sel_trim (float val, lo_message msg);
+	int sel_pan_position (float val, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);

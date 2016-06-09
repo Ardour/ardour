@@ -69,7 +69,9 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/strip/record_safe", _strip->rec_safe_control());
 		}
-		send_select_status ();
+		if (!feedback[10]) {
+			send_select_status ();
+		}
 	}
 
 	if (feedback[1]) { // level controls
