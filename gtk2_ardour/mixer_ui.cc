@@ -249,7 +249,7 @@ Mixer_UI::Mixer_UI ()
 	Gtk::HBox* vca_top_padding = manage (new Gtk::HBox);
 	vca_top_padding->set_size_request (-1, 2);
 	vca_vpacker.pack_start (*vca_top_padding, false, false);
-	
+
 	vca_label.set_text (vca_text);
 	vca_label_bar.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 
@@ -537,7 +537,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 				TreeModel::Row row = *(track_model->append());
 
 				row[stripable_columns.text] = vca->name();
-				row[stripable_columns.visible] = !vca->presentation_info().hidden();
+				row[stripable_columns.visible] = vms->marked_for_display ();
 				row[stripable_columns.strip] = vms;
 				row[stripable_columns.stripable] = vca;
 
@@ -981,14 +981,12 @@ Mixer_UI::track_visibility_changed (std::string const & path)
 	TreeIter iter;
 
 	if ((iter = track_model->get_iter (path))) {
-		AxisView* av = (*iter)[stripable_columns.strip];
-		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
-		if (strip) {
-			bool visible = (*iter)[stripable_columns.visible];
 
-			if (strip->set_marked_for_display (!visible)) {
-				update_track_visibility ();
-			}
+		AxisView* av = (*iter)[stripable_columns.strip];
+		bool visible = (*iter)[stripable_columns.visible];
+
+		if (av->set_marked_for_display (!visible)) {
+			update_track_visibility ();
 		}
 	}
 }
@@ -1004,10 +1002,7 @@ Mixer_UI::update_track_visibility ()
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			AxisView* av = (*i)[stripable_columns.strip];
-			MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
-			if (strip) {
-				(*i)[stripable_columns.visible] = strip->marked_for_display ();
-			}
+			(*i)[stripable_columns.visible] = av->marked_for_display ();
 		}
 
 		/* force presentation catch up with visibility changes
@@ -1208,7 +1203,6 @@ Mixer_UI::hide_all_miditracks ()
 	set_all_audio_midi_visibility (3, false);
 }
 
-
 void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
@@ -1301,6 +1295,8 @@ Mixer_UI::redisplay_track_list ()
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
 		AxisView* s = (*i)[stripable_columns.strip];
+		bool const visible = (*i)[stripable_columns.visible];
+		boost::shared_ptr<Stripable> stripable = (*i)[stripable_columns.stripable];
 
 		if (!s) {
 			/* we're in the middle of changing a row, don't worry */
@@ -1310,9 +1306,11 @@ Mixer_UI::redisplay_track_list ()
 		VCAMasterStrip* vms;
 
 		if ((vms = dynamic_cast<VCAMasterStrip*> (s))) {
-			vca_hpacker.pack_start (*vms, false, false);
-			vms->show ();
-			n_masters++;
+			if (visible) {
+				vca_hpacker.pack_start (*vms, false, false);
+				vms->show ();
+				n_masters++;
+			}
 			continue;
 		}
 
@@ -1322,13 +1320,11 @@ Mixer_UI::redisplay_track_list ()
 			continue;
 		}
 
-		bool const visible = (*i)[stripable_columns.visible];
-
 		if (visible) {
 
 			if (strip->packed()) {
 
-				if (strip->route()->is_master() || strip->route()->is_monitor()) {
+				if (stripable->is_master() || stripable->is_monitor()) {
 					out_packer.reorder_child (*strip, -1);
 
 				} else {
@@ -1337,7 +1333,7 @@ Mixer_UI::redisplay_track_list ()
 
 			} else {
 
-				if (strip->route()->is_master() || strip->route()->is_monitor()) {
+				if (stripable->is_master() || stripable->is_monitor()) {
 					out_packer.pack_start (*strip, false, false);
 				} else {
 					strip_packer.pack_start (*strip, false, false);
@@ -1347,7 +1343,7 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
-			if (strip->route()->is_master() || strip->route()->is_monitor()) {
+			if (stripable->is_master() || stripable->is_monitor()) {
 				/* do nothing, these cannot be hidden */
 			} else {
 				if (strip->packed()) {

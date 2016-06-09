@@ -500,3 +500,19 @@ VCAMasterStrip::finish_color_edit (int response, Gtk::ColorSelectionDialog* dial
 
 	delete_when_idle (dialog);
 }
+
+bool
+VCAMasterStrip::marked_for_display () const
+{
+	return !_vca->presentation_info().hidden();
+}
+
+bool
+VCAMasterStrip::set_marked_for_display (bool yn)
+{
+	if (yn == _vca->presentation_info().hidden()) {
+		_vca->presentation_info().set_hidden (!yn);
+		return true; // things changed
+	}
+	return false;
+}

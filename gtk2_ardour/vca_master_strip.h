@@ -49,6 +49,8 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 
 	static PBD::Signal1<void,VCAMasterStrip*> CatchDeletion;
 
+	bool marked_for_display () const;
+	bool set_marked_for_display (bool);
 
      private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
