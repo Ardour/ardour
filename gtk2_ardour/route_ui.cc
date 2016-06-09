@@ -2246,16 +2246,20 @@ RouteUI::route_color () const
 
 			stringstream ss (p);
 
+			/* old color format version was:
+
+			   16bit value for red:16 bit value for green:16 bit value for blue
+
+			   decode to rgb ..
+			*/
+
 			ss >> component;
 			ss >> colon;
 			color |= ((component >> 2) << 16);
-
 			ss >> component;
 			ss >> colon;
 			color |= ((component >> 2) << 8);
-
 			ss >> component;
-			ss >> colon;
 			color |= (component >> 2);
 
 			_route->presentation_info().set_color (color);
