@@ -75,8 +75,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 		boost::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
 		if (phase_controllable) {
-			phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/phase"), _strip->phase_control()), OSC::instance());
-			send_change_message ("/select/phase", _strip->phase_control());
+			phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/polarity"), _strip->phase_control()), OSC::instance());
+			send_change_message ("/select/polarity", _strip->phase_control());
 		}
 
 	}
@@ -134,7 +134,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 		clear_strip ("/select/record_safe", 0);
 		clear_strip ("/select/monitor_input", 0);
 		clear_strip ("/select/monitor_disk", 0);
-		clear_strip ("/select/phase", 0);
+		clear_strip ("/select/polarity", 0);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {

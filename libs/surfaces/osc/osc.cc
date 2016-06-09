@@ -521,13 +521,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/solo", "i", sel_solo);
 		REGISTER_CALLBACK (serv, "/select/monitor_input", "i", sel_monitor_input);
 		REGISTER_CALLBACK (serv, "/select/monitor_disk", "i", sel_monitor_disk);
+		REGISTER_CALLBACK (serv, "/select/polarity", "i", sel_phase);
 		REGISTER_CALLBACK (serv, "/select/gain", "f", sel_gain);
 		REGISTER_CALLBACK (serv, "/select/fader", "f", sel_fader);
 		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
-
-		REGISTER_CALLBACK (serv, "/select/phase", "i", sel_phase);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -538,7 +537,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
 		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_select);
 		REGISTER_CALLBACK (serv, "/strip/gui_select", "ii", strip_gui_select);
-		REGISTER_CALLBACK (serv, "/strip/phase", "ii", strip_phase);
+		REGISTER_CALLBACK (serv, "/strip/polarity", "ii", strip_phase);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
 		REGISTER_CALLBACK (serv, "/strip/trimabs", "if", route_set_trim_abs);
@@ -1704,7 +1703,7 @@ OSC::sel_phase (uint32_t yn, lo_message msg)
 	if (sur->surface_sel) {
 		return strip_phase(sur->surface_sel, yn, msg);
 	} else { 
-		return route_send_fail ("phase", 0, 0, lo_message_get_source (msg));
+		return route_send_fail ("polarity", 0, 0, lo_message_get_source (msg));
 	}
 }
 
