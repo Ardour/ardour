@@ -166,6 +166,18 @@ PresentationInfo::set_color (PresentationInfo::color_t c)
 	}
 }
 
+bool
+PresentationInfo::color_set () const
+{
+	/* all RGBA values zero? not set.
+	 *
+	 * this is heuristic, but it is fairly realistic. who will ever set
+	 * a color to completely transparent black? only the constructor ..
+	 */
+
+	return _color == 0;
+}
+
 void
 PresentationInfo::set_selected (bool yn)
 {

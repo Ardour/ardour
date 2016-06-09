@@ -145,6 +145,8 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	order_t  order() const { return _order; }
 	color_t  color() const { return _color; }
 
+	bool color_set() const;
+
 	void set_color (color_t);
 	void set_selected (bool yn);
 	void set_hidden (bool yn);
