@@ -84,10 +84,15 @@ ControlSlaveUI::set_stripable (boost::shared_ptr<Stripable> s)
 void
 ControlSlaveUI::update_vca_display ()
 {
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
+
 	VCAList vcas (_session->vca_manager().vcas());
 	bool any = false;
 
 	Gtkmm2ext::container_clear (*this);
+	master_connections.drop_connections ();
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 		if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
@@ -221,7 +226,16 @@ ControlSlaveUI::add_vca_button (boost::shared_ptr<VCA> vca)
 	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::specific_vca_button_release), vca->number()), false);
 	vca_button->set_text (PBD::to_string (vca->number(), std::dec));
+	vca_button->set_fixed_colors (vca->presentation_info().color(), vca->presentation_info().color ());
+
+	vca->presentation_info().PropertyChanged.connect (master_connections, invalidator (*this), boost::bind (&ControlSlaveUI::master_property_changed, this, _1), gui_context());
 
 	pack_start (*vca_button);
 	vca_button->show ();
+}
+
+void
+ControlSlaveUI::master_property_changed (PBD::PropertyChange const& /* what_changed */)
+{
+	update_vca_display ();
 }

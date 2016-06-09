@@ -17,6 +17,7 @@
 */
 
 #include <gtkmm/stock.h>
+#include <gtkmm/colorselection.h>
 
 #include "pbd/convert.h"
 
@@ -34,6 +35,7 @@
 #include "mixer_ui.h"
 #include "tooltips.h"
 #include "ui_config.h"
+#include "utils.h"
 #include "vca_master_strip.h"
 
 #include "i18n.h"
@@ -55,6 +57,15 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	, delete_dialog (0)
 	, control_slave_ui (s)
 {
+
+	PresentationInfo::color_t c = _vca->presentation_info().color ();
+
+	/* XXX need a (better) test of "has a color" */
+
+	if (c == 0) {
+		_vca->presentation_info().set_color (gdk_color_to_rgba (unique_random_color()));
+	}
+
 	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (v));
 
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
@@ -96,6 +107,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
 	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_press));
 	vertical_button.set_fallthrough_to_parent (true);
+	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
 	drop_button.set_text(_("drop"));
@@ -145,6 +157,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
+	_vca->presentation_info().PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
 
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
@@ -372,6 +385,10 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		update_vca_name ();
 	}
+
+	if (what_changed.contains (ARDOUR::Properties::color)) {
+		vertical_button.set_active_color (_vca->presentation_info().color ());
+	}
 }
 
 void
@@ -388,6 +405,7 @@ VCAMasterStrip::build_context_menu ()
 	context_menu = new Menu;
 	MenuList& items = context_menu->items();
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &VCAMasterStrip::start_color_edit)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::drop_all_slaves)));
 	items.push_back (SeparatorElem());
@@ -445,11 +463,40 @@ VCAMasterStrip::drop_button_press ()
 Gdk::Color
 VCAMasterStrip::color () const
 {
-	return gdk_color_from_rgb (_vca->presentation_info().color ());
+	return gdk_color_from_rgba (_vca->presentation_info().color ());
 }
 
 string
 VCAMasterStrip::state_id () const
 {
 	return string_compose (X_("vms-%1"), _vca->number());
+}
+
+void
+VCAMasterStrip::start_color_edit ()
+{
+	Gtk::ColorSelectionDialog* color_dialog = new Gtk::ColorSelectionDialog;
+
+	color_dialog->get_colorsel()->set_has_opacity_control (false);
+	color_dialog->get_colorsel()->set_has_palette (true);
+
+	Gdk::Color c = gdk_color_from_rgba (_vca->presentation_info().color ());
+
+	color_dialog->get_colorsel()->set_previous_color (c);
+	color_dialog->get_colorsel()->set_current_color (c);
+
+	color_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::finish_color_edit), color_dialog));
+	color_dialog->present ();
+}
+
+void
+VCAMasterStrip::finish_color_edit (int response, Gtk::ColorSelectionDialog* dialog)
+{
+	switch (response) {
+	case RESPONSE_OK:
+		_vca->presentation_info().set_color (gdk_color_to_rgba (dialog->get_colorsel()->get_current_color()));
+		break;
+	}
+
+	delete_when_idle (dialog);
 }

@@ -63,6 +63,7 @@
 #include "mixer_strip.h"
 #include "plugin_pin_dialog.h"
 #include "prompter.h"
+#include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
 #include "timers.h"
@@ -2211,9 +2212,8 @@ RouteUI::route_color () const
 
 			/* old v4.x or earlier session. Use this information */
 
-			int component;
+			int red, green, blue;
 			char colon;
-			PresentationInfo::color_t color = 0;
 
 			stringstream ss (p);
 
@@ -2224,16 +2224,17 @@ RouteUI::route_color () const
 			   decode to rgb ..
 			*/
 
-			ss >> component;
+			ss >> red;
 			ss >> colon;
-			color |= ((component >> 2) << 16);
-			ss >> component;
+			ss >> green;
 			ss >> colon;
-			color |= ((component >> 2) << 8);
-			ss >> component;
-			color |= (component >> 2);
+			ss >> blue;
 
-			_route->presentation_info().set_color (color);
+			red >>= 2;
+			green >>= 2;
+			blue >>= 2;
+
+			_route->presentation_info().set_color (RGBA_TO_UINT (red, green, blue, 255));
 		}
 
 		set_color_from_rgba (c, _route->presentation_info().color());

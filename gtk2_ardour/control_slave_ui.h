@@ -27,6 +27,7 @@
 #include <gtkmm/checkmenuitem.h>
 
 #include "pbd/signals.h"
+#include "pbd/properties.h"
 
 #include "ardour/session_handle.h"
 
@@ -47,8 +48,10 @@ class ControlSlaveUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList master_connections;
 	ArdourButton  initial_button;
 
+	void master_property_changed (PBD::PropertyChange const &);
 	void update_vca_display ();
 	void vca_menu_toggle (Gtk::CheckMenuItem*, uint32_t n);
 	bool specific_vca_button_release (GdkEventButton* ev, uint32_t n);

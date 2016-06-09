@@ -313,7 +313,6 @@ ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 	return RGBA_TO_UINT (r,g,b,a);
 }
 
-
 bool
 ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
