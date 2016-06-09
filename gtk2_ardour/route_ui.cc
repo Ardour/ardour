@@ -2016,9 +2016,9 @@ RouteUI::setup_invert_buttons ()
 		}
 
 		if (N <= _max_invert_buttons) {
-			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) channel %1 of this track.  Right-click to show menu."), i + 1));
+			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert polarity of channel %1 of this track. Right-click to show menu."), i + 1));
 		} else {
-			UI::instance()->set_tip (*b, _("Click to show a menu of channels for inversion (phase reverse)"));
+			UI::instance()->set_tip (*b, _("Click to show a menu of channels to invert polarity"));
 		}
 
 		_invert_buttons.push_back (b);
