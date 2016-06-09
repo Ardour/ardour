@@ -24,6 +24,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
+#include "ardour/phase_control.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -65,11 +66,19 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
 			send_change_message ("/select/recenable", _strip->rec_enable_control());
 		}
+
 		boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
-		if (rec_controllable) {
+		if (recsafe_controllable) {
 			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/select/record_safe", _strip->rec_safe_control());
 		}
+
+		boost::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
+		if (phase_controllable) {
+			phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/phase"), _strip->phase_control()), OSC::instance());
+			send_change_message ("/select/phase", _strip->phase_control());
+		}
+
 	}
 
 	if (feedback[1]) { // level controls
@@ -125,6 +134,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 		clear_strip ("/select/record_safe", 0);
 		clear_strip ("/select/monitor_input", 0);
 		clear_strip ("/select/monitor_disk", 0);
+		clear_strip ("/select/phase", 0);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {

@@ -333,6 +333,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_solo,i);
 	PATH_CALLBACK1_MSG(sel_monitor_input,i);
 	PATH_CALLBACK1_MSG(sel_monitor_disk,i);
+	PATH_CALLBACK1_MSG(sel_phase,i);
 	PATH_CALLBACK1_MSG(sel_gain,f);
 	PATH_CALLBACK1_MSG(sel_fader,f);
 	PATH_CALLBACK1_MSG(sel_trim,f);
@@ -396,6 +397,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_recsafe,i,i);
 	PATH_CALLBACK2_MSG(route_monitor_input,i,i);
 	PATH_CALLBACK2_MSG(route_monitor_disk,i,i);
+	PATH_CALLBACK2_MSG(strip_phase,i,i);
 	PATH_CALLBACK2_MSG(strip_select,i,i);
 	PATH_CALLBACK2_MSG(strip_gui_select,i,i);
 	PATH_CALLBACK2_MSG(route_set_gain_abs,i,f);
@@ -417,6 +419,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_recsafe (int ssid, int yn, lo_message msg);
 	int route_monitor_input (int rid, int yn, lo_message msg);
 	int route_monitor_disk (int rid, int yn, lo_message msg);
+	int strip_phase (int rid, int yn, lo_message msg);
 	int strip_select (int rid, int yn, lo_message msg);
 	int _strip_select (int rid, lo_address addr);
 	int strip_gui_select (int rid, int yn, lo_message msg);
@@ -456,6 +459,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_solo (uint32_t state, lo_message msg);
 	int sel_monitor_input (uint32_t state, lo_message msg);
 	int sel_monitor_disk (uint32_t state, lo_message msg);
+	int sel_phase (uint32_t state, lo_message msg);
 	int sel_gain (float state, lo_message msg);
 	int sel_fader (float state, lo_message msg);
 	int sel_trim (float val, lo_message msg);

@@ -46,6 +46,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/presentation_info.h"
 #include "ardour/send.h"
+#include "ardour/phase_control.h"
 
 #include "osc_select_observer.h"
 #include "osc.h"
@@ -526,6 +527,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
 
+		REGISTER_CALLBACK (serv, "/select/phase", "i", sel_phase);
+
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/strip/solo", "ii", route_solo);
@@ -535,6 +538,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
 		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_select);
 		REGISTER_CALLBACK (serv, "/strip/gui_select", "ii", strip_gui_select);
+		REGISTER_CALLBACK (serv, "/strip/phase", "ii", strip_phase);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
 		REGISTER_CALLBACK (serv, "/strip/trimabs", "if", route_set_trim_abs);
@@ -1674,6 +1678,33 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 		return route_monitor_disk(sur->surface_sel, yn, msg);
 	} else { 
 		return route_send_fail ("monitor_disk", 0, 0, lo_message_get_source (msg));
+	}
+}
+
+
+int
+OSC::strip_phase (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::sel_phase (uint32_t yn, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return strip_phase(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("phase", 0, 0, lo_message_get_source (msg));
 	}
 }
 
