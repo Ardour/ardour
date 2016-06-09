@@ -92,6 +92,13 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			send_change_message ("/select/pan_stereo_position", _strip->pan_azimuth_control());
 		}
+
+		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
+		if (width_controllable) {
+			width_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+			send_change_message ("/select/pan_stereo_width", _strip->pan_width_control());
+		}
+
 		// detecting processor changes requires cast to route
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
 		r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
@@ -127,6 +134,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 		}
 		clear_strip ("/select/trimdB", 0);
 		clear_strip ("/select/pan_stereo_position", 0.5);
+		clear_strip ("/select/pan_stereo_width", 1);
 	}
 	if (feedback[9]) {
 		clear_strip ("/select/signal", 0);

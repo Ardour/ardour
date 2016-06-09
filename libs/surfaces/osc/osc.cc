@@ -524,6 +524,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/fader", "f", sel_fader);
 		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
+		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -1881,7 +1882,18 @@ OSC::sel_pan_position (float val, lo_message msg)
 	if (sur->surface_sel) {
 		return route_set_pan_stereo_position (sur->surface_sel, val, msg);
 	} else { 
-		return route_send_fail ("pan_stereo_position", 0, 0, lo_message_get_source (msg));
+		return route_send_fail ("pan_stereo_position", 0, 0.5, lo_message_get_source (msg));
+	}
+}
+
+int
+OSC::sel_pan_width (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return route_set_pan_stereo_width (sur->surface_sel, val, msg);
+	} else { 
+		return route_send_fail ("pan_stereo_width", 0, 1, lo_message_get_source (msg));
 	}
 }
 
