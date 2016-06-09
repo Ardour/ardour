@@ -52,7 +52,7 @@ PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: SessionHandlePtr (s)
 	, _vca (v)
-	, gain_meter (s, 254)
+	, gain_meter (s, 254) /* magic number, don't adjust blindly */
 	, context_menu (0)
 	, delete_dialog (0)
 	, control_slave_ui (s)
