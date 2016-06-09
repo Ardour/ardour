@@ -1613,7 +1613,6 @@ RouteUI::choose_color ()
 void
 RouteUI::set_color (uint32_t c)
 {
-	cerr << "setting route color\n";
 	_route->presentation_info().set_color (c);
 }
 
@@ -2227,10 +2226,41 @@ RouteUI::route_color () const
 {
 	Gdk::Color c;
 	RouteGroup* g = _route->route_group ();
+	string p;
 
 	if (g && g->is_color()) {
 		set_color_from_rgba (c, GroupTabs::group_color (g));
 	} else {
+
+		/* deal with older 4.x color, which was stored in the GUI object state */
+
+		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));
+
+		if (!p.empty()) {
+
+			/* old v4.x or earlier session. Use this information */
+
+			int component;
+			char colon;
+			PresentationInfo::color_t color = 0;
+
+			stringstream ss (p);
+
+			ss >> component;
+			ss >> colon;
+			color |= ((component >> 2) << 16);
+
+			ss >> component;
+			ss >> colon;
+			color |= ((component >> 2) << 8);
+
+			ss >> component;
+			ss >> colon;
+			color |= (component >> 2);
+
+			_route->presentation_info().set_color (color);
+		}
+
 		set_color_from_rgba (c, _route->presentation_info().color());
 	}
 
