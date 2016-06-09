@@ -266,7 +266,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
         MonitorSection* _monitor_section;
 	PluginSelector    *_plugin_selector;
 
-	void strip_property_changed (const PBD::PropertyChange&, MixerStrip *);
+	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
 
 	/* various treeviews */

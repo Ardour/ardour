@@ -57,9 +57,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	, delete_dialog (0)
 	, control_slave_ui (s)
 {
-
-	PresentationInfo::color_t c = _vca->presentation_info().color ();
-
 	/* set color for the VCA, if not already done. */
 
 	if (!_vca->presentation_info().color_set()) {
@@ -231,14 +228,7 @@ VCAMasterStrip::name() const
 void
 VCAMasterStrip::hide_clicked ()
 {
-	if (!delete_dialog) {
-		delete_dialog = new MessageDialog (_("Removing a Master will deassign all slaves. Remove it anyway?"),
-		                                   true, MESSAGE_WARNING, BUTTONS_YES_NO, true);
-		delete_dialog->signal_response().connect (sigc::mem_fun (*this, &VCAMasterStrip::hide_confirmation));
-	}
-
-	delete_dialog->set_position (Gtk::WIN_POS_MOUSE);
-	delete_dialog->present ();
+	_vca->presentation_info().set_hidden (true);
 }
 
 void
@@ -388,6 +378,10 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::color)) {
 		vertical_button.set_active_color (_vca->presentation_info().color ());
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::hidden)) {
+
 	}
 }
 

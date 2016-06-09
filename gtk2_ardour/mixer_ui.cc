@@ -585,6 +585,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 					strip->set_width_enum (_strip_width, this);
 				}
 
+
 				show_strip (strip);
 
 				TreeModel::Row row = *(track_model->insert (insert_iter));
@@ -598,12 +599,13 @@ Mixer_UI::add_stripables (StripableList& slist)
 					_selection.add (strip);
 				}
 
-				route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
-
 				strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 				strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 			}
-		}
+
+			(*s)->presentation_info().PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
+			(*s)->PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
+						}
 
 	} catch (const std::exception& e) {
 		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;
@@ -1485,20 +1487,35 @@ Mixer_UI::build_track_menu ()
 }
 
 void
-Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip* mx)
+Mixer_UI::stripable_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Stripable> ws)
 {
-	if (!what_changed.contains (ARDOUR::Properties::name)) {
+	if (!what_changed.contains (ARDOUR::Properties::hidden) && !what_changed.contains (ARDOUR::Properties::name)) {
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::strip_name_changed, what_changed, mx)
+	boost::shared_ptr<Stripable> s = ws.lock ();
+
+	if (!s) {
+		return;
+	}
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		if ((*i)[stripable_columns.strip] == mx) {
-			(*i)[stripable_columns.text] = mx->route()->name();
+		boost::shared_ptr<Stripable> ss = (*i)[stripable_columns.stripable];
+
+		if (s == ss) {
+
+			if (what_changed.contains (ARDOUR::Properties::name)) {
+				(*i)[stripable_columns.text] = s->name();
+			}
+
+			if (what_changed.contains (ARDOUR::Properties::hidden)) {
+				(*i)[stripable_columns.visible] = !s->presentation_info().hidden();
+				redisplay_track_list ();
+			}
+
 			return;
 		}
 	}
