@@ -60,9 +60,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	PresentationInfo::color_t c = _vca->presentation_info().color ();
 
-	/* XXX need a (better) test of "has a color" */
+	/* set color for the VCA, if not already done. */
 
-	if (c == 0) {
+	if (!_vca->presentation_info().color_set()) {
 		_vca->presentation_info().set_color (gdk_color_to_rgba (unique_random_color()));
 	}
 
