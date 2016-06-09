@@ -56,6 +56,7 @@ namespace Gtk {
 class ArdourButton;
 class ArdourWindow;
 class IOSelectorWindow;
+class ControlSlaveUI;
 
 class RoutePinWindowProxy : public WM::ProxyBase
 {
@@ -126,7 +127,6 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectab
         ArdourButton* solo_safe_led;
         ArdourButton* solo_isolated_led;
 
-	ArdourButton* vca_button;
 
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
@@ -241,8 +241,6 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectab
 
 	void update_solo_display ();
 
-	void update_vca_display ();
-
 	virtual void map_frozen ();
 
 	void adjust_latency ();
@@ -324,6 +322,8 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectab
 
 	SoloMuteRelease* _solo_release;
 	SoloMuteRelease* _mute_release;
+
+	ControlSlaveUI* csu;
 
 private:
 	void setup_invert_buttons ();

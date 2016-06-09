@@ -153,7 +153,6 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
-	vca_button = 0;
 
 	input_selector = 0;
 	output_selector = 0;
@@ -1287,34 +1286,6 @@ RouteUI::update_mute_display ()
         mute_button->set_active_state (mute_active_state (_session, _route));
 }
 
-void
-RouteUI::update_vca_display ()
-{
-	if (!vca_button) {
-		return;
-	}
-
-	VCAList vcas (_session->vca_manager().vcas());
-	string label;
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (_route->slaved_to (*v)) {
-			if (!label.empty()) {
-				label += ' ';
-			}
-			label += PBD::to_string ((*v)->number(), std::dec);
-		}
-	}
-
-	if (label.empty()) {
-		label = _("-vca-");
-		vca_button->set_active_state (Gtkmm2ext::Off);
-	} else {
-		vca_button->set_active_state (Gtkmm2ext::ExplicitActive);
-	}
-
-	vca_button->set_text (label);
-}
 
 void
 RouteUI::route_rec_enable_changed ()

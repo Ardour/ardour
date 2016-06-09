@@ -48,6 +48,7 @@
 #include "pbd/fastlog.h"
 
 #include "axis_view.h"
+#include "control_slave_ui.h"
 #include "ardour_knob.h"
 #include "route_ui.h"
 #include "gain_meter.h"
@@ -136,9 +137,6 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	bool delete_processors ();  //note: returns false if nothing was deleted
 	void toggle_processors ();
 	void ab_plugins ();
-
-	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
-	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 
 	void show_selected ();
 
@@ -330,10 +328,9 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
 
-	void vca_menu_toggle (Gtk::CheckMenuItem*, uint32_t n);
-	bool vca_button_release (GdkEventButton* ev);
-
 	void update_track_number_visibility ();
+
+	ControlSlaveUI control_slave_ui;
 };
 
 #endif /* __ardour_mixer_strip__ */

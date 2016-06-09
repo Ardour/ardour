@@ -103,6 +103,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, control_slave_ui (sess)
 {
 	init ();
 
@@ -134,6 +135,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, control_slave_ui (sess)
 {
 	init ();
 	set_route (rt);
@@ -210,15 +212,6 @@ MixerStrip::init ()
 		solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
 	}
 	solo_iso_table.show ();
-
-	vca_button = manage (new ArdourButton (ArdourButton::default_elements));
-	vca_button->set_no_show_all (true);
-	vca_button->set_name (X_("vca assign"));
-	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	vca_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::vca_button_release), false);
-	UI::instance()->set_tip (*vca_button, _("VCA assignments"));
-	vca_button->set_text (_("-vca-"));
-	vca_button->show ();
 
 	rec_mon_table.set_homogeneous (true);
 	rec_mon_table.set_row_spacings (2);
@@ -315,7 +308,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (*vca_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (control_slave_ui, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	if (!ARDOUR::Profile->get_trx()) {
 		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -397,7 +390,7 @@ MixerStrip::init ()
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
-	_visibility.add (vca_button, X_("VCA"), _("VCA Assigns"), false);
+	_visibility.add (&control_slave_ui, X_("VCA"), _("VCA Assigns"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
@@ -482,6 +475,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	RouteUI::set_route (rt);
+
+	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (rt));
 
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
@@ -650,18 +645,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::setup_comment_button, this), gui_context());
 
-	_route->gain_control()->MasterStatusChange.connect (route_connections,
-	                                                    invalidator (*this),
-	                                                    boost::bind (&MixerStrip::update_vca_display, this),
-	                                                    gui_context());
-
 	set_stuff_from_route ();
 
 	/* now force an update of all the various elements */
 
 	update_mute_display ();
 	update_solo_display ();
-	update_vca_display ();
 	name_changed ();
 	comment_changed ();
 	route_group_changed ();
@@ -2503,100 +2492,6 @@ MixerStrip::set_meter_type (MeterType t)
 {
 	if (_suspend_menu_callbacks) return;
 	gpm.set_type (t);
-}
-
-void
-MixerStrip::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
-{
-	if (!_route) {
-		return;
-	}
-
-	boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (n);
-
-	if (!vca) {
-		return;
-	}
-
-	if (!_selected) {
-		/* if this strip is not selected, add it before carrying out
-		   changes to assignment. the user probably didn't notice
-		   that they were clicking on an unselected track.
-		*/
-		_mixer.select_strip (*this);
-	}
-
-	if (!menuitem->get_active()) {
-		_mixer.do_vca_unassign (vca);
-	} else {
-		_mixer.do_vca_assign (vca);
-	}
-}
-
-void
-MixerStrip::vca_assign (boost::shared_ptr<VCA> vca)
-{
-	if (!vca || !_route) {
-		return;
-	}
-
-	_route->assign (vca);
-}
-
-void
-MixerStrip::vca_unassign (boost::shared_ptr<VCA> vca)
-{
-	if (!_route) {
-		return;
-	}
-
-	_route->unassign (vca);
-}
-
-bool
-MixerStrip::vca_button_release (GdkEventButton* ev)
-{
-	using namespace Gtk::Menu_Helpers;
-
-	if (!_session) {
-		return false;
-	}
-
-	/* primary click only */
-
-	if (ev->button != 1) {
-		return false;
-	}
-
-	if (!_route) {
-		/* no route - nothing to do */
-		return false;
-	}
-
-	VCAList vcas (_session->vca_manager().vcas());
-
-	if (vcas.empty()) {
-		/* the button should not have been visible under these conditions */
-		return true;
-	}
-
-	Menu* menu = new Menu;
-	MenuList& items = menu->items();
-
-	items.push_back (MenuElem (_("Unassign"), sigc::bind (sigc::mem_fun (_mixer, &Mixer_UI::do_vca_unassign), boost::shared_ptr<VCA>())));
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		items.push_back (CheckMenuElem ((*v)->name()));
-		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
-		if (_route->slaved_to (*v)) {
-			item->set_active (true);
-		}
-		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), item, (*v)->number()));
-	}
-
-	menu->popup (1, ev->time);
-
-	return true;
 }
 
 void
