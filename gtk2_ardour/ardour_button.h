@@ -104,7 +104,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
 
-	void set_fixed_colors (const uint32_t active_color, const uint32_t inactive_color);
+	void set_fixed_colors   (const uint32_t active_color, const uint32_t inactive_color);
+	void set_active_color   (const uint32_t active_color);
+	void set_inactive_color (const uint32_t inactive_color);
 
 	void set_fallthrough_to_parent(bool fall) { _fallthrough_to_parent = fall; }
 
@@ -172,7 +174,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _distinct_led_click;
 	bool _hovering;
 	bool _focused;
-	bool _fixed_colors_set;
+	int  _fixed_colors_set;
 	bool _fallthrough_to_parent;
 	int _layout_ellipsize_width;
 	Pango::EllipsizeMode _ellipsis;

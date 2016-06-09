@@ -619,19 +619,26 @@ void
 ArdourButton::set_colors ()
 {
 	_update_colors = false;
-	if (_fixed_colors_set) {
+
+	if (_fixed_colors_set == 0x3) {
 		return;
 	}
+
 	std::string name = get_name();
 	bool failed = false;
 
-	fill_active_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
-	if (failed) {
-		fill_active_color = UIConfiguration::instance().color ("generic button: fill active");
+	if (!(_fixed_colors_set & 0x1)) {
+		fill_active_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
+		if (failed) {
+			fill_active_color = UIConfiguration::instance().color ("generic button: fill active");
+		}
 	}
-	fill_inactive_color = UIConfiguration::instance().color (string_compose ("%1: fill", name), &failed);
-	if (failed) {
-		fill_inactive_color = UIConfiguration::instance().color ("generic button: fill");
+
+	if (!(_fixed_colors_set & 0x2)) {
+		fill_inactive_color = UIConfiguration::instance().color (string_compose ("%1: fill", name), &failed);
+		if (failed) {
+			fill_inactive_color = UIConfiguration::instance().color ("generic button: fill");
+		}
 	}
 
 	text_active_color = ArdourCanvas::contrasting_text_color (fill_active_color);
@@ -659,13 +666,18 @@ ArdourButton::set_colors ()
  */
 void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t color_inactive)
 {
-	_fixed_colors_set = true;
+	set_active_color (color_active);
+	set_inactive_color (color_inactive);
+}
 
-	fill_active_color = color_active;
-	fill_inactive_color = color_inactive;
+void ArdourButton::set_active_color (const uint32_t color)
+{
+	_fixed_colors_set |= 0x1;
+
+	fill_active_color = color;
 
 	unsigned char r, g, b, a;
-	UINT_TO_RGBA(color_active, &r, &g, &b, &a);
+	UINT_TO_RGBA(color, &r, &g, &b, &a);
 
 	double white_contrast = (max (double(r), 255.) - min (double(r), 255.)) +
 		(max (double(g), 255.) - min (double(g), 255.)) +
@@ -679,14 +691,24 @@ void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t
 		RGBA_TO_UINT(255, 255, 255, 255) : /* use white */
 		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
 
+	/* XXX what about led colors ? */
+	CairoWidget::set_dirty ();
+}
 
-	UINT_TO_RGBA(color_inactive, &r, &g, &b, &a);
+void ArdourButton::set_inactive_color (const uint32_t color)
+{
+	_fixed_colors_set |= 0x2;
 
-	white_contrast = (max (double(r), 255.) - min (double(r), 255.)) +
+	fill_inactive_color = color;
+
+	unsigned char r, g, b, a;
+	UINT_TO_RGBA(color, &r, &g, &b, &a);
+
+	double white_contrast = (max (double(r), 255.) - min (double(r), 255.)) +
 		(max (double(g), 255.) - min (double(g), 255.)) +
 		(max (double(b), 255.) - min (double(b), 255.));
 
-	black_contrast = (max (double(r), 0.) - min (double(r), 0.)) +
+	double black_contrast = (max (double(r), 0.) - min (double(r), 0.)) +
 		(max (double(g), 0.) - min (double(g), 0.)) +
 		(max (double(b), 0.) - min (double(b), 0.));
 
