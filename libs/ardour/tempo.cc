@@ -2027,7 +2027,9 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 			if (prev_t) {
 				if (t == section) {
 					section_prev = prev_t;
-					prev_t = t;
+					if (t->locked_to_meter()) {
+						prev_t = t;
+					}
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
