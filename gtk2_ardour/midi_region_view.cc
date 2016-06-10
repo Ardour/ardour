@@ -928,6 +928,11 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 
 	MidiTimeAxisView* const mtv  = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const   view = mtv->midi_view();
+	boost::shared_ptr<MidiRegion> mr  = boost::dynamic_pointer_cast<MidiRegion> (_region);
+
+	if (!mr) {
+		return;
+	}
 
 	// Start of note in frames relative to region start
 	if (snap_t) {
@@ -935,9 +940,8 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 		t = snap_frame_to_grid_underneath (t, grid_frames);
 	}
 
-	const MidiModel::TimeType beat_time = region_frames_to_region_beats(
-		t + _region->start());
-
+	const MidiModel::TimeType beat_time = Evoral::Beats (trackview.session()->tempo_map().beat_at_frame (_region->position() + t)
+							     - (mr->beat() - mr->start_beats().to_double()));
 	const double  note     = view->y_to_note(y);
 	const uint8_t chan     = mtv->get_channel_for_add();
 	const uint8_t velocity = get_velocity_for_add(beat_time);

@@ -101,7 +101,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	boost::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
-
+	Evoral::Beats start_beats () {return _start_beats.val(); }
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
@@ -134,6 +134,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	void set_length_internal (framecnt_t len);
 	void set_start_internal (framecnt_t);
+	void trim_to_internal (framepos_t position, framecnt_t length);
 	void update_length_beats ();
 
 	void model_changed ();

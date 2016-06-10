@@ -171,7 +171,7 @@ class LIBARDOUR_API Region
 	Trimmable::CanTrim can_trim () const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
-
+	double beat () { return _beat; }
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
 
@@ -358,6 +358,8 @@ class LIBARDOUR_API Region
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	virtual void set_length_internal (framecnt_t);
 	virtual void set_start_internal (framecnt_t);
+	bool verify_start_and_length (framepos_t, framecnt_t&);
+	void first_edit ();
 
 	DataType _type;
 
@@ -393,15 +395,13 @@ class LIBARDOUR_API Region
   private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	void trim_to_internal (framepos_t position, framecnt_t length);
+	virtual void trim_to_internal (framepos_t position, framecnt_t length);
 	void modify_front (framepos_t new_position, bool reset_fade);
 	void modify_end (framepos_t new_position, bool reset_fade);
 
 	void maybe_uncopy ();
-	void first_edit ();
 
 	bool verify_start (framepos_t);
-	bool verify_start_and_length (framepos_t, framecnt_t&);
 	bool verify_start_mutable (framepos_t&_start);
 	bool verify_length (framecnt_t&);
 

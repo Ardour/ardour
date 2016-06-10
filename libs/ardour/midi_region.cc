@@ -182,8 +182,7 @@ MidiRegion::post_set (const PropertyChange& pc)
 void
 MidiRegion::set_start_beats_from_start_frames ()
 {
-	BeatsFramesConverter c (_session.tempo_map(), _position - _start);
-	_start_beats = c.from (_start);
+	_start_beats = Evoral::Beats (beat() - _session.tempo_map().beat_at_frame (_position - _start));
 }
 
 void
@@ -198,8 +197,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 {
 	Region::update_after_tempo_map_change (false);
 
-	/* _position has now been updated for the new tempo map */
-	_start = _position - _session.tempo_map().framepos_minus_beats (_position, _start_beats);
+	/* _start has now been updated. */
 	_length = _session.tempo_map().framepos_plus_beats (_position, _length_beats) - _position;
 
 	PropertyChange s_and_l;
@@ -213,8 +211,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 void
 MidiRegion::update_length_beats ()
 {
-	BeatsFramesConverter converter (_session.tempo_map(), _position);
-	_length_beats = converter.from (_length);
+	_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - beat());
 }
 
 void
@@ -223,13 +220,12 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	Region::set_position_internal (pos, allow_bbt_recompute);
 
 	/* set _start to new position in tempo map */
-	_start = _position - _session.tempo_map().framepos_minus_beats (_position, _start_beats);
+	_start = _position - _session.tempo_map().frame_at_beat (beat() - _start_beats.val().to_double());
 
 	/* leave _length_beats alone, and change _length to reflect the state of things
 	   at the new position (tempo map may dictate a different number of frames).
 	*/
-	BeatsFramesConverter converter (_session.tempo_map(), _position);
-	Region::set_length_internal (converter.to (_length_beats));
+	Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position);
 }
 
 framecnt_t
@@ -466,4 +462,72 @@ MidiRegion::set_start_internal (framecnt_t s)
 {
 	Region::set_start_internal (s);
 	set_start_beats_from_start_frames ();
+}
+
+void
+MidiRegion::trim_to_internal (framepos_t position, framecnt_t length)
+{
+	framepos_t new_start;
+
+	if (locked()) {
+		return;
+	}
+
+	PropertyChange what_changed;
+
+	/* beat has not been set by set_position_internal */
+	const double beat_delta = _session.tempo_map().beat_at_frame (position) - beat();
+	const double old_beat = beat();
+
+	/* Set position before length, otherwise for MIDI regions this bad thing happens:
+	 * 1. we call set_length_internal; length in beats is computed using the region's current
+	 *    (soon-to-be old) position
+	 * 2. we call set_position_internal; position is set and length in frames re-computed using
+	 *    length in beats from (1) but at the new position, which is wrong if the region
+	 *    straddles a tempo/meter change.
+	 */
+
+	if (_position != position) {
+		set_position_internal (position, true);
+		what_changed.add (Properties::position);
+	}
+
+	const double new_beat = _session.tempo_map().beat_at_frame (position);
+	const double new_start_beat = _start_beats.val().to_double() + beat_delta;
+
+	new_start = _position - _session.tempo_map().frame_at_beat (new_beat - new_start_beat);
+
+	if (!verify_start_and_length (new_start, length)) {
+		return;
+	}
+
+	if (_start != new_start) {
+		_start_beats = Evoral::Beats (new_start_beat);
+		what_changed.add (Properties::start_beats);
+
+		set_start_internal (new_start);
+		what_changed.add (Properties::start);
+	}
+
+
+
+	if (_length != length) {
+		set_length_internal (length);
+		what_changed.add (Properties::length);
+	}
+
+	set_whole_file (false);
+
+	PropertyChange start_and_length;
+
+	start_and_length.add (Properties::start);
+	start_and_length.add (Properties::length);
+
+	if (what_changed.contains (start_and_length)) {
+		first_edit ();
+	}
+
+	if (!what_changed.empty()) {
+		send_change (what_changed);
+	}
 }

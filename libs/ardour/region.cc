@@ -441,7 +441,6 @@ Region::set_length (framecnt_t len)
 		}
 
 
-		_last_length = _length;
 		set_length_internal (len);
 		_whole_file = false;
 		first_edit ();
@@ -459,6 +458,7 @@ Region::set_length (framecnt_t len)
 void
 Region::set_length_internal (framecnt_t len)
 {
+	_last_length = _length;
 	_length = len;
 }
 
@@ -925,6 +925,12 @@ Region::trim_to_internal (framepos_t position, framecnt_t length)
 
 	PropertyChange what_changed;
 
+	if (_start != new_start) {
+		set_start_internal (new_start);
+		what_changed.add (Properties::start);
+	}
+
+
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
 	 *    (soon-to-be old) position
@@ -939,11 +945,6 @@ Region::trim_to_internal (framepos_t position, framecnt_t length)
 		}
 		set_position_internal (position, true);
 		what_changed.add (Properties::position);
-	}
-
-	if (_start != new_start) {
-		set_start_internal (new_start);
-		what_changed.add (Properties::start);
 	}
 
 	if (_length != length) {
@@ -1834,4 +1835,3 @@ Region::latest_possible_frame () const
 
 	return _position + (minlen - _start) - 1;
 }
-
