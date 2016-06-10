@@ -99,7 +99,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, _solo_group (new ControlGroup (SoloAutomation))
 	, _mute_group (new ControlGroup (MuteAutomation))
 	, _rec_enable_group (new ControlGroup (RecEnableAutomation))
-	, _gain_group (new ControlGroup (GainAutomation))
+	, _gain_group (new GainControlGroup ())
 	, _monitoring_group (new ControlGroup (MonitoringAutomation))
 {
 	_xml_node_name = X_("RouteGroup");
@@ -408,7 +408,11 @@ RouteGroup::set_relative (bool yn, void* /*src*/)
 	if (is_relative() == yn) {
 		return;
 	}
+
 	_relative = yn;
+
+	push_to_groups ();
+
 	send_change (PropertyChange (Properties::group_relative));
 	_session.set_dirty ();
 }
@@ -542,6 +546,12 @@ RouteGroup::post_set (PBD::PropertyChange const &)
 void
 RouteGroup::push_to_groups ()
 {
+	if (is_relative()) {
+		_gain_group->set_mode (ControlGroup::Mode (_gain_group->mode()|ControlGroup::Relative));
+	} else {
+		_gain_group->set_mode (ControlGroup::Mode (_gain_group->mode()&~ControlGroup::Relative));
+	}
+
 	if (_active) {
 		_gain_group->set_active (is_gain());
 		_solo_group->set_active (is_solo());

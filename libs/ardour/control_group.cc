@@ -47,6 +47,12 @@ ControlGroup::set_active (bool yn)
 }
 
 void
+ControlGroup::set_mode (Mode m)
+{
+	_mode = m;
+}
+
+void
 ControlGroup::clear ()
 {
 	/* we're giving up on all members, so we don't care about their
@@ -185,6 +191,11 @@ ControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, dou
 
 /*---- GAIN CONTROL GROUP -----------*/
 
+GainControlGroup::GainControlGroup ()
+	: ControlGroup (GainAutomation)
+{
+}
+
 gain_t
 GainControlGroup::get_min_factor (gain_t factor)
 {
@@ -235,13 +246,9 @@ GainControlGroup::get_max_factor (gain_t factor)
 void
 GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, double val)
 {
-	/* set the primary control */
-
-	control->set_value (val, Controllable::ForGroup);
-
-	/* now propagate across the group */
-
 	if (!_active) {
+		/* set the primary control */
+		control->set_value (val, Controllable::ForGroup);
 		return;
 	}
 
@@ -262,8 +269,9 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 
 		delta -= usable_gain;
 
-		if (delta == 0.0f)
+		if (delta == 0.0f) {
 			return;
+		}
 
 		gain_t factor = delta / usable_gain;
 
@@ -281,6 +289,12 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 			}
 		}
 
+		/* set the primary control */
+
+		control->set_value (val, Controllable::ForGroup);
+
+		/* now propagate across the group */
+
 		for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
 			if (c->second == control) {
 				continue;
@@ -295,10 +309,10 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 
 	} else {
 
+		/* just set entire group */
+
 		for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-			if (c->second != control) {
-				c->second->set_value (val, Controllable::ForGroup);
-			}
+			c->second->set_value (val, Controllable::ForGroup);
 		}
 	}
 }
