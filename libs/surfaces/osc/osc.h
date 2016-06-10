@@ -306,7 +306,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1(master_set_gain,f,);
 	PATH_CALLBACK1(master_set_fader,i,);
 	PATH_CALLBACK1(master_set_trim,f,);
-	PATH_CALLBACK1(master_set_pan_stereo_position,f,);
 	PATH_CALLBACK1(master_set_mute,i,);
 	PATH_CALLBACK1(monitor_set_gain,f,);
 	PATH_CALLBACK1(monitor_set_fader,i,);
@@ -322,6 +321,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
                 }							\
 		return 0;						\
 	}
+
+	// pan position needs message info to send feedback
+	PATH_CALLBACK1_MSG(master_set_pan_stereo_position,f);
 
 	PATH_CALLBACK1_MSG(set_surface_bank_size,i);
 	PATH_CALLBACK1_MSG(set_surface_strip_types,i);
@@ -451,7 +453,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int master_set_gain (float dB);
 	int master_set_fader (uint32_t position);
 	int master_set_trim (float dB);
-	int master_set_pan_stereo_position (float position);
+	int master_set_pan_stereo_position (float position, lo_message msg);
 	int master_set_mute (uint32_t state);
 	int monitor_set_gain (float dB);
 	int monitor_set_fader (uint32_t position);

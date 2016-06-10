@@ -1455,16 +1455,27 @@ OSC::master_set_trim (float dB)
 }
 
 int
-OSC::master_set_pan_stereo_position (float position)
+OSC::master_set_pan_stereo_position (float position, lo_message msg)
 {
 	if (!session) return -1;
 
+	float endposition = .5;
 	boost::shared_ptr<Stripable> s = session->master_out();
 
 	if (s) {
 		if (s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (position, PBD::Controllable::NoGroup);
+			endposition = s->pan_azimuth_control()->get_value ();
 		}
+	}
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+
+	if (sur->feedback[4]) {
+		lo_message reply = lo_message_new ();
+		lo_message_add_float (reply, endposition);
+
+		lo_send_message (lo_message_get_source (msg), "/master/pan_stereo_position", reply);
+		lo_message_free (reply);
 	}
 
 	return 0;
