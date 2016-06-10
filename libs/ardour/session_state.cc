@@ -1237,7 +1237,7 @@ Session::state (bool full_state)
 		RouteList public_order (*r);
 		public_order.sort (cmp);
 
-		/* the sort should have put control outs first */
+		/* the sort should have put the monitor out first */
 
 		if (_monitor_out) {
 			assert (_monitor_out == public_order.front());
