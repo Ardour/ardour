@@ -346,6 +346,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	check_rec_enable_sensitivity ();
 	maybe_add_route_print_mgr ();
 	route_color_changed();
+	route_gui_changed (PropertyChange (Properties::selected));
 }
 
 void
