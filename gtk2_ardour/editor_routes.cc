@@ -895,27 +895,40 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 void
 EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Stripable> s)
 {
+	if (!what_changed.contains (ARDOUR::Properties::hidden) && !what_changed.contains (ARDOUR::Properties::name)) {
+		return;
+	}
+
 	if (_adding_routes) {
 		return;
 	}
 
-	if (what_changed.contains (ARDOUR::Properties::name)) {
+	boost::shared_ptr<Stripable> stripable = s.lock ();
 
-		boost::shared_ptr<Stripable> stripable = s.lock ();
+	if (!stripable) {
+		return;
+	}
 
-		if (!stripable) {
-			return;
-		}
+	TreeModel::Children rows = _model->children();
+	TreeModel::Children::iterator i;
 
-		TreeModel::Children rows = _model->children();
-		TreeModel::Children::iterator i;
+	for (i = rows.begin(); i != rows.end(); ++i) {
 
-		for (i = rows.begin(); i != rows.end(); ++i) {
-			boost::shared_ptr<Stripable> ss = (*i)[_columns.stripable];
-			if (ss == stripable) {
+		boost::shared_ptr<Stripable> ss = (*i)[_columns.stripable];
+
+		if (ss == stripable) {
+
+			if (what_changed.contains (ARDOUR::Properties::name)) {
 				(*i)[_columns.text] = stripable->name();
 				break;
 			}
+
+			if (what_changed.contains (ARDOUR::Properties::hidden)) {
+				(*i)[_columns.visible] = !stripable->presentation_info().hidden();
+				redisplay ();
+			}
+
+			break;
 		}
 	}
 }
