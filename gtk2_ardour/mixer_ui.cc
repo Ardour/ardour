@@ -521,8 +521,10 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 	MixerStrip* strip;
 
+
 	try {
-		no_track_list_redisplay = true;
+		PBD::Unwinder<bool> uw (no_track_list_redisplay, true);
+
 		track_display.set_model (Glib::RefPtr<ListStore>());
 
 		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
@@ -611,12 +613,13 @@ Mixer_UI::add_stripables (StripableList& slist)
 		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;
 	}
 
-	no_track_list_redisplay = false;
 	track_display.set_model (track_model);
 
 	if (!from_scratch) {
 		sync_presentation_info_from_treeview ();
 	}
+
+	redisplay_track_list ();
 }
 
 void
