@@ -830,7 +830,13 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 
 	framepos_t const pre_trim_first_frame = _region->first_frame();
 
-	_region->trim_front ((framepos_t) (new_bound * speed));
+	const framepos_t speed_bound = (framepos_t) (new_bound * speed);
+
+	if (_region->position() == speed_bound) {
+		return false;
+	}
+
+	_region->trim_front (speed_bound);
 
 	if (no_overlap) {
 		// Get the next region on the left of this region and shrink/expand it.
