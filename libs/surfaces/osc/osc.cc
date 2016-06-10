@@ -542,7 +542,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/polarity", "ii", strip_phase);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
-		REGISTER_CALLBACK (serv, "/strip/trimabs", "if", route_set_trim_abs);
 		REGISTER_CALLBACK (serv, "/strip/trimdB", "if", route_set_trim_dB);
 		REGISTER_CALLBACK (serv, "/strip/pan_stereo_position", "if", route_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/strip/pan_stereo_width", "if", route_set_pan_stereo_width);
@@ -1526,10 +1525,13 @@ OSC::route_mute (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
-		s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+		if (s->mute_control()) {
+			s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
 
-	return 0;
+	return route_send_fail ("mute", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1552,10 +1554,13 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
-		s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+		if (s->solo_control()) {
+			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
 
-	return 0;
+	return route_send_fail ("solo", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1596,7 +1601,6 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 			}
 		}
 	}
-	// hmm, not set for whatever reason tell surface
 	return route_send_fail ("recenable", ssid, 0, lo_message_get_source (msg));
 }
 
@@ -1626,7 +1630,6 @@ OSC::route_recsafe (int ssid, int yn, lo_message msg)
 			}
 		}
 	}
-	// hmm, not set for whatever reason tell surface
 	return route_send_fail ("record_safe", ssid, 0,lo_message_get_source (msg));
 }
 
@@ -1641,13 +1644,14 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
-			track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-		} else {
-			route_send_fail ("monitor_input", ssid, 0, lo_message_get_source (msg));
+			if (track->monitoring_control()) {
+				track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+				return 0;
+			}
 		}
 	}
 
-	return 0;
+	return route_send_fail ("monitor_input", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1672,13 +1676,14 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
-			track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
-		} else {
-			route_send_fail ("monitor_disk", ssid, 0, lo_message_get_source (msg));
+			if (track->monitoring_control()) {
+				track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
+				return 0;
+			}
 		}
 	}
 
-	return 0;
+	return route_send_fail ("monitor_disk", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1702,10 +1707,13 @@ OSC::strip_phase (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
-		s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+		if (s->phase_control()) {
+			s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
 
-	return 0;
+	return route_send_fail ("polarity", ssid, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1814,7 +1822,13 @@ OSC::route_set_gain_abs (int rid, float level, lo_message msg)
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
-		s->gain_control()->set_value (level, PBD::Controllable::NoGroup);
+		if (s->gain_control()) {
+			s->gain_control()->set_value (level, PBD::Controllable::NoGroup);
+		} else {
+			return 1;
+		}
+	} else {
+		return 1;
 	}
 
 	return 0;
@@ -1835,9 +1849,9 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 		ret = route_set_gain_abs (rid, dB_to_coefficient (dB), msg);
 	}
 	if (ret != 0) {
-		route_send_fail ("gain", ssid, -193, lo_message_get_source (msg));
+		return route_send_fail ("gain", ssid, -193, lo_message_get_source (msg));
 	}
-	return ret;
+	return 0;
 }
 
 int
@@ -1866,9 +1880,9 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 		ret = route_set_gain_abs (rid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
 	if (ret != 0) {
-		route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
+		return route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
 	}
-	return ret;
+	return 0;
 }
 
 int
@@ -1893,17 +1907,24 @@ OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
 	if (s) {
 		if (s->trim_control()) {
 			s->trim_control()->set_value (level, PBD::Controllable::NoGroup);
+			return 0;
 		}
 
 	}
 
-	return 0;
+	return -1;
 }
 
 int
 OSC::route_set_trim_dB (int ssid, float dB, lo_message msg)
 {
-	return route_set_trim_abs(ssid, dB_to_coefficient (dB), msg);
+	int ret;
+	ret = route_set_trim_abs(ssid, dB_to_coefficient (dB), msg);
+	if (ret != 0) {
+		return route_send_fail ("trimdB", ssid, 0, lo_message_get_source (msg));
+	}
+
+return 0;
 }
 
 int
@@ -1950,11 +1971,11 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (pos, PBD::Controllable::NoGroup);
+			return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->get_value (), lo_message_get_source (msg));
 		}
 	}
 
-	return 0;
-
+	return route_send_fail ("pan_stereo_position", ssid, 0.5, lo_message_get_source (msg));
 }
 
 int
@@ -1968,11 +1989,11 @@ OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 	if (s) {
 		if (s->pan_width_control()) {
 			s->pan_width_control()->set_value (pos, PBD::Controllable::NoGroup);
+			return 0;
 		}
 	}
 
-	return 0;
-
+	return route_send_fail ("pan_stereo_width", ssid, 1, lo_message_get_source (msg));
 }
 
 int
@@ -1997,15 +2018,22 @@ OSC::route_set_send_gain_abs (int ssid, int sid, float val, lo_message msg)
 
 	if (s->send_level_controllable (sid)) {
 		s->send_level_controllable (sid)->set_value (val, PBD::Controllable::NoGroup);
+		return 0;
 	}
 
-	return 0;
+	return -1;
 }
 
 int
 OSC::route_set_send_gain_dB (int ssid, int sid, float val, lo_message msg)
 {
-	return route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
+	int ret;
+	ret = route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
+	if (ret != 0) {
+		return route_send_fail ("send/gain", ssid, -193, lo_message_get_source (msg));
+	}
+
+return 0;
 }
 
 int
@@ -2020,6 +2048,10 @@ OSC::route_set_send_fader (int ssid, int sid, float pos, lo_message msg)
 	} else {
 		ret = route_set_send_gain_abs (ssid, sid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
+	if (ret != 0) {
+		return route_send_fail ("send/fader", ssid, -193, lo_message_get_source (msg));
+	}
+
 	return ret;
 }
 

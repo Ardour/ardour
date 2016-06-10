@@ -406,7 +406,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_set_gain_abs,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_fader,i,f);
-	PATH_CALLBACK2_MSG(route_set_trim_abs,i,f);
 	PATH_CALLBACK2_MSG(route_set_trim_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_position,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_width,i,f);
