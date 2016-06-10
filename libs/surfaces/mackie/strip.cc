@@ -215,6 +215,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_stripable->gain_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
+	_stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
 	boost::shared_ptr<AutomationControl> rec_enable_control = _stripable->rec_enable_control ();
 
@@ -275,6 +276,7 @@ Strip::notify_all()
 	notify_mute_changed ();
 	notify_gain_changed ();
 	notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name));
+	notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::selected));
 	notify_panner_azi_changed ();
 	notify_panner_width_changed ();
 	notify_record_enable_changed ();
@@ -372,11 +374,15 @@ Strip::notify_processor_changed (bool force_update)
 void
 Strip::notify_property_changed (const PropertyChange& what_changed)
 {
-	if (!what_changed.contains (ARDOUR::Properties::name)) {
-		return;
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		show_stripable_name ();
 	}
 
-	show_stripable_name ();
+	if (what_changed.contains (ARDOUR::Properties::selected)) {
+		if (_stripable) {
+			_surface->write (_select->set_state (_stripable->presentation_info().selected()));
+		}
+	}
 }
 
 void
@@ -1304,19 +1310,6 @@ void
 Strip::unlock_controls ()
 {
 	_controls_locked = false;
-}
-
-void
-Strip::gui_selection_changed (const ARDOUR::StrongStripableNotificationList& rl)
-{
-	for (ARDOUR::StrongStripableNotificationList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-		if ((*i) == _stripable) {
-			_surface->write (_select->set_state (on));
-			return;
-		}
-	}
-
-	_surface->write (_select->set_state (off));
 }
 
 string

@@ -1142,14 +1142,6 @@ Surface::update_view_mode_display (bool with_helpful_text)
 }
 
 void
-Surface::gui_selection_changed (const ARDOUR::StrongStripableNotificationList& stripables)
-{
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->gui_selection_changed (stripables);
-	}
-}
-
-void
 Surface::say_hello ()
 {
 	/* wakeup for Mackie Control */

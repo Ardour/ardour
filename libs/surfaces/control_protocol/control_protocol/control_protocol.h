@@ -78,10 +78,9 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
-	static PBD::Signal1<void,uint64_t> AddStripableToSelection;
+	static PBD::Signal1<void,uint64_t> AddStripableSelection;
 	static PBD::Signal1<void,uint64_t> SetStripableSelection;
 	static PBD::Signal1<void,uint64_t> ToggleStripableSelection;
-	static PBD::Signal1<void,uint64_t> RemoveStripableFromSelection;
 	static PBD::Signal0<void>          ClearStripableSelection;
 
 	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to

@@ -803,11 +803,9 @@ Editor::Editor ()
 	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
 	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
 
-	ControlProtocol::AddStripableToSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
-	ControlProtocol::RemoveStripableFromSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
-	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
+	ControlProtocol::AddStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
 	ControlProtocol::ToggleStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
-	ControlProtocol::ClearStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
+	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
 
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
@@ -1011,7 +1009,7 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (PresentationInfo::order_t global_order, Selection::Operation op)
+Editor::control_select (PresentationInfo::order_t order, Selection::Operation op)
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
@@ -1021,22 +1019,7 @@ Editor::control_select (PresentationInfo::order_t global_order, Selection::Opera
 		return;
 	}
 
-	PresentationInfo::Flag select_flags;
-
-	if (global_order & ~0xffffffff) {
-		/* some flags are set, so the PresentationInfo constructor
-		 * will use them
-		 */
-		select_flags = PresentationInfo::Flag (0);
-	} else {
-		/* no type flags set in the global order ID, so assume caller
-		 * wants to select a Route
-		 */
-		select_flags = PresentationInfo::Route;
-	}
-
-	PresentationInfo pi (global_order, select_flags);
-	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (pi.order(), pi.flags());
+	boost::shared_ptr<Stripable> s = _session->get_nth_stripable (order);
 
 	/* selected object may not be a Route */
 

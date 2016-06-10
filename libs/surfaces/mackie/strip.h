@@ -84,8 +84,6 @@ public:
 	void unlock_controls ();
 	bool locked() const { return _controls_locked; }
 
-	void gui_selection_changed (const ARDOUR::StrongStripableNotificationList&);
-
 	void notify_metering_state_changed();
 
 	void block_screen_display_for (uint32_t msecs);

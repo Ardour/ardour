@@ -50,10 +50,9 @@ PBD::Signal0<void>          ControlProtocol::StepTracksDown;
 PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 
 PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
-PBD::Signal1<void,uint64_t> ControlProtocol::AddStripableToSelection;
+PBD::Signal1<void,uint64_t> ControlProtocol::AddStripableSelection;
 PBD::Signal1<void,uint64_t> ControlProtocol::SetStripableSelection;
 PBD::Signal1<void,uint64_t> ControlProtocol::ToggleStripableSelection;
-PBD::Signal1<void,uint64_t> ControlProtocol::RemoveStripableFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
 
 

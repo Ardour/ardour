@@ -138,7 +138,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 		_last_bank[i] = 0;
 	}
 
-	StripableSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1, true), this);
 	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
 
 	_instance = this;
@@ -436,10 +435,6 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		}
 		return -1;
 	}
-
-	/* make sure selection is correct */
-
-	_gui_track_selection_changed (&_last_selected_stripables, false, false);
 
 	/* current bank has not been saved */
 	session->set_dirty();
@@ -1927,68 +1922,6 @@ MackieControlProtocol::force_special_stripable_to_strip (boost::shared_ptr<Strip
 }
 
 void
-MackieControlProtocol::gui_track_selection_changed (ARDOUR::StripableNotificationListPtr rl, bool save_list)
-{
-	_gui_track_selection_changed (rl.get(), save_list, true);
-}
-
-void
-MackieControlProtocol::_gui_track_selection_changed (ARDOUR::StripableNotificationList* rl, bool save_list, bool gui_selection_did_change)
-{
-	/* We need to keep a list of the most recently selected routes around,
-	   but we are not allowed to keep shared_ptr<Stripable> unless we want to
-	   handle the complexities of route deletion. So instead, the GUI sends
-	   us a notification using weak_ptr<Stripable>, which we keep a copy
-	   of. For efficiency's sake, however, we convert the weak_ptr's into
-	   shared_ptr<Stripable> before passing them to however many surfaces (and
-	   thus strips) that we have.
-	*/
-
-	StrongStripableNotificationList srl;
-
-	for (ARDOUR::StripableNotificationList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<ARDOUR::Stripable> r = (*i).lock();
-		if (r) {
-			srl.push_back (r);
-		}
-	}
-
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->gui_selection_changed (srl);
-		}
-	}
-
-	if (save_list) {
-		_last_selected_stripables = *rl;
-	}
-
-	if (gui_selection_did_change) {
-
-		check_fader_automation_state ();
-
-		/* note: this method is also called when we switch banks.
-		 * But ... we don't allow bank switching when in subview mode.
-		 *
-		 * so .. we only have to care about subview mode if the
-		 * GUI selection has changed.
-		 *
-		 * It is possible that first_selected_stripable() may return null if we
-		 * are no longer displaying/mapping that route. In that case,
-		 * we will exit subview mode. If first_selected_stripable() is
-		 * null, and subview mode is not None, then the first call to
-		 * set_subview_mode() will fail, and we will reset to None.
-		 */
-
-		if (set_subview_mode (_subview_mode, first_selected_stripable())) {
-			set_subview_mode (None, boost::shared_ptr<Stripable>());
-		}
-	}
-}
-
-void
 MackieControlProtocol::check_fader_automation_state ()
 {
 	fader_automation_connections.drop_connections ();
@@ -2102,18 +2035,21 @@ MackieControlProtocol::select_range ()
 		return;
 	}
 
+	cerr << "Main modifier state = " << hex << main_modifier_state() << dec << endl;
+
 	for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 
-		if (main_modifier_state() == MODIFIER_SHIFT) {
-			/* XXX can only use order part of PresentationInfo at present */
+		if (main_modifier_state() == MODIFIER_CONTROL) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
+			cerr << "Toggle selection\n";
 			ToggleStripableSelection ((*s)->presentation_info ().order());
 		} else {
 			if (s == stripables.begin()) {
-				/* XXX can only use order part of PresentationInfo at present */
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
 				SetStripableSelection ((*s)->presentation_info().order());
 			} else {
-				/* XXX can only use order part of PresentationInfo at present */
-				AddStripableToSelection ((*s)->presentation_info().order());
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add to selection %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
+				AddStripableSelection ((*s)->presentation_info().order());
 			}
 		}
 	}
