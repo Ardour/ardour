@@ -383,7 +383,10 @@ int main() { return 0; }''',
                 if re.search("i[0-5]86", conf.env['build_target']):
                     conf.env['build_target'] = "i386"
             else:
-                conf.env['build_target'] = 'none'
+                if re.search ('bsd', sys.platform) != None:
+                    conf.env['build_target'] = 'bsd'
+                else:
+                    conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
 
@@ -928,11 +931,13 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
     if Options.options.also_include != '':
-        conf.env.append_value('CXXFLAGS', '-I' + Options.options.also_include)
-        conf.env.append_value('CFLAGS', '-I' + Options.options.also_include)
+        for also_include in Options.options.also_include.split(','):
+            conf.env.append_value('CXXFLAGS', '-I' + also_include)
+            conf.env.append_value('CFLAGS', '-I' + also_include)
 
     if Options.options.also_libdir != '':
-        conf.env.append_value('LDFLAGS', '-L' + Options.options.also_libdir)
+        for also_libdir in Options.options.also_libdir.split(','):
+            conf.env.append_value('LDFLAGS', '-L' + also_libdir)
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
@@ -940,7 +945,10 @@ def configure(conf):
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
         if Options.options.dist_target != 'msvc':
-            conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+            if re.search('linux', sys.platform) != None:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+            else:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h')
         conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
@@ -1033,6 +1041,12 @@ int main () { return 0; }
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
+
+    if re.search('bsd', sys.platform) != None:
+        conf.env.append_value('CFLAGS', '-DPLATFORM_BSD')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_BSD')
+        conf.check_cc(function_name='backtrace', header_name='execinfo.h',
+                lib='execinfo',uselib_store='EXECINFO')
 
     # Tell everyone that this is a waf build
 
@@ -1137,8 +1151,9 @@ int main () { return 0; }
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
     elif Options.options.dist_target != 'mingw':
-        sub_config_and_use(conf, 'tools/sanity_check')
-        sub_config_and_use(conf, 'tools/gccabicheck')
+        if re.search ('linux', sys.platform) != None:
+            sub_config_and_use(conf, 'tools/sanity_check')
+            sub_config_and_use(conf, 'tools/gccabicheck')
 
     sub_config_and_use(conf, 'libs/clearlooks-newer')
 
@@ -1261,8 +1276,9 @@ def build(bld):
     if sys.platform == 'darwin':
         bld.recurse('libs/appleutility')
     elif bld.env['build_target'] != 'mingw':
-        bld.recurse('tools/sanity_check')
-        bld.recurse('tools/gccabicheck')
+        if re.search ('linux', sys.platform) != None:
+            bld.recurse('tools/sanity_check')
+            bld.recurse('tools/gccabicheck')
 
     bld.recurse('libs/clearlooks-newer')
 

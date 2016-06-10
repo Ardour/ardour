@@ -133,7 +133,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
-    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
+    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM EXECINFO'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         if 'cocoa_open_uri.mm' not in obj.source:
@@ -171,6 +171,7 @@ def build(bld):
             testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
+        testobj.linkflags    = ''
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'

@@ -23,10 +23,9 @@
 #include <iostream>
 #if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
-#elif defined(__FREE_BSD__)
+#elif defined(PLATFORM_BSD)
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <sys/_sockaddr_storage.h>
 #include <arpa/inet.h>
 #include <netinet/ip_carp.h>
 #include <sys/types.h>

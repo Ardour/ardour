@@ -13,6 +13,9 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
+    if bld.env['build_target'] == 'bsd':
+            return;
+
     if bld.env['build_target'] == 'mingw':
             return;
 

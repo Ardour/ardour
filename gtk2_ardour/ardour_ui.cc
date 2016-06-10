@@ -22,6 +22,11 @@
 #include "gtk2ardour-version.h"
 #endif
 
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <iostream>

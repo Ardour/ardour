@@ -69,7 +69,6 @@ Port::init (string const & name, Flags flags)
 	_flags = flags;
 
 	_parser = new Parser ();
-
 	for (int i = 0; i < 16; i++) {
 		_channel[i] = new Channel (i, *this);
 		_channel[i]->connect_signals ();
