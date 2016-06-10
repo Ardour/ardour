@@ -37,7 +37,7 @@ above. For each directory you plan to translate, rename the POT file to end in
 .po and then continue with step 3.
 
 2b. If there is an existing translation for your language, run './waf
-i18n_pot' which will bring it up to date (along with all other PO files)
+i18n_po' which will bring it up to date (along with all other PO files)
 
 3. Open the relevant PO file in you PO editor of choice (see below).
 
@@ -69,7 +69,7 @@ master branch. That should generate a file called something like
 3. Run 'bzip2 0001-Update-German-translation.patch' to compress the file.
 
 4. File a new bug report at http://tracker.ardour.org and attach the resulted 
-compressed file and tell either rgareus (Robin Gareus) or las (Paul David) on 
+compressed file and tell either rgareus (Robin Gareus) or las (Paul Davis) on 
 the project's IRC channel (#ardour at irc.freenode.net) about your patch.
 
 There are some more things you need to know.
