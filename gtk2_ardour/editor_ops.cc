@@ -6168,6 +6168,7 @@ Editor::select_next_route()
 	RouteUI *rui;
 	do {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+
 			if (*i == current) {
 				++i;
 				if (i != track_views.end()) {
@@ -6179,10 +6180,12 @@ Editor::select_next_route()
 				break;
 			}
 		}
-		rui = dynamic_cast<RouteUI *>(current);
-	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	selection->set(current);
+		rui = dynamic_cast<RouteUI *>(current);
+
+	} while (current->hidden() || (rui == NULL) || !rui->route()->active());
+
+	selection->set (current);
 
 	ensure_time_axis_view_is_visible (*current, false);
 }
@@ -6200,6 +6203,7 @@ Editor::select_prev_route()
 	RouteUI *rui;
 	do {
 		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
+
 			if (*i == current) {
 				++i;
 				if (i != track_views.rend()) {
@@ -6211,7 +6215,8 @@ Editor::select_prev_route()
 			}
 		}
 		rui = dynamic_cast<RouteUI *>(current);
-	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
+
+	} while (current->hidden() || (rui == NULL) || !rui->route()->active());
 
 	selection->set (current);
 
