@@ -388,6 +388,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
                return 0;                                               \
        }
 
+	PATH_CALLBACK2_MSG(sel_sendgain,i,f);
+	PATH_CALLBACK2_MSG(sel_sendfader,i,f);
+
 	PATH_CALLBACK4(set_surface,i,i,i,i);
 	PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(loop_location,i,i);
@@ -465,6 +468,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_trim (float val, lo_message msg);
 	int sel_pan_position (float val, lo_message msg);
 	int sel_pan_width (float val, lo_message msg);
+	int sel_sendgain (int id, float dB, lo_message msg);
+	int sel_sendfader (int id, float pos, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);

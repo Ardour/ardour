@@ -527,6 +527,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
+		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
+		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -884,6 +886,16 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		else if (!strncmp (path, "/strip/gui_select/", 18) && strlen (path) > 18) {
 			int ssid = atoi (&path[18]);
 			strip_gui_select (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/select/send_gain/", 18) && strlen (path) > 18) {
+			int ssid = atoi (&path[18]);
+			route_mute (ssid, argv[0]->f == 1.0, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/select/send_fader/", 19) && strlen (path) > 19) {
+			int ssid = atoi (&path[19]);
+			route_solo (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
 	}
@@ -2009,6 +2021,28 @@ OSC::route_set_send_fader (int ssid, int sid, float pos, lo_message msg)
 		ret = route_set_send_gain_abs (ssid, sid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
 	return ret;
+}
+
+int
+OSC::sel_sendgain (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return route_set_send_gain_dB(sur->surface_sel, id, val, msg);
+	} else {
+		return route_send_fail ("send_gain", 0, -193, lo_message_get_source (msg));
+	}
+}
+
+int
+OSC::sel_sendfader (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return route_set_send_fader(sur->surface_sel, id, val, msg);
+	} else {
+		return route_send_fail ("send_gain", 0, -193, lo_message_get_source (msg));
+	}
 }
 
 int

@@ -58,17 +58,17 @@ class OSCSelectObserver
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);
-	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
-	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
+	void gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	// sends stuff
 	void send_init (void);
 	void send_end (void);
 	void send_restart (int);
-	void send_gain (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_enable (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_rename (std::string path, uint32_t id, std::string name);
+	void send_name (std::string path, uint32_t id, std::string name);
 	std::string set_path (std::string path, uint32_t id);
 	void clear_strip (std::string path, float val);
 };
