@@ -527,7 +527,7 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 
 struct PresentationInfoTimeAxisViewSorter {
 	bool operator() (TimeAxisView* a, TimeAxisView* b) {
-		return a->presentation_info() < b->presentation_info();
+		return a->presentation_info().order() < b->presentation_info().order();
 	}
 };
 
