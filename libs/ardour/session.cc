@@ -4225,11 +4225,23 @@ Session::get_remote_nth_route (PresentationInfo::order_t n) const
 	return boost::dynamic_pointer_cast<Route> (get_remote_nth_stripable (n, PresentationInfo::Route));
 }
 
-struct GlobalPresentationOrderSorter {
-	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-		return a->presentation_info() < b->presentation_info();
+boost::shared_ptr<Stripable>
+Session::get_nth_stripable (PresentationInfo::order_t n) const
+{
+	StripableList sl;
+
+	get_stripables (sl);
+
+	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+		if ((*s)->presentation_info().order() == n) {
+			return *s;
+		}
 	}
-};
+
+	/* there is no nth stripable */
+
+	return boost::shared_ptr<Stripable>();
+}
 
 boost::shared_ptr<Stripable>
 Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag flags) const
@@ -4238,7 +4250,7 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	PresentationInfo::order_t match_cnt = 0;
 
 	get_stripables (sl);
-	sl.sort (GlobalPresentationOrderSorter());
+	sl.sort (Stripable::PresentationOrderSorter());
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
 		if ((*s)->presentation_info().flag_match (flags)) {
@@ -5370,7 +5382,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->presentation_info() < b->presentation_info();
+	return a->presentation_info().order() < b->presentation_info().order();
 }
 
 bool

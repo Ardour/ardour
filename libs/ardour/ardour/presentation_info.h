@@ -128,6 +128,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		StatusMask = (Selected|Hidden)
 	};
 
+	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
 	static const Flag AllRoutes; /* mask to use for any route include master+monitor, but not auditioner */
 	static const Flag Route;     /* mask for any route (bus or track */
 	static const Flag Track;     /* mask to use for any track */
@@ -142,6 +143,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 	static const order_t max_order;
 
+	PresentationInfo::Flag flags() const { return _flags; }
 	order_t  order() const { return _order; }
 	color_t  color() const { return _color; }
 
@@ -150,26 +152,13 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	void set_color (color_t);
 	void set_selected (bool yn);
 	void set_hidden (bool yn);
-
-	PresentationInfo::Flag flags() const { return _flags; }
+	void set_flags (Flag f) { _flags = f; }
 
 	bool order_set() const { return _flags & OrderSet; }
 
 	bool hidden() const { return _flags & Hidden; }
 	bool selected() const { return _flags & Selected; }
 	bool special() const { return _flags & (MasterOut|MonitorOut|Auditioner); }
-
-	void set_flag (PresentationInfo::Flag f) {
-		_flags = PresentationInfo::Flag (_flags | f);
-	}
-
-	void unset_flag (PresentationInfo::Flag f) {
-		_flags = PresentationInfo::Flag (_flags & ~f);
-	}
-
-	void set_flags (Flag f) {
-		_flags = f;
-	}
 
 	bool flag_match (Flag f) const {
 		/* no flags, match all */
@@ -209,6 +198,13 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 			return true;
 		}
 
+		if (f == AllStripables && (_flags & AllStripables)) {
+			/* any kind of stripable, but not auditioner. Ask for that
+			   specifically.
+			*/
+			return true;
+		}
+
 		/* compare without status mask - we already checked that above 
 		 */
 
@@ -217,14 +213,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state ();
-
-	bool operator< (PresentationInfo const& other) const {
-		return order() < other.order();
-	}
-
-	bool match (PresentationInfo const& other) const {
-		return (_order == other.order()) && flag_match (other.flags());
-	}
 
 	bool operator==(PresentationInfo const& other) {
 		return (_order == other.order()) && (_flags == other.flags());

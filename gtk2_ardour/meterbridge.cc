@@ -401,14 +401,16 @@ Meterbridge::on_scroll()
 struct PresentationInfoRouteSorter
 {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		if (a->is_master()) {
-			/* master before everything else */
-			return true;
-		} else if (b->is_master()) {
-			/* everything else before b */
+		if (a->is_master() || a->is_monitor()) {
+			/* "a" is a special route (master, monitor, etc), and comes
+			 * last in the mixer ordering
+			 */
 			return false;
+		} else if (b->is_master() || b->is_monitor()) {
+			/* everything comes before b */
+			return true;
 		}
-		return a->presentation_info() < b->presentation_info();
+		return a->presentation_info().order() < b->presentation_info().order();
 	}
 };
 
@@ -434,12 +436,11 @@ Meterbridge::set_session (Session* s)
 	_show_master = _session->config.get_show_master_on_meterbridge();
 	_show_midi = _session->config.get_show_midi_on_meterbridge();
 
-	PresentationInfoRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
-	RouteList copy(*routes);
-	copy.sort(sorter);
-	add_strips(copy);
+	RouteList copy (*routes);
+	copy.sort (PresentationInfoRouteSorter());
+	add_strips (copy);
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());

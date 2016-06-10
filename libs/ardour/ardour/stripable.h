@@ -79,6 +79,12 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	void  set_presentation_order (PresentationInfo::order_t, bool notify_class_listeners = true);
 	void  set_presentation_order_explicit (PresentationInfo::order_t);
 
+	struct PresentationOrderSorter {
+		bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+			return a->presentation_info().order() < b->presentation_info().order();
+		}
+	};
+
 	/* gui's call this for their own purposes. */
 
 	PBD::Signal2<void,std::string,void*> gui_changed;
@@ -178,13 +184,6 @@ class LIBARDOUR_API Stripable : public SessionObject {
   protected:
 	PresentationInfo _presentation_info;
 };
-
-struct PresentationInfoSorter {
-	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-		return a->presentation_info() < b->presentation_info();
-	}
-};
-
 
 }
 

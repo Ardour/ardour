@@ -52,6 +52,7 @@ const PresentationInfo::Flag PresentationInfo::Bus = PresentationInfo::Flag (Pre
 const PresentationInfo::Flag PresentationInfo::Track = PresentationInfo::Flag (PresentationInfo::AudioTrack|PresentationInfo::MidiTrack);
 const PresentationInfo::Flag PresentationInfo::Route = PresentationInfo::Flag (PresentationInfo::Bus|PresentationInfo::Track);
 const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut);
+const PresentationInfo::Flag PresentationInfo::AllStripables = PresentationInfo::Flag (PresentationInfo::AllRoutes|PresentationInfo::VCA);
 
 void
 PresentationInfo::make_property_quarks ()

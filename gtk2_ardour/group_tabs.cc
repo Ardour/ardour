@@ -663,18 +663,6 @@ GroupTabs::un_subgroup (RouteGroup* g)
 	g->destroy_subgroup ();
 }
 
-struct CollectSorter {
-	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->presentation_info () < b->presentation_info();
-	}
-};
-
-struct OrderSorter {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->presentation_info() < b->presentation_info();
-	}
-};
-
 /** Collect all members of a RouteGroup so that they are together in the Editor or Mixer.
  *  @param g Group to collect.
  */
@@ -682,12 +670,12 @@ void
 GroupTabs::collect (RouteGroup* g)
 {
 	boost::shared_ptr<RouteList> group_routes = g->route_list ();
-	group_routes->sort (CollectSorter ());
+	group_routes->sort (Stripable::PresentationOrderSorter());
 	int const N = group_routes->size ();
 
 	RouteList::iterator i = group_routes->begin ();
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
-	routes->sort (OrderSorter ());
+	routes->sort (Stripable::PresentationOrderSorter());
 	RouteList::const_iterator j = routes->begin ();
 
 	int diff = 0;

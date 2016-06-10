@@ -246,17 +246,17 @@ struct StripableByPresentationOrder
 {
 	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
 	{
-		return a->presentation_info() < b->presentation_info();
+		return a->presentation_info().order() < b->presentation_info().order();
 	}
 
 	bool operator () (const Stripable & a, const Stripable & b) const
 	{
-		return a.presentation_info() < b.presentation_info();
+		return a.presentation_info().order() < b.presentation_info().order();
 	}
 
 	bool operator () (const Stripable * a, const Stripable * b) const
 	{
-		return a->presentation_info() < b->presentation_info();
+		return a->presentation_info().order() < b->presentation_info().order();
 	}
 };
 

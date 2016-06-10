@@ -338,21 +338,24 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 boost::shared_ptr<Route>
 Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 {
-	PresentationInfo id (PresentationInfo::Flag (0));
+	PresentationInfo::Flag f;
 
 	if (n == 318) {
-		id.set_flags (PresentationInfo::MasterOut);
+		f = PresentationInfo::MasterOut;
 	} else if (n == 319) {
-		id.set_flags (PresentationInfo::MonitorOut);
+		f = PresentationInfo::MonitorOut;
 	} else {
-		id = PresentationInfo (n, PresentationInfo::Route);
+		f = PresentationInfo::Route;
 	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
+	PresentationInfo::order_t match_cnt = 0;
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->presentation_info().match (id)) {
-			return *i;
+		if ((*i)->presentation_info().flag_match (f)) {
+			if (match_cnt++ == n) {
+				return *i;
+			}
 		}
 	}
 

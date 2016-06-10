@@ -107,7 +107,7 @@ class Meterbridge :
 				/* everything comes before b */
 				return true;
 			}
-			return a->presentation_info() < b->presentation_info ();
+			return a->presentation_info().order() < b->presentation_info().order();
 		}
 	};
 
