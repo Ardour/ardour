@@ -477,7 +477,6 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length)
 
 	/* beat has not been set by set_position_internal */
 	const double beat_delta = _session.tempo_map().beat_at_frame (position) - beat();
-	const double old_beat = beat();
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
