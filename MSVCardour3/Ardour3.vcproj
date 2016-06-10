@@ -436,6 +436,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\control_slave_ui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\cursor_context.cc"
 				>
 			</File>
@@ -1467,6 +1471,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\control_point_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\control_slave_ui.h"
 				>
 			</File>
 			<File
