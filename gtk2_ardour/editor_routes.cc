@@ -581,7 +581,6 @@ EditorRoutes::redisplay_real ()
 
 	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
-		boost::shared_ptr<Stripable> route = (*i)[_columns.stripable];
 
 		if (tv == 0) {
 			// just a "title" row
@@ -926,7 +925,9 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 
 			if (what_changed.contains (ARDOUR::Properties::hidden)) {
 				(*i)[_columns.visible] = !stripable->presentation_info().hidden();
+				cerr << stripable->name() << " visibility changed, redisplay\n";
 				redisplay ();
+
 			}
 
 			break;

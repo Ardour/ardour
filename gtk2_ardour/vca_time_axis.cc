@@ -304,3 +304,19 @@ VCATimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	set_gui_property ("height", h);
 	_vca->gui_changed ("track_height", (void*) 0); /* EMIT SIGNAL */
 }
+
+bool
+VCATimeAxisView::marked_for_display () const
+{
+	return !_vca->presentation_info().hidden();
+}
+
+bool
+VCATimeAxisView::set_marked_for_display (bool yn)
+{
+	if (yn == _vca->presentation_info().hidden()) {
+		_vca->presentation_info().set_hidden (!yn);
+		return true; // things changed
+	}
+	return false;
+}
