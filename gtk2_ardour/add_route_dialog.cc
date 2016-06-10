@@ -28,6 +28,7 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/plugin_manager.h"
@@ -71,11 +72,7 @@ AddRouteDialog::AddRouteDialog ()
 	channel_combo.set_name (X_("ChannelCountSelector"));
 	mode_combo.set_name (X_("ChannelCountSelector"));
 
-	refill_channel_setups ();
-	refill_route_groups ();
 	refill_track_modes ();
-
-	channel_combo.set_active_text (channel_combo_strings.front());
 
 	track_bus_combo.append_text (_("Audio Tracks"));
 	track_bus_combo.append_text (_("MIDI Tracks"));
@@ -471,6 +468,9 @@ AddRouteDialog::refill_channel_setups ()
 	ChannelSetup chn;
 
 	route_templates.clear ();
+
+	string channel_current_choice = channel_combo.get_active_text();
+
 	channel_combo_strings.clear ();
 	channel_setups.clear ();
 
@@ -534,7 +534,12 @@ AddRouteDialog::refill_channel_setups ()
 	}
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
-	channel_combo.set_active_text (channel_combo_strings.front());
+
+	if (!channel_current_choice.empty()) {
+		channel_combo.set_active_text (channel_current_choice);
+	} else {
+		channel_combo.set_active_text (channel_combo_strings.front());
+	}
 }
 
 void
