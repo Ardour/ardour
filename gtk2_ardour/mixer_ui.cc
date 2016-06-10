@@ -587,18 +587,25 @@ Mixer_UI::add_stripables (StripableList& slist)
 					strip->set_width_enum (_strip_width, this);
 				}
 
-
 				show_strip (strip);
 
-				TreeModel::Row row = *(track_model->insert (insert_iter));
+				if (!route->is_master()) {
 
-				row[stripable_columns.text] = route->name();
-				row[stripable_columns.visible] = route->is_master() ? true : strip->marked_for_display();
-				row[stripable_columns.stripable] = route;
-				row[stripable_columns.strip] = strip;
+					TreeModel::Row row = *(track_model->insert (insert_iter));
 
-				if (nroutes != 0) {
-					_selection.add (strip);
+					row[stripable_columns.text] = route->name();
+					row[stripable_columns.visible] = strip->marked_for_display();
+					row[stripable_columns.stripable] = route;
+					row[stripable_columns.strip] = strip;
+
+					if (nroutes != 0) {
+						_selection.add (strip);
+					}
+
+				} else {
+
+					out_packer.pack_start (*strip, false, false);
+					strip->set_packed (true);
 				}
 
 				strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
@@ -1328,21 +1335,9 @@ Mixer_UI::redisplay_track_list ()
 		if (visible) {
 
 			if (strip->packed()) {
-
-				if (stripable->is_master() || stripable->is_monitor()) {
-					out_packer.reorder_child (*strip, -1);
-
-				} else {
-					strip_packer.reorder_child (*strip, -1); /* put at end */
-				}
-
+				strip_packer.reorder_child (*strip, -1); /* put at end */
 			} else {
-
-				if (stripable->is_master() || stripable->is_monitor()) {
-					out_packer.pack_start (*strip, false, false);
-				} else {
-					strip_packer.pack_start (*strip, false, false);
-				}
+				strip_packer.pack_start (*strip, false, false);
 				strip->set_packed (true);
 			}
 
