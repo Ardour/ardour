@@ -2671,6 +2671,8 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 				}
 			}
 		}
+		/* minimum allowed measurement distance in frames */
+		const framepos_t min_dframe = 2;
 
 		/* the change in frames is the result of changing the slope of at most 2 previous tempo sections.
 		   constant to constant is straightforward, as the tempo prev to prev_t has constant slope.
@@ -2692,14 +2694,17 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 
 			if (prev_t->position_lock_style() == MusicTime) {
 				if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
+					if (frame > prev_to_prev_t->frame() + min_dframe && (frame + prev_t_frame_contribution) > prev_to_prev_t->frame() + min_dframe) {
 
-					new_bpm = prev_t->beats_per_minute() * ((frame - prev_to_prev_t->frame())
-										/ (double) ((frame + prev_t_frame_contribution) - prev_to_prev_t->frame()));
-
+						new_bpm = prev_t->beats_per_minute() * ((frame - prev_to_prev_t->frame())
+											/ (double) ((frame + prev_t_frame_contribution) - prev_to_prev_t->frame()));
+					} else {
+						new_bpm = prev_t->beats_per_minute();
+					}
 				} else {
 					/* prev to prev is irrelevant */
 
-					if (start_pulse != prev_t->pulse()) {
+					if (start_pulse > prev_t->pulse() && end_pulse > prev_t->pulse()) {
 						new_bpm = prev_t->beats_per_minute() * ((start_pulse - prev_t->pulse()) / (end_pulse - prev_t->pulse()));
 					} else {
 						new_bpm = prev_t->beats_per_minute();
@@ -2708,12 +2713,17 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 			} else {
 				/* AudioTime */
 				if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-					new_bpm = prev_t->beats_per_minute() * ((frame - prev_to_prev_t->frame())
-										/ (double) ((end_frame) - prev_to_prev_t->frame()));
+					if (frame > prev_to_prev_t->frame() + min_dframe && end_frame > prev_to_prev_t->frame() + min_dframe) {
+
+						new_bpm = prev_t->beats_per_minute() * ((frame - prev_to_prev_t->frame())
+											/ (double) ((end_frame) - prev_to_prev_t->frame()));
+					} else {
+						new_bpm = prev_t->beats_per_minute();
+					}
 				} else {
 					/* prev_to_prev_t is irrelevant */
 
-					if (end_frame != prev_t->frame()) {
+					if (frame > prev_t->frame() + min_dframe && end_frame > prev_t->frame() + min_dframe) {
 						new_bpm = prev_t->beats_per_minute() * ((frame - prev_t->frame()) / (double) (end_frame - prev_t->frame()));
 					} else {
 						new_bpm = prev_t->beats_per_minute();
@@ -2722,22 +2732,34 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 			}
 		} else {
 
-			double frame_ratio;
-			double pulse_ratio;
+			double frame_ratio = 1.0;
+			double pulse_ratio = 1.0;
 			const framepos_t pulse_pos = prev_t->frame_at_pulse (pulse, _frame_rate);
 
 			if (prev_to_prev_t) {
-
-				frame_ratio = (((pulse_pos - fr_off) - prev_to_prev_t->frame()) / (double) ((pulse_pos) - prev_to_prev_t->frame()));
-				pulse_ratio = ((start_pulse - prev_to_prev_t->pulse()) / (end_pulse - prev_to_prev_t->pulse()));
+				if (pulse_pos > prev_to_prev_t->frame() + min_dframe && (pulse_pos - fr_off) > prev_to_prev_t->frame() + min_dframe) {
+					frame_ratio = (((pulse_pos - fr_off) - prev_to_prev_t->frame()) / (double) ((pulse_pos) - prev_to_prev_t->frame()));
+				}
+				if (end_pulse > prev_to_prev_t->pulse() && start_pulse > prev_to_prev_t->pulse()) {
+					pulse_ratio = ((start_pulse - prev_to_prev_t->pulse()) / (end_pulse - prev_to_prev_t->pulse()));
+				}
 			} else {
-
-				frame_ratio = (((pulse_pos - fr_off) - prev_t->frame()) / (double) ((pulse_pos) - prev_t->frame()));
+				if (pulse_pos > prev_t->frame() + min_dframe && (pulse_pos - fr_off) > prev_t->frame() + min_dframe) {
+					frame_ratio = (((pulse_pos - fr_off) - prev_t->frame()) / (double) ((pulse_pos) - prev_t->frame()));
+				}
 				pulse_ratio = (start_pulse / end_pulse);
 			}
 			new_bpm = prev_t->beats_per_minute() * (pulse_ratio * frame_ratio);
 		}
 
+		/* don't clamp and proceed here.
+		   testing has revealed that this can go negative,
+		   which is an entirely different thing to just being too low.
+		*/
+		if (new_bpm < 0.5) {
+			return;
+		}
+		new_bpm = min (new_bpm, (double) 1000.0);
 		prev_t->set_beats_per_minute (new_bpm);
 		recompute_tempos (future_map);
 		recompute_meters (future_map);
