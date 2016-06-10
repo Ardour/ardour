@@ -801,6 +801,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 
 		stripable->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
 		stripable->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, ws), gui_context());
+		stripable->presentation_info().PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, ws), gui_context());
 
 		if (boost::dynamic_pointer_cast<Track> (stripable)) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (stripable);
