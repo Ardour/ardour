@@ -1626,9 +1626,7 @@ Mixer_UI::route_groups_changed ()
 void
 Mixer_UI::new_route_group ()
 {
-	RouteList rl;
-
-	_group_tabs->run_new_group_dialog (rl, false);
+	_group_tabs->run_new_group_dialog (0, false);
 }
 
 void

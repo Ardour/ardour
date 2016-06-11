@@ -33,6 +33,7 @@ public:
 	RouteGroupDialog (ARDOUR::RouteGroup *, bool);
 
 	bool do_run ();
+	ARDOUR::RouteGroup* group() const { return _group; }
 
 private:
 	ARDOUR::RouteGroup* _group;

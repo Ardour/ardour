@@ -27,6 +27,7 @@ namespace ARDOUR {
 }
 
 class Editor;
+class RouteGroupDialog;
 
 /** Parent class for tabs which represent route groups as colored tabs;
  *  Currently used on the left-hand side of the editor and at the top of the mixer.
@@ -48,7 +49,7 @@ public:
 	 */
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
-	void run_new_group_dialog (ARDOUR::RouteList const &, bool with_master);
+	void run_new_group_dialog (ARDOUR::RouteList const *, bool with_master);
 
 	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
 	static std::string group_gui_id (ARDOUR::RouteGroup *);
@@ -98,9 +99,10 @@ private:
 	void new_from_selection (bool with_master);
 	void new_from_rec_enabled (bool with_master);
 	void new_from_soloed (bool with_master);
-	ARDOUR::RouteGroup* create_and_add_group () const;
-	ARDOUR::RouteGroup* create_and_add_master () const;
-	ARDOUR::RouteGroup* create_and_add_group_with_master () const;
+
+	void new_group_dialog_finished (int, RouteGroupDialog*, ARDOUR::RouteList const *, bool with_master) const;
+	void edit_group_dialog_finished (int, RouteGroupDialog*) const;
+
 	void collect (ARDOUR::RouteGroup *);
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void edit_group (ARDOUR::RouteGroup *);
@@ -122,7 +124,7 @@ private:
 	void route_added_to_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 
-	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master);
+	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master) const;
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);

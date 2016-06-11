@@ -25,6 +25,8 @@
 #include "ardour/vca_manager.h"
 #include "ardour/vca.h"
 
+#include "gtkmm2ext/doi.h"
+
 #include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
@@ -145,7 +147,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
 			/* edit */
 			RouteGroupDialog d (g, false);
-			d.do_run ();
+			d.present ();
 		} else {
 			Menu* m = get_menu (g, true);
 			if (m) {
@@ -208,12 +210,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 
 		if (!routes.empty()) {
 			if (_dragging_new_tab) {
-				RouteGroup* g = create_and_add_group ();
-				if (g) {
-					for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-						g->add (*i);
-					}
-				}
+				run_new_group_dialog (&routes, false);
 			} else {
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -344,8 +341,8 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	const VCAList vcas = _session->vca_manager().vcas ();
 
 	if (!in_tab_area) {
-		items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
-		items.push_back (MenuElem (_("Create New Group with Control Master ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group_with_master))));
+		items.push_back (MenuElem (_("Create New Group ..."), sigc::bind (sigc::mem_fun(*this, &GroupTabs::run_new_group_dialog), (RouteList const *) 0, false)));
+		items.push_back (MenuElem (_("Create New Group with Control Master ..."), sigc::bind (sigc::mem_fun(*this, &GroupTabs::run_new_group_dialog), (RouteList const *) 0, true)));
 
 		/* context menu is not for a group tab, show the "create new
 		   from" items here
@@ -436,7 +433,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 }
 
 void
-GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool rename_master)
+GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool rename_master) const
 {
 	if (!_session || !group) {
 		return;
@@ -569,86 +566,74 @@ GroupTabs::assign_soloed_to_master (uint32_t which)
 void
 GroupTabs::new_from_selection (bool with_master)
 {
-	run_new_group_dialog (selected_routes(), with_master);
+	RouteList rl (selected_routes());
+	run_new_group_dialog (&rl, with_master);
 }
 
 void
 GroupTabs::new_from_rec_enabled (bool with_master)
 {
-	run_new_group_dialog (get_rec_enabled(), with_master);
+	RouteList rl (get_rec_enabled());
+	run_new_group_dialog (&rl, with_master);
 }
 
 void
 GroupTabs::new_from_soloed (bool with_master)
 {
-	run_new_group_dialog (get_soloed(), with_master);
+	RouteList rl (get_soloed());
+	run_new_group_dialog (&rl, with_master);
 }
 
 void
-GroupTabs::run_new_group_dialog (RouteList const & rl, bool with_master)
+GroupTabs::run_new_group_dialog (RouteList const * rl, bool with_master)
 {
-	if (rl.empty()) {
+	if (rl && rl->empty()) {
 		return;
 	}
 
 	RouteGroup* g = new RouteGroup (*_session, "");
-	RouteGroupDialog d (g, true);
+	RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
-	if (d.do_run ()) {
-		delete g;
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_group_dialog_finished), d, rl ? new RouteList (*rl): 0, with_master));
+	d->present ();
+}
+
+void
+GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList const * rl, bool with_master) const
+{
+	if (r == RESPONSE_OK) {
+
+		_session->add_route_group (d->group());
+
+		if (rl) {
+			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+				d->group()->add (*i);
+			}
+
+			if (with_master) {
+				assign_group_to_master (0, d->group(), true); /* zero => new master */
+			}
+		}
 	} else {
-		_session->add_route_group (g);
-		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-			g->add (*i);
-		}
-
-		if (with_master) {
-			assign_group_to_master (0, g, true); /* zero => new master */
-		}
-	}
-}
-
-RouteGroup *
-GroupTabs::create_and_add_group () const
-{
-	RouteGroup* g = new RouteGroup (*_session, "");
-	RouteGroupDialog d (g, true);
-
-	if (d.do_run ()) {
-		delete g;
-		return 0;
+		delete d->group ();
 	}
 
-	_session->add_route_group (g);
-	return g;
-}
-
-RouteGroup *
-GroupTabs::create_and_add_master () const
-{
-	return 0;
-}
-
-RouteGroup *
-GroupTabs::create_and_add_group_with_master () const
-{
-	RouteGroup* g = new RouteGroup (*_session, "");
-	RouteGroupDialog d (g, true);
-
-	if (d.do_run ()) {
-		delete g;
-		return 0;
-	}
-
-	_session->add_route_group (g);
-	return g;
+	delete rl;
+	delete_when_idle (d);
 }
 
 void
 GroupTabs::edit_group (RouteGroup* g)
 {
-	RouteGroupDialog d (g, false);
-	d.do_run ();
+	RouteGroupDialog* d = new RouteGroupDialog (g, false);
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group_dialog_finished), d));
+	d->present ();
+}
+
+void
+GroupTabs::edit_group_dialog_finished (int r, RouteGroupDialog* d) const
+{
+	delete_when_idle (d);
 }
 
 void
