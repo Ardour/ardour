@@ -1658,12 +1658,14 @@ public:
     typedef std::map<K, V> LT;
     typedef std::pair<const K, V> T;
 
+    typedef typename std::map<K, V>::size_type T_SIZE;
+
     return beginClass<LT> (name)
       .addVoidConstructor ()
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
       .addFunction ("clear", (void (LT::*)())&LT::clear)
-      .addFunction ("count", (void (LT::*)())&LT::count)
+      .addFunction ("count", (T_SIZE (LT::*)(const K&) const)&LT::count)
       .addExtCFunction ("add", &CFunc::tableToMap<K, V>)
       .addExtCFunction ("iter", &CFunc::mapIter<K, V>)
       .addExtCFunction ("table", &CFunc::mapToTable<K, V>);
