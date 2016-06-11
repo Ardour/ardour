@@ -394,6 +394,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK2_MSG(sel_sendgain,i,f);
 	PATH_CALLBACK2_MSG(sel_sendfader,i,f);
+	PATH_CALLBACK2_MSG(sel_sendenable,i,f);
 
 	PATH_CALLBACK4(set_surface,i,i,i,i);
 	PATH_CALLBACK2(locate,i,i);
@@ -418,6 +419,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK3(route_set_send_gain_abs,i,i,f);
 	PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
 	PATH_CALLBACK3(route_set_send_fader,i,i,f);
+	PATH_CALLBACK3(route_set_send_enable,i,i,f);
 	PATH_CALLBACK4(route_plugin_parameter,i,i,i,f);
 	PATH_CALLBACK3(route_plugin_parameter_print,i,i,i);
 
@@ -443,6 +445,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_send_gain_abs (int rid, int sid, float val, lo_message msg);
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
 	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
+	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
 	int route_plugin_parameter (int rid, int piid,int par, float val, lo_message msg);
 	int route_plugin_parameter_print (int rid, int piid,int par, lo_message msg);
 
@@ -479,6 +482,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_pan_width (float val, lo_message msg);
 	int sel_sendgain (int id, float dB, lo_message msg);
 	int sel_sendfader (int id, float pos, lo_message msg);
+	int sel_sendenable (int id, float pos, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
@@ -493,6 +497,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PBD::ScopedConnectionList session_connections;
 
 	int route_send_fail (std::string path, uint32_t ssid, float val, lo_address addr);
+	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
 
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 

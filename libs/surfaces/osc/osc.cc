@@ -533,6 +533,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
 		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
+		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -557,6 +558,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/send/gainabs", "iif", route_set_send_gain_abs);
 		REGISTER_CALLBACK (serv, "/strip/send/gain", "iif", route_set_send_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/send/fader", "iif", route_set_send_fader);
+		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -1881,8 +1883,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	int rid = get_rid (ssid, lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	if (s) {
-	//SetStripableSelection ((*s)->presentation_info().order());
-		SetStripableSelection (rid); //alt above may end up being better
+		SetStripableSelection (rid); 
 	} else {
 		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
 	}
@@ -2102,13 +2103,7 @@ OSC::route_set_send_gain_abs (int ssid, int sid, float val, lo_message msg)
 int
 OSC::route_set_send_gain_dB (int ssid, int sid, float val, lo_message msg)
 {
-	int ret;
-	ret = route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
-	if (ret != 0) {
-		return route_send_fail ("send/gain", ssid, -193, lo_message_get_source (msg));
-	}
-
-return 0;
+	return route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
 }
 
 int
@@ -2117,39 +2112,94 @@ OSC::route_set_send_fader (int ssid, int sid, float pos, lo_message msg)
 	if (!session) {
 		return -1;
 	}
-	int ret;
 	if ((pos > 799.5) && (pos < 800.5)) {
-		ret = route_set_send_gain_abs (ssid, sid, 1.0, msg);
+		return route_set_send_gain_abs (ssid, sid, 1.0, msg);
 	} else {
-		ret = route_set_send_gain_abs (ssid, sid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
+		return route_set_send_gain_abs (ssid, sid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
-	if (ret != 0) {
-		return route_send_fail ("send/fader", ssid, -193, lo_message_get_source (msg));
-	}
-
-	return ret;
 }
 
 int
 OSC::sel_sendgain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	int ret;
 	if (sur->surface_sel) {
-		return route_set_send_gain_dB(sur->surface_sel, id, val, msg);
-	} else {
-		return route_send_fail ("send_gain", 0, -193, lo_message_get_source (msg));
+		ret = route_set_send_gain_dB(sur->surface_sel, id, val, msg);
 	}
+	if (!ret) {
+		return ret;
+	}
+	return sel_send_fail ("send_gain", id, -193, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_sendfader (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	int ret;
 	if (sur->surface_sel) {
-		return route_set_send_fader(sur->surface_sel, id, val, msg);
-	} else {
-		return route_send_fail ("send_gain", 0, -193, lo_message_get_source (msg));
+		ret = route_set_send_fader(sur->surface_sel, id, val, msg);
 	}
+	if (!ret) {
+		return ret;
+	}
+	return sel_send_fail ("send_gain", id, 0, lo_message_get_source (msg));
+
+}
+
+int
+OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+
+		/* revert to zero-based counting */
+
+		if (sid > 0) {
+			--sid;
+		}
+
+		if (s->send_enable_controllable (sid)) {
+			s->send_enable_controllable (sid)->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+
+		if (s->send_level_controllable (sid)) {
+			return 1;
+		}
+
+	}
+
+	return -1;
+}
+
+int
+OSC::sel_sendenable (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	int ret;
+	if (sur->surface_sel) {
+		ret = route_set_send_enable(sur->surface_sel, id, val, msg);
+	}
+	switch (ret) {
+		case 0:
+			return ret;
+		case 1:
+			return sel_send_fail ("send_enable", id, 1, lo_message_get_source (msg));
+		default:
+			sel_send_fail ("send_enable", id, 0, lo_message_get_source (msg));
+			return -1;
+	}
+	return -1;
+
+
 }
 
 int
@@ -2344,6 +2394,29 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_address addr)
 		lo_send_message (addr, sel_pth.c_str(), reply);
 		lo_message_free (reply);
 	}
+
+	return 0;
+}
+
+int
+OSC::sel_send_fail (string path, uint32_t id, float val, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+
+	ostringstream os;
+	lo_message reply;
+	reply = lo_message_new ();
+	if (sur->feedback[2]) {
+		os << "/select/" << path << "/" << id;
+	} else {
+		os << "/select/" << path;
+		lo_message_add_int32 (reply, id);
+	}
+	string str_pth = os.str();
+	lo_message_add_float (reply, (float) val);
+
+	lo_send_message (addr, str_pth.c_str(), reply);
+	lo_message_free (reply);
 
 	return 0;
 }
