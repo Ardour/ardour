@@ -2531,6 +2531,14 @@ void
 TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& sub_num)
 {
 	Metrics future_map;
+	bool was_musical = ts->position_lock_style() == MusicTime;
+
+	if (sub_num == 0 && was_musical) {
+		/* if we're not snapping to music,
+		   AudioTime and MusicTime may be treated identically.
+		*/
+		ts->set_position_lock_style (AudioTime);
+	}
 
 	if (ts->position_lock_style() == MusicTime) {
 		{
@@ -2539,16 +2547,16 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
 			double beat = beat_at_frame_locked (future_map, frame);
 
-			if (sub_num > 0) {
+			if (sub_num > 1) {
 				beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
-			} else if (sub_num == -2) {
+			} else if (sub_num == 1) {
 				/* snap to beat */
 				beat = floor (beat + 0.5);
 			}
 
 			double pulse = pulse_at_beat_locked (future_map, beat);
 
-			if (sub_num == -3) {
+			if (sub_num == -1) {
 				/* snap to  bar */
 				pulse = floor (pulse + 0.5);
 			}
@@ -2569,6 +2577,10 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 				recompute_meters (_metrics);
 			}
 		}
+	}
+
+	if (sub_num == 0 && was_musical) {
+		ts->set_position_lock_style (MusicTime);
 	}
 
 	Metrics::const_iterator d = future_map.begin();

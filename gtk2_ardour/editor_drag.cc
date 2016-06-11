@@ -3338,16 +3338,10 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		const framepos_t pf = adjusted_current_frame (event);
 		TempoMap& map (_editor->session()->tempo_map());
 
-		/* snap to beat is -2, snap to bar is -3 (sorry) */
-		int sub_num = _editor->get_grid_beat_divisions (0);
+		/* snap to beat is 1, snap to bar is -1 (sorry) */
+		int sub_num = _editor->get_grid_music_divisions (event->button.state);
 
-		if (_editor->snap_type() == SnapToBar) {
-			sub_num = -3;
-		} else if (_editor->snap_type() == SnapToBeat) {
-			sub_num = -2;
-		}
-
-		map.gui_move_tempo (_real_section, pf, _editor->get_grid_beat_divisions (0));
+		map.gui_move_tempo (_real_section, pf, sub_num);
 
 		show_verbose_cursor_time (_real_section->frame());
 	}

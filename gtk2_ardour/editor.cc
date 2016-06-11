@@ -4046,6 +4046,47 @@ Editor::get_grid_beat_divisions(framepos_t position)
 	return 0;
 }
 
+/** returns the current musical grid divisiions using the supplied modifier mask from a GtkEvent.
+    if the grid is non-musical, returns 0.
+    if the grid is snapped to bars, returns -1.
+    @param event_state the current keyboard modifier mask.
+*/
+unsigned
+Editor::get_grid_music_divisions (uint32_t event_state)
+{
+	if (snap_mode() == Editing::SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
+		return 0;
+	}
+
+	if (snap_mode() != Editing::SnapOff && ArdourKeyboard::indicates_snap (event_state)) {
+		return 0;
+	}
+
+	switch (_snap_type) {
+	case SnapToBeatDiv128: return 128;
+	case SnapToBeatDiv64:  return 64;
+	case SnapToBeatDiv32:  return 32;
+	case SnapToBeatDiv28:  return 28;
+	case SnapToBeatDiv24:  return 24;
+	case SnapToBeatDiv20:  return 20;
+	case SnapToBeatDiv16:  return 16;
+	case SnapToBeatDiv14:  return 14;
+	case SnapToBeatDiv12:  return 12;
+	case SnapToBeatDiv10:  return 10;
+	case SnapToBeatDiv8:   return 8;
+	case SnapToBeatDiv7:   return 7;
+	case SnapToBeatDiv6:   return 6;
+	case SnapToBeatDiv5:   return 5;
+	case SnapToBeatDiv4:   return 4;
+	case SnapToBeatDiv3:   return 3;
+	case SnapToBeatDiv2:   return 2;
+	case SnapToBeat:       return 1;
+	case SnapToBar :       return -1;
+	default:               return 0;
+	}
+	return 0;
+}
+
 Evoral::Beats
 Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 {
