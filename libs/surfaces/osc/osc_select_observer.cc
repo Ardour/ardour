@@ -25,6 +25,8 @@
 #include "ardour/dB.h"
 #include "ardour/meter.h"
 #include "ardour/phase_control.h"
+#include "ardour/solo_isolate_control.h"
+#include "ardour/solo_safe_control.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -54,6 +56,12 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
 		change_message ("/select/solo", _strip->solo_control());
+
+		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
+		change_message ("/select/solo_iso", _strip->solo_isolate_control());
+
+		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), OSC::instance());
+		change_message ("/select/solo_safe", _strip->solo_safe_control());
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {

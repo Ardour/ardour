@@ -333,6 +333,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
 	PATH_CALLBACK1_MSG(sel_solo,i);
+	PATH_CALLBACK1_MSG(sel_solo_iso,i);
+	PATH_CALLBACK1_MSG(sel_solo_safe,i);
 	PATH_CALLBACK1_MSG(sel_monitor_input,i);
 	PATH_CALLBACK1_MSG(sel_monitor_disk,i);
 	PATH_CALLBACK1_MSG(sel_phase,i);
@@ -398,6 +400,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2(loop_location,i,i);
 	PATH_CALLBACK2_MSG(route_mute,i,i);
 	PATH_CALLBACK2_MSG(route_solo,i,i);
+	PATH_CALLBACK2_MSG(route_solo_iso,i,i);
+	PATH_CALLBACK2_MSG(route_solo_safe,i,i);
 	PATH_CALLBACK2_MSG(route_recenable,i,i);
 	PATH_CALLBACK2_MSG(route_recsafe,i,i);
 	PATH_CALLBACK2_MSG(route_monitor_input,i,i);
@@ -419,6 +423,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int route_mute (int rid, int yn, lo_message msg);
 	int route_solo (int rid, int yn, lo_message msg);
+	int route_solo_iso (int rid, int yn, lo_message msg);
+	int route_solo_safe (int rid, int yn, lo_message msg);
 	int route_recenable (int rid, int yn, lo_message msg);
 	int route_recsafe (int ssid, int yn, lo_message msg);
 	int route_monitor_input (int rid, int yn, lo_message msg);
@@ -461,6 +467,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_recsafe (uint32_t state, lo_message msg);
 	int sel_mute (uint32_t state, lo_message msg);
 	int sel_solo (uint32_t state, lo_message msg);
+	int sel_solo_iso (uint32_t state, lo_message msg);
+	int sel_solo_safe (uint32_t state, lo_message msg);
 	int sel_monitor_input (uint32_t state, lo_message msg);
 	int sel_monitor_disk (uint32_t state, lo_message msg);
 	int sel_phase (uint32_t state, lo_message msg);

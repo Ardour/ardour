@@ -47,6 +47,8 @@
 #include "ardour/presentation_info.h"
 #include "ardour/send.h"
 #include "ardour/phase_control.h"
+#include "ardour/solo_isolate_control.h"
+#include "ardour/solo_safe_control.h"
 
 #include "osc_select_observer.h"
 #include "osc.h"
@@ -519,6 +521,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/record_safe", "i", sel_recsafe);
 		REGISTER_CALLBACK (serv, "/select/mute", "i", sel_mute);
 		REGISTER_CALLBACK (serv, "/select/solo", "i", sel_solo);
+		REGISTER_CALLBACK (serv, "/select/solo_iso", "i", sel_solo_iso);
+		REGISTER_CALLBACK (serv, "/select/solo_safe", "i", sel_solo_safe);
 		REGISTER_CALLBACK (serv, "/select/monitor_input", "i", sel_monitor_input);
 		REGISTER_CALLBACK (serv, "/select/monitor_disk", "i", sel_monitor_disk);
 		REGISTER_CALLBACK (serv, "/select/polarity", "i", sel_phase);
@@ -533,6 +537,8 @@ OSC::register_callbacks()
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/strip/solo", "ii", route_solo);
+		REGISTER_CALLBACK (serv, "/strip/solo_iso", "ii", route_solo_iso);
+		REGISTER_CALLBACK (serv, "/strip/solo_safe", "ii", route_solo_safe);
 		REGISTER_CALLBACK (serv, "/strip/recenable", "ii", route_recenable);
 		REGISTER_CALLBACK (serv, "/strip/record_safe", "ii", route_recsafe);
 		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
@@ -1575,6 +1581,42 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 }
 
 int
+OSC::route_solo_iso (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		if (s->solo_isolate_control()) {
+			s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+
+	return route_send_fail ("solo_iso", ssid, 0, lo_message_get_source (msg));
+}
+
+int
+OSC::route_solo_safe (int ssid, int yn, lo_message msg)
+{
+	if (!session) return -1;
+	int rid = get_rid (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+
+	if (s) {
+		if (s->solo_safe_control()) {
+			s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+
+	return route_send_fail ("solo_safe", ssid, 0, lo_message_get_source (msg));
+}
+
+int
 OSC::sel_solo (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
@@ -1582,6 +1624,28 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 		return route_solo(sur->surface_sel, yn, msg);
 	} else { 
 		return route_send_fail ("solo", 0, 0, lo_message_get_source (msg));
+	}
+}
+
+int
+OSC::sel_solo_iso (uint32_t yn, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return route_solo_iso(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("solo_iso", 0, 0, lo_message_get_source (msg));
+	}
+}
+
+int
+OSC::sel_solo_safe (uint32_t yn, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	if (sur->surface_sel) {
+		return route_solo_safe(sur->surface_sel, yn, msg);
+	} else { 
+		return route_send_fail ("solo_safe", 0, 0, lo_message_get_source (msg));
 	}
 }
 
