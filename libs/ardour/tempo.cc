@@ -2558,7 +2558,10 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 
 			if (sub_num == -1) {
 				/* snap to  bar */
-				pulse = floor (pulse + 0.5);
+				BBT_Time bbt = bbt_at_beat_locked (future_map, beat);
+				bbt.beats = 1;
+				bbt.ticks = 0;
+				pulse = pulse_at_bbt_locked (future_map, bbt);
 			}
 
 			if (solve_map_pulse (future_map, tempo_copy, pulse)) {
