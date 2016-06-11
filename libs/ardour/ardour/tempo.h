@@ -445,7 +445,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
 	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
-	void gui_move_tempo (TempoSection*, const framepos_t& frame);
+	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);

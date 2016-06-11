@@ -2528,15 +2528,31 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 }
 
 void
-TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame)
+TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& sub_num)
 {
 	Metrics future_map;
 
 	if (ts->position_lock_style() == MusicTime) {
 		{
+			/* if we're snapping to a musical grid, set the pulse exactly instead of via the supplied frame. */
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-			const double pulse = pulse_at_frame_locked (future_map, frame);
+			double beat = beat_at_frame_locked (future_map, frame);
+
+			if (sub_num > 0) {
+				beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
+			} else if (sub_num == -2) {
+				/* snap to beat */
+				beat = floor (beat + 0.5);
+			}
+
+			double pulse = pulse_at_beat_locked (future_map, beat);
+
+			if (sub_num == -3) {
+				/* snap to  bar */
+				pulse = floor (pulse + 0.5);
+			}
+
 			if (solve_map_pulse (future_map, tempo_copy, pulse)) {
 				solve_map_pulse (_metrics, ts, pulse);
 				recompute_meters (_metrics);
