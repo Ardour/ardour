@@ -794,7 +794,7 @@ MackieControlProtocol::cancel_press (Button &)
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Transport/ToggleExternalSync");
 	} else {
-		access_action ("Editor/escape");
+		access_action ("Main/Escape");
 	}
 	return none;
 }
