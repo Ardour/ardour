@@ -105,8 +105,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("color 62"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
-			metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
+			if (ts->position_lock_style() == MusicTime) {
+				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("color 5"), buf,
 								 *(const_cast<TempoSection*>(ts))));
+			} else {
+				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
+								 *(const_cast<TempoSection*>(ts))));
+			}
 
 		}
 
