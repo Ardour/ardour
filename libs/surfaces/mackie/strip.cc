@@ -1746,6 +1746,8 @@ Strip::setup_sends_vpot (boost::shared_ptr<Stripable> r)
 	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
 
 	if (!pc) {
+		/* nothing to control */
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		pending_display[0] = string();
 		pending_display[1] = string();
 		return;
@@ -1769,6 +1771,8 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	const uint32_t global_pos = _surface->mcp().global_index (*this);
 
 	if (global_pos >= 8) {
+		/* nothing to control */
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		pending_display[0] = string();
 		pending_display[1] = string();
 		return;
