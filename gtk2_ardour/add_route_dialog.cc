@@ -63,7 +63,6 @@ AddRouteDialog::AddRouteDialog ()
 	, instrument_label (_("Instrument:"))
 {
 	set_name ("AddRouteDialog");
-	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
 	set_position (WIN_POS_MOUSE);

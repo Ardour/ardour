@@ -4005,7 +4005,9 @@ ARDOUR_UI::start_duplicate_routes ()
 void
 ARDOUR_UI::add_route ()
 {
-	int count;
+	if (!add_route_dialog.get (false)) {
+		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_finished));
+	}
 
 	if (!_session) {
 		return;
@@ -4016,7 +4018,14 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	ResponseType r = (ResponseType) add_route_dialog->run ();
+	add_route_dialog->set_position (WIN_POS_MOUSE);
+	add_route_dialog->present();
+}
+
+void
+ARDOUR_UI::add_route_dialog_finished (int r)
+{
+	int count;
 
 	add_route_dialog->hide();
 

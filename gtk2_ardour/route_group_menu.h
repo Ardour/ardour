@@ -40,6 +40,7 @@ public:
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
 	void new_group_dialog_finished (int, RouteGroupDialog*);
+
 	Gtk::Menu* _menu;
 
 	PBD::PropertyList* _default_properties;
