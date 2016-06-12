@@ -2689,6 +2689,11 @@ Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
 	if (v != vca) {
 		spilled_vca = vca;
 		show_vca_change (vca); /* EMIT SIGNAL */
+		if (vca) {
+			_group_tabs->hide ();
+		} else {
+			_group_tabs->show ();
+		}
 		redisplay_track_list ();
 	}
 }
