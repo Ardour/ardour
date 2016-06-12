@@ -762,48 +762,55 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		control_ui->display->show_all ();
 
-		/* set up a meter */
-		/* TODO: only make a meter if the port is Hinted for it */
-
-		MeterInfo * info = new MeterInfo();
- 		control_ui->meterinfo = info;
-
-		info->meter = new FastMeter (
-				5, 5, FastMeter::Vertical, 0,
-				0x0000aaff,
-				0x008800ff, 0x008800ff,
-				0x00ff00ff, 0x00ff00ff,
-				0xcccc00ff, 0xcccc00ff,
-				0xffaa00ff, 0xffaa00ff,
-				0xff0000ff,
-				UIConfiguration::instance().color ("meter background bottom"),
-				UIConfiguration::instance().color ("meter background top")
-				);
-
-		info->min_unbound = desc.min_unbound;
-		info->max_unbound = desc.max_unbound;
-
-		info->min = desc.lower;
-		info->max = desc.upper;
-
 		control_ui->vbox = manage (new VBox);
-		control_ui->hbox = manage (new HBox);
-
-		control_ui->hbox->set_spacing(1);
 		control_ui->vbox->set_spacing(3);
 
-		control_ui->label.set_angle(90);
-		control_ui->hbox->pack_start (control_ui->label, false, false);
- 		control_ui->hbox->pack_start (*info->meter, false, false);
+		if (desc.integer_step || desc.enumeration) {
+			control_ui->vbox->pack_end (*control_ui->display, false, false);
+			control_ui->vbox->pack_end (control_ui->label, false, false);
+		} else {
+			/* set up a meter for float ports */
 
- 		control_ui->vbox->pack_start (*control_ui->hbox, false, false);
+			MeterInfo * info = new MeterInfo();
+			control_ui->meterinfo = info;
 
- 		control_ui->vbox->pack_start (*control_ui->display, false, false);
+			info->meter = new FastMeter (
+					5, 5, FastMeter::Vertical, 0,
+					0x0000aaff,
+					0x008800ff, 0x008800ff,
+					0x00ff00ff, 0x00ff00ff,
+					0xcccc00ff, 0xcccc00ff,
+					0xffaa00ff, 0xffaa00ff,
+					0xff0000ff,
+					UIConfiguration::instance().color ("meter background bottom"),
+					UIConfiguration::instance().color ("meter background top")
+					);
+
+			info->min_unbound = desc.min_unbound;
+			info->max_unbound = desc.max_unbound;
+
+			info->min = desc.lower;
+			info->max = desc.upper;
+
+			control_ui->label.set_angle(90);
+
+			HBox* center =  manage (new HBox);
+			center->set_spacing(1);
+			center->pack_start (control_ui->label, false, false);
+			center->pack_start (*info->meter, false, false);
+
+			control_ui->hbox = manage (new HBox);
+			control_ui->hbox->pack_start (*center, true, false);
+
+			// horizontally center this hbox in the vbox
+			control_ui->vbox->pack_start (*control_ui->hbox, false, false);
+
+			control_ui->meterinfo->meter->show_all();
+			control_ui->meterinfo->packed = true;
+			control_ui->vbox->pack_start (*control_ui->display, false, false);
+		}
 
 		control_ui->pack_start (*control_ui->vbox);
-
-		control_ui->meterinfo->meter->show_all();
-		control_ui->meterinfo->packed = true;
 
 		output_controls.push_back (control_ui);
 	}
