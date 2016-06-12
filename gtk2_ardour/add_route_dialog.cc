@@ -30,6 +30,7 @@
 #include "pbd/convert.h"
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
 
 #include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
@@ -585,19 +586,34 @@ AddRouteDialog::group_changed ()
 {
 	if (_session && route_group_combo.get_active_text () == _("New Group...")) {
 		RouteGroup* g = new RouteGroup (*_session, "");
-		RouteGroupDialog d (g, true);
+		RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
-		if (d.do_run ()) {
-			delete g;
-			route_group_combo.set_active (2);
-		} else {
-			if (_session) {
-				_session->add_route_group (g);
-			}
-			add_route_group (g);
-			route_group_combo.set_active (3);
-		}
+		d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &AddRouteDialog::new_group_dialog_finished), d));
+		d->present();
 	}
+}
+
+void
+AddRouteDialog::new_group_dialog_finished (int r, RouteGroupDialog* d)
+{
+	if (r == RESPONSE_OK) {
+
+		if (!d->name_check()) {
+			return;
+		}
+
+		if (_session) {
+			_session->add_route_group (d->group());
+		}
+
+		add_route_group (d->group());
+		route_group_combo.set_active (3);
+	} else {
+		delete d->group ();
+		route_group_combo.set_active (2);
+	}
+
+	delete_when_idle (d);
 }
 
 AddRouteDialog::InsertAt

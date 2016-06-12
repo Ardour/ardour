@@ -126,12 +126,12 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_gain.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_relative.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_mute.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_solo.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_rec_enable.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_relative.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_mute.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_solo.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_rec_enable.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_color.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_monitoring.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 
@@ -178,35 +178,27 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	show_all_children ();
 }
 
-/** @return true if the route group edit was cancelled, otherwise false */
 bool
-RouteGroupDialog::do_run ()
+RouteGroupDialog::name_check () const
 {
-	while (1) {
-		int const r = run ();
-
-		if (r != Gtk::RESPONSE_OK) {
-			return true;
-		}
-
-		if (unique_name (_name.get_text())) {
-			/* not cancelled and the name is ok, so all is well */
-			return false;
-		}
-
-		_group->set_name (_initial_name);
-		MessageDialog msg (
-			_("The group name is not unique. Please use a different name."),
-			false,
-			Gtk::MESSAGE_ERROR,
-			Gtk::BUTTONS_OK,
-			true
-			);
-
-		msg.run ();
+	if (unique_name (_name.get_text())) {
+		/* not cancelled and the name is ok, so all is well */
+		return true;
 	}
 
-	abort(); /* NOTREACHED */
+	_group->set_name (_initial_name);
+
+	MessageDialog msg (
+		_("The group name is not unique. Please use a different name."),
+		false,
+		Gtk::MESSAGE_ERROR,
+		Gtk::BUTTONS_OK,
+		true
+		);
+
+	msg.set_position (WIN_POS_MOUSE);
+	msg.run ();
+
 	return false;
 }
 

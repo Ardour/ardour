@@ -32,8 +32,8 @@ class RouteGroupDialog : public ArdourDialog
 public:
 	RouteGroupDialog (ARDOUR::RouteGroup *, bool);
 
-	bool do_run ();
 	ARDOUR::RouteGroup* group() const { return _group; }
+	bool name_check () const;
 
 private:
 	ARDOUR::RouteGroup* _group;

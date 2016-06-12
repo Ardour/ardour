@@ -23,6 +23,8 @@
 #include "ardour/route_group.h"
 #include "ardour/session_handle.h"
 
+class RouteGroupDialog;
+
 class RouteGroupMenu : public ARDOUR::SessionHandlePtr
 {
 public:
@@ -37,8 +39,9 @@ public:
 	void add_item (ARDOUR::RouteGroup *, std::set<ARDOUR::RouteGroup*> const &, Gtk::RadioMenuItem::Group*);
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
-
+	void new_group_dialog_finished (int, RouteGroupDialog*);
 	Gtk::Menu* _menu;
+
 	PBD::PropertyList* _default_properties;
 	bool _inhibit_group_selected;
 	ARDOUR::WeakRouteList _subject;

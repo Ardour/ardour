@@ -42,6 +42,7 @@
 #include "instrument_selector.h"
 
 class Editor;
+class RouteGroupDialog;
 
 class AddRouteDialog : public ArdourDialog
 {
@@ -107,7 +108,7 @@ class AddRouteDialog : public ArdourDialog
 	void maybe_update_name_template_entry ();
 
 	void reset_template_option_visibility ();
-
+	void new_group_dialog_finished (int, RouteGroupDialog*);
 	void on_show ();
 
 	struct ChannelSetup {

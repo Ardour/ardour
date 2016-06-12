@@ -603,6 +603,10 @@ GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList cons
 {
 	if (r == RESPONSE_OK) {
 
+		if (!d->name_check()) {
+			return;
+		}
+
 		_session->add_route_group (d->group());
 
 		if (rl) {

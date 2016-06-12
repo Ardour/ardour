@@ -19,12 +19,16 @@
 
 #include <gtkmm/menu.h>
 #include <gtkmm/stock.h>
+
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+
 #include "ardour/session.h"
 #include "ardour/route_group.h"
 #include "ardour/route.h"
 #include "route_group_menu.h"
 #include "route_group_dialog.h"
+
 #include "i18n.h"
 
 using namespace Gtk;
@@ -158,14 +162,22 @@ RouteGroupMenu::new_group ()
 	}
 
 	RouteGroup* g = new RouteGroup (*_session, "");
-	RouteGroupDialog d (g, true);
+	RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
-	if (d.do_run ()) {
-		delete g;
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::new_group_dialog_finished), d));
+}
+
+void
+RouteGroupMenu::new_group_dialog_finished (int r, RouteGroupDialog* d)
+{
+	if (r == RESPONSE_OK) {
+		_session->add_route_group (d->group());
+		set_group (d->group());
 	} else {
-		_session->add_route_group (g);
-		set_group (g);
+		delete d->group ();
 	}
+
+	delete_when_idle (d);
 }
 
 Gtk::Menu *
