@@ -355,24 +355,35 @@ ExportHandler::finish_timespan ()
 
 			std::stringstream track_number;
 			track_number << metadata.track_number ();
+			std::stringstream total_tracks;
+			total_tracks << metadata.total_tracks ();
 			std::stringstream year;
 			year << metadata.year ();
 
 			subs.insert (std::pair<char, std::string> ('a', metadata.artist ()));
 			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
+			subs.insert (std::pair<char, std::string> ('c', metadata.copyright ()));
 			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
 			subs.insert (std::pair<char, std::string> ('f', filename));
+			subs.insert (std::pair<char, std::string> ('l', metadata.lyricist ()));
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 			subs.insert (std::pair<char, std::string> ('s', session.path ()));
+			subs.insert (std::pair<char, std::string> ('o', metadata.conductor ()));
 			subs.insert (std::pair<char, std::string> ('t', metadata.title ()));
+			subs.insert (std::pair<char, std::string> ('z', metadata.organization ()));
 			subs.insert (std::pair<char, std::string> ('A', metadata.album ()));
 			subs.insert (std::pair<char, std::string> ('C', metadata.comment ()));
 			subs.insert (std::pair<char, std::string> ('E', metadata.engineer ()));
 			subs.insert (std::pair<char, std::string> ('G', metadata.genre ()));
+			subs.insert (std::pair<char, std::string> ('L', total_tracks.str ()));
+			subs.insert (std::pair<char, std::string> ('M', metadata.mixer ()));
 			subs.insert (std::pair<char, std::string> ('N', current_timespan->name())); // =?= config_map.begin()->first->name ()
+			subs.insert (std::pair<char, std::string> ('O', metadata.composer ()));
 			subs.insert (std::pair<char, std::string> ('P', metadata.producer ()));
+			subs.insert (std::pair<char, std::string> ('S', metadata.disc_subtitle ()));
 			subs.insert (std::pair<char, std::string> ('T', track_number.str ()));
 			subs.insert (std::pair<char, std::string> ('Y', year.str ()));
+			subs.insert (std::pair<char, std::string> ('Z', metadata.country ()));
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
