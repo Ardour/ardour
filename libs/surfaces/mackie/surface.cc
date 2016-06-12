@@ -675,8 +675,6 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 {
 	MidiByteArray bytes (count, raw_bytes);
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
-
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
 	}
@@ -693,6 +691,9 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 
 	switch (bytes[5]) {
 	case 0x01:
+		if (!_active) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+		}
 		/* MCP: Device Ready
 		   LCP: Connection Challenge
 		*/
@@ -700,12 +701,17 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 			DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device connection challenge\n");
 			write_sysex (host_connection_query (bytes));
 		} else {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mackie Control Device ready, current status = %1\n", _active));
+			if (!_active) {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mackie Control Device ready, current status = %1\n", _active));
+			}
 			turn_it_on ();
 		}
 		break;
 
 	case 0x06:
+		if (!_active) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+		}
 		/* Behringer X-Touch Compact: Device Ready
 		*/
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Behringer X-Touch Compact ready, current status = %1\n", _active));
@@ -713,6 +719,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		break;
 
 	case 0x03: /* LCP Connection Confirmation */
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
 		DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device confirms connection, ardour replies\n");
 		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
 			write_sysex (host_connection_confirmation (bytes));
@@ -721,11 +728,13 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		break;
 
 	case 0x04: /* LCP: Confirmation Denied */
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
 		DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device denies connection\n");
 		_active = false;
 		break;
 
 	default:
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unknown device ID byte %1", (int) bytes[5]));
 		error << "MCP: unknown sysex: " << bytes << endmsg;
 	}
