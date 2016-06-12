@@ -154,7 +154,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 				"%c Copyright\n"
 				"%d File's directory\n"
 				"%f File's full absolute path\n"
-				"%l Lyicist\n"
+				"%l Lyricist\n"
 				"%n Session name\n"
 				"%o Conductor\n"
 				"%t Title\n"
