@@ -151,18 +151,27 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 			_(
 				"%a Artist name\n"
 				"%b File's base-name\n"
+				"%c Copyright\n"
 				"%d File's directory\n"
 				"%f File's full absolute path\n"
+				"%l Lyicist\n"
 				"%n Session name\n"
+				"%o Conductor\n"
 				"%t Title\n"
+				"%z Organization\n"
 				"%A Album\n"
 				"%C Comment\n"
 				"%E Engineer\n"
 				"%G Genre\n"
+				"%L Total track count\n"
+				"%M Mixer\n"
 				"%N Timespan name\n"
+				"%O Composer\n"
 				"%P Producer\n"
+				"%S Disc subtitle\n"
 				"%T Track number\n"
-				"%Y Year"
+				"%Y Year\n"
+				"%Z Country"
 			 ));
 
 	/* Format table */
