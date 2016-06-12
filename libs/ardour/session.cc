@@ -1314,8 +1314,12 @@ Session::reset_monitor_section ()
 	_master_out->output()->disconnect (this);
 	_monitor_out->output()->disconnect (this);
 
-	_monitor_out->input()->ensure_io (_master_out->output()->n_ports(), false, this);
-	_monitor_out->output()->ensure_io (_master_out->output()->n_ports(), false, this);
+	// monitor section follow master bus - except midi
+	ChanCount mon_chn (_master_out->output()->n_ports());
+	mon_chn.set_midi (0);
+
+	_monitor_out->input()->ensure_io (mon_chn, false, this);
+	_monitor_out->output()->ensure_io (mon_chn, false, this);
 
 	for (uint32_t n = 0; n < limit; ++n) {
 		boost::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
