@@ -142,6 +142,7 @@ class MackieControlProtocol
 	bool is_hidden (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
+	void update_selected (boost::shared_ptr<ARDOUR::Stripable>, bool selected);
 
 	void check_fader_automation_state ();
 	void update_fader_automation_state ();
@@ -334,7 +335,8 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-	ARDOUR::StripableNotificationList _last_selected_stripables;
+	typedef std::set<boost::weak_ptr<ARDOUR::Stripable> > Selection;
+	Selection                _last_selected_stripables;
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];

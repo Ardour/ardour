@@ -381,6 +381,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::selected)) {
 		if (_stripable) {
 			_surface->write (_select->set_state (_stripable->presentation_info().selected()));
+			_surface->mcp().update_selected (_stripable, _stripable->presentation_info().selected());
 		}
 	}
 }
@@ -1352,24 +1353,26 @@ Strip::flip_mode_changed ()
 		boost::shared_ptr<AutomationControl> fader_control = _fader->control();
 
 		if (pot_control && fader_control) {
+
 			_vpot->set_control (fader_control);
 			_fader->set_control (pot_control);
+
+			/* update fader with pot value */
+
+			_surface->write (_fader->set_position (pot_control->internal_to_interface (pot_control->get_value ())));
+
+			/* update pot with fader value */
+
+			_surface->write (_vpot->set (fader_control->internal_to_interface (fader_control->get_value()), true, Pot::wrap));
+
+
+			if (_surface->mcp().flip_mode() == MackieControlProtocol::Normal) {
+				do_parameter_display (GainAutomation, fader_control->get_value());
+			} else {
+				do_parameter_display (BusSendLevel, pot_control->get_value());
+			}
+
 		}
-
-		if (_surface->mcp().flip_mode() == MackieControlProtocol::Normal) {
-			do_parameter_display (GainAutomation, fader_control->get_value());
-		} else {
-			do_parameter_display (BusSendLevel, fader_control->get_value());
-		}
-
-		/* update fader */
-
-		_surface->write (_fader->set_position (pot_control->internal_to_interface (pot_control->get_value ())));
-
-		/* update pot */
-
-		_surface->write (_vpot->set (fader_control->internal_to_interface (fader_control->get_value()), true, Pot::wrap));
-
 
 	} else {
 		/* do nothing */

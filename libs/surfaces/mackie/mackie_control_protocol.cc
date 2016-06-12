@@ -1728,11 +1728,15 @@ MackieControlProtocol::redisplay_subview_mode ()
 int
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set subview mode %1 with stripable %2, current flip mode %3\n", sm, (r ? r->name() : string ("null")), _flip_mode));
+
 	if (_flip_mode != Normal) {
 		set_flip_mode (Normal);
 	}
 
 	if (!subview_mode_would_be_ok (sm, r)) {
+
+		DEBUG_TRACE (DEBUG::MackieControl, "subview mode not OK\n");
 
 		if (r) {
 
@@ -2347,9 +2351,7 @@ MackieControlProtocol::is_midi_track (boost::shared_ptr<Stripable> r) const
 bool
 MackieControlProtocol::selected (boost::shared_ptr<Stripable> r) const
 {
-	const StripableNotificationList* rl = &_last_selected_stripables;
-
-	for (ARDOUR::StripableNotificationList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (Selection::const_iterator i = _last_selected_stripables.begin(); i != _last_selected_stripables.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Stripable> rt = (*i).lock();
 		if (rt == r) {
 			return true;
@@ -2381,6 +2383,16 @@ MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 	return false;
 }
 
+void
+MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool selected)
+{
+	if (selected) {
+		_last_selected_stripables.insert (boost::weak_ptr<Stripable> (s));
+	} else {
+		_last_selected_stripables.erase (boost::weak_ptr<Stripable> (s));
+	}
+}
+
 boost::shared_ptr<Stripable>
 MackieControlProtocol::first_selected_stripable () const
 {
@@ -2388,7 +2400,7 @@ MackieControlProtocol::first_selected_stripable () const
 		return boost::shared_ptr<Stripable>();
 	}
 
-	boost::shared_ptr<Stripable> r = _last_selected_stripables.front().lock();
+	boost::shared_ptr<Stripable> r = (*(_last_selected_stripables.begin())).lock();
 
 	if (r) {
 		/* check it is on one of our surfaces */
