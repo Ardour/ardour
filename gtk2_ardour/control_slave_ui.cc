@@ -94,10 +94,12 @@ ControlSlaveUI::update_vca_display ()
 	Gtkmm2ext::container_clear (*this);
 	master_connections.drop_connections ();
 
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
-			add_vca_button (*v);
-			any = true;
+	if (stripable) {
+		for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+			if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
+				add_vca_button (*v);
+				any = true;
+			}
 		}
 	}
 
