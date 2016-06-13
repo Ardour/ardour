@@ -230,6 +230,8 @@ WindowProxy::drop_window ()
 	if (_window) {
 		delete_connection.disconnect ();
 		configure_connection.disconnect ();
+		map_connection.disconnect ();
+		unmap_connection.disconnect ();
 		_window->hide ();
 		delete _window;
 		_window = 0;
@@ -255,8 +257,24 @@ WindowProxy::setup ()
 
 	delete_connection = _window->signal_delete_event().connect (sigc::mem_fun (*this, &WindowProxy::delete_event_handler));
 	configure_connection = _window->signal_configure_event().connect (sigc::mem_fun (*this, &WindowProxy::configure_handler), false);
+	map_connection = _window->signal_map().connect (sigc::mem_fun (*this, &WindowProxy::map_handler), false);
+	unmap_connection = _window->signal_unmap().connect (sigc::mem_fun (*this, &WindowProxy::unmap_handler), false);
 
 	set_pos_and_size ();
+}
+
+void
+WindowProxy::map_handler ()
+{
+	/* emit our own signal */
+	signal_map ();
+}
+
+void
+WindowProxy::unmap_handler ()
+{
+	/* emit out own signal */
+	signal_unmap ();
 }
 
 bool

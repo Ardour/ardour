@@ -81,6 +81,9 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 
 	static std::string xml_node_name();
 
+	sigc::signal0<void> signal_map;
+	sigc::signal0<void> signal_unmap;
+
   protected:
 	std::string  _name;
 	std::string  _menu_name;
@@ -95,6 +98,8 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	StateMask _state_mask;
 	sigc::connection delete_connection;
 	sigc::connection configure_connection;
+	sigc::connection map_connection;
+	sigc::connection unmap_connection;
 
 
 	void save_pos_and_size ();
@@ -103,7 +108,8 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 
 	virtual bool delete_event_handler (GdkEventAny *ev);
 	virtual bool configure_handler (GdkEventConfigure*);
-
+	void map_handler ();
+	void unmap_handler ();
 	virtual void setup ();
 	void toggle ();
 };
