@@ -167,6 +167,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string _osc_url_file;
 	bool _send_route_changes;
 	OSCDebugMode _debugmode;
+	bool tick;
+	bool bank_dirty;
 
 	void register_callbacks ();
 
@@ -451,6 +453,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	//banking functions
 	int set_bank (uint32_t bank_start, lo_message msg);
+	int _set_bank (uint32_t bank_start, lo_address addr);
 	int bank_up (lo_message msg);
 	int bank_down (lo_message msg);
 	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, lo_message msg);
@@ -487,9 +490,13 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Stripable>);
+	void route_lost (boost::weak_ptr<ARDOUR::Stripable>);
 	void gui_selection_changed (ARDOUR::StripableNotificationListPtr stripables);
 
 	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
+	void recalcbanks ();
+	void notify_routes_added (ARDOUR::RouteList &);
+	void notify_vca_added (ARDOUR::VCAList &);
 
 	void update_clock ();
 	bool periodic (void);

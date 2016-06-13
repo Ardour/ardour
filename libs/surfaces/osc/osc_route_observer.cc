@@ -378,7 +378,6 @@ OSCRouteObserver::send_select_status ()
 		} else {
 			lo_message_add_int32 (msg, ssid);
 		}
-		//std::cout << "strip: " << ssid << " strip name: " << _strip->name() << " select: " << _strip->is_selected() << "\n";
 		lo_message_add_float (msg, _strip->is_selected());
 		lo_send_message (addr, path.c_str(), msg);
 		lo_message_free (msg);

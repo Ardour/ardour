@@ -27,6 +27,7 @@
 #include "ardour/phase_control.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
+#include "ardour/route.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -324,18 +325,33 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 
 	lo_message msg = lo_message_new ();
 
-	// ssid is the strip on the surface this observer refers to
-	// not part of the internal ordering.
 	string path = "/select/name";
-	/*if (feedback[2]) {
-		path = set_path (path);
-	} else {
-		lo_message_add_int32 (msg, ssid);
-	}*/
 	lo_message_add_string (msg, _strip->name().c_str());
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
+
+	//spit out the comment at the same time
+	msg = lo_message_new ();
+	path = "/select/comment";
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_strip);
+	lo_message_add_string (msg, route->comment().c_str());
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+
+	// lets tell the surface how many inputs this strip has
+	msg = lo_message_new ();
+	path = "/select/n_inputs";
+	lo_message_add_int32 (msg, route->n_inputs().n_total());
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+	// lets tell the surface how many outputs this strip has
+	msg = lo_message_new ();
+	path = "/select/n_outputs";
+	lo_message_add_int32 (msg, route->n_outputs().n_total());
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+
 }
 
 void

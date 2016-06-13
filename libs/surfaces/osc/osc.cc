@@ -49,6 +49,7 @@
 #include "ardour/phase_control.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
+#include "ardour/vca_manager.h"
 
 #include "osc_select_observer.h"
 #include "osc.h"
@@ -90,6 +91,8 @@ OSC::OSC (Session& s, uint32_t port)
 	, _osc_unix_server (0)
 	, _send_route_changes (true)
 	, _debugmode (Off)
+	, tick (true)
+	, bank_dirty (false)
 	, gui (0)
 {
 	_instance = this;
@@ -246,7 +249,14 @@ OSC::start ()
 	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
 	periodic_timeout->attach (main_loop()->get_context());
 
+	// catch GUI select changes for GUI_select mode
 	StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this, _1), this);
+
+	// catch track reordering
+	// receive routes added
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
+	// receive VCAs added
+	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
 
 	return 0;
 }
@@ -646,7 +656,15 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, sid, s->gainmode, s->feedback);
 	route_observers.push_back (o);
 
-	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Stripable> (strip)), this);
+	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::route_lost, this, boost::weak_ptr<Stripable> (strip)), this);
+}
+
+void
+OSC::route_lost (boost::weak_ptr<Stripable> wr)
+{
+	tick = false;
+	drop_route (wr);
+	bank_dirty = true;
 }
 
 void
@@ -1251,6 +1269,29 @@ OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
 	}
 }
 
+void
+OSC::notify_routes_added (ARDOUR::RouteList &)
+{
+	recalcbanks();
+}
+
+void
+OSC::notify_vca_added (ARDOUR::VCAList &)
+{
+	recalcbanks();
+}
+
+void
+OSC::recalcbanks ()
+{
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		OSCSurface* sur = &_surface[it];
+		// find lo_address
+		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
+		_set_bank (sur->bank, addr);
+	}
+}
+
 /*
  * This gets called not only when bank changes but also:
  *  - bank size change
@@ -1263,6 +1304,12 @@ OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
  */
 int
 OSC::set_bank (uint32_t bank_start, lo_message msg)
+{
+	return _set_bank (bank_start, lo_message_get_source (msg));
+}
+
+int
+OSC::_set_bank (uint32_t bank_start, lo_address addr)
 {
 	if (!session) {
 		return -1;
@@ -1281,18 +1328,18 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 		nstrips = session->nroutes() - 1;
 	}
 	// reset local select
-	_strip_select (0, lo_message_get_source (msg));
+	_strip_select (0, addr);
 	// undo all listeners for this url
 	for (int n = 0; n <= (int) nstrips; ++n) {
 
 		boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n, PresentationInfo::Route);
 
 		if (stp) {
-			end_listen (stp, lo_message_get_source (msg));
+			end_listen (stp, addr);
 		}
 	}
 
-	OSCSurface *s = get_surface (lo_message_get_source (msg));
+	OSCSurface *s = get_surface (addr);
 	uint32_t b_size;
 
 	if (!s->bank_size) {
@@ -1318,15 +1365,17 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 			boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n - 1, PresentationInfo::Route);
 
 			if (stp) {
-				listen_to_route(stp, lo_message_get_source (msg));
+				listen_to_route(stp, addr);
 				if (!s->feedback[10]) {
 					if (stp->is_selected()) {
-						_strip_select (n, lo_message_get_source (msg));
+						_strip_select (n, addr);
 					}
 				}
 			}
 		}
 	}
+	bank_dirty = false;
+	tick = true;
 	return 0;
 }
 
@@ -1832,6 +1881,7 @@ OSC::_strip_select (int ssid, lo_address addr)
 	if (s) {
 		sur->surface_sel = ssid;
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, ssid, sur->gainmode, sur->feedback);
+		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
 	} else {
 		route_send_fail ("select", ssid, 0 , addr);
@@ -2338,6 +2388,12 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 bool
 OSC::periodic (void)
 {
+	if (!tick) {
+		if (bank_dirty) {
+			recalcbanks ();
+		}
+	}
+	
 	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end(); x++) {
 
 		OSCGlobalObserver* go;
@@ -2354,7 +2410,7 @@ OSC::periodic (void)
 			ro->tick();
 		}
 	}
-	for (uint32_t it = 0; it < _surface.size(); ++it) {
+	for (uint32_t it = 0; it < _surface.size(); it++) {
 		OSCSurface* sur = &_surface[it];
 		OSCSelectObserver* so;
 		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
