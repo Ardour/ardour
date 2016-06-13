@@ -56,6 +56,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	};
 
 	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
+	void set_colors ();
 
   protected:
 	bool _hovering;
@@ -73,7 +74,11 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Gtk::Menu*        shuttle_style_menu;
 	Gtk::Menu*        shuttle_context_menu;
 	BindingProxy      binding_proxy;
-
+	Glib::RefPtr<Pango::Layout> left_text;
+	Glib::RefPtr<Pango::Layout> right_text;
+	Pango::AttrList text_attributes;
+	Pango::AttrColor* text_color;
+	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
 	void show_shuttle_context_menu ();
 	void shuttle_style_changed();

@@ -53,7 +53,14 @@ gboolean qt (gboolean, gint, gint, gboolean, Gtk::Tooltip*, gpointer)
 ShuttleControl::ShuttleControl ()
 	: _controllable (new ShuttleControllable (*this))
 	, binding_proxy (_controllable)
+	, text_color (0)
 {
+	left_text = Pango::Layout::create (get_pango_context());
+	right_text = Pango::Layout::create (get_pango_context());
+
+	right_text->set_attributes (text_attributes);
+	left_text->set_attributes (text_attributes);
+
 	set_tooltip (*this, _("Shuttle speed control (Context-click for options)"));
 
 	pattern = 0;
@@ -84,6 +91,9 @@ ShuttleControl::ShuttleControl ()
 	else                               { shuttle_max_speed = 1.5f; }
 
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ShuttleControl::set_colors));
+
+	set_colors ();
 
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
 	g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
@@ -135,6 +145,13 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 	cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
 	cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.4);
 	cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.1);
+
+	Pango::AttrFontDesc* font_attr;
+
+	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (UIConfiguration::instance().get_NormalBoldFont()));
+	text_attributes.change (*font_attr);
+
+	delete font_attr;
 }
 
 void
@@ -143,9 +160,9 @@ ShuttleControl::map_transport_state ()
 	float speed = _session->transport_speed ();
 
 	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
-			&& !( speed == 1.f && last_speed_displayed != 1.f)
-			&& !( speed == 0.f && last_speed_displayed != 0.f)
-	   )
+	     && !( speed == 1.f && last_speed_displayed != 1.f)
+	     && !( speed == 0.f && last_speed_displayed != 0.f)
+		)
 	{
 		return; // nothing to see here, move along.
 	}
@@ -295,8 +312,8 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 			shuttle_speed_on_grab = _session->transport_speed ();
 			mouse_shuttle (ev->x, true);
 			gdk_pointer_grab(ev->window,false,
-					GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-					NULL,NULL,ev->time);
+			                 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+			                 NULL,NULL,ev->time);
 		}
 		break;
 
@@ -546,12 +563,36 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 }
 
 void
+ShuttleControl::set_colors ()
+{
+	int r, g, b, a;
+
+	uint32_t bg_color = UIConfiguration::instance().color (X_("shuttle bg"));
+	uint32_t text = UIConfiguration::instance().color (X_("shuttle text"));
+
+	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
+	bg_r = r/255.0;
+	bg_g = g/255.0;
+	bg_b = b/255.0;
+
+	UINT_TO_RGBA (text, &r, &g, &b, &a);
+
+	/* rescale for Pango colors ... sigh */
+
+	r = lrint (r * 65535.0);
+	g = lrint (g * 65535.0);
+	b = lrint (b * 65535.0);
+
+	delete text_color;
+	text_color = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
+	text_attributes.change (*text_color);
+}
+
+void
 ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 {
-	cairo_text_extents_t extents;
-
 	//black border
-	cairo_set_source_rgb (cr, 0, 0.0, 0.0);
+	cairo_set_source_rgb (cr, bg_r, bg_g, bg_b);
 	rounded_rectangle (cr, 0, 0, get_width(), get_height(), 4);
 	cairo_fill (cr);
 
@@ -616,17 +657,14 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 
 	last_speed_displayed = speed;
 
-	// TODO use a proper pango layout, scale font
-	cairo_set_source_rgb (cr, 0.6, 0.6, 0.6);
-	cairo_set_font_size (cr, 13.0);
-	cairo_text_extents (cr, "0|", &extents); // note the descender
-	const float text_ypos = (get_height() + extents.height - 1.) * .5;
+	const float top_text_margin = 3.0f;
+	const float side_text_margin = 5.0f;
 
-	cairo_move_to (cr, 10, text_ypos);
-	cairo_show_text (cr, buf);
+	left_text->set_text (buf);
+	cairo_move_to (cr, side_text_margin, top_text_margin);
+	pango_cairo_show_layout (cr, left_text->gobj());
 
 	/* style text */
-
 
 	switch (Config->get_shuttle_behaviour()) {
 	case Sprung:
@@ -637,14 +675,15 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 		break;
 	}
 
-	cairo_text_extents (cr, buf, &extents);
-	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), text_ypos);
-	cairo_show_text (cr, buf);
+	right_text->set_text (buf);
+	Pango::Rectangle r = right_text->get_ink_extents ();
+	cairo_move_to (cr, get_width() - ((r.get_width()/PANGO_SCALE) + side_text_margin), top_text_margin);
+	pango_cairo_show_layout (cr, right_text->gobj());
 
 	if (UIConfiguration::instance().get_widget_prelight()) {
 		if (_hovering) {
 			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, 4.0);
-			cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
+			cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
 			cairo_fill (cr);
 		}
 	}
