@@ -674,6 +674,7 @@ Editor::Editor ()
 		_notebook_shrunk = string_is_affirmative (prop->value ());
 	}
 
+	editor_summary_pane.set_check_divider_position (true);
 	editor_summary_pane.add (edit_packer);
 
 	Button* summary_arrows_left_left = manage (new Button);
@@ -718,6 +719,7 @@ Editor::Editor ()
 		editor_summary_pane.add (_summary_hbox);
 	}
 
+	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
 		edit_pane.add (_the_notebook);

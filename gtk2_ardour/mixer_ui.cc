@@ -240,6 +240,7 @@ Mixer_UI::Mixer_UI ()
 
 	rhs_pane1.add (favorite_plugins_frame);
 	rhs_pane1.add (track_display_frame);
+
 	rhs_pane2.add (rhs_pane1);
 	rhs_pane2.add (group_display_frame);
 
@@ -275,6 +276,7 @@ Mixer_UI::Mixer_UI ()
 	global_hpacker.pack_start (inner_pane, true, true);
 	global_hpacker.pack_start (out_packer, false, false);
 
+	list_hpane.set_check_divider_position (true);
 	list_hpane.add (list_vpacker);
 	list_hpane.add (global_hpacker);
 
