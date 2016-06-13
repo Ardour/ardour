@@ -207,7 +207,7 @@ class LIBARDOUR_API Region
 
 	void set_length (framecnt_t);
 	void set_start (framepos_t);
-	void set_position (framepos_t);
+	void set_position (framepos_t, int32_t sub_num = 0);
 	void set_initial_position (framepos_t);
 	void special_set_position (framepos_t);
 	virtual void update_after_tempo_map_change (bool send_change = true);
@@ -216,15 +216,15 @@ class LIBARDOUR_API Region
 	bool at_natural_position () const;
 	void move_to_natural_position ();
 
-	void move_start (frameoffset_t distance);
-	void trim_front (framepos_t new_position);
-	void trim_end (framepos_t new_position);
-	void trim_to (framepos_t position, framecnt_t length);
+	void move_start (frameoffset_t distance, const int32_t& sub_num = 0);
+	void trim_front (framepos_t new_position, const int32_t& sub_num = 0);
+	void trim_end (framepos_t new_position, const int32_t& sub_num = 0);
+	void trim_to (framepos_t position, framecnt_t length, const int32_t& sub_num = 0);
 
 	virtual void fade_range (framepos_t, framepos_t) {}
 
-	void cut_front (framepos_t new_position);
-	void cut_end (framepos_t new_position);
+	void cut_front (framepos_t new_position, const int32_t& sub_num = 0);
+	void cut_end (framepos_t new_position, const int32_t& sub_num = 0);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -358,7 +358,7 @@ class LIBARDOUR_API Region
 	void post_set (const PBD::PropertyChange&);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	virtual void set_length_internal (framecnt_t);
-	virtual void set_start_internal (framecnt_t);
+	virtual void set_start_internal (framecnt_t, const int32_t& sub_num = 0);
 	bool verify_start_and_length (framepos_t, framecnt_t&);
 	void first_edit ();
 
@@ -396,9 +396,9 @@ class LIBARDOUR_API Region
   private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	virtual void trim_to_internal (framepos_t position, framecnt_t length);
-	void modify_front (framepos_t new_position, bool reset_fade);
-	void modify_end (framepos_t new_position, bool reset_fade);
+	virtual void trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num);
+	void modify_front (framepos_t new_position, bool reset_fade, const int32_t& sub_num);
+	void modify_end (framepos_t new_position, bool reset_fade, const int32_t& sub_num);
 
 	void maybe_uncopy ();
 

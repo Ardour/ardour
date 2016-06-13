@@ -248,7 +248,7 @@ protected:
 	/* sets snap delta from unsnapped pos */
 	void setup_snap_delta (framepos_t pos);
 
-	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
+	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit, const int32_t& sub_num);
 
 	void show_verbose_cursor_time (framepos_t);
 	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
@@ -407,13 +407,15 @@ private:
 	void finished_no_copy (
 		bool const,
 		bool const,
-		ARDOUR::framecnt_t const
+		ARDOUR::framecnt_t const,
+		int32_t const ev_state
 		);
 
 	void finished_copy (
 		bool const,
 		bool const,
-		ARDOUR::framecnt_t const
+		ARDOUR::framecnt_t const,
+		int32_t const ev_state
 		);
 
 	RegionView* insert_region_into_playlist (

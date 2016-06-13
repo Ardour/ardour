@@ -1508,7 +1508,7 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
+MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, const int32_t& sub_num)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 	if (commit) {
@@ -1526,7 +1526,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
-
+	region->set_position (pos, sub_num);
 	playlist()->add_region (region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 

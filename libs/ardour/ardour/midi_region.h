@@ -133,8 +133,8 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	void set_length_internal (framecnt_t len);
-	void set_start_internal (framecnt_t);
-	void trim_to_internal (framepos_t position, framecnt_t length);
+	void set_start_internal (framecnt_t, const int32_t& sub_num);
+	void trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num);
 	void update_length_beats ();
 
 	void model_changed ();

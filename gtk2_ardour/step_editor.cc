@@ -122,7 +122,7 @@ StepEditor::prepare_step_edit_region ()
 		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
 		framecnt_t len = next_bar_pos - step_edit_insert_position;
 
-		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
+		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true, _editor.get_grid_music_divisions (0));
 
 		RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);

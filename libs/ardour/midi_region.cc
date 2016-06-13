@@ -458,14 +458,17 @@ MidiRegion::fix_negative_start ()
 }
 
 void
-MidiRegion::set_start_internal (framecnt_t s)
+MidiRegion::set_start_internal (framecnt_t s, const int32_t& sub_num)
 {
-	Region::set_start_internal (s);
-	set_start_beats_from_start_frames ();
+	Region::set_start_internal (s, sub_num);
+
+	if (position_lock_style() == AudioTime) {
+		set_start_beats_from_start_frames ();
+	}
 }
 
 void
-MidiRegion::trim_to_internal (framepos_t position, framecnt_t length)
+MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num)
 {
 	framepos_t new_start;
 
@@ -476,7 +479,7 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length)
 	PropertyChange what_changed;
 
 	/* beat has not been set by set_position_internal */
-	const double beat_delta = _session.tempo_map().beat_at_frame (position) - beat();
+	const double beat_delta = _session.tempo_map().exact_beat_at_frame (position, sub_num) - beat();
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
@@ -504,7 +507,7 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length)
 		_start_beats = Evoral::Beats (new_start_beat);
 		what_changed.add (Properties::start_beats);
 
-		set_start_internal (new_start);
+		set_start_internal (new_start, sub_num);
 		what_changed.add (Properties::start);
 	}
 

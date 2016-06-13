@@ -570,13 +570,19 @@ Region::update_after_tempo_map_change (bool send)
 }
 
 void
-Region::set_position (framepos_t pos)
+Region::set_position (framepos_t pos, int32_t sub_num)
 {
 	if (!can_move()) {
 		return;
 	}
 
-	set_position_internal (pos, true);
+	if (sub_num == 0) {
+		set_position_internal (pos, true);
+	} else {
+		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+		_beat = beat;
+		set_position_internal (pos, false);
+	}
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -738,7 +744,7 @@ Region::set_start (framepos_t pos)
 }
 
 void
-Region::move_start (frameoffset_t distance)
+Region::move_start (frameoffset_t distance, const int32_t& sub_num)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
@@ -774,7 +780,7 @@ Region::move_start (frameoffset_t distance)
 		return;
 	}
 
-	set_start_internal (new_start);
+	set_start_internal (new_start, sub_num);
 
 	_whole_file = false;
 	first_edit ();
@@ -783,25 +789,25 @@ Region::move_start (frameoffset_t distance)
 }
 
 void
-Region::trim_front (framepos_t new_position)
+Region::trim_front (framepos_t new_position, const int32_t& sub_num)
 {
-	modify_front (new_position, false);
+	modify_front (new_position, false, sub_num);
 }
 
 void
-Region::cut_front (framepos_t new_position)
+Region::cut_front (framepos_t new_position, const int32_t& sub_num)
 {
-	modify_front (new_position, true);
+	modify_front (new_position, true, sub_num);
 }
 
 void
-Region::cut_end (framepos_t new_endpoint)
+Region::cut_end (framepos_t new_endpoint, const int32_t& sub_num)
 {
-	modify_end (new_endpoint, true);
+	modify_end (new_endpoint, true, sub_num);
 }
 
 void
-Region::modify_front (framepos_t new_position, bool reset_fade)
+Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t& sub_num)
 {
 	if (locked()) {
 		return;
@@ -831,7 +837,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade)
 			newlen = _length + (_position - new_position);
 		}
 
-		trim_to_internal (new_position, newlen);
+		trim_to_internal (new_position, newlen, sub_num);
 
 		if (reset_fade) {
 			_right_of_split = true;
@@ -846,14 +852,14 @@ Region::modify_front (framepos_t new_position, bool reset_fade)
 }
 
 void
-Region::modify_end (framepos_t new_endpoint, bool reset_fade)
+Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t& sub_num)
 {
 	if (locked()) {
 		return;
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position);
+		trim_to_internal (_position, new_endpoint - _position, sub_num);
 		if (reset_fade) {
 			_left_of_split = true;
 		}
@@ -868,19 +874,19 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade)
  */
 
 void
-Region::trim_end (framepos_t new_endpoint)
+Region::trim_end (framepos_t new_endpoint, const int32_t& sub_num)
 {
-	modify_end (new_endpoint, false);
+	modify_end (new_endpoint, false, sub_num);
 }
 
 void
-Region::trim_to (framepos_t position, framecnt_t length)
+Region::trim_to (framepos_t position, framecnt_t length, const int32_t& sub_num)
 {
 	if (locked()) {
 		return;
 	}
 
-	trim_to_internal (position, length);
+	trim_to_internal (position, length, sub_num);
 
 	if (!property_changes_suspended()) {
 		recompute_at_start ();
@@ -889,7 +895,7 @@ Region::trim_to (framepos_t position, framecnt_t length)
 }
 
 void
-Region::trim_to_internal (framepos_t position, framecnt_t length)
+Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num)
 {
 	framepos_t new_start;
 
@@ -926,7 +932,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length)
 	PropertyChange what_changed;
 
 	if (_start != new_start) {
-		set_start_internal (new_start);
+		set_start_internal (new_start, sub_num);
 		what_changed.add (Properties::start);
 	}
 
@@ -1845,7 +1851,7 @@ Region::post_set (const PropertyChange& pc)
 }
 
 void
-Region::set_start_internal (framecnt_t s)
+Region::set_start_internal (framecnt_t s, const int32_t& sub_num)
 {
 	_start = s;
 }

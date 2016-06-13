@@ -819,7 +819,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 }
 
 bool
-RegionView::trim_front (framepos_t new_bound, bool no_overlap)
+RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t& sub_num)
 {
 	if (_region->locked()) {
 		return false;
@@ -836,7 +836,7 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 		return false;
 	}
 
-	_region->trim_front (speed_bound);
+	_region->trim_front (speed_bound, sub_num);
 
 	if (no_overlap) {
 		// Get the next region on the left of this region and shrink/expand it.

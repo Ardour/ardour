@@ -586,12 +586,16 @@ MeterSection::get_state() const
 /*
   Tempo Map Overview
 
+  The Shaggs - Things I Wonder
+  https://www.youtube.com/watch?v=9wQK6zMJOoQ
+
   Tempo is the rate of the musical pulse.
   Meters divide the pulses into measures and beats.
 
   TempoSections - provide pulses in the form of beats_per_minute() and note_type() where note_type is the division of a whole pulse,
   and beats_per_minute is the number of note_types in one minute (unlike what its name suggests).
-  Note that Tempo::beats_per_minute() has nothing to do with musical beats.
+  Note that Tempo::beats_per_minute() has nothing to do with musical beats. It has been left that way because
+  a shorter one hasn't been found yet (pulse_divisions_per_minute()?).
 
   MeterSecions - divide pulses into measures (via divisions_per_bar) and beats (via note_divisor).
 
@@ -629,6 +633,43 @@ MeterSection::get_state() const
   Because ramped MusicTime and AudioTime tempos can interact with each other,
   reordering is frequent. Care must be taken to keep _metrics in a solved state.
   Solved means ordered by frame or pulse with frame-accurate precision (see check_solved()).
+
+  Music and Audio
+
+  Music and audio-locked objects may seem interchangeable on the surface, but when translating
+  between audio samples and beats, keep in mind that a sample is only a quantised approximation
+  of the actual time (in minutes) of a beat.
+  Thus if a gui user points to the frame occupying the start of a music-locked object on 1|3|0, it does not
+  mean that this frame is the actual location in time of 1|3|0.
+
+  You cannot use a frame measurement to determine beat distance except under special circumstances
+  (e.g. where the user has requested that a beat lie on a SMPTE frame or if the tempo is known to be constant over the duration).
+
+  This means is that a user operating on a musical grid must supply the desired beat position and/or current beat quantization in order for the
+  sample space the user is operating at to be translated correctly to the object.
+
+  The current approach is to interpret the supplied frame using the grid division the user has currently selected.
+  If the user has no musical grid set, they are actually operating in sample space (even SMPTE frames are rounded to audio frame), so
+  the supplied audio frame is interpreted as the desired musical location (beat_at_frame()).
+
+  tldr: Beat, being a function of time, has nothing to do with sample rate, but time quantization can get in the way of precision.
+
+  When frame_at_beat() is called, the position calculation is performed in pulses and minutes.
+  The result is rounded to audio frames.
+  When beat_at_frame() is called, the frame is converted to minutes, with no rounding performed on the result.
+
+  So :
+  frame_at_beat (beat_at_frame (frame)) == frame
+  but :
+  beat_at_frame (frame_at_beat (beat)) != beat due to the time quantization of frame_at_beat().
+
+  Doing the second one will result in a beat distance error of up to 0.5 audio samples.
+  So instead work in pulses and/or beats and only use beat position to caclulate frame position (e.g. after tempo change).
+  For audio-locked objects, use frame position to calculate beat position.
+
+  The above pointless example would then do:
+  beat_at_pulse (pulse_at_beat (beat)) to avoid rounding.
+
 */
 struct MetricSectionSorter {
     bool operator() (const MetricSection* a, const MetricSection* b) {
@@ -2545,24 +2586,8 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 			/* if we're snapping to a musical grid, set the pulse exactly instead of via the supplied frame. */
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-			double beat = beat_at_frame_locked (future_map, frame);
-
-			if (sub_num > 1) {
-				beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
-			} else if (sub_num == 1) {
-				/* snap to beat */
-				beat = floor (beat + 0.5);
-			}
-
+			const double beat = exact_beat_at_frame_locked (future_map, frame, sub_num);
 			double pulse = pulse_at_beat_locked (future_map, beat);
-
-			if (sub_num == -1) {
-				/* snap to  bar */
-				BBT_Time bbt = bbt_at_beat_locked (future_map, beat);
-				bbt.beats = 1;
-				bbt.ticks = 0;
-				pulse = pulse_at_bbt_locked (future_map, bbt);
-			}
 
 			if (solve_map_pulse (future_map, tempo_copy, pulse)) {
 				solve_map_pulse (_metrics, ts, pulse);
@@ -2809,6 +2834,33 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 	}
 
 	MetricPositionChanged (); // Emit Signal
+}
+
+double
+TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t& sub_num)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return exact_beat_at_frame_locked (_metrics, frame, sub_num);
+}
+
+double
+TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t& sub_num)
+{
+	double beat = beat_at_frame_locked (metrics, frame);
+	if (sub_num > 1) {
+		beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
+	} else if (sub_num == 1) {
+		/* snap to beat */
+		beat = floor (beat + 0.5);
+	} else if (sub_num == -1) {
+		/* snap to  bar */
+		Timecode::BBT_Time bbt = bbt_at_beat_locked (metrics, beat);
+		bbt.beats = 1;
+		bbt.ticks = 0;
+		beat = beat_at_bbt_locked (metrics, bbt);
+	}
+	return beat;
 }
 
 framecnt_t

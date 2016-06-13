@@ -510,7 +510,7 @@ Drag::show_verbose_cursor_text (string const & text)
 }
 
 boost::shared_ptr<Region>
-Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
+Drag::add_midi_region (MidiTimeAxisView* view, bool commit, const int32_t& sub_num)
 {
 	if (_editor->session()) {
 		const TempoMap& map (_editor->session()->tempo_map());
@@ -519,7 +519,7 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 		   might be wrong.
 		*/
 		framecnt_t len = map.frame_at_beat (map.beat_at_frame (pos) + 1.0) - pos;
-		return view->add_region (grab_frame(), len, commit);
+		return view->add_region (grab_frame(), len, commit, sub_num);
 	}
 
 	return boost::shared_ptr<Region>();
@@ -1257,7 +1257,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
-			region_copy->set_position (original->position());
+			region_copy->set_position (original->position(), _editor->get_grid_music_divisions (event->button.state));
 			/* need to set this so that the drop zone code can work. This doesn't
 			   actually put the region into the playlist, but just sets a weak pointer
 			   to it.
@@ -1364,7 +1364,8 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		finished_copy (
 			changed_position,
 			changed_tracks,
-			drag_delta
+			drag_delta,
+			ev->button.state
 			);
 
 	} else {
@@ -1372,7 +1373,8 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		finished_no_copy (
 			changed_position,
 			changed_tracks,
-			drag_delta
+			drag_delta,
+			ev->button.state
 			);
 
 	}
@@ -1419,7 +1421,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 }
 
 void
-RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed_tracks*/, framecnt_t const drag_delta)
+RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed_tracks*/, framecnt_t const drag_delta, int32_t const ev_state)
 {
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
@@ -1510,7 +1512,8 @@ void
 RegionMoveDrag::finished_no_copy (
 	bool const changed_position,
 	bool const changed_tracks,
-	framecnt_t const drag_delta
+	framecnt_t const drag_delta,
+	int32_t const ev_state
 	)
 {
 	RegionSelection new_views;
@@ -1631,7 +1634,7 @@ RegionMoveDrag::finished_no_copy (
 				playlist->freeze ();
 			}
 
-			rv->region()->set_position (where);
+			rv->region()->set_position (where, _editor->get_grid_music_divisions (ev_state));
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
@@ -1876,7 +1879,7 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 }
 
 void
-RegionInsertDrag::finished (GdkEvent *, bool)
+RegionInsertDrag::finished (GdkEvent * event, bool)
 {
 	int pos = _views.front().time_axis_view;
 	assert(pos >= 0 && pos < (int)_time_axis_views.size());
@@ -2303,7 +2306,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
 		_editor->begin_reversible_command (_("create region"));
-		_region = add_midi_region (_view, false);
+		_region = add_midi_region (_view, false, _editor->get_grid_music_divisions (event->button.state));
 		_view->playlist()->freeze ();
 	} else {
 		if (_region) {
@@ -2326,10 +2329,10 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
+RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		add_midi_region (_view, true);
+		add_midi_region (_view, true, _editor->get_grid_music_divisions (event->button.state));
 	} else {
 		_view->playlist()->thaw ();
 		_editor->commit_reversible_command();
@@ -2911,7 +2914,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-			bool changed = i->view->trim_front (i->initial_position + dt, non_overlap_trim);
+			bool changed = i->view->trim_front (i->initial_position + dt, non_overlap_trim
+							    , _editor->get_grid_music_divisions (event->button.state));
+
 			if (changed && _preserve_fade_anchor) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 				if (arv) {
@@ -3379,8 +3384,7 @@ TempoMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		map.set_state (*before_state, Stateful::current_state_version);
-		// delete the dummy marker we used for visual representation while moving.
-		// a new visual marker will show up automatically.
+		// delete the dummy (hidden) marker we used for events while moving.
 		delete _marker;
 	}
 }
@@ -4757,7 +4761,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 			/* MIDI track */
 			if (_editor->selection->empty() && _editor->mouse_mode == MouseDraw) {
 				/* nothing selected */
-				add_midi_region (mtv, true);
+				add_midi_region (mtv, true, _editor->get_grid_music_divisions(event->button.state));
 				do_deselect = false;
 			}
 		}
