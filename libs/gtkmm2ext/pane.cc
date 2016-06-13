@@ -31,6 +31,7 @@ Pane::Pane (bool h)
 	: horizontal (h)
 	, did_move (false)
 	, divider_width (2)
+	, check_fract (false)
 {
 	using namespace Gdk;
 
@@ -342,6 +343,58 @@ Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 
 	return false;
 }
+void
+Pane::set_check_divider_position (bool yn)
+{
+	check_fract = yn;
+}
+
+bool
+Pane::fract_is_ok (Dividers::size_type div, float fract)
+{
+#ifdef __APPLE__
+	if (!check_fract) {
+		return true;
+	}
+
+	/* On Quartz, if the pane handle (divider) gets to
+	   be adjacent to the window edge, you can no longer grab it:
+	   any attempt to do so is interpreted by the Quartz window
+	   manager ("Finder") as a resize drag on the window edge.
+	*/
+
+	if (horizontal) {
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_width() * (1.0 - fract) < (divider_width*2)) {
+				/* too close to right edge */
+				return false;
+			}
+		}
+
+		if (div == 0) {
+			if (get_allocation().get_width() * fract < (divider_width*2)) {
+				/* too close to left edge */
+				return false;
+			}
+		}
+	} else {
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_height() * (1.0 - fract) < (divider_width*2)) {
+				/* too close to bottom */
+				return false;
+			}
+		}
+
+		if (div == 0) {
+			if (get_allocation().get_width() * fract < (divider_width*2)) {
+				/* too close to top */
+				return false;
+			}
+		}
+	}
+#endif
+	return true;
+}
 
 bool
 Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
@@ -360,8 +413,9 @@ Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 	d->translate_coordinates (*this, ev->x, ev->y, px, py);
 
 	Dividers::iterator prev = dividers.end();
+	Dividers::size_type div = 0;
 
-	for (Dividers::iterator di = dividers.begin(); di != dividers.end(); ++di) {
+	for (Dividers::iterator di = dividers.begin(); di != dividers.end(); ++di, ++div) {
 		if (*di == d) {
 			break;
 		}
@@ -391,6 +445,10 @@ Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 
 	new_fract = min (1.0f, max (0.0f, new_fract));
 
+	if (!fract_is_ok (div, new_fract)) {
+		return true;
+	}
+
 	if (new_fract != d->fract) {
 		d->fract = new_fract;
 		reallocate (get_allocation ());
@@ -417,46 +475,11 @@ Pane::set_divider (Dividers::size_type div, float fract)
 	}
 
 	fract = max (0.0f, min (1.0f, fract));
+	std::cerr << "Div = " << div << " of " << dividers.size() << std::endl;
 
-#ifdef __APPLE__
-
-	/* On Quartz, if the pane handle (divider) gets to
-	   be adjacent to the window edge, you can no longer grab it:
-	   any attempt to do so is interpreted by the Quartz window
-	   manager ("Finder") as a resize drag on the window edge.
-	*/
-
-	if (horizontal) {
-		if (div == dividers.size() - 1) {
-			if (get_allocation().get_width() * (1.0 - fract) < (divider_width*2)) {
-				/* too close to right edge */
-				return;
-			}
-		}
-
-		if (div == dividers.size() - 1) {
-			if (get_allocation().get_width() * fract < (divider_width*2)) {
-				/* too close to left edge */
-				return;
-			}
-		}
-	} else {
-		if (div == dividers.size() - 1) {
-			if (get_allocation().get_height() * (1.0 - fract) < (divider_width*2)) {
-				/* too close to bottom */
-				return;
-			}
-		}
-
-		if (div == dividers.size() - 1) {
-			if (get_allocation().get_width() * fract < (divider_width*2)) {
-				/* too close to top */
-				return;
-			}
-		}
+	if (!fract_is_ok (div, fract)) {
+		return;
 	}
-
-#endif
 
 	if (fract != (*d)->fract) {
 		(*d)->fract = fract;

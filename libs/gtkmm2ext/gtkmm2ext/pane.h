@@ -64,6 +64,8 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	GType child_type_vfunc() const;
 	void set_drag_cursor (Gdk::Cursor);
 
+	void set_check_divider_position (bool);
+
   protected:
 	bool horizontal;
 
@@ -101,8 +103,11 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	typedef std::list<Divider*> Dividers;
 	Dividers dividers;
 	int divider_width;
+	bool check_fract;
+
 	void add_divider ();
 	void handle_child_visibility ();
+	bool fract_is_ok (Dividers::size_type, float fract);
 };
 
 class LIBGTKMM2EXT_API HPane : public Pane
