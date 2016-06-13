@@ -411,6 +411,8 @@
     <ColorAlias name="send alert button: led active" alias="color 4"/>
     <ColorAlias name="send bg" alias="color 38"/>
     <ColorAlias name="shuttle" alias="color 12"/>
+    <ColorAlias name="shuttle bg" alias="color 4"/>
+    <ColorAlias name="shuttle text" alias="color 13"/>
     <ColorAlias name="silence" alias="color 98"/>
     <ColorAlias name="silence text" alias="color 10"/>
     <ColorAlias name="solo button: fill active" alias="color 12"/>
