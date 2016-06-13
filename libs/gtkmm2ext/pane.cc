@@ -418,6 +418,46 @@ Pane::set_divider (Dividers::size_type div, float fract)
 
 	fract = max (0.0f, min (1.0f, fract));
 
+#ifdef __APPLE__
+
+	/* On Quartz, if the pane handle (divider) gets to
+	   be adjacent to the window edge, you can no longer grab it:
+	   any attempt to do so is interpreted by the Quartz window
+	   manager ("Finder") as a resize drag on the window edge.
+	*/
+
+	if (horizontal) {
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_width() * (1.0 - fract) < (divider_width*2)) {
+				/* too close to right edge */
+				return;
+			}
+		}
+
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_width() * fract < (divider_width*2)) {
+				/* too close to left edge */
+				return;
+			}
+		}
+	} else {
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_height() * (1.0 - fract) < (divider_width*2)) {
+				/* too close to bottom */
+				return;
+			}
+		}
+
+		if (div == dividers.size() - 1) {
+			if (get_allocation().get_width() * fract < (divider_width*2)) {
+				/* too close to top */
+				return;
+			}
+		}
+	}
+
+#endif
+
 	if (fract != (*d)->fract) {
 		(*d)->fract = fract;
 		/* our size hasn't changed, but our internal allocations have */
