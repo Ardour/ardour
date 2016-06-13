@@ -76,6 +76,9 @@ class Manager : public ARDOUR::SessionHandlePtr
 	~Manager();
 
 	static Manager* _instance;
+  private:
+	void window_proxy_was_mapped (ProxyBase*);
+	void window_proxy_was_unmapped (ProxyBase*);
 };
 
 class ProxyBase : public ARDOUR::SessionHandlePtr, public Gtkmm2ext::WindowProxy

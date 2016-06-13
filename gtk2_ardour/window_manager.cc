@@ -68,11 +68,45 @@ Manager::register_window (ProxyBase* info)
 		if (!window_actions) {
 			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
 		}
-
+		
 		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
 			 info->action_name().c_str(), info->menu_name().c_str(),
 			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
+
+		info->signal_map.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_mapped), info));
+		info->signal_unmap.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_unmapped), info));
+
 	}
+}
+
+void
+Manager::window_proxy_was_mapped (ProxyBase* proxy)
+{
+	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	tact->set_active (true);
+}
+
+void
+Manager::window_proxy_was_unmapped (ProxyBase* proxy)
+{
+	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	tact->set_active (false);
 }
 
 void
@@ -89,7 +123,6 @@ Manager::remove (const ProxyBase* info)
 void
 Manager::toggle_window (ProxyBase* proxy)
 {
-
 	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
@@ -196,6 +229,7 @@ ProxyBase::setup ()
 {
 	WindowProxy::setup ();
 	set_session(_session);
+
 }
 
 /*-----------------------*/
