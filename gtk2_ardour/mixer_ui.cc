@@ -1360,10 +1360,10 @@ Mixer_UI::redisplay_track_list ()
 
 	if (n_masters == 0) {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::remove_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
-		vca_scroller.hide ();
+		vca_vpacker.hide ();
 	} else {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
-		vca_scroller.show ();
+		vca_vpacker.show ();
 	}
 
 	_group_tabs->set_dirty ();
