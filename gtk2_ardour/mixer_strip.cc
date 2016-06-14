@@ -283,7 +283,6 @@ MixerStrip::init ()
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
-//	width_hide_box.set_border_width (1);
 	width_hide_box.set_spacing (2);
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (number_label, true, true);
