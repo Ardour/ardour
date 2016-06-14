@@ -241,6 +241,14 @@ namespace ARDOUR {
 
 void pingback (const string& version, const string& announce_path)
 {
+	/* check this is not being run from ./ardev etc. */
+	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
+
+	if (x && string (x).find ("gtk2_ardour") != string::npos) {
+		std::cerr << "no ping\n";
+		return;
+	}
+
 	ping_call* cm = new ping_call (version, announce_path);
 	pthread_t thread;
 
