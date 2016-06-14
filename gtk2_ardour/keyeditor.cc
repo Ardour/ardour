@@ -88,7 +88,7 @@ KeyEditor::KeyEditor ()
 	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
 	vpacker.pack_start (filter_entry, false, false);
 
-	Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
+	Label* hint = manage (new Label (_("To remove a shortcut select an action then press this: ")));
 	hint->show ();
 	unbind_box.set_spacing (6);
 	unbind_box.pack_start (*hint, false, true);
