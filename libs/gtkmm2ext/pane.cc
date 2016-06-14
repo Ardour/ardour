@@ -475,7 +475,6 @@ Pane::set_divider (Dividers::size_type div, float fract)
 	}
 
 	fract = max (0.0f, min (1.0f, fract));
-	std::cerr << "Div = " << div << " of " << dividers.size() << std::endl;
 
 	if (!fract_is_ok (div, fract)) {
 		return;
