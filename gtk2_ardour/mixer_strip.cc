@@ -295,6 +295,7 @@ MixerStrip::init ()
 	number_label.set_fixed_colors (0x80808080, 0x80808080);
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
+	number_label.set_tweaks (ArdourButton::OccasionalText);
 
 	global_vpacker.set_spacing (2);
 	if (!ARDOUR::Profile->get_trx()) {
