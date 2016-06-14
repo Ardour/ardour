@@ -541,14 +541,30 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		}
 	}
 
-	if ((_elements & Text) && !_text.empty()) {
-		// if _layout does not exist, char_pixel_height() creates it,
-		req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
-		assert (_layout);
-		_layout->get_pixel_size (_text_width, _text_height);
+	if (_elements & Text) {
 
-		req->width += rint(1.75 * char_pixel_width()); // padding
-		req->width += _text_width;
+		if (_tweaks & OccasionalText) {
+
+			/* size should not change based on presence or absence
+			 * of text.
+			 */
+
+			if (!_text.empty()) {
+				ensure_layout ();
+				_layout->set_text (_text);
+				_layout->get_pixel_size (_text_width, _text_height);
+			}
+
+		} else if (!_text.empty()) {
+
+			//if _layout does not exist, char_pixel_height() creates it,
+
+			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
+			assert (_layout);
+			_layout->get_pixel_size (_text_width, _text_height);
+			req->width += rint(1.75 * char_pixel_width()); // padding
+			req->width += _text_width;
+		}
 
 		/* XXX hack (surprise). Deal with two common rotation angles */
 

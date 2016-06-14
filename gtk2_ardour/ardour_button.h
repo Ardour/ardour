@@ -55,7 +55,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	enum Tweaks {
 		Square = 0x1,
 		TrackHeader = 0x2,
-		unused3 = 0x4,
+		OccasionalText = 0x4,
+		unused4 = 0x8,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }
