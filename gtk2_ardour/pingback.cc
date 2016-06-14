@@ -245,7 +245,6 @@ void pingback (const string& version, const string& announce_path)
 	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
 
 	if (x && string (x).find ("gtk2_ardour") != string::npos) {
-		std::cerr << "no ping\n";
 		return;
 	}
 
