@@ -23,8 +23,12 @@
 
 #include <map>
 #include <fstream>
+#include <sstream>
 
 #include <boost/algorithm/string.hpp>
+
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include <gtkmm/stock.h>
 #include <gtkmm/label.h>
@@ -35,6 +39,8 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/utils.h"
 
+#include "pbd/error.h"
+#include "pbd/openuri.h"
 #include "pbd/strsplit.h"
 
 #include "ardour/filesystem_paths.h"
@@ -520,6 +526,39 @@ KeyEditor::search_string_updated (const std::string& filter)
 void
 KeyEditor::print () const
 {
-	// use Glib::file_open_tmp() if needed
-	Bindings::save_all_bindings_as_html (cerr);
+	stringstream sstr;
+	Bindings::save_all_bindings_as_html (sstr);
+
+	if (sstr.str().empty()) {
+		return;
+	}
+
+
+	gchar* file_name;
+	GError *err = NULL;
+	gint fd;
+
+	if ((fd = g_file_open_tmp ("akprintXXXXXX.html", &file_name, &err)) < 0) {
+		if (err) {
+			error << string_compose (_("Could not open temporary file to print bindings (%1)"), err->message) << endmsg;
+			g_error_free (err);
+		}
+		return;
+	}
+
+	err = NULL;
+
+	if (!g_file_set_contents (file_name, sstr.str().c_str(), sstr.str().size(), &err)) {
+		::close (fd);
+		g_unlink (file_name);
+		if (err) {
+			error << string_compose (_("Could not save bindings to file (%1)"), err->message) << endmsg;
+			g_error_free (err);
+		}
+		return;
+	}
+
+	::close (fd);
+
+	PBD::open_uri (string_compose ("file:///%1", file_name));
 }
