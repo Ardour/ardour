@@ -103,10 +103,10 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			max_tempo = max (max_tempo, ts->beats_per_minute());
 			min_tempo = min (min_tempo, ts->beats_per_minute());
 
-			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("color 62"),
+			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("tempo curve"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
 			if (ts->position_lock_style() == MusicTime) {
-				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("color 5"), buf,
+				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker music"), buf,
 								 *(const_cast<TempoSection*>(ts))));
 			} else {
 				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,

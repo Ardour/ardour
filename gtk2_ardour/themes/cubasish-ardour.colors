@@ -432,7 +432,9 @@
     <ColorAlias name="stereo panner text" alias="color 4"/>
     <ColorAlias name="sync mark" alias="color 75"/>
     <ColorAlias name="tempo bar" alias="color 46"/>
+    <ColorAlias name="tempo curve" alias="color 62"/>
     <ColorAlias name="tempo marker" alias="color 19"/>
+    <ColorAlias name="tempo marker music" alias="color 5"/>
     <ColorAlias name="time axis frame" alias="color 4"/>
     <ColorAlias name="time axis view item base" alias="color 94"/>
     <ColorAlias name="time stretch fill" alias="color 100"/>
