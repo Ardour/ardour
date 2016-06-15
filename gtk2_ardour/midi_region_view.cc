@@ -1872,7 +1872,8 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	framepos_t region_end = _region->last_frame();
 
 	if (end_frame > region_end) {
-		_region->set_length (end_frame - _region->position());
+		/* XX sets length in beats from audio space. make musical */
+		_region->set_length (end_frame - _region->position(), 0);
 	}
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
@@ -2877,13 +2878,13 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		/* Convert the new x position to a frame within the source */
 		framepos_t current_fr;
 		if (with_snap) {
-			current_fr = snap_pixel_to_sample (current_x, ensure_snap) + _region->start ();
+			current_fr = snap_pixel_to_sample (current_x, ensure_snap);
 		} else {
-			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
+			current_fr = trackview.editor().pixel_to_sample (current_x);
 		}
 
 		/* and then to beats */
-		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr);
+		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr + _region->start());
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
@@ -3568,7 +3569,8 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end_frame));
 
 		_region->clear_changes ();
-		_region->set_length (end_frame - _region->position());
+		/* we probably need to get the snap modifier somehow to make this correct for non-musical use */
+		_region->set_length (end_frame - _region->position(), trackview.editor().get_grid_music_divisions (0));
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 

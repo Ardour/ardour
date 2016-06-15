@@ -2323,7 +2323,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			*/
 
 			framecnt_t const len = (framecnt_t) fabs ((double)(f - grab_frame () - 1));
-			_region->set_length (len < 1 ? 1 : len);
+			_region->set_length (len < 1 ? 1 : len, _editor->get_grid_music_divisions (event->button.state));
 		}
 	}
 }
@@ -2934,7 +2934,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	case EndTrim:
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-			bool changed = i->view->trim_end (i->initial_end + dt, non_overlap_trim);
+			bool changed = i->view->trim_end (i->initial_end + dt, non_overlap_trim, _editor->get_grid_music_divisions (event->button.state));
 			if (changed && _preserve_fade_anchor) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 				if (arv) {
@@ -6333,7 +6333,7 @@ RegionCutDrag::motion (GdkEvent*, bool)
 }
 
 void
-RegionCutDrag::finished (GdkEvent*, bool)
+RegionCutDrag::finished (GdkEvent* event, bool)
 {
 	_editor->get_track_canvas()->canvas()->re_enter();
 
@@ -6347,7 +6347,7 @@ RegionCutDrag::finished (GdkEvent*, bool)
 		return;
 	}
 
-	_editor->split_regions_at (pos, rs);
+	_editor->split_regions_at (pos, rs, _editor->get_grid_music_divisions (event->button.state));
 }
 
 void

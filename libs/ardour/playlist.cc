@@ -1384,12 +1384,12 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 
 	 /* XXX: may not be necessary; Region::post_set should do this, I think */
 	 for (RegionList::iterator r = fixup.begin(); r != fixup.end(); ++r) {
-		 (*r)->recompute_position_from_lock_style ();
+		 (*r)->recompute_position_from_lock_style (0);
 	 }
  }
 
  void
- Playlist::split (framepos_t at)
+ Playlist::split (framepos_t at, const int32_t& sub_num)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1398,19 +1398,19 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 	  */
 
 	 for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
-		 _split_region (*r, at);
+		 _split_region (*r, at, sub_num);
 	 }
  }
 
  void
- Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position)
+ Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t& sub_num)
  {
 	 RegionWriteLock rl (this);
-	 _split_region (region, playlist_position);
+	 _split_region (region, playlist_position, sub_num);
  }
 
  void
- Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position)
+ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t& sub_num)
  {
 	 if (!region->covers (playlist_position)) {
 		 return;
@@ -1451,7 +1451,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 		    since it supplies that offset to the Region constructor, which
 		    is necessary to get audio region gain envelopes right.
 		 */
-		 left = RegionFactory::create (region, 0, plist);
+		 left = RegionFactory::create (region, 0, plist, true, sub_num);
 	 }
 
 	 RegionFactory::region_name (after_name, region->name(), false);
@@ -1466,7 +1466,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 		 plist.add (Properties::layer, region->layer ());
 
 		 /* same note as above */
-		 right = RegionFactory::create (region, before, plist);
+		 right = RegionFactory::create (region, before, plist, true, sub_num);
 	 }
 
 	 add_region_internal (left, region->position());

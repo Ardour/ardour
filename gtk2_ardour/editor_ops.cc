@@ -151,7 +151,7 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_regions_at (framepos_t where, RegionSelection& regions)
+Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t& sub_num)
 {
 	bool frozen = false;
 
@@ -226,7 +226,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 
 		if (pl) {
 			pl->clear_changes ();
-			pl->split_region ((*a)->region(), where);
+			pl->split_region ((*a)->region(), where, sub_num);
 			_session->add_command (new StatefulDiffCommand (pl));
 		}
 
@@ -6151,7 +6151,11 @@ Editor::split_region ()
 			return;
 		}
 
-		split_regions_at (where, rs);
+		if (snap_musical()) {
+			split_regions_at (where, rs, get_grid_music_divisions (0));
+		} else {
+			split_regions_at (where, rs, 0);
+		}
 	}
 }
 
@@ -7294,7 +7298,8 @@ Editor::insert_time (
 			(*i)->clear_owned_changes ();
 
 			if (opt == SplitIntersected) {
-				(*i)->split (pos);
+				/* non musical split */
+				(*i)->split (pos, 0);
 			}
 
 			(*i)->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);

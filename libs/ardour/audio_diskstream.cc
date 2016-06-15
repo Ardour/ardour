@@ -377,9 +377,9 @@ AudioDiskstream::use_destructive_playlist ()
 		throw failed_constructor();
 	}
 
-	/* be sure to stretch the region out to the maximum length */
+	/* be sure to stretch the region out to the maximum length (non-musical)*/
 
-	region->set_length (max_framepos - region->position());
+	region->set_length (max_framepos - region->position(), 0);
 
 	uint32_t n;
 	ChannelList::iterator chan;

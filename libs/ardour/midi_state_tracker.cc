@@ -55,7 +55,7 @@ MidiStateTracker::add (uint8_t note, uint8_t chn)
 	++_active_notes[note + 128 * chn];
 
 	if (_active_notes[note+128 * chn] > 1) {
-		cerr << this << " note " << (int) note << '/' << (int) chn << " was already on, now at " << (int) _active_notes[note+128*chn] << endl;
+		//cerr << this << " note " << (int) note << '/' << (int) chn << " was already on, now at " << (int) _active_notes[note+128*chn] << endl;
 	}
 
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4\n",

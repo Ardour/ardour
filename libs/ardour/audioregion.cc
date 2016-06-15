@@ -279,8 +279,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset)
-	: Region (other, offset)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset, const int32_t& sub_num)
+	: Region (other, offset, sub_num)
 	, AUDIOREGION_COPY_STATE (other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.

@@ -1526,6 +1526,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, co
 	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
+	/* sets beat position */
 	region->set_position (pos, sub_num);
 	playlist()->add_region (region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist()));

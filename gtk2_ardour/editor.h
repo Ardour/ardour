@@ -534,7 +534,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false);
-	void split_regions_at (framepos_t, RegionSelection&);
+	void split_regions_at (framepos_t, RegionSelection&, const int32_t& sub_num);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
 

@@ -1037,7 +1037,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						if (!prev) {
 							_drags->set (new RegionCreateDrag (this, item, parent), event);
 						} else {
-							prev->set_length (t - prev->position ());
+							prev->set_length (t - prev->position (), get_grid_music_divisions (event->button.state));
 						}
 					}
 				} else {

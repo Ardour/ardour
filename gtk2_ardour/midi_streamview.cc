@@ -610,7 +610,7 @@ MidiStreamView::update_rec_box ()
 
 	/* Update the region being recorded to reflect where we currently are */
 	boost::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
-	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start());
+	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start(), 0);
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
 	mrv->extend_active_notes ();

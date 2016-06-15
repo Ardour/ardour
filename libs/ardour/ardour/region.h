@@ -171,9 +171,9 @@ class LIBARDOUR_API Region
 	Trimmable::CanTrim can_trim () const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
-	double beat () { return _beat; }
+	double beat () const { return _beat; }
 	void set_position_lock_style (PositionLockStyle ps);
-	void recompute_position_from_lock_style ();
+	void recompute_position_from_lock_style (const int32_t& sub_num);
 
 	void suspend_property_changes ();
 
@@ -205,7 +205,7 @@ class LIBARDOUR_API Region
 
 	/* EDITING OPERATIONS */
 
-	void set_length (framecnt_t);
+	void set_length (framecnt_t, const int32_t& sub_num);
 	void set_start (framepos_t);
 	void set_position (framepos_t, int32_t sub_num = 0);
 	void set_initial_position (framepos_t);
@@ -339,7 +339,7 @@ class LIBARDOUR_API Region
 	Region (boost::shared_ptr<const Region>);
 
 	/** Construct a region from another region, at an offset within that region */
-	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset);
+	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset, const int32_t& sub_num);
 
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
@@ -356,8 +356,8 @@ class LIBARDOUR_API Region
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
-	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
-	virtual void set_length_internal (framecnt_t);
+	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t& sub_num);
+	virtual void set_length_internal (framecnt_t, const int32_t& sub_num);
 	virtual void set_start_internal (framecnt_t, const int32_t& sub_num = 0);
 	bool verify_start_and_length (framepos_t, framecnt_t&);
 	void first_edit ();

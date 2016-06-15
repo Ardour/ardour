@@ -114,8 +114,8 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	new_src->copy_interpolation_from (src);
 
 	const int ret = finish (region, nsrcs, new_name);
-
-	results[0]->set_length((framecnt_t) floor (r->length() * _request.time_fraction));
+	/* non-musical */
+	results[0]->set_length((framecnt_t) floor (r->length() * _request.time_fraction), 0);
 
 	return ret;
 }

@@ -134,8 +134,8 @@ public:
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos);
-	void split_region (boost::shared_ptr<Region>, framepos_t position);
-	void split (framepos_t at);
+	void split_region (boost::shared_ptr<Region>, framepos_t position, const int32_t& sub_num);
+	void split (framepos_t at, const int32_t& sub_num);
 	void shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue);
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
@@ -380,7 +380,7 @@ public:
 	void begin_undo ();
 	void end_undo ();
 
-	void _split_region (boost::shared_ptr<Region>, framepos_t position);
+	void _split_region (boost::shared_ptr<Region>, framepos_t position, const int32_t& sub_num);
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
 

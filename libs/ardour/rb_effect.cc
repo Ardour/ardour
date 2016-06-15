@@ -352,9 +352,9 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 					  shift);
 		(*x)->set_master_sources (region->master_sources());
 		/* multiply the old (possibly previously stretched) region length by the extra
-		   stretch this time around to get its new length
+		   stretch this time around to get its new length. this is a non-music based edit atm.
 		*/
-		(*x)->set_length ((*x)->length() * tsr.time_fraction);
+		(*x)->set_length ((*x)->length() * tsr.time_fraction, 0);
 	}
 
 	/* stretch region gain envelope */

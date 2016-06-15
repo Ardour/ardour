@@ -320,7 +320,7 @@ Region::Region (boost::shared_ptr<const Region> other)
     the start within \a other is given by \a offset
     (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
 */
-Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
+Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, const int32_t& sub_num)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -344,7 +344,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	set_master_sources (other->_master_sources);
 
 	_start = other->_start + offset;
-	_beat = _session.tempo_map().beat_at_frame (_position);
+	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -419,7 +419,7 @@ Region::set_name (const std::string& str)
 }
 
 void
-Region::set_length (framecnt_t len)
+Region::set_length (framecnt_t len, const int32_t& sub_num)
 {
 	//cerr << "Region::set_length() len = " << len << endl;
 	if (locked()) {
@@ -441,7 +441,7 @@ Region::set_length (framecnt_t len)
 		}
 
 
-		set_length_internal (len);
+		set_length_internal (len, sub_num);
 		_whole_file = false;
 		first_edit ();
 		maybe_uncopy ();
@@ -456,7 +456,7 @@ Region::set_length (framecnt_t len)
 }
 
 void
-Region::set_length_internal (framecnt_t len)
+Region::set_length_internal (framecnt_t len, const int32_t& sub_num)
 {
 	_last_length = _length;
 	_length = len;
@@ -558,7 +558,8 @@ Region::update_after_tempo_map_change (bool send)
 	}
 
 	const framepos_t pos = _session.tempo_map().frame_at_beat (_beat);
-	set_position_internal (pos, false);
+	/* we have _beat. update frame position non-musically */
+	set_position_internal (pos, false, 0);
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -577,11 +578,11 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	}
 
 	if (sub_num == 0) {
-		set_position_internal (pos, true);
+		set_position_internal (pos, true, 0);
 	} else {
 		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
 		_beat = beat;
-		set_position_internal (pos, false);
+		set_position_internal (pos, false, sub_num);
 	}
 
 	/* do this even if the position is the same. this helps out
@@ -629,7 +630,7 @@ Region::set_initial_position (framepos_t pos)
 			_length = max_framepos - _position;
 		}
 
-		recompute_position_from_lock_style ();
+		recompute_position_from_lock_style (0);
 		/* ensure that this move doesn't cause a range move */
 		_last_position = _position;
 	}
@@ -642,7 +643,7 @@ Region::set_initial_position (framepos_t pos)
 }
 
 void
-Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
+Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t& sub_num)
 {
 	/* We emit a change of Properties::position even if the position hasn't changed
 	   (see Region::set_position), so we must always set this up so that
@@ -654,7 +655,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 		_position = pos;
 
 		if (allow_bbt_recompute) {
-			recompute_position_from_lock_style ();
+			recompute_position_from_lock_style (sub_num);
 		}
 		/* check that the new _position wouldn't make the current
 		   length impossible - if so, change the length.
@@ -669,10 +670,10 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 void
-Region::recompute_position_from_lock_style ()
+Region::recompute_position_from_lock_style (const int32_t& sub_num)
 {
 	if (_position_lock_style == MusicTime) {
-		_beat = _session.tempo_map().beat_at_frame (_position);
+		_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
 	}
 }
 
@@ -702,8 +703,8 @@ Region::nudge_position (frameoffset_t n)
 			new_position += n;
 		}
 	}
-
-	set_position_internal (new_position, true);
+	/* assumes non-musical nudge */
+	set_position_internal (new_position, true, 0);
 
 	send_change (Properties::position);
 }
@@ -949,7 +950,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t&
 		if (!property_changes_suspended()) {
 			_last_position = _position;
 		}
-		set_position_internal (position, true);
+		set_position_internal (position, true, sub_num);
 		what_changed.add (Properties::position);
 	}
 
@@ -957,7 +958,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t&
 		if (!property_changes_suspended()) {
 			_last_length = _length;
 		}
-		set_length_internal (length);
+		set_length_internal (length, sub_num);
 		what_changed.add (Properties::length);
 	}
 
@@ -1846,7 +1847,7 @@ void
 Region::post_set (const PropertyChange& pc)
 {
 	if (pc.contains (Properties::position)) {
-		recompute_position_from_lock_style ();
+		recompute_position_from_lock_style (0);
 	}
 }
 

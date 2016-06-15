@@ -102,15 +102,14 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 }
 
 /** Create a new MidiRegion that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
-	: Region (other, offset)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, const int32_t& sub_num)
+	: Region (other, offset, sub_num)
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, other->_length_beats)
 {
-	BeatsFramesConverter bfc (_session.tempo_map(), other->_position);
-	Evoral::Beats const offset_beats = bfc.from (offset);
-
-	_start_beats = other->_start_beats.val() + offset_beats;
+	const double offset_beat = _session.tempo_map().exact_beat_at_frame (other->_position + offset, sub_num) - other->beat();
+	_start_beats = Evoral::Beats (other->_start_beats.val().to_double() + offset_beat);
+	update_length_beats (sub_num);
 	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
@@ -173,7 +172,8 @@ MidiRegion::post_set (const PropertyChange& pc)
 	Region::post_set (pc);
 
 	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
-		update_length_beats ();
+		/* update non-musically */
+		update_length_beats (0);
 	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
 		set_start_beats_from_start_frames ();
 	}
@@ -186,10 +186,10 @@ MidiRegion::set_start_beats_from_start_frames ()
 }
 
 void
-MidiRegion::set_length_internal (framecnt_t len)
+MidiRegion::set_length_internal (framecnt_t len, const int32_t& sub_num)
 {
-	Region::set_length_internal (len);
-	update_length_beats ();
+	Region::set_length_internal (len, sub_num);
+	update_length_beats (sub_num);
 }
 
 void
@@ -198,26 +198,27 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
-	_length = _session.tempo_map().framepos_plus_beats (_position, _length_beats) - _position;
+	_length = _session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position;
 
 	PropertyChange s_and_l;
 	s_and_l.add (Properties::start);
 	s_and_l.add (Properties::length);
+	s_and_l.add (Properties::length_beats);
 	s_and_l.add (Properties::position);
 
 	send_change (s_and_l);
 }
 
 void
-MidiRegion::update_length_beats ()
+MidiRegion::update_length_beats (const int32_t& sub_num)
 {
-	_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - beat());
+	_length_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame (_position + _length, sub_num) - beat());
 }
 
 void
-MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
+MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t& sub_num)
 {
-	Region::set_position_internal (pos, allow_bbt_recompute);
+	Region::set_position_internal (pos, allow_bbt_recompute, sub_num);
 
 	/* set _start to new position in tempo map */
 	_start = _position - _session.tempo_map().frame_at_beat (beat() - _start_beats.val().to_double());
@@ -225,7 +226,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	/* leave _length_beats alone, and change _length to reflect the state of things
 	   at the new position (tempo map may dictate a different number of frames).
 	*/
-	Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position);
+	Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position, sub_num);
 }
 
 framecnt_t
@@ -328,7 +329,10 @@ MidiRegion::set_state (const XMLNode& node, int version)
 	int ret = Region::set_state (node, version);
 
 	if (ret == 0) {
-		update_length_beats ();
+		/* set length beats to the frame (non-musical) */
+		if (position_lock_style() == AudioTime) {
+			update_length_beats (0);
+		}
 	}
 
 	return ret;
@@ -490,11 +494,11 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	 */
 
 	if (_position != position) {
-		set_position_internal (position, true);
+		set_position_internal (position, true, sub_num);
 		what_changed.add (Properties::position);
 	}
 
-	const double new_beat = _session.tempo_map().beat_at_frame (position);
+	const double new_beat = _session.tempo_map().exact_beat_at_frame (position, sub_num);
 	const double new_start_beat = _start_beats.val().to_double() + beat_delta;
 
 	new_start = _position - _session.tempo_map().frame_at_beat (new_beat - new_start_beat);
@@ -511,11 +515,10 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 		what_changed.add (Properties::start);
 	}
 
-
-
 	if (_length != length) {
-		set_length_internal (length);
+		set_length_internal (length, sub_num);
 		what_changed.add (Properties::length);
+		what_changed.add (Properties::length_beats);
 	}
 
 	set_whole_file (false);

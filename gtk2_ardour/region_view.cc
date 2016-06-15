@@ -861,7 +861,7 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t& su
 }
 
 bool
-RegionView::trim_end (framepos_t new_bound, bool no_overlap)
+RegionView::trim_end (framepos_t new_bound, bool no_overlap, const int32_t& sub_num)
 {
 	if (_region->locked()) {
 		return false;
@@ -872,7 +872,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 
 	framepos_t const pre_trim_last_frame = _region->last_frame();
 
-	_region->trim_end ((framepos_t) (new_bound * speed));
+	_region->trim_end ((framepos_t) (new_bound * speed), sub_num);
 
 	if (no_overlap) {
 		// Get the next region on the right of this region and shrink/expand it.
@@ -887,7 +887,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 
 		// Only trim region on the right if the last frame has gone beyond the right region's first frame.
 		if (region_right != 0 && (region_right->first_frame() < _region->last_frame() || regions_touching)) {
-			region_right->trim_front (_region->last_frame() + 1);
+			region_right->trim_front (_region->last_frame() + 1, sub_num);
 		}
 
 		region_changed (ARDOUR::bounds_change);

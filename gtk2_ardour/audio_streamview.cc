@@ -353,8 +353,9 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 				if (nlen != region->length()) {
 
 					region->suspend_property_changes ();
+					/* set non-musical position / length */
 					region->set_position (_trackview.track()->get_capture_start_frame(n));
-					region->set_length (nlen);
+					region->set_length (nlen, 0);
 					region->resume_property_changes ();
 
 					if (origlen == 1) {
@@ -381,7 +382,7 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 
 						region->suspend_property_changes ();
 						region->set_position (_trackview.track()->get_capture_start_frame(n));
-						region->set_length (nlen);
+						region->set_length (nlen, 0);
 						region->resume_property_changes ();
 
 						if (origlen == 1) {
