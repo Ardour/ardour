@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+    
+def configure(conf):
+    conf.load ('compiler_cxx')
+    autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
+    autowaf.check_pkg(conf, 'pangomm-1.5', uselib_store='CAIROMM', atleast_version='1.4')
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            push2.cc
+	    interface.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_push2"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.includes     = [ '.', './push2']
+    obj.name         = 'libardour_push2'
+    obj.target       = 'ardour_push2'
+    obj.uselib       = 'CAIROMM PANGOMM USB'
+    obj.use          = 'libardour libardour_cp libpbd'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+def shutdown():
+    autowaf.shutdown()
