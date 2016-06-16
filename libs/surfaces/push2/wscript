@@ -21,6 +21,7 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
             push2.cc
+            buttons.cc
 	    interface.cc
             midi_byte_array.cc
             leds.cc

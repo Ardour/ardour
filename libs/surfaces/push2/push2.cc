@@ -24,6 +24,8 @@
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 
+#include "midi++/parser.h"
+
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -48,14 +50,14 @@ const int Push2::pixels_per_row = 1024;
 #define ABLETON 0x2982
 #define PUSH2   0x1967
 
-Push2::Push2 (Session& s)
-	: ControlProtocol (s, string (X_("Ableton Push2")))
+Push2::Push2 (ARDOUR::Session& s)
+	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
 	, handle (0)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 {
-	build_led_map ();
+	build_maps ();
 }
 
 Push2::~Push2 ()
@@ -120,6 +122,8 @@ Push2::open ()
 	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port[1]));
 	asp->xthread().attach (main_loop()->get_context());
 
+	connect_to_parser ();
+
 	return 0;
 }
 
@@ -137,6 +141,8 @@ Push2::close ()
 	_async_out[1].reset ((ARDOUR::Port*) 0);
 
 	vblank_connection.disconnect ();
+	periodic_connection.disconnect ();
+	session_connections.drop_connections ();
 
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
@@ -298,7 +304,7 @@ Push2::set_active (bool yn)
 			return -1;
 		}
 
-		// connect_session_signals ();
+		connect_session_signals ();
 
 		/* say hello */
 
@@ -339,6 +345,11 @@ Push2::set_active (bool yn)
 		vblank_connection = vblank_timeout->connect (sigc::mem_fun (*this, &Push2::vblank));
 		vblank_timeout->attach (main_loop()->get_context());
 
+
+		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &Push2::periodic));
+		periodic_timeout->attach (main_loop()->get_context());
+
 	} else {
 
 		stop ();
@@ -356,6 +367,7 @@ void
 Push2::write (int port, const MidiByteArray& data)
 {
 	/* immediate delivery */
+	cerr << data << endl;
 	_output_port[port]->write (&data[0], data.size(), 0);
 }
 
@@ -369,17 +381,373 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
+		// DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
 
 		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*>(port);
 		if (asp) {
 			asp->clear ();
 		}
 
-		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
+		//DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
 		framepos_t now = AudioEngine::instance()->sample_time();
-		// port->parse (now);
+		port->parse (now);
 	}
 
 	return true;
+}
+
+bool
+Push2::periodic ()
+{
+	return true;
+}
+
+void
+Push2::connect_to_parser ()
+{
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Connecting to signals on port %2\n", _input_port[0]->name()));
+
+	MIDI::Parser* p = _input_port[0]->parser();
+
+	/* Incoming sysex */
+	p->sysex.connect_same_thread (*this, boost::bind (&Push2::handle_midi_sysex, this, _1, _2, _3));
+	/* V-Pot messages are Controller */
+	p->controller.connect_same_thread (*this, boost::bind (&Push2::handle_midi_controller_message, this, _1, _2));
+	/* Button messages are NoteOn */
+	p->note_on.connect_same_thread (*this, boost::bind (&Push2::handle_midi_note_on_message, this, _1, _2));
+	/* Button messages are NoteOn but libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
+	p->note_off.connect_same_thread (*this, boost::bind (&Push2::handle_midi_note_on_message, this, _1, _2));
+	/* Fader messages are Pitchbend */
+	p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&Push2::handle_midi_pitchbend_message, this, _1, _2));
+}
+
+void
+Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
+{
+	cerr << "sysex, " << sz << " bytes\n";
+}
+
+void
+Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+{
+	cerr << "controller " << (int) ev->controller_number << " = " << (int) ev->value << endl;
+	CCButtonMap::iterator b = cc_button_map.find (ev->controller_number);
+	if (b != cc_button_map.end()) {
+		if (ev->value == 0) {
+			(this->*b->second->release_method)();
+		} else {
+			(this->*b->second->press_method)();
+		}
+	}
+}
+
+void
+Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+{
+	cerr << "note on" << (int) ev->note_number << ", velocity " << (int) ev->velocity << endl;
+}
+
+void
+Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+{
+	cerr << "note on" << (int) ev->note_number << ", velocity " << (int) ev->velocity << endl;
+}
+
+void
+Push2::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb)
+{
+	cerr << "pitchbend @ " << pb << endl;
+}
+
+void
+Push2::build_maps ()
+{
+	/* Pads */
+
+	Pad* pad;
+
+#define MAKE_PAD(x,y,nn) \
+	pad = new Pad ((x), (y), (nn)); \
+	nn_pad_map.insert (make_pair (pad->extra(), pad)); \
+	coord_pad_map.insert (make_pair (pad->coord(), pad));
+
+	MAKE_PAD (0, 1, 93);
+	MAKE_PAD (0, 2, 94);
+	MAKE_PAD (0, 3, 95);
+	MAKE_PAD (0, 4, 96);
+	MAKE_PAD (0, 5, 97);
+	MAKE_PAD (0, 6, 98);
+	MAKE_PAD (0, 7, 90);
+	MAKE_PAD (1, 0, 84);
+	MAKE_PAD (1, 1, 85);
+	MAKE_PAD (1, 2, 86);
+	MAKE_PAD (1, 3, 87);
+	MAKE_PAD (1, 4, 88);
+	MAKE_PAD (1, 5, 89);
+	MAKE_PAD (1, 6, 90);
+	MAKE_PAD (1, 7, 91);
+	MAKE_PAD (2, 0, 76);
+	MAKE_PAD (2, 1, 77);
+	MAKE_PAD (2, 2, 78);
+	MAKE_PAD (2, 3, 79);
+	MAKE_PAD (2, 4, 80);
+	MAKE_PAD (2, 5, 81);
+	MAKE_PAD (2, 6, 82);
+	MAKE_PAD (2, 7, 83);
+	MAKE_PAD (3, 0, 68);
+	MAKE_PAD (3, 1, 69);
+	MAKE_PAD (3, 2, 70);
+	MAKE_PAD (3, 3, 71);
+	MAKE_PAD (3, 4, 72);
+	MAKE_PAD (3, 5, 73);
+	MAKE_PAD (3, 6, 74);
+	MAKE_PAD (3, 7, 75);
+	MAKE_PAD (4, 0, 60);
+	MAKE_PAD (4, 1, 61);
+	MAKE_PAD (4, 2, 62);
+	MAKE_PAD (4, 3, 63);
+	MAKE_PAD (4, 4, 64);
+	MAKE_PAD (4, 5, 65);
+	MAKE_PAD (4, 6, 66);
+	MAKE_PAD (4, 7, 67);
+	MAKE_PAD (5, 0, 52);
+	MAKE_PAD (5, 1, 53);
+	MAKE_PAD (5, 2, 54);
+	MAKE_PAD (5, 3, 56);
+	MAKE_PAD (5, 4, 56);
+	MAKE_PAD (5, 5, 57);
+	MAKE_PAD (5, 6, 58);
+	MAKE_PAD (5, 7, 59);
+	MAKE_PAD (6, 0, 44);
+	MAKE_PAD (6, 1, 45);
+	MAKE_PAD (6, 2, 46);
+	MAKE_PAD (6, 3, 47);
+	MAKE_PAD (6, 4, 48);
+	MAKE_PAD (6, 5, 49);
+	MAKE_PAD (6, 6, 50);
+	MAKE_PAD (6, 7, 51);
+	MAKE_PAD (7, 0, 36);
+	MAKE_PAD (7, 1, 37);
+	MAKE_PAD (7, 2, 38);
+	MAKE_PAD (7, 3, 39);
+	MAKE_PAD (7, 4, 40);
+	MAKE_PAD (7, 5, 41);
+	MAKE_PAD (7, 6, 42);
+	MAKE_PAD (7, 7, 43);
+
+	/* Now color buttons */
+
+	Button *button;
+
+#define MAKE_COLOR_BUTTON(i,cc) \
+	button = new ColorButton ((i), (cc)); \
+	cc_button_map.insert (make_pair (button->controller_number(), button)); \
+	id_button_map.insert (make_pair (button->id, button));
+#define MAKE_COLOR_BUTTON_PRESS(i,cc,p)\
+	button = new ColorButton ((i), (cc), (p)); \
+	cc_button_map.insert (make_pair (button->controller_number(), button)); \
+	id_button_map.insert (make_pair (button->id, button))
+
+	MAKE_COLOR_BUTTON (Upper1, 102);
+	MAKE_COLOR_BUTTON (Upper2, 103);
+	MAKE_COLOR_BUTTON (Upper3, 104);
+	MAKE_COLOR_BUTTON (Upper4, 105);
+	MAKE_COLOR_BUTTON (Upper5, 106);
+	MAKE_COLOR_BUTTON (Upper6, 107);
+	MAKE_COLOR_BUTTON (Upper7, 108);
+	MAKE_COLOR_BUTTON (Upper8, 109);
+	MAKE_COLOR_BUTTON (Lower1, 21);
+	MAKE_COLOR_BUTTON (Lower2, 22);
+	MAKE_COLOR_BUTTON (Lower3, 23);
+	MAKE_COLOR_BUTTON (Lower4, 24);
+	MAKE_COLOR_BUTTON (Lower5, 25);
+	MAKE_COLOR_BUTTON (Lower6, 26);
+	MAKE_COLOR_BUTTON (Lower7, 27);
+	MAKE_COLOR_BUTTON (Mute, 60);
+	MAKE_COLOR_BUTTON (Solo, 61);
+	MAKE_COLOR_BUTTON (Stop, 29);
+	MAKE_COLOR_BUTTON (Fwd32ndT, 43);
+	MAKE_COLOR_BUTTON (Fwd32nd,42 );
+	MAKE_COLOR_BUTTON (Fwd16thT, 41);
+	MAKE_COLOR_BUTTON (Fwd16th, 40);
+	MAKE_COLOR_BUTTON (Fwd8thT, 39 );
+	MAKE_COLOR_BUTTON (Fwd8th, 38);
+	MAKE_COLOR_BUTTON (Fwd4trT, 37);
+	MAKE_COLOR_BUTTON (Fwd4tr, 36);
+	MAKE_COLOR_BUTTON (Automate, 89);
+	MAKE_COLOR_BUTTON_PRESS (RecordEnable, 86, &Push::button_recenable);
+	MAKE_COLOR_BUTTON_PRESS (Play, 85, &Push2::button_play);
+
+#define MAKE_WHITE_BUTTON(i,cc)\
+	button = new WhiteButton ((i), (cc)); \
+	cc_button_map.insert (make_pair (button->controller_number(), button)); \
+	id_button_map.insert (make_pair (button->id, button))
+#define MAKE_WHITE_BUTTON_PRESS(i,cc,p)\
+	button = new WhiteButton ((i), (cc), (p)); \
+	cc_button_map.insert (make_pair (button->controller_number(), button)); \
+	id_button_map.insert (make_pair (button->id, button))
+
+	MAKE_WHITE_BUTTON (TapTempo, 3);
+	MAKE_WHITE_BUTTON (Metronome, 9);
+	MAKE_WHITE_BUTTON (Setup, 30);
+	MAKE_WHITE_BUTTON (User, 59);
+	MAKE_WHITE_BUTTON (Delete, 118);
+	MAKE_WHITE_BUTTON (AddDevice, 52);
+	MAKE_WHITE_BUTTON (Device, 110);
+	MAKE_WHITE_BUTTON (Mix, 112);
+	MAKE_WHITE_BUTTON (Undo, 119);
+	MAKE_WHITE_BUTTON (AddTrack, 53);
+	MAKE_WHITE_BUTTON (Browse, 113);
+	MAKE_WHITE_BUTTON (Convert, 35);
+	MAKE_WHITE_BUTTON (DoubleLoop, 117);
+	MAKE_WHITE_BUTTON (Quantize, 116);
+	MAKE_WHITE_BUTTON (Duplicate, 88);
+	MAKE_WHITE_BUTTON (New, 87);
+	MAKE_WHITE_BUTTON (FixedLength, 90);
+	MAKE_WHITE_BUTTON_PRESS (Up, 46, &Push2::button_up);
+	MAKE_WHITE_BUTTON (Right, 45);
+	MAKE_WHITE_BUTTON_PRESS (Down, 47, &Push2::button_down);
+	MAKE_WHITE_BUTTON (Left, 44);
+	MAKE_WHITE_BUTTON (Repeat, 56);
+	MAKE_WHITE_BUTTON (Accent, 57);
+	MAKE_WHITE_BUTTON (Scale, 58);
+	MAKE_WHITE_BUTTON (Layout, 31);
+	MAKE_WHITE_BUTTON (OctaveUp, 55);
+	MAKE_WHITE_BUTTON (PageRight, 63);
+	MAKE_WHITE_BUTTON (OctaveDown, 54);
+	MAKE_WHITE_BUTTON (PageLeft, 62);
+	MAKE_WHITE_BUTTON (Shift, 49);
+	MAKE_WHITE_BUTTON (Select, 48);
+}
+
+void
+Push2::thread_init ()
+{
+	struct sched_param rtparam;
+
+	pthread_set_name (event_loop_name().c_str());
+
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
+	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
+
+	memset (&rtparam, 0, sizeof (rtparam));
+	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
+
+	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
+		// do we care? not particularly.
+	}
+}
+
+void
+Push2::connect_session_signals()
+{
+	// receive routes added
+	//session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
+	// receive VCAs added
+	//session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_vca_added, this, _1), this);
+
+	// receive record state toggled
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_record_state_changed, this), this);
+	// receive transport state changed
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_loop_state_changed, this), this);
+	// receive punch-in and punch-out
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_parameter_changed, this, _1), this);
+	// receive rude solo changed
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_solo_active_changed, this, _1), this);
+}
+
+void
+Push2::notify_record_state_changed ()
+{
+	IDButtonMap::iterator b = id_button_map.find (RecordEnable);
+
+	if (b == id_button_map.end()) {
+		return;
+	}
+
+	if (session->actively_recording ()) {
+		b->second->set_state (LED::OneShot24th);
+		b->second->set_color (127);
+	} else {
+		b->second->set_state (LED::Off);
+	}
+
+	write (0, b->second->state_msg());
+}
+
+void
+Push2::notify_transport_state_changed ()
+{
+	cerr << "ts change, id button map holds " << id_button_map.size() << endl;
+
+	IDButtonMap::iterator b = id_button_map.find (Play);
+
+	if (b == id_button_map.end()) {
+		cerr << " no button\n";
+		return;
+	}
+
+	if (session->transport_rolling()) {
+		b->second->set_state (LED::OneShot24th);
+		b->second->set_color (125);
+	} else {
+		b->second->set_state (LED::Off);
+	}
+
+	write (0, b->second->state_msg());
+}
+
+void
+Push2::notify_loop_state_changed ()
+{
+}
+
+void
+Push2::notify_parameter_changed (std::string)
+{
+}
+
+void
+Push2::notify_solo_active_changed (bool yn)
+{
+	IDButtonMap::iterator b = id_button_map.find (Solo);
+
+	if (b == id_button_map.end()) {
+		return;
+	}
+
+	if (yn) {
+		b->second->set_state (LED::Blinking24th);
+	} else {
+		b->second->set_state (LED::Off);
+	}
+
+	write (0, b->second->state_msg());
+}
+
+XMLNode&
+Push2::get_state()
+{
+	XMLNode& node (ControlProtocol::get_state());
+
+	DEBUG_TRACE (DEBUG::Push2, "Push2::get_state done\n");
+
+	return node;
+}
+
+int
+Push2::set_state (const XMLNode & node, int version)
+{
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Push2::set_state: active %1\n", active()));
+
+	int retval = 0;
+
+	if (ControlProtocol::set_state (node, version)) {
+		return -1;
+	}
+
+
+	return retval;
 }
