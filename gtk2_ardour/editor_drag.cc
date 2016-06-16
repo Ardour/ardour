@@ -1256,8 +1256,8 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
 			const boost::shared_ptr<const Region> original = rv->region();
-			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
-			region_copy->set_position (original->position(), _editor->get_grid_music_divisions (event->button.state));
+			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true
+										       , _editor->get_grid_music_divisions (event->button.state));
 			/* need to set this so that the drop zone code can work. This doesn't
 			   actually put the region into the playlist, but just sets a weak pointer
 			   to it.
@@ -1478,7 +1478,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		}
 
 		if (dest_rtv != 0) {
-			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where, modified_playlists);
+			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+									    modified_playlists, _editor->get_grid_music_divisions (ev_state));
+
 			if (new_view != 0) {
 				new_views.push_back (new_view);
 			}
@@ -1574,7 +1576,8 @@ RegionMoveDrag::finished_no_copy (
 			/* insert into new playlist */
 
 			RegionView* new_view = insert_region_into_playlist (
-				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists
+				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
+				modified_playlists, _editor->get_grid_music_divisions (ev_state)
 				);
 
 			if (new_view == 0) {
@@ -1737,7 +1740,8 @@ RegionMoveDrag::insert_region_into_playlist (
 	RouteTimeAxisView* dest_rtv,
 	layer_t dest_layer,
 	framecnt_t where,
-	PlaylistSet& modified_playlists
+	PlaylistSet& modified_playlists,
+	const int32_t& sub_num
 	)
 {
 	boost::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();
@@ -1754,8 +1758,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	if (r.second) {
 		dest_playlist->clear_changes ();
 	}
-
-	dest_playlist->add_region (region, where);
+	dest_playlist->add_region (region, where, 1.0, false, sub_num);
 
 	if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
 		dest_playlist->set_layer (region, dest_layer);

@@ -1190,7 +1190,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cut_copy_midi (Editing::CutCopyOp);
 
 	void mouse_paste ();
-	void paste_internal (framepos_t position, float times);
+	void paste_internal (framepos_t position, float times, const int32_t& sub_num);
 
 	/* EDITING OPERATIONS */
 
@@ -1283,7 +1283,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void delete_ ();
 	void cut ();
 	void copy ();
-	void paste (float times, bool from_context_menu = false);
+	void paste (float times, bool from_context_menu);
 
 	void place_transient ();
 	void remove_transient (ArdourCanvas::Item* item);

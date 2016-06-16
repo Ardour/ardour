@@ -97,7 +97,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	/* editing operations */
 
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::framepos_t, const Selection&, PasteContext&);
+	bool paste (ARDOUR::framepos_t, const Selection&, PasteContext&, const int32_t& sub_num);
 
 	int  set_state (const XMLNode&, int version);
 

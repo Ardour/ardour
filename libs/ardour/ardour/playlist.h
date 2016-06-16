@@ -128,7 +128,7 @@ public:
 
 	/* Editing operations */
 
-	void add_region (boost::shared_ptr<Region>, framepos_t position, float times = 1, bool auto_partition = false);
+	void add_region (boost::shared_ptr<Region>, framepos_t position, float times = 1, bool auto_partition = false, const int32_t& sub_num = 0);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
@@ -161,7 +161,7 @@ public:
 
 	boost::shared_ptr<Playlist> cut  (std::list<AudioRange>&, bool result_is_hidden = true);
 	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
-	int                         paste (boost::shared_ptr<Playlist>, framepos_t position, float times);
+	int                         paste (boost::shared_ptr<Playlist>, framepos_t position, float times, const int32_t& sub_num);
 
 	const RegionListProperty& region_list_property () const { return regions; }
 	boost::shared_ptr<RegionList> region_list();
@@ -362,7 +362,7 @@ public:
 
 	virtual XMLNode& state (bool);
 
-	bool add_region_internal (boost::shared_ptr<Region>, framepos_t position);
+	bool add_region_internal (boost::shared_ptr<Region>, framepos_t position, const int32_t& sub_num = 0);
 
 	int remove_region_internal (boost::shared_ptr<Region>);
 	void copy_regions (RegionList&) const;

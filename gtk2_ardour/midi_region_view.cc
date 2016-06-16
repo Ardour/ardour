@@ -3491,7 +3491,7 @@ MidiRegionView::selection_as_cut_buffer () const
 
 /** This method handles undo */
 bool
-MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx)
+MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx, const int32_t& sub_num)
 {
 	bool commit = false;
 	// Paste notes, if available
@@ -3506,7 +3506,7 @@ MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContex
 	typedef RouteTimeAxisView::AutomationTracks ATracks;
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
-		if (a->second->paste(pos, selection, ctx)) {
+		if (a->second->paste(pos, selection, ctx, sub_num)) {
 			commit = true;
 		}
 	}

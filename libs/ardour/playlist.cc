@@ -665,7 +665,7 @@ Playlist::flush_notifications (bool from_undo)
 
 /** Note: this calls set_layer (..., DBL_MAX) so it will reset the layering index of region */
  void
- Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition)
+ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, const int32_t& sub_num)
  {
 	 RegionWriteLock rlock (this);
 	 times = fabs (times);
@@ -679,7 +679,7 @@ Playlist::flush_notifications (bool from_undo)
 	 }
 
 	 if (itimes >= 1) {
-		 add_region_internal (region, pos);
+		 add_region_internal (region, pos, sub_num);
 		 set_layer (region, DBL_MAX);
 		 pos += region->length();
 		 --itimes;
@@ -692,7 +692,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 for (int i = 0; i < itimes; ++i) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		 add_region_internal (copy, pos);
+		 add_region_internal (copy, pos, sub_num);
 		 set_layer (copy, DBL_MAX);
 		 pos += region->length();
 	 }
@@ -713,7 +713,7 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::layer, region->layer());
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			 add_region_internal (sub, pos);
+			 add_region_internal (sub, pos, sub_num);
 			 set_layer (sub, DBL_MAX);
 		 }
 	 }
@@ -734,7 +734,7 @@ Playlist::flush_notifications (bool from_undo)
  }
 
  bool
- Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position)
+ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, const int32_t& sub_num)
  {
 	 if (region->data_type() != _type) {
 		 return false;
@@ -747,7 +747,7 @@ Playlist::flush_notifications (bool from_undo)
 		 region->set_playlist (boost::weak_ptr<Playlist>(foo));
 	 }
 
-	 region->set_position (position);
+	 region->set_position (position, sub_num);
 
 	 regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	 all_regions.insert (region);
@@ -1146,7 +1146,7 @@ Playlist::flush_notifications (bool from_undo)
 			    chopped.
 			 */
 
-			 ret->paste (pl, (*i).start - start, 1.0f);
+			 ret->paste (pl, (*i).start - start, 1.0f, 0);
 		 }
 	 }
 
@@ -1208,7 +1208,7 @@ Playlist::flush_notifications (bool from_undo)
  }
 
  int
- Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times)
+ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times, const int32_t& sub_num)
  {
 	 times = fabs (times);
 
@@ -1230,7 +1230,7 @@ Playlist::flush_notifications (bool from_undo)
 					    the ordering they had in the original playlist.
 					 */
 
-					 add_region_internal (copy_of_region, (*i)->position() + pos);
+					 add_region_internal (copy_of_region, (*i)->position() + pos, sub_num);
 					 set_layer (copy_of_region, copy_of_region->layer() + top);
 				 }
 				 pos += shift;
@@ -1321,7 +1321,7 @@ Playlist::duplicate_range (AudioRange& range, float times)
 {
 	boost::shared_ptr<Playlist> pl = copy (range.start, range.length(), true);
 	framecnt_t offset = range.end - range.start;
-	paste (pl, range.start + offset, times);
+	paste (pl, range.start + offset, times, 0);
 }
 
 void
@@ -1345,7 +1345,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 
 	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
 		boost::shared_ptr<Playlist> pl = copy ((*i).start, (*i).length(), true);
-		paste (pl, (*i).start + offset, 1.0f); // times ??
+		paste (pl, (*i).start + offset, 1.0f, 0); // times ??
 	}
 }
 

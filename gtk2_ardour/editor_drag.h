@@ -423,7 +423,8 @@ private:
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
 		ARDOUR::framecnt_t,
-		PlaylistSet&
+		PlaylistSet&,
+		const int32_t& sub_num
 		);
 
 	void remove_region_from_playlist (

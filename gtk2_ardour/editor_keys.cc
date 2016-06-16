@@ -105,5 +105,5 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 void
 Editor::keyboard_paste ()
 {
-	paste (1);
+	paste (1, false);
 }

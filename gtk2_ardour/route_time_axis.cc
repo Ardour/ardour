@@ -1585,7 +1585,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx)
+RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t& sub_num)
 {
 	if (!is_track()) {
 		return false;
@@ -1619,7 +1619,7 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 		framecnt_t amount = extent.second - extent.first;
 		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>());
 	}
-	pl->paste (*p, pos, ctx.times);
+	pl->paste (*p, pos, ctx.times, sub_num);
 
 	vector<Command*> cmds;
 	pl->rdiff (cmds);

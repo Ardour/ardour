@@ -185,7 +185,8 @@ class TimeAxisView : public virtual AxisView
 	 */
 	virtual bool paste (ARDOUR::framepos_t pos,
 	                    const Selection&   selection,
-	                    PasteContext&      ctx) { return false; }
+	                    PasteContext&      ctx,
+			    const int32_t& sub_num) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}

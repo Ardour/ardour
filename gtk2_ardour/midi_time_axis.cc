@@ -1635,12 +1635,12 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 }
 
 bool
-MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx)
+MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t& sub_num)
 {
 	if (!_editor.internal_editing()) {
 		// Non-internal paste, paste regions like any other route
-		return RouteTimeAxisView::paste(pos, selection, ctx);
+		return RouteTimeAxisView::paste(pos, selection, ctx, sub_num);
 	}
 
-	return midi_view()->paste(pos, selection, ctx);
+	return midi_view()->paste(pos, selection, ctx, sub_num);
 }

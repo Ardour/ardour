@@ -4635,7 +4635,7 @@ Editor::paste (float times, bool from_context)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
 
-	paste_internal (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), times);
+	paste_internal (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), times, get_grid_music_divisions (0));
 }
 
 void
@@ -4649,11 +4649,11 @@ Editor::mouse_paste ()
 	}
 
 	snap_to (where);
-	paste_internal (where, 1);
+	paste_internal (where, 1, get_grid_music_divisions (0));
 }
 
 void
-Editor::paste_internal (framepos_t position, float times)
+Editor::paste_internal (framepos_t position, float times, const int32_t& sub_num)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
 
@@ -4746,7 +4746,7 @@ Editor::paste_internal (framepos_t position, float times)
 	       "greedy" paste from one automation type to another. */
 
 	    PasteContext ctx(paste_count, times, ItemCounts(), true);
-	    ts.front()->paste (position, *cut_buffer, ctx);
+	    ts.front()->paste (position, *cut_buffer, ctx, sub_num);
 
 	} else {
 
@@ -4754,7 +4754,7 @@ Editor::paste_internal (framepos_t position, float times)
 
 		PasteContext ctx(paste_count, times, ItemCounts(), false);
 		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
-			(*i)->paste (position, *cut_buffer, ctx);
+			(*i)->paste (position, *cut_buffer, ctx, sub_num);
 		}
 	}
 

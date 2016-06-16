@@ -171,9 +171,11 @@ class LIBARDOUR_API Region
 	Trimmable::CanTrim can_trim () const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
-	double beat () const { return _beat; }
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style (const int32_t& sub_num);
+
+	double beat () const { return _beat; }
+	void set_beat (double beat) { _beat = beat; }
 
 	void suspend_property_changes ();
 

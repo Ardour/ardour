@@ -107,8 +107,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, other->_length_beats)
 {
-	const double offset_beat = _session.tempo_map().exact_beat_at_frame (other->_position + offset, sub_num) - other->beat();
-	_start_beats = Evoral::Beats (other->_start_beats.val().to_double() + offset_beat);
+	_start_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame (other->_position + offset - other->_start, sub_num) - other->beat());
 	update_length_beats (sub_num);
 	register_properties ();
 
@@ -163,7 +162,10 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
 
-	return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true));
+	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true)));
+	ret->set_beat (beat());
+
+	return ret;
 }
 
 void
