@@ -169,6 +169,15 @@ class Push2 : public ARDOUR::ControlProtocol
 			Blinking2th
 		};
 
+		enum Colors {
+			Red = 127,
+			Green = 126,
+			Blue = 125,
+			DarkGray = 124,
+			LightGray = 123,
+			White = 122
+		};
+
 		LED (uint8_t e) : _extra (e), _color_index (0), _state (Off) {}
 		virtual ~LED() {}
 
@@ -283,10 +292,10 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void build_maps ();
 
-	MIDI::Port* _input_port[2];
-	MIDI::Port* _output_port[2];
-	boost::shared_ptr<ARDOUR::Port> _async_in[2];
-	boost::shared_ptr<ARDOUR::Port> _async_out[2];
+	MIDI::Port* _input_port;
+	MIDI::Port* _output_port;
+	boost::shared_ptr<ARDOUR::Port> _async_in;
+	boost::shared_ptr<ARDOUR::Port> _async_out;
 
 	void connect_to_parser ();
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t);
@@ -295,7 +304,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
-	void write (int port, const MidiByteArray&);
+	void write (const MidiByteArray&);
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	bool periodic ();
 
@@ -314,6 +323,10 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_recenable ();
 	void button_up ();
 	void button_down ();
+	void button_right ();
+	void button_left ();
+	void button_metronome ();
+	void button_repeat ();
 };
 
 

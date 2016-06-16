@@ -57,6 +57,10 @@ Push2::Push2 (ARDOUR::Session& s)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 {
+	if (open ()) {
+		throw failed_constructor ();
+	}
+
 	build_maps ();
 }
 
@@ -69,6 +73,11 @@ int
 Push2::open ()
 {
 	int err;
+
+	if (handle) {
+		/* already open */
+		return 0;
+	}
 
 	if ((handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
 		return -1;
@@ -92,35 +101,15 @@ Push2::open ()
 
 	/* setup ports */
 
-	_async_in[0]  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in1"), true);
-	_async_out[0] = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out1"), true);
+	_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in"), true);
+	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out"), true);
 
-	if (_async_in[0] == 0 || _async_out[0] == 0) {
+	if (_async_in == 0 || _async_out == 0) {
 		return -1;
 	}
 
-	_input_port[0] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[0]).get();
-	_output_port[0] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[0]).get();
-
-	_async_in[1]  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in2"), true);
-	_async_out[1] = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out2"), true);
-
-	if (_async_in[1] == 0 || _async_out[1] == 0) {
-		return -1;
-	}
-
-	_input_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[1]).get();
-	_output_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[1]).get();
-
-	AsyncMIDIPort* asp;
-
-	asp = dynamic_cast<AsyncMIDIPort*> (_input_port[0]);
-	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port[0]));
-	asp->xthread().attach (main_loop()->get_context());
-
-	asp = dynamic_cast<AsyncMIDIPort*> (_input_port[1]);
-	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port[1]));
-	asp->xthread().attach (main_loop()->get_context());
+	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
+	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
 	connect_to_parser ();
 
@@ -130,15 +119,13 @@ Push2::open ()
 int
 Push2::close ()
 {
-	AudioEngine::instance()->unregister_port (_async_in[0]);
-	AudioEngine::instance()->unregister_port (_async_out[0]);
-	AudioEngine::instance()->unregister_port (_async_in[1]);
-	AudioEngine::instance()->unregister_port (_async_out[1]);
+	AudioEngine::instance()->unregister_port (_async_in);
+	AudioEngine::instance()->unregister_port (_async_out);
 
-	_async_in[0].reset ((ARDOUR::Port*) 0);
-	_async_out[0].reset ((ARDOUR::Port*) 0);
-	_async_in[1].reset ((ARDOUR::Port*) 0);
-	_async_out[1].reset ((ARDOUR::Port*) 0);
+	_async_in.reset ((ARDOUR::Port*) 0);
+	_async_out.reset ((ARDOUR::Port*) 0);
+	_input_port = 0;
+	_output_port = 0;
 
 	vblank_connection.disconnect ();
 	periodic_connection.disconnect ();
@@ -147,6 +134,7 @@ Push2::close ()
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
+		handle = 0;
 	}
 
 	delete [] device_frame_buffer[0];
@@ -304,20 +292,20 @@ Push2::set_active (bool yn)
 			return -1;
 		}
 
+		/* Connect input port to event loop */
+
+		AsyncMIDIPort* asp;
+
+		asp = dynamic_cast<AsyncMIDIPort*> (_input_port);
+		asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port));
+		asp->xthread().attach (main_loop()->get_context());
+
 		connect_session_signals ();
 
 		/* say hello */
 
 		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (frame_buffer);
-		if (!context) {
-			cerr << "Cannot create context\n";
-			return -1;
-		}
 		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-		if (!layout) {
-			cerr << "Cannot create layout\n";
-			return -1;
-		}
 
 		layout->set_text ("hello, Ardour");
 		Pango::FontDescription fd ("Sans Bold 12");
@@ -364,11 +352,11 @@ Push2::set_active (bool yn)
 }
 
 void
-Push2::write (int port, const MidiByteArray& data)
+Push2::write (const MidiByteArray& data)
 {
-	/* immediate delivery */
 	cerr << data << endl;
-	_output_port[port]->write (&data[0], data.size(), 0);
+	/* immediate delivery */
+	_output_port->write (&data[0], data.size(), 0);
 }
 
 bool
@@ -405,9 +393,9 @@ Push2::periodic ()
 void
 Push2::connect_to_parser ()
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("Connecting to signals on port %2\n", _input_port[0]->name()));
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Connecting to signals on port %2\n", _input_port->name()));
 
-	MIDI::Parser* p = _input_port[0]->parser();
+	MIDI::Parser* p = _input_port->parser();
 
 	/* Incoming sysex */
 	p->sysex.connect_same_thread (*this, boost::bind (&Push2::handle_midi_sysex, this, _1, _2, _3));
@@ -430,7 +418,6 @@ Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 void
 Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
-	cerr << "controller " << (int) ev->controller_number << " = " << (int) ev->value << endl;
 	CCButtonMap::iterator b = cc_button_map.find (ev->controller_number);
 	if (b != cc_button_map.end()) {
 		if (ev->value == 0) {
@@ -575,7 +562,7 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON (Fwd4trT, 37);
 	MAKE_COLOR_BUTTON (Fwd4tr, 36);
 	MAKE_COLOR_BUTTON (Automate, 89);
-	MAKE_COLOR_BUTTON_PRESS (RecordEnable, 86, &Push::button_recenable);
+	MAKE_COLOR_BUTTON_PRESS (RecordEnable, 86, &Push2::button_recenable);
 	MAKE_COLOR_BUTTON_PRESS (Play, 85, &Push2::button_play);
 
 #define MAKE_WHITE_BUTTON(i,cc)\
@@ -588,7 +575,7 @@ Push2::build_maps ()
 	id_button_map.insert (make_pair (button->id, button))
 
 	MAKE_WHITE_BUTTON (TapTempo, 3);
-	MAKE_WHITE_BUTTON (Metronome, 9);
+	MAKE_WHITE_BUTTON_PRESS (Metronome, 9, &Push2::button_metronome);
 	MAKE_WHITE_BUTTON (Setup, 30);
 	MAKE_WHITE_BUTTON (User, 59);
 	MAKE_WHITE_BUTTON (Delete, 118);
@@ -605,10 +592,10 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (New, 87);
 	MAKE_WHITE_BUTTON (FixedLength, 90);
 	MAKE_WHITE_BUTTON_PRESS (Up, 46, &Push2::button_up);
-	MAKE_WHITE_BUTTON (Right, 45);
+	MAKE_WHITE_BUTTON_PRESS (Right, 45, &Push2::button_right);
 	MAKE_WHITE_BUTTON_PRESS (Down, 47, &Push2::button_down);
-	MAKE_WHITE_BUTTON (Left, 44);
-	MAKE_WHITE_BUTTON (Repeat, 56);
+	MAKE_WHITE_BUTTON_PRESS (Left, 44, &Push2::button_left);
+	MAKE_WHITE_BUTTON_PRESS (Repeat, 56, &Push2::button_repeat);
 	MAKE_WHITE_BUTTON (Accent, 57);
 	MAKE_WHITE_BUTTON (Scale, 58);
 	MAKE_WHITE_BUTTON (Layout, 31);
@@ -667,36 +654,40 @@ Push2::notify_record_state_changed ()
 		return;
 	}
 
-	if (session->actively_recording ()) {
-		b->second->set_state (LED::OneShot24th);
-		b->second->set_color (127);
-	} else {
+	b->second->set_color (LED::Red);
+
+	switch (session->record_status ()) {
+	case Session::Disabled:
 		b->second->set_state (LED::Off);
+		break;
+	case Session::Enabled:
+		b->second->set_state (LED::Blinking4th);
+		break;
+	case Session::Recording:
+		b->second->set_state (LED::OneShot24th);
+		break;
 	}
 
-	write (0, b->second->state_msg());
+	write (b->second->state_msg());
 }
 
 void
 Push2::notify_transport_state_changed ()
 {
-	cerr << "ts change, id button map holds " << id_button_map.size() << endl;
-
 	IDButtonMap::iterator b = id_button_map.find (Play);
 
 	if (b == id_button_map.end()) {
-		cerr << " no button\n";
 		return;
 	}
 
 	if (session->transport_rolling()) {
 		b->second->set_state (LED::OneShot24th);
-		b->second->set_color (125);
+		b->second->set_color (LED::Blue);
 	} else {
 		b->second->set_state (LED::Off);
 	}
 
-	write (0, b->second->state_msg());
+	write (b->second->state_msg());
 }
 
 void
@@ -724,15 +715,21 @@ Push2::notify_solo_active_changed (bool yn)
 		b->second->set_state (LED::Off);
 	}
 
-	write (0, b->second->state_msg());
+	write (b->second->state_msg());
 }
 
 XMLNode&
 Push2::get_state()
 {
 	XMLNode& node (ControlProtocol::get_state());
+	XMLNode* child;
 
-	DEBUG_TRACE (DEBUG::Push2, "Push2::get_state done\n");
+	child = new XMLNode (X_("Input"));
+	child->add_child_nocopy (_async_in->get_state());
+	node.add_child_nocopy (*child);
+	child = new XMLNode (X_("Output"));
+	child->add_child_nocopy (_async_out->get_state());
+	node.add_child_nocopy (*child);
 
 	return node;
 }
@@ -748,6 +745,21 @@ Push2::set_state (const XMLNode & node, int version)
 		return -1;
 	}
 
+	XMLNode* child;
+
+	if ((child = node.child (X_("Input"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_in->set_state (*portnode, version);
+		}
+	}
+
+	if ((child = node.child (X_("Output"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_out->set_state (*portnode, version);
+		}
+	}
 
 	return retval;
 }

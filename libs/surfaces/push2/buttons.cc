@@ -17,7 +17,6 @@ Push2::button_play ()
 void
 Push2::button_recenable ()
 {
-	std::cerr << "RE toggle\n";
 	rec_enable_toggle ();
 }
 
@@ -31,4 +30,28 @@ void
 Push2::button_down ()
 {
 	scroll_dn_1_track ();
+}
+
+void
+Push2::button_right ()
+{
+	ScrollTimeline (0.75);
+}
+
+void
+Push2::button_left ()
+{
+	ScrollTimeline (-0.75);
+}
+
+void
+Push2::button_repeat ()
+{
+	loop_toggle ();
+}
+
+void
+Push2::button_metronome ()
+{
+	toggle_click ();
 }
