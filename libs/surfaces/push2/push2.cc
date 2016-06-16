@@ -25,6 +25,9 @@
 #include "pbd/failed_constructor.h"
 
 #include "ardour/debug.h"
+#include "ardour/audioengine.h"
+#include "ardour/async_midi_port.h"
+#include "ardour/midiport_manager.h"
 
 #include "push2.h"
 
@@ -52,6 +55,7 @@ Push2::Push2 (Session& s)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 {
+	build_led_map ();
 }
 
 Push2::~Push2 ()
@@ -62,11 +66,15 @@ Push2::~Push2 ()
 int
 Push2::open ()
 {
+	int err;
+
 	if ((handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
 		return -1;
 	}
 
-	libusb_claim_interface (handle, 0x00);
+	if ((err = libusb_claim_interface (handle, 0x00))) {
+		return -1;
+	}
 
 	device_frame_buffer[0] = new uint16_t[rows*pixels_per_row];
 	device_frame_buffer[1] = new uint16_t[rows*pixels_per_row];
@@ -80,12 +88,44 @@ Push2::open ()
 	frame_header[3] = 0x89;
 	memset (&frame_header[4], 0, 12);
 
+	/* setup ports */
+
+	_async_in[0]  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in1"), true);
+	_async_out[0] = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out1"), true);
+
+	if (_async_in[0] == 0 || _async_out[0] == 0) {
+		return -1;
+	}
+
+	_input_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[1]).get();
+	_output_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[1]).get();
+
+	_async_in[1]  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in2"), true);
+	_async_out[1] = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out2"), true);
+
+	if (_async_in[1] == 0 || _async_out[1] == 0) {
+		return -1;
+	}
+
+	_input_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[1]).get();
+	_output_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[1]).get();
+
 	return 0;
 }
 
 int
 Push2::close ()
 {
+	AudioEngine::instance()->unregister_port (_async_in[0]);
+	AudioEngine::instance()->unregister_port (_async_out[0]);
+	AudioEngine::instance()->unregister_port (_async_in[1]);
+	AudioEngine::instance()->unregister_port (_async_out[1]);
+
+	_async_in[0].reset ((ARDOUR::Port*) 0);
+	_async_out[0].reset ((ARDOUR::Port*) 0);
+	_async_in[1].reset ((ARDOUR::Port*) 0);
+	_async_out[1].reset ((ARDOUR::Port*) 0);
+
 	vblank_connection.disconnect ();
 
 	if (handle) {
@@ -302,4 +342,11 @@ Push2::set_active (bool yn)
 	DEBUG_TRACE (DEBUG::Push2, string_compose("Push2Protocol::set_active done with yn: '%1'\n", yn));
 
 	return 0;
+}
+
+void
+Push2::write (int port, const MidiByteArray& data)
+{
+	/* immediate delivery */
+	_output_port[port]->write (&data[0], data.size(), 0);
 }

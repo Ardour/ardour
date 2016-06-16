@@ -22,6 +22,8 @@ def build(bld):
     obj.source = '''
             push2.cc
 	    interface.cc
+            midi_byte_array.cc
+            leds.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
