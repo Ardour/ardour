@@ -67,6 +67,8 @@ const string PluginInsert::port_automation_node_name = "PortAutomation";
 
 PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
+	, _sc_playback_latency (0)
+	, _sc_capture_latency (0)
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
 	, _configured (false)
@@ -215,8 +217,28 @@ PluginInsert::del_sidechain ()
 		return false;
 	}
 	_sidechain.reset ();
+	_sc_playback_latency = 0;
+	_sc_capture_latency = 0;
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return true;
+}
+
+void
+PluginInsert::set_sidechain_latency (uint32_t capture, uint32_t playback)
+{
+	if (_sidechain &&
+			(_sc_playback_latency != playback || _sc_capture_latency != capture)) {
+		_sc_capture_latency = capture;
+		_sc_playback_latency = playback;
+		LatencyRange pl; pl.min = pl.max = playback;
+		LatencyRange cl; cl.min = cl.max = capture;
+		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: capture %2 playback; %3\n", _sidechain->name (), capture, playback));
+		PortSet& ps (_sidechain->input ()->ports ());
+		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
+			p->set_private_latency_range (pl, true);
+			p->set_private_latency_range (cl, false);
+		}
+	}
 }
 
 void

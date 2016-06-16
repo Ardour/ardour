@@ -153,6 +153,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool set_preset_out (const ChanCount&);
 	bool add_sidechain  (uint32_t n_audio = 1);
 	bool del_sidechain ();
+	void set_sidechain_latency (uint32_t, uint32_t);
 	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
 	// end C++ class slavery!
 
@@ -302,6 +303,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	Plugins _plugins;
 
 	boost::shared_ptr<SideChain> _sidechain;
+	uint32_t _sc_playback_latency;
+	uint32_t _sc_capture_latency;
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 

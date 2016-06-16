@@ -444,6 +444,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		if (boost::dynamic_pointer_cast<Send>(*i) != 0) {
 			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
 		}
+		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
+			const framecnt_t longest_session_latency = _initial_delay + _signal_latency;
+			boost::dynamic_pointer_cast<PluginInsert>(*i)->set_sidechain_latency (
+					_initial_delay + latency, longest_session_latency - latency);
+		}
 
 		(*i)->run (bufs, start_frame - latency, end_frame - latency, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
