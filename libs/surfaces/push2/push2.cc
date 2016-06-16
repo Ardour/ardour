@@ -24,11 +24,11 @@
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 
-#include "ardour/debug.h"
-#include "ardour/audioengine.h"
 #include "ardour/async_midi_port.h"
+#include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/midiport_manager.h"
-
+#include "ardour/session.h"
 #include "push2.h"
 
 using namespace ARDOUR;
@@ -97,8 +97,8 @@ Push2::open ()
 		return -1;
 	}
 
-	_input_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[1]).get();
-	_output_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[1]).get();
+	_input_port[0] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[0]).get();
+	_output_port[0] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[0]).get();
 
 	_async_in[1]  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push2 in2"), true);
 	_async_out[1] = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push2 out2"), true);
@@ -109,6 +109,16 @@ Push2::open ()
 
 	_input_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in[1]).get();
 	_output_port[1] = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out[1]).get();
+
+	AsyncMIDIPort* asp;
+
+	asp = dynamic_cast<AsyncMIDIPort*> (_input_port[0]);
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port[0]));
+	asp->xthread().attach (main_loop()->get_context());
+
+	asp = dynamic_cast<AsyncMIDIPort*> (_input_port[1]);
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port[1]));
+	asp->xthread().attach (main_loop()->get_context());
 
 	return 0;
 }
@@ -186,9 +196,8 @@ Push2::do_request (Push2Request * req)
 int
 Push2::stop ()
 {
-	close ();
 	BaseUI::quit ();
-
+	close ();
 	return 0;
 }
 
@@ -279,15 +288,15 @@ Push2::set_active (bool yn)
 
 	if (yn) {
 
+		/* start event loop */
+
+		BaseUI::run ();
+
 		if (open ()) {
 			DEBUG_TRACE (DEBUG::Push2, "device open failed\n");
 			close ();
 			return -1;
 		}
-
-		/* start event loop */
-
-		BaseUI::run ();
 
 		// connect_session_signals ();
 
@@ -332,8 +341,7 @@ Push2::set_active (bool yn)
 
 	} else {
 
-		BaseUI::quit ();
-		close ();
+		stop ();
 
 	}
 
@@ -349,4 +357,29 @@ Push2::write (int port, const MidiByteArray& data)
 {
 	/* immediate delivery */
 	_output_port[port]->write (&data[0], data.size(), 0);
+}
+
+bool
+Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
+{
+	if (ioc & ~IO_IN) {
+		DEBUG_TRACE (DEBUG::Push2, "MIDI port closed\n");
+		return false;
+	}
+
+	if (ioc & IO_IN) {
+
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
+
+		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*>(port);
+		if (asp) {
+			asp->clear ();
+		}
+
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
+		framepos_t now = AudioEngine::instance()->sample_time();
+		// port->parse (now);
+	}
+
+	return true;
 }

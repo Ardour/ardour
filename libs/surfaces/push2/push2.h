@@ -147,6 +147,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<ARDOUR::Port> _async_out[2];
 
 	void write (int port, const MidiByteArray&);
+	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 };
 
 
