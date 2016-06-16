@@ -2393,7 +2393,7 @@ OSC::periodic (void)
 			recalcbanks ();
 		}
 	}
-	
+
 	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end(); x++) {
 
 		OSCGlobalObserver* go;

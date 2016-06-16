@@ -133,9 +133,12 @@ OSCSelectObserver::~OSCSelectObserver ()
 	if (feedback[0]) { // buttons are separate feedback
 		lo_message msg = lo_message_new ();
 		// name is a string do it first
-		string path = "/select/name";
 		lo_message_add_string (msg, " ");
-		lo_send_message (addr, path.c_str(), msg);
+		lo_send_message (addr, "/select/name", msg);
+		lo_message_free (msg);
+		msg = lo_message_new ();
+		lo_message_add_string (msg, " ");
+		lo_send_message (addr, "/select/comment", msg);
 		lo_message_free (msg);
 		clear_strip ("/select/mute", 0);
 		clear_strip ("/select/solo", 0);
@@ -144,6 +147,8 @@ OSCSelectObserver::~OSCSelectObserver ()
 		clear_strip ("/select/monitor_input", 0);
 		clear_strip ("/select/monitor_disk", 0);
 		clear_strip ("/select/polarity", 0);
+		clear_strip ("/select/n_inputs", 0);
+		clear_strip ("/select/n_outputs", 0);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {
