@@ -26,14 +26,18 @@
 
 #include <libusb.h>
 
+#include <cairomm/refptr.h>
+#include <glibmm/threads.h>
+
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "midi++/types.h"
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
 
-#define ABLETON 0x2982
-#define PUSH2   0x1967
+namespace Cairo {
+	class ImageSurface;
+}
 
 namespace ArdourSurface {
 
@@ -53,10 +57,27 @@ class Push2 : public ARDOUR::ControlProtocol
 	static bool probe ();
 	static void* request_factory (uint32_t);
 
+	int set_active (bool yn);
+
    private:
 	libusb_device_handle *handle;
+	Glib::Threads::Mutex fb_lock;
+	uint8_t   frame_header[16];
+	uint16_t* device_frame_buffer[2];
+	int  device_buffer;
+	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
+	sigc::connection vblank_connection;
+
+	static const int cols;
+	static const int rows;
+	static const int pixels_per_row;
+
 	void do_request (Push2Request*);
 	int stop ();
+	int open ();
+	int close ();
+	int render ();
+	bool vblank ();
 };
 
 

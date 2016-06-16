@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2006,2007 Paul Davis
+	Copyright (C) 2017 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -79,9 +79,8 @@ push2_request_buffer_factory (uint32_t num_requests)
 	return Push2::request_factory (num_requests);
 }
 
-// Field names commented out by JE - 06-01-2010
-static ControlProtocolDescriptor mackie_descriptor = {
-	/*name :              */   "Ableton Push2",
+static ControlProtocolDescriptor push2_descriptor = {
+	/*name :              */   "Ableton Push 2",
 	/*id :                */   "uri://ardour.org/surfaces/push2:0",
 	/*ptr :               */   0,
 	/*module :            */   0,
@@ -97,4 +96,4 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/*request_buffer_factory */ push2_request_buffer_factory
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &push2_descriptor; }

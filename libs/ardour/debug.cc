@@ -78,3 +78,4 @@ PBD::DebugBits PBD::DEBUG::BackendPorts = PBD::new_debug_bit ("backendports");
 PBD::DebugBits PBD::DEBUG::VSTCallbacks = PBD::new_debug_bit ("vstcallbacks");
 PBD::DebugBits PBD::DEBUG::FaderPort = PBD::new_debug_bit ("faderport");
 PBD::DebugBits PBD::DEBUG::VCA = PBD::new_debug_bit ("vca");
+PBD::DebugBits PBD::DEBUG::Push2 = PBD::new_debug_bit ("push2");

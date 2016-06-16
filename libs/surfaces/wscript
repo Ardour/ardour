@@ -45,6 +45,8 @@ def configure(conf):
 
     if conf.is_defined('HAVE_USB'):
         children += [ 'push2' ]
+    else:
+        print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
     
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
         children += [ 'osc' ]
