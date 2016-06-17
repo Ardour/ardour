@@ -27,7 +27,6 @@
 #include <libusb.h>
 
 #include <cairomm/refptr.h>
-#include <glibmm/threads.h>
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
@@ -39,6 +38,11 @@
 
 namespace Cairo {
 	class ImageSurface;
+	class Context;
+}
+
+namespace Pango {
+	class Layout;
 }
 
 namespace MIDI {
@@ -75,9 +79,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
    private:
 	libusb_device_handle *handle;
-	Glib::Threads::Mutex fb_lock;
 	uint8_t   frame_header[16];
-	uint16_t* device_frame_buffer[2];
+	uint16_t* device_frame_buffer;
 	int  device_buffer;
 	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
 	sigc::connection vblank_connection;
@@ -91,7 +94,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	int stop ();
 	int open ();
 	int close ();
-	int render ();
+	bool redraw ();
+	int bitblt_to_device_frame_buffer ();
 	bool vblank ();
 
 	enum ButtonID {
@@ -327,6 +331,15 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_left ();
 	void button_metronome ();
 	void button_repeat ();
+
+	/* widgets */
+
+	Cairo::RefPtr<Cairo::Context> context;
+	Glib::RefPtr<Pango::Layout> tc_clock_layout;
+	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
+	Glib::RefPtr<Pango::Layout> upper_layout[8];
+	Glib::RefPtr<Pango::Layout> mid_layout[8];
+	Glib::RefPtr<Pango::Layout> lower_layout[8];
 };
 
 

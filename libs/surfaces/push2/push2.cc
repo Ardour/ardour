@@ -25,12 +25,16 @@
 #include "pbd/failed_constructor.h"
 
 #include "midi++/parser.h"
+#include "timecode/time.h"
+#include "timecode/bbt_time.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
+
 #include "push2.h"
 
 using namespace ARDOUR;
@@ -57,6 +61,27 @@ Push2::Push2 (ARDOUR::Session& s)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 {
+	context = Cairo::Context::create (frame_buffer);
+	tc_clock_layout = Pango::Layout::create (context);
+	bbt_clock_layout = Pango::Layout::create (context);
+
+	Pango::FontDescription fd ("Sans Bold 24");
+	tc_clock_layout->set_font_description (fd);
+	bbt_clock_layout->set_font_description (fd);
+
+	Pango::FontDescription fd2 ("Sans Bold 10");
+	for (int n = 0; n < 8; ++n) {
+		upper_layout[n] = Pango::Layout::create (context);
+		upper_layout[n]->set_font_description (fd2);
+		upper_layout[n]->set_text ("solo");
+		lower_layout[n] = Pango::Layout::create (context);
+		lower_layout[n]->set_font_description (fd2);
+		lower_layout[n]->set_text ("mute");
+		mid_layout[n] = Pango::Layout::create (context);
+		mid_layout[n]->set_font_description (fd2);
+		mid_layout[n]->set_text (string_compose ("Inst %1", n));
+	}
+
 	if (open ()) {
 		throw failed_constructor ();
 	}
@@ -87,11 +112,9 @@ Push2::open ()
 		return -1;
 	}
 
-	device_frame_buffer[0] = new uint16_t[rows*pixels_per_row];
-	device_frame_buffer[1] = new uint16_t[rows*pixels_per_row];
+	device_frame_buffer = new uint16_t[rows*pixels_per_row];
 
-	memset (device_frame_buffer[0], 0, sizeof (uint16_t) * rows * pixels_per_row);
-	memset (device_frame_buffer[1], 0, sizeof (uint16_t) * rows * pixels_per_row);
+	memset (device_frame_buffer, 0, sizeof (uint16_t) * rows * pixels_per_row);
 
 	frame_header[0] = 0xef;
 	frame_header[1] = 0xcd;
@@ -137,11 +160,8 @@ Push2::close ()
 		handle = 0;
 	}
 
-	delete [] device_frame_buffer[0];
-	device_frame_buffer[0] = 0;
-
-	delete [] device_frame_buffer[1];
-	device_frame_buffer[1] = 0;
+	delete [] device_frame_buffer;
+	device_frame_buffer = 0;
 
 	return 0;
 }
@@ -201,7 +221,7 @@ Push2::stop ()
  */
 
 int
-Push2::render ()
+Push2::bitblt_to_device_frame_buffer ()
 {
 	/* ensure that all drawing has been done before we fetch pixel data */
 
@@ -212,9 +232,7 @@ Push2::render ()
 
 	/* fill frame buffer (320kB) */
 
-	Glib::Threads::Mutex::Lock lm (fb_lock);
-
-	uint16_t* fb = (uint16_t*) device_frame_buffer[device_buffer];
+	uint16_t* fb = (uint16_t*) device_frame_buffer;
 
 	for (int row = 0; row < rows; ++row) {
 
@@ -243,10 +261,98 @@ Push2::render ()
 		fb += 64; /* 128 bytes = 64 int16_t */
 	}
 
-	/* swap buffers (under lock protection) */
-	// device_buffer = (device_buffer ? 0 : 1);
-
 	return 0;
+}
+
+bool
+Push2::redraw ()
+{
+	string tc_clock_text;
+	string bbt_clock_text;
+
+	if (session) {
+		framepos_t audible = session->audible_frame();
+		Timecode::Time TC;
+		bool negative = false;
+
+		if (audible < 0) {
+			audible = -audible;
+			negative = true;
+		}
+
+		session->timecode_time (audible, TC);
+
+		TC.negative = TC.negative || negative;
+
+		tc_clock_text = Timecode::timecode_format_time(TC);
+
+		Timecode::BBT_Time bbt = session->tempo_map().bbt_at_frame (audible);
+		char buf[16];
+
+#define BBT_BAR_CHAR "|"
+
+		if (negative) {
+			snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
+			          bbt.bars, bbt.beats, bbt.ticks);
+		} else {
+			snprintf (buf, sizeof (buf), " %03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
+			          bbt.bars, bbt.beats, bbt.ticks);
+		}
+
+		bbt_clock_text = buf;
+	}
+
+	bool dirty = false;
+
+	if (tc_clock_text != tc_clock_layout->get_text()) {
+		dirty = true;
+		tc_clock_layout->set_text (tc_clock_text);
+	}
+
+	if (bbt_clock_text != tc_clock_layout->get_text()) {
+		dirty = true;
+		bbt_clock_layout->set_text (bbt_clock_text);
+	}
+
+	if (!dirty) {
+		return false;
+	}
+
+	context->set_source_rgb (0.764, 0.882, 0.882);
+	context->rectangle (0, 0, 960, 160);
+	context->fill ();
+	context->set_source_rgb (0.23, 0.0, 0.349);
+	context->move_to (650, 25);
+	tc_clock_layout->update_from_cairo_context (context);
+	tc_clock_layout->show_in_cairo_context (context);
+  	context->move_to (650, 60);
+	bbt_clock_layout->update_from_cairo_context (context);
+	bbt_clock_layout->show_in_cairo_context (context);
+
+	for (int n = 0; n < 8; ++n) {
+		context->move_to (10 + (n*120), 2);
+		upper_layout[n]->update_from_cairo_context (context);
+		upper_layout[n]->show_in_cairo_context (context);
+	}
+
+	for (int n = 0; n < 8; ++n) {
+		context->move_to (10 + (n*120), 140);
+		lower_layout[n]->update_from_cairo_context (context);
+		lower_layout[n]->show_in_cairo_context (context);
+	}
+
+	for (int n = 0; n < 8; ++n) {
+		context->move_to (10 + (n*120), 120);
+		context->set_source_rgb (0.0, 0.0, 0.0);
+		mid_layout[n]->update_from_cairo_context (context);
+		mid_layout[n]->show_in_cairo_context (context);
+	}
+
+	/* render clock */
+	/* render foo */
+	/* render bar */
+
+	return true;
 }
 
 bool
@@ -260,12 +366,13 @@ Push2::vblank ()
 		return false;
 	}
 
-	{
-		Glib::Threads::Mutex::Lock lm (fb_lock);
+	if (redraw()) {
+		/* things changed */
+		bitblt_to_device_frame_buffer ();
+	}
 
-		if ((err = libusb_bulk_transfer (handle, 0x01, (uint8_t*) device_frame_buffer[device_buffer] , 2 * rows * pixels_per_row, &transferred, timeout_msecs))) {
-			return false;
-		}
+	if ((err = libusb_bulk_transfer (handle, 0x01, (uint8_t*) device_frame_buffer , 2 * rows * pixels_per_row, &transferred, timeout_msecs))) {
+		return false;
 	}
 
 	return true;
@@ -301,28 +408,6 @@ Push2::set_active (bool yn)
 		asp->xthread().attach (main_loop()->get_context());
 
 		connect_session_signals ();
-
-		/* say hello */
-
-		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (frame_buffer);
-		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-
-		layout->set_text ("hello, Ardour");
-		Pango::FontDescription fd ("Sans Bold 12");
-		layout->set_font_description (fd);
-
-		context->set_source_rgb (0.0, 1.0, 1.0);
-		context->rectangle (0, 0, 960, 160);
-		context->fill ();
-		context->set_source_rgb (0.0, 0.0, 0.0);
-		context->rectangle (50, 50, 860, 60);
-		context->fill ();
-		context->move_to (60, 60);
-		context->set_source_rgb ((random()%255) / 255.0, (random()%255) / 255.0, (random()%255) / 255.0);
-		layout->update_from_cairo_context (context);
-		layout->show_in_cairo_context (context);
-
-		render ();
 
 		/* set up periodic task used to push a frame buffer to the
 		 * device (25fps). The device can handle 60fps, but we don't

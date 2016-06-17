@@ -33,7 +33,7 @@ def build(bld):
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'
     obj.uselib       = 'CAIROMM PANGOMM USB'
-    obj.use          = 'libardour libardour_cp libpbd'
+    obj.use          = 'libardour libardour_cp libpbd libtimecode'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
