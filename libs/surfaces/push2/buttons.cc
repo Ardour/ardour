@@ -165,3 +165,70 @@ Push2::button_lower (uint32_t n)
 		mc->set_value (!mc->get_value(), PBD::Controllable::UseGroup);
 	}
 }
+
+void
+Push2::button_undo ()
+{
+	if (modifier_state & ModShift) {
+		ControlProtocol::Redo ();
+	} else {
+		ControlProtocol::Undo ();
+	}
+}
+
+void
+Push2::button_fwd32t ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (0+n);
+}
+
+void
+Push2::button_fwd32 ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (1+n);
+}
+
+void
+Push2::button_fwd16t ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (2+n);
+}
+
+void
+Push2::button_fwd16 ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (3+n);
+}
+
+void
+Push2::button_fwd8t ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (4+n);
+}
+
+void
+Push2::button_fwd8 ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (5+n);
+}
+
+void
+Push2::button_fwd4t ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (6+n);
+}
+
+void
+Push2::button_fwd4 ()
+{
+	const int n = (modifier_state & ModShift) ? 8 : 0;
+	goto_nth_marker (7+n);
+}
+

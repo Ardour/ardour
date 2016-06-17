@@ -366,6 +366,15 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_lower_6 () { button_lower (5); }
 	void button_lower_7 () { button_lower (6); }
 	void button_lower_8 () { button_lower (7); }
+	void button_undo ();
+	void button_fwd32t ();
+	void button_fwd32 ();
+	void button_fwd16t ();
+	void button_fwd16 ();
+	void button_fwd8t ();
+	void button_fwd8 ();
+	void button_fwd4t ();
+	void button_fwd4 ();
 
 	/* widgets */
 
