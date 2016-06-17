@@ -781,8 +781,22 @@ Push2::notify_loop_state_changed ()
 }
 
 void
-Push2::notify_parameter_changed (std::string)
+Push2::notify_parameter_changed (std::string param)
 {
+	IDButtonMap::iterator b;
+
+	if (param == "clicking") {
+		if ((b = id_button_map.find (Metronome)) == id_button_map.end()) {
+			return;
+		}
+		if (Config->get_clicking()) {
+			b->second->set_state (LED::Pulsing4th);
+			b->second->set_color (LED::White);
+		} else {
+			b->second->set_state (LED::Off);
+		}
+		write (b->second->state_msg ());
+	}
 }
 
 void
