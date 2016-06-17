@@ -346,6 +346,26 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_new ();
 	void button_shift_press ();
 	void button_shift_release ();
+	void button_browse ();
+	void button_clip ();
+	void button_upper (uint32_t n);
+	void button_lower (uint32_t n);
+	void button_upper_1 () { button_upper (0); }
+	void button_upper_2 () { button_upper (1); }
+	void button_upper_3 () { button_upper (2); }
+	void button_upper_4 () { button_upper (3); }
+	void button_upper_5 () { button_upper (4); }
+	void button_upper_6 () { button_upper (5); }
+	void button_upper_7 () { button_upper (6); }
+	void button_upper_8 () { button_upper (7); }
+	void button_lower_1 () { button_lower (0); }
+	void button_lower_2 () { button_lower (1); }
+	void button_lower_3 () { button_lower (2); }
+	void button_lower_4 () { button_lower (3); }
+	void button_lower_5 () { button_lower (4); }
+	void button_lower_6 () { button_lower (5); }
+	void button_lower_7 () { button_lower (6); }
+	void button_lower_8 () { button_lower (7); }
 
 	/* widgets */
 
@@ -355,6 +375,19 @@ class Push2 : public ARDOUR::ControlProtocol
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
 	Glib::RefPtr<Pango::Layout> mid_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
+
+	/* stripables */
+
+	int32_t bank_start;
+	PBD::ScopedConnectionList stripable_connections;
+	boost::shared_ptr<ARDOUR::Stripable> stripable[8];
+	boost::shared_ptr<ARDOUR::Stripable> master;
+	boost::shared_ptr<ARDOUR::Stripable> monitor;
+
+	void solo_change (int);
+	void mute_change (int);
+
+	void switch_bank (uint32_t base);
 };
 
 

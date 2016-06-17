@@ -21,6 +21,7 @@
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 
@@ -61,6 +62,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 	, modifier_state (None)
+	, bank_start (0)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -70,7 +72,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	tc_clock_layout->set_font_description (fd);
 	bbt_clock_layout->set_font_description (fd);
 
-	Pango::FontDescription fd2 ("Sans Bold 10");
+	Pango::FontDescription fd2 ("Sans 10");
 	for (int n = 0; n < 8; ++n) {
 		upper_layout[n] = Pango::Layout::create (context);
 		upper_layout[n]->set_font_description (fd2);
@@ -78,9 +80,12 @@ Push2::Push2 (ARDOUR::Session& s)
 		lower_layout[n] = Pango::Layout::create (context);
 		lower_layout[n]->set_font_description (fd2);
 		lower_layout[n]->set_text ("mute");
+	}
+
+	Pango::FontDescription fd3 ("Sans Bold 10");
+	for (int n = 0; n < 8; ++n) {
 		mid_layout[n] = Pango::Layout::create (context);
-		mid_layout[n]->set_font_description (fd2);
-		mid_layout[n]->set_text (string_compose ("Inst %1", n));
+		mid_layout[n]->set_font_description (fd3);
 	}
 
 	build_maps ();
@@ -155,11 +160,16 @@ Push2::close ()
 	vblank_connection.disconnect ();
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
 		handle = 0;
+	}
+
+	for (int n = 0; n < 8; ++n) {
+		stripable[n].reset ();
 	}
 
 	delete [] device_frame_buffer;
@@ -333,6 +343,18 @@ Push2::redraw ()
 		bbt_clock_layout->set_text (bbt_clock_text);
 	}
 
+	string mid_text;
+
+	for (int n = 0; n < 8; ++n) {
+		if (stripable[n]) {
+			mid_text = short_version (stripable[n]->name(), 10);
+			if (mid_text != mid_layout[n]->get_text()) {
+				mid_layout[n]->set_text (mid_text);
+				dirty = true;
+			}
+		}
+	}
+
 	if (!dirty) {
 		return false;
 	}
@@ -443,6 +465,7 @@ Push2::set_active (bool yn)
 		periodic_timeout->attach (main_loop()->get_context());
 
 		init_buttons ();
+		switch_bank (0);
 
 	} else {
 
@@ -641,21 +664,22 @@ Push2::build_maps ()
 	cc_button_map.insert (make_pair (button->controller_number(), button)); \
 	id_button_map.insert (make_pair (button->id, button))
 
-	MAKE_COLOR_BUTTON (Upper1, 102);
-	MAKE_COLOR_BUTTON (Upper2, 103);
-	MAKE_COLOR_BUTTON (Upper3, 104);
-	MAKE_COLOR_BUTTON (Upper4, 105);
-	MAKE_COLOR_BUTTON (Upper5, 106);
-	MAKE_COLOR_BUTTON (Upper6, 107);
-	MAKE_COLOR_BUTTON (Upper7, 108);
-	MAKE_COLOR_BUTTON (Upper8, 109);
-	MAKE_COLOR_BUTTON (Lower1, 21);
-	MAKE_COLOR_BUTTON (Lower2, 22);
-	MAKE_COLOR_BUTTON (Lower3, 23);
-	MAKE_COLOR_BUTTON (Lower4, 24);
-	MAKE_COLOR_BUTTON (Lower5, 25);
-	MAKE_COLOR_BUTTON (Lower6, 26);
-	MAKE_COLOR_BUTTON (Lower7, 27);
+	MAKE_COLOR_BUTTON_PRESS (Upper1, 102, &Push2::button_upper_1);
+	MAKE_COLOR_BUTTON_PRESS (Upper2, 103, &Push2::button_upper_2);
+	MAKE_COLOR_BUTTON_PRESS (Upper3, 104, &Push2::button_upper_3);
+	MAKE_COLOR_BUTTON_PRESS (Upper4, 105, &Push2::button_upper_4);
+	MAKE_COLOR_BUTTON_PRESS (Upper5, 106, &Push2::button_upper_5);
+	MAKE_COLOR_BUTTON_PRESS (Upper6, 107, &Push2::button_upper_6);
+	MAKE_COLOR_BUTTON_PRESS (Upper7, 108, &Push2::button_upper_7);
+	MAKE_COLOR_BUTTON_PRESS (Upper8, 109, &Push2::button_upper_8);
+	MAKE_COLOR_BUTTON_PRESS (Lower1, 20, &Push2::button_lower_1);
+	MAKE_COLOR_BUTTON_PRESS (Lower2, 21, &Push2::button_lower_2);
+	MAKE_COLOR_BUTTON_PRESS (Lower3, 22, &Push2::button_lower_3);
+	MAKE_COLOR_BUTTON_PRESS (Lower4, 23, &Push2::button_lower_4);
+	MAKE_COLOR_BUTTON_PRESS (Lower5, 24, &Push2::button_lower_5);
+	MAKE_COLOR_BUTTON_PRESS (Lower6, 25, &Push2::button_lower_6);
+	MAKE_COLOR_BUTTON_PRESS (Lower7, 26, &Push2::button_lower_7);
+	MAKE_COLOR_BUTTON_PRESS (Lower8, 27, &Push2::button_lower_8);
 	MAKE_COLOR_BUTTON (Master, 28);
 	MAKE_COLOR_BUTTON (Mute, 60);
 	MAKE_COLOR_BUTTON_PRESS (Solo, 61, &Push2::button_solo);
@@ -695,7 +719,8 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (Mix, 112);
 	MAKE_WHITE_BUTTON (Undo, 119);
 	MAKE_WHITE_BUTTON (AddTrack, 53);
-	MAKE_WHITE_BUTTON (Browse, 113);
+	MAKE_WHITE_BUTTON_PRESS (Browse, 111, &Push2::button_browse);
+	MAKE_WHITE_BUTTON_PRESS (Clip, 113, &Push2::button_clip);
 	MAKE_WHITE_BUTTON (Convert, 35);
 	MAKE_WHITE_BUTTON (DoubleLoop, 117);
 	MAKE_WHITE_BUTTON (Quantize, 116);
@@ -899,4 +924,155 @@ Push2::set_state (const XMLNode & node, int version)
 	}
 
 	return retval;
+}
+
+void
+Push2::switch_bank (uint32_t base)
+{
+	if (!session) {
+		return;
+	}
+
+	stripable_connections.drop_connections ();
+
+	/* try to get the first stripable for the requested bank */
+
+	stripable[0] = session->get_nth_stripable (base+0);
+
+	if (!stripable[0]) {
+		return;
+	}
+
+	/* at least one stripable in this bank */
+	bank_start = base;
+
+	stripable[1] = session->get_nth_stripable (base+1);
+	stripable[2] = session->get_nth_stripable (base+2);
+	stripable[3] = session->get_nth_stripable (base+3);
+	stripable[4] = session->get_nth_stripable (base+4);
+	stripable[5] = session->get_nth_stripable (base+5);
+	stripable[6] = session->get_nth_stripable (base+6);
+	stripable[7] = session->get_nth_stripable (base+7);
+
+	for (int n = 0; n < 8; ++n) {
+		if (!stripable[n]) {
+			continue;
+		}
+
+		/* stripable goes away? refill the bank, starting at the same point */
+
+		stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::switch_bank, this, bank_start), this);
+		boost::shared_ptr<AutomationControl> sc = stripable[n]->solo_control();
+		if (sc) {
+			sc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::solo_change, this, n), this);
+		}
+
+		boost::shared_ptr<AutomationControl> mc = stripable[n]->mute_control();
+		if (mc) {
+			mc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::mute_change, this, n), this);
+		}
+
+		solo_change (n);
+		mute_change (n);
+
+	}
+}
+
+void
+Push2::solo_change (int n)
+{
+	ButtonID bid;
+
+	switch (n) {
+	case 0:
+		bid = Upper1;
+		break;
+	case 1:
+		bid = Upper2;
+		break;
+	case 2:
+		bid = Upper3;
+		break;
+	case 3:
+		bid = Upper4;
+		break;
+	case 4:
+		bid = Upper5;
+		break;
+	case 5:
+		bid = Upper6;
+		break;
+	case 6:
+		bid = Upper7;
+		break;
+	case 7:
+		bid = Upper8;
+		break;
+	default:
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac = stripable[n]->solo_control ();
+	if (!ac) {
+		return;
+	}
+
+	Button* b = id_button_map[bid];
+	if (ac->get_value()) {
+		b->set_color (LED::Red);
+	} else {
+		b->set_color (LED::Black);
+	}
+	b->set_state (LED::OneShot24th);
+	write (b->state_msg());
+}
+
+void
+Push2::mute_change (int n)
+{
+	ButtonID bid;
+
+	switch (n) {
+	case 0:
+		bid = Lower1;
+		break;
+	case 1:
+		bid = Lower2;
+		break;
+	case 2:
+		bid = Lower3;
+		break;
+	case 3:
+		bid = Lower4;
+		break;
+	case 4:
+		bid = Lower5;
+		break;
+	case 5:
+		bid = Lower6;
+		break;
+	case 6:
+		bid = Lower7;
+		break;
+	case 7:
+		bid = Lower8;
+		break;
+	default:
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac = stripable[n]->mute_control ();
+	if (!ac) {
+		return;
+	}
+
+	Button* b = id_button_map[bid];
+
+	if (ac->get_value ()) {
+		b->set_color (LED::Blue);
+	} else {
+		b->set_color (LED::Black);
+	}
+	b->set_state (LED::OneShot24th);
+	write (b->state_msg());
 }
