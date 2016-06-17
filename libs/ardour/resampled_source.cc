@@ -73,14 +73,15 @@ framecnt_t
 ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 {
 	int err;
+	size_t bs = floor (blocksize / source->channels()) *  source->channels();
 
 	/* If the input buffer is empty, refill it. */
 	if (_src_data.input_frames == 0) {
 
-		_src_data.input_frames = source->read (_input, blocksize);
+		_src_data.input_frames = source->read (_input, bs);
 
 		/* The last read will not be a full buffer, so set end_of_input. */
-		if ((framecnt_t) _src_data.input_frames < blocksize) {
+		if ((framecnt_t) _src_data.input_frames < bs) {
 			_end_of_input = true;
 		}
 

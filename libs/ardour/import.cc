@@ -265,14 +265,14 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		uint32_t read_count = 0;
 
 		while (!status.cancel) {
-			framecnt_t const nread = source->read (data.get(), nframes);
+			framecnt_t const nread = source->read (data.get(), nframes * channels);
 			if (nread == 0) {
 				break;
 			}
 
-			peak = compute_peak (data.get(), nread, peak);
+			peak = compute_peak (data.get(), nread * channels, peak);
 
-			read_count += nread;
+			read_count += nread / channels;
 			status.progress = 0.5 * read_count / (source->ratio() * source->length() * channels);
 		}
 
@@ -294,7 +294,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		uint32_t x;
 		uint32_t chn;
 
-		if ((nread = source->read (data.get(), nframes)) == 0) {
+		if ((nread = source->read (data.get(), nframes * channels)) == 0) {
 #ifdef PLATFORM_WINDOWS
 			/* Flush the data once we've finished importing the file. Windows can  */
 			/* cache the data for very long periods of time (perhaps not writing   */
