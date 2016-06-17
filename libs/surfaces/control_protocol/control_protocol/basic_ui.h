@@ -140,6 +140,8 @@ class LIBCONTROLCP_API BasicUI {
 	void all_tracks_rec_in ();
 	void all_tracks_rec_out ();
 
+	void goto_nth_marker (int n);
+
 	ARDOUR::framecnt_t timecode_frames_per_hour ();
 
 	void timecode_time (framepos_t where, Timecode::Time&);

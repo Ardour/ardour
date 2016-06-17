@@ -539,6 +539,37 @@ BasicUI::cancel_all_solo ()
 	}
 }
 
+struct SortLocationsByPosition {
+    bool operator() (Location* a, Location* b) {
+	    return a->start() < b->start();
+    }
+};
+
+void
+BasicUI::goto_nth_marker (int n)
+{
+	if (!session) {
+		return;
+	}
+
+	const Locations::LocationList& l (session->locations()->list());
+	Locations::LocationList ordered;
+	ordered = l;
+
+	SortLocationsByPosition cmp;
+	ordered.sort (cmp);
+
+	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
+		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
+			if (n == 0) {
+				session->request_locate ((*i)->start(), session->transport_rolling());
+				break;
+			}
+			--n;
+		}
+	}
+}
+
 #if 0
 this stuff is waiting to go in so that all UIs can offer complex solo/mute functionality
 
