@@ -24,6 +24,7 @@
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/tempo.h"
+#include "ardour/utils.h"
 
 #include "control_protocol/basic_ui.h"
 
@@ -493,6 +494,51 @@ void
 BasicUI::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
+}
+
+void
+BasicUI::toggle_selection (PresentationInfo::order_t o, PresentationInfo::Flag flags)
+{
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (o, flags);
+
+	if (s) {
+		s->presentation_info().set_selected (!s->presentation_info().selected());
+	}
+}
+
+void
+BasicUI::clear_stripable_selection ()
+{
+	session->clear_stripable_selection ();
+}
+
+void
+BasicUI::toggle_stripable_selection (boost::shared_ptr<Stripable> s)
+{
+	session->toggle_stripable_selection (s);
+}
+
+void
+BasicUI::add_stripable_selection (boost::shared_ptr<Stripable> s)
+{
+	session->add_stripable_selection (s);
+}
+
+void
+BasicUI::set_stripable_selection (boost::shared_ptr<Stripable> s)
+{
+	session->set_stripable_selection (s);
+}
+
+
+void
+BasicUI::cancel_all_solo ()
+{
+	if (session) {
+		StripableList sl;
+		session->get_stripables (sl);
+		session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, PBD::Controllable::NoGroup);
+	}
 }
 
 #if 0
