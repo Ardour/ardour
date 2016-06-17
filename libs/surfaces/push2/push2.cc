@@ -98,7 +98,7 @@ Push2::Push2 (ARDOUR::Session& s)
 
 Push2::~Push2 ()
 {
-	close ();
+	stop ();
 }
 
 int
