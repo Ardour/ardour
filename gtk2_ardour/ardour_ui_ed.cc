@@ -115,6 +115,12 @@ ARDOUR_UI::escape ()
 }
 
 void
+ARDOUR_UI::close_current_dialog ()
+{
+	Keyboard::close_current_dialog ();
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = global_actions.create_action_group (X_("Main"));
@@ -122,6 +128,11 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<Action> act;
 
 	global_actions.register_action (main_actions, X_("Escape"), _("Escape"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
+	/* This is hard-wired into the Keyboard code as "Primary-w". Maybe it
+	   doesn't need to be. This action makes it possible to do this from a
+	   control surface.
+	*/
+	global_actions.register_action (main_actions, X_("close-current-dialog"), _("Close Current Dialog"), sigc::mem_fun (*this, &ARDOUR_UI::close_current_dialog));
 
 	/* menus + submenus that need action items */
 
