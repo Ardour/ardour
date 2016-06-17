@@ -149,6 +149,13 @@ Push2::open ()
 int
 Push2::close ()
 {
+	init_buttons (false);
+
+	/* wait for button data to be flushed */
+	AsyncMIDIPort* asp;
+	asp = dynamic_cast<AsyncMIDIPort*> (_output_port);
+	asp->drain (10000, 500000);
+
 	AudioEngine::instance()->unregister_port (_async_in);
 	AudioEngine::instance()->unregister_port (_async_out);
 
@@ -179,7 +186,7 @@ Push2::close ()
 }
 
 void
-Push2::init_buttons ()
+Push2::init_buttons (bool startup)
 {
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
@@ -189,7 +196,22 @@ Push2::init_buttons ()
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
 		Button* b = id_button_map[buttons[n]];
 
-		b->set_color (LED::White);
+		if (startup) {
+			b->set_color (LED::White);
+		} else {
+			b->set_color (LED::Black);
+		}
+		b->set_state (LED::OneShot24th);
+		write (b->state_msg());
+	}
+
+	ButtonID strip_buttons[] = { Upper1, Upper2, Upper3, Upper4, Upper5, Upper6, Upper7, Upper8,
+	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8 };
+
+	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
+		Button* b = id_button_map[strip_buttons[n]];
+
+		b->set_color (LED::Black);
 		b->set_state (LED::OneShot24th);
 		write (b->state_msg());
 	}
@@ -464,7 +486,7 @@ Push2::set_active (bool yn)
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &Push2::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
-		init_buttons ();
+		init_buttons (true);
 		init_touch_strip ();
 		switch_bank (0);
 
