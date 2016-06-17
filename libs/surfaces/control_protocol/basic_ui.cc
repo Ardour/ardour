@@ -121,9 +121,9 @@ BasicUI::loop_location (framepos_t start, framepos_t end)
 }
 
 void
-BasicUI::goto_start ()
+BasicUI::goto_start (bool and_roll)
 {
-	session->goto_start ();
+	session->goto_start (and_roll);
 }
 
 void

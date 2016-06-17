@@ -59,7 +59,7 @@ class LIBCONTROLCP_API BasicUI {
 	void access_action ( std::string action_path );
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_zero ();
-	void goto_start ();
+	void goto_start (bool and_roll = false);
 	void goto_end ();
 	void rewind ();
 	void ffwd ();
