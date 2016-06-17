@@ -188,9 +188,13 @@ Push2::close ()
 void
 Push2::init_buttons (bool startup)
 {
+	/* This is a list of buttons that we want lit because they do something
+	   in ardour related (loosely, sometimes) to their illuminated label.
+	*/
+
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
-	                       Quantize, Duplicate,
+	                       Quantize, Duplicate, Browse,
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -205,8 +209,12 @@ Push2::init_buttons (bool startup)
 		write (b->state_msg());
 	}
 
+	/* Strip buttons should all be off (black) by default. They will change
+	 * color to reflect various conditions
+	 */
+
 	ButtonID strip_buttons[] = { Upper1, Upper2, Upper3, Upper4, Upper5, Upper6, Upper7, Upper8,
-	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8 };
+	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8, };
 
 	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
 		Button* b = id_button_map[strip_buttons[n]];
@@ -215,6 +223,24 @@ Push2::init_buttons (bool startup)
 		b->set_state (LED::OneShot24th);
 		write (b->state_msg());
 	}
+
+	if (startup) {
+
+		/* all other buttons are off (black) */
+
+		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
+		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
+		                           Accent, Scale, Layout, Note, Session, OctaveUp, PageRight, OctaveDown, PageLeft, };
+
+		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
+			Button* b = id_button_map[off_buttons[n]];
+
+			b->set_color (LED::Black);
+			b->set_state (LED::OneShot24th);
+			write (b->state_msg());
+		}
+	}
+
 }
 
 bool
@@ -272,7 +298,7 @@ Push2::stop ()
  */
 
 int
-Push2::bitblt_to_device_frame_buffer ()
+Push2::blit_to_device_frame_buffer ()
 {
 	/* ensure that all drawing has been done before we fetch pixel data */
 
@@ -301,6 +327,12 @@ Push2::bitblt_to_device_frame_buffer ()
 			/* generate 16 bit BGB565 value */
 
 			*fb++ = (r >> 3) | ((g & 0xfc) << 3) | ((b & 0xf8) << 8);
+
+			/* the push2 docs state that we should xor the pixel
+			 * data. Doing so doesn't work correctly, and not doing
+			 * so seems to work fine (colors roughly match intended
+			 * values).
+			 */
 
 			dp += 4;
 		}
@@ -405,8 +437,13 @@ Push2::redraw ()
 	}
 
 	for (int n = 0; n < 8; ++n) {
-		context->move_to (10 + (n*120), 120);
+		if (stripable[n] && stripable[n]->presentation_info().selected()) {
+			context->rectangle (10 + (n*120) - 5, 115, 120, 22);
+			context->set_source_rgb (1.0, 0.737, 0.172);
+			context->fill();
+		}
 		context->set_source_rgb (0.0, 0.0, 0.0);
+		context->move_to (10 + (n*120), 120);
 		mid_layout[n]->update_from_cairo_context (context);
 		mid_layout[n]->show_in_cairo_context (context);
 	}
@@ -431,7 +468,7 @@ Push2::vblank ()
 
 	if (redraw()) {
 		/* things changed */
-		bitblt_to_device_frame_buffer ();
+		blit_to_device_frame_buffer ();
 	}
 
 	if ((err = libusb_bulk_transfer (handle, 0x01, (uint8_t*) device_frame_buffer , 2 * rows * pixels_per_row, &transferred, timeout_msecs))) {
@@ -520,7 +557,6 @@ Push2::init_touch_strip ()
 void
 Push2::write (const MidiByteArray& data)
 {
-	cerr << data << endl;
 	/* immediate delivery */
 	_output_port->write (&data[0], data.size(), 0);
 }
@@ -578,20 +614,50 @@ Push2::connect_to_parser ()
 void
 Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 {
-	cerr << "sysex, " << sz << " bytes\n";
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Sysex, %1 bytes\n", sz));
 }
 
 void
 Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
+
 	CCButtonMap::iterator b = cc_button_map.find (ev->controller_number);
 
-	if (b != cc_button_map.end()) {
-		if (ev->value == 0) {
-			(this->*b->second->release_method)();
-		} else {
-			(this->*b->second->press_method)();
+	if (ev->value) {
+		/* any press cancels any pending long press timeouts */
+		for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
+			Button* bb = id_button_map[*x];
+			bb->timeout_connection.disconnect ();
 		}
+	}
+
+	if (b != cc_button_map.end()) {
+
+		Button* button = b->second;
+
+		if (ev->value) {
+			buttons_down.insert (button->id);
+			start_press_timeout (*button, button->id);
+		} else {
+			buttons_down.erase (button->id);
+			button->timeout_connection.disconnect ();
+		}
+
+
+		set<ButtonID>::iterator c = consumed.find (button->id);
+
+		if (c == consumed.end()) {
+			if (ev->value == 0) {
+				(this->*button->release_method)();
+			} else {
+				(this->*button->press_method)();
+			}
+		} else {
+			DEBUG_TRACE (DEBUG::Push2, "button was consumed, ignored\n");
+			consumed.erase (c);
+		}
+
 	} else {
 
 		/* encoder/vpot */
@@ -647,6 +713,8 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 void
 Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+
 	switch (ev->note_number) {
 	case 0:
 		strip_vpot_touch (0, ev->velocity > 64);
@@ -693,12 +761,12 @@ Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		}
 		break;
 	}
-
 }
 
 void
 Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
 }
 
 void
@@ -707,183 +775,13 @@ Push2::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb)
 	if (!session) {
 		return;
 	}
+
 	float speed;
 
 	/* range of +1 .. -1 */
 	speed = ((int32_t) pb - 8192) / 8192.0;
 	/* convert to range of +3 .. -3 */
 	session->request_transport_speed (speed * 3.0);
-}
-
-void
-Push2::build_maps ()
-{
-	/* Pads */
-
-	Pad* pad;
-
-#define MAKE_PAD(x,y,nn) \
-	pad = new Pad ((x), (y), (nn)); \
-	nn_pad_map.insert (make_pair (pad->extra(), pad)); \
-	coord_pad_map.insert (make_pair (pad->coord(), pad));
-
-	MAKE_PAD (0, 1, 93);
-	MAKE_PAD (0, 2, 94);
-	MAKE_PAD (0, 3, 95);
-	MAKE_PAD (0, 4, 96);
-	MAKE_PAD (0, 5, 97);
-	MAKE_PAD (0, 6, 98);
-	MAKE_PAD (0, 7, 90);
-	MAKE_PAD (1, 0, 84);
-	MAKE_PAD (1, 1, 85);
-	MAKE_PAD (1, 2, 86);
-	MAKE_PAD (1, 3, 87);
-	MAKE_PAD (1, 4, 88);
-	MAKE_PAD (1, 5, 89);
-	MAKE_PAD (1, 6, 90);
-	MAKE_PAD (1, 7, 91);
-	MAKE_PAD (2, 0, 76);
-	MAKE_PAD (2, 1, 77);
-	MAKE_PAD (2, 2, 78);
-	MAKE_PAD (2, 3, 79);
-	MAKE_PAD (2, 4, 80);
-	MAKE_PAD (2, 5, 81);
-	MAKE_PAD (2, 6, 82);
-	MAKE_PAD (2, 7, 83);
-	MAKE_PAD (3, 0, 68);
-	MAKE_PAD (3, 1, 69);
-	MAKE_PAD (3, 2, 70);
-	MAKE_PAD (3, 3, 71);
-	MAKE_PAD (3, 4, 72);
-	MAKE_PAD (3, 5, 73);
-	MAKE_PAD (3, 6, 74);
-	MAKE_PAD (3, 7, 75);
-	MAKE_PAD (4, 0, 60);
-	MAKE_PAD (4, 1, 61);
-	MAKE_PAD (4, 2, 62);
-	MAKE_PAD (4, 3, 63);
-	MAKE_PAD (4, 4, 64);
-	MAKE_PAD (4, 5, 65);
-	MAKE_PAD (4, 6, 66);
-	MAKE_PAD (4, 7, 67);
-	MAKE_PAD (5, 0, 52);
-	MAKE_PAD (5, 1, 53);
-	MAKE_PAD (5, 2, 54);
-	MAKE_PAD (5, 3, 56);
-	MAKE_PAD (5, 4, 56);
-	MAKE_PAD (5, 5, 57);
-	MAKE_PAD (5, 6, 58);
-	MAKE_PAD (5, 7, 59);
-	MAKE_PAD (6, 0, 44);
-	MAKE_PAD (6, 1, 45);
-	MAKE_PAD (6, 2, 46);
-	MAKE_PAD (6, 3, 47);
-	MAKE_PAD (6, 4, 48);
-	MAKE_PAD (6, 5, 49);
-	MAKE_PAD (6, 6, 50);
-	MAKE_PAD (6, 7, 51);
-	MAKE_PAD (7, 0, 36);
-	MAKE_PAD (7, 1, 37);
-	MAKE_PAD (7, 2, 38);
-	MAKE_PAD (7, 3, 39);
-	MAKE_PAD (7, 4, 40);
-	MAKE_PAD (7, 5, 41);
-	MAKE_PAD (7, 6, 42);
-	MAKE_PAD (7, 7, 43);
-
-	/* Now color buttons */
-
-	Button *button;
-
-#define MAKE_COLOR_BUTTON(i,cc) \
-	button = new ColorButton ((i), (cc)); \
-	cc_button_map.insert (make_pair (button->controller_number(), button)); \
-	id_button_map.insert (make_pair (button->id, button));
-#define MAKE_COLOR_BUTTON_PRESS(i,cc,p)\
-	button = new ColorButton ((i), (cc), (p)); \
-	cc_button_map.insert (make_pair (button->controller_number(), button)); \
-	id_button_map.insert (make_pair (button->id, button))
-
-	MAKE_COLOR_BUTTON_PRESS (Upper1, 102, &Push2::button_upper_1);
-	MAKE_COLOR_BUTTON_PRESS (Upper2, 103, &Push2::button_upper_2);
-	MAKE_COLOR_BUTTON_PRESS (Upper3, 104, &Push2::button_upper_3);
-	MAKE_COLOR_BUTTON_PRESS (Upper4, 105, &Push2::button_upper_4);
-	MAKE_COLOR_BUTTON_PRESS (Upper5, 106, &Push2::button_upper_5);
-	MAKE_COLOR_BUTTON_PRESS (Upper6, 107, &Push2::button_upper_6);
-	MAKE_COLOR_BUTTON_PRESS (Upper7, 108, &Push2::button_upper_7);
-	MAKE_COLOR_BUTTON_PRESS (Upper8, 109, &Push2::button_upper_8);
-	MAKE_COLOR_BUTTON_PRESS (Lower1, 20, &Push2::button_lower_1);
-	MAKE_COLOR_BUTTON_PRESS (Lower2, 21, &Push2::button_lower_2);
-	MAKE_COLOR_BUTTON_PRESS (Lower3, 22, &Push2::button_lower_3);
-	MAKE_COLOR_BUTTON_PRESS (Lower4, 23, &Push2::button_lower_4);
-	MAKE_COLOR_BUTTON_PRESS (Lower5, 24, &Push2::button_lower_5);
-	MAKE_COLOR_BUTTON_PRESS (Lower6, 25, &Push2::button_lower_6);
-	MAKE_COLOR_BUTTON_PRESS (Lower7, 26, &Push2::button_lower_7);
-	MAKE_COLOR_BUTTON_PRESS (Lower8, 27, &Push2::button_lower_8);
-	MAKE_COLOR_BUTTON (Master, 28);
-	MAKE_COLOR_BUTTON (Mute, 60);
-	MAKE_COLOR_BUTTON_PRESS (Solo, 61, &Push2::button_solo);
-	MAKE_COLOR_BUTTON (Stop, 29);
-	MAKE_COLOR_BUTTON_PRESS (Fwd32ndT, 43, &Push2::button_fwd32t);
-	MAKE_COLOR_BUTTON_PRESS (Fwd32nd,42 , &Push2::button_fwd32);
-	MAKE_COLOR_BUTTON_PRESS (Fwd16thT, 41, &Push2::button_fwd16t);
-	MAKE_COLOR_BUTTON_PRESS (Fwd16th, 40, &Push2::button_fwd16);
-	MAKE_COLOR_BUTTON_PRESS (Fwd8thT, 39 , &Push2::button_fwd8t);
-	MAKE_COLOR_BUTTON_PRESS (Fwd8th, 38, &Push2::button_fwd8);
-	MAKE_COLOR_BUTTON_PRESS (Fwd4trT, 37, &Push2::button_fwd4t);
-	MAKE_COLOR_BUTTON_PRESS (Fwd4tr, 36, &Push2::button_fwd4);
-	MAKE_COLOR_BUTTON (Automate, 89);
-	MAKE_COLOR_BUTTON_PRESS (RecordEnable, 86, &Push2::button_recenable);
-	MAKE_COLOR_BUTTON_PRESS (Play, 85, &Push2::button_play);
-
-#define MAKE_WHITE_BUTTON(i,cc)\
-	button = new WhiteButton ((i), (cc)); \
-	cc_button_map.insert (make_pair (button->controller_number(), button)); \
-	id_button_map.insert (make_pair (button->id, button))
-#define MAKE_WHITE_BUTTON_PRESS(i,cc,p)\
-	button = new WhiteButton ((i), (cc), (p)); \
-	cc_button_map.insert (make_pair (button->controller_number(), button)); \
-	id_button_map.insert (make_pair (button->id, button))
-#define MAKE_WHITE_BUTTON_PRESS_RELEASE(i,cc,p,r)                                \
-	button = new WhiteButton ((i), (cc), (p), (r)); \
-	cc_button_map.insert (make_pair (button->controller_number(), button)); \
-	id_button_map.insert (make_pair (button->id, button))
-
-	MAKE_WHITE_BUTTON (TapTempo, 3);
-	MAKE_WHITE_BUTTON_PRESS (Metronome, 9, &Push2::button_metronome);
-	MAKE_WHITE_BUTTON (Setup, 30);
-	MAKE_WHITE_BUTTON (User, 59);
-	MAKE_WHITE_BUTTON (Delete, 118);
-	MAKE_WHITE_BUTTON (AddDevice, 52);
-	MAKE_WHITE_BUTTON (Device, 110);
-	MAKE_WHITE_BUTTON (Mix, 112);
-	MAKE_WHITE_BUTTON_PRESS (Undo, 119, &Push2::button_undo);
-	MAKE_WHITE_BUTTON (AddTrack, 53);
-	MAKE_WHITE_BUTTON_PRESS (Browse, 111, &Push2::button_browse);
-	MAKE_WHITE_BUTTON_PRESS (Clip, 113, &Push2::button_clip);
-	MAKE_WHITE_BUTTON (Convert, 35);
-	MAKE_WHITE_BUTTON (DoubleLoop, 117);
-	MAKE_WHITE_BUTTON (Quantize, 116);
-	MAKE_WHITE_BUTTON (Duplicate, 88);
-	MAKE_WHITE_BUTTON_PRESS (New, 87, &Push2::button_new);
-	MAKE_WHITE_BUTTON_PRESS (FixedLength, 90, &Push2::button_fixed_length);
-	MAKE_WHITE_BUTTON_PRESS (Up, 46, &Push2::button_up);
-	MAKE_WHITE_BUTTON_PRESS (Right, 45, &Push2::button_right);
-	MAKE_WHITE_BUTTON_PRESS (Down, 47, &Push2::button_down);
-	MAKE_WHITE_BUTTON_PRESS (Left, 44, &Push2::button_left);
-	MAKE_WHITE_BUTTON_PRESS (Repeat, 56, &Push2::button_repeat);
-	MAKE_WHITE_BUTTON (Accent, 57);
-	MAKE_WHITE_BUTTON (Scale, 58);
-	MAKE_WHITE_BUTTON (Layout, 31);
-	MAKE_WHITE_BUTTON (Note, 50);
-	MAKE_WHITE_BUTTON (Session, 51);
-	MAKE_WHITE_BUTTON (Layout, 31);
-	MAKE_WHITE_BUTTON (OctaveUp, 55);
-	MAKE_WHITE_BUTTON (PageRight, 63);
-	MAKE_WHITE_BUTTON (OctaveDown, 54);
-	MAKE_WHITE_BUTTON (PageLeft, 62);
-	MAKE_WHITE_BUTTON_PRESS_RELEASE (Shift, 49, &Push2::button_shift_press, &Push2::button_shift_release);
-	MAKE_WHITE_BUTTON (Select, 48);
 }
 
 void
@@ -1077,7 +975,7 @@ Push2::switch_bank (uint32_t base)
 
 	/* try to get the first stripable for the requested bank */
 
-	stripable[0] = session->get_nth_stripable (base+0);
+	stripable[0] = session->get_remote_nth_stripable (base, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
 
 	if (!stripable[0]) {
 		return;
@@ -1086,13 +984,14 @@ Push2::switch_bank (uint32_t base)
 	/* at least one stripable in this bank */
 	bank_start = base;
 
-	stripable[1] = session->get_nth_stripable (base+1);
-	stripable[2] = session->get_nth_stripable (base+2);
-	stripable[3] = session->get_nth_stripable (base+3);
-	stripable[4] = session->get_nth_stripable (base+4);
-	stripable[5] = session->get_nth_stripable (base+5);
-	stripable[6] = session->get_nth_stripable (base+6);
-	stripable[7] = session->get_nth_stripable (base+7);
+	stripable[1] = session->get_remote_nth_stripable (base+1, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[2] = session->get_remote_nth_stripable (base+2, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[3] = session->get_remote_nth_stripable (base+3, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[4] = session->get_remote_nth_stripable (base+4, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[5] = session->get_remote_nth_stripable (base+5, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[6] = session->get_remote_nth_stripable (base+6, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	stripable[7] = session->get_remote_nth_stripable (base+7, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+
 
 	for (int n = 0; n < 8; ++n) {
 		if (!stripable[n]) {
@@ -1112,6 +1011,8 @@ Push2::switch_bank (uint32_t base)
 			mc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::mute_change, this, n), this);
 		}
 
+		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_property_change, this, _1, n), this);
+
 		solo_change (n);
 		mute_change (n);
 
@@ -1119,6 +1020,17 @@ Push2::switch_bank (uint32_t base)
 
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
+}
+
+void
+Push2::stripable_property_change (PropertyChange const& what_changed, int which)
+{
+	if (what_changed.contains (Properties::selected)) {
+		/* cancel string, which will cause a redraw on the next update
+		 * cycle. The redraw will reflect selected status
+		 */
+		mid_layout[which]->set_text (string());
+	}
 }
 
 void
@@ -1285,5 +1197,55 @@ Push2::other_vpot_touch (int n, bool touching)
 				}
 			}
 		}
+	}
+}
+
+void
+Push2::start_shift ()
+{
+	cerr << "start shift\n";
+	modifier_state = ModifierState (modifier_state | ModShift);
+	Button* b = id_button_map[Shift];
+	b->set_color (LED::White);
+	b->set_state (LED::Blinking16th);
+	write (b->state_msg());
+}
+
+void
+Push2::end_shift ()
+{
+	if (modifier_state & ModShift) {
+		cerr << "end shift\n";
+		modifier_state = ModifierState (modifier_state & ~(ModShift));
+		Button* b = id_button_map[Shift];
+		b->timeout_connection.disconnect ();
+		b->set_color (LED::White);
+		b->set_state (LED::OneShot24th);
+		write (b->state_msg());
+	}
+}
+
+void
+Push2::start_select ()
+{
+	cerr << "start select\n";
+	modifier_state = ModifierState (modifier_state | ModSelect);
+	Button* b = id_button_map[Select];
+	b->set_color (LED::White);
+	b->set_state (LED::Blinking16th);
+	write (b->state_msg());
+}
+
+void
+Push2::end_select ()
+{
+	if (modifier_state & ModSelect) {
+		cerr << "end select\n";
+		modifier_state = ModifierState (modifier_state & ~(ModSelect));
+		Button* b = id_button_map[Select];
+		b->timeout_connection.disconnect ();
+		b->set_color (LED::White);
+		b->set_state (LED::OneShot24th);
+		write (b->state_msg());
 	}
 }

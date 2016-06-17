@@ -89,6 +89,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	enum ModifierState {
 		None = 0,
 		ModShift = 0x1,
+		ModSelect = 0x2,
 	};
 
 	ModifierState modifier_state;
@@ -102,7 +103,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	int open ();
 	int close ();
 	bool redraw ();
-	int bitblt_to_device_frame_buffer ();
+	int blit_to_device_frame_buffer ();
 	bool vblank ();
 
 	enum ButtonID {
@@ -229,6 +230,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			, id (bb)
 			, press_method (&Push2::relax)
 			, release_method (&Push2::relax)
+			, long_press_method (&Push2::relax)
 		{}
 
 		Button (ButtonID bb, uint8_t ex, void (Push2::*press)())
@@ -236,6 +238,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			, id (bb)
 			, press_method (press)
 			, release_method (&Push2::relax)
+			, long_press_method (&Push2::relax)
 		{}
 
 		Button (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)())
@@ -243,6 +246,15 @@ class Push2 : public ARDOUR::ControlProtocol
 			, id (bb)
 			, press_method (press)
 			, release_method (release)
+			, long_press_method (&Push2::relax)
+		{}
+
+		Button (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)(), void (Push2::*long_press)())
+			: LED (ex)
+			, id (bb)
+			, press_method (press)
+			, release_method (release)
+			, long_press_method (long_press)
 		{}
 
 		MidiByteArray state_msg () const { return MidiByteArray (3, 0xb0|_state, _extra, _color_index); }
@@ -251,6 +263,8 @@ class Push2 : public ARDOUR::ControlProtocol
 		ButtonID id;
 		void (Push2::*press_method)();
 		void (Push2::*release_method)();
+		void (Push2::*long_press_method)();
+		sigc::connection timeout_connection;
 	};
 
 	struct ColorButton : public Button {
@@ -263,6 +277,9 @@ class Push2 : public ARDOUR::ControlProtocol
 
 		ColorButton (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)())
 			: Button (bb, ex, press, release) {}
+
+		ColorButton (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)(), void (Push2::*long_press)())
+			: Button (bb, ex, press, release, long_press) {}
 	};
 
 	struct WhiteButton : public Button {
@@ -274,6 +291,9 @@ class Push2 : public ARDOUR::ControlProtocol
 
 		WhiteButton (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)())
 			: Button (bb, ex, press, release) {}
+
+		WhiteButton (ButtonID bb, uint8_t ex, void (Push2::*press)(), void (Push2::*release)(), void (Push2::*long_press)())
+			: Button (bb, ex, press, release, long_press) {}
 	};
 
 	void relax () {}
@@ -284,6 +304,11 @@ class Push2 : public ARDOUR::ControlProtocol
 	/* map of Buttons by ButtonID */
 	typedef std::map<ButtonID,Button*> IDButtonMap;
 	IDButtonMap id_button_map;
+	std::set<ButtonID> buttons_down;
+	std::set<ButtonID> consumed;
+
+	bool button_long_press_timeout (ButtonID id);
+	void start_press_timeout (Button&, ButtonID);
 
 	void init_buttons (bool startup);
 	void init_touch_strip ();
@@ -345,8 +370,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_solo ();
 	void button_fixed_length ();
 	void button_new ();
-	void button_shift_press ();
-	void button_shift_release ();
 	void button_browse ();
 	void button_clip ();
 	void button_upper (uint32_t n);
@@ -376,6 +399,19 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_fwd8 ();
 	void button_fwd4t ();
 	void button_fwd4 ();
+	void button_add_track ();
+	void button_stop ();
+	void button_shift_press ();
+	void button_shift_release ();
+	void button_shift_long_press ();
+	void button_select_press ();
+	void button_select_release ();
+	void button_select_long_press ();
+
+	void start_shift ();
+	void end_shift ();
+	void start_select ();
+	void end_select ();
 
 	/* encoders */
 
@@ -403,6 +439,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void solo_change (int);
 	void mute_change (int);
+	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
 
 	void switch_bank (uint32_t base);
 };
