@@ -809,11 +809,9 @@ Push2::notify_solo_active_changed (bool yn)
 	}
 
 	if (yn) {
-		cerr << "soloing\n";
 		b->second->set_state (LED::Blinking4th);
 		b->second->set_color (LED::Red);
 	} else {
-		cerr << "NOT soloing\n";
 		b->second->set_state (LED::Off);
 	}
 
