@@ -407,6 +407,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_select_press ();
 	void button_select_release ();
 	void button_select_long_press ();
+	void button_page_left ();
+	void button_page_right ();
 
 	void start_shift ();
 	void end_shift ();

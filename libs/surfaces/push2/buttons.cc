@@ -198,9 +198,9 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (Session, 51);
 	MAKE_WHITE_BUTTON (Layout, 31);
 	MAKE_WHITE_BUTTON (OctaveUp, 55);
-	MAKE_WHITE_BUTTON (PageRight, 63);
+	MAKE_WHITE_BUTTON_PRESS (PageRight, 63, &Push2::button_page_right);
 	MAKE_WHITE_BUTTON (OctaveDown, 54);
-	MAKE_WHITE_BUTTON (PageLeft, 62);
+	MAKE_WHITE_BUTTON_PRESS (PageLeft, 62, &Push2::button_page_left);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Shift, 49, &Push2::button_shift_press, &Push2::button_shift_release, &Push2::button_shift_long_press);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Select, 48, &Push2::button_select_press, &Push2::button_select_release, &Push2::button_select_long_press);
 }
@@ -243,15 +243,27 @@ Push2::button_down ()
 }
 
 void
-Push2::button_right ()
+Push2::button_page_right ()
 {
 	ScrollTimeline (0.75);
 }
 
 void
-Push2::button_left ()
+Push2::button_page_left ()
 {
 	ScrollTimeline (-0.75);
+}
+
+void
+Push2::button_right ()
+{
+	switch_bank (max (0, bank_start + 8));
+}
+
+void
+Push2::button_left ()
+{
+	switch_bank (max (0, bank_start - 8));
 }
 
 void
@@ -307,17 +319,12 @@ Push2::button_fixed_length ()
 void
 Push2::button_browse ()
 {
-	if (modifier_state & ModShift) {
-		access_action ("Editor/addExistingAudioFiles");
-	} else {
-		switch_bank (max (0, bank_start - 8));
-	}
+	access_action ("Editor/addExistingAudioFiles");
 }
 
 void
 Push2::button_clip ()
 {
-	switch_bank (max (0, bank_start + 8));
 }
 
 void
@@ -335,7 +342,7 @@ Push2::button_upper (uint32_t n)
 	} else {
 		boost::shared_ptr<SoloControl> sc = stripable[n]->solo_control ();
 		if (sc) {
-			sc->set_value (!sc->get_value(), PBD::Controllable::UseGroup);
+			sc->set_value (!sc->self_soloed(), PBD::Controllable::UseGroup);
 		}
 	}
 }
@@ -350,11 +357,10 @@ Push2::button_lower (uint32_t n)
 	if (modifier_state & ModSelect) {
 		stripable[n]->presentation_info().set_selected (!stripable[n]->presentation_info().selected());
 	} else {
-		cerr << "select not set\n";
 		boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
 
 		if (mc) {
-			mc->set_value (!mc->get_value(), PBD::Controllable::UseGroup);
+			mc->set_value (!mc->muted_by_self(), PBD::Controllable::UseGroup);
 		}
 	}
 }

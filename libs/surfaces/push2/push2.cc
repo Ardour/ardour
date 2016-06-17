@@ -194,7 +194,7 @@ Push2::init_buttons (bool startup)
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
-	                       Quantize, Duplicate, Browse,
+	                       Quantize, Duplicate, Browse, PageRight, PageLeft,
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -230,7 +230,7 @@ Push2::init_buttons (bool startup)
 
 		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
-		                           Accent, Scale, Layout, Note, Session, OctaveUp, PageRight, OctaveDown, PageLeft, };
+		                           Accent, Scale, Layout, Note, Session,  OctaveUp, OctaveDown, };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
 			Button* b = id_button_map[off_buttons[n]];
@@ -1067,18 +1067,25 @@ Push2::solo_change (int n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = stripable[n]->solo_control ();
+	boost::shared_ptr<SoloControl> ac = stripable[n]->solo_control ();
 	if (!ac) {
 		return;
 	}
 
 	Button* b = id_button_map[bid];
-	if (ac->get_value()) {
-		b->set_color (LED::Red);
+
+	if (ac->soloed()) {
+		b->set_color (LED::Green);
 	} else {
 		b->set_color (LED::Black);
 	}
-	b->set_state (LED::OneShot24th);
+
+	if (ac->soloed_by_others_upstream() || ac->soloed_by_others_downstream()) {
+		b->set_state (LED::Blinking4th);
+	} else {
+		b->set_state (LED::OneShot24th);
+	}
+
 	write (b->state_msg());
 }
 
@@ -1086,6 +1093,12 @@ void
 Push2::mute_change (int n)
 {
 	ButtonID bid;
+
+	if (!stripable[n]) {
+		return;
+	}
+
+	cerr << "Mute changed on " << n << ' ' << stripable[n]->name() << endl;
 
 	switch (n) {
 	case 0:
@@ -1116,19 +1129,53 @@ Push2::mute_change (int n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = stripable[n]->mute_control ();
-	if (!ac) {
+	boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
+
+	if (!mc) {
 		return;
 	}
 
 	Button* b = id_button_map[bid];
 
-	if (ac->get_value ()) {
-		b->set_color (LED::Blue);
+	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
+
+		if (mc->muted_by_self ()) {
+			/* full mute */
+			b->set_color (LED::Blue);
+			b->set_state (LED::OneShot24th);
+			cerr << "FULL MUTE1\n";
+		} else if (mc->muted_by_others_soloing () || mc->muted_by_masters ()) {
+			/* this will reflect both solo mutes AND master mutes */
+			b->set_color (LED::Blue);
+			b->set_state (LED::Blinking4th);
+			cerr << "OTHER MUTE1\n";
+		} else {
+			/* no mute at all */
+			b->set_color (LED::Black);
+			b->set_state (LED::OneShot24th);
+			cerr << "NO MUTE1\n";
+		}
+
 	} else {
-		b->set_color (LED::Black);
+
+		if (mc->muted_by_self()) {
+			/* full mute */
+			b->set_color (LED::Blue);
+			b->set_state (LED::OneShot24th);
+			cerr << "FULL MUTE2\n";
+		} else if (mc->muted_by_masters ()) {
+			/* this shows only master mutes, not mute-by-others-soloing */
+			b->set_color (LED::Blue);
+			b->set_state (LED::Blinking4th);
+			cerr << "OTHER MUTE1\n";
+		} else {
+			/* no mute at all */
+			b->set_color (LED::Black);
+			b->set_state (LED::OneShot24th);
+			cerr << "NO MUTE2\n";
+		}
 	}
-	b->set_state (LED::OneShot24th);
+
 	write (b->state_msg());
 }
 
