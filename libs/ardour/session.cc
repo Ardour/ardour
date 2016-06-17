@@ -6294,12 +6294,12 @@ Session::goto_end ()
 }
 
 void
-Session::goto_start ()
+Session::goto_start (bool and_roll)
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->start(), false);
+		request_locate (_session_range_location->start(), and_roll);
 	} else {
-		request_locate (0, false);
+		request_locate (0, and_roll);
 	}
 }
 

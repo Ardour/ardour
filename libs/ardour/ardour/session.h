@@ -425,7 +425,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	framepos_t last_transport_start () const { return _last_roll_location; }
 	void goto_end ();
-	void goto_start ();
+	void goto_start (bool and_roll = false);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed, bool as_default = true);
