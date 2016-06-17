@@ -286,6 +286,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	IDButtonMap id_button_map;
 
 	void init_buttons ();
+	void init_touch_strip ();
 
 	/* map of Pads by note number */
 	typedef std::map<int,Pad*> NNPadMap;

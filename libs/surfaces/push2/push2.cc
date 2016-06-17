@@ -465,6 +465,7 @@ Push2::set_active (bool yn)
 		periodic_timeout->attach (main_loop()->get_context());
 
 		init_buttons ();
+		init_touch_strip ();
 		switch_bank (0);
 
 	} else {
@@ -478,6 +479,20 @@ Push2::set_active (bool yn)
 	DEBUG_TRACE (DEBUG::Push2, string_compose("Push2Protocol::set_active done with yn: '%1'\n", yn));
 
 	return 0;
+}
+
+void
+Push2::init_touch_strip ()
+{
+	MidiByteArray msg (9, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x17, 0x00, 0xf7);
+	/* flags are the final byte (ignore end-of-sysex */
+
+	/* show bar, not point
+	   autoreturn to center
+	   bar starts at center
+	*/
+	msg[7] = (1<<4) | (1<<5) | (1<<6);
+	write (msg);
 }
 
 void
@@ -648,6 +663,13 @@ Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 	case 8:
 		other_vpot_touch (3, ev->velocity > 64);
 		break;
+
+		/* touch strip */
+	case 12:
+		if (ev->velocity < 64) {
+			transport_stop ();
+		}
+		break;
 	}
 
 }
@@ -660,7 +682,15 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 void
 Push2::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb)
 {
-	cerr << "pitchbend @ " << pb << endl;
+	if (!session) {
+		return;
+	}
+	float speed;
+
+	/* range of +1 .. -1 */
+	speed = ((int32_t) pb - 8192) / 8192.0;
+	/* convert to range of +3 .. -3 */
+	session->request_transport_speed (speed * 3.0);
 }
 
 void
