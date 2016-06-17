@@ -380,6 +380,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void strip_vpot (int, int);
 	void other_vpot (int, int);
+	void strip_vpot_touch (int, bool);
+	void other_vpot_touch (int, bool);
 
 	/* widgets */
 

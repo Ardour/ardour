@@ -610,13 +610,51 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 void
 Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
-	cerr << "note on" << (int) ev->note_number << ", velocity " << (int) ev->velocity << endl;
+	switch (ev->note_number) {
+	case 0:
+		strip_vpot_touch (0, ev->velocity > 64);
+		break;
+	case 1:
+		strip_vpot_touch (1, ev->velocity > 64);
+		break;
+	case 2:
+		strip_vpot_touch (2, ev->velocity > 64);
+		break;
+	case 3:
+		strip_vpot_touch (3, ev->velocity > 64);
+		break;
+	case 4:
+		strip_vpot_touch (4, ev->velocity > 64);
+		break;
+	case 5:
+		strip_vpot_touch (5, ev->velocity > 64);
+		break;
+	case 6:
+		strip_vpot_touch (6, ev->velocity > 64);
+		break;
+	case 7:
+		strip_vpot_touch (7, ev->velocity > 64);
+		break;
+
+		/* left side */
+	case 10:
+		other_vpot_touch (0, ev->velocity > 64);
+		break;
+	case 9:
+		other_vpot_touch (1, ev->velocity > 64);
+		break;
+
+		/* right side */
+	case 8:
+		other_vpot_touch (3, ev->velocity > 64);
+		break;
+	}
+
 }
 
 void
 Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
-	cerr << "note on" << (int) ev->note_number << ", velocity " << (int) ev->velocity << endl;
 }
 
 void
@@ -1142,6 +1180,21 @@ Push2::strip_vpot (int n, int delta)
 }
 
 void
+Push2::strip_vpot_touch (int n, bool touching)
+{
+	if (stripable[n]) {
+		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
+		if (ac) {
+			if (touching) {
+				ac->start_touch (session->audible_frame());
+			} else {
+				ac->stop_touch (true, session->audible_frame());
+			}
+		}
+	}
+}
+
+void
 Push2::other_vpot (int n, int delta)
 {
 	switch (n) {
@@ -1158,5 +1211,27 @@ Push2::other_vpot (int n, int delta)
 			}
 		}
 		break;
+	}
+}
+
+void
+Push2::other_vpot_touch (int n, bool touching)
+{
+	switch (n) {
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		if (master) {
+			boost::shared_ptr<AutomationControl> ac = master->gain_control();
+			if (ac) {
+				if (touching) {
+					ac->start_touch (session->audible_frame());
+				} else {
+					ac->stop_touch (true, session->audible_frame());
+				}
+			}
+		}
 	}
 }
