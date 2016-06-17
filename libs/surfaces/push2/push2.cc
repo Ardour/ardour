@@ -60,6 +60,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, handle (0)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
+	, modifier_state (None)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -679,6 +680,10 @@ Push2::build_maps ()
 	button = new WhiteButton ((i), (cc), (p)); \
 	cc_button_map.insert (make_pair (button->controller_number(), button)); \
 	id_button_map.insert (make_pair (button->id, button))
+#define MAKE_WHITE_BUTTON_PRESS_RELEASE(i,cc,p,r)                                \
+	button = new WhiteButton ((i), (cc), (p), (r)); \
+	cc_button_map.insert (make_pair (button->controller_number(), button)); \
+	id_button_map.insert (make_pair (button->id, button))
 
 	MAKE_WHITE_BUTTON (TapTempo, 3);
 	MAKE_WHITE_BUTTON_PRESS (Metronome, 9, &Push2::button_metronome);
@@ -712,7 +717,7 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (PageRight, 63);
 	MAKE_WHITE_BUTTON (OctaveDown, 54);
 	MAKE_WHITE_BUTTON (PageLeft, 62);
-	MAKE_WHITE_BUTTON (Shift, 49);
+	MAKE_WHITE_BUTTON_PRESS_RELEASE (Shift, 49, &Push2::button_shift_press, &Push2::button_shift_release);
 	MAKE_WHITE_BUTTON (Select, 48);
 }
 

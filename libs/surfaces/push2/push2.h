@@ -86,6 +86,13 @@ class Push2 : public ARDOUR::ControlProtocol
 	sigc::connection vblank_connection;
 	sigc::connection periodic_connection;
 
+	enum ModifierState {
+		None = 0,
+		ModShift = 0x1,
+	};
+
+	ModifierState modifier_state;
+
 	static const int cols;
 	static const int rows;
 	static const int pixels_per_row;
@@ -337,6 +344,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_solo ();
 	void button_fixed_length ();
 	void button_new ();
+	void button_shift_press ();
+	void button_shift_release ();
 
 	/* widgets */
 

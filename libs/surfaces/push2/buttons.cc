@@ -93,3 +93,16 @@ Push2::button_fixed_length ()
 	id_button_map[FixedLength]->set_state (LED::NoTransition);
 	write (id_button_map[FixedLength]->state_msg());
 }
+
+void
+Push2::button_shift_press ()
+{
+	modifier_state = ModifierState (modifier_state | ModShift);
+}
+
+void
+Push2::button_shift_release ()
+{
+	modifier_state = ModifierState (modifier_state & ~ModShift);
+}
+
