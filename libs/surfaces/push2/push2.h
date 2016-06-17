@@ -331,6 +331,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_left ();
 	void button_metronome ();
 	void button_repeat ();
+	void button_solo ();
 
 	/* widgets */
 

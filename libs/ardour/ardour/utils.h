@@ -198,6 +198,17 @@ template<typename T> boost::shared_ptr<ControlList> stripable_list_to_control_li
 	return cl;
 }
 
+template<typename T> boost::shared_ptr<ControlList> stripable_list_to_control_list (StripableList& sl, boost::shared_ptr<T> (Stripable::*get_control)() const) {
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+		boost::shared_ptr<AutomationControl> ac = ((*s).get()->*get_control)();
+		if (ac) {
+			cl->push_back (ac);
+		}
+	}
+	return cl;
+}
+
 #if __APPLE__
 LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__

@@ -636,7 +636,7 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON (Lower6, 26);
 	MAKE_COLOR_BUTTON (Lower7, 27);
 	MAKE_COLOR_BUTTON (Mute, 60);
-	MAKE_COLOR_BUTTON (Solo, 61);
+	MAKE_COLOR_BUTTON_PRESS (Solo, 61, &Push2::button_solo);
 	MAKE_COLOR_BUTTON (Stop, 29);
 	MAKE_COLOR_BUTTON (Fwd32ndT, 43);
 	MAKE_COLOR_BUTTON (Fwd32nd,42 );
@@ -767,7 +767,7 @@ Push2::notify_transport_state_changed ()
 
 	if (session->transport_rolling()) {
 		b->second->set_state (LED::OneShot24th);
-		b->second->set_color (LED::Blue);
+		b->second->set_color (LED::Green);
 	} else {
 		b->second->set_state (LED::Off);
 	}
@@ -790,7 +790,7 @@ Push2::notify_parameter_changed (std::string param)
 			return;
 		}
 		if (Config->get_clicking()) {
-			b->second->set_state (LED::Pulsing4th);
+			b->second->set_state (LED::Blinking4th);
 			b->second->set_color (LED::White);
 		} else {
 			b->second->set_state (LED::Off);
@@ -802,15 +802,18 @@ Push2::notify_parameter_changed (std::string param)
 void
 Push2::notify_solo_active_changed (bool yn)
 {
-	IDButtonMap::iterator b = id_button_map.find (Solo);
+ 	IDButtonMap::iterator b = id_button_map.find (Solo);
 
 	if (b == id_button_map.end()) {
 		return;
 	}
 
 	if (yn) {
-		b->second->set_state (LED::Blinking24th);
+		cerr << "soloing\n";
+		b->second->set_state (LED::Blinking4th);
+		b->second->set_color (LED::Red);
 	} else {
+		cerr << "NOT soloing\n";
 		b->second->set_state (LED::Off);
 	}
 

@@ -55,3 +55,9 @@ Push2::button_metronome ()
 {
 	toggle_click ();
 }
+
+void
+Push2::button_solo ()
+{
+	cancel_all_solo ();
+}
