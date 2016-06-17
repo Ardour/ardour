@@ -257,6 +257,9 @@ OSC::start ()
 	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
 	// receive VCAs added
 	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
+	// order changed
+	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+
 
 	return 0;
 }
@@ -1283,6 +1286,13 @@ OSC::notify_vca_added (ARDOUR::VCAList &)
 
 void
 OSC::recalcbanks ()
+{
+	tick = false;
+	bank_dirty = true;
+}
+
+void
+OSC::_recalcbanks ()
 {
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
@@ -2389,8 +2399,11 @@ bool
 OSC::periodic (void)
 {
 	if (!tick) {
+		usleep(100); // let flurry of signals subside
 		if (bank_dirty) {
-			recalcbanks ();
+			_recalcbanks ();
+			bank_dirty = false;
+			tick = true;
 		}
 	}
 
