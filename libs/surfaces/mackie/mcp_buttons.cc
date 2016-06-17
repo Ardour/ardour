@@ -887,9 +887,7 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 		return none;
 	}
 
-	if (session) {
-		session->cancel_all_solo ();
-	}
+	cancel_all_solo ();
 	return none;
 }
 

@@ -535,9 +535,7 @@ void
 BasicUI::cancel_all_solo ()
 {
 	if (session) {
-		StripableList sl;
-		session->get_stripables (sl);
-		session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, PBD::Controllable::NoGroup);
+		session->cancel_all_solo ();
 	}
 }
 
