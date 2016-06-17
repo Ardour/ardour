@@ -82,11 +82,12 @@ Push2::Push2 (ARDOUR::Session& s)
 		mid_layout[n]->set_text (string_compose ("Inst %1", n));
 	}
 
+	build_maps ();
+
 	if (open ()) {
 		throw failed_constructor ();
 	}
 
-	build_maps ();
 }
 
 Push2::~Push2 ()
@@ -164,6 +165,23 @@ Push2::close ()
 	device_frame_buffer = 0;
 
 	return 0;
+}
+
+void
+Push2::init_buttons ()
+{
+	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
+	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
+	                       Quantize, Duplicate,
+	};
+
+	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
+		Button* b = id_button_map[buttons[n]];
+
+		b->set_color (LED::White);
+		b->set_state (LED::OneShot24th);
+		write (b->state_msg());
+	}
 }
 
 bool
@@ -325,7 +343,7 @@ Push2::redraw ()
 	context->move_to (650, 25);
 	tc_clock_layout->update_from_cairo_context (context);
 	tc_clock_layout->show_in_cairo_context (context);
-  	context->move_to (650, 60);
+	context->move_to (650, 60);
 	bbt_clock_layout->update_from_cairo_context (context);
 	bbt_clock_layout->show_in_cairo_context (context);
 
@@ -422,6 +440,8 @@ Push2::set_active (bool yn)
 		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (1000); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &Push2::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
+
+		init_buttons ();
 
 	} else {
 
@@ -635,6 +655,7 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON (Lower5, 25);
 	MAKE_COLOR_BUTTON (Lower6, 26);
 	MAKE_COLOR_BUTTON (Lower7, 27);
+	MAKE_COLOR_BUTTON (Master, 28);
 	MAKE_COLOR_BUTTON (Mute, 60);
 	MAKE_COLOR_BUTTON_PRESS (Solo, 61, &Push2::button_solo);
 	MAKE_COLOR_BUTTON (Stop, 29);
@@ -674,8 +695,8 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (DoubleLoop, 117);
 	MAKE_WHITE_BUTTON (Quantize, 116);
 	MAKE_WHITE_BUTTON (Duplicate, 88);
-	MAKE_WHITE_BUTTON (New, 87);
-	MAKE_WHITE_BUTTON (FixedLength, 90);
+	MAKE_WHITE_BUTTON_PRESS (New, 87, &Push2::button_new);
+	MAKE_WHITE_BUTTON_PRESS (FixedLength, 90, &Push2::button_fixed_length);
 	MAKE_WHITE_BUTTON_PRESS (Up, 46, &Push2::button_up);
 	MAKE_WHITE_BUTTON_PRESS (Right, 45, &Push2::button_right);
 	MAKE_WHITE_BUTTON_PRESS (Down, 47, &Push2::button_down);
@@ -683,6 +704,9 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (Repeat, 56, &Push2::button_repeat);
 	MAKE_WHITE_BUTTON (Accent, 57);
 	MAKE_WHITE_BUTTON (Scale, 58);
+	MAKE_WHITE_BUTTON (Layout, 31);
+	MAKE_WHITE_BUTTON (Note, 50);
+	MAKE_WHITE_BUTTON (Session, 51);
 	MAKE_WHITE_BUTTON (Layout, 31);
 	MAKE_WHITE_BUTTON (OctaveUp, 55);
 	MAKE_WHITE_BUTTON (PageRight, 63);
@@ -739,16 +763,17 @@ Push2::notify_record_state_changed ()
 		return;
 	}
 
-	b->second->set_color (LED::Red);
-
 	switch (session->record_status ()) {
 	case Session::Disabled:
-		b->second->set_state (LED::Off);
+		b->second->set_color (LED::White);
+		b->second->set_state (LED::NoTransition);
 		break;
 	case Session::Enabled:
+		b->second->set_color (LED::Red);
 		b->second->set_state (LED::Blinking4th);
 		break;
 	case Session::Recording:
+		b->second->set_color (LED::Red);
 		b->second->set_state (LED::OneShot24th);
 		break;
 	}
@@ -759,20 +784,25 @@ Push2::notify_record_state_changed ()
 void
 Push2::notify_transport_state_changed ()
 {
-	IDButtonMap::iterator b = id_button_map.find (Play);
-
-	if (b == id_button_map.end()) {
-		return;
-	}
+	Button* b = id_button_map[Play];
 
 	if (session->transport_rolling()) {
-		b->second->set_state (LED::OneShot24th);
-		b->second->set_color (LED::Green);
+		b->set_state (LED::OneShot24th);
+		b->set_color (LED::Green);
 	} else {
-		b->second->set_state (LED::Off);
+
+		/* disable any blink on FixedLength from pending edit range op */
+		Button* fl = id_button_map[FixedLength];
+
+		fl->set_color (LED::Black);
+		fl->set_state (LED::NoTransition);
+		write (fl->state_msg());
+
+		b->set_color (LED::White);
+		b->set_state (LED::NoTransition);
 	}
 
-	write (b->second->state_msg());
+	write (b->state_msg());
 }
 
 void
@@ -793,7 +823,8 @@ Push2::notify_parameter_changed (std::string param)
 			b->second->set_state (LED::Blinking4th);
 			b->second->set_color (LED::White);
 		} else {
-			b->second->set_state (LED::Off);
+			b->second->set_color (LED::White);
+			b->second->set_state (LED::NoTransition);
 		}
 		write (b->second->state_msg ());
 	}
@@ -802,7 +833,7 @@ Push2::notify_parameter_changed (std::string param)
 void
 Push2::notify_solo_active_changed (bool yn)
 {
- 	IDButtonMap::iterator b = id_button_map.find (Solo);
+	IDButtonMap::iterator b = id_button_map.find (Solo);
 
 	if (b == id_button_map.end()) {
 		return;
@@ -812,7 +843,8 @@ Push2::notify_solo_active_changed (bool yn)
 		b->second->set_state (LED::Blinking4th);
 		b->second->set_color (LED::Red);
 	} else {
-		b->second->set_state (LED::Off);
+		b->second->set_state (LED::NoTransition);
+		b->second->set_color (LED::White);
 	}
 
 	write (b->second->state_msg());

@@ -155,7 +155,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	struct LED
 	{
 		enum State {
-			Off,
+			NoTransition,
 			OneShot24th,
 			OneShot16th,
 			OneShot8th,
@@ -174,6 +174,7 @@ class Push2 : public ARDOUR::ControlProtocol
 		};
 
 		enum Colors {
+			Black = 0,
 			Red = 127,
 			Green = 126,
 			Blue = 125,
@@ -182,7 +183,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			White = 122
 		};
 
-		LED (uint8_t e) : _extra (e), _color_index (0), _state (Off) {}
+		LED (uint8_t e) : _extra (e), _color_index (0), _state (NoTransition) {}
 		virtual ~LED() {}
 
 		uint8_t extra () const { return _extra; }
@@ -206,7 +207,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			, x (xx)
 			, y (yy) {}
 
-		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|_state, _extra, (_state == Off) ? 0 : _color_index); }
+		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|_state, _extra, _color_index); }
 
 		int coord () const { return (y * 8) + x; }
 		int note_number() const { return extra(); }
@@ -237,7 +238,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			, release_method (release)
 		{}
 
-		MidiByteArray state_msg () const { return MidiByteArray (3, 0xb0|_state, _extra, (_state == Off) ? 0 : _color_index); }
+		MidiByteArray state_msg () const { return MidiByteArray (3, 0xb0|_state, _extra, _color_index); }
 		int controller_number() const { return extra(); }
 
 		ButtonID id;
@@ -276,6 +277,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	/* map of Buttons by ButtonID */
 	typedef std::map<ButtonID,Button*> IDButtonMap;
 	IDButtonMap id_button_map;
+
+	void init_buttons ();
 
 	/* map of Pads by note number */
 	typedef std::map<int,Pad*> NNPadMap;
@@ -332,6 +335,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_metronome ();
 	void button_repeat ();
 	void button_solo ();
+	void button_fixed_length ();
+	void button_new ();
 
 	/* widgets */
 
