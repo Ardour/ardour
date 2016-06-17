@@ -548,11 +548,61 @@ void
 Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
 	CCButtonMap::iterator b = cc_button_map.find (ev->controller_number);
+
 	if (b != cc_button_map.end()) {
 		if (ev->value == 0) {
 			(this->*b->second->release_method)();
 		} else {
 			(this->*b->second->press_method)();
+		}
+	} else {
+
+		/* encoder/vpot */
+
+		int delta = ev->value;
+
+		if (delta > 63) {
+			delta = -(128 - delta);
+		}
+
+		switch (ev->controller_number) {
+		case 71:
+			strip_vpot (0, delta);
+			break;
+		case 72:
+			strip_vpot (1, delta);
+			break;
+		case 73:
+			strip_vpot (2, delta);
+			break;
+		case 74:
+			strip_vpot (3, delta);
+			break;
+		case 75:
+			strip_vpot (4, delta);
+			break;
+		case 76:
+			strip_vpot (5, delta);
+			break;
+		case 77:
+			strip_vpot (6, delta);
+			break;
+		case 78:
+			strip_vpot (7, delta);
+			break;
+
+			/* left side pair */
+		case 14:
+			strip_vpot (8, delta);
+			break;
+		case 15:
+			other_vpot (1, delta);
+			break;
+
+			/* right side */
+		case 79:
+			other_vpot (2, delta);
+			break;
 		}
 	}
 }
@@ -976,6 +1026,9 @@ Push2::switch_bank (uint32_t base)
 		mute_change (n);
 
 	}
+
+	/* master cannot be removed, so no need to connect to going-away signal */
+	master = session->master_out ();
 }
 
 void
@@ -1075,4 +1128,35 @@ Push2::mute_change (int n)
 	}
 	b->set_state (LED::OneShot24th);
 	write (b->state_msg());
+}
+
+void
+Push2::strip_vpot (int n, int delta)
+{
+	if (stripable[n]) {
+		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
+		if (ac) {
+			ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
+		}
+	}
+}
+
+void
+Push2::other_vpot (int n, int delta)
+{
+	switch (n) {
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		/* master gain control */
+		if (master) {
+			boost::shared_ptr<AutomationControl> ac = master->gain_control();
+			if (ac) {
+				ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
+			}
+		}
+		break;
+	}
 }

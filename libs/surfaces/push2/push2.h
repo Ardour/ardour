@@ -376,6 +376,11 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_fwd4t ();
 	void button_fwd4 ();
 
+	/* encoders */
+
+	void strip_vpot (int, int);
+	void other_vpot (int, int);
+
 	/* widgets */
 
 	Cairo::RefPtr<Cairo::Context> context;
