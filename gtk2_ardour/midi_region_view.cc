@@ -1699,16 +1699,27 @@ MidiRegionView::update_note (NoteBase* note, bool update_ghost_regions)
 void
 MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 {
+	TempoMap& map (trackview.session()->tempo_map());
+	const boost::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	boost::shared_ptr<NoteType> note = ev->note();
-	const double x0 = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
+	const framepos_t note_start_frames = map.frame_at_beat (_region->beat() - mr->start_beats().to_double()
+								+ note->time().to_double()) - _region->position();
+
+	const double x0 = trackview.editor().sample_to_pixel (note_start_frames);
 	double x1;
 	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
-	double y1;
-
-	/* trim note display to not overlap the end of its region */
+	double y1;/* trim note display to not overlap the end of its region */
 
 	if (note->length() > 0) {
-		const framepos_t note_end_frames = min (source_beats_to_region_frames (note->end_time()), _region->length());
+		Evoral::Beats note_end_time = note->end_time();
+
+		if (note->end_time() > mr->start_beats() + mr->length_beats()) {
+			note_end_time = mr->length_beats();
+		}
+
+		const framepos_t note_end_frames = map.frame_at_beat (_region->beat() - mr->start_beats().to_double()
+								      + note_end_time.to_double()) - _region->position();
+
 		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_frames)) - 1;
 	} else {
 		x1 = std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1;
@@ -1761,7 +1772,8 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	const framepos_t note_start_frames = source_beats_to_region_frames(note->time());
+	const framepos_t note_start_frames = trackview.session()->tempo_map().frame_at_beat (_region->beat() - midi_region()->start_beats().to_double()
+												 + note->time().to_double()) - _region->position();
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
 	const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
 	const double y = 1.5 + floor(midi_stream_view()->note_to_y(note->note())) + diamond_size * .5;
