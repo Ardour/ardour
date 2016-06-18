@@ -27,7 +27,6 @@
 #include "osc.h"
 #include "osc_controllable.h"
 
-using namespace sigc;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
