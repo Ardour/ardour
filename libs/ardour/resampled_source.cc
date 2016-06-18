@@ -73,7 +73,7 @@ framecnt_t
 ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 {
 	int err;
-	size_t bs = floor (blocksize / source->channels()) *  source->channels();
+	size_t bs = floor ((float)(blocksize / source->channels())) *  source->channels();
 
 	/* If the input buffer is empty, refill it. */
 	if (_src_data.input_frames == 0) {
