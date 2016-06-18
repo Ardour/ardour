@@ -102,6 +102,7 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void fix_negative_start ();
 	Evoral::Beats start_beats () {return _start_beats.val(); }
+ 	Evoral::Beats length_beats () {return _length_beats.val(); }
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {

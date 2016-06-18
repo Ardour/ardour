@@ -197,16 +197,25 @@ MidiRegion::set_length_internal (framecnt_t len, const int32_t& sub_num)
 void
 MidiRegion::update_after_tempo_map_change (bool /* send */)
 {
+	const framepos_t old_pos = _position;
+	const framepos_t old_length = _length;
+	const framepos_t old_start = _start;
+
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
 	_length = _session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position;
 
 	PropertyChange s_and_l;
-	s_and_l.add (Properties::start);
-	s_and_l.add (Properties::length);
-	s_and_l.add (Properties::length_beats);
-	s_and_l.add (Properties::position);
+	if (old_start != _start) {
+		s_and_l.add (Properties::start);
+	}
+	if (old_length != _length) {
+		s_and_l.add (Properties::length);
+	}
+	if (old_pos != _position) {
+		s_and_l.add (Properties::position);
+	}
 
 	send_change (s_and_l);
 }
