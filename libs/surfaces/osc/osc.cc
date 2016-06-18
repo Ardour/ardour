@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 #include "pbd/gstdio_compat.h"
-#include <glibmm/miscutils.h>
+#include <glibmm.h>
 
 #include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
@@ -2399,7 +2399,7 @@ bool
 OSC::periodic (void)
 {
 	if (!tick) {
-		usleep(100); // let flurry of signals subside
+		Glib::usleep(100); // let flurry of signals subside
 		if (bank_dirty) {
 			_recalcbanks ();
 			bank_dirty = false;
