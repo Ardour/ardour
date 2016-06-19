@@ -24,6 +24,8 @@
 #include "pbd/convert.h"
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/file_utils.h"
+#include "pbd/search_path.h"
 
 #include "midi++/parser.h"
 #include "timecode/time.h"
@@ -32,6 +34,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -62,6 +65,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 	, modifier_state (None)
+	, splash_start (0)
 	, bank_start (0)
 {
 	context = Cairo::Context::create (frame_buffer);
@@ -353,6 +357,14 @@ Push2::redraw ()
 	string tc_clock_text;
 	string bbt_clock_text;
 
+	if (splash_start) {
+		if (get_microseconds() - splash_start > 4000000) {
+			splash_start = 0;
+		} else {
+			return false;
+		}
+	}
+
 	if (session) {
 		framepos_t audible = session->audible_frame();
 		Timecode::Time TC;
@@ -526,6 +538,7 @@ Push2::set_active (bool yn)
 		init_buttons (true);
 		init_touch_strip ();
 		switch_bank (0);
+		splash ();
 
 	} else {
 
@@ -1295,4 +1308,63 @@ Push2::end_select ()
 		b->set_state (LED::OneShot24th);
 		write (b->state_msg());
 	}
+}
+
+void
+Push2::splash ()
+{
+	std::string splash_file;
+
+	Searchpath rc (ARDOUR::ardour_data_search_path());
+	rc.add_subdirectory_to_paths ("resources");
+
+	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
+		cerr << "Cannot find splash screen image file\n";
+		throw failed_constructor();
+	}
+
+	Cairo::RefPtr<Cairo::ImageSurface> img = Cairo::ImageSurface::create_from_png (splash_file);
+
+	double x_ratio = (double) img->get_width() / (cols - 20);
+	double y_ratio = (double) img->get_height() / (rows - 20);
+	double scale = min (x_ratio, y_ratio);
+
+	/* background */
+
+	context->set_source_rgb (0.764, 0.882, 0.882);
+	context->paint ();
+
+	/* image */
+
+	context->save ();
+	context->translate (5, 5);
+	context->scale (scale, scale);
+	context->set_source (img, 0, 0);
+	context->paint ();
+	context->restore ();
+
+	/* text */
+
+	Glib::RefPtr<Pango::Layout> some_text = Pango::Layout::create (context);
+
+	Pango::FontDescription fd ("Sans 38");
+	some_text->set_font_description (fd);
+	some_text->set_text (string_compose ("%1 %2", PROGRAM_NAME, VERSIONSTRING));
+
+	context->move_to (200, 10);
+	context->set_source_rgb (0, 0, 0);
+	some_text->update_from_cairo_context (context);
+	some_text->show_in_cairo_context (context);
+
+	Pango::FontDescription fd2 ("Sans Italic 18");
+	some_text->set_font_description (fd2);
+	some_text->set_text (_("Ableton Push 2 Support"));
+
+	context->move_to (200, 80);
+	context->set_source_rgb (0, 0, 0);
+	some_text->update_from_cairo_context (context);
+	some_text->show_in_cairo_context (context);
+
+	splash_start = get_microseconds ();
+	blit_to_device_frame_buffer ();
 }

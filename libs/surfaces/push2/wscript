@@ -16,7 +16,7 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
     autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4', mandatory=True)
-
+    
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
@@ -29,6 +29,7 @@ def build(bld):
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
     obj.includes     = [ '.', './push2']
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'

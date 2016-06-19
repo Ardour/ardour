@@ -431,6 +431,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	Glib::RefPtr<Pango::Layout> mid_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
 
+	void splash ();
+	ARDOUR::microseconds_t splash_start;
+
 	/* stripables */
 
 	int32_t bank_start;
