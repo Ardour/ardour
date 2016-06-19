@@ -145,9 +145,9 @@ NoteBase::set_selected(bool selected)
 		return;
 	}
 
-	const uint32_t base_col = base_color();
-
 	_selected = selected;
+
+	const uint32_t base_col = base_color();
 	set_fill_color (base_col);
 
 	set_outline_color(calculate_outline(base_col, _selected));
