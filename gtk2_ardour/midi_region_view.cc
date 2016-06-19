@@ -3840,11 +3840,7 @@ MidiRegionView::color_handler ()
 void
 MidiRegionView::enable_display (bool yn)
 {
-
 	RegionView::enable_display (yn);
-	if (yn) {
-		redisplay_model ();
-	}
 }
 
 void
