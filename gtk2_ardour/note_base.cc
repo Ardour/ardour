@@ -119,9 +119,9 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		set_fill_color(UIConfiguration::instance().color ("midi note inactive channel"));
-		set_outline_color(calculate_outline(UIConfiguration::instance().color ("midi note inactive channel"),
-		                                    _selected));
+		const ArdourCanvas::Color inactive_ch = UIConfiguration::instance().color ("midi note inactive channel");
+		set_fill_color(inactive_ch);
+		set_outline_color(calculate_outline(inactive_ch, _selected));
 	} else {
 		// set the color according to the notes selection state
 		set_selected(_selected);
@@ -145,10 +145,12 @@ NoteBase::set_selected(bool selected)
 		return;
 	}
 
-	_selected = selected;
-	set_fill_color (base_color());
+	const uint32_t base_col = base_color();
 
-	set_outline_color(calculate_outline(base_color(), _selected));
+	_selected = selected;
+	set_fill_color (base_col);
+
+	set_outline_color(calculate_outline(base_col, _selected));
 }
 
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
@@ -166,8 +168,8 @@ NoteBase::base_color()
 	switch (mode) {
 	case TrackColor:
 	{
-		uint32_t color = _region.midi_stream_view()->get_region_color();
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity),
+		const uint32_t region_color = _region.midi_stream_view()->get_region_color();
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity),
 		                         UIConfiguration::instance().color ("midi note selected"),
 					 0.5);
 	}
