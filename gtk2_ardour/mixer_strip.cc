@@ -1491,20 +1491,20 @@ MixerStrip::setup_comment_button ()
 
 	case Wide:
 		if (_route->comment().empty ()) {
-			_comment_button.unset_bg (STATE_NORMAL);
+			_comment_button.set_name ("generic button");
 			_comment_button.set_text (_("Comments"));
 		} else {
-			_comment_button.modify_bg (STATE_NORMAL, color ());
+			_comment_button.set_name ("comment button");
 			_comment_button.set_text (_("*Comments*"));
 		}
 		break;
 
 	case Narrow:
 		if (_route->comment().empty ()) {
-			_comment_button.unset_bg (STATE_NORMAL);
+			_comment_button.set_name ("generic button");
 			_comment_button.set_text (_("Cmt"));
 		} else {
-			_comment_button.modify_bg (STATE_NORMAL, color ());
+			_comment_button.set_name ("comment button");
 			_comment_button.set_text (_("*Cmt*"));
 		}
 		break;
