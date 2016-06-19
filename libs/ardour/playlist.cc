@@ -657,6 +657,7 @@ Playlist::flush_notifications (bool from_undo)
 	 pending_range_moves.clear ();
 	 pending_region_extensions.clear ();
 	 pending_contents_change = false;
+	 pending_layering = false;
  }
 
  /*************************************************************
