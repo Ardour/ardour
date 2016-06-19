@@ -1469,12 +1469,33 @@ TempoMap::frame_at_beat (const double& beat) const
 	return frame_at_beat_locked (_metrics, beat);
 }
 
-/* meter section based */
+/* meter & tempo section based */
 framecnt_t
 TempoMap::frame_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
-	const TempoSection* prev_t = &tempo_section_at_beat_locked (metrics, beat);
-	const MeterSection* prev_m = &meter_section_at_beat_locked (metrics, beat);
+	MeterSection* prev_m = 0;
+	TempoSection* prev_t = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (prev_m && m->beat() > beat) {
+				break;
+			}
+			prev_m = m;
+		}
+	}
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_t && ((t->pulse() - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat() > beat) {
+				break;
+			}
+			prev_t = t;
+		}
+
+	}
 
 	return prev_t->frame_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse(), _frame_rate);
 }
