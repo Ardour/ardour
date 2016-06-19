@@ -267,8 +267,10 @@ MidiGhostRegion::set_colors()
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->item->set_fill_color (UIConfiguration::instance().color_mod((*it)->event->base_color(), "ghost track midi fill"));
-		(*it)->item->set_outline_color (UIConfiguration::instance().color ("ghost track midi outline"));
+		_fill = UIConfiguration::instance().color_mod((*it)->event->base_color(), "ghost track midi fill");
+		_outline = UIConfiguration::instance().color ("ghost track midi outline");
+		(*it)->item->set_fill_color (_fill);
+		(*it)->item->set_outline_color (_outline);
 	}
 }
 
@@ -331,8 +333,8 @@ MidiGhostRegion::add_note (NoteBase* n)
 	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
-	event->item->set_outline_color (UIConfiguration::instance().color ("ghost track midi outline"));
+	event->item->set_fill_color (_fill);
+	event->item->set_outline_color (_outline);
 
 	MidiStreamView* mv = midi_view();
 

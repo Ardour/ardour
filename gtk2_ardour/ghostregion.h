@@ -115,6 +115,8 @@ public:
 	void clear_events();
 
 private:
+	ArdourCanvas::Color _fill;
+	ArdourCanvas::Color _outline;
 
 	MidiGhostRegion::GhostEvent* find_event (NoteBase*);
 
