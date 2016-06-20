@@ -57,8 +57,8 @@ class LIBARDOUR_API PortManager
 
 	/* Port registration */
 
-	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false);
-	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false);
+	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
+	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
 	int unregister_port (boost::shared_ptr<Port>);
 
 	/* Port connectivity */
@@ -140,7 +140,7 @@ class LIBARDOUR_API PortManager
 	SerializedRCUManager<Ports> ports;
 	bool _port_remove_in_progress;
 
-	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false);
+	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
 	void port_registration_failure (const std::string& portname);
 
 	/** List of ports to be used between ::cycle_start() and ::cycle_end()

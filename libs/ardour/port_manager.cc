@@ -294,24 +294,28 @@ PortManager::port_registration_failure (const std::string& portname)
 }
 
 boost::shared_ptr<Port>
-PortManager::register_port (DataType dtype, const string& portname, bool input, bool async)
+PortManager::register_port (DataType dtype, const string& portname, bool input, bool async, PortFlags flags)
 {
 	boost::shared_ptr<Port> newport;
+
+	/* limit the possible flags that can be set */
+
+	flags = PortFlags (flags & (Hidden|Shadow|IsTerminal));
 
 	try {
 		if (dtype == DataType::AUDIO) {
 			DEBUG_TRACE (DEBUG::Ports, string_compose ("registering AUDIO port %1, input %2\n",
 								   portname, input));
-			newport.reset (new AudioPort (portname, (input ? IsInput : IsOutput)));
+			newport.reset (new AudioPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
 		} else if (dtype == DataType::MIDI) {
 			if (async) {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering ASYNC MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new AsyncMIDIPort (portname, (input ? IsInput : IsOutput)));
+				newport.reset (new AsyncMIDIPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
 			} else {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new MidiPort (portname, (input ? IsInput : IsOutput)));
+				newport.reset (new MidiPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
 			}
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
@@ -339,15 +343,15 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 }
 
 boost::shared_ptr<Port>
-PortManager::register_input_port (DataType type, const string& portname, bool async)
+PortManager::register_input_port (DataType type, const string& portname, bool async, PortFlags extra_flags)
 {
-	return register_port (type, portname, true, async);
+	return register_port (type, portname, true, async, extra_flags);
 }
 
 boost::shared_ptr<Port>
-PortManager::register_output_port (DataType type, const string& portname, bool async)
+PortManager::register_output_port (DataType type, const string& portname, bool async, PortFlags extra_flags)
 {
-	return register_port (type, portname, false, async);
+	return register_port (type, portname, false, async, extra_flags);
 }
 
 int
