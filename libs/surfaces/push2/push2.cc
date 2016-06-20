@@ -145,6 +145,8 @@ Push2::open ()
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
+	boost::dynamic_pointer_cast<AsyncMIDIPort> (_async_in)->add_shadow_port (string_compose (_("%1 Pads"), X_("Push 2")));
+
 	connect_to_parser ();
 
 	return 0;
