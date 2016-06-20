@@ -1410,12 +1410,17 @@ MidiRegionView::region_resized (const PropertyChange& what_changed)
 		_region_relative_time_converter.set_origin_b(_region->position());
 		_region_relative_time_converter_double.set_origin_b(_region->position());
 		/* reset_width dependent_items() redisplays model */
+
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start) ||
 	    what_changed.contains (ARDOUR::Properties::position)) {
 		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
 	}
+	if (what_changed.contains (ARDOUR::Properties::length)) {
+		enable_display (true);
+	}
+
 }
 
 void
@@ -1425,7 +1430,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 
 	if (_enable_display) {
 		redisplay_model();
-	}
+		}
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if ((*x)->canvas_item()->width() >= _pixel_width) {
@@ -1754,8 +1759,9 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	}
 
 	// Update color in case velocity has changed
-	//ev->set_fill_color(ev->base_color());
-	//ev->set_outline_color(ev->calculate_outline(ev->base_color(), ev->selected()));
+	const uint32_t base_col = ev->base_color();
+	ev->set_fill_color(base_col);
+	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	if (update_ghost_regions) {
 		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
