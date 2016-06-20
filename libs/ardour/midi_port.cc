@@ -81,6 +81,19 @@ MidiPort::cycle_start (pframes_t nframes)
 			}
 		}
 	}
+
+	if (inbound_midi_filter) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+		inbound_midi_filter (mb, mb);
+	}
+
+	if (_shadow_port) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+		if (shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
+			_shadow_port->flush_buffers (nframes);
+		}
+	}
+
 }
 
 Buffer&
@@ -317,4 +330,32 @@ void
 MidiPort::set_trace_on (bool yn)
 {
 	_trace_on = yn;
+}
+
+int
+MidiPort::add_shadow_port (string const & name, MidiFilter mf)
+{
+	if (!ARDOUR::Port::receives_input()) {
+		return -1;
+	}
+
+	if (_shadow_port) {
+		return -2;
+	}
+
+	shadow_midi_filter = mf;
+
+	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
+		return -3;
+	}
+
+	/* forward on our port latency to the shadow port.
+
+	   XXX: need to capture latency changes and forward them too.
+	*/
+
+	LatencyRange latency = private_latency_range (false);
+	_shadow_port->set_private_latency_range (latency, false);
+
+	return 0;
 }
