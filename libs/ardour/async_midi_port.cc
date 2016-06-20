@@ -364,7 +364,7 @@ AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 
 	/* shadow port is not async. */
 
-	if (!(shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false)))) {
+	if (!(shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
 		return -3;
 	}
 
