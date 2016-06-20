@@ -151,7 +151,10 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 		}
 
 		if (shadow_port) {
-			shadow_midi_filter (mb, shadow_port->get_midi_buffer (nframes));
+			MidiBuffer& shadow_buffer (shadow_port->get_midi_buffer (nframes));
+			if (shadow_midi_filter (mb, shadow_buffer)) {
+				shadow_port->flush_buffers (nframes);
+			}
 		}
 	}
 }
