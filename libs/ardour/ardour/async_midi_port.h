@@ -76,6 +76,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
 	void set_inbound_filter (MidiFilter);
 	int add_shadow_port (std::string const &, MidiFilter);
+	boost::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
 
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
@@ -106,7 +107,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 	MidiFilter inbound_midi_filter;
 
-	boost::shared_ptr<MidiPort> shadow_port;
+	boost::shared_ptr<MidiPort> _shadow_port;
 	MidiFilter shadow_midi_filter;
 
 	static pthread_t _process_thread;

@@ -150,10 +150,9 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 			inbound_midi_filter (mb, mb);
 		}
 
-		if (shadow_port) {
-			MidiBuffer& shadow_buffer (shadow_port->get_midi_buffer (nframes));
-			if (shadow_midi_filter (mb, shadow_buffer)) {
-				shadow_port->flush_buffers (nframes);
+		if (_shadow_port) {
+			if (shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
+				_shadow_port->flush_buffers (nframes);
 			}
 		}
 	}
@@ -359,7 +358,7 @@ AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 		return -1;
 	}
 
-	if (shadow_port) {
+	if (_shadow_port) {
 		return -2;
 	}
 
@@ -367,7 +366,7 @@ AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 
 	/* shadow port is not async. */
 
-	if (!(shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
+	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
 		return -3;
 	}
 
@@ -377,7 +376,7 @@ AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 	*/
 
 	LatencyRange latency = private_latency_range (false);
-	shadow_port->set_private_latency_range (latency, false);
+	_shadow_port->set_private_latency_range (latency, false);
 
 	return 0;
 }
