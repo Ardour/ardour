@@ -41,30 +41,6 @@ pthread_t AsyncMIDIPort::_process_thread;
 
 #define port_engine AudioEngine::instance()->port_engine()
 
-static bool
-filter_relax (MidiBuffer& in, MidiBuffer& out)
-{
-	return false;
-}
-
-static bool
-filter_copy (MidiBuffer& in, MidiBuffer& out)
-{
-	out.copy (in);
-	return false;
-}
-
-static bool
-filter_notes_only (MidiBuffer& in, MidiBuffer& out)
-{
-	for (MidiBuffer::iterator b = in.begin(); b != in.end(); ++b) {
-		if ((*b).is_note_on() || (*b).is_note_off()) {
-			out.push_back (*b);
-		}
-	}
-	return false;
-}
-
 AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	: MidiPort (name, flags)
 	, MIDI::Port (name, MIDI::Port::Flags (0))
@@ -74,7 +50,6 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, output_fifo (2048)
 	, input_fifo (1024)
 	, _xthread (true)
-	, inbound_midi_filter (boost::bind (filter_notes_only, _1, _2))
 {
 }
 
@@ -171,10 +146,12 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 			_xthread.wakeup ();
 		}
 
-		if (shadow_port) {
-			inbound_midi_filter (mb, shadow_port->get_midi_buffer (nframes));
-		} else {
+		if (inbound_midi_filter) {
 			inbound_midi_filter (mb, mb);
+		}
+
+		if (shadow_port) {
+			shadow_midi_filter (mb, shadow_port->get_midi_buffer (nframes));
 		}
 	}
 }
@@ -373,7 +350,7 @@ AsyncMIDIPort::is_process_thread()
 }
 
 int
-AsyncMIDIPort::add_shadow_port (string const & name)
+AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 {
 	if (!ARDOUR::Port::receives_input()) {
 		return -1;
@@ -382,6 +359,8 @@ AsyncMIDIPort::add_shadow_port (string const & name)
 	if (shadow_port) {
 		return -2;
 	}
+
+	shadow_midi_filter = mf;
 
 	/* shadow port is not async. */
 

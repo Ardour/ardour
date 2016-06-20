@@ -73,8 +73,9 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	int selectable() const { return -1; }
 	void set_timer (boost::function<framecnt_t (void)>&);
 
-	void set_inbound_filter (boost::function<bool(MidiBuffer&,MidiBuffer&)>);
-	int add_shadow_port (std::string const &);
+	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
+	void set_inbound_filter (MidiFilter);
+	int add_shadow_port (std::string const &, MidiFilter);
 
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
@@ -104,8 +105,10 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 	void flush_output_fifo (pframes_t);
 
+	MidiFilter inbound_midi_filter;
+
 	boost::shared_ptr<MidiPort> shadow_port;
-	boost::function<bool(MidiBuffer&,MidiBuffer&)> inbound_midi_filter;
+	MidiFilter shadow_midi_filter;
 
 	static pthread_t _process_thread;
 };
