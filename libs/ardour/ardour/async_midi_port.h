@@ -98,7 +98,6 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	std::string _connections;
 	PBD::ScopedConnection connect_connection;
 	PBD::ScopedConnection halt_connection;
-	void flush (void* jack_port_buffer);
 	void jack_halted ();
 	void make_connections ();
 	void init (std::string const &, Flags);
