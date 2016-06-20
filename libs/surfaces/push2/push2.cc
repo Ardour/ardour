@@ -145,7 +145,7 @@ Push2::open ()
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
-	boost::dynamic_pointer_cast<AsyncMIDIPort> (_async_in)->add_shadow_port (string_compose (_("%1 Pads"), X_("Push 2")));
+	boost::dynamic_pointer_cast<AsyncMIDIPort> (_async_in)->add_shadow_port (string_compose (_("%1 Pads"), X_("Push 2")), boost::bind (&Push2::pad_filter, this, _1, _2));
 
 	connect_to_parser ();
 
@@ -247,6 +247,13 @@ Push2::init_buttons (bool startup)
 		}
 	}
 
+	for (NNPadMap::iterator pi = nn_pad_map.begin(); pi != nn_pad_map.end(); ++pi) {
+		Pad* pad = pi->second;
+
+		pad->set_color (LED::Black);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
+	}
 }
 
 bool
@@ -726,9 +733,14 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 }
 
 void
-Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+
+	if (ev->velocity == 0) {
+		handle_midi_note_off_message (parser, ev);
+		return;
+	}
 
 	switch (ev->note_number) {
 	case 0:
@@ -776,12 +788,51 @@ Push2::handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		}
 		break;
 	}
+
+	if (ev->note_number < 11) {
+		return;
+	}
+
+	/* Pad */
+
+	NNPadMap::iterator pi = nn_pad_map.find (ev->note_number);
+
+	if (pi == nn_pad_map.end()) {
+		return;
+	}
+
+	Pad* pad = pi->second;
+
+	pad->set_color (LED::White);
+	pad->set_state (LED::OneShot24th);
+	write (pad->state_msg());
 }
 
 void
 Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+
+	if (ev->note_number < 11) {
+		/* theoretically related to encoder touch start/end, but
+		 * actually they send note on with two different velocity
+		 * values (127 & 64).
+		 */
+		return;
+	}
+
+	NNPadMap::iterator pi = nn_pad_map.find (ev->note_number);
+
+	if (pi == nn_pad_map.end()) {
+		return;
+	}
+
+	Pad* pad = pi->second;
+
+	pad->set_color (LED::Black);
+	pad->set_state (LED::OneShot24th);
+	write (pad->state_msg());
+
 }
 
 void
@@ -1369,4 +1420,26 @@ Push2::splash ()
 
 	splash_start = get_microseconds ();
 	blit_to_device_frame_buffer ();
+}
+
+bool
+Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
+{
+	/* This filter is called asynchronously from a realtime process
+	   context. It must use atomics to check state, and must not block.
+	*/
+
+	bool matched = false;
+
+	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
+		if ((*ev).is_note_on() || (*ev).is_note_off()) {
+			/* encoder touch start/touch end use note 0-10 */
+			if ((*ev).note() > 10) {
+				out.push_back (*ev);
+				matched = true;
+			}
+		}
+	}
+
+	return matched;
 }

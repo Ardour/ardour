@@ -53,6 +53,7 @@ namespace MIDI {
 namespace ARDOUR {
 	class AsyncMIDIPort;
 	class Port;
+	class MidiBuffer;
 }
 
 namespace ArdourSurface {
@@ -447,6 +448,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
 
 	void switch_bank (uint32_t base);
+
+	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 };
 
 
