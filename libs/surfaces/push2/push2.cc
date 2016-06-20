@@ -36,6 +36,8 @@
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/midi_track.h"
+#include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
@@ -1092,10 +1094,43 @@ void
 Push2::stripable_property_change (PropertyChange const& what_changed, int which)
 {
 	if (what_changed.contains (Properties::selected)) {
+		if (!stripable[which]) {
+			return;
+		}
+
 		/* cancel string, which will cause a redraw on the next update
 		 * cycle. The redraw will reflect selected status
 		 */
+
 		mid_layout[which]->set_text (string());
+
+		if (stripable[which]->presentation_info().selected()) {
+
+			boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
+			boost::shared_ptr<Stripable> current_first_selection = first_selected_stripable.lock();
+			boost::shared_ptr<MidiTrack> mtrack;
+
+			mtrack = boost::dynamic_pointer_cast<MidiTrack> (current_first_selection);
+
+			/* disconnect from pad port, if appropriate */
+			if (mtrack && pad_port) {
+				cerr << "Disconnect pads from " << mtrack->name() << endl;
+				mtrack->input()->disconnect (mtrack->input()->nth(0), pad_port->name(), this);
+			}
+
+			first_selected_stripable = boost::weak_ptr<Stripable> (stripable[which]);
+
+			/* now connect the pad port to this (newly) selected midi
+			 * track, if indeed it is
+			 */
+
+			mtrack = boost::dynamic_pointer_cast<MidiTrack> (stripable[which]);
+
+			if (mtrack && pad_port) {
+				cerr << "Reconnect pads to " << mtrack->name() << endl;
+				mtrack->input()->connect (mtrack->input()->nth (0), pad_port->name(), this);
+			}
+		}
 	}
 }
 

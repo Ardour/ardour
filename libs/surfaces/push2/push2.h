@@ -450,6 +450,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void switch_bank (uint32_t base);
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
+
+	boost::weak_ptr<ARDOUR::Stripable> first_selected_stripable;
 };
 
 
