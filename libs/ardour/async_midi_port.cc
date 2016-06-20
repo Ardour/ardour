@@ -371,5 +371,13 @@ AsyncMIDIPort::add_shadow_port (string const & name, MidiFilter mf)
 		return -3;
 	}
 
+	/* forward on our port latency to the shadow port.
+
+	   XXX: need to capture latency changes and forward them too.
+	*/
+
+	LatencyRange latency = private_latency_range (false);
+	shadow_port->set_private_latency_range (latency, false);
+
 	return 0;
 }
