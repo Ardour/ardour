@@ -84,7 +84,7 @@ Push2::build_maps ()
 	MAKE_PAD (5, 0, 52);
 	MAKE_PAD (5, 1, 53);
 	MAKE_PAD (5, 2, 54);
-	MAKE_PAD (5, 3, 56);
+	MAKE_PAD (5, 3, 55);
 	MAKE_PAD (5, 4, 56);
 	MAKE_PAD (5, 5, 57);
 	MAKE_PAD (5, 6, 58);
