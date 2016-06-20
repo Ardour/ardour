@@ -653,7 +653,11 @@ namespace ARDOUR {
 		IsOutput = 0x2,
 		IsPhysical = 0x4,
 		CanMonitor = 0x8,
-		IsTerminal = 0x10
+		IsTerminal = 0x10,
+
+		/* non-JACK related flags */
+		Hidden = 0x20,
+		Shadow = 0x40,
 	};
 
 	struct LatencyRange {
