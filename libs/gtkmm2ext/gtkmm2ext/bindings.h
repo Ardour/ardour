@@ -43,6 +43,7 @@ class LIBGTKMM2EXT_API KeyboardKey
 	}
 
 	std::string name() const;
+	std::string native_name() const;
 	static bool make_key (const std::string&, KeyboardKey&);
 
 	std::string display_label() const;

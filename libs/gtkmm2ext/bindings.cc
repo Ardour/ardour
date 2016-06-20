@@ -234,6 +234,51 @@ KeyboardKey::name () const
 	return str;
 }
 
+string
+KeyboardKey::native_name () const
+{
+	int s = state();
+
+	string str;
+
+	if (s & Keyboard::PrimaryModifier) {
+		str += Keyboard::primary_modifier_name ();
+	}
+	if (s & Keyboard::SecondaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::secondary_modifier_name ();
+	}
+	if (s & Keyboard::TertiaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::tertiary_modifier_name ();
+	}
+	if (s & Keyboard::Level4Modifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::level4_modifier_name ();
+	}
+
+	if (!str.empty()) {
+		str += '-';
+	}
+
+	char const *gdk_name = gdk_keyval_name (key());
+
+	if (gdk_name) {
+		str += gdk_name;
+	} else {
+		/* fail! */
+		return string();
+	}
+
+	return str;
+}
+
 bool
 KeyboardKey::make_key (const string& str, KeyboardKey& k)
 {
@@ -683,30 +728,66 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 		return;
 	}
 
-	ostr << "<http>\n<head>\n<title>";
+
+	ostr << "<html>\n<head>\n<title>";
 	ostr << PROGRAM_NAME;
-	ostr << "</title>\n</head>\n<body>\n";
+	ostr << "</title>\n";
+
+
+	ostr << "<style>\n";
+	ostr << ".container {\n\
+   -webkit-column-count: 3;\n\
+      -moz-column-count: 3;\n\
+           column-count: 3;\n\
+\n\
+   -webkit-column-gap: 8em;\n\
+      -moz-column-gap: 8em;\n\
+           column-gap: 8em;\n\
+}";
+	ostr << "\n\
+.container dt\n\
+{\n\
+    clear: left;\n\
+    float: left;\n\
+    width: 25%;\n\
+    margin: 0;\n\
+    padding: 5px;\n\
+    font-weight: bold;\n\
+}\n\
+\n\
+.container dd\n\
+{\n\
+    float: left;\n\
+    width: 65%;\n\
+    margin: 0;\n\
+    padding: 5px;\n\
+    font-weight: normal;\n\
+    font-style: italic;\n\
+}";
+	ostr << "</style>\n";
+
+	ostr << "</head>\n<body>\n";
+
+	ostr << "<div class=\"container\">\n";
 
 	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
 		(*b)->save_as_html (ostr);
 	}
 
+	ostr << "</div>\n";
 	ostr << "</body>\n";
-	ostr << "</http>\n";
+	ostr << "</html>\n";
 }
 
 void
 Bindings::save_as_html (ostream& ostr) const
 {
-	ostr << "<h1 class=\"binding-set-name\">";
-	ostr << name();
-	ostr << "</h1>\n";
 
 	if (!press_bindings.empty() || !button_press_bindings.empty()) {
 
-		ostr << "<h2 class=\"action-title\">";
-		ostr << _("Press");
-		ostr << "</h2>\n";
+		ostr << "<h1 class=\"binding-set-name\">";
+		ostr << name();
+		ostr << "</h1>\n";
 
 		if (!press_bindings.empty()) {
 
@@ -731,7 +812,7 @@ Bindings::save_as_html (ostream& ostr) const
 					continue;
 				}
 
-				ostr << "<dt class=\"key-name\">" << k->first.name() << "</dt>\n";
+				ostr << "<dt class=\"key-name\">" << k->first.native_name() << "</dt>\n";
 				ostr << "<dd class=\"key-action\">" << action->get_label() << "</dd>\n";
 			}
 
@@ -740,10 +821,6 @@ Bindings::save_as_html (ostream& ostr) const
 	}
 
 	if (!release_bindings.empty() || !release_bindings.empty()) {
-
-		ostr << "<h2 class=\"action-title\">";
-		ostr << _("Release");
-		ostr << "</h2>\n";
 
 		if (!release_bindings.empty()) {
 			ostr << "<dl class=\"key-binding\">\n";
