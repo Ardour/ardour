@@ -852,7 +852,15 @@ void
 EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
 	char buf[16];
-	format_position (region->length(), buf, sizeof (buf));
+
+	if (ARDOUR_UI::instance()->secondary_clock->mode () == AudioClock::BBT) {
+		TempoMap& map (_session->tempo_map());
+		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_frame (region->last_frame()) - map.beat_at_frame (region->first_frame()));
+		snprintf (buf, sizeof (buf), "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+	} else {
+		format_position (region->length(), buf, sizeof (buf));
+	}
+
 	row[_columns.length] = buf;
 }
 
