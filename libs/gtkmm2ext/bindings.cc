@@ -26,6 +26,7 @@
 #include "pbd/convert.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
+#include "pbd/replace_all.h"
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/actions.h"
@@ -261,6 +262,51 @@ KeyboardKey::native_name () const
 			str += '-';
 		}
 		str += Keyboard::level4_modifier_name ();
+	}
+
+	if (!str.empty()) {
+		str += '-';
+	}
+
+	char const *gdk_name = gdk_keyval_name (key());
+
+	if (gdk_name) {
+		str += gdk_name;
+	} else {
+		/* fail! */
+		return string();
+	}
+
+	return str;
+}
+
+string
+KeyboardKey::native_short_name () const
+{
+	int s = state();
+
+	string str;
+
+	if (s & Keyboard::PrimaryModifier) {
+		str += Keyboard::primary_modifier_short_name ();
+	}
+	if (s & Keyboard::SecondaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::secondary_modifier_short_name ();
+	}
+	if (s & Keyboard::TertiaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::tertiary_modifier_short_name ();
+	}
+	if (s & Keyboard::Level4Modifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += Keyboard::level4_modifier_short_name ();
 	}
 
 	if (!str.empty()) {
@@ -735,32 +781,14 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 
 
 	ostr << "<style>\n";
-	ostr << ".container {\n\
-   -webkit-column-count: 3;\n\
-      -moz-column-count: 3;\n\
-           column-count: 3;\n\
-\n\
-   -webkit-column-gap: 8em;\n\
-      -moz-column-gap: 8em;\n\
-           column-gap: 8em;\n\
-}";
 	ostr << "\n\
-.container dt\n\
+.key-name-even, .key-name-odd\n\
 {\n\
-    clear: left;\n\
-    float: left;\n\
-    width: 25%;\n\
-    margin: 0;\n\
-    padding: 5px;\n\
     font-weight: bold;\n\
 }\n\
 \n\
-.container dd\n\
+.key-action-odd, .key-action-even\n\
 {\n\
-    float: left;\n\
-    width: 65%;\n\
-    margin: 0;\n\
-    padding: 5px;\n\
     font-weight: normal;\n\
     font-style: italic;\n\
 }";
@@ -783,74 +811,78 @@ void
 Bindings::save_as_html (ostream& ostr) const
 {
 
-	if (!press_bindings.empty() || !button_press_bindings.empty()) {
+	if (!press_bindings.empty()) {
 
-		ostr << "<h1 class=\"binding-set-name\">";
+		ostr << "<div><h1 class=\"binding-set-name\">\n";
 		ostr << name();
-		ostr << "</h1>\n";
+		ostr << "</h1><table><tr><th>Shortcut</th><th>Operation</th></tr>\n";
 
-		if (!press_bindings.empty()) {
+		int row_count = 0;
 
-			ostr << "<dl class=\"key-binding\">\n";
-
-			for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-				if (k->first.name().empty()) {
-					continue;
-				}
-
-				RefPtr<Action> action;
-
-				if (k->second.action) {
-					action = k->second.action;
-				} else {
-					if (_action_map) {
-						action = _action_map->find_action (k->second.action_name);
-					}
-				}
-
-				if (!action) {
-					continue;
-				}
-
-				ostr << "<dt class=\"key-name\">" << k->first.native_name() << "</dt>\n";
-				ostr << "<dd class=\"key-action\">" << action->get_label() << "</dd>\n";
+		for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+			if (k->first.name().empty()) {
+				continue;
 			}
 
-			ostr << "</dl>\n";
-		}
-	}
+			RefPtr<Action> action;
 
-	if (!release_bindings.empty() || !release_bindings.empty()) {
-
-		if (!release_bindings.empty()) {
-			ostr << "<dl class=\"key-binding\">\n";
-
-			for (KeybindingMap::const_iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-
-				if (k->first.name().empty()) {
-					continue;
+			if (k->second.action) {
+				action = k->second.action;
+			} else {
+				if (_action_map) {
+					action = _action_map->find_action (k->second.action_name);
 				}
-
-				RefPtr<Action> action;
-
-				if (k->second.action) {
-					action = k->second.action;
-				} else {
-					if (_action_map) {
-						action = _action_map->find_action (k->second.action_name);
-					}
-				}
-
-				if (!action) {
-					continue;
-				}
-
-				ostr << "<dt class=\"key-name\">" << k->first.name() << "</dt>\n";
-				ostr << "<dd class=\"key-action\">" << action->get_label() << "</dd>\n";
 			}
 
-			ostr << "</dl>\n";
+			if (!action) {
+				continue;
+			}
+
+			string key_name = k->first.native_short_name ();
+			replace_all (key_name, X_("KP_"), X_("Numpad "));
+
+			string::size_type pos;
+
+			char const *targets[] = { X_("Separator"), X_("Add"), X_("Subtract"), X_("Decimal"), X_("Divide"),
+			                          X_("grave"), X_("comma"), X_("period"), X_("asterisk"), X_("backslash"),
+			                          X_("apostrophe"), X_("minus"), X_("plus"), X_("slash"), X_("semicolon"),
+			                          X_("colon"), X_("equal"), X_("bracketleft"), X_("bracketright"),
+			                          X_("ampersand"), X_("numbersign"), X_("parenleft"), X_("parenright"),
+			                          X_("quoteright"), X_("quoteleft"), X_("exclam"), X_("quotedbl"),
+			                                0
+			};
+
+			char const *replacements[] = { X_("-"), X_("+"), X_("-"), X_("."), X_("/"),
+			                               X_("`"), X_(","), X_("."), X_("*"), X_("\\"),
+			                               X_("'"), X_("-"), X_("+"), X_("/"), X_(";"),
+			                               X_(":"), X_("="), X_("{"), X_("{"),
+			                               X_("&"), X_("#"), X_("("), X_(")"),
+			                               X_("`"), X_("'"), X_("!"), X_("\""),
+			};
+
+			for (size_t n = 0; targets[n]; ++n) {
+				if ((pos = key_name.find (targets[n])) != string::npos) {
+					key_name.replace (pos, strlen (targets[n]), replacements[n]);
+				}
+			}
+
+			if (row_count % 2) {
+				ostr << "<tr><td class=\"key-name-odd\">";
+			} else {
+				ostr << "<tr><td class=\"key-name-even\">";
+			}
+			ostr << key_name;
+			if (row_count % 2) {
+				ostr << "</td><td class=\"key-action-odd\">";
+			} else {
+				ostr << "</td><td class=\"key-action-even\">";
+			}
+			ostr << action->get_label();
+			ostr << "</td></tr>\n";
+			row_count++;
 		}
+
+		ostr << "</table></div>\n";
 	}
 }
 
