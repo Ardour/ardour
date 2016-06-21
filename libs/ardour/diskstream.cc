@@ -568,7 +568,9 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
                         continue;
                 }
                 boost::shared_ptr<AutomationList> alist = ac->alist();
-
+		if (!alist->size()) {
+			continue;
+		}
                 XMLNode & before = alist->get_state ();
                 bool const things_moved = alist->move_ranges (movements);
                 if (things_moved) {
@@ -598,6 +600,9 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 
 	for (set<Evoral::Parameter>::const_iterator i = a.begin (); i != a.end (); ++i) {
 		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
+		if (!al->size()) {
+			continue;
+		}
 		XMLNode & before = al->get_state ();
 		bool const things_moved = al->move_ranges (movements);
 		if (things_moved) {
