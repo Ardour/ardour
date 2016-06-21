@@ -826,3 +826,10 @@ ARDOUR_UI_UTILS::overwrite_file_dialog (Gtk::Window& parent, string title, strin
 		return false;
 	}
 }
+
+bool
+ARDOUR_UI_UTILS::running_from_source_tree ()
+{
+	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
+	return x && (string (x).find ("gtk2_ardour") != string::npos);
+}
