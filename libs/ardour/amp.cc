@@ -388,7 +388,7 @@ Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framec
 		assert (_gain_automation_buffer);
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 			start_frame, end_frame, _gain_automation_buffer, nframes);
-		if (start_frame != _current_automation_frame) {
+		if (start_frame != _current_automation_frame && _session.bounce_processing ()) {
 			_current_gain = _gain_automation_buffer[0];
 		}
 		_current_automation_frame = end_frame;
