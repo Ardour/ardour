@@ -1759,9 +1759,9 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	}
 
 	// Update color in case velocity has changed
-	const uint32_t base_col = ev->base_color();
-	ev->set_fill_color(base_col);
-	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
+	//const uint32_t base_col = ev->base_color();
+	//ev->set_fill_color(base_col);
+	//ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	if (update_ghost_regions) {
 		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
