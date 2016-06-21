@@ -19,7 +19,7 @@
 
 UI_CONFIG_VARIABLE (std::string, icon_set, "icon-set", "default")
 UI_CONFIG_VARIABLE (std::string, ui_rc_file, "ui-rc-file", "clearlooks.rc")
-UI_CONFIG_VARIABLE (std::string, color_file, "color-file", "dark-ardour")
+UI_CONFIG_VARIABLE (std::string, color_file, "color-file", "dark")
 UI_CONFIG_VARIABLE (bool, flat_buttons, "flat-buttons", false)
 UI_CONFIG_VARIABLE (bool, blink_rec_arm, "blink-rec-arm", false)
 UI_CONFIG_VARIABLE (float, waveform_gradient_depth, "waveform-gradient-depth", 0)
