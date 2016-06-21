@@ -27,8 +27,9 @@
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 #include "gtkmm2ext/utils.h"
 
-#include "pbd/file_utils.h"
 #include "pbd/compose.h"
+#include "pbd/file_utils.h"
+#include "pbd/replace_all.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
@@ -70,19 +71,32 @@ ColorThemeManager::ColorThemeManager ()
 		theme_list = TreeStore::create (color_theme_columns);
 
 		TreeModel::iterator selected_iter = theme_list->children().end();
+		const bool running_from_source = running_from_source_tree();
 
 		for (std::map<string,string>::iterator c = color_themes.begin(); c != color_themes.end(); ++c) {
 			TreeModel::Row row;
 
 			row = *(theme_list->append());
 			row[color_theme_columns.name] = c->first;
-			row[color_theme_columns.path] = c->second;
+
+			string color_file_name = c->second;
+
+			if (running_from_source) {
+				/* color themes from within the source tree are
+				   suffixed by "-PROGRAM-NAME" (lowercased)
+				*/
+				replace_all (color_file_name, string_compose ("-%1", downcase (PROGRAM_NAME)), "");
+			}
+
+			row[color_theme_columns.path] = color_file_name;
 
 			/* match second (path; really basename) since that is
 			   what we store/restore.
 			*/
 
-			if (UIConfiguration::instance().get_color_file() == c->second) {
+			cerr << "selected CF is " << UIConfiguration::instance().get_color_file () << " this is " << c->second << endl;
+
+			if (UIConfiguration::instance().get_color_file() == color_file_name) {
 				selected_iter = row;
 			}
 		}
@@ -131,7 +145,7 @@ ColorThemeManager::ColorThemeManager ()
 
 	palette_group = initialize_palette_canvas (*palette_viewport.canvas());
 	palette_viewport.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ColorThemeManager::palette_canvas_allocated), palette_group, palette_viewport.canvas(),
-								     sigc::mem_fun (*this, &ColorThemeManager::palette_event)));
+	                                                             sigc::mem_fun (*this, &ColorThemeManager::palette_event)));
 	palette_scroller.add (palette_viewport);
 
 	modifier_scroller.add (modifier_vbox);
@@ -219,7 +233,7 @@ ColorThemeManager::reset_canvas_colors()
 	string cfile;
 	string basename;
 
-	basename = UIConfiguration::instance().color_file_name (true, true, true);
+	basename = UIConfiguration::instance().color_file_name (false, running_from_source_tree(), false);
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
 		string backup = cfile + string (X_(".old"));
@@ -227,7 +241,7 @@ ColorThemeManager::reset_canvas_colors()
 		/* don't really care if it fails */
 	}
 
-	UIConfiguration::instance().load_defaults();
+	UIConfiguration::instance().load_color_theme (false);
 	UIConfiguration::instance().save_state ();
 }
 
@@ -610,8 +624,8 @@ ColorThemeManager::on_color_theme_changed ()
 
 		if (row) {
 			string new_theme = row[color_theme_columns.path];
+			cerr << "New theme name = " << new_theme << endl;
 			UIConfiguration::instance().set_color_file (new_theme);
 		}
 	}
 }
-
