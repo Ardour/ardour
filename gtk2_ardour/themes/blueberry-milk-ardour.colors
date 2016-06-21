@@ -139,6 +139,7 @@
     <ColorAlias name="clock: cursor" alias="color 8"/>
     <ColorAlias name="clock: edited text" alias="color 8"/>
     <ColorAlias name="clock: text" alias="color 13"/>
+    <ColorAlias name="comment button: fill" alias="color 20"/>
     <ColorAlias name="control point fill" alias="color 17"/>
     <ColorAlias name="control point outline" alias="meter color3"/>
     <ColorAlias name="control point selected fill" alias="color 62"/>
