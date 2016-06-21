@@ -1945,9 +1945,62 @@ TempoMap::bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) 
 		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
 		return bbt;
 	}
-	const double beat = beat_at_frame_locked (metrics, frame);
 
-	return bbt_at_beat_locked (metrics, beat);
+	const TempoSection& ts = tempo_section_at_frame_locked (metrics, frame);
+	MeterSection* prev_m = 0;
+	MeterSection* next_m = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (prev_m && m->frame() > frame) {
+				next_m = m;
+				break;
+			}
+			prev_m = m;
+		}
+	}
+
+	double beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
+
+	/* handle frame before first meter */
+	if (frame < prev_m->frame()) {
+		beat = 0.0;
+	}
+	/* audio locked meters fake their beat */
+	if (next_m && next_m->beat() < beat) {
+		beat = next_m->beat();
+	}
+
+	beat = max (0.0, beat);
+
+	const double beats_in_ms = beat - prev_m->beat();
+	const uint32_t bars_in_ms = (uint32_t) floor (beats_in_ms / prev_m->divisions_per_bar());
+	const uint32_t total_bars = bars_in_ms + (prev_m->bbt().bars - 1);
+	const double remaining_beats = beats_in_ms - (bars_in_ms * prev_m->divisions_per_bar());
+	const double remaining_ticks = (remaining_beats - floor (remaining_beats)) * BBT_Time::ticks_per_beat;
+
+	BBT_Time ret;
+
+	ret.ticks = (uint32_t) floor (remaining_ticks + 0.5);
+	ret.beats = (uint32_t) floor (remaining_beats);
+	ret.bars = total_bars;
+
+	/* 0 0 0 to 1 1 0 - based mapping*/
+	++ret.bars;
+	++ret.beats;
+
+	if (ret.ticks >= BBT_Time::ticks_per_beat) {
+		++ret.beats;
+		ret.ticks -= BBT_Time::ticks_per_beat;
+	}
+
+	if (ret.beats >= prev_m->divisions_per_bar() + 1) {
+		++ret.bars;
+		ret.beats = 1;
+	}
+
+	return ret;
 }
 
 framepos_t
