@@ -331,8 +331,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	if (string (VERSIONSTRING).find (".pre") != string::npos) {
 		/* check this is not being run from ./ardev etc. */
-		gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
-		if (!x || string (x).find ("gtk2_ardour") == string::npos) {
+		if (!running_from_source_tree ()) {
 			pre_release_dialog ();
 		}
 	}
