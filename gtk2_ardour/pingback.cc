@@ -40,6 +40,7 @@
 #include "ardour/rc_configuration.h"
 
 #include "pingback.h"
+#include "utils.h"
 
 using std::string;
 using namespace ARDOUR;
@@ -241,10 +242,10 @@ namespace ARDOUR {
 
 void pingback (const string& version, const string& announce_path)
 {
-	/* check this is not being run from ./ardev etc. */
-	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
-
-	if (x && string (x).find ("gtk2_ardour") != string::npos) {
+	if (ARDOUR_UI_UTILS::running_from_source_tree ()) {
+		/* we don't ping under these conditions, because the user is
+		   probably just paul or robin :)
+		*/
 		return;
 	}
 
