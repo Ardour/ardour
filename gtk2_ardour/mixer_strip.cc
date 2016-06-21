@@ -263,7 +263,9 @@ MixerStrip::init ()
 	group_button.set_name ("mixer strip button");
 
 	_comment_button.set_name (X_("mixer strip button"));
+	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
+	_comment_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::comment_button_resized));
 
 	// TODO implement ArdourKnob::on_size_request properly
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
@@ -1487,33 +1489,27 @@ MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::wea
 void
 MixerStrip::setup_comment_button ()
 {
-	switch (_width) {
+	std::string comment = _route->comment();
 
-	case Wide:
-		if (_route->comment().empty ()) {
-			_comment_button.set_name ("generic button");
-			_comment_button.set_text (_("Comments"));
-		} else {
-			_comment_button.set_name ("comment button");
-			_comment_button.set_text (_("*Comments*"));
-		}
-		break;
+	set_tooltip (_comment_button, comment.empty() ? _("Click to add/edit comments") : _route->comment());
 
-	case Narrow:
-		if (_route->comment().empty ()) {
-			_comment_button.set_name ("generic button");
-			_comment_button.set_text (_("Cmt"));
-		} else {
-			_comment_button.set_name ("comment button");
-			_comment_button.set_text (_("*Cmt*"));
-		}
-		break;
+	if (comment.empty ()) {
+		_comment_button.set_name ("generic button");
+		_comment_button.set_text (_width  == Wide ? _("Comments") : _("Cmt"));
+		return;
 	}
 
-	set_tooltip (
-		_comment_button, _route->comment().empty() ? _("Click to add/edit comments") : _route->comment()
-		);
+	_comment_button.set_name ("comment button");
 
+	string::size_type pos = comment.find_first_of (" \t\n");
+	if (pos != string::npos) {
+		comment = comment.substr (0, pos);
+	}
+	if (comment.empty()) {
+		_comment_button.set_text (_width  == Wide ? _("Comments") : _("Cmt"));
+	} else {
+		_comment_button.set_text (comment);
+	}
 }
 
 bool
@@ -1789,6 +1785,12 @@ void
 MixerStrip::name_button_resized (Gtk::Allocation& alloc)
 {
 	name_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+}
+
+void
+MixerStrip::comment_button_resized (Gtk::Allocation& alloc)
+{
+	_comment_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 bool
