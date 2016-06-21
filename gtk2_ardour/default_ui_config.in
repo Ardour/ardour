@@ -3,7 +3,7 @@
   <UI>
     <Option name="icon-set" value="default"/>
     <Option name="ui-rc-file" value="clearlooks.rc"/>
-    <Option name="color-file" value="dark-ardour"/>
+    <Option name="color-file" value="dark"/>
     <Option name="flat-buttons" value="0"/>
     <Option name="blink-rec-arm" value="0"/>
     <Option name="waveform-gradient-depth" value="0"/>
