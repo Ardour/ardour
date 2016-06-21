@@ -60,7 +60,7 @@ private:
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
 
-	std::string  color_file_name (bool use_my, bool with_program, bool with_version) const;
+	std::string  color_file_name (bool use_my, bool with_program_name, bool with_version) const;
 
 	typedef std::map<std::string,ArdourCanvas::Color> Colors;
 	typedef std::map<std::string,std::string> ColorAliases;

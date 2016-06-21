@@ -42,7 +42,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
 #include "pbd/locale_guard.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
@@ -258,7 +257,7 @@ UIConfiguration::load_defaults ()
 }
 
 std::string
-UIConfiguration::color_file_name (bool use_my, bool with_program, bool with_version) const
+UIConfiguration::color_file_name (bool use_my, bool with_program_name, bool with_version) const
 {
 	string basename;
 
@@ -268,7 +267,7 @@ UIConfiguration::color_file_name (bool use_my, bool with_program, bool with_vers
 
 	basename += color_file.get();  //this is the overall theme file, e.g. "dark"
 
-	if (with_program) {
+	if (with_program_name) {
 		basename += '-';
 		basename += downcase (PROGRAM_NAME);
 	}
@@ -295,24 +294,18 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 * in turn calls save_state()
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
+	const bool running_from_source = ARDOUR_UI_UTILS::running_from_source_tree ();
 
 	if (allow_own) {
 
 		PBD::Searchpath sp (user_config_directory());
 
-		if (find_file (sp, color_file_name (true, true, true), cfile)) {
+		if (find_file (sp, color_file_name (true, running_from_source, true), cfile)) {
 			found = true;
 		}
 
-
 		if (!found) {
-			if (find_file (sp, color_file_name (true, true, false), cfile)) {
-				found = true;
-			}
-		}
-
-		if (!found) {
-			if (find_file (sp, color_file_name (true, false, false), cfile)) {
+			if (find_file (sp, color_file_name (true, running_from_source, false), cfile)) {
 				found = true;
 			}
 		}
@@ -320,44 +313,38 @@ UIConfiguration::load_color_theme (bool allow_own)
 	}
 
 	if (!found) {
-
-		if (find_file (theme_search_path(), color_file_name (false, true, true), cfile)) {
+		if (find_file (theme_search_path(), color_file_name (false, running_from_source, true), cfile)) {
 			found = true;
 		}
 
 		if (!found) {
-			if (find_file (theme_search_path(), color_file_name (false, true, false), cfile)) {
-				found = true;
-			}
-		}
-
-		if (!found) {
-			if (find_file (theme_search_path(), color_file_name (false, false, false), cfile)) {
+			if (find_file (theme_search_path(), color_file_name (false, running_from_source, false), cfile)) {
 				found = true;
 			}
 		}
 	}
 
-	if (found) {
-
-		XMLTree tree;
-
-		info << string_compose (_("Loading color file %1"), cfile) << endmsg;
-
-		if (!tree.read (cfile.c_str())) {
-			error << string_compose(_("cannot read color file \"%1\""), cfile) << endmsg;
-			return -1;
-		}
-
-		if (set_state (*tree.root(), Stateful::loading_state_version)) {
-			error << string_compose(_("color file \"%1\" not loaded successfully."), cfile) << endmsg;
-			return -1;
-		}
-
-		ColorsChanged ();
-	} else {
+	if (!found) {
 		warning << string_compose (_("Color file for %1 not found along %2"), color_file.get(), theme_search_path().to_string()) << endmsg;
+		return -1;
 	}
+
+
+	XMLTree tree;
+
+	info << string_compose (_("Loading color file %1"), cfile) << endmsg;
+
+	if (!tree.read (cfile.c_str())) {
+		error << string_compose(_("cannot read color file \"%1\""), cfile) << endmsg;
+		return -1;
+	}
+
+	if (set_state (*tree.root(), Stateful::loading_state_version)) {
+		error << string_compose(_("color file \"%1\" not loaded successfully."), cfile) << endmsg;
+		return -1;
+		}
+
+	ColorsChanged ();
 
 	return 0;
 }
@@ -400,7 +387,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true, true));;
+	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, false, true));;
 
 	tree.set_root (root);
 
