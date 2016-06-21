@@ -71,7 +71,7 @@ Marker & yes & from Active Marker to Mouse
 
 %ranges Editor Defining Loop, Punch Range and Tempo Changes
 
-%markers editor Markers \& Locations
+%markers Editor Markers \& Locations
 The "move" commands all move the active marker(s). Jump to the first 9 markers using
 the keypad digits 1-9 (requires numlock).
 
