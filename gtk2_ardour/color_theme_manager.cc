@@ -94,8 +94,6 @@ ColorThemeManager::ColorThemeManager ()
 			   what we store/restore.
 			*/
 
-			cerr << "selected CF is " << UIConfiguration::instance().get_color_file () << " this is " << c->second << endl;
-
 			if (UIConfiguration::instance().get_color_file() == color_file_name) {
 				selected_iter = row;
 			}
@@ -624,7 +622,6 @@ ColorThemeManager::on_color_theme_changed ()
 
 		if (row) {
 			string new_theme = row[color_theme_columns.path];
-			cerr << "New theme name = " << new_theme << endl;
 			UIConfiguration::instance().set_color_file (new_theme);
 		}
 	}
