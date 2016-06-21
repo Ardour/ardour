@@ -300,12 +300,14 @@ UIConfiguration::load_color_theme (bool allow_own)
 
 		PBD::Searchpath sp (user_config_directory());
 
-		if (find_file (sp, color_file_name (true, running_from_source, true), cfile)) {
+		/* user's own color files never have the program name in them */
+
+		if (find_file (sp, color_file_name (true, false, true), cfile)) {
 			found = true;
 		}
 
 		if (!found) {
-			if (find_file (sp, color_file_name (true, running_from_source, false), cfile)) {
+			if (find_file (sp, color_file_name (true, false, false), cfile)) {
 				found = true;
 			}
 		}

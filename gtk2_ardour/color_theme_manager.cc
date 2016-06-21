@@ -231,7 +231,9 @@ ColorThemeManager::reset_canvas_colors()
 	string cfile;
 	string basename;
 
-	basename = UIConfiguration::instance().color_file_name (false, running_from_source_tree(), false);
+	/* look for a versioned user-owned color file, and try to rename it */
+
+	basename = UIConfiguration::instance().color_file_name (true, false, true);
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
 		string backup = cfile + string (X_(".old"));
