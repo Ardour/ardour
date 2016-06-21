@@ -37,8 +37,6 @@ class ThemeManager : public Gtk::VBox
   public:
 	ThemeManager();
 
-	int save (std::string path);
-
 	void on_flat_buttons_toggled ();
 	void on_blink_rec_arm_toggled ();
         void on_region_color_toggled ();
