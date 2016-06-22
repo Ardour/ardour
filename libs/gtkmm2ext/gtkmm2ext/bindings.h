@@ -17,6 +17,7 @@
 #include "gtkmm2ext/visibility.h"
 
 class XMLNode;
+class XMLProperty;
 
 namespace Gtkmm2ext {
 
@@ -146,8 +147,10 @@ class LIBGTKMM2EXT_API Bindings {
 
 	struct ActionInfo {
 		ActionInfo (std::string const& name) : action_name (name) {}
+		ActionInfo (std::string const& name, std::string const& grp) : action_name (name), group_name (grp) {}
 
 		std::string action_name;
+		std::string group_name; /* may be empty */
 		Glib::RefPtr<Gtk::Action> action;
 	};
 	typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
@@ -164,13 +167,13 @@ class LIBGTKMM2EXT_API Bindings {
 	bool empty_keys () const;
 	bool empty_mouse () const;
 
-	bool add (KeyboardKey, Operation, std::string const&, bool can_save = false);
+	bool add (KeyboardKey, Operation, std::string const&, XMLProperty const*, bool can_save = false);
 	bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
 	bool remove (Operation, std::string const& action_name, bool can_save = false);
 
 	bool activate (KeyboardKey, Operation);
 
-	void add (MouseButton, Operation, std::string const&);
+	void add (MouseButton, Operation, std::string const&, XMLProperty const*);
 	void remove (MouseButton, Operation);
 	bool activate (MouseButton, Operation);
 

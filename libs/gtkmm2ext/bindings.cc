@@ -609,23 +609,30 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 	}
 
 	if (is_registered(op, action_name)) {
-		remove(op, action_name, can_save);
+		remove (op, action_name, can_save);
 	}
-	add (kb, op, action_name, can_save);
+
+	/* XXX need a way to get the old group name */
+	add (kb, op, action_name, 0, can_save);
+
 	return true;
 }
 
 bool
-Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can_save)
+Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLProperty const* group, bool can_save)
 {
 	if (is_registered (op, action_name)) {
 		return false;
 	}
 
 	KeybindingMap& kbm = get_keymap (op);
-
-	KeybindingMap::value_type new_pair (kb, ActionInfo (action_name));
-	kbm.insert (new_pair).first;
+	if (group) {
+		KeybindingMap::value_type new_pair = make_pair (kb, ActionInfo (action_name, group->value()));
+		kbm.insert (new_pair).first;
+	} else {
+		KeybindingMap::value_type new_pair = make_pair (kb, ActionInfo (action_name));
+		kbm.insert (new_pair).first;
+	}
 
 	if (can_save) {
 		Keyboard::keybindings_changed ();
@@ -695,7 +702,7 @@ Bindings::activate (MouseButton bb, Operation op)
 }
 
 void
-Bindings::add (MouseButton bb, Operation op, string const& action_name)
+Bindings::add (MouseButton bb, Operation op, string const& action_name, XMLProperty const* /*group*/)
 {
 	MouseButtonBindingMap& bbm = get_mousemap(op);
 
@@ -813,76 +820,98 @@ Bindings::save_as_html (ostream& ostr) const
 
 	if (!press_bindings.empty()) {
 
-		ostr << "<div><h1 class=\"binding-set-name\">\n";
+		ostr << "<div class=\"binding-set\">\n";
+		ostr << "<h1>";
 		ostr << name();
-		ostr << "</h1><table><tr><th>Shortcut</th><th>Operation</th></tr>\n";
+		ostr << "</h1>\n\n";
 
-		int row_count = 0;
+		/* first pass: separate by group */
+
+		typedef std::map<std::string, std::vector<KeybindingMap::const_iterator> > GroupMap;
+		GroupMap group_map;
 
 		for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
 			if (k->first.name().empty()) {
 				continue;
 			}
 
-			RefPtr<Action> action;
-
-			if (k->second.action) {
-				action = k->second.action;
+			string group_name;
+			if (!k->second.group_name.empty()) {
+				group_name = k->second.group_name;
 			} else {
-				if (_action_map) {
-					action = _action_map->find_action (k->second.action_name);
-				}
+				group_name = X_("nogroup");
 			}
 
-			if (!action) {
-				continue;
-			}
-
-			string key_name = k->first.native_short_name ();
-			replace_all (key_name, X_("KP_"), X_("Numpad "));
-
-			string::size_type pos;
-
-			char const *targets[] = { X_("Separator"), X_("Add"), X_("Subtract"), X_("Decimal"), X_("Divide"),
-			                          X_("grave"), X_("comma"), X_("period"), X_("asterisk"), X_("backslash"),
-			                          X_("apostrophe"), X_("minus"), X_("plus"), X_("slash"), X_("semicolon"),
-			                          X_("colon"), X_("equal"), X_("bracketleft"), X_("bracketright"),
-			                          X_("ampersand"), X_("numbersign"), X_("parenleft"), X_("parenright"),
-			                          X_("quoteright"), X_("quoteleft"), X_("exclam"), X_("quotedbl"),
-			                                0
-			};
-
-			char const *replacements[] = { X_("-"), X_("+"), X_("-"), X_("."), X_("/"),
-			                               X_("`"), X_(","), X_("."), X_("*"), X_("\\"),
-			                               X_("'"), X_("-"), X_("+"), X_("/"), X_(";"),
-			                               X_(":"), X_("="), X_("{"), X_("{"),
-			                               X_("&"), X_("#"), X_("("), X_(")"),
-			                               X_("`"), X_("'"), X_("!"), X_("\""),
-			};
-
-			for (size_t n = 0; targets[n]; ++n) {
-				if ((pos = key_name.find (targets[n])) != string::npos) {
-					key_name.replace (pos, strlen (targets[n]), replacements[n]);
-				}
-			}
-
-			if (row_count % 2) {
-				ostr << "<tr><td class=\"key-name-odd\">";
+			GroupMap::iterator gm = group_map.find (group_name);
+			if (gm == group_map.end()) {
+				std::vector<KeybindingMap::const_iterator> li;
+				li.push_back (k);
+				group_map.insert (make_pair (group_name,li));
 			} else {
-				ostr << "<tr><td class=\"key-name-even\">";
+				gm->second.push_back (k);
 			}
-			ostr << key_name;
-			if (row_count % 2) {
-				ostr << "</td><td class=\"key-action-odd\">";
-			} else {
-				ostr << "</td><td class=\"key-action-even\">";
-			}
-			ostr << action->get_label();
-			ostr << "</td></tr>\n";
-			row_count++;
 		}
 
-		ostr << "</table></div>\n";
+		for (GroupMap::const_iterator gm = group_map.begin(); gm != group_map.end(); ++gm) {
+
+			ostr << "<div class=\"group\">\n";
+			ostr << "<div class=\"group-name\">" << gm->first << "</div>\n";
+
+			for (vector<KeybindingMap::const_iterator>::const_iterator k = gm->second.begin(); k != gm->second.end(); ++k) {
+
+				if ((*k)->first.name().empty()) {
+					continue;
+				}
+
+				RefPtr<Action> action;
+
+				if ((*k)->second.action) {
+					action = (*k)->second.action;
+				} else {
+					if (_action_map) {
+						action = _action_map->find_action ((*k)->second.action_name);
+					}
+				}
+
+				if (!action) {
+					continue;
+				}
+
+				string key_name = (*k)->first.native_short_name ();
+				replace_all (key_name, X_("KP_"), X_("Numpad "));
+
+				string::size_type pos;
+
+				char const *targets[] = { X_("Separator"), X_("Add"), X_("Subtract"), X_("Decimal"), X_("Divide"),
+				                          X_("grave"), X_("comma"), X_("period"), X_("asterisk"), X_("backslash"),
+				                          X_("apostrophe"), X_("minus"), X_("plus"), X_("slash"), X_("semicolon"),
+				                          X_("colon"), X_("equal"), X_("bracketleft"), X_("bracketright"),
+				                          X_("ampersand"), X_("numbersign"), X_("parenleft"), X_("parenright"),
+				                          X_("quoteright"), X_("quoteleft"), X_("exclam"), X_("quotedbl"),
+				                          0
+				};
+
+				char const *replacements[] = { X_("-"), X_("+"), X_("-"), X_("."), X_("/"),
+				                               X_("`"), X_(","), X_("."), X_("*"), X_("\\"),
+				                               X_("'"), X_("-"), X_("+"), X_("/"), X_(";"),
+				                               X_(":"), X_("="), X_("{"), X_("{"),
+				                               X_("&"), X_("#"), X_("("), X_(")"),
+				                               X_("`"), X_("'"), X_("!"), X_("\""),
+				};
+
+				for (size_t n = 0; targets[n]; ++n) {
+					if ((pos = key_name.find (targets[n])) != string::npos) {
+						key_name.replace (pos, strlen (targets[n]), replacements[n]);
+					}
+				}
+
+				ostr << "<div class=\"key\">" << key_name << "</div>";
+				ostr << "<div class=\"action\">" << action->get_label() << "</div>\n";
+			}
+			ostr << "</div>\n\n";
+		}
+
+		ostr << "</div>\n";
 	}
 }
 
@@ -922,11 +951,13 @@ Bindings::load_operation (XMLNode const& node)
 			XMLProperty const * ap;
 			XMLProperty const * kp;
 			XMLProperty const * bp;
+			XMLProperty const * gp;
 			XMLNode const * child = *p;
 
 			ap = child->property ("action");
 			kp = child->property ("key");
 			bp = child->property ("button");
+			gp = child->property ("group");
 
 			if (!ap || (!kp && !bp)) {
 				continue;
@@ -937,13 +968,13 @@ Bindings::load_operation (XMLNode const& node)
 				if (!KeyboardKey::make_key (kp->value(), k)) {
 					continue;
 				}
-				add (k, op, ap->value());
+				add (k, op, ap->value(), gp);
 			} else {
 				MouseButton b;
 				if (!MouseButton::make_button (bp->value(), b)) {
 					continue;
 				}
-				add (b, op, ap->value());
+				add (b, op, ap->value(), gp);
 			}
 		}
 	}
