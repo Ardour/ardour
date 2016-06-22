@@ -221,6 +221,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
+	favorite_plugins_display.set_tooltip_column (0);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginFavoritePtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.add_drop_targets (target_list);
