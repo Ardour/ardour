@@ -637,6 +637,9 @@ OSC::get_unix_server_url()
 void
 OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 {
+	if (!strip) {
+		return;
+	}
 	/* avoid duplicate listens */
 
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end(); ++x) {
@@ -654,9 +657,8 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 	}
 
 	OSCSurface *s = get_surface(addr);
-	uint32_t sid = get_sid (strip->presentation_info().order() + 1, addr);
-	// above is zero based add 1
-	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, sid, s->gainmode, s->feedback);
+	uint32_t ssid = get_sid (strip, addr);
+	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, ssid, s->gainmode, s->feedback);
 	route_observers.push_back (o);
 
 	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::route_lost, this, boost::weak_ptr<Stripable> (strip)), this);
@@ -1107,7 +1109,9 @@ OSC::routes_list (lo_message msg)
 			lo_message_add_int32 (reply, r->muted());
 			lo_message_add_int32 (reply, r->soloed());
 			/* XXX Can only use order at this point */
-			lo_message_add_int32 (reply, r->presentation_info().order());
+			//lo_message_add_int32 (reply, r->presentation_info().order());
+			// try this instead.
+			lo_message_add_int32 (reply, get_sid (r, lo_message_get_source (msg)));
 
 			if (boost::dynamic_pointer_cast<AudioTrack>(r)
 					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
@@ -1142,8 +1146,6 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo
 	OSCSurface *s = get_surface(lo_message_get_source (msg));
 	s->bank_size = b_size;
 	s->strip_types = strips;
-	//next line could be a call that finds out how many strips there are
-	s->nstrips = session->nroutes(); // need to do this for strips
 	s->feedback = fb;
 	s->gainmode = gm;
 	// set bank and strip feedback
@@ -1164,14 +1166,11 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 	return 0;
 }
 
-
 int
 OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 {
 	OSCSurface *s = get_surface(lo_message_get_source (msg));
 	s->strip_types = st;
-	//next line could be a call that finds out how many strips there are
-	s->nstrips = session->nroutes(); // need to do this for strips
 
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
@@ -1227,15 +1226,17 @@ OSC::get_surface (lo_address addr)
 	s.remote_url = r_url;
 	s.bank = 1;
 	s.bank_size = 0; // need to find out how many strips there are
-	s.nstrips = session->nroutes(); // may need to do this after MARK below
 	s.strip_types = 31; // 31 is tracks, busses, and VCAs (no master/monitor)
 	s.feedback = 0;
 	s.gainmode = 0;
 	s.sel_obs = 0;
 	s.surface_sel = 0;
-	//get sorted should go here
+	s.strips = get_sorted_stripables(s.strip_types);
+
+	// I think the line below can be removed
+	s.nstrips = s.strips.size();
 	_surface.push_back (s);
-	//MARK
+
 	return &_surface[_surface.size() - 1];
 }
 
@@ -1275,13 +1276,13 @@ OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
 void
 OSC::notify_routes_added (ARDOUR::RouteList &)
 {
-	recalcbanks();
+	//recalcbanks();
 }
 
 void
 OSC::notify_vca_added (ARDOUR::VCAList &)
 {
-	recalcbanks();
+	//recalcbanks();
 }
 
 void
@@ -1294,6 +1295,7 @@ OSC::recalcbanks ()
 void
 OSC::_recalcbanks ()
 {
+	// do a set_bank for each surface we know about.
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
 		// find lo_address
@@ -1324,65 +1326,83 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	if (!session) {
 		return -1;
 	}
-	//StripableList strips;
-	//session->get_stripables (strips);
 	// no nstripables yet
 	if (!session->nroutes()) {
 		return -1;
 	}
-	// don't include monitor or master in count for now
-	uint32_t nstrips;
-	if (session->monitor_out ()) {
-		nstrips = session->nroutes() - 2;
-	} else {
-		nstrips = session->nroutes() - 1;
-	}
+
 	// reset local select
 	_strip_select (0, addr);
+
 	// undo all listeners for this url
-	for (int n = 0; n <= (int) nstrips; ++n) {
+	StripableList stripables;
+	session->get_stripables (stripables);
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
-		boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n, PresentationInfo::Route);
-
+		boost::shared_ptr<Stripable> stp = *it;
 		if (stp) {
 			end_listen (stp, addr);
 		}
 	}
 
 	OSCSurface *s = get_surface (addr);
-	uint32_t b_size;
+	s->strips = get_sorted_stripables(s->strip_types);
+	// I think the line below can be removed
+	s->nstrips = s->strips.size();
 
+	uint32_t b_size;
 	if (!s->bank_size) {
-		// no banking
-		b_size = nstrips;
+		// no banking - bank includes all stripables
+		b_size = s->nstrips;
 	} else {
 		b_size = s->bank_size;
 	}
 
 	// Do limits checking - high end still not quite right
 	if (bank_start < 1) bank_start = 1;
-	if (b_size >= nstrips)  {
+	if (b_size >= s->nstrips)  {
 		bank_start = 1;
-	} else if ((bank_start > nstrips)) {
-		bank_start = (uint32_t)((nstrips - b_size) + 1);
+	} else if (bank_start > ((s->nstrips - b_size) + 1)) {
+		bank_start = (uint32_t)((s->nstrips - b_size) + 1);
 	}
 	//save bank in case we have had to change it
 	s->bank = bank_start;
 
 	if (s->feedback[0] || s->feedback[1]) {
-		for (int n = bank_start; n < (int) (b_size + bank_start); ++n) {
-			// this next will eventually include strip types
-			boost::shared_ptr<Stripable> stp = session->get_remote_nth_stripable (n - 1, PresentationInfo::Route);
 
-			if (stp) {
-				listen_to_route(stp, addr);
-				if (!s->feedback[10]) {
-					if (stp->is_selected()) {
-						_strip_select (n, addr);
+		for (uint32_t n = bank_start; n < (min ((b_size + bank_start), s->nstrips + 1)); ++n) {
+			if (n <= s->strips.size()) {
+				boost::shared_ptr<Stripable> stp = s->strips[n - 1];
+
+				if (stp) {
+					listen_to_route(stp, addr);
+					if (!s->feedback[10]) {
+						if (stp->is_selected()) {
+							_strip_select (n, addr);
+						}
 					}
 				}
 			}
 		}
+	}
+	if (s->feedback[4]) {
+		lo_message reply;
+		reply = lo_message_new ();
+		if ((s->bank > (s->nstrips - s->bank_size)) || (s->nstrips < s->bank_size)) {
+			lo_message_add_int32 (reply, 0);
+		} else {
+			lo_message_add_int32 (reply, 1);
+		}
+		lo_send_message (addr, "/bank_up", reply);
+		lo_message_free (reply);
+		reply = lo_message_new ();
+		if (s->bank > 1) {
+			lo_message_add_int32 (reply, 1);
+		} else {
+			lo_message_add_int32 (reply, 0);
+		}
+		lo_send_message (addr, "/bank_down", reply);
+		lo_message_free (reply);
 	}
 	bank_dirty = false;
 	tick = true;
@@ -1416,10 +1436,27 @@ OSC::bank_down (lo_message msg)
 }
 
 uint32_t
-OSC::get_sid (uint32_t rid, lo_address addr)
+OSC::get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr)
 {
 	OSCSurface *s = get_surface(addr);
-	return rid - s->bank + 1;
+
+	uint32_t b_size;
+	if (!s->bank_size) {
+		// no banking
+		b_size = s->nstrips;
+	} else {
+		b_size = s->bank_size;
+	}
+
+	for (uint32_t n = s->bank; n < (min ((b_size + s->bank), s->nstrips + 1)); ++n) {
+		if (n <= s->strips.size()) {
+			if (strip == s->strips[n-1]) {
+				return n - s->bank + 1;
+			}
+		}
+	}
+	// failsafe... should never get here.
+	return 0;
 }
 
 uint32_t
@@ -1427,6 +1464,17 @@ OSC::get_rid (uint32_t ssid, lo_address addr)
 {
 	OSCSurface *s = get_surface(addr);
 	return ssid + s->bank - 2;
+}
+
+boost::shared_ptr<ARDOUR::Stripable>
+OSC::get_strip (uint32_t ssid, lo_address addr)
+{
+	OSCSurface *s = get_surface(addr);
+	if ((ssid + s->bank - 2) < s->nstrips) {
+		return s->strips[ssid + s->bank - 2];
+	}
+	// guess it is out of range
+	return boost::shared_ptr<ARDOUR::Stripable>();
 }
 
 void
@@ -1598,9 +1646,7 @@ int
 OSC::route_mute (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->mute_control()) {
@@ -1627,9 +1673,7 @@ int
 OSC::route_solo (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->solo_control()) {
@@ -1645,9 +1689,7 @@ int
 OSC::route_solo_iso (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->solo_isolate_control()) {
@@ -1663,9 +1705,7 @@ int
 OSC::route_solo_safe (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->solo_safe_control()) {
@@ -1725,9 +1765,7 @@ int
 OSC::route_recenable (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->rec_enable_control()) {
@@ -1755,9 +1793,7 @@ int
 OSC::route_recsafe (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
 		if (s->rec_safe_control()) {
 			s->rec_safe_control()->set_value (yn, PBD::Controllable::UseGroup);
@@ -1773,9 +1809,7 @@ int
 OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
@@ -1805,9 +1839,7 @@ int
 OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
@@ -1838,9 +1870,7 @@ int
 OSC::strip_phase (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->phase_control()) {
@@ -1879,15 +1909,16 @@ OSC::_strip_select (int ssid, lo_address addr)
 		route_send_fail ("select", ssid, 0, addr);
 		return -1;
 	}
-	int rid = get_rid (ssid, addr);
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	OSCSurface *sur = get_surface(addr);
 	if (sur->sel_obs) {
 		delete sur->sel_obs;
 		sur->sel_obs = 0;
 	}
 	sur->surface_sel = 0;
-
+	boost::shared_ptr<Stripable> s;
+	if (ssid){
+		s = get_strip (ssid, addr);
+	}
 	if (s) {
 		sur->surface_sel = ssid;
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, ssid, sur->gainmode, sur->feedback);
@@ -1943,7 +1974,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	int rid = get_rid (ssid, lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 	if (s) {
-		SetStripableSelection (rid); 
+		SetStripableSelection (rid);
 	} else {
 		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
 	}
@@ -1952,10 +1983,11 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 }
 
 int
-OSC::route_set_gain_abs (int rid, float level, lo_message msg)
+OSC::route_set_gain_abs (int ssid, float level, lo_message msg)
 {
 	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
+	//boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
 		if (s->gain_control()) {
@@ -1978,11 +2010,10 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 		return -1;
 	}
 	int ret;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
 	if (dB < -192) {
-		ret = route_set_gain_abs (rid, 0.0, msg);
+		ret = route_set_gain_abs (ssid, 0.0, msg);
 	} else {
-		ret = route_set_gain_abs (rid, dB_to_coefficient (dB), msg);
+		ret = route_set_gain_abs (ssid, dB_to_coefficient (dB), msg);
 	}
 	if (ret != 0) {
 		return route_send_fail ("gain", ssid, -193, lo_message_get_source (msg));
@@ -2009,11 +2040,10 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 		return -1;
 	}
 	int ret;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
 	if ((pos > 799.5) && (pos < 800.5)) {
-		ret = route_set_gain_abs (rid, 1.0, msg);
+		ret = route_set_gain_abs (ssid, 1.0, msg);
 	} else {
-		ret = route_set_gain_abs (rid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
+		ret = route_set_gain_abs (ssid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
 	}
 	if (ret != 0) {
 		return route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
@@ -2036,9 +2066,7 @@ int
 OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->trim_control()) {
@@ -2100,9 +2128,7 @@ int
 OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if(s->pan_azimuth_control()) {
@@ -2118,9 +2144,7 @@ int
 OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 {
 	if (!session) return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 		if (s->pan_width_control()) {
@@ -2138,9 +2162,7 @@ OSC::route_set_send_gain_abs (int ssid, int sid, float val, lo_message msg)
 	if (!session) {
 		return -1;
 	}
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (!s) {
 		return -1;
@@ -2214,9 +2236,7 @@ OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
 	if (!session) {
 		return -1;
 	}
-	int rid = get_rid (ssid, lo_message_get_source (msg));
-
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	if (s) {
 
@@ -2267,26 +2287,26 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 {
 	if (!session)
 		return -1;
-	int rid = get_rid (ssid, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
 	if (!r) {
-		PBD::error << "OSC: Invalid Remote Control ID '" << rid << "'" << endmsg;
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
 		return -1;
 	}
 
 	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
 
 	if (!redi) {
-		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << rid << "'" << endmsg;
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
 		return -1;
 	}
 
 	boost::shared_ptr<PluginInsert> pi;
 
 	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
-		PBD::error << "OSC: given processor # " << piid << " on RID '" << rid << "' is not a Plugin." << endmsg;
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
 		return -1;
 	}
 
@@ -2296,12 +2316,12 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 	uint32_t controlid = pip->nth_parameter (par,ok);
 
 	if (!ok) {
-		PBD::error << "OSC: Cannot find parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "'" << endmsg;
+		PBD::error << "OSC: Cannot find parameter # " << par <<  " for plugin # " << piid << " on RID '" << ssid << "'" << endmsg;
 		return -1;
 	}
 
 	if (!pip->parameter_is_input(controlid)) {
-		PBD::error << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is not a control input" << endmsg;
+		PBD::error << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << ssid << "' is not a control input" << endmsg;
 		return -1;
 	}
 
@@ -2314,7 +2334,7 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 		// cerr << "parameter:" << redi->describe_parameter(controlid) << " val:" << val << "\n";
 		c->set_value (val, PBD::Controllable::NoGroup);
 	} else {
-		PBD::warning << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is out of range" << endmsg;
+		PBD::warning << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << ssid << "' is out of range" << endmsg;
 		PBD::info << "OSC: Valid range min=" << pd.lower << " max=" << pd.upper << endmsg;
 	}
 
@@ -2328,9 +2348,9 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 	if (!session) {
 		return -1;
 	}
-	int rid = get_rid (ssid, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
 	if (!r) {
 		return -1;
@@ -2383,11 +2403,9 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
 			OSCSurface* sur = &_surface[it];
 			if(!sur->feedback[10]) {
-				uint32_t sel_strip = strip->presentation_info().order() + 1;
-				if (!(sel_strip < sur->bank) && !(sel_strip >= (sur->bank + sur->bank_size))) {
-					lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-					_strip_select ((sel_strip - sur->bank + 1), addr);
-				}
+				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
+				uint32_t sel_strip = get_sid (strip, addr);
+				_strip_select (sel_strip, addr);
 			}
 		}
 	}
@@ -2511,3 +2529,74 @@ OSC::set_state (const XMLNode& node, int version)
 
 	return 0;
 }
+
+// predicate for sort call in get_sorted_stripables
+struct StripableByPresentationOrder
+{
+	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
+	{
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+
+	bool operator () (const Stripable & a, const Stripable & b) const
+	{
+		return a.presentation_info().order() < b.presentation_info().order();
+	}
+
+	bool operator () (const Stripable * a, const Stripable * b) const
+	{
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+};
+
+OSC::Sorted
+OSC::get_sorted_stripables(std::bitset<32> types)
+{
+	Sorted sorted;
+
+	// fetch all stripables
+	StripableList stripables;
+
+	session->get_stripables (stripables);
+
+	// Look for stripables that match bit in sur->strip_types
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+
+		boost::shared_ptr<Stripable> s = *it;
+		if ((!types[9]) && (s->presentation_info().flags() & PresentationInfo::Flag::Hidden)) {
+			// do nothing... skip it
+		} else {
+
+			if (types[0] && (s->presentation_info().flags() & PresentationInfo::Flag::AudioTrack)) {
+				sorted.push_back (s);
+			} else
+			if (types[1] && (s->presentation_info().flags() & PresentationInfo::Flag::MidiTrack)) {
+				sorted.push_back (s);
+			} else
+			if (types[2] && (s->presentation_info().flags() & PresentationInfo::Flag::AudioBus)) {
+				sorted.push_back (s);
+			} else
+			if (types[3] && (s->presentation_info().flags() & PresentationInfo::Flag::MidiBus)) {
+				sorted.push_back (s);
+			} else
+			if (types[4] && (s->presentation_info().flags() & PresentationInfo::Flag::VCA)) {
+				sorted.push_back (s);
+			} else
+			if (types[5] && (s->presentation_info().flags() & PresentationInfo::Flag::MasterOut)) {
+				sorted.push_back (s);
+			} else
+			if (types[6] && (s->presentation_info().flags() & PresentationInfo::Flag::MonitorOut)) {
+				sorted.push_back (s);
+			} else
+			if (types[8] && (s->presentation_info().flags() & PresentationInfo::Flag::Selected)) {
+				sorted.push_back (s);
+			} else
+			if (types[9] && (s->presentation_info().flags() & PresentationInfo::Flag::Hidden)) {
+				sorted.push_back (s);
+			}
+		}
+	}
+	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+	return sorted;
+}
+

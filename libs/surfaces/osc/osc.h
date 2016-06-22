@@ -96,6 +96,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		All
 	};
 
+	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
+	Sorted get_sorted_stripables(std::bitset<32> types);
+
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
 	public:
@@ -108,21 +111,22 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1023?
 		uint32_t surface_sel;		// which strip within the bank is locally selected
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
-		//StripableList strips;	//list of stripables for the current bank
+		Sorted strips;				// list of stripables for this surface
 	};
 		/*
 		 * Reminder of what strip_types there are
-		 * XXX these have changed!!!
-		AudioTrack = 0x1,
-		MidiTrack = 0x2,
-		AudioBus = 0x4,
-		MidiBus = 0x8,
-		VCA = 0x10,
-		MasterOut = 0x800,
-		MonitorOut = 0x1000,
-		Auditioner = 0x2000,
-		Selected = 0x4000,
-		Hidden = 0x8000,
+		 *
+		AudioTrack = 0x1 =	[0]
+		MidiTrack = 0x2 =	[1]
+		AudioBus = 0x4 =	[2]
+		MidiBus = 0x8 =		[3]
+		VCA = 0x10 =		[4]
+		MasterOut = 0x20 =	[5]
+		MonitorOut = 0x40 =	[6]
+		Auditioner = 0x80 =	[7] skip don't look for.
+		Selected = 0x100 =	[8]
+		Hidden = 0x200 =	[9]
+		OrderSet = 0x400,
 		*/
 		/*
 		 * feedback bits:
@@ -136,7 +140,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [7] - Send metering as dB or positional depending on gainmode
 		 * [8] - Send metering as 16 bits (led strip)
 		 * [9] - Send signal present (signal greater than -20dB)
-		 * [10] - Selection is local
+		 * [10] - Announce follows Select
 		 */
 
 
@@ -182,8 +186,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	std::string get_unix_server_url ();
 	OSCSurface * get_surface (lo_address addr);
-	uint32_t get_sid (uint32_t rid, lo_address addr);
-	uint32_t get_rid (uint32_t sid, lo_address addr);
+	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
+	uint32_t get_rid (uint32_t ssid, lo_address addr);
+	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
 	void global_feedback (std::bitset<32> feedback, lo_address msg, uint32_t gainmode);
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);

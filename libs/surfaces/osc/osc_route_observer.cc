@@ -155,7 +155,12 @@ OSCRouteObserver::tick ()
 {
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
-		float now_meter = _strip->peak_meter()->meter_level(0, MeterMCP);
+		float now_meter;
+		if (_strip->peak_meter()) {
+			now_meter = _strip->peak_meter()->meter_level(0, MeterMCP);
+		} else {
+			now_meter = -193;
+		}
 		if (now_meter < -193) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
