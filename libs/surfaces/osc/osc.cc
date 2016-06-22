@@ -1378,7 +1378,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 					listen_to_route(stp, addr);
 					if (!s->feedback[10]) {
 						if (stp->is_selected()) {
-							_strip_select (n, addr);
+							_strip_select (n + 1 - s->bank_size , addr);
 						}
 					}
 				}
