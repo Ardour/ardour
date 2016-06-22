@@ -1463,7 +1463,7 @@ uint32_t
 OSC::get_rid (uint32_t ssid, lo_address addr)
 {
 	OSCSurface *s = get_surface(addr);
-	return ssid + s->bank - 2;
+	return ssid + s->bank - 1;
 }
 
 boost::shared_ptr<ARDOUR::Stripable>
@@ -1972,7 +1972,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	}
 
 	int rid = get_rid (ssid, lo_message_get_source (msg));
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
 		SetStripableSelection (rid);
 	} else {
@@ -1987,7 +1987,6 @@ OSC::route_set_gain_abs (int ssid, float level, lo_message msg)
 {
 	if (!session) return -1;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
-	//boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::Route);
 
 	if (s) {
 		if (s->gain_control()) {

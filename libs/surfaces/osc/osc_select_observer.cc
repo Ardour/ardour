@@ -58,16 +58,20 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
 		change_message ("/select/solo", _strip->solo_control());
 
-		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
-		change_message ("/select/solo_iso", _strip->solo_isolate_control());
+		if (_strip->solo_isolate_control()) {
+			_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
+			change_message ("/select/solo_iso", _strip->solo_isolate_control());
+		}
 
-		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), OSC::instance());
-		change_message ("/select/solo_safe", _strip->solo_safe_control());
+		if (_strip->solo_safe_control()) {
+			_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), OSC::instance());
+			change_message ("/select/solo_safe", _strip->solo_safe_control());
+		}
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {
-		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), OSC::instance());
-		monitor_status (track->monitoring_control());
+			track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), OSC::instance());
+			monitor_status (track->monitoring_control());
 		}
 
 		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
@@ -119,8 +123,11 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 		// detecting processor changes requires cast to route
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
-		r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
-		send_init();
+		if (r) {
+			r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
+			send_init();
+		}
+
 	}
 	tick();
 }
@@ -340,26 +347,28 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 
-	//spit out the comment at the same time
-	msg = lo_message_new ();
-	path = "/select/comment";
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_strip);
-	lo_message_add_string (msg, route->comment().c_str());
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	if (route) {
+		//spit out the comment at the same time
+		msg = lo_message_new ();
+		path = "/select/comment";
+		lo_message_add_string (msg, route->comment().c_str());
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
 
-	// lets tell the surface how many inputs this strip has
-	msg = lo_message_new ();
-	path = "/select/n_inputs";
-	lo_message_add_int32 (msg, route->n_inputs().n_total());
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-	// lets tell the surface how many outputs this strip has
-	msg = lo_message_new ();
-	path = "/select/n_outputs";
-	lo_message_add_int32 (msg, route->n_outputs().n_total());
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+		// lets tell the surface how many inputs this strip has
+		msg = lo_message_new ();
+		path = "/select/n_inputs";
+		lo_message_add_int32 (msg, route->n_inputs().n_total());
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+		// lets tell the surface how many outputs this strip has
+		msg = lo_message_new ();
+		path = "/select/n_outputs";
+		lo_message_add_int32 (msg, route->n_outputs().n_total());
+		lo_send_message (addr, path.c_str(), msg);
+		lo_message_free (msg);
+	}
 
 }
 
