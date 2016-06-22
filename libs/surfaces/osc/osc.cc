@@ -2581,12 +2581,6 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 			if (types[4] && (s->presentation_info().flags() & PresentationInfo::VCA)) {
 				sorted.push_back (s);
 			} else
-			if (types[5] && (s->presentation_info().flags() & PresentationInfo::MasterOut)) {
-				sorted.push_back (s);
-			} else
-			if (types[6] && (s->presentation_info().flags() & PresentationInfo::MonitorOut)) {
-				sorted.push_back (s);
-			} else
 			if (types[8] && (s->presentation_info().flags() & PresentationInfo::Selected)) {
 				sorted.push_back (s);
 			} else
@@ -2596,6 +2590,13 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 		}
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+	// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
+	if (types[5]) {
+		sorted.push_back (session->master_out());
+	}
+	if (types[6]) {
+		sorted.push_back (session->monitor_out());
+	}
 	return sorted;
 }
 
