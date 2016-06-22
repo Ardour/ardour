@@ -2563,35 +2563,35 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
 		boost::shared_ptr<Stripable> s = *it;
-		if ((!types[9]) && (s->presentation_info().flags() & PresentationInfo::Flag::Hidden)) {
+		if ((!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 			// do nothing... skip it
 		} else {
 
-			if (types[0] && (s->presentation_info().flags() & PresentationInfo::Flag::AudioTrack)) {
+			if (types[0] && (s->presentation_info().flags() & PresentationInfo::AudioTrack)) {
 				sorted.push_back (s);
 			} else
-			if (types[1] && (s->presentation_info().flags() & PresentationInfo::Flag::MidiTrack)) {
+			if (types[1] && (s->presentation_info().flags() & PresentationInfo::MidiTrack)) {
 				sorted.push_back (s);
 			} else
-			if (types[2] && (s->presentation_info().flags() & PresentationInfo::Flag::AudioBus)) {
+			if (types[2] && (s->presentation_info().flags() & PresentationInfo::AudioBus)) {
 				sorted.push_back (s);
 			} else
-			if (types[3] && (s->presentation_info().flags() & PresentationInfo::Flag::MidiBus)) {
+			if (types[3] && (s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 				sorted.push_back (s);
 			} else
-			if (types[4] && (s->presentation_info().flags() & PresentationInfo::Flag::VCA)) {
+			if (types[4] && (s->presentation_info().flags() & PresentationInfo::VCA)) {
 				sorted.push_back (s);
 			} else
-			if (types[5] && (s->presentation_info().flags() & PresentationInfo::Flag::MasterOut)) {
+			if (types[5] && (s->presentation_info().flags() & PresentationInfo::MasterOut)) {
 				sorted.push_back (s);
 			} else
-			if (types[6] && (s->presentation_info().flags() & PresentationInfo::Flag::MonitorOut)) {
+			if (types[6] && (s->presentation_info().flags() & PresentationInfo::MonitorOut)) {
 				sorted.push_back (s);
 			} else
-			if (types[8] && (s->presentation_info().flags() & PresentationInfo::Flag::Selected)) {
+			if (types[8] && (s->presentation_info().flags() & PresentationInfo::Selected)) {
 				sorted.push_back (s);
 			} else
-			if (types[9] && (s->presentation_info().flags() & PresentationInfo::Flag::Hidden)) {
+			if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 				sorted.push_back (s);
 			}
 		}
