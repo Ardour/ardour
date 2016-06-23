@@ -19,14 +19,14 @@ $exec_prefix = "lib";
 $dll_suffix = "32";
 $lib_ext = ".dll";
 $monospace = "ArdourMono";
-$font_small = 9;
+$font_small = 8.5;
 $font_smaller = 8;
-$font_normal = 10;
-$font_big = 14;
-$font_large = 18;
-$font_larger = 24;
-$font_huger = 34;
-$font_massive = 60;
+$font_normal = 9;
+$font_big = 11;
+$font_large = 14.5;
+$font_larger = 19;
+$font_huger = 27;
+$font_massive = 48;
 
 sub process_file
 {
