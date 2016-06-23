@@ -280,9 +280,12 @@ while (<SOURCE>) {
 		$b =~ s/SECONDARY/Secondary-/;
 		$b =~ s/TERTIARY/Tertiary-/;
 		$b =~ s/LEVEL4/Level4-/;
-		
+
+		$g = $group_names{$gkey};
+		$g =~ s/\\&/&amp;/g;
+
 		$bref = $owner_bindings{$owner};
-		push (@$bref, [ $action, $b, $group_names{$gkey} ]);
+		push (@$bref, [ $action, $b, $g]);
 	    }
 	}
 
