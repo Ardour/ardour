@@ -349,8 +349,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 			ArdourCanvas::Rectangle* rect = NULL;
 			ArdourCanvas::Polygon*   poly = NULL;
 			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
-				rect->set_y0 (y);
-				rect->set_y1 (y + h);
+				rect->set (ArdourCanvas::Rect (rect->x0(), y, rect->x1(), y + h));
 			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(event->item))) {
 				Duple position = poly->position();
 				position.y = y;
@@ -389,10 +388,7 @@ MidiGhostRegion::update_note (NoteBase* parent)
 	ArdourCanvas::Polygon*   poly = NULL;
 	if ((note = dynamic_cast<Note*>(parent))) {
 		if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
-			double const x1 = parent->x0 ();
-			double const x2 = parent->x1 ();
-			rect->set_x0 (x1);
-			rect->set_x1 (x2);
+			rect->set (ArdourCanvas::Rect (parent->x0(), rect->y0(), parent->x1(), rect->y1()));
 		}
 	} else if ((hit = dynamic_cast<Hit*>(parent))) {
 		if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {

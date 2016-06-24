@@ -1184,11 +1184,11 @@ MidiRegionView::redisplay_model()
 	_optimization_iterator = _events.begin();
 
 	bool empty_when_starting = _events.empty();
+	NoteBase* cne;
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
 		boost::shared_ptr<NoteType> note (*n);
-		NoteBase* cne;
 		bool visible;
 
 		if (note_in_region_range (note, visible)) {
@@ -1732,10 +1732,8 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1);
 
-	ev->set_x0 (x0);
-	ev->set_x1 (x1);
-	ev->set_y0 (y0);
-	ev->set_y1 (y1);
+	ArdourCanvas::Rect rect (x0, y0, x1, y1);
+	ev->set (rect);
 
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
