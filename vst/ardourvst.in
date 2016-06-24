@@ -1,13 +1,14 @@
 #!/bin/sh
 
 #
-# Running Ardour requires these 3 variables to be set
+# Running Ardour requires these variables to be set
 #
 
 export ARDOUR_DATA_PATH=@DATADIR@
 export ARDOUR_CONFIG_PATH=@CONFDIR@
 export ARDOUR_DLL_PATH=@LIBDIR@
 
+export VAMP_PATH=@LIBDIR@/vamp${VAMP_PATH:+:$VAMP_PATH}
 export GTK_PATH=@LIBDIR@${GTK_PATH:+:$GTK_PATH}
 export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -15,5 +16,3 @@ export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export ARDOUR_SELF="$0"
 
 exec wine @LIBDIR@/ardour-@VERSION@-vst.exe.so "$@"
-
-

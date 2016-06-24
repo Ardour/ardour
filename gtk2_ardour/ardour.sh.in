@@ -57,7 +57,7 @@ export ARDOUR_SELF="$0"
 # VAMP has its own lookup path
 # 
 
-export VAMP_PATH=@LIBDIR@/vamp
+export VAMP_PATH=@LIBDIR@/vamp${VAMP_PATH:+:$VAMP_PATH}
 
 if [ $# -gt 0 ] ; then
     case $1 in
