@@ -98,6 +98,12 @@ Note::hide ()
 }
 
 void
+Note::set (Rect rect)
+{
+	_rectangle->set (rect);
+}
+
+void
 Note::set_x0 (Coord x0)
 {
 	_rectangle->set_x0 (x0);

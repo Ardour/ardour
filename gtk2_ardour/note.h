@@ -46,6 +46,7 @@ public:
 	ArdourCanvas::Coord x1 () const;
 	ArdourCanvas::Coord y1 () const;
 
+	void set (ArdourCanvas::Rect);
 	void set_x0 (ArdourCanvas::Coord);
 	void set_y0 (ArdourCanvas::Coord);
 	void set_x1 (ArdourCanvas::Coord);
