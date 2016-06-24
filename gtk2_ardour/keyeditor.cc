@@ -546,10 +546,16 @@ KeyEditor::print () const
 		return;
 	}
 
+#ifdef PLATFORM_WINDOWS
+	::close (fd);
+#endif
+
 	err = NULL;
 
 	if (!g_file_set_contents (file_name, sstr.str().c_str(), sstr.str().size(), &err)) {
+#ifndef PLATFORM_WINDOWS
 		::close (fd);
+#endif
 		g_unlink (file_name);
 		if (err) {
 			error << string_compose (_("Could not save bindings to file (%1)"), err->message) << endmsg;
@@ -558,7 +564,9 @@ KeyEditor::print () const
 		return;
 	}
 
+#ifndef PLATFORM_WINDOWS
 	::close (fd);
+#endif
 
 	PBD::open_uri (string_compose ("file:///%1", file_name));
 }
