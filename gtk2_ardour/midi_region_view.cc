@@ -1720,7 +1720,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 		Evoral::Beats note_end_time = note->end_time();
 
 		if (note->end_time() > mr->start_beats() + mr->length_beats()) {
-			note_end_time = mr->length_beats();
+			note_end_time = mr->start_beats() + mr->length_beats();
 		}
 
 		const framepos_t note_end_frames = map.frame_at_beat (_region->beat() - mr->start_beats().to_double()
@@ -2898,7 +2898,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* and then to beats */
-		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr + _region->start());
+		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr) + midi_region()->start_beats();
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
