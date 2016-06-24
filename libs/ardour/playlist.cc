@@ -692,7 +692,7 @@ Playlist::flush_notifications (bool from_undo)
 	 */
 
 	 for (int i = 0; i < itimes; ++i) {
-		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true, sub_num);
 		 add_region_internal (copy, pos, sub_num);
 		 set_layer (copy, DBL_MAX);
 		 pos += region->length();
