@@ -197,6 +197,12 @@ MidiRegion::set_length_internal (framecnt_t len, const int32_t& sub_num)
 void
 MidiRegion::update_after_tempo_map_change (bool /* send */)
 {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl || position_lock_style() != MusicTime) {
+		return;
+	}
+
 	const framepos_t old_pos = _position;
 	const framepos_t old_length = _length;
 	const framepos_t old_start = _start;
@@ -233,6 +239,11 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 
 	/* set _start to new position in tempo map */
 	_start = _position - _session.tempo_map().frame_at_beat (beat() - _start_beats.val().to_double());
+
+	/* in construction from src */
+	if (_length_beats == Evoral::Beats()) {
+		update_length_beats (sub_num);
+	}
 
 	/* leave _length_beats alone, and change _length to reflect the state of things
 	   at the new position (tempo map may dictate a different number of frames).
@@ -479,7 +490,7 @@ MidiRegion::set_start_internal (framecnt_t s, const int32_t& sub_num)
 
 	if (position_lock_style() == AudioTime) {
 		set_start_beats_from_start_frames ();
-	}
+		}
 }
 
 void
