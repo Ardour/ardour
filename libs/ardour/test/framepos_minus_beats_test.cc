@@ -110,7 +110,7 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames
-	  0 pulses                                              4 pulses
+	  0 pulses                                              3 pulses
 	  |                 |                 |                 |             |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
 
@@ -121,7 +121,7 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	Tempo tempoB (240);
 	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, TempoSection::Constant, MusicTime);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0 / tempoA.note_type(), BBT_Time (4, 1, 0), 0, MusicTime);
+	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
 
 	/* Now some tests */
 

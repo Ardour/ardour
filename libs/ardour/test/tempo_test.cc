@@ -29,7 +29,7 @@ TempoTest::recomputeMapTest ()
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames
-	  0 pulses                                              4 pulses
+	  0 pulses                                              3 pulses
 	  |                 |                 |                 |             |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
 
@@ -38,7 +38,7 @@ TempoTest::recomputeMapTest ()
 	Tempo tempoA (120);
 	map.add_tempo (tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 4.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 3.0, 0, TempoSection::Constant, MusicTime);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
 
