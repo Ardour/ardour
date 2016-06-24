@@ -105,8 +105,8 @@ class LIBARDOUR_API Meter {
 /** A section of timeline with a certain Tempo or Meter. */
 class LIBARDOUR_API MetricSection {
   public:
-	MetricSection (double pulse, framepos_t frame, PositionLockStyle pls)
-		: _pulse (pulse), _frame (frame), _movable (true), _position_lock_style (pls) {}
+	MetricSection (double pulse, framepos_t frame, PositionLockStyle pls, bool is_tempo)
+		: _pulse (pulse), _frame (frame), _movable (true), _position_lock_style (pls), _is_tempo (is_tempo) {}
 
 	virtual ~MetricSection() {}
 
@@ -129,19 +129,21 @@ class LIBARDOUR_API MetricSection {
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
+	const bool is_tempo () const { return _is_tempo; }
 
 private:
 	double             _pulse;
 	framepos_t         _frame;
 	bool               _movable;
 	PositionLockStyle  _position_lock_style;
+	const bool         _is_tempo;
 };
 
 /** A section of timeline with a certain Meter. */
 class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
 	MeterSection (double pulse, framepos_t frame, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type, PositionLockStyle pls)
-		: MetricSection (pulse, frame, pls), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
+		: MetricSection (pulse, frame, pls, false), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
 
 	MeterSection (const XMLNode&);
 
@@ -172,7 +174,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& pulse, const framepos_t& frame, double qpm, double note_type, Type tempo_type, PositionLockStyle pls)
-		: MetricSection (pulse, frame, pls), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
+		: MetricSection (pulse, frame, pls, true), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
 
 	TempoSection (const XMLNode&);
 
@@ -198,8 +200,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double tempo_at_pulse (const double& pulse) const;
 	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
 
-	double pulse_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
-	frameoffset_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
+	double pulse_at_frame (const framepos_t& frame, const framepos_t& frame_rate) const;
+	framepos_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
 
 	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate);
 	double compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const;
@@ -401,7 +403,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	*/
 
 	double beat_at_frame (const framecnt_t& frame) const;
-	framecnt_t frame_at_beat (const double& beat) const;
+	framepos_t frame_at_beat (const double& beat) const;
 
 	Tempo tempo_at_frame (const framepos_t& frame) const;
 	framepos_t frame_at_tempo (const Tempo& tempo) const;
@@ -415,7 +417,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double beat_at_pulse (const double& pulse) const;
 
 	double pulse_at_frame (const framecnt_t& frame) const;
-	framecnt_t frame_at_pulse (const double& pulse) const;
+	framepos_t frame_at_pulse (const double& pulse) const;
 
 	/* bbt - it's nearly always better to use beats.*/
 	Timecode::BBT_Time bbt_at_frame (framepos_t when);
@@ -461,13 +463,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 private:
 
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
-	framecnt_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
+	framepos_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
 	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	double beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
-	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
+	framepos_t frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
 	Tempo tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
 	framepos_t frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const;
