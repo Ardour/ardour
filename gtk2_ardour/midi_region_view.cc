@@ -1417,10 +1417,11 @@ MidiRegionView::region_resized (const PropertyChange& what_changed)
 	    what_changed.contains (ARDOUR::Properties::position)) {
 		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
 	}
-	if (what_changed.contains (ARDOUR::Properties::length)) {
+	/* catch an end trim so we can live update */
+	if (!what_changed.contains (ARDOUR::Properties::start) &&
+	    what_changed.contains (ARDOUR::Properties::length)) {
 		enable_display (true);
 	}
-
 }
 
 void
@@ -3979,6 +3980,10 @@ MidiRegionView::trim_front_ending ()
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}
+	/* until _start is modified on the fly during front trim,
+	   we have to redisplay the model when a start trim has finished.
+	*/
+	enable_display (true);
 }
 
 void
