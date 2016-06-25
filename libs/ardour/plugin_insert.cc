@@ -976,7 +976,7 @@ PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
-			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0 in_map, out_map, nframes);
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0, in_map, out_map, nframes, 0);
 		}
 	} else
 #endif
