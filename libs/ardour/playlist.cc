@@ -2928,9 +2928,8 @@ Playlist::update_after_tempo_map_change ()
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 		(*i)->update_after_tempo_map_change ();
 	}
-
+	/* possibly causes a contents changed notification (flush_notifications()) */
 	thaw ();
-	notify_contents_changed();
 }
 
 void
