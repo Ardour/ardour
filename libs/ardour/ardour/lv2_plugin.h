@@ -108,6 +108,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool requires_fixed_sized_buffers () const;
 
 	int connect_and_run (BufferSet& bufs,
+	                     framepos_t start, framepos_t end, double speed,
 	                     ChanMapping in, ChanMapping out,
 	                     pframes_t nframes, framecnt_t offset);
 

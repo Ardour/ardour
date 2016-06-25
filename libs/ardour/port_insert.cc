@@ -107,7 +107,7 @@ PortInsert::latency() const
 }
 
 void
-PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
+PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports().n_total() == 0) {
 		return;
@@ -134,7 +134,7 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
                    hear the remnants of whatever MTDM pumped into the pipeline.
                 */
 
-                silence (nframes);
+                silence (nframes, start_frame);
 
                 if (_latency_flush_frames > nframes) {
                         _latency_flush_frames -= nframes;
@@ -147,11 +147,11 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 
 	if (!_active && !_pending_active) {
 		/* deliver silence */
-		silence (nframes);
+		silence (nframes, start_frame);
 		goto out;
 	}
 
-	_out->run (bufs, start_frame, end_frame, nframes, true);
+	_out->run (bufs, start_frame, end_frame, speed, nframes, true);
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
 
   out:

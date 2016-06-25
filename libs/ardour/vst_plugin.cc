@@ -46,6 +46,8 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _plugin (0)
 	, _pi (0)
 	, _num (0)
+	, _transport_frame (0)
+	, _transport_speed (0.f)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -533,10 +535,14 @@ VSTPlugin::automatable () const
 
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
+		framepos_t start, framepos_t end, double speed,
 		ChanMapping in_map, ChanMapping out_map,
 		pframes_t nframes, framecnt_t offset)
 {
-	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
+	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
+
+	_transport_frame = start;
+	_transport_speed = speed;
 
 	ChanCount bufs_count;
 	bufs_count.set(DataType::AUDIO, 1);

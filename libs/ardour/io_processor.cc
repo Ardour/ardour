@@ -240,7 +240,7 @@ IOProcessor::set_state_2X (const XMLNode& node, int version)
 }
 
 void
-IOProcessor::silence (framecnt_t nframes)
+IOProcessor::silence (framecnt_t nframes, framepos_t /* start_frame */)
 {
 	if (_own_output && _output) {
 		_output->silence (nframes);

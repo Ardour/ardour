@@ -171,6 +171,8 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	std::vector<std::pair<int,int> > io_configs;
 	pframes_t _current_block_size;
 	framecnt_t _last_nframes;
+	framepos_t _transport_frame;
+	framepos_t _transport_speed;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 	bool _has_midi_input;
@@ -226,8 +228,9 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	void discover_factory_presets ();
 
-	bool      last_transport_rolling;
-	float     last_transport_speed;
+	framepos_t transport_frame;
+	float      transport_speed;
+	floa t     last_transport_speed;
 
 	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);

@@ -127,7 +127,7 @@ public:
 
 	bool display_to_user() const;
 
-	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t /*nframes*/, bool /*result_required*/);
+	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
 
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int /* version */);

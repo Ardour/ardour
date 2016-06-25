@@ -159,7 +159,7 @@ Send::set_delay_out(framecnt_t delay)
 }
 
 void
-Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
+Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
@@ -185,13 +185,13 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframe
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (sendbufs, start_frame, end_frame, nframes, true);
+	_amp->run (sendbufs, start_frame, end_frame, speed, nframes, true);
 
-	_delayline->run (sendbufs, start_frame, end_frame, nframes, true);
+	_delayline->run (sendbufs, start_frame, end_frame, speed, nframes, true);
 
 	/* deliver to outputs */
 
-	Delivery::run (sendbufs, start_frame, end_frame, nframes, true);
+	Delivery::run (sendbufs, start_frame, end_frame, speed, nframes, true);
 
 	/* consider metering */
 
@@ -199,7 +199,7 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframe
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (*_output_buffers, start_frame, end_frame, nframes, true);
+			_meter->run (*_output_buffers, start_frame, end_frame, speed, nframes, true);
 		}
 	}
 

@@ -2248,17 +2248,18 @@ write_position(LV2_Atom_Forge*     forge,
 
 int
 LV2Plugin::connect_and_run(BufferSet& bufs,
-	ChanMapping in_map, ChanMapping out_map,
-	pframes_t nframes, framecnt_t offset)
+		framepos_t start, framepos_t end, double speed,
+		ChanMapping in_map, ChanMapping out_map,
+		pframes_t nframes, framecnt_t offset)
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 run %2 offset %3\n", name(), nframes, offset));
-	Plugin::connect_and_run(bufs, in_map, out_map, nframes, offset);
+	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
 	cycles_t then = get_cycles();
 
 	TempoMap&               tmap     = _session.tempo_map();
 	Metrics::const_iterator metric_i = tmap.metrics_end();
-	TempoMetric             tmetric  = tmap.metric_at(_session.transport_frame(), &metric_i);
+	TempoMetric             tmetric  = tmap.metric_at(start, &metric_i);
 
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
@@ -2269,7 +2270,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 #ifdef LV2_EXTENDED
-	if (_can_write_automation && _session.transport_frame() != _next_cycle_start) {
+	if (_can_write_automation && start != _next_cycle_start) {
 		// add guard-points after locating
 		for (AutomationCtrlMap::iterator i = _ctrl_map.begin(); i != _ctrl_map.end(); ++i) {
 			i->second->guard = true;
@@ -2337,13 +2338,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			if (valid && (flags & PORT_INPUT)) {
 				Timecode::BBT_Time bbt;
 				if ((flags & PORT_POSITION)) {
-					if (_session.transport_frame() != _next_cycle_start ||
-					    _session.transport_speed() != _next_cycle_speed) {
+					if (start != _next_cycle_start ||
+					    speed != _next_cycle_speed) {
 						// Transport has changed, write position at cycle start
-						bbt = tmap.bbt_at_frame (_session.transport_frame());
+						bbt = tmap.bbt_at_frame (start);
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, _session.transport_speed(),
-						               _session.transport_frame(), 0);
+						               tmetric, bbt, speed, start, 0);
 					}
 				}
 
@@ -2357,7 +2357,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
-				const framepos_t   tend = _session.transport_frame() + nframes;
+				const framepos_t   tend = end;
 				++metric_i;
 				while (m != m_end || (metric_i != tmap.metrics_end() &&
 				                      (*metric_i)->frame() < tend)) {
@@ -2374,9 +2374,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						tmetric.set_metric(metric);
 						bbt = tmap.bbt_at_pulse (metric->pulse());
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, _session.transport_speed(),
+						               tmetric, bbt, speed,
 						               metric->frame(),
-						               metric->frame() - _session.transport_frame());
+						               metric->frame() - start);
 						++metric_i;
 					}
 				}
@@ -2497,8 +2497,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								if (c &&
 								     (c->ac->automation_state() == Touch || c->ac->automation_state() == Write)
 								   ) {
-									framepos_t when = std::max ((framepos_t) 0, _session.transport_frame() + frames - _current_latency);
-									assert (_session.transport_frame() + frames - _current_latency >= 0);
+									framepos_t when = std::max ((framepos_t) 0, start + frames - _current_latency);
+									assert (start + frames - _current_latency >= 0);
 									if (c->guard) {
 										c->guard = false;
 										c->ac->list()->add (when, v, true, true);
@@ -2560,7 +2560,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								AutomationCtrlPtr c = get_automation_control (p);
 								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Start Touch p: %1\n", p));
 								if (c) {
-									c->ac->start_touch (std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
+									c->ac->start_touch (std::max ((framepos_t)0, start - _current_latency));
 									c->guard = true;
 								}
 							}
@@ -2575,7 +2575,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								AutomationCtrlPtr c = get_automation_control (p);
 								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("End Touch p: %1\n", p));
 								if (c) {
-									c->ac->stop_touch (true, std::max ((framepos_t)0, _session.transport_frame() - _current_latency));
+									c->ac->stop_touch (true, std::max ((framepos_t)0, start - _current_latency));
 								}
 							}
 						}
@@ -2625,8 +2625,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	set_cycles((uint32_t)(now - then));
 
 	// Update expected transport information for next cycle so we can detect changes
-	_next_cycle_speed = _session.transport_speed();
-	_next_cycle_start = _session.transport_frame() + (nframes * _next_cycle_speed);
+	_next_cycle_speed = speed;
+	_next_cycle_start = end;
 
 	if (_latency_control_port) {
 		framecnt_t new_latency = signal_latency ();

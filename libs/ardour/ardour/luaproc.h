@@ -75,6 +75,7 @@ public:
 	framecnt_t  signal_latency() const { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
+			framepos_t start, framepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
 			pframes_t nframes, framecnt_t offset);
 

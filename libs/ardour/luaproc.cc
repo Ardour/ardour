@@ -613,6 +613,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 
 int
 LuaProc::connect_and_run (BufferSet& bufs,
+		framepos_t start, framepos_t end, double speed,
 		ChanMapping in, ChanMapping out,
 		pframes_t nframes, framecnt_t offset)
 {
@@ -620,7 +621,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 		return 0;
 	}
 
-	Plugin::connect_and_run (bufs, in, out, nframes, offset);
+	Plugin::connect_and_run (bufs, start, end, speed, in, out, nframes, offset);
 
 	// This is needed for ARDOUR::Session requests :(
 	if (! SessionEvent::has_per_thread_pool ()) {

@@ -444,10 +444,10 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 			if (no_meter) {
 				BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
-				_meter->run (bufs, 0, 0, nframes, true);
-				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
+				_meter->run (bufs, start_frame, end_frame, 1.0, nframes, true);
+				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, speed(), nframes);
 			} else {
-				_input->process_input (_meter, start_frame, end_frame, nframes);
+				_input->process_input (_meter, start_frame, end_frame, speed(), nframes);
 			}
 		}
 
@@ -460,7 +460,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		fill_buffers_with_input (bufs, _input, nframes);
 
 		if (_meter_point == MeterInput) {
-			_meter->run (bufs, start_frame, end_frame, nframes, true);
+			_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
 		}
 
 		passthru (bufs, start_frame, end_frame, nframes, false);

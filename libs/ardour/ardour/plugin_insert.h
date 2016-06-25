@@ -61,8 +61,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void update_id (PBD::ID);
 	void set_state_dir (const std::string& d = "");
 
-	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
-	void silence (framecnt_t nframes);
+	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void silence (framecnt_t nframes, framepos_t start_frame);
 
 	void activate ();
 	void deactivate ();
@@ -344,8 +344,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	PinMappings _out_map;
 	ChanMapping _thru_map; // out-idx <=  in-idx
 
-	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
-	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
+	void automation_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes);
+	void connect_and_run (BufferSet& bufs, framepos_t start, framecnt_t end, double speed, pframes_t nframes, framecnt_t offset, bool with_auto);
 	void bypass (BufferSet& bufs, pframes_t nframes);
 	void inplace_silence_unconnected (BufferSet&, const PinMappings&, framecnt_t nframes, framecnt_t offset) const;
 

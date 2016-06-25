@@ -593,7 +593,7 @@ PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& o
 }
 
 void
-PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
+PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes, framecnt_t offset, bool with_auto)
 {
 	// TODO: atomically copy maps & _no_inplace
 	PinMappings in_map (_in_map);
@@ -661,7 +661,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			if (c->list() && c->automation_playback()) {
 				bool valid;
 
-				const float val = c->list()->rt_safe_eval (now, valid);
+				const float val = c->list()->rt_safe_eval (start, valid);
 
 				if (valid) {
 					/* This is the ONLY place where we are
@@ -709,7 +709,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			ChanMapping mb_in_map (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
 			ChanMapping mb_out_map (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
 
-			_plugins.front()->connect_and_run (bufs, mb_in_map, mb_out_map, nframes, offset);
+			_plugins.front()->connect_and_run (bufs, start, end, speed, mb_in_map, mb_out_map, nframes, offset);
 
 			for (uint32_t out = _configured_in.n_audio (); out < bufs.count().get (DataType::AUDIO); ++out) {
 				bufs.get (DataType::AUDIO, out).silence (nframes, offset);
@@ -785,7 +785,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				i_out_map.offset_to (*t, natural_input_streams ().get (*t));
 			}
 
-			if ((*i)->connect_and_run (inplace_bufs, i_in_map, i_out_map, nframes, offset)) {
+			if ((*i)->connect_and_run (inplace_bufs, start, end, speed, i_in_map, i_out_map, nframes, offset)) {
 				deactivate ();
 			}
 		}
@@ -815,7 +815,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		/* in-place processing */
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			if ((*i)->connect_and_run(bufs, in_map[pc], out_map[pc], nframes, offset)) {
+			if ((*i)->connect_and_run(bufs, start, end, speed, in_map[pc], out_map[pc], nframes, offset)) {
 				deactivate ();
 			}
 		}
@@ -962,7 +962,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 }
 
 void
-PluginInsert::silence (framecnt_t nframes)
+PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
 {
 	if (!active ()) {
 		return;
@@ -976,17 +976,17 @@ PluginInsert::silence (framecnt_t nframes)
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
-			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0 in_map, out_map, nframes);
 		}
 	} else
 #endif
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
+		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0, in_map, out_map, nframes, 0);
 	}
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
 {
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
@@ -994,13 +994,13 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		if (_sidechain) {
 			// collect sidechain input for complete cycle (!)
 			// TODO we need delaylines here for latency compensation
-			_sidechain->run (bufs, start_frame, end_frame, nframes, true);
+			_sidechain->run (bufs, start_frame, end_frame, speed, nframes, true);
 		}
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
-			automation_run (bufs, start_frame, nframes);
+			automation_run (bufs, start_frame, end_frame, speed, nframes);
 		} else {
-			connect_and_run (bufs, nframes, 0, false);
+			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, false);
 		}
 
 	} else {
@@ -1016,39 +1016,37 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes)
+PluginInsert::automation_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
-	framepos_t now = start;
-	framepos_t end = now + nframes;
 	framecnt_t offset = 0;
 
 	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
-		connect_and_run (bufs, nframes, offset, false);
+		connect_and_run (bufs, start, end, speed, nframes, offset, false);
 		return;
 	}
 
-	if (!find_next_event (now, end, next_event) || _plugins.front()->requires_fixed_sized_buffers()) {
+	if (!find_next_event (start, end, next_event) || _plugins.front()->requires_fixed_sized_buffers()) {
 
 		/* no events have a time within the relevant range */
 
-		connect_and_run (bufs, nframes, offset, true, now);
+		connect_and_run (bufs, start, end, speed, nframes, offset, true);
 		return;
 	}
 
 	while (nframes) {
 
-		framecnt_t cnt = min (((framecnt_t) ceil (next_event.when) - now), (framecnt_t) nframes);
+		framecnt_t cnt = min (((framecnt_t) ceil (next_event.when) - start), (framecnt_t) nframes);
 
-		connect_and_run (bufs, cnt, offset, true, now);
+		connect_and_run (bufs, start, start + cnt, speed, cnt, offset, true); // XXX (start + cnt) * speed
 
 		nframes -= cnt;
 		offset += cnt;
-		now += cnt;
+		start += cnt;
 
-		if (!find_next_event (now, end, next_event)) {
+		if (!find_next_event (start, end, next_event)) {
 			break;
 		}
 	}
@@ -1056,7 +1054,7 @@ PluginInsert::automation_run (BufferSet& bufs, framepos_t start, pframes_t nfram
 	/* cleanup anything that is left to do */
 
 	if (nframes) {
-		connect_and_run (bufs, nframes, offset, true, now);
+		connect_and_run (bufs, start, start + nframes, speed, nframes, offset, true);
 	}
 }
 

@@ -676,8 +676,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool   synced_to_ltc () const { return config.get_external_sync() && Config->get_sync_source() == LTC && g_atomic_int_get (const_cast<gint*>(&_ltc_active)); }
 
 	double transport_speed() const { return _transport_speed; }
-	bool   transport_stopped() const { return _transport_speed == 0.0f; }
-	bool   transport_rolling() const { return _transport_speed != 0.0f; }
+	bool   transport_stopped() const { return _transport_speed == 0.0; }
+	bool   transport_rolling() const { return _transport_speed != 0.0; }
 
 	bool silent () { return _silent; }
 

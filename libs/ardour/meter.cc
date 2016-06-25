@@ -78,7 +78,7 @@ PeakMeter::~PeakMeter ()
  * (runs in jack realtime context)
  */
 void
-PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
+PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;

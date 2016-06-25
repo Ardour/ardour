@@ -46,7 +46,7 @@ CapturingProcessor::set_block_size (pframes_t nframes)
 }
 
 void
-CapturingProcessor::run (BufferSet& bufs, framepos_t, framepos_t, pframes_t nframes, bool)
+CapturingProcessor::run (BufferSet& bufs, framepos_t, framepos_t, double, pframes_t nframes, bool)
 {
 	if (active()) {
 		capture_buffers.read_from (bufs, nframes);

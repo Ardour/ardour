@@ -71,7 +71,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
+Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;

@@ -63,10 +63,11 @@ public:
 	bool parameter_is_input (uint32_t) const { return true; }
 	bool parameter_is_output (uint32_t) const { return false; }
 
-	int connect_and_run (
-		BufferSet&, ChanMapping in, ChanMapping out,
-		pframes_t nframes, framecnt_t offset
-		);
+	int connect_and_run (BufferSet&,
+			framepos_t start, framepos_t end, double speed,
+			ChanMapping in, ChanMapping out,
+			pframes_t nframes, framecnt_t offset
+			);
 
 	std::string unique_id () const;
 	const char * label () const;
@@ -89,6 +90,8 @@ public:
 	PluginInsert* plugin_insert () const { return _pi; }
 	uint32_t plugin_number () const { return _num; }
 	VstTimeInfo* timeinfo () { return &_timeInfo; }
+	framepos_t transport_frame () const { return _transport_frame; }
+	float transport_speed () const { return _transport_speed; }
 
 
 protected:
@@ -112,6 +115,9 @@ protected:
 
 	MidiBuffer* _midi_out_buf;
 	VstTimeInfo _timeInfo;
+
+	framepos_t _transport_frame;
+	float      _transport_speed;
 };
 
 }

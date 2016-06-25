@@ -50,7 +50,7 @@ DelayLine::~DelayLine ()
 
 #define FADE_LEN (16)
 void
-DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end_frame */, pframes_t nsamples, bool)
+DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end_frame */, double /* speed */, pframes_t nsamples, bool)
 {
 	const uint32_t chn = _configured_output.n_audio();
 	pframes_t p0 = 0;

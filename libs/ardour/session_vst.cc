@@ -200,8 +200,8 @@ intptr_t Session::vst_callback (
 
 		timeinfo->nanoSeconds = g_get_monotonic_time () * 1000;
 
-		if (session) {
-			framepos_t now = session->transport_frame();
+		if (plug && session) {
+			framepos_t now = plug->transport_frame();
 
 			timeinfo->samplePos = now;
 			timeinfo->sampleRate = session->frame_rate();
@@ -280,7 +280,7 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportRecording;
 			}
 
-			if (session->transport_speed () != 0.0f) {
+			if (plug->transport_speed () != 0.0f) {
 				newflags |= kVstTransportPlaying;
 			}
 

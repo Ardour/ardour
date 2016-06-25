@@ -36,7 +36,7 @@ class LIBARDOUR_API CapturingProcessor : public Processor
   public: // Processor overrides
 	bool display_to_user() const { return false; }
 	int set_block_size (pframes_t nframes);
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool result_required);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool result_required);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	virtual XMLNode& state (bool);

@@ -448,7 +448,8 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, audio_input_cnt (0)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
-	, last_transport_rolling (false)
+	, transport_frame (false)
+	, transport_speed (false)
 	, last_transport_speed (0.0)
 {
 	if (!preset_search_path_initialized) {
@@ -1584,9 +1585,15 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 }
 
 int
-AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_map, pframes_t nframes, framecnt_t offset)
+AUPlugin::connect_and_run (BufferSet& bufs,
+		framepos_t start, framepos_t end, double speed,
+		ChanMapping in_map, ChanMapping out_map,
+		pframes_t nframes, framecnt_t offset)
 {
-	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
+	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
+
+	transport_frame = start;
+	transport_speed = speed;
 
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
@@ -1760,8 +1767,8 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
 
-	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
-	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (_session.transport_frame() + input_offset);
+	TempoMetric metric = tmap.metric_at (transport_frame + input_offset);
+	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (transport_frame + input_offset);
 
 	if (outCurrentBeat) {
 		const double ppq_scaling = metric.meter().note_divisor() / 4.0;
@@ -1799,8 +1806,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
 
-	TempoMetric metric = tmap.metric_at (_session.transport_frame() + input_offset);
-	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (_session.transport_frame() + input_offset);
+	TempoMetric metric = tmap.metric_at (transport_frame + input_offset);
+	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (transport_frame + input_offset);
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
@@ -1808,7 +1815,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
 			double const beat_frac_to_next = (Timecode::BBT_Time::ticks_per_beat - bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-			*outDeltaSampleOffsetToNextBeat = tmap.frame_at_beat (tmap.beat_at_frame (_session.transport_frame() + input_offset) + beat_frac_to_next);
+			*outDeltaSampleOffsetToNextBeat = tmap.frame_at_beat (tmap.beat_at_frame (transport_frame + input_offset) + beat_frac_to_next);
 		}
 	}
 
@@ -1842,22 +1849,20 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					Float64*  outCycleStartBeat,
 					Float64*  outCycleEndBeat)
 {
-	bool rolling;
-	float speed;
+	const bool rolling = (transport_speed != 0);
+	const bool last_transport_rolling = (last_transport_speed != 0);
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour transport state callback\n");
 
-	rolling = _session.transport_rolling();
-	speed = _session.transport_speed ();
 
 	if (outIsPlaying) {
-		*outIsPlaying = _session.transport_rolling();
+		*outIsPlaying = rolling;
 	}
 
 	if (outTransportStateChanged) {
 		if (rolling != last_transport_rolling) {
 			*outTransportStateChanged = true;
-		} else if (speed != last_transport_speed) {
+		} else if (transport_speed != last_transport_speed) {
 			*outTransportStateChanged = true;
 		} else {
 			*outTransportStateChanged = false;
@@ -1868,13 +1873,14 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 		/* this assumes that the AU can only call this host callback from render context,
 		   where input_offset is valid.
 		*/
-		*outCurrentSampleInTimeLine = _session.transport_frame() + input_offset;
+		*outCurrentSampleInTimeLine = transport_frame + input_offset;
 	}
 
 	if (outIsCycling) {
+		// TODO check bounce-processing
 		Location* loc = _session.locations()->auto_loop_location();
 
-		*outIsCycling = (loc && _session.transport_rolling() && _session.get_play_loop());
+		*outIsCycling = (loc && rolling && _session.get_play_loop());
 
 		if (*outIsCycling) {
 
@@ -1919,8 +1925,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 		}
 	}
 
-	last_transport_rolling = rolling;
-	last_transport_speed = speed;
+	last_transport_speed = transport_speed;
 
 	return noErr;
 }

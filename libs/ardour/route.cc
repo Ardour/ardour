@@ -415,6 +415,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool const meter_already_run = metering_state() == MeteringInput;
 
 	framecnt_t latency = 0;
+	const double speed = _session.transport_speed ();
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
@@ -450,7 +451,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					_initial_delay + latency, longest_session_latency - latency);
 		}
 
-		(*i)->run (bufs, start_frame - latency, end_frame - latency, nframes, *i != _processors.back());
+		(*i)->run (bufs, start_frame - latency, end_frame - latency, speed, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 
 		if ((*i)->active ()) {
@@ -478,6 +479,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 	_trim->setup_gain_automation (start, start + nframes, nframes);
 
 	latency = 0;
+	const double speed = _session.transport_speed ();
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (!include_endpoint && (*i) == endpoint) {
@@ -500,7 +502,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		 */
 		if ((*i) == _main_outs) {
 			assert ((*i)->does_routing());
-			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);
+			(*i)->run (buffers, start - latency, start - latency + nframes, speed, nframes, true);
 			buffers.set_count ((*i)->output_streams());
 		}
 
@@ -508,7 +510,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		 * Also don't bother with metering.
 		 */
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
-			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);
+			(*i)->run (buffers, start - latency, start - latency + nframes, 1.0, nframes, true);
 			buffers.set_count ((*i)->output_streams());
 			latency += (*i)->signal_latency ();
 		}
@@ -2890,6 +2892,8 @@ Route::silence_unlocked (framecnt_t nframes)
 {
 	/* Must be called with the processor lock held */
 
+	const framepos_t now = _session.transport_frame ();
+
 	if (!_silent) {
 
 		_output->silence (nframes);
@@ -2902,7 +2906,7 @@ Route::silence_unlocked (framecnt_t nframes)
 				continue;
 			}
 
-			(*i)->silence (nframes);
+			(*i)->silence (nframes, now);
 		}
 
 		if (nframes == _session.get_block_size()) {
@@ -3432,7 +3436,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_frame, end_frame, nframes, true);
+		_meter->run (bufs, start_frame, end_frame, 0.0, nframes, true);
 	}
 
 	_amp->apply_gain_automation (false);
@@ -3472,7 +3476,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_frame, end_frame, nframes, true);
+		_meter->run (bufs, start_frame, end_frame, 1.0, nframes, true);
 	}
 
 	passthru (bufs, start_frame, end_frame, nframes, declick);

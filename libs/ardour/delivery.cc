@@ -229,7 +229,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double /*speed*/, pframes_t nframes, bool result_required)
 {
 	assert (_output);
 

@@ -133,7 +133,7 @@ InternalSend::send_to_going_away ()
 }
 
 void
-InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
+InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || !_send_to) {
 		_meter->reset ();
@@ -213,9 +213,9 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
+	_amp->run (mixbufs, start_frame, end_frame, speed, nframes, true);
 
-	_delayline->run (mixbufs, start_frame, end_frame, nframes, true);
+	_delayline->run (mixbufs, start_frame, end_frame, speed, nframes, true);
 
 	/* consider metering */
 
@@ -223,7 +223,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		if (_amp->gain_control()->get_value() == GAIN_COEFF_ZERO) {
 			_meter->reset();
 		} else {
-			_meter->run (mixbufs, start_frame, end_frame, nframes, true);
+			_meter->run (mixbufs, start_frame, end_frame, speed, nframes, true);
 		}
 	}
 

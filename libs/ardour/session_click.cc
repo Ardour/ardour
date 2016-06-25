@@ -133,7 +133,7 @@ Session::click (framepos_t start, framecnt_t nframes)
 		}
 	}
 
-	_click_gain->run (bufs, 0, 0, nframes, false);
+	_click_gain->run (bufs, 0, 0, 1.0, nframes, false);
 	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 }
 

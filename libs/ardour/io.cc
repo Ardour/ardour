@@ -1675,7 +1675,7 @@ IO::connected_to (const string& str) const
  *  Caller must hold process lock.
  */
 void
-IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
+IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes)
 {
 	/* don't read the data into new buffers - just use the port buffers directly */
 
@@ -1686,7 +1686,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 
 	_buffers.get_backend_port_addresses (_ports, nframes);
 	if (proc) {
-		proc->run (_buffers, start_frame, end_frame, nframes, true);
+		proc->run (_buffers, start_frame, end_frame, speed, nframes, true);
 	}
 }
 

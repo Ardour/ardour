@@ -404,7 +404,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	_capture_filter.filter (bufs);
 
 	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
-		_meter->run (bufs, start_frame, end_frame, nframes, true);
+		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
 	}
 
 

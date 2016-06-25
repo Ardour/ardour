@@ -99,8 +99,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool inplace_broken() const { return false; }
 
 	virtual int connect_and_run (BufferSet& bufs,
-				     ChanMapping in, ChanMapping out,
-				     pframes_t nframes, framecnt_t offset);
+			framepos_t start, framepos_t end, double speed,
+			ChanMapping in, ChanMapping out,
+			pframes_t nframes, framecnt_t offset);
 
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;

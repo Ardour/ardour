@@ -329,8 +329,9 @@ Plugin::preset_by_uri (const string& uri)
 
 int
 Plugin::connect_and_run (BufferSet& bufs,
-			 ChanMapping /*in_map*/, ChanMapping /*out_map*/,
-			 pframes_t /* nframes */, framecnt_t /*offset*/)
+		framepos_t /*start*/, framepos_t /*end*/, double /*speed*/,
+		ChanMapping /*in_map*/, ChanMapping /*out_map*/,
+		pframes_t /* nframes */, framecnt_t /*offset*/)
 {
 	if (bufs.count().n_midi() > 0) {
 

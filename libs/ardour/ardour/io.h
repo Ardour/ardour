@@ -194,7 +194,7 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	/* three utility functions - this just seems to be simplest place to put them */
 
 	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset);
-	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, pframes_t nframes);
+	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes);
 	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
