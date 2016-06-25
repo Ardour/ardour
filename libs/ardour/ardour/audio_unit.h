@@ -84,8 +84,9 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int set_block_size (pframes_t nframes);
 
 	int connect_and_run (BufferSet& bufs,
-			     ChanMapping in, ChanMapping out,
-			     pframes_t nframes, framecnt_t offset);
+			framepos_t start, framepos_t end, double speed,
+			ChanMapping in, ChanMapping out,
+			pframes_t nframes, framecnt_t offset);
 	std::set<Evoral::Parameter> automatable() const;
 	std::string describe_parameter (Evoral::Parameter);
 	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
@@ -230,7 +231,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	framepos_t transport_frame;
 	float      transport_speed;
-	floa t     last_transport_speed;
+	float      last_transport_speed;
 
 	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
