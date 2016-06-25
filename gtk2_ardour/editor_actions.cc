@@ -645,7 +645,7 @@ Editor::register_actions ()
 		ruler_range_action->set_active (true);
 		ruler_loop_punch_action->set_active (true);
 		ruler_loop_punch_action->set_active (true);
-		ruler_bbt_action->set_active (false);
+		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (true);
 		ruler_timecode_action->set_active (true);
 		ruler_minsec_action->set_active (false);
