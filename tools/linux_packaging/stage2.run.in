@@ -508,7 +508,7 @@ MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 ################################
 
 # uninstall any older versions
-UNINSTALLERS=$(find ${INSTALL_DEST_BASE} -maxdepth 1 -type f -name "${PGM_NAME}*.uninstall.sh")
+UNINSTALLERS=$(find ${INSTALL_DEST_BASE} -maxdepth 1 -type f -name "${PGM_NAME}-*.uninstall.sh")
 if [ ! -z "$UNINSTALLERS" ];
 then
 	for i in $UNINSTALLERS; do
