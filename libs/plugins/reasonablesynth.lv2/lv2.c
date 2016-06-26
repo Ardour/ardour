@@ -153,6 +153,13 @@ run(LV2_Handle handle, uint32_t n_samples)
         )
     {
       if (ev->body.type == self->midi_MidiEvent) {
+#ifdef DEBUG_MIDI_EVENT // debug midi messages in synth -- not rt-safe(!)
+        printf ("%5d (%d):", ev->time.frames,  ev->body.size);
+        for (uint8_t i = 0; i < ev->body.size; ++i) {
+          printf (" %02x", ((const uint8_t*)(ev+1))[i]);
+        }
+        printf ("\n");
+#endif
         if (written + BUFFER_SIZE_SAMPLES < ev->time.frames
             && ev->time.frames < n_samples) {
           /* first synthesize sound up until the message timestamp */
