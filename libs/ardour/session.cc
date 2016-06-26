@@ -3459,7 +3459,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			}
 		}
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 		/* clang complains: 'operator<<' should be declared prior to the call site or in an associated namespace of one of its
 		 * arguments std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid)"
 		 */

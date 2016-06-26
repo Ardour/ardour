@@ -37,6 +37,9 @@
 #undef interface // VKamyshniy: to avoid "include/giomm-2.4/giomm/dbusmessage.h:270:94: error: expected ',' or '...' before 'struct'"
 #endif
 
+#else // posix
+#include <sys/types.h>
+#include <sys/wait.h> /* WNOHANG is part of the exposed API */
 #endif
 
 #include <string>

@@ -2,6 +2,8 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
+import re
+import sys
 
 # Mandatory variables
 top = '.'
@@ -19,5 +21,6 @@ def build(bld):
     obj.source = [ 'abicheck.c' ]
     obj.target = 'gcc-glibmm-abi-check'
     obj.name = 'gcc-glibmm-abi-check'
-    obj.lib = 'dl'
+    if re.search ("freebsd", sys.platform) == None:
+        obj.lib = 'dl'
     obj.install_path = None
