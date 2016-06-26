@@ -483,8 +483,8 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	row[_columns.region] = region;
 
 	region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference>(region, TreeRowReference(_model, TreePath (row))) );
-
-	populate_row(region, (*row));
+	PropertyChange pc;
+	populate_row(region, (*row), pc);
 }
 
 void
@@ -532,14 +532,13 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	our_interests.add (ARDOUR::Properties::fade_out_active);
 
 	if (what_changed.contains (our_interests)) {
-
 		if (last_row != 0) {
 
 			TreeModel::iterator j = _model->get_iter (last_row.get_path());
 			boost::shared_ptr<Region> c = (*j)[_columns.region];
 
 			if (c == r) {
-				populate_row (r, (*j));
+				populate_row (r, (*j), what_changed);
 
 				if (what_changed.contains (ARDOUR::Properties::hidden)) {
 					redisplay ();
@@ -559,7 +558,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 			boost::shared_ptr<Region> c = (*j)[_columns.region];
 
 			if (c == r) {
-				populate_row (r, (*j));
+				populate_row (r, (*j), what_changed);
 
 				if (what_changed.contains (ARDOUR::Properties::hidden)) {
 					redisplay ();
@@ -698,9 +697,9 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 	it = region_row_map.find (region);
 
 	if (it != region_row_map.end()){
-
+		PropertyChange c;
 		TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
-		populate_row(region, (*j));
+		populate_row(region, (*j), c);
 	}
 }
 
@@ -720,7 +719,8 @@ EditorRegions::update_all_rows ()
 		boost::shared_ptr<Region> region = (*j)[_columns.region];
 
 		if (!region->automatic()) {
-			populate_row(region, (*j));
+			PropertyChange c;
+			populate_row(region, (*j), c);
 		}
 	}
 }
@@ -787,26 +787,53 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 }
 
 void
-EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row, PBD::PropertyChange const &what_changed)
 {
 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
 	//uint32_t used = _session->playlists->region_use_count (region);
 	/* Presently a region is only used once so let's save on the sequential scan to determine use count */
 	uint32_t used = 1;
 
-	populate_row_position (region, row, used);
-	populate_row_end (region, row, used);
-	populate_row_sync (region, row, used);
-	populate_row_fade_in (region, row, used, audioregion);
-	populate_row_fade_out (region, row, used, audioregion);
-	populate_row_locked (region, row, used);
-	populate_row_glued (region, row, used);
-	populate_row_muted (region, row, used);
-	populate_row_opaque (region, row, used);
-	populate_row_length (region, row);
-	populate_row_source (region, row);
-	populate_row_name (region, row);
-	populate_row_used (region, row, used);
+	PropertyChange c;
+	const bool all = what_changed == c;
+
+	if (all || what_changed.contains (Properties::position)) {
+		populate_row_position (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::start)) {
+		populate_row_sync (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::fade_in)) {
+		populate_row_fade_in (region, row, used, audioregion);
+	}
+	if (all || what_changed.contains (Properties::fade_out)) {
+		populate_row_fade_out (region, row, used, audioregion);
+	}
+	if (all || what_changed.contains (Properties::locked)) {
+		populate_row_locked (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::position_lock_style)) {
+		populate_row_glued (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::muted)) {
+		populate_row_muted (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::opaque)) {
+		populate_row_opaque (region, row, used);
+	}
+	if (all || what_changed.contains (Properties::length)) {
+		populate_row_end (region, row, used);
+		populate_row_length (region, row);
+	}
+	if (all) {
+		populate_row_source (region, row);
+	}
+	if (all || what_changed.contains (Properties::name)) {
+		populate_row_name (region, row);
+	}
+	if (all) {
+		populate_row_used (region, row, used);
+	}
 }
 
 #if 0
