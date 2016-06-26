@@ -335,6 +335,11 @@ AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared
 		return false;
 	}
 
+	PropertyChange bounds;
+	bounds.add (Properties::start);
+	bounds.add (Properties::position);
+	bounds.add (Properties::length);
+
 	PropertyChange our_interests;
 
 	our_interests.add (Properties::fade_in_active);
@@ -348,8 +353,8 @@ AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared
 	bool parent_wants_notify;
 
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
-
-	if (parent_wants_notify || (what_changed.contains (our_interests))) {
+	/* if bounds changed, we have already done notify_contents_changed ()*/
+	if ((parent_wants_notify || what_changed.contains (our_interests)) && !what_changed.contains (bounds)) {
 		notify_contents_changed ();
 	}
 
