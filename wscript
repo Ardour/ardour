@@ -568,6 +568,9 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
+    if re.search ("freebsd", sys.platform) != None:
+        linker_flags.append('-lexecinfo')
+
     if conf.env['DEBUG_RT_ALLOC']:
         compiler_flags.append('-DDEBUG_RT_ALLOC')
         linker_flags.append('-ldl')
@@ -745,12 +748,20 @@ def options(opt):
                     'Multiple modifiers must be separated by \'><\'')
     opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
                     help='directory where Boost header files can be found')
-    opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
-                    help='additional include directory where header files can be found (split multiples with commas)')
-    opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
-                    help='additional include directory where shared libraries can be found (split multiples with commas)')
-    opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
-                    help='directory where Wine\'s Windows header files can be found')
+    if re.search ("freebsd", sys.platform) != None:
+        opt.add_option('--also-include', type='string', action='store', dest='also_include', default='/usr/local/include',
+                       help='additional include directory where header files can be found (split multiples with commas)')
+        opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='/usr/local/lib',
+                       help='additional include directory where shared libraries can be found (split multiples with commas)')
+        opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/local/include/wine/windows',
+                       help='directory where Wine\'s Windows header files can be found')
+    else:        
+        opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
+                       help='additional include directory where header files can be found (split multiples with commas)')
+        opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
+                       help='additional include directory where shared libraries can be found (split multiples with commas)')
+        opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
+                       help='directory where Wine\'s Windows header files can be found')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
@@ -940,7 +951,10 @@ def configure(conf):
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
         if Options.options.dist_target != 'msvc':
-            conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+            if re.search ("freebsd", sys.platform) != None:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', uselib_store='DL')
+            else:
+                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
         conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,

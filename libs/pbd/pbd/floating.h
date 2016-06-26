@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 
+#include <cstdlib> // abs(int)
 #include <cmath>
 
 #include "pbd/libpbd_visibility.h"

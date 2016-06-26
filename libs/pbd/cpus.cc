@@ -43,10 +43,14 @@ hardware_concurrency()
 {
 #if defined(PTW32_VERSION) || defined(__hpux)
         return pthread_num_processors_np();
-#elif defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__APPLE__)
         int count;
         size_t size=sizeof(count);
         return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
+#elif defined(__FreeBSD__)
+        int count;
+        size_t size=sizeof(count);
+        return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
 #elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
         int const count=sysconf(_SC_NPROCESSORS_ONLN);
         return (count>0)?count:0;
