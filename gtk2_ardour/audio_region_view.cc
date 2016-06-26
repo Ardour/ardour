@@ -1623,6 +1623,11 @@ AudioRegionView::set_fade_visibility (bool yn)
 void
 AudioRegionView::update_coverage_frames (LayerDisplay d)
 {
+	if (d != Stacked) {
+		/* don't do coverage frames unless we're in stacked mode */
+		return;
+	}
+
 	RegionView::update_coverage_frames (d);
 
 	if (fade_in_handle)       { fade_in_handle->raise_to_top (); }
