@@ -144,6 +144,8 @@ AutomationControl::set_automation_state (AutoState as)
 	}
 	if (_list && as != alist()->automation_state()) {
 
+		const double val = get_value ();
+
 		alist()->set_automation_state (as);
 		if (_desc.toggled) {
 			return;  // No watch for boolean automation
@@ -152,6 +154,10 @@ AutomationControl::set_automation_state (AutoState as)
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as == Touch) {
+			if (alist()->empty()) {
+				Control::set_double (val, _session.transport_frame(), true);
+				Changed (true, Controllable::NoGroup);
+			}
 			if (!touching()) {
 				AutomationWatch::instance().remove_automation_watch (shared_from_this());
 			} else {
