@@ -82,6 +82,8 @@ reset_cursor_to_default_state (Gtk::StateType, Gtk::Entry* widget)
 	reset_cursor_to_default (widget);
 }
 
+sigc::signal<void, ARDOUR::AutoState> GainMeterBase::ChangeGainAutomationState;
+
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()),  // value
 	                   0.0,  // lower
@@ -90,6 +92,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	                   dB_coeff_step(Config->get_max_gain()))  // page increment
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
+	, gain_astate_propagate (false)
 	, _data_type (DataType::AUDIO)
 {
 	using namespace Menu_Helpers;
@@ -225,20 +228,17 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		gain_astate_menu.items().clear ();
 
 		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
-							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
-									  Evoral::Parameter(GainAutomation), (AutoState) ARDOUR::Off)));
+							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
-								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
+							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
-								    Evoral::Parameter(GainAutomation), (AutoState) Write)));
+							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
-								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
+							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Touch)));
 
 		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
+		connections.push_back (ChangeGainAutomationState.connect (sigc::mem_fun(*this, &GainMeterBase::set_gain_astate)));
 
 		_control->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
 		_control->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
@@ -257,6 +257,17 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	} else {
 		peak_display.show ();
 	}
+}
+
+void
+GainMeterBase::set_gain_astate (AutoState as)
+{
+	if (gain_astate_propagate) {
+		gain_astate_propagate = false;
+		ChangeGainAutomationState (as);
+		return;
+	}
+	_amp->set_parameter_automation_state (Evoral::Parameter (GainAutomation), as);
 }
 
 void
@@ -756,6 +767,7 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 
 	switch (ev->button) {
 		case 1:
+			gain_astate_propagate = Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier));
 			gain_astate_menu.popup (1, ev->time);
 			break;
 		default:

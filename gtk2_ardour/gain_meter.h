@@ -131,6 +131,10 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Menu gain_astate_menu;
 	Gtk::Menu gain_astyle_menu;
 
+	void set_gain_astate (ARDOUR::AutoState);
+	bool gain_astate_propagate;
+	static sigc::signal<void, ARDOUR::AutoState> ChangeGainAutomationState;
+
 	gint gain_automation_style_button_event (GdkEventButton *);
 	gint gain_automation_state_button_event (GdkEventButton *);
 	gint pan_automation_style_button_event (GdkEventButton *);
