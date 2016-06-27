@@ -155,7 +155,8 @@ AutomationControl::set_automation_state (AutoState as)
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as == Touch) {
 			if (alist()->empty()) {
-				Control::set_double (val, _session.transport_frame(), true);
+				Control::set_double (val, _session.current_start_frame (), true);
+				Control::set_double (val, _session.current_end_frame (), true);
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
