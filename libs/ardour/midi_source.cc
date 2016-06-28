@@ -44,6 +44,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
 
@@ -192,9 +193,11 @@ MidiSource::midi_read (const Lock&                        lm,
                        framecnt_t                         cnt,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
-                       const std::set<Evoral::Parameter>& filtered) const
+                       const std::set<Evoral::Parameter>& filtered,
+		       double                             beat,
+		       double                             start_beat) const
 {
-	BeatsFramesConverter converter(_session.tempo_map(), source_start);
+	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
@@ -247,12 +250,14 @@ MidiSource::midi_read (const Lock&                        lm,
 			 * some way (maybe keep an iterator per playlist).
 			 */
 			for (i = _model->begin(); i != _model->end(); ++i) {
-				const framecnt_t time_frames = converter.to(i->time());
-				if (time_frames >= start) {
+				if (i->time().to_double() + (beat - start_beat) >= beat) {
 					break;
 				}
 			}
 			_model_iter_valid = true;
+			if (!linear_read) {
+				_model->active_notes().clear();
+			}
 #endif
 		}
 
@@ -260,21 +265,21 @@ MidiSource::midi_read (const Lock&                        lm,
 
 		// Copy events in [start, start + cnt) into dst
 		for (; i != _model->end(); ++i) {
-			const framecnt_t time_frames = converter.to(i->time());
-			if (time_frames < start + cnt) {
+			const framecnt_t time_frames = _session.tempo_map().frame_at_beat (i->time().to_double() + (beat - start_beat));
+
+			if (time_frames < start + cnt + source_start) {
 				if (filter && filter->filter(i->buffer(), i->size())) {
 					DEBUG_TRACE (DEBUG::MidiSourceIO,
 					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-					                             _name, time_frames + source_start, i->event_type(), i->size()));
+					                             _name, time_frames, i->event_type(), i->size()));
 					continue;
 				}
-
 				// Offset by source start to convert event time to session time
-				dst.write (time_frames + source_start, i->event_type(), i->size(), i->buffer());
+				dst.write (time_frames, i->event_type(), i->size(), i->buffer());
 
 				DEBUG_TRACE (DEBUG::MidiSourceIO,
 				             string_compose ("%1: add event @ %2 type %3 size %4\n",
-				                             _name, time_frames + source_start, i->event_type(), i->size()));
+				                             _name, time_frames, i->event_type(), i->size()));
 
 				if (tracker) {
 					tracker->track (*i);

@@ -331,7 +331,9 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 			to_read, // read duration in frames
 			tracker,
 			filter,
-			_filtered_parameters
+			_filtered_parameters,
+			beat(),
+			_start_beats.val().to_double()
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}
