@@ -506,7 +506,7 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 
 	PropertyChange what_changed;
 
-	/* beat has not been set exactly by set_position_internal.
+	/* beat has been set exactly by set_position_internal, but the source starts on a frame.
 	   we have trimmed by frames, so we must ignore _beat and set start beats using frames.
 	*/
 	const double pos_beat = _session.tempo_map().beat_at_frame (position);
