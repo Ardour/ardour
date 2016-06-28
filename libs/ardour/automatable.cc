@@ -233,7 +233,12 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			if (param.type() == NullAutomation) {
 				warning << "Automation has null type" << endl;
 				continue;
-                        }
+			}
+
+			if (_can_automate_list.find (param) == _can_automate_list.end ()) {
+				warning << "Ignored automation data for non-automatable parameter" << endl;
+				continue;
+			}
 
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
