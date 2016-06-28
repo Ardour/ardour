@@ -244,7 +244,6 @@ SessionPlaylists::destroy_region (boost::shared_ptr<Region> r)
 	}
 }
 
-
 void
 SessionPlaylists::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vector<boost::shared_ptr<Region> >& result)
 {
@@ -260,7 +259,10 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
 {
 	uint32_t count = 0;
 
-	cerr << "\t\tcheck " << playlists.size() << " playlists\n";
+	/* XXXX this can go wildly wrong in the presence of circular references
+	 * between compound regions.
+	 */
+
 	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
@@ -268,7 +270,6 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
                 }
 	}
 
-	cerr << "\t\tcheck " << playlists.size() << " unused playlists\n";
 	for (List::const_iterator p = unused_playlists.begin(); p != unused_playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
@@ -518,4 +519,3 @@ SessionPlaylists::foreach (boost::function<void(boost::shared_ptr<const Playlist
 		}
 	}
 }
-

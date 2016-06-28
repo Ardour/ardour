@@ -1531,15 +1531,15 @@ Region::deep_sources (std::set<boost::shared_ptr<Source> > & sources) const
 
 		if (ps) {
 			if (sources.find (ps) == sources.end()) {
+				/* (Playlist)Source not currently in
+				   accumulating set, so recurse.
+				*/
 				ps->playlist()->deep_sources (sources);
-				cerr << ps->name() << " new source\n";
-			} else {
-				cerr << ps->name() << " already in source list\n";
 			}
 		}
 
+		/* add this source */
 		sources.insert (*i);
-		cerr << "Added src " << (*i)->name() << endl;
 	}
 
 	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
@@ -1548,15 +1548,15 @@ Region::deep_sources (std::set<boost::shared_ptr<Source> > & sources) const
 
 		if (ps) {
 			if (sources.find (ps) == sources.end()) {
+				/* (Playlist)Source not currently in
+				   accumulating set, so recurse.
+				*/
 				ps->playlist()->deep_sources (sources);
-				cerr << ps->name() << " new source2\n";
-			} else {
-				cerr << ps->name() << " already in source list2\n";
 			}
 		}
 
+		/* add this source */
 		sources.insert (*i);
-		cerr << "Added master src " << (*i)->name() << endl;
 	}
 }
 

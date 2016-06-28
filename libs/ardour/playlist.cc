@@ -2675,7 +2675,13 @@ Playlist::uses_source (boost::shared_ptr<const Source> src, bool shallow) const
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
 	for (set<boost::shared_ptr<Region> >::const_iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
-		if ((*r)->uses_source (src, true)) {
+		/* Note: passing the second argument as false can cause at best
+		   incredibly deep and time-consuming recursion, and at worst
+		   cycles if the user has managed to create cycles of reference
+		   between compound regions. We generally only this during
+		   cleanup, and @param shallow is passed as true.
+		*/
+		if ((*r)->uses_source (src, shallow)) {
 			return true;
 		}
 	}
