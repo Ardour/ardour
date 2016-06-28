@@ -507,10 +507,11 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	PropertyChange what_changed;
 
 	/* beat has been set exactly by set_position_internal, but the source starts on a frame.
-	   we have trimmed by frames, so we must ignore _beat and set start beats using frames.
+	   working in beats seems the correct thing to do, but reports of a missing first note
+	   on playback suggest otherwise. for now, we work in exact beats.
 	*/
-	const double pos_beat = _session.tempo_map().beat_at_frame (position);
-	const double beat_delta = pos_beat - _session.tempo_map().beat_at_frame (_position);
+	const double pos_beat = _session.tempo_map().exact_beat_at_frame (position, sub_num);
+	const double beat_delta = pos_beat - beat();
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
@@ -526,7 +527,7 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	}
 
 	const double new_start_beat = _start_beats.val().to_double() + beat_delta;
-	new_start = _position - _session.tempo_map().frame_at_beat (pos_beat - new_start_beat);
+	new_start = _position - _session.tempo_map().frame_at_beat (beat() - new_start_beat);
 
 	if (!verify_start_and_length (new_start, length)) {
 		return;
