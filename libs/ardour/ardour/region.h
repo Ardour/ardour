@@ -197,7 +197,8 @@ class LIBARDOUR_API Region
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool any_source_equivalent (boost::shared_ptr<const Region>) const;
-	bool uses_source (boost::shared_ptr<const Source>) const;
+	bool uses_source (boost::shared_ptr<const Source>, bool shallow = false) const;
+	void deep_sources (std::set<boost::shared_ptr<Source> >&) const;
 
 	std::string source_string () const;
 
@@ -310,7 +311,7 @@ class LIBARDOUR_API Region
 	/** merges _onsets OR _transients with _user_transients into given list
 	 * if _onsets and _transients are unset, run analysis.
 	 * list is not thinned, duplicates remain in place.
-	 * 
+	 *
 	 * intended for: Playlist::find_next_transient ()
 	 */
 	virtual void get_transients (AnalysisFeatureList&) {

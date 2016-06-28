@@ -130,7 +130,6 @@ public:
 
 	void add_region (boost::shared_ptr<Region>, framepos_t position, float times = 1, bool auto_partition = false);
 	void remove_region (boost::shared_ptr<Region>);
-	void remove_region_by_source (boost::shared_ptr<Source>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
@@ -181,7 +180,8 @@ public:
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (framepos_t const) const;
 
-	bool uses_source (boost::shared_ptr<const Source> src) const;
+	bool uses_source (boost::shared_ptr<const Source> src, bool shallow = false) const;
+	void deep_sources (std::set<boost::shared_ptr<Source> >&) const;
 
 	framepos_t find_next_transient (framepos_t position, int dir);
 

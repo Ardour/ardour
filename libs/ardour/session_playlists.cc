@@ -260,6 +260,7 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
 {
 	uint32_t count = 0;
 
+	cerr << "\t\tcheck " << playlists.size() << " playlists\n";
 	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
@@ -267,6 +268,7 @@ SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
                 }
 	}
 
+	cerr << "\t\tcheck " << playlists.size() << " unused playlists\n";
 	for (List::const_iterator p = unused_playlists.begin(); p != unused_playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
@@ -500,3 +502,20 @@ SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
 
 	return pl_tr;
 }
+
+void
+SessionPlaylists::foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+	for (List::iterator i = playlists.begin(); i != playlists.end(); i++) {
+		if (!(*i)->hidden()) {
+			functor (*i);
+		}
+	}
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
+		if (!(*i)->hidden()) {
+			functor (*i);
+		}
+	}
+}
+

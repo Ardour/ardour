@@ -54,12 +54,14 @@ public:
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
 	uint32_t region_use_count (boost::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
+	void foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor);
 	void get (std::vector<boost::shared_ptr<Playlist> >&) const;
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
 	void destroy_region (boost::shared_ptr<Region>);
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
 	void sync_all_regions_with_regions ();
 	std::vector<boost::shared_ptr<Playlist> > playlists_for_track (boost::shared_ptr<Track>) const;
+	uint32_t n_playlists() const;
 
 private:
 	friend class Session;
@@ -69,7 +71,6 @@ private:
 	void remove_weak (boost::weak_ptr<Playlist>);
 	void track (bool, boost::weak_ptr<Playlist>);
 
-	uint32_t n_playlists() const;
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
 	void add_state (XMLNode *, bool);

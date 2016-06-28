@@ -1774,10 +1774,21 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
   **********************************************************************/
 
 boost::shared_ptr<RegionList>
-Playlist::region_list() {
+Playlist::region_list()
+{
 	RegionReadLock rlock (this);
 	boost::shared_ptr<RegionList> rlist (new RegionList (regions.rlist ()));
 	return rlist;
+}
+
+void
+Playlist::deep_sources (std::set<boost::shared_ptr<Source> >& sources) const
+{
+	RegionReadLock rlock (const_cast<Playlist*>(this));
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		(*i)->deep_sources (sources);
+	}
 }
 
 boost::shared_ptr<RegionList>
@@ -2659,18 +2670,19 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 }
 
 bool
-Playlist::uses_source (boost::shared_ptr<const Source> src) const
+Playlist::uses_source (boost::shared_ptr<const Source> src, bool shallow) const
 {
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
 	for (set<boost::shared_ptr<Region> >::const_iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
-		if ((*r)->uses_source (src)) {
+		if ((*r)->uses_source (src, true)) {
 			return true;
 		}
 	}
 
 	return false;
 }
+
 
 boost::shared_ptr<Region>
 Playlist::find_region (const ID& id) const
@@ -2934,25 +2946,6 @@ Playlist::has_region_at (framepos_t const p) const
 	}
 
 	return (i != regions.end());
-}
-
-/** Remove any region that uses a given source */
-void
-Playlist::remove_region_by_source (boost::shared_ptr<Source> s)
-{
-	RegionWriteLock rl (this);
-
-	RegionList::iterator i = regions.begin();
-	while (i != regions.end()) {
-		RegionList::iterator j = i;
-		++j;
-
-		if ((*i)->uses_source (s)) {
-			remove_region_internal (*i);
-		}
-
-		i = j;
-	}
 }
 
 /** Look from a session frame time and find the start time of the next region

@@ -2872,14 +2872,17 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		return 0;
 	}
 
-	this_snapshot_path = _path;
-	this_snapshot_path += legalize_for_path (_current_snapshot_name);
+	this_snapshot_path = Glib::build_filename (_path, legalize_for_path (_current_snapshot_name));
 	this_snapshot_path += statefile_suffix;
 
 	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
 
+		cerr << "Looking at snapshot " << (*i) << " ( with this = [" << this_snapshot_path << "])\n";
+
 		if (exclude_this_snapshot && *i == this_snapshot_path) {
+			cerr << "\texcluded\n";
 			continue;
+
 		}
 
 		if (find_all_sources (*i, result) < 0) {
@@ -3010,6 +3013,12 @@ Session::cleanup_peakfiles ()
 	return 0;
 }
 
+static void
+merge_all_sources (boost::shared_ptr<const Playlist> pl, std::set<boost::shared_ptr<Source> >* all_sources)
+{
+	pl->deep_sources (*all_sources);
+}
+
 int
 Session::cleanup_sources (CleanupReport& rep)
 {
@@ -3020,14 +3029,14 @@ Session::cleanup_sources (CleanupReport& rep)
 	string midi_path;
 	vector<string> candidates;
 	vector<string> unused;
-	set<string> all_sources;
-	bool used;
+	set<string> sources_used_by_all_snapshots;
 	string spath;
 	int ret = -1;
 	string tmppath1;
 	string tmppath2;
 	Searchpath asp;
 	Searchpath msp;
+	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
@@ -3098,12 +3107,21 @@ Session::cleanup_sources (CleanupReport& rep)
 	find_files_matching_filter (candidates, audio_path, accept_all_audio_files, (void *) 0, true, true);
 	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
 
-	/* find all sources, but don't use this snapshot because the
-	   state file on disk still references sources we may have already
-	   dropped.
+	/* add sources from all other snapshots as "used", but don't use this
+	   snapshot because the state file on disk still references sources we
+	   may have already dropped.
 	*/
 
-	find_all_sources_across_snapshots (all_sources, true);
+	find_all_sources_across_snapshots (sources_used_by_all_snapshots, true);
+
+	/* Although the region factory has a list of all regions ever created
+	 * for this session, we're only interested in regions actually in
+	 * playlists right now. So merge all playlist regions lists together.
+	 *
+	 * This will include the playlists used within compound regions.
+	 */
+
+	playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
 
 	/*  add our current source list
 	 */
@@ -3113,58 +3131,75 @@ Session::cleanup_sources (CleanupReport& rep)
                 SourceMap::iterator tmp = i;
                 ++tmp;
 
-		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
+		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) == 0) {
+			/* not a file */
+			i = tmp;
+			continue;
+		}
 
-			/* this is mostly for windows which doesn't allow file
-			 * renaming if the file is in use. But we don't special
-			 * case it because we need to know if this causes
-			 * problems, and the easiest way to notice that is to
-			 * keep it in place for all platforms.
+		/* this is mostly for windows which doesn't allow file
+		 * renaming if the file is in use. But we do not special
+		 * case it because we need to know if this causes
+		 * problems, and the easiest way to notice that is to
+		 * keep it in place for all platforms.
+		 */
+
+		fs->close ();
+
+		if (!fs->is_stub()) {
+
+			/* Note that we're checking a list of all
+			 * sources across all snapshots with the list
+			 * of sources used by this snapshot.
 			 */
 
-			fs->close ();
+			if (sources_used_by_this_snapshot.find (i->second) != sources_used_by_this_snapshot.end()) {
+				/* this source is in use by this snapshot */
+				sources_used_by_all_snapshots.insert (fs->path());
+				cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
+			} else {
+				cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
+				/* this source is NOT in use by this snapshot
+				 */
 
-			if (!fs->is_stub()) {
+				/* remove all related regions from RegionFactory master list
+				 */
 
-				if (playlists->source_use_count (fs) != 0) {
-					all_sources.insert (fs->path());
-				} else {
+				RegionFactory::remove_regions_using_source (i->second);
 
-					/* we might not remove this source from disk, because it may be used
-					   by other snapshots, but its not being used in this version
-					   so lets get rid of it now, along with any representative regions
-					   in the region list.
-					*/
+				/* remove from our current source list
+				 * also. We may not remove it from
+				 * disk, because it may be used by
+				 * other snapshots, but it isn't used inside this
+				 * snapshot anymore, so we don't need a
+				 * reference to it.
+				 */
 
-					RegionFactory::remove_regions_using_source (i->second);
-
-					// also remove source from all_sources
-
-					for (set<string>::iterator j = all_sources.begin(); j != all_sources.end(); ++j) {
-						spath = Glib::path_get_basename (*j);
-						if (spath == i->second->name()) {
-							all_sources.erase (j);
-							break;
-						}
-					}
-
-					sources.erase (i);
-				}
+				sources.erase (i);
 			}
 		}
 
                 i = tmp;
 	}
 
+	/* now check each candidate source to see if it exists in the list of
+	   sources_used_by_all_snapshots. If it doesn't, put it into "unused".
+	*/
+
+	cerr << "Candidates: " << candidates.size() << endl;
+	cerr << "Used by others: " << sources_used_by_all_snapshots.size() << endl;
+
 	for (vector<string>::iterator x = candidates.begin(); x != candidates.end(); ++x) {
 
-		used = false;
+		bool used = false;
 		spath = *x;
 
-		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
+		for (set<string>::iterator i = sources_used_by_all_snapshots.begin(); i != sources_used_by_all_snapshots.end(); ++i) {
 
 			tmppath1 = canonical_path (spath);
 			tmppath2 = canonical_path ((*i));
+
+			cerr << "\t => " << tmppath2 << endl;
 
 			if (tmppath1 == tmppath2) {
 				used = true;
@@ -3175,6 +3210,14 @@ Session::cleanup_sources (CleanupReport& rep)
 		if (!used) {
 			unused.push_back (spath);
 		}
+	}
+
+	cerr << "Actually unused: " << unused.size() << endl;
+
+	if (unused.empty()) {
+		/* Nothing to do */
+		ret = 0;
+		goto out;
 	}
 
 	/* now try to move all unused files into the "dead" directory(ies) */
@@ -3239,19 +3282,13 @@ Session::cleanup_sources (CleanupReport& rep)
 				newpath = newpath_v;
 			}
 
-		} else {
-
-			/* it doesn't exist, or we can't read it or something */
-
 		}
 
 		g_stat ((*x).c_str(), &statbuf);
 
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"),
-					  (*x), newpath, strerror (errno))
-			      << endmsg;
-			goto out;
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, strerror (errno)) << endmsg;
+			continue;
 		}
 
 		/* see if there an easy to find peakfile for this file, and remove it.
