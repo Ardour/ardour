@@ -5264,7 +5264,7 @@ msgstr "PT Projekt importieren"
 
 #: editor_pt_import.cc:97
 msgid "%1: this is only the directory/folder name, not the filename.\n"
-msgstr "%1: dies ist nur der Verzeichnisname, nicht der Dateiname."
+msgstr "%1: dies ist nur der Verzeichnisname, nicht der Dateiname.\n"
 
 #: editor_pt_import.cc:132
 msgid "Doesn't seem to be a valid PT session file"
@@ -9587,8 +9587,7 @@ msgstr "  -C, --curvetest filename    Curve algorithm debugger\n"
 
 #: opts.cc:82
 msgid "  -k, --keybindings filename  Name of key bindings to load\n"
-msgstr ""
-"  -k, --keybindings dateiname       Dateiname für die Tastaturbelegungen"
+msgstr "  -k, --keybindings dateiname       Dateiname für die Tastaturbelegungen\n"
 
 #: panner2d.cc:896
 msgid "Panner (2D)"
