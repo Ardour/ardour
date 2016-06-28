@@ -797,7 +797,7 @@ msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
 "das Hochladen nach Soundcloud ist gescheitert. Vielleicht sind E-mail-"
-"Adresse oder Passwort falsch?"
+"Adresse oder Passwort falsch?\n"
 
 #: export_handler.cc:523 export_handler.cc:526
 msgid "an error occurred while writing a TOC/CUE file: %1"
@@ -3244,7 +3244,7 @@ msgid ""
 "Upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n"
 msgstr ""
 "Das Hochladen nach Soundcloud ist gescheitert. Vielleicht sind E-mail-"
-"Adresse oder Passwort falsch?"
+"Adresse oder Passwort falsch?\n"
 
 #: source_factory.cc:390
 msgid "Recovery attempted on a MIDI file - not implemented"
