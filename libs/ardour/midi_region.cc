@@ -506,8 +506,11 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 
 	PropertyChange what_changed;
 
-	/* beat has not been set by set_position_internal */
-	const double beat_delta = _session.tempo_map().exact_beat_at_frame (position, sub_num) - beat();
+	/* beat has not been set exactly by set_position_internal.
+	   we have trimmed by frames, so we must ignore _beat and set start beats using frames.
+	*/
+	const double pos_beat = _session.tempo_map().beat_at_frame (position);
+	const double beat_delta = pos_beat - _session.tempo_map().beat_at_frame (_position);
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
@@ -522,10 +525,8 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 		what_changed.add (Properties::position);
 	}
 
-	const double new_beat = _session.tempo_map().exact_beat_at_frame (position, sub_num);
 	const double new_start_beat = _start_beats.val().to_double() + beat_delta;
-
-	new_start = _position - _session.tempo_map().frame_at_beat (new_beat - new_start_beat);
+	new_start = _position - _session.tempo_map().frame_at_beat (pos_beat - new_start_beat);
 
 	if (!verify_start_and_length (new_start, length)) {
 		return;
