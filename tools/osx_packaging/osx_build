@@ -496,7 +496,12 @@ cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 
 # Themes: only install those named for this app
 lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
-cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
+for colorfile in `echo ../../gtk2_ardour/themes/*-${lower_case_appname}.colors`
+do
+    cf=`basename $colorfile`
+    cf=`echo $cf | sed -e "s/-${lower_case_appname}//"`
+    cp $colorfile $Themes/$cf
+done
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
