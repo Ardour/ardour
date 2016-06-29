@@ -145,12 +145,13 @@ Mixer_UI::Mixer_UI ()
 
 	group_model = ListStore::create (group_columns);
 	group_display.set_model (group_model);
-	group_display.append_column (_("Group"), group_columns.text);
 	group_display.append_column (_("Show"), group_columns.visible);
+	group_display.append_column (_("Group"), group_columns.text);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	group_display.get_column (0)->set_expand(true);
-	group_display.get_column (1)->set_expand(false);
+	group_display.get_column (0)->set_expand(false);
+	group_display.get_column (1)->set_expand(true);
+	group_display.get_column (1)->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
 	group_display.set_name ("EditGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
@@ -160,13 +161,13 @@ Mixer_UI::Mixer_UI ()
 
 	/* name is directly editable */
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (1));
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &Mixer_UI::route_group_name_edit));
 
 	/* use checkbox for the active column */
 
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (1));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (0));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
@@ -1551,7 +1552,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 0:
+	case 1:
 		if (Keyboard::is_edit_event (ev)) {
 			if (group) {
 				// edit_route_group (group);
@@ -1563,7 +1564,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		}
 		break;
 
-	case 1:
+	case 0:
 	{
 		bool visible = (*iter)[group_columns.visible];
 		(*iter)[group_columns.visible] = !visible;
@@ -1827,7 +1828,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);
-		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (1));
 		group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 
@@ -2113,13 +2114,13 @@ Mixer_UI::setup_track_display ()
 {
 	track_model = ListStore::create (stripable_columns);
 	track_display.set_model (track_model);
-	track_display.append_column (_("Strips"), stripable_columns.text);
 	track_display.append_column (_("Show"), stripable_columns.visible);
+	track_display.append_column (_("Strips"), stripable_columns.text);
 	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	track_display.get_column (0)->set_expand(true);
-	track_display.get_column (1)->set_expand(false);
-	track_display.get_column (0)->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
+	track_display.get_column (0)->set_expand(false);
+	track_display.get_column (1)->set_expand(true);
+	track_display.get_column (1)->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
 	track_display.set_name (X_("EditGroupList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
@@ -2129,7 +2130,7 @@ Mixer_UI::setup_track_display ()
 	track_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_delete));
 	track_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_reorder));
 
-	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
+	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (0));
 	track_list_visible_cell->property_activatable() = true;
 	track_list_visible_cell->property_radio() = false;
 	track_list_visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &Mixer_UI::track_visibility_changed));
