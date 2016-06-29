@@ -491,6 +491,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* do not retain position for add route dialog */
 	add_route_dialog.set_state_mask (WindowProxy::Size);
 
+	/* Trigger setting up the color scheme and loading the GTK RC file */
+
+	UIConfiguration::instance().load_rc_file (false);
+
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
