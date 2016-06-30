@@ -11,7 +11,7 @@ style "default" = "medium_text"
   GtkTreeView         :: focus-line-width                 = 0
   GtkTreeView         :: tree-line-width                  = 1
   GtkTreeView         :: row-ending-details               = 0
-  
+
   GtkWidget           :: focus-line-pattern               = "\001\001"        #                              Dash pattern used to draw the focus indicator.
   GtkWidget           :: focus-line-width                 = 1                 # [               1 ] ( >= 0 ) Width, in pixels, of the focus indicator line.
   GtkWidget           :: focus-padding                    = 1                 # [               1 ] ( >= 0 ) Width, in pixels, between focus indicator and the widget box.
@@ -20,12 +20,12 @@ style "default" = "medium_text"
   GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
   GtkWidget           :: link-color                       = shade(1.25, @bright_color)
   GtkWidget           :: visited-link-color               = @bright_color
-  
+
   GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
   GtkDialog           :: button-spacing                   = 4                 # [               6 ] ( >= 0 ) Spacing between buttons.
   GtkDialog           :: content-area-border              = 2                 # [               2 ] ( >= 0 ) Width of border around the main dialog area.
   GtkDialog           :: content-area-spacing             = 0                 # [               0 ] ( >= 0 ) The default spacing used between elements of the content area of the dialog.
-  
+
 
   GtkButton           :: default-border = { 0, 0, 0, 0 }
   GtkButton           :: default-outside_border = { 0, 0, 0, 0 }
@@ -50,7 +50,7 @@ style "default" = "medium_text"
   GtkPaned            :: handle-size                      = 4                 # [               5 ] ( >= 0 ) Width of handle.
 
   GtkScale            :: activate-slider                  = 1                 # [               0 ] ( bool ) With this option set to TRUE, sliders will be drawn ACTIVE and with shadow IN while they are dragged.
-  GtkScale            :: slider-length                    = 23                # [              31 ] ( >= 0 ) Length of scale's slider.	
+  GtkScale            :: slider-length                    = 23                # [              31 ] ( >= 0 ) Length of scale's slider.
   GtkScale            :: slider-width                     = 14                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.
   GtkScale            :: trough-side-details              = 1                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.
 
@@ -58,10 +58,10 @@ style "default" = "medium_text"
   GtkScrollbar        :: arrow-scaling                    = 0.4               # [             0.5 ] ( 0.1  ) The arrow size proportion relative to the scroll button size.
   GtkScrollbar        :: fixed-slider-length              = 0                 # [               0 ] ( bool ) Don't change slider size, just lock it to the minimum length.
   GtkScrollbar        :: min-slider-length                = 50                # [              21 ] ( >= 0 ) Minimum length of scrollbar slider.
-  GtkScrollbar        :: slider-width                     = 15                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.    
+  GtkScrollbar        :: slider-width                     = 15                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.
   GtkScrollbar        :: stepper-spacing                  = 0                 # [               0 ] ( >= 0 ) The spacing between the stepper buttons and thumb. Note that setting this value to anything > 0 will automatically set the trough-under-steppers style property to TRUE as well. Also, stepper-spacing won't have any effect if there are no steppers.
   GtkScrollbar        :: trough-border                    = 0                 # [               1 ] ( >= 0 ) Spacing between thumb/steppers and outer trough bevel.
-  GtkScrollbar        :: trough-side-details              = 0                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.    
+  GtkScrollbar        :: trough-side-details              = 0                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.
   GtkScrollbar        :: trough-under-steppers            = 1                 # [               1 ] ( bool ) Whether to draw the trough across the full length of the range or to exclude the steppers and their spacing. Note that setting the "stepper-spacing" style property to any value > 0 will automatically enable trough-under-steppers too.
 
   GtkScrollbar        :: has-backward-stepper             = 1                 # [               1 ] ( bool ) Display the standard backward arrow button.
@@ -76,7 +76,7 @@ style "default" = "medium_text"
 
 #Menu Properties
   GtkMenuBar          :: internal-padding                 = 1                 # [               1 ] ( >= 0 ) Amount of border space between the menubar shadow and the menu items.
-  GtkMenuBar          :: shadow-type                      = GTK_SHADOW_OUT    # [  GTK_SHADOW_OUT ]          Style of bevel around the menubar. 
+  GtkMenuBar          :: shadow-type                      = GTK_SHADOW_OUT    # [  GTK_SHADOW_OUT ]          Style of bevel around the menubar.
 
   GtkMenu             :: arrow-placement                  = GTK_ARROWS_BOTH   # [ GTK_ARROWS_BOTH ]          Indicates where scroll arrows should be placed.
   GtkMenu             :: arrow-scaling                    = 0.5               # [             0.7 ] ( 0.1  ) Arbitrary constant to scale down the size of the scroll arrow.
@@ -137,7 +137,7 @@ style "default" = "medium_text"
 
 #engine specific tweaks
 
-  engine "clearlooks" 
+  engine "clearlooks"
   {
     #style              = GLOSSY
     #colorize_scrollbar = TRUE
@@ -171,7 +171,7 @@ style "entry"
 style "treeview_parent_node"
 {
 	# specifies *just* the color used for whole file rows when not selected
-	
+
 	fg[NORMAL] = { 0.0, 0.6, 0.85 }
 }
 
@@ -180,7 +180,7 @@ style "treeview_display" = "small_bold_text"
 	GtkWidget::focus-line-width = 0
 
 	# expander arrow border and DnD "icon" text
-	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+	fg[NORMAL] = { 0.8, 0.8, 0.8 }
 
 	bg[NORMAL] = { 0.8, 0.8, 0.8 }
 
@@ -189,7 +189,7 @@ style "treeview_display" = "small_bold_text"
 	base[NORMAL] = { 0.20, 0.20, 0.25 }
 
 	# selected row bg when window does not have focus (including during DnD)
-	base[ACTIVE] = { 0.0, 0.75, 0.75 }    
+	base[ACTIVE] = { 0.0, 0.75, 0.75 }
 
 	# selected row bg when window has focus
 	base[SELECTED] = { 0, 0.75, 0.75 }
@@ -198,14 +198,14 @@ style "treeview_display" = "small_bold_text"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
 
 	# selected row text with window focus
-	text[SELECTED] = { 1.0, 1.0, 1.0 }  
+	text[SELECTED] = { 1.0, 1.0, 1.0 }
 
 	# selected row text without window focus (including during DnD)
-	text[ACTIVE] = { 1.0, 1.0, 1.0 }  
+	text[ACTIVE] = { 1.0, 1.0, 1.0 }
 }
 
 style "track_header_inactive"  = "larger_text"
-{     
+{
         bg[NORMAL] =      @track_header_inactive
 	bg[ACTIVE] =      @track_header_inactive
 	bg[INSENSITIVE] = @track_header_inactive
@@ -234,27 +234,27 @@ style "automation_track_header"
 
 style "inspector_processor_list" = "processor_list"
 {
- 	base[SELECTED] = { 0.3, 0.3, 0.3 }
+	base[SELECTED] = { 0.3, 0.3, 0.3 }
 }
 
-style "time_info_box" 
+style "time_info_box"
 {
         bg[NORMAL] = { 0.05, 0.05, 0.05 }
 }
 
-style "status_bar_box" 
+style "status_bar_box"
 {
         bg[NORMAL] = { 0.149, 0.149, 0.149 }
 }
 
 style "very_small_text"
 {
- 	font_name = "@FONT_SMALLER@"
+	font_name = "@FONT_SMALLER@"
 }
 
 style "small_text"
 {
- 	font_name = "@FONT_SMALL@"
+	font_name = "@FONT_SMALL@"
 }
 
 style "small_clock"
@@ -269,17 +269,17 @@ style "small_italic_text"
 
 style "small_bold_text"
 {
- 	font_name = "bold @FONT_SMALL@"
+	font_name = "bold @FONT_SMALL@"
 }
 
 style "medium_bold_text"
 {
- 	font_name = "bold @FONT_NORMAL@"
+	font_name = "bold @FONT_NORMAL@"
 }
 
 style "medium_text"
 {
- 	font_name = "@FONT_NORMAL@"
+	font_name = "@FONT_NORMAL@"
 }
 
 style "medium_monospace_text"
@@ -288,7 +288,7 @@ style "medium_monospace_text"
 }
 
 style "red_medium_text" = "medium_text"
-{	
+{
 	fg[NORMAL] = @bright_indicator
 	fg[ACTIVE] = @bright_indicator
 	fg[SELECTED] = @bright_indicator
@@ -296,7 +296,7 @@ style "red_medium_text" = "medium_text"
 
 style "large_bold_text"
 {
- 	font_name = "bold @FONT_LARGE@"
+	font_name = "bold @FONT_LARGE@"
 }
 
 style "big_text"
@@ -311,7 +311,7 @@ style "bigger_clock"
 
 style "larger_text"
 {
- 	font_name = "@FONT_LARGE@"
+	font_name = "@FONT_LARGE@"
 }
 
 style "massive_clock"
@@ -344,7 +344,7 @@ style "marker_text" = "small text"
 
 style "midi_tracer_textview" = "medium_monospace_text"
 {
-	
+
 }
 
 style "time_axis_view_item_name" = "very small text"
@@ -354,7 +354,7 @@ style "time_axis_view_item_name" = "very small text"
 
 style "midi_tracer_textview" = "medium_monospace_text"
 {
-	
+
 }
 
 style "time_axis_view_item_name" = "very small text"
@@ -645,7 +645,7 @@ style "medium_bold_entry"  = "medium_bold_text"
 	fg[NORMAL] = @texts
 	fg[ACTIVE] = @contrasting_indicator
 	fg[SELECTED] = @fg_selected
-	
+
 	text[NORMAL] = @texts
 	text[ACTIVE] = @texts
 	text[SELECTED] = @fg_selected
@@ -653,7 +653,7 @@ style "medium_bold_entry"  = "medium_bold_text"
 	bg[NORMAL] = @bases
 	bg[SELECTED] = @bases
 	bg[SELECTED] = @bases
-	
+
 	base[NORMAL] = @bases
 	base[ACTIVE] = @bases
 	base[SELECTED] = @bg_selected
@@ -962,7 +962,7 @@ style "sync_alert"
 	bg[PRELIGHT] = @somewhat_bright_indicator
 	bg[SELECTED] = @somewhat_bright_indicator
 	bg[NORMAL] = @somewhat_bright_indicator
-	
+
 	fg[NORMAL] = @darkest
 	fg[PRELIGHT] = @darkest
 	fg[SELECTED] = @darkest
@@ -1232,4 +1232,3 @@ widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar" style:highest "vca_label_bar"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
-
