@@ -2072,6 +2072,8 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 		route_send_fail ("select", ssid, 0, lo_message_get_source (msg));
 		return -1;
 	}
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	sur->expand_enable = false;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
 		SetStripableSelection (s->presentation_info().order());
