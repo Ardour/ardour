@@ -146,6 +146,28 @@ style "default" = "medium_text"
   }
 }
 
+style "entry"
+{
+  # setting these two to zero avoids the focus indicator around the text
+
+  xthickness = 0
+  ythickness = 0
+
+  # special base + text for GtkEntry to aid with visibility during text entry
+
+  base[NORMAL]      = @entry_base
+  base[PRELIGHT]    = @entry_base
+  base[INSENSITIVE] = @entry_base
+  base[ACTIVE]      = @entry_base_selected /* base for focused, selected text */
+  base[SELECTED]    = @entry_base_selected   /* base for non-focused, selected text */
+
+  text[NORMAL]      = @entry_text
+  text[PRELIGHT]    = @entry_text
+  text[INSENSITIVE] = shade (0.92, @entry_text)
+  text[ACTIVE]      = @entry_text_selected
+  text[SELECTED]    = @entry_text_selected
+}
+
 style "treeview_parent_node"
 {
 	# specifies *just* the color used for whole file rows when not selected
