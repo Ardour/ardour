@@ -49,7 +49,7 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
 	entry.signal_populate_popup().connect (sigc::mem_fun (*this, &FloatingTextEntry::populate_popup));
 
 	entry.select_region (0, -1);
-	entry.set_state (Gtk::STATE_SELECTED);
+	// entry.set_state (Gtk::STATE_SELECTED);
 
 	if (parent) {
 		parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
