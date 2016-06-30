@@ -661,8 +661,6 @@ style "medium_bold_entry"  = "medium_bold_text"
 
 style "small_entry" = "small_text"
 {
-	xthickness = 3
-	ythickness = 3
 	fg[NORMAL] = @texts
 	fg[ACTIVE] = @contrasting_indicator
 	fg[SELECTED] = @fg_selected
