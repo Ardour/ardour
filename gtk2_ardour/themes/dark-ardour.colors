@@ -179,6 +179,7 @@
     <ColorAlias name="gtk_bases" alias="color 27"/>
     <ColorAlias name="gtk_entry_base" alias="color 82"/>
     <ColorAlias name="gtk_entry_base_selected" alias="color 18"/>
+    <ColorAlias name="gtk_entry_cursor" alias="color 9"/>
     <ColorAlias name="gtk_entry_text" alias="color 43"/>
     <ColorAlias name="gtk_entry_text_selected" alias="color 13"/>
     <ColorAlias name="gtk_entry_text_selected" alias="color 27"/>
