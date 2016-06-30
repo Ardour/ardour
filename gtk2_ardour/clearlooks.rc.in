@@ -1038,6 +1038,8 @@ style "vca_label_bar" = "medium_bold_text"
 }
 
 class "GtkWidget" style:highest "default"
+class "GtkSpinButton" style:highest "default"
+class "GtkEntry" style:highest "entry"
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
 class "GtkButton" style:highest "ardour_button"
