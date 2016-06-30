@@ -22,8 +22,8 @@
 using namespace Gtkmm2ext;
 
 FocusEntry::FocusEntry ()
+	: next_release_selects (false)
 {
-	next_release_selects = false;
 }
 
 bool
