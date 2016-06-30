@@ -69,9 +69,8 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/strip/record_safe", _strip->rec_safe_control());
 		}
-		if (!feedback[10]) {
-			send_select_status ();
-		}
+		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_select_status, this, _1), OSC::instance());
+		send_select_status (ARDOUR::Properties::selected);
 	}
 
 	if (feedback[1]) { // level controls
@@ -371,20 +370,21 @@ OSCRouteObserver::clear_strip (string path, float val)
 }
 
 void
-OSCRouteObserver::send_select_status ()
+OSCRouteObserver::send_select_status (const PropertyChange& what)
 {
-	// waiting for _strip->is_selected to start working
-	if (_strip) {
-		string path = "/strip/gui_select";
+	if (what == PropertyChange(ARDOUR::Properties::selected)) {
+		if (_strip) {
+			string path = "/strip/select";
 
-		lo_message msg = lo_message_new ();
-		if (feedback[2]) {
-			path = set_path (path);
-		} else {
-			lo_message_add_int32 (msg, ssid);
+			lo_message msg = lo_message_new ();
+			if (feedback[2]) {
+				path = set_path (path);
+			} else {
+				lo_message_add_int32 (msg, ssid);
+			}
+			lo_message_add_float (msg, _strip->is_selected());
+			lo_send_message (addr, path.c_str(), msg);
+			lo_message_free (msg);
 		}
-		lo_message_add_float (msg, _strip->is_selected());
-		lo_send_message (addr, path.c_str(), msg);
-		lo_message_free (msg);
 	}
 }

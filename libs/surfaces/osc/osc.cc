@@ -260,6 +260,22 @@ OSC::start ()
 	// order changed
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
+	// guess at which stripable is the current editor mixerstrip
+	// right now just choose the first one we find, may be the wrong one
+	// hopefully we will have access to session->current_strip at some point
+	StripableList stripables;
+
+	session->get_stripables (stripables);
+	_select = boost::shared_ptr<Stripable>();
+
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+		boost::shared_ptr<Stripable> s = *it;
+		if (s->is_selected()) {
+			_select = s;
+			break;
+		}
+	}
+
 
 	return 0;
 }
@@ -547,6 +563,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
+		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -557,8 +574,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/record_safe", "ii", route_recsafe);
 		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
 		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
-		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_select);
-		REGISTER_CALLBACK (serv, "/strip/gui_select", "ii", strip_gui_select);
+		REGISTER_CALLBACK (serv, "/strip/expand", "ii", strip_expand);
+		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_gui_select);
 		REGISTER_CALLBACK (serv, "/strip/polarity", "ii", strip_phase);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
@@ -908,13 +925,13 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 			route_recsafe (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
+		else if (!strncmp (path, "/strip/expand/", 14) && strlen (path) > 14) {
 			int ssid = atoi (&path[14]);
-			strip_select (ssid, argv[0]->f == 1.0, msg);
+			strip_expand (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
-		else if (!strncmp (path, "/strip/gui_select/", 18) && strlen (path) > 18) {
-			int ssid = atoi (&path[18]);
+		else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
+			int ssid = atoi (&path[14]);
 			strip_gui_select (ssid, argv[0]->f == 1.0, msg);
 			ret = 0;
 		}
@@ -1230,10 +1247,10 @@ OSC::get_surface (lo_address addr)
 	s.feedback = 0;
 	s.gainmode = 0;
 	s.sel_obs = 0;
-	s.surface_sel = 0;
+	s.expand = 0;
+	s.expand_enable = false;
 	s.strips = get_sorted_stripables(s.strip_types);
 
-	// I think the line below can be removed
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
 
@@ -1276,12 +1293,14 @@ OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
 void
 OSC::notify_routes_added (ARDOUR::RouteList &)
 {
+	// not sure if we need this
 	//recalcbanks();
 }
 
 void
 OSC::notify_vca_added (ARDOUR::VCAList &)
 {
+	// not sure if we need this
 	//recalcbanks();
 }
 
@@ -1320,6 +1339,7 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 	return _set_bank (bank_start, lo_message_get_source (msg));
 }
 
+// set bank is callable with either message or address
 int
 OSC::_set_bank (uint32_t bank_start, lo_address addr)
 {
@@ -1331,8 +1351,12 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		return -1;
 	}
 
-	// reset local select
-	_strip_select (0, addr);
+	OSCSurface *s = get_surface (addr);
+
+	// revert any expand to select
+	 s->expand = 0;
+	 s->expand_enable = false;
+	_strip_select (_select, addr);
 
 	// undo all listeners for this url
 	StripableList stripables;
@@ -1345,9 +1369,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		}
 	}
 
-	OSCSurface *s = get_surface (addr);
 	s->strips = get_sorted_stripables(s->strip_types);
-	// I think the line below can be removed
 	s->nstrips = s->strips.size();
 
 	uint32_t b_size;
@@ -1376,16 +1398,13 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 
 				if (stp) {
 					listen_to_route(stp, addr);
-					if (!s->feedback[10]) {
-						if (stp->is_selected()) {
-							_strip_select (n + 1 - s->bank , addr);
-						}
-					}
 				}
 			}
 		}
 	}
+	// light bankup or bankdown buttons if it is possible to bank in that direction
 	if (s->feedback[4]) {
+		// these two messages could be bundled
 		lo_message reply;
 		reply = lo_message_new ();
 		if ((s->bank > (s->nstrips - s->bank_size)) || (s->nstrips < s->bank_size)) {
@@ -1457,13 +1476,6 @@ OSC::get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr)
 	}
 	// failsafe... should never get here.
 	return 0;
-}
-
-uint32_t
-OSC::get_rid (uint32_t ssid, lo_address addr)
-{
-	OSCSurface *s = get_surface(addr);
-	return ssid + s->bank - 1;
 }
 
 boost::shared_ptr<ARDOUR::Stripable>
@@ -1662,11 +1674,19 @@ int
 OSC::sel_mute (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_mute(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("mute", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->mute_control()) {
+			s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("mute", 0, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1721,44 +1741,76 @@ int
 OSC::sel_solo (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_solo(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("solo", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->solo_control()) {
+			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("solo", 0, 0, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_solo_iso (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_solo_iso(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("solo_iso", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->solo_isolate_control()) {
+			s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("solo_iso", 0, 0, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_solo_safe (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_solo_safe(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("solo_safe", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->solo_safe_control()) {
+			s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("solo_safe", 0, 0, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_recenable (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_recenable(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("recenable", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->rec_enable_control()) {
+			s->rec_enable_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("recenable", 0, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1782,11 +1834,19 @@ int
 OSC::sel_recsafe (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_recsafe(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("record_safe", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->rec_safe_control()) {
+			s->rec_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("record_safe", 0, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1828,11 +1888,22 @@ int
 OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_monitor_input(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("monitor_input", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (track) {
+			if (track->monitoring_control()) {
+				track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+				return 0;
+			}
+		}
+	}
+	return route_send_fail ("monitor_input", 0, 0, lo_message_get_source (msg));
 }
 
 int
@@ -1858,11 +1929,22 @@ int
 OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_monitor_disk(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("monitor_disk", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (track) {
+			if (track->monitoring_control()) {
+				track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
+				return 0;
+			}
+		}
+	}
+	return route_send_fail ("monitor_disk", 0, 0, lo_message_get_source (msg));
 }
 
 
@@ -1886,27 +1968,41 @@ int
 OSC::sel_phase (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return strip_phase(sur->surface_sel, yn, msg);
-	} else { 
-		return route_send_fail ("polarity", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->phase_control()) {
+			s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("polarity", 0, 0, lo_message_get_source (msg));
 }
 
 int
-OSC::strip_select (int ssid, int yn, lo_message msg)
+OSC::strip_expand (int ssid, int yn, lo_message msg)
 {
-	//ignore button release
-	if (!yn) return 0;
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	sur->expand_enable = (bool) yn;
+	sur->expand = ssid;
+	boost::shared_ptr<Stripable> s;
+	if (yn) {
+		s = get_strip (ssid, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
 
-	return _strip_select ( ssid, lo_message_get_source (msg));
+	return _strip_select (s, lo_message_get_source (msg));
 }
 
 int
-OSC::_strip_select (int ssid, lo_address addr)
+OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 {
 	if (!session) {
-		route_send_fail ("select", ssid, 0, addr);
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr);
@@ -1914,47 +2010,53 @@ OSC::_strip_select (int ssid, lo_address addr)
 		delete sur->sel_obs;
 		sur->sel_obs = 0;
 	}
-	sur->surface_sel = 0;
-	boost::shared_ptr<Stripable> s;
-	if (ssid){
-		s = get_strip (ssid, addr);
-	}
 	if (s) {
-		sur->surface_sel = ssid;
-		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, ssid, sur->gainmode, sur->feedback);
+		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur->gainmode, sur->feedback);
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
-	} else {
-		route_send_fail ("select", ssid, 0 , addr);
+	} else if (sur->expand_enable && sur->expand) {
+		route_send_fail ("select", sur->expand, 0 , addr);
+		sur->expand = 0;
+		sur->expand_enable = false;
 	}
+	//update buttons on surface
 	int b_s = sur->bank_size;
 	if (!b_s) { // bank size 0 means we need to know how many strips there are.
 		b_s = sur->nstrips;
 	}
 	for (int i = 1;  i <= b_s; i++) {
-		string path = "select";
-		if (!sur->feedback[10]) {
-			path = "gui_select";
-		}
-		if (i==(int)sur->surface_sel) {
+		string path = "expand";
+
+		if ((i==(int)sur->expand) && sur->expand_enable) {
 			lo_message reply = lo_message_new ();
 			if (sur->feedback[2]) {
 				ostringstream os;
-				os << "/strip/" << path << "/" << ssid;
+				os << "/strip/" << path << "/" << i;
 				path = os.str();
 			} else {
 				ostringstream os;
 				os << "/strip/" << path;
 				path = os.str();
-				lo_message_add_int32 (reply, ssid);
+				lo_message_add_int32 (reply, i);
 			}
-				lo_message_add_float (reply, (float) 1);
+			lo_message_add_float (reply, (float) 1);
 
-				lo_send_message (addr, path.c_str(), reply);
-				lo_message_free (reply);
-			} else {
-				route_send_fail (path, i, 0, addr);
-			}
+			lo_send_message (addr, path.c_str(), reply);
+			lo_message_free (reply);
+			reply = lo_message_new ();
+			lo_message_add_float (reply, 1.0);
+			lo_send_message (addr, "/select/expand", reply);
+			lo_message_free (reply);
+
+		} else {
+			route_send_fail (path, i, 0, addr);
+		}
+	}
+	if (!sur->expand_enable) {
+		lo_message reply = lo_message_new ();
+		lo_message_add_float (reply, 0.0);
+		lo_send_message (addr, "/select/expand", reply);
+		lo_message_free (reply);
 	}
 
 	return 0;
@@ -1967,19 +2069,33 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	if (!yn) return 0;
 
 	if (!session) {
-		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
+		route_send_fail ("select", ssid, 0, lo_message_get_source (msg));
 		return -1;
 	}
-
-	int rid = get_rid (ssid, lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
-		SetStripableSelection (rid);
+		SetStripableSelection (s->presentation_info().order());
+		//s->presentation_info().set_selected(true);
 	} else {
-		route_send_fail ("gui_select", ssid, 0, lo_message_get_source (msg));
+		route_send_fail ("select", ssid, 0, lo_message_get_source (msg));
 	}
 
 	return 0;
+}
+
+int
+OSC::sel_expand (uint32_t state, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	sur->expand_enable = (bool) state;
+	boost::shared_ptr<Stripable> s;
+	if (state) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+
+	return _strip_select (s, lo_message_get_source (msg));
 }
 
 int
@@ -2024,11 +2140,25 @@ int
 OSC::sel_gain (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_set_gain_dB(sur->surface_sel, val, msg);
-	} else { 
-		return route_send_fail ("gain", 0, -193, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		float abs;
+		if (val < -192) {
+			abs = 0;
+		} else {
+			abs = dB_to_coefficient (val);
+		}
+		if (s->gain_control()) {
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("gain", 0, -193, lo_message_get_source (msg));
 }
 
 int
@@ -2054,11 +2184,25 @@ int
 OSC::sel_fader (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_set_gain_fader(sur->surface_sel, val, msg);
-	} else { 
-		return route_send_fail ("fader", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		float abs;
+		if ((val > 799.5) && (val < 800.5)) {
+			abs = 1.0;
+		} else {
+			abs = slider_position_to_gain_with_max ((val/1023), 2.0);
+		}
+		if (s->gain_control()) {
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("fader", 0, 0, lo_message_get_source (msg));
 }
 
 int
@@ -2094,33 +2238,58 @@ int
 OSC::sel_trim (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_set_trim_dB (sur->surface_sel, val, msg);
-	} else { 
-		return route_send_fail ("trimdB", 0, 0, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->trim_control()) {
+			s->trim_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("trimdB", 0, 0, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_pan_position (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_set_pan_stereo_position (sur->surface_sel, val, msg);
-	} else { 
-		return route_send_fail ("pan_stereo_position", 0, 0.5, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if(s->pan_azimuth_control()) {
+			s->pan_azimuth_control()->set_value (val, PBD::Controllable::NoGroup);
+			//return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->get_value (), lo_message_get_source (msg));
+			return 0;
+		}
+	}
+	return route_send_fail ("pan_stereo_position", 0, 0.5, lo_message_get_source (msg));
 }
 
 int
 OSC::sel_pan_width (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	if (sur->surface_sel) {
-		return route_set_pan_stereo_width (sur->surface_sel, val, msg);
-	} else { 
-		return route_send_fail ("pan_stereo_width", 0, 1, lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
+	if (s) {
+		if (s->pan_width_control()) {
+			s->pan_width_control()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return route_send_fail ("pan_stereo_width", 0, 1, lo_message_get_source (msg));
 }
 
 int
@@ -2204,12 +2373,27 @@ int
 OSC::sel_sendgain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	int ret;
-	if (sur->surface_sel) {
-		ret = route_set_send_gain_dB(sur->surface_sel, id, val, msg);
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
-	if (!ret) {
-		return ret;
+	float abs;
+	if (s) {
+		if (val < -192) {
+			abs = 0;
+		} else {
+			abs = dB_to_coefficient (val);
+		}
+		if (id > 0) {
+			--id;
+		}
+
+		if (s->send_level_controllable (id)) {
+			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
 	return sel_send_fail ("send_gain", id, -193, lo_message_get_source (msg));
 }
@@ -2218,15 +2402,29 @@ int
 OSC::sel_sendfader (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	int ret;
-	if (sur->surface_sel) {
-		ret = route_set_send_fader(sur->surface_sel, id, val, msg);
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
-	if (!ret) {
-		return ret;
+	float abs;
+	if (s) {
+		if ((val > 799.5) && (val < 800.5)) {
+			abs = 1.0;
+		} else {
+			abs = slider_position_to_gain_with_max ((val/1023), 2.0);
+		}
+		if (id > 0) {
+			--id;
+		}
+
+		if (s->send_level_controllable (id)) {
+			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
 	return sel_send_fail ("send_gain", id, 0, lo_message_get_source (msg));
-
 }
 
 int
@@ -2251,7 +2449,7 @@ OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
 		}
 
 		if (s->send_level_controllable (sid)) {
-			return 1;
+			return 0;
 		}
 
 	}
@@ -2263,22 +2461,25 @@ int
 OSC::sel_sendenable (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	int ret;
-	if (sur->surface_sel) {
-		ret = route_set_send_enable(sur->surface_sel, id, val, msg);
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
 	}
-	switch (ret) {
-		case 0:
-			return ret;
-		case 1:
-			return sel_send_fail ("send_enable", id, 1, lo_message_get_source (msg));
-		default:
-			sel_send_fail ("send_enable", id, 0, lo_message_get_source (msg));
-			return -1;
+	if (s) {
+		if (id > 0) {
+			--id;
+		}
+		if (s->send_enable_controllable (id)) {
+			s->send_enable_controllable (id)->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+		if (s->send_level_controllable (id)) {
+			return sel_send_fail ("send_enable", id + 1, 1, lo_message_get_source (msg));
+		}
 	}
-	return -1;
-
-
+	return sel_send_fail ("send_enable", id + 1, 0, lo_message_get_source (msg));
 }
 
 int
@@ -2401,10 +2602,10 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 	if (strip) {
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
 			OSCSurface* sur = &_surface[it];
-			if(!sur->feedback[10]) {
+			_select = strip;
+			if(!sur->expand_enable) {
 				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-				uint32_t sel_strip = get_sid (strip, addr);
-				_strip_select (sel_strip, addr);
+				_strip_select (strip, addr);
 			}
 		}
 	}
@@ -2471,7 +2672,7 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_address addr)
 		lo_send_message (addr, str_pth.c_str(), reply);
 		lo_message_free (reply);
 	}
-	if (sur->surface_sel == ssid) {
+	if ((_select == get_strip (ssid, addr)) || ((sur->expand == ssid) && (sur->expand_enable))) {
 		os.str("");
 		os << "/select/" << path;
 		string sel_pth = os.str();

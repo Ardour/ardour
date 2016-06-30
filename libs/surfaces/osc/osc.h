@@ -109,7 +109,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1023?
-		uint32_t surface_sel;		// which strip within the bank is locally selected
+		uint32_t expand;			// Used by /select/select
+		bool expand_enable;			// use expand instead of select
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
 		Sorted strips;				// list of stripables for this surface
 	};
@@ -140,7 +141,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [7] - Send metering as dB or positional depending on gainmode
 		 * [8] - Send metering as 16 bits (led strip)
 		 * [9] - Send signal present (signal greater than -20dB)
-		 * [10] - Announce follows Select
 		 */
 
 
@@ -173,6 +173,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	OSCDebugMode _debugmode;
 	bool tick;
 	bool bank_dirty;
+	boost::shared_ptr<ARDOUR::Stripable> _select;	// which stripable out of /surface/stripables is gui selected
 
 	void register_callbacks ();
 
@@ -187,7 +188,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string get_unix_server_url ();
 	OSCSurface * get_surface (lo_address addr);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
-	uint32_t get_rid (uint32_t ssid, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
 	void global_feedback (std::bitset<32> feedback, lo_address msg, uint32_t gainmode);
 
@@ -350,6 +350,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_trim,f);
 	PATH_CALLBACK1_MSG(sel_pan_position,f);
 	PATH_CALLBACK1_MSG(sel_pan_width,f);
+	PATH_CALLBACK1_MSG(sel_expand,i);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -415,7 +416,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_monitor_input,i,i);
 	PATH_CALLBACK2_MSG(route_monitor_disk,i,i);
 	PATH_CALLBACK2_MSG(strip_phase,i,i);
-	PATH_CALLBACK2_MSG(strip_select,i,i);
+	PATH_CALLBACK2_MSG(strip_expand,i,i);
 	PATH_CALLBACK2_MSG(strip_gui_select,i,i);
 	PATH_CALLBACK2_MSG(route_set_gain_abs,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_dB,i,f);
@@ -439,8 +440,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_monitor_input (int rid, int yn, lo_message msg);
 	int route_monitor_disk (int rid, int yn, lo_message msg);
 	int strip_phase (int rid, int yn, lo_message msg);
-	int strip_select (int rid, int yn, lo_message msg);
-	int _strip_select (int rid, lo_address addr);
+	int strip_expand (int rid, int yn, lo_message msg);
+	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
 	int strip_gui_select (int rid, int yn, lo_message msg);
 	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);
@@ -491,6 +492,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_sendgain (int id, float dB, lo_message msg);
 	int sel_sendfader (int id, float pos, lo_message msg);
 	int sel_sendenable (int id, float pos, lo_message msg);
+	int sel_expand (uint32_t state, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);

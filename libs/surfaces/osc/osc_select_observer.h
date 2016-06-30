@@ -34,7 +34,7 @@ class OSCSelectObserver
 {
 
   public:
-	OSCSelectObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t sid, uint32_t gainmode, std::bitset<32> feedback);
+	OSCSelectObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t gainmode, std::bitset<32> feedback);
 	~OSCSelectObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
@@ -50,7 +50,6 @@ class OSCSelectObserver
 
 	lo_address addr;
 	std::string path;
-	uint32_t ssid;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	float _last_meter;

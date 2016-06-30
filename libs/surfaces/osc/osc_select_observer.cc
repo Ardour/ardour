@@ -39,9 +39,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t ss, uint32_t gm, std::bitset<32> fb)
+OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t gm, std::bitset<32> fb)
 	: _strip (s)
-	,ssid (ss)
 	,gainmode (gm)
 	,feedback (fb)
 	,nsends (0)
