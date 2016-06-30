@@ -103,8 +103,7 @@ style "default" = "medium_text"
   GtkTreeView         :: horizontal-separator             = 8                 # [               2 ] ( >= 0 ) Horizontal space between cells. Must be an even number.
   GtkTreeView         :: vertical-separator               = 2                 # [               2 ] ( >= 0 ) Vertical space between cells. Must be an even number.
 
-  GtkEntry            :: honors-transparent-bg-hint       = 1                 # [               0 ] ( bool ) (Clearlooks) Without this, gecko will fill in the background of the entry.
-  GtkEntry            :: cursor-color = @bg_selected
+  GtkEntry::cursor_color = @entry_cursor
 
   #GtkToolbar::shadow_type = GTK_SHADOW_ETCHED_IN
 
