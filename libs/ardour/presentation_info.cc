@@ -176,7 +176,7 @@ PresentationInfo::color_set () const
 	 * a color to completely transparent black? only the constructor ..
 	 */
 
-	return _color == 0;
+	return _color != 0;
 }
 
 void
