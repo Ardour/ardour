@@ -1599,7 +1599,11 @@ RouteUI::route_state_id () const
 int
 RouteUI::set_color_from_route ()
 {
-	return 0;
+	if (_route->presentation_info().color_set()) {
+		return 0; /* nothing to do */
+	}
+
+	return 1; /* pick a color */
 }
 
 /** @return true if this name should be used for the route, otherwise false */
