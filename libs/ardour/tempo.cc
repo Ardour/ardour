@@ -2474,7 +2474,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 
 				for (Metrics::const_iterator ii = imaginary.begin(); ii != imaginary.end(); ++ii) {
 					TempoSection* t;
-					if ((*i)->is_tempo()) {
+					if ((*ii)->is_tempo()) {
 						t = static_cast<TempoSection*> (*ii);
 						if ((t->locked_to_meter() || !t->movable()) && t->frame() == m->frame()) {
 							meter_locked_tempo = t;
