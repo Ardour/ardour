@@ -361,7 +361,7 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
         XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested, 0, MusicTime);
+		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested,  map.frame_at_bbt (requested), MusicTime);
 	} else {
 		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested, map.frame_at_bbt (requested), AudioTime);
 	}
