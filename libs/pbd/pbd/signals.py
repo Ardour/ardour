@@ -268,9 +268,15 @@ def signal(f, n, v):
     print("\t}", file=f)
 
     print("""
-	bool empty () {
+	bool empty () const {
 		Glib::Threads::Mutex::Lock lm (_mutex);
 		return _slots.empty ();
+	}
+""", file=f)
+    print("""
+	bool size () const {
+		Glib::Threads::Mutex::Lock lm (_mutex);
+		return _slots.size ();
 	}
 """, file=f)
 
@@ -286,14 +292,15 @@ def signal(f, n, v):
     print("""
 	boost::shared_ptr<Connection> _connect (slot_function_type f)
 	{
-#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-                if (_debug_connection) {
-                        PBD::stacktrace (std::cerr, 10);
-                }
-#endif
 		boost::shared_ptr<Connection> c (new Connection (this));
 		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots[c] = f;
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+                if (_debug_connection) {
+                        std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+                        PBD::stacktrace (std::cerr, 10);
+                }
+#endif
 		return c;
 	}""", file=f)
 
@@ -302,6 +309,12 @@ def signal(f, n, v):
 	{
 		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots.erase (c);
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+                if (_debug_connection) {
+                        std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+                        PBD::stacktrace (std::cerr, 10);
+                }
+#endif
 	}
 };    
 """, file=f)
