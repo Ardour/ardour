@@ -602,6 +602,10 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 		try {
 			lua_dsp_configure (&in, &out);
 		} catch (luabridge::LuaException const& e) {
+			PBD::error << "LuaException: " << e.what () << "\n";
+#ifndef NDEBUG
+			std::cerr << "LuaException: " << e.what () << "\n";
+#endif
 			return false;
 		}
 	}
