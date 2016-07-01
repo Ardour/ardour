@@ -128,7 +128,7 @@ PresentationInfo::set_state (XMLNode const& node, int /* version */)
 	if ((prop = node.property (X_("color"))) != 0) {
 		color_t c = atoi (prop->value());
 		if (c != _color) {
-			pc.add (Properties::order);
+			pc.add (Properties::color);
 			_color = c;
 		}
 	}
@@ -175,7 +175,6 @@ PresentationInfo::color_set () const
 	 * this is heuristic, but it is fairly realistic. who will ever set
 	 * a color to completely transparent black? only the constructor ..
 	 */
-
 	return _color != 0;
 }
 
