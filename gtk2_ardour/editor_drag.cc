@@ -3189,6 +3189,10 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			const double beat = map.beat_at_bbt (bbt);
 			_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
 						       , beat, bbt, map.frame_at_bbt (bbt), _real_section->position_lock_style());
+			if (!_real_section) {
+				aborted (true);
+				return;
+			}
 
 		}
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
@@ -3328,6 +3332,11 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				_real_section = map.add_tempo (_marker->tempo(), map.pulse_at_frame (frame), 0, _real_section->type(), MusicTime);
 			} else {
 				_real_section = map.add_tempo (_marker->tempo(), 0.0, frame, _real_section->type(), AudioTime);
+			}
+
+			if (!_real_section) {
+				aborted (true);
+				return;
 			}
 		}
 
