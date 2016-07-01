@@ -53,9 +53,11 @@ function map_type (t)
 end
 
 -- these globals are *not* shared between DSP and UI
-local filt -- the biquad filter instance
+local filters = {}  -- the biquad filter instances (DSP)
+local filt -- the biquad filter instance (GUI, response)
 local cur = {0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
+local chn = 0 -- channel/filter count
 
 function dsp_init (rate)
 	self:shmem ():allocate (1) -- shared mem to tell the GUI the samplerate
@@ -64,6 +66,16 @@ function dsp_init (rate)
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
 	filt = ARDOUR.DSP.Biquad (rate) -- initialize filter
 	lpf = 13000 / rate -- interpolation time constant
+end
+
+function dsp_configure (ins, outs)
+	assert (ins:n_audio () == outs:n_audio ())
+	local cfg = self:shmem ():to_int (0):array ()
+	local rate = cfg[1]
+	chn = ins:n_audio ()
+	for c = 1, chn do
+		filters[c] = ARDOUR.DSP.Biquad (rate) -- initialize filters
+	end
 end
 
 -- helper functions for parameter interpolation
@@ -99,7 +111,9 @@ function apply_params (ctrl)
 		cur[4] = low_pass_filter_param (cur[4], ctrl[4], 0.01) -- quality
 	end
 
-	filt:compute (map_type (cur[1]), cur[3], cur[4], cur[2])
+	for c = 1, chn do
+		filters[c]:compute (map_type (cur[1]), cur[3], cur[4], cur[2])
+	end
 end
 
 
@@ -126,11 +140,11 @@ function dsp_run (ins, outs, n_samples)
 			-- check if output and input buffers for this channel are identical
 			-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
 			if ins[c]:sameinstance (outs[c]) then
-				filt:run (ins[c]:offset (off), siz) -- in-place processing
+				filters[c]:run (ins[c]:offset (off), siz) -- in-place processing
 			else
 				-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 				ARDOUR.DSP.copy_vector (outs[c]:offset (off), ins[c]:offset (off), siz)
-				filt:run (outs[c]:offset (off), siz)
+				filters[c]:run (outs[c]:offset (off), siz)
 			end
 		end
 

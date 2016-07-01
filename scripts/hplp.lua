@@ -55,16 +55,27 @@ local filters = {}  -- the biquad filter instances (DSP)
 local filt -- the biquad filter instance (GUI, response)
 local cur = {0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
+local chn = 0 -- channel/filter count
 
 function dsp_init (rate)
 	self:shmem ():allocate (1) -- shared mem to tell the GUI the samplerate
 	local cfg = self:shmem ():to_int (0):array ()
 	cfg[1] = rate
-	-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
-	for k = 1,4 do
-		filters[k] = ARDOUR.DSP.Biquad (rate) -- initialize filters
-	end
 	lpf = 13000 / rate -- interpolation time constant
+end
+
+function dsp_configure (ins, outs)
+	assert (ins:n_audio () == outs:n_audio ())
+	local cfg = self:shmem ():to_int (0):array ()
+	local rate = cfg[1]
+	chn = ins:n_audio ()
+	for c = 1, chn do
+		filters[c] = {}
+		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
+		for k = 1,4 do
+			filters[c][k] = ARDOUR.DSP.Biquad (rate) -- initialize filters
+		end
+	end
 end
 
 -- helper functions for parameter interpolation
@@ -91,8 +102,10 @@ function apply_params (ctrl)
 
 	if cur[1] ~= ctrl[1] or cur[2] ~= ctrl[2] then
 		-- reset filter state when type or order changes
-		for k = 1,4 do
-			filters[k]:reset ()
+		for c = 1, chn do
+			for k = 1,4 do
+				filters[c][k]:reset ()
+			end
 		end
 		for k = 1,4 do cur[k] = ctrl[k] end
 	else
@@ -104,8 +117,10 @@ function apply_params (ctrl)
 	if cur[2] < 1 then cur[2] = 1 end
 	if cur[2] > 4 then cur[2] = 4 end
 
-	for k = 1,4 do
-		filters[k]:compute (map_type (cur[1]), cur[3], cur[4], 0)
+	for c = 1, chn do
+		for k = 1,4 do
+			filters[c][k]:compute (map_type (cur[1]), cur[3], cur[4], 0)
+		end
 	end
 end
 
@@ -134,15 +149,15 @@ function dsp_run (ins, outs, n_samples)
 		for c = 1,#ins do
 			-- check if output and input buffers for this channel are identical
 			-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
-			if ins[c]:sameinstance (outs[c]) then
+			if false then --- ins[c]:sameinstance (outs[c]) then
 				for k = 1,o do
-					filters[k]:run (ins[c]:offset (off), siz) -- in-place processing
+					filters[c][k]:run (ins[c]:offset (off), siz) -- in-place processing
 				end
 			else
 				-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 				ARDOUR.DSP.copy_vector (outs[c]:offset (off), ins[c]:offset (off), siz)
 				for k = 1,o do
-					filters[o]:run (outs[c]:offset (off), siz)
+					filters[c][k]:run (outs[c]:offset (off), siz)
 				end
 			end
 		end
