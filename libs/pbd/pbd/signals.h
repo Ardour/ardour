@@ -20,6 +20,8 @@
 #ifndef __pbd_signals_h__
 #define __pbd_signals_h__
 
+#include <csignal>
+
 #include <list>
 #include <map>
 
@@ -67,7 +69,7 @@ public:
 #endif
 
 protected:
-        Glib::Threads::Mutex _mutex;
+	mutable Glib::Threads::Mutex _mutex;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
 #endif
