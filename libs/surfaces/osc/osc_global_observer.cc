@@ -147,12 +147,12 @@ OSCGlobalObserver::tick ()
 			os << setw(2) << setfill('0') << timecode.minutes;
 			os << ':';
 			os << setw(2) << setfill('0') << timecode.seconds;
-			os << '.';
+			os << ':';
 			os << setw(2) << setfill('0') << timecode.frames;
 
 			lo_message msg = lo_message_new ();
 			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/timecode", msg);
+			lo_send_message (addr, "/position/smpte", msg);
 			lo_message_free (msg);
 		}
 		if (feedback[5]) { // Bar beat enabled
@@ -171,7 +171,40 @@ OSCGlobalObserver::tick ()
 
 			lo_message msg = lo_message_new ();
 			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/bar_beat", msg);
+			lo_send_message (addr, "/position/bbt", msg);
+			lo_message_free (msg);
+		}
+		if (feedback[11]) { // minutes/seconds enabled
+			framepos_t left = now_frame;
+			int hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+			left -= (framecnt_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+			int mins = (int) floor (left / (session->frame_rate() * 60.0f));
+			left -= (framecnt_t) floor (mins * session->frame_rate() * 60.0f);
+			int secs = (int) floor (left / (float) session->frame_rate());
+			left -= (framecnt_t) floor ((double)(secs * session->frame_rate()));
+			int millisecs = floor (left * 1000.0 / (float) session->frame_rate());
+
+			// Min/sec mode: Hours/Minutes/Seconds/msec
+			ostringstream os;
+			os << setw(2) << setfill('0') << hrs;
+			os << ':';
+			os << setw(2) << setfill('0') << mins;
+			os << ':';
+			os << setw(2) << setfill('0') << secs;
+			os << '.';
+			os << setw(3) << setfill('0') << millisecs;
+
+			lo_message msg = lo_message_new ();
+			lo_message_add_string (msg, os.str().c_str());
+			lo_send_message (addr, "/position/time", msg);
+			lo_message_free (msg);
+		}
+		if (feedback[10]) { // samples
+			ostringstream os;
+			os << now_frame;
+			lo_message msg = lo_message_new ();
+			lo_message_add_string (msg, os.str().c_str());
+			lo_send_message (addr, "/position/samples", msg);
 			lo_message_free (msg);
 		}
 		_last_frame = now_frame;

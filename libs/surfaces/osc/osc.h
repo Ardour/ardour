@@ -115,21 +115,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		Sorted strips;				// list of stripables for this surface
 	};
 		/*
-		 * Reminder of what strip_types there are
-		 *
-		AudioTrack = 0x1 =	[0]
-		MidiTrack = 0x2 =	[1]
-		AudioBus = 0x4 =	[2]
-		MidiBus = 0x8 =		[3]
-		VCA = 0x10 =		[4]
-		MasterOut = 0x20 =	[5]
-		MonitorOut = 0x40 =	[6]
-		Auditioner = 0x80 =	[7] skip don't look for.
-		Selected = 0x100 =	[8]
-		Hidden = 0x200 =	[9]
-		OrderSet = 0x400,
-		*/
-		/*
 		 * feedback bits:
 		 * [0] - Strips - buttons
 		 * [1] - Strips - variables (pots/faders)
@@ -141,6 +126,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [7] - Send metering as dB or positional depending on gainmode
 		 * [8] - Send metering as 16 bits (led strip)
 		 * [9] - Send signal present (signal greater than -20dB)
+		 * [10] - Send Playhead position as samples
+		 * [11] - Send Playhead position as minutes seconds
+		 * [12]	- Send Playhead position like primary/secondary GUI clocks
 		 */
 
 
