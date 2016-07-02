@@ -32,7 +32,7 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
         , entry_changed (false)
 	, by_popup_menu (false)
 {
-	set_name (X_("FloatingTextEntry"));
+	//set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_border_width (0);
 
