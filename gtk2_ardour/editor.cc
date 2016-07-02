@@ -1021,7 +1021,7 @@ Editor::control_select (PresentationInfo::order_t order, Selection::Operation op
 		return;
 	}
 
-	boost::shared_ptr<Stripable> s = _session->get_nth_stripable (order);
+	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (order, PresentationInfo::AllStripables);
 
 	/* selected object may not be a Route */
 
