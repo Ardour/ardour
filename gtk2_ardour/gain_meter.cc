@@ -129,11 +129,13 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display.set_alignment (0.5);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
+	peak_display.set_alignment (0.5);
 
 	/* stuff related to the fact that the peak display is not, in
 	   fact, supposed to be a text entry.
@@ -962,8 +964,6 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {
-	gain_display_box.set_border_width (0);
-
 	if (gain_display.get_parent()) {
 		gain_display.get_parent()->remove (gain_display);
 	}
