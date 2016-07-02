@@ -3347,6 +3347,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
 	parameter_changed ("use-monitor-bus");
+	parameter_changed ("open-gui-after-adding-plugin");
 }
 
 void
