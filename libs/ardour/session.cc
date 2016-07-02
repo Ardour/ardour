@@ -4230,24 +4230,6 @@ Session::get_remote_nth_route (PresentationInfo::order_t n) const
 }
 
 boost::shared_ptr<Stripable>
-Session::get_nth_stripable (PresentationInfo::order_t n) const
-{
-	StripableList sl;
-
-	get_stripables (sl);
-
-	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
-		if ((*s)->presentation_info().order() == n) {
-			return *s;
-		}
-	}
-
-	/* there is no nth stripable */
-
-	return boost::shared_ptr<Stripable>();
-}
-
-boost::shared_ptr<Stripable>
 Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag flags) const
 {
 	StripableList sl;

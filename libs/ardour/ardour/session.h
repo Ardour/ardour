@@ -311,7 +311,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool io_name_is_legal (const std::string&) const;
 	boost::shared_ptr<Route> route_by_name (std::string) const;
 	boost::shared_ptr<Route> route_by_id (PBD::ID) const;
-	boost::shared_ptr<Stripable> get_nth_stripable (PresentationInfo::order_t n) const;
 	boost::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
 	boost::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
 	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
