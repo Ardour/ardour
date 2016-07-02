@@ -81,7 +81,7 @@ end
 
 -- helper functions for parameter interpolation
 function param_changed (ctrl)
-	if ctrl[1] == cur[1] and ctrl[2] == cur[2] and ctrl[3] == cur[3] and ctrl[4] == cur[4] then
+	if math.floor(ctrl[1]) == math.floor(cur[1]) and math.floor(ctrl[2]) == math.floor(cur[2]) and ctrl[3] == cur[3] and ctrl[4] == cur[4] then
 		return false
 	end
 	return true
@@ -140,7 +140,7 @@ function dsp_run (ins, outs, n_samples)
 		siz = 64
 	end
 
-	local o = cur[2]
+	local o = math.floor(cur[2])
 
 	while n_samples > 0 do
 		if changed then apply_params (CtrlPorts:array ()) end
@@ -268,7 +268,7 @@ function render_inline (ctx, w, max_h)
 	grid_freq (ctx, w, h, 10000)
 	ctx:unset_dash ()
 
-	local o = cur[2]
+	local o = math.floor(cur[2])
 	-- draw transfer function line
 	ctx:set_source_rgba (.8, .8, .8, 1.0)
 	ctx:move_to (-.5, db_to_y (o * filt:dB_at_freq (freq_at_x (0, w)), h))
