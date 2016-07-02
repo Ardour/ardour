@@ -165,6 +165,7 @@ RouteGroupMenu::new_group ()
 	RouteGroupDialog* d = new RouteGroupDialog (g, true);
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::new_group_dialog_finished), d));
+	d->present ();
 }
 
 void
