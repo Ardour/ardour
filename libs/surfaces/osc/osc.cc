@@ -1486,7 +1486,7 @@ boost::shared_ptr<ARDOUR::Stripable>
 OSC::get_strip (uint32_t ssid, lo_address addr)
 {
 	OSCSurface *s = get_surface(addr);
-	if ((ssid + s->bank - 2) < s->nstrips) {
+	if (ssid && ((ssid + s->bank - 2) < s->nstrips)) {
 		return s->strips[ssid + s->bank - 2];
 	}
 	// guess it is out of range
