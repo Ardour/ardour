@@ -260,22 +260,7 @@ OSC::start ()
 	// order changed
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
-	// guess at which stripable is the current editor mixerstrip
-	// right now just choose the first one we find, may be the wrong one
-	// hopefully we will have access to session->current_strip at some point
-	StripableList stripables;
-
-	session->get_stripables (stripables);
 	_select = boost::shared_ptr<Stripable>();
-
-	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-		boost::shared_ptr<Stripable> s = *it;
-		if (s->is_selected()) {
-			_select = s;
-			break;
-		}
-	}
-
 
 	return 0;
 }
@@ -1238,6 +1223,25 @@ OSC::get_surface (lo_address addr)
 			return &_surface[it];
 		}
 	}
+	// if we do this when OSC is started we get the wrong stripable
+	// we don't need this until we actually have a surface to deal with
+	if (!_select) {
+		// guess at which stripable is the current editor mixerstrip
+		// right now just choose the first one we find, may be the wrong one
+		// hopefully we will have access to session->current_strip at some point
+		StripableList stripables;
+
+		session->get_stripables (stripables);
+
+		for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+			boost::shared_ptr<Stripable> s = *it;
+			if (s->is_selected()) {
+				_select = s;
+				break;
+			}
+		}
+	}
+
 	// No surface create one with default values
 	OSCSurface s;
 	s.remote_url = r_url;
