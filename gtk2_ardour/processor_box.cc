@@ -1602,6 +1602,7 @@ ProcessorEntry::PluginDisplay::render_inline (cairo_t* cr, uint32_t width)
 		}
 	}
 
+	cairo_surface_flush(_surf);
 	cairo_surface_mark_dirty(_surf);
 	const double xc = floor ((width - dis->width) * .5);
 	cairo_set_source_surface(cr, _surf, xc, 0);
