@@ -140,6 +140,7 @@ CLASSINFO(RegionSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(Selection);
 CLASSINFO(ArdourMarker);
+CLASSINFO(LuaCairoImageSurface);
 
 namespace Cairo {
 	class Context;
@@ -1204,6 +1205,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
+		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
@@ -1300,8 +1302,16 @@ LuaBindings::dsp (lua_State* L)
 		.addConstructor <void (*) (double)> ()
 		.addFunction ("run", &DSP::Biquad::run)
 		.addFunction ("compute", &DSP::Biquad::compute)
+		.addFunction ("configure", &DSP::Biquad::configure)
 		.addFunction ("reset", &DSP::Biquad::reset)
 		.addFunction ("dB_at_freq", &DSP::Biquad::dB_at_freq)
+		.endClass ()
+		.beginClass <DSP::FFTSpectrum> ("FFTSpectrum")
+		.addConstructor <void (*) (uint32_t, double)> ()
+		.addFunction ("set_data_hann", &DSP::FFTSpectrum::set_data_hann)
+		.addFunction ("execute", &DSP::FFTSpectrum::execute)
+		.addFunction ("power_at_bin", &DSP::FFTSpectrum::power_at_bin)
+		.addFunction ("freq_at_bin", &DSP::FFTSpectrum::freq_at_bin)
 		.endClass ()
 
 		/* DSP enums */

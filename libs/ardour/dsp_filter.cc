@@ -155,6 +155,16 @@ Biquad::run (float *data, const uint32_t n_samples)
 }
 
 void
+Biquad::configure (double a1, double a2, double b0, double b1, double b2)
+{
+	_a1 = a1;
+	_a2 = a2;
+	_b0 = b0;
+	_b1 = b1;
+	_b2 = b2;
+}
+
+void
 Biquad::compute (Type type, double freq, double Q, double gain)
 {
 	if (Q <= .001)     { Q = 0.001; }
@@ -288,4 +298,99 @@ Biquad::dB_at_freq (float freq) const
 	float rv = 20.f * log10f (sqrtf ((SQUARE(a) + SQUARE(b)) * (SQUARE(c) + SQUARE(d))) / (SQUARE(c) + SQUARE(d)));
 	if (!isfinite_local (rv)) { rv = 0; }
 	return std::min (120.f, std::max(-120.f, rv));
+}
+
+
+Glib::Threads::Mutex FFTSpectrum::fft_planner_lock;
+
+FFTSpectrum::FFTSpectrum (uint32_t window_size, double rate)
+	: hann_window (0)
+{
+	init (window_size, rate);
+}
+
+FFTSpectrum::~FFTSpectrum ()
+{
+	{
+		Glib::Threads::Mutex::Lock lk (fft_planner_lock);
+		fftwf_destroy_plan (_fftplan);
+	}
+	fftwf_free (_fft_data_in);
+	fftwf_free (_fft_data_out);
+	free (_fft_power);
+	free (hann_window);
+}
+
+void
+FFTSpectrum::init (uint32_t window_size, double rate)
+{
+	Glib::Threads::Mutex::Lock lk (fft_planner_lock);
+
+	_fft_window_size = window_size;
+	_fft_data_size   = window_size / 2;
+	_fft_freq_per_bin = rate / _fft_data_size / 2.f;
+
+	_fft_data_in  = (float *) fftwf_malloc (sizeof(float) * _fft_window_size);
+	_fft_data_out = (float *) fftwf_malloc (sizeof(float) * _fft_window_size);
+	_fft_power    = (float *) malloc (sizeof(float) * _fft_data_size);
+
+	reset ();
+
+	_fftplan = fftwf_plan_r2r_1d (_fft_window_size, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+
+	hann_window  = (float *) malloc(sizeof(float) * window_size);
+	double sum = 0.0;
+
+	for (uint32_t i = 0; i < window_size; ++i) {
+		hann_window[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(window_size)));
+		sum += hann_window[i];
+	}
+	const double isum = 2.0 / sum;
+	for (uint32_t i = 0; i < window_size; ++i) {
+		hann_window[i] *= isum;
+	}
+}
+
+void
+FFTSpectrum::reset ()
+{
+	for (uint32_t i = 0; i < _fft_data_size; ++i) {
+		_fft_power[i] = 0;
+	}
+	for (uint32_t i = 0; i < _fft_window_size; ++i) {
+		_fft_data_out[i] = 0;
+	}
+}
+
+void
+FFTSpectrum::set_data_hann (float const * const data, uint32_t n_samples, uint32_t offset)
+{
+	assert(n_samples + offset <= _fft_window_size);
+	for (uint32_t i = 0; i < n_samples; ++i) {
+		_fft_data_in[i + offset] = data[i] * hann_window[i + offset];
+	}
+}
+
+void
+FFTSpectrum::execute ()
+{
+	fftwf_execute (_fftplan);
+
+	_fft_power[0] = _fft_data_out[0] * _fft_data_out[0];
+
+#define FRe (_fft_data_out[i])
+#define FIm (_fft_data_out[_fft_window_size - i])
+	for (uint32_t i = 1; i < _fft_data_size - 1; ++i) {
+		_fft_power[i] = (FRe * FRe) + (FIm * FIm);
+		//_fft_phase[i] = atan2f (FIm, FRe);
+	}
+#undef FRe
+#undef FIm
+}
+
+float
+FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const {
+	assert (b >= 0 && b < _fft_data_size);
+	const float a = _fft_power[b] * norm;
+	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }

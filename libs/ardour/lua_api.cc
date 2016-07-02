@@ -304,3 +304,44 @@ ARDOUR::LuaOSC::Address::send (lua_State *L)
 	luabridge::Stack<bool>::push (L, (rv == 0));
 	return 1;
 }
+
+static double hue2rgb (const double p, const double q, double t) {
+	if (t < 0.0) t += 1.0;
+	if (t > 1.0) t -= 1.0;
+	if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
+	if (t < 1.0 / 2.0) return q;
+	if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+	return p;
+}
+
+int
+ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
+{
+	int top = lua_gettop(L);
+	if (top < 3) {
+		return luaL_argerror (L, 1, "invalid number of arguments, :hsla_to_rgba (h, s, l [,a])");
+	}
+	double h = luabridge::Stack<double>::get (L, 1);
+	double s = luabridge::Stack<double>::get (L, 2);
+	double l = luabridge::Stack<double>::get (L, 3);
+	double a = 1.0;
+	if (top > 3) {
+		a = luabridge::Stack<double>::get (L, 4);
+	}
+
+	// we can't use ArdourCanvas::hsva_to_color here
+	// besides we want HSL not HSV and without intermediate
+	// color_to_rgba (rgba_to_color ())
+	double r,g,b;
+	const double cq = l < 0.5 ? l * (1 + s) : l + s - l * s;
+	const double cp = 2.f * l - cq;
+	r = hue2rgb (cp, cq, h + 1.0 / 3.0);
+	g = hue2rgb (cp, cq, h);
+	b = hue2rgb (cp, cq, h - 1.0 / 3.0);
+
+	luabridge::Stack<double>::push (L, r);
+	luabridge::Stack<double>::push (L, g);
+	luabridge::Stack<double>::push (L, b);
+	luabridge::Stack<double>::push (L, a);
+	return 4;
+}

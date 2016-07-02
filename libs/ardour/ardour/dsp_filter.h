@@ -23,6 +23,8 @@
 #include <string.h>
 #include <assert.h>
 #include <glib.h>
+#include <glibmm.h>
+#include <fftw3.h>
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR { namespace DSP {
@@ -229,6 +231,9 @@ namespace ARDOUR { namespace DSP {
 			 */
 			void compute (Type t, double freq, double Q, double gain);
 
+			/** setup filter, set coefficients directly */
+			void configure (double a1, double a2, double b0, double b1, double b2);
+
 			/** filter transfer function (filter response for spectrum visualization)
 			 * @param freq frequency
 			 * @return gain at given frequency in dB (clamped to -120..+120)
@@ -242,6 +247,52 @@ namespace ARDOUR { namespace DSP {
 			float  _z1, _z2;
 			double _a1, _a2;
 			double _b0, _b1, _b2;
+	};
+
+	class LIBARDOUR_API FFTSpectrum {
+		public:
+			FFTSpectrum (uint32_t window_size, double rate);
+			~FFTSpectrum ();
+
+			/** set data to be analyzed and pre-process with hanning window
+			 * n_samples + offset must not be larger than the configured window_size
+			 *
+			 * @param data raw audio data
+			 * @param n_samples number of samples to write to analysis buffer
+			 * @param offset destination offset
+			 */
+			void set_data_hann (float const * const data, const uint32_t n_samples, const uint32_t offset = 0);
+
+			/** process current data in buffer */
+			void execute ();
+
+			/** query
+			 * @param bin the frequency bin 0 .. window_size / 2
+			 * @param norm gain factor (set equal to @bin for 1/f normalization)
+			 * @return signal power at given bin (in dBFS)
+			 */
+			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;
+
+			float freq_at_bin (const uint32_t bin) const {
+				return bin * _fft_freq_per_bin;
+			}
+
+		private:
+			static Glib::Threads::Mutex fft_planner_lock;
+			float* hann_window;
+
+			void init (uint32_t window_size, double rate);
+			void reset ();
+
+			uint32_t _fft_window_size;
+			uint32_t _fft_data_size;
+			double   _fft_freq_per_bin;
+
+			float* _fft_data_in;
+			float* _fft_data_out;
+			float* _fft_power;
+
+			fftwf_plan _fftplan;
 	};
 
 } } /* namespace */

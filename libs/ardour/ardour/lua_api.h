@@ -118,6 +118,18 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns 3 parameters: AutomationList, ControlList, ParamaterDescriptor
 	 */
 	int plugin_automation (lua_State *lua);
+
+	/**
+	 * A convenience function for colorspace HSL to RGB conversion.
+	 * All ranges are 0..1
+	 *
+	 * Example:
+	 * @code
+	 * local r, g, b, a = ARDOUR.LuaAPI.hsla_to_rgba (hue, saturation, luminosity, alpha)
+	 * @endcode
+	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
+	 */
+	int hsla_to_rgba (lua_State *lua);
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {
