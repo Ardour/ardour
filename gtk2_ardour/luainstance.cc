@@ -17,6 +17,7 @@
  */
 
 #include <cairomm/context.h>
+#include <cairomm/surface.h>
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -39,6 +40,113 @@
 #include "script_selector.h"
 
 #include "i18n.h"
+
+namespace LuaCairo {
+/** wrap RefPtr< Cairo::ImageSurface >
+ *
+ * Image surfaces provide the ability to render to memory buffers either
+ * allocated by cairo or by the calling code. The supported image formats are
+ * those defined in Cairo::Format.
+ */
+class ImageSurface {
+	public:
+		/**
+		 * Creates an image surface of the specified format and dimensions. Initially
+		 * the surface contents are all 0. (Specifically, within each pixel, each
+		 * color or alpha channel belonging to format will be 0. The contents of bits
+		 * within a pixel, but not belonging to the given format are undefined).
+		 *
+		 * @param format 	format of pixels in the surface to create
+		 * @param width 	width of the surface, in pixels
+		 * @param height 	height of the surface, in pixels
+		 */
+		ImageSurface (Cairo::Format format, int width, int height)
+			: _surface (Cairo::ImageSurface::create (format, width, height))
+			, _ctx (Cairo::Context::create (_surface))
+			, ctx (_ctx->cobj ()) {}
+
+		~ImageSurface () {}
+
+		/**
+		 * Set this surface as source for another context.
+		 * This allows to draw this surface
+		 */
+		void set_as_source (Cairo::Context* c, int x, int y) {
+			_surface->flush ();
+			c->set_source (_surface, x, y);
+		}
+
+		/**
+		 * Returns a context object to perform operations on the surface
+		 */
+		Cairo::Context* context () {
+			return (Cairo::Context *)&ctx;
+		}
+
+		/**
+		 * Returns the stride of the image surface in bytes (or 0 if surface is not
+		 * an image surface). The stride is the distance in bytes from the beginning
+		 * of one row of the image data to the beginning of the next row.
+		 */
+		int get_stride () const {
+			return _surface->get_stride ();
+		}
+
+		/** Gets the width of the ImageSurface in pixels */
+		int get_width () const {
+			return _surface->get_width ();
+		}
+
+		/** Gets the height of the ImageSurface in pixels */
+		int get_height () const {
+			return _surface->get_height ();
+		}
+
+		/**
+		 * Get a pointer to the data of the image surface, for direct
+		 * inspection or modification.
+		 *
+		 * Return value: a pointer to the image data of this surface or NULL
+		 * if @surface is not an image surface.
+		 *
+		 */
+		unsigned char* get_data () {
+			return _surface->get_data ();
+		}
+
+		/** Tells cairo to consider the data buffer dirty.
+		 *
+		 * In particular, if you've created an ImageSurface with a data buffer that
+		 * you've allocated yourself and you draw to that data buffer using means
+		 * other than cairo, you must call mark_dirty() before doing any additional
+		 * drawing to that surface with cairo.
+		 *
+		 * Note that if you do draw to the Surface outside of cairo, you must call
+		 * flush() before doing the drawing.
+		 */
+		void mark_dirty () {
+			_surface->mark_dirty ();
+		}
+
+		/** Marks a rectangular area of the given surface dirty.
+		 *
+		 * @param x 	 X coordinate of dirty rectangle
+		 * @param y 	Y coordinate of dirty rectangle
+		 * @param width 	width of dirty rectangle
+		 * @param height 	height of dirty rectangle
+		 */
+		void mark_dirty (int x, int y, int width, int height) {
+			_surface->mark_dirty (x, y, width, height);
+		}
+
+	private:
+		Cairo::RefPtr<Cairo::ImageSurface> _surface;
+		Cairo::RefPtr<Cairo::Context> _ctx;
+		Cairo::Context ctx;
+};
+}; // namespace
+
+////////////////////////////////////////////////////////////////////////////////
 
 namespace LuaSignal {
 
@@ -180,6 +288,21 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addConst ("Over", CAIRO_OPERATOR_OVER)
 		.addConst ("Add", CAIRO_OPERATOR_ADD)
 		.endNamespace ()
+
+		.beginNamespace ("Format")
+		.addConst ("ARGB32", CAIRO_FORMAT_ARGB32)
+		.addConst ("RGB24", CAIRO_FORMAT_RGB24)
+		.endNamespace ()
+
+		.beginClass <LuaCairo::ImageSurface> ("ImageSurface")
+		.addConstructor <void (*) (Cairo::Format, int, int)> ()
+		.addFunction ("set_as_source", &LuaCairo::ImageSurface::set_as_source)
+		.addFunction ("context", &LuaCairo::ImageSurface::context)
+		.addFunction ("get_stride", &LuaCairo::ImageSurface::get_stride)
+		.addFunction ("get_width", &LuaCairo::ImageSurface::get_width)
+		.addFunction ("get_height", &LuaCairo::ImageSurface::get_height)
+		.addFunction ("get_data", &LuaCairo::ImageSurface::get_data)
+		.endClass ()
 
 		.endNamespace ();
 
