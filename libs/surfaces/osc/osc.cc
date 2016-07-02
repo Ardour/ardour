@@ -1461,6 +1461,10 @@ OSC::bank_down (lo_message msg)
 uint32_t
 OSC::get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr)
 {
+	if (!strip) {
+		return 0;
+	}
+
 	OSCSurface *s = get_surface(addr);
 
 	uint32_t b_size;
@@ -2018,10 +2022,16 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur->gainmode, sur->feedback);
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
-	} else if (sur->expand_enable && sur->expand) {
-		route_send_fail ("select", sur->expand, 0 , addr);
+	} else if (sur->expand_enable) {
 		sur->expand = 0;
 		sur->expand_enable = false;
+		if (_select) {
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (_select, addr, sur->gainmode, sur->feedback);
+			_select->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+			sur->sel_obs = sel_fb;
+		}
+	} else {
+		route_send_fail ("select", sur->expand, 0 , addr);
 	}
 	//update buttons on surface
 	int b_s = sur->bank_size;
@@ -2031,7 +2041,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	for (int i = 1;  i <= b_s; i++) {
 		string path = "expand";
 
-		if ((i==(int)sur->expand) && sur->expand_enable) {
+		if ((i == (int) sur->expand) && sur->expand_enable) {
 			lo_message reply = lo_message_new ();
 			if (sur->feedback[2]) {
 				ostringstream os;
@@ -2053,7 +2063,11 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 			lo_message_free (reply);
 
 		} else {
-			route_send_fail (path, i, 0, addr);
+			lo_message reply = lo_message_new ();
+			lo_message_add_int32 (reply, i);
+			lo_message_add_float (reply, 0.0);
+			lo_send_message (addr, "/strip/expand", reply);
+			lo_message_free (reply);
 		}
 	}
 	if (!sur->expand_enable) {
@@ -2093,9 +2107,9 @@ int
 OSC::sel_expand (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
-	sur->expand_enable = (bool) state;
 	boost::shared_ptr<Stripable> s;
-	if (state) {
+	sur->expand_enable = (bool) state;
+	if (state && sur->expand) {
 		s = get_strip (sur->expand, lo_message_get_source (msg));
 	} else {
 		s = _select;
