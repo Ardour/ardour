@@ -589,26 +589,28 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 bool
 LuaProc::configure_io (ChanCount in, ChanCount out)
 {
-	_configured_in = in;
-	_configured_out = out;
-
-	_configured_in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
-	_configured_out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
+	in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
+	out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
 
 	// configure the DSP if needed
-	lua_State* L = lua.getState ();
-	luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
-	if (lua_dsp_configure.type () == LUA_TFUNCTION) {
-		try {
-			lua_dsp_configure (&in, &out);
-		} catch (luabridge::LuaException const& e) {
-			PBD::error << "LuaException: " << e.what () << "\n";
+	if (in != _configured_in || out != _configured_out) {
+		lua_State* L = lua.getState ();
+		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
+		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
+			try {
+				lua_dsp_configure (&in, &out);
+			} catch (luabridge::LuaException const& e) {
+				PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
-			std::cerr << "LuaException: " << e.what () << "\n";
+				std::cerr << "LuaException: " << e.what () << "\n";
 #endif
-			return false;
+				return false;
+			}
 		}
 	}
+
+	_configured_in = in;
+	_configured_out = out;
 
 	_info->n_inputs = _configured_in;
 	_info->n_outputs = _configured_out;
