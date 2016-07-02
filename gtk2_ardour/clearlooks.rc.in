@@ -104,13 +104,8 @@ style "default" = "medium_text"
   GtkTreeView         :: vertical-separator               = 2                 # [               2 ] ( >= 0 ) Vertical space between cells. Must be an even number.
 
   GtkEntry::cursor_color = @entry_cursor
-
-  #GtkToolbar::shadow_type = GTK_SHADOW_ETCHED_IN
-
-  #xthickness = 0
-  #ythickness = 0
-
-#Base Colors
+  GtkEntry::state-hint = 0
+  
   bg[NORMAL]          = @background
   bg[PRELIGHT]        = shade(1.1, @background)
   bg[ACTIVE]          = shade(0.9, @background)
@@ -122,6 +117,8 @@ style "default" = "medium_text"
   fg[ACTIVE]          = shade(0.9, @foreground)
   fg[INSENSITIVE]     = shade(0.7, @background)
   fg[SELECTED]        = @fg_selected
+
+  # These base and text colors will be used by treeviews and some other widgets.
 
   base[NORMAL]        = @bases
   base[PRELIGHT]      = @bases
@@ -135,20 +132,18 @@ style "default" = "medium_text"
   text[INSENSITIVE]   = shade(0.7, @lightest) /* text color for focused selected text */
   text[SELECTED]      = @fg_selected          /* text color for non-focused selected text */
 
-#engine specific tweaks
+  #engine specific tweaks
 
   engine "clearlooks"
   {
-    #style              = GLOSSY
-    #colorize_scrollbar = TRUE
     menubarstyle       = 2 # 0 = flat, 1 = sunken, 2 = flat gradient
-    #toolbarstyle       = 0 # 0 = flat, 1 = enable effects
   }
 }
 
 style "entry"
 {
-  # setting these two to zero avoids the focus indicator around the text
+  GtkEntry::cursor_color = @entry_cursor
+  GtkEntry::inner-border = { 2, 2, 2, 2 }
 
   xthickness = 0
   ythickness = 0
@@ -158,14 +153,54 @@ style "entry"
   base[NORMAL]      = @bases
   base[PRELIGHT]    = @bases
   base[INSENSITIVE] = @bases
-  base[ACTIVE]      = @bg_selected
+  base[ACTIVE]      = @bases
   base[SELECTED]    = @bg_selected
 
   text[NORMAL]      = @texts
   text[PRELIGHT]    = @texts
   text[INSENSITIVE] = shade (0.92, @texts)
-  text[ACTIVE]      = @fg_selected
+  text[ACTIVE]      = @texts
   text[SELECTED]    = @fg_selected
+}
+
+style "spin_button" = "entry"
+{
+  engine "clearlooks"
+  {
+	# without this empty declaration, SpinButtons draw their arrows oddly
+  }
+
+}
+
+style "mixer_strip_entry" = "small_text"
+{
+        xthickness = 3
+        ythickness = 3
+
+	bg[NORMAL] = @bases
+	bg[ACTIVE] = @bases
+	bg[SELECTED] = @bases
+
+	text[NORMAL] = @texts
+	text[ACTIVE] = @texts
+	text[SELECTED] = @texts
+
+	base[NORMAL] = @bases
+	base[ACTIVE] = @bases
+	base[SELECTED] = @bases
+}
+
+style "peak_display_peaked_entry" = "mixer_strip_entry"
+{
+	fg[ACTIVE] = @texts
+	fg[SELECTED] = @texts
+	text[SELECTED] = @texts
+
+	base[NORMAL] = @bright_indicator
+	base[ACTIVE] = @bright_indicator
+	base[PRELIGHT] = @bright_indicator
+	base[INSENSITIVE] = @bright_indicator
+	base[SELECTED] = @bright_indicator
 }
 
 style "treeview_parent_node"
@@ -659,25 +694,6 @@ style "medium_bold_entry"  = "medium_bold_text"
 	base[SELECTED] = @bg_selected
 }
 
-style "small_entry" = "small_text"
-{
-	fg[NORMAL] = @texts
-	fg[ACTIVE] = @contrasting_indicator
-	fg[SELECTED] = @fg_selected
-
-	text[NORMAL] = @texts
-	text[ACTIVE] = @texts
-	text[SELECTED] = @texts
-
-	bg[NORMAL] = @bases
-	bg[ACTIVE] = @bases
-	bg[SELECTED] = @bases
-
-	base[NORMAL] = @bases
-	base[ACTIVE] = @bases
-	base[SELECTED] = @bases
-}
-
 style "small_spinner" = "small_text"
 {
 	xthickness = 0
@@ -693,13 +709,6 @@ style "small_spinner" = "small_text"
 	base[NORMAL] = @bases
 	base[ACTIVE] = @bases
 	base[SELECTED] = @background
-}
-
-style "red_active_small_entry" = "small_entry"
-{
-	fg[ACTIVE] = @texts
-	fg[SELECTED] = @texts
-	text[SELECTED] = @texts
 }
 
 style "small_red_on_black_entry"  = "small_bold_text"
@@ -918,19 +927,6 @@ style "paler_bright_when_active" = "medium_text"
 	bg[ACTIVE] = lighter(@bright_indicator)
 }
 
-style "peak_display_peaked_entry" = "small_entry"
-{
-	fg[ACTIVE] = @texts
-	fg[SELECTED] = @texts
-	text[SELECTED] = @texts
-
-	base[NORMAL] = @bright_indicator
-	base[ACTIVE] = @bright_indicator
-	base[PRELIGHT] = @bright_indicator
-	base[INSENSITIVE] = @bright_indicator
-	base[SELECTED] = @bright_indicator
-}
-
 style "selected_strip_frame"
 {
 	fg[NORMAL] = @bright_indicator
@@ -1038,8 +1034,8 @@ style "vca_label_bar" = "medium_bold_text"
 }
 
 class "GtkWidget" style:highest "default"
-class "GtkEntry" style:highest "entry"
-class "GtkSpinButton" style:highest "default"
+class "GtkSpinButton" style:highest "spin_button"
+class "GtkEntry" style "entry"                          # not :highest to allow instances to override this
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
 class "GtkButton" style:highest "ardour_button"
@@ -1065,7 +1061,6 @@ widget "*MixerAutomationModeButton.*" style:highest "very_small_button"
 widget "*MixerAutomationPlaybackButton*" style:highest "very_small_button"
 widget "*MixerAutomationPlaybackButton.*" style:highest "very_small_button"
 widget "*ShuttleControl" style:highest "shuttle_control"
-#widget "*MainMenuBar" style:highest "menu_bar_base"
 widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
@@ -1153,11 +1148,9 @@ widget "*MixerTrackCommentArea" style:highest "option_entry"
 widget "*MixerPanZone" style:highest "pan_zone"
 widget "*RegionEditorLabel" style:highest "medium_text"
 widget "*RegionEditorEntry" style:highest "medium_entry"
-widget "*MixerStripGainDisplay" style:highest "small_entry"
-widget "*MixerStripGainDisplay*" style:highest "small_entry"
-widget "*MixerStripPeakDisplay" style:highest "red_active_small_entry"
-widget "*MixerStripPeakDisplay*" style:highest "red_active_small_entry"
-widget "*MixerStripPeakDisplayPeak*" style:highest "peak_display_peaked_entry"
+widget "*MixerStripGainDisplay" style:highest "mixer_strip_entry"
+widget "*MixerStripPeakDisplay" style:highest "mixer_strip_entry"
+widget "*MixerStripPeakDisplayPeak" style:highest "peak_display_peaked_entry"
 widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
 widget "*MixerStripFrame" style:highest "base_frame"
 widget "*FadeCurve" style:highest "medium_bold_entry"
@@ -1230,3 +1223,4 @@ widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar" style:highest "vca_label_bar"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
+
