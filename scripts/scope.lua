@@ -20,7 +20,7 @@ function dsp_params ()
 	{
 		{ ["type"] = "input", name = "Timescale", min = .1, max = 5, default = 2, unit="sec", logarithmic = true },
 		{ ["type"] = "input", name = "Logscale", min = 0, max = 1, default = 0, toggled = true },
-		{ ["type"] = "input", name = "Height", min = 0, max = 3, default = 1, enum = true, scalepoints =
+		{ ["type"] = "input", name = "Height (Aspect)", min = 0, max = 3, default = 1, enum = true, scalepoints =
 			{
 				["Min"] = 0,
 				["16:10"] = 1,
@@ -70,7 +70,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 			else
 				local w0 = bufsiz - write_ptr;
 				ARDOUR.DSP.copy_vector (shmem:to_float (write_ptr + chn_off), bufs:get_audio (ib):data (offset), w0)
-				ARDOUR.DSP.copy_vector (shmem:to_float (chn_off)            , bufs:get_audio (ib):data (offset), n_samples - w0)
+				ARDOUR.DSP.copy_vector (shmem:to_float (chn_off)            , bufs:get_audio (ib):data (offset + w0), n_samples - w0)
 			end
 			if (ob ~= ARDOUR.ChanMapping.Invalid and ib ~= ob) then
 				ARDOUR.DSP.copy_vector (bufs:get_audio (ob):data (offset), bufs:get_audio (ib):data (offset), n_samples)

@@ -76,6 +76,7 @@ function dsp_configure (ins, outs)
 	for c = 1, chn do
 		filters[c] = ARDOUR.DSP.Biquad (rate) -- initialize filters
 	end
+	cur = {0, 0, 0, 0}
 end
 
 -- helper functions for parameter interpolation
