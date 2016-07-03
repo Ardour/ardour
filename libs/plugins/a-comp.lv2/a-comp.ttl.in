@@ -7,14 +7,15 @@
 @prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
 @prefix unit: <http://lv2plug.in/ns/extensions/units#> .
 
+<http://ardour.org/credits.html>
+	a foaf:Person ;
+	foaf:name "Ardour Team" ;
+	foaf:homepage <http://ardour.org/> .
+
 <urn:ardour:a-comp>
-    a lv2:Plugin , doap:Project;
+    a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
-    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ,
-                        <http://lv2plug.in/ns/ext/buf-size#boundedBlockLength> ;
-
-    lv2:requiredFeature <http://lv2plug.in/ns/ext/options#options> ,
-                        <http://lv2plug.in/ns/ext/urid#map> ;
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable>;
 
     lv2:port [
         a lv2:InputPort, lv2:AudioPort ;
@@ -136,18 +137,11 @@
 A powerful mono compressor.
 """ ;
 
-    mod:brand "Ardour" ;
-    mod:label "a-comp" ;
-
     doap:name "a-comp" ;
     doap:license "GPL v2+" ;
+    doap:maintainer <http://ardour.org/credits.html>
 
 #   ui:ui <urn:ardour:a-comp#ui>;
-
-    doap:maintainer [
-        foaf:name "Damien Zammit" ;
-        foaf:homepage <http://www.zamaudio.com> ;
-    ] ;
 
     lv2:microVersion 0 ;
     lv2:minorVersion 1 .
