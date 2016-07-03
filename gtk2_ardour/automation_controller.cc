@@ -90,6 +90,10 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		but->set_controllable(ac);
 		but->signal_clicked.connect(
 			sigc::mem_fun(*this, &AutomationController::toggled));
+		const bool active = _adjustment->get_value() >= 0.5;
+		if (but->get_active() != active) {
+			but->set_active(active);
+		}
 		_widget = but;
 	} else if (use_knob) {
 		ArdourKnob* knob = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent));

@@ -337,6 +337,8 @@
     <ColorAlias name="plugin bypass button: led active" alias="color 8"/>
     <ColorAlias name="pluginlist hide button: led active" alias="color 14"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="color 14"/>
+    <ColorAlias name="pluginui toggle: fill" alias="color 71"/>
+    <ColorAlias name="pluginui toggle: fill active" alias="color 9"/>
     <ColorAlias name="processor automation line" alias="color 77"/>
     <ColorAlias name="processor control button: fill" alias="color 29"/>
     <ColorAlias name="processor control button: fill active" alias="color 46"/>

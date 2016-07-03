@@ -246,10 +246,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		Gtk::ComboBoxText*                      combo;
 		boost::shared_ptr<ARDOUR::ScalePoints>  scale_points;
-		Gtk::ToggleButton*                      button;
 		boost::shared_ptr<AutomationController> controller;
 		Gtkmm2ext::ClickBox*                    clickbox;
 		Gtk::Label                              label;
+		bool                                    button;
 		bool                                    update_pending;
 		char                                    ignore_change;
 		Gtk::Button                             automate_button;
@@ -282,9 +282,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	                             bool                                         is_input);
 
 	void ui_parameter_changed (ControlUI* cui);
-	void toggle_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
-	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
 
 	void astate_clicked (ControlUI*);

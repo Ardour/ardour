@@ -340,11 +340,7 @@ GenericPluginUI::build ()
 	for (i = 0; i < control_uis.size(); ++i) {
 		ControlUI* cui = control_uis[i];
 
-		if (cui->controller || cui->clickbox || cui->combo) {
-			// Get all of the controls into a list, so that
-			// we can lay them out a bit more nicely later.
-			cui_controls_list.push_back(cui);
-		} else if (cui->button || cui->file_button) {
+		if (cui->button || cui->file_button) {
 
 			if (!is_scrollable && button_row == button_rows) {
 				button_row = 0;
@@ -357,6 +353,11 @@ GenericPluginUI::build ()
 			button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1,
 			                     FILL|EXPAND, FILL);
 			button_row++;
+
+		} else if (cui->controller || cui->clickbox || cui->combo) {
+			// Get all of the controls into a list, so that
+			// we can lay them out a bit more nicely later.
+			cui_controls_list.push_back(cui);
 
 		} else if (cui->display) {
 
@@ -501,7 +502,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 
 	ignore_change = 0;
 	display = 0;
-	button = 0;
+	button = false;
 	clickbox = 0;
 	meterinfo = 0;
 }
@@ -633,39 +634,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			return control_ui;
 		}
 
-		if (desc.toggled) {
-
-			/* Build a button */
-
-			control_ui->button = manage (new ToggleButton ());
-			control_ui->button->set_name ("PluginEditorButton");
-			control_ui->button->set_size_request (20, 20);
-
-			control_ui->pack_start (control_ui->label, true, true);
-			control_ui->pack_start (*control_ui->button, false, true);
-			control_ui->pack_start (control_ui->automate_button, false, false);
-
-			if (mcontrol->flags () & Controllable::NotAutomatable) {
-				control_ui->automate_button.set_sensitive (false);
-				set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
-			} else {
-				control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
-				mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
-			}
-
-			control_ui->button->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-
-			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
-
-			if (value > 0.5){
-				control_ui->button->set_active(true);
-			}
-
-			automation_state_changed (control_ui);
-
-			return control_ui;
-		}
-
 		if (desc.datatype == Variant::PATH) {
 
 			/* Build a file selector button */
@@ -703,7 +671,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		Adjustment* adj = control_ui->controller->adjustment();
 
-		if (desc.integer_step) {
+		if (desc.integer_step && !desc.toggled) {
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
@@ -711,6 +679,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 			}
+		} else if (desc.toggled) {
+			control_ui->controller->set_size_request (req.height, req.height);
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
@@ -727,7 +697,16 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		*/
 
 		control_ui->pack_start (control_ui->label, true, true);
-		if (desc.integer_step) {
+
+		if (desc.toggled) {
+			control_ui->button = true;
+			ArdourButton* but = dynamic_cast<ArdourButton*>(control_ui->controller->widget ());
+			assert (but);
+			but->set_name ("pluginui toggle");
+			update_control_display(control_ui);
+		}
+
+		if (desc.integer_step && !desc.toggled) {
 			control_ui->pack_start (*control_ui->clickbox, false, false);
 		} else {
 			control_ui->pack_start (*control_ui->controller, false, false);
@@ -864,22 +843,6 @@ GenericPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 }
 
 void
-GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
-{
-	float val = cui->control->get_value();
-
-	if (!cui->ignore_change) {
-		if (val > 0.5) {
-			cui->button->set_active (true);
-			cui->button->set_name ("PluginEditorButton-active");
-		} else {
-			cui->button->set_active (false);
-			cui->button->set_name ("PluginEditorButton");
-		}
-	}
-}
-
-void
 GenericPluginUI::ui_parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
@@ -907,12 +870,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 			}
 		}
 	} else if (cui->button) {
-
-		if (val > 0.5) {
-			cui->button->set_active (true);
-		} else {
-			cui->button->set_active (false);
-		}
+		// AutomationController handles this
 	}
 
 	if( cui->controller ) {
@@ -928,20 +886,6 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 			cui->adjustment->set_value (val);
 		}
 	}*/
-	cui->ignore_change--;
-}
-
-void
-GenericPluginUI::control_port_toggled (ControlUI* cui)
-{
-	cui->ignore_change++;
-	const bool active = cui->button->get_active();
-	if (active) {
-		cui->button->set_name ("PluginEditorButton-active");
-	} else {
-		cui->button->set_name ("PluginEditorButton");
-	}
-	insert->automation_control (cui->parameter())->set_value (active, Controllable::NoGroup);
 	cui->ignore_change--;
 }
 
