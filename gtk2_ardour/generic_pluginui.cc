@@ -43,6 +43,7 @@
 #include "ardour/session.h"
 #include "ardour/value_as_string.h"
 
+#include "ardour_spinner.h"
 #include "prompter.h"
 #include "plugin_ui.h"
 #include "gui_thread.h"
@@ -660,9 +661,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		/* create the controller */
+		bool use_knob = false; // XXX TODO
 
 		if (mcontrol) {
-			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol);
+			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
 		}
 
 		/* XXX this code is not right yet, because it doesn't handle
@@ -679,7 +681,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 			}
-		} else if (desc.toggled) {
+		} else if (desc.toggled || use_knob) {
 			control_ui->controller->set_size_request (req.height, req.height);
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
@@ -709,6 +711,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		if (desc.integer_step && !desc.toggled) {
 			control_ui->pack_start (*control_ui->clickbox, false, false);
 		} else {
+			if (!desc.toggled && use_knob) {
+				ArdourSpinner* spb = manage (new ArdourSpinner (mcontrol, adj, insert));
+				control_ui->pack_start (*spb, false, false);
+			}
 			control_ui->pack_start (*control_ui->controller, false, false);
 		}
 
