@@ -2938,17 +2938,18 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 	/* create a gap in the presentation info to accomodate @param how_many
 	 * new objects.
 	 */
-	boost::shared_ptr <RouteList> rd = routes.reader();
+	StripableList sl;
+	get_stripables (sl);
 
-	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
-		boost::shared_ptr<Route> rt (*ri);
+	for (StripableList::iterator si = sl.begin(); si != sl.end(); ++si) {
+		boost::shared_ptr<Stripable> s (*si);
 
-		if (rt->presentation_info().special()) {
+		if (s->is_monitor() || s->is_auditioner()) {
 			continue;
 		}
 
-		if (rt->presentation_info().order () >= first_new_order) {
-			rt->set_presentation_order (rt->presentation_info().order () + how_many);
+		if (s->presentation_info().order () >= first_new_order) {
+			s->set_presentation_order (s->presentation_info().order () + how_many);
 		}
 	}
 }
