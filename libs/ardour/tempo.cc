@@ -1246,7 +1246,7 @@ TempoMap::first_tempo ()
 	return *t;
 }
 void
-TempoMap::recompute_tempos (Metrics& metrics)
+TempoMap::recompute_tempi (Metrics& metrics)
 {
 	TempoSection* prev_t = 0;
 
@@ -1386,7 +1386,7 @@ TempoMap::recompute_map (Metrics& metrics, framepos_t end)
 		return;
 	}
 
-	recompute_tempos (metrics);
+	recompute_tempi (metrics);
 	recompute_meters (metrics);
 }
 
@@ -2214,7 +2214,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 	}
 
 #if (0)
-	recompute_tempos (imaginary);
+	recompute_tempi (imaginary);
 
 	if (check_solved (imaginary)) {
 		return true;
@@ -2226,7 +2226,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
 
-	recompute_tempos (imaginary);
+	recompute_tempi (imaginary);
 
 	if (check_solved (imaginary)) {
 		return true;
@@ -2280,7 +2280,7 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 	}
 
 #if (0)
-	recompute_tempos (imaginary);
+	recompute_tempi (imaginary);
 
 	if (check_solved (imaginary)) {
 		return true;
@@ -2292,7 +2292,7 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
 
-	recompute_tempos (imaginary);
+	recompute_tempi (imaginary);
 	/* Reordering
 	 * XX need a restriction here, but only for this case,
 	 * as audio locked tempos don't interact in the same way.
@@ -2762,7 +2762,7 @@ TempoMap::gui_move_meter (MeterSection* ms, const framepos_t& frame)
 
 			if (solve_map_frame (future_map, copy, frame)) {
 				solve_map_frame (_metrics, ms, frame);
-				recompute_tempos (_metrics);
+				recompute_tempi (_metrics);
 			}
 		}
 	} else {
@@ -2775,7 +2775,7 @@ TempoMap::gui_move_meter (MeterSection* ms, const framepos_t& frame)
 
 			if (solve_map_bbt (future_map, copy, bbt)) {
 				solve_map_bbt (_metrics, ms, bbt);
-				recompute_tempos (_metrics);
+				recompute_tempi (_metrics);
 			}
 		}
 	}
@@ -2798,7 +2798,7 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
 		tempo_copy->set_beats_per_minute (bpm.beats_per_minute());
-		recompute_tempos (future_map);
+		recompute_tempi (future_map);
 
 		if (check_solved (future_map)) {
 			ts->set_beats_per_minute (bpm.beats_per_minute());
@@ -2947,12 +2947,12 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 		}
 		new_bpm = min (new_bpm, (double) 1000.0);
 		prev_t->set_beats_per_minute (new_bpm);
-		recompute_tempos (future_map);
+		recompute_tempi (future_map);
 		recompute_meters (future_map);
 
 		if (check_solved (future_map)) {
 			ts->set_beats_per_minute (new_bpm);
-			recompute_tempos (_metrics);
+			recompute_tempi (_metrics);
 			recompute_meters (_metrics);
 		}
 	}

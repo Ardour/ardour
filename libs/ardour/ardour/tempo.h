@@ -336,7 +336,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const MeterSection& meter_section_at_frame (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
 
-	/** add a tempo section locked to pls. ignored values will be set in recompute_tempos()
+	/** add a tempo section locked to pls. ignored values will be set in recompute_tempi()
 	 * @param pulse pulse position of new section. ignored if pls == AudioTime
 	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 * @param type type of new tempo section (Ramp, Constant)
@@ -510,7 +510,7 @@ private:
 	framecnt_t                    _frame_rate;
 	mutable Glib::Threads::RWLock lock;
 
-	void recompute_tempos (Metrics& metrics);
+	void recompute_tempi (Metrics& metrics);
 	void recompute_meters (Metrics& metrics);
 	void recompute_map (Metrics& metrics, framepos_t end = -1);
 
