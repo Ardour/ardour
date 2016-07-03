@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "dsp",
 	name        = "Simple Amp II",
-	category    = "Amplifier",
+	category    = "Example",
 	license     = "MIT",
 	author      = "Robin Gareus",
 	email       = "robin@gareus.org",
