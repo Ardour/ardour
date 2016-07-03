@@ -36,6 +36,7 @@ gtk2_ardour_sources = [
         'ardour_display.cc',
         'ardour_dropdown.cc',
         'ardour_knob.cc',
+        'ardour_spinner.cc',
         'ardour_ui.cc',
         'ardour_ui2.cc',
         'ardour_ui_dependents.cc',
