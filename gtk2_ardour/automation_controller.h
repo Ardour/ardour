@@ -61,7 +61,8 @@ public:
 		boost::shared_ptr<ARDOUR::Automatable>       parent,
 		const Evoral::Parameter&                     param,
 		const ARDOUR::ParameterDescriptor&           desc,
-		boost::shared_ptr<ARDOUR::AutomationControl> ac);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac,
+		bool                                         use_knob = false);
 
 	~AutomationController();
 
@@ -80,7 +81,8 @@ public:
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
 	                      boost::shared_ptr<ARDOUR::AutomationControl> ac,
-	                      Gtk::Adjustment*                             adj);
+	                      Gtk::Adjustment*                             adj,
+	                      bool                                         use_knob);
 
 	void start_touch();
 	void end_touch();

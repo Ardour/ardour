@@ -30,6 +30,7 @@
 #include "ardour/tempo.h"
 
 #include "ardour_button.h"
+#include "ardour_knob.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
@@ -65,7 +66,8 @@ AutomationBarController::~AutomationBarController()
 
 AutomationController::AutomationController(boost::shared_ptr<Automatable>       printer,
                                            boost::shared_ptr<AutomationControl> ac,
-                                           Adjustment*                          adj)
+                                           Adjustment*                          adj,
+                                           bool                                 use_knob)
 	: _widget(NULL)
 	, _printer (printer)
 	, _controllable(ac)
@@ -89,6 +91,11 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		but->signal_clicked.connect(
 			sigc::mem_fun(*this, &AutomationController::toggled));
 		_widget = but;
+	} else if (use_knob) {
+		ArdourKnob* knob = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent));
+		knob->set_controllable (ac);
+		knob->set_name("processor control knob");
+		_widget = knob;
 	} else {
 		AutomationBarController* bar = manage(new AutomationBarController(_printer, ac, adj));
 
@@ -123,7 +130,8 @@ boost::shared_ptr<AutomationController>
 AutomationController::create(boost::shared_ptr<Automatable>       printer,
                              const Evoral::Parameter&             param,
                              const ParameterDescriptor&           desc,
-                             boost::shared_ptr<AutomationControl> ac)
+                             boost::shared_ptr<AutomationControl> ac,
+                             bool use_knob)
 {
 	const double lo        = ac->internal_to_interface(desc.lower);
 	const double up        = ac->internal_to_interface(desc.upper);
@@ -136,7 +144,7 @@ AutomationController::create(boost::shared_ptr<Automatable>       printer,
 
 	assert (ac);
 	assert(ac->parameter() == param);
-	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment));
+	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment, use_knob));
 }
 
 void
