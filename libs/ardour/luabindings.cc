@@ -140,7 +140,13 @@ CLASSINFO(RegionSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(Selection);
 CLASSINFO(ArdourMarker);
-CLASSINFO(LuaCairoImageSurface);
+
+namespace LuaCairo {
+	class ImageSurface;
+	class PangoLayout;
+}
+CLASSKEYS(LuaCairo::ImageSurface);
+CLASSKEYS(LuaCairo::PangoLayout);
 
 namespace Cairo {
 	class Context;

@@ -18,6 +18,7 @@
 
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
+#include <pango/pangocairo.h>
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -144,6 +145,179 @@ class ImageSurface {
 		Cairo::RefPtr<Cairo::Context> _ctx;
 		Cairo::Context ctx;
 };
+
+class PangoLayout {
+	public:
+		/** Create a new PangoLayout Text Display
+		 * @param c CairoContext for the layout
+		 * @param font_name a font-description e.g. "Mono 8px"
+		 */
+		PangoLayout (Cairo::Context* c, std::string font_name) {
+			::PangoLayout* pl = pango_cairo_create_layout (c->cobj ());
+			_layout = Glib::wrap (pl);
+			Pango::FontDescription fd (font_name);
+			_layout->set_font_description (fd);
+		}
+
+		~PangoLayout () {}
+
+		/** Gets the text in the layout. The returned text should not
+		 * be freed or modified.
+		 *
+		 * @return The text in the @a layout.
+		 */
+		std::string get_text () const {
+			return _layout->get_text ();
+		}
+		/** Set the text of the layout.
+		 * @param text The text for the layout.
+		 */
+		void set_text (const std::string& text) {
+			_layout->set_text (text);
+		}
+
+		/** Returns the number of Unicode characters in the
+		 * the text of @a layout.
+		 *
+		 * @return The number of Unicode characters
+		 * in the text of @a layout.
+		 */
+		int get_character_count () const {
+			return _layout->get_character_count ();
+		}
+
+		/** Sets the layout text and attribute list from marked-up text (see markup format).
+		 * Replaces the current text and attribute list.
+		 * @param markup Some marked-up text.
+		 */
+		void set_markup (const std::string& markup) {
+			_layout->set_markup (markup);
+		}
+
+		/** Sets the width to which the lines of the Pango::Layout should wrap or
+		 * ellipsized.  The default value is -1: no width set.
+		 *
+		 * @param width The desired width in Pango units, or -1 to indicate that no
+		 * wrapping or ellipsization should be performed.
+		 */
+		void set_width (int width) {
+			_layout->set_width (width * PANGO_SCALE);
+		}
+
+		/** Gets the width to which the lines of the Pango::Layout should wrap.
+		 *
+		 * @return The width in Pango units, or -1 if no width set.
+		 */
+		int get_width () const {
+			return _layout->get_width () / PANGO_SCALE;
+		}
+
+		/** Sets the type of ellipsization being performed for @a layout.
+		 * Depending on the ellipsization mode @a ellipsize text is
+		 * removed from the start, middle, or end of text so they
+		 * fit within the width and height of layout set with
+		 * set_width() and set_height().
+		 *
+		 * If the layout contains characters such as newlines that
+		 * force it to be layed out in multiple paragraphs, then whether
+		 * each paragraph is ellipsized separately or the entire layout
+		 * is ellipsized as a whole depends on the set height of the layout.
+		 * See set_height() for details.
+		 *
+		 * @param ellipsize The new ellipsization mode for @a layout.
+		 */
+		void set_ellipsize (Pango::EllipsizeMode ellipsize) {
+			_layout->set_ellipsize (ellipsize);
+		}
+
+		/** Gets the type of ellipsization being performed for @a layout.
+		 * See set_ellipsize()
+		 *
+		 * @return The current ellipsization mode for @a layout.
+		 *
+		 * Use is_ellipsized() to query whether any paragraphs
+		 * were actually ellipsized.
+		 */
+		Pango::EllipsizeMode get_ellipsize () const {
+			return _layout->get_ellipsize ();
+		}
+
+		/** Queries whether the layout had to ellipsize any paragraphs.
+		 *
+		 * This returns <tt>true</tt> if the ellipsization mode for @a layout
+		 * is not Pango::ELLIPSIZE_NONE, a positive width is set on @a layout,
+		 * and there are paragraphs exceeding that width that have to be
+		 * ellipsized.
+		 *
+		 * @return <tt>true</tt> if any paragraphs had to be ellipsized, <tt>false</tt>
+		 * otherwise.
+		 */
+		bool is_ellipsized () const {
+			return _layout->is_ellipsized ();
+		}
+
+		/** Sets the wrap mode; the wrap mode only has effect if a width
+		 * is set on the layout with set_width().
+		 * To turn off wrapping, set the width to -1.
+		 *
+		 * @param wrap The wrap mode.
+		 */
+		void set_wrap (Pango::WrapMode wrap) {
+			_layout->set_width (wrap);
+		}
+
+		/** Gets the wrap mode for the layout.
+		 *
+		 * Use is_wrapped() to query whether any paragraphs
+		 * were actually wrapped.
+		 *
+		 * @return Active wrap mode.
+		 */
+		Pango::WrapMode get_wrap () const {
+			return _layout->get_wrap ();
+		}
+
+		/** Queries whether the layout had to wrap any paragraphs.
+		 *
+		 * This returns <tt>true</tt> if a positive width is set on @a layout,
+		 * ellipsization mode of @a layout is set to Pango::ELLIPSIZE_NONE,
+		 * and there are paragraphs exceeding the layout width that have
+		 * to be wrapped.
+		 *
+		 * @return <tt>true</tt> if any paragraphs had to be wrapped, <tt>false</tt>
+		 * otherwise.
+		 */
+		bool is_wrapped () const {
+			return _layout->is_wrapped ();
+		}
+
+		/** Determines the logical width and height of a Pango::Layout
+		 * in device units.
+		 */
+		int get_pixel_size (lua_State *L) {
+			int width, height;
+			_layout->get_pixel_size (width, height);
+			luabridge::Stack<int>::push (L, width);
+			luabridge::Stack<int>::push (L, height);
+			return 2;
+		}
+
+
+		/** Draws a Layout in the specified Cairo @a context. The top-left
+		 *  corner of the Layout will be drawn at the current point of the
+		 *  cairo context.
+		 *
+		 * @param context A Cairo context.
+		 */
+		void show_in_cairo_context (Cairo::Context* c) {
+			pango_cairo_update_layout (c->cobj (), _layout->gobj());
+			pango_cairo_show_layout (c->cobj (), _layout->gobj());
+		}
+
+	private:
+		Glib::RefPtr<Pango::Layout> _layout;
+};
+
 }; // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +477,37 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("get_height", &LuaCairo::ImageSurface::get_height)
 		.addFunction ("get_data", &LuaCairo::ImageSurface::get_data)
 		.endClass ()
+
+		.beginClass <LuaCairo::PangoLayout> ("PangoLayout")
+		.addConstructor <void (*) (Cairo::Context*, std::string)> ()
+		.addCFunction ("get_pixel_size", &LuaCairo::PangoLayout::get_pixel_size)
+		.addFunction ("get_text", &LuaCairo::PangoLayout::get_text)
+		.addFunction ("set_text", &LuaCairo::PangoLayout::set_text)
+		.addFunction ("show_in_cairo_context", &LuaCairo::PangoLayout::show_in_cairo_context)
+		.addFunction ("get_character_count", &LuaCairo::PangoLayout::get_character_count)
+		.addFunction ("set_markup", &LuaCairo::PangoLayout::set_markup)
+		.addFunction ("set_width", &LuaCairo::PangoLayout::set_width)
+		.addFunction ("set_ellipsize", &LuaCairo::PangoLayout::set_ellipsize)
+		.addFunction ("get_ellipsize", &LuaCairo::PangoLayout::get_ellipsize)
+		.addFunction ("is_ellipsized", &LuaCairo::PangoLayout::is_ellipsized)
+		.addFunction ("set_wrap", &LuaCairo::PangoLayout::set_wrap)
+		.addFunction ("get_wrap", &LuaCairo::PangoLayout::get_wrap)
+		.addFunction ("is_wrapped", &LuaCairo::PangoLayout::is_wrapped)
+		.endClass ()
+
+		/* enums */
+		.beginNamespace ("EllipsizeMode")
+		.addConst ("None", Pango::ELLIPSIZE_NONE)
+		.addConst ("Start", Pango::ELLIPSIZE_START)
+		.addConst ("Middle", Pango::ELLIPSIZE_MIDDLE)
+		.addConst ("End", Pango::ELLIPSIZE_END)
+		.endNamespace ()
+
+		.beginNamespace ("WrapMode")
+		.addConst ("Word", Pango::WRAP_WORD)
+		.addConst ("Char", Pango::WRAP_CHAR)
+		.addConst ("WordChar", Pango::WRAP_WORD_CHAR)
+		.endNamespace ()
 
 		.endNamespace ();
 
