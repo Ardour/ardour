@@ -409,14 +409,18 @@ Editor::edit_meter_section (MeterSection* section)
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
 	double const note_type = meter_dialog.get_note_type ();
+	const Meter meter (bpb, note_type);
+
 	Timecode::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
+
 	framepos_t const frame = _session->tempo_map().frame_at_bbt (when);
+	const PositionLockStyle pls = (meter_dialog.get_lock_style() == AudioTime) ? AudioTime : MusicTime;
 
 	begin_reversible_command (_("replace meter mark"));
         XMLNode &before = _session->tempo_map().get_state();
 
-	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when, frame, meter_dialog.get_lock_style());
+	_session->tempo_map().replace_meter (*section, meter, when, frame, pls);
 
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -437,21 +441,23 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	double bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type ();
-	Timecode::BBT_Time when;
+	bpm = max (0.01, bpm);
+	const Tempo tempo (bpm, nt);
 
+	Timecode::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
-	bpm = max (0.01, bpm);
+	const TempoSection::Type ttype (tempo_dialog.get_tempo_type());
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
 
 	if (tempo_dialog.get_lock_style() == AudioTime) {
 		framepos_t const f = _session->tempo_map().predict_tempo_position (section, when).second;
-		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), 0.0, f, tempo_dialog.get_tempo_type(), AudioTime);
+		_session->tempo_map().replace_tempo (*section, tempo, 0.0, f, ttype, AudioTime);
 	} else {
 		double const p = _session->tempo_map().predict_tempo_position (section, when).first;
-		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), p, 0, tempo_dialog.get_tempo_type(), MusicTime);
+		_session->tempo_map().replace_tempo (*section, tempo, p, 0, ttype, MusicTime);
 	}
 
 	XMLNode &after = _session->tempo_map().get_state();

@@ -1391,20 +1391,30 @@ Editor::toggle_marker_lock_style ()
 		begin_reversible_command (_("change meter lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
 		MeterSection* msp = &mm->meter();
+
+		const Meter meter (msp->divisions_per_bar(), msp->note_divisor());
+		const Timecode::BBT_Time bbt (msp->bbt());
+		const framepos_t frame = msp->frame();
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt(), msp->frame(), pls);
+		_session->tempo_map().replace_meter (*msp, meter, bbt, frame, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
 	} else if (tm) {
-		begin_reversible_command (_("change tempo lock style"));
-		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
+
+		const Tempo tempo (tsp->beats_per_minute());
+		const double pulse = tsp->pulse();
+		const framepos_t frame = tsp->frame();
+		const TempoSection::Type type = tsp->type();
 		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->frame(), tsp->type(), pls);
+		begin_reversible_command (_("change tempo lock style"));
+		XMLNode &before = _session->tempo_map().get_state();
+
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, type, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1420,12 +1430,18 @@ Editor::toggle_tempo_type ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (tm) {
+		TempoSection* tsp = &tm->tempo();
+
+		const Tempo tempo (tsp->beats_per_minute(), tsp->note_type());
+		const double pulse = tsp->pulse();
+		const framepos_t frame = tsp->frame();
+		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;
+		const PositionLockStyle pls = tsp->position_lock_style();
+
 		begin_reversible_command (_("change tempo type"));
 		XMLNode &before = _session->tempo_map().get_state();
-		TempoSection* tsp = &tm->tempo();
-		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;
-		_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->frame()
-						     , type, tsp->position_lock_style());
+
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, type, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));

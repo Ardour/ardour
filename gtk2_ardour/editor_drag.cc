@@ -3324,14 +3324,16 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->begin_reversible_command (_("move tempo mark"));
 
 		} else {
+			const Tempo tempo (_marker->tempo());
 			const framepos_t frame = adjusted_current_frame (event) + 1;
+			const TempoSection::Type type = _real_section->type();
 
 			_editor->begin_reversible_command (_("copy tempo mark"));
 
 			if (_real_section->position_lock_style() == MusicTime) {
-				_real_section = map.add_tempo (_marker->tempo(), map.pulse_at_frame (frame), 0, _real_section->type(), MusicTime);
+				_real_section = map.add_tempo (tempo, map.pulse_at_frame (frame), 0, type, MusicTime);
 			} else {
-				_real_section = map.add_tempo (_marker->tempo(), 0.0, frame, _real_section->type(), AudioTime);
+				_real_section = map.add_tempo (tempo, 0.0, frame, type, AudioTime);
 			}
 
 			if (!_real_section) {
