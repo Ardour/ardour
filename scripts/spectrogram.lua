@@ -145,6 +145,7 @@ local read_ptr = 0
 local line = 0
 local img = nil
 local fft_size = 0
+local last_log = false
 
 function render_inline (ctx, w, max_h)
 	local ctrl = CtrlPorts:array () -- get control port array (read/write)
@@ -188,6 +189,12 @@ function render_inline (ctx, w, max_h)
 		fft = ARDOUR.DSP.FFTSpectrum (fft_size, rate)
 	end
 
+	if last_log ~= logscale then
+		last_log = logscale
+		img = nil
+		line = 0
+	end
+
 	-- calc height
 	if hmode == 0 then
 		h = math.ceil (w * 10 / 16)
@@ -209,12 +216,18 @@ function render_inline (ctx, w, max_h)
 	if not img or img:get_width() ~= w or img:get_height () ~= h then
 		img = Cairo.ImageSurface (Cairo.Format.ARGB32, w, h)
 	end
+	local ictx = img:context ()
 
-	-- read ring-buffer, analyze
+	local bins = fft_size / 2 - 1 -- fft bin count
+	local bpx = bins / w  -- bins per x-pixel (linear)
+	local fpb = rate / fft_size -- freq-step per bin
+	local f_e = rate / 2 / fpb -- log-scale exponent
+	local f_b = w / math.log (fft_size / 2) -- inverse log-scale base
+	local f_l = math.log (fft_size / rate) * f_b -- inverse logscale lower-bound
+
+	-- available samples in ring-buffer
 	local write_ptr = shmem:atomic_get_int (0)
 	local avail = (write_ptr + buf_size - read_ptr) % buf_size
-
-	local ictx = img:context ()
 
 	while (avail >= fft_size) do
 		-- process one line / buffer
@@ -232,12 +245,8 @@ function render_inline (ctx, w, max_h)
 		avail = (write_ptr + buf_size - read_ptr ) % buf_size
 
 		-- draw spectrum
-		local bins = fft_size / 2 - 1
-		local bpx = bins / w
-		local fpb = rate / fft_size
 		assert (bpx >= 1)
 
-		local f_e = rate / 2 / fpb
 		-- scroll
 		if line == 0 then line = h - 1; else line = line - 1; end
 
@@ -291,6 +300,35 @@ function render_inline (ctx, w, max_h)
 		ctx:rectangle (0, 0, w, yp)
 		ctx:fill ()
 	end
+
+
+	-- draw grid on top
+	function x_at_freq (f)
+		if logscale then
+			return f_l + f_b * math.log (f)
+		else
+			return 2 * w * f / rate;
+		end
+	end
+
+	function grid_freq (f)
+		-- draw vertical grid line
+		local x = .5 + math.floor (x_at_freq (f))
+		ctx:move_to (x, 0)
+		ctx:line_to (x, h)
+		ctx:stroke ()
+	end
+
+	-- draw grid on top
+	local dash3 = C.DoubleVector ()
+	dash3:add ({1, 3})
+	ctx:set_line_width (1.0)
+	ctx:set_dash (dash3, 2) -- dotted line
+	ctx:set_source_rgba (.5, .5, .5, .8)
+	grid_freq (100)
+	grid_freq (1000)
+	grid_freq (10000)
+	ctx:unset_dash ()
 
 	return {w, h}
 end
