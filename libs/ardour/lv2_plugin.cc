@@ -36,6 +36,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/replace_all.h"
 #include "pbd/xml++.h"
 
 #include "libardour-config.h"
@@ -1644,6 +1645,7 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 		LilvNode* render = get_value(lworld, unit, _world.units_render);
 		if (render) {
 			desc.print_fmt = lilv_node_as_string(render);
+			replace_all (desc.print_fmt, "%f", "%.2f");
 			lilv_node_free(render);
 		}
 	}
