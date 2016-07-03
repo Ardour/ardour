@@ -150,16 +150,12 @@ function dsp_run (ins, outs, n_samples)
 		for c = 1,#ins do
 			-- check if output and input buffers for this channel are identical
 			-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
-			if false then --- ins[c]:sameinstance (outs[c]) then
-				for k = 1,o do
-					filters[c][k]:run (ins[c]:offset (off), siz) -- in-place processing
-				end
-			else
+			if not ins[c]:sameinstance (outs[c]) then
 				-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 				ARDOUR.DSP.copy_vector (outs[c]:offset (off), ins[c]:offset (off), siz)
-				for k = 1,o do
-					filters[c][k]:run (outs[c]:offset (off), siz)
-				end
+			end
+			for k = 1,o do
+				filters[c][k]:run (outs[c]:offset (off), siz) -- in-place processing
 			end
 		end
 

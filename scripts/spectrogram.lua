@@ -215,6 +215,7 @@ function render_inline (ctx, w, max_h)
 	-- re-create image surface
 	if not img or img:get_width() ~= w or img:get_height () ~= h then
 		img = Cairo.ImageSurface (Cairo.Format.ARGB32, w, h)
+		line = 0
 	end
 	local ictx = img:context ()
 
