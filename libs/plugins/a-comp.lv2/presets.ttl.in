@@ -1,0 +1,118 @@
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix pset:  <http://lv2plug.in/ns/ext/presets#> .
+
+<urn:ardour:a-comp#preset001>
+    lv2:port [
+        lv2:symbol "att" ;
+        pset:value 10.000000 ;
+    ] ,
+    [
+        lv2:symbol "rel" ;
+        pset:value 80.000000 ;
+    ] ,
+    [
+        lv2:symbol "kn" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "rat" ;
+        pset:value 4.000000 ;
+    ] ,
+    [
+        lv2:symbol "thr" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "mak" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "gr" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "outlevel" ;
+        pset:value -45.000000 ;
+    ] ,
+    [
+        lv2:symbol "sidech" ;
+        pset:value 0.000000 ;
+    ] .
+
+<urn:ardour:a-comp#preset002>
+    lv2:port [
+        lv2:symbol "att" ;
+        pset:value 10.000000 ;
+    ] ,
+    [
+        lv2:symbol "rel" ;
+        pset:value 10.000000 ;
+    ] ,
+    [
+        lv2:symbol "kn" ;
+        pset:value 1.000000 ;
+    ] ,
+    [
+        lv2:symbol "rat" ;
+        pset:value 5.000000 ;
+    ] ,
+    [
+        lv2:symbol "thr" ;
+        pset:value -18.000000 ;
+    ] ,
+    [
+        lv2:symbol "mak" ;
+        pset:value 6.000000 ;
+    ] ,
+    [
+        lv2:symbol "gr" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "outlevel" ;
+        pset:value -45.000000 ;
+    ] ,
+    [
+        lv2:symbol "sidech" ;
+        pset:value 0.000000 ;
+    ] .
+
+<urn:ardour:a-comp#preset003>
+    lv2:port [
+        lv2:symbol "att" ;
+        pset:value 50.000000 ;
+    ] ,
+    [
+        lv2:symbol "rel" ;
+        pset:value 400.000000 ;
+    ] ,
+    [
+        lv2:symbol "kn" ;
+        pset:value 8.000000 ;
+    ] ,
+    [
+        lv2:symbol "rat" ;
+        pset:value 5.000000 ;
+    ] ,
+    [
+        lv2:symbol "thr" ;
+        pset:value -16.000000 ;
+    ] ,
+    [
+        lv2:symbol "mak" ;
+        pset:value 9.000000 ;
+    ] ,
+    [
+        lv2:symbol "gr" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "outlevel" ;
+        pset:value -45.000000 ;
+    ] ,
+    [
+        lv2:symbol "sidech" ;
+        pset:value 0.000000 ;
+    ] .
+
+
