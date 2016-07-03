@@ -340,6 +340,9 @@ Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 {
 	PresentationInfo::Flag f;
 
+	/* These numbers are defined by the MMC specification.
+	 */
+
 	if (n == 318) {
 		f = PresentationInfo::MasterOut;
 	} else if (n == 319) {
