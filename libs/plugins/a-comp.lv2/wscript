@@ -38,7 +38,7 @@ def build(bld):
         obj = bld(features     = 'c cshlib',
                   source       = 'a-comp.c',
                   name         = 'a-comp',
-                  cflags       = [ '-fPIC' ],
+                  cflags       = [ '-fPIC',  bld.env['compiler_flags_dict']['c99'] ],
                   includes     = [ '../../ardour' ],
                   target       = '../../LV2/%s/a-comp' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,
