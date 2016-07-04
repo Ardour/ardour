@@ -805,10 +805,6 @@ Editor::Editor ()
 	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
 	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
 
-	ControlProtocol::AddStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
-	ControlProtocol::ToggleStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
-	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
-
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* handle escape */
@@ -1008,48 +1004,6 @@ void
 Editor::control_unselect ()
 {
 	selection->clear_tracks ();
-}
-
-void
-Editor::control_select (PresentationInfo::order_t order, Selection::Operation op)
-{
-	/* handles the (static) signal from the ControlProtocol class that
-	 * requests setting the selected track to a given RID
-	 */
-
-	if (!_session) {
-		return;
-	}
-
-	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (order, PresentationInfo::AllStripables);
-
-	/* selected object may not be a Route */
-
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
-
-	if (!r) {
-		return;
-	}
-
-	TimeAxisView* tav = axis_view_from_route (r);
-
-	if (tav) {
-		switch (op) {
-		case Selection::Add:
-			selection->add (tav);
-			break;
-		case Selection::Toggle:
-			selection->toggle (tav);
-			break;
-		case Selection::Extend:
-			break;
-		case Selection::Set:
-			selection->set (tav);
-			break;
-		}
-	} else {
-		selection->clear_tracks ();
-	}
 }
 
 void
