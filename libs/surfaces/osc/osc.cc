@@ -2620,9 +2620,9 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 		strip = boost::dynamic_pointer_cast<Stripable>(session->get_editor_mixer().lock());
 	}
 	if (strip) {
+		_select = strip;
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
 			OSCSurface* sur = &_surface[it];
-			_select = strip;
 			if(!sur->expand_enable) {
 				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
 				_strip_select (strip, addr);
