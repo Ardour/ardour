@@ -134,6 +134,12 @@ class LIBARDOUR_API AutomationControl
 
 	virtual void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
+	/* Session needs to call this method before it queues up the real
+	   change for execution in a realtime context. C++ access control sucks.
+	*/
+	friend class Session;
+	virtual void do_pre_realtime_queue_stuff (double new_value) {}
+
   private:
 	/* I am unclear on why we have to make ControlGroup a friend in order
 	   to get access to the ::set_group() method when it is already

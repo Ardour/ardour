@@ -39,21 +39,6 @@ RecordEnableControl::RecordEnableControl (Session& session, std::string const & 
 void
 RecordEnableControl::set_value (double val, Controllable::GroupControlDisposition gcd)
 {
-	/* do the non-RT part of rec-enabling first - the RT part will be done
-	 * on the next process cycle. This does mean that theoretically we are
-	 * doing things provisionally on the assumption that the rec-enable
-	 * change will work, but this had better be a solid assumption for
-	 * other reasons.
-	 */
-
-	if (!AudioEngine::instance()->in_process_thread()) {
-		if (_recordable.prep_record_enabled (val)) {
-			/* failed */
-			std::cerr << "Prep rec-enable failed\n";
-			return;
-		}
-	}
-
 	/* Because we are marked as a RealTime control, this will queue
 	   up the control change to be executed in a realtime context.
 	*/
@@ -71,3 +56,20 @@ RecordEnableControl::actually_set_value (double val, Controllable::GroupControlD
 	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
+void
+RecordEnableControl::do_pre_realtime_queue_stuff (double newval)
+{
+	/* do the non-RT part of rec-enabling first - the RT part will be done
+	 * on the next process cycle. This does mean that theoretically we are
+	 * doing things provisionally on the assumption that the rec-enable
+	 * change will work, but this had better be a solid assumption for
+	 * other reasons.
+	 *
+	 * this is guaranteed to be called from a non-process thread.
+	 */
+
+	if (_recordable.prep_record_enabled (newval)) {
+		/* failed */
+		std::cerr << "Prep rec-enable failed\n";
+	}
+}
