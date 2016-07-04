@@ -28,15 +28,16 @@ namespace ArdourCanvas {
 
 class LIBCANVAS_API PolyLine : public PolyItem
 {
-  public:
+public:
 	PolyLine (Canvas*);
 	PolyLine (Item*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
 	virtual void set_steps (Points const &, bool stepped);
+	virtual void compute_bounding_box () const;
 
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 	/**
 	 * Set the distance at which a point will be considered to be covered
 	 * by the line. For the definition of "distance" see
@@ -44,8 +45,11 @@ class LIBCANVAS_API PolyLine : public PolyItem
 	 */
 	void set_covers_threshold (double);
 
-  private:
+	void set_fill_y1 (double);
+
+private:
 	double _threshold;
+	double _y1;
 };
 
 }

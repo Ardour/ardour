@@ -32,7 +32,7 @@ public:
 	PolyItem (Canvas*);
 	PolyItem (Item*);
 
-	void compute_bounding_box () const;
+	virtual void compute_bounding_box () const;
 
 	virtual void set (Points const &);
 	Points const & get () const;

@@ -28,6 +28,7 @@ using namespace ArdourCanvas;
 PolyLine::PolyLine (Canvas* c)
 	: PolyItem (c)
 	, _threshold (1.0)
+	, _y1 (0)
 {
 }
 
@@ -38,8 +39,54 @@ PolyLine::PolyLine (Item* parent)
 }
 
 void
+PolyLine::compute_bounding_box () const
+{
+	PolyItem::compute_bounding_box ();
+	if (_y1 > 0 && _bounding_box) {
+		_bounding_box.get().x0 = 0;
+		_bounding_box.get().x1 = COORD_MAX;
+		if (_y1 > _bounding_box.get().y1) {
+			_bounding_box.get().y1 = _y1;
+		}
+	}
+}
+
+void
+PolyLine::set_fill_y1 (double y1) {
+	begin_change ();
+	_bounding_box_dirty = true;
+	_y1 = y1;
+	end_change ();
+}
+
+void
 PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (_fill && _y1 > 0 && _points.size() > 0) {
+		const ArdourCanvas::Rect& vp (_canvas->visible_area());
+		setup_fill_context (context);
+
+		Duple y (0, _y1);
+		float y1 = item_to_window (y).y;
+		render_path (area, context);
+		Duple c0 (item_to_window (_points.back()));
+		Duple c1 (item_to_window (_points.front()));
+		if (c0.x < vp.x1) {
+			context->line_to (vp.x1, c0.y);
+			context->line_to (vp.x1, y1);
+		} else {
+			context->line_to (vp.x1, y1);
+		}
+		if (c1.x > vp.x0) {
+			context->line_to (vp.x0, y1);
+			context->line_to (vp.x0, c1.y);
+		} else {
+			context->line_to (vp.x0, y1);
+		}
+		context->close_path ();
+		context->fill ();
+	}
+
 	if (_outline) {
 		setup_outline_context (context);
 		render_path (area, context);
