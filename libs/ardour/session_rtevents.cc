@@ -38,6 +38,12 @@ void
 Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	std::cerr << "Session::set_controls called on " << cl->size() << " controls, group = " << enum_2_string (gcd) << std::endl;
+
+	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+		/* as of july 2017 this is a no-op for everything except record enable */
+		(*ci)->do_pre_realtime_queue_stuff (val);
+	}
+
 	queue_event (get_rt_event (cl, val, gcd));
 }
 
