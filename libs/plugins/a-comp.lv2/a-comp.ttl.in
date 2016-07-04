@@ -59,6 +59,7 @@
             unit:symbol " " ;
             unit:render "%f  " ;
         ] ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
