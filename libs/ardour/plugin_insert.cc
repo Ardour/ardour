@@ -858,8 +858,8 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 	 */
 
 	// TODO: atomically copy maps & _no_inplace
-	ChanMapping in_map (input_map ());
-	ChanMapping out_map (output_map ());
+	const ChanMapping in_map (no_sc_input_map ());
+	const ChanMapping out_map (output_map ());
 	if (_mapping_changed) {
 		_no_inplace = check_inplace ();
 		_mapping_changed = false;
@@ -988,14 +988,14 @@ PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
 void
 PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
 {
+	if (_sidechain) {
+		// collect sidechain input for complete cycle (!)
+		// TODO we need delaylines here for latency compensation
+		_sidechain->run (bufs, start_frame, end_frame, speed, nframes, true);
+	}
+
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
-
-		if (_sidechain) {
-			// collect sidechain input for complete cycle (!)
-			// TODO we need delaylines here for latency compensation
-			_sidechain->run (bufs, start_frame, end_frame, speed, nframes, true);
-		}
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automation_run (bufs, start_frame, end_frame, speed, nframes);
@@ -1248,6 +1248,24 @@ PluginInsert::input_map () const
 		for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 			for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 				rv.set (tm->first, i->first + pc * natural_input_streams().get(tm->first), i->second);
+			}
+		}
+	}
+	return rv;
+}
+
+
+ChanMapping
+PluginInsert::no_sc_input_map () const
+{
+	ChanMapping rv;
+	uint32_t pc = 0;
+	for (PinMappings::const_iterator i = _in_map.begin (); i != _in_map.end (); ++i, ++pc) {
+		ChanMapping m (i->second);
+		const ChanMapping::Mappings& mp ((*i).second.mappings());
+		for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+			for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+				rv.set (tm->first, i->first + pc * (natural_input_streams().get(tm->first) - _cached_sidechain_pins.get(tm->first)), i->second);
 			}
 		}
 	}

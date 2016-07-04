@@ -96,6 +96,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool pre_seed (const ChanCount&, const ChanCount&, const ChanMapping&, const ChanMapping&, const ChanMapping&);
 
 	ChanMapping input_map () const; ///< combined (all instances) input map
+	ChanMapping no_sc_input_map () const; ///< combined (all instances) input map w/o sidechain sinks
 	ChanMapping output_map () const; ///< combined (all instances) output map
 	bool has_midi_bypass () const;
 	bool has_midi_thru () const;
