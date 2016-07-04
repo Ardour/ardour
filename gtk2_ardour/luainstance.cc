@@ -176,16 +176,6 @@ class PangoLayout {
 			_layout->set_text (text);
 		}
 
-		/** Returns the number of Unicode characters in the
-		 * the text of @a layout.
-		 *
-		 * @return The number of Unicode characters
-		 * in the text of @a layout.
-		 */
-		int get_character_count () const {
-			return _layout->get_character_count ();
-		}
-
 		/** Sets the layout text and attribute list from marked-up text (see markup format).
 		 * Replaces the current text and attribute list.
 		 * @param markup Some marked-up text.
@@ -484,7 +474,6 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("get_text", &LuaCairo::PangoLayout::get_text)
 		.addFunction ("set_text", &LuaCairo::PangoLayout::set_text)
 		.addFunction ("show_in_cairo_context", &LuaCairo::PangoLayout::show_in_cairo_context)
-		.addFunction ("get_character_count", &LuaCairo::PangoLayout::get_character_count)
 		.addFunction ("set_markup", &LuaCairo::PangoLayout::set_markup)
 		.addFunction ("set_width", &LuaCairo::PangoLayout::set_width)
 		.addFunction ("set_ellipsize", &LuaCairo::PangoLayout::set_ellipsize)
