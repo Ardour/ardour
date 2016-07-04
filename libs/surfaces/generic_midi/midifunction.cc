@@ -165,14 +165,9 @@ MIDIFunction::execute ()
 
 	case Select:
 		if (!_argument.empty()) {
-			/* this uses only the numerical orderpart of a
-			   PresentionInfo, because it only sets the lower 32
-			   bits of a 64 bit value. This will be interpreted
-			   as a request to select only Routes.
-			*/
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
-			_ui->SetStripableSelection (rid);
+			_ui->toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: SetRouteSelection = %1\n", rid));
 		}
 		break;

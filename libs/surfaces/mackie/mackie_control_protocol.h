@@ -335,7 +335,7 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-	typedef std::set<boost::weak_ptr<ARDOUR::Stripable> > Selection;
+	typedef std::vector<boost::weak_ptr<ARDOUR::Stripable> > Selection;
 	Selection                _last_selected_stripables;
 	XMLNode*                 configuration_state;
 	int                      state_version;

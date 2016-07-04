@@ -2039,21 +2039,24 @@ MackieControlProtocol::select_range ()
 		return;
 	}
 
-	cerr << "Main modifier state = " << hex << main_modifier_state() << dec << endl;
+	if (stripables.size() == 1 && _last_selected_stripables.size() == 1 && stripables.front()->presentation_info().selected()) {
+		/* cancel selection for one and only selected stripable */
+		session->toggle_stripable_selection (stripables.front());
+	} else {
 
-	for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
+		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 
-		if (main_modifier_state() == MODIFIER_CONTROL) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-			cerr << "Toggle selection\n";
-			ToggleStripableSelection ((*s)->presentation_info ().order());
-		} else {
-			if (s == stripables.begin()) {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-				SetStripableSelection ((*s)->presentation_info().order());
+			if (main_modifier_state() == MODIFIER_CONTROL) {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
+				session->toggle_stripable_selection (*s);
 			} else {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add to selection %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-				AddStripableSelection ((*s)->presentation_info().order());
+				if (s == stripables.begin()) {
+					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
+					session->set_stripable_selection (*s);
+			} else {
+					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add to selection %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
+					session->add_stripable_selection (*s);
+				}
 			}
 		}
 	}
@@ -2384,12 +2387,41 @@ MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 }
 
 void
-MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool selected)
+MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool became_selected)
 {
-	if (selected) {
-		_last_selected_stripables.insert (boost::weak_ptr<Stripable> (s));
+	if (became_selected) {
+
+		if (selected (s)) {
+			/* already selected .. mmmm */
+			cerr << "stripable " << s->name() << " already marked as selected\n";
+			return;
+		}
+
+		_last_selected_stripables.push_back (boost::weak_ptr<Stripable> (s));
+
+		check_fader_automation_state ();
+
+		/* It is possible that first_selected_route() may return null if we
+		 * are no longer displaying/mapping that route. In that case,
+		 * we will exit subview mode. If first_selected_route() is
+		 * null, and subview mode is not None, then the first call to
+		 * set_subview_mode() will fail, and we will reset to None.
+		 */
+
+		if (set_subview_mode (_subview_mode, first_selected_stripable())) {
+			set_subview_mode (None, boost::shared_ptr<Stripable>());
+		}
+
 	} else {
-		_last_selected_stripables.erase (boost::weak_ptr<Stripable> (s));
+
+		for (Selection::iterator i = _last_selected_stripables.begin(); i != _last_selected_stripables.end(); ++i) {
+			boost::shared_ptr<ARDOUR::Stripable> ss = (*i).lock();
+
+			if (ss == s) {
+				_last_selected_stripables.erase (i);
+				break;
+			}
+		}
 	}
 }
 

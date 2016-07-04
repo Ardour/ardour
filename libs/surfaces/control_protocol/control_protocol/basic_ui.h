@@ -27,6 +27,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
+#include "ardour/presentation_info.h"
 
 #include "timecode/time.h"
 
@@ -35,6 +36,7 @@
 namespace ARDOUR {
 	class Session;
 	class SessionEvent;
+	class Stripable;
 }
 
 class LIBCONTROLCP_API BasicUI {
@@ -44,7 +46,13 @@ class LIBCONTROLCP_API BasicUI {
 
 	void add_marker (const std::string& = std::string());
 	void remove_marker_at_playhead ();
-	
+
+	void clear_stripable_selection ();
+	void toggle_stripable_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void add_stripable_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void set_stripable_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void toggle_selection (ARDOUR::PresentationInfo::order_t, ARDOUR::PresentationInfo::Flag);
+
 //	void mark_in();
 //	void mark_out();
 
