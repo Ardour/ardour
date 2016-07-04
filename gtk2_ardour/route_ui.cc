@@ -462,8 +462,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					_mute_release->routes = rl;
 				}
 
-				_session->set_control (_route->mute_control(), _route->muted_by_self() ? 0.0 : 1.0, Controllable::UseGroup);
-
+				_route->mute_control()->set_value (!_route->muted_by_self(), Controllable::UseGroup);
 			}
 		}
 	}
@@ -600,9 +599,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					/* ??? we need a just_one_listen() method */
 				} else {
 					DisplaySuspender ds;
-					boost::shared_ptr<ControlList> cl (new ControlList);
-					cl->push_back (_route->solo_control());
-					_session->set_controls (cl, 1.0, Controllable::NoGroup);
+					_route->solo_control()->set_value (1.0, Controllable::NoGroup);
 				}
 
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -757,7 +754,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else {
 
 			boost::shared_ptr<Track> trk = track();
-			_session->set_control (trk->rec_enable_control(), !trk->rec_enable_control()->get_value(), Controllable::UseGroup);
+			trk->rec_enable_control()->set_value (!trk->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}
 
