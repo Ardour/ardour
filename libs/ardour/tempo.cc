@@ -772,13 +772,13 @@ TempoMap::remove_meter (const MeterSection& tempo, bool complete_operation)
 bool
 TempoMap::remove_meter_locked (const MeterSection& meter)
 {
-	Metrics::iterator i;
 
-	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
-		TempoSection* t = 0;
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (meter.frame() == (*i)->frame()) {
-				if (t->locked_to_meter()) {
+	if (meter.position_lock_style() == AudioTime) {
+		/* remove meter-locked tempo */
+		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+			TempoSection* t = 0;
+			if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+				if (t->locked_to_meter() && meter.frame() == (*i)->frame()) {
 					delete (*i);
 					_metrics.erase (i);
 					break;
@@ -787,7 +787,7 @@ TempoMap::remove_meter_locked (const MeterSection& meter)
 		}
 	}
 
-	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
+	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 		if (dynamic_cast<MeterSection*> (*i) != 0) {
 			if (meter.frame() == (*i)->frame()) {
 				if ((*i)->movable()) {
@@ -981,6 +981,7 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
 	TempoSection* t = new TempoSection (pulse, frame, tempo.beats_per_minute(), tempo.note_type(), type, pls);
 	t->set_locked_to_meter (locked_to_meter);
 	bool solved = false;
+
 	do_insert (t);
 
 	if (recompute) {
@@ -993,8 +994,8 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
 	}
 
 	if (!solved && recompute) {
-		remove_tempo_locked (*t);
-		return 0;
+		warning << "Adding tempo may have left the tempo map unsolved." << endmsg;
+		recompute_map (_metrics);
 	}
 
 	return t;
@@ -1087,8 +1088,11 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 	}
 
 	if (!solved && recompute) {
-		remove_meter_locked (*new_meter);
-		return 0;
+		/* if this has failed to solve, there is little we can do other than to ensure that
+		   the new map is recalculated.
+		*/
+		warning << "Adding meter may have left the tempo map unsolved." << endmsg;
+		recompute_map (_metrics);
 	}
 
 	return new_meter;
@@ -2111,10 +2115,17 @@ TempoMap::check_solved (const Metrics& metrics) const
 			m = static_cast<MeterSection*> (*i);
 			if (prev_m && m->position_lock_style() == AudioTime) {
 				const TempoSection* t = &tempo_section_at_frame_locked (metrics, m->frame() - 1);
-				const double nascent_m_pulse = ((m->beat() - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse();
-				const framepos_t nascent_m_frame = t->frame_at_pulse (nascent_m_pulse, _frame_rate);
-
-				if (t && (nascent_m_frame > m->frame() || nascent_m_frame < 0)) {
+				const framepos_t nascent_m_frame = t->frame_at_pulse (m->pulse(), _frame_rate);
+				/* Here we check that a preceding section of music doesn't overlap a subsequent one.
+				   It is complicated by the fact that audio locked meters represent a discontinuity in the pulse
+				   (they place an exact pulse at a particular time expressed only in frames).
+				   This has the effect of shifting the calculated frame at the meter pulse (wrt the previous section of music)
+				   away from its actual frame (which is now the frame location of the exact pulse).
+				   This can result in the calculated frame (from the previous musical section)
+				   differing from the exact frame by one sample.
+				   Allow for that.
+				*/
+				if (t && (nascent_m_frame > m->frame() + 1 || nascent_m_frame < 0)) {
 					return false;
 				}
 			}
