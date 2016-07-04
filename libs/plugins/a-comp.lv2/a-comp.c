@@ -79,7 +79,7 @@ typedef struct {
 	float v_knee;
 	float v_ratio;
 	float v_thresdb;
-	float v_makeup;
+	float v_lvl;
 #endif
 } AComp;
 
@@ -224,11 +224,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 		acomp->v_thresdb = *acomp->thresdb;
 		acomp->need_expose = true;
 	}
-
-	if (acomp->v_makeup != *acomp->makeup) {
-		acomp->v_makeup = *acomp->makeup;
-		acomp->need_expose = true;
-	}
 #endif
 
 	for (i = 0; i < n_samples; i++) {
@@ -267,13 +262,21 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
 
+		// TODO re-use local variables on stack
+		// store values back to acomp at the end of the inner-loop
 		acomp->old_yl = Lyl;
 		acomp->old_y1 = Ly1;
 		acomp->old_yg = Lyg;
 	}
+
 	*(acomp->outlevel) = (max == 0.f) ? -45.f : to_dB(max);
 
 #ifdef LV2_EXTENDED
+	// XXX Lyg is not correct, we need input-level filtered by attack/release
+	if (fabsf (acomp->v_lvl - Lyg) >= 1) { // quantize to 1dB difference
+		acomp->need_expose = true;
+		acomp->v_lvl = Lyg;
+	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
 		acomp->queue_draw->queue_draw (acomp->queue_draw->handle);
@@ -307,17 +310,13 @@ cleanup(LV2_Handle instance)
 
 #ifdef LV2_EXTENDED
 static float
-comp_curve (AComp* self, float in) {
+comp_curve (AComp* self, float xg) {
 	const float knee = self->v_knee;
 	const float ratio = self->v_ratio;
-	const float makeup = self->v_makeup;
 	const float thresdb = self->v_thresdb;
 
 	const float width = 6.f * knee + 0.01f;
-	float xg, yg;
-
-	yg = 0.f;
-	xg = (in == 0.f) ? -160.f : to_dB (fabs (in));
+	float yg = 0.f;
 
 	if (2.f * (xg - thresdb) < -width) {
 		yg = xg;
@@ -326,8 +325,7 @@ comp_curve (AComp* self, float in) {
 	} else if (2.f * (xg - thresdb) > width) {
 		yg = thresdb + (xg - thresdb) / ratio;
 	}
-
-	return yg + makeup;
+	return yg;
 }
 
 
@@ -335,7 +333,7 @@ static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
 	AComp* self = (AComp*)instance;
-	uint32_t h = MIN (ceilf (w * 9.f/16.f), max_h);
+	uint32_t h = MIN (w, max_h);
 
 	if (!self->display || self->w != w || self->h != h) {
 		if (self->display) cairo_surface_destroy(self->display);
@@ -351,20 +349,51 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
 	cairo_fill (cr);
 
-	// TODO draw grid.
-
-	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
 	cairo_set_line_width(cr, 1.0);
-	cairo_move_to (cr, 0, 0);
+
+	// draw grid 10dB steps
+	const double dash2[] = {1, 3};
+	cairo_save (cr);
+	cairo_set_dash(cr, dash2, 2, 2);
+	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+
+	for (uint32_t d = 1; d < 6; ++d) {
+		const float x = -.5 + floorf (w * (d * 10.f / 60.f));
+		const float y = -.5 + floorf (h * (d * 10.f / 60.f));
+
+		cairo_move_to (cr, x, 0);
+		cairo_line_to (cr, x, h);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, w, y);
+		cairo_stroke (cr);
+	}
+	cairo_restore (cr);
+
+
+	// draw curve
+	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
+	cairo_move_to (cr, 0, h);
 
 	for (uint32_t x = 0; x < w; ++x) {
-		// TODO proper range..
-		float v = x / (float)w;
-		float y_db = comp_curve (self, v);
-		float y = h - h * from_dB (y_db);
+		// plot -60..0  dB
+		const float x_db = 60.f * (-1.f + x / (float)w);
+		const float y_db = comp_curve (self, x_db);
+		const float y = h * (y_db / -60.f);
 		cairo_line_to (cr, x, y);
 	}
-	cairo_stroke (cr);
+	cairo_stroke_preserve (cr);
+
+	cairo_line_to (cr, w, h);
+	cairo_close_path (cr);
+	cairo_clip (cr);
+
+	// draw signal level
+	const float x = w * (self->v_lvl + 60) / 60.f;
+	cairo_rectangle (cr, 0, 0, x, h);
+	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+	cairo_fill (cr);
 
 
 	// create RGBA surface
