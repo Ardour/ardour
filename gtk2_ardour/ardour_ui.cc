@@ -2306,7 +2306,12 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	if (affect_transport) {
 		if (rolling) {
 			_session->request_stop (with_abort, true);
-		} else {
+
+		} else if (!with_abort) { /* with_abort == true means the
+		                           * command was intended to stop
+		                           * transport, not start.
+		                           */
+
 			/* the only external sync condition we can be in here
 			 * would be Engine (JACK) sync, in which case we still
 			 * want to do this.
