@@ -38,6 +38,7 @@ using std::string;
 
 string PresentationInfo::state_node_name = X_("PresentationInfo");
 PBD::Signal0<void> PresentationInfo::Change;
+PBD::Signal0<void> PresentationInfo::SelectionChange;
 
 namespace ARDOUR {
 	namespace Properties {

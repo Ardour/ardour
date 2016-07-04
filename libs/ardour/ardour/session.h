@@ -302,6 +302,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	};
 
 	void notify_presentation_info_change ();
+	void clear_stripable_selection ();
+	void toggle_stripable_selection (boost::shared_ptr<Stripable>);
+	void add_stripable_selection (boost::shared_ptr<Stripable>);
+	void set_stripable_selection (boost::shared_ptr<Stripable>);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
