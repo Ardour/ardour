@@ -222,6 +222,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 static void
 deactivate(LV2_Handle instance)
 {
+	activate(instance);
 }
 
 static void
