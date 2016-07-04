@@ -39,8 +39,10 @@ def build(bld):
                   source       = 'a-comp.c',
                   name         = 'a-comp',
                   cflags       = [ '-fPIC' ],
+                  includes     = [ '../../ardour' ],
                   target       = '../../LV2/%s/a-comp' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,
+                  uselib       = 'CAIRO',
                   use          = 'LV2_1_0_0'
                   )
         obj.env.cshlib_PATTERN = module_pat

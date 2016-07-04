@@ -14,6 +14,13 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#ifdef LV2_EXTENDED
+#include <cairo/cairo.h>
+#include "ardour/lv2_extensions.h"
+#endif
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
@@ -57,6 +64,23 @@ typedef struct {
 	float old_yl;
 	float old_y1;
 	float old_yg;
+
+#ifdef LV2_EXTENDED
+	bool                     need_expose;
+	LV2_Inline_Display_Image_Surface surf;
+	cairo_surface_t*         display;
+	LV2_Inline_Display*      queue_draw;
+	uint32_t                 w, h;
+
+	/* ports pointers are only valid during run so we'll
+	 * have to cache them for the display, besides
+	 * we do want to check for changes
+	 */
+	float v_knee;
+	float v_ratio;
+	float v_thresdb;
+	float v_makeup;
+#endif
 } AComp;
 
 static LV2_Handle
@@ -65,10 +89,19 @@ instantiate(const LV2_Descriptor* descriptor,
             const char* bundle_path,
             const LV2_Feature* const* features)
 {
-	AComp* acomp = (AComp*)malloc(sizeof(AComp));
-	acomp->srate = rate;
+	AComp* acomp = (AComp*)calloc(1, sizeof(AComp));
 
+	for (int i=0; features[i]; ++i) {
+#ifdef LV2_EXTENDED
+		if (!strcmp(features[i]->URI, LV2_INLINEDISPLAY__queue_draw)) {
+			acomp->queue_draw = (LV2_Inline_Display*) features[i]->data;
+		}
+#endif
+	}
+
+	acomp->srate = rate;
 	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
+	acomp->need_expose = true;
 
 	return (LV2_Handle)acomp;
 }
@@ -176,6 +209,28 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float ratio = *(acomp->ratio);
 	float thresdb = *(acomp->thresdb);
 
+#ifdef LV2_EXTENDED
+	if (acomp->v_knee != *acomp->knee) {
+		acomp->v_knee = *acomp->knee;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_ratio != *acomp->ratio) {
+		acomp->v_ratio = *acomp->ratio;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_thresdb != *acomp->thresdb) {
+		acomp->v_thresdb = *acomp->thresdb;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_makeup != *acomp->makeup) {
+		acomp->v_makeup = *acomp->makeup;
+		acomp->need_expose = true;
+	}
+#endif
+
 	for (i = 0; i < n_samples; i++) {
 		in0 = input0[i];
 		in1 = input1[i];
@@ -217,6 +272,13 @@ run(LV2_Handle instance, uint32_t n_samples)
 		acomp->old_yg = Lyg;
 	}
 	*(acomp->outlevel) = (max == 0.f) ? -45.f : to_dB(max);
+
+#ifdef LV2_EXTENDED
+	if (acomp->need_expose && acomp->queue_draw) {
+		acomp->need_expose = false;
+		acomp->queue_draw->queue_draw (acomp->queue_draw->handle);
+	}
+#endif
 }
 
 static void
@@ -228,12 +290,102 @@ deactivate(LV2_Handle instance)
 static void
 cleanup(LV2_Handle instance)
 {
+#ifdef LV2_EXTENDED
+	AComp* acomp = (AComp*)instance;
+	if (acomp->display) {
+		cairo_surface_destroy (acomp->display);
+	}
+#endif
+
 	free(instance);
 }
+
+
+#ifndef MIN
+#define MIN(A,B) ((A) < (B)) ? (A) : (B)
+#endif
+
+#ifdef LV2_EXTENDED
+static float
+comp_curve (AComp* self, float in) {
+	const float knee = self->v_knee;
+	const float ratio = self->v_ratio;
+	const float makeup = self->v_makeup;
+	const float thresdb = self->v_thresdb;
+
+	const float width = 6.f * knee + 0.01f;
+	float xg, yg;
+
+	yg = 0.f;
+	xg = (in == 0.f) ? -160.f : to_dB (fabs (in));
+
+	if (2.f * (xg - thresdb) < -width) {
+		yg = xg;
+	} else if (2.f * fabs (xg - thresdb) <= width) {
+		yg = xg + (1.f / ratio - 1.f ) * (xg - thresdb + width / 2.f) * (xg - thresdb + width / 2.f) / (2.f * width);
+	} else if (2.f * (xg - thresdb) > width) {
+		yg = thresdb + (xg - thresdb) / ratio;
+	}
+
+	return yg + makeup;
+}
+
+
+static LV2_Inline_Display_Image_Surface *
+render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
+{
+	AComp* self = (AComp*)instance;
+	uint32_t h = MIN (ceilf (w * 9.f/16.f), max_h);
+
+	if (!self->display || self->w != w || self->h != h) {
+		if (self->display) cairo_surface_destroy(self->display);
+		self->display = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
+		self->w = w;
+		self->h = h;
+	}
+
+	cairo_t* cr = cairo_create (self->display);
+
+	// clear background
+	cairo_rectangle (cr, 0, 0, w, h);
+	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
+	cairo_fill (cr);
+
+	// TODO draw grid.
+
+	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
+	cairo_set_line_width(cr, 1.0);
+	cairo_move_to (cr, 0, 0);
+
+	for (uint32_t x = 0; x < w; ++x) {
+		// TODO proper range..
+		float v = x / (float)w;
+		float y_db = comp_curve (self, v);
+		float y = h - h * from_dB (y_db);
+		cairo_line_to (cr, x, y);
+	}
+	cairo_stroke (cr);
+
+
+	// create RGBA surface
+	cairo_destroy (cr);
+	cairo_surface_flush (self->display);
+	self->surf.width = cairo_image_surface_get_width (self->display);
+	self->surf.height = cairo_image_surface_get_height (self->display);
+	self->surf.stride = cairo_image_surface_get_stride (self->display);
+	self->surf.data = cairo_image_surface_get_data  (self->display);
+
+	return &self->surf;
+}
+#endif
 
 static const void*
 extension_data(const char* uri)
 {
+	static const LV2_Inline_Display_Interface display  = { render_inline };
+	if (!strcmp(uri, LV2_INLINEDISPLAY__interface)) {
+		return &display;
+	}
 	return NULL;
 }
 
