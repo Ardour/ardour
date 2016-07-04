@@ -324,6 +324,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_spinner.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_ui.cc"
 				>
 			</File>
@@ -1363,6 +1367,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ardour_knob.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_spinner.h"
 				>
 			</File>
 			<File
