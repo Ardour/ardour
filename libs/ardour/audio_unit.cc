@@ -1263,12 +1263,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
 			int32_t possible_in = i->first;
 			int32_t possible_out = i->second;
-			if (possible_in <= 1 || possible_out <= 1) {
+			if (possible_in < 1 || possible_out < 1) {
 				continue;
 			}
 			for (uint32_t i = 1; i < input_elements; ++i) {
-				// TODO: consider up-to bus_inputs[i]
-				io_configs.push_back (pair<int,int> (possible_in + bus_inputs[i], possible_out));
+				for (uint32_t j = 0; j < bus_inputs[i]; ++j) {
+					io_configs.push_back (pair<int,int> (possible_in + j, possible_out));
+				}
 			}
 		}
 	}
