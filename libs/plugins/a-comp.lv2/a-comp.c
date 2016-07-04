@@ -80,6 +80,8 @@ typedef struct {
 	float v_ratio;
 	float v_thresdb;
 	float v_lvl;
+	float v_lvl_in;
+	float v_lvl_out;
 #endif
 } AComp;
 
@@ -226,6 +228,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
+	float in_peak = 0;
+
 	for (i = 0; i < n_samples; i++) {
 		in0 = input0[i];
 		in1 = input1[i];
@@ -257,6 +261,9 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 		*(acomp->gainr) = Lyl;
 
+		if (in0 > in_peak) {
+			in_peak = in0;
+		}
 		lgaininp = in0 * Lgain;
 		output[i] = lgaininp * from_dB(*(acomp->makeup));
 
@@ -272,10 +279,14 @@ run(LV2_Handle instance, uint32_t n_samples)
 	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 
 #ifdef LV2_EXTENDED
-	const float v_lvl = (max < 0.001f) ? -60.f : to_dB(max);
-	if (fabsf (acomp->v_lvl - v_lvl) >= 1) { // quantize to 1dB difference
+	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
+	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
+	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
+	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
+		// >= 1dB difference
 		acomp->need_expose = true;
-		acomp->v_lvl = v_lvl;
+		acomp->v_lvl_in = v_lvl_in;
+		acomp->v_lvl_out = v_lvl_out - *acomp->makeup;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -328,7 +339,6 @@ comp_curve (AComp* self, float xg) {
 	return yg;
 }
 
-
 static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
@@ -352,8 +362,10 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_set_line_width(cr, 1.0);
 
 	// draw grid 10dB steps
+	const double dash1[] = {1, 2};
 	const double dash2[] = {1, 3};
 	cairo_save (cr);
+	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_dash(cr, dash2, 2, 2);
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
 
@@ -367,6 +379,17 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
+		cairo_stroke (cr);
+	}
+	if (self->v_thresdb < 0) {
+		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
+		const float y = -.5 + floorf (h * (self->v_thresdb / -60.f));
+		cairo_set_dash(cr, dash1, 2, 2);
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, w, y);
+		cairo_stroke (cr);
+		cairo_move_to (cr, 0, h);
+		cairo_line_to (cr, w, 0);
 		cairo_stroke (cr);
 	}
 	cairo_restore (cr);
@@ -389,13 +412,34 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_close_path (cr);
 	cairo_clip (cr);
 
-	// draw signal level
-	// TODO add a gradient pattern above threshold
+	// draw signal level & reduction/gradient
+	const float top = comp_curve (self, 0);
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, h);
+	if (top > self->v_thresdb) {
+		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0.8, 0.1, 0.1, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, top / -60.f, 0.8, 0.1, 0.1, 0.5);
+	}
+	if (self->v_knee > 0) {
+		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - self->v_knee) / -60.f), 0.5, 0.5, 0.5, 0.5);
+	} else {
+		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - .01) / -60.f), 0.5, 0.5, 0.5, 0.5);
+	}
+	cairo_pattern_add_color_stop_rgba (pat, 1.0, 0.5, 0.5, 0.5, 0.5);
+
 	// maybe cut off at x-position?
-	const float y = h * (self->v_lvl + 60) / 60.f;
-	cairo_rectangle (cr, 0, h - y, w, y);
-	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+	const float x = w * (self->v_lvl_in + 60) / 60.f;
+	const float y = h * (self->v_lvl_out + 60) / 60.f;
+	cairo_rectangle (cr, 0, h - y, x, y);
+	if (self->v_ratio > 1.0) {
+		cairo_set_source (cr, pat);
+	} else {
+		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+	}
 	cairo_fill (cr);
+
+	cairo_pattern_destroy (pat); // TODO cache pattern
 
 
 	// create RGBA surface
