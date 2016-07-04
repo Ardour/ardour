@@ -1289,15 +1289,13 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-	blink_rec_display(true);  //this lets the button change "immediately" rather than wait for the next blink
-	update_monitoring_display ();
+	blink_rec_display (true);  //this lets the button change "immediately" rather than wait for the next blink
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-	blink_rec_display(true);  //this lets the button change "immediately" rather than wait for the next blink
-	update_monitoring_display ();
+	blink_rec_display (true);  //this lets the button change "immediately" rather than wait for the next blink
 }
 
 void
