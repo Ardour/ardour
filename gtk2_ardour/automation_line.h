@@ -73,6 +73,7 @@ public:
 	void queue_reset ();
 	void reset ();
 	void clear ();
+	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
 
 	void set_selected_points (PointSelection const &);
 	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
@@ -235,6 +236,8 @@ private:
 
 	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
 	ARDOUR::framecnt_t _maximum_time;
+
+	bool _fill;
 
 	const ARDOUR::ParameterDescriptor _desc;
 

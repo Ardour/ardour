@@ -86,6 +86,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	, _parent_group (parent)
 	, _offset (0)
 	, _maximum_time (max_framepos)
+	, _fill (false)
 	, _desc (desc)
 {
 	if (converter) {
@@ -229,6 +230,11 @@ AutomationLine::set_height (guint32 h)
 			(*i)->set_size (bsz);
 		}
 
+		if (_fill) {
+			line->set_fill_y1 (_height);
+		} else {
+			line->set_fill_y1 (0);
+		}
 		reset ();
 	}
 }
@@ -238,6 +244,7 @@ AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
 	line->set_outline_color (color);
+	line->set_fill_color ((color & 0xffff00) + 80); // XXX TODO configurable transparency
 }
 
 void

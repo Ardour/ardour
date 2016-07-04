@@ -270,6 +270,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 			);
 
 		line->set_line_color (UIConfiguration::instance().color ("processor automation line"));
+		line->set_fill (true);
 		line->queue_reset ();
 		add_line (line);
 	}
