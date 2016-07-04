@@ -130,9 +130,7 @@ FaderPort::mute ()
 		return;
 	}
 
-	boost::shared_ptr<ControlList> cl (new ControlList);
-	cl->push_back (_current_stripable->mute_control());
-	session->set_controls (cl, !_current_stripable->mute_control()->muted(), PBD::Controllable::UseGroup);
+	_current_stripable->mute_control()->set_value (!_current_stripable->mute_control()->muted(), PBD::Controllable::UseGroup);
 }
 
 void
@@ -142,7 +140,7 @@ FaderPort::solo ()
 		return;
 	}
 
-	_current_stripable->solo_control()->set_value (_current_stripable->solo_control()->soloed() ? 0.0 : 1.0, PBD::Controllable::UseGroup);
+	_current_stripable->solo_control()->set_value (_current_stripable->solo_control()->soloed(), PBD::Controllable::UseGroup);
 }
 
 void
