@@ -269,13 +269,13 @@ run(LV2_Handle instance, uint32_t n_samples)
 		acomp->old_yg = Lyg;
 	}
 
-	*(acomp->outlevel) = (max == 0.f) ? -45.f : to_dB(max);
+	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 
 #ifdef LV2_EXTENDED
-	// XXX Lyg is not correct, we need input-level filtered by attack/release
-	if (fabsf (acomp->v_lvl - Lyg) >= 1) { // quantize to 1dB difference
+	const float v_lvl = (max < 0.001f) ? -60.f : to_dB(max);
+	if (fabsf (acomp->v_lvl - v_lvl) >= 1) { // quantize to 1dB difference
 		acomp->need_expose = true;
-		acomp->v_lvl = Lyg;
+		acomp->v_lvl = v_lvl;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -390,8 +390,10 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_clip (cr);
 
 	// draw signal level
-	const float x = w * (self->v_lvl + 60) / 60.f;
-	cairo_rectangle (cr, 0, 0, x, h);
+	// TODO add a gradient pattern above threshold
+	// maybe cut off at x-position?
+	const float y = h * (self->v_lvl + 60) / 60.f;
+	cairo_rectangle (cr, 0, h - y, w, y);
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
 	cairo_fill (cr);
 
