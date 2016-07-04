@@ -353,17 +353,19 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
 	double note_type = meter_dialog.get_note_type ();
-	Timecode::BBT_Time requested;
 
+	Timecode::BBT_Time requested;
 	meter_dialog.get_bbt_time (requested);
+
+	const double beat = map.beat_at_bbt (requested);
 
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested,  map.frame_at_bbt (requested), MusicTime);
+		map.add_meter (Meter (bpb, note_type), beat, requested,  map.frame_at_beat (beat), MusicTime);
 	} else {
-		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested, map.frame_at_bbt (requested), AudioTime);
+		map.add_meter (Meter (bpb, note_type), beat, requested, map.frame_at_beat (beat), AudioTime);
 	}
 
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
