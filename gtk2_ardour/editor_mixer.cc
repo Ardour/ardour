@@ -197,21 +197,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		return;
 	}
 
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		if (!tact || !tact->get_active()) {
-			/* not showing mixer strip presently */
-			return;
-		}
-	}
-
-	if (current_mixer_strip == 0) {
-		create_editor_mixer ();
-	}
-
-
 	// if this is an automation track, then we shold the mixer strip should
 	// show the parent
 
@@ -238,6 +223,22 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 				route = mt->route();
 			}
 		}
+	}
+
+	_session->set_editor_mixer (route);
+
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		if (!tact || !tact->get_active()) {
+			/* not showing mixer strip presently */
+			return;
+		}
+	}
+
+	if (current_mixer_strip == 0) {
+		create_editor_mixer ();
 	}
 
 	if (current_mixer_strip->route() == route) {

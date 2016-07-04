@@ -2617,7 +2617,7 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 	boost::shared_ptr<Stripable> strip;
 
 	if (!stripables->empty()) {
-		strip = stripables->front().lock();
+		strip = boost::dynamic_pointer_cast<Stripable>(session->get_editor_mixer().lock());
 	}
 	if (strip) {
 		for (uint32_t it = 0; it < _surface.size(); ++it) {

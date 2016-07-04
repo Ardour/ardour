@@ -818,6 +818,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
+	boost::weak_ptr<Route> get_editor_mixer() const { return _editor_mixer; }
+	void set_editor_mixer (boost::weak_ptr<Route> r) { _editor_mixer = r; }
 
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
 	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
@@ -1867,6 +1869,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> _master_out;
 	boost::shared_ptr<Route> _monitor_out;
+	boost::weak_ptr<Route> _editor_mixer;
 
 	void auto_connect_master_bus ();
 
