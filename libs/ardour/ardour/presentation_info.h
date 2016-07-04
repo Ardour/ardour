@@ -208,7 +208,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		/* compare without status mask - we already checked that above 
 		 */
 
-		return (f &~ (StatusMask|OrderSet)) == (_flags &~ (StatusMask|OrderSet));
+		return (_flags & (f &~ (StatusMask|OrderSet))) != 0; /* some flag matches */
 	}
 
 	int set_state (XMLNode const&, int);
