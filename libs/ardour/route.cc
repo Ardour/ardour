@@ -3443,6 +3443,12 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	_trim->apply_gain_automation (false);
 	passthru (bufs, start_frame, end_frame, nframes, 0);
 
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		if (d) {
+			d->flush_buffers (nframes);
+		}
+	}
 	return 0;
 }
 
@@ -3481,6 +3487,12 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		if (d) {
+			d->flush_buffers (nframes);
+		}
+	}
 	return 0;
 }
 
