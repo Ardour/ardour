@@ -26,7 +26,7 @@ def build(bld):
 
     if bld.is_defined ('HAVE_LV2'):
         # Build RDF files
-        for i in ['manifest.ttl', 'a-comp.ttl', 'presets.ttl']:
+        for i in ['manifest.ttl', 'a-comp.ttl', 'a-comp#stereo.ttl', 'presets.ttl']:
             bld(features     = 'subst',
                 source       = i + '.in',
                 target       = '../../LV2/%s/%s' % (bundle, i),

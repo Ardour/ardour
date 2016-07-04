@@ -11,7 +11,7 @@
 	foaf:name "Ardour Team" ;
 	foaf:homepage <http://ardour.org/> .
 
-<urn:ardour:a-comp>
+<urn:ardour:a-comp#stereo>
     a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
     lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable>;
@@ -114,28 +114,40 @@
     lv2:port [
         a lv2:InputPort, lv2:AudioPort ;
         lv2:index 9 ;
-        lv2:symbol "lv2_audio_in_1" ;
+        lv2:symbol "in_1" ;
         lv2:name "Audio Input 1" ;
     ] ,
     [
         a lv2:InputPort, lv2:AudioPort ;
         lv2:index 10 ;
-        lv2:symbol "lv2_sidechain_in" ;
+        lv2:symbol "in_2" ;
+        lv2:name "Audio Input 2" ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 11 ;
+        lv2:symbol "sidechain_in" ;
         lv2:name "Sidechain Input" ;
         lv2:portProperty lv2:isSideChain;
     ],
     [
         a lv2:OutputPort, lv2:AudioPort ;
-        lv2:index 11 ;
-        lv2:symbol "lv2_audio_out_1" ;
+        lv2:index 12 ;
+        lv2:symbol "out_1" ;
         lv2:name "Audio Output 1" ;
+    ],
+    [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 13 ;
+        lv2:symbol "out_2" ;
+        lv2:name "Audio Output 2" ;
     ] ;
 
     rdfs:comment """
-A powerful mono compressor.
+A powerful stereo compressor.
 """ ;
 
-    doap:name "a-comp" ;
+    doap:name "a-comp stereo" ;
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html>
 

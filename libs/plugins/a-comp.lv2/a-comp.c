@@ -24,14 +24,11 @@
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
-#define ACOMP_URI "urn:ardour:a-comp"
+#define ACOMP_URI		"urn:ardour:a-comp"
+#define ACOMP_STEREO_URI	"urn:ardour:a-comp#stereo"
 
 typedef enum {
-	ACOMP_INPUT0 = 0,
-	ACOMP_INPUT1,
-	ACOMP_OUTPUT,
-
-	ACOMP_ATTACK,
+	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
 	ACOMP_KNEE,
 	ACOMP_RATIO,
@@ -41,14 +38,32 @@ typedef enum {
 	ACOMP_GAINR,
 	ACOMP_OUTLEVEL,
 	ACOMP_SIDECHAIN,
-} PortIndex;
 
+	ACOMP_INPUT,
+	ACOMP_SC,
+	ACOMP_OUTPUT,
+} PortIndexMono;
+
+typedef enum {
+	ACOMP_STEREO_ATTACK = 0,
+	ACOMP_STEREO_RELEASE,
+	ACOMP_STEREO_KNEE,
+	ACOMP_STEREO_RATIO,
+	ACOMP_STEREO_THRESHOLD,
+	ACOMP_STEREO_MAKEUP,
+
+	ACOMP_STEREO_GAINR,
+	ACOMP_STEREO_OUTLEVEL,
+	ACOMP_STEREO_SIDECHAIN,
+
+	ACOMP_STEREO_INPUT0,
+	ACOMP_STEREO_INPUT1,
+	ACOMP_STEREO_SC,
+	ACOMP_STEREO_OUTPUT0,
+	ACOMP_STEREO_OUTPUT1,
+} PortIndexStereo;
 
 typedef struct {
-	float* input0;
-	float* input1;
-	float* output;
-
 	float* attack;
 	float* release;
 	float* knee;
@@ -59,6 +74,12 @@ typedef struct {
 	float* gainr;
 	float* outlevel;
 	float* sidechain;
+
+	float* input0;
+	float* input1;
+	float* sc;
+	float* output0;
+	float* output1;
 
 	float srate;
 	float old_yl;
@@ -108,14 +129,15 @@ instantiate(const LV2_Descriptor* descriptor,
 	return (LV2_Handle)acomp;
 }
 
+
 static void
-connect_port(LV2_Handle instance,
+connect_port_mono(LV2_Handle instance,
              uint32_t port,
              void* data)
 {
 	AComp* acomp = (AComp*)instance;
 
-	switch ((PortIndex)port) {
+	switch ((PortIndexMono)port) {
 	case ACOMP_ATTACK:
 		acomp->attack = (float*)data;
 		break;
@@ -143,14 +165,67 @@ connect_port(LV2_Handle instance,
 	case ACOMP_SIDECHAIN:
 		acomp->sidechain = (float*)data;
 		break;
-	case ACOMP_INPUT0:
+	case ACOMP_INPUT:
 		acomp->input0 = (float*)data;
 		break;
-	case ACOMP_INPUT1:
-		acomp->input1 = (float*)data;
+	case ACOMP_SC:
+		acomp->sc = (float*)data;
 		break;
 	case ACOMP_OUTPUT:
-		acomp->output = (float*)data;
+		acomp->output0 = (float*)data;
+		break;
+	}
+}
+
+static void
+connect_port_stereo(LV2_Handle instance,
+             uint32_t port,
+             void* data)
+{
+	AComp* acomp = (AComp*)instance;
+
+	switch ((PortIndexStereo)port) {
+	case ACOMP_STEREO_ATTACK:
+		acomp->attack = (float*)data;
+		break;
+	case ACOMP_STEREO_RELEASE:
+		acomp->release = (float*)data;
+		break;
+	case ACOMP_STEREO_KNEE:
+		acomp->knee = (float*)data;
+		break;
+	case ACOMP_STEREO_RATIO:
+		acomp->ratio = (float*)data;
+		break;
+	case ACOMP_STEREO_THRESHOLD:
+		acomp->thresdb = (float*)data;
+		break;
+	case ACOMP_STEREO_MAKEUP:
+		acomp->makeup = (float*)data;
+		break;
+	case ACOMP_STEREO_GAINR:
+		acomp->gainr = (float*)data;
+		break;
+	case ACOMP_STEREO_OUTLEVEL:
+		acomp->outlevel = (float*)data;
+		break;
+	case ACOMP_STEREO_SIDECHAIN:
+		acomp->sidechain = (float*)data;
+		break;
+	case ACOMP_STEREO_INPUT0:
+		acomp->input0 = (float*)data;
+		break;
+	case ACOMP_STEREO_INPUT1:
+		acomp->input1 = (float*)data;
+		break;
+	case ACOMP_STEREO_SC:
+		acomp->sc = (float*)data;
+		break;
+	case ACOMP_STEREO_OUTPUT0:
+		acomp->output0 = (float*)data;
+		break;
+	case ACOMP_STEREO_OUTPUT1:
+		acomp->output1 = (float*)data;
 		break;
 	}
 }
@@ -185,13 +260,13 @@ activate(LV2_Handle instance)
 }
 
 static void
-run(LV2_Handle instance, uint32_t n_samples)
+run_mono(LV2_Handle instance, uint32_t n_samples)
 {
 	AComp* acomp = (AComp*)instance;
 
-	const float* const input0 = acomp->input0;
-	const float* const input1 = acomp->input1;
-	float* const output = acomp->output;
+	const float* const input = acomp->input0;
+	const float* const sc = acomp->sc;
+	float* const output = acomp->output0;
 
 	float srate = acomp->srate;
 	float width = (6.f * *(acomp->knee)) + 0.01;
@@ -207,7 +282,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	uint32_t i;
 	float ingain;
 	float in0;
-	float in1;
+	float sc0;
 	float ratio = *(acomp->ratio);
 	float thresdb = *(acomp->thresdb);
 
@@ -231,9 +306,9 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float in_peak = 0;
 
 	for (i = 0; i < n_samples; i++) {
-		in0 = input0[i];
-		in1 = input1[i];
-		ingain = usesidechain ? in1 : in0;
+		in0 = input[i];
+		sc0 = sc[i];
+		ingain = usesidechain ? sc0 : in0;
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(fabs(ingain));
 		Lxg = sanitize_denormal(Lxg);
@@ -268,6 +343,124 @@ run(LV2_Handle instance, uint32_t n_samples)
 		output[i] = lgaininp * from_dB(*(acomp->makeup));
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
+
+		// TODO re-use local variables on stack
+		// store values back to acomp at the end of the inner-loop
+		acomp->old_yl = Lyl;
+		acomp->old_y1 = Ly1;
+		acomp->old_yg = Lyg;
+	}
+
+	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+
+#ifdef LV2_EXTENDED
+	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
+	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
+	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
+	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
+		// >= 1dB difference
+		acomp->need_expose = true;
+		acomp->v_lvl_in = v_lvl_in;
+		acomp->v_lvl_out = v_lvl_out - *acomp->makeup;
+	}
+	if (acomp->need_expose && acomp->queue_draw) {
+		acomp->need_expose = false;
+		acomp->queue_draw->queue_draw (acomp->queue_draw->handle);
+	}
+#endif
+}
+
+static void
+run_stereo(LV2_Handle instance, uint32_t n_samples)
+{
+	AComp* acomp = (AComp*)instance;
+
+	const float* const input0 = acomp->input0;
+	const float* const input1 = acomp->input1;
+	const float* const sc = acomp->sc;
+	float* const output0 = acomp->output0;
+	float* const output1 = acomp->output1;
+
+	float srate = acomp->srate;
+	float width = (6.f * *(acomp->knee)) + 0.01;
+	float cdb=0.f;
+	float attack_coeff = exp(-1000.f/(*(acomp->attack) * srate));
+	float release_coeff = exp(-1000.f/(*(acomp->release) * srate));
+
+	float max = 0.f;
+	float lgaininp = 0.f;
+	float rgaininp = 0.f;
+	float Lgain = 1.f;
+	float Lxg, Lxl, Lyg, Lyl, Ly1;
+	int usesidechain = (*(acomp->sidechain) < 0.5) ? 0 : 1;
+	uint32_t i;
+	float ingain;
+	float in0;
+	float in1;
+	float sc0;
+	float ratio = *(acomp->ratio);
+	float thresdb = *(acomp->thresdb);
+
+#ifdef LV2_EXTENDED
+	if (acomp->v_knee != *acomp->knee) {
+		acomp->v_knee = *acomp->knee;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_ratio != *acomp->ratio) {
+		acomp->v_ratio = *acomp->ratio;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_thresdb != *acomp->thresdb) {
+		acomp->v_thresdb = *acomp->thresdb;
+		acomp->need_expose = true;
+	}
+#endif
+
+	float in_peak = 0;
+
+	for (i = 0; i < n_samples; i++) {
+		in0 = input0[i];
+		in1 = input1[i];
+		sc0 = sc[i];
+		ingain = usesidechain ? fabs(sc0) : fmaxf(fabs(in0), fabs(in1));
+		Lyg = 0.f;
+		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
+		Lxg = sanitize_denormal(Lxg);
+
+		Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
+
+		if (2.f*(Lxg-thresdb) < -width) {
+			Lyg = Lxg;
+		} else {
+			Lyg = thresdb + (Lxg-thresdb)/ratio;
+			Lyg = sanitize_denormal(Lyg);
+		}
+
+		Lxl = Lxg - Lyg;
+
+		acomp->old_y1 = sanitize_denormal(acomp->old_y1);
+		acomp->old_yl = sanitize_denormal(acomp->old_yl);
+		Ly1 = fmaxf(Lxl, release_coeff * acomp->old_y1+(1.f-release_coeff)*Lxl);
+		Lyl = attack_coeff * acomp->old_yl+(1.f-attack_coeff)*Ly1;
+		Ly1 = sanitize_denormal(Ly1);
+		Lyl = sanitize_denormal(Lyl);
+
+		cdb = -Lyl;
+		Lgain = from_dB(cdb);
+
+		*(acomp->gainr) = Lyl;
+
+		if (ingain > in_peak) {
+			in_peak = ingain;
+		}
+		lgaininp = in0 * Lgain;
+		rgaininp = in1 * Lgain;
+		output0[i] = lgaininp * from_dB(*(acomp->makeup));
+		output1[i] = rgaininp * from_dB(*(acomp->makeup));
+
+		max = (fmaxf(fabsf(output0[i]), fabsf(output1[i])) > max) ? fmaxf(fabsf(output0[i]), fabsf(output1[i])) : sanitize_denormal(max);
 
 		// TODO re-use local variables on stack
 		// store values back to acomp at the end of the inner-loop
@@ -464,12 +657,23 @@ extension_data(const char* uri)
 	return NULL;
 }
 
-static const LV2_Descriptor descriptor = {
+static const LV2_Descriptor descriptor_mono = {
 	ACOMP_URI,
 	instantiate,
-	connect_port,
+	connect_port_mono,
 	activate,
-	run,
+	run_mono,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor_stereo = {
+	ACOMP_STEREO_URI,
+	instantiate,
+	connect_port_stereo,
+	activate,
+	run_stereo,
 	deactivate,
 	cleanup,
 	extension_data
@@ -481,7 +685,9 @@ lv2_descriptor(uint32_t index)
 {
 	switch (index) {
 	case 0:
-		return &descriptor;
+		return &descriptor_mono;
+	case 1:
+		return &descriptor_stereo;
 	default:
 		return NULL;
 	}
