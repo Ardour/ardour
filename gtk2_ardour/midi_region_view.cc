@@ -935,12 +935,16 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 	}
 
 	// Start of note in frames relative to region start
+	uint32_t divisions = 0;
+
 	if (snap_t) {
 		framecnt_t grid_frames;
 		t = snap_frame_to_grid_underneath (t, grid_frames);
+		divisions = trackview.editor().get_grid_music_divisions (0);
 	}
 
-	const MidiModel::TimeType beat_time = Evoral::Beats (trackview.session()->tempo_map().beat_at_frame (_region->position() + t)
+
+	const MidiModel::TimeType beat_time = Evoral::Beats (trackview.session()->tempo_map().exact_beat_at_frame (_region->position() + t, divisions)
 							     - (mr->beat() - mr->start_beats().to_double()));
 	const double  note     = view->y_to_note(y);
 	const uint8_t chan     = mtv->get_channel_for_add();
