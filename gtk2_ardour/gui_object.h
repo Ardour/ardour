@@ -66,6 +66,9 @@ public:
 	static XMLNode* get_or_add_node (XMLNode *, const std::string &);
 
   private:
+	// no copy construction. object_map saves pointers to _state XMLNodes
+	// use set_state(get_state())
+	GUIObjectState (const GUIObjectState& other);
 
 	XMLNode _state;
 	// ideally we'd use a O(1) hash table here,

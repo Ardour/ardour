@@ -4383,7 +4383,7 @@ Editor::current_visual_state (bool with_tracks)
 	vs->zoom_focus = zoom_focus;
 
 	if (with_tracks) {
-		*vs->gui_state = *ARDOUR_UI::instance()->gui_object_state;
+		vs->gui_state->set_state (ARDOUR_UI::instance()->gui_object_state->get_state());
 	}
 
 	return vs;
@@ -4448,7 +4448,7 @@ Editor::use_visual_state (VisualState& vs)
 	reposition_and_zoom (vs.leftmost_frame, vs.samples_per_pixel);
 
 	if (vs.gui_state) {
-		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
+		ARDOUR_UI::instance()->gui_object_state->set_state (vs.gui_state->get_state());
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			(*i)->clear_property_cache();
