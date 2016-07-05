@@ -68,6 +68,10 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void deactivate ();
 	void flush ();
 
+	void enable (bool yn);
+	bool enabled () const;
+	bool bypassable () const;
+
 	bool reset_parameters_to_default ();
 	bool can_reset_all_parameters ();
 
@@ -355,6 +359,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_parameter_state_2X (const XMLNode& node, int version);
 	void set_control_ids (const XMLNode&, int version);
 
+	void enable_changed ();
+	void bypassable_changed ();
+
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
 
@@ -363,6 +370,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void latency_changed (framecnt_t, framecnt_t);
 	bool _latency_changed;
+	uint32_t _bypass_port;
 };
 
 } // namespace ARDOUR

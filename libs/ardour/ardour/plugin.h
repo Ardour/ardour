@@ -113,6 +113,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
+	virtual uint32_t designated_bypass_port () { return UINT32_MAX; }
+
 	struct LIBARDOUR_API IOPortDescription {
 		public:
 		IOPortDescription (const std::string& n)

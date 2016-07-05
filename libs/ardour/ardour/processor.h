@@ -59,7 +59,9 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual bool display_to_user() const { return _display_to_user; }
 	virtual void set_display_to_user (bool);
 
-	bool active () const { return _pending_active; }
+	bool active () const { return _pending_active; } ///< ardour hard bypass
+	virtual bool enabled () const { return _pending_active; } ///< processor enabled/bypass
+	virtual bool bypassable () const { return true; } ///< enable is not automated or locked
 
 	virtual bool does_routing() const { return false; }
 
@@ -80,6 +82,8 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
 	virtual void flush() {}
+
+	virtual void enable (bool yn) { if (yn) { activate (); } else { deactivate (); } }
 
 	virtual bool configure_io (ChanCount in, ChanCount out);
 
@@ -111,6 +115,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void set_pre_fader (bool);
 
 	PBD::Signal0<void>                     ActiveChanged;
+	PBD::Signal0<void>                     BypassableChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
 	void  set_ui (void*);

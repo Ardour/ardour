@@ -76,6 +76,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _strict_io (false)
 	, _custom_cfg (false)
 	, _maps_from_state (false)
+	, _bypass_port (UINT32_MAX)
 {
 	/* the first is the master */
 
@@ -457,6 +458,7 @@ PluginInsert::create_automatable_parameters ()
 		plugin->set_automation_control (i, c);
 	}
 
+
 	const Plugin::PropertyDescriptors& pdl (plugin->get_supported_properties ());
 	for (Plugin::PropertyDescriptors::const_iterator p = pdl.begin(); p != pdl.end(); ++p) {
 		Evoral::Parameter param (PluginPropertyAutomation, 0, p->first);
@@ -467,6 +469,16 @@ PluginInsert::create_automatable_parameters ()
 				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 			}
 			add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
+		}
+	}
+
+	_bypass_port = plugin->designated_bypass_port ();
+
+	if (_bypass_port != UINT32_MAX) {
+		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
+		if (0 == (ac->flags () & Controllable::NotAutomatable)) {
+			ac->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&PluginInsert::bypassable_changed, this));
+			ac->Changed.connect_same_thread (*this, boost::bind (&PluginInsert::enable_changed, this));
 		}
 	}
 }
@@ -557,6 +569,60 @@ PluginInsert::flush ()
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->flush ();
 	}
+}
+
+void
+PluginInsert::enable (bool yn)
+{
+	if (_bypass_port == UINT32_MAX) {
+		if (yn) {
+			activate ();
+		} else {
+			deactivate ();
+		}
+	} else {
+		if (!_pending_active) {
+			activate ();
+		}
+		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
+		ac->set_value (yn ? 1.0 : 0.0, Controllable::NoGroup);
+		ActiveChanged ();
+	}
+}
+
+bool
+PluginInsert::enabled () const
+{
+	if (_bypass_port == UINT32_MAX) {
+		return Processor::enabled ();
+	} else {
+		boost::shared_ptr<const AutomationControl> ac = boost::const_pointer_cast<AutomationControl> (automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port)));
+		return (ac->get_value () > 0 && _pending_active);
+	}
+}
+
+bool
+PluginInsert::bypassable () const
+{
+	if (_bypass_port == UINT32_MAX) {
+		return true;
+	} else {
+		boost::shared_ptr<const AutomationControl> ac = boost::const_pointer_cast<AutomationControl> (automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port)));
+
+		return !ac->automation_playback ();
+	}
+}
+
+void
+PluginInsert::enable_changed ()
+{
+	ActiveChanged ();
+}
+
+void
+PluginInsert::bypassable_changed ()
+{
+	BypassableChanged ();
 }
 
 void
@@ -2832,6 +2898,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		vst->set_insert (this, _plugins.size ());
 	}
 #endif
+
 	_plugins.push_back (plugin);
 }
 
