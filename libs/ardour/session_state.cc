@@ -2262,7 +2262,7 @@ Session::save_template (string template_name, bool replace_existing)
 void
 Session::refresh_disk_space ()
 {
-#if __APPLE__ || __FreeBSD__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
+#if __APPLE__ || __FreeBSD__ || __NetBSD__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
 
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
@@ -2272,10 +2272,15 @@ Session::refresh_disk_space ()
 	_total_free_4k_blocks_uncertain = false;
 
 	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+#if defined(__NetBSD__)
+		struct statvfs statfsbuf;
 
+		statvfs (i->path.c_str(), &statfsbuf);
+#else
 		struct statfs statfsbuf;
-		statfs (i->path.c_str(), &statfsbuf);
 
+		statfs (i->path.c_str(), &statfsbuf);
+#endif
 		double const scale = statfsbuf.f_bsize / 4096.0;
 
 		/* See if this filesystem is read-only */
