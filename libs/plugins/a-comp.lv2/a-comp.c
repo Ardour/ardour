@@ -309,6 +309,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		in0 = input[i];
 		sc0 = sc[i];
 		ingain = usesidechain ? fabs(sc0) : fabs(in0);
+		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -336,9 +337,6 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		*(acomp->gainr) = Lyl;
 
-		if (ingain > in_peak) {
-			in_peak = ingain;
-		}
 		lgaininp = in0 * Lgain;
 		output[i] = lgaininp * from_dB(*(acomp->makeup));
 
@@ -427,6 +425,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		sc0 = sc[i];
 		maxabslr = fmaxf(fabs(in0), fabs(in1));
 		ingain = usesidechain ? fabs(sc0) : maxabslr;
+		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -454,9 +453,6 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 		*(acomp->gainr) = Lyl;
 
-		if (ingain > in_peak) {
-			in_peak = ingain;
-		}
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
 		output0[i] = lgaininp * from_dB(*(acomp->makeup));
