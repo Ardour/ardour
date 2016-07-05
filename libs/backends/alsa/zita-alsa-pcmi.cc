@@ -175,7 +175,12 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 		timespec timeout;
 		timeout.tv_sec = 1;
 		timeout.tv_nsec = 0;
+#if defined(__NetBSD__)
+		r = pollts (_poll_fd, n2, &timeout, NULL);
+#else
 		r = ppoll (_poll_fd, n2, &timeout, NULL);
+#endif
+
 
 		if (r < 0)
 		{
