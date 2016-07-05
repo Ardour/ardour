@@ -396,7 +396,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		if (recalc) {
 			xfade += 1.0f / (float)n_samples;
 			adelay->fbstate *= (1.-xfade);
-			int p = adelay->posz - adelay->tap[adelay->next]; // next line
+			p = adelay->posz - adelay->tap[adelay->next]; // next line
 			if (p<0) p += MAX_DELAY;
 			adelay->fbstate += adelay->z[p] * xfade;
 		}
