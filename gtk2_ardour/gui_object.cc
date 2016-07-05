@@ -67,7 +67,7 @@ GUIObjectState::get_or_add_node (const string& id)
 	if (i != object_map.end()) {
 		return i->second;
 	}
-	//assert (get_node (&_state, id) == 0); // XXX
+	//assert (get_node (&_state, id) == 0); // XXX performance penalty due to get_node()
 	XMLNode* child = new XMLNode (X_("Object"));
 	child->add_property (X_("id"), id);
 	_state.add_child_nocopy (*child);
@@ -87,12 +87,13 @@ GUIObjectState::get_string (const string& id, const string& prop_name, bool* emp
 {
 	std::map <std::string, XMLNode*>::const_iterator i = object_map.find (id);
 	if (i == object_map.end()) {
-		//assert (get_node (&_state, id) == 0); // XXX
+		//assert (get_node (&_state, id) == 0); // XXX performance penalty due to get_node()
 		if (empty) {
 			*empty = true;
 		}
 		return string ();
 	}
+	//assert (get_node (&_state, id) == i->second); // XXX performance penalty due to get_node()
 
 	XMLProperty const * p (i->second->property (prop_name));
 	if (!p) {
