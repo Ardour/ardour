@@ -17,8 +17,11 @@
 //
 // ----------------------------------------------------------------------------
 
-
+#if defined(__NetBSD__)
+#include <sys/endian.h>
+#else
 #include <endian.h>
+#endif
 #include <sys/time.h>
 #include "zita-alsa-pcmi.h"
 
