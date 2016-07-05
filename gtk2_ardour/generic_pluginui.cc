@@ -152,7 +152,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
 
-	bypass_button.set_active (!pi->active());
+	bypass_button.set_active (!pi->enabled());
 
 	prefheight = 0;
 	build ();

@@ -456,7 +456,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	bypass_button.set_name ("plugin bypass button");
 	bypass_button.set_text (_("Bypass"));
-	bypass_button.set_active (!pi->active());
+	bypass_button.set_active (!pi->enabled ());
 	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
@@ -550,7 +550,7 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 	boost::shared_ptr<Processor> p (weak_p.lock());
 
 	if (p) {
-		bypass_button.set_active (!p->active());
+		bypass_button.set_active (!p->enabled ());
 	}
 }
 
@@ -663,12 +663,8 @@ PlugUIBase::bypass_button_release (GdkEventButton*)
 {
 	bool view_says_bypassed = (bypass_button.active_state() != 0);
 
-	if (view_says_bypassed != insert->active()) {
-		if (view_says_bypassed) {
-			insert->activate ();
-		} else {
-			insert->deactivate ();
-		}
+	if (view_says_bypassed != insert->enabled ()) {
+		insert->enable (view_says_bypassed);
 	}
 
 	return false;
