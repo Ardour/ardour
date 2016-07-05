@@ -136,6 +136,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
+	clear_strip ("/select/expand", 0);
 	if (feedback[0]) { // buttons are separate feedback
 		lo_message msg = lo_message_new ();
 		// name is a string do it first
