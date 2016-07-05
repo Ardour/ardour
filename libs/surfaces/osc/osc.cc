@@ -2094,7 +2094,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	sur->expand_enable = false;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
-		s->presentation_info().set_selected (!s->presentation_info().selected());
+		session->set_stripable_selection (s);
 	} else {
 		route_send_fail ("select", ssid, 0, lo_message_get_source (msg));
 	}
