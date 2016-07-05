@@ -1019,6 +1019,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			if ((*i)->active()) {
+				// why?  emit  ActiveChanged() ??
 				(*i)->activate ();
 			}
 
@@ -1077,7 +1078,7 @@ Route::disable_processors (Placement p)
 	placement_range(p, start, end);
 
 	for (ProcessorList::iterator i = start; i != end; ++i) {
-		(*i)->deactivate ();
+		(*i)->enable (false);
 	}
 
 	_session.set_dirty ();
@@ -1091,7 +1092,7 @@ Route::disable_processors ()
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->deactivate ();
+		(*i)->enable (false);
 	}
 
 	_session.set_dirty ();
@@ -1110,7 +1111,7 @@ Route::disable_plugins (Placement p)
 
 	for (ProcessorList::iterator i = start; i != end; ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			(*i)->deactivate ();
+			(*i)->enable (false);
 		}
 	}
 
@@ -1126,7 +1127,7 @@ Route::disable_plugins ()
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			(*i)->deactivate ();
+			(*i)->enable (false);
 		}
 	}
 
@@ -1150,8 +1151,8 @@ Route::ab_plugins (bool forward)
 				continue;
 			}
 
-			if ((*i)->active()) {
-				(*i)->deactivate ();
+			if ((*i)->enabled ()) {
+				(*i)->enable (false);
 				(*i)->set_next_ab_is_active (true);
 			} else {
 				(*i)->set_next_ab_is_active (false);
@@ -1168,11 +1169,7 @@ Route::ab_plugins (bool forward)
 				continue;
 			}
 
-			if ((*i)->get_next_ab_is_active()) {
-				(*i)->activate ();
-			} else {
-				(*i)->deactivate ();
-			}
+			(*i)->enable ((*i)->get_next_ab_is_active ());
 		}
 	}
 
@@ -1413,7 +1410,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 
 		ProcessorList::iterator i;
 		bool replaced = false;
-		bool enable = old->active ();
+		bool enable = old->enabled ();
 
 		for (i = _processors.begin(); i != _processors.end(); ) {
 			if (*i == old) {
@@ -1457,7 +1454,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		}
 
 		if (enable) {
-			sub->activate ();
+			sub->enable (true);
 		}
 
 		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
@@ -1831,12 +1828,7 @@ Route::all_visible_processors_active (bool state)
 		if (!(*i)->display_to_user() || boost::dynamic_pointer_cast<Amp> (*i)) {
 			continue;
 		}
-
-		if (state) {
-			(*i)->activate ();
-		} else {
-			(*i)->deactivate ();
-		}
+		(*i)->enable (state);
 	}
 
 	_session.set_dirty ();
@@ -4526,8 +4518,8 @@ Route::setup_invisible_processors ()
 	_processors = new_processors;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (!(*i)->display_to_user () && !(*i)->active () && (*i) != _monitor_send) {
-			(*i)->activate ();
+		if (!(*i)->display_to_user () && !(*i)->enabled () && (*i) != _monitor_send) {
+			(*i)->enable (true);
 		}
 	}
 
