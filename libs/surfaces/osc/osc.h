@@ -486,7 +486,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Stripable>);
 	void route_lost (boost::weak_ptr<ARDOUR::Stripable>);
-	void gui_selection_changed (ARDOUR::StripableNotificationListPtr stripables);
+	void gui_selection_changed (void);
 
 	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
 	void recalcbanks ();

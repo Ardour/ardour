@@ -249,8 +249,8 @@ OSC::start ()
 	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
 	periodic_timeout->attach (main_loop()->get_context());
 
-	// catch GUI select changes for GUI_select mode
-	StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this, _1), this);
+	// catch current editor mixer changes for GUI_select mode
+	session->EditorMixerChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this), this);
 
 	// catch track reordering
 	// receive routes added
@@ -1226,20 +1226,7 @@ OSC::get_surface (lo_address addr)
 	// if we do this when OSC is started we get the wrong stripable
 	// we don't need this until we actually have a surface to deal with
 	if (!_select) {
-		// guess at which stripable is the current editor mixerstrip
-		// right now just choose the first one we find, may be the wrong one
-		// hopefully we will have access to session->current_strip at some point
-		StripableList stripables;
-
-		session->get_stripables (stripables);
-
-		for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-			boost::shared_ptr<Stripable> s = *it;
-			if (s->is_selected()) {
-				_select = s;
-				break;
-			}
-		}
+		gui_selection_changed();
 	}
 
 	// No surface create one with default values
@@ -2611,13 +2598,11 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 }
 
 void
-OSC::gui_selection_changed (StripableNotificationListPtr stripables)
+OSC::gui_selection_changed ()
 {
 	boost::shared_ptr<Stripable> strip;
 
-	if (!stripables->empty()) {
-		strip = boost::dynamic_pointer_cast<Stripable>(session->get_editor_mixer().lock());
-	}
+	strip = boost::dynamic_pointer_cast<Stripable>(session->get_editor_mixer().lock());
 	if (strip) {
 		_select = strip;
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
@@ -2628,7 +2613,6 @@ OSC::gui_selection_changed (StripableNotificationListPtr stripables)
 			}
 		}
 	}
-
 }
 
 // timer callbacks
