@@ -1264,8 +1264,11 @@ PluginInsert::no_sc_input_map () const
 		ChanMapping m (i->second);
 		const ChanMapping::Mappings& mp ((*i).second.mappings());
 		for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+			uint32_t ins = natural_input_streams().get(tm->first) - _cached_sidechain_pins.get(tm->first);
 			for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
-				rv.set (tm->first, i->first + pc * (natural_input_streams().get(tm->first) - _cached_sidechain_pins.get(tm->first)), i->second);
+				if (i->second < ins) {
+					rv.set (tm->first, i->first + pc * ins, i->second);
+				}
 			}
 		}
 	}
