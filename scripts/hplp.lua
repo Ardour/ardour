@@ -1,11 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "High/Low Pass Filter",
+	name        = "a-High/Low Pass Filter",
 	category    = "Filter",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Example Ardour Lua DSP Plugin]]
 }
 
