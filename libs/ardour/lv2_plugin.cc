@@ -130,6 +130,7 @@ public:
 	LilvNode* ext_expensive;
 	LilvNode* ext_causesArtifacts;
 	LilvNode* ext_notAutomatic;
+	LilvNode* ext_rangeSteps;
 	LilvNode* lv2_AudioPort;
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
@@ -1934,6 +1935,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
+	LilvNode* steps   = lilv_port_get(_impl->plugin, port, _world.ext_rangeSteps);
+
 	// TODO: Once we can rely on lilv 0.18.0 being present,
 	// load_parameter_descriptor() can be used for ports as well
 	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.lv2_integer);
@@ -1959,9 +1962,34 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 
 	desc.update_steps();
 
+	if (steps) {
+		//override auto-calculated steps in update_steps()
+		float s = lilv_node_as_float (steps);
+		const float delta = desc.upper - desc.lower;
+
+		desc.step = desc.smallstep = (delta / s);
+		desc.largestep = std::min ((delta / 5.0f), 10.f * desc.smallstep);
+
+		if (desc.logarithmic) {
+			// TODO marry AutomationControl::internal_to_interface () with
+			// http://lv2plug.in/ns/ext/port-props/#rangeSteps
+			desc.smallstep = desc.smallstep / logf(s);
+			desc.step      = desc.step      / logf(s);
+			desc.largestep = desc.largestep / logf(s);
+		} else if (desc.integer_step) {
+			desc.smallstep = 1.0;
+			desc.step      = std::max(1.f, rintf (desc.step));
+			desc.largestep = std::max(1.f, rintf (desc.largestep));
+		}
+		DEBUG_TRACE(DEBUG::LV2, string_compose("parameter %1 small: %2, step: %3 largestep: %4\n",
+					which, desc.smallstep, desc.step, desc.largestep));
+	}
+
+
 	lilv_node_free(def);
 	lilv_node_free(min);
 	lilv_node_free(max);
+	lilv_node_free(steps);
 	lilv_nodes_free(portunits);
 
 	return 0;
@@ -2819,6 +2847,7 @@ LV2World::LV2World()
 	ext_expensive      = lilv_new_uri(world, LV2_PORT_PROPS__expensive);
 	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
 	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
+	ext_rangeSteps     = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
@@ -2910,6 +2939,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
+	lilv_node_free(ext_rangeSteps);
 	lilv_node_free(ext_notAutomatic);
 	lilv_node_free(ext_causesArtifacts);
 	lilv_node_free(ext_expensive);

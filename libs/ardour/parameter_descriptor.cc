@@ -158,6 +158,9 @@ ParameterDescriptor::update_steps()
 		step      = slider_position_to_gain(largestep / 10.0);
 		smallstep = step;
 	} else {
+		/* note that LV2Plugin::get_parameter_descriptor ()
+		 * overrides this is lv2:rangeStep is set for a port.
+		 */
 		const float delta = upper - lower;
 
 		/* 30 happens to be the total number of steps for a fader with default
