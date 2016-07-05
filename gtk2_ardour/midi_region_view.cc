@@ -2750,6 +2750,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 void
 MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
+	TempoMap& tmap (trackview.session()->tempo_map());
 	bool cursor_set = false;
 	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
 
@@ -2811,9 +2812,19 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				sign = -1;
 			}
 
-			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x, ensure_snap) : trackview.editor ().pixel_to_sample (current_x));
-			Evoral::Beats beats     = region_frames_to_region_beats (snapped_x);
-			Evoral::Beats len       = Evoral::Beats();
+			double  snapped_x;
+			uint32_t divisions = 0;
+
+			if (with_snap) {
+				snapped_x = snap_pixel_to_sample (current_x, ensure_snap);
+				divisions = trackview.editor().get_grid_music_divisions (0);
+			} else {
+				snapped_x = trackview.editor ().pixel_to_sample (current_x);
+			}
+			const Evoral::Beats beats = Evoral::Beats (tmap.exact_beat_at_frame (snapped_x + midi_region()->position(), divisions)
+								     - midi_region()->beat()) + midi_region()->start_beats();
+
+			Evoral::Beats len         = Evoral::Beats();
 
 			if (at_front) {
 				if (beats < canvas_note->note()->end_time()) {
@@ -2846,6 +2857,7 @@ void
 MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
+	TempoMap& tmap (trackview.session()->tempo_map());
 
 	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
 	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
@@ -2893,16 +2905,19 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			sign = -1;
 		}
 
+		uint32_t divisions = 0;
 		/* Convert the new x position to a frame within the source */
 		framepos_t current_fr;
 		if (with_snap) {
 			current_fr = snap_pixel_to_sample (current_x, ensure_snap);
+			divisions = trackview.editor().get_grid_music_divisions (0);
 		} else {
 			current_fr = trackview.editor().pixel_to_sample (current_x);
 		}
 
 		/* and then to beats */
-		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr) + midi_region()->start_beats();
+		const Evoral::Beats x_beats = Evoral::Beats (tmap.exact_beat_at_frame (current_fr + midi_region()->position(), divisions)
+							     - midi_region()->beat()) + midi_region()->start_beats();
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
@@ -4114,8 +4129,8 @@ framepos_t
 MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_frames) const
 {
 	PublicEditor& editor = trackview.editor ();
-	const Evoral::Beats p_beat = region_frames_to_region_beats (p);
 	const Evoral::Beats grid_beats = get_grid_beats(p);
+	const Evoral::Beats p_beat = max (Evoral::Beats(), region_frames_to_region_beats (p));
 
 	grid_frames = region_beats_to_region_frames (p_beat + grid_beats) - region_beats_to_region_frames (p_beat);
 
