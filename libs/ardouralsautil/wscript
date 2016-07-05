@@ -51,6 +51,7 @@ def build(bld):
             obj.defines = [
                     '_POSIX_SOURCE',
                     '_XOPEN_SOURCE=500',
+                    '_NETBSD_SOURCE',
                     'ARD_PROG_NAME="ardour-request-device"',
                     'ARD_APPL_NAME="Ardour ALSA Backend"',
             ]
