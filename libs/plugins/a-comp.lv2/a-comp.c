@@ -308,9 +308,9 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
 		sc0 = sc[i];
-		ingain = usesidechain ? sc0 : in0;
+		ingain = usesidechain ? fabs(sc0) : fabs(in0);
 		Lyg = 0.f;
-		Lxg = (ingain==0.f) ? -160.f : to_dB(fabs(ingain));
+		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
 
 		Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
@@ -336,8 +336,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		*(acomp->gainr) = Lyl;
 
-		if (in0 > in_peak) {
-			in_peak = in0;
+		if (ingain > in_peak) {
+			in_peak = ingain;
 		}
 		lgaininp = in0 * Lgain;
 		output[i] = lgaininp * from_dB(*(acomp->makeup));
@@ -398,6 +398,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float in0;
 	float in1;
 	float sc0;
+	float maxabslr;
 	float ratio = *(acomp->ratio);
 	float thresdb = *(acomp->thresdb);
 
@@ -424,7 +425,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		in0 = input0[i];
 		in1 = input1[i];
 		sc0 = sc[i];
-		ingain = usesidechain ? fabs(sc0) : fmaxf(fabs(in0), fabs(in1));
+		maxabslr = fmaxf(fabs(in0), fabs(in1));
+		ingain = usesidechain ? fabs(sc0) : maxabslr;
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -460,7 +462,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		output0[i] = lgaininp * from_dB(*(acomp->makeup));
 		output1[i] = rgaininp * from_dB(*(acomp->makeup));
 
-		max = (fmaxf(fabsf(output0[i]), fabsf(output1[i])) > max) ? fmaxf(fabsf(output0[i]), fabsf(output1[i])) : sanitize_denormal(max);
+		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
 
 		// TODO re-use local variables on stack
 		// store values back to acomp at the end of the inner-loop
