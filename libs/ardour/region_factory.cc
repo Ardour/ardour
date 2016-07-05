@@ -83,11 +83,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, co
 	if (ret) {
 		ret->set_name (new_region_name(ret->name()));
 
-		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
+		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
 			ret->set_position_lock_style (MusicTime);
 		}
 
-		ret->set_position (region->position());
+		ret->set_position (region->position(), sub_num);
 
 		/* pure copy constructor - no property list */
 		if (announce) {
@@ -127,7 +127,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 	if (ret) {
 		ret->apply_changes (plist);
 
-		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
+		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
 			ret->set_position_lock_style (MusicTime);
 		}
 
@@ -168,7 +168,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 	if (ret) {
 		ret->apply_changes (plist);
 
-		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
+		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
 			ret->set_position_lock_style (MusicTime);
 		}
 
@@ -209,7 +209,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	if (ret) {
 		ret->apply_changes (plist);
 
-		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
+		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
 			ret->set_position_lock_style (MusicTime);
 		}
 
@@ -253,7 +253,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	if (ret) {
 		ret->apply_changes (plist);
 
-		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
+		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
 			ret->set_position_lock_style (MusicTime);
 		}
 
