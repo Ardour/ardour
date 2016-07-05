@@ -1,0 +1,38 @@
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix pset:  <http://lv2plug.in/ns/ext/presets#> .
+
+<urn:ardour:a-delay#preset001>
+    lv2:port [
+        lv2:symbol "inv" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "sync" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "time" ;
+        pset:value 160.000000 ;
+    ] ,
+    [
+        lv2:symbol "div" ;
+        pset:value 3 ;
+    ] ,
+    [
+        lv2:symbol "drywet" ;
+        pset:value 50.000000 ;
+    ] ,
+    [
+        lv2:symbol "lpf" ;
+        pset:value 6000.000000 ;
+    ] ,
+    [
+        lv2:symbol "gain" ;
+        pset:value 0.000000 ;
+    ] ,
+    [
+        lv2:symbol "delaytime" ;
+        pset:value 0.000000 ;
+    ] .
+
+

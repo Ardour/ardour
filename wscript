@@ -220,6 +220,7 @@ children = [
         'libs/canvas',
         'libs/plugins/reasonablesynth.lv2',
         'libs/plugins/a-comp.lv2',
+        'libs/plugins/a-delay.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',

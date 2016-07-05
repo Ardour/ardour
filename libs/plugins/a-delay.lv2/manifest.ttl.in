@@ -1,0 +1,20 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
+
+<urn:ardour:a-delay>
+    a lv2:Plugin ;
+    lv2:binary <a-delay@LIB_EXT@> ;
+    rdfs:seeAlso <a-delay.ttl> .
+
+#<urn:ardour:a-delay#ui>
+#    a ui:GtkUI ;
+#    ui:binary <a-delay-ui@LIB_EXT@> ;
+#    rdfs:seeAlso <a-delay.ttl> .
+
+<urn:ardour:a-delay#preset001>
+    a pset:Preset ;
+    lv2:appliesTo <urn:ardour:a-delay> ;
+    rdfs:label "Zero" ;
+    rdfs:seeAlso <presets.ttl> .
