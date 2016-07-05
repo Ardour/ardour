@@ -126,6 +126,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool parameter_is_output (uint32_t) const;
 	bool parameter_is_toggled (uint32_t) const;
 
+	uint32_t designated_bypass_port ();
+
 	boost::shared_ptr<ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 

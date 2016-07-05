@@ -2703,6 +2703,22 @@ LV2Plugin::parameter_is_input(uint32_t param) const
 	return _port_flags[param] & PORT_INPUT;
 }
 
+uint32_t
+LV2Plugin::designated_bypass_port ()
+{
+#ifdef LV2_EXTENDED
+	const LilvPort* port = NULL;
+	LilvNode* designation = lilv_new_uri (_world.world, LV2_PROCESSING_URI__enable);
+	port = lilv_plugin_get_port_by_designation (
+			_impl->plugin, _world.lv2_InputPort, designation);
+	lilv_node_free(designation);
+	if (port) {
+		return lilv_port_get_index (_impl->plugin, port);
+	}
+#endif
+	return UINT32_MAX;
+}
+
 void
 LV2Plugin::print_parameter(uint32_t param, char* buf, uint32_t len) const
 {
