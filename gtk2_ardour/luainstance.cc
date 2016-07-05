@@ -465,7 +465,7 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("get_stride", &LuaCairo::ImageSurface::get_stride)
 		.addFunction ("get_width", &LuaCairo::ImageSurface::get_width)
 		.addFunction ("get_height", &LuaCairo::ImageSurface::get_height)
-		.addFunction ("get_data", &LuaCairo::ImageSurface::get_data)
+		//.addFunction ("get_data", &LuaCairo::ImageSurface::get_data) // uint8_t* array is n/a
 		.endClass ()
 
 		.beginClass <LuaCairo::PangoLayout> ("PangoLayout")
