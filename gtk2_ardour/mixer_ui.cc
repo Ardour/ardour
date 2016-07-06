@@ -25,6 +25,8 @@
 #include <map>
 #include <sigc++/bind.h>
 
+#include <boost/foreach.hpp>
+
 #include <gtkmm/accelmap.h>
 
 #include "pbd/convert.h"
@@ -108,12 +110,13 @@ Mixer_UI::Mixer_UI ()
 	, _following_editor_selection (false)
 	, _maximised (false)
 	, _show_mixer_list (true)
+	, myactions (X_("mixer"))
 {
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
-
-	/* bindings was already set in MixerActor constructor */
-
+	register_actions ();
+	load_bindings ();
 	_content.set_data ("ardour-bindings", bindings);
+
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
 
 	scroller.set_can_default (true);
 	// set_default (scroller);
@@ -2724,4 +2727,227 @@ bool
 Mixer_UI::showing_vca_slaves_for (boost::shared_ptr<VCA> vca) const
 {
        return vca == spilled_vca.lock();
+}
+
+void
+Mixer_UI::register_actions ()
+{
+	Glib::RefPtr<ActionGroup> group = myactions.create_action_group (X_("Mixer"));
+
+	myactions.register_action (group, "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::solo_action));
+	myactions.register_action (group, "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::mute_action));
+	myactions.register_action (group, "recenable", _("Toggle Rec-enable on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::rec_enable_action));
+	myactions.register_action (group, "increment-gain", _("Decrease Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_up_action));
+	myactions.register_action (group, "decrement-gain", _("Increase Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_down_action));
+	myactions.register_action (group, "unity-gain", _("Set Gain to 0dB on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::unity_gain_action));
+
+
+	myactions.register_action (group, "copy-processors", _("Copy Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::copy_processors));
+	myactions.register_action (group, "cut-processors", _("Cut Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::cut_processors));
+	myactions.register_action (group, "paste-processors", _("Paste Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::paste_processors));
+	myactions.register_action (group, "delete-processors", _("Delete Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::delete_processors));
+	myactions.register_action (group, "select-all-processors", _("Select All (visible) Processors"), sigc::mem_fun (*this, &Mixer_UI::select_all_processors));
+	myactions.register_action (group, "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::toggle_processors));
+	myactions.register_action (group, "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &Mixer_UI::ab_plugins));
+	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
+
+	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
+	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
+
+	myactions.register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
+	                           sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_midi_input_active), false));
+}
+
+void
+Mixer_UI::load_bindings ()
+{
+	bindings = Bindings::get_bindings (X_("Mixer"), myactions);
+}
+
+template<class T> void
+Mixer_UI::control_action (boost::shared_ptr<T> (Stripable::*get_control)() const)
+{
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	boost::shared_ptr<AutomationControl> ac;
+	bool val = false;
+	bool have_val = false;
+
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			ac = (s.get()->*get_control)();
+			if (ac) {
+				cl->push_back (ac);
+				if (!have_val) {
+					val = !ac->get_value();
+					have_val = true;
+				}
+			}
+		}
+	}
+
+	_session->set_controls (cl,  val, Controllable::UseGroup);
+}
+
+void
+Mixer_UI::solo_action ()
+{
+	control_action (&Stripable::solo_control);
+}
+
+void
+Mixer_UI::mute_action ()
+{
+	control_action (&Stripable::mute_control);
+}
+
+void
+Mixer_UI::rec_enable_action ()
+{
+	control_action (&Stripable::rec_enable_control);
+}
+
+void
+Mixer_UI::step_gain_up_action ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->step_gain_up ();
+		}
+	}
+}
+
+void
+Mixer_UI::step_gain_down_action ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->step_gain_down ();
+		}
+	}
+}
+
+void
+Mixer_UI::unity_gain_action ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			boost::shared_ptr<AutomationControl> ac = s->gain_control();
+			if (ac) {
+				ac->set_value (1.0, Controllable::UseGroup);
+			}
+		}
+	}
+}
+
+void
+Mixer_UI::copy_processors ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->copy_processors ();
+		}
+	}
+}
+void
+Mixer_UI::cut_processors ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->cut_processors ();
+		}
+	}
+}
+void
+Mixer_UI::paste_processors ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->paste_processors ();
+		}
+	}
+}
+void
+Mixer_UI::select_all_processors ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->select_all_processors ();
+		}
+	}
+}
+void
+Mixer_UI::toggle_processors ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->toggle_processors ();
+		}
+	}
+}
+void
+Mixer_UI::ab_plugins ()
+{
+	set_axis_targets_for_operation ();
+
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->ab_plugins ();
+		}
+	}
+}
+
+void
+Mixer_UI::vca_assign (boost::shared_ptr<VCA> vca)
+{
+	set_axis_targets_for_operation ();
+#if 0
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->vca_assign (vca);
+		}
+	}
+#endif
+}
+
+void
+Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
+{
+	set_axis_targets_for_operation ();
+#if 0
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		if (ms) {
+			ms->vca_unassign (vca);
+		}
+	}
+#endif
 }

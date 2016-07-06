@@ -41,18 +41,19 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 
+#include <gtkmm2ext/bindings.h>
 #include "gtkmm2ext/dndtreeview.h"
 #include <gtkmm2ext/pane.h>
+#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/treeutils.h"
 
-#include "gtkmm2ext/tabbable.h"
-
 #include "enums.h"
-#include "mixer_actor.h"
+#include "route_processor_selection.h"
 
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;
+	class VCA;
 };
 
 class AxisView;
@@ -75,7 +76,7 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
+class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
 	static Mixer_UI* instance();
@@ -119,6 +120,12 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	bool showing_vca_slaves_for (boost::shared_ptr<ARDOUR::VCA>) const;
 
 	sigc::signal1<void,boost::shared_ptr<ARDOUR::VCA> > show_vca_change;
+
+	RouteProcessorSelection& selection() { return _selection; }
+	void register_actions ();
+
+        void load_bindings ();
+        Gtkmm2ext::Bindings*  bindings;
 
   protected:
 	void set_axis_targets_for_operation ();
@@ -376,6 +383,28 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	mutable boost::weak_ptr<ARDOUR::VCA> spilled_vca;
 
 	void escape ();
+
+	Gtkmm2ext::ActionMap myactions;
+	RouteProcessorSelection _selection;
+	AxisViewSelection _axis_targets;
+
+	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
+	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+
+	template<class T> void control_action (boost::shared_ptr<T> (ARDOUR::Stripable::*get_control)() const);
+	void solo_action ();
+	void mute_action ();
+	void rec_enable_action ();
+	void step_gain_up_action ();
+	void step_gain_down_action ();
+	void unity_gain_action ();
+
+	void copy_processors ();
+	void cut_processors ();
+	void paste_processors ();
+	void select_all_processors ();
+	void toggle_processors ();
+	void ab_plugins ();
 };
 
 #endif /* __ardour_mixer_ui_h__ */
