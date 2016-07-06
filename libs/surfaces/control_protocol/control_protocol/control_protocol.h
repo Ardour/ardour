@@ -39,6 +39,7 @@ namespace ARDOUR {
 class Route;
 class Session;
 class Bundle;
+class Stripable;
 
 class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
@@ -78,12 +79,21 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > AddStripableToSelection;
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > SetStripableSelection;
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ToggleStripableSelection;
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > RemoveStripableFromSelection;
+	static PBD::Signal0<void>          ClearStripableSelection;
+
 	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to
 	   respond. Typically this will always be GUI->"others" - the GUI pays
 	   no attention to these signals.
 	*/
 
 	static PBD::Signal1<void,StripableNotificationListPtr> StripableSelectionChanged;
+
+	static boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable ();
+	static void set_first_selected_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
 	/* the model here is as follows:
 
@@ -132,6 +142,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
         int set_state (XMLNode const &, int version);
 
         static const std::string state_node_name;
+        static StripableNotificationList const & last_selected() { return _last_selected; }
 
   protected:
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
@@ -143,6 +154,14 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
   private:
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
         bool _active;
+
+
+        static Glib::Threads::Mutex first_selected_mutex;
+        static boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
+        static StripableNotificationList _last_selected;
+        static void stripable_selection_changed (StripableNotificationListPtr);
+        static bool selection_connected;
+        static PBD::ScopedConnection selection_connection;
 };
 
 extern "C" {

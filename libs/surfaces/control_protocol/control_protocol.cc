@@ -49,7 +49,19 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 PBD::Signal0<void>          ControlProtocol::StepTracksDown;
 PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::AddStripableToSelection;
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::SetStripableSelection;
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::ToggleStripableSelection;
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::RemoveStripableFromSelection;
+PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
+
 PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
+
+Glib::Threads::Mutex ControlProtocol::first_selected_mutex;
+boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
+StripableNotificationList ControlProtocol::_last_selected;
+bool ControlProtocol::selection_connected = false;
+PBD::ScopedConnection ControlProtocol::selection_connection;
 
 const std::string ControlProtocol::state_node_name ("Protocol");
 
@@ -58,6 +70,12 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 	, _name (str)
 	, _active (false)
 {
+	if (!selection_connected) {
+		/* this is all static, connect it only once (and early), for all ControlProtocols */
+
+		StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::stripable_selection_changed, _1));
+		selection_connected = true;
+	}
 }
 
 ControlProtocol::~ControlProtocol ()
@@ -323,4 +341,36 @@ ControlProtocol::set_state (XMLNode const & node, int /* version */)
 	}
 
 	return 0;
+}
+
+boost::shared_ptr<Stripable>
+ControlProtocol::first_selected_stripable ()
+{
+	Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+	return _first_selected_stripable.lock();
+}
+
+void
+ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
+{
+	Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+	_first_selected_stripable = s;
+}
+
+void
+ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
+{
+	_last_selected = *sp;
+
+	{
+		Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+
+		if (!_last_selected.empty()) {
+			_first_selected_stripable = _last_selected.front().lock();
+		} else {
+			_first_selected_stripable = boost::weak_ptr<Stripable>();
+		}
+	}
+
+	cerr << "CP: selection now " << _last_selected.size() << endl;
 }

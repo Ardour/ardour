@@ -167,7 +167,8 @@ MIDIFunction::execute ()
 		if (!_argument.empty()) {
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
-			_ui->toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
+			// XX fix me ... need to get stripable, not RID
+			//_ui->toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: SetRouteSelection = %1\n", rid));
 		}
 		break;

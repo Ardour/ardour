@@ -138,8 +138,6 @@ class MackieControlProtocol
 	bool is_track (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_audio_track (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Stripable>) const;
-	bool selected (boost::shared_ptr<ARDOUR::Stripable>) const;
-	bool is_hidden (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
 	void update_selected (boost::shared_ptr<ARDOUR::Stripable>, bool selected);
@@ -335,8 +333,6 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-	typedef std::vector<boost::weak_ptr<ARDOUR::Stripable> > Selection;
-	Selection                _last_selected_stripables;
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];

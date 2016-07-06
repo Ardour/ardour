@@ -289,12 +289,12 @@ MackieControlProtocol::get_sorted_stripables()
 
 		switch (_view_mode) {
 		case Mixer:
-			if (!is_hidden (s)) {
+			if (!s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
 		case AudioTracks:
-			if (is_audio_track(s) && !is_hidden(s)) {
+			if (is_audio_track(s) && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -306,13 +306,13 @@ MackieControlProtocol::get_sorted_stripables()
 				}
 #endif
 			} else {
-				if (!is_track(s) && !is_hidden(s)) {
+				if (!is_track(s) && !s->presentation_info().hidden()) {
 					sorted.push_back (s);
 				}
 			}
 			break;
 		case MidiTracks:
-			if (is_midi_track(s) && !is_hidden(s)) {
+			if (is_midi_track(s) && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -320,22 +320,22 @@ MackieControlProtocol::get_sorted_stripables()
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
 #ifdef MIXBUS
-			if (!s->mixbus() && !is_track() && !is_hidden(s))
+			if (!s->mixbus() && !is_track() && !s->presentation_info().hidden())
 #else
-			if (!is_track(s) && !is_hidden(s))
+			if (!is_track(s) && !s->presentation_info().hidden())
 #endif
 			{
 				sorted.push_back (s);
 			}
 			break;
 		case Hidden: // Show all the tracks we have hidden
-			if (is_hidden(s)) {
+			if (s->presentation_info().hidden()) {
 				// maybe separate groups
 				sorted.push_back (s);
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
-			if (selected(s) && !is_hidden(s)) {
+			if (s->presentation_info().selected() && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -2039,23 +2039,19 @@ MackieControlProtocol::select_range ()
 		return;
 	}
 
-	if (stripables.size() == 1 && _last_selected_stripables.size() == 1 && stripables.front()->presentation_info().selected()) {
+	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->presentation_info().selected()) {
 		/* cancel selection for one and only selected stripable */
-		session->toggle_stripable_selection (stripables.front());
+		ToggleStripableSelection (stripables.front());
 	} else {
-
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 
-			if (main_modifier_state() == MODIFIER_CONTROL) {
-				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("toggle selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-				session->toggle_stripable_selection (*s);
+			if (main_modifier_state() == MODIFIER_SHIFT) {
+				ToggleStripableSelection (*s);
 			} else {
 				if (s == stripables.begin()) {
-					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set selection of %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-					session->set_stripable_selection (*s);
-			} else {
-					DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add to selection %1 (%2)\n", (*s)->name(), (*s)->presentation_info().order()));
-					session->add_stripable_selection (*s);
+					SetStripableSelection (*s);
+				} else {
+					AddStripableToSelection (*s);
 				}
 			}
 		}
@@ -2352,27 +2348,6 @@ MackieControlProtocol::is_midi_track (boost::shared_ptr<Stripable> r) const
 }
 
 bool
-MackieControlProtocol::selected (boost::shared_ptr<Stripable> r) const
-{
-	for (Selection::const_iterator i = _last_selected_stripables.begin(); i != _last_selected_stripables.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Stripable> rt = (*i).lock();
-		if (rt == r) {
-			return true;
-		}
-	}
-	return false;
-}
-
-bool
-MackieControlProtocol::is_hidden (boost::shared_ptr<Stripable> r) const
-{
-	if (!r) {
-		return false;
-	}
-	return (r->presentation_info().flags() & PresentationInfo::Hidden);
-}
-
-bool
 MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -2391,14 +2366,6 @@ MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool bec
 {
 	if (became_selected) {
 
-		if (selected (s)) {
-			/* already selected .. mmmm */
-			cerr << "stripable " << s->name() << " already marked as selected\n";
-			return;
-		}
-
-		_last_selected_stripables.push_back (boost::weak_ptr<Stripable> (s));
-
 		check_fader_automation_state ();
 
 		/* It is possible that first_selected_route() may return null if we
@@ -2412,33 +2379,19 @@ MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool bec
 			set_subview_mode (None, boost::shared_ptr<Stripable>());
 		}
 
-	} else {
-
-		for (Selection::iterator i = _last_selected_stripables.begin(); i != _last_selected_stripables.end(); ++i) {
-			boost::shared_ptr<ARDOUR::Stripable> ss = (*i).lock();
-
-			if (ss == s) {
-				_last_selected_stripables.erase (i);
-				break;
-			}
-		}
 	}
 }
 
 boost::shared_ptr<Stripable>
 MackieControlProtocol::first_selected_stripable () const
 {
-	if (_last_selected_stripables.empty()) {
-		return boost::shared_ptr<Stripable>();
-	}
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
 
-	boost::shared_ptr<Stripable> r = (*(_last_selected_stripables.begin())).lock();
-
-	if (r) {
+	if (s) {
 		/* check it is on one of our surfaces */
 
-		if (is_mapped (r)) {
-			return r;
+		if (is_mapped (s)) {
+			return s;
 		}
 
 		/* stripable is not mapped. thus, the currently selected stripable is
@@ -2446,10 +2399,10 @@ MackieControlProtocol::first_selected_stripable () const
 		 * no currently selected stripable.
 		 */
 
-		r.reset ();
+		s.reset ();
 	}
 
-	return r; /* may be null */
+	return s; /* may be null */
 }
 
 boost::shared_ptr<Stripable>

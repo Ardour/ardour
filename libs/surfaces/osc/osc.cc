@@ -2600,9 +2600,8 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 void
 OSC::gui_selection_changed ()
 {
-	boost::shared_ptr<Stripable> strip;
+	boost::shared_ptr<Stripable> strip = ControlProtocol::first_selected_stripable();
 
-	strip = boost::dynamic_pointer_cast<Stripable>(session->get_editor_mixer().lock());
 	if (strip) {
 		_select = strip;
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
