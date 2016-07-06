@@ -1091,6 +1091,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void control_step_tracks_down ();
 	void control_view (uint32_t);
 	void control_scroll (float);
+	void control_select (boost::shared_ptr<ARDOUR::Stripable>, Selection::Operation);
 	void control_unselect ();
 	void access_action (std::string,std::string);
 	bool deferred_control_scroll (framepos_t);
@@ -1132,7 +1133,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true) const;
-	RouteTimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
+	TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 
 	TrackViewList get_tracks_for_range_action () const;
 

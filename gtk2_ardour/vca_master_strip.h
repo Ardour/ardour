@@ -42,6 +42,9 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
 	~VCAMasterStrip ();
 
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
+	ARDOUR::PresentationInfo const & presentation_info () const;
+
 	std::string name() const;
 	Gdk::Color color () const;
 	std::string state_id() const;

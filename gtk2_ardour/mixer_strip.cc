@@ -1719,8 +1719,10 @@ MixerStrip::list_route_operations ()
 }
 
 void
-MixerStrip::show_selected ()
+MixerStrip::set_selected (bool yn)
 {
+	AxisView::set_selected (yn);
+
 	if (selected()) {
 		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		global_frame.set_name ("MixerStripSelectedFrame");

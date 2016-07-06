@@ -48,9 +48,9 @@ class MixerActor : virtual public sigc::trackable
   protected:
 	Gtkmm2ext::ActionMap myactions;
 	RouteProcessorSelection _selection;
-	RouteUISelection _route_targets;
+	AxisViewSelection _axis_targets;
 
-	virtual void set_route_targets_for_operation () = 0;
+	virtual void set_axis_targets_for_operation () = 0;
 
 	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);

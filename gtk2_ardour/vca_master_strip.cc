@@ -510,3 +510,16 @@ VCAMasterStrip::set_marked_for_display (bool yn)
 	}
 	return false;
 }
+
+PresentationInfo const &
+VCAMasterStrip::presentation_info () const
+{
+	return _vca->presentation_info();
+}
+
+boost::shared_ptr<Stripable>
+VCAMasterStrip::stripable () const
+{
+	return _vca;
+}
+

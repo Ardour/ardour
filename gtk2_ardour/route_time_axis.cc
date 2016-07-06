@@ -2921,18 +2921,6 @@ RouteTimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> c)
 	}
 }
 
-PresentationInfo const &
-RouteTimeAxisView::presentation_info () const
-{
-	return _route->presentation_info();
-}
-
-boost::shared_ptr<Stripable>
-RouteTimeAxisView::stripable () const
-{
-	return _route;
-}
-
 Gdk::Color
 RouteTimeAxisView::color () const
 {

@@ -805,6 +805,12 @@ Editor::Editor ()
 	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
 	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
 
+	ControlProtocol::AddStripableToSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
+	ControlProtocol::RemoveStripableFromSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
+	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
+	ControlProtocol::ToggleStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
+	ControlProtocol::ClearStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
+
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* handle escape */
@@ -1004,6 +1010,30 @@ void
 Editor::control_unselect ()
 {
 	selection->clear_tracks ();
+}
+
+void
+Editor::control_select (boost::shared_ptr<Stripable> s, Selection::Operation op)
+{
+	TimeAxisView* tav = axis_view_from_stripable (s);
+
+	if (tav) {
+		switch (op) {
+		case Selection::Add:
+			selection->add (tav);
+			break;
+		case Selection::Toggle:
+			selection->toggle (tav);
+			break;
+		case Selection::Extend:
+			break;
+		case Selection::Set:
+			selection->set (tav);
+			break;
+		}
+	} else {
+		selection->clear_tracks ();
+	}
 }
 
 void
@@ -5155,16 +5185,13 @@ Editor::region_view_removed ()
 	_summary->set_background_dirty ();
 }
 
-RouteTimeAxisView*
-Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
+TimeAxisView*
+Editor::axis_view_from_stripable (boost::shared_ptr<Stripable> s) const
 {
-	TrackViewList::const_iterator j = track_views.begin ();
-	while (j != track_views.end()) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
-		if (rtv && rtv->route() == r) {
-			return rtv;
+	for (TrackViewList::const_iterator j = track_views.begin (); j != track_views.end(); ++j) {
+		if ((*j)->stripable() == s) {
+			return *j;
 		}
-		++j;
 	}
 
 	return 0;
@@ -5177,7 +5204,7 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 	TrackViewList t;
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		TimeAxisView* tv = axis_view_from_route (*i);
+		TimeAxisView* tv = axis_view_from_stripable (*i);
 		if (tv) {
 			t.push_back (tv);
 		}

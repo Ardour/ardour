@@ -527,7 +527,7 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 
 struct PresentationInfoTimeAxisViewSorter {
 	bool operator() (TimeAxisView* a, TimeAxisView* b) {
-		return a->presentation_info().order() < b->presentation_info().order();
+		return a->stripable()->presentation_info().order() < b->stripable()->presentation_info().order();
 	}
 };
 
@@ -1395,22 +1395,22 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
 			}
 			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
-			RouteTimeAxisView* rtav = _editor->axis_view_from_route (audio_tracks.front());
-			if (rtav) {
-				rtav->set_height (original->current_height());
+			TimeAxisView* tav =_editor->axis_view_from_stripable (audio_tracks.front());
+			if (tav) {
+				tav->set_height (original->current_height());
 			}
-			return rtav;
+			return dynamic_cast<RouteTimeAxisView*>(tav);
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
 			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
 			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
-			RouteTimeAxisView* rtav = _editor->axis_view_from_route (midi_tracks.front());
-			if (rtav) {
-				rtav->set_height (original->current_height());
+			TimeAxisView* tav = _editor->axis_view_from_stripable (midi_tracks.front());
+			if (tav) {
+				tav->set_height (original->current_height());
 			}
-			return rtav;
+			return dynamic_cast<RouteTimeAxisView*> (tav);
 		}
 	} catch (...) {
 		error << _("Could not create new track after region placed in the drop zone") << endmsg;

@@ -18,7 +18,10 @@
 */
 
 #include <algorithm>
+
 #include "ardour/route_group.h"
+#include "control_protocol/control_protocol.h"
+
 #include "track_selection.h"
 #include "time_axis_view.h"
 #include "public_editor.h"
@@ -57,4 +60,3 @@ TrackSelection::add (TrackViewList const & t)
 
 	return added;
 }
-

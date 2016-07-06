@@ -30,7 +30,7 @@ class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::t
 {
   public:
 	ProcessorSelection processors;
-	RouteUISelection     routes;
+	AxisViewSelection  axes;
 
 	RouteProcessorSelection();
 
@@ -47,17 +47,17 @@ class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::t
 	void set (XMLNode* node);
 	void add (XMLNode* node);
 
-	void set (RouteUI*);
-	void add (RouteUI*);
-	void remove (RouteUI*);
+	void set (AxisView*);
+	void add (AxisView*);
+	void remove (AxisView*);
 
 	void clear_processors ();
 	void clear_routes ();
 
-	bool selected (RouteUI*);
+	bool selected (AxisView*);
 
   private:
-	void removed (RouteUI*);
+	void removed (AxisView*);
 	bool _no_route_change_signal;
 
 };

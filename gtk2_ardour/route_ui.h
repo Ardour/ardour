@@ -74,12 +74,14 @@ class RoutePinWindowProxy : public WM::ProxyBase
 	PBD::ScopedConnection going_away_connection;
 };
 
-class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectable, public virtual PBD::ScopedConnectionList
+class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual Selectable, public virtual sigc::trackable
 {
   public:
 	RouteUI (ARDOUR::Session*);
 
 	virtual ~RouteUI();
+
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
@@ -105,9 +107,6 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual Selectab
 	virtual void set_color (uint32_t c);
 	Gdk::Color route_color () const;
 	void choose_color ();
-
-	bool selected () const;
-	void set_selected (bool);
 
 	bool ignore_toggle;
 	bool wait_for_release;

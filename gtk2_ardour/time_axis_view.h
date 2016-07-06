@@ -105,9 +105,6 @@ class TimeAxisView : public virtual AxisView
 
 	static void setup_sizes ();
 
-	virtual boost::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
-	virtual ARDOUR::PresentationInfo const & presentation_info () const = 0;
-
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }
 
@@ -138,6 +135,8 @@ class TimeAxisView : public virtual AxisView
 
 	/** @return true if hidden, otherwise false */
 	bool hidden () const { return _hidden; }
+
+	void set_selected (bool);
 
 	virtual bool selectable() const { return true; }
 
@@ -305,9 +304,6 @@ class TimeAxisView : public virtual AxisView
 	void conditionally_add_to_selection ();
 
 	void build_size_menu ();
-
-  protected:
-	void show_selected ();
 
   private:
 	Gtk::VBox*            control_parent;

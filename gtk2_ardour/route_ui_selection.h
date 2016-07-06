@@ -23,8 +23,8 @@
 
 #include <set>
 
-class RouteUI;
+class AxisView;
 
-struct RouteUISelection : std::set<RouteUI*> {};
+struct AxisViewSelection : std::set<AxisView*> {};
 
 #endif /* __ardour_gtk_route_ui_selection_h__ */

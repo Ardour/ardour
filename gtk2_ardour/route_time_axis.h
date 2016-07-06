@@ -83,10 +83,9 @@ public:
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
-	void set_route (boost::shared_ptr<ARDOUR::Route>);
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
-	ARDOUR::PresentationInfo const & presentation_info () const;
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	void show_selection (TimeSelection&);
 	void set_button_names ();

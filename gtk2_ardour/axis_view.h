@@ -37,10 +37,13 @@
 
 namespace ARDOUR {
 	class Session;
+	class Stripable;
+	class PresentationInfo;
 }
 
 /**
- * AxisView defines the abstract base class for time-axis trackviews and routes.
+ * AxisView defines the abstract base class for horizontal and vertical
+ * presentations of Stripables.
  *
  */
 class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR::SessionHandlePtr, public virtual Selectable
@@ -52,6 +55,8 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 	virtual Gdk::Color color() const = 0;
 
 	sigc::signal<void> Hiding;
+
+	virtual boost::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
 
 	virtual std::string state_id() const = 0;
 	/* for now, we always return properties in string form.
@@ -71,6 +76,8 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 		gui_object_state().remove_node (state_id());
 		property_hashtable.clear ();
 	}
+
+	void set_selected (bool yn);
 
 	virtual bool marked_for_display () const;
 	virtual bool set_marked_for_display (bool);

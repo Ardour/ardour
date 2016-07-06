@@ -88,6 +88,8 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
+
 	void set_width_enum (Width, void* owner);
 	Width get_width_enum () const { return _width; }
 	void* width_owner () const { return _width_owner; }
@@ -138,7 +140,7 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	void toggle_processors ();
 	void ab_plugins ();
 
-	void show_selected ();
+	void set_selected (bool yn);
 
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 

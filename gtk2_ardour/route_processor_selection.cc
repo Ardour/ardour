@@ -42,7 +42,7 @@ RouteProcessorSelection::operator= (const RouteProcessorSelection& other)
 {
 	if (&other != this) {
 		processors = other.processors;
-		routes = other.routes;
+		axes = other.axes;
 	}
 	return *this;
 }
@@ -51,7 +51,7 @@ bool
 operator== (const RouteProcessorSelection& a, const RouteProcessorSelection& b)
 {
 	// XXX MUST TEST PROCESSORS SOMEHOW
-	return a.routes == b.routes;
+	return a.axes == b.axes;
 }
 
 void
@@ -71,10 +71,10 @@ RouteProcessorSelection::clear_processors ()
 void
 RouteProcessorSelection::clear_routes ()
 {
-	for (RouteUISelection::iterator i = routes.begin(); i != routes.end(); ++i) {
+	for (AxisViewSelection::iterator i = axes.begin(); i != axes.end(); ++i) {
 		(*i)->set_selected (false);
 	}
-	routes.clear ();
+	axes.clear ();
 	drop_connections ();
 	if (!_no_route_change_signal) {
 		RoutesChanged ();
@@ -98,34 +98,33 @@ RouteProcessorSelection::set (XMLNode* node)
 }
 
 void
-RouteProcessorSelection::add (RouteUI* r)
+RouteProcessorSelection::add (AxisView* r)
 {
-	if (find (routes.begin(), routes.end(), r) == routes.end()) {
-		if (routes.insert (r).second) {
-			r->set_selected (true);
+	if (axes.insert (r).second) {
 
-			MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
+		r->set_selected (true);
 
-			if (ms) {
-				ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
-			}
+		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 
-			if (!_no_route_change_signal) {
-				RoutesChanged();
-			}
+		if (ms) {
+			ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
+		}
+
+		if (!_no_route_change_signal) {
+			RoutesChanged();
 		}
 	}
 }
 
 void
-RouteProcessorSelection::remove (RouteUI* r)
+RouteProcessorSelection::remove (AxisView* r)
 {
 	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
 
-	RouteUISelection::iterator i;
-	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
+	AxisViewSelection::iterator i;
+	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
 		(*i)->set_selected (false);
-		routes.erase (i);
+		axes.erase (i);
 		if (!_no_route_change_signal) {
 			RoutesChanged ();
 		}
@@ -133,22 +132,22 @@ RouteProcessorSelection::remove (RouteUI* r)
 }
 
 void
-RouteProcessorSelection::set (RouteUI* r)
+RouteProcessorSelection::set (AxisView* r)
 {
 	clear_routes ();
 	add (r);
 }
 
 bool
-RouteProcessorSelection::selected (RouteUI* r)
+RouteProcessorSelection::selected (AxisView* r)
 {
-	return find (routes.begin(), routes.end(), r) != routes.end();
+	return find (axes.begin(), axes.end(), r) != axes.end();
 }
 
 bool
 RouteProcessorSelection::empty ()
 {
-	return processors.empty () && routes.empty ();
+	return processors.empty () && axes.empty ();
 }
 
 void

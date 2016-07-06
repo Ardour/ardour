@@ -97,3 +97,19 @@ AxisView::gui_object_state()
 {
 	return *ARDOUR_UI::instance()->gui_object_state;
 }
+
+void
+AxisView::set_selected (bool yn)
+{
+	if (selected() == yn) {
+		return;
+	}
+
+	Selectable::set_selected (yn);
+
+	boost::shared_ptr<Stripable> s = stripable ();
+
+	if (s) {
+		s->presentation_info().set_selected (yn);
+	}
+}

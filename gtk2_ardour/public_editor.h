@@ -57,6 +57,7 @@ namespace ARDOUR {
 	class RouteGroup;
         class Trimmable;
         class Movable;
+        class Stripable;
 }
 
 namespace Gtk {
@@ -371,7 +372,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
         virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
-	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
+	virtual TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
 
         virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
         virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;

@@ -977,3 +977,4 @@ MeterStrip::color () const
 {
 	return RouteUI::route_color ();
 }
+

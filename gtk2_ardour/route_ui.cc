@@ -2144,33 +2144,6 @@ RouteUI::route_gui_changed (PropertyChange const& what_changed)
 			route_color_changed ();
 		}
 	}
-
-	if (what_changed.contains (Properties::selected)) {
-		show_selected ();
-	}
-}
-
-void
-RouteUI::set_selected (bool yn)
-{
-	Selectable::set_selected (yn);
-	if (_route) {
-		_route->presentation_info().set_selected (yn);
-	}
-}
-
-bool
-RouteUI::selected () const
-{
-	/* XXX not sure if this is a wise design. Probably don't really want
-	 * the cached _selected value from Selectable.
-	 */
-
-	if (!_route) {
-		return _selected;
-	}
-
-	return _route->presentation_info().selected();
 }
 
 void
@@ -2365,3 +2338,10 @@ RouteUI::mark_hidden (bool yn)
 	}
 	return false;
 }
+
+boost::shared_ptr<Stripable>
+RouteUI::stripable () const
+{
+	return _route;
+}
+

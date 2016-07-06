@@ -30,6 +30,8 @@
 
 #include "ardour/rc_configuration.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
@@ -225,7 +227,11 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		}
 	}
 
-	_session->set_editor_mixer (route);
+	/* Typically this is set by changing the TAV selection but if for any
+	   reason we decide to show a different strip for some reason, make
+	   sure that control surfaces can find it.
+	*/
+	ARDOUR::ControlProtocol::set_first_selected_stripable (route);
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 
@@ -295,12 +301,12 @@ Editor::follow_mixer_selection ()
 	_following_mixer_selection = true;
 	selection->block_tracks_changed (true);
 
-	RouteUISelection& s (Mixer_UI::instance()->selection().routes);
+	AxisViewSelection& s (Mixer_UI::instance()->selection().axes);
 
 	selection->clear_tracks ();
 
-	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
-		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
+	for (AxisViewSelection::iterator i = s.begin(); i != s.end(); ++i) {
+		TimeAxisView* tav = axis_view_from_stripable ((*i)->stripable());
 		if (tav) {
 			selection->add (tav);
 		}

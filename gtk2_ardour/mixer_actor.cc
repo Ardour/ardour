@@ -92,57 +92,57 @@ MixerActor::load_bindings ()
 void
 MixerActor::solo_action ()
 {
-	GdkEventButton ev;
+	set_axis_targets_for_operation ();
 
-	ev.type = GDK_BUTTON_PRESS;
-	ev.button = 1;
-	ev.state = 0;
-
-	set_route_targets_for_operation ();
-
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		r->solo_press (&ev);
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			boost::shared_ptr<AutomationControl> ac = s->solo_control();
+			if (ac) {
+				ac->set_value (!ac->get_value(), Controllable::UseGroup);
+			}
+		}
 	}
 }
 
 void
 MixerActor::mute_action ()
 {
-	GdkEventButton ev;
+	set_axis_targets_for_operation ();
 
-	ev.type = GDK_BUTTON_PRESS;
-	ev.button = 1;
-	ev.state = 0;
-
-	set_route_targets_for_operation ();
-
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		r->mute_press (&ev);
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			boost::shared_ptr<AutomationControl> ac = s->mute_control();
+			if (ac) {
+				ac->set_value (!ac->get_value(), Controllable::UseGroup);
+			}
+		}
 	}
 }
 
 void
 MixerActor::rec_enable_action ()
 {
-	GdkEventButton ev;
+	set_axis_targets_for_operation ();
 
-	ev.type = GDK_BUTTON_PRESS;
-	ev.button = 1;
-	ev.state = 0;
-
-	set_route_targets_for_operation ();
-
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		r->rec_enable_press (&ev);
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			boost::shared_ptr<AutomationControl> ac = s->rec_enable_control();
+			if (ac) {
+				ac->set_value (!ac->get_value(), Controllable::UseGroup);
+			}
+		}
 	}
 }
 
 void
 MixerActor::step_gain_up_action ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->step_gain_up ();
@@ -153,9 +153,9 @@ MixerActor::step_gain_up_action ()
 void
 MixerActor::step_gain_down_action ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->step_gain_down ();
@@ -166,13 +166,15 @@ MixerActor::step_gain_down_action ()
 void
 MixerActor::unity_gain_action ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-printf("setting gain to unity (?)");
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		boost::shared_ptr<Route> rp = r->route();
-		if (rp) {
-			rp->gain_control()->set_value (1.0, Controllable::NoGroup);
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		boost::shared_ptr<Stripable> s = r->stripable();
+		if (s) {
+			boost::shared_ptr<AutomationControl> ac = s->gain_control();
+			if (ac) {
+				ac->set_value (1.0, Controllable::UseGroup);
+			}
 		}
 	}
 }
@@ -180,9 +182,9 @@ printf("setting gain to unity (?)");
 void
 MixerActor::copy_processors ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->copy_processors ();
@@ -192,9 +194,9 @@ MixerActor::copy_processors ()
 void
 MixerActor::cut_processors ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->cut_processors ();
@@ -204,9 +206,9 @@ MixerActor::cut_processors ()
 void
 MixerActor::paste_processors ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->paste_processors ();
@@ -216,9 +218,9 @@ MixerActor::paste_processors ()
 void
 MixerActor::select_all_processors ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->select_all_processors ();
@@ -228,9 +230,9 @@ MixerActor::select_all_processors ()
 void
 MixerActor::toggle_processors ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->toggle_processors ();
@@ -240,9 +242,9 @@ MixerActor::toggle_processors ()
 void
 MixerActor::ab_plugins ()
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->ab_plugins ();
@@ -253,9 +255,9 @@ MixerActor::ab_plugins ()
 void
 MixerActor::vca_assign (boost::shared_ptr<VCA> vca)
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 #if 0
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_assign (vca);
@@ -267,9 +269,9 @@ MixerActor::vca_assign (boost::shared_ptr<VCA> vca)
 void
 MixerActor::vca_unassign (boost::shared_ptr<VCA> vca)
 {
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 #if 0
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
+	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);

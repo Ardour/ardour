@@ -816,11 +816,11 @@ Mixer_UI::follow_editor_selection ()
 	_selection.clear_routes ();
 
 	for (TrackViewList::iterator i = s.begin(); i != s.end(); ++i) {
-		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtav) {
-			MixerStrip* ms = strip_by_route (rtav->route());
-			if (ms) {
-				_selection.add (ms);
+		TimeAxisView* tav = dynamic_cast<TimeAxisView*> (*i);
+		if (tav) {
+			AxisView* axis = axis_by_stripable (tav->stripable());
+			if (axis) {
+				_selection.add (axis);
 			}
 		}
 	}
@@ -831,10 +831,22 @@ Mixer_UI::follow_editor_selection ()
 
 
 MixerStrip*
-Mixer_UI::strip_by_route (boost::shared_ptr<Route> r)
+Mixer_UI::strip_by_route (boost::shared_ptr<Route> r) const
 {
-	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route() == r) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
+AxisView*
+Mixer_UI::axis_by_stripable (boost::shared_ptr<Stripable> s) const
+{
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->stripable() == s) {
 			return (*i);
 		}
 	}
@@ -850,7 +862,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 			/* primary-click: toggle selection state of strip */
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				_selection.remove (strip);
-			} else if (_selection.routes.size() > 1) {
+			} else if (_selection.axes.size() > 1) {
 				/* de-select others */
 				_selection.set (strip);
 			}
@@ -2220,12 +2232,12 @@ Mixer_UI::strip_by_x (int x)
 }
 
 void
-Mixer_UI::set_route_targets_for_operation ()
+Mixer_UI::set_axis_targets_for_operation ()
 {
-	_route_targets.clear ();
+	_axis_targets.clear ();
 
 	if (!_selection.empty()) {
-		_route_targets = _selection.routes;
+		_axis_targets = _selection.axes;
 		return;
 	}
 
@@ -2251,13 +2263,13 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 	boost::shared_ptr<RouteList> rl (new RouteList);
 	bool onoff = false;
 
-	set_route_targets_for_operation ();
+	set_axis_targets_for_operation ();
 
-	for (RouteUISelection::iterator r = _route_targets.begin(); r != _route_targets.end(); ++r) {
-		boost::shared_ptr<MidiTrack> mt = (*r)->midi_track();
+	for (AxisViewSelection::iterator r = _axis_targets.begin(); r != _axis_targets.end(); ++r) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> ((*r)->stripable());
 
 		if (mt) {
-			rl->push_back ((*r)->route());
+			rl->push_back (mt);
 			onoff = !mt->input_active();
 		}
 	}
@@ -2458,7 +2470,7 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 	Gtk::Menu* m = manage (new Menu);
 	MenuList& items = m->items ();
 
-	if (_selection.routes.empty()) {
+	if (_selection.axes.empty()) {
 		items.push_back (MenuElem (_("No Track/Bus is selected.")));
 	} else {
 		items.push_back (MenuElem (_("Add at the top"),
@@ -2575,17 +2587,23 @@ Mixer_UI::plugin_row_activated (const TreeModel::Path& path, TreeViewColumn* col
 void
 Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition pos)
 {
-	if (!_session || _selection.routes.empty()) {
+	if (!_session || _selection.axes.empty()) {
 		return;
 	}
 
 	PluginInfoPtr pip = ppp->_pip;
-	for (RouteUISelection::iterator i = _selection.routes.begin(); i != _selection.routes.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Route> rt = (*i)->route();
-		if (!rt) { continue; }
+	for (AxisViewSelection::iterator i = _selection.axes.begin(); i != _selection.axes.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> rt = boost::dynamic_pointer_cast<ARDOUR::Route> ((*i)->stripable());
+
+		if (!rt) {
+			continue;
+		}
 
 		PluginPtr p = pip->load (*_session);
-		if (!p) { continue; }
+
+		if (!p) {
+			continue;
+		}
 
 		if (ppp->_preset.valid) {
 			p->load_preset (ppp->_preset);

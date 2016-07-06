@@ -742,9 +742,15 @@ TimeAxisView::popup_display_menu (guint32 when)
 }
 
 void
-TimeAxisView::show_selected ()
+TimeAxisView::set_selected (bool yn)
 {
-	if (selected()) {
+	if (yn == selected()) {
+		return;
+	}
+
+	Selectable::set_selected (yn);
+
+	if (_selected) {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);
 		time_axis_frame.set_name ("MixerStripSelectedFrame");
 		controls_ebox.set_name (controls_base_selected_name);
@@ -770,6 +776,7 @@ TimeAxisView::show_selected ()
 	}
 
 	time_axis_frame.show();
+
 }
 
 void

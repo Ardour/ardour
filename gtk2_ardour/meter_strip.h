@@ -53,6 +53,8 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	std::string name() const;
 	Gdk::Color color () const;
 
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
+
 	void set_session (ARDOUR::Session* s);
 	void fast_update ();
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }

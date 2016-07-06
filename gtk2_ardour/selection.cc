@@ -26,6 +26,8 @@
 #include "ardour/playlist.h"
 #include "ardour/rc_configuration.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "audio_region_view.h"
 #include "debug.h"
 #include "gui_thread.h"
@@ -637,6 +639,7 @@ Selection::remove (TimeAxisView* track)
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
 		track->set_selected (false);
 		tracks.erase (i);
+
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}

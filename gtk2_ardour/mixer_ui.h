@@ -121,7 +121,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	sigc::signal1<void,boost::shared_ptr<ARDOUR::VCA> > show_vca_change;
 
   protected:
-	void set_route_targets_for_operation ();
+	void set_axis_targets_for_operation ();
 
   private:
 	Mixer_UI ();
@@ -177,7 +177,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void add_masters (ARDOUR::VCAList&);
 	void remove_master (VCAMasterStrip*);
 
-	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>);
+	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
+	AxisView* axis_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 
 	void hide_all_strips (bool with_select);
 	void unselect_all_strips();
