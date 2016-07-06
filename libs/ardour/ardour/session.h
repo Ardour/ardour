@@ -302,10 +302,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	};
 
 	void notify_presentation_info_change ();
-	void clear_stripable_selection ();
-	void toggle_stripable_selection (boost::shared_ptr<Stripable>);
-	void add_stripable_selection (boost::shared_ptr<Stripable>);
-	void set_stripable_selection (boost::shared_ptr<Stripable>);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
@@ -822,9 +818,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
-	boost::weak_ptr<Route> get_editor_mixer() const { return _editor_mixer; }
-	void set_editor_mixer (boost::weak_ptr<Route> r) { _editor_mixer = r; EditorMixerChanged(); }
-	static PBD::Signal0<void> EditorMixerChanged;
 
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
 	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
@@ -1874,7 +1867,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> _master_out;
 	boost::shared_ptr<Route> _monitor_out;
-	boost::weak_ptr<Route> _editor_mixer;
 
 	void auto_connect_master_bus ();
 
