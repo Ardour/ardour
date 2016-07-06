@@ -210,18 +210,29 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	filter_frame->show_all ();
 
+	HBox* side_by_side = manage (new HBox);
+	VBox* right_side = manage (new VBox);
+
 	table->attach (scroller, 0, 7, 0, 5);
 	table->attach (*filter_frame, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
-	table->attach(*btn_add, 1, 2, 7, 8, FILL, FILL, 5, 5);
-	table->attach(*btn_remove, 5, 6, 7, 8, FILL, FILL, 5, 5);
 
-	table->attach(ascroller, 0, 7, 8, 10);
+	right_side->pack_start (ascroller);
+
+	HBox* add_remove = manage (new HBox);
+	add_remove->pack_start (*btn_add, true, true);
+	add_remove->pack_start (*btn_remove, true, true);
+
+	right_side->pack_start (*add_remove, false, false);
+	right_side->set_size_request (200, -1);
+
+	side_by_side->pack_start (*table);
+	side_by_side->pack_start (*right_side);
 
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 	set_response_sensitive (RESPONSE_APPLY, false);
-	get_vbox()->pack_start (*table);
+	get_vbox()->pack_start (*side_by_side);
 
 	table->set_name("PluginSelectorTable");
 	plugin_display.set_name("PluginSelectorDisplay");
