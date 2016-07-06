@@ -46,7 +46,7 @@ LuaProc::LuaProc (AudioEngine& engine,
                   Session& session,
                   const std::string &script)
 	: Plugin (engine, session)
-	, _mempool ("LuaProc", 1048576) // 1 MB is plenty. (64K would be enough)
+	, _mempool ("LuaProc", 2097152)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _lua_dsp (0)
 	, _script (script)
@@ -69,7 +69,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 
 LuaProc::LuaProc (const LuaProc &other)
 	: Plugin (other)
-	, _mempool ("LuaProc", 1048576) // 1 MB is plenty. (64K would be enough)
+	, _mempool ("LuaProc", 2097152)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _lua_dsp (0)
 	, _script (other.script ())
@@ -118,6 +118,7 @@ LuaProc::init ()
 	_stats_avg[0] = _stats_avg[1] = _stats_max[0] = _stats_max[1] = _stats_cnt = 0;
 #endif
 
+	lua.tweak_rt_gc ();
 	lua.Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
 	// register session object
 	lua_State* L = lua.getState ();
@@ -759,7 +760,8 @@ LuaProc::connect_and_run (BufferSet& bufs,
 #ifdef WITH_LUAPROC_STATS
 	int64_t t1 = g_get_monotonic_time ();
 #endif
-	lua.collect_garbage (); // rt-safe, slight *regular* performance overhead
+
+	lua.collect_garbage_step ();
 #ifdef WITH_LUAPROC_STATS
 	++_stats_cnt;
 	int64_t t2 = g_get_monotonic_time ();

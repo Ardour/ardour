@@ -238,7 +238,7 @@ Session::Session (AudioEngine &eng,
 	, pending_locate_flush (false)
 	, pending_abort (false)
 	, pending_auto_loop (false)
-	, _mempool ("Session", 1048576)
+	, _mempool ("Session", 2097152)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
@@ -5170,6 +5170,7 @@ Session::try_run_lua (pframes_t nframes)
 	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
 	if (tm.locked ()) {
 		try { (*_lua_run)(nframes); } catch (luabridge::LuaException const& e) { }
+		lua.collect_garbage_step ();
 	}
 }
 
@@ -5179,6 +5180,7 @@ Session::setup_lua ()
 #ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
 #endif
+	lua.tweak_rt_gc ();
 	lua.do_command (
 			"function ArdourSession ()"
 			"  local self = { scripts = {}, instances = {} }"

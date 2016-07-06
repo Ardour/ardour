@@ -77,6 +77,17 @@ LuaState::collect_garbage () {
 }
 
 void
+LuaState::collect_garbage_step () {
+	lua_gc (L, LUA_GCSTEP, 0);
+}
+
+void
+LuaState::tweak_rt_gc () {
+	//lua_gc (L, LUA_GCSETPAUSE, 20);
+	lua_gc (L, LUA_GCSETSTEPMUL, 100);
+}
+
+void
 LuaState::print (std::string text) {
 	Print (text); /* EMIT SIGNAL */
 }
