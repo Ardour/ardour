@@ -37,6 +37,10 @@ using namespace Glib;
 void
 Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
+	if (cl->empty()) {
+		return;
+	}
+
 	std::cerr << "Session::set_controls called on " << cl->size() << " controls, group = " << enum_2_string (gcd) << std::endl;
 
 	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
@@ -50,6 +54,10 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 void
 Session::set_control (boost::shared_ptr<AutomationControl> ac, double val, Controllable::GroupControlDisposition gcd)
 {
+	if (!ac) {
+		return;
+	}
+
 	boost::shared_ptr<ControlList> cl (new ControlList);
 	cl->push_back (ac);
 	set_controls (cl, val, gcd);
