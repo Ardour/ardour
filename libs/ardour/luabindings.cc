@@ -226,6 +226,9 @@ LuaBindings::stddef (lua_State* L)
 		.beginStdVector <std::string> ("StringVector")
 		.endClass ()
 
+	// register float array (uint8_t*)
+		.registerArray <uint8_t> ("ByteArray")
+
 	// register float array (float*)
 		.registerArray <float> ("FloatArray")
 
@@ -292,6 +295,33 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
 		.addFunction ("name", &PBD::Controllable::name)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
+		.endClass ()
+
+		.beginClass <PBD::RingBufferNPT <uint8_t> > ("RingBuffer8")
+		.addConstructor <void (*) (size_t)> ()
+		.addFunction ("reset", &PBD::RingBufferNPT<uint8_t>::reset)
+		.addFunction ("read", &PBD::RingBufferNPT<uint8_t>::read)
+		.addFunction ("write", &PBD::RingBufferNPT<uint8_t>::write)
+		.addFunction ("write_space", &PBD::RingBufferNPT<uint8_t>::write_space)
+		.addFunction ("read_space", &PBD::RingBufferNPT<uint8_t>::read_space)
+		.endClass ()
+
+		.beginClass <PBD::RingBufferNPT <float> > ("RingBufferF")
+		.addConstructor <void (*) (size_t)> ()
+		.addFunction ("reset", &PBD::RingBufferNPT<float>::reset)
+		.addFunction ("read", &PBD::RingBufferNPT<float>::read)
+		.addFunction ("write", &PBD::RingBufferNPT<float>::write)
+		.addFunction ("write_space", &PBD::RingBufferNPT<float>::write_space)
+		.addFunction ("read_space", &PBD::RingBufferNPT<float>::read_space)
+		.endClass ()
+
+		.beginClass <PBD::RingBufferNPT <int> > ("RingBufferI")
+		.addConstructor <void (*) (size_t)> ()
+		.addFunction ("reset", &PBD::RingBufferNPT<int>::reset)
+		.addFunction ("read", &PBD::RingBufferNPT<int>::read)
+		.addFunction ("write", &PBD::RingBufferNPT<int>::write)
+		.addFunction ("write_space", &PBD::RingBufferNPT<int>::write_space)
+		.addFunction ("read_space", &PBD::RingBufferNPT<int>::read_space)
 		.endClass ()
 
 		/* PBD enums */
