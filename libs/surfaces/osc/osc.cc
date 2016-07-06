@@ -249,8 +249,8 @@ OSC::start ()
 	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
 	periodic_timeout->attach (main_loop()->get_context());
 
-	// catch current editor mixer changes for GUI_select mode
-	session->EditorMixerChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this), this);
+	// catch changes to selection for GUI_select mode
+	StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this), this);
 
 	// catch track reordering
 	// receive routes added
@@ -2081,7 +2081,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	sur->expand_enable = false;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	if (s) {
-		session->set_stripable_selection (s);
+		SetStripableSelection (s);
 	} else {
 		route_send_fail ("select", ssid, 0, lo_message_get_source (msg));
 	}

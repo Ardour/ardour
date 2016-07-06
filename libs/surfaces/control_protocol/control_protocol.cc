@@ -371,6 +371,4 @@ ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
 			_first_selected_stripable = boost::weak_ptr<Stripable>();
 		}
 	}
-
-	cerr << "CP: selection now " << _last_selected.size() << endl;
 }
