@@ -187,7 +187,7 @@ end
 
 function db_to_y (db, h)
 	-- y-axis gain mapping
-	if db < -48 then db = -48 end
+	if db < -60 then db = -60 end
 	if db >  12 then db =  12 end
 	return -.5 + round (0.2 * h) - h * db / 60
 end
@@ -238,6 +238,8 @@ function render_inline (ctx, w, max_h)
 	ctx:rectangle (0, 0, w, h)
 	ctx:set_source_rgba (.2, .2, .2, 1.0)
 	ctx:fill ()
+	ctx:rectangle (0, 0, w, h)
+	ctx:clip ();
 
 	-- set line width: 1px
 	-- Note: a cairo pixel at [1,1]  spans [0.5->1.5 , 0.5->1.5]
