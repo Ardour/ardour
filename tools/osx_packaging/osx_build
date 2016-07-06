@@ -540,7 +540,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends ; do
+for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Frameworks/LV2/* ; do
 
     libbase=`basename $libdir`
     
