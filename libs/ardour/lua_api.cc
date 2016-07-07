@@ -345,3 +345,153 @@ ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
 	luabridge::Stack<double>::push (L, a);
 	return 4;
 }
+
+luabridge::LuaRef::Proxy&
+luabridge::LuaRef::Proxy::clone_instance (const void* classkey, void* p) {
+  lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_tableRef);
+  lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_keyRef);
+
+	luabridge::UserdataPtr::push_raw (m_L, p, classkey);
+
+  lua_rawset (m_L, -3);
+  lua_pop (m_L, 1);
+  return *this;
+}
+
+LuaTableRef::LuaTableRef () {}
+LuaTableRef::~LuaTableRef () {}
+
+int
+LuaTableRef::get (lua_State* L)
+{
+	luabridge::LuaRef rv (luabridge::newTable (L));
+	for (std::vector<LuaTableEntry>::const_iterator i = _data.begin (); i != _data.end (); ++i) {
+		switch ((*i).keytype) {
+			case LUA_TSTRING:
+				assign(&rv, i->k_s, *i);
+				break;
+			case LUA_TNUMBER:
+				assign(&rv, i->k_n, *i);
+				break;
+		}
+	}
+	luabridge::push (L, rv);
+	return 1;
+}
+
+int
+LuaTableRef::set (lua_State* L)
+{
+	if (!lua_istable (L, -1)) { return luaL_error (L, "argument is not a table"); }
+	_data.clear ();
+
+	lua_pushvalue (L, -1);
+	lua_pushnil (L);
+	while (lua_next (L, -2)) {
+		lua_pushvalue (L, -2);
+
+		LuaTableEntry s (lua_type(L, -1), lua_type(L, -2));
+		switch (lua_type(L, -1)) {
+			case LUA_TSTRING:
+				s.k_s = luabridge::Stack<std::string>::get (L, -1);
+				break;
+				;
+			case LUA_TNUMBER:
+				s.k_n = luabridge::Stack<unsigned int>::get (L, -1);
+				break;
+			default:
+				// invalid key
+				lua_pop (L, 2);
+				continue;
+		}
+
+		switch(lua_type(L, -2)) {
+			case LUA_TSTRING:
+				s.s = luabridge::Stack<std::string>::get (L, -2);
+				break;
+			case LUA_TBOOLEAN:
+				s.b = lua_toboolean (L, -2);
+				break;
+			case LUA_TNUMBER:
+				s.n = lua_tonumber (L, -2);
+				break;
+			case LUA_TUSERDATA:
+				{
+					bool ok = false;
+					lua_getmetatable (L, -2);
+					lua_rawgetp (L, -1, luabridge::getIdentityKey ());
+					if (lua_isboolean (L, -1)) {
+						lua_pop (L, 1);
+						const void* key = lua_topointer (L, -1);
+						lua_pop (L, 1);
+						void const* classkey = findclasskey (L, key);
+
+						if (classkey) {
+							ok = true;
+							s.c = classkey;
+							s.p = luabridge::Userdata::get_ptr (L, -2);
+						}
+					}  else {
+						lua_pop (L, 2);
+					}
+
+					if (ok) {
+						break;
+					}
+					// invalid userdata -- fall through
+				}
+				// no break
+			case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
+			case LUA_TTABLE: // no nested tables, sorry.
+			case LUA_TNIL: // fallthrough
+			default:
+				// invalid value
+				lua_pop (L, 2);
+				continue;
+		}
+
+		_data.push_back(s);
+		lua_pop (L, 2);
+	}
+	return 0;
+}
+
+void*
+LuaTableRef::findclasskey (lua_State *L, const void* key)
+{
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_pushnil (L);
+	while (lua_next (L, -2)) {
+		lua_pushvalue (L, -2);
+		if (lua_topointer(L, -2) == key) {
+			void* rv = lua_touserdata (L, -1);
+			lua_pop (L, 4);
+			return rv;
+		}
+		lua_pop (L, 2);
+	}
+	lua_pop (L, 1);
+	return NULL;
+}
+
+template<typename T>
+void LuaTableRef::assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s)
+{
+	switch (s.valuetype) {
+		case LUA_TSTRING:
+			(*rv)[key] = s.s;
+			break;
+		case LUA_TBOOLEAN:
+			(*rv)[key] = s.b;
+			break;
+		case LUA_TNUMBER:
+			(*rv)[key] = s.n;
+			break;
+		case LUA_TUSERDATA:
+			(*rv)[key].clone_instance (s.c, s.p);
+			break;
+		default:
+			assert (0);
+			break;
+	}
+}

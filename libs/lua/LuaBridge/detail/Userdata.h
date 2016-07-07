@@ -302,6 +302,11 @@ ud __parent (nil)
 public:
   virtual ~Userdata () { }
 
+  static void* get_ptr (lua_State* L, int index) {
+    Userdata* ud = static_cast <Userdata*> (lua_touserdata (L, index));
+    return ud->m_p;
+  }
+
   //--------------------------------------------------------------------------
   /**
     Returns the Userdata* if the class on the Lua stack matches.
@@ -455,6 +460,15 @@ private:
     // Can't construct with a null pointer!
     //
     assert (m_p != 0);
+  }
+
+  friend class LuaRef;
+  static inline void push_raw (lua_State* const L, void* p, const void* classkey)
+  {
+    new (lua_newuserdata (L, sizeof (UserdataPtr))) UserdataPtr (p);
+    lua_rawgetp (L, LUA_REGISTRYINDEX, classkey);
+    assert (lua_istable (L, -1));
+    lua_setmetatable (L, -2);
   }
 
 public:

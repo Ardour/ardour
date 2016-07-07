@@ -181,6 +181,46 @@ namespace ARDOUR { namespace LuaOSC {
 			lo_address _addr;
 	};
 
-} } /* namespace */
+}
+
+class LuaTableRef {
+	public:
+		LuaTableRef ();
+		~LuaTableRef ();
+
+		int get (lua_State* L);
+		int set (lua_State* L);
+
+	private:
+		struct LuaTableEntry {
+			LuaTableEntry (int kt, int vt)
+				: keytype (kt)
+				, valuetype (vt)
+			{ }
+
+			int keytype;
+			std::string k_s;
+			unsigned int k_n;
+
+			int valuetype;
+			// LUA_TUSERDATA
+			const void* c;
+			void* p;
+			// LUA_TBOOLEAN
+			bool b;
+			// LUA_TSTRING:
+			std::string s;
+			// LUA_TNUMBER:
+			double n;
+		};
+
+		std::vector<LuaTableEntry> _data;
+
+		static void* findclasskey (lua_State *L, const void* key);
+		template<typename T>
+		static void assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s);
+};
+
+} /* namespace */
 
 #endif // _ardour_lua_api_h_

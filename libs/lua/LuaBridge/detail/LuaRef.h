@@ -180,6 +180,11 @@ private:
       return *this;
     }
 
+    // the implementation needs UserdataPtr, which
+    // is not yet defined here.
+    // -> libs/ardour/lua_api.cc
+    Proxy& clone_instance (const void* key, void* p);
+
     //--------------------------------------------------------------------------
     /**
         Assign a new value to this table key.

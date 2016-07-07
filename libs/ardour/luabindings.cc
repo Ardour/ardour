@@ -169,6 +169,7 @@ CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanMapping);
 CLASSKEYS(ARDOUR::DSP::DspShm);
+CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(PBD::ID);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::PluginInfo);
@@ -1373,6 +1374,12 @@ LuaBindings::dsp (lua_State* L)
 		.endClass ()
 
 		.endNamespace () // DSP
+
+		.beginClass <LuaTableRef> ("LuaTableRef")
+		.addCFunction ("get", &LuaTableRef::get)
+		.addCFunction ("set", &LuaTableRef::set)
+		.endClass ()
+
 		.endNamespace (); // ARDOUR
 }
 
