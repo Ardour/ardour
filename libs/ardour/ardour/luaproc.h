@@ -89,6 +89,10 @@ public:
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 
+	uint32_t designated_bypass_port () {
+		return _designated_bypass_port;
+	}
+
 	std::string state_node_name() const { return "luaproc"; }
 	void add_state (XMLNode *) const;
 	int set_state (const XMLNode&, int version);
@@ -145,6 +149,7 @@ private:
 	std::vector<std::pair<bool, int> > _ctrl_params;
 	std::map<int, ARDOUR::ParameterDescriptor> _param_desc;
 	std::map<int, std::string> _param_doc;
+	uint32_t _designated_bypass_port;
 
 	float* _control_data;
 	float* _shadow_data;

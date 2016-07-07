@@ -52,6 +52,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _script (script)
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
+	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
 	, _has_midi_input (false)
@@ -75,6 +76,7 @@ LuaProc::LuaProc (const LuaProc &other)
 	, _script (other.script ())
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
+	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
 	, _has_midi_input (false)
@@ -285,6 +287,10 @@ LuaProc::load_script ()
 				_param_desc[pn].integer_step = lr["integer"].isBoolean () && (lr["integer"]).cast<bool> ();
 				_param_desc[pn].sr_dependent = lr["ratemult"].isBoolean () && (lr["ratemult"]).cast<bool> ();
 				_param_desc[pn].enumeration  = lr["enum"].isBoolean () && (lr["enum"]).cast<bool> ();
+
+				if (lr["bypass"].isBoolean () && (lr["bypass"]).cast<bool> ()) {
+					_designated_bypass_port = pn - 1; // lua table starts at 1.
+				}
 
 				if (lr["unit"].isString ()) {
 					std::string unit = lr["unit"].cast<std::string> ();
