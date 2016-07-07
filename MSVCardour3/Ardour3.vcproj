@@ -824,10 +824,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\mixer_actor.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\mixer_group_tabs.cc"
 				>
 			</File>
@@ -1855,10 +1851,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\missing_plugin_dialog.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\mixer_actor.h"
 				>
 			</File>
 			<File
