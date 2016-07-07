@@ -360,13 +360,17 @@ ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
 void
 ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
 {
+	bool had_selection = !_last_selected.empty();
+
 	_last_selected = *sp;
 
 	{
 		Glib::Threads::Mutex::Lock lm (first_selected_mutex);
 
 		if (!_last_selected.empty()) {
-			_first_selected_stripable = _last_selected.front().lock();
+			if (!had_selection) {
+				_first_selected_stripable = _last_selected.front().lock();
+			}
 		} else {
 			_first_selected_stripable = boost::weak_ptr<Stripable>();
 		}
