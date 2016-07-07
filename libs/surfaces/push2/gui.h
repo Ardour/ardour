@@ -28,6 +28,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/notebook.h>
 
 namespace Gtk {
@@ -99,6 +100,12 @@ private:
 
 	/* root notes */
 
+	Gtk::Adjustment root_note_octave_adjustment;
+	Gtk::SpinButton root_note_octave;
+	Gtk::Label root_note_octave_label;
+
+	void root_note_octave_adjustment_changed ();
+
 	struct NoteColumns : public Gtk::TreeModel::ColumnRecord {
 		NoteColumns () {
 			add (number);
@@ -110,6 +117,9 @@ private:
 	NoteColumns note_columns;
 	Glib::RefPtr<Gtk::ListStore> build_note_columns ();
 	Gtk::ComboBox root_note_selector;
+	Gtk::Label root_note_label;
+
+	void root_note_changed ();
 
 	/* modes/scales */
 
@@ -124,10 +134,13 @@ private:
 	ModeColumns mode_columns;
 	Glib::RefPtr<Gtk::ListStore> build_mode_columns ();
 	Gtk::ComboBox mode_selector;
+	Gtk::Label mode_label;
 
 	Gtk::Notebook pad_notebook;
-	Gtk::VBox     mode_packer;
+	Gtk::Table    mode_packer;
 	Gtk::VBox     custom_packer;
+
+	void reprogram_pad_scale ();
 };
 
 }

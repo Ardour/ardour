@@ -19,9 +19,6 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 	*/
 
 	switch (t) {
-	case Random:
-		m.steps.push_back (0.0); // sekrit code for "random"
-		break;
 	case Dorian:
 		m.steps.push_back (1.0);
 		m.steps.push_back (1.5);
@@ -29,14 +26,57 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 		m.steps.push_back (3.0);
 		m.steps.push_back (4.0);
 		m.steps.push_back (4.5);
+		m.steps.push_back (5.5);
 		break;
-	case Ionian:
+	case IonianMajor:
 		m.steps.push_back (1.0);
 		m.steps.push_back (2.0);
 		m.steps.push_back (2.5);
 		m.steps.push_back (3.5);
 		m.steps.push_back (4.5);
 		m.steps.push_back (5.5);
+		break;
+	case Minor:
+		m.steps.push_back (1.0);
+		m.steps.push_back (1.5);
+		m.steps.push_back (2.5);
+		m.steps.push_back (3.5);
+		m.steps.push_back (4.0);
+		m.steps.push_back (5.0);
+		break;
+	case HarmonicMinor:
+		m.steps.push_back (1.0);
+		m.steps.push_back (1.5);
+		m.steps.push_back (2.5);
+		m.steps.push_back (3.5);
+		m.steps.push_back (5.0);
+		m.steps.push_back (5.5);
+		break;
+	case  BluesScale:
+		m.steps.push_back (1.0);
+		m.steps.push_back (1.5);
+		m.steps.push_back (2.5);
+		m.steps.push_back (3);
+		m.steps.push_back (3.5);
+		m.steps.push_back (4.5);
+		m.steps.push_back (5.0);
+		m.steps.push_back (5.5);
+		break;
+	case MelodicMinorAscending:
+		m.steps.push_back (1.0);
+		m.steps.push_back (1.5);
+		m.steps.push_back (2.5);
+		m.steps.push_back (3.5);
+		m.steps.push_back (4.5);
+		m.steps.push_back (5.5);
+		break;
+	case MelodicMinorDescending:
+		m.steps.push_back (1.0);
+		m.steps.push_back (2.0);
+		m.steps.push_back (2.5);
+		m.steps.push_back (3.5);
+		m.steps.push_back (4.5);
+		m.steps.push_back (5.0);
 		break;
 	case Phrygian:
 		m.steps.push_back (0.5);
@@ -90,23 +130,6 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 		m.steps.push_back (3.5);
 		m.steps.push_back (5.0);
 		break;
-	case  MajorChord:
-		m.steps.push_back (2.0);
-		m.steps.push_back (3.5);
-		break;
-	case  MinorChord:
-		m.steps.push_back (1.5);
-		m.steps.push_back (3.5);
-		break;
-	case  Min7:
-		m.steps.push_back (1.5);
-		m.steps.push_back (3.5);
-		m.steps.push_back (5.0);
-		break;
-	case  Sus4:
-		m.steps.push_back (2.5);
-		m.steps.push_back (3.5);
-		break;
 	case  Chromatic:
 		m.steps.push_back (0.5);
 		m.steps.push_back (1.0);
@@ -116,16 +139,6 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 		m.steps.push_back (3.0);
 		m.steps.push_back (3.5);
 		m.steps.push_back (4.0);
-		m.steps.push_back (4.5);
-		m.steps.push_back (5.0);
-		m.steps.push_back (5.5);
-		break;
-	case  BluesScale:
-		m.steps.push_back (1.0);
-		m.steps.push_back (1.5);
-		m.steps.push_back (2.5);
-		m.steps.push_back (3);
-		m.steps.push_back (3.5);
 		m.steps.push_back (4.5);
 		m.steps.push_back (5.0);
 		m.steps.push_back (5.5);

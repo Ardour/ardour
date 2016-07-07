@@ -25,7 +25,8 @@ def build(bld):
 	    interface.cc
             midi_byte_array.cc
             leds.cc
-	    gui.cc            
+	    gui.cc
+	    mode.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]

@@ -84,6 +84,12 @@ P2GUI::P2GUI (Push2& p)
 	, action_table (5, 4)
 	, ignore_active_change (false)
 	, pad_table (8, 8)
+	, root_note_octave_adjustment (3, 0, 10, 1, 1)
+	, root_note_octave (root_note_octave_adjustment)
+	, root_note_octave_label (X_("Octave"))
+	, root_note_label (X_("Root"))
+	, mode_label (X_("Mode (Scale)"))
+	, mode_packer (3, 2)
 {
 	set_border_width (12);
 
@@ -132,16 +138,31 @@ P2GUI::P2GUI (Push2& p)
 
 	root_note_selector.set_model (build_note_columns());
 	root_note_selector.pack_start (note_columns.name);
+	root_note_selector.set_active (0);
 
 	mode_selector.set_model (build_mode_columns());
 	mode_selector.pack_start (mode_columns.name);
+	mode_selector.set_active (0);
 
-	mode_packer.pack_start (root_note_selector, false, false);
-	mode_packer.pack_start (mode_selector, false, false);
+	mode_packer.set_border_width (12);
+	mode_packer.set_spacings (12);
+
+	mode_packer.attach (root_note_label, 0, 1, 0, 1, AttachOptions (FILL|EXPAND), SHRINK);
+	mode_packer.attach (root_note_selector, 1, 2, 0, 1, AttachOptions (FILL|EXPAND), SHRINK);
+
+	mode_packer.attach (root_note_octave_label, 0, 1, 1, 2, AttachOptions (FILL|EXPAND), SHRINK);
+	mode_packer.attach (root_note_octave, 1, 2, 1, 2, AttachOptions (FILL|EXPAND), SHRINK);
+
+	mode_packer.attach (mode_label, 0, 1, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
+	mode_packer.attach (mode_selector, 1, 2, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
 
 	pad_notebook.append_page (pad_table, _("Pad Layout"));
 	pad_notebook.append_page (mode_packer, _("Modes/Scales"));
 	pad_notebook.append_page (custom_packer, _("Custom"));
+
+	root_note_octave_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
+	root_note_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
+	mode_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
 
 	set_spacing (12);
 
@@ -446,16 +467,28 @@ P2GUI::build_mode_columns ()
 	TreeModel::Row row;
 
 	row = *store->append();
-	row[mode_columns.name] = _("Random");
-	row[mode_columns.mode] = MusicalMode::Random;
-
-	row = *store->append();
 	row[mode_columns.name] = _("Dorian");
 	row[mode_columns.mode] = MusicalMode::Dorian;
 
 	row = *store->append();
-	row[mode_columns.name] = _("Ionian (\"Minor\")");
-	row[mode_columns.mode] = MusicalMode::Ionian;
+	row[mode_columns.name] = _("Ionian (\"Major\")");
+	row[mode_columns.mode] = MusicalMode::IonianMajor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Minor");
+	row[mode_columns.mode] = MusicalMode::Minor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Harmonic Minor");
+	row[mode_columns.mode] = MusicalMode::HarmonicMinor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Melodic Minor Ascending");
+	row[mode_columns.mode] = MusicalMode::MelodicMinorAscending;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Melodic Minor Descending");
+	row[mode_columns.mode] = MusicalMode::MelodicMinorDescending;
 
 	row = *store->append();
 	row[mode_columns.name] = _("Phrygian");
@@ -484,22 +517,6 @@ P2GUI::build_mode_columns ()
 	row = *store->append();
 	row[mode_columns.name] = _("Pentatonic Minor");
 	row[mode_columns.mode] = MusicalMode::PentatonicMinor;
-
-	row = *store->append();
-	row[mode_columns.name] = _("Major Chord");
-	row[mode_columns.mode] = MusicalMode::MajorChord;
-
-	row = *store->append();
-	row[mode_columns.name] = _("Minor Chord");
-	row[mode_columns.mode] = MusicalMode::MinorChord;
-
-	row = *store->append();
-	row[mode_columns.name] = _("Min7");
-	row[mode_columns.mode] = MusicalMode::Min7;
-
-	row = *store->append();
-	row[mode_columns.name] = _("Sus4");
-	row[mode_columns.mode] = MusicalMode::Sus4;
 
 	row = *store->append();
 	row[mode_columns.name] = _("Chromatic");
@@ -610,11 +627,89 @@ P2GUI::build_note_columns ()
 	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (note_columns);
 	TreeModel::Row row;
 
-	for (int n = 0; n < 127; ++n) {
-		row = *store->append ();
-		row[note_columns.number] = n;
-		row[note_columns.name] = Evoral::midi_note_name (n);
-	}
+	row = *store->append ();
+	row[note_columns.number] = 0;
+	row[note_columns.name] = "C";
+
+	row = *store->append ();
+	row[note_columns.number] = 1;
+	row[note_columns.name] = "C#";
+
+	row = *store->append ();
+	row[note_columns.number] = 2;
+	row[note_columns.name] = "D";
+
+	row = *store->append ();
+	row[note_columns.number] = 3;
+	row[note_columns.name] = "D#";
+
+	row = *store->append ();
+	row[note_columns.number] = 4;
+	row[note_columns.name] = "E";
+
+	row = *store->append ();
+	row[note_columns.number] = 5;
+	row[note_columns.name] = "F";
+
+	row = *store->append ();
+	row[note_columns.number] = 6;
+	row[note_columns.name] = "F#";
+
+	row = *store->append ();
+	row[note_columns.number] = 7;
+	row[note_columns.name] = "G";
+
+	row = *store->append ();
+	row[note_columns.number] = 8;
+	row[note_columns.name] = "G#";
+
+	row = *store->append ();
+	row[note_columns.number] = 9;
+	row[note_columns.name] = "A";
+
+	row = *store->append ();
+	row[note_columns.number] = 10;
+	row[note_columns.name] = "A#";
+
+	row = *store->append ();
+	row[note_columns.number] = 11;
+	row[note_columns.name] = "B";
 
 	return store;
+}
+
+void
+P2GUI::reprogram_pad_scale ()
+{
+	int root;
+	int octave;
+	MusicalMode::Type mode;
+
+	Gtk::TreeModel::iterator iter = root_note_selector.get_active();
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		if (row) {
+			root = row[note_columns.number];
+		} else {
+			root = 5;
+		}
+	} else {
+		root = 5;
+	}
+
+	octave = (int) floor (root_note_octave_adjustment.get_value ());
+
+	iter = mode_selector.get_active();
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		if (row) {
+			mode = row[mode_columns.mode];
+		} else {
+			mode = MusicalMode::IonianMajor;
+		}
+	} else {
+		mode = MusicalMode::IonianMajor;
+	}
+
+	p2.set_pad_scale (root, octave, mode);
 }

@@ -39,6 +39,7 @@
 #include "control_protocol/types.h"
 
 #include "midi_byte_array.h"
+#include "mode.h"
 
 namespace Cairo {
 	class ImageSurface;
@@ -96,6 +97,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	uint8_t pad_note (int row, int col) const;
 	PBD::Signal0<void> PadChange;
+
+	void set_pad_scale (int root, int octave, MusicalMode::Type mode);
 
    private:
 	libusb_device_handle *handle;
@@ -211,7 +214,7 @@ class Push2 : public ARDOUR::ControlProtocol
 			White = 122
 		};
 
-		LED (uint8_t e) : _extra (e), _color_index (0), _state (NoTransition) {}
+		LED (uint8_t e) : _extra (e), _color_index (Black), _state (NoTransition) {}
 		virtual ~LED() {}
 
 		uint8_t extra () const { return _extra; }
@@ -230,10 +233,20 @@ class Push2 : public ARDOUR::ControlProtocol
 	};
 
 	struct Pad : public LED {
+		enum WhenPressed {
+			Nothing,
+			FlashOn,
+			FlashOff,
+		};
+
 		Pad (int xx, int yy, uint8_t ex)
 			: LED (ex)
 			, x (xx)
-			, y (yy) {}
+			, y (yy)
+			, do_when_pressed (FlashOn)
+			, filtered (ex)
+			, perma_color (LED::Black)
+		{}
 
 		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|_state, _extra, _color_index); }
 
@@ -242,6 +255,9 @@ class Push2 : public ARDOUR::ControlProtocol
 
 		int x;
 		int y;
+		int do_when_pressed;
+		int filtered;
+		int perma_color;
 	};
 
 	struct Button : public LED {

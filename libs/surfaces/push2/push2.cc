@@ -107,13 +107,13 @@ Push2::Push2 (ARDOUR::Session& s)
 
 	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
 
+	/* catch arrival and departure of Push2 itself */
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	/* ports might already be there */
-
 	port_registration_handler ();
 }
 
@@ -848,9 +848,15 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 
 	Pad* pad = pi->second;
 
-	pad->set_color (LED::White);
-	pad->set_state (LED::OneShot24th);
-	write (pad->state_msg());
+	if (pad->do_when_pressed == Pad::FlashOn) {
+		pad->set_color (LED::White);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
+	} else if (pad->do_when_pressed == Pad::FlashOff) {
+		pad->set_color (LED::Black);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
+	}
 }
 
 void
@@ -874,9 +880,15 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	Pad* pad = pi->second;
 
-	pad->set_color (LED::Black);
-	pad->set_state (LED::OneShot24th);
-	write (pad->state_msg());
+	if (pad->do_when_pressed == Pad::FlashOn) {
+		pad->set_color (LED::Black);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
+	} else if (pad->do_when_pressed == Pad::FlashOff) {
+		pad->set_color (pad->perma_color);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
+	}
 }
 
 void
@@ -1545,16 +1557,20 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 			if ((*ev).note() > 10 && (*ev).note() != 12) {
 
-				int n = (*ev).note ();
+				const int n = (*ev).note ();
+				NNPadMap::const_iterator nni = nn_pad_map.find (n);
 
-				map<int,int>::const_iterator ni = pad_map.find (n);
-
-				if (ni != pad_map.end()) {
+				if (nni != nn_pad_map.end()) {
+					Pad const * pad = nni->second;
 					/* shift for output to the shadow port */
-					(*ev).set_note (ni->second);
-					out.push_back (*ev);
-					/* shift back so that the pads light correctly  */
-					(*ev).set_note (n);
+					if (pad->filtered >= 0) {
+						(*ev).set_note (pad->filtered);
+						out.push_back (*ev);
+						/* shift back so that the pads light correctly  */
+						(*ev).set_note (n);
+					} else {
+						/* no mapping, don't send event */
+					}
 				} else {
 					out.push_back (*ev);
 				}
@@ -1633,10 +1649,8 @@ Push2::input_port()
 void
 Push2::build_pad_table ()
 {
-	for (int row = 0; row < 8; ++row) {
-		for (int col = 7; col >= 0; --col) {
-			pad_map[row*8+col] = 99 - (row*8+(7-col)) + (octave_shift*12);
-		}
+	for (int n = 36; n < 100; ++n) {
+		pad_map[n] = n + (octave_shift*12);
 	}
 
 	PadChange (); /* emit signal */
@@ -1652,4 +1666,85 @@ Push2::pad_note (int row, int col) const
 	}
 
 	return 0;
+}
+
+void
+Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode)
+{
+	cerr << "reset pad to r = " << root << " o = " << octave << " m = " << mode << endl;
+
+	MusicalMode m (mode);
+
+	if (mode == MusicalMode::Chromatic) {
+		/* back to "normal" */
+		for (int note = 36; note < 100; ++note) {
+			Pad* pad = nn_pad_map[note];
+			pad->do_when_pressed = Pad::FlashOn;
+			pad->set_color (LED::Black);
+			pad->perma_color = LED::Black;
+			pad->filtered = note;
+			write (pad->state_msg());
+		}
+
+		PadChange ();
+		return;
+	}
+
+	vector<float>::iterator interval;
+	int note;
+	int keep_root = root;
+
+	interval = m.steps.begin();
+	root += (octave*12);
+	note = root;
+
+	set<int> mode_map; /* contains only notes in mode */
+
+	mode_map.insert (note);
+
+	while (note < 128) {
+
+		if (interval == m.steps.end()) {
+
+			/* last distance was the end of the scale,
+			   so wrap, adding the next note at one
+			   octave above the last root.
+			*/
+
+			interval = m.steps.begin();
+			root += 12;
+			mode_map.insert (root);
+
+		} else {
+			note = (int) floor (root + (2.0 * (*interval)));
+			interval++;
+			mode_map.insert (note);
+		}
+	}
+
+	for (note = 36; note < 100; ++note) {
+		Pad* pad = nn_pad_map[note];
+
+		if (mode_map.find (note) != mode_map.end()) {
+			if ((note % 12) == keep_root) {
+				pad->set_color (LED::Green);
+				pad->perma_color = LED::Green;
+			} else {
+				pad->set_color (LED::White);
+				pad->perma_color = LED::White;
+			}
+			pad->do_when_pressed = Pad::FlashOff;
+			/* Chromatic: all pads send their own note number */
+			pad->filtered = note;
+		} else {
+			/* note is not in mode, turn it off */
+			pad->do_when_pressed = Pad::Nothing;
+			pad->set_color (LED::Black);
+			pad->filtered = -1;
+		}
+
+		write (pad->state_msg());
+	}
+
+	PadChange (); /* EMIT SIGNAL */
 }

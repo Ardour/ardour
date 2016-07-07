@@ -7,9 +7,12 @@ class MusicalMode
 {
   public:
 	enum Type {
-		Random,
 		Dorian,
-		Ionian,
+		IonianMajor,
+		Minor,
+		HarmonicMinor,
+		MelodicMinorAscending,
+		MelodicMinorDescending,
 		Phrygian,
 		Lydian,
 		Mixolydian,
@@ -17,10 +20,6 @@ class MusicalMode
 		Locrian,
 		PentatonicMajor,
 		PentatonicMinor,
-		MajorChord,
-		MinorChord,
-		Min7,
-		Sus4,
 		Chromatic,
 		BluesScale,
 		NeapolitanMinor,

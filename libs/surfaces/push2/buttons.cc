@@ -42,13 +42,14 @@ Push2::build_maps ()
 	nn_pad_map.insert (std::make_pair (pad->extra(), pad)); \
 	coord_pad_map.insert (std::make_pair (pad->coord(), pad));
 
+	MAKE_PAD (0, 0, 92);
 	MAKE_PAD (0, 1, 93);
 	MAKE_PAD (0, 2, 94);
 	MAKE_PAD (0, 3, 95);
 	MAKE_PAD (0, 4, 96);
 	MAKE_PAD (0, 5, 97);
 	MAKE_PAD (0, 6, 98);
-	MAKE_PAD (0, 7, 90);
+	MAKE_PAD (0, 7, 99);
 	MAKE_PAD (1, 0, 84);
 	MAKE_PAD (1, 1, 85);
 	MAKE_PAD (1, 2, 86);
