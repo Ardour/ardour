@@ -1225,7 +1225,7 @@ OSC::get_surface (lo_address addr)
 	}
 	// if we do this when OSC is started we get the wrong stripable
 	// we don't need this until we actually have a surface to deal with
-	if (!_select) {
+	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
 		gui_selection_changed();
 	}
 
@@ -1305,6 +1305,10 @@ OSC::recalcbanks ()
 void
 OSC::_recalcbanks ()
 {
+	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
+		_select = ControlProtocol::first_selected_stripable();
+	}
+
 	// do a set_bank for each surface we know about.
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
@@ -1347,7 +1351,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	// revert any expand to select
 	 s->expand = 0;
 	 s->expand_enable = false;
-	_strip_select (_select, addr);
+	_strip_select (ControlProtocol::first_selected_stripable(), addr);
 
 	// undo all listeners for this url
 	StripableList stripables;
@@ -1371,11 +1375,12 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		b_size = s->bank_size;
 	}
 
-	// Do limits checking - high end still not quite right
+	// Do limits checking
 	if (bank_start < 1) bank_start = 1;
 	if (b_size >= s->nstrips)  {
 		bank_start = 1;
 	} else if (bank_start > ((s->nstrips - b_size) + 1)) {
+		// top bank is always filled if there are enough strips for at least one bank
 		bank_start = (uint32_t)((s->nstrips - b_size) + 1);
 	}
 	//save bank in case we have had to change it
@@ -1988,7 +1993,7 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 	if (yn) {
 		s = get_strip (ssid, lo_message_get_source (msg));
 	} else {
-		s = _select;
+		s = ControlProtocol::first_selected_stripable();
 	}
 
 	return _strip_select (s, lo_message_get_source (msg));
@@ -2098,7 +2103,7 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 	if (state && sur->expand) {
 		s = get_strip (sur->expand, lo_message_get_source (msg));
 	} else {
-		s = _select;
+		s = ControlProtocol::first_selected_stripable();
 	}
 
 	return _strip_select (s, lo_message_get_source (msg));
