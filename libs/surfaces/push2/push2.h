@@ -100,7 +100,12 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
 
-   private:
+	MusicalMode::Type mode() const { return  _mode; }
+	int scale_root() const { return _scale_root; }
+	int root_octave() const { return _root_octave; }
+	bool in_key() const { return _in_key; }
+
+  private:
 	libusb_device_handle *handle;
 	uint8_t   frame_header[16];
 	uint16_t* device_frame_buffer;
@@ -514,10 +519,10 @@ class Push2 : public ARDOUR::ControlProtocol
 	std::map<int,int> pad_map;
 	void build_pad_table();
 
-	MusicalMode::Type mode;
-	int scale_root;
-	int root_octave;
-	bool in_key;
+	MusicalMode::Type _mode;
+	int _scale_root;
+	int _root_octave;
+	bool _in_key;
 
 	int octave_shift;
 };

@@ -126,10 +126,10 @@ Push2::Push2 (ARDOUR::Session& s)
 	, bank_start (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
-	, mode (MusicalMode::IonianMajor)
-	, scale_root (36)
-	, root_octave (3)
-	, in_key (true)
+	, _mode (MusicalMode::IonianMajor)
+	, _scale_root (0)
+	, _root_octave (3)
+	, _in_key (true)
 	, octave_shift (0)
 {
 	context = Cairo::Context::create (frame_buffer);
@@ -651,7 +651,7 @@ Push2::set_active (bool yn)
 
 		init_buttons (true);
 		init_touch_strip ();
-		set_pad_scale (scale_root, root_octave, mode, in_key);
+		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
 		switch_bank (0);
 		splash ();
 
@@ -1114,10 +1114,10 @@ Push2::get_state()
 	child->add_child_nocopy (_async_out->get_state());
 	node.add_child_nocopy (*child);
 
-	node.add_property ("root", to_string (scale_root, std::dec));
-	node.add_property ("root_octave", to_string (root_octave, std::dec));
-	node.add_property ("in_key", in_key ? X_("yes") : X_("no"));
-	node.add_property ("mode", enum_2_string (mode));
+	node.add_property (X_("root"), to_string (_scale_root, std::dec));
+	node.add_property (X_("root_octave"), to_string (_root_octave, std::dec));
+	node.add_property (X_("in_key"), _in_key ? X_("yes") : X_("no"));
+	node.add_property (X_("mode"), enum_2_string (_mode));
 
 	return node;
 }
@@ -1147,6 +1147,24 @@ Push2::set_state (const XMLNode & node, int version)
 		if (portnode) {
 			_async_out->set_state (*portnode, version);
 		}
+	}
+
+	XMLProperty const* prop;
+
+	if ((prop = node.property (X_("root"))) != 0) {
+		_scale_root = atoi (prop->value());
+	}
+
+	if ((prop = node.property (X_("root_octave"))) != 0) {
+		_root_octave = atoi (prop->value());
+	}
+
+	if ((prop = node.property (X_("in_key"))) != 0) {
+		_in_key = string_is_affirmative (prop->value());
+	}
+
+	if ((prop = node.property (X_("mode"))) != 0) {
+		_mode = (MusicalMode::Type) string_2_enum (prop->value(), _mode);
 	}
 
 	return retval;
@@ -1737,7 +1755,7 @@ Push2::pad_note (int row, int col) const
 void
 Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
-	cerr << "reset pad to r = " << root << " o = " << octave << " m = " << mode << endl;
+	cerr << "reset pad to r = " << root << " o = " << octave << " m = " << mode << " ik " << inkey << endl;
 
 	MusicalMode m (mode);
 	vector<float>::iterator interval;
@@ -1803,6 +1821,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 					if ((notenum % 12) == original_root) {
 						pad->set_color (LED::Green);
+						cerr << "Green!\n";
 						pad->perma_color = LED::Green;
 					} else {
 						pad->set_color (LED::White);
@@ -1866,8 +1885,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 	/* store state */
 
-	scale_root = root;
-	root_octave = octave;
-	in_key = inkey;
-	mode = mode;
+	_scale_root = original_root;
+	_root_octave = octave;
+	_in_key = inkey;
+	_mode = mode;
 }

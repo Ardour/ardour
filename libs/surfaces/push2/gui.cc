@@ -84,7 +84,7 @@ P2GUI::P2GUI (Push2& p)
 	, action_table (5, 4)
 	, ignore_active_change (false)
 	, pad_table (8, 8)
-	, root_note_octave_adjustment (3, 0, 10, 1, 1)
+	, root_note_octave_adjustment (p2.root_octave(), 0, 10, 1, 1)
 	, root_note_octave (root_note_octave_adjustment)
 	, root_note_octave_label (_("Octave"))
 	, root_note_label (_("Root"))
@@ -139,11 +139,11 @@ P2GUI::P2GUI (Push2& p)
 
 	root_note_selector.set_model (build_note_columns());
 	root_note_selector.pack_start (note_columns.name);
-	root_note_selector.set_active (0);
+	root_note_selector.set_active (p2.scale_root());
 
 	mode_selector.set_model (build_mode_columns());
 	mode_selector.pack_start (mode_columns.name);
-	mode_selector.set_active (0);
+	mode_selector.set_active ((int) p2.mode());
 
 	mode_packer.set_border_width (12);
 	mode_packer.set_spacings (12);
@@ -157,6 +157,7 @@ P2GUI::P2GUI (Push2& p)
 	mode_packer.attach (mode_label, 0, 1, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
 	mode_packer.attach (mode_selector, 1, 2, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
 
+	inkey_button.set_active (p2.in_key());
 	mode_packer.attach (inkey_button, 1, 2, 3, 4, AttachOptions (FILL|EXPAND), SHRINK);
 
 	pad_notebook.append_page (pad_table, _("Pad Layout"));
