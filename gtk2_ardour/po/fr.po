@@ -8,22 +8,27 @@
 # Romain Arnaud <roming22@gmail.com>, 2011, 2013.
 # Fred Rech <f.rech@yahoo.fr>, 2014.
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
+# Edouard <edwsaintesprit@hotmail.com>, 2016.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-03-31 20:13-0400\n"
-"PO-Revision-Date: 2015-03-28 20:56+0100\n"
-"Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2016-05-22 17:33+0100\n"
+"Last-Translator: Edouard <edwsaintesprit@hotmail.com>\n"
+"Language-Team: français <>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.7.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../\n"
+"X-Language: fr_FR\n"
+"X-Source-Language: en_US\n"
+"X-Poedit-Bookmarks: -1,-1,2807,-1,-1,-1,-1,-1,-1,-1\n"
 
 #: about.cc:125
 msgid "Brian Ahr"
@@ -63,7 +68,7 @@ msgstr "Chris Cannam"
 
 #: about.cc:134
 msgid "Jeremy Carter"
-msgstr ""
+msgstr "Jeremy Carter"
 
 #: about.cc:135
 msgid "Jesse Chappell"
@@ -91,7 +96,7 @@ msgstr "Gerard van Dongen"
 
 #: about.cc:141
 msgid "John Emmas"
-msgstr ""
+msgstr "John Emmas"
 
 #: about.cc:142
 msgid "Colin Fletcher"
@@ -171,7 +176,7 @@ msgstr "Matt Krai"
 
 #: about.cc:161
 msgid "Georg Krause"
-msgstr ""
+msgstr "Georg Krause"
 
 #: about.cc:162
 msgid "Nick Lanham"
@@ -203,7 +208,7 @@ msgstr "Doug Mclain"
 
 #: about.cc:169
 msgid "Todd Naugle"
-msgstr ""
+msgstr "Todd Naugle"
 
 #: about.cc:170
 msgid "Jack O'Quin"
@@ -271,7 +276,7 @@ msgstr "Thorsten Wilms"
 
 #: about.cc:186
 msgid "Grygorii Zharun"
-msgstr ""
+msgstr "Grygorii Zharun"
 
 # I thought it's the right way to add my name to the translators list ?
 # Oh, by the way, have contacted Romain, the last translator, and he says "no problem you can edit the po files, have done my best, it's your turn now!"
@@ -407,40 +412,43 @@ msgstr ""
 "\tRui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
 
 #: about.cc:591
-#, fuzzy
 msgid "Copyright (C) 1999-2015 Paul Davis\n"
-msgstr "Copyright © 1999-2013 Paul Davis\n"
+msgstr "Copyright © 1999-2016 Paul Davis\n"
 
 #: about.cc:595
 msgid "http://ardour.org/"
 msgstr "http://ardour.org"
 
 #: about.cc:596
-#, fuzzy
+#, qt-format
 msgid ""
 "%1%2\n"
 "(built from revision %3)"
 msgstr ""
-"%1\n"
-"(compilé de la révision %2)"
+"%1%2\n"
+"(compilation de la révision %3)"
 
 #: about.cc:600
 msgid "Config"
 msgstr "Configuration"
 
 #: actions.cc:85
+#, qt-format
 msgid "Loading menus from %1"
 msgstr "Chargement des menus depuis %1"
 
 #: actions.cc:88 actions.cc:89
+#, qt-format
 msgid "badly formatted menu definition file: %1"
 msgstr "fichier de définition de menu mal formé : %1"
 
 #: actions.cc:91
+#, qt-format
 msgid "%1 menu definition file not found"
 msgstr "fichier de définition de menu introuvable : %1"
 
 #: actions.cc:95 actions.cc:96
+#, qt-format
 msgid "%1 will not work without a valid menu definition file"
 msgstr "%1 ne fonctionnera pas sans un fichier de définition de menu valide"
 
@@ -477,21 +485,20 @@ msgid "Busses"
 msgstr "Bus"
 
 #: add_route_dialog.cc:83 add_route_dialog.cc:559
-#, fuzzy
 msgid "First"
-msgstr "bas de la première page"
+msgstr "Premier"
 
 #: add_route_dialog.cc:84 add_route_dialog.cc:561
 msgid "After Editor Selection"
-msgstr ""
+msgstr "Après la sélection de l'éditeur\t"
 
 #: add_route_dialog.cc:85 add_route_dialog.cc:563
 msgid "After Mixer Selection"
-msgstr ""
+msgstr "Après la sélection du mixeur"
 
 #: add_route_dialog.cc:86
 msgid "Last"
-msgstr ""
+msgstr "Dernier"
 
 #: add_route_dialog.cc:103
 msgid "Add:"
@@ -512,7 +519,6 @@ msgid "Group:"
 msgstr "Groupe :"
 
 #: add_route_dialog.cc:162
-#, fuzzy
 msgid "Insert:"
 msgstr "Insérer :"
 
@@ -621,6 +627,7 @@ msgid "Ambiguous File"
 msgstr "Fichier indeterminé"
 
 #: ambiguous_file_dialog.cc:35
+#, qt-format
 msgid ""
 "%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
@@ -705,6 +712,7 @@ msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_ui.cc:164
+#, qt-format
 msgid ""
 "%1 %2.x has discovered configuration files from %1 %3.x.\n"
 "\n"
@@ -713,6 +721,12 @@ msgid ""
 "\n"
 "(This will require you to restart %1.)"
 msgstr ""
+"%1 %2.x a trouvé des fichiers de configuration de %1 %3.x.\n"
+"\n"
+"Voulez vous copier les fichiers utilisables avant de commencer l'utilisation "
+"du programme ?\n"
+"\n"
+"(Ceci nécessite un redémarrage de %1.)"
 
 #: ardour_ui.cc:211 editor_actions.cc:642 region_editor.cc:51
 msgid "Audition"
@@ -762,14 +776,13 @@ msgstr "Réglages Audio/MIDI"
 
 #: ardour_ui.cc:227
 msgid "Video Export Dialog"
-msgstr ""
+msgstr "Fenêtre d'export vidéo"
 
 #: ardour_ui.cc:228
 msgid "Properties"
 msgstr "Propriétés"
 
 #: ardour_ui.cc:230 bundle_manager.cc:264
-#, fuzzy
 msgid "Bundle Manager"
 msgstr "Gestionnaire de Groupes"
 
@@ -786,10 +799,14 @@ msgid "MIDI Connections"
 msgstr "Connexions MIDI"
 
 #: ardour_ui.cc:242
+#, qt-format
 msgid "Your configuration files were copied. You can now restart %1."
 msgstr ""
+"Vos fichiers de configuration ont été copiés. Vous pouvez redémarrer %1 "
+"maintenant."
 
 #: ardour_ui.cc:481
+#, qt-format
 msgid ""
 "The audio backend was shutdown because:\n"
 "\n"
@@ -800,6 +817,7 @@ msgstr ""
 "%1"
 
 #: ardour_ui.cc:483
+#, qt-format
 msgid ""
 "The audio backend has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -817,10 +835,12 @@ msgid ""
 "Audio Unit Plugin Scan Failed. Automatic AU scanning has been disabled. "
 "Please see the log window for further details."
 msgstr ""
+"La recherche de plugins Audio Unit a échoué. La recherche automatique d'AU a "
+"été désactivée. Référez vous à la fenêtre de log pour plus de détails."
 
 #: ardour_ui.cc:508
 msgid "Audio Unit Plugin Scan Failed:"
-msgstr ""
+msgstr "La recherche de plugins Audio Unit a échoué :"
 
 #: ardour_ui.cc:827
 msgid "NSM server did not announce itself"
@@ -840,18 +860,19 @@ msgstr "NSM : échec d'initialisation"
 
 #: ardour_ui.cc:900
 msgid "Free/Demo Version Warning"
-msgstr ""
+msgstr "Avertissement de version gratuite/démo"
 
 #: ardour_ui.cc:902
+#, qt-format
 msgid "Subscribe and support development of %1"
-msgstr ""
+msgstr "Souscrivez et soutenez le développement de %1"
 
 #: ardour_ui.cc:903
-#, fuzzy
 msgid "Don't warn me about this again"
 msgstr "Ne plus me poser la question"
 
 #: ardour_ui.cc:905
+#, qt-format
 msgid ""
 "<span weight=\"bold\" size=\"large\">%1</span>\n"
 "\n"
@@ -861,40 +882,55 @@ msgid ""
 "\n"
 "%4"
 msgstr ""
+"<span weight=\"bold\" size=\"large\">%1</span>\n"
+"\n"
+"<b>%2</b>\n"
+"\n"
+"<i>%3</i>\n"
+"\n"
+"%4"
 
 #: ardour_ui.cc:906
+#, qt-format
 msgid "This is a free/demo version of %1"
-msgstr ""
+msgstr "Ceci est une version gratuite de démonstration de %1"
 
 #: ardour_ui.cc:907
 msgid "It will not restore OR save any plugin settings"
-msgstr ""
+msgstr "Aucun paramètre de plugin ne sera sauvegardé ou chargé"
 
 #: ardour_ui.cc:908
 msgid ""
 "If you load an existing session with plugin settings\n"
 "they will not be used and will be lost."
 msgstr ""
+"Si vous ouvrez une session existante avec des paramètres de plugins,\n"
+"ils ne seront pas utilisés et seront perdus."
 
 #: ardour_ui.cc:910 plugin_ui.cc:569
 msgid ""
 "To get full access to updates without this limitation\n"
 "consider becoming a subscriber for a low cost every month."
 msgstr ""
+"Pour avoir un accès complet aux mises à jour sans cette limitation,\n"
+"pensez à devenir souscripteur pour un coût modéré chaque mois."
 
 #: ardour_ui.cc:920
 msgid "Quit now"
-msgstr ""
+msgstr "Quitter maintenant"
 
 #: ardour_ui.cc:921
+#, qt-format
 msgid "Continue using %1"
-msgstr ""
+msgstr "Continuer à utiliser %1"
 
 #: ardour_ui.cc:954 startup.cc:345
+#, qt-format
 msgid "%1 is ready for use"
 msgstr "%1 est prêt à être utilisé."
 
 #: ardour_ui.cc:996
+#, qt-format
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -926,6 +962,7 @@ msgid "Save and quit"
 msgstr "Sauvegarder et quitter"
 
 #: ardour_ui.cc:1069
+#, qt-format
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -944,6 +981,7 @@ msgid "Unsaved Session"
 msgstr "Session non sauvegardée"
 
 #: ardour_ui.cc:1140
+#, qt-format
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -962,6 +1000,7 @@ msgstr ""
 "Que voulez-vous faire ?"
 
 #: ardour_ui.cc:1143
+#, qt-format
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -1084,6 +1123,7 @@ msgid "Recent Sessions"
 msgstr "Sessions récentes"
 
 #: ardour_ui.cc:1684
+#, qt-format
 msgid ""
 "%1 is not connected to any audio backend.\n"
 "You cannot open or close sessions in this condition"
@@ -1097,6 +1137,7 @@ msgstr "Ouvrir une session"
 
 #: ardour_ui.cc:1733 session_dialog.cc:349 session_import_dialog.cc:170
 #: session_metadata_dialog.cc:858
+#, qt-format
 msgid "%1 sessions"
 msgstr "Sessions %1"
 
@@ -1105,12 +1146,14 @@ msgid "You cannot add a track without a session already loaded."
 msgstr "Vous ne pouvez pas ajouter une piste sans avoir ouvert une session."
 
 #: ardour_ui.cc:1778
+#, qt-format
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "impossible de créer %1 nouvelle piste mélangée"
 msgstr[1] "impossible de créer %1 nouvelles pistes mélangées"
 
 #: ardour_ui.cc:1784 ardour_ui.cc:1845
+#, qt-format
 msgid ""
 "There are insufficient ports available\n"
 "to create a new track or bus.\n"
@@ -1128,12 +1171,14 @@ msgstr ""
 "Vous ne pouvez pas ajouter une piste ou un bus sans avoir ouvert une session."
 
 #: ardour_ui.cc:1828
+#, qt-format
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "impossible de créer %1 nouvelle piste audio"
 msgstr[1] "impossible de créer %1 nouvelles pistes audios"
 
 #: ardour_ui.cc:1837
+#, qt-format
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "impossible de créer %1 nouveau bus"
@@ -1164,6 +1209,7 @@ msgid "Name of new snapshot"
 msgstr "Nom du nouveau cliché"
 
 #: ardour_ui.cc:2405
+#, qt-format
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -1189,6 +1235,7 @@ msgid "Rename Session"
 msgstr "Renommer la session"
 
 #: ardour_ui.cc:2470 ardour_ui.cc:2886 ardour_ui.cc:2924
+#, qt-format
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1222,6 +1269,7 @@ msgid "-template"
 msgstr "-modèle"
 
 #: ardour_ui.cc:2643
+#, qt-format
 msgid ""
 "This session\n"
 "%1\n"
@@ -1236,10 +1284,12 @@ msgid "Open Existing Session"
 msgstr "Ouvrir une session"
 
 #: ardour_ui.cc:2914
+#, qt-format
 msgid "There is no existing session at \"%1\""
 msgstr "Aucune session n'existe dans « %1 »"
 
 #: ardour_ui.cc:3006
+#, qt-format
 msgid "Please wait while %1 loads your session"
 msgstr "Patientez pendant que %1 ouvre la session"
 
@@ -1252,6 +1302,7 @@ msgid "Click the Close button to try again."
 msgstr "Cliquez sur le bouton « Fermer » pour réessayer."
 
 #: ardour_ui.cc:3043
+#, qt-format
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "La session « %1 (cliché %2) » ne s'est pas chargée correctement"
 
@@ -1274,6 +1325,7 @@ msgid "Read-only Session"
 msgstr "Session en lecture-seule"
 
 #: ardour_ui.cc:3139
+#, qt-format
 msgid "Could not create session in \"%1\""
 msgstr "Impossible de créer une session dans « %1 »"
 
@@ -1311,6 +1363,7 @@ msgid "giga"
 msgstr "giga"
 
 #: ardour_ui.cc:3363
+#, qt-format
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1318,13 +1371,14 @@ msgid_plural ""
 "The following %1 files were deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
 msgstr[0] ""
-"Le fichier suivant a été éffacé de %2,\n"
-"libérant %3 %4octets d'espace disque."
+"Le fichier suivant a été effacé de %2,\n"
+"libérant %3 %4 octets d'espace disque."
 msgstr[1] ""
-"Les %1 fichiers suivants ont été éffacés de %2,\n"
-"libérant %3 %4octets d'espace disque."
+"Les %1 fichiers suivants ont été effacés de %2,\n"
+"libérant %3 %4 octets d'espace disque."
 
 #: ardour_ui.cc:3370
+#, qt-format
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1345,20 +1399,20 @@ msgid_plural ""
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr[0] ""
 "Le fichier suivant n'était plus utilisé\n"
-"et a été déplacé vers: %2\n"
+"et a été déplacé vers : %2\n"
 "\n"
-"Après un redémarrage de %5,\n"
+"Après un redémarrage de %5\n"
 "\n"
 "<span face=\"mono\">Session -> Nettoyer -> Vider la corbeille</span>\n"
-"libérera %3 %4octets d'espace-disque supplémentaire.\n"
+"libérera %3 %4 octets d'espace-disque supplémentaire.\n"
 msgstr[1] ""
 "Les %1 fichiers suivants n'étaient plus utilisés\n"
-"et ont été déplacés vers: %2\n"
+"et ont été déplacés vers : %2\n"
 "\n"
-"Après un redémarrage de %5,\n"
+"Après un redémarrage de %5\n"
 "\n"
 "<span face=\"mono\">Session -> Nettoyer -> Vider la corbeille</span>\n"
-"libérera %3 %4octets d'espace-disque supplémentaire.\n"
+"libérera %3 %4 octets d'espace-disque supplémentaire.\n"
 
 #: ardour_ui.cc:3430
 msgid "Are you sure you want to clean-up?"
@@ -1387,6 +1441,7 @@ msgid "deleted file"
 msgstr "fichier effacé"
 
 #: ardour_ui.cc:3637
+#, qt-format
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
 msgstr ""
 "Le serveur vidéo n'a pas été lancé par %1. La demande pour l'arrêter est "
@@ -1406,7 +1461,7 @@ msgstr "Oui, l'arrêter"
 
 #: ardour_ui.cc:3671
 msgid "The Video Server is already started."
-msgstr "Le serveur vidéo est déjà démarré"
+msgstr "Le serveur vidéo est déjà démarré."
 
 #: ardour_ui.cc:3673
 msgid ""
@@ -1421,12 +1476,13 @@ msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Preferences."
 msgstr ""
+"Impossible de se connecter au serveur vidéo. Démarrez-le ou congifurez son "
+"URL d'accès dans les Préférences."
 
 # Should we translate docroot?
 #: ardour_ui.cc:3711
-#, fuzzy
 msgid "Specified docroot is not an existing directory."
-msgstr "Le répertoire-racine spéficié n'existe pas."
+msgstr "Le répertoire-racine spécifié n'existe pas."
 
 #: ardour_ui.cc:3717 ardour_ui.cc:3723
 msgid "Given Video Server is not an executable file."
@@ -1441,6 +1497,7 @@ msgid "Video-server was started but does not respond to requests..."
 msgstr "Le serveur vidéo a été démarré mais ne répond pas aux requêtes…"
 
 #: ardour_ui.cc:3812 editor_audio_import.cc:641
+#, qt-format
 msgid "could not open %1"
 msgstr "impossible d'ouvrir %1"
 
@@ -1454,6 +1511,7 @@ msgstr ""
 "L'enregistrement s'est arrêté car votre système n'était pas assez rapide."
 
 #: ardour_ui.cc:4043
+#, qt-format
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1476,15 +1534,15 @@ msgid "Cancel plugin scan"
 msgstr "Annuler la recherche de greffons"
 
 #: ardour_ui.cc:4124
-#, fuzzy
 msgid "Stop Timeout"
-msgstr "Délai d'expiration de la recherche"
+msgstr "Délai d'expiration de l'arrêt"
 
 #: ardour_ui.cc:4131
 msgid "Scan Timeout"
 msgstr "Délai d'expiration de la recherche"
 
 #: ardour_ui.cc:4174
+#, qt-format
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1503,6 +1561,7 @@ msgid "Crash Recovery"
 msgstr "Récupération après un crash"
 
 #: ardour_ui.cc:4215
+#, qt-format
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1521,7 +1580,7 @@ msgstr ""
 
 #: ardour_ui.cc:4227
 msgid "Ignore crash data"
-msgstr "Ignorer les données"
+msgstr "Ignorer les données de crash"
 
 #: ardour_ui.cc:4228
 msgid "Recover from crash"
@@ -1532,6 +1591,7 @@ msgid "Sample Rate Mismatch"
 msgstr "Mauvais taux d'échantillonnage"
 
 #: ardour_ui.cc:4249
+#, qt-format
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1558,6 +1618,7 @@ msgid "Could not reconnect to the Audio/MIDI engine"
 msgstr "Reconnection au moteur Audio/MIDI impossible"
 
 #: ardour_ui.cc:4590
+#, qt-format
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -1702,7 +1763,7 @@ msgstr "Réinitialiser tous les indicateurs de crête"
 
 #: ardour_ui2.cc:146
 msgid "Show Error Log and acknowledge warnings"
-msgstr ""
+msgstr "Afficher le log des erreurs et prendre en compte les avertissement"
 
 #: ardour_ui2.cc:179
 msgid "[ERROR]: "
@@ -1726,7 +1787,7 @@ msgstr "Suivre éditions"
 
 #: ardour_ui2.cc:716 rc_option_editor.cc:2300
 msgid "GUI"
-msgstr "IHM"
+msgstr "Interface graphique"
 
 #: ardour_ui2.cc:733 rc_option_editor.cc:1309 rc_option_editor.cc:1327
 #: rc_option_editor.cc:1330 rc_option_editor.cc:1332 rc_option_editor.cc:1334
@@ -1948,7 +2009,7 @@ msgstr "Bandeau de mesure"
 
 #: ardour_ui_ed.cc:204
 msgid "Reattach All Tearoffs"
-msgstr ""
+msgstr "Ré-ancrer les panneaux désancrés"
 
 #: ardour_ui_ed.cc:206 midi_tracer.cc:45
 msgid "MIDI Tracer"
@@ -1967,29 +2028,28 @@ msgid "Reference"
 msgstr "Référence"
 
 #: ardour_ui_ed.cc:212
-#, fuzzy
 msgid "Report A Bug"
-msgstr "Rapporter un &bogue..."
+msgstr "Rapporter un bug"
 
 #: ardour_ui_ed.cc:213
 msgid "Cheat Sheet"
-msgstr ""
+msgstr "Liste des raccourcis"
 
 #: ardour_ui_ed.cc:214
 msgid "Ardour Website"
-msgstr ""
+msgstr "Site web d'Ardour"
 
 #: ardour_ui_ed.cc:215
 msgid "Ardour Development"
-msgstr ""
+msgstr "Développement d'Ardour"
 
 #: ardour_ui_ed.cc:216
 msgid "User Forums"
-msgstr ""
+msgstr "Forums utilisateurs"
 
 #: ardour_ui_ed.cc:217
 msgid "How to report a bug"
-msgstr ""
+msgstr "Comment rapporter un bug"
 
 # Utilisation de sauvegarder pour éviter la confusion avec enregistrer que l'on réserve au son.
 #: ardour_ui_ed.cc:219 plugin_ui.cc:419
@@ -2024,7 +2084,7 @@ msgstr "Lecture/continuer/arrêt"
 
 #: ardour_ui_ed.cc:249
 msgid "Stop and Forget Capture"
-msgstr "Arrêt avec destruction du dernier enregistrement"
+msgstr "Arrêter et détruire le dernier enregistrement"
 
 #: ardour_ui_ed.cc:259
 msgid "Transition To Roll"
@@ -2039,9 +2099,8 @@ msgid "Play Loop Range"
 msgstr "Lire l'intervalle de boucle"
 
 #: ardour_ui_ed.cc:270
-#, fuzzy
 msgid "Play Selection"
-msgstr "Lire la sélection avec compte à rebours"
+msgstr "Lire la sélection"
 
 #: ardour_ui_ed.cc:273
 msgid "Play Selection w/Preroll"
@@ -2073,11 +2132,11 @@ msgstr "Avance rapide"
 
 #: ardour_ui_ed.cc:300
 msgid "Forward (Slow)"
-msgstr "Avancer (lent)"
+msgstr "Avance rapide (lent)"
 
 #: ardour_ui_ed.cc:303
 msgid "Forward (Fast)"
-msgstr "Avancer (rapide)"
+msgstr "Avance rapide (rapide)"
 
 #: ardour_ui_ed.cc:306
 msgid "Go to Zero"
@@ -2097,7 +2156,7 @@ msgstr "Aller à la toute fin"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
 msgid "Numpad Decimal"
-msgstr "Décimale du pavé numérique"
+msgstr "Point du pavé numérique"
 
 #: ardour_ui_ed.cc:329
 msgid "Numpad 0"
@@ -2150,7 +2209,7 @@ msgstr "Focus sur l'horloge"
 #: session_option_editor.cc:109 session_option_editor.cc:122
 #: session_option_editor.cc:124 session_option_editor.cc:126
 msgid "Timecode"
-msgstr "« Timecode »"
+msgstr "Timecode"
 
 #: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 editor_actions.cc:567
 msgid "Bars & Beats"
@@ -2211,12 +2270,13 @@ msgid "Time Master"
 msgstr "Horloge maître"
 
 #: ardour_ui_ed.cc:420
+#, qt-format
 msgid "Toggle Record Enable Track %1"
 msgstr "Armer la piste %1"
 
 #: ardour_ui_ed.cc:427
 msgid "Percentage"
-msgstr "pourcentage"
+msgstr "Pourcentage"
 
 #: ardour_ui_ed.cc:428 shuttle_control.cc:178
 msgid "Semitones"
@@ -2264,7 +2324,7 @@ msgstr "Tampons"
 
 #: ardour_ui_ed.cc:540
 msgid "Timecode Format"
-msgstr "Format du « Timecode »"
+msgstr "Format du timecode"
 
 #: ardour_ui_ed.cc:541
 msgid "File Format"
@@ -2323,10 +2383,12 @@ msgstr "Sig."
 #: session_metadata_dialog.cc:452 session_metadata_dialog.cc:500
 #: session_metadata_dialog.cc:556 session_metadata_dialog.cc:845
 #: streamview.cc:470
+#, qt-format
 msgid "programming error: %1"
 msgstr "erreur de programmation: %1"
 
 #: audio_clock.cc:1997 audio_clock.cc:2025
+#, qt-format
 msgid "programming error: %1 %2"
 msgstr "erreur de programmation: %1 %2"
 
@@ -2373,22 +2435,20 @@ msgstr "ajout d'un point de contrôle de gain"
 
 #: automation_controller.cc:286 automation_controller.cc:302
 msgid "Select Note..."
-msgstr ""
+msgstr "Sélectionner une note..."
 
 #: automation_controller.cc:293
-#, fuzzy
 msgid "Halve"
-msgstr "Diviser par deux les durées dans la sélection."
+msgstr "Diviser par deux"
 
 #: automation_controller.cc:296
-#, fuzzy
 msgid "Double"
-msgstr "Double"
+msgstr "Doubler"
 
 #: automation_controller.cc:307
-#, fuzzy
+#, qt-format
 msgid "Set to %1 beat(s)"
-msgstr "Impossible de régler le pilote sur %1"
+msgstr "Régler sur %1 temps"
 
 #: automation_line.cc:286 automation_line.cc:462
 msgid "automation event move"
@@ -2403,6 +2463,7 @@ msgid "remove control point"
 msgstr "retrait de point de contrôle"
 
 #: automation_line.cc:1003
+#, qt-format
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "Les points illégaux sur la ligne d'automation « %1 » sont ignorés"
 
@@ -2412,7 +2473,7 @@ msgstr "ajouter un événement d'automation à "
 
 #: automation_streamview.cc:95
 msgid "unable to display automation region for control without list"
-msgstr ""
+msgstr "Impossible d'afficher la zone d'automation pour un contrôle sans liste"
 
 #: automation_time_axis.cc:163
 msgid "automation state"
@@ -2471,9 +2532,8 @@ msgid "State"
 msgstr "État"
 
 #: automation_time_axis.cc:592
-#, fuzzy
 msgid "Discrete"
-msgstr "Discret"
+msgstr "Ponctuel"
 
 #: automation_time_axis.cc:598 export_format_dialog.cc:485
 msgid "Linear"
@@ -2487,17 +2547,13 @@ msgstr "Mode"
 msgid "Disassociate"
 msgstr "Désassocier"
 
-# We can do better
 #: bundle_manager.cc:186
-#, fuzzy
 msgid "Edit Bundle"
-msgstr "Editer le groupe"
+msgstr "Éditer le groupe"
 
-# Sens?
 #: bundle_manager.cc:201
-#, fuzzy
 msgid "Direction:"
-msgstr "Direction :"
+msgstr "Sens :"
 
 #: bundle_manager.cc:206 bundle_manager.cc:210 engine_dialog.cc:662
 #: mixer_strip.cc:162 mixer_strip.cc:367 mixer_strip.cc:2240
@@ -2759,11 +2815,10 @@ msgstr "Glissant"
 msgid "Splice"
 msgstr "Collant"
 
-# Contexte?
 #: editor.cc:197 editor_actions.cc:501
 #, fuzzy
 msgid "Ripple"
-msgstr "Ondulation"
+msgstr "Insertion propagée"
 
 #: editor.cc:198 editor_actions.cc:157 editor_actions.cc:503
 #: editor_actions.cc:1789 editor_markers.cc:905 editor_rulers.cc:260
@@ -2966,18 +3021,16 @@ msgid "Select All in Range"
 msgstr "Sélectionner tout dans l'intervalle"
 
 #: editor.cc:1863 editor_actions.cc:297
-#, fuzzy
 msgid "Set Loop from Selection"
-msgstr "Régler l'intervalle de boucle sur la sélection"
+msgstr "Convertir la sélection en marqueurs de début et fin de boucle"
 
 #: editor.cc:1864 editor_actions.cc:298
-#, fuzzy
 msgid "Set Punch from Selection"
-msgstr "Régler l'intervalle de « punch » sur la sélection"
+msgstr "Convertir la sélection en marqueurs de début et fin de punch"
 
 #: editor.cc:1865 editor_actions.cc:299
 msgid "Set Session Start/End from Selection"
-msgstr ""
+msgstr "Convertir la sélection en marqueurs de début et fin de session"
 
 #: editor.cc:1868
 msgid "Add Range Markers"
@@ -3145,6 +3198,7 @@ msgstr "Décaler"
 msgid ""
 "Playhead position stored with a negative value - ignored (use zero instead)"
 msgstr ""
+"Valeur de position de tête de lecture négative - ignorée (placée à zéro)"
 
 #: editor.cc:3006 editor.cc:3707 editor.cc:3778 midi_channel_selector.cc:157
 #: midi_channel_selector.cc:395 midi_channel_selector.cc:431
@@ -3152,41 +3206,40 @@ msgid "All"
 msgstr "Tout"
 
 #: editor.cc:3210
-#, fuzzy
 msgid "Smart Mode (add Range functions to Grab mode)"
-msgstr "Mode Smart (ajoute des fonctions d'intervalle au mode Object)"
+msgstr "Mode Intelligent (ajoute des fonctions d'intervalle au mode Sélection)"
 
 #: editor.cc:3211
-#, fuzzy
 msgid "Grab Mode (select/move objects)"
-msgstr "Mode Objet (sélectionner/déplacer des objets)"
+msgstr "Mode Sélection (sélectionner/déplacer des objets)"
 
 #: editor.cc:3212
-#, fuzzy
 msgid "Cut Mode (split regions)"
-msgstr "Mode découpage (séparation des régions)"
+msgstr "Mode Découpe (séparation des régions)"
 
 #: editor.cc:3213
-#, fuzzy
 msgid "Range Mode (select time ranges)"
-msgstr "Mode Intervalles (sélectionner/déplacer des Intervalles)"
+msgstr "Mode Intervalle (sélectionner/déplacer des Intervalles)"
 
 #: editor.cc:3214
 msgid "Draw Mode (draw and edit gain/notes/automation)"
-msgstr ""
+msgstr "Mode Dessin (dessiner et modifier le gain, les notes, l'automation)"
 
 #: editor.cc:3215
 msgid "Stretch Mode (time-stretch audio and midi regions, preserving pitch)"
 msgstr ""
+"Mode Étirement (modifie la durée des régions audio et midi en préservant la "
+"tonalité)"
 
 #: editor.cc:3216
-#, fuzzy
 msgid "Audition Mode (listen to regions)"
-msgstr "Écouter des Régions spécifiques"
+msgstr "Mode Audition (écouter des régions)"
 
 #: editor.cc:3217
 msgid "Internal Edit Mode (edit notes and gain curves inside regions)"
 msgstr ""
+"Mode Edition Interne (modifier les courbes de gain et les notes à "
+"l'intérieur des régions)"
 
 #: editor.cc:3218
 msgid ""
@@ -3194,8 +3247,7 @@ msgid ""
 "Context-click for other operations"
 msgstr ""
 "Groupes : cliquer pour (dés)activer\n"
-"un groupe.\n"
-"Clic droit pour les autres options."
+"Clic droit pour les autres options"
 
 #: editor.cc:3219
 msgid "Nudge Region/Selection Later"
@@ -3219,7 +3271,7 @@ msgstr "Zoomer à l'échelle de temps"
 
 #: editor.cc:3224 editor.cc:3729 editor_actions.cc:263
 msgid "Zoom to Session"
-msgstr "Montrer toute la session"
+msgstr "Zoom sur la session"
 
 #: editor.cc:3225
 msgid "Zoom focus"
@@ -3227,11 +3279,11 @@ msgstr "Zoomer sur"
 
 #: editor.cc:3226
 msgid "Expand Tracks"
-msgstr "Agrandir la taille des pistes"
+msgstr "Agrandir les pistes"
 
 #: editor.cc:3227
 msgid "Shrink Tracks"
-msgstr "Réduire la taille des pistes"
+msgstr "Réduire les pistes"
 
 #: editor.cc:3228
 msgid "Number of visible tracks"
@@ -3262,6 +3314,7 @@ msgid "Command|Undo"
 msgstr "Annuler"
 
 #: editor.cc:3503
+#, qt-format
 msgid "Command|Undo (%1)"
 msgstr "Annuler (%1)"
 
@@ -3271,6 +3324,7 @@ msgid "Redo"
 msgstr "Refaire"
 
 #: editor.cc:3512
+#, qt-format
 msgid "Redo (%1)"
 msgstr "Refaire (%1)"
 
@@ -3323,9 +3377,8 @@ msgid "Fit All tracks"
 msgstr "Ajuster pour toutes les pistes"
 
 #: editor.cc:3718
-#, fuzzy
 msgid "Fit Selection"
-msgstr "Ajuster à la fenêtre"
+msgstr "Ajuster à la sélection"
 
 #: editor.cc:3720
 msgid "Zoom to 10 ms"
@@ -3376,6 +3429,7 @@ msgid "Playlist Deletion"
 msgstr "Suppression de la liste de lecture"
 
 #: editor.cc:4121
+#, qt-format
 msgid ""
 "Playlist %1 is currently unused.\n"
 "If it is kept, its audio files will not be cleaned.\n"
@@ -3412,6 +3466,7 @@ msgid "clear playlists"
 msgstr "effacer les listes de lecture"
 
 #: editor.cc:5046
+#, qt-format
 msgid "Please wait while %1 loads visual data."
 msgstr "Patienter pendant que %1 charge les données graphiques."
 
@@ -3422,7 +3477,7 @@ msgstr "Éditer…"
 
 #: editor.cc:5934 editor_actions.cc:1941
 msgid "Legatize"
-msgstr ""
+msgstr "Ligaturer"
 
 #: editor.cc:5936 editor_actions.cc:1940
 msgid "Quantize..."
@@ -3430,11 +3485,11 @@ msgstr "Quantifier…"
 
 #: editor.cc:5938 editor_actions.cc:1943
 msgid "Remove Overlap"
-msgstr ""
+msgstr "Supprimer le recouvrement"
 
 #: editor.cc:5940 editor_actions.cc:1942
 msgid "Transform..."
-msgstr ""
+msgstr "Transformer..."
 
 #: editor_actions.cc:92
 msgid "Autoconnect"
@@ -3466,9 +3521,8 @@ msgstr "Fondu"
 
 # Context?
 #: editor_actions.cc:100
-#, fuzzy
 msgid "Latch"
-msgstr "Loquet"
+msgstr "Verrouillage"
 
 #: editor_actions.cc:101 editor_regions.cc:112 region_editor.cc:46
 msgid "Region"
@@ -3571,7 +3625,7 @@ msgstr "Sous-trames"
 
 #: editor_actions.cc:140
 msgid "Timecode fps"
-msgstr "Trames/s « timecode »"
+msgstr "Trames/s du timecode"
 
 #: editor_actions.cc:141 route_time_axis.cc:575
 msgid "Height"
@@ -3752,14 +3806,17 @@ msgid "Toggle Solo Isolate"
 msgstr "Basculer Solo Isolé"
 
 #: editor_actions.cc:226
+#, qt-format
 msgid "Save View %1"
 msgstr "Sauvegarder la vue %1"
 
 #: editor_actions.cc:232
+#, qt-format
 msgid "Go to View %1"
 msgstr "Charger la vue %1"
 
 #: editor_actions.cc:238
+#, qt-format
 msgid "Locate to Mark %1"
 msgstr "Se placer au repère %1"
 
@@ -3805,7 +3862,7 @@ msgstr "Tête de lecture à la grille précédente"
 
 #: editor_actions.cc:264
 msgid "Zoom to Selection"
-msgstr ""
+msgstr "Zoom sur la sélection"
 
 #: editor_actions.cc:265
 msgid "Toggle Zoom State"
@@ -3877,7 +3934,7 @@ msgstr "Déplacer le repère actif à la tête de lecture"
 
 #: editor_actions.cc:295
 msgid "Use Skip Ranges"
-msgstr ""
+msgstr "Utiliser les sauts de plage"
 
 #: editor_actions.cc:302
 msgid "Play Selected Regions"
@@ -3901,11 +3958,11 @@ msgstr "Déplacer le repère actif à la position de la souris"
 
 #: editor_actions.cc:319
 msgid "Undo Selection Change"
-msgstr ""
+msgstr "Annuler la modification de sélection"
 
 #: editor_actions.cc:320
 msgid "Redo Selection Change"
-msgstr ""
+msgstr "Refaire la modification de sélection"
 
 #: editor_actions.cc:322
 msgid "Export Audio"
@@ -3940,14 +3997,12 @@ msgid "Log"
 msgstr "Journal"
 
 #: editor_actions.cc:351 editor_actions.cc:353
-#, fuzzy
 msgid "Move to Next Transient"
-msgstr "Aller au prochain début de Région (Pistes sélectionnées)"
+msgstr "Aller à la prochaine transitoire"
 
 #: editor_actions.cc:352 editor_actions.cc:354
-#, fuzzy
 msgid "Move to Previous Transient"
-msgstr "Aller au prochain début de Région (Pistes sélectionnées)"
+msgstr "Aller à la transitoire précédente"
 
 #: editor_actions.cc:358 editor_actions.cc:361
 msgid "Start Range"
@@ -3985,7 +4040,7 @@ msgstr "Supprimer"
 
 #: editor_actions.cc:411
 msgid "Fit Selection (Vertical)"
-msgstr ""
+msgstr "Ajuster à la sélection (verticale)"
 
 #: editor_actions.cc:413 time_axis_view.cc:1371
 msgid "Largest"
@@ -4040,7 +4095,6 @@ msgid "Smart Object Mode"
 msgstr "Mode objet intelligent"
 
 #: editor_actions.cc:450
-#, fuzzy
 msgid "Smart"
 msgstr "Intelligent"
 
@@ -4066,7 +4120,7 @@ msgstr "Outil de transformation temporelle"
 
 #: editor_actions.cc:478
 msgid "Content Tool"
-msgstr ""
+msgstr "Outil Contenu"
 
 #: editor_actions.cc:484
 msgid "Cut Tool"
@@ -4074,9 +4128,8 @@ msgstr "Outil de découpe"
 
 # Mieux?
 #: editor_actions.cc:490
-#, fuzzy
 msgid "Step Mouse Mode"
-msgstr "Mode Pas-à-pas"
+msgstr "Mode Pas-à-pas souris"
 
 #: editor_actions.cc:497
 msgid "Change Edit Point"
@@ -4120,125 +4173,124 @@ msgstr "Choix d'alignement musical précédent"
 
 #: editor_actions.cc:523
 msgid "Snap to CD Frame"
-msgstr "Aligner sur la trame CD"
+msgstr "Aimanter à la trame CD"
 
 #: editor_actions.cc:524
 msgid "Snap to Timecode Frame"
-msgstr "Aligner sur la trame de « timecode »"
+msgstr "Aimanter à la trame de timecode"
 
 #: editor_actions.cc:525
 msgid "Snap to Timecode Seconds"
-msgstr "Aligner sur les secondes de « timecode »"
+msgstr "Aimanter aux secondes de timecode"
 
 #: editor_actions.cc:526
 msgid "Snap to Timecode Minutes"
-msgstr "Aligner sur les minutes de « timecode »"
+msgstr "Aimanter aux minutes de timecode"
 
 #: editor_actions.cc:527
 msgid "Snap to Seconds"
-msgstr "Aligner sur les secondes"
+msgstr "Aimanter aux secondes"
 
 #: editor_actions.cc:528
 msgid "Snap to Minutes"
-msgstr "Aligner sur les minutes"
+msgstr "Aimanter aux minutes"
 
 #: editor_actions.cc:530
 msgid "Snap to One Twenty Eighths"
-msgstr "Aligner aux quintuple croches"
+msgstr "Aimanter au 28ème de temps"
 
 #: editor_actions.cc:531
 msgid "Snap to Sixty Fourths"
-msgstr "Aligner sur un 64ème de temps"
+msgstr "Aimanter au 46ème de temps"
 
 #: editor_actions.cc:532
 msgid "Snap to Thirty Seconds"
-msgstr "Aligner sur 30 secondes"
+msgstr "Aimanter toutes les 30 secondes"
 
 #: editor_actions.cc:533
 msgid "Snap to Twenty Eighths"
-msgstr "Aligner sur un 28ème de temps"
+msgstr "Aimanter au 28ème de temps"
 
 #: editor_actions.cc:534
 msgid "Snap to Twenty Fourths"
-msgstr "Aligner sur un 24ème de temps"
+msgstr "Aimanter au 24ème de temps"
 
 #: editor_actions.cc:535
 msgid "Snap to Twentieths"
-msgstr "Aligner sur un 20ème de temps"
+msgstr "Aimanter au 20ème de temps"
 
 #: editor_actions.cc:536
 msgid "Snap to Sixteenths"
-msgstr "Aligner sur un 16ème de temps"
+msgstr "Aimanter au 16ème de temps"
 
 #: editor_actions.cc:537
 msgid "Snap to Fourteenths"
-msgstr "Aligner sur un 14ème de temps"
+msgstr "Aimanter au 14ème de temps"
 
 #: editor_actions.cc:538
 msgid "Snap to Twelfths"
-msgstr "Aligner sur un 12ème de temps"
+msgstr "Aimanter au 12ème de temps"
 
 #: editor_actions.cc:539
 msgid "Snap to Tenths"
-msgstr "Aligner sur un 10ème de temps"
+msgstr "Aimanter au 10ème de temps"
 
 #: editor_actions.cc:540
 msgid "Snap to Eighths"
-msgstr "Aligner sur un 8ème de temps"
+msgstr "Aimanter au 8ème de temps"
 
 #: editor_actions.cc:541
 msgid "Snap to Sevenths"
-msgstr "Aligner sur un 7ème de temps"
+msgstr "Aimanter au 7ème de temps"
 
 #: editor_actions.cc:542
 msgid "Snap to Sixths"
-msgstr "Aligner sur un 6ème de temps"
+msgstr "Aimanter au 6ème de temps"
 
 #: editor_actions.cc:543
 msgid "Snap to Fifths"
-msgstr "Aligner sur un 5ème de temps"
+msgstr "Aimanter au 5ème de temps"
 
 # Pas plutôt la noire ?
 #: editor_actions.cc:544
-#, fuzzy
 msgid "Snap to Quarters"
-msgstr "un quart de temps"
+msgstr "Aimanter au quart de temps"
 
 #: editor_actions.cc:545
 msgid "Snap to Thirds"
-msgstr "Aligner sur un triolet"
+msgstr "Aimanter au tiers de temps"
 
 #: editor_actions.cc:546
 msgid "Snap to Halves"
-msgstr "Aligner sur un demi temps"
+msgstr "Aimanter au demi temps"
 
 #: editor_actions.cc:548
 msgid "Snap to Beat"
-msgstr "Aligner sur un temps"
+msgstr "Aimanter au temps"
 
 #: editor_actions.cc:549
 msgid "Snap to Bar"
-msgstr "Aligner sur les mesures"
+msgstr "Aimanter à la mesure"
 
 #: editor_actions.cc:550
 msgid "Snap to Mark"
-msgstr "Aligner sur les repères"
+msgstr "Aimanter aux repères"
 
 #: editor_actions.cc:551
 msgid "Snap to Region Start"
-msgstr "Aligner sur un début de région"
+msgstr "Aimanter au début de région"
 
 #: editor_actions.cc:552
 msgid "Snap to Region End"
-msgstr "Aligner sur fin de région"
+msgstr "Aimanter à la fin de région"
 
 #: editor_actions.cc:553
 msgid "Snap to Region Sync"
-msgstr "Aligner sur synchro de région"
+msgstr "Aimanter aux synchros de région"
 
 #: editor_actions.cc:554
 msgid "Snap to Region Boundary"
-msgstr "Aligner sur limite de région"
+msgstr "Aimanter aux limites de région"
 
 #: editor_actions.cc:556
 msgid "Show Marker Lines"
@@ -4270,7 +4322,7 @@ msgstr "Numéro de trame"
 
 #: editor_actions.cc:580
 msgid "Timecode Background"
-msgstr "« Timecode » en arrière-plan"
+msgstr "Arrière plan du timecode"
 
 #: editor_actions.cc:581
 msgid "Fullscreen"
@@ -4318,7 +4370,7 @@ msgstr "par position de région"
 
 #: editor_actions.cc:665
 msgid "By Region Timestamp"
-msgstr "par date de région"
+msgstr "par horodatage de région"
 
 #: editor_actions.cc:667
 msgid "By Region Start in File"
@@ -4376,7 +4428,7 @@ msgstr "Afficher les onglets de groupes"
 
 #: editor_actions.cc:701
 msgid "Show Measure Lines"
-msgstr ""
+msgstr "Afficher les lignes de mesure"
 
 #: editor_actions.cc:705
 msgid "Show Logo"
@@ -4388,10 +4440,12 @@ msgstr ""
 "Basculer l'entrée MIDI active pour les pistes/bus sélectionnés dans l'éditeur"
 
 #: editor_actions.cc:732
+#, qt-format
 msgid "Loaded editor bindings from %1"
 msgstr "Raccourcis d'éditeur chargés depuis %1"
 
 #: editor_actions.cc:734
+#, qt-format
 msgid "Could not find editor.bindings in search path %1"
 msgstr ""
 "Impossible de trouver « editor.bindings » dans le chemin de recherche %1"
@@ -4399,6 +4453,7 @@ msgstr ""
 #: editor_actions.cc:1078 editor_actions.cc:1474 editor_actions.cc:1485
 #: editor_actions.cc:1538 editor_actions.cc:1549 editor_actions.cc:1596
 #: editor_actions.cc:1606 editor_regions.cc:1563
+#, qt-format
 msgid "programming error: %1: %2"
 msgstr "erreur de programmation: %1: %2"
 
@@ -4604,7 +4659,6 @@ msgid "Nudge Earlier"
 msgstr "Décaler vers la gauche"
 
 #: editor_actions.cc:1955
-#, fuzzy
 msgid "Sequence Regions"
 msgstr "Séquencer les régions"
 
@@ -4646,7 +4700,7 @@ msgstr "Placer transitoire"
 
 #: editor_actions.cc:1990
 msgid "Split/Separate"
-msgstr ""
+msgstr "Découper/Séparer"
 
 #: editor_actions.cc:1991
 msgid "Trim Start at Edit Point"
@@ -4695,6 +4749,7 @@ msgid "Add Existing Media"
 msgstr "Importer un média"
 
 #: editor_audio_import.cc:175
+#, qt-format
 msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%1 as a new file, or skip it?"
@@ -4703,6 +4758,7 @@ msgstr ""
 "nouveau fichier, ou l'ignorer ?"
 
 #: editor_audio_import.cc:177
+#, qt-format
 msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%2 as a new source, or skip it?"
@@ -4715,6 +4771,7 @@ msgid "Cancel Import"
 msgstr "Annuler l'importation"
 
 #: editor_audio_import.cc:559
+#, qt-format
 msgid "Editor: cannot open file \"%1\", (%2)"
 msgstr "Éditeur : impossible d'ouvrir le fichier « %1 » (%2)"
 
@@ -4736,6 +4793,7 @@ msgid "Sample rate"
 msgstr "Échantillonnage"
 
 #: editor_audio_import.cc:573 editor_audio_import.cc:599
+#, qt-format
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
@@ -4748,13 +4806,11 @@ msgstr ""
 msgid "Embed it anyway"
 msgstr "Lier quand même"
 
-# drop zone?
 #: editor_canvas_events.cc:1306 editor_drag.cc:1381
-#, fuzzy
 msgid "Could not create new track after region placed in the drop zone"
 msgstr ""
-"Impossible de créer une nouvelle piste à partir d'une région placée dans la "
-"zone de suppression"
+"Impossible de créer une nouvelle piste d'après la région placée dans la zone "
+"cible"
 
 #: editor_drag.cc:1266
 msgid "fixed time region drag"
@@ -4762,7 +4818,7 @@ msgstr "Déplacement vertical de région"
 
 #: editor_drag.cc:2214
 msgid "Ripple drag"
-msgstr ""
+msgstr "Déplacement propagé"
 
 #: editor_drag.cc:2365 midi_region_view.cc:2813
 #, fuzzy
@@ -4814,16 +4870,17 @@ msgid "An error occurred while executing time stretch operation"
 msgstr "Une erreur est survenue pendant l'opération d'étirement temporel"
 
 #: editor_drag.cc:4947
+#, qt-format
 msgid "programming_error: %1"
 msgstr "%1 : erreur de programmation"
 
 #: editor_drag.cc:5016 editor_drag.cc:5026
 msgid "new skip marker"
-msgstr ""
+msgstr "nouveau marqueur de saut"
 
 #: editor_drag.cc:5017
 msgid "skip"
-msgstr ""
+msgstr "saut"
 
 #: editor_drag.cc:5021 location_ui.cc:56
 msgid "CD"
@@ -4831,7 +4888,7 @@ msgstr "CD"
 
 #: editor_drag.cc:5022
 msgid "new CD marker"
-msgstr ""
+msgstr "nouveau marqueur de CD"
 
 #: editor_drag.cc:5027 editor_route_groups.cc:437 mixer_ui.cc:1493
 msgid "unnamed"
@@ -4839,7 +4896,7 @@ msgstr "(sans nom)"
 
 #: editor_drag.cc:5309
 msgid "Automation range drag created for invalid region type"
-msgstr ""
+msgstr "Zone d'automation créée pour un type de région invalide"
 
 # Short for color
 #: editor_route_groups.cc:96
@@ -4860,12 +4917,12 @@ msgstr "V"
 
 #: editor_route_groups.cc:98
 msgid "Group is visible?"
-msgstr "Groupe est visible ?"
+msgstr "Groupe visible ?"
 
 # Active
 #: editor_route_groups.cc:99
 msgid "On"
-msgstr "Act."
+msgstr "Oui"
 
 #: editor_route_groups.cc:99
 msgid "Group is enabled?"
@@ -4881,15 +4938,15 @@ msgstr "Partager gain ?"
 
 #: editor_route_groups.cc:101
 msgid "relative|Rel"
-msgstr "Rel."
+msgstr "relatif|Rel"
 
 #: editor_route_groups.cc:101
 msgid "Relative Gain Changes?"
-msgstr "Changements de gain relatifs"
+msgstr "Changements de gain relatifs ?"
 
 #: editor_route_groups.cc:102
 msgid "mute|M"
-msgstr "M"
+msgstr "muet|M"
 
 #: editor_route_groups.cc:102
 msgid "Sharing Mute?"
@@ -4897,7 +4954,7 @@ msgstr "Partager muet ?"
 
 #: editor_route_groups.cc:103
 msgid "solo|S"
-msgstr "S"
+msgstr "solo|S"
 
 #: editor_route_groups.cc:103
 msgid "Sharing Solo?"
@@ -4914,15 +4971,15 @@ msgstr "Partager l'armement ?"
 
 #: editor_route_groups.cc:105
 msgid "monitoring|Mon"
-msgstr "Mon."
+msgstr "monitoring|Mon"
 
 #: editor_route_groups.cc:105
 msgid "Sharing Monitoring Choice?"
-msgstr "Partager le choix d'écoute ?"
+msgstr "Partager le choix de moniotoring ?"
 
 #: editor_route_groups.cc:106
 msgid "selection|Sel"
-msgstr "Sél."
+msgstr "sélection|Sél"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Selected/Editing Status?"
@@ -4930,7 +4987,7 @@ msgstr "Partager le statut de sélection/édition ?"
 
 #: editor_route_groups.cc:107
 msgid "active|A"
-msgstr "A"
+msgstr "actif|A"
 
 #: editor_route_groups.cc:107
 msgid "Sharing Active Status?"
@@ -4943,9 +5000,10 @@ msgstr "Partager le statut d'activation ?"
 #: editor_markers.cc:1236 editor_markers.cc:1261 editor_markers.cc:1312
 #: editor_markers.cc:1356 editor_markers.cc:1382 editor_markers.cc:1576
 #: editor_mouse.cc:2120
-#, fuzzy
 msgid "programming error: marker canvas item has no marker object pointer!"
-msgstr "programming error : marker canvas item has no marker object pointer!"
+msgstr ""
+"erreur de programmation : l'élément de marqueur de canvas n'a pas de "
+"pointeur d'objet marqueur !"
 
 #: editor_export_audio.cc:145 editor_export_audio.cc:150
 msgid "File Exists!"
@@ -5146,6 +5204,7 @@ msgid "sequence regions"
 msgstr "séquencer les régions"
 
 #: editor_ops.cc:694
+#, qt-format
 msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr "build_region_boundary_cache appelé avec snap_type = %1"
 
@@ -5286,6 +5345,7 @@ msgid "Cannot freeze"
 msgstr "Impossible de geler"
 
 #: editor_ops.cc:3803
+#, qt-format
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -5318,7 +5378,6 @@ msgid "Cancel Freeze"
 msgstr "Annuler le gel"
 
 #: editor_ops.cc:3854
-#, fuzzy
 msgid ""
 "You can't perform this operation because the processing of the signal will "
 "cause one or more of the tracks to end up with a region with more channels "
@@ -5326,9 +5385,10 @@ msgid ""
 "\n"
 "You can do this without processing, which is a different operation."
 msgstr ""
-"Opération impossible: le traitement du signal sur une ou plusieurs Pistes va "
-"créer une ou plusieurs Régions avec plus de canaux que la ou les Pistes ont "
-"d'entrées.\n"
+"Vous ne pouvez pas réaliser cette opération car le traitement du signal "
+"créerait une ou plusieurs pistes dont une région possède plus de cannaux que "
+"cette piste n'a d'entrées.\n"
+"\n"
 "\n"
 "Vous pouvez faire cela sans traitement, ce qui est une opération différente."
 
@@ -5410,6 +5470,7 @@ msgid "Fork Region(s)"
 msgstr "Séparer région(s)"
 
 #: editor_ops.cc:5112
+#, qt-format
 msgid "Could not unlink %1"
 msgstr "Impossible de délier %1"
 
@@ -5438,9 +5499,8 @@ msgid "change region opacity"
 msgstr "changer l'opacité de la région"
 
 #: editor_ops.cc:5572
-#, fuzzy
 msgid "fade range"
-msgstr "intervalle de fondu"
+msgstr "zone de fondu"
 
 #: editor_ops.cc:5610
 msgid "set fade in length"
@@ -5480,7 +5540,7 @@ msgstr "régler l'intervalle de « punch » sur la sélection"
 
 #: editor_ops.cc:6041
 msgid "set session start/end from selection"
-msgstr ""
+msgstr "Définir le début et la fin de la session depuis la sélection "
 
 #: editor_ops.cc:6066
 msgid "set punch range from region"
@@ -5512,6 +5572,7 @@ msgid "split regions"
 msgstr "scinder les régions"
 
 #: editor_ops.cc:6278
+#, qt-format
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -5582,6 +5643,7 @@ msgid "That would be bad news ...."
 msgstr "Mauvaise nouvelle…"
 
 #: editor_ops.cc:6791 route_ui.cc:1548
+#, qt-format
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5613,6 +5675,7 @@ msgid "bus"
 msgstr "bus"
 
 #: editor_ops.cc:6822
+#, qt-format
 msgid ""
 "Do you really want to remove %1 %2 and %3 %4?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -5626,6 +5689,7 @@ msgstr ""
 "annulée !"
 
 #: editor_ops.cc:6827
+#, qt-format
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -5639,7 +5703,7 @@ msgstr ""
 "annulée !"
 
 #: editor_ops.cc:6833
-#, fuzzy
+#, qt-format
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "\n"
@@ -5647,7 +5711,7 @@ msgid ""
 msgstr ""
 "Voulez-vous vraiment supprimer %1 %2 ?\n"
 "\n"
-"Le fichier de session sera écrasé et tette action ne pourra pas être "
+"Le fichier de session sera écrasé et cette action ne pourra pas être "
 "annulée !"
 
 #: editor_ops.cc:6840
@@ -5659,6 +5723,7 @@ msgid "Yes, remove it."
 msgstr "Oui, supprimer."
 
 #: editor_ops.cc:6847 editor_ops.cc:6849
+#, qt-format
 msgid "Remove %1"
 msgstr "Supprimer %1"
 
@@ -5696,6 +5761,7 @@ msgid "uncombine regions"
 msgstr "disjoindre les régions"
 
 #: editor_ops.cc:7315
+#, qt-format
 msgid "%1: Locked"
 msgstr "%1 : verrouillé"
 
@@ -5943,11 +6009,11 @@ msgstr "Ré-afficher les intervalles masqués"
 
 #: editor_rulers.cc:224
 msgid "Make Loop range"
-msgstr ""
+msgstr "Créer une zone de boucle"
 
 #: editor_rulers.cc:225
 msgid "Make Punch range"
-msgstr ""
+msgstr "Créer une zone de punch"
 
 #: editor_rulers.cc:230
 msgid "New CD track marker"
@@ -5970,6 +6036,7 @@ msgid "New name of snapshot"
 msgstr "Nouveau nom du cliché"
 
 #: editor_snapshots.cc:157
+#, qt-format
 msgid ""
 "Do you really want to remove snapshot \"%1\" ?\n"
 "(which cannot be undone)"
@@ -6053,6 +6120,7 @@ msgid "Back to settings"
 msgstr "Retour aux réglages"
 
 #: engine_dialog.cc:111
+#, qt-format
 msgid ""
 "No audio/MIDI backends detected. %1 cannot run\n"
 "\n"
@@ -6149,9 +6217,10 @@ msgstr "Latence matérielle en sortie :"
 
 #: engine_dialog.cc:493
 msgid "MIDI System:"
-msgstr ""
+msgstr "Système MIDI :"
 
 #: engine_dialog.cc:511
+#, qt-format
 msgid ""
 "The %1 audio backend was configured and started externally.\n"
 "This limits your control over it."
@@ -6201,50 +6270,58 @@ msgid "all available channels"
 msgstr "tous les canaux disponibles"
 
 #: engine_dialog.cc:1039 latency_gui.cc:39
-#, fuzzy
 msgid "sample"
 msgid_plural "samples"
-msgstr[0] "échantillons"
+msgstr[0] "échantillon"
 msgstr[1] "échantillons"
 
 #: engine_dialog.cc:1090
 #, c-format
 msgid "(%.1f ms)"
-msgstr ""
+msgstr "(%.1f ms)"
 
 #: engine_dialog.cc:1593
+#, qt-format
 msgid "Could not start backend engine %1"
 msgstr "Impossible de démarrer le moteur %1"
 
 #: engine_dialog.cc:1644
+#, qt-format
 msgid "Cannot set driver to %1"
 msgstr "Impossible de régler le pilote sur %1"
 
 #: engine_dialog.cc:1648
+#, qt-format
 msgid "Cannot set device name to %1"
 msgstr "Impossible de nommer l'appareil %1"
 
 #: engine_dialog.cc:1652
+#, qt-format
 msgid "Cannot set sample rate to %1"
 msgstr "Impossible de régler la fréquence d’échantillonnage sur %1"
 
 #: engine_dialog.cc:1656
+#, qt-format
 msgid "Cannot set buffer size to %1"
 msgstr "Impossible de régler la taille du tampon à %1"
 
 #: engine_dialog.cc:1662
+#, qt-format
 msgid "Cannot set input channels to %1"
 msgstr "Impossible de régler les canaux d'entrée sur %1"
 
 #: engine_dialog.cc:1666
+#, qt-format
 msgid "Cannot set output channels to %1"
 msgstr "Impossible de régler les canaux de sortie sur %1"
 
 #: engine_dialog.cc:1672
+#, qt-format
 msgid "Cannot set input latency to %1"
 msgstr "Impossible de régler la latence d'entrée sur %1"
 
 #: engine_dialog.cc:1676
+#, qt-format
 msgid "Cannot set output latency to %1"
 msgstr "Impossible de régler la latence de sortie sur %1"
 
@@ -6294,6 +6371,7 @@ msgid "Detecting ..."
 msgstr "Détection…"
 
 #: engine_dialog.cc:2171
+#, qt-format
 msgid "Disconnect from %1"
 msgstr "Déconnecter de %1"
 
@@ -6303,12 +6381,13 @@ msgid "Active"
 msgstr "Actif"
 
 #: engine_dialog.cc:2185
+#, qt-format
 msgid "Connect to %1"
 msgstr "Connecter à %1"
 
 #: engine_dialog.cc:2190
 msgid "Inactive"
-msgstr ""
+msgstr "Inactif"
 
 #: export_channel_selector.cc:45 sfdb_ui.cc:151
 msgid "Channels:"
@@ -6323,14 +6402,17 @@ msgid "Bus or Track"
 msgstr "Piste ou Bus"
 
 #: export_channel_selector.cc:459
+#, qt-format
 msgid "Region contents without fades nor region gain (channels: %1)"
 msgstr "Contenu de région sans fondus ni gain (canaux : %1)"
 
 #: export_channel_selector.cc:463
+#, qt-format
 msgid "Region contents with fades and region gain (channels: %1)"
 msgstr "Contenu de région avec fondu et gain (canaux : %1)"
 
 #: export_channel_selector.cc:467
+#, qt-format
 msgid "Track output (channels: %1)"
 msgstr "Sortie de piste (canaux : %1)"
 
@@ -6379,6 +6461,7 @@ msgid "Files that will be overwritten"
 msgstr "Fichier qui vont être écrasés"
 
 #: export_dialog.cc:296
+#, qt-format
 msgid "Export initialization failed: %1"
 msgstr "Échec de l'initialisation de l'exportation : %1"
 
@@ -6391,10 +6474,12 @@ msgid "export"
 msgstr "Exporter"
 
 #: export_dialog.cc:346
+#, qt-format
 msgid "Normalizing '%3' (timespan %1 of %2)"
 msgstr "Normalisation de « %3 » (période %1 de %2)"
 
 #: export_dialog.cc:350
+#, qt-format
 msgid "Exporting '%3' (timespan %1 of %2)"
 msgstr "Exportation de « %3 » (période %1 de %2)"
 
@@ -6451,6 +6536,7 @@ msgid "No format!"
 msgstr "Aucun format !"
 
 #: export_file_notebook.cc:291
+#, qt-format
 msgid "Format %1: %2"
 msgstr "Format %1 : %2"
 
@@ -6489,10 +6575,12 @@ msgstr ""
 "le moment</i></small>"
 
 #: export_filename_selector.cc:214
+#, qt-format
 msgid "<small><i>Current (approximate) filename: \"%1\"</i></small>"
 msgstr "<small><i>Nom de fichier (approximatif) actuel : « %1 »</i></small>"
 
 #: export_filename_selector.cc:250 export_filename_selector.cc:336
+#, qt-format
 msgid ""
 "%1: this is only the directory/folder name, not the filename.\n"
 "The filename will be chosen from the information just above the folder "
@@ -6587,9 +6675,8 @@ msgid "Fast (sinc)"
 msgstr "Rapide (sinc)"
 
 #: export_format_dialog.cc:490
-#, fuzzy
 msgid "Zero order hold"
-msgstr "Interpolation répétitive (ZOH)"
+msgstr "Bloqueur d'ordre zéro"
 
 #: export_format_dialog.cc:895
 msgid "Linear encoding options"
@@ -6644,19 +6731,21 @@ msgid "Range"
 msgstr "Intervalle"
 
 #: sfdb_freesound_mootcher.cc:189 sfdb_freesound_mootcher.cc:324
+#, qt-format
 msgid "curl error %1 (%2)"
 msgstr "erreur curl %1 (%2)"
 
 #: sfdb_freesound_mootcher.cc:266
-#, fuzzy
 msgid "getSoundResourceFile: There is no valid root in the xml file"
-msgstr "getSoundResourceFile: Aucune racine valide dans le fichier xml"
+msgstr "getSoundResourceFile: There is no valid root in the xml file"
 
 #: sfdb_freesound_mootcher.cc:271
+#, qt-format
 msgid "getSoundResourceFile: root = %1, != response"
-msgstr ""
+msgstr "getSoundResourceFile: root = %1, != response"
 
 #: sfdb_freesound_mootcher.cc:410 rc_option_editor.cc:1824
+#, qt-format
 msgid "%1"
 msgstr "%1"
 
@@ -6694,14 +6783,12 @@ msgid "<span size=\"large\">Presets</span>"
 msgstr "<span size=\"large\">Réglages prédéfinis</span>"
 
 #: generic_pluginui.cc:97
-#, fuzzy
 msgid "Manual"
 msgstr "Manuel"
 
 #: generic_pluginui.cc:106
-#, fuzzy
 msgid "All Automation"
-msgstr "Afficher toute l'automation"
+msgstr "Toute l'automation"
 
 # ?
 #: generic_pluginui.cc:250
@@ -6714,22 +6801,26 @@ msgid "Controls"
 msgstr "Contrôles"
 
 #: generic_pluginui.cc:293
+#, qt-format
 msgid "Plugin Editor: could not build control element for port %1"
 msgstr ""
 "Éditeur de greffon : impossible de construire l'élément de contrôle pour le "
 "port %1"
 
 #: generic_pluginui.cc:318
+#, qt-format
 msgid "Plugin Editor: no control for property %1"
-msgstr ""
+msgstr "Editeur de plugins : pas de contrôleur pour la propriété %1"
 
 #: generic_pluginui.cc:324
+#, qt-format
 msgid "Plugin Editor: could not build control element for property %1"
 msgstr ""
+"Editeur de plugins : impossible de créer le contrôleur pour la propriété %1"
 
 #: generic_pluginui.cc:468
 msgid "Meters"
-msgstr "Signatures"
+msgstr "Afficheurs"
 
 #: generic_pluginui.cc:490
 msgid "Automation control"
@@ -6782,9 +6873,8 @@ msgstr "Éditer le groupe…"
 
 # À l'air de changer la couleur…
 #: group_tabs.cc:325
-#, fuzzy
 msgid "Collect Group"
-msgstr "Former un Groupe"
+msgstr "Réunir dans un groupe"
 
 #: group_tabs.cc:326
 msgid "Remove Group"
@@ -6828,7 +6918,7 @@ msgstr "rester en place"
 
 #: insert_time_dialog.cc:58
 msgid "move"
-msgstr "être bougées"
+msgstr "être déplacées"
 
 #: insert_time_dialog.cc:59
 msgid "be split"
@@ -6836,7 +6926,7 @@ msgstr "être séparées"
 
 #: insert_time_dialog.cc:65
 msgid "Insert time on all the track's playlists"
-msgstr "Insérer du temps sur toutes les playlists de la piste"
+msgstr "Insérer un temps sur toutes les playlists de la piste"
 
 #: insert_time_dialog.cc:68
 msgid "Move glued regions"
@@ -6855,13 +6945,12 @@ msgid "Move locked markers"
 msgstr "Déplacer les repères verrouillés"
 
 #: insert_time_dialog.cc:83
-#, fuzzy
 msgid ""
 "Move tempo and meter changes\n"
 "<i>(may cause oddities in the tempo map)</i>"
 msgstr ""
 "Changer le tempo et le rythme\n"
-"<i>(cela peut causer une table de Tempo bizarre)</i>"
+"<i>(cela peut causer une table de tempo bizarre)</i>"
 
 #: insert_time_dialog.cc:91
 msgid "Insert time"
@@ -6872,6 +6961,7 @@ msgid "-none-"
 msgstr "aucun"
 
 #: interthread_progress_window.cc:103
+#, qt-format
 msgid "Importing file: %1 of %2"
 msgstr "Import du fichier : %1 sur %2"
 
@@ -6880,10 +6970,12 @@ msgid "I/O selector"
 msgstr "Sélecteur E/S"
 
 #: io_selector.cc:266
+#, qt-format
 msgid "%1 input"
-msgstr "Entrée %1"
+msgstr "entrée %1"
 
 #: io_selector.cc:268
+#, qt-format
 msgid "%1 output"
 msgstr "sortie %1"
 
@@ -6892,12 +6984,14 @@ msgid "your own"
 msgstr "votre propre"
 
 #: keyboard.cc:133 keyboard.cc:157
+#, qt-format
 msgid "Default keybindings not found - %1 will be hard to use!"
 msgstr ""
 "Raccourcis clavier par défaut introuvables - Il sera difficile d'utiliser "
 "%1 !"
 
 #: keyboard.cc:136
+#, qt-format
 msgid "Key bindings file \"%1\" not found. Default bindings used instead"
 msgstr ""
 "Fichier de raccourcis clavier « %1 » non trouvé. Utilisation des raccourcis "
@@ -6920,11 +7014,9 @@ msgid "Select an action, then press the key(s) to (re)set its shortcut"
 msgstr ""
 "Sélectionnez une action, puis appuyez sur la touche pour définir le raccourci"
 
-# Only Keyboard or also control surfaces ?
 #: keyeditor.cc:98
-#, fuzzy
 msgid "Reset Bindings to Defaults"
-msgstr "Réinitialiser les raccourcis claviers par défaut"
+msgstr "Réinitialiser les raccourcis par défaut"
 
 #: keyeditor.cc:263
 #, fuzzy
@@ -6960,6 +7052,7 @@ msgid "period"
 msgstr "période"
 
 #: latency_gui.cc:55
+#, qt-format
 msgid "%1 sample"
 msgid_plural "%1 samples"
 msgstr[0] "%1 échantillon"
@@ -6970,6 +7063,7 @@ msgid "Reset"
 msgstr "Réinitialiser"
 
 #: latency_gui.cc:149 rhythm_ferret.cc:273 sfdb_ui.cc:1912
+#, qt-format
 msgid "programming error: %1 (%2)"
 msgstr "programming error : %1 (%2)"
 
@@ -7054,15 +7148,17 @@ msgid "add range marker"
 msgstr "ajouter un repère d'intervalle"
 
 #: main.cc:82
+#, qt-format
 msgid "%1 could not connect to the audio backend."
 msgstr "%1 ne peut pas se connecter au moteur audio."
 
 #: main.cc:107 main.cc:123
+#, qt-format
 msgid "The audio backend (%1) has failed, or terminated"
 msgstr "Le moteur audio (%1) n'a pas fonctionné ou s'est arrêté"
 
 #: main.cc:110
-#, fuzzy
+#, qt-format
 msgid ""
 "%2 exited unexpectedly, and without notifying %1.\n"
 "\n"
@@ -7070,26 +7166,30 @@ msgid ""
 "\n"
 "Click OK to exit %1."
 msgstr ""
-"%2 fermé de manière inattendue, sans rien notifier à %1.\n"
+"%2 s'est terminé de manière inattendue, sans rien notifier à %1.\n"
 "\n"
-"Ceci pourrait venir d'erreur ou mauvaise configuration dans %2.\n"
+"Ceci pourrait venir d'une erreur ou d'une mauvaise configuration dans %2.\n"
 "\n"
-"Cliquer sur OK pour fermer %1."
+"Cliquer OK pour fermer %1."
 
 #: main.cc:124
-#, fuzzy
+#, qt-format
 msgid "%2 exited unexpectedly, and without notifying %1."
-msgstr "%2 fermé de manière inattendue, et sans rien notifier à %1."
+msgstr "%2 s'est terminé de manière inattendue, et sans rien notifier à %1."
 
 #: main.cc:219
+#, qt-format
 msgid ""
 "\n"
 "   %1 could not understand your command line      "
 msgstr ""
+"\n"
+"   %1 n'a pas pu interpréter votre ligne de commande      "
 
 #: main.cc:221
+#, qt-format
 msgid "An error was encountered while launching %1"
-msgstr ""
+msgstr "Une erreur a été rencontrée au lancement de %1"
 
 #: main.cc:310
 msgid " (built using "
@@ -7112,12 +7212,13 @@ msgstr ""
 "Joel Baker, Robin Gareus"
 
 #: main.cc:326
+#, qt-format
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr "%1 est distribué sans AUCUNE GARANTIE"
 
 #: main.cc:327
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr "pas même de COMMERCIALISATION ou d'ADÉQUATION À UN BUT PARTICULIER."
+msgstr "pas même de COMMERCIABILISATION ou d'ADÉQUATION À UN BUT PARTICULIER."
 
 #: main.cc:328
 msgid "This is free software, and you are welcome to redistribute it "
@@ -7130,17 +7231,18 @@ msgstr ""
 "distribution."
 
 #: main.cc:334
+#, qt-format
 msgid "could not initialize %1."
 msgstr "impossible d'initialiser %1."
 
 #: main.cc:344
 msgid "Cannot xinstall SIGPIPE error handler"
-msgstr ""
+msgstr "Impossible d'installer le gestionnaire d'erreurs SIGPIPE"
 
 #: main.cc:351
-#, fuzzy
+#, qt-format
 msgid "could not create %1 GUI"
-msgstr "IHM %1 impossible à créer"
+msgstr "Impossible de créer l'interface de %1"
 
 #: main_clock.cc:52
 msgid "Display delta to edit cursor"
@@ -7228,22 +7330,27 @@ msgid "Click to invert current selected playback channels"
 msgstr "Cliquer pour inverser les canaux de lecture actuellement sélectionnés"
 
 #: midi_channel_selector.cc:620
+#, qt-format
 msgid "Click to toggle playback of channel %1"
 msgstr "Cliquer pour basculer la lecture du canal %1"
 
 #: midi_channel_selector.cc:628
+#, qt-format
 msgid "Click to force all MIDI channel messages to channel %1"
 msgstr "Cliquer pour forcer tous les message des canaux MIDI vers le canal %1"
 
 #: midi_channel_selector.cc:718
+#, qt-format
 msgid "Click to toggle recording of channel %1"
 msgstr "Cliquer pour basculer l'enregistrement du canal %1"
 
 #: midi_channel_selector.cc:726
+#, qt-format
 msgid "Click to force all recorded channels to %1"
 msgstr "Cliquer pour forcer tous les canaux enregistrés à %1"
 
 #: midi_export_dialog.cc:35
+#, qt-format
 msgid "Export MIDI: %1"
 msgstr "Export MIDI : %1"
 
@@ -7356,29 +7463,24 @@ msgid "add note"
 msgstr "ajouter une note"
 
 #: midi_region_view.cc:1885
-#, fuzzy
 msgid "step add"
-msgstr "Ajouter Pas-à-pas"
+msgstr "ajouter pas-à-pas"
 
 #: midi_region_view.cc:1979 midi_region_view.cc:2002
-#, fuzzy
 msgid "alter patch change"
-msgstr "Modifier le changement de patch"
+msgstr "modifier le changement de patch"
 
 #: midi_region_view.cc:2038
-#, fuzzy
 msgid "add patch change"
-msgstr "Ajouter le changement de patch"
+msgstr "ajouter le changement de patch"
 
 #: midi_region_view.cc:2060 midi_region_view.cc:2061
-#, fuzzy
 msgid "move patch change"
-msgstr "Déplacer le changement de patch"
+msgstr "déplacer le changement de patch"
 
 #: midi_region_view.cc:2073 midi_region_view.cc:2074
-#, fuzzy
 msgid "delete patch change"
-msgstr "Effacer le changement de patch"
+msgstr "effacer le changement de patch"
 
 #: midi_region_view.cc:2112
 msgid "delete selection"
@@ -7393,9 +7495,8 @@ msgid "move notes"
 msgstr "déplacer les notes"
 
 #: midi_region_view.cc:3070
-#, fuzzy
 msgid "change velocities"
-msgstr "Changer les vélocités"
+msgstr "changer les vélocités"
 
 #: midi_region_view.cc:3136
 msgid "transpose"
@@ -7431,11 +7532,11 @@ msgstr "coller"
 
 #: midi_streamview.cc:185
 msgid "attempt to display MIDI region with no source"
-msgstr ""
+msgstr "Tentative de création de région MIDI sans source"
 
 #: midi_streamview.cc:195
 msgid "attempt to display MIDI region with no model"
-msgstr ""
+msgstr "Tentative de création de région MIDI sans modèle"
 
 #: midi_streamview.cc:506
 msgid "failed to create MIDI region"
@@ -7507,14 +7608,17 @@ msgid "Show all channels"
 msgstr "Afficher tous les canaux"
 
 #: midi_time_axis.cc:687 midi_time_axis.cc:816
+#, qt-format
 msgid "Channel %1"
 msgstr "Canal %1"
 
 #: midi_time_axis.cc:942 midi_time_axis.cc:974
+#, qt-format
 msgid "Controllers %1-%2"
 msgstr "Contrôleurs %1-%2"
 
 #: midi_time_axis.cc:965 midi_time_axis.cc:968
+#, qt-format
 msgid "Controller %1"
 msgstr "Contrôleur %1"
 
@@ -7576,9 +7680,8 @@ msgid "New velocity"
 msgstr "Nouvelle vélocité"
 
 #: missing_file_dialog.cc:35
-#, fuzzy
 msgid "Missing File"
-msgstr "Fichier manquant !"
+msgstr "Fichier manquant"
 
 #: missing_file_dialog.cc:37
 msgid "Select a folder to search"
@@ -7605,6 +7708,7 @@ msgid "audio"
 msgstr "audio"
 
 #: missing_file_dialog.cc:70
+#, qt-format
 msgid ""
 "%1 cannot find the %2 file\n"
 "\n"
@@ -7637,54 +7741,44 @@ msgid "OK"
 msgstr "OK"
 
 #: mixer_actor.cc:55
-#, fuzzy
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
-msgstr "Basculer Solo sur les Pistes/Bus sélectionnés-Console"
+msgstr "Basculer Solo sur les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:56
-#, fuzzy
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
-msgstr "Basculer Muet sur les Pistes/Bus sélectionnés-Console"
+msgstr "Basculer Muet sur les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:57
-#, fuzzy
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
-msgstr "Basculer Enreg-Armé les Pistes/Bus sélectionnés-Console"
+msgstr "Basculer Enreg-Armé les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:58
-#, fuzzy
 msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
-msgstr "Baisser le gain pour les Pistes/Bus sélectionnés-Console"
+msgstr "Baisser le gain pour les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:59
-#, fuzzy
 msgid "Increase Gain on Mixer-Selected Tracks/Busses"
-msgstr "Augmenter le gain pour les Pistes/Bus sélectionnés-Console"
+msgstr "Augmenter le gain pour les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:60
-#, fuzzy
 msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
-msgstr "Gain à 0dB pour les Pistes/Bus sélectionnés-Console"
+msgstr "Gain à 0dB pour les Pistes/Bus sélectionnés dans la console"
 
 #: mixer_actor.cc:63
-#, fuzzy
 msgid "Copy Selected Processors"
 msgstr "Copier les traitements sélectionnés"
 
 #: mixer_actor.cc:64
-#, fuzzy
 msgid "Cut Selected Processors"
-msgstr "Enlever les traitements sélectionnés"
+msgstr "Couper les traitements sélectionnés"
 
 #: mixer_actor.cc:65
-#, fuzzy
 msgid "Paste Selected Processors"
 msgstr "Coller les traitements sélectionnés"
 
 #: mixer_actor.cc:66
-#, fuzzy
 msgid "Delete Selected Processors"
-msgstr "Enlever les traitements sélectionnés"
+msgstr "Supprimer les traitements sélectionnés"
 
 #: mixer_actor.cc:67
 #, fuzzy
@@ -7692,9 +7786,8 @@ msgid "Select All (visible) Processors"
 msgstr "Sélectionner tous les traitements (visibles)"
 
 #: mixer_actor.cc:68
-#, fuzzy
 msgid "Toggle Selected Processors"
-msgstr "Basculer les traitements sélectionnés"
+msgstr "(dés)Activer les traitements sélectionnés"
 
 #: mixer_actor.cc:69
 msgid "Toggle Selected Plugins"
@@ -7702,7 +7795,7 @@ msgstr "Activer/désactiver le greffon sélectionné"
 
 #: mixer_actor.cc:70
 msgid "Deselect all strips and processors"
-msgstr ""
+msgstr "Désélectionner toutes les tranches et traitements"
 
 #: mixer_actor.cc:72 mixer_actor.cc:73
 #, fuzzy
@@ -7710,17 +7803,18 @@ msgid "Scroll Mixer Window to the left"
 msgstr "Défiler vers la gauche de la Console"
 
 #: mixer_actor.cc:75
-#, fuzzy
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
-msgstr "Pour les Pistes/Bus sélectionnés-Console, activer l'entrée MIDI"
+msgstr ""
+"Activer l'entrée MIDI des Pistes/Bus sélectionnés dans la console, activer "
+"l'entrée MIDI"
 
 #: mixer_actor.cc:90
-#, fuzzy
+#, fuzzy, qt-format
 msgid "Loaded mixer bindings from %1"
 msgstr "Réglages de Console chargées depuis %1"
 
 #: mixer_actor.cc:92
-#, fuzzy
+#, fuzzy, qt-format
 msgid "Could not find mixer.bindings in search path %1"
 msgstr "Réglages de Console introuvables dans %1"
 
@@ -7738,6 +7832,7 @@ msgid "Click to toggle the width of this mixer strip."
 msgstr "Cliquer pour changer la largeur de la tranche de mixage."
 
 #: mixer_strip.cc:151
+#, qt-format
 msgid ""
 "\n"
 "%1-%2-click to toggle the width of all strips."
@@ -7775,9 +7870,8 @@ msgid "Phase Invert"
 msgstr "Inverseur de phase"
 
 #: mixer_strip.cc:369 rc_option_editor.cc:2328
-#, fuzzy
 msgid "Record & Monitor"
-msgstr ": moniteur"
+msgstr "Enregistrement & monitoring"
 
 #: mixer_strip.cc:370 rc_option_editor.cc:2329
 #, fuzzy
@@ -7789,36 +7883,33 @@ msgid "Enable/Disable MIDI input"
 msgstr "Activer/désactiver l'entrée MIDI"
 
 #: mixer_strip.cc:688
-#, fuzzy
 msgid "Aux"
-msgstr ""
-"Départs\n"
-"Aux"
+msgstr "Aux"
 
 #: mixer_strip.cc:710
-#, fuzzy
 msgid "Snd"
 msgstr "Dép"
 
 #: mixer_strip.cc:776 mixer_strip.cc:879 processor_box.cc:2382
-#, fuzzy
 msgid "Not connected to audio engine - no I/O changes are possible"
-msgstr "Déconnecté du moteur Audio: pas de changement E/S possible"
+msgstr "Déconnecté du moteur Audio : pas de modification d'E/S possible"
 
 #: mixer_strip.cc:833 mixer_strip.cc:935
+#, qt-format
 msgid "Add %1 port"
-msgstr ""
+msgstr "Ajouter un port %1"
 
 #: mixer_strip.cc:840 mixer_strip.cc:942
-#, fuzzy
 msgid "Routing Grid"
-msgstr "Routine des départs"
+msgstr "Grille de routage"
 
 #: mixer_strip.cc:1171
+#, qt-format
 msgid "<b>INPUT</b> to %1"
 msgstr "<b>ENTRÉE</b> vers %1"
 
 #: mixer_strip.cc:1174
+#, qt-format
 msgid "<b>OUTPUT</b> from %1"
 msgstr "<b>SORTIE</b> depuis %1"
 
@@ -7859,14 +7950,12 @@ msgid "Comments..."
 msgstr "Commentaires…"
 
 #: mixer_strip.cc:1509 route_time_axis.cc:565
-#, fuzzy
 msgid "Inputs..."
-msgstr "Entrées"
+msgstr "Entrées..."
 
 #: mixer_strip.cc:1511 route_time_axis.cc:567
-#, fuzzy
 msgid "Outputs..."
-msgstr "Sorties"
+msgstr "Sorties..."
 
 #: mixer_strip.cc:1516
 msgid "Save As Template..."
@@ -7882,7 +7971,7 @@ msgstr "Protèger contre les dénormalisations"
 
 #: mixer_strip.cc:1539 route_time_axis.cc:580
 msgid "Remote Control ID..."
-msgstr "ID de télécommande…"
+msgstr "ID de contrôle à distance..."
 
 #: mixer_strip.cc:1823
 #, fuzzy
@@ -7896,16 +7985,15 @@ msgstr "Post"
 
 #: mixer_strip.cc:1847
 msgid "Pr"
-msgstr ""
+msgstr "Pr"
 
 #: mixer_strip.cc:1851
 msgid "Po"
-msgstr ""
+msgstr "Po"
 
 #: mixer_strip.cc:1860
-#, fuzzy
 msgid "C"
-msgstr "Ajouter un do"
+msgstr "C"
 
 #: mixer_strip.cc:2008 route_ui.cc:168
 msgid "Disk"
@@ -7933,19 +8021,19 @@ msgid "Post Fader"
 msgstr "Post-atténuation"
 
 #: mixer_strip.cc:2286 meter_strip.cc:847
-#, fuzzy
+#, qt-format
 msgid "Change all in Group to %1"
-msgstr "Tout dans le groupe en %1"
+msgstr "Changer tout dans le groupe en %1"
 
 #: mixer_strip.cc:2288 meter_strip.cc:849
-#, fuzzy
+#, qt-format
 msgid "Change all to %1"
-msgstr "Tout en %1"
+msgstr "Changer tout en %1"
 
 #: mixer_strip.cc:2290 meter_strip.cc:851
-#, fuzzy
+#, qt-format
 msgid "Change same track-type to %1"
-msgstr "Toutes les Pistes du même type en %1"
+msgstr "Toutes les pistes du même type en %1"
 
 #: mixer_ui.cc:130 route_time_axis.cc:818
 msgid "Group"
@@ -7966,7 +8054,7 @@ msgstr "Tranches"
 
 #: meter_strip.cc:157
 msgid "Reset Peak"
-msgstr ""
+msgstr "Réinitialiser crête"
 
 #: meter_strip.cc:883
 #, fuzzy
@@ -7990,12 +8078,11 @@ msgstr "Grand"
 
 #: meter_strip.cc:887
 msgid "Venti"
-msgstr ""
+msgstr "Venti"
 
 #: meter_patterns.cc:82
-#, fuzzy
 msgid "Peak"
-msgstr "Pic"
+msgstr "Crête"
 
 #: meter_patterns.cc:85
 #, fuzzy
@@ -8003,38 +8090,36 @@ msgid "RMS + Peak"
 msgstr "RMS + Crête"
 
 #: meter_patterns.cc:88
-#, fuzzy
 msgid "IEC1/DIN"
-msgstr "Niveau ligne IEC1/DIN, 0 dBu "
+msgstr "IEC1/DIN"
 
 #: meter_patterns.cc:91
-#, fuzzy
 msgid "IEC1/Nordic"
-msgstr "IEC1/Nordique"
+msgstr "IEC1/Nordic"
 
 #: meter_patterns.cc:94
 msgid "IEC2/BBC"
-msgstr ""
+msgstr "IEC2/BBC"
 
 #: meter_patterns.cc:97
 msgid "IEC2/EBU"
-msgstr ""
+msgstr "IEC2/EBU"
 
 #: meter_patterns.cc:100
 msgid "K20"
-msgstr ""
+msgstr "K20"
 
 #: meter_patterns.cc:103
 msgid "K14"
-msgstr ""
+msgstr "K14"
 
 #: meter_patterns.cc:106
 msgid "K12"
-msgstr ""
+msgstr "K12"
 
 #: meter_patterns.cc:109
 msgid "VU"
-msgstr ""
+msgstr "VU"
 
 #: monitor_section.cc:69
 msgid "SiP"
@@ -8085,22 +8170,20 @@ msgid "Solo controls toggle pre-fader-listen"
 msgstr "Les contrôles de Solo sont Pré-Fader"
 
 #: monitor_section.cc:156
-#, fuzzy
 msgid "Gain increase for soloed signals (0dB is normal)"
-msgstr "Volume des signaux en mode solo (0dB est normal)"
+msgstr "Augmentation du gain pour les signaux solo (0dB est normal)"
 
 #: monitor_section.cc:170
 msgid "Solo Boost"
 msgstr "Gain Solo"
 
 #: monitor_section.cc:185
-#, fuzzy
 msgid ""
 "Gain reduction non-soloed signals\n"
 "A value above -inf dB causes \"solo-in-front\""
 msgstr ""
 "Baisse de gain des signaux non-solo\n"
-"Une valeur supérieure à -infini cause \"solo-devant\""
+"Une valeur supérieure à -infini crée un \"solo-mise en avant\""
 
 #: monitor_section.cc:196
 #, fuzzy
@@ -8108,14 +8191,12 @@ msgid "SiP Cut"
 msgstr "Réduction SeP"
 
 #: monitor_section.cc:211
-#, fuzzy
 msgid "Gain reduction to use when dimming monitor outputs"
-msgstr "Réduction de volume (Dim) pour les sorties Monitor"
+msgstr "Réduction de gain pour l'atténuation des sorties de monitoring"
 
 #: monitor_section.cc:225 monitor_section.cc:283
-#, fuzzy
 msgid "Dim"
-msgstr "Dim"
+msgstr "Atténuer"
 
 #: monitor_section.cc:235
 #, fuzzy
@@ -8140,54 +8221,48 @@ msgstr ""
 "solo sera audible)"
 
 #: monitor_section.cc:323
-#, fuzzy
 msgid "Monitor"
-msgstr ": moniteur"
+msgstr "Monitoring"
 
 #: monitor_section.cc:744
-#, fuzzy
 msgid "Switch monitor to mono"
-msgstr "Ecoute Mono"
+msgstr "Passer le moniteur en mono"
 
 #: monitor_section.cc:747
-#, fuzzy
 msgid "Cut monitor"
-msgstr "Couper l'écoute"
+msgstr "Couper le monitoring"
 
 #: monitor_section.cc:750
-#, fuzzy
 msgid "Dim monitor"
-msgstr "Dim écoute"
+msgstr "Atténuer l'écoute"
 
 #: monitor_section.cc:753
-#, fuzzy
 msgid "Toggle exclusive solo mode"
-msgstr "Basculer mode Solo en exclusif"
+msgstr "Basculer mode Solo exclusif"
 
 #: monitor_section.cc:759
-#, fuzzy
 msgid "Toggle mute overrides solo mode"
-msgstr "Basculer le mode Solo remplace Muet"
+msgstr "(dés)Activer le mode muet prioritaire sur solo"
 
 #: monitor_section.cc:771
-#, fuzzy
+#, qt-format
 msgid "Cut monitor channel %1"
-msgstr "Canal d'écoute %1 muet"
+msgstr "Couper le canal de monitoring %1"
 
 #: monitor_section.cc:776
-#, fuzzy
+#, qt-format
 msgid "Dim monitor channel %1"
-msgstr "Dim écoute canal %1"
+msgstr "Atténuer le canal de monitoring %1"
 
 #: monitor_section.cc:781
-#, fuzzy
+#, qt-format
 msgid "Solo monitor channel %1"
-msgstr "Solo écoute canal %1"
+msgstr "Solo sur canal de monitoring %1"
 
 #: monitor_section.cc:786
-#, fuzzy
+#, qt-format
 msgid "Invert monitor channel %1"
-msgstr "Inverser la phase du canal %1"
+msgstr "Inverser la phase du canal de monitoring %1"
 
 #: monitor_section.cc:796
 #, fuzzy
@@ -8205,9 +8280,8 @@ msgid "Pre Fade Listen (PFL) solo"
 msgstr "Solo Pré Fader (PFL)"
 
 #: mono_panner.cc:109 stereo_panner.cc:119
-#, fuzzy
 msgid "bypassed"
-msgstr "Désactivé"
+msgstr "désactivé"
 
 #: mono_panner.cc:123
 #, c-format
@@ -8215,9 +8289,8 @@ msgid "L:%3d R:%3d"
 msgstr "G : %3d D : %3d"
 
 #: mono_panner_editor.cc:33
-#, fuzzy
 msgid "Mono Panner"
-msgstr "Pan. Mono"
+msgstr "Panoramique Mono"
 
 #: mono_panner_editor.cc:44 mono_panner_editor.cc:49
 #: stereo_panner_editor.cc:46 stereo_panner_editor.cc:51
@@ -8225,9 +8298,9 @@ msgid "%"
 msgstr "%"
 
 #: nag.cc:41
-#, fuzzy
+#, qt-format
 msgid "Support %1 Development"
-msgstr "Soutenir le développement d'%1"
+msgstr "Soutenir le développement de %1"
 
 #: nag.cc:42
 msgid "I'd like to make a one-time donation"
@@ -8323,14 +8396,12 @@ msgid "dbFS"
 msgstr "dBFS"
 
 #: normalize_dialog.cc:56
-#, fuzzy
 msgid "Normalize each region using its own peak value"
-msgstr "Normaliser chaque Région selon son propre pic de niveau"
+msgstr "Normaliser chaque Région selon son propre niveau de crête"
 
 #: normalize_dialog.cc:58
-#, fuzzy
 msgid "Normalize each region using the peak value of all regions"
-msgstr "Normaliser chaque Région selon le pic de niveau de toutes"
+msgstr "Normaliser chaque Région selon le niveau de crête global"
 
 #: normalize_dialog.cc:73
 msgid "Normalize"
@@ -8338,7 +8409,7 @@ msgstr "Normaliser"
 
 #: note_select_dialog.cc:33
 msgid "Select Note"
-msgstr ""
+msgstr "Sélectionner une note"
 
 #: opts.cc:57
 msgid "Usage: "
@@ -8370,7 +8441,6 @@ msgstr ""
 "clavier possibles\n"
 
 #: opts.cc:63
-#, fuzzy
 msgid ""
 "  -c, --name <name>           Use a specific backend client name, default is "
 "ardour\n"
@@ -8418,9 +8488,9 @@ msgstr ""
 "spécifiques\n"
 
 #: opts.cc:70
-#, fuzzy
 msgid "  -P, --no-connect-ports      Do not connect any ports at startup\n"
-msgstr "  -P, --no-connect-ports      Sans port connecté au démarrage\n"
+msgstr ""
+"  -P, --no-connect-ports      Ne pas connecter les ports au démarrage\n"
 
 #: opts.cc:71
 msgid "  -S, --sync                  Draw the gui synchronously \n"
@@ -8484,6 +8554,7 @@ msgid "Playlists grouped by track"
 msgstr "Listes de lecture groupées par piste"
 
 #: playlist_selector.cc:101
+#, qt-format
 msgid "Playlist for %1"
 msgstr "Liste de lecture pour %1"
 
@@ -8504,7 +8575,6 @@ msgid "dB scale"
 msgstr "Échelle en dB"
 
 #: plugin_eq_gui.cc:116
-#, fuzzy
 msgid "Show phase"
 msgstr "Afficher la phase"
 
@@ -8543,7 +8613,7 @@ msgstr "Gestionnaire de greffons"
 
 #: plugin_selector.cc:85
 msgid "Fav"
-msgstr ""
+msgstr "Fav"
 
 #: plugin_selector.cc:87
 msgid "Available Plugins"
@@ -8599,11 +8669,11 @@ msgstr "Insérer des greffons"
 
 #: plugin_selector.cc:337 plugin_selector.cc:338 plugin_selector.cc:339
 #: plugin_selector.cc:340
-#, fuzzy
 msgid "variable"
-msgstr "Variable"
+msgstr "variable"
 
 #: plugin_selector.cc:496
+#, qt-format
 msgid ""
 "The plugin \"%1\" could not be loaded\n"
 "\n"
@@ -8619,7 +8689,7 @@ msgstr "Favoris"
 
 #: plugin_selector.cc:646
 msgid "Plugin Manager..."
-msgstr "Gestionnaire de greffon…"
+msgstr "Gestionnaire de plugins ..."
 
 #: plugin_selector.cc:650
 msgid "By Creator"
@@ -8634,26 +8704,26 @@ msgid "Eh? LADSPA plugins don't have editors!"
 msgstr "Hein ? Les greffons LADSPA n'ont pas d'éditeur !"
 
 #: plugin_ui.cc:122 plugin_ui.cc:227
-#, fuzzy
+#, qt-format
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
 "version of %1)"
 msgstr ""
 "Type d'Éditeur de plugin inconnu (note: VST non supporté dans cette version "
-"d'%1)"
+"de %1)"
 
 #: plugin_ui.cc:125
 msgid "unknown type of editor-supplying plugin"
 msgstr "type inconnu pour le greffon fournissant un éditeur"
 
 #: plugin_ui.cc:257
-#, fuzzy
+#, qt-format
 msgid ""
 "unknown type of editor-supplying plugin (note: no linuxVST support in this "
 "version of %1)"
 msgstr ""
 "type d'Éditeur de plugin inconnu (note: LinuxVST non supporté dans cette "
-"version d'%1)"
+"version de %1)"
 
 #: plugin_ui.cc:329
 msgid "create_lv2_editor called on non-LV2 plugin"
@@ -8664,72 +8734,73 @@ msgid "Add"
 msgstr "Ajouter"
 
 #: plugin_ui.cc:422
-#, fuzzy
 msgid "Description"
 msgstr "Description"
 
 #: plugin_ui.cc:423
 msgid "Plugin analysis"
-msgstr "Analyse du greffon"
+msgstr "Analyse du plugin"
 
 #: plugin_ui.cc:430
-#, fuzzy
 msgid ""
 "Presets (if any) for this plugin\n"
 "(Both factory and user-created)"
 msgstr ""
-"Présets (éventuels) pour ce plugin\n"
+"Paramétrages (éventuels) pour ce plugin\n"
 "(d'usine et d'utilisateur)"
 
 #: plugin_ui.cc:431
 msgid "Save a new preset"
-msgstr "Sauvegarder nouveau préréglage"
+msgstr "Sauvegarder un nouveau paramétrage"
 
 #: plugin_ui.cc:432
 msgid "Save the current preset"
-msgstr "Sauvegarder le préréglage actuel"
+msgstr "Sauvegarder le paramétrage actuel"
 
 #: plugin_ui.cc:433
 msgid "Delete the current preset"
-msgstr "Effacer le préréglage actuel"
+msgstr "Supprimer le paramétrage actuel"
 
 #: plugin_ui.cc:434
-#, fuzzy
 msgid "Disable signal processing by the plugin"
 msgstr "Désactiver le traitement du signal par le plugin"
 
 #: plugin_ui.cc:467 plugin_ui.cc:663
+#, qt-format
 msgid ""
 "Click to allow the plugin to receive keyboard events that %1 would normally "
 "use as a shortcut"
 msgstr ""
-"Cliquez pour autoriser le greffon à recevoir des événements que %1 considère "
-"habituellement comme des raccourcis"
+"Cliquez pour autoriser le plugin à recevoir des événements clavier que %1 "
+"considère habituellement comme des raccourcis"
 
 #: plugin_ui.cc:468
 msgid "Click to enable/disable this plugin"
-msgstr "Cliquer pour activer/désactiver ce greffon"
+msgstr "Cliquer pour activer/désactiver ce plugin"
 
 #: plugin_ui.cc:507
+#, qt-format
 msgid "latency (%1 sample)"
 msgid_plural "latency (%1 samples)"
 msgstr[0] "latence (%1 sample)"
 msgstr[1] "latence (%1 samples)"
 
 #: plugin_ui.cc:509
+#, qt-format
 msgid "latency (%1 ms)"
 msgstr "latence (%1 ms)"
 
 #: plugin_ui.cc:520
 msgid "Edit Latency"
-msgstr "Editer la latence"
+msgstr "Modifier la latence"
 
 #: plugin_ui.cc:566
+#, qt-format
 msgid ""
 "Plugin presets are not supported in this build of %1. Consider paying for a "
 "full version"
 msgstr ""
-"Les préréglages de plugins ne sont pas pris en charge par cette version de "
+"Les paramétrages de plugins ne sont pas pris en charge par cette version de "
 "%1. Envisagez d'acheter une version complète."
 
 #: plugin_ui.cc:574
@@ -8737,16 +8808,21 @@ msgid ""
 "Plugin presets are not supported in this build, see the Log window for more "
 "information."
 msgstr ""
+"Les paramétrages de plugins ne sont pas pris en charge par cette version, "
+"consultez la fenêtre Journal pour plus d'informations."
 
 #: plugin_ui.cc:670
+#, qt-format
 msgid "Click to allow normal use of %1 keyboard shortcuts"
 msgstr "Cliquer pour utiliser normalement les raccourcis claviers de %1"
 
 #: port_group.cc:337
+#, qt-format
 msgid "%1 Busses"
 msgstr "Bus %1"
 
 #: port_group.cc:338
+#, qt-format
 msgid "%1 Tracks"
 msgstr "Pistes %1"
 
@@ -8755,6 +8831,7 @@ msgid "Hardware"
 msgstr "Matériel"
 
 #: port_group.cc:340
+#, qt-format
 msgid "%1 Misc"
 msgstr "Divers %1"
 
@@ -8832,9 +8909,8 @@ msgid "No signal detected"
 msgstr "Aucun signal détecté"
 
 #: port_insert_ui.cc:165
-#, fuzzy
 msgid "Port Insert "
-msgstr "Insertion du port "
+msgstr "Insertion de port "
 
 #: port_matrix.cc:331 port_matrix.cc:357
 msgid "<b>Sources</b>"
@@ -8868,14 +8944,12 @@ msgid "Rescan"
 msgstr "Rafraîchir"
 
 #: port_matrix.cc:529
-#, fuzzy
 msgid "Show individual ports"
 msgstr "Afficher les ports individuels"
 
 #: port_matrix.cc:535
-#, fuzzy
 msgid "Flip"
-msgstr "Bascule"
+msgstr "Inverser"
 
 #: port_matrix.cc:722
 #, fuzzy
@@ -8887,23 +8961,21 @@ msgstr ""
 "pas compatible avec la nouvelle configuration."
 
 #: port_matrix.cc:725
-#, fuzzy
 msgid "Cannot add port"
-msgstr "Ajout de port impossible"
+msgstr "Impossible d'ajouter un port"
 
 #: port_matrix.cc:747
 msgid "Port removal not allowed"
 msgstr "Suppression de port non permise"
 
 #: port_matrix.cc:748
-#, fuzzy
 msgid ""
 "This port cannot be removed.\n"
 "Either the first plugin in the track or buss cannot accept\n"
 "the new number of inputs or the last plugin has more outputs."
 msgstr ""
 "Retirer ce port est impossible.\n"
-"Soit le premier plugin de la Piste (Bus) ne peut gérer le \n"
+"Soit le premier plugin de la piste ou bus ne peut gérer le \n"
 "nouveau nombre d'entrées, soit le dernier à plus de sorties."
 
 #: port_matrix.cc:965
@@ -8925,11 +8997,11 @@ msgid "There are no ports to connect."
 msgstr "Il n'y a aucun port à connecter."
 
 #: port_matrix_body.cc:84
+#, qt-format
 msgid "There are no %1 ports to connect."
 msgstr "Il n'y a aucun port %1 à connecter."
 
 #: processor_box.cc:150
-#, fuzzy
 msgid "Send"
 msgstr "Départ"
 
@@ -8939,7 +9011,7 @@ msgid "Return"
 msgstr "Retour"
 
 #: processor_box.cc:310
-#, fuzzy
+#, qt-format
 msgid ""
 "\n"
 "This mono plugin has been replicated %1 times."
@@ -8948,29 +9020,29 @@ msgstr ""
 "Ce plugin mono a été dupliqué %1 fois."
 
 #: processor_box.cc:314
-#, fuzzy
+#, qt-format
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
 "Alt+double-click to show generic GUI.%2"
 msgstr ""
 "<b>%1</b>\n"
-"Double-clic pour afficher l'interface.\n"
+"Double-cliquez pour afficher l'interface.\n"
 "Alt+Double-clic pour afficher l'interface générique. %2"
 
 #: processor_box.cc:317
-#, fuzzy
+#, qt-format
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
 msgstr ""
 "<b>%1</b>\n"
-"Double-clic pour afficher l'interface générique. %2"
+"Double-cliquez pour afficher l'interface générique. %2"
 
 #: processor_box.cc:361
 #, c-format
 msgid "(%1x1) "
-msgstr ""
+msgstr "(%1x1) "
 
 #: processor_box.cc:437
 msgid "Show All Controls"
@@ -8981,9 +9053,8 @@ msgid "Hide All Controls"
 msgstr "Cacher tous les contrôles"
 
 #: processor_box.cc:475
-#, fuzzy
 msgid "Link panner controls"
-msgstr "Lier les contrôles de pan."
+msgstr "Lier les contrôles de panoramique"
 
 #: processor_box.cc:575
 msgid "on"
@@ -8991,7 +9062,7 @@ msgstr "allumé"
 
 #: processor_box.cc:575 rc_option_editor.cc:2360 rc_option_editor.cc:2374
 msgid "off"
-msgstr "sans"
+msgstr "éteint"
 
 #: processor_box.cc:957
 msgid ""
@@ -8999,15 +9070,16 @@ msgid ""
 "plugins,inserts,sends and more"
 msgstr ""
 "Clic-droit pour ajouter/enlever/modifier\n"
-"greffons/départs/insertions etc."
+"plugins/départs/insertions etc..."
 
 #: processor_box.cc:1429 processor_box.cc:1804
 msgid "Plugin Incompatibility"
-msgstr "Incompatibilité du greffon"
+msgstr "Incompatibilité du plugin"
 
 #: processor_box.cc:1432
+#, qt-format
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
-msgstr "Vous avez essayé d'ajouter le greffon « %1 » dans l'emplacement %2.\n"
+msgstr "Vous avez essayé d'ajouter le plugin « %1 » dans l'emplacement %2.\n"
 
 #: processor_box.cc:1438
 msgid ""
@@ -9015,15 +9087,17 @@ msgid ""
 "This plugin has:\n"
 msgstr ""
 "\n"
-"Ce greffon possède :\n"
+"Ce plugin possède :\n"
 
 #: processor_box.cc:1441
+#, qt-format
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 entrée MIDI\n"
 msgstr[1] "\t%1 entrées MIDI\n"
 
 #: processor_box.cc:1445
+#, qt-format
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 entrée audio\n"
@@ -9038,18 +9112,21 @@ msgstr ""
 "mais au point d'insertion, il y a :\n"
 
 #: processor_box.cc:1451
+#, qt-format
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 canal MIDI\n"
 msgstr[1] "\t%1 canaux MIDI\n"
 
 #: processor_box.cc:1455
+#, qt-format
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 canal audio\n"
 msgstr[1] "\t%1 canaux audio\n"
 
 #: processor_box.cc:1458
+#, qt-format
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -9058,6 +9135,7 @@ msgstr ""
 "%1 est incapable d'insérer ce greffon ici.\n"
 
 #: processor_box.cc:1495
+#, qt-format
 msgid "Cannot set up new send: %1"
 msgstr "Impossible de configurer le nouveau départ : %1"
 
@@ -9076,6 +9154,7 @@ msgid "Rename Processor"
 msgstr "Renommer le traitement"
 
 #: processor_box.cc:2022
+#, qt-format
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr "Au moins 100 objets E/S avec un nom comme %1 - nom inchangé"
 
@@ -9095,6 +9174,7 @@ msgstr ""
 "ne correspond pas à la configuration de cette Piste."
 
 #: processor_box.cc:2216
+#, qt-format
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -9111,6 +9191,7 @@ msgid "Remove processors"
 msgstr "Enlever les traitements"
 
 #: processor_box.cc:2237
+#, qt-format
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -9119,7 +9200,7 @@ msgstr ""
 "(ceci ne pourra pas être annulé)"
 
 #: processor_box.cc:2240
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -9177,20 +9258,20 @@ msgid "Edit with generic controls..."
 msgstr "Editer avec l'interface générique..."
 
 #: processor_box.cc:2789
+#, qt-format
 msgid "%1: %2 (by %3)"
 msgstr "%1 : %2 (par %3)"
 
 #: processor_box.cc:2791
+#, qt-format
 msgid "%1 (by %2)"
 msgstr "%1 (par %2)"
 
 #: patch_change_dialog.cc:50
-#, fuzzy
 msgid "Patch Change"
 msgstr "Changer le patch"
 
 #: patch_change_dialog.cc:76
-#, fuzzy
 msgid "Patch Bank"
 msgstr "Banque du patch"
 
@@ -9287,7 +9368,7 @@ msgstr "Insérer une note avec :"
 
 #: rc_option_editor.cc:405
 msgid "Ignore snap using:"
-msgstr "Ignorer l'alignement avec :"
+msgstr "Ignorer l'aimantation avec :"
 
 #: rc_option_editor.cc:421
 msgid "Keyboard layout:"
@@ -9305,10 +9386,12 @@ msgstr "Par défaut"
 #: rc_option_editor.cc:573
 msgid "Major font-scale changes require an application restart to re-layout."
 msgstr ""
+"Des modifications importantes de la taille de police nécessitent un "
+"redémarrage de l'application pour réorganiser l'affichage."
 
 #: rc_option_editor.cc:614
 msgid "Waveform Clip Level (dBFS):"
-msgstr ""
+msgstr "Niveau d'écrêtage des formes d'ondes (dBFS) :"
 
 #: rc_option_editor.cc:666
 msgid "Playback (seconds of buffering):"
@@ -9328,9 +9411,8 @@ msgid "Double-click on a name to edit settings for an enabled protocol"
 msgstr "Double cliquer sur un nom pour configurer un protocole activé"
 
 #: rc_option_editor.cc:903
-#, fuzzy
 msgid "Show Video Export Info before export"
-msgstr "Afficher les Infos d'Export Vidéo avant l'Export"
+msgstr "Afficher les Infos d'Export Vidéo avant l'export"
 
 #: rc_option_editor.cc:904
 #, fuzzy
@@ -9343,14 +9425,13 @@ msgid "Advanced Setup (remote video server)"
 msgstr "Options Avancées (serveur vidéo distant)"
 
 #: rc_option_editor.cc:913
-#, fuzzy
 msgid ""
 "<b>When enabled</b> you can speficify a custom video-server URL and docroot. "
 "- Do not enable this option unless you know what you are doing."
 msgstr ""
 "<b>Si actif</b> vous pouvez spécifier l'URL du serveur vidéo et le "
-"répertoire racine. Activez cette option seulement si vous savez ce que vous "
-"faites !"
+"répertoire racine. - Activez cette option seulement si vous savez ce que "
+"vous faites !"
 
 #: rc_option_editor.cc:915
 #, fuzzy
@@ -9374,7 +9455,6 @@ msgid "Video Folder:"
 msgstr "Répertoire Vidéo :"
 
 #: rc_option_editor.cc:927
-#, fuzzy
 msgid ""
 "Local path to the video-server document-root. Only files below this "
 "directory will be accessible by the video-server. If the server run on a "
@@ -9383,40 +9463,40 @@ msgid ""
 "monitor and file-browsing when opening/adding a video file."
 msgstr ""
 "Chemin local vers le répertoire-racine du serveur vidéo. Seuls les fichiers "
-"de ce répertoire seront accessibles au serveur vidéo. Si le serveur tourne "
-"sur une machine distante, le chemin doit viser un répertoire réseau inclus "
-"dans le répertoire-racine et monté. Ne pas renseigner le chemin si il est "
-"indisponible. Ce chemin est utilisé pour le Monitoring vidéo local, et "
+"contenus dans ce répertoire seront accessibles au serveur vidéo. Si le "
+"serveur tourne sur une machine distante, le chemin doit viser un répertoire "
+"réseau inclus dans le répertoire-racine et monté ou laissé vide s'il est "
+"indisponible. Ce chemin est utilisé pour le monitoring vidéo local, et "
 "l'exploration lors de l'ouverture/ajout de fichiers vidéo."
 
 #: rc_option_editor.cc:934
-#, fuzzy
 msgid ""
 "<b>When enabled</b> an information window with details is displayed before "
 "the video-export dialog."
 msgstr ""
-"<b>Si actif</b> les détails de l'export vidéo seront affichés avant la boite "
-"de dialogue de l'export."
+"<b>Si actif</b> une fenêtre d'informations détaillées sera affichée avant la "
+"boite de dialogue de l'export vidéo."
 
 #: rc_option_editor.cc:939
-#, fuzzy
 msgid ""
 "<b>When enabled</b> the video server is never launched automatically without "
 "confirmation"
 msgstr ""
-"<b>Si actif</b> le serveur vidéo sera toujours lancé APRES confirmation."
+"<b>Si actif</b> le serveur vidéo ne sera pas lancé automatiquement sans "
+"confirmation"
 
 #: rc_option_editor.cc:1022
 msgid "Always Display Plugin Scan Progress"
-msgstr ""
+msgstr "Toujours afficher la progression de la recherche de plugins"
 
 #: rc_option_editor.cc:1023
 msgid "Scan for [new] VST Plugins on Application Start"
-msgstr ""
+msgstr "Rechercher les nouveaux plugins VST au démarrage de l'application"
 
 #: rc_option_editor.cc:1024
 msgid "Scan for AudioUnit Plugins on Application Start"
 msgstr ""
+"Rechercher les nouveaux plugins AudioUnit au démarrage de l'application"
 
 #: rc_option_editor.cc:1035
 #, fuzzy
@@ -9425,13 +9505,15 @@ msgstr "Général"
 
 #: rc_option_editor.cc:1041
 msgid "Scan for Plugins"
-msgstr "Rechercher des greffons"
+msgstr "Rechercher des plugins"
 
 #: rc_option_editor.cc:1048
 msgid ""
 "<b>When enabled</b> a popup window showing plugin scan progress is displayed "
 "for indexing (cache load) and discovery (detect new plugins)"
 msgstr ""
+"<b>Si actif</b>, une fenêtre pop-up montre la progression de la recherche de "
+"nouveaux plugins et de leur indexation."
 
 #: rc_option_editor.cc:1055
 msgid ""
@@ -9439,25 +9521,25 @@ msgid ""
 "Plugins that require more time to load will be blacklisted. A value of 0 "
 "disables the timeout."
 msgstr ""
+"Indique le temps maximum d'instanciation d'un plugin en dixièmes de "
+"secondes. Les plugins nécessitant plus de temps pour se charger seront mis "
+"en liste noire. La valeur 0 désactive cette limite."
 
 #: rc_option_editor.cc:1057
 msgid "Scan Time Out [deciseconds]"
-msgstr ""
+msgstr "Temps d'indexation maximum (décisecondes)"
 
 #: rc_option_editor.cc:1065
-#, fuzzy
 msgid "VST"
-msgstr ""
-"Type d'Éditeur de plugin inconnu (note: VST non supporté dans cette version "
-"d'%1)"
+msgstr "VST"
 
 #: rc_option_editor.cc:1071
 msgid "Clear VST Cache"
-msgstr ""
+msgstr "Effacer le tampon VST"
 
 #: rc_option_editor.cc:1075
 msgid "Clear VST Blacklist"
-msgstr ""
+msgstr "Effacer la liste noire VST"
 
 #: rc_option_editor.cc:1083
 msgid ""
@@ -9465,18 +9547,21 @@ msgid ""
 "cache index on application start. When disabled new plugins will only be "
 "available after triggering a 'Scan' manually"
 msgstr ""
+"<b>Si actif</b> les nouveaux plugins VST sont recherchés, testés et ajoutés "
+"à la liste au démarrage de l'application. Si inactif, les nouveaux plugins "
+"ne seront disponibles qu'après un déclenchement manuel de recherche"
 
 #: rc_option_editor.cc:1086
 msgid "Linux VST Path:"
-msgstr ""
+msgstr "Dossier Linux VST :"
 
 #: rc_option_editor.cc:1093
 msgid "Windows VST Path:"
-msgstr ""
+msgstr "Dossier Windows VST :"
 
 #: rc_option_editor.cc:1102
 msgid "Audio Unit"
-msgstr ""
+msgstr "Audio Unit"
 
 #: rc_option_editor.cc:1111
 msgid ""
@@ -9485,30 +9570,36 @@ msgid ""
 "manually. The first successful scan will enable AU auto-scan, Any crash "
 "during plugin discovery will disable it."
 msgstr ""
+"<b>Si actif</b> les nouveaux plugins AudioUnit sont recherchés au démarrage "
+"de l'application. Si inactif, les nouveaux plugins ne seront disponibles "
+"qu'après un déclenchement manuel de recherche. La première recherche réussie "
+"active le scan automatique des AU, tandis qu'un crash pendant la recherche "
+"le désactive."
 
 #: rc_option_editor.cc:1114
 msgid "Clear AU Cache"
-msgstr ""
+msgstr "Effacer le cache AU"
 
 #: rc_option_editor.cc:1118
 msgid "Clear AU Blacklist"
-msgstr ""
+msgstr "Effacer la liste noire AU"
 
 #: rc_option_editor.cc:1201
 msgid "Set Windows VST Search Path"
-msgstr ""
+msgstr "Indique le dossier de recherche des VST Windows"
 
 #: rc_option_editor.cc:1216
 msgid "Set Linux VST Search Path"
-msgstr ""
+msgstr "Indique le dossier de recherche des VST Linus"
 
 #: rc_option_editor.cc:1297
+#, qt-format
 msgid "%1 Preferences"
 msgstr "Préférences de %1"
 
 #: rc_option_editor.cc:1309
 msgid "DSP CPU Utilization"
-msgstr "Utilisation du Processeur/Traitements"
+msgstr "Utilisation du processeur de traitement"
 
 #: rc_option_editor.cc:1313
 msgid "Signal processing uses"
@@ -9523,10 +9614,12 @@ msgid "all available processors"
 msgstr "tous les processeurs disponibles"
 
 #: rc_option_editor.cc:1322
+#, qt-format
 msgid "%1 processors"
 msgstr "%1 processeurs"
 
 #: rc_option_editor.cc:1325
+#, qt-format
 msgid "This setting will only take effect when %1 is restarted."
 msgstr "Cette option ne sera prise en compte qu'après un redémarrage de %1."
 
@@ -9582,7 +9675,7 @@ msgstr "Rester en enregistrement à l'arrêt"
 
 #: rc_option_editor.cc:1423
 msgid "Play loop is a transport mode"
-msgstr ""
+msgstr "Le bouton Boucle est un mode de lecture"
 
 #: rc_option_editor.cc:1428
 msgid ""
@@ -9592,6 +9685,11 @@ msgid ""
 "<b>When disabled</b> the loop button starts playing the loop, but stop then "
 "cancels loop playback"
 msgstr ""
+"<b>Si actif</b>, le bouton Boucle ne démarre pas la lecture mais force la "
+"lecture à se limiter à la boucle\n"
+"\n"
+"<b>Si inactif</b>, le bouton Boucle lance la lecture de la boucle, et Stop "
+"annule la lecture en boucle"
 
 #: rc_option_editor.cc:1434
 #, fuzzy
@@ -9599,12 +9697,12 @@ msgid "Stop recording when an xrun occurs"
 msgstr "Stopper l'enregistrement si un xrun survient"
 
 #: rc_option_editor.cc:1439
-#, fuzzy
+#, qt-format
 msgid ""
 "<b>When enabled</b> %1 will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
-"<b>Si actif</b> %1 stoppera l'enregistrement si le moteur Audio détecte un "
+"<b>Si actif</b> %1 stoppera l'enregistrement si le moteur audio détecte un "
 "problème de débit (xrun)"
 
 #: rc_option_editor.cc:1445
@@ -9616,7 +9714,7 @@ msgid "Stop at the end of the session"
 msgstr "Arrêter à la fin de la session"
 
 #: rc_option_editor.cc:1459
-#, fuzzy
+#, qt-format
 msgid ""
 "<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the "
 "transport when it reaches the current session end marker\n"
@@ -9624,19 +9722,18 @@ msgid ""
 "<b>When disabled</b> %1 will continue to roll past the session end marker at "
 "all times"
 msgstr ""
-"<b>Si actif</b> quand %1 <b>n'enregistre pas</b>, le Transport est stoppé au "
+"<b>Si actif</b> quand %1 <b>n'enregistre pas</b>, la lecture s'arrête au "
 "repère de fin de session\n"
 "\n"
-"<b>Si inactif</b> %1 ne stoppera jamais le Transport au repère de fin de "
-"session"
+"<b>Si inactif</b> %1 continuera toujours la lecture au delà du repère de fin "
+"de session"
 
 #: rc_option_editor.cc:1467
-#, fuzzy
 msgid "Do seamless looping (not possible when slaved to MTC, LTC etc)"
-msgstr "Boucle sans transition audible (impossible si esclave MTC, LTC, etc)"
+msgstr "Boucle sans clic (impossible en mode esclave MTC, LTC, etc)"
 
 #: rc_option_editor.cc:1472
-#, fuzzy
+#, qt-format
 msgid ""
 "<b>When enabled</b> this will loop by reading ahead and wrapping around at "
 "the loop point, preventing any need to do a transport locate at the end of "
@@ -9645,38 +9742,37 @@ msgid ""
 "<b>When disabled</b> looping is done by locating back to the start of the "
 "loop when %1 reaches the end which will often cause a small click or delay"
 msgstr ""
-"<b>Si actif</b> la lecture en boucle sera lancée entre les points de boucle, "
-"sans qu'il soit nécessaire de relocaliser le Transport à la fin de la "
-"boucle.\n"
+"<b>Si actif</b> la lecture en boucle sera anticipée et englobera le point de "
+"bouclage, sans qu'il soit nécessaire de relocaliser le transport à la fin de "
+"la boucle.\n"
 "\n"
-"<b>Si inactif</b> la boucle est réalisée en se repositionnant au début quand "
-"%1 atteint la fin, ce qui peut souvent causer un léger clic ou délai."
+"<b>Si inactif</b> la boucle est réalisée en se repositionnant au début de la "
+"boucle quand %1 atteint la fin, ce qui peut souvent causer un léger clic ou "
+"délai."
 
 #: rc_option_editor.cc:1480
 msgid "Disable per-track record disarm while rolling"
 msgstr "Désactiver le désarmement des piste pendant l'enregistrement"
 
 #: rc_option_editor.cc:1484
-#, fuzzy
 msgid ""
 "<b>When enabled</b> this will prevent you from accidentally stopping "
 "specific tracks recording during a take"
 msgstr ""
 "<b>Si activé<b> évitera de stopper accidentellement l'enregistrement de "
-"Pistes spécifiques pendant une prise"
+"pistes spécifiques pendant une prise"
 
 #: rc_option_editor.cc:1489
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr "-12 dB de gain pendant le déplacement rapide avant/arrière"
 
 #: rc_option_editor.cc:1493
-#, fuzzy
 msgid ""
 "This will reduce the unpleasant increase in perceived volume that occurs "
 "when fast-forwarding or rewinding through some kinds of audio"
 msgstr ""
-"Ceci va réduire la désagréable augmentation du volume perçu lors du "
-"déplacement rapide avant/arrière dans certains types d'Audio"
+"Réduit la l'augmentation désagréable du volume perçu lors du déplacement "
+"rapide avant/arrière dans certains types d'audio"
 
 #: rc_option_editor.cc:1497
 msgid "Sync/Slave"
@@ -9684,15 +9780,14 @@ msgstr "Synchronisé/Esclave"
 
 #: rc_option_editor.cc:1501
 msgid "External timecode source"
-msgstr "Source de « timecode » externe"
+msgstr "Source de timecode externe"
 
 #: rc_option_editor.cc:1510
-#, fuzzy
 msgid "Match session video frame rate to external timecode"
-msgstr "Synchroniser le taux d'images/sec. de la session au timecode externe"
+msgstr "Synchroniser le taux d'images/sec de la session au timecode externe"
 
 #: rc_option_editor.cc:1516
-#, fuzzy
+#, qt-format
 msgid ""
 "This option controls the value of the video frame rate <i>while chasing</i> "
 "an external timecode source.\n"
@@ -9705,11 +9800,11 @@ msgid ""
 "indication in the main clock will flash red and %1 will convert between the "
 "external timecode standard and the session standard."
 msgstr ""
-"Cette option controle le taux d'images/secondes <i>quand on suit</i> une "
-"source externe de Timecode.\n"
+"Cette option contrôle le taux de trames par seconde <i>quand on suit</i> une "
+"source externe de timecode.\n"
 "\n"
-"<b>Si actif</b> le taux d'images/secondes de la session sera aligné sur "
-"celui de la source externe de Timecode.\n"
+"<b>Si actif</b> le taux de trames par seconde de la session sera aligné sur "
+"celui de la source externe de timecode.\n"
 "\n"
 "<b>Si inactif</b> le taux d'images/secondes de la session ne sera pas aligné "
 "sur celui de la source externe de Timecode choisie. Dans l'horloge "
@@ -9718,9 +9813,10 @@ msgstr ""
 
 #: rc_option_editor.cc:1526
 msgid "Sync lock timecode to clock - Disable drift compensation."
-msgstr ""
+msgstr "Verrouiller "
 
 #: rc_option_editor.cc:1532
+#, qt-format
 msgid ""
 "<b>When enabled</b> %1 will never varispeed when slaved to external "
 "timecode. Sync Lock indicates that the selected external timecode source "
@@ -9731,14 +9827,21 @@ msgid ""
 "<b>When disabled</b> %1 will compensate for potential drift, regardless if "
 "the timecode sources shares clock sync."
 msgstr ""
+"<b>Si activé</b> %1 ne fera pas varier la vitesse de lecture lorsqu'en mode "
+"esclave vis à vis d'un timecode externe. Le verrouillage de synchro indique "
+"que la source externe de timecode sélectionnée partage sa synchronisation "
+"(Black &amp; Burst, Wordclock, etc) avec l'interface audio. Cette option "
+"désactive la compensation de dérive. La vitesse de lecture est fixée à 1.0. "
+"Le varispeed LTC sera ignoré et causera une dérive.\n"
+"\n"
+"<b>Si désactivé</b> %1 compensera une dérive potentielle, quel que soit le "
+"partage de synchro de la source de timeclock."
 
 #: rc_option_editor.cc:1547
-#, fuzzy
 msgid "Lock to 29.9700 fps instead of 30000/1001"
-msgstr "Bloquer à 29.9700 img/sec plutot que 30000/1001"
+msgstr "Bloquer à 29.9700 i/s au lieu de 30000/1001"
 
 #: rc_option_editor.cc:1553
-#, fuzzy
 msgid ""
 "<b>When enabled</b> the external timecode source is assumed to use 29.97 fps "
 "instead of 30000/1001.\n"
@@ -9750,15 +9853,15 @@ msgid ""
 "vendors use that rate - despite it being against the specs - because the "
 "variant of using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
-"<b>Si actif</b> la source de Timecode externe est supposée débiter 29.97 img/"
-"sec plutot que 30000/1001.\n"
-"Le code SMPTE 12M-1999 spécifie 29.97 DF comme 30000/1001. Les "
-"spécifications complémentaires mentionnent que le code à 29.97 DF cumule une "
-"erreur inférieure à 86 msec pour 24 heures.\n"
-"Le Timecode Drop-Frame va compenser exactement pour du NTSC au débit de 30 * "
-"0.999 (donc 29.97). Cela n'est pas le taux avéré, néammoins certains "
+"<b>Si actif</b> la source de timecode externe est supposée débiter 29.97 img/"
+"sec plutôt que 30000/1001.\n"
+"Le code SMPTE 12M-1999 spécifie 29.97df comme 30000/1001. Les spécifications "
+"complémentaires mentionnent que le code à 29.97df cumule une erreur "
+"inférieure à 86 ms pour 24 heures.\n"
+"Le timecode Drop-Frame va compenser exactement pour du NTSC au débit de 30 * "
+"0.999 (donc 29.97). Cela n'est pas le taux réel, néanmoins certains "
 "constructeurs l'utilisent -malgré son opposition aux spécifications- car "
-"utiliser 29.97 img/sec n'induit aucun décalage de Timecode.\n"
+"utiliser 29.97 img/sec n'induit aucun décalage de timecode.\n"
 
 #: rc_option_editor.cc:1563
 #, fuzzy
@@ -9776,7 +9879,6 @@ msgid "LTC Generator"
 msgstr "Générateur LTC"
 
 #: rc_option_editor.cc:1587
-#, fuzzy
 msgid "Enable LTC generator"
 msgstr "Activer le générateur LTC"
 
@@ -9786,6 +9888,7 @@ msgid "Send LTC while stopped"
 msgstr "Envoyer LTC à l'arrêt"
 
 #: rc_option_editor.cc:1600
+#, qt-format
 msgid ""
 "<b>When enabled</b> %1 will continue to send LTC information even when the "
 "transport (playhead) is not moving"
@@ -9809,7 +9912,7 @@ msgstr ""
 
 #: rc_option_editor.cc:1622
 msgid "Allow dragging of playhead"
-msgstr ""
+msgstr "Autoriser l'entraînement de la tête de lecture"
 
 #: rc_option_editor.cc:1630
 msgid "Move relevant automation when audio regions are moved"
@@ -9821,9 +9924,8 @@ msgid "Show meters on tracks in the editor"
 msgstr "Bargraphe de la Piste affiché dans l'Éditeur"
 
 #: rc_option_editor.cc:1646
-#, fuzzy
 msgid "Display master-meter in the toolbar"
-msgstr "Bargraphe du Master affiché dans la barre d'outils"
+msgstr "Vu-mètre master affiché dans la barre d'outils"
 
 #: rc_option_editor.cc:1653
 #, fuzzy
@@ -9843,18 +9945,16 @@ msgid "only if they have identical length, position and origin"
 msgstr "seulement si durée, position et origine sont identiques"
 
 #: rc_option_editor.cc:1684
-#, fuzzy
 msgid "Make rubberband selection rectangle snap to the grid"
-msgstr "Le rectangle de sélection élastique \"colle\" à la grille"
+msgstr "Aimanter la sélection élastique à la grille"
 
 #: rc_option_editor.cc:1692
 msgid "Show waveforms in regions"
 msgstr "Afficher l'enveloppe sonore dans les régions"
 
 #: rc_option_editor.cc:1700
-#, fuzzy
 msgid "Show gain envelopes in audio regions"
-msgstr "Afficher les enveloppes de gain des Régions Audio "
+msgstr "Afficher les enveloppes de gain dans les régions audio "
 
 #: rc_option_editor.cc:1701
 msgid "in all modes"
@@ -9929,20 +10029,19 @@ msgstr ""
 
 #: rc_option_editor.cc:1786
 msgid "After splitting selected regions, select"
-msgstr ""
+msgstr "Après la découpe de régions sélectionnées, sélectionner"
 
 #: rc_option_editor.cc:1791
-#, fuzzy
 msgid "no regions"
-msgstr "Régions"
+msgstr "aucune région"
 
 #: rc_option_editor.cc:1794
 msgid "newly-created regions"
-msgstr ""
+msgstr "les régions nouvellement créées"
 
 #: rc_option_editor.cc:1798
 msgid "existing selection and newly-created regions"
-msgstr ""
+msgstr "la sélection en cours et les régions nouvellement créées"
 
 #: rc_option_editor.cc:1805
 msgid "Buffering"
@@ -9959,7 +10058,7 @@ msgstr "via le pilote Audio"
 
 #: rc_option_editor.cc:1825
 msgid "audio hardware"
-msgstr "le matériel audio"
+msgstr "matériel audio"
 
 #: rc_option_editor.cc:1832
 msgid "Tape machine mode"
@@ -10057,9 +10156,8 @@ msgid "Solo / mute"
 msgstr "Solo / muet"
 
 #: rc_option_editor.cc:1964
-#, fuzzy
 msgid "Solo-in-place mute cut (dB)"
-msgstr "Diminution (en dB) des Pistes NON solo-en-place "
+msgstr "Atténuation des Pistes du solo-en-place (dB)"
 
 #: rc_option_editor.cc:1971
 #, fuzzy
@@ -10151,7 +10249,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2087
 msgid "MIDI read-ahead time (seconds)"
-msgstr ""
+msgstr "Temps d'avance sur lecture du MIDI (secondes)"
 
 #: rc_option_editor.cc:2105
 msgid "Send MIDI Time Code"
@@ -10218,7 +10316,7 @@ msgid "User interaction"
 msgstr "Interaction utilisateur"
 
 #: rc_option_editor.cc:2232
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "Use translations of %1 messages\n"
 "   <i>(requires a restart of %1 to take effect)</i>\n"
@@ -10252,11 +10350,8 @@ msgstr "Interface graphique"
 
 # widget is not translated else than "gadget" in french. have choosen the french word for "tool"
 #: rc_option_editor.cc:2272
-#, fuzzy
 msgid "Graphically indicate mouse pointer hovering over various widgets"
-msgstr ""
-"Changer l'aspect du pointeur lors du survol des différents outils par la "
-"souris"
+msgstr "Changer l'aspect du pointeur lors du survol des différents outils"
 
 #: rc_option_editor.cc:2281
 msgid "Show tooltips if mouse hovers over a control"
@@ -10265,18 +10360,24 @@ msgstr "Afficher des infobulles quand la souris survole une contrôle"
 #: rc_option_editor.cc:2290
 msgid "Use name highlight bars in region displays (requires a restart)"
 msgstr ""
+"Afficher des barres de noms dans l'affichage des régions (nécessite un "
+"redémarrage)"
 
 #: rc_option_editor.cc:2303
 msgid "update transport clock display at FPS instead of every 100ms"
 msgstr ""
+"met à jour l'affichage de l'horloge de lecture au taux de rafraîchissement "
+"de l'écran au lieu de toutes les 100ms"
 
 #: rc_option_editor.cc:2312
 msgid "Lock timeout (seconds)"
-msgstr ""
+msgstr "Délai de temporisation du verrouillage (secondes)"
 
 #: rc_option_editor.cc:2320
 msgid "Lock GUI after this many idle seconds (zero to never lock)"
 msgstr ""
+"Verrouille l'interface graphique après ce nombre de secondes (zéro pour ne "
+"jamais vérouiller)"
 
 #: rc_option_editor.cc:2336
 #, fuzzy
@@ -10363,28 +10464,28 @@ msgstr "Niveau ligne, 0 dBu "
 
 #: rc_option_editor.cc:2393 rc_option_editor.cc:2409
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
-msgstr ""
+msgstr "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
 
 #: rc_option_editor.cc:2394 rc_option_editor.cc:2410
 msgid "-20dBFS (SMPTE RP.0155)"
-msgstr ""
+msgstr "-20dBFS (SMPTE RP.0155)"
 
 #: rc_option_editor.cc:2395 rc_option_editor.cc:2411
 msgid "-18dBFS (EBU, BBC)"
-msgstr ""
+msgstr "-18dBFS (EBU, BBC)"
 
 #: rc_option_editor.cc:2396 rc_option_editor.cc:2412
 msgid "-15dBFS (DIN)"
-msgstr ""
+msgstr "-15dBFS (DIN)"
 
 #: rc_option_editor.cc:2398
-#, fuzzy
 msgid ""
 "Configure meter-marks and color-knee point for dBFS scale DPM, set reference "
 "level for IEC1/Nordic, IEC2 PPM and VU meter."
 msgstr ""
-"Configurer les bargraphes : zones de changement de couleur (échelle dB FS) "
-"et niveaux de réference des différents types de modulomètre."
+"Configurer les échelle et zones de changement de couleur pour le modulomètre "
+"dBFS, et le niveau de référence pour les modulomètres IEC1/Nordic, IEC2 PPM "
+"et VU-mètre."
 
 #: rc_option_editor.cc:2404
 #, fuzzy
@@ -10403,21 +10504,19 @@ msgstr "VU-Mètre standard "
 
 #: rc_option_editor.cc:2425
 msgid "0VU = -2dBu (France)"
-msgstr ""
+msgstr "0VU = -2dBu (France)"
 
 #: rc_option_editor.cc:2426
-#, fuzzy
 msgid "0VU = 0dBu (North America, Australia)"
-msgstr "0VU = 0dBu (Amerique du Nord, Australie)"
+msgstr "0VU = 0dBu (Amérique du Nord, Australie)"
 
 #: rc_option_editor.cc:2427
-#, fuzzy
 msgid "0VU = +4dBu (standard)"
-msgstr "0VU = 0dBu (Amerique du Nord, Australie)"
+msgstr "0VU = +4dBu (standard)"
 
 #: rc_option_editor.cc:2428
 msgid "0VU = +8dBu"
-msgstr ""
+msgstr "0VU = +8dBu"
 
 #: rc_option_editor.cc:2434
 #, fuzzy
@@ -10434,9 +10533,8 @@ msgstr ""
 "de pic clignote en rouge."
 
 #: rc_option_editor.cc:2449
-#, fuzzy
 msgid "LED meter style"
-msgstr "Affichage en mode LED"
+msgstr "Style d'afficheur LED"
 
 #: rc_option_editor.cc:2457
 #, fuzzy
@@ -10483,6 +10581,7 @@ msgid "Source:"
 msgstr "Source :"
 
 #: region_editor.cc:166
+#, qt-format
 msgid "Region '%1'"
 msgstr "Région '%1'"
 
@@ -10518,16 +10617,14 @@ msgid "Track:"
 msgstr "Piste :"
 
 #: region_layering_order_editor.cc:104
-#, fuzzy
 msgid "Choose Top Region"
-msgstr "Choisir la Région audible"
+msgstr "Choisir la région de premier plan"
 
 # not sure why no space between the words, or if it doesn't need to be translate ?
 # PLUS, translation says "hide the text"
 #: region_view.cc:277
-#, fuzzy
 msgid "SilenceText"
-msgstr "CacherLeTexte"
+msgstr "SilenceText"
 
 #: region_view.cc:292 region_view.cc:311
 msgid "minutes"
@@ -10542,18 +10639,19 @@ msgid "secs"
 msgstr "secondes"
 
 #: region_view.cc:301
+#, qt-format
 msgid "%1 silent segment"
 msgid_plural "%1 silent segments"
 msgstr[0] "%1 segment silencieux"
 msgstr[1] "%1 segments silencieux"
 
 #: region_view.cc:303
-#, fuzzy
+#, fuzzy, qt-format
 msgid "shortest = %1 %2"
 msgstr "le plus court = %1 %2"
 
 #: region_view.cc:320
-#, fuzzy
+#, qt-format
 msgid ""
 "\n"
 "  (shortest audible segment = %1 %2)"
@@ -10574,14 +10672,12 @@ msgid "Note Onset"
 msgstr "Début de note"
 
 #: rhythm_ferret.cc:54
-#, fuzzy
 msgid "Energy Based"
-msgstr "Basé sur l'Amplitude du Signal"
+msgstr "Basé sur l'énergie"
 
 #: rhythm_ferret.cc:55
-#, fuzzy
 msgid "Spectral Difference"
-msgstr "Différence Spectrale"
+msgstr "Différence spectrale"
 
 #: rhythm_ferret.cc:56
 #, fuzzy
@@ -10590,10 +10686,9 @@ msgstr "Contenu Hautes Fréquences"
 
 #: rhythm_ferret.cc:57
 msgid "Complex Domain"
-msgstr ""
+msgstr "Domaine complexe"
 
 #: rhythm_ferret.cc:58
-#, fuzzy
 msgid "Phase Deviation"
 msgstr "Déviation de Phase"
 
@@ -10696,7 +10791,7 @@ msgstr "<b>Partage</b>"
 
 #: route_group_dialog.cc:200
 msgid "The group name is not unique. Please use a different name."
-msgstr ""
+msgstr "Le nom du groupe existe déjà. Choisissez un autre nom."
 
 #: route_params_ui.cc:84
 msgid "Tracks/Busses"
@@ -10746,9 +10841,8 @@ msgid "Route Group"
 msgstr "Groupe"
 
 #: route_time_axis.cc:264
-#, fuzzy
 msgid "MIDI Controllers and Automation"
-msgstr "Automation et Controleurs MIDI"
+msgstr "Automation et contrôleurs MIDI"
 
 #: route_time_axis.cc:495
 msgid "Show All Automation"
@@ -10763,7 +10857,6 @@ msgid "Hide All Automation"
 msgstr "Cacher toute l'automation"
 
 #: route_time_axis.cc:510
-#, fuzzy
 msgid "Processor automation"
 msgstr "Automation du traitement"
 
@@ -10825,7 +10918,7 @@ msgstr "Mode sans empilement"
 
 #: route_time_axis.cc:792
 msgid "Record Mode"
-msgstr ""
+msgstr "Mode enregistrement"
 
 #: route_time_axis.cc:799 route_time_axis.cc:1789
 msgid "Playlist"
@@ -10852,6 +10945,7 @@ msgid "New Playlist"
 msgstr "Nouvelle liste de lecture"
 
 #: route_time_axis.cc:1436
+#, qt-format
 msgid "You cannot create a track with that name as it is reserved for %1"
 msgstr "Vous ne pouvez pas créer une piste avec ce nom, il est réservé pour %1"
 
@@ -10876,6 +10970,7 @@ msgid "Select From All..."
 msgstr "Choisir depuis toutes…"
 
 #: route_time_axis.cc:1779
+#, qt-format
 msgid "Take: %1.%2"
 msgstr "Prise : %1.%2"
 
@@ -10888,6 +10983,7 @@ msgid "Underlays"
 msgstr "Sous-couches"
 
 #: route_time_axis.cc:2588
+#, qt-format
 msgid "Remove \"%1\""
 msgstr "Supprimer « %1 »"
 
@@ -10897,9 +10993,8 @@ msgid "programming error: underlay reference pointer pairs are inconsistent!"
 msgstr "programming error: underlay reference pointer pairs are inconsistent!"
 
 #: route_time_axis.cc:2702
-#, fuzzy
 msgid "After-fade listen (AFL)"
-msgstr "Ecoute Après Fader (AFL)"
+msgstr "Écoute Après Fader (AFL)"
 
 #: route_time_axis.cc:2706
 #, fuzzy
@@ -10935,7 +11030,7 @@ msgstr "Écoute de lecture"
 
 #: route_ui.cc:676
 msgid "Not connected to AudioEngine - cannot engage record"
-msgstr ""
+msgstr "Non connecté au moteur audio - impossible d'activer l'enregistrement"
 
 #: route_ui.cc:875
 #, fuzzy
@@ -10943,49 +11038,40 @@ msgid "Step Entry"
 msgstr "Pas-à-pas"
 
 #: route_ui.cc:948
-#, fuzzy
 msgid "Assign all tracks (prefader)"
-msgstr "Assigner toutes les Pistes (pré-fader)"
+msgstr "Assigner toutes les pistes (pré-fader)"
 
 #: route_ui.cc:952
-#, fuzzy
 msgid "Assign all tracks and buses (prefader)"
-msgstr "Assigner toutes les Pistes et Bus (pré-fader)"
+msgstr "Assigner toutes les pistes et bus (pré-fader)"
 
 #: route_ui.cc:956
-#, fuzzy
 msgid "Assign all tracks (postfader)"
-msgstr "Assigner toutes les Pistes (post-fader)"
+msgstr "Assigner toutes les pistes (post-fader)"
 
 #: route_ui.cc:960
-#, fuzzy
 msgid "Assign all tracks and buses (postfader)"
-msgstr "Assigner toutes les Pistes et Bus (post-fader)"
+msgstr "Assigner toutes les pistes et bus (post-fader)"
 
 #: route_ui.cc:964
-#, fuzzy
 msgid "Assign selected tracks (prefader)"
-msgstr "Assigner les Pistes sélectionnées (pré-fader)"
+msgstr "Assigner les pistes sélectionnées (pré-fader)"
 
 #: route_ui.cc:968
-#, fuzzy
 msgid "Assign selected tracks and buses (prefader)"
-msgstr "Assigner les Pistes et Bus sélectionnés (pré-fader)"
+msgstr "Assigner les pistes et bus sélectionnés (pré-fader)"
 
 #: route_ui.cc:971
-#, fuzzy
 msgid "Assign selected tracks (postfader)"
-msgstr "Assigner les Pistes sélectionnées (post-fader)"
+msgstr "Assigner les pistes sélectionnées (post-fader)"
 
 #: route_ui.cc:975
-#, fuzzy
 msgid "Assign selected tracks and buses (postfader)"
-msgstr "Assigner les Pistes et Bus sélectionnés (post-fader)"
+msgstr "Assigner les pistes et bus sélectionnés (post-fader)"
 
 #: route_ui.cc:978
-#, fuzzy
 msgid "Copy track/bus gains to sends"
-msgstr "Assigner le gain de Piste/Bus aux départs"
+msgstr "Appliquer le gain de piste/bus aux départs"
 
 #: route_ui.cc:979
 msgid "Set sends gain to -inf"
@@ -11004,12 +11090,10 @@ msgid "Solo Safe"
 msgstr "Solo verrouillé"
 
 #: route_ui.cc:1329
-#, fuzzy
 msgid "Pre Fader Sends"
 msgstr "Départs Pré-Fader"
 
 #: route_ui.cc:1335
-#, fuzzy
 msgid "Post Fader Sends"
 msgstr "Départs Post-Fader"
 
@@ -11026,6 +11110,7 @@ msgid "Color Selection"
 msgstr "Sélection de Couleur"
 
 #: route_ui.cc:1564
+#, qt-format
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "\n"
@@ -11041,6 +11126,7 @@ msgstr ""
 "écrasé)"
 
 #: route_ui.cc:1566
+#, qt-format
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "\n"
@@ -11095,7 +11181,7 @@ msgid " latency"
 msgstr " latence"
 
 #: route_ui.cc:1871
-#, fuzzy
+#, fuzzy, qt-format
 msgid "Cannot create route template directory %1"
 msgstr "Impossible de créer le répertoire modèle de Routine %1"
 
@@ -11116,7 +11202,7 @@ msgid "Remote control ID:"
 msgstr "Identifiant de contrôleur distant :"
 
 #: route_ui.cc:1983
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "The remote control ID of %1 is: %2\n"
 "\n"
@@ -11139,7 +11225,7 @@ msgid "the monitor bus"
 msgstr "Le Bus de Monitoring"
 
 #: route_ui.cc:1989
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "The remote control ID of %5 is: %2\n"
 "\n"
@@ -11159,6 +11245,7 @@ msgstr ""
 "Interaction Utlisateur%4"
 
 #: route_ui.cc:2046
+#, qt-format
 msgid ""
 "Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
 "to show menu."
@@ -11167,9 +11254,8 @@ msgstr ""
 "pour afficher le menu."
 
 #: route_ui.cc:2048
-#, fuzzy
 msgid "Click to show a menu of channels for inversion (phase reverse)"
-msgstr "Cliquer affiche le menu des canaux pour l'inversion de phase"
+msgstr "Cliquer pour afficher le menu des canaux pour l'inversion de phase"
 
 #: search_path_option.cc:35
 msgid "Select folder to search for media"
@@ -11313,6 +11399,7 @@ msgid "Elements"
 msgstr "Élements"
 
 #: session_import_dialog.cc:111
+#, qt-format
 msgid "Cannot load XML for session from %1"
 msgstr "Impossible de charger le XML pour la session %1"
 
@@ -11332,23 +11419,23 @@ msgstr "Tous les éléments de ce type seront sélectionnés !"
 
 #: session_metadata_dialog.cc:285
 msgid "EAN Check digit OK"
-msgstr ""
+msgstr "Clé de contrôle EAN correcte"
 
 #: session_metadata_dialog.cc:289
 msgid "EAN Check digit error"
-msgstr ""
+msgstr "Clé de contrôle EAN incorrecte"
 
 #: session_metadata_dialog.cc:289
 msgid "expected"
-msgstr ""
+msgstr "attendu"
 
 #: session_metadata_dialog.cc:294
 msgid "EAN Length error"
-msgstr ""
+msgstr "Erreur de longueur EAN"
 
 #: session_metadata_dialog.cc:423
 msgid "Field"
-msgstr "champ"
+msgstr "Champ"
 
 #: session_metadata_dialog.cc:427
 msgid "Values (current value on top)"
@@ -11447,7 +11534,7 @@ msgstr "ISRC"
 
 #: session_metadata_dialog.cc:733
 msgid "EAN barcode"
-msgstr ""
+msgstr "Code-barre EAN"
 
 #: session_metadata_dialog.cc:746
 msgid "People"
@@ -11490,9 +11577,8 @@ msgid "Metadata|Mixer"
 msgstr "Mixeur"
 
 #: session_metadata_dialog.cc:783
-#, fuzzy
 msgid "School"
-msgstr "Ecole"
+msgstr "École"
 
 #: session_metadata_dialog.cc:788
 #, fuzzy
@@ -11540,11 +11626,11 @@ msgstr "Propriétés de la session"
 
 #: session_option_editor.cc:41
 msgid "Timecode Settings"
-msgstr "Paramètres de « timecode »"
+msgstr "Paramètres de timecode"
 
 #: session_option_editor.cc:45
 msgid "Timecode frames-per-second"
-msgstr "Trames par secondes de « timecode »"
+msgstr "Trames par secondes de timecode"
 
 #: session_option_editor.cc:50
 msgid "23.976"
@@ -11627,50 +11713,52 @@ msgid "-4.1667 - 0.1%"
 msgstr "-4.1667 - 0.1%"
 
 #: session_option_editor.cc:84
-#, fuzzy
 msgid ""
 "Use Video File's FPS Instead of Timecode Value for Timeline and Video "
 "Monitor."
 msgstr ""
-"Utiliser le débit du fichier vidéo (à la place du Timecode) pour la Timeline "
-"et le Monitoring Vidéo."
+"Utiliser le débit du fichier vidéo au lieu du timecode pour la timeline et "
+"le Monitoring Vidéo."
 
 #: session_option_editor.cc:91
 msgid ""
 "Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-"
 "sync)."
 msgstr ""
+"Appliquer les pulldown/pullup à la timeline vidéo et au moniteur vidéo (sauf "
+"en cas d'utilisation de JACK-sync)"
 
 # Chaîne suivie d'un « : » d'où l'espace insécable en fin
 #: session_option_editor.cc:96
 msgid "Ext Timecode Offsets"
-msgstr "Décalage du « timecode » externe "
+msgstr "Décalages de timecode externe "
 
 # Chaîne suivie d'un « : » d'où l'espace insécable en fin
 #: session_option_editor.cc:100
 msgid "Slave Timecode offset"
-msgstr "Décalage du « timecode » esclave "
+msgstr "Décalage du timecode esclave"
 
 #: session_option_editor.cc:107
 msgid "The specified offset is added to the received timecode (MTC or LTC)."
-msgstr "Le décalage spécifié est ajouté au « timecode » reçu (MTC ou LTC)."
+msgstr "Le décalage spécifié est ajouté au timecode reçu (MTC ou LTC)."
 
 #: session_option_editor.cc:113
 msgid "Timecode Generator offset"
-msgstr "Décalage du générateur de « timecode »"
+msgstr "Décalage du générateur de timecode"
 
 #: session_option_editor.cc:120
 msgid ""
 "Specify an offset which is added to the generated timecode (so far only LTC)."
 msgstr ""
-"Spécifie un décalage qui sera ajouté au « timecode » généré (seulement LTC "
-"pour le moment)."
+"Spécifie un décalage qui sera ajouté au timecode généré (seulement LTC pour "
+"le moment)."
 
 #: session_option_editor.cc:124
 msgid "JACK Transport/Time Settings"
 msgstr "Paramètres temporels/transport JACK"
 
 #: session_option_editor.cc:128
+#, qt-format
 msgid ""
 "%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
 msgstr ""
@@ -11679,7 +11767,7 @@ msgstr ""
 
 #: session_option_editor.cc:136
 msgid "destructive-xfade-seconds"
-msgstr ""
+msgstr "Secondes-de-fondu-destructif"
 
 #: session_option_editor.cc:137
 msgid "Destructive crossfade length"
@@ -11749,32 +11837,33 @@ msgstr "Chercher les fichiers MIDI dans :"
 #: session_option_editor.cc:206 session_option_editor.cc:218
 #: session_option_editor.cc:228 session_option_editor.cc:239
 msgid "Filenames"
-msgstr ""
+msgstr "Noms de fichiers"
 
 #: session_option_editor.cc:206
 msgid "File Naming"
-msgstr ""
+msgstr "Dénomination de fichier"
 
 #: session_option_editor.cc:212
 msgid "Prefix Track number"
-msgstr ""
+msgstr "Préfixer avec le numéro de piste"
 
 #: session_option_editor.cc:217
 msgid ""
 "Adds the current track number to the beginning of the recorded file name."
 msgstr ""
+"Ajoute le numéro de piste en cours au début du nom du fichier enregistré."
 
 #: session_option_editor.cc:222
 msgid "Prefix Take Name"
-msgstr ""
+msgstr "Préfixer le nom de la prise"
 
 #: session_option_editor.cc:227
 msgid "Adds the Take Name to the beginning of the recorded file name."
-msgstr ""
+msgstr "Ajoute le nom de la prise au début du nom de fichier enregistré."
 
 #: session_option_editor.cc:232
 msgid "Take Name"
-msgstr ""
+msgstr "Nom de prise"
 
 #: session_option_editor.cc:245
 msgid ""
@@ -11797,17 +11886,14 @@ msgid "Meterbridge"
 msgstr "Bandeau de mesure"
 
 #: session_option_editor.cc:257
-#, fuzzy
 msgid "Route Display"
-msgstr "Affichage"
+msgstr "Affichage du routage"
 
 #: session_option_editor.cc:261
-#, fuzzy
 msgid "Show Midi Tracks"
-msgstr "Afficher les Pistes MIDI"
+msgstr "Afficher les pistes Midi"
 
 #: session_option_editor.cc:268
-#, fuzzy
 msgid "Show Busses"
 msgstr "Afficher les Bus"
 
@@ -11822,24 +11908,20 @@ msgid "Button Area"
 msgstr "Zone de Boutons"
 
 #: session_option_editor.cc:284
-#, fuzzy
 msgid "Rec-enable Button"
-msgstr "Bouton Armer-Enregistrement"
+msgstr "Bouton d'armement d'enregistrement"
 
 #: session_option_editor.cc:291
-#, fuzzy
 msgid "Mute Button"
-msgstr "Bouton Muet"
+msgstr "Bouton muet"
 
 #: session_option_editor.cc:298
-#, fuzzy
 msgid "Solo Button"
-msgstr "Bouton Solo"
+msgstr "Bouton solo"
 
 #: session_option_editor.cc:305
-#, fuzzy
 msgid "Monitor Buttons"
-msgstr "Boutons de Monitoring"
+msgstr "Boutons de monitoring"
 
 #: session_option_editor.cc:310
 #, fuzzy
@@ -11886,7 +11968,6 @@ msgid "replace both overlapping notes with a single note"
 msgstr "fusionner les notes"
 
 #: session_option_editor.cc:346
-#, fuzzy
 msgid "Glue to bars and beats"
 msgstr "Coller aux mesures et temps"
 
@@ -11904,7 +11985,7 @@ msgstr "Par défaut"
 
 #: session_option_editor.cc:364
 msgid "Use these settings as defaults"
-msgstr ""
+msgstr "Utiliser ces paramètres par défaut"
 
 #: sfdb_ui.cc:90 sfdb_ui.cc:110 sfdb_ui.cc:119
 msgid "as new tracks"
@@ -11923,7 +12004,7 @@ msgid "as new tape tracks"
 msgstr "comme nouvelles pistes de magnéto"
 
 #: sfdb_ui.cc:100
-#, fuzzy
+#, fuzzy, qt-format
 msgid "programming error: unknown import mode string %1"
 msgstr "programming error: unknown import mode string %1"
 
@@ -11948,13 +12029,13 @@ msgid "Tags:"
 msgstr "Étiquettes :"
 
 #: sfdb_ui.cc:293 sfdb_ui.cc:409
+#, qt-format
 msgid "Could not read file: %1 (%2)."
 msgstr "Impossible de lire le fichier « %1 » (%2)."
 
 #: sfdb_ui.cc:297
-#, fuzzy
 msgid "<b>Midi File Information</b>"
-msgstr "<b>Infos du Fichier Midi</b>"
+msgstr "<b>Informations du fichier Midi</b>"
 
 #: sfdb_ui.cc:458
 msgid "Could not access soundfile: "
@@ -12052,7 +12133,6 @@ msgid "Filename"
 msgstr "Nom du fichier"
 
 #: sfdb_ui.cc:697
-#, fuzzy
 msgid "Duration"
 msgstr "Durée"
 
@@ -12094,6 +12174,7 @@ msgid "SoundFileBrowser: Could not tokenize string: "
 msgstr "SoundFileBrowser: Could not tokenize string: "
 
 #: sfdb_ui.cc:1136
+#, qt-format
 msgid "%1 more page of 100 results available"
 msgid_plural "%1 more pages of 100 results available"
 msgstr[0] "Encore %1 page de 100 résultats disponible"
@@ -12153,6 +12234,7 @@ msgid "all files in one region"
 msgstr "tout dans une région"
 
 #: sfdb_ui.cc:1521
+#, qt-format
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
@@ -12166,7 +12248,7 @@ msgstr "Copier les fichiers dans la session"
 
 #: sfdb_ui.cc:1682 sfdb_ui.cc:1859
 msgid "file timestamp"
-msgstr "à l'horodatage du fichier"
+msgstr "horodatage du fichier"
 
 #: sfdb_ui.cc:1683 sfdb_ui.cc:1861
 msgid "edit point"
@@ -12177,9 +12259,8 @@ msgid "playhead"
 msgstr "à la Tête de Lecture"
 
 #: sfdb_ui.cc:1685
-#, fuzzy
 msgid "session start"
-msgstr "au début de la session"
+msgstr "début de la session"
 
 #: sfdb_ui.cc:1691
 #, fuzzy
@@ -12201,7 +12282,7 @@ msgstr "<b>Qualité de la conversion</b>"
 
 #: sfdb_ui.cc:1756
 msgid "<b>Instrument</b>"
-msgstr ""
+msgstr "<b>Instrument</b>"
 
 #: sfdb_ui.cc:1768 sfdb_ui.cc:1875
 msgid "Best"
@@ -12265,29 +12346,31 @@ msgstr "Arrêt"
 
 #: soundcloud_export_selector.cc:44
 msgid "User Email"
-msgstr ""
+msgstr "E-mail utilisateur"
 
 #: soundcloud_export_selector.cc:45
 msgid "Password"
-msgstr ""
+msgstr "Mot de passe"
 
 #: soundcloud_export_selector.cc:46
 msgid "Make files public"
-msgstr ""
+msgstr "Rendre les fichiers publics"
 
 #: soundcloud_export_selector.cc:47
 msgid "Open uploaded files in browser"
-msgstr ""
+msgstr "Ouvrir les fichiers téléversés dans le navigateur"
 
 #: soundcloud_export_selector.cc:48
 msgid "Make files downloadable"
-msgstr ""
+msgstr "Rendre les fichiers téléchargeables"
 
 #: soundcloud_export_selector.cc:107
+#, qt-format
 msgid "%1: %2 of %3 bytes uploaded"
-msgstr ""
+msgstr "%1: %2 of %3 octets téléversés"
 
 #: splash.cc:73
+#, qt-format
 msgid "%1 loading ..."
 msgstr "Chargement de %1…"
 
@@ -12304,6 +12387,7 @@ msgid "Azimuth:"
 msgstr "Azimuth :"
 
 #: startup.cc:67
+#, qt-format
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
 "%1 will play NO role in monitoring"
@@ -12312,10 +12396,12 @@ msgstr ""
 "(%1 ne jouera AUCUN rôle dans le monitoring)"
 
 #: startup.cc:69
+#, qt-format
 msgid "Ask %1 to play back material as it is being recorded"
 msgstr "Demander à %1 de diffuser le signal pendant l'enregistrement"
 
 #: startup.cc:142
+#, qt-format
 msgid ""
 "<span size=\"larger\">%1 is a digital audio workstation. You can use it to "
 "record, edit and mix multi-track audio. You can produce your own CDs, mix "
@@ -12332,14 +12418,17 @@ msgstr ""
 "Nous allons configurer le logiciel avant que vous ne l'utilisiez.</span> "
 
 #: startup.cc:168
+#, qt-format
 msgid "Welcome to %1"
-msgstr "Bienvenue dans Ardour"
+msgstr "Bienvenue dans %1"
 
 #: startup.cc:191
+#, qt-format
 msgid "Default folder for %1 sessions"
 msgstr "Dossier par défaut des sessions %1"
 
 #: startup.cc:197
+#, qt-format
 msgid ""
 "Each project that you work on with %1 has its own folder.\n"
 "These can require a lot of disk space if you are recording audio.\n"
@@ -12376,11 +12465,12 @@ msgstr ""
 "Lors de l'enregistrement des instruments ou des voix, vous voudrez\n"
 "certainement entendre le signal simultanément à son enregistrement. Ceci\n"
 "est appelé le \"monitoring\".\n"
-"Il existe différentes manières de le faire, selon le matériel et sa"
-"configuration. Les deux manières les plus courantes sont présentées ici.\n"
+"Il existe différentes manières de le faire, selon le matériel et "
+"saconfiguration. Les deux manières les plus courantes sont présentées ici.\n"
 "Veuillez en choisir une convenant à votre configuration.\n"
 "\n"
-"<i>(Ce choix peut être modifié à tout moment, dans le dialogue des Préférences)</i>\n"
+"<i>(Ce choix peut être modifié à tout moment, dans le diaue des "
+"Préférences)</i>\n"
 "\n"
 "<i>Si vous ne savez pas quoi choisir, conservez l'option par défaut.</i>"
 
@@ -12414,7 +12504,6 @@ msgstr ""
 "sans affecter le mixage."
 
 #: startup.cc:321
-#, fuzzy
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -12422,8 +12511,8 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "<i>Ceci peut être changé à tout moment dans le dialogue de Préférences.\n"
-"Vous pouvez aussi ajouter ou retirer la section d'écoute de toute session.</"
-"i>\n"
+"Vous pouvez aussi ajouter ou retirer la tranche de monitoring de toute "
+"session.</i>\n"
 "\n"
 "<i>Si vous ne voyez pas de quoi il s'agit, acceptez le choix par défaut.</i>"
 
@@ -12432,7 +12521,7 @@ msgid "Monitor Section"
 msgstr "Section Monitoring"
 
 #: step_entry.cc:60
-#, fuzzy
+#, fuzzy, qt-format
 msgid "Step Entry: %1"
 msgstr "Pas-à-pas : %1"
 
@@ -12446,11 +12535,11 @@ msgstr ">mesure"
 
 #: step_entry.cc:67
 msgid ">EP"
-msgstr ""
+msgstr ">EP"
 
 #: step_entry.cc:68
 msgid "sustain"
-msgstr ""
+msgstr "tenue"
 
 #: step_entry.cc:69
 #, fuzzy
@@ -12536,7 +12625,7 @@ msgstr "Définir le volume (vélocité) à fortissimo"
 
 #: step_entry.cc:283
 msgid "Set volume (velocity) to fortississimo"
-msgstr ""
+msgstr "Régler le colume (vélocité) à fortissimo"
 
 #: step_entry.cc:331
 msgid "Stack inserted notes to form a chord"
@@ -12659,28 +12748,24 @@ msgid "Insert Note G-sharp"
 msgstr "Insérer un sol dièse"
 
 #: step_entry.cc:611
-#, fuzzy
 msgid "Insert a Note-length Rest"
-msgstr "Insérer un silence (durée de Note)"
+msgstr "Insérer un silence (durée de note)"
 
 #: step_entry.cc:612
-#, fuzzy
 msgid "Insert a Snap-length Rest"
-msgstr "Insérer un silence (durée de Note)"
+msgstr "Insérer un silence (durée d'aimantation)"
 
 #: step_entry.cc:614 step_entry.cc:615
 msgid "Move to next octave"
 msgstr "Déplacer au prochain octave"
 
 #: step_entry.cc:617
-#, fuzzy
 msgid "Move to Next Note Length"
-msgstr "A la prochaine durée de note"
+msgstr "Aller à la prochaine durée de note"
 
 #: step_entry.cc:618
-#, fuzzy
 msgid "Move to Previous Note Length"
-msgstr "A la précédente durée de note"
+msgstr "Aller à la précédente durée de note"
 
 #: step_entry.cc:620
 msgid "Increase Note Length"
@@ -12691,14 +12776,12 @@ msgid "Decrease Note Length"
 msgstr "Diminuer la durée de la note"
 
 #: step_entry.cc:623
-#, fuzzy
 msgid "Move to Next Note Velocity"
-msgstr "A la prochaine vélocité de note"
+msgstr "Aller à la prochaine vélocité de note"
 
 #: step_entry.cc:624
-#, fuzzy
 msgid "Move to Previous Note Velocity"
-msgstr "A la précédente vélocité de note"
+msgstr "Aller à la précédente vélocité de note"
 
 #: step_entry.cc:626
 msgid "Increase Note Velocity"
@@ -12762,32 +12845,26 @@ msgid "Set Note Length to 1/2"
 msgstr "Durée de la note : 1/2"
 
 #: step_entry.cc:648
-#, fuzzy
 msgid "Set Note Length to 1/3"
 msgstr "Durée de la note : 1/3"
 
 #: step_entry.cc:650
-#, fuzzy
 msgid "Set Note Length to 1/4"
 msgstr "Durée de la note : 1/4"
 
 #: step_entry.cc:652
-#, fuzzy
 msgid "Set Note Length to 1/8"
 msgstr "Durée de la note : 1/8"
 
 #: step_entry.cc:654
-#, fuzzy
 msgid "Set Note Length to 1/16"
 msgstr "Durée de la note : 1/16"
 
 #: step_entry.cc:656
-#, fuzzy
 msgid "Set Note Length to 1/32"
 msgstr "Durée de la note : 1/32"
 
 #: step_entry.cc:658
-#, fuzzy
 msgid "Set Note Length to 1/64"
 msgstr "Durée de la note : 1/64"
 
@@ -12828,7 +12905,7 @@ msgstr "Vélocité de la note : Fortississimo"
 
 #: step_entry.cc:679
 msgid "Toggle Triple Notes"
-msgstr ""
+msgstr "Activer/désactiver les triolets"
 
 #: step_entry.cc:684
 msgid "No Dotted Notes"
@@ -12850,9 +12927,8 @@ msgid "Toggled Triple-Dotted Notes"
 msgstr "Notes Triple-pointées"
 
 #: step_entry.cc:693
-#, fuzzy
 msgid "Toggle Chord Entry"
-msgstr "Basculer en entrée d'accord"
+msgstr "(dés)Activer la saisie d'accords"
 
 #: step_entry.cc:695
 #, fuzzy
@@ -12875,7 +12951,6 @@ msgid "Width"
 msgstr "Largeur"
 
 #: strip_silence_dialog.cc:44
-#, fuzzy
 msgid "Strip Silence"
 msgstr "Enlever le silence"
 
@@ -12885,7 +12960,6 @@ msgid "Minimum length"
 msgstr "Durée minimum"
 
 #: strip_silence_dialog.cc:83
-#, fuzzy
 msgid "Fade length"
 msgstr "Durée du fondu"
 
@@ -12904,7 +12978,7 @@ msgstr "Note percussive"
 
 #: tempo_dialog.cc:44 tempo_dialog.cc:60
 msgid "Tap tempo"
-msgstr ""
+msgstr "Taper le tempo"
 
 #: tempo_dialog.cc:54
 msgid "Edit Tempo"
@@ -12964,8 +13038,9 @@ msgid "Tempo begins at"
 msgstr "Le tempo démarre à"
 
 #: tempo_dialog.cc:251
+#, qt-format
 msgid "incomprehensible pulse note type (%1)"
-msgstr ""
+msgstr "type de rythmique incompréhensible (%1) "
 
 #: tempo_dialog.cc:307
 msgid "Edit Meter"
@@ -12984,8 +13059,9 @@ msgid "Meter begins at bar:"
 msgstr "La signature commence à la mesure :"
 
 #: tempo_dialog.cc:484
+#, qt-format
 msgid "incomprehensible meter note type (%1)"
-msgstr ""
+msgstr "type de signature incompréhensible (%1)"
 
 #: theme_manager.cc:65
 msgid "Dark Theme"
@@ -13005,7 +13081,7 @@ msgstr "Afficher des boutons « plats »"
 
 #: theme_manager.cc:69
 msgid "Blink Rec-Arm buttons"
-msgstr ""
+msgstr "Faire clignoter les boutons d'armement d'enregistrement"
 
 #: theme_manager.cc:70
 msgid "Color regions using their track's color"
@@ -13013,15 +13089,15 @@ msgstr "Appliquer la couleur de la piste aux régions"
 
 #: theme_manager.cc:71
 msgid "Show waveform clipping"
-msgstr ""
+msgstr "Montrer l’écrêtage des formes d'ondes"
 
 #: theme_manager.cc:73
 msgid "Waveforms color gradient depth"
-msgstr ""
+msgstr "Profondeur de dégradé des couleurs de formes d'ondes"
 
 #: theme_manager.cc:75
 msgid "Timeline item gradient depth"
-msgstr ""
+msgstr "Profondeur de dégradé des éléments de la timeline"
 
 #: theme_manager.cc:76
 #, fuzzy
@@ -13030,11 +13106,11 @@ msgstr "Les fenêtres flottantes sont des boites de dialogues."
 
 #: theme_manager.cc:77
 msgid "Transient windows follow front window."
-msgstr ""
+msgstr "les fenêtres des transitoires suivent la fenêtre au premier plan."
 
 #: theme_manager.cc:78
 msgid "Icon Set"
-msgstr ""
+msgstr "Jeu d'icônes"
 
 #: theme_manager.cc:87
 msgid "Object"
@@ -13042,18 +13118,18 @@ msgstr "Objet"
 
 #: theme_manager.cc:163
 msgid "Items"
-msgstr ""
+msgstr "Éléments"
 
 #: theme_manager.cc:164
 msgid "Palette"
-msgstr ""
+msgstr "Palette"
 
 #: theme_manager.cc:165
 msgid "Transparency"
-msgstr ""
+msgstr "Transparence"
 
 #: theme_manager.cc:195
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "Mark all floating windows to be type \"Dialog\" rather than using \"Utility"
 "\" for some.\n"
@@ -13066,21 +13142,26 @@ msgstr ""
 "redémarrage d'%1 pour prendre effet."
 
 #: theme_manager.cc:199
+#, qt-format
 msgid ""
 "Make transient windows follow the front window when toggling between the "
 "editor and mixer.\n"
 "This requires a restart of %1 to take effect"
 msgstr ""
+"Impose aux fenêtres des transitoires de suivre la fenêtre au premier plan "
+"lors du basculement entre l'éditeur et le mixeur.\n"
+"Nécessite un redémarrage de %1"
 
 #: theme_manager.cc:620
 msgid "Color Palette"
-msgstr ""
+msgstr "Palette de couleurs"
 
 #: time_axis_view.cc:148
 msgid "Track/Bus name (double click to edit)"
 msgstr "Nom piste/bus (double cliquer pour éditer)"
 
 #: time_axis_view_item.cc:345
+#, qt-format
 msgid "new duration %1 frame is out of bounds for %2"
 msgid_plural "new duration of %1 frames is out of bounds for %2"
 msgstr[0] "la nouvelle durée d'%1 trame est hors limites pour %2"
@@ -13105,7 +13186,7 @@ msgstr "Minimiser la distorsion temporelle"
 
 #: time_fx_dialog.cc:66
 msgid "Preserve Formants"
-msgstr ""
+msgstr "Préserver les formants"
 
 #: time_fx_dialog.cc:71
 #, fuzzy
@@ -13157,38 +13238,37 @@ msgid "Stop recording at auto-punch end"
 msgstr "Stopper l'enregistrement au punch-out"
 
 #: time_selection.cc:40
-#, fuzzy
+#, fuzzy, qt-format
 msgid "programming error: request for non-existent audio range (%1)!"
 msgstr "programming error: request for non-existent audio range (%1)!"
 
 #: transform_dialog.cc:39
 msgid "this note's"
-msgstr ""
+msgstr "celui de cette note"
 
 #: transform_dialog.cc:40
-#, fuzzy
 msgid "the previous note's"
-msgstr "A la précédente durée de note"
+msgstr "Celui de la note précédente"
 
 #: transform_dialog.cc:41
 msgid "this note's index"
-msgstr ""
+msgstr "index de cette note"
 
 #: transform_dialog.cc:42
 msgid "the number of notes"
-msgstr ""
+msgstr "le nombre de notes"
 
 #: transform_dialog.cc:43
 msgid "exactly"
-msgstr ""
+msgstr "exactement"
 
 #: transform_dialog.cc:44
 msgid "a random number from"
-msgstr ""
+msgstr "un nombre aléatoire de"
 
 #: transform_dialog.cc:55
 msgid "equal steps from"
-msgstr ""
+msgstr "des pas égaux de"
 
 #: transform_dialog.cc:58
 #, fuzzy
@@ -13196,27 +13276,25 @@ msgid "note number"
 msgstr "numéro de note"
 
 #: transform_dialog.cc:59
-#, fuzzy
 msgid "velocity"
-msgstr "Vélocité"
+msgstr "vélocité"
 
 #: transform_dialog.cc:60
 msgid "start time"
-msgstr ""
+msgstr "temps de début"
 
 #: transform_dialog.cc:61
-#, fuzzy
 msgid "length"
-msgstr "Durée"
+msgstr "durée"
 
 #: transform_dialog.cc:82 transform_dialog.cc:113
 msgid "Transform"
-msgstr ""
+msgstr "Transformer"
 
 #: transform_dialog.cc:91
 #, fuzzy
 msgid "Set "
-msgstr "Créer une boucle à partir de l'intervalle"
+msgstr "Créer"
 
 #: transpose_dialog.cc:30
 msgid "Transpose MIDI"
@@ -13227,62 +13305,73 @@ msgid "Transpose"
 msgstr "Transposer"
 
 #: ui_config.cc:163 ui_config.cc:300
+#, qt-format
 msgid "Loading default ui configuration file %1"
 msgstr ""
-"Chargement du fichier de style par défaut (%1) pour l'interface graphique"
+"Chargement du fichier de style par défaut pour l'interface graphique %1"
 
 #: ui_config.cc:166 ui_config.cc:303
+#, qt-format
 msgid "cannot read default ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier de configuration d'interface graphique par "
 "défaut « %1 »"
 
 #: ui_config.cc:169 ui_config.cc:308
+#, qt-format
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr ""
-"le fichier par défaut (%1) pour la configuration de l'interface graphique "
-"n'a pas pu être chargé correctement."
+"le fichier par défaut de configuration de l'interface graphique \"%1\" n'a "
+"pas pu être chargé correctement."
 
 #: ui_config.cc:177
-#, fuzzy
+#, qt-format
 msgid "Could not find default UI configuration file %1"
 msgstr ""
-"Chargement du fichier de style par défaut (%1) pour l'interface graphique"
+"Impossible de trouver le fichier de configuration d'interface graphique par "
+"défaut %1"
 
 #: ui_config.cc:219
+#, qt-format
 msgid "Loading color file %1"
-msgstr ""
+msgstr "Chargement du fichier de couleur %1"
 
 #: ui_config.cc:222
+#, qt-format
 msgid "cannot read color file \"%1\""
-msgstr ""
+msgstr "impossible de lire le fichier de couleur \"%1\""
 
 #: ui_config.cc:227
+#, qt-format
 msgid "color file \"%1\" not loaded successfully."
-msgstr ""
+msgstr "le fichier de couleur \"%1\" n'a pas été chargé correctement"
 
 #: ui_config.cc:233
+#, qt-format
 msgid "Color file %1 not found"
-msgstr ""
+msgstr "Fichier de couleur %1 introuvable"
 
 #: ui_config.cc:282 ui_config.cc:361
-#, fuzzy
+#, qt-format
 msgid "Color file %1 not saved"
-msgstr "Fichier de configuration %1 non sauvegardé"
+msgstr "Fichier de couleur %1 non sauvegardé"
 
 #: ui_config.cc:317
+#, qt-format
 msgid "Loading user ui configuration file %1"
 msgstr ""
 "Chargement du fichier utilisateur de la configuration de l'interface "
 "graphique %1"
 
 #: ui_config.cc:320
+#, qt-format
 msgid "cannot read ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier (%1) pour la configuration de l'interface "
 "graphique"
 
 #: ui_config.cc:325
+#, qt-format
 msgid "user ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 "le fichier utilisateur de configuration de l'interface graphique « %1 » n'a "
@@ -13291,29 +13380,33 @@ msgstr ""
 #: ui_config.cc:333
 msgid "could not find any ui configuration file, canvas will look broken."
 msgstr ""
-"aucun fichier de configuration de l'interface graphique n'a éte trouvé.\n"
-"Elle aura l'air étrange."
+"aucun fichier de configuration d'interface graphique trouvé, l’aspect de "
+"l'interface sera mauvais."
 
 #: ui_config.cc:351
+#, qt-format
 msgid "Config file %1 not saved"
 msgstr "Fichier de configuration %1 non sauvegardé"
 
 #: ui_config.cc:592
-#, fuzzy
+#, qt-format
 msgid "Color %1 not found"
-msgstr "Préset de plugin %1 non trouvé"
+msgstr "Couleur %1 introuvable"
 
 #: ui_config.cc:662
+#, qt-format
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
 "Impossible de trouver le fichier de style « %1 » dans « %2 ». L'interface de "
 "%3 sera étrange."
 
 #: utils.cc:117 utils.cc:160
+#, qt-format
 msgid "bad XPM header %1"
 msgstr "mauvais entête XPM %1"
 
 #: utils.cc:577
+#, qt-format
 msgid "cannot find XPM file for %1"
 msgstr "impossible de trouver le fichier XMP pour %1"
 
@@ -13322,16 +13415,21 @@ msgid "default"
 msgstr "par défaut"
 
 #: utils.cc:642
+#, qt-format
 msgid "icon \"%1\" not found for icon set \"%2\", fallback to default"
 msgstr ""
+"L'icône \"%1\" est introuvable dans le jeu d'icônes \"%2\", icône par défaut "
+"utilisée"
 
 #: utils.cc:649
+#, qt-format
 msgid "cannot find icon image for %1 using %2"
 msgstr "Impossible de trouver l'icône pour %1 avec %2"
 
 #: utils.cc:666 utils.cc:682
+#, qt-format
 msgid "Caught exception while loading icon named %1"
-msgstr ""
+msgstr "Exception rencontrée lors du chargement de l'icône %1"
 
 #: add_video_dialog.cc:54
 #, fuzzy
@@ -13344,7 +13442,6 @@ msgid "Open Video Monitor Window"
 msgstr "Ouvrir vidéo"
 
 #: add_video_dialog.cc:63
-#, fuzzy
 msgid "Adjust Session Framerate to Match Video Framerate"
 msgstr "Ajuster le débit de la session à celui de la vidéo"
 
@@ -13354,14 +13451,12 @@ msgid "Reload docroot"
 msgstr "Recharger le répertoire-racine"
 
 #: add_video_dialog.cc:120
-#, fuzzy
 msgid "Video files"
 msgstr "Fichiers vidéo"
 
 #: add_video_dialog.cc:149
-#, fuzzy
 msgid "<b>Video Information</b>"
-msgstr "<b>Infos de la vidéo</b>"
+msgstr "<b>Informations vidéo</b>"
 
 #: add_video_dialog.cc:152
 #, fuzzy
@@ -13380,11 +13475,12 @@ msgstr "Format de l'image :"
 
 #: add_video_dialog.cc:244
 msgid "VideoServerIndex"
-msgstr ""
+msgstr "Index de serveur vidéo"
 
 #: add_video_dialog.cc:675
+#, qt-format
 msgid " %1 fps"
-msgstr ""
+msgstr " %1 ips"
 
 #: video_timeline.cc:468
 #, fuzzy
@@ -13397,25 +13493,25 @@ msgstr ""
 "vidéo ?"
 
 #: video_timeline.cc:506
-#, fuzzy
+#, qt-format
 msgid ""
 "Failed to set session-framerate: '%1' does not have a corresponding option "
 "setting in %2."
 msgstr ""
-"Echec du réglage de débit (Img/sec) : '%1' n' a aucune option correspondante "
-"dans %2."
+"Échec du réglage de débit de session : '%1' n' a aucune option "
+"correspondante dans %2."
 
 #: video_timeline.cc:514
-#, fuzzy
+#, qt-format
 msgid ""
 "Video file's framerate is not equal to %1 session timecode's framerate: '%2' "
 "vs '%3'"
 msgstr ""
-"Le débit Img/sec du fichier vidéo ne correspond pas à celui du Timecode de "
-"la session : '%2' versus '%3'"
+"Le débit Img/sec du fichier vidéo ne correspond pas à celui du timecode de "
+"la session %1 : '%2' au lieu de '%3'"
 
 #: video_timeline.cc:587
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually "
 "means that the video server was not started by %1 and uses a different "
@@ -13444,13 +13540,15 @@ msgstr ""
 
 #: video_timeline.cc:739
 msgid "Video-monitor 'xjadeo' cannot be launched."
-msgstr ""
+msgstr "Le moniteur vidéo 'xjadeo' n'a pas pu être démarré."
 
 #: video_timeline.cc:766
 msgid ""
 "Video-monitor 'xjadeo' is too old. Please install xjadeo version 0.7.7 or "
 "later. http://xjadeo.sf.net/"
 msgstr ""
+"Le moniteur vidéo 'xjadeo' est trop ancien. Installez xjadeo version 0.7.7 "
+"ou ultérieur. http://xjadeo.sf.net/"
 
 #: video_monitor.cc:285
 #, fuzzy
@@ -13458,7 +13556,7 @@ msgid "Video Monitor: File Not Found."
 msgstr "Moniteur Vidéo : Fichier Non Trouvé."
 
 #: transcode_ffmpeg.cc:56
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "No ffprobe or ffmpeg executables could be found on this system.\n"
 "Video import and export is not possible until you install those tools.\n"
@@ -13497,14 +13595,12 @@ msgid "Transcode/Import Video File "
 msgstr "Transcodage/Import du fichier vidéo "
 
 #: transcode_video_dialog.cc:58
-#, fuzzy
 msgid "Output File:"
 msgstr "Fichier de sortie :"
 
 #: transcode_video_dialog.cc:61 export_video_dialog.cc:85
-#, fuzzy
 msgid "Abort"
-msgstr "Abandon"
+msgstr "Annuler"
 
 #: transcode_video_dialog.cc:63
 msgid "Height = "
@@ -13521,9 +13617,8 @@ msgid "Debug Mode: Print ffmpeg command and output to stdout."
 msgstr "Mode Débug: commande ffmpeg et sortie vers stdout."
 
 #: transcode_video_dialog.cc:107
-#, fuzzy
 msgid "<b>File Information</b>"
-msgstr "<b>Infos du fichier</b>"
+msgstr "<b>Informations du fichier</b>"
 
 #: transcode_video_dialog.cc:113
 #, fuzzy
@@ -13537,7 +13632,7 @@ msgstr ""
 "la fenêtre de Log."
 
 #: transcode_video_dialog.cc:120
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "File-info can not be read. Most likely '%1' is not a valid video-file or an "
 "unsupported video codec or format."
@@ -13551,12 +13646,10 @@ msgid "FPS:"
 msgstr "IPS :"
 
 #: transcode_video_dialog.cc:136
-#, fuzzy
 msgid "Duration:"
 msgstr "Durée :"
 
 #: transcode_video_dialog.cc:138
-#, fuzzy
 msgid "Codec:"
 msgstr "Codec :"
 
@@ -13567,12 +13660,11 @@ msgstr "Géométrie :"
 
 #: transcode_video_dialog.cc:155
 msgid "??"
-msgstr ""
+msgstr "??"
 
 #: transcode_video_dialog.cc:176
-#, fuzzy
 msgid "<b>Import Settings</b>"
-msgstr "<b>Importer Réglages</b>"
+msgstr "<b>Paramètres d'import</b>"
 
 #: transcode_video_dialog.cc:181
 #, fuzzy
@@ -13606,14 +13698,12 @@ msgid "Bitrate (KBit/s):"
 msgstr "Taux (KBits/sec) :"
 
 #: transcode_video_dialog.cc:227
-#, fuzzy
 msgid "Extract Audio:"
-msgstr "Extraire l'Audio :"
+msgstr "Extraire l'audio :"
 
 #: transcode_video_dialog.cc:232
-#, fuzzy
 msgid "No Audio Track Present"
-msgstr "Aucune Piste Audio"
+msgstr "Pas de piste audio"
 
 #: transcode_video_dialog.cc:235
 #, fuzzy
@@ -13626,9 +13716,8 @@ msgid "Extracting Audio.."
 msgstr "Extraction Audio.."
 
 #: transcode_video_dialog.cc:353
-#, fuzzy
 msgid "Audio Extraction Failed."
-msgstr "Echec de l'extraction Audio."
+msgstr "Échec de l'extraction audio."
 
 #: transcode_video_dialog.cc:379
 #, fuzzy
@@ -13636,9 +13725,8 @@ msgid "Transcoding Video.."
 msgstr "Transcodage Vidéo.."
 
 #: transcode_video_dialog.cc:413
-#, fuzzy
 msgid "Transcoding Failed."
-msgstr "Echec du Transcodage."
+msgstr "Échec du Transcodage."
 
 #: transcode_video_dialog.cc:503
 msgid "Save Transcoded Video File"
@@ -13650,9 +13738,8 @@ msgid "Launch Video Server"
 msgstr "Lancer le Serveur Vidéo"
 
 #: video_server_dialog.cc:53
-#, fuzzy
 msgid "Server Executable:"
-msgstr "Exécutable du Serveur :"
+msgstr "Exécutable du serveur :"
 
 #: video_server_dialog.cc:55
 #, fuzzy
@@ -13665,7 +13752,7 @@ msgid "Don't show this dialog again. (Reset in Edit->Preferences)."
 msgstr "Ne plus afficher ce message. (RàZ dans Edition -> Préférences)."
 
 #: video_server_dialog.cc:97
-#, fuzzy
+#, fuzzy, qt-format
 msgid ""
 "The external video server 'harvid' can not be found.\n"
 "The tool is included with the %1 releases from ardour.org, alternatively you "
@@ -13682,7 +13769,6 @@ msgstr ""
 "voir aussi (anglais) http://manual.ardour.org/video-timeline/setup/"
 
 #: video_server_dialog.cc:129
-#, fuzzy
 msgid "Listen Address:"
 msgstr "Adresse d'écoute :"
 
@@ -13697,16 +13783,16 @@ msgid "Cache Size:"
 msgstr "Taille du cache :"
 
 #: video_server_dialog.cc:145
-#, fuzzy
+#, qt-format
 msgid ""
 "%1 relies on an external video server for the videotimeline.\n"
 "The server configured in Edit -> Preferences -> Video is not reachable.\n"
 "Do you want %1 to launch 'harvid' on this machine?"
 msgstr ""
-"%1 s'appuie sur un Serveur Vidéo externe pour la timeline vidéo.\n"
+"%1 utilise un Serveur Vidéo externe pour la timeline vidéo.\n"
 "Le serveur configuré dans Edition -> Préférences -> Vidéo n'est pas "
 "accessible.\n"
-"Voulez vous qu'%1 lance 'harvid' sur cette machine?"
+"Voulez vous qu'%1 lance 'harvid' sur cette machine ?"
 
 #: video_server_dialog.cc:189
 #, fuzzy
@@ -13714,9 +13800,8 @@ msgid "Set Video Server Executable"
 msgstr "Réglages du programme de Serveur Vidéo"
 
 #: video_server_dialog.cc:209
-#, fuzzy
 msgid "Server docroot"
-msgstr "Dossier-racine du Serveur"
+msgstr "Dossier-racine du serveur"
 
 #: utils_videotl.cc:60
 #, fuzzy
@@ -13733,12 +13818,10 @@ msgstr ""
 "Serveur Vidéo ne pourra pas le lire. Voulez vous vraiment continuer ?"
 
 #: utils_videotl.cc:64
-#, fuzzy
 msgid "Continue"
 msgstr "Continuer"
 
 #: utils_videotl.cc:70
-#, fuzzy
 msgid "Confirm Overwrite"
 msgstr "Confirmer l'écrasement"
 
@@ -13748,9 +13831,9 @@ msgid "A file with the same name already exists.  Do you want to overwrite it?"
 msgstr "Un fichier existant porte déjà ce nom. Voulez vous l'écraser ?"
 
 #: utils_videotl.cc:81 utils_videotl.cc:97
-#, fuzzy
+#, qt-format
 msgid "Cannot create video folder \"%1\" (%2)"
-msgstr "Création du dossier vidéo \"%1\" impossible (%2)"
+msgstr "Impossible de créer le dossier vidéo \"%1\" (%2)"
 
 #: export_video_dialog.cc:71
 #, fuzzy
@@ -13768,9 +13851,8 @@ msgid "Scale Video (W x H):"
 msgstr "Taille de vidéo (L x H)"
 
 #: export_video_dialog.cc:88
-#, fuzzy
 msgid "Retain Aspect"
-msgstr "Format de l'image :"
+msgstr "Conserver l'aspect"
 
 #: export_video_dialog.cc:93
 #, fuzzy
@@ -13793,12 +13875,10 @@ msgid "Codec Optimizations:"
 msgstr "Optimisations du Codec :"
 
 #: export_video_dialog.cc:98
-#, fuzzy
 msgid "Deinterlace"
 msgstr "Désinterlacer"
 
 #: export_video_dialog.cc:99
-#, fuzzy
 msgid "Use [2] B-frames (MPEG 2 or 4 only)"
 msgstr "Choisir [2] B-frames (MPEG 2 ou 4 seulement)"
 
@@ -13824,24 +13904,22 @@ msgstr ""
 
 #: export_video_dialog.cc:130
 msgid "<b>Output:</b> (file extension defines format)"
-msgstr ""
+msgstr "<b>Sortie :</b>(l'extension de fichier détermine le format)"
 
 #: export_video_dialog.cc:140
-#, fuzzy
 msgid "<b>Input Video:</b>"
-msgstr "<b>Entrée :</b>"
+msgstr "<b>Entrée vidéo :</b>"
 
 #: export_video_dialog.cc:151
 msgid "Audio:"
 msgstr "Audio :"
 
 #: export_video_dialog.cc:153
-#, fuzzy
 msgid "Master Bus"
-msgstr "Bus Master"
+msgstr "Bus master"
 
 #: export_video_dialog.cc:158
-#, fuzzy
+#, qt-format
 msgid "from the %1 session's start to the session's end"
 msgstr "du début à la fin de la session %1"
 
@@ -13879,22 +13957,19 @@ msgstr "Fréquence d'échantillonnage audio :"
 
 #: export_video_dialog.cc:222 export_video_dialog.cc:231
 #: export_video_dialog.cc:830 export_video_dialog.cc:833
-#, fuzzy
 msgid "(default for format)"
-msgstr "Format de sortie par défaut"
+msgstr "(format de sortie par défaut)"
 
 #: export_video_dialog.cc:242 export_video_dialog.cc:255
 #: export_video_dialog.cc:837 export_video_dialog.cc:846
-#, fuzzy
 msgid "(default)"
 msgstr "(par défaut)"
 
 #: export_video_dialog.cc:256 export_video_dialog.cc:840
 msgid "(retain)"
-msgstr ""
+msgstr "(conserver)"
 
 #: export_video_dialog.cc:348
-#, fuzzy
 msgid "from 00:00:00:00 to the video's end"
 msgstr "de 00:00:00:00 à la fin de la vidéo"
 
@@ -13975,7 +14050,7 @@ msgid "<b>Video Export Info</b>"
 msgstr "<b>Informations d'export vidéo</b>"
 
 #: export_video_infobox.cc:51
-#, fuzzy
+#, qt-format
 msgid ""
 "Video encoding is a non-trivial task with many details.\n"
 "\n"
@@ -13988,7 +14063,7 @@ msgstr ""
 "Merci de consulter le manuel à %1/video-timeline/operations/#export "
 "(anglais).\n"
 "\n"
-"Ouvrir le manuel en ligne ? "
+"Ouvrir le manuel dans votre navigateur ? "
 
 #~ msgid ""
 #~ "Could not connect to the Video Server. Start it or configure its access "
@@ -13996,62 +14071,3 @@ msgstr ""
 #~ msgstr ""
 #~ "Impossible de se connecter au serveur vidéo. Démarrez-le ou configurez "
 #~ "son URL d'accès dans Édition -> Préférences."
-
-# The ":" is missing in the original translation
-#~ msgid "MIDI System"
-#~ msgstr "Système MIDI :"
-
-#~ msgid "%u samples"
-#~ msgstr "%u samples"
-
-#, fuzzy
-#~ msgid ""
-#~ "<b>Welcome to this BETA release of Ardour %1</b>\n"
-#~ "\n"
-#~ "Ardour %1 has been released for Linux but because of the lack of "
-#~ "testers,\n"
-#~ "it is still at the beta stage on OS X. So, a few guidelines:\n"
-#~ "\n"
-#~ "1) Please do <b>NOT</b> use this software with the expectation that it is "
-#~ "stable or reliable\n"
-#~ "   though it may be so, depending on your workflow.\n"
-#~ "2) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n"
-#~ "3) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to "
-#~ "report issues\n"
-#~ "   making sure to note the product version number as %1-beta.\n"
-#~ "4) Please <b>DO</b> use the ardour-users mailing list to discuss ideas "
-#~ "and pass on comments.\n"
-#~ "5) Please <b>DO</b> join us on IRC for real time discussions about "
-#~ "ardour3. You\n"
-#~ "   can get there directly from Ardour via the Help->Chat menu option.\n"
-#~ "\n"
-#~ "Full information on all the above can be found on the support page at\n"
-#~ "\n"
-#~ "                http://ardour.org/support\n"
-#~ msgstr ""
-#~ "<b>Bienvenue dans la version BETA d'Ardour %1</b>\n"
-#~ "\n"
-#~ "Ardour %1 a été réalisé pour Linux, mais à cause du manque de testeurs\n"
-#~ "en est toujours au stade béta sur OS X. Donc, quelques conseils :\n"
-#~ "\n"
-#~ "1) Merci de ne <b>PAS</b> utiliser ce logiciel en espérant qu'il soit "
-#~ "stable ou fiable\n"
-#~ "   bien qu'il puisse l'etre, selon votre utilisation.\n"
-#~ "2) <b>Merci de ne PAS utiliser les forums d'ardour.org pour reporter des "
-#~ "problèmes.</b>.\n"
-#~ "3) Merci <b>D'UTILISER</b> le gestionnaire de défauts à http://tracker."
-#~ "ardour.org/ pour reporter des problèmes.\n"
-#~ "   assurez vous de bien noter la version comme %1-beta.\n"
-#~ "4) Merci <b>D'UTILISER</b> la liste de diffusion ardour-users pour "
-#~ "discuter de vos idées et commentaires sur le logiciel.\n"
-#~ "5) Merci de nous <b>REJOINDRE</b> sur IRC pour discuter en temps réel "
-#~ "d'Ardour3.\n"
-#~ "        Vous pouvez le faire depuis Ardour, dans le menu Aide => Chat.\n"
-#~ "\n"
-#~ "Les informations complètes sur ce qui précède sont dans la rubrique "
-#~ "support (en anglais) à\n"
-#~ "\n"
-#~ "                http://ardour.org/support\n"
-
-#~ msgid "This is a BETA RELEASE"
-#~ msgstr "Ceci est une VERSION BETA"
