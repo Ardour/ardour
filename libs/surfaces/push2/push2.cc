@@ -69,6 +69,8 @@ Push2::Push2 (ARDOUR::Session& s)
 	, modifier_state (None)
 	, splash_start (0)
 	, bank_start (0)
+	, connection_state (ConnectionState (0))
+	, gui (0)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -100,11 +102,47 @@ Push2::Push2 (ARDOUR::Session& s)
 		throw failed_constructor ();
 	}
 
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
+
+	/* Catch port connections and disconnections */
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
+
+	/* ports might already be there */
+
+	port_registration_handler ();
 }
 
 Push2::~Push2 ()
 {
 	stop ();
+}
+
+void
+Push2::port_registration_handler ()
+{
+	if (_async_in->connected() && _async_out->connected()) {
+		/* don't waste cycles here */
+		return;
+	}
+
+	string input_port_name = X_("Ableton Push 2 MIDI 1 in");
+	string output_port_name = X_("Ableton Push 2 MIDI 1 out");
+	vector<string> in;
+	vector<string> out;
+
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
+
+	if (!in.empty() && !out.empty()) {
+		cerr << "Push2: both ports found\n";
+		cerr << "\tconnecting to " << in.front() <<  " + " << out.front() << endl;
+		if (!_async_in->connected()) {
+			AudioEngine::instance()->connect (_async_in->name(), in.front());
+		}
+		if (!_async_out->connected()) {
+			AudioEngine::instance()->connect (_async_out->name(), out.front());
+		}
+	}
 }
 
 int
@@ -1478,3 +1516,67 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 	return matched;
 }
+
+bool
+Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+{
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  start\n");
+	if (!_input_port || !_output_port) {
+		return false;
+	}
+
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
+
+	if (ni == name1 || ni == name2) {
+		if (yn) {
+			connection_state |= InputConnected;
+		} else {
+			connection_state &= ~InputConnected;
+		}
+	} else if (no == name1 || no == name2) {
+		if (yn) {
+			connection_state |= OutputConnected;
+		} else {
+			connection_state &= ~OutputConnected;
+		}
+	} else {
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
+		/* not our ports */
+		return false;
+	}
+
+	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+
+		/* XXX this is a horrible hack. Without a short sleep here,
+		   something prevents the device wakeup messages from being
+		   sent and/or the responses from being received.
+		*/
+
+		g_usleep (100000);
+                DEBUG_TRACE (DEBUG::FaderPort, "device now connected for both input and output\n");
+                // connected ();
+
+	} else {
+		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both) or not yet fully connected\n");
+	}
+
+	ConnectionChange (); /* emit signal for our GUI */
+
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  end\n");
+
+	return true; /* connection status changed */
+}
+
+boost::shared_ptr<Port>
+Push2::output_port()
+{
+	return _async_out;
+}
+
+boost::shared_ptr<Port>
+Push2::input_port()
+{
+	return _async_in;
+}
+

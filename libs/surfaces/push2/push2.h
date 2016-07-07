@@ -74,9 +74,18 @@ class Push2 : public ARDOUR::ControlProtocol
 	static bool probe ();
 	static void* request_factory (uint32_t);
 
+	bool has_editor () const { return true; }
+	void* get_gui () const;
+	void  tear_down_gui ();
+
 	int set_active (bool yn);
 	XMLNode& get_state();
 	int set_state (const XMLNode & node, int version);
+
+	PBD::Signal0<void> ConnectionChange;
+
+	boost::shared_ptr<ARDOUR::Port> input_port();
+	boost::shared_ptr<ARDOUR::Port> output_port();
 
    private:
 	libusb_device_handle *handle;
@@ -452,6 +461,24 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
 	boost::weak_ptr<ARDOUR::Stripable> first_selected_stripable;
+
+	PBD::ScopedConnection port_reg_connection;
+	void port_registration_handler ();
+
+	enum ConnectionState {
+		InputConnected = 0x1,
+		OutputConnected = 0x2
+	};
+
+	int connection_state;
+	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	PBD::ScopedConnection port_connection;
+
+	/* GUI */
+
+	mutable void *gui;
+	void build_gui ();
+
 };
 
 
