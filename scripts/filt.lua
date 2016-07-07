@@ -21,6 +21,7 @@ end
 function dsp_params ()
 	return
 	{
+		{ ["type"] = "input", name = "Enable", min = 0, max = 1, default = 1, bypass = true, toggled = true },
 		{ ["type"] = "input", name = "Type", min = 0, max = 4, default = 0, enum = true, scalepoints =
 			{
 				["Peaking"]    = 0,
@@ -52,10 +53,18 @@ function map_type (t)
 	end
 end
 
+function ctrl_data ()
+	local ctrl = CtrlPorts:array ()
+	if ctrl[1] <= 0 then -- when disabled
+		ctrl[3] = 0; -- force gain to 0dB
+	end
+	return ctrl
+end
+
 -- these globals are *not* shared between DSP and UI
 local filters = {}  -- the biquad filter instances (DSP)
 local filt -- the biquad filter instance (GUI, response)
-local cur = {0, 0, 0, 0} -- current parameters
+local cur = {0, 0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
 local chn = 0 -- channel/filter count
 
@@ -76,12 +85,12 @@ function dsp_configure (ins, outs)
 	for c = 1, chn do
 		filters[c] = ARDOUR.DSP.Biquad (rate) -- initialize filters
 	end
-	cur = {0, 0, 0, 0}
+	cur = {0, 0, 0, 0, 0}
 end
 
 -- helper functions for parameter interpolation
 function param_changed (ctrl)
-	if ctrl[1] == cur[1] and ctrl[2] == cur[2] and ctrl[3] == cur[3] and ctrl[4] == cur[4] then
+	if ctrl[2] == cur[2] and ctrl[3] == cur[3] and ctrl[4] == cur[4] and ctrl[5] == cur[5] then
 		return false
 	end
 	return true
@@ -101,19 +110,19 @@ function apply_params (ctrl)
 		return
 	end
 
-	if cur[1] ~= ctrl[1] then
+	if cur[2] ~= ctrl[2] then
 		-- reset filter state when type changes
 		filt:reset ()
-		for k = 1,4 do cur[k] = ctrl[k] end
+		for k = 2,5 do cur[k] = ctrl[k] end
 	else
 		-- low-pass filter ctrl parameter values, smooth transition
-		cur[2] = low_pass_filter_param (cur[2], ctrl[2], 0.1) -- gain/dB
-		cur[3] = low_pass_filter_param (cur[3], ctrl[3], 1.0) -- freq/Hz
-		cur[4] = low_pass_filter_param (cur[4], ctrl[4], 0.01) -- quality
+		cur[3] = low_pass_filter_param (cur[3], ctrl[3], 0.1) -- gain/dB
+		cur[4] = low_pass_filter_param (cur[4], ctrl[4], 1.0) -- freq/Hz
+		cur[5] = low_pass_filter_param (cur[5], ctrl[5], 0.01) -- quality
 	end
 
 	for c = 1, chn do
-		filters[c]:compute (map_type (cur[1]), cur[3], cur[4], cur[2])
+		filters[c]:compute (map_type (cur[2]), cur[4], cur[5], cur[3])
 	end
 end
 
@@ -123,17 +132,18 @@ function dsp_run (ins, outs, n_samples)
 	local changed = false
 	local siz = n_samples
 	local off = 0
+	local ctrl = ctrl_data ()
 
 	-- if a parameter was changed, process at most 64 samples at a time
 	-- and interpolate parameters until the current settings match
 	-- the target values
-	if param_changed (CtrlPorts:array ()) then
+	if param_changed (ctrl) then
 		changed = true
 		siz = 64
 	end
 
 	while n_samples > 0 do
-		if changed then apply_params (CtrlPorts:array ()) end
+		if changed then apply_params (ctrl) end
 		if siz > n_samples then siz = n_samples end
 
 		-- process all channels
@@ -212,9 +222,9 @@ function render_inline (ctx, w, max_h)
 
 	-- set filter coefficients if they have changed
 	if param_changed (CtrlPorts:array ()) then
-		local ctrl = CtrlPorts:array ()
-		for k = 1,4 do cur[k] = ctrl[k] end
-		filt:compute (map_type (cur[1]), cur[3], cur[4], cur[2])
+		local ctrl = ctrl_data ()
+		for k = 2,5 do cur[k] = ctrl[k] end
+		filt:compute (map_type (cur[2]), cur[4], cur[5], cur[3])
 	end
 
 	-- calc height of inline display
