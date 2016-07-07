@@ -48,12 +48,13 @@ namespace ARDOUR { namespace DSP {
 	 */
 	class DspShm {
 		public:
-			DspShm ()
+			DspShm (size_t s = 0)
 				: _data (0)
 				, _size (0)
 			{
 				assert (sizeof(float) == sizeof (int32_t));
 				assert (sizeof(float) == sizeof (int));
+				allocate (s);
 			}
 
 			~DspShm () {
@@ -65,6 +66,7 @@ namespace ARDOUR { namespace DSP {
 			 * @param s size, total number of float or integer elements to store.
 			 */
 			void allocate (size_t s) {
+				if (s == _size) { return; }
 				_data = realloc (_data, sizeof(float) * s);
 				if (_data) { _size = s; }
 			}

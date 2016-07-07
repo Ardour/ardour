@@ -428,6 +428,9 @@ LuaBindings::common (lua_State* L)
 		.addVoidConstructor ()
 		.addFunction ("get", static_cast<uint32_t(ChanMapping::*)(DataType, uint32_t) const>(&ChanMapping::get))
 		.addFunction ("set", &ChanMapping::set)
+		.addFunction ("count", &ChanMapping::count)
+		.addFunction ("n_total", &ChanMapping::n_total)
+		.addFunction ("is_monotonic", &ChanMapping::is_monotonic)
 		.addConst ("Invalid", 4294967295U) // UINT32_MAX
 		.endClass ()
 
@@ -1365,6 +1368,7 @@ LuaBindings::dsp (lua_State* L)
 		.endNamespace ()
 
 		.beginClass <DSP::DspShm> ("DspShm")
+		.addConstructor<void (*) (size_t)> ()
 		.addFunction ("allocate", &DSP::DspShm::allocate)
 		.addFunction ("clear", &DSP::DspShm::clear)
 		.addFunction ("to_float", &DSP::DspShm::to_float)
