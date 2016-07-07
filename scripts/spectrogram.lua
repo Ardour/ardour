@@ -42,81 +42,67 @@ function dsp_params ()
 	}
 end
 
+-- a C memory area.
+-- It needs to be in global scope.
+-- When the variable is set to nil, the allocated memory
+-- is free()ed
+local cmem = nil
+
 function dsp_init (rate)
 	-- global variables (DSP part only)
-	samplerate = rate
-	bufsiz = 2 * rate
 	dpy_hz = rate / 25
 	dpy_wr = 0
-end
 
-function dsp_configure (ins, outs)
-	-- store configuration in global variable
-	audio_ins = ins:n_audio ()
-	-- allocate shared memory area, ringbuffer between DSP/GUI
-	self:shmem ():allocate (4 + bufsiz)
-	self:shmem ():clear ()
-	self:shmem ():atomic_set_int (0, 0)
-	local cfg = self:shmem ():to_int (1):array ()
-	cfg[1] = samplerate
-	cfg[2] = bufsiz
+	-- create a ringbuffer to hold (float) audio-data
+	rb = PBD.RingBufferF (2 * rate)
+
+	-- allocate memory, local mix buffer
+	cmem = ARDOUR.DSP.DspShm (8192)
+
+	-- create a table of objects to share with the GUI
+	local tbl = {}
+	tbl['rb'] = rb;
+	tbl['samplerate'] = rate
+
+	-- "self" is a special DSP variable referring
+	-- to the plugin instance itself.
+	--
+	-- "table()" is-a http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR.LuaTableRef
+	-- which allows to store/retrieve lua-tables to share them other interpreters
+	self:table ():set (tbl);
 end
 
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
-	local shmem = self:shmem ()
-	local write_ptr = shmem:atomic_get_int (0)
+	-- here we sum all audio input channels channels and then copy the data to a ringbuffer
+	-- for the GUI to process later
 
-	-- sum channels, copy to ringbuffer
+	local audio_ins = in_map:count (): n_audio () -- number of audio input buffers
+	local ccnt = 0 -- processed channel count
+	local mem = cmem:to_float(0) -- a "FloatArray", float* for direct C API usage from the previously allocated buffer
 	for c = 1,audio_ins do
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
 		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped input buffer for given cannel
 		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped output buffer for given cannel
 		if (ib ~= ARDOUR.ChanMapping.Invalid) then
-			-- check ringbuffer wrap-around
-			if (write_ptr + n_samples < bufsiz) then
-				if c == 1 then
-					ARDOUR.DSP.copy_vector (shmem:to_float (4 + write_ptr), bufs:get_audio (ib):data (offset), n_samples)
-				else
-					ARDOUR.DSP.mix_buffers_no_gain (shmem:to_float (4 + write_ptr), bufs:get_audio (ib):data (offset), n_samples)
-				end
+			if c == 1 then
+				-- first channel, copy as-is
+				ARDOUR.DSP.copy_vector (mem, bufs:get_audio (ib):data (offset), n_samples)
 			else
-				local w0 = bufsiz - write_ptr
-				if c == 1 then
-					ARDOUR.DSP.copy_vector (shmem:to_float (4 + write_ptr), bufs:get_audio (ib):data (offset), w0)
-					ARDOUR.DSP.copy_vector (shmem:to_float (4)            , bufs:get_audio (ib):data (offset + w0), n_samples - w0)
-				else
-					ARDOUR.DSP.mix_buffers_no_gain (shmem:to_float (4 + write_ptr), bufs:get_audio (ib):data (offset), w0)
-					ARDOUR.DSP.mix_buffers_no_gain (shmem:to_float (4)            , bufs:get_audio (ib):data (offset + w0), n_samples - w0)
-				end
+				-- all other channels, add to existing data.
+				ARDOUR.DSP.mix_buffers_no_gain (mem, bufs:get_audio (ib):data (offset), n_samples)
 			end
+			ccnt = ccnt + 1;
+
 			-- copy data to output (if not processing in-place)
 			if (ob ~= ARDOUR.ChanMapping.Invalid and ib ~= ob) then
 				ARDOUR.DSP.copy_vector (bufs:get_audio (ob):data (offset), bufs:get_audio (ib):data (offset), n_samples)
 			end
-		else
-			-- invalid (unconnnected) input
-			if (write_ptr + n_samples < bufsiz) then
-				ARDOUR.DSP.memset (shmem:to_float (4 + write_ptr), 0, n_samples)
-			else
-				local w0 = bufsiz - write_ptr
-				ARDOUR.DSP.memset (shmem:to_float (4 + write_ptr), 0, w0)
-				ARDOUR.DSP.memset (shmem:to_float (4)            , 0, n_samples - w0)
-			end
 		end
 	end
 
-	-- normalize  1 / channel-count
-	if audio_ins > 1 then
-		if (write_ptr + n_samples < bufsiz) then
-			ARDOUR.DSP.apply_gain_to_buffer (shmem:to_float (4 + write_ptr), n_samples, 1 / audio_ins)
-		else
-			local w0 = bufsiz - write_ptr
-			ARDOUR.DSP.apply_gain_to_buffer (shmem:to_float (4 + write_ptr), w0, 1 / audio_ins)
-			ARDOUR.DSP.apply_gain_to_buffer (shmem:to_float (4)            , n_samples - w0, 1 / audio_ins)
-		end
-	end
-
-	-- clear unconnected inplace buffers
+	-- Clear unconnected output buffers.
+	-- In case we're processing in-place some buffers may be identical,
+	-- so this must be done  *after processing*.
 	for c = 1,audio_ins do
 		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped input buffer for given cannel
 		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped output buffer for given cannel
@@ -125,11 +111,21 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		end
 	end
 
-	write_ptr = (write_ptr + n_samples) % bufsiz
-	shmem:atomic_set_int (0, write_ptr)
+	-- Normalize gain (1 / channel-count)
+	if ccnt > 1 then
+		ARDOUR.DSP.apply_gain_to_buffer (mem, n_samples, 1 / ccnt)
+	end
+
+	-- if no channels were processed, feed silence.
+	if ccnt == 0 then
+		ARDOUR.DSP.memset (mem, 0, n_samples)
+	end
+
+	-- write data to the ringbuffer
+	rb:write (mem, n_samples)
 
 	-- emit QueueDraw every FPS
-	-- TODO: call every window-size worth of samples, at most every FPS
+	-- TODO: call every FFT window-size worth of samples, at most every FPS
 	dpy_wr = dpy_wr + n_samples
 	if (dpy_wr > dpy_hz) then
 		dpy_wr = dpy_wr % dpy_hz
@@ -149,13 +145,10 @@ local last_log = false
 
 function render_inline (ctx, w, max_h)
 	local ctrl = CtrlPorts:array () -- get control port array (read/write)
-	local shmem = self:shmem () -- get shared memory region
-	local cfg = shmem:to_int (1):array () -- "cast" into lua-table
-	local rate = cfg[1]
-	local buf_size = cfg[2]
-
-	if buf_size == 0 then
-		return
+	local tbl = self:table ():get () -- get shared memory table
+	local rate = tbl['samplerate']
+	if not cmem then
+		cmem = ARDOUR.DSP.DspShm (0)
 	end
 
 	-- get settings
@@ -187,6 +180,7 @@ function render_inline (ctx, w, max_h)
 
 	if not fft then
 		fft = ARDOUR.DSP.FFTSpectrum (fft_size, rate)
+		cmem:allocate (fft_size)
 	end
 
 	if last_log ~= logscale then
@@ -226,24 +220,14 @@ function render_inline (ctx, w, max_h)
 	local f_b = w / math.log (fft_size / 2) -- inverse log-scale base
 	local f_l = math.log (fft_size / rate) * f_b -- inverse logscale lower-bound
 
-	-- available samples in ring-buffer
-	local write_ptr = shmem:atomic_get_int (0)
-	local avail = (write_ptr + buf_size - read_ptr) % buf_size
+	local rb = tbl['rb'];
+	local mem = cmem:to_float (0)
 
-	while (avail >= fft_size) do
+	while (rb:read_space() >= fft_size) do
 		-- process one line / buffer
-		if read_ptr + fft_size < buf_size then
-			fft:set_data_hann (shmem:to_float (read_ptr + 4), fft_size, 0)
-		else
-			local r0 = buf_size - read_ptr
-			fft:set_data_hann (shmem:to_float (read_ptr + 4), r0, 0)
-			fft:set_data_hann (shmem:to_float (4), fft_size - r0, r0)
-		end
-
+		rb:read (mem, fft_size)
+		fft:set_data_hann (mem, fft_size, 0)
 		fft:execute ()
-
-		read_ptr = (read_ptr + fft_size) % buf_size
-		avail = (write_ptr + buf_size - read_ptr ) % buf_size
 
 		-- draw spectrum
 		assert (bpx >= 1)
