@@ -131,6 +131,7 @@ LuaProc::init ()
 		.beginClass <LuaProc> ("LuaProc")
 		.addFunction ("queue_draw", &LuaProc::queue_draw)
 		.addFunction ("shmem", &LuaProc::instance_shm)
+		.addFunction ("table", &LuaProc::instance_ref)
 		.endClass ()
 		.endNamespace ();
 
@@ -1065,6 +1066,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 		.beginNamespace ("Ardour")
 		.beginClass <LuaProc> ("LuaProc")
 		.addFunction ("shmem", &LuaProc::instance_shm)
+		.addFunction ("table", &LuaProc::instance_ref)
 		.endClass ()
 		.endNamespace ();
 

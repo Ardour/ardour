@@ -31,6 +31,7 @@
 #include "ardour/plugin.h"
 #include "ardour/luascripting.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/lua_api.h"
 
 #include "lua/luastate.h"
 
@@ -127,6 +128,9 @@ private:
 	void queue_draw () { QueueDraw(); /* EMIT SIGNAL */ }
 	DSP::DspShm* instance_shm () { return &lshm; }
 	DSP::DspShm lshm;
+
+	LuaTableRef* instance_ref () { return &lref; }
+	LuaTableRef lref;
 
 	void init ();
 	bool load_script ();
