@@ -38,6 +38,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
+#include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
@@ -1209,6 +1210,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 {
 	uint32_t io_count;
 	uint32_t io_index;
+	boost::shared_ptr<IO> io;
 	boost::shared_ptr<Port> port;
 	vector<string> port_connections;
 
@@ -1243,20 +1245,17 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	}
 
 	if (for_input) {
-		io_count = route->n_inputs().n_total();
+		io = route->input();
 		tooltip << string_compose (_("<b>INPUT</b> to %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	} else {
-		io_count = route->n_outputs().n_total();
+		io = route->output();
 		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	}
 
+	io_count = io->n_ports().n_total();
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
-		if (for_input) {
-			port = route->input()->nth (io_index);
-		} else {
-			port = route->output()->nth (io_index);
-		}
+		port = io->nth (io_index);
 
 		port_connections.clear ();
 		port->get_connections(port_connections);
