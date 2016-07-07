@@ -488,7 +488,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* pad mapping */
 
-	uint8_t pad_table[8][8];
+	std::map<int,int> pad_map;
 	void build_pad_table();
 	int octave_shift;
 };

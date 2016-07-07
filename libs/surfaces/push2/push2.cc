@@ -1512,14 +1512,19 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 			if ((*ev).note() > 10) {
 
-				/* shift for output to the shadow port */
-				(*ev).set_note ((*ev).note() + (octave_shift*12));
+				int n = (*ev).note ();
 
-				out.push_back (*ev);
+				map<int,int>::const_iterator ni = pad_map.find (n);
 
-				/* shift back so that the pads light correctly  */
-				(*ev).set_note ((*ev).note() - (octave_shift*12));
-
+				if (ni != pad_map.end()) {
+					/* shift for output to the shadow port */
+					(*ev).set_note (ni->second);
+					out.push_back (*ev);
+					/* shift back so that the pads light correctly  */
+					(*ev).set_note (n);
+				} else {
+					out.push_back (*ev);
+				}
 
 				matched = true;
 			}
@@ -1595,16 +1600,8 @@ Push2::input_port()
 void
 Push2::build_pad_table ()
 {
-	for (int row = 0; row < 8; ++row ) {
-		for (int col = 0; col < 8; ++col) {
-
-			/* top left pad sends note number 92 by default */
-
-			int note_number = 92 - (row*8+col);
-			note_number += (octave_shift * 12);
-			note_number = max (0, min (127, note_number));
-			pad_table[row][col] = note_number;
-		}
+	for (int i = 36; i < 99; ++i) {
+		pad_map[i] = i + (octave_shift*12);
 	}
 
 	PadChange (); /* emit signal */
@@ -1613,8 +1610,10 @@ Push2::build_pad_table ()
 uint8_t
 Push2::pad_note (int row, int col) const
 {
-	if (row < 8 && col < 8) {
-		return pad_table[row][col];
+	map<int,int>::const_iterator ni = pad_map.find (row*8+col);
+
+	if (ni != pad_map.end()) {
+		return ni->second;
 	}
 
 	return 0;
