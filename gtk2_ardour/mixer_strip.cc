@@ -1235,24 +1235,67 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	ostringstream tooltip;
 	char * tooltip_cstr;
 
-	//to avoid confusion, the button caption should only show connections that match the datatype of the track
+	/* To avoid confusion, the button caption only shows connections that match the expected datatype
+	 *
+	 * First of all, if the user made only connections to a given type, we should use that one since
+	 * it is very probably what the user expects. If there are several connections types, then show
+	 * audio ones as primary, which matches expectations for both audio tracks with midi control and
+	 * synthesisers. This first heuristic can be expressed with these two rules:
+	 * A) If there are connected audio ports, consider audio as primary type.
+	 * B) Else, if there are connected midi ports, consider midi as primary type.
+	 *
+	 * If there are no connected ports, then we choose the primary type based on the type of existing
+	 * but unconnected ports. Again:
+	 * C) If there are audio ports, consider audio as primary type.
+	 * D) Else, if there are midi ports, consider midi as primary type. */
+
 	DataType dt = DataType::AUDIO;
-	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 ) {
-		dt = DataType::MIDI;
-		// avoid further confusion with Midi-tracks that have a synth.
-		// Audio-ports may be connected, but button says "Disconnected"
+	bool match = false;
+
+	if (for_input) {
+		io = route->input();
+	} else {
+		io = route->output();
+	}
+
+	io_count = io->n_ports().n_total();
+	for (io_index = 0; io_index < io_count; ++io_index) {
+		port = io->nth (io_index);
+		if (port->connected()) {
+			match = true;
+			if (port->type() == DataType::AUDIO) {
+				/* Rule A) applies no matter the remaining ports */
+				dt = DataType::AUDIO;
+				break;
+			}
+			if (port->type() == DataType::MIDI) {
+				/* Rule B) is a good candidate... */
+				dt = DataType::MIDI;
+				/* ...but continue the loop to check remaining ports for rule A) */
+			}
+		}
+	}
+
+	if (!match) {
+		/* Neither rule A) nor rule B) matched */
+		if ( io->n_ports().n_audio() > 0 ) {
+			/* Rule C */
+			dt = DataType::AUDIO;
+		} else if ( io->n_ports().n_midi() > 0 ) {
+			/* Rule D */
+			dt = DataType::MIDI;
+		}
+	}
+
+	if ( dt == DataType::MIDI ) {
 		tooltip << _("MIDI ");
 	}
 
 	if (for_input) {
-		io = route->input();
 		tooltip << string_compose (_("<b>INPUT</b> to %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	} else {
-		io = route->output();
 		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	}
-
-	io_count = io->n_ports().n_total();
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
 		port = io->nth (io_index);
