@@ -1267,9 +1267,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 				continue;
 			}
 			for (uint32_t i = 1; i < input_elements; ++i) {
-				for (uint32_t j = 0; j < bus_inputs[i]; ++j) {
-					io_configs.push_back (pair<int,int> (possible_in + j, possible_out));
-				}
+				// can't use up-to bus_inputs[]
+				// waves' SC-C6(s) for example fails to configure with only 1 input
+				// on the 2nd bus.
+				io_configs.push_back (pair<int,int> (possible_in + bus_inputs[i], possible_out));
 			}
 		}
 	}
