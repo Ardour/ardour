@@ -170,6 +170,7 @@ class MackieControlProtocol
 	boost::shared_ptr<Mackie::Surface> nth_surface (uint32_t) const;
 
 	uint32_t global_index (Mackie::Strip&);
+	uint32_t global_index_locked (Mackie::Strip&);
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
@@ -228,11 +229,11 @@ class MackieControlProtocol
 
 	void add_down_button (ARDOUR::AutomationType, int surface, int strip);
 	void remove_down_button (ARDOUR::AutomationType, int surface, int strip);
-	ControlList down_controls (ARDOUR::AutomationType);
+	ControlList down_controls (ARDOUR::AutomationType, uint32_t pressed);
 
 	void add_down_select_button (int surface, int strip);
 	void remove_down_select_button (int surface, int strip);
-	void select_range ();
+	void select_range (uint32_t pressed);
 
 	int16_t ipmidi_base() const { return _ipmidi_base; }
 	void    set_ipmidi_base (int16_t);
@@ -378,7 +379,7 @@ class MackieControlProtocol
 	DownButtonMap  _down_buttons;
 	DownButtonList _down_select_buttons;
 
-	void pull_stripable_range (DownButtonList&, ARDOUR::StripableList&);
+	void pull_stripable_range (DownButtonList&, ARDOUR::StripableList&, uint32_t pressed);
 
 	/* implemented button handlers */
 	Mackie::LedState stop_press(Mackie::Button &);

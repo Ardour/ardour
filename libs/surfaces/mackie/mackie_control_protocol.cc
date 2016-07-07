@@ -2027,13 +2027,13 @@ MackieControlProtocol::remove_down_select_button (int surface, int strip)
 }
 
 void
-MackieControlProtocol::select_range ()
+MackieControlProtocol::select_range (uint32_t pressed)
 {
 	StripableList stripables;
 
-	pull_stripable_range (_down_select_buttons, stripables);
+	pull_stripable_range (_down_select_buttons, stripables, pressed);
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables\n", stripables.size()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables, first = %2\n", stripables.size(), stripables.front()->name()));
 
 	if (stripables.empty()) {
 		return;
@@ -2093,7 +2093,7 @@ MackieControlProtocol::remove_down_button (AutomationType a, int surface, int st
 }
 
 MackieControlProtocol::ControlList
-MackieControlProtocol::down_controls (AutomationType p)
+MackieControlProtocol::down_controls (AutomationType p, uint32_t pressed)
 {
 	ControlList controls;
 	StripableList stripables;
@@ -2107,7 +2107,7 @@ MackieControlProtocol::down_controls (AutomationType p)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("looking for down buttons for %1, got %2\n",
 							   p, m->second.size()));
 
-	pull_stripable_range (m->second, stripables);
+	pull_stripable_range (m->second, stripables, pressed);
 
 	switch (p) {
 	case GainAutomation:
@@ -2150,7 +2150,7 @@ struct ButtonRangeSorter {
 };
 
 void
-MackieControlProtocol::pull_stripable_range (DownButtonList& down, StripableList& selected)
+MackieControlProtocol::pull_stripable_range (DownButtonList& down, StripableList& selected, uint32_t pressed)
 {
 	ButtonRangeSorter cmp;
 
@@ -2200,13 +2200,19 @@ MackieControlProtocol::pull_stripable_range (DownButtonList& down, StripableList
 									   (*s)->number(), fs, ls));
 
 			for (uint32_t n = fs; n < ls; ++n) {
-				boost::shared_ptr<Stripable> r = (*s)->nth_strip (n)->stripable();
+				Strip* strip = (*s)->nth_strip (n);
+				boost::shared_ptr<Stripable> r = strip->stripable();
 				if (r) {
-					selected.push_back (r);
+					if (global_index_locked (*strip) == pressed) {
+						selected.push_front (r);
+					} else {
+						selected.push_back (r);
+					}
 				}
 			}
 		}
 	}
+
 }
 
 void
@@ -2415,6 +2421,12 @@ uint32_t
 MackieControlProtocol::global_index (Strip& strip)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	return global_index_locked (strip);
+}
+
+uint32_t
+MackieControlProtocol::global_index_locked (Strip& strip)
+{
 	uint32_t global = 0;
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
