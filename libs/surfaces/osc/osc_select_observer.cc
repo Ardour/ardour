@@ -128,6 +128,50 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 		}
 
 	}
+	if (feedback[13]) { // Well known controls
+		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
+		if (_strip->pan_elevation_control ()) {
+			_strip->pan_elevation_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
+			change_message ("/select/pan_elevation_position", _strip->pan_elevation_control());
+		}
+		if (_strip->pan_frontback_control ()) {
+			_strip->pan_frontback_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
+			change_message ("/select/pan_frontback_position", _strip->pan_frontback_control());
+		}
+		if (_strip->pan_lfe_control ()) {
+			_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_position"), _strip->pan_lfe_control()), OSC::instance());
+			change_message ("/select/pan_lfe_position", _strip->pan_lfe_control());
+		}
+		// Compressor
+		if (_strip->comp_enable_controllable ()) {
+			_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
+			change_message ("/select/comp_enable", _strip->comp_enable_controllable());
+		}
+		if (_strip->comp_threshold_controllable ()) {
+			_strip->comp_threshold_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), _strip->comp_threshold_controllable()), OSC::instance());
+			change_message ("/select/comp_threshold", _strip->comp_threshold_controllable());
+		}
+		if (_strip->comp_speed_controllable ()) {
+			_strip->comp_speed_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_speed"), _strip->comp_speed_controllable()), OSC::instance());
+			change_message ("/select/comp_speed", _strip->comp_speed_controllable());
+		}
+		if (_strip->comp_mode_controllable ()) {
+			_strip->comp_mode_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_mode"), _strip->comp_mode_controllable()), OSC::instance());
+			change_message ("/select/comp_mode", _strip->comp_mode_controllable());
+			text_message ("/select/comp_mode_name", _strip->comp_mode_name(_strip->comp_mode_controllable()->get_value()));
+			text_message ("/select/comp_speed_name", _strip->comp_speed_name(_strip->comp_mode_controllable()->get_value()));
+		}
+		if (_strip->comp_makeup_controllable ()) {
+			_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
+			change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
+		}
+		if (_strip->comp_redux_controllable ()) {
+			_strip->comp_redux_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_redux"), _strip->comp_redux_controllable()), OSC::instance());
+			change_message ("/select/comp_redux", _strip->comp_redux_controllable());
+		}
+
+	}
+
 	tick();
 }
 
@@ -378,6 +422,17 @@ OSCSelectObserver::change_message (string path, boost::shared_ptr<Controllable> 
 	lo_message msg = lo_message_new ();
 
 	lo_message_add_float (msg, (float) controllable->get_value());
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::text_message (string path, std::string text)
+{
+	lo_message msg = lo_message_new ();
+
+	lo_message_add_string (msg, text.c_str());
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
