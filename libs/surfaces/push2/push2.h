@@ -95,10 +95,10 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<ARDOUR::Port> input_port();
 	boost::shared_ptr<ARDOUR::Port> output_port();
 
-	uint8_t pad_note (int row, int col) const;
+	int pad_note (int row, int col) const;
 	PBD::Signal0<void> PadChange;
 
-	void set_pad_scale (int root, int octave, MusicalMode::Type mode);
+	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
 
    private:
 	libusb_device_handle *handle;
@@ -513,6 +513,12 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	std::map<int,int> pad_map;
 	void build_pad_table();
+
+	MusicalMode::Type mode;
+	int scale_root;
+	int root_octave;
+	bool in_key;
+
 	int octave_shift;
 };
 

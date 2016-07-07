@@ -86,10 +86,11 @@ P2GUI::P2GUI (Push2& p)
 	, pad_table (8, 8)
 	, root_note_octave_adjustment (3, 0, 10, 1, 1)
 	, root_note_octave (root_note_octave_adjustment)
-	, root_note_octave_label (X_("Octave"))
-	, root_note_label (X_("Root"))
-	, mode_label (X_("Mode (Scale)"))
-	, mode_packer (3, 2)
+	, root_note_octave_label (_("Octave"))
+	, root_note_label (_("Root"))
+	, mode_label (_("Mode (Scale)"))
+	, inkey_button (_("In-Key Mode"))
+	, mode_packer (3, 3)
 {
 	set_border_width (12);
 
@@ -156,6 +157,8 @@ P2GUI::P2GUI (Push2& p)
 	mode_packer.attach (mode_label, 0, 1, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
 	mode_packer.attach (mode_selector, 1, 2, 2, 3, AttachOptions (FILL|EXPAND), SHRINK);
 
+	mode_packer.attach (inkey_button, 1, 2, 3, 4, AttachOptions (FILL|EXPAND), SHRINK);
+
 	pad_notebook.append_page (pad_table, _("Pad Layout"));
 	pad_notebook.append_page (mode_packer, _("Modes/Scales"));
 	pad_notebook.append_page (custom_packer, _("Custom"));
@@ -163,6 +166,7 @@ P2GUI::P2GUI (Push2& p)
 	root_note_octave_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
 	root_note_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
 	mode_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
+	inkey_button.signal_clicked().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
 
 	set_spacing (12);
 
@@ -447,15 +451,15 @@ P2GUI::build_pad_table ()
 {
 	container_clear (pad_table);
 
-	for (int row = 0; row < 8; ++row) {
+	for (int row = 7; row >= 0; --row) {
 		for (int col = 0; col < 8; ++col) {
 
-			int n = (int) p2.pad_note (row, col);
+			int n = p2.pad_note (row, col);
 
 			Gtk::Button* b = manage (new Button (string_compose ("%1 (%2)", Evoral::midi_note_name (n), n)));
 			b->show ();
 
-			pad_table.attach (*b, col, col+1, row, row + 1);
+			pad_table.attach (*b, col, col+1, (7-row), (8-row));
 		}
 	}
 }
@@ -684,6 +688,7 @@ P2GUI::reprogram_pad_scale ()
 	int root;
 	int octave;
 	MusicalMode::Type mode;
+	bool inkey;
 
 	Gtk::TreeModel::iterator iter = root_note_selector.get_active();
 	if (iter) {
@@ -711,5 +716,7 @@ P2GUI::reprogram_pad_scale ()
 		mode = MusicalMode::IonianMajor;
 	}
 
-	p2.set_pad_scale (root, octave, mode);
+	inkey = inkey_button.get_active ();
+
+	p2.set_pad_scale (root, octave, mode, inkey);
 }

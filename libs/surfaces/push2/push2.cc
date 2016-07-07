@@ -26,6 +26,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
+#include "pbd/enumwriter.h"
 
 #include "midi++/parser.h"
 #include "timecode/time.h"
@@ -61,6 +62,59 @@ const int Push2::pixels_per_row = 1024;
 #define ABLETON 0x2982
 #define PUSH2   0x1967
 
+__attribute__((constructor)) static void
+register_enums ()
+{
+	EnumWriter& enum_writer (EnumWriter::instance());
+	vector<int> i;
+	vector<string> s;
+
+	MusicalMode::Type mode;
+
+#define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
+#define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
+
+	REGISTER_CLASS_ENUM (MusicalMode,Dorian);
+	REGISTER_CLASS_ENUM (MusicalMode, IonianMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, Minor);
+	REGISTER_CLASS_ENUM (MusicalMode, HarmonicMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorAscending);
+	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorDescending);
+	REGISTER_CLASS_ENUM (MusicalMode, Phrygian);
+	REGISTER_CLASS_ENUM (MusicalMode, Lydian);
+	REGISTER_CLASS_ENUM (MusicalMode, Mixolydian);
+	REGISTER_CLASS_ENUM (MusicalMode, Aeolian);
+	REGISTER_CLASS_ENUM (MusicalMode, Locrian);
+	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, Chromatic);
+	REGISTER_CLASS_ENUM (MusicalMode, BluesScale);
+	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, Oriental);
+	REGISTER_CLASS_ENUM (MusicalMode, DoubleHarmonic);
+	REGISTER_CLASS_ENUM (MusicalMode, Enigmatic);
+	REGISTER_CLASS_ENUM (MusicalMode, Hirajoshi);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, Kumoi);
+	REGISTER_CLASS_ENUM (MusicalMode, Iwato);
+	REGISTER_CLASS_ENUM (MusicalMode, Hindu);
+	REGISTER_CLASS_ENUM (MusicalMode, Spanish8Tone);
+	REGISTER_CLASS_ENUM (MusicalMode, Pelog);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianGypsy);
+	REGISTER_CLASS_ENUM (MusicalMode, Overtone);
+	REGISTER_CLASS_ENUM (MusicalMode, LeadingWholeTone);
+	REGISTER_CLASS_ENUM (MusicalMode, Arabian);
+	REGISTER_CLASS_ENUM (MusicalMode, Balinese);
+	REGISTER_CLASS_ENUM (MusicalMode, Gypsy);
+	REGISTER_CLASS_ENUM (MusicalMode, Mohammedan);
+	REGISTER_CLASS_ENUM (MusicalMode, Javanese);
+	REGISTER_CLASS_ENUM (MusicalMode, Persian);
+	REGISTER_CLASS_ENUM (MusicalMode, Algerian);
+	REGISTER (mode);
+}
+
 Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
@@ -72,6 +126,10 @@ Push2::Push2 (ARDOUR::Session& s)
 	, bank_start (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
+	, mode (MusicalMode::IonianMajor)
+	, scale_root (36)
+	, root_octave (3)
+	, in_key (true)
 	, octave_shift (0)
 {
 	context = Cairo::Context::create (frame_buffer);
@@ -292,12 +350,14 @@ Push2::init_buttons (bool startup)
 		}
 	}
 
-	for (NNPadMap::iterator pi = nn_pad_map.begin(); pi != nn_pad_map.end(); ++pi) {
-		Pad* pad = pi->second;
+	if (!startup) {
+		for (NNPadMap::iterator pi = nn_pad_map.begin(); pi != nn_pad_map.end(); ++pi) {
+			Pad* pad = pi->second;
 
-		pad->set_color (LED::Black);
-		pad->set_state (LED::OneShot24th);
-		write (pad->state_msg());
+			pad->set_color (LED::Black);
+			pad->set_state (LED::OneShot24th);
+			write (pad->state_msg());
+		}
 	}
 }
 
@@ -591,6 +651,7 @@ Push2::set_active (bool yn)
 
 		init_buttons (true);
 		init_touch_strip ();
+		set_pad_scale (scale_root, root_octave, mode, in_key);
 		switch_bank (0);
 		splash ();
 
@@ -1052,6 +1113,11 @@ Push2::get_state()
 	child = new XMLNode (X_("Output"));
 	child->add_child_nocopy (_async_out->get_state());
 	node.add_child_nocopy (*child);
+
+	node.add_property ("root", to_string (scale_root, std::dec));
+	node.add_property ("root_octave", to_string (root_octave, std::dec));
+	node.add_property ("in_key", in_key ? X_("yes") : X_("no"));
+	node.add_property ("mode", enum_2_string (mode));
 
 	return node;
 }
@@ -1656,51 +1722,39 @@ Push2::build_pad_table ()
 	PadChange (); /* emit signal */
 }
 
-uint8_t
+int
 Push2::pad_note (int row, int col) const
 {
-	map<int,int>::const_iterator ni = pad_map.find (row*8+col);
+	NNPadMap::const_iterator nni = nn_pad_map.find (36+(row*8)+col);
 
-	if (ni != pad_map.end()) {
-		return ni->second;
+	if (nni != nn_pad_map.end()) {
+		return nni->second->filtered;
 	}
 
 	return 0;
 }
 
 void
-Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode)
+Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
 	cerr << "reset pad to r = " << root << " o = " << octave << " m = " << mode << endl;
 
 	MusicalMode m (mode);
-
-	if (mode == MusicalMode::Chromatic) {
-		/* back to "normal" */
-		for (int note = 36; note < 100; ++note) {
-			Pad* pad = nn_pad_map[note];
-			pad->do_when_pressed = Pad::FlashOn;
-			pad->set_color (LED::Black);
-			pad->perma_color = LED::Black;
-			pad->filtered = note;
-			write (pad->state_msg());
-		}
-
-		PadChange ();
-		return;
-	}
-
 	vector<float>::iterator interval;
 	int note;
-	int keep_root = root;
+	const int original_root = root;
 
 	interval = m.steps.begin();
 	root += (octave*12);
 	note = root;
 
-	set<int> mode_map; /* contains only notes in mode */
+	const int root_start = root;
+
+	set<int> mode_map; /* contains only notes in mode, O(logN) lookup */
+	vector<int> mode_vector; /* sorted in note order */
 
 	mode_map.insert (note);
+	mode_vector.push_back (note);
 
 	while (note < 128) {
 
@@ -1714,37 +1768,106 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode)
 			interval = m.steps.begin();
 			root += 12;
 			mode_map.insert (root);
+			mode_vector.push_back (root);
 
 		} else {
 			note = (int) floor (root + (2.0 * (*interval)));
 			interval++;
 			mode_map.insert (note);
+			mode_vector.push_back (note);
 		}
 	}
 
-	for (note = 36; note < 100; ++note) {
-		Pad* pad = nn_pad_map[note];
+	if (inkey) {
 
-		if (mode_map.find (note) != mode_map.end()) {
-			if ((note % 12) == keep_root) {
-				pad->set_color (LED::Green);
-				pad->perma_color = LED::Green;
-			} else {
-				pad->set_color (LED::White);
-				pad->perma_color = LED::White;
+		vector<int>::iterator notei;
+		int row_offset = 0;
+		for (int row = 0; row < 8; ++row) {
+
+			/* Ableton's grid layout wraps the available notes in the scale
+			 * by offsetting 3 notes per row (from the bottom)
+			 */
+
+			notei = mode_vector.begin();
+			notei += row_offset;
+			row_offset += 3;
+
+			for (int col = 0; col < 8; ++col) {
+				int index = 36 + (row*8) + col;
+				Pad* pad = nn_pad_map[index];
+				int notenum;
+				if (notei != mode_vector.end()) {
+
+					notenum = *notei;
+					pad->filtered = notenum;
+
+					if ((notenum % 12) == original_root) {
+						pad->set_color (LED::Green);
+						pad->perma_color = LED::Green;
+					} else {
+						pad->set_color (LED::White);
+						pad->perma_color = LED::White;
+					}
+
+					pad->do_when_pressed = Pad::FlashOff;
+					notei++;
+
+				} else {
+
+					pad->set_color (LED::Black);
+					pad->do_when_pressed = Pad::Nothing;
+					pad->filtered = -1;
+				}
+
+				write (pad->state_msg());
 			}
-			pad->do_when_pressed = Pad::FlashOff;
-			/* Chromatic: all pads send their own note number */
-			pad->filtered = note;
-		} else {
-			/* note is not in mode, turn it off */
-			pad->do_when_pressed = Pad::Nothing;
-			pad->set_color (LED::Black);
-			pad->filtered = -1;
 		}
 
-		write (pad->state_msg());
+	} else {
+
+		/* chromatic: all notes available, but highlight those in the scale */
+
+		for (note = 36; note < 100; ++note) {
+
+			Pad* pad = nn_pad_map[note];
+
+			/* Chromatic: all pads play, half-tone steps. Light
+			 * those in the scale, and highlight root notes
+			 */
+
+			pad->filtered = root_start + (note - 36);
+
+			if (mode_map.find (note) != mode_map.end()) {
+
+				if ((note % 12) == original_root) {
+					pad->set_color (LED::Green);
+					pad->perma_color = LED::Green;
+				} else {
+					pad->set_color (LED::White);
+					pad->perma_color = LED::White;
+				}
+
+				pad->do_when_pressed = Pad::FlashOff;
+
+			} else {
+
+				/* note is not in mode, turn it off */
+
+				pad->do_when_pressed = Pad::FlashOn;
+				pad->set_color (LED::Black);
+
+			}
+
+			write (pad->state_msg());
+		}
 	}
 
 	PadChange (); /* EMIT SIGNAL */
+
+	/* store state */
+
+	scale_root = root;
+	root_octave = octave;
+	in_key = inkey;
+	mode = mode;
 }

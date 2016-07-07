@@ -24,6 +24,7 @@
 #include <string>
 
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/image.h>
 #include <gtkmm/table.h>
@@ -135,6 +136,8 @@ private:
 	Glib::RefPtr<Gtk::ListStore> build_mode_columns ();
 	Gtk::ComboBox mode_selector;
 	Gtk::Label mode_label;
+
+	Gtk::CheckButton inkey_button;
 
 	Gtk::Notebook pad_notebook;
 	Gtk::Table    mode_packer;
