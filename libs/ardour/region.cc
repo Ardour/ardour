@@ -672,9 +672,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 void
 Region::recompute_position_from_lock_style (const int32_t& sub_num)
 {
-	if (_position_lock_style == MusicTime) {
-		_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	}
+	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
 }
 
 void
