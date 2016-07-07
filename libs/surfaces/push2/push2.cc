@@ -1508,9 +1508,12 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
 		if ((*ev).is_note_on() || (*ev).is_note_off()) {
-			/* encoder touch start/touch end use note 0-10 */
 
-			if ((*ev).note() > 10) {
+			/* encoder touch start/touch end use note
+			 * 0-10. touchstrip uses note 12
+			 */
+
+			if ((*ev).note() > 10 && (*ev).note() != 12) {
 
 				int n = (*ev).note ();
 
@@ -1600,8 +1603,10 @@ Push2::input_port()
 void
 Push2::build_pad_table ()
 {
-	for (int i = 36; i < 99; ++i) {
-		pad_map[i] = i + (octave_shift*12);
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 7; col >= 0; --col) {
+			pad_map[row*8+col] = 99 - (row*8+(7-col)) + (octave_shift*12);
+		}
 	}
 
 	PadChange (); /* emit signal */

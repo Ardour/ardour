@@ -32,6 +32,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 
+#include "evoral/midi_util.h"
+
 #include "push2.h"
 #include "gui.h"
 
@@ -125,12 +127,26 @@ P2GUI::P2GUI (Push2& p)
 
 	hpacker.pack_start (table, true, true);
 
+	pad_table.set_spacings (3);
 	build_pad_table ();
+
+	root_note_selector.set_model (build_note_columns());
+	root_note_selector.pack_start (note_columns.name);
+
+	mode_selector.set_model (build_mode_columns());
+	mode_selector.pack_start (mode_columns.name);
+
+	mode_packer.pack_start (root_note_selector, false, false);
+	mode_packer.pack_start (mode_selector, false, false);
+
+	pad_notebook.append_page (pad_table, _("Pad Layout"));
+	pad_notebook.append_page (mode_packer, _("Modes/Scales"));
+	pad_notebook.append_page (custom_packer, _("Custom"));
 
 	set_spacing (12);
 
 	pack_start (hpacker, false, false);
-	pack_start (pad_table, true, true);
+	pack_start (pad_notebook);
 
 	/* update the port connection combos */
 
@@ -413,10 +429,192 @@ P2GUI::build_pad_table ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 
-			Gtk::Button* b = manage (new Button (string_compose ("%1", (int) p2.pad_note (row, col))));
+			int n = (int) p2.pad_note (row, col);
+
+			Gtk::Button* b = manage (new Button (string_compose ("%1 (%2)", Evoral::midi_note_name (n), n)));
 			b->show ();
 
 			pad_table.attach (*b, col, col+1, row, row + 1);
 		}
 	}
+}
+
+Glib::RefPtr<Gtk::ListStore>
+P2GUI::build_mode_columns ()
+{
+	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (mode_columns);
+	TreeModel::Row row;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Random");
+	row[mode_columns.mode] = MusicalMode::Random;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Dorian");
+	row[mode_columns.mode] = MusicalMode::Dorian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Ionian (\"Minor\")");
+	row[mode_columns.mode] = MusicalMode::Ionian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Phrygian");
+	row[mode_columns.mode] = MusicalMode::Phrygian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Lydian");
+	row[mode_columns.mode] = MusicalMode::Lydian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Mixolydian");
+	row[mode_columns.mode] = MusicalMode::Mixolydian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Aeolian (\"Major\")");
+	row[mode_columns.mode] = MusicalMode::Aeolian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Locrian");
+	row[mode_columns.mode] = MusicalMode::Locrian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Pentatonic Major");
+	row[mode_columns.mode] = MusicalMode::PentatonicMajor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Pentatonic Minor");
+	row[mode_columns.mode] = MusicalMode::PentatonicMinor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Major Chord");
+	row[mode_columns.mode] = MusicalMode::MajorChord;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Minor Chord");
+	row[mode_columns.mode] = MusicalMode::MinorChord;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Min7");
+	row[mode_columns.mode] = MusicalMode::Min7;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Sus4");
+	row[mode_columns.mode] = MusicalMode::Sus4;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Chromatic");
+	row[mode_columns.mode] = MusicalMode::Chromatic;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Blues Scale");
+	row[mode_columns.mode] = MusicalMode::BluesScale;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Neapolitan Minor");
+	row[mode_columns.mode] = MusicalMode::NeapolitanMinor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Neapolitan Major");
+	row[mode_columns.mode] = MusicalMode::NeapolitanMajor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Oriental");
+	row[mode_columns.mode] = MusicalMode::Oriental;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Double Harmonic");
+	row[mode_columns.mode] = MusicalMode::DoubleHarmonic;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Enigmatic");
+	row[mode_columns.mode] = MusicalMode::Enigmatic;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Hirajoshi");
+	row[mode_columns.mode] = MusicalMode::Hirajoshi;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Hungarian Minor");
+	row[mode_columns.mode] = MusicalMode::HungarianMinor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Hungarian Major");
+	row[mode_columns.mode] = MusicalMode::HungarianMajor;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Kumoi");
+	row[mode_columns.mode] = MusicalMode::Kumoi;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Iwato");
+	row[mode_columns.mode] = MusicalMode::Iwato;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Hindu");
+	row[mode_columns.mode] = MusicalMode::Hindu;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Spanish 8 Tone");
+	row[mode_columns.mode] = MusicalMode::Spanish8Tone;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Pelog");
+	row[mode_columns.mode] = MusicalMode::Pelog;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Hungarian Gypsy");
+	row[mode_columns.mode] = MusicalMode::HungarianGypsy;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Overtone");
+	row[mode_columns.mode] = MusicalMode::Overtone;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Leading Whole Tone");
+	row[mode_columns.mode] = MusicalMode::LeadingWholeTone;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Arabian");
+	row[mode_columns.mode] = MusicalMode::Arabian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Balinese");
+	row[mode_columns.mode] = MusicalMode::Balinese;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Gypsy");
+	row[mode_columns.mode] = MusicalMode::Gypsy;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Mohammedan");
+	row[mode_columns.mode] = MusicalMode::Mohammedan;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Javanese");
+	row[mode_columns.mode] = MusicalMode::Javanese;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Persian");
+	row[mode_columns.mode] = MusicalMode::Persian;
+
+	row = *store->append();
+	row[mode_columns.name] = _("Algerian");
+	row[mode_columns.mode] = MusicalMode::Algerian;
+
+	return store;
+}
+
+Glib::RefPtr<Gtk::ListStore>
+P2GUI::build_note_columns ()
+{
+	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (note_columns);
+	TreeModel::Row row;
+
+	for (int n = 0; n < 127; ++n) {
+		row = *store->append ();
+		row[note_columns.number] = n;
+		row[note_columns.name] = Evoral::midi_note_name (n);
+	}
+
+	return store;
 }

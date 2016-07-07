@@ -28,6 +28,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/notebook.h>
 
 namespace Gtk {
 	class CellRendererCombo;
@@ -35,6 +36,7 @@ namespace Gtk {
 }
 
 #include "push2.h"
+#include "mode.h"
 
 namespace ArdourSurface {
 
@@ -94,6 +96,38 @@ private:
 	/* Pads */
 
 	Gtk::Table pad_table;
+
+	/* root notes */
+
+	struct NoteColumns : public Gtk::TreeModel::ColumnRecord {
+		NoteColumns () {
+			add (number);
+			add (name);
+		}
+		Gtk::TreeModelColumn<int>         number;
+		Gtk::TreeModelColumn<std::string> name;
+	};
+	NoteColumns note_columns;
+	Glib::RefPtr<Gtk::ListStore> build_note_columns ();
+	Gtk::ComboBox root_note_selector;
+
+	/* modes/scales */
+
+	struct ModeColumns : public Gtk::TreeModel::ColumnRecord {
+		ModeColumns () {
+			add (mode);
+			add (name);
+		}
+		Gtk::TreeModelColumn<MusicalMode::Type>  mode;
+		Gtk::TreeModelColumn<std::string> name;
+	};
+	ModeColumns mode_columns;
+	Glib::RefPtr<Gtk::ListStore> build_mode_columns ();
+	Gtk::ComboBox mode_selector;
+
+	Gtk::Notebook pad_notebook;
+	Gtk::VBox     mode_packer;
+	Gtk::VBox     custom_packer;
 };
 
 }
