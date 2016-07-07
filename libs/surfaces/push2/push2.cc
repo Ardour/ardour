@@ -105,6 +105,8 @@ Push2::Push2 (ARDOUR::Session& s)
 		throw failed_constructor ();
 	}
 
+	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
+
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
 
 	/* Catch port connections and disconnections */
@@ -1143,36 +1145,64 @@ Push2::stripable_property_change (PropertyChange const& what_changed, int which)
 		 */
 
 		mid_layout[which]->set_text (string());
-
-		if (stripable[which]->presentation_info().selected()) {
-
-			boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
-			boost::shared_ptr<Stripable> current_first_selection = first_selected_stripable.lock();
-			boost::shared_ptr<MidiTrack> mtrack;
-
-			mtrack = boost::dynamic_pointer_cast<MidiTrack> (current_first_selection);
-
-			/* disconnect from pad port, if appropriate */
-			if (mtrack && pad_port) {
-				cerr << "Disconnect pads from " << mtrack->name() << endl;
-				mtrack->input()->disconnect (mtrack->input()->nth(0), pad_port->name(), this);
-			}
-
-			first_selected_stripable = boost::weak_ptr<Stripable> (stripable[which]);
-
-			/* now connect the pad port to this (newly) selected midi
-			 * track, if indeed it is
-			 */
-
-			mtrack = boost::dynamic_pointer_cast<MidiTrack> (stripable[which]);
-
-			if (mtrack && pad_port) {
-				cerr << "Reconnect pads to " << mtrack->name() << endl;
-				mtrack->input()->connect (mtrack->input()->nth (0), pad_port->name(), this);
-			}
-		}
 	}
 }
+
+void
+Push2::stripable_selection_change (StripableNotificationListPtr selected)
+{
+
+	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
+	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
+	boost::shared_ptr<MidiTrack> new_pad_target;
+
+	/* See if there's a MIDI track selected */
+
+	for (StripableNotificationList::iterator si = selected->begin(); si != selected->end(); ++si) {
+
+		new_pad_target = boost::dynamic_pointer_cast<MidiTrack> ((*si).lock());
+
+		if (new_pad_target) {
+			break;
+		}
+	}
+
+	if (new_pad_target) {
+		cerr << "new midi pad target " << new_pad_target->name() << endl;
+	} else {
+		cerr << "no midi pad target\n";
+	}
+
+	if (current_midi_track == new_pad_target) {
+		/* nothing to do */
+		return;
+	}
+
+	if (!new_pad_target) {
+		/* leave existing connection alone */
+		return;
+	}
+
+	/* disconnect from pad port, if appropriate */
+
+	if (current_midi_track && pad_port) {
+		cerr << "Disconnect pads from " << current_midi_track->name() << endl;
+		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+	}
+
+	/* now connect the pad port to this (newly) selected midi
+	 * track, if indeed there is one.
+	 */
+
+	if (new_pad_target && pad_port) {
+		cerr << "Reconnect pads to " << new_pad_target->name() << endl;
+		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
+		current_pad_target = new_pad_target;
+	} else {
+		current_pad_target.reset ();
+	}
+}
+
 
 void
 Push2::solo_change (int n)

@@ -30,9 +30,13 @@
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
+
 #include "midi++/types.h"
+
 #include "ardour/types.h"
+
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/types.h"
 
 #include "midi_byte_array.h"
 
@@ -54,6 +58,7 @@ namespace ARDOUR {
 	class AsyncMIDIPort;
 	class Port;
 	class MidiBuffer;
+	class MidiTrack;
 }
 
 namespace ArdourSurface {
@@ -467,7 +472,9 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
-	boost::weak_ptr<ARDOUR::Stripable> first_selected_stripable;
+	boost::weak_ptr<ARDOUR::MidiTrack> current_pad_target;
+	PBD::ScopedConnection selection_connection;
+	void stripable_selection_change (ARDOUR::StripableNotificationListPtr);
 
 	PBD::ScopedConnection port_reg_connection;
 	void port_registration_handler ();
