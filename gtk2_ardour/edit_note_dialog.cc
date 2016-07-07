@@ -93,7 +93,8 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 
 	_time_clock.set_session (_region_view->get_time_axis_view().session ());
 	_time_clock.set_mode (AudioClock::BBT);
-	_time_clock.set (_region_view->source_relative_time_converter().to ((*_events.begin())->note()->time ()), true);
+	_time_clock.set (_region_view->source_relative_time_converter().to
+			 ((*_events.begin())->note()->time()) + (_region_view->region()->position() - _region_view->region()->start()), true);
 
 	l = manage (left_aligned_label (_("Length")));
 	table->attach (*l, 0, 1, r, r + 1);
@@ -193,7 +194,8 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	Evoral::Beats const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
+	Evoral::Beats const t = _region_view->source_relative_time_converter().from
+		(_time_clock.current_time() - (_region_view->region()->position() - _region_view->region()->start()));
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
