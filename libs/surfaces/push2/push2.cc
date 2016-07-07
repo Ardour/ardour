@@ -42,6 +42,7 @@
 #include "ardour/tempo.h"
 
 #include "push2.h"
+#include "gui.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -1596,13 +1597,17 @@ Push2::build_pad_table ()
 {
 	for (int row = 0; row < 8; ++row ) {
 		for (int col = 0; col < 8; ++col) {
+
 			/* top left pad sends note number 92 by default */
+
 			int note_number = 92 - (row*8+col);
 			note_number += (octave_shift * 12);
 			note_number = max (0, min (127, note_number));
 			pad_table[row][col] = note_number;
 		}
 	}
+
+	PadChange (); /* emit signal */
 }
 
 uint8_t

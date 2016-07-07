@@ -44,8 +44,11 @@ public:
 	P2GUI (Push2&);
 	~P2GUI ();
 
+	void build_pad_table ();
+
 private:
 	Push2& p2;
+	PBD::ScopedConnectionList p2_connections;
 	Gtk::HBox hpacker;
 	Gtk::Table table;
 	Gtk::Table action_table;
@@ -91,7 +94,6 @@ private:
 	/* Pads */
 
 	Gtk::Table pad_table;
-	void build_pad_table ();
 };
 
 }

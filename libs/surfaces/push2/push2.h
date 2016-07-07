@@ -64,6 +64,8 @@ public:
 	~Push2Request () {}
 };
 
+class P2GUI;
+
 class Push2 : public ARDOUR::ControlProtocol
             , public AbstractUI<Push2Request>
 {
@@ -88,6 +90,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<ARDOUR::Port> output_port();
 
 	uint8_t pad_note (int row, int col) const;
+	PBD::Signal0<void> PadChange;
 
    private:
 	libusb_device_handle *handle;
@@ -480,7 +483,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* GUI */
 
-	mutable void *gui;
+	mutable P2GUI* gui;
 	void build_gui ();
 
 	/* pad mapping */

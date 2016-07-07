@@ -64,14 +64,14 @@ Push2::tear_down_gui ()
 			delete w;
 		}
 	}
-	delete static_cast<P2GUI*> (gui);
+	delete gui;
 	gui = 0;
 }
 
 void
 Push2::build_gui ()
 {
-	gui = (void*) new P2GUI (*this);
+	gui = new P2GUI (*this);
 }
 
 /*--------------------*/
@@ -139,6 +139,7 @@ P2GUI::P2GUI (Push2& p)
 	/* catch future changes to connection state */
 
 	// p2.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&P2GUI::connection_handler, this), gui_context());
+	p2.PadChange.connect (p2_connections, invalidator (*this), boost::bind (&P2GUI::build_pad_table, this), gui_context());
 }
 
 P2GUI::~P2GUI ()
@@ -407,14 +408,15 @@ P2GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 void
 P2GUI::build_pad_table ()
 {
-	Gtk::Label* l;
+	container_clear (pad_table);
 
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
-			l = manage (new Label);
-			l->set_text (string_compose ("%1", (int) p2.pad_note (row, col)));
-			l->show ();
-			pad_table.attach (*l, col, col+1, row, row + 1);
+
+			Gtk::Button* b = manage (new Button (string_compose ("%1", (int) p2.pad_note (row, col))));
+			b->show ();
+
+			pad_table.attach (*b, col, col+1, row, row + 1);
 		}
 	}
 }
