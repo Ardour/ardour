@@ -87,6 +87,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<ARDOUR::Port> input_port();
 	boost::shared_ptr<ARDOUR::Port> output_port();
 
+	uint8_t pad_note (int row, int col) const;
+
    private:
 	libusb_device_handle *handle;
 	uint8_t   frame_header[16];
@@ -419,6 +421,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_select_long_press ();
 	void button_page_left ();
 	void button_page_right ();
+	void button_octave_up ();
+	void button_octave_down ();
 
 	void start_shift ();
 	void end_shift ();
@@ -479,6 +483,11 @@ class Push2 : public ARDOUR::ControlProtocol
 	mutable void *gui;
 	void build_gui ();
 
+	/* pad mapping */
+
+	uint8_t pad_table[8][8];
+	void build_pad_table();
+	int octave_shift;
 };
 
 

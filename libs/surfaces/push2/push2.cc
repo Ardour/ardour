@@ -71,6 +71,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, bank_start (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
+	, octave_shift (0)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -96,6 +97,7 @@ Push2::Push2 (ARDOUR::Session& s)
 		mid_layout[n]->set_font_description (fd3);
 	}
 
+	build_pad_table ();
 	build_maps ();
 
 	if (open ()) {
@@ -240,7 +242,7 @@ Push2::init_buttons (bool startup)
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
-	                       Quantize, Duplicate, Browse, PageRight, PageLeft,
+	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -276,7 +278,7 @@ Push2::init_buttons (bool startup)
 
 		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
-		                           Accent, Scale, Layout, Note, Session,  OctaveUp, OctaveDown, };
+		                           Accent, Scale, Layout, Note, Session,  };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
 			Button* b = id_button_map[off_buttons[n]];
@@ -872,7 +874,6 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 	pad->set_color (LED::Black);
 	pad->set_state (LED::OneShot24th);
 	write (pad->state_msg());
-
 }
 
 void
@@ -1507,8 +1508,18 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
 		if ((*ev).is_note_on() || (*ev).is_note_off()) {
 			/* encoder touch start/touch end use note 0-10 */
+
 			if ((*ev).note() > 10) {
+
+				/* shift for output to the shadow port */
+				(*ev).set_note ((*ev).note() + (octave_shift*12));
+
 				out.push_back (*ev);
+
+				/* shift back so that the pads light correctly  */
+				(*ev).set_note ((*ev).note() - (octave_shift*12));
+
+
 				matched = true;
 			}
 		}
@@ -1580,3 +1591,26 @@ Push2::input_port()
 	return _async_in;
 }
 
+void
+Push2::build_pad_table ()
+{
+	for (int row = 0; row < 8; ++row ) {
+		for (int col = 0; col < 8; ++col) {
+			/* top left pad sends note number 92 by default */
+			int note_number = 92 - (row*8+col);
+			note_number += (octave_shift * 12);
+			note_number = max (0, min (127, note_number));
+			pad_table[row][col] = note_number;
+		}
+	}
+}
+
+uint8_t
+Push2::pad_note (int row, int col) const
+{
+	if (row < 8 && col < 8) {
+		return pad_table[row][col];
+	}
+
+	return 0;
+}

@@ -127,6 +127,8 @@ P2GUI::P2GUI (Push2& p)
 
 	build_pad_table ();
 
+	set_spacing (12);
+
 	pack_start (hpacker, false, false);
 	pack_start (pad_table, true, true);
 
@@ -410,9 +412,9 @@ P2GUI::build_pad_table ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			l = manage (new Label);
-			l->set_text (string_compose ("%1, %2", row, col));
+			l->set_text (string_compose ("%1", (int) p2.pad_note (row, col)));
 			l->show ();
-			pad_table.attach (*l, col, col+1, 7 - row, 7 - row + 1);
+			pad_table.attach (*l, col, col+1, row, row + 1);
 		}
 	}
 }

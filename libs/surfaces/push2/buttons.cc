@@ -197,9 +197,9 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (Note, 50);
 	MAKE_WHITE_BUTTON (Session, 51);
 	MAKE_WHITE_BUTTON (Layout, 31);
-	MAKE_WHITE_BUTTON (OctaveUp, 55);
+	MAKE_WHITE_BUTTON_PRESS (OctaveUp, 55, &Push2::button_octave_up);
 	MAKE_WHITE_BUTTON_PRESS (PageRight, 63, &Push2::button_page_right);
-	MAKE_WHITE_BUTTON (OctaveDown, 54);
+	MAKE_WHITE_BUTTON_PRESS (OctaveDown, 54, &Push2::button_octave_down);
 	MAKE_WHITE_BUTTON_PRESS (PageLeft, 62, &Push2::button_page_left);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Shift, 49, &Push2::button_shift_press, &Push2::button_shift_release, &Push2::button_shift_long_press);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Select, 48, &Push2::button_select_press, &Push2::button_select_release, &Push2::button_select_long_press);
@@ -588,4 +588,18 @@ Push2::start_press_timeout (Button& button, ButtonID id)
 	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (500); // milliseconds
 	button.timeout_connection = timeout->connect (sigc::bind (sigc::mem_fun (*this, &Push2::button_long_press_timeout), id));
 	timeout->attach (main_loop()->get_context());
+}
+
+void
+Push2::button_octave_down ()
+{
+	octave_shift = (max (-4, octave_shift - 1));
+	build_pad_table ();
+}
+
+void
+Push2::button_octave_up ()
+{
+	octave_shift = (max (4, octave_shift + 1));
+	build_pad_table ();
 }
