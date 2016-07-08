@@ -238,28 +238,17 @@ Push2::open ()
 
 	/* setup ports */
 
-	_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("push 2 in"), true);
-	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("push 2 out"), true);
+	_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Push 2 in"), true);
+	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Push 2 out"), true);
 
 	if (_async_in == 0 || _async_out == 0) {
 		return -1;
 	}
 
-	_input_bundle.reset (new ARDOUR::Bundle (_("Push 2 In"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("Push 2 Out"), false));
-
-	_input_bundle->add_channel (
-		_async_in->name(),
-		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (_async_in->name())
-		);
-
-	_output_bundle->add_channel (
-		_async_out->name(),
-		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (_async_out->name())
-		);
-
+	/* We do not add our ports to the input/output bundles because we don't
+	 * want users wiring them by hand. They could use JACK tools if they
+	 * really insist on that.
+	 */
 
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
@@ -273,6 +262,9 @@ Push2::open ()
 	boost::shared_ptr<MidiPort> shadow_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 
 	if (shadow_port) {
+
+		_output_bundle.reset (new ARDOUR::Bundle (_("Push 2 Pads"), false));
+
 		_output_bundle->add_channel (
 			shadow_port->name(),
 			ARDOUR::DataType::MIDI,
@@ -292,8 +284,7 @@ Push2::bundles ()
 {
 	list<boost::shared_ptr<ARDOUR::Bundle> > b;
 
-	if (_input_bundle) {
-		b.push_back (_input_bundle);
+	if (_output_bundle) {
 		b.push_back (_output_bundle);
 	}
 
