@@ -691,6 +691,12 @@ Push2::set_active (bool yn)
 		switch_bank (0);
 		splash ();
 
+		/* catch current selection, if any */
+		{
+			StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
+			stripable_selection_change (sp);
+		}
+
 	} else {
 
 		stop ();
