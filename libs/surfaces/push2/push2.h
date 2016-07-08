@@ -82,6 +82,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	static bool probe ();
 	static void* request_factory (uint32_t);
 
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+
 	bool has_editor () const { return true; }
 	void* get_gui () const;
 	void  tear_down_gui ();
@@ -372,6 +374,11 @@ class Push2 : public ARDOUR::ControlProtocol
 	void set_led_state (ButtonID, LED::State);
 
 	void build_maps ();
+
+	// Bundle to represent our input ports
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	// Bundle to represent our output ports
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
