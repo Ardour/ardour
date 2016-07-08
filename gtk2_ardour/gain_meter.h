@@ -98,6 +98,14 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	 */
 	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
 
+	static std::string astate_string (ARDOUR::AutoState);
+	static std::string short_astate_string (ARDOUR::AutoState);
+	static std::string _astate_string (ARDOUR::AutoState, bool);
+
+	static std::string astyle_string (ARDOUR::AutoStyle);
+	static std::string short_astyle_string (ARDOUR::AutoStyle);
+	static std::string _astyle_string (ARDOUR::AutoStyle, bool);
+
   protected:
 
 	friend class MixerStrip;
@@ -144,15 +152,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void gain_automation_style_changed();
 
 	void setup_gain_adjustment ();
-
-	std::string astate_string (ARDOUR::AutoState);
-	std::string short_astate_string (ARDOUR::AutoState);
-	std::string _astate_string (ARDOUR::AutoState, bool);
-
-	std::string astyle_string (ARDOUR::AutoStyle);
-	std::string short_astyle_string (ARDOUR::AutoStyle);
-	std::string _astyle_string (ARDOUR::AutoStyle, bool);
-
 	Width _width;
 
 	void show_gain ();

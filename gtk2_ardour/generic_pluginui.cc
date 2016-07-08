@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "pbd/stl_delete.h"
+#include "pbd/unwind.h"
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
@@ -43,11 +44,11 @@
 #include "ardour/session.h"
 #include "ardour/value_as_string.h"
 
-#include "ardour_spinner.h"
 #include "prompter.h"
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
+#include "gain_meter.h"
 #include "timers.h"
 #include "tooltips.h"
 #include "ui_config.h"
@@ -148,6 +149,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	prefheight = 0;
 	build ();
+	main_contents.show ();
 }
 
 GenericPluginUI::~GenericPluginUI ()
@@ -210,6 +212,7 @@ void
 GenericPluginUI::build ()
 {
 	std::vector<ControlUI *> control_uis;
+	bool grid = true;
 
 	// Build a ControlUI for each control port
 	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
@@ -230,6 +233,11 @@ GenericPluginUI::build ()
 			const float value = plugin->get_parameter(i);
 
 			ControlUI* cui;
+			Plugin::UILayoutHint hint;
+
+			if (!plugin->get_layout(i, hint)) {
+				grid = false;
+			}
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
@@ -237,9 +245,16 @@ GenericPluginUI::build ()
 
 			ParameterDescriptor desc;
 			plugin->get_parameter_descriptor(i, desc);
-			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i))) == 0) {
+			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i), hint.knob)) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
+			}
+
+			if (grid) {
+				cui->x0 = hint.x0;
+				cui->x1 = hint.x1;
+				cui->y0 = hint.y0;
+				cui->y1 = hint.y1;
 			}
 
 			const std::string param_docs = plugin->get_parameter_docs(i);
@@ -280,7 +295,11 @@ GenericPluginUI::build ()
 		plugin->announce_property_values();
 	}
 
-	layout (control_uis);
+	if (grid) {
+		custom_layout (control_uis);
+	} else {
+		automatic_layout (control_uis);
+	}
 
 	output_update ();
 
@@ -292,7 +311,7 @@ GenericPluginUI::build ()
 
 
 void
-GenericPluginUI::layout (const std::vector<ControlUI *>& control_uis)
+GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 {
 	guint32 x = 0;
 
@@ -349,7 +368,6 @@ GenericPluginUI::layout (const std::vector<ControlUI *>& control_uis)
 	frame->set_label (_("Controls"));
 	frame->add (*box);
 	hpacker.pack_start(*frame, true, true);
-
 
 	// Add special controls to UI, and build list of normal controls to be layed out later
 	std::vector<ControlUI *> cui_controls_list;
@@ -497,10 +515,33 @@ GenericPluginUI::layout (const std::vector<ControlUI *>& control_uis)
 	}
 }
 
+void
+GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
+{
+	Gtk::Table* layout = manage (new Gtk::Table ());
+
+	for (vector<ControlUI*>::const_iterator i = control_uis.begin(); i != control_uis.end(); ++i) {
+		ControlUI* cui = *i;
+		if (cui->x0 < 0 || cui->y0 < 0) {
+			continue;
+		}
+		layout->attach (*cui, cui->x0, cui->x1, cui->y0, cui->y1, FILL, SHRINK, 2, 2);
+	}
+	hpacker.pack_start (*layout, true, true);
+}
+
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	: param(p)
 	, automate_button (X_("")) // force creation of a label
-	, file_button(NULL)
+	, combo (0)
+	, clickbox (0)
+	, file_button (0)
+	, spin_box (0)
+	, display (0)
+	, hbox (0)
+	, vbox (0)
+	, meterinfo (0)
+	, knobtable (0)
 {
 	automate_button.set_name ("PluginAutomateButton");
 	set_tooltip (automate_button, _("Automation control"));
@@ -510,13 +551,13 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	   below). be sure to include a descender.
 	*/
 
-	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 15, 10);
+	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 12, 6);
 
-	ignore_change = 0;
-	display = 0;
+	ignore_change = false;
+	update_pending = false;
 	button = false;
-	clickbox = 0;
-	meterinfo = 0;
+
+	x0 = x1 = y0 = y1 = -1;
 }
 
 GenericPluginUI::ControlUI::~ControlUI()
@@ -534,21 +575,30 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 
 	// don't lock to avoid deadlock because we're triggered by
 	// AutomationControl::Changed() while the automation lock is taken
+
+	if (cui->knobtable) {
+		cui->automate_button.set_text (
+				GainMeterBase::astate_string (
+					insert->get_parameter_automation_state (cui->parameter()))
+				);
+		return;
+	}
+
 	switch (insert->get_parameter_automation_state (cui->parameter()) & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
-		cui->automate_button.set_label (S_("Automation|Manual"));
+		cui->automate_button.set_text (S_("Automation|Manual"));
 		break;
 	case Play:
-		cui->automate_button.set_label (_("Play"));
+		cui->automate_button.set_text (_("Play"));
 		break;
 	case Write:
-		cui->automate_button.set_label (_("Write"));
+		cui->automate_button.set_text (_("Write"));
 		break;
 	case Touch:
-		cui->automate_button.set_label (_("Touch"));
+		cui->automate_button.set_text (_("Touch"));
 		break;
 	default:
-		cui->automate_button.set_label (_("???"));
+		cui->automate_button.set_text (_("???"));
 		break;
 	}
 }
@@ -587,18 +637,17 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
                                    const ParameterDescriptor&           desc,
                                    boost::shared_ptr<AutomationControl> mcontrol,
                                    float                                value,
-                                   bool                                 is_input)
+                                   bool                                 is_input,
+                                   bool                                 use_knob)
 {
 	ControlUI* control_ui = 0;
 
 	control_ui = manage (new ControlUI (param));
 	control_ui->combo = 0;
 	control_ui->control = mcontrol;
-	control_ui->update_pending = false;
 	control_ui->label.set_text (desc.label);
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
-
 	control_ui->set_spacing (5);
 
 	Gtk::Requisition req (control_ui->automate_button.size_request());
@@ -629,6 +678,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				labels.push_back(i->first);
 			}
 
+			// TODO use ArdourDropDown
 			control_ui->combo = new Gtk::ComboBoxText();
 			set_popdown_strings(*control_ui->combo, labels);
 			control_ui->combo->signal_changed().connect(
@@ -638,8 +688,16 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			                          boost::bind(&GenericPluginUI::ui_parameter_changed,
 			                                      this, control_ui),
 			                          gui_context());
-			control_ui->pack_start(control_ui->label, true, true);
-			control_ui->pack_start(*control_ui->combo, false, true);
+
+			if (use_knob) {
+				control_ui->knobtable = manage (new Table());
+				control_ui->pack_start(*control_ui->knobtable, true, false);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
+				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
+			} else {
+				control_ui->pack_start(control_ui->label, true, true);
+				control_ui->pack_start(*control_ui->combo, false, true);
+			}
 
 			update_control_display(control_ui);
 
@@ -654,8 +712,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
 			control_ui->file_button->set_title(desc.label);
 
-			control_ui->pack_start (control_ui->label, false, true);
-			control_ui->pack_start (*control_ui->file_button, true, true);
+			if (use_knob) {
+				control_ui->knobtable = manage (new Table());
+				control_ui->pack_start(*control_ui->knobtable, true, false);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
+				control_ui->knobtable->attach (*control_ui->file_button, 0, 1, 1, 2);
+			} else {
+				control_ui->pack_start (control_ui->label, false, true);
+				control_ui->pack_start (*control_ui->file_button, true, true);
+			}
 
 			// Connect signals (TODO: do this via the Control)
 			control_ui->file_button->signal_file_set().connect(
@@ -672,8 +737,11 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		/* create the controller */
-		bool use_knob = false; // XXX TODO
 
+		/* XXX memory leak: SliderController not destroyed by ControlUI
+		 * destructor, and manage() reports object hierarchy
+		 * ambiguity.
+		 */
 		if (mcontrol) {
 			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
 		}
@@ -692,24 +760,71 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 			}
-		} else if (desc.toggled || use_knob) {
+		} else if (desc.toggled) {
 			control_ui->controller->set_size_request (req.height, req.height);
+		} else if (use_knob) {
+			control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
 		} else {
-			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
-
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("ProcessorControlSlider"));
+		}
 
+		if (!desc.integer_step && !desc.toggled && use_knob) {
+			control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj, insert));
 		}
 
 		adj->set_value (mcontrol->internal_to_interface(value));
 
-		/* XXX memory leak: SliderController not destroyed by ControlUI
-		   destructor, and manage() reports object hierarchy
-		   ambiguity.
-		*/
+		if (use_knob) {
+			set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
 
-		control_ui->pack_start (control_ui->label, true, true);
+			control_ui->label.set_alignment (0.5, 0.5);
+			control_ui->knobtable = manage (new Table());
+			control_ui->pack_start(*control_ui->knobtable, true, false);
+
+			if (control_ui->clickbox) {
+				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			} else if (control_ui->spin_box) {
+				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
+				control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 2, 3, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 2, 3, SHRINK, SHRINK, 2, 0);
+			} else if (desc.toggled) {
+				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
+				align->add (*control_ui->controller);
+				control_ui->knobtable->attach (*align, 0, 2, 0, 1, FILL, SHRINK, 2, 2);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			} else {
+				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			}
+
+		} else {
+
+			control_ui->pack_start (control_ui->label, true, true);
+			if (control_ui->clickbox) {
+				control_ui->pack_start (*control_ui->clickbox, false, false);
+			} else if (control_ui->spin_box) {
+				control_ui->pack_start (*control_ui->spin_box, false, false);
+				control_ui->pack_start (*control_ui->controller, false, false);
+			} else {
+				control_ui->pack_start (*control_ui->controller, false, false);
+			}
+			control_ui->pack_start (control_ui->automate_button, false, false);
+		}
+
+
+		if (mcontrol->flags () & Controllable::NotAutomatable) {
+			control_ui->automate_button.set_sensitive (false);
+			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
+		} else {
+			control_ui->automate_button.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
+			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+		}
 
 		if (desc.toggled) {
 			control_ui->button = true;
@@ -717,26 +832,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			assert (but);
 			but->set_name ("pluginui toggle");
 			update_control_display(control_ui);
-		}
-
-		if (desc.integer_step && !desc.toggled) {
-			control_ui->pack_start (*control_ui->clickbox, false, false);
-		} else {
-			if (!desc.toggled && use_knob) {
-				ArdourSpinner* spb = manage (new ArdourSpinner (mcontrol, adj, insert));
-				control_ui->pack_start (*spb, false, false);
-			}
-			control_ui->pack_start (*control_ui->controller, false, false);
-		}
-
-		control_ui->pack_start (control_ui->automate_button, false, false);
-
-		if (mcontrol->flags () & Controllable::NotAutomatable) {
-			control_ui->automate_button.set_sensitive (false);
-			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
-		} else {
-			control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
-			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 		}
 
 		automation_state_changed (control_ui);
@@ -877,7 +972,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 
 	float val = cui->control->get_value();
 
-	cui->ignore_change++;
+	PBD::Unwinder<bool> (cui->ignore_change, true);
 
 	if (cui->combo && cui->scale_points) {
 		for (ARDOUR::ScalePoints::iterator it = cui->scale_points->begin(); it != cui->scale_points->end(); ++it) {
@@ -903,7 +998,6 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 			cui->adjustment->set_value (val);
 		}
 	}*/
-	cui->ignore_change--;
 }
 
 void

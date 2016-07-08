@@ -51,6 +51,7 @@
 
 #include "ardour_button.h"
 #include "ardour_dropdown.h"
+#include "ardour_spinner.h"
 #include "ardour_window.h"
 #include "automation_controller.h"
 
@@ -230,16 +231,19 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		/* input */
 
-		Gtk::ComboBoxText*                      combo;
 		boost::shared_ptr<ARDOUR::ScalePoints>  scale_points;
 		boost::shared_ptr<AutomationController> controller;
-		Gtkmm2ext::ClickBox*                    clickbox;
+
+		ArdourButton                            automate_button;
 		Gtk::Label                              label;
+		Gtk::ComboBoxText*                      combo;
+		Gtkmm2ext::ClickBox*                    clickbox;
+		Gtk::FileChooserButton*                 file_button;
+		ArdourSpinner*                          spin_box;
+
 		bool                                    button;
 		bool                                    update_pending;
-		char                                    ignore_change;
-		Gtk::Button                             automate_button;
-		Gtk::FileChooserButton*                 file_button;
+		bool                                    ignore_change;
 
 		/* output */
 
@@ -252,6 +256,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		ControlUI (const Evoral::Parameter& param);
 		~ControlUI ();
+
+		/* layout */
+		Gtk::Table* knobtable;
+		int x0, x1, y0, y1;
 	};
 
 	std::vector<ControlUI*>   input_controls;
@@ -261,13 +269,15 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 
 	void build ();
-	void layout (const std::vector<ControlUI *>& control_uis);
+	void automatic_layout (const std::vector<ControlUI *>& control_uis);
+	void custom_layout (const std::vector<ControlUI *>& control_uis);
 
 	ControlUI* build_control_ui (const Evoral::Parameter&                     param,
 	                             const ARDOUR::ParameterDescriptor&           desc,
 	                             boost::shared_ptr<ARDOUR::AutomationControl> mcontrol,
 	                             float                                        value,
-	                             bool                                         is_input);
+	                             bool                                         is_input,
+	                             bool                                         use_knob = false);
 
 	void ui_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);

@@ -18,7 +18,10 @@
  */
 
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/keyboard.h"
+
+#include "ardour/value_as_string.h"
 
 #include "ardour_spinner.h"
 
@@ -58,6 +61,11 @@ ArdourSpinner::ArdourSpinner (
 	_spin_adj.signal_value_changed().connect (sigc::mem_fun(*this, &ArdourSpinner::spin_adjusted));
 	adj->signal_value_changed().connect (sigc::mem_fun(*this, &ArdourSpinner::ctrl_adjusted));
 	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourSpinner::controllable_changed, this), gui_context());
+
+
+	// this assume the "upper" value needs most space.
+	std::string txt = ARDOUR::value_as_string (c->desc(), c->upper ());
+	Gtkmm2ext::set_size_request_to_display_given_text (*this, txt, 2, 2);
 
 	add (_btn);
 	show_all ();
