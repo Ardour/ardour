@@ -338,6 +338,15 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_trim,f);
 	PATH_CALLBACK1_MSG(sel_pan_position,f);
 	PATH_CALLBACK1_MSG(sel_pan_width,f);
+	PATH_CALLBACK1_MSG(sel_pan_elevation,f);
+	PATH_CALLBACK1_MSG(sel_pan_frontback,f);
+	PATH_CALLBACK1_MSG(sel_pan_lfe,f);
+	PATH_CALLBACK1_MSG(sel_comp_enable,f);
+	PATH_CALLBACK1_MSG(sel_comp_threshold,f);
+	PATH_CALLBACK1_MSG(sel_comp_speed,f);
+	PATH_CALLBACK1_MSG(sel_comp_mode,f);
+	PATH_CALLBACK1_MSG(sel_comp_makeup,f);
+	PATH_CALLBACK1_MSG(sel_comp_redux,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
@@ -481,6 +490,15 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_sendfader (int id, float pos, lo_message msg);
 	int sel_sendenable (int id, float pos, lo_message msg);
 	int sel_expand (uint32_t state, lo_message msg);
+	int sel_pan_elevation (float val, lo_message msg);
+	int sel_pan_frontback (float val, lo_message msg);
+	int sel_pan_lfe (float val, lo_message msg);
+	int sel_comp_enable (float val, lo_message msg);
+	int sel_comp_threshold (float val, lo_message msg);
+	int sel_comp_speed (float val, lo_message msg);
+	int sel_comp_mode (float val, lo_message msg);
+	int sel_comp_makeup (float val, lo_message msg);
+	int sel_comp_redux (float val, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
@@ -501,6 +519,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int route_send_fail (std::string path, uint32_t ssid, float val, lo_address addr);
 	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
+	int sel_fail (std::string path, float val, lo_address addr);
 
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 

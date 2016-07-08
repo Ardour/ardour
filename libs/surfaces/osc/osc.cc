@@ -549,6 +549,15 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
 		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
+		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
+		REGISTER_CALLBACK (serv, "/select/pan_frontback_position", "f", sel_pan_frontback);
+		REGISTER_CALLBACK (serv, "/select/pan_lfe_position", "f", sel_pan_lfe);
+		REGISTER_CALLBACK (serv, "/select/comp_enable", "f", sel_comp_enable);
+		REGISTER_CALLBACK (serv, "/select/comp_threshold", "f", sel_comp_threshold);
+		REGISTER_CALLBACK (serv, "/select/comp_speed", "f", sel_comp_speed);
+		REGISTER_CALLBACK (serv, "/select/comp_mode", "f", sel_comp_mode);
+		REGISTER_CALLBACK (serv, "/select/comp_makeup", "f", sel_comp_makeup);
+		REGISTER_CALLBACK (serv, "/select/comp_redux", "f", sel_comp_redux);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -1686,7 +1695,7 @@ OSC::sel_mute (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("mute", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("mute", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1753,7 +1762,7 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("solo", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("solo", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1772,7 +1781,7 @@ OSC::sel_solo_iso (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("solo_iso", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("solo_iso", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1791,7 +1800,7 @@ OSC::sel_solo_safe (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("solo_safe", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("solo_safe", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1810,7 +1819,7 @@ OSC::sel_recenable (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("recenable", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("recenable", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1846,7 +1855,7 @@ OSC::sel_recsafe (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("record_safe", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("record_safe", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1903,7 +1912,7 @@ OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return route_send_fail ("monitor_input", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("monitor_input", 0, lo_message_get_source (msg));
 }
 
 int
@@ -1944,7 +1953,7 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return route_send_fail ("monitor_disk", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("monitor_disk", 0, lo_message_get_source (msg));
 }
 
 
@@ -1980,7 +1989,7 @@ OSC::sel_phase (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("polarity", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("polarity", 0, lo_message_get_source (msg));
 }
 
 int
@@ -2169,7 +2178,7 @@ OSC::sel_gain (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("gain", 0, -193, lo_message_get_source (msg));
+	return sel_fail ("gain", -193, lo_message_get_source (msg));
 }
 
 int
@@ -2213,7 +2222,7 @@ OSC::sel_fader (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("fader", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("fader", 0, lo_message_get_source (msg));
 }
 
 int
@@ -2261,7 +2270,7 @@ OSC::sel_trim (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("trimdB", 0, 0, lo_message_get_source (msg));
+	return sel_fail ("trimdB", 0, lo_message_get_source (msg));
 }
 
 int
@@ -2281,7 +2290,7 @@ OSC::sel_pan_position (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("pan_stereo_position", 0, 0.5, lo_message_get_source (msg));
+	return sel_fail ("pan_stereo_position", 0.5, lo_message_get_source (msg));
 }
 
 int
@@ -2300,7 +2309,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return route_send_fail ("pan_stereo_width", 0, 1, lo_message_get_source (msg));
+	return sel_fail ("pan_stereo_width", 1, lo_message_get_source (msg));
 }
 
 int
@@ -2602,6 +2611,179 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 	return 0;
 }
 
+// select
+
+int
+OSC::sel_pan_elevation (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->pan_elevation_control()) {
+			s->pan_elevation_control()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("pan_elevation_position", 0.5, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_pan_frontback (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->pan_frontback_control()) {
+			s->pan_frontback_control()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("pan_frontback_position", 0.5, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_pan_lfe (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->pan_lfe_control()) {
+			s->pan_lfe_control()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("pan_lfe_position", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_enable (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_enable_controllable()) {
+			s->comp_enable_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_enable", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_threshold (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_threshold_controllable()) {
+			s->comp_threshold_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_threshold", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_speed (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_speed_controllable()) {
+			s->comp_speed_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_speed", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_mode (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_mode_controllable()) {
+			s->comp_mode_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_mode", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_makeup (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_makeup_controllable()) {
+			s->comp_makeup_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_makeup", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_comp_redux (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->comp_redux_controllable()) {
+			s->comp_redux_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("comp_redux", 0, lo_message_get_source (msg));
+}
+
 void
 OSC::gui_selection_changed ()
 {
@@ -2688,6 +2870,21 @@ OSC::route_send_fail (string path, uint32_t ssid, float val, lo_address addr)
 		lo_send_message (addr, sel_pth.c_str(), reply);
 		lo_message_free (reply);
 	}
+
+	return 0;
+}
+
+int
+OSC::sel_fail (string path, float val, lo_address addr)
+{
+	ostringstream os;
+	os.str("");
+	os << "/select/" << path;
+	string sel_pth = os.str();
+	lo_message reply = lo_message_new ();
+	lo_message_add_float (reply, (float) val);
+	lo_send_message (addr, sel_pth.c_str(), reply);
+	lo_message_free (reply);
 
 	return 0;
 }
