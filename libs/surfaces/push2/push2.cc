@@ -1703,6 +1703,8 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 				matched = true;
 			}
+		} else if ((*ev).is_pitch_bender() || (*ev).is_aftertouch() || (*ev).is_channel_pressure()) {
+			out.push_back (*ev);
 		}
 	}
 
