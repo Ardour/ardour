@@ -466,8 +466,16 @@ class CoreAudioBackend : public AudioBackend {
 	std::vector<CoreBackendPort *> _system_midi_in;
 	std::vector<CoreBackendPort *> _system_midi_out;
 
+	struct SortByPortName
+	{
+		bool operator ()(const CoreBackendPort* lhs, const CoreBackendPort* rhs) const
+		{
+			return lhs->name () < rhs->name ();
+		}
+	};
+
 	typedef std::map<std::string, CoreBackendPort *> PortMap; // fast lookup in _ports
-	typedef std::set<CoreBackendPort *> PortIndex; // fast lookup in _ports
+	typedef std::set<CoreBackendPort *, SortByPortName> PortIndex; // fast lookup in _ports
 	PortMap _portmap;
 	PortIndex _ports;
 

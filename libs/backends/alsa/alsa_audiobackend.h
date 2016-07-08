@@ -409,8 +409,16 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<AlsaPort *> _system_midi_in;
 		std::vector<AlsaPort *> _system_midi_out;
 
+		struct SortByPortName
+		{
+			bool operator ()(const AlsaPort* lhs, const AlsaPort* rhs) const
+			{
+				return lhs->name () < rhs->name ();
+			}
+		};
+
 		typedef std::map<std::string, AlsaPort *> PortMap; // fast lookup in _ports
-		typedef std::set<AlsaPort *> PortIndex; // fast lookup in _ports
+		typedef std::set<AlsaPort *, SortByPortName> PortIndex; // fast lookup in _ports
 		PortMap _portmap;
 		PortIndex _ports;
 

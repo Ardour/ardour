@@ -451,8 +451,16 @@ class DummyAudioBackend : public AudioBackend {
 		std::vector<DummyMidiPort *> _system_midi_in;
 		std::vector<DummyMidiPort *> _system_midi_out;
 
+		struct SortByPortName
+		{
+			bool operator ()(const DummyPort* lhs, const DummyPort* rhs) const
+			{
+				return lhs->name () < rhs->name ();
+			}
+		};
+
 		typedef std::map<std::string, DummyPort *> PortMap; // fast lookup in _ports
-		typedef std::set<DummyPort *> PortIndex; // fast lookup in _ports
+		typedef std::set<DummyPort *, SortByPortName> PortIndex; // fast lookup in _ports
 		PortMap _portmap;
 		PortIndex _ports;
 
