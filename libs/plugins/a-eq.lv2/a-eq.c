@@ -110,6 +110,7 @@ typedef struct {
 	float v_filtog[BANDS];
 	float v_shelftogl;
 	float v_shelftogh;
+	float v_master;
 
 	bool need_expose;
 
@@ -429,6 +430,10 @@ run(LV2_Handle instance, uint32_t n_samples)
 			aeq->v_shelftogh = *(aeq->shelftogh);
 			aeq->need_expose = true;
 		}
+		if (aeq->v_master != *(aeq->master)) {
+			aeq->v_master = *(aeq->master);
+			aeq->need_expose = true;
+		}
 	}
 
 #ifdef LV2_EXTENDED
@@ -560,15 +565,15 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	cairo_set_line_width(cr, 1.0);
 
-	// draw grid 10dB steps
+	// draw grid 5dB steps
 	const double dash2[] = {1, 3};
 	cairo_save (cr);
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_dash(cr, dash2, 2, 2);
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
 
-	for (uint32_t d = 1; d < 6; ++d) {
-		const float y = -.5 + floorf (h * (d * 10.f / 60.f));
+	for (uint32_t d = 1; d < 8; ++d) {
+		const float y = -.5 + floorf (h * (d * 5.f / 40.f));
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
@@ -581,12 +586,12 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_move_to (cr, 0, h);
 
 	for (uint32_t x = 0; x < w; ++x) {
-		// plot 20..20kHz +-30dB
+		// plot 20..20kHz +-20dB
 		const float x_hz = 20.f * powf (1000.f, (float)x / (float)w);
-		const float y_db = to_dB(eq_curve(self, x_hz));
-		const float y = h * -y_db / 60.0 + h / 2;
+		const float y_db = to_dB(eq_curve(self, x_hz)) + self->v_master;
+		const float y = h * -y_db / 40.0 + h / 2;
 		cairo_line_to (cr, x, y);
-		printf("(hz,H,db)=(%f, %f, %f)\n", x_hz, from_dB(y_db), y_db);
+		//printf("(hz,H,db)=(%f, %f, %f)\n", x_hz, from_dB(y_db), y_db);
 	}
 	cairo_stroke_preserve (cr);
 
