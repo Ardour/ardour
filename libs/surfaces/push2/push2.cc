@@ -1755,8 +1755,6 @@ Push2::pad_note (int row, int col) const
 void
 Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
-	cerr << "reset pad to r = " << root << " o = " << octave << " m = " << mode << " ik " << inkey << endl;
-
 	MusicalMode m (mode);
 	vector<float>::iterator interval;
 	int note;
@@ -1821,7 +1819,6 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 					if ((notenum % 12) == original_root) {
 						pad->set_color (LED::Green);
-						cerr << "Green!\n";
 						pad->perma_color = LED::Green;
 					} else {
 						pad->set_color (LED::White);
