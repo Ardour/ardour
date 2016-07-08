@@ -44,10 +44,10 @@ class LIBARDOUR_API VCAManager : public SessionHandleRef, public PBD::StatefulDe
 	VCAManager (ARDOUR::Session&);
 	~VCAManager ();
 
-	int create_vca (uint32_t n, std::string const & name = std::string());
+	int create_vca (uint32_t how_many, std::string const & name = std::string());
 	void remove_vca (boost::shared_ptr<VCA>);
 
-	boost::shared_ptr<VCA> vca_by_number(uint32_t) const;
+	boost::shared_ptr<VCA> vca_by_number(int32_t) const;
 
 	VCAList vcas() const;
 	VCAList::size_type n_vcas() const { return _vcas.size(); }

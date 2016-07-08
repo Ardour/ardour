@@ -116,7 +116,7 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 }
 
 boost::shared_ptr<VCA>
-VCAManager::vca_by_number (uint32_t n) const
+VCAManager::vca_by_number (int32_t n) const
 {
 	Mutex::Lock lm (lock);
 
