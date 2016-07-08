@@ -1275,6 +1275,24 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		}
 	}
 
+	if (output_elements > 1) {
+		const vector<pair<int,int> >& ioc (pinfo->cache.io_configs);
+		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
+			int32_t possible_in = i->first;
+			int32_t possible_out = i->second;
+			if (possible_in < 1 || possible_out < 1) {
+				continue;
+			}
+			for (uint32_t i = 1; i < output_elements; ++i) {
+				int32_t c = bus_outputs[i];
+				for (uint32_t j = 1; j < i; ++j) {
+					c += bus_outputs [j];
+				}
+				io_configs.push_back (pair<int,int> (possible_in, possible_out + c));
+			}
+		}
+	}
+
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations, looking for %3 in, %4 out\n",
 							name(), io_configs.size(), in, out));
 
