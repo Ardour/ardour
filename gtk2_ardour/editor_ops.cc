@@ -4170,6 +4170,7 @@ Editor::cut_copy (CutCopyOp op)
 	}
 }
 
+
 struct AutomationRecord {
 	AutomationRecord () : state (0) , line(NULL) {}
 	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
@@ -4178,7 +4179,11 @@ struct AutomationRecord {
 	const AutomationLine* line; ///< line this came from
 	boost::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
-
+struct PointsSelectionPositionSorter {
+	bool operator() (ControlPoint* a, ControlPoint* b) {
+		return (*(a->model()))->when < (*(b->model()))->when;
+	}
+};
 /** Cut, copy or clear selected automation points.
  *  @param op Operation (Cut, Copy or Clear)
  */
@@ -4196,9 +4201,12 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 	typedef std::map<boost::shared_ptr<AutomationList>, AutomationRecord> Lists;
 	Lists lists;
 
+	/* user could select points in any order */
+	selection->points.sort(PointsSelectionPositionSorter ());
+	
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
-	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-		const AutomationLine&                   line = (*i)->line();
+	for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+		const AutomationLine&                   line = (*sel_point)->line();
 		const boost::shared_ptr<AutomationList> al   = line.the_list();
 		if (lists.find (al) == lists.end ()) {
 			/* We haven't seen this list yet, so make a record for it.  This includes
@@ -4218,17 +4226,17 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 
 		/* Add all selected points to the relevant copy ControlLists */
 		framepos_t start = std::numeric_limits<framepos_t>::max();
-		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
-			AutomationList::const_iterator    j  = (*i)->model();
+		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+			boost::shared_ptr<AutomationList>    al = (*sel_point)->line().the_list();
+			AutomationList::const_iterator ctrl_evt = (*sel_point)->model ();
 
-			lists[al].copy->fast_simple_add ((*j)->when, (*j)->value);
+			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
 			if (midi) {
 				/* Update earliest MIDI start time in beats */
-				earliest = std::min(earliest, Evoral::Beats((*j)->when));
+				earliest = std::min(earliest, Evoral::Beats((*ctrl_evt)->when));
 			} else {
 				/* Update earliest session start time in frames */
-				start = std::min(start, (*i)->line().session_position(j));
+				start = std::min(start, (*sel_point)->line().session_position(ctrl_evt));
 			}
 		}
 
@@ -4251,12 +4259,13 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 			   start time, so relative ordering between points is preserved
 			   when copying from several lists and the paste starts at the
 			   earliest copied piece of data. */
-			for (AutomationList::iterator j = i->second.copy->begin(); j != i->second.copy->end(); ++j) {
-				(*j)->when -= line_offset;
+			boost::shared_ptr<Evoral::ControlList> &al_cpy = i->second.copy;
+			for (AutomationList::iterator ctrl_evt = al_cpy->begin(); ctrl_evt != al_cpy->end(); ++ctrl_evt) {
+				(*ctrl_evt)->when -= line_offset;
 			}
 
 			/* And add it to the cut buffer */
-			cut_buffer->add (i->second.copy);
+			cut_buffer->add (al_cpy);
 		}
 	}
 
@@ -4268,9 +4277,22 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 		}
 
 		/* Remove each selected point from its AutomationList */
-		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
-			al->erase ((*i)->model ());
+		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+			AutomationLine& line = (*sel_point)->line ();
+			boost::shared_ptr<AutomationList> al = line.the_list();
+
+			bool erase = true;
+			
+			if (dynamic_cast<AudioRegionGainLine*> (&line)) {
+				/* removing of first and last gain point in region gain lines is prohibited*/
+				if (line.is_last_point (*(*sel_point)) || line.is_first_point (*(*sel_point))) {
+					erase = false;
+				}
+			}
+
+			if(erase) {
+				al->erase ((*sel_point)->model ());
+			}
 		}
 
 		/* Thaw the lists and add undo records for them */
