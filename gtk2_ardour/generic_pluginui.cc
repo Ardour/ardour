@@ -63,11 +63,6 @@ using namespace ARDOUR_UI_UTILS;
 
 GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi)
-	, button_table (initial_button_rows, initial_button_cols)
-	, output_table (initial_output_rows, initial_output_cols)
-	, hAdjustment(0.0, 0.0, 0.0)
-	, vAdjustment(0.0, 0.0, 0.0)
-	, scroller_view(hAdjustment, vAdjustment)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
 {
@@ -137,15 +132,12 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (*constraint_hbox, false, false);
 
-	if (is_scrollable ) {
-		scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-		scroller.set_name ("PluginEditor");
-		scroller_view.set_name("PluginEditor");
-		scroller_view.add (hpacker);
-		scroller.add (scroller_view);
-
-		main_contents.pack_start (scroller, true, true);
-
+	if (is_scrollable) {
+		Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow());
+		scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		scroller->set_name ("PluginEditor");
+		scroller->add (hpacker);
+		main_contents.pack_start (*scroller, true, true);
 	} else {
 		main_contents.pack_start (hpacker, false, false);
 	}
@@ -217,58 +209,10 @@ static const float default_similarity_threshold = 0.3;
 void
 GenericPluginUI::build ()
 {
-	guint32 i = 0;
-	guint32 x = 0;
-	Frame* frame;
-	Frame* bt_frame;
-	VBox* box;
-	int output_row, output_col;
-	int button_row, button_col;
-	int output_rows, output_cols;
-	int button_rows, button_cols;
-
-	hpacker.set_spacing (10);
-
-	output_rows = initial_output_rows;
-	output_cols = initial_output_cols;
-	button_rows = initial_button_rows;
-	button_cols = initial_button_cols;
-	output_row = 0;
-	button_row = 0;
-	output_col = 0;
-	button_col = 0;
-
-	button_table.set_homogeneous (false);
-	button_table.set_row_spacings (2);
-	button_table.set_col_spacings (2);
-	output_table.set_homogeneous (true);
-	output_table.set_row_spacings (2);
-	output_table.set_col_spacings (2);
-	button_table.set_border_width (5);
-	output_table.set_border_width (5);
-
-	hpacker.set_border_width (10);
-
-	bt_frame = manage (new Frame);
-	bt_frame->set_name ("BaseFrame");
-	bt_frame->set_label (_("Switches"));
-	bt_frame->add (button_table);
-	hpacker.pack_start(*bt_frame, true, true);
-
-	box = manage (new VBox);
-	box->set_border_width (5);
-	box->set_spacing (1);
-
-	frame = manage (new Frame);
-	frame->set_name ("BaseFrame");
-	frame->set_label (_("Controls"));
-	frame->add (*box);
-	hpacker.pack_start(*frame, true, true);
-
 	std::vector<ControlUI *> control_uis;
 
 	// Build a ControlUI for each control port
-	for (i = 0; i < plugin->parameter_count(); ++i) {
+	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
 
 		if (plugin->parameter_is_control (i)) {
 
@@ -336,9 +280,80 @@ GenericPluginUI::build ()
 		plugin->announce_property_values();
 	}
 
+	layout (control_uis);
+
+	output_update ();
+
+	automation_manual_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Off));
+	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
+	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
+	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
+}
+
+
+void
+GenericPluginUI::layout (const std::vector<ControlUI *>& control_uis)
+{
+	guint32 x = 0;
+
+	static const int32_t initial_button_rows = 12;
+	static const int32_t initial_button_cols = 1;
+	static const int32_t initial_output_rows = 1;
+	static const int32_t initial_output_cols = 4;
+
+	Gtk::Table* button_table = manage (new Gtk::Table (initial_button_rows, initial_button_cols));
+	Gtk::Table* output_table = manage (new Gtk::Table (initial_output_rows, initial_output_cols));
+
+	Frame* frame;
+	Frame* bt_frame;
+	VBox* box;
+	int output_row, output_col;
+	int button_row, button_col;
+	int output_rows, output_cols;
+	int button_rows, button_cols;
+
+	hpacker.set_spacing (10);
+	hpacker.set_border_width (10);
+
+	output_rows = initial_output_rows;
+	output_cols = initial_output_cols;
+	button_rows = initial_button_rows;
+	button_cols = initial_button_cols;
+	output_row = 0;
+	button_row = 0;
+	output_col = 0;
+	button_col = 0;
+
+	button_table->set_homogeneous (false);
+	button_table->set_row_spacings (2);
+	button_table->set_col_spacings (2);
+	output_table->set_homogeneous (true);
+	output_table->set_row_spacings (2);
+	output_table->set_col_spacings (2);
+	button_table->set_border_width (5);
+	output_table->set_border_width (5);
+
+
+	bt_frame = manage (new Frame);
+	bt_frame->set_name ("BaseFrame");
+	bt_frame->set_label (_("Switches"));
+	bt_frame->add (*button_table);
+	hpacker.pack_start(*bt_frame, true, true);
+
+	box = manage (new VBox);
+	box->set_border_width (5);
+	box->set_spacing (1);
+
+	frame = manage (new Frame);
+	frame->set_name ("BaseFrame");
+	frame->set_label (_("Controls"));
+	frame->add (*box);
+	hpacker.pack_start(*frame, true, true);
+
+
 	// Add special controls to UI, and build list of normal controls to be layed out later
 	std::vector<ControlUI *> cui_controls_list;
-	for (i = 0; i < control_uis.size(); ++i) {
+	for (size_t i = 0; i < control_uis.size(); ++i) {
 		ControlUI* cui = control_uis[i];
 
 		if (cui->button || cui->file_button) {
@@ -347,11 +362,11 @@ GenericPluginUI::build ()
 				button_row = 0;
 				if (++button_col == button_cols) {
 					button_cols += 2;
-					button_table.resize (button_rows, button_cols);
+					button_table->resize (button_rows, button_cols);
 				}
 			}
 
-			button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1,
+			button_table->attach (*cui, button_col, button_col + 1, button_row, button_row+1,
 			                     FILL|EXPAND, FILL);
 			button_row++;
 
@@ -362,14 +377,14 @@ GenericPluginUI::build ()
 
 		} else if (cui->display) {
 
-			output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
+			output_table->attach (*cui, output_col, output_col + 1, output_row, output_row+1,
 			                     FILL|EXPAND, FILL);
 
 			// TODO: The meters should be divided into multiple rows
 
 			if (++output_col == output_cols) {
 				output_cols ++;
-				output_table.resize (output_rows, output_cols);
+				output_table->resize (output_rows, output_cols);
 			}
 		}
 	}
@@ -383,7 +398,7 @@ GenericPluginUI::build ()
 	std::vector<float> similarity_scores(cui_controls_list.size());
 	float most_similar = 0.0, least_similar = 1.0;
 
-	i = 0;
+	size_t i = 0;
 	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
 		label = (*cuip)->label.get_text();
 		numbers_in_labels[i] = get_number(label);
@@ -463,27 +478,23 @@ GenericPluginUI::build ()
 		hpacker.remove (*frame);
 	}
 
-	if (button_table.children().empty()) {
+	if (button_table->children().empty()) {
 		hpacker.remove (*bt_frame);
+		delete button_table;
+	} else {
+		button_table->show_all ();
 	}
 
-	if (!output_table.children().empty()) {
+	if (!output_table->children().empty()) {
 		frame = manage (new Frame);
 		frame->set_name ("BaseFrame");
 		frame->set_label(_("Meters"));
-		frame->add (output_table);
+		frame->add (*output_table);
 		hpacker.pack_end (*frame, true, true);
+		output_table->show_all ();
+	} else {
+		delete output_table;
 	}
-
-	output_update ();
-
-	output_table.show_all ();
-	button_table.show_all ();
-
-	automation_manual_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Off));
-	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
-	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
-	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
 }
 
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)

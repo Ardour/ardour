@@ -194,17 +194,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
   private:
 	Gtk::VBox main_contents;
-
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
-
-	Gtk::Table button_table;
-	Gtk::Table output_table;
-
-	Gtk::ScrolledWindow scroller;
-	Gtk::Adjustment hAdjustment;
-	Gtk::Adjustment vAdjustment;
-	Gtk::Viewport scroller_view;
 	Gtk::Menu* automation_menu;
 
 	gint prefheight;
@@ -228,11 +219,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 			max_unbound = false;
 		}
 	};
-
-	static const int32_t initial_button_rows = 12;
-	static const int32_t initial_button_cols = 1;
-	static const int32_t initial_output_rows = 1;
-	static const int32_t initial_output_cols = 4;
 
 	/* FIXME: Unify with AutomationController */
 	struct ControlUI : public Gtk::HBox {
@@ -275,6 +261,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 
 	void build ();
+	void layout (const std::vector<ControlUI *>& control_uis);
+
 	ControlUI* build_control_ui (const Evoral::Parameter&                     param,
 	                             const ARDOUR::ParameterDescriptor&           desc,
 	                             boost::shared_ptr<ARDOUR::AutomationControl> mcontrol,
