@@ -505,7 +505,7 @@ class CoreAudioBackend : public AudioBackend {
 	}
 
 	bool valid_port (PortHandle port) const {
-		return _ports.find (static_cast<CoreBackendPort*>(port)) != _ports.end ();
+		return std::find (_ports.begin(), _ports.end(), static_cast<CoreBackendPort*>(port)) != _ports.end ();
 	}
 
 	CoreBackendPort* find_port (const std::string& port_name) const {

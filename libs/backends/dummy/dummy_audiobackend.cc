@@ -809,7 +809,7 @@ DummyAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	DummyPort* port = static_cast<DummyPort*>(port_handle);
-	PortIndex::iterator i = _ports.find (static_cast<DummyPort*>(port_handle));
+	PortIndex::iterator i = std::find (_ports.begin(), _ports.end(), static_cast<DummyPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::error << _("DummyBackend::unregister_port: Failed to find port") << endmsg;
 		return;

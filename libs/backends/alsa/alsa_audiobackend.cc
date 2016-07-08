@@ -1362,7 +1362,7 @@ AlsaAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	AlsaPort* port = static_cast<AlsaPort*>(port_handle);
-	PortIndex::iterator i = _ports.find (static_cast<AlsaPort*>(port_handle));
+	PortIndex::iterator i = std::find (_ports.begin(), _ports.end(), static_cast<AlsaPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::error << _("AlsaBackend::unregister_port: Failed to find port") << endmsg;
 		return;

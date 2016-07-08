@@ -1054,7 +1054,7 @@ CoreAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	CoreBackendPort* port = static_cast<CoreBackendPort*>(port_handle);
-	PortIndex::iterator i = _ports.find (static_cast<CoreBackendPort*>(port_handle));
+	PortIndex::iterator i = std::find (_ports.begin(), _ports.end(), static_cast<CoreBackendPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::warning << _("CoreAudioBackend::unregister_port: Failed to find port") << endmsg;
 		return;
