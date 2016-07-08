@@ -356,7 +356,7 @@ Push2::button_lower (uint32_t n)
 	}
 
 	if (modifier_state & ModSelect) {
-		stripable[n]->presentation_info().set_selected (!stripable[n]->presentation_info().selected());
+		SetStripableSelection (stripable[n]);
 	} else {
 		boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
 
@@ -495,7 +495,7 @@ Push2::button_select_release ()
 		/* no visible track selected, select first (if any) */
 
 		if (stripable[0]) {
-			stripable[0]->presentation_info().set_selected (true);
+			SetStripableSelection (stripable[0]);
 		}
 
 	} else {
@@ -509,10 +509,10 @@ Push2::button_select_release ()
 				   switch banks by one, and select leftmost
 				*/
 				if (bank_start != 0) {
-					stripable[selected]->presentation_info().set_selected (false);
+					ClearStripableSelection ();
 					switch_bank (bank_start-1);
 					if (stripable[0]) {
-						stripable[0]->presentation_info().set_selected (true);
+						SetStripableSelection (stripable[0]);
 					}
 				}
 			} else {
@@ -522,8 +522,7 @@ Push2::button_select_release ()
 					--n;
 				}
 				if (n >= 0) {
-					stripable[selected]->presentation_info().set_selected (false);
-					stripable[n]->presentation_info().set_selected (true);
+					SetStripableSelection (stripable[n]);
 				}
 			}
 
@@ -536,10 +535,10 @@ Push2::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				stripable[selected]->presentation_info().set_selected (false);
+				ToggleStripableSelection (stripable[selected]);
 				switch_bank (bank_start+1);
 				if (stripable[7]) {
-					stripable[7]->presentation_info().set_selected (true);
+					SetStripableSelection (stripable[7]);
 				}
 			} else {
 				/* select next, if any */
@@ -549,8 +548,7 @@ Push2::button_select_release ()
 				}
 
 				if (n != 8) {
-					stripable[selected]->presentation_info().set_selected (false);
-					stripable[n]->presentation_info().set_selected (true);
+					SetStripableSelection (stripable[n]);
 				}
 			}
 		}
