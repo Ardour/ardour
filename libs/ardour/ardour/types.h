@@ -658,6 +658,7 @@ namespace ARDOUR {
 		/* non-JACK related flags */
 		Hidden = 0x20,
 		Shadow = 0x40,
+		ControlOnly = 0x80, /* MIDI, do not use as a source of music/performance data */
 	};
 
 	struct LatencyRange {

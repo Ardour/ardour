@@ -17,6 +17,13 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#include <ardourext/misc.h>
+#else
+#include <regex.h>
+#endif
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
@@ -266,7 +273,23 @@ PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlag
 		return 0;
 	}
 
-	return _backend->get_ports (port_name_pattern, type, flags, s);
+	int ret = _backend->get_ports (port_name_pattern, type, flags, s);
+	if (!ret) {
+		return ret;
+	}
+
+	if (!(flags & ControlOnly)) {
+		/* remove all ports whose name indicates that they are for control only */
+		for (vector<string>::iterator si = s.begin(); si != s.end();) {
+			if (port_is_control_only (*si)) {
+				si = s.erase (si);
+			} else {
+				++si;
+			}
+		}
+	}
+
+	return 0;
 }
 
 void
@@ -779,4 +802,36 @@ PortManager::port_engine()
 {
 	assert (_backend);
 	return *_backend;
+}
+
+bool
+PortManager::port_is_control_only (std::string const& name)
+{
+	static regex_t compiled_pattern;
+	static string pattern;
+
+	if (pattern.empty()) {
+
+		/* This is a list of regular expressions that match ports
+		 * related to physical MIDI devices that we do not want to
+		 * expose as normal physical ports.
+		 */
+
+		const char * const control_only_ports[] = {
+			X_(".*Ableton Push.*"),
+		};
+
+		pattern = "(";
+		for (size_t n = 0; n < sizeof (control_only_ports)/sizeof (control_only_ports[0]); ++n) {
+			if (n > 0) {
+				pattern += '|';
+			}
+			pattern += control_only_ports[n];
+		}
+		pattern += ')';
+
+		regcomp (&compiled_pattern, pattern.c_str(), REG_EXTENDED|REG_NOSUB);
+	}
+
+	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
 }

@@ -82,6 +82,8 @@ class LIBARDOUR_API PortManager
 	std::string             get_pretty_name_by_name (const std::string& portname) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 
+	static bool port_is_control_only (std::string const &);
+
 	/* other Port management */
 
 	bool      port_is_physical (const std::string&) const;
