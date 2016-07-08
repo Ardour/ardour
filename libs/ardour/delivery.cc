@@ -297,22 +297,28 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 
 		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
 
-		// MIDI data will not have been delivered by the panner
+		// non-audio data will not have been delivered by the panner
 
-		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
-			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, ports.port(0)->port_offset());
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
+				_output->copy_to_outputs (bufs, *t, nframes, ports.port(0)->port_offset());
+			}
 		}
 
 	} else {
 
 		// Do a 1:1 copy of data to output ports
 
-		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
+		// audio is handled separately because we use 0 for the offset
+		// XXX how does this interact with Port::increment_global_port_buffer_offset ?
+		if (bufs.count().n_audio() > 0) {
 			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 		}
 
-		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
-			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, ports.port(0)->port_offset());
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
+				_output->copy_to_outputs (bufs, *t, nframes, ports.port(0)->port_offset());
+			}
 		}
 	}
 
