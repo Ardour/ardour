@@ -1772,6 +1772,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 	mode_map.insert (note);
 	mode_vector.push_back (note);
 
+	/* build a map of all notes in the mode, from the root to 127 */
+
 	while (note < 128) {
 
 		if (interval == m.steps.end()) {
