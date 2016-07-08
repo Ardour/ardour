@@ -150,6 +150,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
   private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
+	boost::weak_ptr<VCA> group_master;
 
 	PBD::Property<bool> _relative;
 	PBD::Property<bool> _active;

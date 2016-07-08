@@ -126,11 +126,17 @@ RouteGroup::~RouteGroup ()
 	_rec_enable_group->clear ();
 	_monitoring_group->clear ();
 
+	boost::shared_ptr<VCA> vca (group_master.lock());
+
 	for (RouteList::iterator i = routes->begin(); i != routes->end();) {
 		RouteList::iterator tmp = i;
 		++tmp;
 
 		(*i)->set_route_group (0);
+
+		if (vca) {
+			(*i)->unassign (vca);
+		}
 
 		i = tmp;
 	}
@@ -164,6 +170,12 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	r->set_route_group (this);
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 
+	boost::shared_ptr<VCA> vca (group_master.lock());
+
+	if (vca) {
+		r->assign  (vca);
+	}
+
 	_session.set_dirty ();
 	RouteAdded (this, boost::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 	return 0;
@@ -186,6 +198,13 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 
 	if ((i = find (routes->begin(), routes->end(), r)) != routes->end()) {
 		r->set_route_group (0);
+
+		boost::shared_ptr<VCA> vca = group_master.lock();
+
+		if (vca) {
+			r->unassign (vca);
+		}
+
 		_solo_group->remove_control (r->solo_control());
 		_mute_group->remove_control (r->mute_control());
 		_gain_group->remove_control (r->gain_control());
@@ -584,6 +603,8 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
 		(*r)->assign (master);
 	}
+
+	group_master = master;
 }
 
 void
@@ -602,6 +623,8 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
 		(*r)->unassign (master);
 	}
+
+	group_master.reset ();
 }
 
 bool
