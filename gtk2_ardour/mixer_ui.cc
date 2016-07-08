@@ -1057,7 +1057,8 @@ Mixer_UI::show_strip (MixerStrip* ms)
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		if (strip == ms) {
 			(*i)[stripable_columns.visible] = true;
-			redisplay_track_list ();
+			av->set_marked_for_display (true);
+			update_track_visibility ();
 			break;
 		}
 	}
@@ -1075,7 +1076,8 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		if (strip == ms) {
 			(*i)[stripable_columns.visible] = false;
-			redisplay_track_list ();
+			av->set_marked_for_display (false);
+			update_track_visibility ();
 			break;
 		}
 	}
