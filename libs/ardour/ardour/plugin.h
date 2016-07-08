@@ -88,6 +88,18 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual std::string get_docs () const { return ""; }
 	virtual std::string get_parameter_docs (uint32_t /*which*/) const { return ""; }
 
+	struct UILayoutHint {
+		UILayoutHint ()
+			: x0(-1), x1(-1), y0(-1), y1(-1), knob(false) {}
+		int x0;
+		int x1;
+		int y0;
+		int y1;
+		bool knob;
+	};
+
+	virtual bool get_layout (uint32_t which, UILayoutHint&) const { return false; }
+
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
 	virtual void activate () = 0;
