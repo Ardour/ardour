@@ -1721,11 +1721,13 @@ IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 void
 IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset)
 {
-	// Copy any buffers 1:1 to outputs
-
 	PortSet::iterator o = _ports.begin(type);
 	BufferSet::iterator i = bufs.begin(type);
 	BufferSet::iterator prev = i;
+
+	assert(i != bufs.end(type)); // or second loop will crash
+
+	// Copy any buffers 1:1 to outputs
 
 	while (i != bufs.end(type) && o != _ports.end (type)) {
 		Buffer& port_buffer (o->get_buffer (nframes));
