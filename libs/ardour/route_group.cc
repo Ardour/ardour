@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis
+    Copyright (C) 2000-2016 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,11 +28,13 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
+#include "ardour/debug.h"
 #include "ardour/monitor_control.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
-#include "ardour/debug.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "i18n.h"
 
@@ -52,6 +54,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> group_route_active;
 		PropertyDescriptor<bool> group_color;
 		PropertyDescriptor<bool> group_monitoring;
+		PropertyDescriptor<int32_t> group_master_number;
 	}
 }
 
@@ -76,9 +79,11 @@ RouteGroup::make_property_quarks ()
 	Properties::group_route_active.property_id = g_quark_from_static_string (X_("route-active"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::group_route_active.property_id));
 	Properties::group_color.property_id = g_quark_from_static_string (X_("color"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",       Properties::group_color.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n", Properties::group_color.property_id));
 	Properties::group_monitoring.property_id = g_quark_from_static_string (X_("monitoring"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n",       Properties::group_monitoring.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n", Properties::group_monitoring.property_id));
+	Properties::group_master_number.property_id = g_quark_from_static_string (X_("group-master-number"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for group-master-number = %1\n", Properties::group_master_number.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::group_relative, true) \
@@ -91,7 +96,8 @@ RouteGroup::make_property_quarks ()
 	, _select (Properties::group_select, true) \
 	, _route_active (Properties::group_route_active, true) \
 	, _color (Properties::group_color, true) \
-	, _monitoring (Properties::group_monitoring, true)
+	, _monitoring (Properties::group_monitoring, true) \
+	, _group_master_number (Properties::group_master_number, -1)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
@@ -116,6 +122,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_route_active);
 	add_property (_color);
 	add_property (_monitoring);
+	add_property (_group_master_number);
 }
 
 RouteGroup::~RouteGroup ()
@@ -274,6 +281,17 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	if (_group_master_number.val() > 0) {
+		boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (_group_master_number.val());
+		if (vca) {
+			/* no need to do the assignment because slaves will
+			   handle that themselves. But we can set group_master
+			   to use with future assignments of newly added routes.
+			*/
+			group_master = vca;
+		}
+	}
+
 	push_to_groups ();
 
 	return 0;
@@ -311,6 +329,10 @@ RouteGroup::set_gain (bool yn)
 	if (is_gain() == yn) {
 		return;
 	}
+	if (has_control_master()) {
+		return;
+	}
+
 	_gain = yn;
 	_gain_group->set_active (yn);
 
@@ -605,6 +627,7 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 	}
 
 	group_master = master;
+	_group_master_number = master->number();
 }
 
 void
@@ -625,6 +648,7 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 	}
 
 	group_master.reset ();
+	_group_master_number = -1;
 }
 
 bool
@@ -635,4 +659,10 @@ RouteGroup::slaved () const
 	}
 
 	return routes->front()->slaved ();
+}
+
+bool
+RouteGroup::has_control_master() const
+{
+	return group_master.lock() != 0;
 }

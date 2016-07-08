@@ -48,6 +48,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_color;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_monitoring;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<int32_t> group_master_number;
 	/* we use these declared in region.cc */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> hidden;
 };
@@ -75,7 +76,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool is_active () const { return _active.val(); }
 	bool is_relative () const { return _relative.val(); }
 	bool is_hidden () const { return _hidden.val(); }
-	bool is_gain () const { return _gain.val(); }
+	bool is_gain () const { return _gain.val() && _group_master_number.val() > 0; }
 	bool is_mute () const { return _mute.val(); }
 	bool is_solo () const { return _solo.val(); }
 	bool is_recenable () const { return _recenable.val(); }
@@ -83,6 +84,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool is_route_active () const { return _route_active.val(); }
 	bool is_color () const { return _color.val(); }
 	bool is_monitoring() const { return _monitoring.val(); }
+	int32_t group_master_number() const { return _group_master_number.val(); }
 
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
@@ -145,6 +147,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	void assign_master (boost::shared_ptr<VCA>);
 	void unassign_master (boost::shared_ptr<VCA>);
+	bool has_control_master() const;
 	bool slaved () const;
 
   private:
@@ -163,6 +166,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	PBD::Property<bool> _route_active;
 	PBD::Property<bool> _color;
 	PBD::Property<bool> _monitoring;
+	PBD::Property<int32_t> _group_master_number;
 
 	boost::shared_ptr<ControlGroup> _solo_group;
 	boost::shared_ptr<ControlGroup> _mute_group;
