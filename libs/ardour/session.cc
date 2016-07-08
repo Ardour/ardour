@@ -930,7 +930,28 @@ Session::setup_bundles ()
 	vector<string> outputs[DataType::num_types];
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
 		_engine.get_physical_inputs (DataType (DataType::Symbol (i)), inputs[i]);
+
+		/* rip out ControlOnly ports */
+
+		for (vector<string>::iterator si = inputs[i].begin(); si != inputs[i].end(); ) {
+			if (PortManager::port_is_control_only (*si)) {
+				si = inputs[i].erase (si);
+			} else {
+				++si;
+			}
+		}
+
 		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+
+		/* rip out ControlOnly ports */
+
+		for (vector<string>::iterator si = outputs[i].begin(); si != outputs[i].end(); ) {
+			if (PortManager::port_is_control_only (*si)) {
+				si = outputs[i].erase (si);
+			} else {
+				++si;
+			}
+		}
 	}
 
 	/* Create a set of Bundle objects that map
