@@ -1088,7 +1088,6 @@ Editor::sensitize_all_region_actions (bool s)
 void
 Editor::sensitize_the_right_region_actions ()
 {
-
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	sensitize_all_region_actions (!rs.empty ());
 
@@ -1373,11 +1372,15 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 
-	if (!_all_region_actions_sensitized) {
-		/* This selection change might have changed what region actions
-		   are allowed, so sensitize them all in case a key is pressed.
-		*/
-		sensitize_all_region_actions (true);
+	if (selection->regions.empty()) {
+		sensitize_all_region_actions (false);
+	} else {
+		if (!_all_region_actions_sensitized) {
+			/* This selection change might have changed what region actions
+			   are allowed, so sensitize them all in case a key is pressed.
+			*/
+			sensitize_all_region_actions (true);
+		}
 	}
 
 	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {

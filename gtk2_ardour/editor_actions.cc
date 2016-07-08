@@ -2049,6 +2049,6 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "choose-top-region", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), false));
 	reg_sens (_region_actions, "choose-top-region-context-menu", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), true));
 
-	_all_region_actions_sensitized = true;
-
+	/* desensitize them all by default. region selection will change this */
+	sensitize_all_region_actions (false);
 }
