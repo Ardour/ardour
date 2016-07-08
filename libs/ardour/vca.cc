@@ -34,7 +34,7 @@ using namespace PBD;
 using std::string;
 
 Glib::Threads::Mutex VCA::number_lock;
-uint32_t VCA::next_number = 1;
+int32_t VCA::next_number = 1;
 string VCA::xml_node_name (X_("VCA"));
 
 string
@@ -43,7 +43,7 @@ VCA::default_name_template ()
 	return _("VCA %n");
 }
 
-uint32_t
+int32_t
 VCA::next_vca_number ()
 {
 	/* we could use atomic inc here, but elsewhere we need more complete
@@ -54,20 +54,20 @@ VCA::next_vca_number ()
 }
 
 void
-VCA::set_next_vca_number (uint32_t n)
+VCA::set_next_vca_number (int32_t n)
 {
 	Glib::Threads::Mutex::Lock lm (number_lock);
 	next_number = n;
 }
 
-uint32_t
+int32_t
 VCA::get_next_vca_number ()
 {
 	Glib::Threads::Mutex::Lock lm (number_lock);
 	return next_number;
 }
 
-VCA::VCA (Session& s,  uint32_t num, const string& name)
+VCA::VCA (Session& s,  int32_t num, const string& name)
 	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
 	, Automatable (s)

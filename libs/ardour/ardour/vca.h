@@ -52,10 +52,10 @@ class LIBARDOUR_API VCA : public Stripable,
                           public Monitorable,
                           public boost::enable_shared_from_this<VCA> {
   public:
-	VCA (Session& session,  uint32_t num, const std::string& name);
+	VCA (Session& session,  int32_t num, const std::string& name);
 	~VCA();
 
-	uint32_t number () const { return _number; }
+	int32_t number () const { return _number; }
 
 	int init ();
 	XMLNode& get_state();
@@ -94,12 +94,12 @@ class LIBARDOUR_API VCA : public Stripable,
 	MonitorState monitoring_state() const;
 
 	static std::string default_name_template ();
-	static uint32_t next_vca_number ();
+	static int32_t next_vca_number ();
 	static std::string xml_node_name;
 
 	/* used by Session to save/restore the atomic counter */
-	static uint32_t get_next_vca_number ();
-	static void set_next_vca_number (uint32_t);
+	static int32_t get_next_vca_number ();
+	static void set_next_vca_number (int32_t);
 
 	boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 	boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
@@ -142,14 +142,14 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<MonitorControl> monitoring_control() const { return boost::shared_ptr<MonitorControl>(); }
 
   private:
-	uint32_t _number;
+	int32_t _number;
 
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
 
 
-	static uint32_t next_number;
+	static int32_t next_number;
 	static Glib::Threads::Mutex number_lock;
 
 	void solo_target_going_away (boost::weak_ptr<Route>);
