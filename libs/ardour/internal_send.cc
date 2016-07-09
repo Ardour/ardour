@@ -144,7 +144,9 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	// in-place, which a send must never do.
 
 	if (_panshell && !_panshell->bypassed() && role() != Listen) {
-		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
+		if (mixbufs.count ().n_audio () > 0) {
+			_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
+		}
 
 		/* non-audio data will not have been copied by the panner, do it now
 		 * if there are more buffers available than send buffers, ignore them,
