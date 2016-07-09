@@ -7015,8 +7015,18 @@ Session::auto_connect_thread_run ()
 			}
 		}
 
-		while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
-			update_latency_compensation ();
+		if (!actively_recording ()) { // might not be needed,
+			/* this is only used for updating plugin latencies, the
+			 * graph does not change. so it's safe in general.
+			 * BUT..
+			 * .. update_latency_compensation () entails set_capture_offset()
+			 * which calls Diskstream::set_capture_offset () which
+			 * modifies the capture offset... which can be a proplem
+			 * in "prepare_to_stop"
+			 */
+			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
+				update_latency_compensation ();
+			}
 		}
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
