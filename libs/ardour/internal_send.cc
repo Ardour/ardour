@@ -145,6 +145,27 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	if (_panshell && !_panshell->bypassed() && role() != Listen) {
 		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
+
+		/* non-audio data will not have been copied by the panner, do it now
+		 * if there are more buffers available than send buffers, ignore them,
+		 * if there are less, copy the last as IO::copy_to_output does. */
+
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (*t != DataType::AUDIO) {
+				BufferSet::iterator o = mixbufs.begin(*t);
+				BufferSet::iterator i = bufs.begin(*t);
+
+				while (i != bufs.end(*t) && o != mixbufs.end(*t)) {
+					o->read_from (*i, nframes);
+					++i;
+					++o;
+				}
+				while (o != mixbufs.end(*t)) {
+					o->silence(nframes, 0);
+					++o;
+				}
+			}
+		}
 	} else {
 		if (role() == Listen) {
 			/* We're going to the monitor bus, so discard MIDI data */
