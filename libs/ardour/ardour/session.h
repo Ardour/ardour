@@ -1528,6 +1528,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	AutoConnectQueue _auto_connect_queue;
 	guint _latency_recompute_pending;
 
+	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type, bool excluding);
+
 	void auto_connect (const AutoConnectRequest&);
 	void queue_latency_recompute ();
 
