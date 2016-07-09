@@ -293,8 +293,10 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 void
 EditorSummary::set_background_dirty ()
 {
-	_background_dirty = true;
-	set_dirty ();
+	if (!_background_dirty) {
+		_background_dirty = true;
+		set_dirty ();
+	}
 }
 
 /** Set the summary so that just the overlays (viewbox, playhead etc.) will be re-rendered */
