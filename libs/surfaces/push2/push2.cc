@@ -193,8 +193,8 @@ Push2::port_registration_handler ()
 	vector<string> in;
 	vector<string> out;
 
-	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput|ControlOnly), in);
-	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput|ControlOnly), out);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
 
 	if (!in.empty() && !out.empty()) {
 		cerr << "Push2: both ports found\n";
