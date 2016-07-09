@@ -129,7 +129,7 @@ class LIBARDOUR_API MetricSection {
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
-	const bool is_tempo () const { return _is_tempo; }
+	bool is_tempo () const { return _is_tempo; }
 
 private:
 	double             _pulse;
