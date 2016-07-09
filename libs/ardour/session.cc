@@ -2580,6 +2580,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				route_group->add (bus);
 			}
 
+			bus->add_internal_return ();
 			ret.push_back (bus);
 		}
 
