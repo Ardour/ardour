@@ -133,6 +133,8 @@ ControllableDescriptor::set (const std::string& str)
 		} else {
 			return -1;
 		}
+
+		_presentation_order -= 1; /* order is zero-based, but maps use 1-based */
 	}
 
 	if (path[1] == "gain") {
