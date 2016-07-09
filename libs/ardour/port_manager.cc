@@ -273,23 +273,7 @@ PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlag
 		return 0;
 	}
 
-	int ret = _backend->get_ports (port_name_pattern, type, flags, s);
-	if (!ret) {
-		return ret;
-	}
-
-	if (!(flags & ControlOnly)) {
-		/* remove all ports whose name indicates that they are for control only */
-		for (vector<string>::iterator si = s.begin(); si != s.end();) {
-			if (port_is_control_only (*si)) {
-				si = s.erase (si);
-			} else {
-				++si;
-			}
-		}
-	}
-
-	return 0;
+	return _backend->get_ports (port_name_pattern, type, flags, s);
 }
 
 void
@@ -819,6 +803,7 @@ PortManager::port_is_control_only (std::string const& name)
 
 		const char * const control_only_ports[] = {
 			X_(".*Ableton Push.*"),
+			X_(".*FaderPort .*"),
 		};
 
 		pattern = "(";
