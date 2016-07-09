@@ -775,26 +775,41 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	/* the color that will be used to show parts of regions that will not be heard */
 	uint32_t const non_playing_color = UIConfiguration::instance().color_mod ("covered region", "covered region base");
 
-	t = pl->find_next_region_boundary (t, 1);
 
-	/* is this region is on top at time t? */
-	bool const new_me = (pl->top_unmuted_region_at (t) == _region);
+	while (t < end) {
 
-	/* start off any new rect, if required */
-	if (cr == 0 || me != new_me) {
-		cr = new ArdourCanvas::Rectangle (group);
-		_coverage_frames.push_back (cr);
-		cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
-		cr->set_y0 (1);
-		cr->set_y1 (_height + 1);
-		cr->set_outline (false);
-		cr->set_ignore_events (true);
-		if (new_me) {
-			cr->set_fill_color (UINT_RGBA_CHANGE_A (non_playing_color, 0));
-		} else {
-			cr->set_fill_color (non_playing_color);
+		t++;
+
+		/* is this region is on top at time t? */
+		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
+		/* finish off any old rect, if required */
+		if (cr && me != new_me) {
+			cr->set_x1 (trackview.editor().sample_to_pixel (t - position));
 		}
+
+		/* start off any new rect, if required */
+		if (cr == 0 || me != new_me) {
+			cr = new ArdourCanvas::Rectangle (group);
+			_coverage_frames.push_back (cr);
+			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
+			cr->set_y0 (1);
+			cr->set_y1 (_height + 1);
+			cr->set_outline (false);
+			cr->set_ignore_events (true);
+			if (new_me) {
+				cr->set_fill_color (UINT_RGBA_CHANGE_A (non_playing_color, 0));
+			} else {
+				cr->set_fill_color (non_playing_color);
+			}
+		}
+		t = pl->find_next_region_boundary (t, 1);
+		if (t < 0) {
+			break;
+		}
+		me = new_me;
 	}
+
+	t = pl->find_next_region_boundary (t, 1);
 
 	if (cr) {
 		/* finish off the last rectangle */

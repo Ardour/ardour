@@ -297,7 +297,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 		/* tricky. playlist_changed() does this as well, and its really inefficient. */
-		//update_coverage_frames ();
+		update_coverage_frames ();
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
