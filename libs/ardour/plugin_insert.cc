@@ -2959,10 +2959,8 @@ PluginInsert::latency_changed ()
 {
 	// this is called in RT context, LatencyChanged is emitted after run()
 	_latency_changed = true;
-#if 1 // TODO check possible deadlock in RT-context (esp. with jack) latency-callback.
 	// XXX This also needs a proper API not an owner() hack.
-	static_cast<Route*>(owner ())->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-#endif
+	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
 }
 
 void

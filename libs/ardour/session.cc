@@ -279,6 +279,7 @@ Session::Session (AudioEngine &eng,
 	, _reconnecting_routes_in_progress (false)
 	, _route_deletion_in_progress (false)
 	, destructive_index (0)
+	, _latency_recompute_pending (0)
 	, _track_number_decimals(1)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
@@ -3418,6 +3419,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+		r->processor_latency_changed.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
 
 		if (r->is_master()) {
 			_master_out = r;
@@ -6839,6 +6841,16 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs
 }
 
 void
+Session::queue_latency_recompute ()
+{
+	g_atomic_int_inc (&_latency_recompute_pending);
+	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
+		pthread_cond_signal (&_auto_connect_cond);
+		pthread_mutex_unlock (&_auto_connect_mutex);
+	}
+}
+
+void
 Session::auto_connect (const AutoConnectRequest& ar)
 {
 	boost::shared_ptr<Route> route = ar.route.lock();
@@ -7001,6 +7013,10 @@ Session::auto_connect_thread_run ()
 				auto_connect (ar);
 				lx.acquire ();
 			}
+		}
+
+		while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
+			update_latency_compensation ();
 		}
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);

@@ -360,6 +360,7 @@ public:
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
 	PBD::Signal1<void,void*> record_enable_changed;
+	PBD::Signal0<void> processor_latency_changed;
 	/** the metering point has changed */
 	PBD::Signal0<void>       meter_change;
 	PBD::Signal0<void>       signal_latency_changed;

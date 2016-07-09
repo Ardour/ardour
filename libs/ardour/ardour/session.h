@@ -1509,8 +1509,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
 	Glib::Threads::Mutex  _auto_connect_queue_lock;
 	AutoConnectQueue _auto_connect_queue;
+	guint _latency_recompute_pending;
 
 	void auto_connect (const AutoConnectRequest&);
+	void queue_latency_recompute ();
 
 	/* SessionEventManager interface */
 
