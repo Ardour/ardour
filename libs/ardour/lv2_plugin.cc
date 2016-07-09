@@ -2707,9 +2707,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	if (_latency_control_port) {
 		framecnt_t new_latency = signal_latency ();
-		if (_current_latency != new_latency) {
-			LatencyChanged (_current_latency, new_latency); /* EMIT SIGNAL */
-		}
 		_current_latency = new_latency;
 	}
 	return 0;

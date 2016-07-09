@@ -69,6 +69,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _sc_playback_latency (0)
 	, _sc_capture_latency (0)
+	, _plugin_signal_latency (0)
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
 	, _configured (false)
@@ -551,6 +552,10 @@ PluginInsert::activate ()
 	}
 
 	Processor::activate ();
+	if (_plugin_signal_latency != signal_latency ()) {
+		_plugin_signal_latency = signal_latency ();
+		latency_changed ();
+	}
 }
 
 void
@@ -560,6 +565,10 @@ PluginInsert::deactivate ()
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->deactivate ();
+	}
+	if (_plugin_signal_latency != signal_latency ()) {
+		_plugin_signal_latency = signal_latency ();
+		latency_changed ();
 	}
 }
 
@@ -913,6 +922,11 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 			AnalysisDataGathered(&_signal_analysis_inputs,
 					     &_signal_analysis_outputs);
 		}
+	}
+
+	if (_plugin_signal_latency != signal_latency ()) {
+		_plugin_signal_latency = signal_latency ();
+		latency_changed ();
 	}
 }
 
@@ -2699,6 +2713,9 @@ PluginInsert::describe_parameter (Evoral::Parameter param)
 ARDOUR::framecnt_t
 PluginInsert::signal_latency() const
 {
+	if (!_pending_active) {
+		return 0;
+	}
 	if (_user_latency) {
 		return _user_latency;
 	}
@@ -2878,7 +2895,6 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
-		plugin->LatencyChanged.connect_same_thread (*this, boost::bind (&PluginInsert::latency_changed, this, _1, _2));
 		_custom_sinks = plugin->get_info()->n_inputs;
 		// cache sidechain port count
 		_cached_sidechain_pins.reset ();
@@ -2939,10 +2955,14 @@ PluginInsert::monitoring_changed ()
 }
 
 void
-PluginInsert::latency_changed (framecnt_t, framecnt_t)
+PluginInsert::latency_changed ()
 {
 	// this is called in RT context, LatencyChanged is emitted after run()
 	_latency_changed = true;
+#if 0 // TODO check possible deadlock in RT-context
+	// XXX This also needs a proper API not an owner() hack.
+	static_cast<Route*>(owner ())->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+#endif
 }
 
 void

@@ -310,6 +310,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	boost::shared_ptr<SideChain> _sidechain;
 	uint32_t _sc_playback_latency;
 	uint32_t _sc_capture_latency;
+	uint32_t _plugin_signal_latency;
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
@@ -368,7 +369,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void start_touch (uint32_t param_id);
 	void end_touch (uint32_t param_id);
 
-	void latency_changed (framecnt_t, framecnt_t);
+	void latency_changed ();
 	bool _latency_changed;
 	uint32_t _bypass_port;
 };
