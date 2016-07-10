@@ -1278,6 +1278,7 @@ LuaBindings::dsp (lua_State* L)
 		.beginClass <BufferSet> ("BufferSet")
 		.addEqualCheck ()
 		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
+		.addFunction ("get_midi", static_cast<MidiBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_midi))
 		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
 		.endClass()
 		.endNamespace ();
