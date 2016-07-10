@@ -45,7 +45,13 @@ class TrackMixLayout : public Push2Layout
 
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
+	PBD::ScopedConnectionList stripable_connections;
 	bool _dirty;
+
+	Glib::RefPtr<Pango::Layout> name_layout;
+
+	void drop_stripable ();
+	void name_changed ();
 };
 
 } /* namespace */

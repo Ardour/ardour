@@ -56,6 +56,10 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Conte
 	: Push2Layout (p, s)
 	, _dirty (false)
 {
+	name_layout = Pango::Layout::create (context);
+
+	Pango::FontDescription fd ("Sans Bold 24");
+	name_layout->set_font_description (fd);
 }
 
 TrackMixLayout::~TrackMixLayout ()
@@ -65,11 +69,20 @@ TrackMixLayout::~TrackMixLayout ()
 bool
 TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (!_dirty) {
+		return false;
+	}
+
 	context->set_source_rgb (0.764, 0.882, 0.882);
 	context->rectangle (0, 0, 960, 160);
 	context->fill ();
 
-	return false;
+	context->set_source_rgb (0.23, 0.0, 0.349);
+	context->move_to (10, 2);
+	name_layout->update_from_cairo_context (context);
+	name_layout->show_in_cairo_context (context);
+
+	return true;
 }
 
 void
@@ -96,5 +109,26 @@ void
 TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 {
 	stripable = s;
+
+	if (stripable) {
+		stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
+		name_changed ();
+	}
+
+	_dirty = true;
+}
+
+void
+TrackMixLayout::drop_stripable ()
+{
+	stripable_connections.drop_connections ();
+	stripable.reset ();
+	_dirty = true;
+}
+
+void
+TrackMixLayout::name_changed ()
+{
+	name_layout->set_text (stripable->name());
 	_dirty = true;
 }

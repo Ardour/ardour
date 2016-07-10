@@ -25,6 +25,7 @@
 
 #include "layout.h"
 #include "push2.h"
+#include "track_mix.h"
 
 using namespace ArdourSurface;
 using namespace ARDOUR;
@@ -176,7 +177,7 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON (Delete, 118);
 	MAKE_WHITE_BUTTON (AddDevice, 52);
 	MAKE_WHITE_BUTTON (Device, 110);
-	MAKE_WHITE_BUTTON (Mix, 112);
+	MAKE_WHITE_BUTTON_PRESS (Mix, 112, &Push2::button_mix_press);
 	MAKE_WHITE_BUTTON_PRESS (Undo, 119, &Push2::button_undo);
 	MAKE_WHITE_BUTTON_PRESS (AddTrack, 53, &Push2::button_add_track);
 	MAKE_WHITE_BUTTON_PRESS (Browse, 111, &Push2::button_browse);
@@ -545,5 +546,18 @@ Push2::button_scale_press ()
 		_current_layout = scale_layout;
 	} else {
 		_current_layout = mix_layout;
+	}
+}
+
+void
+Push2::button_mix_press ()
+{
+	if (_current_layout == track_mix_layout) {
+		_current_layout = mix_layout;
+	} else {
+		if (ControlProtocol::first_selected_stripable()) {
+			dynamic_cast<TrackMixLayout*> (track_mix_layout)->set_stripable (ControlProtocol::first_selected_stripable());
+			_current_layout = track_mix_layout;
+		}
 	}
 }

@@ -267,6 +267,8 @@ Push2::open ()
 
 	mix_layout = new MixLayout (*this, *session, context);
 	scale_layout = new ScaleLayout (*this, *session, context);
+	track_mix_layout = new TrackMixLayout (*this, *session, context);
+
 	_current_layout = mix_layout;
 
 	return 0;

@@ -446,6 +446,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_octave_down ();
 	void button_layout_press ();
 	void button_scale_press ();
+	void button_mix_press ();
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
@@ -494,6 +495,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	Push2Layout* drawn_layout;
 	Push2Layout* mix_layout;
 	Push2Layout* scale_layout;
+	Push2Layout* track_mix_layout;
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
