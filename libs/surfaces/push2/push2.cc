@@ -131,6 +131,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _root_octave (3)
 	, _in_key (true)
 	, octave_shift (0)
+	, percussion (false)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -339,7 +340,7 @@ Push2::init_buttons (bool startup)
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
-	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown
+	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -375,7 +376,7 @@ Push2::init_buttons (bool startup)
 
 		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
-		                           Accent, Scale, Layout, Note, Session,  };
+		                           Accent, Scale, Note, Session,  };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
 			Button* b = id_button_map[off_buttons[n]];
@@ -1932,4 +1933,55 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 	_root_octave = octave;
 	_in_key = inkey;
 	_mode = mode;
+}
+
+void
+Push2::set_percussive_mode (bool yn)
+{
+	if (!yn) {
+		cerr << "back to scale\n";
+		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+		percussion = false;
+		return;
+	}
+
+	int drum_note = 36;
+
+	for (int row = 0; row < 8; ++row) {
+
+		for (int col = 0; col < 4; ++col) {
+
+			int index = 36 + (row*8) + col;
+			Pad* pad = nn_pad_map[index];
+
+			pad->filtered = drum_note;
+			drum_note++;
+		}
+	}
+
+	for (int row = 0; row < 8; ++row) {
+
+		for (int col = 4; col < 8; ++col) {
+
+			int index = 36 + (row*8) + col;
+			Pad* pad = nn_pad_map[index];
+
+			pad->filtered = drum_note;
+			drum_note++;
+		}
+	}
+
+	percussion = true;
+
+	PadChange (); /* EMIT SIGNAL */
+}
+
+void
+Push2::button_layout_press ()
+{
+	if (percussion) {
+		set_percussive_mode (false);
+	} else {
+		set_percussive_mode (true);
+	}
 }

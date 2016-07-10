@@ -194,7 +194,7 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (Repeat, 56, &Push2::button_repeat);
 	MAKE_WHITE_BUTTON (Accent, 57);
 	MAKE_WHITE_BUTTON (Scale, 58);
-	MAKE_WHITE_BUTTON (Layout, 31);
+	MAKE_WHITE_BUTTON_PRESS (Layout, 31, &Push2::button_layout_press);
 	MAKE_WHITE_BUTTON (Note, 50);
 	MAKE_WHITE_BUTTON (Session, 51);
 	MAKE_WHITE_BUTTON (Layout, 31);

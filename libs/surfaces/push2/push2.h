@@ -459,6 +459,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_page_right ();
 	void button_octave_up ();
 	void button_octave_down ();
+	void button_layout_press ();
 
 	void start_shift ();
 	void end_shift ();
@@ -532,6 +533,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool _in_key;
 
 	int octave_shift;
+
+	bool percussion;
+	void set_percussive_mode (bool);
 };
 
 
