@@ -213,7 +213,7 @@ Push2::button_play ()
 		return;
 	}
 
-	if (modifier_state & ModShift) {
+	if (_modifier_state & ModShift) {
 		goto_start (session->transport_rolling());
 		return;
 	}
@@ -258,13 +258,13 @@ Push2::button_page_left ()
 void
 Push2::button_right ()
 {
-	switch_bank (max (0, bank_start + 8));
+	_current_layout->button_right ();
 }
 
 void
 Push2::button_left ()
 {
-	switch_bank (max (0, bank_start - 8));
+	_current_layout->button_left ();
 }
 
 void
@@ -331,45 +331,19 @@ Push2::button_clip ()
 void
 Push2::button_upper (uint32_t n)
 {
-	if (!stripable[n]) {
-		return;
-	}
-
-	if (modifier_state & ModShift) {
-		boost::shared_ptr<AutomationControl> sc = stripable[n]->rec_enable_control ();
-		if (sc) {
-			sc->set_value (!sc->get_value(), PBD::Controllable::UseGroup);
-		}
-	} else {
-		boost::shared_ptr<SoloControl> sc = stripable[n]->solo_control ();
-		if (sc) {
-			sc->set_value (!sc->self_soloed(), PBD::Controllable::UseGroup);
-		}
-	}
+	_current_layout->button_upper (n);
 }
 
 void
 Push2::button_lower (uint32_t n)
 {
-	if (!stripable[n]) {
-		return;
-	}
-
-	if (modifier_state & ModSelect) {
-		SetStripableSelection (stripable[n]);
-	} else {
-		boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
-
-		if (mc) {
-			mc->set_value (!mc->muted_by_self(), PBD::Controllable::UseGroup);
-		}
-	}
+	_current_layout->button_lower (n);
 }
 
 void
 Push2::button_undo ()
 {
-	if (modifier_state & ModShift) {
+	if (_modifier_state & ModShift) {
 		ControlProtocol::Redo ();
 	} else {
 		ControlProtocol::Undo ();
@@ -379,56 +353,56 @@ Push2::button_undo ()
 void
 Push2::button_fwd32t ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (0+n);
 }
 
 void
 Push2::button_fwd32 ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (1+n);
 }
 
 void
 Push2::button_fwd16t ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (2+n);
 }
 
 void
 Push2::button_fwd16 ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (3+n);
 }
 
 void
 Push2::button_fwd8t ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (4+n);
 }
 
 void
 Push2::button_fwd8 ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (5+n);
 }
 
 void
 Push2::button_fwd4t ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (6+n);
 }
 
 void
 Push2::button_fwd4 ()
 {
-	const int n = (modifier_state & ModShift) ? 8 : 0;
+	const int n = (_modifier_state & ModShift) ? 8 : 0;
 	goto_nth_marker (7+n);
 }
 
@@ -466,93 +440,30 @@ Push2::button_shift_long_press ()
 void
 Push2::button_select_press ()
 {
-	start_select ();
+	cerr << "start select\n";
+	_modifier_state = ModifierState (_modifier_state | ModSelect);
+	Button* b = id_button_map[Select];
+	b->set_color (Push2::LED::White);
+	b->set_state (Push2::LED::Blinking16th);
+	write (b->state_msg());
+
+	_current_layout->button_select_press ();
 }
 
 void
 Push2::button_select_release ()
 {
-	if (!(modifier_state & ModSelect)) {
-		/* somebody else used us as a modifier */
-		return;
+	if (_modifier_state & ModSelect) {
+		cerr << "end select\n";
+		_modifier_state = ModifierState (_modifier_state & ~(ModSelect));
+		Button* b = id_button_map[Select];
+		b->timeout_connection.disconnect ();
+		b->set_color (Push2::LED::White);
+		b->set_state (Push2::LED::OneShot24th);
+		write (b->state_msg());
 	}
 
-	end_select ();
-
-	int selected = -1;
-
-	for (int n = 0; n < 8; ++n) {
-		if (stripable[n]) {
-			if (stripable[n]->presentation_info().selected()) {
-					selected = n;
-					break;
-			}
-		}
-	}
-
-	if (selected < 0) {
-
-		/* no visible track selected, select first (if any) */
-
-		if (stripable[0]) {
-			SetStripableSelection (stripable[0]);
-		}
-
-	} else {
-
-		if (modifier_state & ModShift) {
-			std::cerr << "select prev\n";
-			/* select prev */
-
-			if (selected == 0) {
-				/* current selected is leftmost ... cancel selection,
-				   switch banks by one, and select leftmost
-				*/
-				if (bank_start != 0) {
-					ClearStripableSelection ();
-					switch_bank (bank_start-1);
-					if (stripable[0]) {
-						SetStripableSelection (stripable[0]);
-					}
-				}
-			} else {
-				/* select prev, if any */
-				int n = selected - 1;
-				while (n >= 0 && !stripable[n]) {
-					--n;
-				}
-				if (n >= 0) {
-					SetStripableSelection (stripable[n]);
-				}
-			}
-
-		} else {
-
-			std::cerr << "select next\n";
-			/* select next */
-
-			if (selected == 7) {
-				/* current selected is rightmost ... cancel selection,
-				   switch banks by one, and select righmost
-				*/
-				ToggleStripableSelection (stripable[selected]);
-				switch_bank (bank_start+1);
-				if (stripable[7]) {
-					SetStripableSelection (stripable[7]);
-				}
-			} else {
-				/* select next, if any */
-				int n = selected + 1;
-				while (n < 8 && !stripable[n]) {
-					++n;
-				}
-
-				if (n != 8) {
-					SetStripableSelection (stripable[n]);
-				}
-			}
-		}
-	}
+	_current_layout->button_select_release ();
 }
 
 void
@@ -622,9 +533,9 @@ Push2::button_layout_press ()
 void
 Push2::button_scale_press ()
 {
-	if (current_menu != scale_menu) {
-		show_scale_menu ();
+	if (_current_layout != scale_layout) {
+		_current_layout = scale_layout;
 	} else {
-		cancel_menu ();
+		_current_layout = mix_layout;
 	}
 }

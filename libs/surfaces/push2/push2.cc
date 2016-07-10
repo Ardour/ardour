@@ -1,24 +1,20 @@
 /*
-	Copyright (C) 2016 Paul Davis
+  Copyright (C) 2016 Paul Davis
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#include <cairomm/context.h>
-#include <cairomm/surface.h>
-#include <pangomm/layout.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -46,13 +42,13 @@
 #include "gui.h"
 #include "menu.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
-
-#include "i18n.h"
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
@@ -122,9 +118,10 @@ Push2::Push2 (ARDOUR::Session& s)
 	, handle (0)
 	, device_buffer (0)
 	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
-	, modifier_state (None)
+	, _modifier_state (None)
 	, splash_start (0)
-	, bank_start (0)
+	, _current_layout (0)
+	, drawn_layout (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
 	, _mode (MusicalMode::IonianMajor)
@@ -133,42 +130,26 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _in_key (true)
 	, octave_shift (0)
 	, percussion (false)
-	, current_menu (0)
-	, drawn_menu (0)
 {
 	context = Cairo::Context::create (frame_buffer);
-	tc_clock_layout = Pango::Layout::create (context);
-	bbt_clock_layout = Pango::Layout::create (context);
-
-	Pango::FontDescription fd ("Sans Bold 24");
-	tc_clock_layout->set_font_description (fd);
-	bbt_clock_layout->set_font_description (fd);
-
-	Pango::FontDescription fd2 ("Sans 10");
-	for (int n = 0; n < 8; ++n) {
-		upper_layout[n] = Pango::Layout::create (context);
-		upper_layout[n]->set_font_description (fd2);
-		upper_layout[n]->set_text ("solo");
-		lower_layout[n] = Pango::Layout::create (context);
-		lower_layout[n]->set_font_description (fd2);
-		lower_layout[n]->set_text ("mute");
-	}
-
-	Pango::FontDescription fd3 ("Sans Bold 10");
-	for (int n = 0; n < 8; ++n) {
-		mid_layout[n] = Pango::Layout::create (context);
-		mid_layout[n]->set_font_description (fd3);
-	}
 
 	build_pad_table ();
 	build_maps ();
-	build_scale_menu ();
+
+	/* master cannot be removed, so no need to connect to going-away signal */
+	master = session->master_out ();
 
 	if (open ()) {
 		throw failed_constructor ();
 	}
 
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
+	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
+
+	/* catch current selection, if any */
+	{
+		StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
+		stripable_selection_change (sp);
+	}
 
 	/* catch arrival and departure of Push2 itself */
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
@@ -281,6 +262,10 @@ Push2::open ()
 
 	connect_to_parser ();
 
+	mix_layout = new MixLayout (*this, *session, context);
+	scale_layout = new ScaleLayout (*this, *session, context);
+	_current_layout = mix_layout;
+
 	return 0;
 }
 
@@ -317,16 +302,11 @@ Push2::close ()
 	vblank_connection.disconnect ();
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
-	stripable_connections.drop_connections ();
 
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
 		handle = 0;
-	}
-
-	for (int n = 0; n < 8; ++n) {
-		stripable[n].reset ();
 	}
 
 	delete [] device_frame_buffer;
@@ -509,133 +489,34 @@ Push2::blit_to_device_frame_buffer ()
 bool
 Push2::redraw ()
 {
-	string tc_clock_text;
-	string bbt_clock_text;
-
 	if (splash_start) {
-		if (get_microseconds() - splash_start > 4000000) {
+
+		/* display splash for 3 seconds */
+
+		if (get_microseconds() - splash_start > 3000000) {
 			splash_start = 0;
 		} else {
 			return false;
 		}
 	}
 
-	if (current_menu) {
-		if (current_menu->dirty() || drawn_menu != current_menu) {
-			/* fill background */
-			context->set_source_rgb (0.764, 0.882, 0.882);
-			context->rectangle (0, 0, 960, 160);
-			context->fill ();
-			/* now menu */
-			current_menu->redraw (context);
-			drawn_menu = current_menu;
-			return true;
-		}
-		return false;
-	} else {
-		drawn_menu = 0;
-	}
+	Glib::Threads::Mutex::Lock lm (layout_lock, Glib::Threads::TRY_LOCK);
 
-	if (session) {
-		framepos_t audible = session->audible_frame();
-		Timecode::Time TC;
-		bool negative = false;
-
-		if (audible < 0) {
-			audible = -audible;
-			negative = true;
-		}
-
-		session->timecode_time (audible, TC);
-
-		TC.negative = TC.negative || negative;
-
-		tc_clock_text = Timecode::timecode_format_time(TC);
-
-		Timecode::BBT_Time bbt = session->tempo_map().bbt_at_frame (audible);
-		char buf[16];
-
-#define BBT_BAR_CHAR "|"
-
-		if (negative) {
-			snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
-			          bbt.bars, bbt.beats, bbt.ticks);
-		} else {
-			snprintf (buf, sizeof (buf), " %03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
-			          bbt.bars, bbt.beats, bbt.ticks);
-		}
-
-		bbt_clock_text = buf;
-	}
-
-	bool dirty = false;
-
-	if (tc_clock_text != tc_clock_layout->get_text()) {
-		dirty = true;
-		tc_clock_layout->set_text (tc_clock_text);
-	}
-
-	if (bbt_clock_text != tc_clock_layout->get_text()) {
-		dirty = true;
-		bbt_clock_layout->set_text (bbt_clock_text);
-	}
-
-	string mid_text;
-
-	for (int n = 0; n < 8; ++n) {
-		if (stripable[n]) {
-			mid_text = short_version (stripable[n]->name(), 10);
-			if (mid_text != mid_layout[n]->get_text()) {
-				mid_layout[n]->set_text (mid_text);
-				dirty = true;
-			}
-		}
-	}
-
-	if (!dirty) {
+	if (!lm.locked()) {
+		/* can't get layout, no re-render needed */
 		return false;
 	}
 
-	context->set_source_rgb (0.764, 0.882, 0.882);
-	context->rectangle (0, 0, 960, 160);
-	context->fill ();
-	context->set_source_rgb (0.23, 0.0, 0.349);
-	context->move_to (650, 25);
-	tc_clock_layout->update_from_cairo_context (context);
-	tc_clock_layout->show_in_cairo_context (context);
-	context->move_to (650, 60);
-	bbt_clock_layout->update_from_cairo_context (context);
-	bbt_clock_layout->show_in_cairo_context (context);
+	bool render_needed = false;
 
-	for (int n = 0; n < 8; ++n) {
-		context->move_to (10 + (n*120), 2);
-		upper_layout[n]->update_from_cairo_context (context);
-		upper_layout[n]->show_in_cairo_context (context);
+	if (drawn_layout != _current_layout) {
+		render_needed = true;
 	}
 
-	for (int n = 0; n < 8; ++n) {
-		context->move_to (10 + (n*120), 140);
-		lower_layout[n]->update_from_cairo_context (context);
-		lower_layout[n]->show_in_cairo_context (context);
-	}
+	bool dirty = _current_layout->redraw (context);
+	drawn_layout = _current_layout;
 
-	for (int n = 0; n < 8; ++n) {
-		if (stripable[n] && stripable[n]->presentation_info().selected()) {
-			context->rectangle (10 + (n*120) - 5, 115, 120, 22);
-			context->set_source_rgb (1.0, 0.737, 0.172);
-			context->fill();
-		}
-		context->set_source_rgb (0.0, 0.0, 0.0);
-		context->move_to (10 + (n*120), 120);
-		mid_layout[n]->update_from_cairo_context (context);
-		mid_layout[n]->show_in_cairo_context (context);
-	}
-
-	/* render clock */
-	/* render foo */
-	/* render bar */
-
-	return true;
+	return dirty || render_needed;
 }
 
 bool
@@ -709,14 +590,8 @@ Push2::set_active (bool yn)
 		init_buttons (true);
 		init_touch_strip ();
 		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
-		switch_bank (0);
 		splash ();
 
-		/* catch current selection, if any */
-		{
-			StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
-			stripable_selection_change (sp);
-		}
 
 	} else {
 
@@ -861,33 +736,33 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 		switch (ev->controller_number) {
 		case 71:
-			strip_vpot (0, delta);
+			_current_layout->strip_vpot (0, delta);
 			break;
 		case 72:
-			strip_vpot (1, delta);
+			_current_layout->strip_vpot (1, delta);
 			break;
 		case 73:
-			strip_vpot (2, delta);
+			_current_layout->strip_vpot (2, delta);
 			break;
 		case 74:
-			strip_vpot (3, delta);
+			_current_layout->strip_vpot (3, delta);
 			break;
 		case 75:
-			strip_vpot (4, delta);
+			_current_layout->strip_vpot (4, delta);
 			break;
 		case 76:
-			strip_vpot (5, delta);
+			_current_layout->strip_vpot (5, delta);
 			break;
 		case 77:
-			strip_vpot (6, delta);
+			_current_layout->strip_vpot (6, delta);
 			break;
 		case 78:
-			strip_vpot (7, delta);
+			_current_layout->strip_vpot (7, delta);
 			break;
 
 			/* left side pair */
 		case 14:
-			strip_vpot (8, delta);
+			other_vpot (8, delta);
 			break;
 		case 15:
 			other_vpot (1, delta);
@@ -913,28 +788,28 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 
 	switch (ev->note_number) {
 	case 0:
-		strip_vpot_touch (0, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (0, ev->velocity > 64);
 		break;
 	case 1:
-		strip_vpot_touch (1, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (1, ev->velocity > 64);
 		break;
 	case 2:
-		strip_vpot_touch (2, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (2, ev->velocity > 64);
 		break;
 	case 3:
-		strip_vpot_touch (3, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (3, ev->velocity > 64);
 		break;
 	case 4:
-		strip_vpot_touch (4, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (4, ev->velocity > 64);
 		break;
 	case 5:
-		strip_vpot_touch (5, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (5, ev->velocity > 64);
 		break;
 	case 6:
-		strip_vpot_touch (6, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (6, ev->velocity > 64);
 		break;
 	case 7:
-		strip_vpot_touch (7, ev->velocity > 64);
+		_current_layout->strip_vpot_touch (7, ev->velocity > 64);
 		break;
 
 		/* left side */
@@ -1234,317 +1109,6 @@ Push2::set_state (const XMLNode & node, int version)
 }
 
 void
-Push2::switch_bank (uint32_t base)
-{
-	if (!session) {
-		return;
-	}
-
-	stripable_connections.drop_connections ();
-
-	/* try to get the first stripable for the requested bank */
-
-	stripable[0] = session->get_remote_nth_stripable (base, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-
-	if (!stripable[0]) {
-		return;
-	}
-
-	/* at least one stripable in this bank */
-	bank_start = base;
-
-	stripable[1] = session->get_remote_nth_stripable (base+1, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[2] = session->get_remote_nth_stripable (base+2, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[3] = session->get_remote_nth_stripable (base+3, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[4] = session->get_remote_nth_stripable (base+4, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[5] = session->get_remote_nth_stripable (base+5, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[6] = session->get_remote_nth_stripable (base+6, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[7] = session->get_remote_nth_stripable (base+7, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-
-
-	for (int n = 0; n < 8; ++n) {
-		if (!stripable[n]) {
-			continue;
-		}
-
-		/* stripable goes away? refill the bank, starting at the same point */
-
-		stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::switch_bank, this, bank_start), this);
-		boost::shared_ptr<AutomationControl> sc = stripable[n]->solo_control();
-		if (sc) {
-			sc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::solo_change, this, n), this);
-		}
-
-		boost::shared_ptr<AutomationControl> mc = stripable[n]->mute_control();
-		if (mc) {
-			mc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::mute_change, this, n), this);
-		}
-
-		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_property_change, this, _1, n), this);
-
-		solo_change (n);
-		mute_change (n);
-
-	}
-
-	/* master cannot be removed, so no need to connect to going-away signal */
-	master = session->master_out ();
-}
-
-void
-Push2::stripable_property_change (PropertyChange const& what_changed, int which)
-{
-	if (what_changed.contains (Properties::selected)) {
-		if (!stripable[which]) {
-			return;
-		}
-
-		/* cancel string, which will cause a redraw on the next update
-		 * cycle. The redraw will reflect selected status
-		 */
-
-		mid_layout[which]->set_text (string());
-	}
-}
-
-void
-Push2::stripable_selection_change (StripableNotificationListPtr selected)
-{
-
-	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
-	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
-	boost::shared_ptr<MidiTrack> new_pad_target;
-
-	/* See if there's a MIDI track selected */
-
-	for (StripableNotificationList::iterator si = selected->begin(); si != selected->end(); ++si) {
-
-		new_pad_target = boost::dynamic_pointer_cast<MidiTrack> ((*si).lock());
-
-		if (new_pad_target) {
-			break;
-		}
-	}
-
-	if (new_pad_target) {
-		cerr << "new midi pad target " << new_pad_target->name() << endl;
-	} else {
-		cerr << "no midi pad target\n";
-	}
-
-	if (current_midi_track == new_pad_target) {
-		/* nothing to do */
-		return;
-	}
-
-	if (!new_pad_target) {
-		/* leave existing connection alone */
-		return;
-	}
-
-	/* disconnect from pad port, if appropriate */
-
-	if (current_midi_track && pad_port) {
-		cerr << "Disconnect pads from " << current_midi_track->name() << endl;
-		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
-	}
-
-	/* now connect the pad port to this (newly) selected midi
-	 * track, if indeed there is one.
-	 */
-
-	if (new_pad_target && pad_port) {
-		cerr << "Reconnect pads to " << new_pad_target->name() << endl;
-		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
-		current_pad_target = new_pad_target;
-	} else {
-		current_pad_target.reset ();
-	}
-}
-
-
-void
-Push2::solo_change (int n)
-{
-	ButtonID bid;
-
-	switch (n) {
-	case 0:
-		bid = Upper1;
-		break;
-	case 1:
-		bid = Upper2;
-		break;
-	case 2:
-		bid = Upper3;
-		break;
-	case 3:
-		bid = Upper4;
-		break;
-	case 4:
-		bid = Upper5;
-		break;
-	case 5:
-		bid = Upper6;
-		break;
-	case 6:
-		bid = Upper7;
-		break;
-	case 7:
-		bid = Upper8;
-		break;
-	default:
-		return;
-	}
-
-	boost::shared_ptr<SoloControl> ac = stripable[n]->solo_control ();
-	if (!ac) {
-		return;
-	}
-
-	Button* b = id_button_map[bid];
-
-	if (ac->soloed()) {
-		b->set_color (LED::Green);
-	} else {
-		b->set_color (LED::Black);
-	}
-
-	if (ac->soloed_by_others_upstream() || ac->soloed_by_others_downstream()) {
-		b->set_state (LED::Blinking4th);
-	} else {
-		b->set_state (LED::OneShot24th);
-	}
-
-	write (b->state_msg());
-}
-
-void
-Push2::mute_change (int n)
-{
-	ButtonID bid;
-
-	if (!stripable[n]) {
-		return;
-	}
-
-	cerr << "Mute changed on " << n << ' ' << stripable[n]->name() << endl;
-
-	switch (n) {
-	case 0:
-		bid = Lower1;
-		break;
-	case 1:
-		bid = Lower2;
-		break;
-	case 2:
-		bid = Lower3;
-		break;
-	case 3:
-		bid = Lower4;
-		break;
-	case 4:
-		bid = Lower5;
-		break;
-	case 5:
-		bid = Lower6;
-		break;
-	case 6:
-		bid = Lower7;
-		break;
-	case 7:
-		bid = Lower8;
-		break;
-	default:
-		return;
-	}
-
-	boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
-
-	if (!mc) {
-		return;
-	}
-
-	Button* b = id_button_map[bid];
-
-	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
-
-		if (mc->muted_by_self ()) {
-			/* full mute */
-			b->set_color (LED::Blue);
-			b->set_state (LED::OneShot24th);
-			cerr << "FULL MUTE1\n";
-		} else if (mc->muted_by_others_soloing () || mc->muted_by_masters ()) {
-			/* this will reflect both solo mutes AND master mutes */
-			b->set_color (LED::Blue);
-			b->set_state (LED::Blinking4th);
-			cerr << "OTHER MUTE1\n";
-		} else {
-			/* no mute at all */
-			b->set_color (LED::Black);
-			b->set_state (LED::OneShot24th);
-			cerr << "NO MUTE1\n";
-		}
-
-	} else {
-
-		if (mc->muted_by_self()) {
-			/* full mute */
-			b->set_color (LED::Blue);
-			b->set_state (LED::OneShot24th);
-			cerr << "FULL MUTE2\n";
-		} else if (mc->muted_by_masters ()) {
-			/* this shows only master mutes, not mute-by-others-soloing */
-			b->set_color (LED::Blue);
-			b->set_state (LED::Blinking4th);
-			cerr << "OTHER MUTE1\n";
-		} else {
-			/* no mute at all */
-			b->set_color (LED::Black);
-			b->set_state (LED::OneShot24th);
-			cerr << "NO MUTE2\n";
-		}
-	}
-
-	write (b->state_msg());
-}
-
-void
-Push2::strip_vpot (int n, int delta)
-{
-	if (current_menu) {
-		current_menu->step_active (n, delta);
-		return;
-	}
-
-	if (stripable[n]) {
-		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
-		if (ac) {
-			ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
-		}
-	}
-}
-
-void
-Push2::strip_vpot_touch (int n, bool touching)
-{
-	if (current_menu) {
-		return;
-	}
-
-	if (stripable[n]) {
-		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
-		if (ac) {
-			if (touching) {
-				ac->start_touch (session->audible_frame());
-			} else {
-				ac->stop_touch (true, session->audible_frame());
-			}
-		}
-	}
-}
-
-void
 Push2::other_vpot (int n, int delta)
 {
 	switch (n) {
@@ -1590,7 +1154,7 @@ void
 Push2::start_shift ()
 {
 	cerr << "start shift\n";
-	modifier_state = ModifierState (modifier_state | ModShift);
+	_modifier_state = ModifierState (_modifier_state | ModShift);
 	Button* b = id_button_map[Shift];
 	b->set_color (LED::White);
 	b->set_state (LED::Blinking16th);
@@ -1600,35 +1164,10 @@ Push2::start_shift ()
 void
 Push2::end_shift ()
 {
-	if (modifier_state & ModShift) {
+	if (_modifier_state & ModShift) {
 		cerr << "end shift\n";
-		modifier_state = ModifierState (modifier_state & ~(ModShift));
+		_modifier_state = ModifierState (_modifier_state & ~(ModShift));
 		Button* b = id_button_map[Shift];
-		b->timeout_connection.disconnect ();
-		b->set_color (LED::White);
-		b->set_state (LED::OneShot24th);
-		write (b->state_msg());
-	}
-}
-
-void
-Push2::start_select ()
-{
-	cerr << "start select\n";
-	modifier_state = ModifierState (modifier_state | ModSelect);
-	Button* b = id_button_map[Select];
-	b->set_color (LED::White);
-	b->set_state (LED::Blinking16th);
-	write (b->state_msg());
-}
-
-void
-Push2::end_select ()
-{
-	if (modifier_state & ModSelect) {
-		cerr << "end select\n";
-		modifier_state = ModifierState (modifier_state & ~(ModSelect));
-		Button* b = id_button_map[Select];
 		b->timeout_connection.disconnect ();
 		b->set_color (LED::White);
 		b->set_state (LED::OneShot24th);
@@ -2005,72 +1544,69 @@ Push2::set_percussive_mode (bool yn)
 	PadChange (); /* EMIT SIGNAL */
 }
 
-void
-Push2::set_menu (Push2Menu* m)
+Push2Layout*
+Push2::current_layout () const
 {
-	current_menu = m;
-	drawn_menu = 0;
+	Glib::Threads::Mutex::Lock lm (layout_lock);
+	return _current_layout;
 }
 
 void
-Push2::build_scale_menu ()
+Push2::stripable_selection_change (StripableNotificationListPtr selected)
 {
-	vector<string> v;
+	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
+	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
+	boost::shared_ptr<MidiTrack> new_pad_target;
 
-	scale_menu = new Push2Menu (context);
+	/* See if there's a MIDI track selected */
 
-	v.push_back ("Dorian");
-	v.push_back ("IonianMajor");
-	v.push_back ("Minor");
-	v.push_back ("HarmonicMinor");
-	v.push_back ("MelodicMinorAscending");
-	v.push_back ("MelodicMinorDescending");
-	v.push_back ("Phrygian");
-	v.push_back ("Lydian");
-	v.push_back ("Mixolydian");
-	v.push_back ("Aeolian");
-	v.push_back ("Locrian");
-	v.push_back ("PentatonicMajor");
-	v.push_back ("PentatonicMinor");
-	v.push_back ("Chromatic");
-	v.push_back ("BluesScale");
-	v.push_back ("NeapolitanMinor");
-	v.push_back ("NeapolitanMajor");
-	v.push_back ("Oriental");
-	v.push_back ("DoubleHarmonic");
-	v.push_back ("Enigmatic");
-	v.push_back ("Hirajoshi");
-	v.push_back ("HungarianMinor");
-	v.push_back ("HungarianMajor");
-	v.push_back ("Kumoi");
-	v.push_back ("Iwato");
-	v.push_back ("Hindu");
-	v.push_back ("Spanish8Tone");
-	v.push_back ("Pelog");
-	v.push_back ("HungarianGypsy");
-	v.push_back ("Overtone");
-	v.push_back ("LeadingWholeTone");
-	v.push_back ("Arabian");
-	v.push_back ("Balinese");
-	v.push_back ("Gypsy");
-	v.push_back ("Mohammedan");
-	v.push_back ("Javanese");
-	v.push_back ("Persian");
-	v.push_back ("Algeria");
+	for (StripableNotificationList::iterator si = selected->begin(); si != selected->end(); ++si) {
 
-	scale_menu->fill_column (0, v);
+		new_pad_target = boost::dynamic_pointer_cast<MidiTrack> ((*si).lock());
 
-	v.clear ();
+		if (new_pad_target) {
+			break;
+		}
+	}
+
+	if (new_pad_target) {
+		cerr << "new midi pad target " << new_pad_target->name() << endl;
+	} else {
+		cerr << "no midi pad target\n";
+	}
+
+	if (current_midi_track == new_pad_target) {
+		/* nothing to do */
+		return;
+	}
+
+	if (!new_pad_target) {
+		/* leave existing connection alone */
+		return;
+	}
+
+	/* disconnect from pad port, if appropriate */
+
+	if (current_midi_track && pad_port) {
+		cerr << "Disconnect pads from " << current_midi_track->name() << endl;
+		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+	}
+
+	/* now connect the pad port to this (newly) selected midi
+	 * track, if indeed there is one.
+	 */
+
+	if (new_pad_target && pad_port) {
+		cerr << "Reconnect pads to " << new_pad_target->name() << endl;
+		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
+		current_pad_target = new_pad_target;
+	} else {
+		current_pad_target.reset ();
+	}
 }
 
-void
-Push2::show_scale_menu ()
+Push2::Button*
+Push2::button_by_id (ButtonID bid)
 {
-	set_menu (scale_menu);
-}
-
-void
-Push2::cancel_menu ()
-{
-	set_menu (0);
+	return id_button_map[bid];
 }

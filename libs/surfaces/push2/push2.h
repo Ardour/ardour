@@ -72,72 +72,12 @@ public:
 
 class P2GUI;
 class Push2Menu;
+class Push2Layout;
 
 class Push2 : public ARDOUR::ControlProtocol
             , public AbstractUI<Push2Request>
 {
-   public:
-	Push2 (ARDOUR::Session&);
-	~Push2 ();
-
-	static bool probe ();
-	static void* request_factory (uint32_t);
-
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
-
-	bool has_editor () const { return true; }
-	void* get_gui () const;
-	void  tear_down_gui ();
-
-	int set_active (bool yn);
-	XMLNode& get_state();
-	int set_state (const XMLNode & node, int version);
-
-	PBD::Signal0<void> ConnectionChange;
-
-	boost::shared_ptr<ARDOUR::Port> input_port();
-	boost::shared_ptr<ARDOUR::Port> output_port();
-
-	int pad_note (int row, int col) const;
-	PBD::Signal0<void> PadChange;
-
-	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
-
-	MusicalMode::Type mode() const { return  _mode; }
-	int scale_root() const { return _scale_root; }
-	int root_octave() const { return _root_octave; }
-	bool in_key() const { return _in_key; }
-
-	static const int cols;
-	static const int rows;
-
-  private:
-	libusb_device_handle *handle;
-	uint8_t   frame_header[16];
-	uint16_t* device_frame_buffer;
-	int  device_buffer;
-	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
-	sigc::connection vblank_connection;
-	sigc::connection periodic_connection;
-
-	enum ModifierState {
-		None = 0,
-		ModShift = 0x1,
-		ModSelect = 0x2,
-	};
-
-	ModifierState modifier_state;
-
-	static const int pixels_per_row;
-
-	void do_request (Push2Request*);
-	int stop ();
-	int open ();
-	int close ();
-	bool redraw ();
-	int blit_to_device_frame_buffer ();
-	bool vblank ();
-
+  public:
 	enum ButtonID {
 		TapTempo,
 		Metronome,
@@ -341,6 +281,76 @@ class Push2 : public ARDOUR::ControlProtocol
 			: Button (bb, ex, press, release, long_press) {}
 	};
 
+  public:
+	Push2 (ARDOUR::Session&);
+	~Push2 ();
+
+	static bool probe ();
+	static void* request_factory (uint32_t);
+
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+
+	bool has_editor () const { return true; }
+	void* get_gui () const;
+	void  tear_down_gui ();
+
+	int set_active (bool yn);
+	XMLNode& get_state();
+	int set_state (const XMLNode & node, int version);
+
+	PBD::Signal0<void> ConnectionChange;
+
+	boost::shared_ptr<ARDOUR::Port> input_port();
+	boost::shared_ptr<ARDOUR::Port> output_port();
+
+	int pad_note (int row, int col) const;
+	PBD::Signal0<void> PadChange;
+
+	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
+
+	MusicalMode::Type mode() const { return  _mode; }
+	int scale_root() const { return _scale_root; }
+	int root_octave() const { return _root_octave; }
+	bool in_key() const { return _in_key; }
+
+	Push2Layout* current_layout() const;
+
+	enum ModifierState {
+		None = 0,
+		ModShift = 0x1,
+		ModSelect = 0x2,
+	};
+
+	ModifierState modifier_state() const { return _modifier_state; }
+
+	Button* button_by_id (ButtonID);
+
+	void write (const MidiByteArray&);
+
+	static const int cols;
+	static const int rows;
+
+  private:
+	libusb_device_handle *handle;
+	uint8_t   frame_header[16];
+	uint16_t* device_frame_buffer;
+	int  device_buffer;
+	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
+	sigc::connection vblank_connection;
+	sigc::connection periodic_connection;
+
+	ModifierState _modifier_state;
+
+	static const int pixels_per_row;
+
+	void do_request (Push2Request*);
+	int stop ();
+	int open ();
+	int close ();
+	bool redraw ();
+	int blit_to_device_frame_buffer ();
+	bool vblank ();
+
 	void relax () {}
 
 	/* map of Buttons by CC */
@@ -394,7 +404,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
-	void write (const MidiByteArray&);
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	bool periodic ();
 
@@ -422,24 +431,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_new ();
 	void button_browse ();
 	void button_clip ();
-	void button_upper (uint32_t n);
-	void button_lower (uint32_t n);
-	void button_upper_1 () { button_upper (0); }
-	void button_upper_2 () { button_upper (1); }
-	void button_upper_3 () { button_upper (2); }
-	void button_upper_4 () { button_upper (3); }
-	void button_upper_5 () { button_upper (4); }
-	void button_upper_6 () { button_upper (5); }
-	void button_upper_7 () { button_upper (6); }
-	void button_upper_8 () { button_upper (7); }
-	void button_lower_1 () { button_lower (0); }
-	void button_lower_2 () { button_lower (1); }
-	void button_lower_3 () { button_lower (2); }
-	void button_lower_4 () { button_lower (3); }
-	void button_lower_5 () { button_lower (4); }
-	void button_lower_6 () { button_lower (5); }
-	void button_lower_7 () { button_lower (6); }
-	void button_lower_8 () { button_lower (7); }
 	void button_undo ();
 	void button_fwd32t ();
 	void button_fwd32 ();
@@ -464,49 +455,57 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_layout_press ();
 	void button_scale_press ();
 
+	void button_upper (uint32_t n);
+	void button_lower (uint32_t n);
+
+	void button_upper_1 () { button_upper (0); }
+	void button_upper_2 () { button_upper (1); }
+	void button_upper_3 () { button_upper (2); }
+	void button_upper_4 () { button_upper (3); }
+	void button_upper_5 () { button_upper (4); }
+	void button_upper_6 () { button_upper (5); }
+	void button_upper_7 () { button_upper (6); }
+	void button_upper_8 () { button_upper (7); }
+	void button_lower_1 () { button_lower (0); }
+	void button_lower_2 () { button_lower (1); }
+	void button_lower_3 () { button_lower (2); }
+	void button_lower_4 () { button_lower (3); }
+	void button_lower_5 () { button_lower (4); }
+	void button_lower_6 () { button_lower (5); }
+	void button_lower_7 () { button_lower (6); }
+	void button_lower_8 () { button_lower (7); }
+
 	void start_shift ();
 	void end_shift ();
-	void start_select ();
-	void end_select ();
 
-	/* encoders */
+	/* non-strip encoders */
 
-	void strip_vpot (int, int);
 	void other_vpot (int, int);
-	void strip_vpot_touch (int, bool);
 	void other_vpot_touch (int, bool);
 
-	/* widgets */
+	/* special Stripables */
+
+	boost::shared_ptr<ARDOUR::Stripable> master;
+	boost::shared_ptr<ARDOUR::Stripable> monitor;
+
+	/* Cairo graphics context */
 
 	Cairo::RefPtr<Cairo::Context> context;
-	Glib::RefPtr<Pango::Layout> tc_clock_layout;
-	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
-	Glib::RefPtr<Pango::Layout> upper_layout[8];
-	Glib::RefPtr<Pango::Layout> mid_layout[8];
-	Glib::RefPtr<Pango::Layout> lower_layout[8];
 
 	void splash ();
 	ARDOUR::microseconds_t splash_start;
 
-	/* stripables */
+	/* Layouts */
 
-	int32_t bank_start;
-	PBD::ScopedConnectionList stripable_connections;
-	boost::shared_ptr<ARDOUR::Stripable> stripable[8];
-	boost::shared_ptr<ARDOUR::Stripable> master;
-	boost::shared_ptr<ARDOUR::Stripable> monitor;
-
-	void solo_change (int);
-	void mute_change (int);
-	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
-
-	void switch_bank (uint32_t base);
+	mutable Glib::Threads::Mutex layout_lock;
+	Push2Layout* _current_layout;
+	Push2Layout* drawn_layout;
+	Push2Layout* mix_layout;
+	Push2Layout* scale_layout;
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
 	boost::weak_ptr<ARDOUR::MidiTrack> current_pad_target;
-	PBD::ScopedConnection selection_connection;
-	void stripable_selection_change (ARDOUR::StripableNotificationListPtr);
 
 	PBD::ScopedConnection port_reg_connection;
 	void port_registration_handler ();
@@ -527,6 +526,9 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* pad mapping */
 
+	PBD::ScopedConnection selection_connection;
+	void stripable_selection_change (ARDOUR::StripableNotificationListPtr);
+
 	std::map<int,int> pad_map;
 	void build_pad_table();
 
@@ -539,16 +541,92 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	bool percussion;
 	void set_percussive_mode (bool);
+};
 
-	/* menus */
-	Push2Menu* current_menu;
-	Push2Menu* drawn_menu;
+class Push2Layout
+{
+  public:
+	Push2Layout (Push2& p, ARDOUR::Session& s);
+	virtual ~Push2Layout ();
+
+	bool mapped() const;
+
+	virtual bool redraw (Cairo::RefPtr<Cairo::Context>) const = 0;
+
+	virtual void button_upper (uint32_t n) {}
+	virtual void button_lower (uint32_t n) {}
+	virtual void button_up ()  {}
+	virtual void button_down ()  {}
+	virtual void button_right ()  {}
+	virtual void button_left ()  {}
+	virtual void button_select_press () {}
+	virtual void button_select_release () {}
+
+	virtual void strip_vpot (int, int) = 0;
+	virtual void strip_vpot_touch (int, bool) = 0;
+
+  protected:
+	Push2& p2;
+	ARDOUR::Session& session;
+};
+
+
+class MixLayout : public Push2Layout
+{
+   public:
+	MixLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
+	~MixLayout ();
+
+	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+
+	void button_upper (uint32_t n);
+	void button_lower (uint32_t n);
+	void button_left ();
+	void button_right ();
+	void button_select_press ();
+	void button_select_release ();
+
+	void strip_vpot (int, int);
+	void strip_vpot_touch (int, bool);
+
+  private:
+	Glib::RefPtr<Pango::Layout> tc_clock_layout;
+	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
+	Glib::RefPtr<Pango::Layout> upper_layout[8];
+	Glib::RefPtr<Pango::Layout> mid_layout[8];
+	Glib::RefPtr<Pango::Layout> lower_layout[8];
+
+	/* stripables */
+
+	int32_t bank_start;
+	PBD::ScopedConnectionList stripable_connections;
+	boost::shared_ptr<ARDOUR::Stripable> stripable[8];
+
+	void solo_change (int);
+	void mute_change (int);
+
+	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
+
+	void switch_bank (uint32_t base);
+};
+
+class ScaleLayout : public Push2Layout
+{
+   public:
+	ScaleLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
+	~ScaleLayout ();
+
+	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+
+	void button_upper (uint32_t n);
+	void button_lower (uint32_t n);
+
+	void strip_vpot (int, int);
+	void strip_vpot_touch (int, bool);
+
+   private:
 	Push2Menu* scale_menu;
-
-	void build_scale_menu ();
-	void set_menu (Push2Menu*);
-	void show_scale_menu ();
-	void cancel_menu ();
+	void build_scale_menu (Cairo::RefPtr<Cairo::Context>);
 };
 
 } /* namespace */
