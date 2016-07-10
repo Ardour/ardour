@@ -173,9 +173,9 @@ MIDIControllable::stop_learning ()
 int
 MIDIControllable::control_to_midi (float val)
 {
-        if (controllable->is_gain_like()) {
-                return gain_to_slider_position (val) * max_value_for_type ();
-        }
+	if (controllable->is_gain_like()) {
+		return gain_to_slider_position (val) * max_value_for_type ();
+	}
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
