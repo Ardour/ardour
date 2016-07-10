@@ -1674,17 +1674,13 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	, _import_active (false)
 	, _reset_post_import (false)
 {
-	VBox* vbox;
-	HBox* hbox;
 	vector<string> str;
 
-	set_size_request (-1, 450);
+	set_size_request (-1, 550);
 
 	block_two.set_border_width (12);
 	block_three.set_border_width (12);
 	block_four.set_border_width (12);
-
-	options.set_spacing (12);
 
 	str.clear ();
 	str.push_back (_("file timestamp"));
@@ -1697,70 +1693,42 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 
 	Label* l = manage (new Label);
 	l->set_markup (_("<b>Add files ...</b>"));
-
-	vbox = manage (new VBox);
-	vbox->set_border_width (12);
-	vbox->set_spacing (6);
-	vbox->pack_start (*l, false, false);
-	vbox->pack_start (action_combo, false, false);
-	hbox = manage (new HBox);
-	hbox->pack_start (*vbox, false, false);
-	options.pack_start (*hbox, false, false);
+	options.attach (*l, 0, 1, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (action_combo, 0, 1, 1, 2, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Insert at</b>"));
-
-	vbox = manage (new VBox);
-	vbox->set_border_width (12);
-	vbox->set_spacing (6);
-	vbox->pack_start (*l, false, false);
-	vbox->pack_start (where_combo, false, false);
-	hbox = manage (new HBox);
-	hbox->pack_start (*vbox, false, false);
-	options.pack_start (*hbox, false, false);
-
+	options.attach (*l, 0, 1, 3, 4, FILL, SHRINK, 8, 0);
+	options.attach (where_combo, 0, 1, 4, 5, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Mapping</b>"));
+	options.attach (*l, 1, 2, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (channel_combo, 1, 2, 1, 2, FILL, SHRINK, 8, 0);
 
-	vbox = manage (new VBox);
-	vbox->set_border_width (12);
-	vbox->set_spacing (6);
-	vbox->pack_start (*l, false, false);
-	vbox->pack_start (channel_combo, false, false);
-	hbox = manage (new HBox);
-	hbox->pack_start (*vbox, false, false);
-	options.pack_start (*hbox, false, false);
+	l = manage (new Label);
+	l->set_markup (_("<b>Conversion quality</b>"));
+	options.attach (*l, 1, 2, 3, 4, FILL, SHRINK, 8, 0);
+	options.attach (src_combo, 1, 2, 4, 5, FILL, SHRINK, 8, 0);
+
+	l = manage (new Label);
+	l->set_markup (_("<b>Instrument</b>"));
+	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (instrument_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
+
+	Alignment *hspace = manage (new Alignment ());
+	hspace->set_size_request(2, 2);
+	options.attach (*hspace, 0, 3, 2, 3, FILL, SHRINK, 0, 8);
+
+	Alignment *vspace = manage (new Alignment ());
+	vspace->set_size_request(2, 2);
+	options.attach (*vspace, 2, 3, 0, 3, EXPAND, SHRINK, 0, 0);
 
 	str.clear ();
 	str.push_back (_("one track per file"));
 	set_popdown_strings (channel_combo, str);
 	channel_combo.set_active_text (str.front());
 	channel_combo.set_sensitive (false);
-
-	l = manage (new Label);
-	l->set_markup (_("<b>Conversion quality</b>"));
-
-	vbox = manage (new VBox);
-	vbox->set_border_width (12);
-	vbox->set_spacing (6);
-	vbox->pack_start (*l, false, false);
-	vbox->pack_start (src_combo, false, false);
-	hbox = manage (new HBox);
-	hbox->pack_start (*vbox, false, false);
-	options.pack_start (*hbox, false, false);
-
-	l = manage (new Label);
-	l->set_markup (_("<b>Instrument</b>"));
-
-	vbox = manage (new VBox);
-	vbox->set_border_width (12);
-	vbox->set_spacing (6);
-	vbox->pack_start (*l, false, false);
-	vbox->pack_start (instrument_combo, false, false);
-	hbox = manage (new HBox);
-	hbox->pack_start (*vbox, false, false);
-	options.pack_start (*hbox, false, false);
 
 	str.clear ();
 	str.push_back (_("Best"));
@@ -1787,10 +1755,9 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	}
 
 	block_four.pack_start (copy_files_btn, false, false);
+	options.attach (block_four, 3, 4, 4, 5, FILL, SHRINK, 8, 0);
 
-	options.pack_start (block_four, false, false);
-
-	vpacker.pack_start (options, false, false);
+	vpacker.pack_start (options, false, true);
 
 	/* setup disposition map */
 

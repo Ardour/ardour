@@ -303,7 +303,7 @@ class SoundFileOmega : public SoundFileBrowser
 	typedef std::map<std::string,Editing::ImportDisposition> DispositionMap;
 	DispositionMap disposition_map;
 
-	Gtk::HBox options;
+	Gtk::Table options;
 	Gtk::VBox block_two;
 	Gtk::VBox block_three;
 	Gtk::VBox block_four;
