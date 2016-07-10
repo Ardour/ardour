@@ -20,14 +20,16 @@
 #ifndef __ardour_capturing_processor_h__
 #define __ardour_capturing_processor_h__
 
+#include "ardour/fixed_delay.h"
 #include "ardour/processor.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
 class LIBARDOUR_API CapturingProcessor : public Processor
 {
   public:
-	CapturingProcessor (Session & session);
+	CapturingProcessor (Session & session, framecnt_t latency);
 	~CapturingProcessor();
 
   public: // main interface
@@ -47,6 +49,8 @@ class LIBARDOUR_API CapturingProcessor : public Processor
 
 	framecnt_t block_size;
 	BufferSet capture_buffers;
+	FixedDelay _delaybuffers;
+	framecnt_t _latency;
 };
 
 } // namespace ARDOUR

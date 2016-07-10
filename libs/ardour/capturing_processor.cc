@@ -26,9 +26,10 @@
 
 namespace ARDOUR {
 
-CapturingProcessor::CapturingProcessor (Session & session)
+CapturingProcessor::CapturingProcessor (Session & session, framecnt_t latency)
 	: Processor (session, X_("capture point"))
 	, block_size (AudioEngine::instance()->samples_per_cycle())
+	, _latency (latency)
 {
 	realloc_buffers ();
 }
@@ -48,8 +49,14 @@ CapturingProcessor::set_block_size (pframes_t nframes)
 void
 CapturingProcessor::run (BufferSet& bufs, framepos_t, framepos_t, double, pframes_t nframes, bool)
 {
-	if (active()) {
-		capture_buffers.read_from (bufs, nframes);
+	if (!active()) {
+		_delaybuffers.flush ();
+		return;
+	}
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t b = 0; b < bufs.count().get (*t); ++b) {
+			_delaybuffers.delay (*t, b, capture_buffers.get (*t, b), bufs.get (*t, b), nframes, 0, 0);
+		}
 	}
 }
 
@@ -57,6 +64,7 @@ bool
 CapturingProcessor::configure_io (ChanCount in, ChanCount out)
 {
 	Processor::configure_io (in, out);
+	_delaybuffers.set (out, _latency);
 	realloc_buffers();
 	return true;
 }
@@ -72,6 +80,7 @@ void
 CapturingProcessor::realloc_buffers()
 {
 	capture_buffers.ensure_buffers (_configured_input, block_size);
+	_delaybuffers.flush ();
 }
 
 XMLNode &

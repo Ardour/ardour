@@ -3716,7 +3716,9 @@ Route::add_export_point()
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
-		_capturing_processor.reset (new CapturingProcessor (_session));
+		// this aligns all tracks; but not tracks + busses
+		assert (_session.worst_track_latency () >= _initial_delay);
+		_capturing_processor.reset (new CapturingProcessor (_session, _session.worst_track_latency () - _initial_delay));
 		_capturing_processor->activate ();
 
 		configure_processors_unlocked (0, &lw);
