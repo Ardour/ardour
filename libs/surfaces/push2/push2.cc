@@ -1256,7 +1256,7 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 					Pad const * pad = nni->second;
 					/* shift for output to the shadow port */
 					if (pad->filtered >= 0) {
-						(*ev).set_note (pad->filtered);
+						(*ev).set_note (pad->filtered + (octave_shift*12));
 						out.push_back (*ev);
 						/* shift back so that the pads light correctly  */
 						(*ev).set_note (n);

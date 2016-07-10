@@ -503,20 +503,28 @@ Push2::start_press_timeout (Button& button, ButtonID id)
 void
 Push2::button_octave_down ()
 {
+	if (_modifier_state & ModShift) {
+		octave_shift = 0;
+		return;
+	}
+
 	int os = (max (-4, octave_shift - 1));
 	if (os != octave_shift) {
 		octave_shift = os;
-		build_pad_table ();
 	}
 }
 
 void
 Push2::button_octave_up ()
 {
+	if (_modifier_state & ModShift) {
+		octave_shift = 0;
+		return;
+	}
+
 	int os = (min (4, octave_shift + 1));
 	if (os != octave_shift) {
 		octave_shift = os;
-		build_pad_table ();
 	}
 }
 
