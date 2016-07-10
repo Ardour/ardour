@@ -1615,31 +1615,17 @@ Push2::get_color_index (uint32_t rgb)
 		return i->second;
 	}
 
-	cerr << "new color 0x" << std::hex << rgb << std::dec << endl;
-
 	int r, g, b, a;
 	UINT_TO_RGBA (rgb, &r, &g, &b, &a);
-	uint8_t r7, r1;
-	uint8_t b7, b1;
-	uint8_t g7, g1;
-	uint8_t w7, w1;
-
-	r7 = r & 0x7f;
-	r1 = r & 0x1;
-	g7 = g & 0x7f;
-	g1 = g & 0x1;
-	b7 = b & 0x7f;
-	b1 = b & 0x1;
-	w7 = 204 & 0x7f;
-	w1 = 204 & 0x1;
+	int w = 204; /* not sure where/when we should get this value */
 
 	/* get a free index */
 
 	uint8_t index;
 
 	if (color_map_free_list.empty()) {
-		/* random replacement of any entry below 122 (where the
-		 * Ableton standard colors live, and not zero either (black)
+		/* random replacement of any entry above zero and below 122 (where the
+		 * Ableton standard colors live)
 		 */
 		index = 1 + (random() % 121);
 	} else {
@@ -1651,14 +1637,14 @@ Push2::get_color_index (uint32_t rgb)
 	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
 
 	palette_msg[7] = index;
-	palette_msg[8] = r7;
-	palette_msg[9] = r1;
-	palette_msg[10] = g7;
-	palette_msg[11] = g1;
-	palette_msg[12] = b7;
-	palette_msg[13] = b1;
-	palette_msg[14] = w7;
-	palette_msg[15] = w1;
+	palette_msg[8] = r & 0x7f;
+	palette_msg[9] = r & 0x1;
+	palette_msg[10] = g & 0x7f;
+	palette_msg[11] = g & 0x1;
+	palette_msg[12] = b & 0x7f;
+	palette_msg[13] = b & 0x1;
+	palette_msg[14] = w & 0x7f;
+	palette_msg[15] = w & 0x1;
 
 	write (palette_msg);
 	write (update_pallette_msg);
