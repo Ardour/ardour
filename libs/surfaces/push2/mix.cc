@@ -269,7 +269,6 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, int wh
 	}
 }
 
-
 void
 MixLayout::solo_change (int n)
 {

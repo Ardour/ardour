@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <map>
+#include <stack>
 #include <list>
 #include <set>
 
@@ -327,6 +328,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void write (const MidiByteArray&);
 
+	uint8_t get_color_index (uint32_t rgb);
+
 	static const int cols;
 	static const int rows;
 
@@ -532,6 +535,14 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	bool percussion;
 	void set_percussive_mode (bool);
+
+	/* color map */
+
+	typedef std::map<uint32_t,uint8_t> ColorMap;
+	typedef std::stack<uint8_t> ColorMapFreeList;
+	ColorMap color_map;
+	ColorMapFreeList color_map_free_list;
+	void build_color_map ();
 };
 
 } /* namespace */

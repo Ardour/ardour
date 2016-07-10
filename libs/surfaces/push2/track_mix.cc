@@ -60,6 +60,17 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Conte
 
 	Pango::FontDescription fd ("Sans Bold 24");
 	name_layout->set_font_description (fd);
+
+	Pango::FontDescription fd2 ("Sans 10");
+	for (int n = 0; n < 8; ++n) {
+		upper_layout[n] = Pango::Layout::create (context);
+		upper_layout[n]->set_font_description (fd2);
+		upper_layout[n]->set_text ("solo");
+		lower_layout[n] = Pango::Layout::create (context);
+		lower_layout[n]->set_font_description (fd2);
+		lower_layout[n]->set_text ("mute");
+	}
+
 }
 
 TrackMixLayout::~TrackMixLayout ()
@@ -112,7 +123,12 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 
 	if (stripable) {
 		stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
+
+		stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
+		stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
+
 		name_changed ();
+		color_changed ();
 	}
 
 	_dirty = true;
@@ -131,4 +147,27 @@ TrackMixLayout::name_changed ()
 {
 	name_layout->set_text (stripable->name());
 	_dirty = true;
+}
+
+void
+TrackMixLayout::color_changed ()
+{
+	uint32_t rgb = stripable->presentation_info().color();
+	uint8_t index = p2.get_color_index (rgb);
+
+	Push2::Button* b = p2.button_by_id (Push2::Upper1);
+	b->set_color (index);
+	b->set_state (Push2::LED::OneShot24th);
+	p2.write (b->state_msg ());
+}
+
+void
+TrackMixLayout::stripable_property_change (PropertyChange const& what_changed)
+{
+	if (what_changed.contains (Properties::color)) {
+		color_changed ();
+	}
+	if (what_changed.contains (Properties::name)) {
+		name_changed ();
+	}
 }

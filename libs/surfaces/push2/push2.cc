@@ -38,6 +38,8 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "gtkmm2ext/rgb_macros.h"
+
 #include "push2.h"
 #include "gui.h"
 #include "layout.h"
@@ -138,6 +140,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	context = Cairo::Context::create (frame_buffer);
 
 	build_maps ();
+	build_color_map ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
@@ -1601,4 +1604,86 @@ Push2::Button*
 Push2::button_by_id (ButtonID bid)
 {
 	return id_button_map[bid];
+}
+
+uint8_t
+Push2::get_color_index (uint32_t rgb)
+{
+	ColorMap::iterator i = color_map.find (rgb);
+
+	if (i != color_map.end()) {
+		return i->second;
+	}
+
+	cerr << "new color 0x" << std::hex << rgb << std::dec << endl;
+
+	int r, g, b, a;
+	UINT_TO_RGBA (rgb, &r, &g, &b, &a);
+	uint8_t r7, r1;
+	uint8_t b7, b1;
+	uint8_t g7, g1;
+	uint8_t w7, w1;
+
+	r7 = r & 0x7f;
+	r1 = r & 0x1;
+	g7 = g & 0x7f;
+	g1 = g & 0x1;
+	b7 = b & 0x7f;
+	b1 = b & 0x1;
+	w7 = 204 & 0x7f;
+	w1 = 204 & 0x1;
+
+	/* get a free index */
+
+	uint8_t index;
+
+	if (color_map_free_list.empty()) {
+		/* random replacement of any entry below 122 (where the
+		 * Ableton standard colors live, and not zero either (black)
+		 */
+		index = 1 + (random() % 121);
+	} else {
+		index = color_map_free_list.top();
+		color_map_free_list.pop();
+	}
+
+	MidiByteArray palette_msg (17, 0xf0, 0x00 , 0x21, 0x1d, 0x01, 0x01, 0x03, 0x7D, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x01, 0x7E, 0x00, 0xF7);
+	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
+
+	palette_msg[7] = index;
+	palette_msg[8] = r7;
+	palette_msg[9] = r1;
+	palette_msg[10] = g7;
+	palette_msg[11] = g1;
+	palette_msg[12] = b7;
+	palette_msg[13] = b1;
+	palette_msg[14] = w7;
+	palette_msg[15] = w1;
+
+	write (palette_msg);
+	write (update_pallette_msg);
+
+	color_map[index] = rgb;
+
+	return index;
+}
+
+void
+Push2::build_color_map ()
+{
+	/* These are "standard" colors that Ableton docs suggest will always be
+	   there
+	*/
+
+	color_map.insert (make_pair (RGB_TO_UINT (0,0,0), 0));
+	color_map.insert (make_pair (RGB_TO_UINT (204,204,204), 122));
+	color_map.insert (make_pair (RGB_TO_UINT (64,64,64), 123));
+	color_map.insert (make_pair (RGB_TO_UINT (20,20,20), 124));
+	color_map.insert (make_pair (RGB_TO_UINT (0,0,255), 125));
+	color_map.insert (make_pair (RGB_TO_UINT (0,255,0), 126));
+	color_map.insert (make_pair (RGB_TO_UINT (255,0,0), 127));
+
+	for (uint8_t n = 1; n < 122; ++n) {
+		color_map_free_list.push (n);
+	}
 }

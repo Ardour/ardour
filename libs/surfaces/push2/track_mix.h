@@ -49,9 +49,14 @@ class TrackMixLayout : public Push2Layout
 	bool _dirty;
 
 	Glib::RefPtr<Pango::Layout> name_layout;
+	Glib::RefPtr<Pango::Layout> upper_layout[8];
+	Glib::RefPtr<Pango::Layout> lower_layout[8];
+
+	void stripable_property_change (PBD::PropertyChange const& what_changed);
 
 	void drop_stripable ();
 	void name_changed ();
+	void color_changed ();
 };
 
 } /* namespace */
