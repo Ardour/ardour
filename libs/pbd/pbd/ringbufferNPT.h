@@ -59,6 +59,7 @@ class /*LIBPBD_API*/ RingBufferNPT
 
 	size_t  read  (T *dest, size_t cnt);
 	size_t  write (const T *src, size_t cnt);
+	size_t  write_one (const T src);
 
 	struct rw_vector {
 	    T *buf[2];
@@ -196,6 +197,12 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
 
         g_atomic_int_set(&write_ptr, priv_write_ptr);
         return to_write;
+}
+
+template<class T> /*LIBPBD_API*/ size_t
+RingBufferNPT<T>::write_one (const T src)
+{
+	return write (&src, 1);
 }
 
 template<class T> /*LIBPBD_API*/ void
