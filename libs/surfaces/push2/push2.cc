@@ -303,6 +303,13 @@ Push2::close ()
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
 
+	_current_layout = 0;
+	drawn_layout = 0;
+	delete mix_layout;
+	mix_layout = 0;
+	delete scale_layout;
+	scale_layout = 0;
+
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
