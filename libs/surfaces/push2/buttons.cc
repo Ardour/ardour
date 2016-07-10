@@ -39,8 +39,7 @@ Push2::build_maps ()
 
 #define MAKE_PAD(x,y,nn) \
 	pad = new Pad ((x), (y), (nn)); \
-	nn_pad_map.insert (std::make_pair (pad->extra(), pad)); \
-	coord_pad_map.insert (std::make_pair (pad->coord(), pad));
+	nn_pad_map.insert (std::make_pair (pad->extra(), pad));
 
 	MAKE_PAD (0, 0, 92);
 	MAKE_PAD (0, 1, 93);

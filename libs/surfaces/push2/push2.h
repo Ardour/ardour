@@ -371,14 +371,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	/* map of Pads by note number */
 	typedef std::map<int,Pad*> NNPadMap;
 	NNPadMap nn_pad_map;
-	/* map of Pads by coordinate
-	 *
-	 * coord = row * 64 + column;
-	 *
-	 * rows start at top left
-	 */
-	typedef std::map<int,Pad*> CoordPadMap;
-	CoordPadMap coord_pad_map;
 
 	void set_button_color (ButtonID, uint8_t color_index);
 	void set_button_state (ButtonID, LED::State);
@@ -528,9 +520,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	PBD::ScopedConnection selection_connection;
 	void stripable_selection_change (ARDOUR::StripableNotificationListPtr);
-
-	std::map<int,int> pad_map;
-	void build_pad_table();
 
 	MusicalMode::Type _mode;
 	int _scale_root;

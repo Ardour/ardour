@@ -133,7 +133,6 @@ Push2::Push2 (ARDOUR::Session& s)
 {
 	context = Cairo::Context::create (frame_buffer);
 
-	build_pad_table ();
 	build_maps ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
@@ -1338,16 +1337,6 @@ boost::shared_ptr<Port>
 Push2::input_port()
 {
 	return _async_in;
-}
-
-void
-Push2::build_pad_table ()
-{
-	for (int n = 36; n < 100; ++n) {
-		pad_map[n] = n + (octave_shift*12);
-	}
-
-	PadChange (); /* emit signal */
 }
 
 int
