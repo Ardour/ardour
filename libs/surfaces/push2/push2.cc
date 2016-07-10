@@ -900,16 +900,6 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 void
 Push2::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb)
 {
-	if (!session) {
-		return;
-	}
-
-	float speed;
-
-	/* range of +1 .. -1 */
-	speed = ((int32_t) pb - 8192) / 8192.0;
-	/* convert to range of +3 .. -3 */
-	session->request_transport_speed (speed * 3.0);
 }
 
 void
