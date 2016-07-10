@@ -23,6 +23,7 @@
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
 
+#include "layout.h"
 #include "push2.h"
 
 using namespace ArdourSurface;

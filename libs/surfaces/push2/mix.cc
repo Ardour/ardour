@@ -41,6 +41,7 @@
 #include "ardour/tempo.h"
 
 #include "push2.h"
+#include "mix.h"
 
 #include "i18n.h"
 

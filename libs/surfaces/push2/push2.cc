@@ -40,6 +40,10 @@
 
 #include "push2.h"
 #include "gui.h"
+#include "layout.h"
+#include "scale.h"
+#include "mix.h"
+#include "track_mix.h"
 #include "menu.h"
 
 #include "i18n.h"

@@ -16,6 +16,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "layout.h"
 #include "push2.h"
 
 using namespace ARDOUR;

@@ -40,8 +40,9 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "push2.h"
 #include "menu.h"
+#include "push2.h"
+#include "scale.h"
 
 #include "i18n.h"
 
