@@ -193,7 +193,7 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (Left, 44, &Push2::button_left);
 	MAKE_WHITE_BUTTON_PRESS (Repeat, 56, &Push2::button_repeat);
 	MAKE_WHITE_BUTTON (Accent, 57);
-	MAKE_WHITE_BUTTON (Scale, 58);
+	MAKE_WHITE_BUTTON_PRESS (Scale, 58, &Push2::button_scale_press);
 	MAKE_WHITE_BUTTON_PRESS (Layout, 31, &Push2::button_layout_press);
 	MAKE_WHITE_BUTTON (Note, 50);
 	MAKE_WHITE_BUTTON (Session, 51);
@@ -606,5 +606,25 @@ Push2::button_octave_up ()
 	if (os != octave_shift) {
 		octave_shift = os;
 		build_pad_table ();
+	}
+}
+
+void
+Push2::button_layout_press ()
+{
+	if (percussion) {
+		set_percussive_mode (false);
+	} else {
+		set_percussive_mode (true);
+	}
+}
+
+void
+Push2::button_scale_press ()
+{
+	if (current_menu != scale_menu) {
+		show_scale_menu ();
+	} else {
+		cancel_menu ();
 	}
 }

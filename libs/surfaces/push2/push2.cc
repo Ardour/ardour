@@ -44,6 +44,7 @@
 
 #include "push2.h"
 #include "gui.h"
+#include "menu.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -132,6 +133,8 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _in_key (true)
 	, octave_shift (0)
 	, percussion (false)
+	, current_menu (0)
+	, drawn_menu (0)
 {
 	context = Cairo::Context::create (frame_buffer);
 	tc_clock_layout = Pango::Layout::create (context);
@@ -159,6 +162,7 @@ Push2::Push2 (ARDOUR::Session& s)
 
 	build_pad_table ();
 	build_maps ();
+	build_scale_menu ();
 
 	if (open ()) {
 		throw failed_constructor ();
@@ -340,7 +344,7 @@ Push2::init_buttons (bool startup)
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
-	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout
+	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -376,7 +380,7 @@ Push2::init_buttons (bool startup)
 
 		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
-		                           Accent, Scale, Note, Session,  };
+		                           Accent, Note, Session,  };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
 			Button* b = id_button_map[off_buttons[n]];
@@ -514,6 +518,22 @@ Push2::redraw ()
 		} else {
 			return false;
 		}
+	}
+
+	if (current_menu) {
+		if (current_menu->dirty() || drawn_menu != current_menu) {
+			/* fill background */
+			context->set_source_rgb (0.764, 0.882, 0.882);
+			context->rectangle (0, 0, 960, 160);
+			context->fill ();
+			/* now menu */
+			current_menu->redraw (context);
+			drawn_menu = current_menu;
+			return true;
+		}
+		return false;
+	} else {
+		drawn_menu = 0;
 	}
 
 	if (session) {
@@ -1492,6 +1512,11 @@ Push2::mute_change (int n)
 void
 Push2::strip_vpot (int n, int delta)
 {
+	if (current_menu) {
+		current_menu->step_active (n, delta);
+		return;
+	}
+
 	if (stripable[n]) {
 		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
 		if (ac) {
@@ -1503,6 +1528,10 @@ Push2::strip_vpot (int n, int delta)
 void
 Push2::strip_vpot_touch (int n, bool touching)
 {
+	if (current_menu) {
+		return;
+	}
+
 	if (stripable[n]) {
 		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
 		if (ac) {
@@ -1977,11 +2006,71 @@ Push2::set_percussive_mode (bool yn)
 }
 
 void
-Push2::button_layout_press ()
+Push2::set_menu (Push2Menu* m)
 {
-	if (percussion) {
-		set_percussive_mode (false);
-	} else {
-		set_percussive_mode (true);
-	}
+	current_menu = m;
+	drawn_menu = 0;
+}
+
+void
+Push2::build_scale_menu ()
+{
+	vector<string> v;
+
+	scale_menu = new Push2Menu (context);
+
+	v.push_back ("Dorian");
+	v.push_back ("IonianMajor");
+	v.push_back ("Minor");
+	v.push_back ("HarmonicMinor");
+	v.push_back ("MelodicMinorAscending");
+	v.push_back ("MelodicMinorDescending");
+	v.push_back ("Phrygian");
+	v.push_back ("Lydian");
+	v.push_back ("Mixolydian");
+	v.push_back ("Aeolian");
+	v.push_back ("Locrian");
+	v.push_back ("PentatonicMajor");
+	v.push_back ("PentatonicMinor");
+	v.push_back ("Chromatic");
+	v.push_back ("BluesScale");
+	v.push_back ("NeapolitanMinor");
+	v.push_back ("NeapolitanMajor");
+	v.push_back ("Oriental");
+	v.push_back ("DoubleHarmonic");
+	v.push_back ("Enigmatic");
+	v.push_back ("Hirajoshi");
+	v.push_back ("HungarianMinor");
+	v.push_back ("HungarianMajor");
+	v.push_back ("Kumoi");
+	v.push_back ("Iwato");
+	v.push_back ("Hindu");
+	v.push_back ("Spanish8Tone");
+	v.push_back ("Pelog");
+	v.push_back ("HungarianGypsy");
+	v.push_back ("Overtone");
+	v.push_back ("LeadingWholeTone");
+	v.push_back ("Arabian");
+	v.push_back ("Balinese");
+	v.push_back ("Gypsy");
+	v.push_back ("Mohammedan");
+	v.push_back ("Javanese");
+	v.push_back ("Persian");
+	v.push_back ("Algeria");
+
+	scale_menu->fill_column (0, v);
+
+	v.clear ();
+}
+
+void
+Push2::show_scale_menu ()
+{
+	set_menu (scale_menu);
+}
+
+void
+Push2::cancel_menu ()
+{
+	set_menu (0);
 }

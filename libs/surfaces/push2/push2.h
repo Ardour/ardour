@@ -71,6 +71,7 @@ public:
 };
 
 class P2GUI;
+class Push2Menu;
 
 class Push2 : public ARDOUR::ControlProtocol
             , public AbstractUI<Push2Request>
@@ -107,6 +108,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	int root_octave() const { return _root_octave; }
 	bool in_key() const { return _in_key; }
 
+	static const int cols;
+	static const int rows;
+
   private:
 	libusb_device_handle *handle;
 	uint8_t   frame_header[16];
@@ -124,8 +128,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	ModifierState modifier_state;
 
-	static const int cols;
-	static const int rows;
 	static const int pixels_per_row;
 
 	void do_request (Push2Request*);
@@ -460,6 +462,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_octave_up ();
 	void button_octave_down ();
 	void button_layout_press ();
+	void button_scale_press ();
 
 	void start_shift ();
 	void end_shift ();
@@ -536,8 +539,17 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	bool percussion;
 	void set_percussive_mode (bool);
-};
 
+	/* menus */
+	Push2Menu* current_menu;
+	Push2Menu* drawn_menu;
+	Push2Menu* scale_menu;
+
+	void build_scale_menu ();
+	void set_menu (Push2Menu*);
+	void show_scale_menu ();
+	void cancel_menu ();
+};
 
 } /* namespace */
 

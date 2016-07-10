@@ -27,6 +27,7 @@ def build(bld):
             leds.cc
 	    gui.cc
 	    mode.cc
+	    menu.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
