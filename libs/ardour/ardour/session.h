@@ -1266,6 +1266,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool _exporting;
 	bool _export_rolling;
 	framepos_t _export_preroll;
+	framepos_t _export_latency;
 
 	boost::shared_ptr<ExportHandler> export_handler;
 	boost::shared_ptr<ExportStatus>  export_status;

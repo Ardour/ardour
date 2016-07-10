@@ -111,6 +111,21 @@ Session::start_audio_export (framepos_t position)
 	}
 
 	_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
+	if (_export_preroll == 0) {
+		// must be > 0 so that transport is started in sync.
+		_export_preroll = 1;
+	}
+
+	/* "worst_track_latency" is the correct value for stem-exports
+	 * see to Route::add_export_point(),
+	 *
+	 * for master-bus export, we'd need to add the master's latency.
+	 * or actually longest-total-session-latency.
+	 *
+	 * We can't use worst_playback_latency because that includes
+	 * includes external latencies and would overcompensate.
+	 */
+	_export_latency = worst_track_latency ();
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
@@ -212,7 +227,23 @@ Session::process_export_fw (pframes_t nframes)
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		post_transport ();
+
 		return 0;
+	}
+
+	if (_export_latency > 0) {
+		framepos_t remain = std::min ((framepos_t)nframes, _export_latency);
+
+		_engine.main_thread()->get_buffers ();
+		process_without_events (remain);
+		_engine.main_thread()->drop_buffers ();
+
+		_export_latency -= remain;
+		nframes -= remain;
+
+		if (nframes == 0) {
+			return 0;
+		}
 	}
 
 	_engine.main_thread()->get_buffers ();
