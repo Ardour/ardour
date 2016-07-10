@@ -1717,11 +1717,11 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (instrument_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
 
 	Alignment *hspace = manage (new Alignment ());
-	hspace->set_size_request(2, 2);
+	hspace->set_size_request (2, 2);
 	options.attach (*hspace, 0, 3, 2, 3, FILL, SHRINK, 0, 8);
 
 	Alignment *vspace = manage (new Alignment ());
-	vspace->set_size_request(2, 2);
+	vspace->set_size_request (2, 2);
 	options.attach (*vspace, 2, 3, 0, 3, EXPAND, SHRINK, 0, 0);
 
 	str.clear ();
