@@ -44,8 +44,10 @@ end
 
 -- a C memory area.
 -- It needs to be in global scope.
--- When the variable is set to nil, the allocated memory
--- is free()ed
+-- When the variable is set to nil, the allocated memory is free()ed.
+-- the memory can be interpeted as float* for use in DSP, or read/write
+-- to a C++ Ringbuffer instance.
+-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:DspShm
 local cmem = nil
 
 function dsp_init (rate)
@@ -54,6 +56,7 @@ function dsp_init (rate)
 	dpy_wr = 0
 
 	-- create a ringbuffer to hold (float) audio-data
+	-- http://manual.ardour.org/lua-scripting/class_reference/#PBD:RingBufferF
 	rb = PBD.RingBufferF (2 * rate)
 
 	-- allocate memory, local mix buffer
@@ -72,6 +75,9 @@ function dsp_init (rate)
 	self:table ():set (tbl);
 end
 
+-- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
+-- 'connect_and_run()". There is no overhead (mapping, translating buffers).
+-- The lua implementation is responsible to map all the buffers directly.
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	-- here we sum all audio input channels channels and then copy the data to a ringbuffer
 	-- for the GUI to process later
@@ -80,10 +86,16 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local ccnt = 0 -- processed channel count
 	local mem = cmem:to_float(0) -- a "FloatArray", float* for direct C API usage from the previously allocated buffer
 	for c = 1,audio_ins do
+		-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:ChanMapping
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
-		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped input buffer for given cannel
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped output buffer for given cannel
+		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1) -- get index of mapped input buffer
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1) -- get index of mapped output buffer
+
+		-- check if the input is connected to a buffer
 		if (ib ~= ARDOUR.ChanMapping.Invalid) then
+
+			-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:AudioBuffer
+			-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 			if c == 1 then
 				-- first channel, copy as-is
 				ARDOUR.DSP.copy_vector (mem, bufs:get_audio (ib):data (offset), n_samples)
@@ -104,8 +116,8 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	-- In case we're processing in-place some buffers may be identical,
 	-- so this must be done  *after processing*.
 	for c = 1,audio_ins do
-		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped input buffer for given cannel
-		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1) -- get id of mapped output buffer for given cannel
+		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1)
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1)
 		if (ib == ARDOUR.ChanMapping.Invalid and ob ~= ARDOUR.ChanMapping.Invalid) then
 			bufs:get_audio (ob):silence (n_samples, offset)
 		end
@@ -122,6 +134,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	end
 
 	-- write data to the ringbuffer
+	-- http://manual.ardour.org/lua-scripting/class_reference/#PBD:RingBufferF
 	rb:write (mem, n_samples)
 
 	-- emit QueueDraw every FPS

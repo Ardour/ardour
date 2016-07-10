@@ -25,7 +25,7 @@ function factory ()
 			mb:silence (n_samples, 0); -- clear existing buffer
 
 			for _,e in pairs (events) do
-				-- e is an http://ardourman/lua-scripting/class_reference/#Evoral:MidiEvent
+				-- e is-a http://manual.ardour.org/lua-scripting/class_reference/#Evoral:MidiEvent
 				e:set_channel (2)
 				mb:push_event (e)
 			end

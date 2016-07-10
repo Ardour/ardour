@@ -36,8 +36,8 @@ end
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	for c = 1,audio_ins do
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
-		local ib = in_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped input buffer for given cannel
-		local ob = out_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		local ib = in_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped input buffer for given channel
+		local ob = out_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped output buffer for given channel
 		assert (ib ~= ARDOUR.ChanMapping.Invalid);
 		assert (ob ~= ARDOUR.ChanMapping.Invalid);
 		local a = bufs:get_audio (ib):data (offset):get_table(n_samples) -- copy audio-data from input buffer
