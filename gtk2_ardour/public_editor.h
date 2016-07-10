@@ -289,7 +289,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void restore_editing_space () = 0;
 	virtual framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_regions_at (framepos_t, RegionSelection&, const int32_t& sub_num) = 0;
+	virtual void split_regions_at (framepos_t, RegionSelection&, const int32_t sub_num) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;

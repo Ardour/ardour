@@ -510,7 +510,7 @@ Drag::show_verbose_cursor_text (string const & text)
 }
 
 boost::shared_ptr<Region>
-Drag::add_midi_region (MidiTimeAxisView* view, bool commit, const int32_t& sub_num)
+Drag::add_midi_region (MidiTimeAxisView* view, bool commit, const int32_t sub_num)
 {
 	if (_editor->session()) {
 		const TempoMap& map (_editor->session()->tempo_map());
@@ -1741,7 +1741,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	layer_t dest_layer,
 	framecnt_t where,
 	PlaylistSet& modified_playlists,
-	const int32_t& sub_num
+	const int32_t sub_num
 	)
 {
 	boost::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();

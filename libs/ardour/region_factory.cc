@@ -46,7 +46,7 @@ std::map<std::string, PBD::ID>                RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, const int32_t& sub_num)
+RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, const int32_t sub_num)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> ar;
@@ -144,7 +144,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, const PropertyList& plist, bool announce, const int32_t& sub_num)
+RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, const PropertyList& plist, bool announce, const int32_t sub_num)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;

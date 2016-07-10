@@ -320,7 +320,7 @@ Region::Region (boost::shared_ptr<const Region> other)
     the start within \a other is given by \a offset
     (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
 */
-Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, const int32_t& sub_num)
+Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, const int32_t sub_num)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -419,7 +419,7 @@ Region::set_name (const std::string& str)
 }
 
 void
-Region::set_length (framecnt_t len, const int32_t& sub_num)
+Region::set_length (framecnt_t len, const int32_t sub_num)
 {
 	//cerr << "Region::set_length() len = " << len << endl;
 	if (locked()) {
@@ -456,7 +456,7 @@ Region::set_length (framecnt_t len, const int32_t& sub_num)
 }
 
 void
-Region::set_length_internal (framecnt_t len, const int32_t& sub_num)
+Region::set_length_internal (framecnt_t len, const int32_t sub_num)
 {
 	_last_length = _length;
 	_length = len;
@@ -643,7 +643,7 @@ Region::set_initial_position (framepos_t pos)
 }
 
 void
-Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t& sub_num)
+Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
 {
 	/* We emit a change of Properties::position even if the position hasn't changed
 	   (see Region::set_position), so we must always set this up so that
@@ -670,7 +670,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 }
 
 void
-Region::recompute_position_from_lock_style (const int32_t& sub_num)
+Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
 }
@@ -743,7 +743,7 @@ Region::set_start (framepos_t pos)
 }
 
 void
-Region::move_start (frameoffset_t distance, const int32_t& sub_num)
+Region::move_start (frameoffset_t distance, const int32_t sub_num)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
@@ -788,25 +788,25 @@ Region::move_start (frameoffset_t distance, const int32_t& sub_num)
 }
 
 void
-Region::trim_front (framepos_t new_position, const int32_t& sub_num)
+Region::trim_front (framepos_t new_position, const int32_t sub_num)
 {
 	modify_front (new_position, false, sub_num);
 }
 
 void
-Region::cut_front (framepos_t new_position, const int32_t& sub_num)
+Region::cut_front (framepos_t new_position, const int32_t sub_num)
 {
 	modify_front (new_position, true, sub_num);
 }
 
 void
-Region::cut_end (framepos_t new_endpoint, const int32_t& sub_num)
+Region::cut_end (framepos_t new_endpoint, const int32_t sub_num)
 {
 	modify_end (new_endpoint, true, sub_num);
 }
 
 void
-Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t& sub_num)
+Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
@@ -851,7 +851,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t& s
 }
 
 void
-Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t& sub_num)
+Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
@@ -873,13 +873,13 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t& sub
  */
 
 void
-Region::trim_end (framepos_t new_endpoint, const int32_t& sub_num)
+Region::trim_end (framepos_t new_endpoint, const int32_t sub_num)
 {
 	modify_end (new_endpoint, false, sub_num);
 }
 
 void
-Region::trim_to (framepos_t position, framecnt_t length, const int32_t& sub_num)
+Region::trim_to (framepos_t position, framecnt_t length, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
@@ -894,7 +894,7 @@ Region::trim_to (framepos_t position, framecnt_t length, const int32_t& sub_num)
 }
 
 void
-Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num)
+Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t sub_num)
 {
 	framepos_t new_start;
 
@@ -1850,7 +1850,7 @@ Region::post_set (const PropertyChange& pc)
 }
 
 void
-Region::set_start_internal (framecnt_t s, const int32_t& sub_num)
+Region::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	_start = s;
 }

@@ -102,12 +102,12 @@ class RegionView : public TimeAxisViewItem
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
 
-	bool trim_front (framepos_t, bool, const int32_t& sub_num);
+	bool trim_front (framepos_t, bool, const int32_t sub_num);
 
 	/** Called when a start trim has finished */
 	virtual void trim_front_ending () {}
 
-	bool trim_end (framepos_t, bool, const int32_t& sub_num);
+	bool trim_end (framepos_t, bool, const int32_t sub_num);
         void move_contents (ARDOUR::frameoffset_t);
 	virtual void thaw_after_trim ();
 

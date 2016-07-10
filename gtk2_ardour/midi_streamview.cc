@@ -662,7 +662,7 @@ struct RegionPositionSorter {
 };
 
 bool
-MidiStreamView::paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t& sub_num)
+MidiStreamView::paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	/* Paste into the first region which starts on or before pos.  Only called when
 	   using an internal editing tool. */

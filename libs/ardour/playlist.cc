@@ -666,7 +666,7 @@ Playlist::flush_notifications (bool from_undo)
 
 /** Note: this calls set_layer (..., DBL_MAX) so it will reset the layering index of region */
  void
- Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, const int32_t& sub_num)
+ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, const int32_t sub_num)
  {
 	 RegionWriteLock rlock (this);
 	 times = fabs (times);
@@ -735,7 +735,7 @@ Playlist::flush_notifications (bool from_undo)
  }
 
  bool
- Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, const int32_t& sub_num)
+ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, const int32_t sub_num)
  {
 	 if (region->data_type() != _type) {
 		 return false;
@@ -1209,7 +1209,7 @@ Playlist::flush_notifications (bool from_undo)
  }
 
  int
- Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times, const int32_t& sub_num)
+ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times, const int32_t sub_num)
  {
 	 times = fabs (times);
 
@@ -1390,7 +1390,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
  }
 
  void
- Playlist::split (framepos_t at, const int32_t& sub_num)
+ Playlist::split (framepos_t at, const int32_t sub_num)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1404,14 +1404,14 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
  }
 
  void
- Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t& sub_num)
+ Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t sub_num)
  {
 	 RegionWriteLock rl (this);
 	 _split_region (region, playlist_position, sub_num);
  }
 
  void
- Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t& sub_num)
+ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t sub_num)
  {
 	 if (!region->covers (playlist_position)) {
 		 return;

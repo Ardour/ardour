@@ -834,7 +834,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 }
 
 bool
-RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t& sub_num)
+RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;
@@ -876,7 +876,7 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t& su
 }
 
 bool
-RegionView::trim_end (framepos_t new_bound, bool no_overlap, const int32_t& sub_num)
+RegionView::trim_end (framepos_t new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;

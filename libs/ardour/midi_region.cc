@@ -102,7 +102,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 }
 
 /** Create a new MidiRegion that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, const int32_t& sub_num)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, const int32_t sub_num)
 	: Region (other, offset, sub_num)
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, other->_length_beats)
@@ -188,7 +188,7 @@ MidiRegion::set_start_beats_from_start_frames ()
 }
 
 void
-MidiRegion::set_length_internal (framecnt_t len, const int32_t& sub_num)
+MidiRegion::set_length_internal (framecnt_t len, const int32_t sub_num)
 {
 	Region::set_length_internal (len, sub_num);
 	update_length_beats (sub_num);
@@ -227,13 +227,13 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 }
 
 void
-MidiRegion::update_length_beats (const int32_t& sub_num)
+MidiRegion::update_length_beats (const int32_t sub_num)
 {
 	_length_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame (_position + _length, sub_num) - beat());
 }
 
 void
-MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t& sub_num)
+MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
 {
 	Region::set_position_internal (pos, allow_bbt_recompute, sub_num);
 
@@ -486,7 +486,7 @@ MidiRegion::fix_negative_start ()
 }
 
 void
-MidiRegion::set_start_internal (framecnt_t s, const int32_t& sub_num)
+MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	Region::set_start_internal (s, sub_num);
 
@@ -496,7 +496,7 @@ MidiRegion::set_start_internal (framecnt_t s, const int32_t& sub_num)
 }
 
 void
-MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int32_t& sub_num)
+MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int32_t sub_num)
 {
 	framepos_t new_start;
 

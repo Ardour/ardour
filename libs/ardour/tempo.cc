@@ -2978,7 +2978,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 }
 
 double
-TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t& sub_num)
+TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -2986,7 +2986,7 @@ TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t& sub_num)
 }
 
 double
-TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t& sub_num)
+TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num)
 {
 	double beat = beat_at_frame_locked (metrics, frame);
 	if (sub_num > 1) {

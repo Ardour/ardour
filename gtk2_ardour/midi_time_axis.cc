@@ -1508,7 +1508,7 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, const int32_t& sub_num)
+MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, const int32_t sub_num)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 	if (commit) {
@@ -1635,7 +1635,7 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 }
 
 bool
-MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t& sub_num)
+MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	if (!_editor.internal_editing()) {
 		// Non-internal paste, paste regions like any other route

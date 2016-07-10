@@ -151,7 +151,7 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t& sub_num)
+Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t sub_num)
 {
 	bool frozen = false;
 
@@ -4653,7 +4653,7 @@ Editor::mouse_paste ()
 }
 
 void
-Editor::paste_internal (framepos_t position, float times, const int32_t& sub_num)
+Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
 

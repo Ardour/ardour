@@ -452,7 +452,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
 
-	double exact_beat_at_frame (const framepos_t& frame, const int32_t& sub_num);
+	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
@@ -497,7 +497,7 @@ private:
 	bool solve_map_frame (Metrics& metrics, MeterSection* section, const framepos_t& frame);
 	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
 
-	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t& sub_num);
+	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
