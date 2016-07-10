@@ -128,7 +128,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y_pos));
 
 	} else {
-		const framepos_t frame_step = (end_frame - frame) / 5;
+		const framepos_t frame_step = max ((end_frame - frame) / 5, (framepos_t) 1);
 		framepos_t current_frame = frame;
 
 		while (current_frame < (end_frame - frame_step)) {
