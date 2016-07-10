@@ -31,6 +31,7 @@ def build(bld):
 	    menu.cc
 	    mix.cc
 	    scale.cc
+	    track_mix.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
