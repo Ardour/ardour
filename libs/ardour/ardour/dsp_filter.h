@@ -25,7 +25,11 @@
 #include <glib.h>
 #include <glibmm.h>
 #include <fftw3.h>
+
+#include "ardour/buffer_set.h"
+#include "ardour/chan_mapping.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
 
 namespace ARDOUR { namespace DSP {
 
@@ -158,6 +162,12 @@ namespace ARDOUR { namespace DSP {
 	 * @returns deflected value
 	 */
 	float log_meter_coeff (float coeff);
+
+	void process_map (BufferSet* bufs,
+	                  const ChanMapping& in,
+	                  const ChanMapping& out,
+	                  pframes_t nframes, framecnt_t offset,
+	                  const DataType&);
 
 	/** 1st order Low Pass filter */
 	class LIBARDOUR_API LowPass {

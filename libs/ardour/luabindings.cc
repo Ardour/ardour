@@ -1343,6 +1343,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("mmult", &DSP::mmult)
 		.addFunction ("log_meter", &DSP::log_meter)
 		.addFunction ("log_meter_coeff", &DSP::log_meter_coeff)
+		.addFunction ("process_map", &DSP::process_map)
 		.addRefFunction ("peaks", &DSP::peaks)
 
 		.beginClass <DSP::LowPass> ("LowPass")

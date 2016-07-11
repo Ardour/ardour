@@ -46,8 +46,24 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	-- The following code is needed with "dsp_runmap" to work for arbitrary pin connections
 	-- this passes though all audio/midi data unprocessed.
 
-	local audio_ins = in_map:count (): n_audio () -- number of audio input buffers
-	local audio_outs = out_map:count (): n_audio () -- number of audio output buffers
+	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("audio"))
+	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("midi"))
+
+	-- equivalent lua code.
+	-- NOTE: the lua implementation below is intended for io-config [-1,-1].
+	-- It only works for actually mapped channels due to in_map:count() out_map:count()
+	-- being identical to the i/o pin count in this case.
+	--
+	-- Plugins that have multiple possible configurations will need to implement
+	-- dsp_configure() and remember the actual channel count.
+	--
+	-- ARDOUR.DSP.process_map() does iterate over the mapping itself and works generally.
+	-- Still the lua code below does lend itself as elaborate example.
+	--
+	--[[
+
+	local audio_ins = in_map:count (): n_audio () -- number of mapped audio input buffers
+	local audio_outs = out_map:count (): n_audio () -- number of mapped audio output buffers
 	assert (audio_outs, audio_ins) -- ioconfig [-1, -1]: must match
 
 	-- copy audio data if any
@@ -94,4 +110,5 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 			bufs:get_midi (ob):silence (n_samples, offset)
 		end
 	end
+	--]]
 end
