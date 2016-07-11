@@ -176,6 +176,7 @@ static const char* authors[] = {
 	N_("Jack O'Quin"),
 	N_("Pavel Potocek"),
 	N_("Nimal Ratnayake"),
+	N_("Julien Rivaud"),
 	N_("David Robillard"),
 	N_("Julien Roger"),
 	N_("Taybin Rutkin"),
