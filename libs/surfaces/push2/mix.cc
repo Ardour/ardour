@@ -39,6 +39,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/vca_manager.h"
 
 #include "canvas/colors.h"
 
@@ -61,13 +62,6 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 	, bank_start (0)
 	, vpot_mode (Volume)
 {
-	tc_clock_layout = Pango::Layout::create (context);
-	bbt_clock_layout = Pango::Layout::create (context);
-
-	Pango::FontDescription fd ("Sans Bold 24");
-	tc_clock_layout->set_font_description (fd);
-	bbt_clock_layout->set_font_description (fd);
-
 	Pango::FontDescription fd2 ("Sans 10");
 	for (int n = 0; n < 8; ++n) {
 		upper_layout[n] = Pango::Layout::create (context);
@@ -116,6 +110,9 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 	}
 
 	mode_button = p2.button_by_id (Push2::Upper1);
+
+	session.RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripables_added, this), &p2);
+	session.vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripables_added, this), &p2);
 }
 
 MixLayout::~MixLayout ()
@@ -133,55 +130,12 @@ MixLayout::on_show ()
 	p2.write (mode_button->state_msg());
 
 	switch_bank (bank_start);
-	show_vpot_mode ();
 }
 
 bool
 MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 {
-	framepos_t audible = session.audible_frame();
-	Timecode::Time TC;
-	bool negative = false;
-	string tc_clock_text;
-	string bbt_clock_text;
-
-	if (audible < 0) {
-		audible = -audible;
-		negative = true;
-	}
-
-	session.timecode_time (audible, TC);
-
-	TC.negative = TC.negative || negative;
-
-	tc_clock_text = Timecode::timecode_format_time(TC);
-
-	Timecode::BBT_Time bbt = session.tempo_map().bbt_at_frame (audible);
-	char buf[16];
-
-#define BBT_BAR_CHAR "|"
-
-	if (negative) {
-		snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
-		          bbt.bars, bbt.beats, bbt.ticks);
-	} else {
-		snprintf (buf, sizeof (buf), " %03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
-		          bbt.bars, bbt.beats, bbt.ticks);
-	}
-
-	bbt_clock_text = buf;
-
 	bool children_dirty = false;
-
-	if (tc_clock_text != tc_clock_layout->get_text()) {
-		children_dirty = true;
-		tc_clock_layout->set_text (tc_clock_text);
-	}
-
-	if (bbt_clock_text != bbt_clock_layout->get_text()) {
-		children_dirty = true;
-		bbt_clock_layout->set_text (bbt_clock_text);
-	}
 
 	for (int n = 0; n < 8; ++n) {
 		if (knobs[n]->dirty()) {
@@ -192,6 +146,7 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
+
 			string shortname = short_version (stripable[n]->name(), 10);
 			string text;
 			boost::shared_ptr<AutomationControl> ac;
@@ -224,16 +179,6 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
 	context->rectangle (0, 0, p2.cols, p2.rows);
 	context->fill ();
-
-	/* clocks */
-
-	set_source_rgb (context, ArdourCanvas::contrasting_text_color (p2.get_color (Push2::DarkBackground)));
-	context->move_to (650, 30);
-	tc_clock_layout->update_from_cairo_context (context);
-	tc_clock_layout->show_in_cairo_context (context);
-	context->move_to (650, 65);
-	bbt_clock_layout->update_from_cairo_context (context);
-	bbt_clock_layout->show_in_cairo_context (context);
 
 	set_source_rgb (context, p2.get_color (Push2::ParameterName));
 
@@ -390,6 +335,61 @@ MixLayout::show_vpot_mode ()
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
 		break;
+	case Send1:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->send_level_controllable (0));
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
+	case Send2:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->send_level_controllable (1));
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
+	case Send3:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->send_level_controllable (2));
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
+	case Send4:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->send_level_controllable (3));
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
+	case Send5:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->send_level_controllable (4));
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
 	default:
 		break;
 	}
@@ -473,39 +473,40 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, int wh
 }
 
 void
-MixLayout::solo_change (int n)
-{
-}
-
-void
-MixLayout::mute_change (int n)
-{
-}
-
-void
 MixLayout::switch_bank (uint32_t base)
 {
 	stripable_connections.drop_connections ();
 
-	/* try to get the first stripable for the requested bank */
+	/* work backwards so we can tell if we should actually switch banks */
 
-	stripable[0] = session.get_remote_nth_stripable (base, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+	boost::shared_ptr<Stripable> s[8];
+	uint32_t old_empty = 0;
+	uint32_t new_empty = 0;
 
-	if (!stripable[0]) {
+	for (int n = 0; n < 8; ++n) {
+		if (!stripable[n]) {
+			old_empty++;
+		}
+		s[n] = session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+		if (!s[n]) {
+			new_empty++;
+		}
+	}
+
+	if ((new_empty != 0) && (new_empty >= old_empty)) {
+		/* some missing strips; new bank the same or more empty stripables than the old one, do
+		   nothing since we had already reached the end.
+		*/
 		return;
 	}
 
+	for (int n = 0; n < 8; ++n) {
+		stripable[n] = s[n];
+	}
+
 	/* at least one stripable in this bank */
+
 	bank_start = base;
-
-	stripable[1] = session.get_remote_nth_stripable (base+1, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[2] = session.get_remote_nth_stripable (base+2, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[3] = session.get_remote_nth_stripable (base+3, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[4] = session.get_remote_nth_stripable (base+4, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[5] = session.get_remote_nth_stripable (base+5, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[6] = session.get_remote_nth_stripable (base+6, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-	stripable[7] = session.get_remote_nth_stripable (base+7, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-
 
 	for (int n = 0; n < 8; ++n) {
 		if (!stripable[n]) {
@@ -516,9 +517,6 @@ MixLayout::switch_bank (uint32_t base)
 
 		stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
 		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
-
-		solo_change (n);
-		mute_change (n);
 
 		Push2::Button* b;
 
@@ -554,7 +552,11 @@ MixLayout::switch_bank (uint32_t base)
 		p2.write (b->state_msg());
 
 		knobs[n]->set_text_color (stripable[n]->presentation_info().color());
+		knobs[n]->set_arc_start_color (stripable[n]->presentation_info().color());
+		knobs[n]->set_arc_end_color (stripable[n]->presentation_info().color());
 	}
+
+	show_vpot_mode ();
 }
 
 void
@@ -657,4 +659,11 @@ MixLayout::button_select_release ()
 			}
 		}
 	}
+}
+
+void
+MixLayout::stripables_added ()
+{
+	/* reload current bank */
+	switch_bank (bank_start);
 }

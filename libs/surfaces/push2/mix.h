@@ -53,8 +53,6 @@ class MixLayout : public Push2Layout
 
   private:
 	mutable bool _dirty;
-	Glib::RefPtr<Pango::Layout> tc_clock_layout;
-	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
 	Push2Knob* knobs[8];
@@ -65,8 +63,8 @@ class MixLayout : public Push2Layout
 	PBD::ScopedConnectionList stripable_connections;
 	boost::shared_ptr<ARDOUR::Stripable> stripable[8];
 
-	void solo_change (int);
-	void mute_change (int);
+	PBD::ScopedConnectionList session_connections;
+	void stripables_added ();
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
 

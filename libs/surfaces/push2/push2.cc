@@ -141,6 +141,8 @@ Push2::Push2 (ARDOUR::Session& s)
 	, octave_shift (0)
 	, percussion (false)
 {
+	cerr << "new push2 @ " << this << "\n";
+
 	context = Cairo::Context::create (frame_buffer);
 
 	build_maps ();
@@ -174,12 +176,20 @@ Push2::Push2 (ARDOUR::Session& s)
 
 Push2::~Push2 ()
 {
+	cerr << "push2 deleted\n";
 	stop ();
 }
 
 void
 Push2::port_registration_handler ()
 {
+	cerr << "preg for " << this << endl;
+
+	if (!_async_in && !_async_out) {
+		/* ports not registered yet */
+		return;
+	}
+
 	if (_async_in->connected() && _async_out->connected()) {
 		/* don't waste cycles here */
 		return;
@@ -512,7 +522,6 @@ Push2::redraw ()
 		/* display splash for 3 seconds */
 
 		if (get_microseconds() - splash_start > 3000000) {
-			cerr << "splash done\n";
 			splash_start = 0;
 		} else {
 			return false;
@@ -1694,8 +1703,8 @@ Push2::fill_color_table ()
 	colors.insert (make_pair (KnobLineShadow, ArdourCanvas::rgba_to_color  (0, 0, 0, 0.3)));
 	colors.insert (make_pair (KnobLine, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
 
-	colors.insert (make_pair (KnobForeground, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
-	colors.insert (make_pair (KnobBackground, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+	colors.insert (make_pair (KnobForeground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	colors.insert (make_pair (KnobBackground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
 	colors.insert (make_pair (KnobShadow, ArdourCanvas::rgba_to_color (0, 0, 0, 0.1)));
 	colors.insert (make_pair (KnobBorder, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
 
