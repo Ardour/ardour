@@ -48,6 +48,7 @@
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
+#include "ardour_knob.h"
 #include "gain_meter.h"
 #include "timers.h"
 #include "tooltips.h"
@@ -787,10 +788,12 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
 				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
 			} else if (control_ui->spin_box) {
+				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
+				knob->set_tooltip_prefix (desc.label + ": ");
+				knob->set_printer (insert);
 				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
-				control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 2, 3, FILL, SHRINK);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 2, 3, SHRINK, SHRINK, 2, 0);
+				control_ui->knobtable->attach (*control_ui->spin_box, 0, 1, 1, 2);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
 			} else if (desc.toggled) {
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
