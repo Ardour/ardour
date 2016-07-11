@@ -13,7 +13,7 @@ local evlen = 3
 local hpadding, vpadding = 4, 2
 
 function dsp_ioconfig ()
-	return { { audio_in = 0, audio_out = 0}, }
+	return { { audio_in = -1, audio_out = -1}, }
 end
 
 function dsp_has_midi_input () return true end
@@ -53,23 +53,32 @@ function dsp_init (rate)
 	end
 end
 
-function dsp_run (_, _, n_samples)
-	assert (type(midiin) == "table")
-	assert (type(midiout) == "table")
-
+function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local pos = self:shmem():atomic_get_int(0)
 	local buffer = self:shmem():to_int(1):array()
 
-	-- passthrough midi data, and fill the event buffer
-	for i, d in pairs(midiin) do
-		local ev = d["data"]
-		midiout[i] = { time = d["time"], data = ev }
-		pos = pos % ringsize + 1
-		for j = 1, math.min(#ev,evlen) do
-			buffer[(pos-1)*evlen + j] = ev[j]
-		end
-		for j = #ev+1, evlen do
-			buffer[(pos-1)*evlen + j] = 0
+	-- passthrough all data
+	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("audio"))
+	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("midi"))
+
+	-- then fill the event buffer
+	local ib = in_map:get (ARDOUR.DataType ("midi"), 0) -- index of 1st midi input
+
+	if ib ~= ARDOUR.ChanMapping.Invalid then
+		local events = bufs:get_midi (ib):table () -- copy event list into a lua table
+
+		-- iterate over all MIDI events
+		for _, e in pairs (events) do
+			local ev = e:buffer():array()
+			pos = pos % ringsize + 1
+			-- copy the data
+			for j = 1, math.min(e:size(),evlen) do
+				buffer[(pos-1)*evlen + j] = ev[j]
+			end
+			-- zero unused slots
+			for j = e:size()+1, evlen do
+				buffer[(pos-1)*evlen + j] = 0
+			end
 		end
 	end
 
