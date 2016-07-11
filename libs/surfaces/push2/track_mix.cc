@@ -77,12 +77,12 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Conte
 
 	Push2Knob* knob;
 
-	knob = new Push2Knob (p2);
+	knob = new Push2Knob (p2, context);
 	knob->set_position (60, 80);
 	knob->set_radius (35);
 	knobs.push_back (knob);
 
-	knob = new Push2Knob (p2);
+	knob = new Push2Knob (p2, context);
 	knob->set_position (180, 80);
 	knob->set_radius (35);
 	knobs.push_back (knob);

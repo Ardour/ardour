@@ -145,7 +145,7 @@ Push2::Push2 (ARDOUR::Session& s)
 
 	build_maps ();
 	build_color_map ();
-	fill_color_table (); 
+	fill_color_table ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
@@ -276,8 +276,6 @@ Push2::open ()
 	mix_layout = new MixLayout (*this, *session, context);
 	scale_layout = new ScaleLayout (*this, *session, context);
 	track_mix_layout = new TrackMixLayout (*this, *session, context);
-
-	_current_layout = mix_layout;
 
 	return 0;
 }
@@ -514,6 +512,7 @@ Push2::redraw ()
 		/* display splash for 3 seconds */
 
 		if (get_microseconds() - splash_start > 3000000) {
+			cerr << "splash done\n";
 			splash_start = 0;
 		} else {
 			return false;
@@ -611,7 +610,7 @@ Push2::set_active (bool yn)
 		init_touch_strip ();
 		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
 		splash ();
-
+		set_current_layout (mix_layout);
 
 	} else {
 
@@ -1711,4 +1710,18 @@ Push2::get_color (ColorName name)
 	}
 
 	return random();
+}
+
+void
+Push2::set_current_layout (Push2Layout* layout)
+{
+	if (_current_layout) {
+		_current_layout->on_hide ();
+	}
+
+	_current_layout = layout;
+
+	if (_current_layout) {
+		_current_layout->on_show ();
+	}
 }

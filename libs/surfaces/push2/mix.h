@@ -20,6 +20,7 @@
 #define __ardour_push2_mix_layout_h__
 
 #include "layout.h"
+#include "push2.h"
 
 namespace ARDOUR {
 	class Stripable;
@@ -36,6 +37,7 @@ class MixLayout : public Push2Layout
 	~MixLayout ();
 
 	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+	void on_show ();
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
@@ -43,11 +45,14 @@ class MixLayout : public Push2Layout
 	void button_right ();
 	void button_select_press ();
 	void button_select_release ();
+	void button_solo ();
+	void button_mute ();
 
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
 
   private:
+	mutable bool _dirty;
 	Glib::RefPtr<Pango::Layout> tc_clock_layout;
 	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
@@ -66,6 +71,17 @@ class MixLayout : public Push2Layout
 	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
 
 	void switch_bank (uint32_t base);
+
+	enum VPotMode {
+		Volume,
+		PanAzimuth,
+		PanWidth,
+		Send1, Send2, Send3, Send4, Send5
+	};
+
+	Push2::Button* mode_button;
+	VPotMode vpot_mode;
+	void show_vpot_mode ();
 };
 
 } /* namespace */

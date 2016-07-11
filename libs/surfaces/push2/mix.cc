@@ -57,7 +57,9 @@ using namespace ArdourSurface;
 
 MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> context)
 	: Push2Layout (p, s)
+	, _dirty (true)
 	, bank_start (0)
+	, vpot_mode (Volume)
 {
 	tc_clock_layout = Pango::Layout::create (context);
 	bbt_clock_layout = Pango::Layout::create (context);
@@ -108,16 +110,30 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 	}
 
 	for (int n = 0; n < 8; ++n) {
-		knobs[n] = new Push2Knob (p2);
+		knobs[n] = new Push2Knob (p2, context);
 		knobs[n]->set_position (60 + (n*120), 95);
 		knobs[n]->set_radius (25);
 	}
 
-	switch_bank (0);
+	mode_button = p2.button_by_id (Push2::Upper1);
 }
 
 MixLayout::~MixLayout ()
 {
+	for (int n = 0; n < 8; ++n) {
+		delete knobs[n];
+	}
+}
+
+void
+MixLayout::on_show ()
+{
+	mode_button->set_color (Push2::LED::White);
+	mode_button->set_state (Push2::LED::OneShot24th);
+	p2.write (mode_button->state_msg());
+
+	switch_bank (bank_start);
+	show_vpot_mode ();
 }
 
 bool
@@ -162,7 +178,7 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 		tc_clock_layout->set_text (tc_clock_text);
 	}
 
-	if (bbt_clock_text != tc_clock_layout->get_text()) {
+	if (bbt_clock_text != bbt_clock_layout->get_text()) {
 		children_dirty = true;
 		bbt_clock_layout->set_text (bbt_clock_text);
 	}
@@ -176,15 +192,32 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			string name = short_version (stripable[n]->name(), 10);
-			if (name != lower_layout[n]->get_text()) {
-				lower_layout[n]->set_text (name);
+			string shortname = short_version (stripable[n]->name(), 10);
+			string text;
+			boost::shared_ptr<AutomationControl> ac;
+			ac = stripable[n]->solo_control();
+			if (ac && ac->get_value()) {
+				text += "* ";
+			}
+			boost::shared_ptr<MuteControl> mc;
+			mc = stripable[n]->mute_control ();
+			if (mc) {
+				if (mc->muted_by_self_or_masters()) {
+					text += "! ";
+				} else if (mc->muted_by_others_soloing()) {
+					text += "- "; // it would be nice to use Unicode mute"\uD83D\uDD07 ";
+				}
+			}
+			text += shortname;
+
+			if (text != lower_layout[n]->get_text()) {
+				lower_layout[n]->set_text (text);
 				children_dirty = true;
 			}
 		}
 	}
 
-	if (!children_dirty) {
+	if (!children_dirty && !_dirty) {
 		return false;
 	}
 
@@ -205,9 +238,24 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	set_source_rgb (context, p2.get_color (Push2::ParameterName));
 
 	for (int n = 0; n < 8; ++n) {
+
 		if (upper_layout[n]->get_text().empty()) {
 			continue;
 		}
+
+		/* Draw highlight box */
+
+		uint32_t color = p2.get_color (Push2::ParameterName);
+
+		if (n == (int) vpot_mode) {
+			set_source_rgb (context, color);
+			context->rectangle (10 + (n*120) - 5, 2, 120, 21);
+			context->fill();
+			set_source_rgb (context, ArdourCanvas::contrasting_text_color (color));
+		}  else {
+			set_source_rgb (context, color);
+		}
+
 		context->move_to (10 + (n*120), 2);
 		upper_layout[n]->update_from_cairo_context (context);
 		upper_layout[n]->show_in_cairo_context (context);
@@ -229,20 +277,24 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 		}
 
 		if (stripable[n]) {
+			uint32_t color = stripable[n]->presentation_info().color();
+
 			if (stripable[n]->presentation_info().selected()) {
-				set_source_rgb (context, stripable[n]->presentation_info().color());
-				context->rectangle (10 + (n*120) - 5, 137, 120, 22);
+				set_source_rgb (context, color);
+				context->rectangle (10 + (n*120) - 5, 137, 120, 21);
 				context->fill();
-				set_source_rgb (context, ArdourCanvas::contrasting_text_color (stripable[n]->presentation_info().color()));
+				set_source_rgb (context, ArdourCanvas::contrasting_text_color (color));
 			}  else {
-				set_source_rgb (context, stripable[n]->presentation_info().color());
+				set_source_rgb (context, color);
 			}
+
+			context->move_to (10 + (n*120), 140);
+			lower_layout[n]->update_from_cairo_context (context);
+			lower_layout[n]->show_in_cairo_context (context);
 		}
-		/* XXX what color is used here? text should be empty anyway... no stripable */
-		context->move_to (10 + (n*120), 140);
-		lower_layout[n]->update_from_cairo_context (context);
-		lower_layout[n]->show_in_cairo_context (context);
 	}
+
+	_dirty = false;
 
 	return true;
 }
@@ -250,19 +302,121 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 void
 MixLayout::button_upper (uint32_t n)
 {
-	if (!stripable[n]) {
-		return;
+	Push2::Button* b;
+	switch (n) {
+	case 0:
+		vpot_mode = Volume;
+		b = p2.button_by_id (Push2::Upper1);
+		break;
+	case 1:
+		vpot_mode = PanAzimuth;
+		b = p2.button_by_id (Push2::Upper2);
+		break;
+	case 2:
+		vpot_mode = PanWidth;
+		b = p2.button_by_id (Push2::Upper3);
+		break;
+	case 3:
+		vpot_mode = Send1;
+		b = p2.button_by_id (Push2::Upper4);
+		break;
+	case 4:
+		vpot_mode = Send2;
+		b = p2.button_by_id (Push2::Upper5);
+		break;
+	case 5:
+		vpot_mode = Send3;
+		b = p2.button_by_id (Push2::Upper6);
+		break;
+	case 6:
+		vpot_mode = Send4;
+		b = p2.button_by_id (Push2::Upper7);
+		break;
+	case 7:
+		vpot_mode = Send5;
+		b = p2.button_by_id (Push2::Upper8);
+		break;
 	}
 
-	if (p2.modifier_state() & Push2::ModShift) {
-		boost::shared_ptr<AutomationControl> sc = stripable[n]->rec_enable_control ();
-		if (sc) {
-			sc->set_value (!sc->get_value(), PBD::Controllable::UseGroup);
+	if (b != mode_button) {
+		mode_button->set_color (Push2::LED::Black);
+		mode_button->set_state (Push2::LED::OneShot24th);
+		p2.write (mode_button->state_msg());
+	}
+
+	mode_button = b;
+
+	show_vpot_mode ();
+}
+
+void
+MixLayout::show_vpot_mode ()
+{
+	mode_button->set_color (Push2::LED::White);
+	mode_button->set_state (Push2::LED::OneShot24th);
+	p2.write (mode_button->state_msg());
+
+	boost::shared_ptr<AutomationControl> ac;
+	switch (vpot_mode) {
+	case Volume:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->gain_control());
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-	} else {
-		boost::shared_ptr<SoloControl> sc = stripable[n]->solo_control ();
-		if (sc) {
-			sc->set_value (!sc->self_soloed(), PBD::Controllable::UseGroup);
+		break;
+	case PanAzimuth:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->pan_azimuth_control());
+				knobs[s]->add_flag (Push2Knob::ArcToZero);
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+		}
+		break;
+	case PanWidth:
+		for (int s = 0; s < 8; ++s) {
+			if (stripable[s]) {
+				knobs[s]->set_controllable (stripable[s]->pan_width_control());
+			} else {
+				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+
+			}
+			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+		}
+		break;
+	default:
+		break;
+	}
+
+	_dirty = true;
+}
+
+void
+MixLayout::button_mute ()
+{
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	if (s) {
+		boost::shared_ptr<AutomationControl> ac = s->mute_control();
+		if (ac) {
+			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
+}
+
+void
+MixLayout::button_solo ()
+{
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	if (s) {
+		boost::shared_ptr<AutomationControl> ac = s->solo_control();
+		if (ac) {
+			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
 		}
 	}
 }
@@ -280,11 +434,10 @@ MixLayout::button_lower (uint32_t n)
 void
 MixLayout::strip_vpot (int n, int delta)
 {
-	if (stripable[n]) {
-		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
-		if (ac) {
-			ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
-		}
+	boost::shared_ptr<Controllable> ac = knobs[n]->controllable();
+
+	if (ac) {
+		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
 	}
 }
 
@@ -322,147 +475,11 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, int wh
 void
 MixLayout::solo_change (int n)
 {
-	Push2::ButtonID bid;
-
-	switch (n) {
-	case 0:
-		bid = Push2::Upper1;
-		break;
-	case 1:
-		bid = Push2::Upper2;
-		break;
-	case 2:
-		bid = Push2::Upper3;
-		break;
-	case 3:
-		bid = Push2::Upper4;
-		break;
-	case 4:
-		bid = Push2::Upper5;
-		break;
-	case 5:
-		bid = Push2::Upper6;
-		break;
-	case 6:
-		bid = Push2::Upper7;
-		break;
-	case 7:
-		bid = Push2::Upper8;
-		break;
-	default:
-		return;
-	}
-
-	boost::shared_ptr<SoloControl> ac = stripable[n]->solo_control ();
-	if (!ac) {
-		return;
-	}
-
-	Push2::Button* b = p2.button_by_id (bid);
-
-	if (ac->soloed()) {
-		b->set_color (Push2::LED::Green);
-	} else {
-		b->set_color (Push2::LED::Black);
-	}
-
-	if (ac->soloed_by_others_upstream() || ac->soloed_by_others_downstream()) {
-		b->set_state (Push2::LED::Blinking4th);
-	} else {
-		b->set_state (Push2::LED::OneShot24th);
-	}
-
-	p2.write (b->state_msg());
 }
 
 void
 MixLayout::mute_change (int n)
 {
-	Push2::ButtonID bid;
-
-	if (!stripable[n]) {
-		return;
-	}
-
-	cerr << "Mute changed on " << n << ' ' << stripable[n]->name() << endl;
-
-	switch (n) {
-	case 0:
-		bid = Push2::Lower1;
-		break;
-	case 1:
-		bid = Push2::Lower2;
-		break;
-	case 2:
-		bid = Push2::Lower3;
-		break;
-	case 3:
-		bid = Push2::Lower4;
-		break;
-	case 4:
-		bid = Push2::Lower5;
-		break;
-	case 5:
-		bid = Push2::Lower6;
-		break;
-	case 6:
-		bid = Push2::Lower7;
-		break;
-	case 7:
-		bid = Push2::Lower8;
-		break;
-	default:
-		return;
-	}
-
-	boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
-
-	if (!mc) {
-		return;
-	}
-
-	Push2::Button* b = p2.button_by_id (bid);
-
-	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
-
-		if (mc->muted_by_self ()) {
-			/* full mute */
-			b->set_color (Push2::LED::Blue);
-			b->set_state (Push2::LED::OneShot24th);
-			cerr << "FULL MUTE1\n";
-		} else if (mc->muted_by_others_soloing () || mc->muted_by_masters ()) {
-			/* this will reflect both solo mutes AND master mutes */
-			b->set_color (Push2::LED::Blue);
-			b->set_state (Push2::LED::Blinking4th);
-			cerr << "OTHER MUTE1\n";
-		} else {
-			/* no mute at all */
-			b->set_color (Push2::LED::Black);
-			b->set_state (Push2::LED::OneShot24th);
-			cerr << "NO MUTE1\n";
-		}
-
-	} else {
-
-		if (mc->muted_by_self()) {
-			/* full mute */
-			b->set_color (Push2::LED::Blue);
-			b->set_state (Push2::LED::OneShot24th);
-			cerr << "FULL MUTE2\n";
-		} else if (mc->muted_by_masters ()) {
-			/* this shows only master mutes, not mute-by-others-soloing */
-			b->set_color (Push2::LED::Blue);
-			b->set_state (Push2::LED::Blinking4th);
-			cerr << "OTHER MUTE1\n";
-		} else {
-			/* no mute at all */
-			b->set_color (Push2::LED::Black);
-			b->set_state (Push2::LED::OneShot24th);
-			cerr << "NO MUTE2\n";
-		}
-	}
-
-	p2.write (b->state_msg());
 }
 
 void
@@ -498,16 +515,6 @@ MixLayout::switch_bank (uint32_t base)
 		/* stripable goes away? refill the bank, starting at the same point */
 
 		stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
-		boost::shared_ptr<AutomationControl> sc = stripable[n]->solo_control();
-		if (sc) {
-			sc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::solo_change, this, n), &p2);
-		}
-
-		boost::shared_ptr<AutomationControl> mc = stripable[n]->mute_control();
-		if (mc) {
-			mc->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::mute_change, this, n), &p2);
-		}
-
 		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
 
 		solo_change (n);
@@ -545,6 +552,8 @@ MixLayout::switch_bank (uint32_t base)
 		b->set_color (p2.get_color_index (stripable[n]->presentation_info().color()));
 		b->set_state (Push2::LED::OneShot24th);
 		p2.write (b->state_msg());
+
+		knobs[n]->set_text_color (stripable[n]->presentation_info().color());
 	}
 }
 

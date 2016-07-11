@@ -120,6 +120,10 @@ Push2::build_maps ()
 	button = new ColorButton ((i), (cc), (p)); \
 	cc_button_map.insert (std::make_pair (button->controller_number(), button)); \
 	id_button_map.insert (std::make_pair (button->id, button))
+#define MAKE_COLOR_BUTTON_PRESS_RELEASE_LONG(i,cc,p,r,l)                      \
+	button = new ColorButton ((i), (cc), (p), (r), (l)); \
+	cc_button_map.insert (std::make_pair (button->controller_number(), button)); \
+	id_button_map.insert (std::make_pair (button->id, button))
 
 	MAKE_COLOR_BUTTON_PRESS (Upper1, 102, &Push2::button_upper_1);
 	MAKE_COLOR_BUTTON_PRESS (Upper2, 103, &Push2::button_upper_2);
@@ -138,8 +142,8 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON_PRESS (Lower7, 26, &Push2::button_lower_7);
 	MAKE_COLOR_BUTTON_PRESS (Lower8, 27, &Push2::button_lower_8);
 	MAKE_COLOR_BUTTON (Master, 28);
-	MAKE_COLOR_BUTTON (Mute, 60);
-	MAKE_COLOR_BUTTON_PRESS (Solo, 61, &Push2::button_solo);
+	MAKE_COLOR_BUTTON_PRESS (Mute, 60, &Push2::button_mute);
+	MAKE_COLOR_BUTTON_PRESS_RELEASE_LONG (Solo, 61, &Push2::relax, &Push2::button_solo, &Push2::button_solo_long_press);
 	MAKE_COLOR_BUTTON_PRESS (Stop, 29, &Push2::button_stop);
 	MAKE_COLOR_BUTTON_PRESS (Fwd32ndT, 43, &Push2::button_fwd32t);
 	MAKE_COLOR_BUTTON_PRESS (Fwd32nd,42 , &Push2::button_fwd32);
@@ -281,9 +285,25 @@ Push2::button_metronome ()
 }
 
 void
-Push2::button_solo ()
+Push2::button_solo_long_press ()
 {
 	cancel_all_solo ();
+}
+
+void
+Push2::button_mute ()
+{
+	if (_current_layout) {
+		_current_layout->button_mute ();
+	}
+}
+
+void
+Push2::button_solo ()
+{
+	if (_current_layout) {
+		_current_layout->button_solo ();
+	}
 }
 
 void
@@ -543,9 +563,9 @@ void
 Push2::button_scale_press ()
 {
 	if (_current_layout != scale_layout) {
-		_current_layout = scale_layout;
+		set_current_layout (_current_layout);
 	} else {
-		_current_layout = mix_layout;
+		set_current_layout (mix_layout);
 	}
 }
 
@@ -553,11 +573,10 @@ void
 Push2::button_mix_press ()
 {
 	if (_current_layout == track_mix_layout) {
-		_current_layout = mix_layout;
+		set_current_layout (mix_layout);
 	} else {
 		if (ControlProtocol::first_selected_stripable()) {
-			dynamic_cast<TrackMixLayout*> (track_mix_layout)->set_stripable (ControlProtocol::first_selected_stripable());
-			_current_layout = track_mix_layout;
+			set_current_layout (track_mix_layout);
 		}
 	}
 }

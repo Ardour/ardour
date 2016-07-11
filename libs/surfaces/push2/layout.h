@@ -44,6 +44,8 @@ class Push2Layout
 	bool mapped() const;
 
 	virtual bool redraw (Cairo::RefPtr<Cairo::Context>) const = 0;
+	virtual void on_show () {}
+	virtual void on_hide () {}
 
 	virtual void button_upper (uint32_t n) {}
 	virtual void button_lower (uint32_t n) {}
@@ -53,6 +55,8 @@ class Push2Layout
 	virtual void button_left ()  {}
 	virtual void button_select_press () {}
 	virtual void button_select_release () {}
+	virtual void button_solo () {}
+	virtual void button_mute () {}
 
 	virtual void strip_vpot (int, int) = 0;
 	virtual void strip_vpot_touch (int, bool) = 0;
