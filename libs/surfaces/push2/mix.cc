@@ -133,7 +133,7 @@ MixLayout::on_show ()
 }
 
 bool
-MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
+MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
 {
 	bool children_dirty = false;
 
@@ -172,7 +172,7 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 		}
 	}
 
-	if (!children_dirty && !_dirty) {
+	if (!children_dirty && !_dirty && !force) {
 		return false;
 	}
 
@@ -212,7 +212,7 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	context->stroke ();
 
 	for (int n = 0; n < 8; ++n) {
-		knobs[n]->redraw (context);
+		knobs[n]->redraw (context, force);
 	}
 
 	for (int n = 0; n < 8; ++n) {

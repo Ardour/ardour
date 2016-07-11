@@ -187,7 +187,7 @@ Push2Menu::get_active (int col)
 }
 
 void
-Push2Menu::redraw (Cairo::RefPtr<Cairo::Context> context) const
+Push2Menu::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
 {
 	for (int n = 0; n < 8; ++n) {
 

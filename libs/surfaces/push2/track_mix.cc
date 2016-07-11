@@ -58,56 +58,86 @@ using namespace ArdourSurface;
 
 TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> context)
 	: Push2Layout (p, s)
-	, _dirty (false)
+	, _dirty (true)
 {
-	name_layout = Pango::Layout::create (context);
-
-	Pango::FontDescription fd ("Sans Bold 14");
-	name_layout->set_font_description (fd);
-
 	Pango::FontDescription fd2 ("Sans 10");
+
 	for (int n = 0; n < 8; ++n) {
 		upper_layout[n] = Pango::Layout::create (context);
 		upper_layout[n]->set_font_description (fd2);
-		upper_layout[n]->set_text ("solo");
+
+		switch (n) {
+		case 0:
+			upper_layout[n]->set_text (_("TRACK VOLUME"));
+			break;
+		case 1:
+			upper_layout[n]->set_text (_("TRACK PAN"));
+			break;
+		case 2:
+			upper_layout[n]->set_text (_("TRACK WIDTH"));
+			break;
+		case 3:
+			upper_layout[n]->set_text (_("TRACK TRIM"));
+			break;
+		case 4:
+			upper_layout[n]->set_text (_(""));
+			break;
+		case 5:
+			upper_layout[n]->set_text (_(""));
+			break;
+		case 6:
+			upper_layout[n]->set_text (_(""));
+			break;
+		case 7:
+			upper_layout[n]->set_text (_(""));
+			break;
+		}
+
 		lower_layout[n] = Pango::Layout::create (context);
 		lower_layout[n]->set_font_description (fd2);
-		lower_layout[n]->set_text ("mute");
+
+		knobs[n] = new Push2Knob (p2, context);
+		knobs[n]->set_position (60 + (120*n), 95);
+		knobs[n]->set_radius (25);
 	}
 
-	Push2Knob* knob;
-
-	knob = new Push2Knob (p2, context);
-	knob->set_position (60, 80);
-	knob->set_radius (35);
-	knobs.push_back (knob);
-
-	knob = new Push2Knob (p2, context);
-	knob->set_position (180, 80);
-	knob->set_radius (35);
-	knobs.push_back (knob);
+	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::selection_changed, this), &p2);
 }
 
 TrackMixLayout::~TrackMixLayout ()
 {
-	for (vector<Push2Knob*>::iterator k = knobs.begin(); k != knobs.end(); ++k) {
-		delete *k;
+	for (int n = 0; n < 8; ++n) {
+		delete knobs[n];
 	}
 }
 
+void
+TrackMixLayout::selection_changed ()
+{
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	if (s) {
+		set_stripable (s);
+	}
+}
+void
+TrackMixLayout::on_show ()
+{
+	selection_changed ();
+}
+
 bool
-TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
+TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
 {
 	bool children_dirty = false;
 
-	for (vector<Push2Knob*>::const_iterator k = knobs.begin(); k != knobs.end(); ++k) {
-		if ((*k)->dirty()) {
+	for (int n = 0; n < 8; ++n) {
+		if (knobs[n]->dirty()) {
 			children_dirty = true;
 			break;
 		}
 	}
 
-	if (!children_dirty && !_dirty) {
+	if (!children_dirty) {
 		return false;
 	}
 
@@ -115,19 +145,28 @@ TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	context->rectangle (0, 0, p2.cols, p2.rows);
 	context->fill ();
 
-	if (stripable) {
-		int r,g,b,a;
-		UINT_TO_RGBA (stripable->presentation_info().color(), &r, &g, &b, &a);
-		context->set_source_rgb (r/255.0, g/255.0, b/255.0);
-	} else {
-		context->set_source_rgb (0.23, 0.0, 0.349);
-	}
-	context->move_to (10, 2);
-	name_layout->update_from_cairo_context (context);
-	name_layout->show_in_cairo_context (context);
+	for (int n = 0; n < 8; ++n) {
 
-	for (vector<Push2Knob*>::const_iterator k = knobs.begin(); k != knobs.end(); ++k) {
-		(*k)->redraw (context);
+		if (upper_layout[n]->get_text().empty()) {
+			continue;
+		}
+
+		/* Draw highlight box */
+
+		uint32_t color = p2.get_color (Push2::ParameterName);
+		set_source_rgb (context, color);
+		context->move_to (10 + (n*120), 2);
+		upper_layout[n]->update_from_cairo_context (context);
+		upper_layout[n]->show_in_cairo_context (context);
+	}
+
+	context->move_to (0, 22.5);
+	context->line_to (p2.cols, 22.5);
+	context->set_line_width (1.0);
+	context->stroke ();
+
+	for (int n = 0; n < 8; ++n) {
+		knobs[n]->redraw (context, force);
 	}
 
 	return true;
@@ -144,33 +183,14 @@ TrackMixLayout::button_lower (uint32_t n)
 }
 
 void
-TrackMixLayout::strip_vpot (int n, int delta)
-{
-	if (!stripable) {
-		return;
-	}
-
-	switch (n) {
-	case 0: /* gain */
-		boost::shared_ptr<AutomationControl> ac = stripable->gain_control();
-		if (ac) {
-			ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
-		}
-		break;
-	}
-}
-
-void
-TrackMixLayout::strip_vpot_touch (int, bool)
-{
-}
-
-void
 TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 {
+	stripable_connections.drop_connections ();
+
 	stripable = s;
 
 	if (stripable) {
+
 		stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
 
 		stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
@@ -178,6 +198,14 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 
 		knobs[0]->set_controllable (stripable->gain_control());
 		knobs[1]->set_controllable (stripable->pan_azimuth_control());
+		knobs[1]->add_flag (Push2Knob::ArcToZero);
+		knobs[2]->set_controllable (stripable->pan_width_control());
+		knobs[3]->set_controllable (stripable->trim_control());
+		knobs[3]->add_flag (Push2Knob::ArcToZero);
+		knobs[4]->set_controllable (boost::shared_ptr<AutomationControl>());
+		knobs[5]->set_controllable (boost::shared_ptr<AutomationControl>());
+		knobs[6]->set_controllable (boost::shared_ptr<AutomationControl>());
+		knobs[7]->set_controllable (boost::shared_ptr<AutomationControl>());
 
 		name_changed ();
 		color_changed ();
@@ -197,7 +225,6 @@ TrackMixLayout::drop_stripable ()
 void
 TrackMixLayout::name_changed ()
 {
-	name_layout->set_text (stripable->name());
 	_dirty = true;
 }
 
@@ -205,12 +232,12 @@ void
 TrackMixLayout::color_changed ()
 {
 	uint32_t rgb = stripable->presentation_info().color();
-	uint8_t index = p2.get_color_index (rgb);
 
-	Push2::Button* b = p2.button_by_id (Push2::Upper1);
-	b->set_color (index);
-	b->set_state (Push2::LED::OneShot24th);
-	p2.write (b->state_msg ());
+	for (int n = 0; n < 8; ++n) {
+		knobs[n]->set_text_color (rgb);
+		knobs[n]->set_arc_start_color (rgb);
+		knobs[n]->set_arc_end_color (rgb);
+	}
 }
 
 void
@@ -221,5 +248,28 @@ TrackMixLayout::stripable_property_change (PropertyChange const& what_changed)
 	}
 	if (what_changed.contains (Properties::name)) {
 		name_changed ();
+	}
+}
+
+void
+TrackMixLayout::strip_vpot (int n, int delta)
+{
+	boost::shared_ptr<Controllable> ac = knobs[n]->controllable();
+
+	if (ac) {
+		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
+	}
+}
+
+void
+TrackMixLayout::strip_vpot_touch (int n, bool touching)
+{
+	boost::shared_ptr<AutomationControl> ac = knobs[n]->controllable();
+	if (ac) {
+		if (touching) {
+			ac->start_touch (session.audible_frame());
+		} else {
+			ac->stop_touch (true, session.audible_frame());
+		}
 	}
 }

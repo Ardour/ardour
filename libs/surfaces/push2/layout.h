@@ -43,7 +43,7 @@ class Push2Layout
 
 	bool mapped() const;
 
-	virtual bool redraw (Cairo::RefPtr<Cairo::Context>) const = 0;
+	virtual bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const = 0;
 	virtual void on_show () {}
 	virtual void on_hide () {}
 

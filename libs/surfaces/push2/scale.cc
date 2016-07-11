@@ -63,7 +63,7 @@ ScaleLayout::~ScaleLayout ()
 }
 
 bool
-ScaleLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
+ScaleLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
 {
 	bool draw = false;
 
@@ -79,7 +79,7 @@ ScaleLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	context->rectangle (0, 0, 960, 160);
 	context->fill ();
 
-	scale_menu->redraw (context);
+	scale_menu->redraw (context, force);
 
 	return true;
 }

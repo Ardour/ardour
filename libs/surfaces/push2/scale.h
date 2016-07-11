@@ -33,7 +33,7 @@ class ScaleLayout : public Push2Layout
 	ScaleLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
 	~ScaleLayout ();
 
-	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+	bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);

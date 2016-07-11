@@ -31,7 +31,7 @@ class Push2Menu {
    public:
 	Push2Menu (Cairo::RefPtr<Cairo::Context>);
 
-	void redraw (Cairo::RefPtr<Cairo::Context>) const;
+	void redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
 	bool dirty () const { return _dirty; }
 
 	void fill_column (int col, std::vector<std::string>);

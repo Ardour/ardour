@@ -39,7 +39,8 @@ class TrackMixLayout : public Push2Layout
 
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
-	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+	bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
+	void on_show ();
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
@@ -52,13 +53,15 @@ class TrackMixLayout : public Push2Layout
 	PBD::ScopedConnectionList stripable_connections;
 	bool _dirty;
 
-	Glib::RefPtr<Pango::Layout> name_layout;
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
 
-	std::vector<Push2Knob*> knobs;
+	Push2Knob* knobs[8];
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
+
+	PBD::ScopedConnection selection_connection;
+	void selection_changed ();
 
 	void drop_stripable ();
 	void name_changed ();

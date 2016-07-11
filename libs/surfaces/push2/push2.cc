@@ -541,7 +541,7 @@ Push2::redraw ()
 		render_needed = true;
 	}
 
-	bool dirty = _current_layout->redraw (context);
+	bool dirty = _current_layout->redraw (context, render_needed);
 	drawn_layout = _current_layout;
 
 	return dirty || render_needed;
@@ -1729,6 +1729,7 @@ Push2::set_current_layout (Push2Layout* layout)
 	}
 
 	_current_layout = layout;
+	drawn_layout = 0;
 
 	if (_current_layout) {
 		_current_layout->on_show ();

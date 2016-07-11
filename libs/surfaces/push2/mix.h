@@ -36,7 +36,7 @@ class MixLayout : public Push2Layout
 	MixLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
 	~MixLayout ();
 
-	bool redraw (Cairo::RefPtr<Cairo::Context>) const;
+	bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
 	void on_show ();
 
 	void button_upper (uint32_t n);
