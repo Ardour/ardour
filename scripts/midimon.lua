@@ -85,7 +85,7 @@ local show_scm = nil
 
 function show_midi(ctx, x, y, buffer, event)
 	local base = (event - 1) * evlen
-	if buffer[base+1] == -1 then return end
+	if buffer[base+1] == -1 then return false end
 	local evtype = buffer[base + 1] >> 4
 	local channel = (buffer[base + 1] & 15) + 1 -- for System Common Messages this has no use
 	if evtype == 8 then
@@ -126,10 +126,15 @@ function show_midi(ctx, x, y, buffer, event)
 			txt:set_text("-- Active")
 		elseif message == 15 then
 			txt:set_text("-- Reset")
+		else
+			return false
 		end
+	else
+		return false
 	end
 	ctx:move_to (x, y)
 	txt:show_in_cairo_context (ctx)
+	return true
 end
 
 function render_inline (ctx, displaywidth, max_h)
@@ -143,7 +148,7 @@ function render_inline (ctx, displaywidth, max_h)
 		txt = Cairo.PangoLayout (ctx, "Mono " .. cursize)
 	end
 
-	if ctrl[3] > 0 then hex = " %2X" else hex = " %3u" end
+	if ctrl[3] > 0 then hex = " %02X" else hex = " %3u" end
 	show_scm = ctrl[4]
 
 	-- compute the size of the display
@@ -159,22 +164,23 @@ function render_inline (ctx, displaywidth, max_h)
 	ctx:set_source_rgba (.2, .2, .2, 1.0)
 	ctx:fill ()
 
-	-- print latest event
+	-- color of latest event
 	ctx:set_source_rgba (1.0, 1.0, 1.0, 1.0)
-	show_midi(ctx, x, y, buffer, pos)
-	y = y - lineheight - vpadding
 
-	-- and remaining events
-	ctx:set_source_rgba (.8, .8, .8, 1.0)
-	for i = pos-1, 1, -1 do
+	-- print events
+	for i = pos, 1, -1 do
 		if y < 0 then break end
-		show_midi(ctx, x, y, buffer, i)
-		y = y - lineheight - vpadding
+		if show_midi(ctx, x, y, buffer, i) then
+			y = y - lineheight - vpadding
+			ctx:set_source_rgba (.8, .8, .8, 1.0)
+		end
 	end
 	for i = ringsize, pos+1, -1 do
 		if y < 0 then break end
-		show_midi(ctx, x, y, buffer, i)
-		y = y - lineheight - vpadding
+		if show_midi(ctx, x, y, buffer, i) then
+			y = y - lineheight - vpadding
+			ctx:set_source_rgba (.8, .8, .8, 1.0)
+		end
 	end
 
 	return {displaywidth, displayheight}
