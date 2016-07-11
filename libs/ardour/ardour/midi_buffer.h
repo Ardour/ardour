@@ -45,6 +45,7 @@ public:
 	void merge_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
 
 	void copy(const MidiBuffer& copy);
+	void copy(MidiBuffer const * const);
 
 	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);

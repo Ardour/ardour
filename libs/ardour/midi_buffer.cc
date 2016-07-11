@@ -80,6 +80,14 @@ MidiBuffer::copy(const MidiBuffer& copy)
 	memcpy(_data, copy._data, copy._size);
 }
 
+void
+MidiBuffer::copy(MidiBuffer const * const copy)
+{
+	assert(_capacity >= copy->size ());
+	_size = copy->size ();
+	memcpy(_data, copy->data(), _size);
+}
+
 
 /** Read events from @a src starting at time @a offset into the START of this buffer, for
  * time duration @a nframes.  Relative time, where 0 = start of buffer.
