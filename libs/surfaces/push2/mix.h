@@ -27,6 +27,8 @@ namespace ARDOUR {
 
 namespace ArdourSurface {
 
+class Push2Knob;
+
 class MixLayout : public Push2Layout
 {
    public:
@@ -49,8 +51,8 @@ class MixLayout : public Push2Layout
 	Glib::RefPtr<Pango::Layout> tc_clock_layout;
 	Glib::RefPtr<Pango::Layout> bbt_clock_layout;
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
-	Glib::RefPtr<Pango::Layout> mid_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
+	Push2Knob* knobs[8];
 
 	/* stripables */
 

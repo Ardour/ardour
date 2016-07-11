@@ -1686,7 +1686,7 @@ Push2::fill_color_table ()
 	colors.insert (make_pair (DarkBackground, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
 	colors.insert (make_pair (LightBackground, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (ParameterName, ArdourCanvas::rgba_to_color (0.32, 0.28, 0.47, 1)));
+	colors.insert (make_pair (ParameterName, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
 	colors.insert (make_pair (KnobArcBackground, ArdourCanvas::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
 	colors.insert (make_pair (KnobArcStart, ArdourCanvas::rgba_to_color (1.0, 0.0, 0.0, 1.0)));

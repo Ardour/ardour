@@ -40,8 +40,12 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "push2.h"
+#include "canvas/colors.h"
+
 #include "mix.h"
+#include "knob.h"
+#include "push2.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -66,16 +70,47 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 	for (int n = 0; n < 8; ++n) {
 		upper_layout[n] = Pango::Layout::create (context);
 		upper_layout[n]->set_font_description (fd2);
-		upper_layout[n]->set_text ("solo");
-		lower_layout[n] = Pango::Layout::create (context);
-		lower_layout[n]->set_font_description (fd2);
-		lower_layout[n]->set_text ("mute");
+
+		string txt;
+		switch (n) {
+		case 0:
+			txt = _("Volumes");
+			break;
+		case 1:
+			txt = _("Pans");
+			break;
+		case 2:
+			txt = _("Pan Widths");
+			break;
+		case 3:
+			txt = _("A Sends");
+			break;
+		case 4:
+			txt = _("B Sends");
+			break;
+		case 5:
+			txt = _("C Sends");
+			break;
+		case 6:
+			txt = _("D Sends");
+			break;
+		case 7:
+			txt = _("E Sends");
+			break;
+		}
+		upper_layout[n]->set_text (txt);
 	}
 
-	Pango::FontDescription fd3 ("Sans Bold 10");
+	Pango::FontDescription fd3 ("Sans 10");
 	for (int n = 0; n < 8; ++n) {
-		mid_layout[n] = Pango::Layout::create (context);
-		mid_layout[n]->set_font_description (fd3);
+		lower_layout[n] = Pango::Layout::create (context);
+		lower_layout[n]->set_font_description (fd3);
+	}
+
+	for (int n = 0; n < 8; ++n) {
+		knobs[n] = new Push2Knob (p2);
+		knobs[n]->set_position (60 + (n*120), 95);
+		knobs[n]->set_radius (25);
 	}
 
 	switch_bank (0);
@@ -120,70 +155,93 @@ MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	bbt_clock_text = buf;
 
-	bool dirty = false;
+	bool children_dirty = false;
 
 	if (tc_clock_text != tc_clock_layout->get_text()) {
-		dirty = true;
+		children_dirty = true;
 		tc_clock_layout->set_text (tc_clock_text);
 	}
 
 	if (bbt_clock_text != tc_clock_layout->get_text()) {
-		dirty = true;
+		children_dirty = true;
 		bbt_clock_layout->set_text (bbt_clock_text);
 	}
 
-	string mid_text;
+	for (int n = 0; n < 8; ++n) {
+		if (knobs[n]->dirty()) {
+			children_dirty = true;
+			break;
+		}
+	}
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			mid_text = short_version (stripable[n]->name(), 10);
-			if (mid_text != mid_layout[n]->get_text()) {
-				mid_layout[n]->set_text (mid_text);
-				dirty = true;
+			string name = short_version (stripable[n]->name(), 10);
+			if (name != lower_layout[n]->get_text()) {
+				lower_layout[n]->set_text (name);
+				children_dirty = true;
 			}
 		}
 	}
 
-	if (!dirty) {
+	if (!children_dirty) {
 		return false;
 	}
 
-	context->set_source_rgb (0.764, 0.882, 0.882);
-	context->rectangle (0, 0, 960, 160);
+	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
+	context->rectangle (0, 0, p2.cols, p2.rows);
 	context->fill ();
 
 	/* clocks */
 
-	context->set_source_rgb (0.23, 0.0, 0.349);
-	context->move_to (650, 25);
+	set_source_rgb (context, ArdourCanvas::contrasting_text_color (p2.get_color (Push2::DarkBackground)));
+	context->move_to (650, 30);
 	tc_clock_layout->update_from_cairo_context (context);
 	tc_clock_layout->show_in_cairo_context (context);
-	context->move_to (650, 60);
+	context->move_to (650, 65);
 	bbt_clock_layout->update_from_cairo_context (context);
 	bbt_clock_layout->show_in_cairo_context (context);
 
+	set_source_rgb (context, p2.get_color (Push2::ParameterName));
+
 	for (int n = 0; n < 8; ++n) {
+		if (upper_layout[n]->get_text().empty()) {
+			continue;
+		}
 		context->move_to (10 + (n*120), 2);
 		upper_layout[n]->update_from_cairo_context (context);
 		upper_layout[n]->show_in_cairo_context (context);
 	}
 
+	context->move_to (0, 22.5);
+	context->line_to (p2.cols, 22.5);
+	context->set_line_width (1.0);
+	context->stroke ();
+
 	for (int n = 0; n < 8; ++n) {
-		context->move_to (10 + (n*120), 140);
-		lower_layout[n]->update_from_cairo_context (context);
-		lower_layout[n]->show_in_cairo_context (context);
+		knobs[n]->redraw (context);
 	}
 
 	for (int n = 0; n < 8; ++n) {
-		if (stripable[n] && stripable[n]->presentation_info().selected()) {
-			context->rectangle (10 + (n*120) - 5, 115, 120, 22);
-			context->set_source_rgb (1.0, 0.737, 0.172);
-			context->fill();
+
+		if (lower_layout[n]->get_text().empty()) {
+			continue;
 		}
-		context->set_source_rgb (0.0, 0.0, 0.0);
-		context->move_to (10 + (n*120), 120);
-		mid_layout[n]->update_from_cairo_context (context);
-		mid_layout[n]->show_in_cairo_context (context);
+
+		if (stripable[n]) {
+			if (stripable[n]->presentation_info().selected()) {
+				set_source_rgb (context, stripable[n]->presentation_info().color());
+				context->rectangle (10 + (n*120) - 5, 137, 120, 22);
+				context->fill();
+				set_source_rgb (context, ArdourCanvas::contrasting_text_color (stripable[n]->presentation_info().color()));
+			}  else {
+				set_source_rgb (context, stripable[n]->presentation_info().color());
+			}
+		}
+		/* XXX what color is used here? text should be empty anyway... no stripable */
+		context->move_to (10 + (n*120), 140);
+		lower_layout[n]->update_from_cairo_context (context);
+		lower_layout[n]->show_in_cairo_context (context);
 	}
 
 	return true;
@@ -216,15 +274,7 @@ MixLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	if (p2.modifier_state() & Push2::ModSelect) {
-		ControlProtocol::SetStripableSelection (stripable[n]);
-	} else {
-		boost::shared_ptr<MuteControl> mc = stripable[n]->mute_control ();
-
-		if (mc) {
-			mc->set_value (!mc->muted_by_self(), PBD::Controllable::UseGroup);
-		}
-	}
+	ControlProtocol::SetStripableSelection (stripable[n]);
 }
 
 void
@@ -265,7 +315,7 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, int wh
 		 * cycle. The redraw will reflect selected status
 		 */
 
-		mid_layout[which]->set_text (string());
+		lower_layout[which]->set_text (string());
 	}
 }
 
@@ -463,6 +513,38 @@ MixLayout::switch_bank (uint32_t base)
 		solo_change (n);
 		mute_change (n);
 
+		Push2::Button* b;
+
+		switch (n) {
+		case 0:
+			b = p2.button_by_id (Push2::Lower1);
+			break;
+		case 1:
+			b = p2.button_by_id (Push2::Lower2);
+			break;
+		case 2:
+			b = p2.button_by_id (Push2::Lower3);
+			break;
+		case 3:
+			b = p2.button_by_id (Push2::Lower4);
+			break;
+		case 4:
+			b = p2.button_by_id (Push2::Lower5);
+			break;
+		case 5:
+			b = p2.button_by_id (Push2::Lower6);
+			break;
+		case 6:
+			b = p2.button_by_id (Push2::Lower7);
+			break;
+		case 7:
+			b = p2.button_by_id (Push2::Lower8);
+			break;
+		}
+
+		b->set_color (p2.get_color_index (stripable[n]->presentation_info().color()));
+		b->set_state (Push2::LED::OneShot24th);
+		p2.write (b->state_msg());
 	}
 }
 
@@ -477,6 +559,7 @@ MixLayout::button_left ()
 {
 	switch_bank (max (0, bank_start - 8));
 }
+
 
 void
 MixLayout::button_select_press ()
@@ -566,5 +649,3 @@ MixLayout::button_select_release ()
 		}
 	}
 }
-
-

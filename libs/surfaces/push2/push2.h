@@ -287,6 +287,8 @@ class Push2 : public ARDOUR::ControlProtocol
 		LightBackground,
 
 		ParameterName,
+		StripableName,
+		ClockText,
 
 		KnobArcBackground,
 		KnobArcStart,
