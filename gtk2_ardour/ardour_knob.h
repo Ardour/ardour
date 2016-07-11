@@ -25,6 +25,8 @@
 #include <gtkmm/action.h>
 
 #include "pbd/signals.h"
+#include "ardour/automatable.h"
+
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
@@ -74,7 +76,7 @@ public:
 	void add_elements (Element);
 	static Element default_elements;
 
-	void set_tooltip_prefix (std::string pfx) { _tooltip_prefix = pfx; }
+	void set_tooltip_prefix (std::string pfx) { _tooltip_prefix = pfx; controllable_changed (true); }
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
@@ -83,6 +85,8 @@ public:
 	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_motion_notify_event (GdkEventMotion *ev) ;
+
+	void set_printer (boost::shared_ptr<ARDOUR::Automatable> p) { _printer = p; controllable_changed (true); }
 
 	void color_handler ();
 
@@ -97,14 +101,14 @@ public:
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
 
-	void controllable_changed ();
+	void controllable_changed (bool force_update = false);
 	PBD::ScopedConnection watch_connection;
 
 
   private:
-	Element                     _elements;
-
-	BindingProxy                binding_proxy;
+	Element _elements;
+	BindingProxy binding_proxy;
+	boost::shared_ptr<ARDOUR::Automatable> _printer;
 
 	bool _hovering;
 	float _grabbed_x;

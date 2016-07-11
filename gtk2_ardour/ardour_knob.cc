@@ -33,6 +33,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
 #include "ardour_knob.h"
@@ -69,7 +70,8 @@ ArdourKnob::ArdourKnob (Element e, Flags flags)
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
 
 	// watch automation :(
-	Timers::rapid_connect (sigc::mem_fun (*this, &ArdourKnob::controllable_changed));
+	// TODO only use for GainAutomation
+	Timers::rapid_connect (sigc::bind (sigc::mem_fun (*this, &ArdourKnob::controllable_changed), false));
 }
 
 ArdourKnob::~ArdourKnob()
@@ -460,7 +462,7 @@ ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 
 	binding_proxy.set_controllable (c);
 
-	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourKnob::controllable_changed, this), gui_context());
+	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourKnob::controllable_changed, this, false), gui_context());
 
 	_normal = c->internal_to_interface(c->normal());
 
@@ -468,7 +470,7 @@ ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 }
 
 void
-ArdourKnob::controllable_changed ()
+ArdourKnob::controllable_changed (bool force_update)
 {
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (!c) return;
@@ -476,13 +478,19 @@ ArdourKnob::controllable_changed ()
 	float val = c->get_interface();
 	val = min( max(0.0f, val), 1.0f); // clamp
 
-	if (val == _val) {
+	if (val == _val && !force_update) {
 		return;
 	}
 
 	_val = val;
 	if (!_tooltip_prefix.empty()) {
-		_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (c);
+		if (_printer && ac) {
+
+			_tooltip.set_tip (_tooltip_prefix + _printer->value_as_string (ac));
+		} else {
+			_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
+		}
 	}
 	set_dirty();
 }
