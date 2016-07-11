@@ -2305,7 +2305,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->pan_width_control()) {
-			s->pan_width_control()->set_value (val, PBD::Controllable::NoGroup);
+			s->pan_width_control()->set_value (s->pan_width_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}

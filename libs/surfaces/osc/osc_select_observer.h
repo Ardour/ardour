@@ -45,8 +45,9 @@ class OSCSelectObserver
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
 
 	PBD::ScopedConnectionList strip_connections;
-	// sends need their own
+	// sends and eq need their own
 	PBD::ScopedConnectionList send_connections;
+	PBD::ScopedConnectionList eq_connections;
 
 	lo_address addr;
 	std::string path;
@@ -58,7 +59,9 @@ class OSCSelectObserver
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void change_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void text_message (std::string path, std::string text);
+	void text_with_id (std::string path, uint32_t id, std::string name);
 	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
@@ -67,10 +70,12 @@ class OSCSelectObserver
 	void send_end (void);
 	void send_restart (int);
 	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_enable (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_name (std::string path, uint32_t id, std::string name);
+	void eq_init (void);
+	void eq_end (void);
+	void eq_restart (int);
 	std::string set_path (std::string path, uint32_t id);
 	void clear_strip (std::string path, float val);
+	void clear_strip_with_id (std::string path, uint32_t id, float val);
 };
 
 #endif /* __osc_oscselectobserver_h__ */
