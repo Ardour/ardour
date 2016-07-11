@@ -98,7 +98,7 @@ Note::hide ()
 }
 
 void
-Note::set (Rect rect)
+Note::set (ArdourCanvas::Rect rect)
 {
 	_rectangle->set (rect);
 }
