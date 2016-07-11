@@ -31,14 +31,14 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	if ib ~= ARDOUR.ChanMapping.Invalid then
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:MidiBuffer
 		local mb = bufs:get_midi (ib) -- get the mapped buffer
-		events = mb:table () -- copy event list into a lua table
+		local events = mb:table () -- copy event list into a lua table
 
 		-- iterate over all MIDI events
 		for _, e in pairs (events) do
 			-- e is-a http://manual.ardour.org/lua-scripting/class_reference/#Evoral:MidiEvent
 
-			-- do something with the event
-			--print (e:channel ())
+			-- do something with the event e.g.
+			print (e:channel (), e:time (), e:size (), e:buffer ():array ()[1], e:buffer ():get_table (e:size ())[1])
 		end
 	end
 

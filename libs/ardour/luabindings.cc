@@ -1303,6 +1303,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("size", &Evoral::Event<framepos_t>::size)
 		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
 		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
+		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::MIDIEvent<framepos_t>::time)
 		.endClass ()
 
 		.beginClass <Evoral::Beats> ("Beats")
