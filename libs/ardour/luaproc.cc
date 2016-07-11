@@ -599,7 +599,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	if (exact_match) {
 		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, preferred_out);
-		printf("EXACT MATCH.. %d %d\n", preferred_out, audio_out);
 	} else {
 		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, audio_out);
