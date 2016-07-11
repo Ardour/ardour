@@ -282,6 +282,25 @@ class Push2 : public ARDOUR::ControlProtocol
 			: Button (bb, ex, press, release, long_press) {}
 	};
 
+	enum ColorName {
+		DarkBackground,
+		LightBackground,
+
+		ParameterName,
+
+		KnobArcBackground,
+		KnobArcStart,
+		KnobArcEnd,
+
+		KnobLine,
+		KnobLineShadow,
+
+		KnobForeground,
+		KnobBackground,
+		KnobShadow,
+		KnobBorder,
+	};
+
   public:
 	Push2 (ARDOUR::Session&);
 	~Push2 ();
@@ -329,6 +348,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void write (const MidiByteArray&);
 
 	uint8_t get_color_index (uint32_t rgb);
+	uint32_t get_color (ColorName);
 
 	static const int cols;
 	static const int rows;
@@ -536,13 +556,19 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool percussion;
 	void set_percussive_mode (bool);
 
-	/* color map */
+	/* color map (device side) */
 
 	typedef std::map<uint32_t,uint8_t> ColorMap;
 	typedef std::stack<uint8_t> ColorMapFreeList;
 	ColorMap color_map;
 	ColorMapFreeList color_map_free_list;
 	void build_color_map ();
+
+	/* our own colors */
+
+	typedef std::map<ColorName,uint32_t> Colors;
+	Colors colors;
+	void fill_color_table ();
 };
 
 } /* namespace */

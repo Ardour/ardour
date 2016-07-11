@@ -19,6 +19,8 @@
 #ifndef __ardour_push2_track_mix_layout_h__
 #define __ardour_push2_track_mix_layout_h__
 
+#include <vector>
+
 #include "layout.h"
 
 namespace ARDOUR {
@@ -26,6 +28,8 @@ namespace ARDOUR {
 }
 
 namespace ArdourSurface {
+
+class Push2Knob;
 
 class TrackMixLayout : public Push2Layout
 {
@@ -51,6 +55,8 @@ class TrackMixLayout : public Push2Layout
 	Glib::RefPtr<Pango::Layout> name_layout;
 	Glib::RefPtr<Pango::Layout> upper_layout[8];
 	Glib::RefPtr<Pango::Layout> lower_layout[8];
+
+	std::vector<Push2Knob*> knobs;
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
 

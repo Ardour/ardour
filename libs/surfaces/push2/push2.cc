@@ -16,6 +16,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdlib.h>
+
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 #include "pbd/debug.h"
@@ -39,6 +41,8 @@
 #include "ardour/tempo.h"
 
 #include "gtkmm2ext/rgb_macros.h"
+
+#include "canvas/colors.h"
 
 #include "push2.h"
 #include "gui.h"
@@ -141,6 +145,7 @@ Push2::Push2 (ARDOUR::Session& s)
 
 	build_maps ();
 	build_color_map ();
+	fill_color_table (); 
 
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
@@ -1658,7 +1663,8 @@ void
 Push2::build_color_map ()
 {
 	/* These are "standard" colors that Ableton docs suggest will always be
-	   there
+	   there. Put them in our color map so that when we look up these
+	   colors, we will use the Ableton indices for them.
 	*/
 
 	color_map.insert (make_pair (RGB_TO_UINT (0,0,0), 0));
@@ -1672,4 +1678,37 @@ Push2::build_color_map ()
 	for (uint8_t n = 1; n < 122; ++n) {
 		color_map_free_list.push (n);
 	}
+}
+
+void
+Push2::fill_color_table ()
+{
+	colors.insert (make_pair (DarkBackground, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
+	colors.insert (make_pair (LightBackground, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
+
+	colors.insert (make_pair (ParameterName, ArdourCanvas::rgba_to_color (0.32, 0.28, 0.47, 1)));
+
+	colors.insert (make_pair (KnobArcBackground, ArdourCanvas::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
+	colors.insert (make_pair (KnobArcStart, ArdourCanvas::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
+	colors.insert (make_pair (KnobArcEnd, ArdourCanvas::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
+
+	colors.insert (make_pair (KnobLineShadow, ArdourCanvas::rgba_to_color  (0, 0, 0, 0.3)));
+	colors.insert (make_pair (KnobLine, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+
+	colors.insert (make_pair (KnobForeground, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+	colors.insert (make_pair (KnobBackground, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+	colors.insert (make_pair (KnobShadow, ArdourCanvas::rgba_to_color (0, 0, 0, 0.1)));
+	colors.insert (make_pair (KnobBorder, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
+
+}
+
+uint32_t
+Push2::get_color (ColorName name)
+{
+	Colors::iterator c = colors.find (name);
+	if (c != colors.end()) {
+		return c->second;
+	}
+
+	return random();
 }

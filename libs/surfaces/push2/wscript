@@ -26,12 +26,14 @@ def build(bld):
             midi_byte_array.cc
             leds.cc
 	    gui.cc
+	    knob.cc
 	    layout.cc
 	    mode.cc
 	    menu.cc
 	    mix.cc
 	    scale.cc
 	    track_mix.cc
+	    utils.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
@@ -41,7 +43,7 @@ def build(bld):
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'
     obj.uselib       = 'CAIROMM PANGOMM USB GTKMM'
-    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libevoral libtimecode'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libevoral libcanvas libtimecode'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
