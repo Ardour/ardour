@@ -156,6 +156,10 @@ private:
 
 	ChanCount _configured_in;
 	ChanCount _configured_out;
+
+	ChanCount _selected_in;
+	ChanCount _selected_out;
+
 	PluginOutputConfiguration _output_configs;
 
 	bool _has_midi_input;

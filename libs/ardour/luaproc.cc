@@ -544,6 +544,11 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		}
 	}
 
+	if (found && imprecise) {
+		*imprecise = in;
+		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
+	}
+
 	if (!found && imprecise) {
 		/* try harder */
 		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
@@ -584,13 +589,23 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		return false;
 	}
 
+	if (imprecise) {
+		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
+		_selected_in = *imprecise;
+	} else {
+		_selected_in = in;
+	}
+
 	if (exact_match) {
 		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, preferred_out);
+		printf("EXACT MATCH.. %d %d\n", preferred_out, audio_out);
 	} else {
 		out.set (DataType::MIDI, midi_out);
 		out.set (DataType::AUDIO, audio_out);
 	}
+	_selected_out = out;
+
 	return true;
 }
 
@@ -600,13 +615,48 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 	in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
 
+	_info->n_inputs = _selected_in;
+	_info->n_outputs = _selected_out;
+
 	// configure the DSP if needed
 	if (in != _configured_in || out != _configured_out) {
 		lua_State* L = lua.getState ();
 		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
 		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
 			try {
-				lua_dsp_configure (&in, &out);
+				luabridge::LuaRef io = lua_dsp_configure (&in, &out);
+				if (io.isTable ()) {
+					ChanCount lin (_selected_in);
+					ChanCount lout (_selected_out);
+
+					if (io["audio_in"].type() == LUA_TNUMBER) {
+						const int c = io["audio_in"].cast<int> ();
+						if (c >= 0) {
+							lin.set (DataType::AUDIO, c);
+						}
+					}
+					if (io["audio_out"].type() == LUA_TNUMBER) {
+						const int c = io["audio_out"].cast<int> ();
+						if (c >= 0) {
+							lout.set (DataType::AUDIO, c);
+						}
+					}
+					if (io["midi_in"].type() == LUA_TNUMBER) {
+						const int c = io["midi_in"].cast<int> ();
+						if (c >= 0) {
+							lin.set (DataType::MIDI, c);
+						}
+					}
+					_info->n_inputs = lin;
+					if (io["midi_out"].type() == LUA_TNUMBER) {
+						const int c = io["midi_out"].cast<int> ();
+						if (c >= 0) {
+							lout.set (DataType::MIDI, c);
+						}
+					}
+					_info->n_inputs = lin;
+					_info->n_outputs = lout;
+				}
 			} catch (luabridge::LuaException const& e) {
 				PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
@@ -620,8 +670,6 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 	_configured_in = in;
 	_configured_out = out;
 
-	_info->n_inputs = _configured_in;
-	_info->n_outputs = _configured_out;
 	return true;
 }
 
