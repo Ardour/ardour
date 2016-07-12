@@ -346,7 +346,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_comp_speed,f);
 	PATH_CALLBACK1_MSG(sel_comp_mode,f);
 	PATH_CALLBACK1_MSG(sel_comp_makeup,f);
-	PATH_CALLBACK1_MSG(sel_comp_redux,f);
+	PATH_CALLBACK1_MSG(sel_eq_enable,f);
+	PATH_CALLBACK1_MSG(sel_eq_hpf,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
@@ -400,6 +401,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(sel_sendgain,i,f);
 	PATH_CALLBACK2_MSG(sel_sendfader,i,f);
 	PATH_CALLBACK2_MSG(sel_sendenable,i,f);
+	PATH_CALLBACK2_MSG(sel_eq_gain,i,f);
+	PATH_CALLBACK2_MSG(sel_eq_freq,i,f);
+	PATH_CALLBACK2_MSG(sel_eq_q,i,f);
+	PATH_CALLBACK2_MSG(sel_eq_shape,i,f);
 
 	PATH_CALLBACK4(set_surface,i,i,i,i);
 	PATH_CALLBACK2(locate,i,i);
@@ -498,7 +503,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_comp_speed (float val, lo_message msg);
 	int sel_comp_mode (float val, lo_message msg);
 	int sel_comp_makeup (float val, lo_message msg);
-	int sel_comp_redux (float val, lo_message msg);
+	int sel_eq_enable (float val, lo_message msg);
+	int sel_eq_hpf (float val, lo_message msg);
+	int sel_eq_gain (int id, float val, lo_message msg);
+	int sel_eq_freq (int id, float val, lo_message msg);
+	int sel_eq_q (int id, float val, lo_message msg);
+	int sel_eq_shape (int id, float val, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);

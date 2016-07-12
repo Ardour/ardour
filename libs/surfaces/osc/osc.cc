@@ -557,7 +557,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/comp_speed", "f", sel_comp_speed);
 		REGISTER_CALLBACK (serv, "/select/comp_mode", "f", sel_comp_mode);
 		REGISTER_CALLBACK (serv, "/select/comp_makeup", "f", sel_comp_makeup);
-		REGISTER_CALLBACK (serv, "/select/comp_redux", "f", sel_comp_redux);
+		REGISTER_CALLBACK (serv, "/select/eq_enable", "f", sel_eq_enable);
+		REGISTER_CALLBACK (serv, "/select/eq_hpf", "f", sel_eq_hpf);
+		REGISTER_CALLBACK (serv, "/select/eq_gain", "if", sel_eq_gain);
+		REGISTER_CALLBACK (serv, "/select/eq_freq", "if", sel_eq_freq);
+		REGISTER_CALLBACK (serv, "/select/eq_q", "if", sel_eq_q);
+		REGISTER_CALLBACK (serv, "/select/eq_shape", "if", sel_eq_shape);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
@@ -2286,7 +2291,6 @@ OSC::sel_pan_position (float val, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (val, PBD::Controllable::NoGroup);
-			//return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->get_value (), lo_message_get_source (msg));
 			return 0;
 		}
 	}
@@ -2625,7 +2629,7 @@ OSC::sel_pan_elevation (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->pan_elevation_control()) {
-			s->pan_elevation_control()->set_value (val, PBD::Controllable::NoGroup);
+			s->pan_elevation_control()->set_value (s->pan_elevation_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2644,7 +2648,7 @@ OSC::sel_pan_frontback (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->pan_frontback_control()) {
-			s->pan_frontback_control()->set_value (val, PBD::Controllable::NoGroup);
+			s->pan_frontback_control()->set_value (s->pan_frontback_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2663,13 +2667,14 @@ OSC::sel_pan_lfe (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->pan_lfe_control()) {
-			s->pan_lfe_control()->set_value (val, PBD::Controllable::NoGroup);
+			s->pan_lfe_control()->set_value (s->pan_lfe_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
 	return sel_fail ("pan_lfe_position", 0, lo_message_get_source (msg));
 }
 
+// compressor control
 int
 OSC::sel_comp_enable (float val, lo_message msg)
 {
@@ -2682,7 +2687,7 @@ OSC::sel_comp_enable (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->comp_enable_controllable()) {
-			s->comp_enable_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			s->comp_enable_controllable()->set_value (s->comp_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2701,7 +2706,7 @@ OSC::sel_comp_threshold (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->comp_threshold_controllable()) {
-			s->comp_threshold_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			s->comp_threshold_controllable()->set_value (s->comp_threshold_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2720,7 +2725,7 @@ OSC::sel_comp_speed (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->comp_speed_controllable()) {
-			s->comp_speed_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			s->comp_speed_controllable()->set_value (s->comp_speed_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2739,7 +2744,7 @@ OSC::sel_comp_mode (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->comp_mode_controllable()) {
-			s->comp_mode_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			s->comp_mode_controllable()->set_value (s->comp_mode_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -2758,15 +2763,17 @@ OSC::sel_comp_makeup (float val, lo_message msg)
 	}
 	if (s) {
 		if (s->comp_makeup_controllable()) {
-			s->comp_makeup_controllable()->set_value (val, PBD::Controllable::NoGroup);
+			s->comp_makeup_controllable()->set_value (s->comp_makeup_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
 	return sel_fail ("comp_makeup", 0, lo_message_get_source (msg));
 }
 
+// EQ control
+
 int
-OSC::sel_comp_redux (float val, lo_message msg)
+OSC::sel_eq_enable (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
 	boost::shared_ptr<Stripable> s;
@@ -2776,12 +2783,119 @@ OSC::sel_comp_redux (float val, lo_message msg)
 		s = _select;
 	}
 	if (s) {
-		if (s->comp_redux_controllable()) {
-			s->comp_redux_controllable()->set_value (val, PBD::Controllable::NoGroup);
+		if (s->eq_enable_controllable()) {
+			s->eq_enable_controllable()->set_value (s->eq_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
-	return sel_fail ("comp_redux", 0, lo_message_get_source (msg));
+	return sel_fail ("eq_enable", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_eq_hpf (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->eq_hpf_controllable()) {
+			s->eq_hpf_controllable()->set_value (s->eq_hpf_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_hpf", 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_eq_gain (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (id > 0) {
+			--id;
+		}
+		if (s->eq_gain_controllable (id)) {
+			s->eq_gain_controllable (id)->set_value (s->eq_gain_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_send_fail ("eq_gain", id + 1, 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_eq_freq (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (id > 0) {
+			--id;
+		}
+		if (s->eq_freq_controllable (id)) {
+			s->eq_freq_controllable (id)->set_value (s->eq_freq_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_send_fail ("eq_freq", id + 1, 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_eq_q (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (id > 0) {
+			--id;
+		}
+		if (s->eq_q_controllable (id)) {
+			s->eq_q_controllable (id)->set_value (s->eq_q_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_send_fail ("eq_q", id + 1, 0, lo_message_get_source (msg));
+}
+
+int
+OSC::sel_eq_shape (int id, float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(lo_message_get_source (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, lo_message_get_source (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (id > 0) {
+			--id;
+		}
+		if (s->eq_shape_controllable (id)) {
+			s->eq_shape_controllable (id)->set_value (s->eq_shape_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_send_fail ("eq_shape", id + 1, 0, lo_message_get_source (msg));
 }
 
 void
