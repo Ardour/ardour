@@ -781,7 +781,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 			control_ui->label.set_alignment (0.5, 0.5);
 			control_ui->knobtable = manage (new Table());
-			control_ui->pack_start(*control_ui->knobtable, true, false);
+			control_ui->pack_start(*control_ui->knobtable, true, true);
 
 			if (control_ui->clickbox) {
 				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
@@ -791,13 +791,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
 				knob->set_tooltip_prefix (desc.label + ": ");
 				knob->set_printer (insert);
-				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
-				control_ui->knobtable->attach (*control_ui->spin_box, 0, 1, 1, 2);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
+				align->add (*control_ui->controller);
+				control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);
+				control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 0, 1, SHRINK, SHRINK, 2, 0);
 			} else if (desc.toggled) {
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
-				control_ui->knobtable->attach (*align, 0, 2, 0, 1, FILL, SHRINK, 2, 2);
+				control_ui->knobtable->attach (*align, 0, 2, 0, 1, EXPAND, SHRINK, 2, 2);
 				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
 				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
 			} else {
