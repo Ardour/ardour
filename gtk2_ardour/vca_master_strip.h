@@ -70,7 +70,6 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	ArdourButton number_label;
 	ArdourButton solo_button;
 	ArdourButton mute_button;
-	ArdourButton drop_button;
 	Gtk::Menu*   context_menu;
 	Gtk::MessageDialog* delete_dialog;
 	ArdourButton vertical_button;
@@ -98,7 +97,6 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void hide_confirmation (int);
 	void self_delete ();
 	void remove ();
-	void drop_button_press ();
 	void drop_all_slaves ();
 
 	void parameter_changed (std::string const& p);

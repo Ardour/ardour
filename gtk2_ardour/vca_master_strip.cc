@@ -95,7 +95,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	bottom_padding.set_size_request (-1, 32); /* this one is a hack. there's no trivial way to compute it */
+	bottom_padding.set_size_request (-1, 55); /* this one is a hack. there's no trivial way to compute it */
 
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
@@ -107,10 +107,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
-	drop_button.set_text(_("drop"));
-	drop_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::drop_button_press));
-	set_tooltip (drop_button, _("Unassign all slaves from this control master"));
-
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 
@@ -120,7 +116,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false, 2);
 	global_vpacker.pack_start (control_slave_ui, false, false);
-	global_vpacker.pack_start (drop_button, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
 
 	global_frame.add (global_vpacker);
@@ -139,7 +134,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	gain_meter.show ();
 	solo_mute_box.show_all ();
 	control_slave_ui.show ();
-	drop_button.show ();
 
 	/* force setting of visible selected status */
 
@@ -446,12 +440,6 @@ VCAMasterStrip::drop_all_slaves ()
 	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
 		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
 	}
-}
-
-void
-VCAMasterStrip::drop_button_press ()
-{
-	drop_all_slaves ();
 }
 
 Gdk::Color
