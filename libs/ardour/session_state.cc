@@ -1095,6 +1095,8 @@ Session::state (bool full_state)
 		}
 	}
 
+	node->add_property ("end-is-free", _session_range_end_is_free ? X_("yes") : X_("no"));
+
 	/* save the ID counter */
 
 	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
@@ -1357,6 +1359,10 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	setup_raid_path(_session_dir->root_path());
+
+	if ((prop = node.property (X_("end-is-free"))) != 0) {
+		_session_range_end_is_free = string_is_affirmative (prop->value());
+	}
 
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;

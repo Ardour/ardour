@@ -178,6 +178,7 @@ Session::Session (AudioEngine &eng,
 	, _record_status (Disabled)
 	, _transport_frame (0)
 	, _session_range_location (0)
+	, _session_range_end_is_free (true)
 	, _slave (0)
 	, _silent (false)
 	, _transport_speed (0)
@@ -4389,10 +4390,16 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 			_session_range_location->set_start (a);
 		}
 
-		if (b > _session_range_location->end()) {
+		if (_session_range_end_is_free && (b > _session_range_location->end())) {
 			_session_range_location->set_end (b);
 		}
 	}
+}
+
+void
+Session::set_end_is_free (bool yn)
+{
+	_session_range_end_is_free = yn;
 }
 
 void

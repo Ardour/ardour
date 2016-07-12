@@ -459,6 +459,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
 	void set_session_extents (framepos_t start, framepos_t end);
+	void set_end_is_free (bool);
 	int location_name(std::string& result, std::string base = std::string(""));
 
 	pframes_t get_block_size()        const { return current_block_size; }
@@ -1175,6 +1176,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	mutable gint            _record_status;
 	framepos_t              _transport_frame;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
+	bool                    _session_range_end_is_free;
 	Slave*                  _slave;
 	bool                    _silent;
 
