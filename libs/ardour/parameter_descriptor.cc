@@ -188,4 +188,34 @@ ParameterDescriptor::update_steps()
 	}
 }
 
+std::string
+ParameterDescriptor::midi_note_name (const uint8_t b)
+{
+	char buf[8];
+	if (b > 127) {
+		snprintf(buf, sizeof(buf), "%d", b);
+		return buf;
+	}
+
+	static const char* notes[] = {
+		S_("Note|C"),
+		S_("Note|C#"),
+		S_("Note|D"),
+		S_("Note|D#"),
+		S_("Note|E"),
+		S_("Note|F"),
+		S_("Note|F#"),
+		S_("Note|G"),
+		S_("Note|G#"),
+		S_("Note|A"),
+		S_("Note|A#"),
+		S_("Note|B")
+	};
+
+	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
+	const int octave = b / 12 - 1;
+	snprintf (buf, sizeof (buf), "%s%d", notes[b % 12], octave);
+	return buf;
+}
+
 } // namespace ARDOUR

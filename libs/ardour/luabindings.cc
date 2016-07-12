@@ -742,6 +742,7 @@ LuaBindings::common (lua_State* L)
 		.addVoidConstructor ()
 		.addData ("label", &ParameterDescriptor::label)
 		.addData ("logarithmic", &ParameterDescriptor::logarithmic)
+		.addStaticFunction ("midi_note_name", &ParameterDescriptor::midi_note_name)
 		.endClass ()
 
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")

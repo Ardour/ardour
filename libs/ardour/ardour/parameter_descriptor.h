@@ -43,6 +43,8 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 		HZ,         ///< Frequency in Hertz
 	};
 
+	static std::string midi_note_name (uint8_t);
+
 	ParameterDescriptor(const Evoral::Parameter& parameter);
 
 	ParameterDescriptor();

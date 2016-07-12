@@ -46,16 +46,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 
 	// Value is not a scale point, print it normally
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
-		if (v >= 0 && v <= 127) {
-			const int         num          = rint(v);
-			static const char names[12][3] = {
-				"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
-			};
-			snprintf(buf, sizeof(buf), "%s %d", names[num % 12], (num / 12) - 2);
-		} else {
-			// Odd, invalid range, just print the number
-			snprintf(buf, sizeof(buf), "%.0f", v);
-		}
+		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
 	} else if (!desc.print_fmt.empty()) {
 		snprintf(buf, sizeof(buf), desc.print_fmt.c_str(), v);
 	} else if (desc.integer_step) {
