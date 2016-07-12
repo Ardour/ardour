@@ -3,9 +3,7 @@ ardour {
 	name        = "Amplifier",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Versatile +/- 20dB multichannel amplifier]]
 }
 
@@ -78,14 +76,17 @@ function dsp_run (ins, outs, n_samples)
 		off = off + siz
 	end
 
+--[[
 	if changed then
 		self:queue_draw () -- notify display
 	end
+--]]
 end
 
 -------------------------------------------------------------------------------
 --- inline display + text example
 
+--[[
 local txt = nil -- cache pango context globally
 
 function render_inline (ctx, w, max_h)
@@ -115,3 +116,4 @@ function render_inline (ctx, w, max_h)
 
 	return {w, h}
 end
+--]]

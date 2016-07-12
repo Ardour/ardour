@@ -1,6 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "OSC Callback Example",
+	author      = "Ardour Lua Task Force",
 	description = "Send OSC messages",
 }
 

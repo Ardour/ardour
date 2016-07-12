@@ -3,10 +3,8 @@ ardour {
 	name        = "Biquad Filter",
 	category    = "Filter",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
-	description = [[Example Ardour Lua DSP Plugin]]
+	author      = "Ardour Team",
+	description = [[A Versatile Filter Plugin]]
 }
 
 function dsp_ioconfig ()

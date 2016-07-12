@@ -2,9 +2,7 @@ ardour {
 	["type"]    = "EditorAction",
 	name        = "Add Scopes",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Add 'Inline Scope' Lua Processor to all Tracks]]
 }
 

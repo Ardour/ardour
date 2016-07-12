@@ -2,13 +2,9 @@ ardour {
 	["type"]    = "dsp",
 	name        = "Voice/Level Activate",
 	category    = "Utility",
+	author      = "Ardour Team",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	authoremail = "robin@gareus.org",
-	site        = "http://gareus.org",
-	description = [[
-	An Example Audio Plugin that rolls the transport
-	when the signal level on the plugin's input exceeds a given threshold.]]
+	description = [[Roll the transport when the signal level on the plugin's input exceeds a given threshold.]]
 }
 
 function dsp_ioconfig ()

@@ -2,9 +2,7 @@ ardour {
 	["type"]    = "session",
 	name        = "Rewrite Midi",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Lua Task Force",
 	description = [[An example session script preprocesses midi buffers.]]
 }
 

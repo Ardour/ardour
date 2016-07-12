@@ -1,8 +1,6 @@
 ardour { ["type"] = "EditorAction", name = "Bounce+Replace Regions",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Bounce selected regions with processing and replace region]]
 }
 

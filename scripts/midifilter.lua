@@ -1,11 +1,9 @@
 ardour {
 	["type"]    = "dsp",
 	name        = "Midi Filter",
-	category    = "Utility",
+	category    = "Example", -- "Utility"
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Lua Task Force",
 	description = [[An Example Midi Filter for prototyping.]]
 }
 

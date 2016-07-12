@@ -1,8 +1,6 @@
 ardour { ["type"] = "EditorAction", name = "Tom's Loop",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Bounce the loop-range of all non muted audio tracks, paste N times at playhead]]
 }
 

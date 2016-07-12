@@ -1,8 +1,6 @@
 ardour { ["type"] = "EditorAction", name = "Remove Unknown Plugins",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Team",
 	description = [[Remove all unknown plugins/processors from all tracks and busses]]
 }
 

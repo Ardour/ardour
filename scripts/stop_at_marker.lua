@@ -2,9 +2,7 @@ ardour {
 	["type"]    = "session",
 	name        = "Stop at Marker",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
+	author      = "Ardour Lua Task Force",
 	description = [[An example session script which stops the transport on every location marker when rolling forward.]]
 }
 

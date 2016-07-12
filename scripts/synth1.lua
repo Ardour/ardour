@@ -3,10 +3,8 @@ ardour {
 	name        = "Simple Synth",
 	category    = "Instrument",
 	license     = "MIT",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
-	description = [[An Example Synth for prototyping.]]
+	author      = "Ardour Lua Task Force",
+	description = [[An Example Synth for Prototyping.]]
 }
 
 function dsp_ioconfig ()
