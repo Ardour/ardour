@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#include <sigc++/trackable.h>
+
 #include <cairomm/refptr.h>
 
 namespace ARDOUR {
@@ -35,7 +37,7 @@ namespace ArdourSurface {
 
 class Push2;
 
-class Push2Layout
+class Push2Layout : public sigc::trackable
 {
   public:
 	Push2Layout (Push2& p, ARDOUR::Session& s);

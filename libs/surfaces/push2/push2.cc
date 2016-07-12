@@ -40,6 +40,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "canvas/colors.h"
@@ -141,8 +142,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	, octave_shift (0)
 	, percussion (false)
 {
-	cerr << "new push2 @ " << this << "\n";
-
 	context = Cairo::Context::create (frame_buffer);
 
 	build_maps ();
@@ -176,15 +175,16 @@ Push2::Push2 (ARDOUR::Session& s)
 
 Push2::~Push2 ()
 {
-	cerr << "push2 deleted\n";
 	stop ();
+
+	delete track_mix_layout;
+	delete mix_layout;
+	delete scale_layout;
 }
 
 void
 Push2::port_registration_handler ()
 {
-	cerr << "preg for " << this << endl;
-
 	if (!_async_in && !_async_out) {
 		/* ports not registered yet */
 		return;

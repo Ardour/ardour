@@ -43,6 +43,8 @@
 
 #include "canvas/colors.h"
 
+#include "gtkmm2ext/gui_thread.h"
+
 #include "mix.h"
 #include "knob.h"
 #include "push2.h"
@@ -111,8 +113,8 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 
 	mode_button = p2.button_by_id (Push2::Upper1);
 
-	session.RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripables_added, this), &p2);
-	session.vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripables_added, this), &p2);
+	session.RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &p2);
+	session.vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &p2);
 }
 
 MixLayout::~MixLayout ()
@@ -515,8 +517,8 @@ MixLayout::switch_bank (uint32_t base)
 
 		/* stripable goes away? refill the bank, starting at the same point */
 
-		stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
-		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
+		stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
+		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
 
 		Push2::Button* b;
 

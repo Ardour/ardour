@@ -40,6 +40,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "knob.h"
@@ -66,42 +67,50 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Conte
 		upper_layout[n] = Pango::Layout::create (context);
 		upper_layout[n]->set_font_description (fd2);
 
+		lower_layout[n] = Pango::Layout::create (context);
+		lower_layout[n]->set_font_description (fd2);
+
 		switch (n) {
 		case 0:
 			upper_layout[n]->set_text (_("TRACK VOLUME"));
+			lower_layout[n]->set_text (_("MUTE"));
 			break;
 		case 1:
 			upper_layout[n]->set_text (_("TRACK PAN"));
+			lower_layout[n]->set_text (_("SOLO"));
 			break;
 		case 2:
 			upper_layout[n]->set_text (_("TRACK WIDTH"));
+			lower_layout[n]->set_text (_("REC-ENABLE"));
 			break;
 		case 3:
 			upper_layout[n]->set_text (_("TRACK TRIM"));
+			lower_layout[n]->set_text (_("IN"));
 			break;
 		case 4:
 			upper_layout[n]->set_text (_(""));
+			lower_layout[n]->set_text (_("DISK"));
 			break;
 		case 5:
 			upper_layout[n]->set_text (_(""));
+			lower_layout[n]->set_text (_("SOLO ISO"));
 			break;
 		case 6:
 			upper_layout[n]->set_text (_(""));
+			lower_layout[n]->set_text (_("SOLO LOCK"));
 			break;
 		case 7:
 			upper_layout[n]->set_text (_(""));
+			lower_layout[n]->set_text (_(""));
 			break;
 		}
-
-		lower_layout[n] = Pango::Layout::create (context);
-		lower_layout[n]->set_font_description (fd2);
 
 		knobs[n] = new Push2Knob (p2, context);
 		knobs[n]->set_position (60 + (120*n), 95);
 		knobs[n]->set_radius (25);
 	}
 
-	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::selection_changed, this), &p2);
+	ControlProtocol::StripableSelectionChanged.connect (selection_connection, invalidator (*this), boost::bind (&TrackMixLayout::selection_changed, this), &p2);
 }
 
 TrackMixLayout::~TrackMixLayout ()
@@ -147,17 +156,23 @@ TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
 
 	for (int n = 0; n < 8; ++n) {
 
-		if (upper_layout[n]->get_text().empty()) {
-			continue;
+		if (!upper_layout[n]->get_text().empty()) {
+
+			/* Draw highlight box */
+
+			uint32_t color = p2.get_color (Push2::ParameterName);
+			set_source_rgb (context, color);
+
+			context->move_to (10 + (n*120), 2);
+			upper_layout[n]->update_from_cairo_context (context);
+			upper_layout[n]->show_in_cairo_context (context);
 		}
 
-		/* Draw highlight box */
-
-		uint32_t color = p2.get_color (Push2::ParameterName);
-		set_source_rgb (context, color);
-		context->move_to (10 + (n*120), 2);
-		upper_layout[n]->update_from_cairo_context (context);
-		upper_layout[n]->show_in_cairo_context (context);
+		if (!lower_layout[n]->get_text().empty()) {
+			context->move_to (10 + (n*120), 140);
+			lower_layout[n]->update_from_cairo_context (context);
+			lower_layout[n]->show_in_cairo_context (context);
+		}
 	}
 
 	context->move_to (0, 22.5);
@@ -191,10 +206,10 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 
 	if (stripable) {
 
-		stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
+		stripable->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
 
-		stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
-		stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
+		stripable->PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
+		stripable->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
 
 		knobs[0]->set_controllable (stripable->gain_control());
 		knobs[1]->set_controllable (stripable->pan_azimuth_control());
