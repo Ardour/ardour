@@ -37,7 +37,11 @@ function dsp_params ()
 		{ ["type"] = "input",
 			name = "System messages",
 			doc = "If enabled, the monitor will show System Control and Real-Time messages",
-			min = 0, max = 1, default = 0, toggled = true }
+			min = 0, max = 1, default = 0, toggled = true },
+		{ ["type"] = "input",
+			name = "Numeric Notes",
+			doc = "If enabled, note-events displayed numerically",
+			min = 0, max = 1, default = 0, toggled = true },
 	}
 end
 
@@ -90,7 +94,17 @@ end
 local txt = nil -- a pango context
 local cursize = 0
 local hex = nil
+local format_note = nil
 local show_scm = nil
+
+function format_note_name(b)
+	return string.format ("%5s", ARDOUR.ParameterDescriptor.midi_note_name (b))
+end
+
+function format_note_num(b)
+	return string.format (hex, b)
+end
+
 
 function show_midi(ctx, x, y, buffer, event)
 	local base = (event - 1) * evlen
@@ -98,11 +112,11 @@ function show_midi(ctx, x, y, buffer, event)
 	local evtype = buffer[base + 1] >> 4
 	local channel = (buffer[base + 1] & 15) + 1 -- for System Common Messages this has no use
 	if evtype == 8 then
-		txt:set_text(string.format("%02u \u{2669}Off" .. hex .. hex, channel, buffer[base+2], buffer[base+3]))
+		txt:set_text(string.format("%02u \u{2669}Off%s" .. hex, channel, format_note(buffer[base+2]), buffer[base+3]))
 	elseif evtype == 9 then
-		txt:set_text(string.format("%02u \u{2669}On " .. hex .. hex, channel, buffer[base+2], buffer[base+3]))
+		txt:set_text(string.format("%02u \u{2669}On %s" .. hex, channel, format_note(buffer[base+2]), buffer[base+3]))
 	elseif evtype == 10 then
-		txt:set_text(string.format("%02u \u{2669}KP " .. hex .. hex, channel, buffer[base+2], buffer[base+3]))
+		txt:set_text(string.format("%02u \u{2669}KP %s" .. hex, channel, format_note(buffer[base+2]), buffer[base+3]))
 	elseif evtype == 11 then
 		txt:set_text(string.format("%02u CC  " .. hex .. hex, channel, buffer[base+2], buffer[base+3]))
 	elseif evtype == 12 then
@@ -159,6 +173,12 @@ function render_inline (ctx, displaywidth, max_h)
 
 	if ctrl[3] > 0 then hex = " %02X" else hex = " %3u" end
 	show_scm = ctrl[4]
+
+	if ctrl[5] > 0 then
+		format_note = format_note_num
+	else
+		format_note = format_note_name
+	end
 
 	-- compute the size of the display
 	txt:set_text("0")
