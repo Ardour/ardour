@@ -14,7 +14,7 @@
 <urn:ardour:a-reverb>
 	a doap:Project, lv2:Plugin, lv2:SpatialPlugin ;
 
-	doap:name "A-Reverb";
+	doap:name "a-Reverb";
 	rdfs:comment "A Schroeder Reverberator"
 
 	doap:maintainer <http://ardour.org/credits.html>
