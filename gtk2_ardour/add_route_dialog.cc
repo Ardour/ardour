@@ -268,6 +268,7 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		break;
 	case MidiTrack:
 		channel_combo.set_sensitive (false);
@@ -278,6 +279,7 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		break;
 	case MixedTrack:
 		{
@@ -295,6 +297,7 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		break;
 	case AudioBus:
 		mode_combo.set_sensitive (false);
@@ -305,6 +308,7 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		break;
 	case VCAMaster:
 		mode_combo.set_sensitive (false);
@@ -315,6 +319,7 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (false);
 		strict_io_combo.set_sensitive (false);
+		insert_at_combo.set_sensitive (false);
 		break;
 	case MidiBus:
 		mode_combo.set_sensitive (false);
@@ -324,6 +329,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		break;
 	}
 
