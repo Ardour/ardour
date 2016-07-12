@@ -2239,6 +2239,8 @@ Editor::set_session_end_from_playhead ()
 
 		commit_reversible_command ();
 	}
+
+	_session->set_end_is_free (false);
 }
 
 void
@@ -6293,11 +6295,11 @@ Editor::set_session_extents_from_selection ()
 
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {
-		_session->set_session_extents ( start, end );  // this will create a new session range;  no need for UNDO
+		_session->set_session_extents (start, end);  // this will create a new session range;  no need for UNDO
 	} else {
 		XMLNode &before = loc->get_state();
 
-		_session->set_session_extents ( start, end );
+		_session->set_session_extents (start, end);
 
 		XMLNode &after = loc->get_state();
 
@@ -6307,6 +6309,8 @@ Editor::set_session_extents_from_selection ()
 
 		commit_reversible_command ();
 	}
+
+	_session->set_end_is_free (false);
 }
 
 void
