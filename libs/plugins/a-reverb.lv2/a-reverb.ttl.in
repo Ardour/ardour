@@ -1,0 +1,61 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://ardour.org/credits.html>
+	a foaf:Person ;
+	foaf:name "Ardour Team" ;
+	foaf:homepage <http://ardour.org/> .
+
+<urn:ardour:a-reverb>
+	a doap:Project, lv2:Plugin, lv2:SpatialPlugin ;
+
+	doap:name "A-Reverb";
+	rdfs:comment "A Schroeder Reverberator"
+
+	doap:maintainer <http://ardour.org/credits.html>
+	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
+
+	lv2:microVersion 0 ; lv2:minorVersion 1 ;
+	lv2:optionalFeature lv2:hardRTCapable ;
+
+	lv2:port
+	[
+		a lv2:AudioPort ,
+			lv2:InputPort ;
+		lv2:index 0 ;
+		lv2:symbol "in" ;
+		lv2:name "In"
+	],
+	[
+		a lv2:AudioPort ,
+			lv2:OutputPort ;
+		lv2:index 1 ;
+		lv2:symbol "out" ;
+		lv2:name "Out"
+	],
+	[
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 3 ;
+		lv2:symbol "gain_in" ;
+		lv2:name "Input Gain";
+		lv2:default -30;
+		lv2:minimum -80;
+		lv2:maximum  -3;
+		unit:unit unit:db ;
+	],
+	[
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 2 ;
+		lv2:symbol "mix" ;
+		lv2:name "Dry/Wet";
+		lv2:default 0.3;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] ;
+	.
