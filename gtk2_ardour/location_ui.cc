@@ -420,6 +420,9 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 			break;
 		case LocEnd:
 			location->set_end (_session->transport_frame ());
+			if (location->is_session_range()) {
+				_session->set_end_is_free (false);
+			}
 			break;
 		default:
 			break;
@@ -464,9 +467,15 @@ LocationEditRow::clock_changed (LocationPart part)
 			break;
 		case LocEnd:
 			location->set_end (end_clock.current_time());
+			if (location->is_session_range()) {
+				_session->set_end_is_free (false);
+			}
 			break;
 		case LocLength:
 			location->set_end (location->start() + length_clock.current_duration());
+			if (location->is_session_range()) {
+				_session->set_end_is_free (false);
+			}
 		default:
 			break;
 	}

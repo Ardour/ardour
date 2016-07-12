@@ -433,6 +433,9 @@ Editor::nudge_forward (bool next, bool force_playhead)
 					} else {
 						loc->set_end (max_framepos);
 					}
+					if (loc->is_session_range()) {
+						_session->set_end_is_free (false);
+					}
 				}
 				if (!in_command) {
 					begin_reversible_command (_("nudge location forward"));
@@ -523,6 +526,9 @@ Editor::nudge_backward (bool next, bool force_playhead)
 						loc->set_end (loc->end() - distance);
 					} else {
 						loc->set_end (loc->length());
+					}
+					if (loc->is_session_range()) {
+						_session->set_end_is_free (false);
 					}
 				}
 				if (!in_command) {
