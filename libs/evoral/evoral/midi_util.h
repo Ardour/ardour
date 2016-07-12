@@ -133,8 +133,6 @@ midi_event_is_valid(const uint8_t* buffer, size_t len)
 	return true;
 }
 
-LIBEVORAL_API std::string midi_note_name (uint8_t noteval);
-
 } // namespace Evoral
 
 #endif // EVORAL_MIDI_UTIL_H
