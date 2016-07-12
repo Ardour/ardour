@@ -453,9 +453,13 @@ eq_curve (Aeq* self, float f) {
 	double complex H = 1.0;
 	double theta = f * 2. * M_PI / SR;
 	double complex z = cexp(I * theta);
+	double complex zz = cexp(2 * I * theta);
+	double complex zm = z - 1.0;
+	double complex zp = z + 1.0;
+	double complex zzm = zz - 1.0;
+
 	double A;
 	double m0, m1, m2, g, k;
-	int j = 0;
 
 	// low
 	if (self->v_filtog[0]) {
@@ -467,60 +471,47 @@ eq_curve (Aeq* self, float f) {
 		k = self->v_filter[0].k;
 		if (self->v_shelftogl) {
 			// lowshelf
-			H *= (A*m0*(z-1.0)*(z-1.0) + g*g*(m0+m2)*(1.0+z)*(1.0+z) + sqrt(A)*g*(k*m0+m1) * (z*z-1.0)) / (A*(z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z) + sqrt(A)*g*k*(z*z-1.0));
+			H *= (A*m0*zm*zm + g*g*(m0+m2)*zp*zp + sqrt(A)*g*(k*m0+m1) * zzm) / (A*zm*zm + g*g*zp*zp + sqrt(A)*g*k*zzm);
 		} else {
 			// hp:
-			H *= ((z-1.0)*(z-1.0)) / ((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z) + g*k*(z*z-1.0));
+			H *= zm*zm / (zm*zm + g*g*zp*zp + g*k*zzm);
 		}
-		j++;
 	}
 
 	// peq1:
 	if (self->v_filtog[1]) {
 		A = pow(10.0, self->v_g[1]/40.0);
-		m0 = self->v_filter[1].m[0];
-		m1 = self->v_filter[1].m[1];
-		m2 = self->v_filter[1].m[2];
+		m1 = self->v_filter[1].m[1] / A;
 		g = self->v_filter[1].g;
 		k = self->v_filter[1].k;
-		H *= (g*k*m0*(z*z-1.0) + A*(g*(1.0+z)*(m1*(z-1.0) + g*m2*(1.0+z)) + m0*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)))) / (g*k*(z*z-1.0) + A*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)));
-		j++;
+		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
 	}
 
 	// peq2:
 	if (self->v_filtog[2]) {
 		A = pow(10.0, self->v_g[2]/40.0);
-		m0 = self->v_filter[2].m[0];
-		m1 = self->v_filter[2].m[1];
-		m2 = self->v_filter[2].m[2];
+		m1 = self->v_filter[2].m[1] / A;
 		g = self->v_filter[2].g;
 		k = self->v_filter[2].k;
-		H *= (g*k*m0*(z*z-1.0) + A*(g*(1.0+z)*(m1*(z-1.0) + g*m2*(1.0+z)) + m0*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)))) / (g*k*(z*z-1.0) + A*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)));
-		j++;
+		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
 	}
 
 	// peq3:
 	if (self->v_filtog[3]) {
 		A = pow(10.0, self->v_g[3]/40.0);
-		m0 = self->v_filter[3].m[0];
-		m1 = self->v_filter[3].m[1];
-		m2 = self->v_filter[3].m[2];
+		m1 = self->v_filter[3].m[1] / A;
 		g = self->v_filter[3].g;
 		k = self->v_filter[3].k;
-		H *= (g*k*m0*(z*z-1.0) + A*(g*(1.0+z)*(m1*(z-1.0) + g*m2*(1.0+z)) + m0*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)))) / (g*k*(z*z-1.0) + A*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)));
-		j++;
+		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
 	}
 
 	// peq4:
 	if (self->v_filtog[4]) {
 		A = pow(10.0, self->v_g[4]/40.0);
-		m0 = self->v_filter[4].m[0];
-		m1 = self->v_filter[4].m[1];
-		m2 = self->v_filter[4].m[2];
+		m1 = self->v_filter[4].m[1] / A;
 		g = self->v_filter[4].g;
 		k = self->v_filter[4].k;
-		H *= (g*k*m0*(z*z-1.0) + A*(g*(1.0+z)*(m1*(z-1.0) + g*m2*(1.0+z)) + m0*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)))) / (g*k*(z*z-1.0) + A*((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z)));
-		j++;
+		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
 	}
 
 	// high
@@ -533,12 +524,11 @@ eq_curve (Aeq* self, float f) {
 		k = self->v_filter[5].k;
 		if (self->v_shelftogh) {
 			// highshelf:
-			H *= ( sqrt(A) * g * (1.0 + z) * (m1 * (z - 1.0) + sqrt(A)*g*m2*(1.0+z)) + m0 * ( (z-1.0)*(z-1.0) + A*g*g*(1.0+z)*(1.0+z) + sqrt(A)*g*k*(z*z-1.0))) / ((z-1.0)*(z-1.0) + A*g*g*(1.0+z)*(1.0+z) + sqrt(A)*g*k*(z*z-1.0));
+			H *= ( sqrt(A) * g * zp * (m1 * zm + sqrt(A)*g*m2*zp) + m0 * ( zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm)) / (zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm);
 		} else {
 			// lp:
-			H *= (g*g*(1.0+z)*(1.0+z)) / ((z-1.0)*(z-1.0) + g*g*(1.0+z)*(1.0+z) + g*k*(z*z-1.0));
+			H *= (g*g*zp*zp) / (zm*zm + g*g*zp*zp + g*k*zzm);
 		}
-		j++;
 	}
 
 	return cabs(H);
