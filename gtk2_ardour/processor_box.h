@@ -242,15 +242,18 @@ private:
 
 	class PluginDisplay : public Gtk::DrawingArea {
 	public:
-		PluginDisplay(boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
+		PluginDisplay(ProcessorEntry&, boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
 		virtual ~PluginDisplay();
 	protected:
 		bool on_expose_event (GdkEventExpose *);
 		void on_size_request (Gtk::Requisition* req);
+		bool on_button_press_event (GdkEventButton *ev);
+		bool on_button_release_event (GdkEventButton *ev);
 
 		void update_height_alloc (uint32_t inline_height);
 		virtual uint32_t render_inline (cairo_t *, uint32_t width);
 
+		ProcessorEntry& _entry;
 		boost::shared_ptr<ARDOUR::Plugin> _plug;
 		PBD::ScopedConnection _qdraw_connection;
 		cairo_surface_t* _surf;
@@ -261,7 +264,7 @@ private:
 
 	class LuaPluginDisplay : public PluginDisplay {
 	public:
-		LuaPluginDisplay(boost::shared_ptr<ARDOUR::LuaProc>, uint32_t max_height = 80);
+		LuaPluginDisplay(ProcessorEntry&, boost::shared_ptr<ARDOUR::LuaProc>, uint32_t max_height = 80);
 		~LuaPluginDisplay();
 	protected:
 		virtual uint32_t render_inline (cairo_t *, uint32_t width);

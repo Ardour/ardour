@@ -182,11 +182,11 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		if (pi && pi->plugin() && pi->plugin()->has_inline_display()) {
 			if (pi->plugin()->get_info()->type != ARDOUR::Lua) {
-				_plugin_display = new PluginDisplay (pi->plugin(),
+				_plugin_display = new PluginDisplay (*this, pi->plugin(),
 						std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
 			} else {
 				assert (boost::dynamic_pointer_cast<LuaProc>(pi->plugin()));
-				_plugin_display = new LuaPluginDisplay (boost::dynamic_pointer_cast<LuaProc>(pi->plugin()),
+				_plugin_display = new LuaPluginDisplay (*this, boost::dynamic_pointer_cast<LuaProc>(pi->plugin()),
 						std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
 			}
 			_vbox.pack_start (*_plugin_display);
@@ -1508,16 +1508,27 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 	}
 }
 
-ProcessorEntry::PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
-	: _plug (p)
+ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
+	: _entry (e)
+	, _plug (p)
 	, _surf (0)
 	, _max_height (max_height)
 	, _cur_height (1)
 	, _scroll (false)
 {
 	set_name ("processor prefader");
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
 			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
+
+	std::string postfix = "";
+	if (_plug->has_editor()) {
+		ARDOUR_UI_UTILS::set_tooltip (*this,
+				string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), e.name (Wide), Keyboard::primary_modifier_name (), postfix));
+	} else {
+		ARDOUR_UI_UTILS::set_tooltip (*this,
+				string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), e.name (Wide), postfix));
+	}
 }
 
 ProcessorEntry::PluginDisplay::~PluginDisplay ()
@@ -1527,8 +1538,33 @@ ProcessorEntry::PluginDisplay::~PluginDisplay ()
 	}
 }
 
+bool
+ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
+{
+	assert (_entry.processor ());
+
+	// consider some tweaks to pass this up to the DnDVBox somehow:
+	// select processor, then call (private)
+	//_entry._parent->processor_button_press_event (ev, &_entry);
+	if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			_entry._parent->generic_edit_processor (_entry.processor ());
+		} else {
+			_entry._parent->edit_processor (_entry.processor ());
+		}
+		return true;
+	}
+	return false;
+}
+
+bool
+ProcessorEntry::PluginDisplay::on_button_release_event (GdkEventButton *ev)
+{
+	return false;
+}
+
 void
-ProcessorEntry::PluginDisplay::on_size_request (Gtk::Requisition* req)
+ProcessorEntry::PluginDisplay::on_size_request (Requisition* req)
 {
 	req->width = 56;
 	req->height = _cur_height;
@@ -1662,8 +1698,8 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	return true;
 }
 
-ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (boost::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
-	: PluginDisplay (p, max_height)
+ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
+	: PluginDisplay (e, p, max_height)
 	, _luaproc (p)
 	, _lua_render_inline (0)
 {
@@ -3896,6 +3932,9 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
+	if (!_session->engine().connected()) {
+		return;
+	}
 
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
@@ -3912,6 +3951,9 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 		return;
 	}
 	if (edit_aux_send (processor)) {
+		return;
+	}
+	if (!_session->engine().connected()) {
 		return;
 	}
 
