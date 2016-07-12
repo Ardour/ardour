@@ -128,7 +128,6 @@ instantiate(const LV2_Descriptor* descriptor,
             const char* bundle_path,
             const LV2_Feature* const* features)
 {
-	int i;
 	Aeq* aeq = (Aeq*)malloc(sizeof(Aeq));
 	aeq->srate = rate;
 	
@@ -140,7 +139,7 @@ instantiate(const LV2_Descriptor* descriptor,
 	}
 #endif
 
-	for (i = 0; i < BANDS; i++)
+	for (int i = 0; i < BANDS; i++)
 		linear_svf_reset(&aeq->v_filter[i]);
 
 	aeq->need_expose = true;
@@ -547,7 +546,7 @@ static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
 	Aeq* self = (Aeq*)instance;
-	uint32_t h = MIN (w, max_h);
+	uint32_t h = MIN (w * 9 / 16, max_h);
 
 	if (!self->display || self->w != w || self->h != h) {
 		if (self->display) cairo_surface_destroy(self->display);

@@ -11,6 +11,16 @@
 	foaf:name "Ardour Team" ;
 	foaf:homepage <http://ardour.org/> .
 
+unit:hz0
+	a unit:Unit ;
+	rdfs:label "hertz" ;
+	unit:prefixConversion [
+		unit:factor 0.001 ;
+		unit:to units:khz
+	] ;
+	unit:render "%.0f Hz" ;
+	unit:symbol "Hz" .
+
 <urn:ardour:a-eq>
     a lv2:Plugin, doap:Project, lv2:FilterPlugin ;
 
@@ -37,7 +47,7 @@
         lv2:default 160.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
@@ -58,7 +68,7 @@
         lv2:default 300.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
@@ -88,7 +98,7 @@
         lv2:default 1000.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
@@ -118,7 +128,7 @@
         lv2:default 2500.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
@@ -148,7 +158,7 @@
         lv2:default 6000.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
@@ -188,7 +198,7 @@
         lv2:default 9000.000000 ;
         lv2:minimum 20.000000 ;
         lv2:maximum 20000.000000 ;
-        unit:unit unit:hz ;
+        unit:unit unit:hz0 ;
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
