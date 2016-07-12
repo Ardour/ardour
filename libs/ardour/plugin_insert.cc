@@ -2960,6 +2960,7 @@ PluginInsert::latency_changed ()
 	// this is called in RT context, LatencyChanged is emitted after run()
 	_latency_changed = true;
 	// XXX This also needs a proper API not an owner() hack.
+	assert (owner ());
 	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
 }
 
