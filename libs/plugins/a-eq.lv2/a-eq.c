@@ -143,7 +143,9 @@ instantiate(const LV2_Descriptor* descriptor,
 		linear_svf_reset(&aeq->v_filter[i]);
 
 	aeq->need_expose = true;
+#ifdef LV2_EXTENDED
 	aeq->display = NULL;
+#endif
 
 	return (LV2_Handle)aeq;
 }

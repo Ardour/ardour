@@ -87,8 +87,8 @@ typedef struct {
 	float old_yg;
 
 #ifdef LV2_EXTENDED
-	bool                     need_expose;
 	LV2_Inline_Display_Image_Surface surf;
+	bool                     need_expose;
 	cairo_surface_t*         display;
 	LV2_Inline_Display*      queue_draw;
 	uint32_t                 w, h;
@@ -124,7 +124,9 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	acomp->srate = rate;
 	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
+#ifdef LV2_EXTENDED
 	acomp->need_expose = true;
+#endif
 
 	return (LV2_Handle)acomp;
 }
@@ -648,10 +650,12 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 static const void*
 extension_data(const char* uri)
 {
+#ifdef LV2_EXTENDED
 	static const LV2_Inline_Display_Interface display  = { render_inline };
 	if (!strcmp(uri, LV2_INLINEDISPLAY__interface)) {
 		return &display;
 	}
+#endif
 	return NULL;
 }
 
