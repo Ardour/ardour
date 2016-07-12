@@ -48,12 +48,6 @@ Stripable::set_presentation_order (PresentationInfo::order_t order, bool notify_
 	}
 }
 
-void
-Stripable::set_presentation_order_explicit (PresentationInfo::order_t order)
-{
-	_presentation_info.set_order (order);
-}
-
 int
 Stripable::set_state (XMLNode const& node, int version)
 {

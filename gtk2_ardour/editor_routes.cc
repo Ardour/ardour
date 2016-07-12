@@ -1030,7 +1030,7 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 		stripable->presentation_info().set_hidden (!visible);
 
 		if (order != stripable->presentation_info().order()) {
-			stripable->set_presentation_order_explicit (order);
+			stripable->set_presentation_order (order, false);
 			change = true;
 		}
 

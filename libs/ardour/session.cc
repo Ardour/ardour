@@ -3453,7 +3453,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 				if (order == PresentationInfo::max_order) {
 					/* just add to the end */
-					r->set_presentation_order_explicit (n_routes + added);
+					r->set_presentation_order (n_routes + added, false);
 					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to NR %1 + %2 = %3\n", n_routes, added, n_routes + added));
 				} else {
 					r->set_presentation_order (order + added);
