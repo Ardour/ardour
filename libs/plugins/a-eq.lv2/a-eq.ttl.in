@@ -16,7 +16,7 @@ unit:hz0
 	rdfs:label "hertz" ;
 	unit:prefixConversion [
 		unit:factor 0.001 ;
-		unit:to units:khz
+		unit:to unit:khz
 	] ;
 	unit:render "%.0f Hz" ;
 	unit:symbol "Hz" .
