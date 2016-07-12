@@ -342,7 +342,8 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 		} else if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
 			_tabs.set_current_page (_tabs.page_num (editor->contents()));
 		} else {
-			/* do nothing */
+			/* go to mixer */
+			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
 		}
 		return;
 	}
