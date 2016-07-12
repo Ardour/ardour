@@ -4,5 +4,5 @@
 
 <urn:ardour:a-eq>
     a lv2:Plugin ;
-    lv2:binary <a-eq.so> ;
+    lv2:binary <a-eq@LIB_EXT@> ;
     rdfs:seeAlso <a-eq.ttl> .
