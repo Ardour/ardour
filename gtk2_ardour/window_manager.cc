@@ -144,10 +144,25 @@ Manager::show_visible() const
 {
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		if ((*i)->visible()) {
-			if (! (*i)->get (true)) {
+			Gtk::Window* win = (*i)->get (true);
+			if (!win) {
 				/* the window may be a plugin GUI for a plugin which
 				 * is disabled or longer present.
 				 */
+				continue;
+			}
+			if (dynamic_cast<ArdourDialog*> (win)) {
+				/* do not show dialogs at startup. Most
+				 * dialogs require some signal connection work
+				 * because we are trying to avoid recursive
+				 * event loops (connecting instead to
+				 * ::signal_response(). This means we need to
+				 * destroy the window as well, so that the code
+				 * which checks if it should be created will
+				 * find that it is missing and will create it 
+				 * and connect to any necessary signals.
+				 */
+				(*i)->drop_window ();
 				continue;
 			}
 			(*i)->show_all ();
