@@ -4061,7 +4061,7 @@ MidiRegionView::get_note_name (boost::shared_ptr<NoteType> n, uint8_t note_value
 	char buf[128];
 	snprintf (buf, sizeof (buf), "%d %s\nCh %d Vel %d",
 	          (int) note_value,
-	          name.empty() ? Evoral::midi_note_name (note_value).c_str() : name.c_str(),
+	          name.empty() ? ParameterDescriptor::midi_note_name (note_value).c_str() : name.c_str(),
 	          (int) n->channel() + 1,
 	          (int) n->velocity());
 

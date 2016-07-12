@@ -760,7 +760,7 @@ MidiListEditor::redisplay_model ()
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
-			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
+			row[columns.note_name] = ParameterDescriptor::midi_note_name ((*i)->note());
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
