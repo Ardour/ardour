@@ -235,19 +235,6 @@ AddRouteDialog::type_wanted() const
 void
 AddRouteDialog::maybe_update_name_template_entry ()
 {
-	if (
-		name_template_entry.get_text() != "" &&
-		name_template_entry.get_text() != VCA::default_name_template() &&
-		name_template_entry.get_text() != _("Audio") &&
-		name_template_entry.get_text() != _("MIDI")  &&
-		name_template_entry.get_text() != _("Audio+MIDI")  &&
-		name_template_entry.get_text() != _("Bus")) {
-		strict_io_combo.set_sensitive (false);
-		return;
-	}
-
-	strict_io_combo.set_sensitive (true);
-
 	switch (type_wanted()) {
 	case AudioTrack:
 		name_template_entry.set_text (_("Audio"));
@@ -280,6 +267,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
 		break;
 	case MidiTrack:
 		channel_combo.set_sensitive (false);
@@ -289,6 +277,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (false);
 		instrument_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
 		break;
 	case MixedTrack:
 		{
@@ -305,6 +294,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
 		break;
 	case AudioBus:
 		mode_combo.set_sensitive (false);
@@ -314,6 +304,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
 		break;
 	case VCAMaster:
 		mode_combo.set_sensitive (false);
@@ -323,6 +314,7 @@ AddRouteDialog::track_type_chosen ()
 		mode_label.set_sensitive (false);
 		instrument_label.set_sensitive (false);
 		route_group_combo.set_sensitive (false);
+		strict_io_combo.set_sensitive (false);
 		break;
 	case MidiBus:
 		mode_combo.set_sensitive (false);
@@ -331,6 +323,7 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (false);
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
 		break;
 	}
 
