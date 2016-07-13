@@ -26,6 +26,8 @@
 #include <glibmm.h>
 #include <fftw3.h>
 
+#include "pbd/malign.h"
+
 #include "ardour/buffer_set.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/libardour_visibility.h"
@@ -62,7 +64,7 @@ namespace ARDOUR { namespace DSP {
 			}
 
 			~DspShm () {
-				free (_data);
+				cache_aligned_free (_data);
 			}
 
 			/** [re] allocate memory in host's memory space
@@ -71,7 +73,8 @@ namespace ARDOUR { namespace DSP {
 			 */
 			void allocate (size_t s) {
 				if (s == _size) { return; }
-				_data = realloc (_data, sizeof(float) * s);
+				cache_aligned_free (_data);
+				cache_aligned_malloc ((void**) &_data, sizeof (float) * s);
 				if (_data) { _size = s; }
 			}
 
