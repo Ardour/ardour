@@ -128,7 +128,7 @@ instantiate(const LV2_Descriptor* descriptor,
             const char* bundle_path,
             const LV2_Feature* const* features)
 {
-	Aeq* aeq = (Aeq*)malloc(sizeof(Aeq));
+	Aeq* aeq = (Aeq*)calloc(1, sizeof(Aeq));
 	aeq->srate = rate;
 	
 #ifdef LV2_EXTENDED
@@ -141,6 +141,8 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	for (int i = 0; i < BANDS; i++)
 		linear_svf_reset(&aeq->v_filter[i]);
+
+	// TODO initialize self->v_
 
 	aeq->need_expose = true;
 #ifdef LV2_EXTENDED

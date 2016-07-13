@@ -35,6 +35,7 @@ PolyLine::PolyLine (Canvas* c)
 PolyLine::PolyLine (Item* parent)
 	: PolyItem (parent)
 	, _threshold (1.0)
+	, _y1 (0)
 {
 }
 
