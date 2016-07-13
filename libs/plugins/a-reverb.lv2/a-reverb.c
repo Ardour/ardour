@@ -19,6 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE // needed for M_PI
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -27,7 +31,6 @@
 
 #define RV_NZ 7
 #define DENORMAL_PROTECT (1e-14)
-
 
 typedef struct {
 	float* delays[2][RV_NZ]; /**< delay line buffer */
@@ -249,6 +252,7 @@ typedef struct {
 
 	float v_mix;
 	float v_roomsz;
+	float srate;
 
 	b_reverb r;
 } AReverb;
@@ -270,6 +274,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	// these are set in initReverb()
 	self->v_roomsz = 0.75;
 	self->v_mix = 0.1;
+	self->srate = rate;
 
 	return (LV2_Handle)self;
 }
@@ -313,15 +318,16 @@ run (LV2_Handle instance, uint32_t n_samples)
 	float* const      output0 = self->output0;
 	float* const      output1 = self->output1;
 
-	// TODO interpolate
+	// 25Hz update
+	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 25 / self->srate));
+
 	if (*self->mix != self->v_mix) {
-		self->v_mix = *self->mix;
-		const float u = self->r.wet + self->r.dry;
-		self->r.wet = self->v_mix * u;
-		self->r.dry = u - (self->v_mix * u);
+		self->v_mix += tau * ( *self->mix - self->v_mix);
+		self->r.wet = self->v_mix;
+		self->r.dry = 1.0 - self->v_mix;
 	}
 	if (*self->roomsz != self->v_roomsz) {
-		self->v_roomsz = *self->roomsz;
+		self->v_roomsz += tau * ( *self->roomsz - self->v_roomsz);
 		self->r.gain[0] = 0.773 * self->v_roomsz;
 		self->r.gain[1] = 0.802 * self->v_roomsz;
 		self->r.gain[2] = 0.753 * self->v_roomsz;

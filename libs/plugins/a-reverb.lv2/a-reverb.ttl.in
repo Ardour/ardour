@@ -20,7 +20,7 @@
 	doap:maintainer <http://ardour.org/credits.html>
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 
-	lv2:microVersion 0 ; lv2:minorVersion 1 ;
+	lv2:microVersion 0 ; lv2:minorVersion 2 ;
 	lv2:optionalFeature lv2:hardRTCapable ;
 
 	lv2:port
@@ -56,8 +56,8 @@
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 4 ;
-		lv2:symbol "mix" ;
-		lv2:name "Dry/Wet";
+		lv2:symbol "blend" ;
+		lv2:name "Blend";
 		lv2:default 0.3;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
