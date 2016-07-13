@@ -7041,3 +7041,14 @@ Session::auto_connect_thread_run ()
 	}
 	pthread_mutex_unlock (&_auto_connect_mutex);
 }
+
+void
+Session::cancel_all_solo ()
+{
+	StripableList sl;
+
+	get_stripables (sl);
+
+	set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, Controllable::NoGroup);
+	clear_all_solo_state (routes.reader());
+}
