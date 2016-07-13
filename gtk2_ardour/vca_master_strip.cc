@@ -510,4 +510,3 @@ VCAMasterStrip::stripable () const
 {
 	return _vca;
 }
-

@@ -187,7 +187,7 @@
 		<ColorAlias name="gtk_bright_color" alias="color 74"/>
 		<ColorAlias name="gtk_bright_indicator" alias="color 1"/>
 		<ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
-		<ColorAlias name="gtk_control_base" alias="color 104"/>
+		<ColorAlias name="gtk_control_master" alias="color 64"/>
 		<ColorAlias name="gtk_control_text" alias="color 26"/>
 		<ColorAlias name="gtk_control_text2" alias="color 83"/>
 		<ColorAlias name="gtk_darkest" alias="color 67"/>

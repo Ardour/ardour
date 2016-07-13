@@ -758,6 +758,21 @@ style "audio_track_base" = "default"
 	bg[SELECTED] = @background
 }
 
+style "control_master_base" = "default"
+{
+	font_name = " 8"
+	# NORMAL is used for single-data type labels, or Audio
+	# ACTIVE is used for MIDI in the presence of multiple data type
+	fg[NORMAL] = @foreground
+	fg[ACTIVE] = darker(@foreground)
+
+	bg[NORMAL] = @control_master
+	bg[ACTIVE] = @background
+	bg[PRELIGHT] = @background
+	bg[INSENSITIVE] = @background
+	bg[SELECTED] = @background
+}
+
 style "midi_track_base" = "default"
 {
 	font_name = " 8"
@@ -1110,6 +1125,7 @@ widget "*AudioMidiTrackMetricsInactive" style:highest "midi_track_metrics_inacti
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
 widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
+widget "*ControlMasterBaseUnselected" style:highest "control_master_base"
 
 widget "*SendUIFader" style:highest "plugin_slider"
 widget "*ReturnUIFader" style:highest "plugin_slider"
