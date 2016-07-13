@@ -31,8 +31,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
-
-#include "evoral/midi_util.h"
+#include "ardour/parameter_descriptor.h"
 
 #include "push2.h"
 #include "gui.h"
@@ -457,7 +456,7 @@ P2GUI::build_pad_table ()
 
 			int n = p2.pad_note (row, col);
 
-			Gtk::Button* b = manage (new Button (string_compose ("%1 (%2)", Evoral::midi_note_name (n), n)));
+			Gtk::Button* b = manage (new Button (string_compose ("%1 (%2)", ParameterDescriptor::midi_note_name (n), n)));
 			b->show ();
 
 			pad_table.attach (*b, col, col+1, (7-row), (8-row));
