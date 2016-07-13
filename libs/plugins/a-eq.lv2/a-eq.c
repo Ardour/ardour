@@ -130,7 +130,7 @@ instantiate(const LV2_Descriptor* descriptor,
 {
 	Aeq* aeq = (Aeq*)calloc(1, sizeof(Aeq));
 	aeq->srate = rate;
-	
+
 #ifdef LV2_EXTENDED
 	for (int i=0; features[i]; ++i) {
 		if (!strcmp(features[i]->URI, LV2_INLINEDISPLAY__queue_draw)) {
@@ -447,93 +447,146 @@ run(LV2_Handle instance, uint32_t n_samples)
 #endif
 }
 
-
-#ifdef LV2_EXTENDED
-static float
-eq_curve (Aeq* self, float f) {
-	float SR = self->srate;
-	double complex H = 1.0;
-	double theta = f * 2. * M_PI / SR;
-	double complex z = cexp(I * theta);
-	double complex zz = cexp(2 * I * theta);
+static double
+calc_peq(Aeq* self, int i, double omega) {
+	double complex H = 0.0;
+	double complex z = cexp(I * omega);
+	double complex zz = cexp(2. * I * omega);
 	double complex zm = z - 1.0;
 	double complex zp = z + 1.0;
 	double complex zzm = zz - 1.0;
 
-	double A;
-	double m0, m1, m2, g, k;
+	double A = pow(10.0, self->v_g[i]/40.0);
+	double g = self->v_filter[i].g;
+	double k = self->v_filter[i].k;
+	double m1 = k * (A * A - 1.0) / A;
+
+	H = (g*k*zzm + A*(g*zp*(m1*zm) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
+	return cabs(H);
+}
+
+static double
+calc_lowpass(Aeq* self, double omega) {
+	double complex H = 0.0;
+	double complex z = cexp(I * omega);
+	double complex zz = cexp(2. * I * omega);
+	double complex zm = z - 1.0;
+	double complex zp = z + 1.0;
+	double complex zzm = zz - 1.0;
+
+	double g = self->v_filter[5].g;
+	double k = self->v_filter[5].k;
+
+	H = (g*g*zp*zp) / (zm*zm + g*g*zp*zp + g*k*zzm);
+	return cabs(H);
+}
+
+static double
+calc_highpass(Aeq* self, double omega) {
+	double complex H = 0.0;
+	double complex z = cexp(I * omega);
+	double complex zz = cexp(2. * I * omega);
+	double complex zm = z - 1.0;
+	double complex zp = z + 1.0;
+	double complex zzm = zz - 1.0;
+
+	double g = self->v_filter[0].g;
+	double k = self->v_filter[0].k;
+
+	H = zm*zm / (zm*zm + g*g*zp*zp + g*k*zzm);
+	return cabs(H);
+}
+
+static double
+calc_lowshelf(Aeq* self, double omega) {
+	double complex H = 0.0;
+	double complex z = cexp(I * omega);
+	double complex zz = cexp(2. * I * omega);
+	double complex zm = z - 1.0;
+	double complex zp = z + 1.0;
+	double complex zzm = zz - 1.0;
+
+	double A = pow(10.0, self->v_g[0]/40.0);
+	double g = self->v_filter[0].g;
+	double k = self->v_filter[0].k;
+	double m0 = self->v_filter[0].m[0];
+	double m1 = self->v_filter[0].m[1];
+	double m2 = self->v_filter[0].m[2];
+
+	H = (A*m0*zm*zm + g*g*(m0+m2)*zp*zp + sqrt(A)*g*(k*m0+m1) * zzm) / (A*zm*zm + g*g*zp*zp + sqrt(A)*g*k*zzm);
+	return cabs(H);
+}
+
+static double
+calc_highshelf(Aeq* self, double omega) {
+	double complex H = 0.0;
+	double complex z = cexp(I * omega);
+	double complex zz = cexp(2. * I * omega);
+	double complex zm = z - 1.0;
+	double complex zp = z + 1.0;
+	double complex zzm = zz - 1.0;
+
+	double A = pow(10.0, self->v_g[5]/40.0);
+	double g = self->v_filter[5].g;
+	double k = self->v_filter[5].k;
+	double m0 = self->v_filter[5].m[0];
+	double m1 = self->v_filter[5].m[1];
+	double m2 = self->v_filter[5].m[2];
+
+	H = ( sqrt(A) * g * zp * (m1 * zm + sqrt(A)*g*m2*zp) + m0 * ( zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm)) / (zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm);
+	return cabs(H);
+}
+
+#ifdef LV2_EXTENDED
+static float
+eq_curve (Aeq* self, float f) {
+	double complex response = 1.0;
+	double SR = (double)self->srate;
+	double omega = f * 2. * M_PI / SR;
 
 	// low
 	if (self->v_filtog[0]) {
-		A = pow(10.0, self->v_g[0]/40.0);
-		m0 = self->v_filter[0].m[0];
-		m1 = self->v_filter[0].m[1];
-		m2 = self->v_filter[0].m[2];
-		g = self->v_filter[0].g;
-		k = self->v_filter[0].k;
 		if (self->v_shelftogl) {
 			// lowshelf
-			H *= (A*m0*zm*zm + g*g*(m0+m2)*zp*zp + sqrt(A)*g*(k*m0+m1) * zzm) / (A*zm*zm + g*g*zp*zp + sqrt(A)*g*k*zzm);
+			response *= calc_lowshelf(self, omega);
 		} else {
 			// hp:
-			H *= zm*zm / (zm*zm + g*g*zp*zp + g*k*zzm);
+			response *= calc_highpass(self, omega);
 		}
 	}
 
 	// peq1:
 	if (self->v_filtog[1]) {
-		A = pow(10.0, self->v_g[1]/40.0);
-		m1 = self->v_filter[1].m[1] / A;
-		g = self->v_filter[1].g;
-		k = self->v_filter[1].k;
-		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
+		response *= calc_peq(self, 1, omega);
 	}
 
 	// peq2:
 	if (self->v_filtog[2]) {
-		A = pow(10.0, self->v_g[2]/40.0);
-		m1 = self->v_filter[2].m[1] / A;
-		g = self->v_filter[2].g;
-		k = self->v_filter[2].k;
-		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
+		response *= calc_peq(self, 2, omega);
 	}
 
 	// peq3:
 	if (self->v_filtog[3]) {
-		A = pow(10.0, self->v_g[3]/40.0);
-		m1 = self->v_filter[3].m[1] / A;
-		g = self->v_filter[3].g;
-		k = self->v_filter[3].k;
-		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
+		response *= calc_peq(self, 3, omega);
 	}
 
 	// peq4:
 	if (self->v_filtog[4]) {
-		A = pow(10.0, self->v_g[4]/40.0);
-		m1 = self->v_filter[4].m[1] / A;
-		g = self->v_filter[4].g;
-		k = self->v_filter[4].k;
-		H *= (g*k*zzm + A*(g*zp*(m1*zm + g*m2*zp) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
+		response *= calc_peq(self, 4, omega);
 	}
 
 	// high
 	if (self->v_filtog[5]) {
-		A = pow(10.0, self->v_g[5]/40.0);
-		m0 = self->v_filter[5].m[0];
-		m1 = self->v_filter[5].m[1];
-		m2 = self->v_filter[5].m[2];
-		g = self->v_filter[5].g;
-		k = self->v_filter[5].k;
 		if (self->v_shelftogh) {
 			// highshelf:
-			H *= ( sqrt(A) * g * zp * (m1 * zm + sqrt(A)*g*m2*zp) + m0 * ( zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm)) / (zm*zm + A*g*g*zp*zp + sqrt(A)*g*k*zzm);
+			response *= calc_highshelf(self, omega);
 		} else {
 			// lp:
-			H *= (g*g*zp*zp) / (zm*zm + g*g*zp*zp + g*k*zzm);
+			response *= calc_lowpass(self, omega);
 		}
 	}
 
-	return cabs(H);
+	return response;
 }
 
 static LV2_Inline_Display_Image_Surface *
