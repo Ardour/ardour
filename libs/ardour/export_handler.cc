@@ -839,7 +839,7 @@ ExportHandler::toc_escape_cdtext (const std::string& txt)
 	char buf[5];
 
 	try {
-		latin1_txt = Glib::convert (txt, "ISO-8859-1", "UTF-8");
+		latin1_txt = Glib::convert_with_fallback (txt, "ISO-8859-1", "UTF-8", "_");
 	} catch (Glib::ConvertError& err) {
 		throw Glib::ConvertError (err.code(), string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
 	}
