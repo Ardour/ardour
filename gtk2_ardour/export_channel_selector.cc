@@ -710,7 +710,7 @@ TrackExportChannelSelector::update_config()
 			continue;
 		}
 
-		ExportProfileManager::ChannelConfigStatePtr state = manager->add_channel_config();
+		ExportProfileManager::ChannelConfigStatePtr state;
 
 		boost::shared_ptr<Route> route = row[track_cols.route];
 
@@ -722,16 +722,25 @@ TrackExportChannelSelector::update_config()
 					ExportChannelPtr channel (new PortExportChannel ());
 					PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
 					pec->add_port(port);
+					if (!state) {
+						state = manager->add_channel_config();
+					}
 					state->config->register_channel(channel);
 				}
 			}
 		} else {
 			std::list<ExportChannelPtr> list;
 			RouteExportChannel::create_from_route (list, route);
+			if (list.size () == 0) {
+				continue;
+			}
+			state = manager->add_channel_config();
 			state->config->register_channels (list);
 		}
 
-		state->config->set_name (route->name());
+		if (state) {
+			state->config->set_name (route->name());
+		}
 
 	}
 
