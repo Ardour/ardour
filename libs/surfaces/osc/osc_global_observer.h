@@ -60,6 +60,7 @@ class OSCGlobalObserver
 	void send_transport_state_changed(void);
 	void send_record_state_changed (void);
 	void send_session_saved (std::string name);
+	void solo_active (bool active);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */

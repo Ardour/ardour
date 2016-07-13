@@ -115,6 +115,8 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		// session feedback
 		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_session_saved, this, _1), OSC::instance());
 		send_session_saved (session->snap_name());
+		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
+		solo_active (session->soloing() || session->listening());
 
 		/*
 		* 	Maybe (many) more
@@ -372,3 +374,11 @@ OSCGlobalObserver::send_session_saved (std::string name)
 
 }
 
+void
+OSCGlobalObserver::solo_active (bool active)
+{
+	lo_message msg = lo_message_new ();
+	lo_message_add_float (msg, (float) active);
+	lo_send_message (addr, "/cancel_all_solos", msg);
+	lo_message_free (msg);
+}

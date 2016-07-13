@@ -443,6 +443,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/toggle_all_rec_enables", "f", toggle_all_rec_enables);
 		REGISTER_CALLBACK (serv, "/all_tracks_rec_in", "f", all_tracks_rec_in);
 		REGISTER_CALLBACK (serv, "/all_tracks_rec_out", "f", all_tracks_rec_out);
+		REGISTER_CALLBACK (serv, "/cancel_all_solos", "f", cancel_all_solos);
 		REGISTER_CALLBACK (serv, "/remove_marker", "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/remove_marker", "f", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/jump_bars", "f", jump_by_bars);
@@ -1174,6 +1175,13 @@ OSC::routes_list (lo_message msg)
 	lo_send_message (lo_message_get_source (msg), "#reply", reply);
 
 	lo_message_free (reply);
+}
+
+int
+OSC::cancel_all_solos ()
+{
+	session->clear_all_solo_state (session->get_routes());
+	return 0;
 }
 
 int

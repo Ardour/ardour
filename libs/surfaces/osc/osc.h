@@ -245,6 +245,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(toggle_all_rec_enables);
 	PATH_CALLBACK(all_tracks_rec_in);
 	PATH_CALLBACK(all_tracks_rec_out);
+	PATH_CALLBACK(cancel_all_solos);
 	PATH_CALLBACK(remove_marker_at_playhead);
 	PATH_CALLBACK(mark_in);
 	PATH_CALLBACK(mark_out);
@@ -523,6 +524,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void notify_vca_added (ARDOUR::VCAList &);
 
 	void update_clock ();
+	int cancel_all_solos ();
 	bool periodic (void);
 	sigc::connection periodic_connection;
 	PBD::ScopedConnectionList session_connections;
