@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-13 08:29+0200\n"
+"POT-Creation-Date: 2016-07-13 18:09-0400\n"
 "PO-Revision-Date: 2016-05-13 10:38+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 2.0\n"
 
-#: actions.cc:259
+#: actions.cc:261
 msgid "Unknown action name: %1"
 msgstr "Unbekannter Aktionsname: %1"
 
@@ -65,11 +65,11 @@ msgstr "Leider kann ich das nicht tun, %1"
 msgid "Command"
 msgstr "Befehl"
 
-#: keyboard.cc:71 keyboard.cc:88
+#: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
 msgstr "Strg"
 
-#: keyboard.cc:72 keyboard.cc:90
+#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
 msgstr "Key|Shift"
 
@@ -77,33 +77,49 @@ msgstr "Key|Shift"
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:89
+#: keyboard.cc:75
+msgid "Cmd"
+msgstr ""
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Ctrl"
+msgstr ""
+
+#: keyboard.cc:78
+msgid "Opt"
+msgstr ""
+
+#: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:91
+#: keyboard.cc:96
 msgid "Windows"
 msgstr "Windows"
 
-#: keyboard.cc:142 keyboard.cc:672
+#: keyboard.cc:101
+msgid "Win"
+msgstr ""
+
+#: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:683
+#: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
 "Fehler."
 
-#: keyboard.cc:709
+#: keyboard.cc:722
 msgid "Keyboard binding found without a name"
 msgstr "Tastenzuordnung ohne Namen gefunden"
 
-#: keyboard.cc:739
+#: keyboard.cc:752
 msgid "Cannot save key bindings to %1"
 msgstr "Kann Tastenzuordnungen nicht nach %1 sichern"
 
-#: keyboard.cc:755
+#: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
 

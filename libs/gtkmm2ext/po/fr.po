@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-28 20:55+0100\n"
+"POT-Creation-Date: 2016-07-13 18:09-0400\n"
 "PO-Revision-Date: 2015-03-28 20:57+0100\n"
 "Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
 "Language-Team: \n"
@@ -18,12 +18,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../\n"
 
-#: actions.cc:336
-#, fuzzy
-msgid "programming error: %1"
-msgstr "erreur de programmation : %1"
-
-#: actions.cc:511
+#: actions.cc:261
 msgid "Unknown action name: %1"
 msgstr "Nom d'action inconnu : %1"
 
@@ -43,11 +38,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:113
+#: gtk_ui.cc:119
 msgid "Log"
 msgstr "Journal"
 
-#: gtk_ui.cc:370
+#: gtk_ui.cc:388
 msgid ""
 "\n"
 "\n"
@@ -57,72 +52,75 @@ msgstr ""
 "\n"
 "Raccourci : "
 
-#: gtk_ui.cc:638
+#: gtk_ui.cc:688
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
-#: gtk_ui.cc:674
+#: gtk_ui.cc:724
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
-#: keyboard.cc:73
+#: keyboard.cc:70
 msgid "Command"
 msgstr "Commande"
 
-#: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
+#: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
+#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
 msgstr "Maj."
 
-#: keyboard.cc:76
+#: keyboard.cc:73
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:91
+#: keyboard.cc:75
+msgid "Cmd"
+msgstr ""
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Ctrl"
+msgstr ""
+
+#: keyboard.cc:78
+msgid "Opt"
+msgstr ""
+
+#: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:93
-msgid "Meta"
-msgstr "Meta"
+#: keyboard.cc:96
+msgid "Windows"
+msgstr ""
 
-#: keyboard.cc:144 keyboard.cc:540
+#: keyboard.cc:101
+msgid "Win"
+msgstr ""
+
+#: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:551
+#: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "fichier de raccourcis claviers contient des erreurs ou introuvable dans "
 "« %2 »."
 
-#: keyboard.cc:602
+#: keyboard.cc:722
+msgid "Keyboard binding found without a name"
+msgstr ""
+
+#: keyboard.cc:752
+msgid "Cannot save key bindings to %1"
+msgstr ""
+
+#: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Impossible de renommer votre propre fichier de raccourcis clavier (%1)"
-
-#: motionfeedback.cc:486
-msgid "motionfeedback: failed to open a temporary file for writing: %1"
-msgstr ""
-"rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
-"écriture : %1"
-
-# Or is it "image set"?
-#: motionfeedback.cc:516
-#, fuzzy
-msgid "motionfeedback: could not save image set to %1"
-msgstr ""
-"rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
-
-#: motionfeedback.cc:526
-msgid "motionfeedback: caught PixbufError: %1"
-msgstr "rétroaction de mouvement : PixbufError attrapée : %1"
-
-#: motionfeedback.cc:528
-msgid "motionfeedback: unknown exception"
-msgstr "rétroaction de mouvement : exception inconnue"
 
 #: paths_dialog.cc:32
 msgid "Add"
@@ -148,6 +146,30 @@ msgstr "Cliquez pour afficher dans une fenêtre séparée"
 msgid "Click to put this back in the main window"
 msgstr "Cliquez pour remettre dans la fenêtre principale"
 
-#: textviewer.cc:34
+#: textviewer.cc:32
 msgid "Close"
 msgstr "Fermer"
+
+#, fuzzy
+#~ msgid "programming error: %1"
+#~ msgstr "erreur de programmation : %1"
+
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
+#~ msgstr ""
+#~ "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
+#~ "écriture : %1"
+
+# Or is it "image set"?
+#, fuzzy
+#~ msgid "motionfeedback: could not save image set to %1"
+#~ msgstr ""
+#~ "rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
+
+#~ msgid "motionfeedback: caught PixbufError: %1"
+#~ msgstr "rétroaction de mouvement : PixbufError attrapée : %1"
+
+#~ msgid "motionfeedback: unknown exception"
+#~ msgstr "rétroaction de mouvement : exception inconnue"

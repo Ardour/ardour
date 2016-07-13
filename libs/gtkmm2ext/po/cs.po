@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-31 20:13-0400\n"
+"POT-Creation-Date: 2016-07-13 18:09-0400\n"
 "PO-Revision-Date: 2013-06-13 22:33+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -17,11 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: actions.cc:336
-msgid "programming error: %1"
-msgstr ""
-
-#: actions.cc:511
+#: actions.cc:261
 msgid "Unknown action name: %1"
 msgstr "Neznámý název pro činnost: %1"
 
@@ -41,11 +37,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:113
+#: gtk_ui.cc:119
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:370
+#: gtk_ui.cc:388
 msgid ""
 "\n"
 "\n"
@@ -55,65 +51,73 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:638
+#: gtk_ui.cc:688
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:674
+#: gtk_ui.cc:724
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
-#: keyboard.cc:73
+#: keyboard.cc:70
 msgid "Command"
 msgstr "Příkaz"
 
-#: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
+#: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
+#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
 msgstr "Key|Shift"
 
-#: keyboard.cc:76
+#: keyboard.cc:73
 msgid "Option"
 msgstr "Volba"
 
-#: keyboard.cc:91
+#: keyboard.cc:75
+msgid "Cmd"
+msgstr ""
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Ctrl"
+msgstr ""
+
+#: keyboard.cc:78
+msgid "Opt"
+msgstr ""
+
+#: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:93
-msgid "Meta"
-msgstr "Meta"
+#: keyboard.cc:96
+msgid "Windows"
+msgstr ""
 
-#: keyboard.cc:144 keyboard.cc:540
+#: keyboard.cc:101
+msgid "Win"
+msgstr ""
+
+#: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:551
+#: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
-#: keyboard.cc:602
+#: keyboard.cc:722
+msgid "Keyboard binding found without a name"
+msgstr ""
+
+#: keyboard.cc:752
+msgid "Cannot save key bindings to %1"
+msgstr ""
+
+#: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
-
-#: motionfeedback.cc:486
-msgid "motionfeedback: failed to open a temporary file for writing: %1"
-msgstr ""
-
-#: motionfeedback.cc:516
-msgid "motionfeedback: could not save image set to %1"
-msgstr ""
-
-#: motionfeedback.cc:526
-msgid "motionfeedback: caught PixbufError: %1"
-msgstr ""
-
-#: motionfeedback.cc:528
-msgid "motionfeedback: unknown exception"
 msgstr ""
 
 #: paths_dialog.cc:32
@@ -140,6 +144,9 @@ msgstr "Klepněte pro odtržení do vlastního okna"
 msgid "Click to put this back in the main window"
 msgstr "Klepněte pro ukotvení do hlavního okna"
 
-#: textviewer.cc:34
+#: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
+
+#~ msgid "Meta"
+#~ msgstr "Meta"

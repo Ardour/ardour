@@ -1579,13 +1579,13 @@ IO::bundle_channel_name (uint32_t c, uint32_t n, DataType t) const
 		case 2:
 			return c == 0 ? _("L") : _("R");
 		default:
-			snprintf (buf, sizeof(buf), _("%d"), (c + 1));
+			snprintf (buf, sizeof(buf), "%d", (c + 1));
 			return buf;
 		}
 
 	} else {
 
-		snprintf (buf, sizeof(buf), _("%d"), (c + 1));
+		snprintf (buf, sizeof(buf), "%d", (c + 1));
 		return buf;
 
 	}

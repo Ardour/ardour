@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-23 23:09+0300\n"
+"POT-Creation-Date: 2016-07-13 18:09-0400\n"
 "PO-Revision-Date: 2014-10-10 23:22+0300\n"
 "Last-Translator: Александр Кольцов <ag1455@mail.ru>\n"
 "Language-Team: русский <ru>\n"
@@ -20,11 +20,7 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: actions.cc:336
-msgid "programming error: %1"
-msgstr "программная ошибка: %1"
-
-#: actions.cc:511
+#: actions.cc:261
 msgid "Unknown action name: %1"
 msgstr "Неизвестное название действия: %1"
 
@@ -44,11 +40,11 @@ msgstr "Информационный файл курсора горячих то
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:113
+#: gtk_ui.cc:119
 msgid "Log"
 msgstr "Журнал"
 
-#: gtk_ui.cc:370
+#: gtk_ui.cc:388
 msgid ""
 "\n"
 "\n"
@@ -58,65 +54,73 @@ msgstr ""
 "\n"
 "Комбинация клавиш: "
 
-#: gtk_ui.cc:638
+#: gtk_ui.cc:688
 msgid "Press To Exit"
 msgstr "Нажмите для выхода"
 
-#: gtk_ui.cc:674
+#: gtk_ui.cc:724
 msgid "I'm sorry %1, I can't do that"
 msgstr "Простите, %1, я не могу этого сделать"
 
-#: keyboard.cc:73
+#: keyboard.cc:70
 msgid "Command"
 msgstr "Команда"
 
-#: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
+#: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
+#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
 msgstr "Shift"
 
-#: keyboard.cc:76
+#: keyboard.cc:73
 msgid "Option"
 msgstr "Опции"
 
-#: keyboard.cc:91
+#: keyboard.cc:75
+msgid "Cmd"
+msgstr ""
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Ctrl"
+msgstr ""
+
+#: keyboard.cc:78
+msgid "Opt"
+msgstr ""
+
+#: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:93
-msgid "Meta"
-msgstr "Meta"
+#: keyboard.cc:96
+msgid "Windows"
+msgstr ""
 
-#: keyboard.cc:144 keyboard.cc:540
+#: keyboard.cc:101
+msgid "Win"
+msgstr ""
+
+#: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: keyboard.cc:551
+#: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "Файл привязки клавиш не найден в \"% 2 \" или содержит ошибки."
 
-#: keyboard.cc:602
+#: keyboard.cc:722
+msgid "Keyboard binding found without a name"
+msgstr ""
+
+#: keyboard.cc:752
+msgid "Cannot save key bindings to %1"
+msgstr ""
+
+#: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Невозможно переименовать ваш ​​файл биндинга клавиш (%1)"
-
-#: motionfeedback.cc:486
-msgid "motionfeedback: failed to open a temporary file for writing: %1"
-msgstr "motionfeedback: не удалось открыть временный файл для записи: %1"
-
-#: motionfeedback.cc:516
-msgid "motionfeedback: could not save image set to %1"
-msgstr "motionfeedback: невозможно сохранить установки изображения в %1"
-
-#: motionfeedback.cc:526
-msgid "motionfeedback: caught PixbufError: %1"
-msgstr "motionfeedback: PixbufError поймал: %1"
-
-#: motionfeedback.cc:528
-msgid "motionfeedback: unknown exception"
-msgstr "motionfeedback: неизвестное исключение"
 
 #: paths_dialog.cc:32
 msgid "Add"
@@ -142,6 +146,24 @@ msgstr "Щёлкните, чтобы превратить эту панель и
 msgid "Click to put this back in the main window"
 msgstr "Щёлкните, чтобы превратить это плавающее окно в панель инструментов"
 
-#: textviewer.cc:34
+#: textviewer.cc:32
 msgid "Close"
 msgstr "Закрыть"
+
+#~ msgid "programming error: %1"
+#~ msgstr "программная ошибка: %1"
+
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
+#~ msgstr "motionfeedback: не удалось открыть временный файл для записи: %1"
+
+#~ msgid "motionfeedback: could not save image set to %1"
+#~ msgstr "motionfeedback: невозможно сохранить установки изображения в %1"
+
+#~ msgid "motionfeedback: caught PixbufError: %1"
+#~ msgstr "motionfeedback: PixbufError поймал: %1"
+
+#~ msgid "motionfeedback: unknown exception"
+#~ msgstr "motionfeedback: неизвестное исключение"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-27 10:25+0800\n"
+"POT-Creation-Date: 2016-07-13 18:09-0400\n"
 "PO-Revision-Date: 2016-03-27 10:27+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.4\n"
 
-#: actions.cc:259
+#: actions.cc:261
 msgid "Unknown action name: %1"
 msgstr "未知的动作名称：%1"
 
@@ -63,11 +63,11 @@ msgstr "对不起 %1，我不能那样做"
 msgid "Command"
 msgstr "命令"
 
-#: keyboard.cc:71 keyboard.cc:88
+#: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
 msgstr ""
 
-#: keyboard.cc:72 keyboard.cc:90
+#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
 msgstr "键|Shift"
 
@@ -75,31 +75,47 @@ msgstr "键|Shift"
 msgid "Option"
 msgstr "选项"
 
-#: keyboard.cc:89
+#: keyboard.cc:75
+msgid "Cmd"
+msgstr ""
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Ctrl"
+msgstr ""
+
+#: keyboard.cc:78
+msgid "Opt"
+msgstr ""
+
+#: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
 msgstr ""
 
-#: keyboard.cc:91
+#: keyboard.cc:96
 msgid "Windows"
 msgstr ""
 
-#: keyboard.cc:142 keyboard.cc:672
+#: keyboard.cc:101
+msgid "Win"
+msgstr ""
+
+#: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
 msgstr "未知"
 
-#: keyboard.cc:683
+#: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "在 \"%2\" 找不到按键绑定文件或者包含有错误。"
 
-#: keyboard.cc:708
+#: keyboard.cc:722
 msgid "Keyboard binding found without a name"
 msgstr "键盘绑定未发现一个名称"
 
-#: keyboard.cc:738
+#: keyboard.cc:752
 msgid "Cannot save key bindings to %1"
 msgstr "无法保存按键绑定到 %1"
 
-#: keyboard.cc:754
+#: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "无法重命名您自己的按键绑定文件（%1）"
 
