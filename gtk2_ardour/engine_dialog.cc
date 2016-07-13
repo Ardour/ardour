@@ -1596,12 +1596,7 @@ EngineControl::output_device_changed ()
 string
 EngineControl::bufsize_as_string (uint32_t sz)
 {
-	/* Translators: "samples" is always plural here, so no
-	   need for plural+singular forms.
-	 */
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%u %s", sz, P_("sample", "samples", sz));
-	return buf;
+	return string_compose (P_("%1 sample", "%1 samples", sz), sz);
 }
 
 string
