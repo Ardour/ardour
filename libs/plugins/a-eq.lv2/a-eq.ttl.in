@@ -88,7 +88,8 @@ unit:hz0
         lv2:symbol "bw1" ;
         lv2:default 1.000000 ;
         lv2:minimum 0.1000000 ;
-        lv2:maximum 6.000000 ;
+        lv2:maximum 4.000000 ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -118,7 +119,8 @@ unit:hz0
         lv2:symbol "bw2" ;
         lv2:default 1.000000 ;
         lv2:minimum 0.1000000 ;
-        lv2:maximum 6.000000 ;
+        lv2:maximum 4.000000 ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -148,7 +150,8 @@ unit:hz0
         lv2:symbol "bw3" ;
         lv2:default 1.000000 ;
         lv2:minimum 0.1000000 ;
-        lv2:maximum 6.000000 ;
+        lv2:maximum 4.000000 ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -178,7 +181,8 @@ unit:hz0
         lv2:symbol "bw4" ;
         lv2:default 1.000000 ;
         lv2:minimum 0.1000000 ;
-        lv2:maximum 6.000000 ;
+        lv2:maximum 4.000000 ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
