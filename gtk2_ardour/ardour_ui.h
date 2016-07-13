@@ -232,6 +232,7 @@ public:
 
 	XMLNode* main_window_settings() const;
 	XMLNode* editor_settings() const;
+	XMLNode* preferences_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;

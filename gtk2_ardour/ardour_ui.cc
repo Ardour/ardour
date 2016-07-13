@@ -3574,6 +3574,11 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		new_session->add_instant_xml (*n, false);
 	}
 
+	n = Config->instant_xml (X_("Preferences"));
+	if (n) {
+		new_session->add_instant_xml (*n, false);
+	}
+
 	/* Put the playhead at 0 and scroll fully left */
 	n = new_session->instant_xml (X_("Editor"));
 	if (n) {
@@ -4542,6 +4547,24 @@ ARDOUR_UI::export_video (bool range)
 	export_video_dialog->apply_state(editor->get_selection().time, range);
 	export_video_dialog->run ();
 	export_video_dialog->hide ();
+}
+
+XMLNode*
+ARDOUR_UI::preferences_settings () const
+{
+	XMLNode* node = 0;
+
+	if (_session) {
+		node = _session->instant_xml(X_("Preferences"));
+	} else {
+		node = Config->instant_xml(X_("Preferences"));
+	}
+
+	if (!node) {
+		node = new XMLNode (X_("Preferences"));
+	}
+
+	return node;
 }
 
 XMLNode*

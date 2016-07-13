@@ -68,7 +68,7 @@ Manager::register_window (ProxyBase* info)
 		if (!window_actions) {
 			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
 		}
-		
+
 		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
 			 info->action_name().c_str(), info->menu_name().c_str(),
 			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
@@ -159,7 +159,7 @@ Manager::show_visible() const
 				 * ::signal_response(). This means we need to
 				 * destroy the window as well, so that the code
 				 * which checks if it should be created will
-				 * find that it is missing and will create it 
+				 * find that it is missing and will create it
 				 * and connect to any necessary signals.
 				 */
 				(*i)->drop_window ();

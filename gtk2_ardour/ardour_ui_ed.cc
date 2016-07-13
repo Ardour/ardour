@@ -733,6 +733,7 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode& enode (editor->get_state());
 	XMLNode& mnode (mixer->get_state());
 	XMLNode& bnode (meterbridge->get_state());
+	XMLNode& pnode (rc_option_editor->get_state());
 
 	Config->add_extra_xml (*window_node);
 	Config->add_extra_xml (audio_midi_setup->get_state());
@@ -745,6 +746,7 @@ ARDOUR_UI::save_ardour_state ()
 		_session->add_instant_xml (main_window_node);
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
+		_session->add_instant_xml (pnode);
 		_session->add_instant_xml (bnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
@@ -753,12 +755,17 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (main_window_node);
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
+		Config->add_instant_xml (pnode);
 		Config->add_instant_xml (bnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
 	}
+
 	delete &enode;
+	delete &mnode;
+	delete &bnode;
+	delete &pnode;
 
 	Keyboard::save_keybindings ();
 }

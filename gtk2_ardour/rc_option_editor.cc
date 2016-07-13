@@ -1362,7 +1362,7 @@ public:
 		edit_box->set_spacing(3);
 		_box->pack_start (*edit_box, false, false);
 		edit_box->show ();
-		
+
 		Label* label = manage (new Label);
 		label->set_text (_("Click to edit the settings for selected protocol ( it must be ENABLED first ):"));
 		edit_box->pack_start (*label, false, false);
@@ -1432,7 +1432,7 @@ private:
 		else
 			edit_button->set_sensitive (false);
 	}
-	
+
 	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
@@ -1854,6 +1854,13 @@ RCOptionEditor::RCOptionEditor ()
         , _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
+	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
+	if (node) {
+		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
+		   (Gtk::StateType) here !!!
+		*/
+		Tabbable::set_state (*node, Stateful::loading_state_version);
+	}
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 
@@ -2337,7 +2344,7 @@ if (!Profile->get_mixbus()) {
 	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
 
 	add_option (_("Editor"), rsas);
-	
+
 	add_option (_("Editor/Waveforms"), new OptionEditorHeading (_("Waveforms")));
 
 if (!Profile->get_mixbus()) {
@@ -3481,4 +3488,12 @@ RCOptionEditor::use_own_window (bool and_fill_it)
 	}
 
 	return win;
+}
+
+XMLNode&
+RCOptionEditor::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("Preferences"));
+	node->add_child_nocopy (Tabbable::get_state());
+	return *node;
 }
