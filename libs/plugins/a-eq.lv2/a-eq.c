@@ -67,14 +67,14 @@ typedef enum {
 	AEQ_OUTPUT,
 } PortIndex;
 
-static inline float
-to_dB(float g) {
-	return (20.f*log10(g));
+static inline double
+to_dB(double g) {
+	return (20.0*log10(g));
 }
 
-static inline float
-from_dB(float gdb) {
-	return (exp(gdb/20.f*log(10.f)));
+static inline double
+from_dB(double gdb) {
+	return (exp(gdb/20.0*log(10.0)));
 }
 
 struct linear_svf {
@@ -458,7 +458,7 @@ calc_peq(Aeq* self, int i, double omega) {
 
 	double A = pow(10.0, self->v_g[i]/40.0);
 	double g = self->v_filter[i].g;
-	double k = self->v_filter[i].k;
+	double k = self->v_filter[i].k * A;
 	double m1 = k * (A * A - 1.0) / A;
 
 	H = (g*k*zzm + A*(g*zp*(m1*zm) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
@@ -635,9 +635,8 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 		// plot 20..20kHz +-20dB
 		const float x_hz = 20.f * powf (1000.f, (float)x / (float)w);
 		const float y_db = to_dB(eq_curve(self, x_hz)) + self->v_master;
-		const float y = h * -y_db / 40.0 + h / 2;
+		const float y = (float)h * (-y_db / 40.0 + 0.5);
 		cairo_line_to (cr, x, y);
-		//printf("(hz,H,db)=(%f, %f, %f)\n", x_hz, from_dB(y_db), y_db);
 	}
 	cairo_stroke_preserve (cr);
 
