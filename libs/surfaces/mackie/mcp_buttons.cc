@@ -888,6 +888,7 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 	}
 
 	if (session) {
+		session->set_controls (route_list_to_control_list (session->get_routes(), &Stripable::solo_control), 0.0, Controllable::NoGroup);
 		session->clear_all_solo_state (session->get_routes()); 
 	}
 	return none;
