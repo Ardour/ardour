@@ -1,8 +1,9 @@
-/* a-reverb -- based on b_reverb (setBfree)
+/* a-reverb -- based on b_reverb (setBfree) and FreeVerb
  *
  * Copyright (C) 2003-2004 Fredrik Kilander <fk@dsv.su.se>
  * Copyright (C) 2008-2016 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2012 Will Panther <pantherb@setbfree.org>
+ * Copyright (C) 2016 Damien Zammit <damien@zamaudio.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +25,24 @@
 #include <math.h>
 #include <string.h>
 
-#define RV_NZ 7
+#define RV_NZ (8+4)
 #define DENORMAL_PROTECT (1e-14)
 
-typedef struct {
-	float* delays[RV_NZ]; /**< delay line buffer */
 
-	float* idx0[RV_NZ];	/**< Reset pointer ref delays[]*/
-	float* idxp[RV_NZ];	/**< Index pointer ref delays[]*/
-	float* endp[RV_NZ];	/**< End pointer   ref delays[]*/
+typedef struct {
+	float* delays[2][RV_NZ]; /**< delay line buffer */
+
+	float* idx0[2][RV_NZ];	/**< Reset pointer ref delays[]*/
+	float* idxp[2][RV_NZ];	/**< Index pointer ref delays[]*/
+	float* endp[2][RV_NZ];	/**< End pointer   ref delays[]*/
 
 	float gain[RV_NZ]; /**< feedback gains */
-	float yy1; /**< Previous output sample */
-	float y_1; /**< Feedback sample */
+	float yy1_0; /**< Previous output sample */
+	float y_1_0; /**< Feedback sample */
+	float yy1_1; /**< Previous output sample */
+	float y_1_1; /**< Feedback sample */
 
-	int end[RV_NZ];
+	int end[2][RV_NZ];
 
 	float inputGain;	/**< Input gain value */
 	float fbk;	/**< Feedback gain */
@@ -47,18 +51,18 @@ typedef struct {
 } b_reverb;
 
 static int
-setReverbPointers (b_reverb *r, int i, const double rate)
+setReverbPointers (b_reverb *r, int i, int c, const double rate)
 {
-	int e = (r->end[i] * rate / 25000.0);
+	int e = (r->end[c][i] * rate / 44100.0);
 	e = e | 1;
-	r->delays[i] = (float*)realloc ((void*)r->delays[i], (e + 2) * sizeof (float));
-	if (!r->delays[i]) {
+	r->delays[c][i] = (float*)realloc ((void*)r->delays[c][i], (e + 2) * sizeof (float));
+	if (!r->delays[c][i]) {
 		return -1;
 	} else {
-		memset (r->delays[i], 0 , (e + 2) * sizeof (float));
+		memset (r->delays[c][i], 0 , (e + 2) * sizeof (float));
 	}
-	r->endp[i] = r->delays[i] + e + 1;
-	r->idx0[i] = r->idxp[i] = &(r->delays[i][0]);
+	r->endp[c][i] = r->delays[c][i] + e + 1;
+	r->idx0[c][i] = r->idxp[c][i] = &(r->delays[c][i][0]);
 
 	return 0;
 }
@@ -67,103 +71,171 @@ static int
 initReverb (b_reverb *r, const double rate)
 {
 	int err = 0;
-	r->inputGain = 0.1; /* Input gain value */
+	int stereowidth = 7;
+
+	r->inputGain = powf (10.0, .05 * -20.0);  // -20dB
 	r->fbk = -0.015; /* Feedback gain */
-	r->wet = 0.1; /* Output dry gain */
-	r->dry = 0.9; /* Output wet gain */
+	r->wet = 0.3;
+	r->dry = 0.7;
 
 	/* feedback combfilter */
-	r->gain[0] = 0.773;
-	r->gain[1] = 0.802;
-	r->gain[2] = 0.753;
-	r->gain[3] = 0.733;
+	r->gain[0] = 0.75;
+	r->gain[1] = 0.75;
+	r->gain[2] = 0.75;
+	r->gain[3] = 0.75;
+	r->gain[4] = 0.75;
+	r->gain[5] = 0.75;
+	r->gain[6] = 0.75;
+	r->gain[7] = 0.75;
 
 	/* all-pass filter */
-	r->gain[4] = sqrtf (0.5);
-	r->gain[5] = sqrtf (0.5);
-	r->gain[6] = sqrtf (0.5);
+	r->gain[8] = 0.5;
+	r->gain[9] = 0.5;
+	r->gain[10] = 0.5;
+	r->gain[11] = 0.5;
 
-	/* delay lines */
-	r->end[0] = 1687;
-	r->end[1] = 1601;
-	r->end[2] = 2053;
-	r->end[3] = 2251;
+	/* delay lines left */
+	r->end[0][0] = 1116;
+	r->end[0][1] = 1188;
+	r->end[0][2] = 1277;
+	r->end[0][3] = 1356;
+	r->end[0][4] = 1422;
+	r->end[0][5] = 1491;
+	r->end[0][6] = 1557;
+	r->end[0][7] = 1617;
+
+	/* all pass filters left */
+	r->end[0][8] = 556;
+	r->end[0][9] = 441;
+	r->end[0][10] = 341;
+	r->end[0][11] = 225;
+
+	/* delay lines right */
+	r->end[1][0] = 1116 + stereowidth;
+	r->end[1][1] = 1188 + stereowidth;
+	r->end[1][2] = 1277 + stereowidth;
+	r->end[1][3] = 1356 + stereowidth;
+	r->end[1][4] = 1422 + stereowidth;
+	r->end[1][5] = 1491 + stereowidth;
+	r->end[1][6] = 1557 + stereowidth;
+	r->end[1][7] = 1617 + stereowidth;
 
 	/* all pass filters */
-	r->end[4] = 347;
-	r->end[5] = 113;
-	r->end[6] = 37;
+	r->end[1][8] = 556 + stereowidth;
+	r->end[1][9] = 441 + stereowidth;
+	r->end[1][10] = 341 + stereowidth;
+	r->end[1][11] = 225 + stereowidth;
 
 	for (int i = 0; i < RV_NZ; ++i) {
-		r->delays[i]= NULL;
+		r->delays[0][i] = NULL;
+		r->delays[1][i] = NULL;
 	}
 
-	r->yy1 = 0.0;
-	r->y_1 = 0.0;
+	r->yy1_0 = 0.0;
+	r->y_1_0 = 0.0;
+	r->yy1_1 = 0.0;
+	r->y_1_1 = 0.0;
 
 	for (int i = 0; i < RV_NZ; i++) {
-		err |= setReverbPointers (r, i, rate);
+		err |= setReverbPointers (r, i, 0, rate);
+		err |= setReverbPointers (r, i, 1, rate);
 	}
 	return err;
 }
 
 static void
 reverb (b_reverb* r,
-        const float* inbuf,
-        float* outbuf,
+        const float* inbuf0,
+        const float* inbuf1,
+        float* outbuf0,
+        float* outbuf1,
         size_t n_samples)
 {
-	float** const idxp = r->idxp;
-	float* const* const endp = r->endp;
-	float* const* const idx0 = r->idx0;
+	float** const idxp0 = r->idxp[0];
+	float** const idxp1 = r->idxp[1];
+	float* const* const endp0 = r->endp[0];
+	float* const* const endp1 = r->endp[1];
+	float* const* const idx00 = r->idx0[0];
+	float* const* const idx01 = r->idx0[1];
 	const float* const gain = r->gain;
 	const float inputGain = r->inputGain;
 	const float fbk = r->fbk;
 	const float wet = r->wet;
 	const float dry = r->dry;
 
-	const float* xp = inbuf;
-	float* yp = outbuf;
+	const float* xp0 = inbuf0;
+	const float* xp1 = inbuf1;
+	float* yp0 = outbuf0;
+	float* yp1 = outbuf1;
 
-	float y_1 = r->y_1;
-	float yy1 = r->yy1;
+	float y_1_0 = r->y_1_0;
+	float yy1_0 = r->yy1_0;
+	float y_1_1 = r->y_1_1;
+	float yy1_1 = r->yy1_1;
 
 	for (size_t i = 0; i < n_samples; ++i) {
 		int j;
 		float y;
-		const float xo = *xp++;
-		const float x = y_1 + (inputGain * xo);
+		const float xo0 = *xp0++;
+		const float xo1 = *xp1++;
+		const float x0 = y_1_0 + (inputGain * xo0);
+		const float x1 = y_1_1 + (inputGain * xo1);
 		float xa = 0.0;
+		float xb = 0.0;
 		/* First we do four feedback comb filters (ie parallel delay lines,
 		 * each with a single tap at the end that feeds back at the start) */
 
-		for (j = 0; j < 4; ++j) {
-			y = *idxp[j];
-			*idxp[j] = x + (gain[j] * y);
-			if (endp[j] <= ++(idxp[j])) {
-				idxp[j] = idx0[j];
+		for (j = 0; j < 8; ++j) {
+			y = *idxp0[j];
+			*idxp0[j] = x0 + (gain[j] * y);
+			if (endp0[j] <= ++(idxp0[j])) {
+				idxp0[j] = idx00[j];
 			}
 			xa += y;
 		}
-
-		for (; j < 7; ++j) {
-			y = *idxp[j];
-			*idxp[j] = gain[j] * (xa + y);
-			if (endp[j] <= ++(idxp[j])) {
-				idxp[j] = idx0[j];
+		for (; j < 12; ++j) {
+			y = *idxp0[j];
+			*idxp0[j] = gain[j] * (xa + y);
+			if (endp0[j] <= ++(idxp0[j])) {
+				idxp0[j] = idx00[j];
 			}
 			xa = y - xa;
 		}
 
-		y = 0.5f * (xa + yy1);
-		yy1 = y;
-		y_1 = fbk * xa;
+		y = 0.5f * (xa + yy1_0);
+		yy1_0 = y;
+		y_1_0 = fbk * xa;
 
-		*yp++ = ((wet * y) + (dry * xo));
+		*yp0++ = ((wet * y) + (dry * xo0));
+
+		for (j = 0; j < 8; ++j) {
+			y = *idxp1[j];
+			*idxp1[j] = x1 + (gain[j] * y);
+			if (endp1[j] <= ++(idxp1[j])) {
+				idxp1[j] = idx01[j];
+			}
+			xb += y;
+		}
+		for (; j < 12; ++j) {
+			y = *idxp1[j];
+			*idxp1[j] = gain[j] * (xb + y);
+			if (endp1[j] <= ++(idxp1[j])) {
+				idxp1[j] = idx01[j];
+			}
+			xb = y - xb;
+		}
+
+		y = 0.5f * (xb + yy1_1);
+		yy1_1 = y;
+		y_1_1 = fbk * xb;
+
+		*yp1++ = ((wet * y) + (dry * xo1));
 	}
 
-	r->y_1 = y_1 + DENORMAL_PROTECT;
-	r->yy1 = yy1 + DENORMAL_PROTECT;
+	r->y_1_0 = y_1_0 + DENORMAL_PROTECT;
+	r->yy1_0 = yy1_0 + DENORMAL_PROTECT;
+	r->y_1_1 = y_1_1 + DENORMAL_PROTECT;
+	r->yy1_1 = yy1_1 + DENORMAL_PROTECT;
 }
 
 /******************************************************************************
@@ -173,23 +245,25 @@ reverb (b_reverb* r,
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 typedef enum {
-	AR_INPUT      = 0,
-	AR_OUTPUT     = 1,
-	AR_MIX        = 2,
-	AR_GAIN_IN    = 3,
-	AR_GAIN_OUT   = 4,
+	AR_INPUT0     = 0,
+	AR_INPUT1     = 1,
+	AR_OUTPUT0    = 2,
+	AR_OUTPUT1    = 3,
+	AR_MIX        = 4,
+	AR_ROOMSZ     = 5,
 } PortIndex;
 
 typedef struct {
-	float* input;
-	float* output;
+	float* input0;
+	float* input1;
+	float* output0;
+	float* output1;
 
 	float* mix;
-	float* gain_in;
-	float* gain_out; // unused
+	float* roomsz;
 
 	float v_mix;
-	float v_gain_in;
+	float v_roomsz;
 
 	b_reverb r;
 } AReverb;
@@ -209,7 +283,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	}
 
 	// these are set in initReverb()
-	self->v_gain_in = -40; // [dB]
+	self->v_roomsz = 0.75;
 	self->v_mix = 0.1;
 
 	return (LV2_Handle)self;
@@ -223,20 +297,23 @@ connect_port (LV2_Handle instance,
 	AReverb* self = (AReverb*)instance;
 
 	switch ((PortIndex)port) {
-		case AR_INPUT:
-			self->input = (float*)data;
+		case AR_INPUT0:
+			self->input0 = (float*)data;
 			break;
-		case AR_OUTPUT:
-			self->output = (float*)data;
+		case AR_INPUT1:
+			self->input1 = (float*)data;
+			break;
+		case AR_OUTPUT0:
+			self->output0 = (float*)data;
+			break;
+		case AR_OUTPUT1:
+			self->output1 = (float*)data;
 			break;
 		case AR_MIX:
 			self->mix = (float*)data;
 			break;
-		case AR_GAIN_IN:
-			self->gain_in = (float*)data;
-			break;
-		case AR_GAIN_OUT:
-			self->gain_out = (float*)data;
+		case AR_ROOMSZ:
+			self->roomsz = (float*)data;
 			break;
 	}
 }
@@ -246,8 +323,10 @@ run (LV2_Handle instance, uint32_t n_samples)
 {
 	AReverb* self = (AReverb*)instance;
 
-	const float* const input  = self->input;
-	float* const       output = self->output;
+	const float* const input0 = self->input0;
+	const float* const input1 = self->input1;
+	float* const      output0 = self->output0;
+	float* const      output1 = self->output1;
 
 	// TODO interpolate
 	if (*self->mix != self->v_mix) {
@@ -256,31 +335,40 @@ run (LV2_Handle instance, uint32_t n_samples)
 		self->r.wet = self->v_mix * u;
 		self->r.dry = u - (self->v_mix * u);
 	}
-	if (*self->gain_in != self->v_gain_in) {
-		self->v_gain_in = *self->gain_in;
-		self->r.inputGain = powf (10.0, .05 * self->v_gain_in);
-	}
-	if (self->gain_out) { // unused
-		const float g = *self->gain_out;
-		const float u = self->r.wet + self->r.dry;
-		self->r.wet = g * (self->r.wet / u);
-		self->r.dry = g * (self->r.dry / u);
+	if (*self->roomsz != self->v_roomsz) {
+		self->v_roomsz = *self->roomsz;
+		self->r.gain[0] = self->v_roomsz;
+		self->r.gain[1] = self->v_roomsz;
+		self->r.gain[2] = self->v_roomsz;
+		self->r.gain[3] = self->v_roomsz;
+		self->r.gain[4] = self->v_roomsz;
+		self->r.gain[5] = self->v_roomsz;
+		self->r.gain[6] = self->v_roomsz;
+		self->r.gain[7] = self->v_roomsz;
 	}
 
-	reverb (&self->r, input, output, n_samples);
+	reverb (&self->r, input0, input1, output0, output1, n_samples);
 }
 
 static void
 activate (LV2_Handle instance)
 {
 	AReverb* self = (AReverb*)instance;
-	self->r.y_1 = 0;
-	self->r.yy1 = 0;
+
+	self->r.y_1_0 = 0;
+	self->r.yy1_0 = 0;
+	self->r.y_1_1 = 0;
+	self->r.yy1_1 = 0;
+	for (int i = 0; i < RV_NZ; ++i) {
+		self->r.delays[0][i] = NULL;
+		self->r.delays[1][i] = NULL;
+	}
 }
 
 static void
 deactivate (LV2_Handle instance)
 {
+	activate(instance);
 }
 
 static void
@@ -288,7 +376,8 @@ cleanup (LV2_Handle instance)
 {
 	AReverb* self = (AReverb*)instance;
 	for (int i = 0; i < RV_NZ; ++i) {
-		free (self->r.delays[i]);
+		free (self->r.delays[0][i]);
+		free (self->r.delays[1][i]);
 	}
 	free (instance);
 }
