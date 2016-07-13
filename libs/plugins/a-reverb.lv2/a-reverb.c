@@ -25,7 +25,7 @@
 #include <math.h>
 #include <string.h>
 
-#define RV_NZ (8+4)
+#define RV_NZ 7
 #define DENORMAL_PROTECT (1e-14)
 
 
@@ -53,7 +53,7 @@ typedef struct {
 static int
 setReverbPointers (b_reverb *r, int i, int c, const double rate)
 {
-	int e = (r->end[c][i] * rate / 44100.0);
+	int e = (r->end[c][i] * rate / 25000.0);
 	e = e | 1;
 	r->delays[c][i] = (float*)realloc ((void*)r->delays[c][i], (e + 2) * sizeof (float));
 	if (!r->delays[c][i]) {
@@ -79,52 +79,37 @@ initReverb (b_reverb *r, const double rate)
 	r->dry = 0.7;
 
 	/* feedback combfilter */
-	r->gain[0] = 0.75;
-	r->gain[1] = 0.75;
-	r->gain[2] = 0.75;
-	r->gain[3] = 0.75;
-	r->gain[4] = 0.75;
-	r->gain[5] = 0.75;
-	r->gain[6] = 0.75;
-	r->gain[7] = 0.75;
+	r->gain[0] = 0.773;
+	r->gain[1] = 0.802;
+	r->gain[2] = 0.753;
+	r->gain[3] = 0.733;
 
 	/* all-pass filter */
-	r->gain[8] = 0.5;
-	r->gain[9] = 0.5;
-	r->gain[10] = 0.5;
-	r->gain[11] = 0.5;
+	r->gain[4] = sqrtf (0.5);
+	r->gain[5] = sqrtf (0.5);
+	r->gain[6] = sqrtf (0.5);
 
 	/* delay lines left */
-	r->end[0][0] = 1116;
-	r->end[0][1] = 1188;
-	r->end[0][2] = 1277;
-	r->end[0][3] = 1356;
-	r->end[0][4] = 1422;
-	r->end[0][5] = 1491;
-	r->end[0][6] = 1557;
-	r->end[0][7] = 1617;
+	r->end[0][0] = 1687;
+	r->end[0][1] = 1601;
+	r->end[0][2] = 2053;
+	r->end[0][3] = 2251;
 
 	/* all pass filters left */
-	r->end[0][8] = 556;
-	r->end[0][9] = 441;
-	r->end[0][10] = 341;
-	r->end[0][11] = 225;
+	r->end[0][4] = 347;
+	r->end[0][5] = 113;
+	r->end[0][6] = 37;
 
 	/* delay lines right */
-	r->end[1][0] = 1116 + stereowidth;
-	r->end[1][1] = 1188 + stereowidth;
-	r->end[1][2] = 1277 + stereowidth;
-	r->end[1][3] = 1356 + stereowidth;
-	r->end[1][4] = 1422 + stereowidth;
-	r->end[1][5] = 1491 + stereowidth;
-	r->end[1][6] = 1557 + stereowidth;
-	r->end[1][7] = 1617 + stereowidth;
+	r->end[1][0] = 1687 + stereowidth;
+	r->end[1][1] = 1601 + stereowidth;
+	r->end[1][2] = 2053 + stereowidth;
+	r->end[1][3] = 2251 + stereowidth;
 
-	/* all pass filters */
-	r->end[1][8] = 556 + stereowidth;
-	r->end[1][9] = 441 + stereowidth;
-	r->end[1][10] = 341 + stereowidth;
-	r->end[1][11] = 225 + stereowidth;
+	/* all pass filters right */
+	r->end[0][4] = 347 + stereowidth;
+	r->end[0][5] = 113 + stereowidth;
+	r->end[0][6] = 37 + stereowidth;
 
 	for (int i = 0; i < RV_NZ; ++i) {
 		r->delays[0][i] = NULL;
@@ -185,7 +170,7 @@ reverb (b_reverb* r,
 		/* First we do four feedback comb filters (ie parallel delay lines,
 		 * each with a single tap at the end that feeds back at the start) */
 
-		for (j = 0; j < 8; ++j) {
+		for (j = 0; j < 4; ++j) {
 			y = *idxp0[j];
 			*idxp0[j] = x0 + (gain[j] * y);
 			if (endp0[j] <= ++(idxp0[j])) {
@@ -193,7 +178,7 @@ reverb (b_reverb* r,
 			}
 			xa += y;
 		}
-		for (; j < 12; ++j) {
+		for (; j < 7; ++j) {
 			y = *idxp0[j];
 			*idxp0[j] = gain[j] * (xa + y);
 			if (endp0[j] <= ++(idxp0[j])) {
@@ -208,7 +193,7 @@ reverb (b_reverb* r,
 
 		*yp0++ = ((wet * y) + (dry * xo0));
 
-		for (j = 0; j < 8; ++j) {
+		for (j = 0; j < 4; ++j) {
 			y = *idxp1[j];
 			*idxp1[j] = x1 + (gain[j] * y);
 			if (endp1[j] <= ++(idxp1[j])) {
@@ -216,7 +201,7 @@ reverb (b_reverb* r,
 			}
 			xb += y;
 		}
-		for (; j < 12; ++j) {
+		for (; j < 7; ++j) {
 			y = *idxp1[j];
 			*idxp1[j] = gain[j] * (xb + y);
 			if (endp1[j] <= ++(idxp1[j])) {
@@ -337,14 +322,10 @@ run (LV2_Handle instance, uint32_t n_samples)
 	}
 	if (*self->roomsz != self->v_roomsz) {
 		self->v_roomsz = *self->roomsz;
-		self->r.gain[0] = self->v_roomsz;
-		self->r.gain[1] = self->v_roomsz;
-		self->r.gain[2] = self->v_roomsz;
-		self->r.gain[3] = self->v_roomsz;
-		self->r.gain[4] = self->v_roomsz;
-		self->r.gain[5] = self->v_roomsz;
-		self->r.gain[6] = self->v_roomsz;
-		self->r.gain[7] = self->v_roomsz;
+		self->r.gain[0] = 0.773 * self->v_roomsz;
+		self->r.gain[1] = 0.802 * self->v_roomsz;
+		self->r.gain[2] = 0.753 * self->v_roomsz;
+		self->r.gain[3] = 0.733 * self->v_roomsz;
 	}
 
 	reverb (&self->r, input0, input1, output0, output1, n_samples);
