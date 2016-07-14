@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 06:18-0400\n"
+"POT-Creation-Date: 2016-07-14 06:20-0400\n"
 "PO-Revision-Date: 2015-03-16 19:51+0100\n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: \n"
@@ -3788,7 +3788,7 @@ msgid "Keep Remaining"
 msgstr ""
 
 #: editor.cc:4150 editor_audio_import.cc:600 editor_ops.cc:6530
-#: engine_dialog.cc:2991 sfdb_freesound_mootcher.cc:69 processor_box.cc:3431
+#: engine_dialog.cc:2986 sfdb_freesound_mootcher.cc:69 processor_box.cc:3431
 #: processor_box.cc:3456
 msgid "Cancel"
 msgstr "Cancelar"
@@ -6629,7 +6629,7 @@ msgstr ""
 msgid "Use Buffered I/O"
 msgstr ""
 
-#: engine_dialog.cc:91 engine_dialog.cc:3005
+#: engine_dialog.cc:91 engine_dialog.cc:3000
 msgid "Measure"
 msgstr "Medir"
 
@@ -6689,7 +6689,7 @@ msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr ""
 "Si estás conforme con los resultados, pulsa el botón \"Usar resultados\"."
 
-#: engine_dialog.cc:235 engine_dialog.cc:3143 engine_dialog.cc:3153
+#: engine_dialog.cc:235 engine_dialog.cc:3138 engine_dialog.cc:3148
 msgid "No measurement results yet"
 msgstr "Aún no hay resultados de la medición"
 
@@ -6799,134 +6799,133 @@ msgstr "Calibrar"
 msgid "all available channels"
 msgstr "Todos los canales disponibles"
 
-#: engine_dialog.cc:1603 latency_gui.cc:39
-#, fuzzy
-msgid "sample"
-msgid_plural "samples"
-msgstr[0] "muestra"
-msgstr[1] "muestra"
+#: engine_dialog.cc:1599 latency_gui.cc:55
+msgid "%1 sample"
+msgid_plural "%1 samples"
+msgstr[0] "%1 muestra"
+msgstr[1] "%1 muestras"
 
-#: engine_dialog.cc:1667
+#: engine_dialog.cc:1662
 #, c-format
 msgid "(%.1f ms)"
 msgstr ""
 
-#: engine_dialog.cc:2418
+#: engine_dialog.cc:2413
 msgid "Could not start backend engine %1"
 msgstr ""
 
-#: engine_dialog.cc:2450
+#: engine_dialog.cc:2445
 msgid "Cannot set driver to %1"
 msgstr ""
 
-#: engine_dialog.cc:2455
+#: engine_dialog.cc:2450
 msgid "Cannot set input device name to %1"
 msgstr ""
 
-#: engine_dialog.cc:2459
+#: engine_dialog.cc:2454
 msgid "Cannot set output device name to %1"
 msgstr ""
 
-#: engine_dialog.cc:2464
+#: engine_dialog.cc:2459
 msgid "Cannot set device name to %1"
 msgstr ""
 
-#: engine_dialog.cc:2469
+#: engine_dialog.cc:2464
 msgid "Cannot set sample rate to %1"
 msgstr ""
 
-#: engine_dialog.cc:2473
+#: engine_dialog.cc:2468
 msgid "Cannot set buffer size to %1"
 msgstr ""
 
-#: engine_dialog.cc:2477
+#: engine_dialog.cc:2472
 msgid "Cannot set periods to %1"
 msgstr ""
 
-#: engine_dialog.cc:2483
+#: engine_dialog.cc:2478
 msgid "Cannot set input channels to %1"
 msgstr ""
 
-#: engine_dialog.cc:2487
+#: engine_dialog.cc:2482
 msgid "Cannot set output channels to %1"
 msgstr ""
 
-#: engine_dialog.cc:2493
+#: engine_dialog.cc:2488
 msgid "Cannot set input latency to %1"
 msgstr ""
 
-#: engine_dialog.cc:2497
+#: engine_dialog.cc:2492
 msgid "Cannot set output latency to %1"
 msgstr ""
 
-#: engine_dialog.cc:2856 engine_dialog.cc:2922
+#: engine_dialog.cc:2851 engine_dialog.cc:2917
 msgid "No signal detected "
 msgstr ""
 
-#: engine_dialog.cc:2863
+#: engine_dialog.cc:2858
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
 msgstr ""
 
-#: engine_dialog.cc:2876 engine_dialog.cc:2930 port_insert_ui.cc:70
+#: engine_dialog.cc:2871 engine_dialog.cc:2925 port_insert_ui.cc:70
 #: port_insert_ui.cc:98
 msgid "Disconnected from audio engine"
 msgstr "Desconectado del motor de audio"
 
-#: engine_dialog.cc:2885 engine_dialog.cc:2938
+#: engine_dialog.cc:2880 engine_dialog.cc:2933
 msgid "Detected roundtrip latency: "
 msgstr ""
 
-#: engine_dialog.cc:2887 engine_dialog.cc:2940
+#: engine_dialog.cc:2882 engine_dialog.cc:2935
 msgid "Systemic latency: "
 msgstr ""
 
-#: engine_dialog.cc:2894
+#: engine_dialog.cc:2889
 msgid "(signal detection error)"
 msgstr ""
 
-#: engine_dialog.cc:2900
+#: engine_dialog.cc:2895
 msgid "(inverted - bad wiring)"
 msgstr ""
 
-#: engine_dialog.cc:2947
+#: engine_dialog.cc:2942
 msgid "(averaging)"
 msgstr ""
 
-#: engine_dialog.cc:2953
+#: engine_dialog.cc:2948
 msgid "(too large jitter)"
 msgstr ""
 
-#: engine_dialog.cc:2957
+#: engine_dialog.cc:2952
 msgid "(large jitter)"
 msgstr ""
 
-#: engine_dialog.cc:2969
+#: engine_dialog.cc:2964
 msgid "Timeout - large MIDI jitter."
 msgstr ""
 
-#: engine_dialog.cc:2985 port_insert_ui.cc:134
+#: engine_dialog.cc:2980 port_insert_ui.cc:134
 msgid "Detecting ..."
 msgstr "Detectando..."
 
-#: engine_dialog.cc:3086
+#: engine_dialog.cc:3081
 msgid "Disconnect from %1"
 msgstr ""
 
-#: engine_dialog.cc:3091
+#: engine_dialog.cc:3086
 msgid "Running"
 msgstr ""
 
-#: engine_dialog.cc:3093
+#: engine_dialog.cc:3088
 msgid "Connected"
 msgstr ""
 
-#: engine_dialog.cc:3104
+#: engine_dialog.cc:3099
 msgid "Connect to %1"
 msgstr ""
 
-#: engine_dialog.cc:3108 shuttle_control.cc:655
+#: engine_dialog.cc:3103 shuttle_control.cc:655
 msgid "Stopped"
 msgstr "Parado"
 
@@ -7885,6 +7884,11 @@ msgstr ""
 msgid "Could not save bindings to file (%1)"
 msgstr ""
 
+#: latency_gui.cc:39
+#, fuzzy
+msgid "sample"
+msgstr "muestra"
+
 #: latency_gui.cc:40
 msgid "msec"
 msgstr "msec"
@@ -7892,12 +7896,6 @@ msgstr "msec"
 #: latency_gui.cc:41
 msgid "period"
 msgstr "periodo"
-
-#: latency_gui.cc:55
-msgid "%1 sample"
-msgid_plural "%1 samples"
-msgstr[0] "%1 muestra"
-msgstr[1] "%1 muestras"
 
 #: latency_gui.cc:72 panner_ui.cc:411 plugin_pin_dialog.cc:109
 #: plugin_ui.cc:421
