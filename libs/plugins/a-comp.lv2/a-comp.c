@@ -623,7 +623,7 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	// maybe cut off at x-position?
 	const float x = w * (self->v_lvl_in + 60) / 60.f;
-	const float y = h * (self->v_lvl_out + 60) / 60.f;
+	//const float y = h * (self->v_lvl_out + 60) / 60.f;
 	cairo_rectangle (cr, 0, h - x, x, h);
 	if (self->v_ratio > 1.0) {
 		cairo_set_source (cr, pat);

@@ -3,7 +3,6 @@
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rsz:  <http://lv2plug.in/ns/ext/resize-port#> .
-@prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
 @prefix unit: <http://lv2plug.in/ns/extensions/units#> .
 
 <http://ardour.org/credits.html>
@@ -139,8 +138,6 @@ A powerful mono compressor.
     doap:name "a-Compressor" ;
 		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
     doap:maintainer <http://ardour.org/credits.html>
-
-#   ui:ui <urn:ardour:a-comp#ui>;
 
     lv2:microVersion 1 ;
     lv2:minorVersion 1 .

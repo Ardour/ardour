@@ -48,16 +48,4 @@ def build(bld):
                   )
         obj.env.cshlib_PATTERN = module_pat
 
-        # Build plugin GUI
-        obj = bld(features     = 'cxx cxxshlib',
-                  source       = 'ui.cc',
-                  name         = 'a-comp-ui',
-                  cxxflags     = [ '-fPIC' ],
-                  target       = '../../LV2/%s/a-comp-ui' % bundle,
-                  install_path = '${LV2DIR}/%s' % bundle,
-                  uselib       = 'GTKMM GTK',
-                  use          = 'LV2_1_0_0'
-                  )
-        obj.env.cxxshlib_PATTERN = module_pat
-
 # vi:set ts=4 sw=4 et:
