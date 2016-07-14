@@ -1195,7 +1195,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
 
-	global_feedback (s->feedback, msg, s->gainmode);
+	global_feedback (s->feedback, lo_message_get_source (msg), s->gainmode);
 	return 0;
 }
 
@@ -1232,7 +1232,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	set_bank(s->bank, msg);
 
 	// Set global/master feedback
-	global_feedback (s->feedback, msg, s->gainmode);
+	global_feedback (s->feedback, lo_message_get_source (msg), s->gainmode);
 	return 0;
 }
 
@@ -1247,7 +1247,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 	set_bank(s->bank, msg);
 
 	// Set global/master feedback
-	global_feedback (s->feedback, msg, s->gainmode);
+	global_feedback (s->feedback, lo_message_get_source (msg), s->gainmode);
 	return 0;
 }
 
@@ -1292,18 +1292,17 @@ OSC::get_surface (lo_address addr)
 
 // setup global feedback for a surface
 void
-OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
+OSC::global_feedback (bitset<32> feedback, lo_address addr, uint32_t gainmode)
 {
 	// first destroy global observer for this surface
 	GlobalObservers::iterator x;
-
 	for (x = global_observers.begin(); x != global_observers.end();) {
 
 		OSCGlobalObserver* ro;
 
 		if ((ro = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
 
-			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(lo_message_get_source (msg)));
+			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(addr));
 
 			if (res == 0) {
 				delete *x;
@@ -1317,8 +1316,7 @@ OSC::global_feedback (bitset<32> feedback, lo_address msg, uint32_t gainmode)
 	}
 	if (feedback[4] || feedback[3] || feedback[5] || feedback[6]) {
 		// create a new Global Observer for this surface
-		//OSCSurface *s = get_surface (lo_message_get_source (msg));
-		OSCGlobalObserver* o = new OSCGlobalObserver (*session, lo_message_get_source (msg), gainmode, /*s->*/feedback);
+		OSCGlobalObserver* o = new OSCGlobalObserver (*session, addr, gainmode, /*s->*/feedback);
 		global_observers.push_back (o);
 	}
 }
@@ -2949,6 +2947,15 @@ OSC::periodic (void)
 {
 	if (!tick) {
 		Glib::usleep(100); // let flurry of signals subside
+		if (global_init) {
+			for (uint32_t it = 0; it < _surface.size(); it++) {
+				OSCSurface* sur = &_surface[it];
+				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
+				global_feedback (sur->feedback, addr, sur->gainmode);
+			}
+			global_init = false;
+			tick = true;
+		}
 		if (bank_dirty) {
 			_recalcbanks ();
 			bank_dirty = false;
@@ -3059,6 +3066,20 @@ OSC::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.add_property("debugmode", (int) _debugmode); // TODO: enum2str
+	if (_surface.size()) {
+		XMLNode* config = new XMLNode (X_("Configurations"));
+		for (uint32_t it = 0; it < _surface.size(); ++it) {
+			OSCSurface* sur = &_surface[it];
+			XMLNode* devnode = new XMLNode (X_("Configuration"));
+			devnode->add_property (X_("url"), sur->remote_url);
+			devnode->add_property (X_("bank-size"), sur->bank_size);
+			devnode->add_property (X_("strip-types"), sur->strip_types.to_ulong());
+			devnode->add_property (X_("feedback"), sur->feedback.to_ulong());
+			devnode->add_property (X_("gainmode"), sur->gainmode);
+			config->add_child_nocopy (*devnode);
+		}
+		node.add_child_nocopy (*config);
+	}
 	return node;
 }
 
@@ -3072,6 +3093,44 @@ OSC::set_state (const XMLNode& node, int version)
 	if (p) {
 		_debugmode = OSCDebugMode (PBD::atoi(p->value ()));
 	}
+	XMLNode* cnode = node.child (X_("Configurations"));
+
+	if (cnode) {
+		XMLNodeList const& devices = cnode->children();
+		for (XMLNodeList::const_iterator d = devices.begin(); d != devices.end(); ++d) {
+			XMLProperty const * prop = (*d)->property (X_("url"));
+			if (prop) {
+				OSCSurface s;
+				bank_dirty = true;
+				s.remote_url = prop->value();
+				prop = (*d)->property (X_("bank-size"));
+				if (prop) {
+					s.bank_size = atoi (prop->value().c_str());
+				}
+				prop = (*d)->property (X_("strip-types"));
+				if (prop) {
+					s.strip_types = atoi (prop->value().c_str());
+				}
+				prop = (*d)->property (X_("feedback"));
+				if (prop) {
+					s.feedback = atoi (prop->value().c_str());
+				}
+				prop = (*d)->property (X_("gainmode"));
+				if (prop) {
+					s.gainmode = atoi (prop->value().c_str());
+				}
+				s.bank = 1;
+				s.sel_obs = 0;
+				s.expand = 0;
+				s.expand_enable = false;
+				s.strips = get_sorted_stripables(s.strip_types);
+				s.nstrips = s.strips.size();
+				_surface.push_back (s);
+			}
+		}
+	}
+	global_init = true;
+	tick = false;
 
 	return 0;
 }
