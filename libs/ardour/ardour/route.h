@@ -588,6 +588,8 @@ public:
 	                                     pframes_t nframes, int declick,
 	                                     bool gain_automation_ok);
 
+	void flush_processor_buffers_locked (framecnt_t nframes);
+
 	virtual void bounce_process (BufferSet& bufs,
 	                             framepos_t start_frame, framecnt_t nframes,
 															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,

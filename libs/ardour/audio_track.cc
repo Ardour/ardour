@@ -394,12 +394,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!diskstream->record_enabled() && _session.transport_rolling()));
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
-		if (d) {
-			d->flush_buffers (nframes);
-		}
-	}
+	flush_processor_buffers_locked (nframes);
 
 	need_butler = diskstream->commit (playback_distance);
 

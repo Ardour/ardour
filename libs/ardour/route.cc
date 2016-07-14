@@ -3391,6 +3391,17 @@ Route::pans_required () const
 	return max (n_inputs ().n_audio(), processor_max_streams.n_audio());
 }
 
+void
+Route::flush_processor_buffers_locked (framecnt_t nframes)
+{
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		if (d) {
+			d->flush_buffers (nframes);
+		}
+	}
+}
+
 int
 Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
@@ -3436,12 +3447,8 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	_trim->apply_gain_automation (false);
 	passthru (bufs, start_frame, end_frame, nframes, 0);
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
-		if (d) {
-			d->flush_buffers (nframes);
-		}
-	}
+	flush_processor_buffers_locked (nframes);
+
 	return 0;
 }
 
@@ -3480,12 +3487,8 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
-		if (d) {
-			d->flush_buffers (nframes);
-		}
-	}
+	flush_processor_buffers_locked (nframes);
+
 	return 0;
 }
 
