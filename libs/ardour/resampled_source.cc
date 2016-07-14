@@ -81,7 +81,7 @@ ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 		_src_data.input_frames = source->read (_input, bs);
 
 		/* The last read will not be a full buffer, so set end_of_input. */
-		if ((framecnt_t) _src_data.input_frames < bs) {
+		if ((size_t) _src_data.input_frames < bs) {
 			_end_of_input = true;
 		}
 
