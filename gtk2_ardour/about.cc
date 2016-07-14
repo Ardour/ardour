@@ -36,7 +36,7 @@
 #include "configinfo.h"
 #include "rgb_macros.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"

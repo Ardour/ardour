@@ -18,7 +18,7 @@
 */
 #include <cstdio>
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "pbd/pathexpand.h"
 #include "gtkmm2ext/paths_dialog.h"
 

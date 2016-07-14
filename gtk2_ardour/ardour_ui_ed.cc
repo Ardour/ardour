@@ -68,7 +68,7 @@
 
 #include "control_protocol/control_protocol.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

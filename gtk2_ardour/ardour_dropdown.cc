@@ -35,7 +35,7 @@
 
 #include "ardour_dropdown.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #define REFLECTION_HEIGHT 2
 

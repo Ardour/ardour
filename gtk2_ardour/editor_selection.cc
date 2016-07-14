@@ -43,7 +43,7 @@
 #include "midi_region_view.h"
 #include "sfdb_ui.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

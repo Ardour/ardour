@@ -35,7 +35,7 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Glib;

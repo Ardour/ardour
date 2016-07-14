@@ -57,7 +57,7 @@
 #include "jog.h"
 #include "meter.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
 #define random() rand()

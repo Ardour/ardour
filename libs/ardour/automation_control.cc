@@ -31,7 +31,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef COMPILER_MSVC
 #include <float.h>

@@ -57,7 +57,7 @@
 #include "ardour/utils.h"
 #include "ardour/rc_configuration.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace std;

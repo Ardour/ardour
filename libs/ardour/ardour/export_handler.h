@@ -34,7 +34,7 @@
 #include "ardour/types.h"
 #include "pbd/signals.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace AudioGrapher {
 	class BroadcastInfo;

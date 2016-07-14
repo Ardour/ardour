@@ -26,7 +26,7 @@
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtkmm2ext;
 using namespace std;

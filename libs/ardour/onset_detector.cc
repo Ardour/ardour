@@ -20,7 +20,7 @@
 #include <cmath>
 #include "ardour/onset_detector.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Vamp;
 using namespace ARDOUR;

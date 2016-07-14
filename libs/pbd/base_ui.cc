@@ -35,7 +35,7 @@
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "pbd/debug.h"
 

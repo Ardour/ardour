@@ -32,7 +32,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Glib;
 using namespace ARDOUR;

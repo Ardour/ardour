@@ -31,7 +31,7 @@
 
 #include "device_info.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

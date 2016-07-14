@@ -20,7 +20,7 @@
 #include "control_point_dialog.h"
 #include "control_point.h"
 #include "automation_line.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include <gtkmm/stock.h>
 
 /**

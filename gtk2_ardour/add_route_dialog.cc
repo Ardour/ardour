@@ -43,7 +43,7 @@
 #include "add_route_dialog.h"
 #include "route_group_dialog.h"
 #include "tooltips.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;

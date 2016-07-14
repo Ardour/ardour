@@ -29,7 +29,7 @@
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
 #include "shlobj.h"

@@ -42,7 +42,7 @@
 #include "vbap.h"
 #include "vbap_speakers.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

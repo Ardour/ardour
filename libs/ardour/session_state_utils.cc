@@ -30,7 +30,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/filename_extensions.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;

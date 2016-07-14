@@ -38,7 +38,7 @@
 #include "public_editor.h"
 #include "ui_config.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                  parent,
                                             AutomationTimeAxisView&                   time_axis,

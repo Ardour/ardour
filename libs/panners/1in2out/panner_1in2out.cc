@@ -51,7 +51,7 @@
 #include "ardour/pannable.h"
 #include "ardour/profile.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "panner_1in2out.h"
 
 #include "pbd/mathfix.h"

@@ -35,7 +35,7 @@
 
 #include "pbd/convert.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using std::string;
 using std::vector;

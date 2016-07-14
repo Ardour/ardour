@@ -42,7 +42,7 @@
 #include "pbd/windows_mmcss.h"
 #endif
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 extern void setup_libpbd_enums ();
 

@@ -23,7 +23,7 @@
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 

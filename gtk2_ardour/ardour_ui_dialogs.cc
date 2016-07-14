@@ -70,7 +70,7 @@
 #include "time_info_box.h"
 #include "timers.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

@@ -23,7 +23,7 @@
 #include <iostream>
 #include "ardour/chan_mapping.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 static const char* state_node_name = "Channelmap";
 

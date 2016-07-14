@@ -37,7 +37,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 MidiControlUI* MidiControlUI::_instance = 0;
 

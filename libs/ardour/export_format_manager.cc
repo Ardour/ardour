@@ -23,7 +23,7 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_format_compatibility.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using std::string;
 

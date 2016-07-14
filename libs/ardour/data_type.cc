@@ -18,7 +18,7 @@
 */
 
 #include "ardour/data_type.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 const char *
 ARDOUR::DataType::to_i18n_string () const

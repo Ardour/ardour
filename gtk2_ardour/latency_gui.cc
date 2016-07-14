@@ -27,7 +27,7 @@
 
 #include "latency_gui.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace Gtk;

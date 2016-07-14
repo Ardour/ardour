@@ -83,7 +83,7 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace Mackie;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "pbd/abstract_ui.cc" // instantiate template
 

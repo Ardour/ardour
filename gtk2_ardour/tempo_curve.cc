@@ -16,7 +16,7 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 PBD::Signal1<void,TempoCurve*> TempoCurve::CatchDeletion;
 

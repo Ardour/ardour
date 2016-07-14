@@ -40,7 +40,7 @@
 #include "ardour/uri_map.h"
 #include "ardour/value_as_string.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

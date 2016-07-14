@@ -26,7 +26,7 @@
 #include "ardour/tempo.h"
 #include "pbd/failed_constructor.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;

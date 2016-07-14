@@ -48,7 +48,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace ARDOUR { template <typename T> class MidiRingBuffer; }
 

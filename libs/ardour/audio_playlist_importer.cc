@@ -31,7 +31,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/session_playlists.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;

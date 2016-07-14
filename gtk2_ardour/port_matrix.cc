@@ -37,7 +37,7 @@
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
 #include "ardour_dialog.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "gui_thread.h"
 #include "utils.h"
 

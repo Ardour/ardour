@@ -24,7 +24,7 @@
 #include "export_format_dialog.h"
 #include "gui_thread.h"
 #include "tooltips.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 

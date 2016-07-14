@@ -25,7 +25,7 @@
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using std::map;
 using namespace std;

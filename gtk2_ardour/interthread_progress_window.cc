@@ -22,7 +22,7 @@
 #include "gtkmm2ext/utils.h"
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

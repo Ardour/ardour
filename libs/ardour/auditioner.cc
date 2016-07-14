@@ -43,7 +43,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 Auditioner::Auditioner (Session& s)
 	: Track (s, "auditioner", PresentationInfo::Auditioner)

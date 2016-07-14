@@ -40,7 +40,7 @@
 #include "selection.h"
 #include "script_selector.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace LuaCairo {
 /** wrap RefPtr< Cairo::ImageSurface >

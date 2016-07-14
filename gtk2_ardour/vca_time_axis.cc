@@ -33,7 +33,7 @@
 #include "ui_config.h"
 #include "vca_time_axis.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;

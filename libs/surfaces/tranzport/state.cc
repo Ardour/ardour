@@ -38,7 +38,7 @@ using namespace std;
 using namespace sigc;
 using namespace PBD;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "pbd/abstract_ui.cc"
 

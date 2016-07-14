@@ -37,7 +37,7 @@
 
 #include "ardour_display.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtkmm2ext;
 using namespace Gdk;

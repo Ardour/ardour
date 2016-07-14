@@ -41,7 +41,7 @@
 #include "time_axis_view.h"
 #include "ui_config.h"
 #include "utils.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "audio_time_axis.h"
 #include "editor_group_tabs.h"
 #include "editor_routes.h"

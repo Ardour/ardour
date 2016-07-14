@@ -21,7 +21,7 @@
 #include "pbd/shortpath.h"
 
 #include "search_path_option.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

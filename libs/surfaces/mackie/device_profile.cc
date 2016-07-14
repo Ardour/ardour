@@ -33,7 +33,7 @@
 #include "mackie_control_protocol.h"
 #include "device_profile.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

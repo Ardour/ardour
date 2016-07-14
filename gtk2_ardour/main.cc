@@ -58,7 +58,7 @@
 #include "enums.h"
 #include "bundle_env.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <fcntl.h> // Needed for '_fmode'

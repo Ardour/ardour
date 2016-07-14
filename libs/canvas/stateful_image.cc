@@ -11,7 +11,7 @@
 #include "canvas/stateful_image.h"
 #include "canvas/utils.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ArdourCanvas;
 using PBD::error;

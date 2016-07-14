@@ -53,7 +53,7 @@
 #include "ardour/session.h"
 #include "ardour/speakers.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "pbd/mathfix.h"
 

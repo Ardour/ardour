@@ -50,7 +50,7 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

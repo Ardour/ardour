@@ -23,7 +23,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_scene_change.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

@@ -51,7 +51,7 @@
 #include "startup.h"
 #include "opts.h"
 #include "engine_dialog.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "utils.h"
 
 using namespace std;

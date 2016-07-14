@@ -61,7 +61,7 @@
 #include <AudioToolbox/AudioFormat.h>
 #endif // HAVE_COREAUDIO
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

@@ -22,7 +22,7 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace ARDOUR {
 

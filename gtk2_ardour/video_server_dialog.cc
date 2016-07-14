@@ -36,7 +36,7 @@
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
 #include "video_tool_paths.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>

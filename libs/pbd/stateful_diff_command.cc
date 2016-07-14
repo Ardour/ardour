@@ -20,7 +20,7 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/property_list.h"
 #include "pbd/demangle.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;

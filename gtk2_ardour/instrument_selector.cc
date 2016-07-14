@@ -20,7 +20,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "instrument_selector.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;

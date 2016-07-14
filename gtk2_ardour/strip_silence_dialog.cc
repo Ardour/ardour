@@ -32,7 +32,7 @@
 #include "strip_silence_dialog.h"
 #include "region_view.h"
 #include "rgb_macros.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "logmeter.h"
 
 using namespace ARDOUR;

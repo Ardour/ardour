@@ -37,7 +37,7 @@
 #include "pbd/basename.h"
 #include "pbd/error.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 /***********************************************************/
 /* VSTFX - A set of modules for managing linux VST plugins */

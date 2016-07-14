@@ -43,7 +43,7 @@ class Command;
 using namespace PBD;
 using namespace ARDOUR;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulDestructible *ptr)
 {

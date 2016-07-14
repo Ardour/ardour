@@ -45,7 +45,7 @@
 #include "meter_strip.h"
 #include "meter_patterns.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;

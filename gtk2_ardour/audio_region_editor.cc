@@ -33,7 +33,7 @@
 #include "audio_region_view.h"
 #include "gui_thread.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

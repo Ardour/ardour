@@ -31,7 +31,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace ARDOUR
 {

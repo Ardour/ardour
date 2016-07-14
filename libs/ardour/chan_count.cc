@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include "ardour/chan_count.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 static const char* state_node_name = "Channels";
 

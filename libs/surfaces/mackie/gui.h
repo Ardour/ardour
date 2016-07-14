@@ -33,7 +33,7 @@ namespace Gtk {
 
 #include "button.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace ArdourSurface {
 

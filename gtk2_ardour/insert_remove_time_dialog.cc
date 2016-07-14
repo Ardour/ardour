@@ -23,7 +23,7 @@
 #include <gtkmm/alignment.h>
 #include "insert_remove_time_dialog.h"
 #include "audio_clock.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Editing;

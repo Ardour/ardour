@@ -71,7 +71,7 @@
 #include "utils.h"
 
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;

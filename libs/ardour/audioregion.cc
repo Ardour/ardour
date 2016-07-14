@@ -55,7 +55,7 @@
 #include "ardour/coreaudiosource.h"
 #endif // HAVE_COREAUDIO
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include <locale.h>
 
 using namespace std;

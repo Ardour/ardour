@@ -21,7 +21,7 @@
 #include <sstream>
 
 #include "gui_object.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using std::string;
 

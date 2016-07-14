@@ -35,7 +35,7 @@
 #include "interthread_progress_window.h"
 
 #include "pbd/openuri.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 

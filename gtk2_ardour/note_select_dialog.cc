@@ -21,7 +21,7 @@
 
 #include "note_select_dialog.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 static void
 _note_on_event_handler(GtkWidget* /*widget*/, int note, gpointer arg)

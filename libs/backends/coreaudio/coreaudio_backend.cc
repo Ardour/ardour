@@ -31,7 +31,7 @@
 #include "pbd/file_utils.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 

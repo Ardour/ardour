@@ -58,7 +58,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "ardour/debug.h"
 

@@ -18,7 +18,7 @@
 */
 
 #include "bundle_env.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include <shlobj.h>
 #include <stdlib.h>

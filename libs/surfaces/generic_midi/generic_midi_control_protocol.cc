@@ -53,7 +53,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 

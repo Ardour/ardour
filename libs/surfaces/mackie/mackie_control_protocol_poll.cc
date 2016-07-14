@@ -9,7 +9,7 @@
 #include "midi++/types.h"
 #include "midi++/port.h"
 #include "midi++/manager.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include <unistd.h>
 #include <fcntl.h>

@@ -20,7 +20,7 @@
 #include "editor_locations.h"
 #include "location_ui.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;

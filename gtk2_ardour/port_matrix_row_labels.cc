@@ -27,7 +27,7 @@
 #include "port_matrix_row_labels.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 

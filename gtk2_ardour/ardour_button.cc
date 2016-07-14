@@ -39,7 +39,7 @@
 #include "tooltips.h"
 #include "ui_config.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #define BASELINESTRETCH (1.25)
 #define TRACKHEADERBTNW (3.10)

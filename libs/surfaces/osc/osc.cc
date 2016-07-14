@@ -56,7 +56,7 @@
 #include "osc_controllable.h"
 #include "osc_route_observer.h"
 #include "osc_global_observer.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace std;

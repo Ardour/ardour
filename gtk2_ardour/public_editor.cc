@@ -19,7 +19,7 @@
 
 #include "public_editor.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 PublicEditor* PublicEditor::_instance = 0;
 

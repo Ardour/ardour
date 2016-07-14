@@ -22,7 +22,7 @@
 #undef interface
 #endif
 #include "export_video_infobox.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace std;

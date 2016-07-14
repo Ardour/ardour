@@ -48,7 +48,7 @@
 #include "ardour/slave.h"
 #include "ardour/ticker.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

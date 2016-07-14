@@ -22,7 +22,7 @@
 #include "ardour/ardour.h"
 
 #include "configinfo.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 ConfigInfoDialog::ConfigInfoDialog ()
 	: ArdourDialog (_("Build Configuration"))

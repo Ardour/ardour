@@ -43,7 +43,7 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/debug.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace Gtk;

@@ -30,7 +30,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/utils.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 namespace ARDOUR {
 

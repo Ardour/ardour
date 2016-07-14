@@ -32,7 +32,7 @@ def build(bld):
     obj.includes     = ['.', './control_protocol']
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
-    obj.use          = 'libardour'
+    obj.use          = 'libardour libpbd'
     obj.uselib       = 'GLIBMM SIGCPP XML'
     obj.install_path = bld.env['LIBDIR']
 

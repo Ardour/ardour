@@ -54,7 +54,7 @@
 #include "session_dialog.h"
 #include "opts.h"
 #include "engine_dialog.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"

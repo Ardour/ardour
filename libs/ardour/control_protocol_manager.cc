@@ -38,7 +38,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");

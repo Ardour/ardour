@@ -32,7 +32,7 @@
 #include "surface.h"
 #include "fader.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 /* handlers for all buttons, broken into a separate file to avoid clutter in
  * mackie_control_protocol.cc

@@ -44,7 +44,7 @@
 #include "canvas/scroll_group.h"
 
 #include "editor.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "keyboard.h"
 #include "audio_region_view.h"
 #include "automation_region_view.h"

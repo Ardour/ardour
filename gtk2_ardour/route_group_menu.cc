@@ -29,7 +29,7 @@
 #include "route_group_menu.h"
 #include "route_group_dialog.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;

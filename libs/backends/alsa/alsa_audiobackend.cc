@@ -32,7 +32,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "ardouralsautil/devicelist.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 

@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string>
 #include "bundle_env.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include <glibmm.h>
 #include <fontconfig/fontconfig.h>

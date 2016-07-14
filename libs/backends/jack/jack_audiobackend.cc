@@ -36,7 +36,7 @@
 #include "jack_utils.h"
 #include "jack_session.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

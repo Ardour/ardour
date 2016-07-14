@@ -25,7 +25,7 @@
 
 #include "gtkmm2ext/cursors.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtkmm2ext;
 

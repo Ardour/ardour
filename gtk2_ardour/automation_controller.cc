@@ -36,7 +36,7 @@
 #include "note_select_dialog.h"
 #include "timers.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;

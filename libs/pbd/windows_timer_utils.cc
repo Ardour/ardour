@@ -25,7 +25,7 @@
 #include "pbd/debug.h"
 #include "pbd/error.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #define DEBUG_TIMING(msg) DEBUG_TRACE (PBD::DEBUG::Timing, msg);
 

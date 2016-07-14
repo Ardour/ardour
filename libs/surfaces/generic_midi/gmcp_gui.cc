@@ -41,7 +41,7 @@
 
 #include "generic_midi_control_protocol.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 class GMCPGUI : public Gtk::VBox
 {

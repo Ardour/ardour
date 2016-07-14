@@ -35,7 +35,7 @@
 
 #include "add_video_dialog.h"
 #include "utils_videotl.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace std;

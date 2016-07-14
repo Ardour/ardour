@@ -44,7 +44,7 @@
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include <locale.h>
 
 using namespace std;

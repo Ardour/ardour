@@ -26,7 +26,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/debug.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #ifdef COMPILER_MSVC
 #include <ardourext/misc.h>  // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be

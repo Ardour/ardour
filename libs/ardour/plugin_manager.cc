@@ -95,7 +95,7 @@
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "ardour/debug.h"
 

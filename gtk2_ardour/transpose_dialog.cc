@@ -22,7 +22,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 #include "transpose_dialog.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 

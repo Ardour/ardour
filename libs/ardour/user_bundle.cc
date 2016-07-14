@@ -18,7 +18,7 @@
 */
 
 #include "ardour/user_bundle.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"

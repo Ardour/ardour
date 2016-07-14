@@ -25,7 +25,7 @@
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/utils.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents)
 	: Gtk::Window (Gtk::WINDOW_POPUP)

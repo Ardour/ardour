@@ -52,7 +52,7 @@
 #include "ardour/plugin_types.h"
 #include "ardour/vst_info_file.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "sha1.c"
 
 #define MAX_STRING_LEN 256

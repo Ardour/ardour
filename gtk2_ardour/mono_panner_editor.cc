@@ -24,7 +24,7 @@
 #include "pbd/controllable.h"
 #include "mono_panner_editor.h"
 #include "mono_panner.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;

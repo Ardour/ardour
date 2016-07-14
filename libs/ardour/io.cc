@@ -43,7 +43,7 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
 

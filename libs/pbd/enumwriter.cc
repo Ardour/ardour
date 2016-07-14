@@ -31,7 +31,7 @@
 using namespace std;
 using namespace PBD;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 EnumWriter* EnumWriter::_instance = 0;
 map<string,string> EnumWriter::hack_table;

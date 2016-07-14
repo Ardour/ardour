@@ -31,7 +31,7 @@
 #include "utils_videotl.h"
 #include "video_tool_paths.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace VideoUtils;

@@ -60,7 +60,7 @@
 #include "rc_option_editor.h"
 #include "time_info_box.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

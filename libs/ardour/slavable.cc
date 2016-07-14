@@ -30,7 +30,7 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

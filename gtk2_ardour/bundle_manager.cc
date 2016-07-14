@@ -29,7 +29,7 @@
 #include "ardour/user_bundle.h"
 #include "bundle_manager.h"
 #include "gui_thread.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "utils.h"
 
 using namespace std;

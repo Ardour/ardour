@@ -20,7 +20,7 @@
 
 #include "lua_script_manager.h"
 #include "script_selector.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

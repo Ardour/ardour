@@ -22,7 +22,7 @@
 
 #include "ardour/export_preset.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 ExportPresetSelector::ExportPresetSelector () :
   label (_("Preset"), Gtk::ALIGN_LEFT),

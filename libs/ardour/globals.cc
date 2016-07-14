@@ -119,7 +119,7 @@
        #include <Carbon/Carbon.h> // For Gestalt
 #endif
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 ARDOUR::RCConfiguration* ARDOUR::Config = 0;
 ARDOUR::RuntimeProfile* ARDOUR::Profile = 0;

@@ -21,7 +21,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include <map>
 #include <cerrno>

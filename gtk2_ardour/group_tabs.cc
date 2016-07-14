@@ -31,7 +31,7 @@
 #include "route_group_dialog.h"
 #include "group_tabs.h"
 #include "keyboard.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "ui_config.h"

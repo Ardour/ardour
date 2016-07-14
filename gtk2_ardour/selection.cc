@@ -41,7 +41,7 @@
 #include "public_editor.h"
 #include "control_point.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

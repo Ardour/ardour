@@ -30,7 +30,7 @@
 #include "mixer_ui.h"
 #include "meterbridge.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
