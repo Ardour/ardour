@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:15-0400\n"
+"POT-Creation-Date: 2016-07-14 06:18-0400\n"
 "PO-Revision-Date: 2015-03-28 20:54+0100\n"
 "Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
 "Language-Team: \n"
@@ -176,7 +176,7 @@ msgstr ""
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr ""
 
-#: audio_backend.cc:107 export_formats.cc:52 session.cc:6806 session.cc:6826
+#: audio_backend.cc:107 export_formats.cc:52 session.cc:6771 session.cc:6791
 msgid "None"
 msgstr "Aucune"
 
@@ -295,7 +295,7 @@ msgstr "Listes de lecture Audio (inutilisées)"
 #: audio_playlist_source.cc:171 audiosource.cc:1046
 #: midi_playlist_source.cc:147 midi_playlist_source.cc:155
 #: midi_playlist_source.cc:162 midi_source.cc:403 plugin_insert.cc:1259
-#: rb_effect.cc:327 session.cc:5348 session.cc:5375 session.cc:5495
+#: rb_effect.cc:327 session.cc:5313 session.cc:5340 session.cc:5460
 #: session_handle.cc:88 sndfilesource.cc:173
 #, fuzzy
 msgid "programming error: %1"
@@ -596,7 +596,7 @@ msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: control_protocol_manager.cc:520
+#: control_protocol_manager.cc:516
 msgid "Control protocol \"%1\" has no descriptor"
 msgstr ""
 
@@ -616,7 +616,7 @@ msgstr ""
 msgid "audio"
 msgstr "Audio"
 
-#: data_type.cc:28 session.cc:2486
+#: data_type.cc:28 session.cc:2451
 #, fuzzy
 msgid "MIDI"
 msgstr "MIDI"
@@ -997,7 +997,7 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "Chargement de la configuration"
 
-#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1191
+#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1156
 #, fuzzy
 msgid "Monitor"
 msgstr ": moniteur"
@@ -1166,15 +1166,15 @@ msgstr "Entrée %s"
 msgid "%s out"
 msgstr "Sortie %s"
 
-#: io.cc:1578 session.cc:991 session.cc:1025
+#: io.cc:1578 session.cc:956 session.cc:990
 msgid "mono"
 msgstr "Mono"
 
-#: io.cc:1580 session.cc:1004 session.cc:1039
+#: io.cc:1580 session.cc:969 session.cc:1004
 msgid "L"
 msgstr "G"
 
-#: io.cc:1580 session.cc:1006 session.cc:1041
+#: io.cc:1580 session.cc:971 session.cc:1006
 msgid "R"
 msgstr "D"
 
@@ -1264,7 +1264,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:1059 session.cc:1701 session.cc:6339 session_state.cc:1205
+#: location.cc:1059 session.cc:1666 session.cc:6304 session_state.cc:1205
 msgid "session"
 msgstr "Session"
 
@@ -1983,13 +1983,13 @@ msgstr ""
 msgid "non-port insert XML used for port plugin insert"
 msgstr ""
 
-#: port_manager.cc:295
+#: port_manager.cc:288
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr ""
 
-#: port_manager.cc:297
+#: port_manager.cc:290
 msgid ""
 "No more ports are available. You will need to stop %1 and restart with more "
 "ports if you need this many tracks."
@@ -1997,20 +1997,20 @@ msgstr ""
 "Plus de port disponible. Vous devez stopper %1 et redémarrer avec plus de "
 "ports si vous avez besoin d'autant de pistes."
 
-#: port_manager.cc:300
+#: port_manager.cc:293
 #, fuzzy
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
 
-#: port_manager.cc:343
+#: port_manager.cc:332
 msgid "unable to create port: %1"
 msgstr "création de port impossible : %1"
 
-#: port_manager.cc:464
+#: port_manager.cc:453
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr ""
 
-#: port_manager.cc:516 port_manager.cc:517
+#: port_manager.cc:505 port_manager.cc:506
 msgid "Re-establising port %1 failed"
 msgstr ""
 
@@ -2254,72 +2254,72 @@ msgstr ""
 msgid "could not setup Click I/O"
 msgstr ""
 
-#: session.cc:985
+#: session.cc:950
 #, fuzzy, c-format
 msgid "out %s"
 msgstr "Sortie %s"
 
-#: session.cc:987
+#: session.cc:952
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "Sortie %<PRIu32>"
 
-#: session.cc:1002
+#: session.cc:967
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "Sortie %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1019
+#: session.cc:984
 #, fuzzy, c-format
 msgid "in %s"
 msgstr "Entrée %s"
 
-#: session.cc:1021
+#: session.cc:986
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "Entrée %<PRIu32>"
 
-#: session.cc:1036
+#: session.cc:1001
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "Entrée %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1116
+#: session.cc:1081
 msgid "cannot connect master output %1 to %2"
 msgstr "Connection de sortie Master %1 à %2 impossible"
 
-#: session.cc:1204
+#: session.cc:1169
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 
-#: session.cc:1238 session.cc:1369
+#: session.cc:1203 session.cc:1334
 #, fuzzy
 msgid "cannot connect control input %1 to %2"
 msgstr "Connection de sortie Master %1 à %2 impossible"
 
-#: session.cc:1258 session.cc:1388
+#: session.cc:1223 session.cc:1353
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Préférences d'E/S du bus de Monitoring introuvables"
 
-#: session.cc:1289 session.cc:1419
+#: session.cc:1254 session.cc:1384
 #, fuzzy
 msgid "cannot connect control output %1 to %2"
 msgstr "Connection de sortie Master %1 à %2 impossible"
 
-#: session.cc:1477
+#: session.cc:1442
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 "Création du bus d'Audition impossible : pas d'audition de région possible"
 
-#: session.cc:1678
+#: session.cc:1643
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "Session : le Punch ne peut pas utiliser cet intervalle (début <= fin)"
 
-#: session.cc:1705
+#: session.cc:1670
 msgid "Session: you can't use that location for session start/end)"
 msgstr ""
 
-#: session.cc:1737
+#: session.cc:1702
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -2327,31 +2327,31 @@ msgstr ""
 "La boucle ne peut utiliser cet intervalle car sa durée est inférieure ou "
 "égale à zéro"
 
-#: session.cc:1920
+#: session.cc:1885
 msgid "programming error: session range removed!"
 msgstr ""
 
-#: session.cc:2192
+#: session.cc:2157
 msgid "feedback loop setup between %1 and %2"
 msgstr ""
 
-#: session.cc:2453
+#: session.cc:2418
 msgid "Track "
 msgstr ""
 
-#: session.cc:2455
+#: session.cc:2420
 msgid "Audio "
 msgstr ""
 
-#: session.cc:2460
+#: session.cc:2425
 msgid "MIDI "
 msgstr ""
 
-#: session.cc:2534
+#: session.cc:2499
 msgid "Session: could not create new midi track."
 msgstr "Session : création de nouvelle piste MIDI impossible."
 
-#: session.cc:2540
+#: session.cc:2505
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2359,84 +2359,84 @@ msgstr ""
 "Plus de port JACK disponible. Vous devez stopper %1 et redémarrer JACK avec "
 "plus de ports si vous avez besoin d'autant de pistes."
 
-#: session.cc:2581 session.cc:2584
+#: session.cc:2546 session.cc:2549
 msgid "Midi Bus"
 msgstr ""
 
-#: session.cc:2606
+#: session.cc:2571
 msgid "cannot configure new midi bus input"
 msgstr ""
 
-#: session.cc:2612
+#: session.cc:2577
 msgid "cannot configure new midi bus output"
 msgstr ""
 
-#: session.cc:2626 session.cc:3171
+#: session.cc:2591 session.cc:3136
 msgid "Session: could not create new audio route."
 msgstr "Session : impossible de créer un nouveau routage Audio."
 
-#: session.cc:3056 session.cc:3064 session.cc:3147 session.cc:3155
+#: session.cc:3021 session.cc:3029 session.cc:3112 session.cc:3120
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "Impossible de créer une piste Audio avec %1 Entrée(s) / %2 Sortie(s)"
 
-#: session.cc:3084
+#: session.cc:3049
 msgid "Session: could not create new audio track."
 msgstr "Session : impossible de créer une nouvelle piste Audio."
 
-#: session.cc:3122 session.cc:3125
+#: session.cc:3087 session.cc:3090
 #, fuzzy
 msgid "Bus"
 msgstr "Bus"
 
-#: session.cc:3241 session.cc:3251
+#: session.cc:3206 session.cc:3216
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr ""
 
-#: session.cc:3327
+#: session.cc:3292
 msgid "Session: cannot create track/bus from template description"
 msgstr ""
 
-#: session.cc:3365
+#: session.cc:3330
 msgid "Session: could not create new route from template"
 msgstr ""
 
-#: session.cc:3399
+#: session.cc:3364
 msgid "Adding new tracks/busses failed"
 msgstr "Echec de l'ajout de nouvelles pistes/bus"
 
-#: session.cc:4818
+#: session.cc:4783
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr ""
 
-#: session.cc:4948 session.cc:5021
+#: session.cc:4913 session.cc:4986
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Il y a déjà %1 prises pour %2, c'est trop !"
 
-#: session.cc:5697
+#: session.cc:5662
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5709
+#: session.cc:5674
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5721
+#: session.cc:5686
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5733
+#: session.cc:5698
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5859
+#: session.cc:5824
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Impossible d'établir un intervalle où fin <= début (ex. %1 <= %2)"
 
-#: session.cc:5868
+#: session.cc:5833
 msgid "Cannot write a range with no data."
 msgstr ""
 
-#: session.cc:5910
+#: session.cc:5875
 #, fuzzy
 msgid "cannot create new file \"%1\" for %2"
 msgstr "(%2) : création du répertoire %1 pour l'utilisateur %3 impossible"

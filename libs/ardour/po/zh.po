@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:15-0400\n"
+"POT-Creation-Date: 2016-07-14 06:18-0400\n"
 "PO-Revision-Date: 2016-03-27 10:49+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -175,7 +175,7 @@ msgstr "内存溢出错误"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "无法连接音频/MIDI引擎"
 
-#: audio_backend.cc:107 export_formats.cc:52 session.cc:6806 session.cc:6826
+#: audio_backend.cc:107 export_formats.cc:52 session.cc:6771 session.cc:6791
 msgid "None"
 msgstr "无"
 
@@ -287,7 +287,7 @@ msgstr "音频播放列表（未使用的）"
 #: audio_playlist_source.cc:171 audiosource.cc:1046
 #: midi_playlist_source.cc:147 midi_playlist_source.cc:155
 #: midi_playlist_source.cc:162 midi_source.cc:403 plugin_insert.cc:1259
-#: rb_effect.cc:327 session.cc:5348 session.cc:5375 session.cc:5495
+#: rb_effect.cc:327 session.cc:5313 session.cc:5340 session.cc:5460
 #: session_handle.cc:88 sndfilesource.cc:173
 msgid "programming error: %1"
 msgstr "程序错误：%1"
@@ -575,7 +575,7 @@ msgstr "控制面协议管理器：无法载入模式 \"%1\" (%2)"
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr "控制面协议管理器：模式 \"%1\" 没有描述符函数。"
 
-#: control_protocol_manager.cc:520
+#: control_protocol_manager.cc:516
 msgid "Control protocol \"%1\" has no descriptor"
 msgstr "控制面协议 \"%1\" 没有描述符"
 
@@ -595,7 +595,7 @@ msgstr "在 /proc/cpuinfo 里无法定位 cpu MHz"
 msgid "audio"
 msgstr "音频"
 
-#: data_type.cc:28 session.cc:2486
+#: data_type.cc:28 session.cc:2451
 msgid "MIDI"
 msgstr ""
 
@@ -967,7 +967,7 @@ msgstr "无法设置系统打开文件限制。当前限制是 %1 打开文件"
 msgid "Loading configuration"
 msgstr "正在载入配置中"
 
-#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1191
+#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1156
 msgid "Monitor"
 msgstr "监控"
 
@@ -1134,15 +1134,15 @@ msgstr "%s 入"
 msgid "%s out"
 msgstr "%s 出"
 
-#: io.cc:1578 session.cc:991 session.cc:1025
+#: io.cc:1578 session.cc:956 session.cc:990
 msgid "mono"
 msgstr "单声道"
 
-#: io.cc:1580 session.cc:1004 session.cc:1039
+#: io.cc:1580 session.cc:969 session.cc:1004
 msgid "L"
 msgstr "左"
 
-#: io.cc:1580 session.cc:1006 session.cc:1041
+#: io.cc:1580 session.cc:971 session.cc:1006
 msgid "R"
 msgstr "右"
 
@@ -1234,7 +1234,7 @@ msgstr "位置：尝试使用未知的位置作为已选择的位置"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "不正确的 XML模式传递给 Location::set_state"
 
-#: location.cc:1059 session.cc:1701 session.cc:6339 session_state.cc:1205
+#: location.cc:1059 session.cc:1666 session.cc:6304 session_state.cc:1205
 msgid "session"
 msgstr "会话"
 
@@ -1923,13 +1923,13 @@ msgstr "XML节点正在描述的端口插入缺失 “type” 字段"
 msgid "non-port insert XML used for port plugin insert"
 msgstr "non-port 插入 XML 已用于端口插件插入"
 
-#: port_manager.cc:295
+#: port_manager.cc:288
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr "名称为 \"%1\" 的端口已存在：检查已复制的音轨/总线名称"
 
-#: port_manager.cc:297
+#: port_manager.cc:290
 msgid ""
 "No more ports are available. You will need to stop %1 and restart with more "
 "ports if you need this many tracks."
@@ -1937,19 +1937,19 @@ msgstr ""
 "无更多的可用端口。如果您需要这么多音轨，您将必须停止 %1 ，然后带着更多的端口"
 "重启。"
 
-#: port_manager.cc:300
+#: port_manager.cc:293
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "音频引擎：无法注册端口 \"%1\": %2"
 
-#: port_manager.cc:343
+#: port_manager.cc:332
 msgid "unable to create port: %1"
 msgstr "不能创建端口：%1"
 
-#: port_manager.cc:464
+#: port_manager.cc:453
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "音频引擎：无法连接 %1（%2）到 %3（%4）"
 
-#: port_manager.cc:516 port_manager.cc:517
+#: port_manager.cc:505 port_manager.cc:506
 msgid "Re-establising port %1 failed"
 msgstr "重新确立端口 %1 失败"
 
@@ -2190,99 +2190,99 @@ msgstr "建立标准连接"
 msgid "could not setup Click I/O"
 msgstr "无法设置音频识别声（节拍器）输入/输出"
 
-#: session.cc:985
+#: session.cc:950
 #, c-format
 msgid "out %s"
 msgstr "输出 %s"
 
-#: session.cc:987
+#: session.cc:952
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "输出 %<PRIu32>"
 
-#: session.cc:1002
+#: session.cc:967
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "输出 %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1019
+#: session.cc:984
 #, c-format
 msgid "in %s"
 msgstr "输入 %s"
 
-#: session.cc:1021
+#: session.cc:986
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "输入 %<PRIu32>"
 
-#: session.cc:1036
+#: session.cc:1001
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "输入 %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1116
+#: session.cc:1081
 msgid "cannot connect master output %1 to %2"
 msgstr "无法连接主控输出 %1 到 %2"
 
-#: session.cc:1204
+#: session.cc:1169
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr "无法创建监控部分。”监控“端口名称不是唯一的。"
 
-#: session.cc:1238 session.cc:1369
+#: session.cc:1203 session.cc:1334
 msgid "cannot connect control input %1 to %2"
 msgstr "无法连接控制输入 %1 到 %2"
 
-#: session.cc:1258 session.cc:1388
+#: session.cc:1223 session.cc:1353
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "找不到用于监控总线（%1）的优先输入/输出"
 
-#: session.cc:1289 session.cc:1419
+#: session.cc:1254 session.cc:1384
 msgid "cannot connect control output %1 to %2"
 msgstr "无法连接控制输出 %1 到 %2"
 
-#: session.cc:1477
+#: session.cc:1442
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "无法创建监听器：不可能监听区域"
 
-#: session.cc:1678
+#: session.cc:1643
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "会话：您不能为自动切换使用该位置（起点 <= 终点）"
 
-#: session.cc:1705
+#: session.cc:1670
 msgid "Session: you can't use that location for session start/end)"
 msgstr "会话：您不能为会话使用该位置（起点/终点）"
 
-#: session.cc:1737
+#: session.cc:1702
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr "您不能为自动循环使用该位置，因为它的长度是零或者负值"
 
-#: session.cc:1920
+#: session.cc:1885
 msgid "programming error: session range removed!"
 msgstr "程序错误：会话范围已移除！"
 
-#: session.cc:2192
+#: session.cc:2157
 msgid "feedback loop setup between %1 and %2"
 msgstr "反馈环路设置在 %1 和 %2 之间"
 
-#: session.cc:2453
+#: session.cc:2418
 msgid "Track "
 msgstr "音轨"
 
-#: session.cc:2455
+#: session.cc:2420
 msgid "Audio "
 msgstr "音频"
 
-#: session.cc:2460
+#: session.cc:2425
 msgid "MIDI "
 msgstr ""
 
-#: session.cc:2534
+#: session.cc:2499
 msgid "Session: could not create new midi track."
 msgstr "会话：无法创建新的 MIDI 音轨。"
 
-#: session.cc:2540
+#: session.cc:2505
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2290,83 +2290,83 @@ msgstr ""
 "无更多的 JACK 端口可用。如果您需要这么多音轨，您将必须停止 %1 ，然后带着更多"
 "的端口重启 JACK。"
 
-#: session.cc:2581 session.cc:2584
+#: session.cc:2546 session.cc:2549
 msgid "Midi Bus"
 msgstr "MIDI 总线"
 
-#: session.cc:2606
+#: session.cc:2571
 msgid "cannot configure new midi bus input"
 msgstr "无法配置新的 MIDI 总线输入"
 
-#: session.cc:2612
+#: session.cc:2577
 msgid "cannot configure new midi bus output"
 msgstr "无法配置新的 MIDI 总线输出"
 
-#: session.cc:2626 session.cc:3171
+#: session.cc:2591 session.cc:3136
 msgid "Session: could not create new audio route."
 msgstr "会话：无法创建新的音频路由。"
 
-#: session.cc:3056 session.cc:3064 session.cc:3147 session.cc:3155
+#: session.cc:3021 session.cc:3029 session.cc:3112 session.cc:3120
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "无法为新的音频轨道配置 %1 入/ %2 出的配位"
 
-#: session.cc:3084
+#: session.cc:3049
 msgid "Session: could not create new audio track."
 msgstr "会话：无法创建新的音频轨道。"
 
-#: session.cc:3122 session.cc:3125
+#: session.cc:3087 session.cc:3090
 msgid "Bus"
 msgstr "总线"
 
-#: session.cc:3241 session.cc:3251
+#: session.cc:3206 session.cc:3216
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "会话：UINT_MAX 路由？不可能！"
 
-#: session.cc:3327
+#: session.cc:3292
 msgid "Session: cannot create track/bus from template description"
 msgstr "会话：无法从模板描述创建新的音轨/总线"
 
-#: session.cc:3365
+#: session.cc:3330
 msgid "Session: could not create new route from template"
 msgstr "会话：无法从模板创建新的音频路由"
 
-#: session.cc:3399
+#: session.cc:3364
 msgid "Adding new tracks/busses failed"
 msgstr "添加新的音轨/总线失败"
 
-#: session.cc:4818
+#: session.cc:4783
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "合并嵌入的文件 %1：名称冲突并且 md5 哈希冲突！"
 
-#: session.cc:4948 session.cc:5021
+#: session.cc:4913 session.cc:4986
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "在此 %1 已经为 %2 录制中，我考虑太多。"
 
-#: session.cc:5697
+#: session.cc:5662
 msgid "send ID %1 appears to be in use already"
 msgstr "发送端 ID 似乎已经在使用中"
 
-#: session.cc:5709
+#: session.cc:5674
 msgid "aux send ID %1 appears to be in use already"
 msgstr "辅助发送端 ID 似乎已经在使用中"
 
-#: session.cc:5721
+#: session.cc:5686
 msgid "return ID %1 appears to be in use already"
 msgstr "返回 ID 似乎已经在使用中"
 
-#: session.cc:5733
+#: session.cc:5698
 msgid "insert ID %1 appears to be in use already"
 msgstr "插入 ID 似乎已经在使用中"
 
-#: session.cc:5859
+#: session.cc:5824
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "无法写入一个位于终点 <= 起点的范围（例如 %1 <= %2）"
 
-#: session.cc:5868
+#: session.cc:5833
 msgid "Cannot write a range with no data."
 msgstr "没有数据无法写入一个范围。"
 
-#: session.cc:5910
+#: session.cc:5875
 msgid "cannot create new file \"%1\" for %2"
 msgstr "无法为 %2 创建新的文件 \"%1\""
 

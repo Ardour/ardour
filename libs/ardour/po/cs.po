@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:15-0400\n"
+"POT-Creation-Date: 2016-07-14 06:18-0400\n"
 "PO-Revision-Date: 2013-06-13 22:47+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -174,7 +174,7 @@ msgstr ""
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr ""
 
-#: audio_backend.cc:107 export_formats.cc:52 session.cc:6806 session.cc:6826
+#: audio_backend.cc:107 export_formats.cc:52 session.cc:6771 session.cc:6791
 msgid "None"
 msgstr "Žádný"
 
@@ -295,7 +295,7 @@ msgstr "Seznamy zvukových skladeb (nepoužívané)"
 #: audio_playlist_source.cc:171 audiosource.cc:1046
 #: midi_playlist_source.cc:147 midi_playlist_source.cc:155
 #: midi_playlist_source.cc:162 midi_source.cc:403 plugin_insert.cc:1259
-#: rb_effect.cc:327 session.cc:5348 session.cc:5375 session.cc:5495
+#: rb_effect.cc:327 session.cc:5313 session.cc:5340 session.cc:5460
 #: session_handle.cc:88 sndfilesource.cc:173
 msgid "programming error: %1"
 msgstr "Chyba v programování: %1"
@@ -592,7 +592,7 @@ msgstr "ControlProtocolManager: Nelze nahrát modul \"%1\" (%2)"
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr "ControlProtocolManager: Modul \"%1\" nemá žádnou funkci k popisu"
 
-#: control_protocol_manager.cc:520
+#: control_protocol_manager.cc:516
 msgid "Control protocol \"%1\" has no descriptor"
 msgstr ""
 
@@ -612,7 +612,7 @@ msgstr "Nelze nalézt takt CPU (MHz) v /proc/cpuinfo"
 msgid "audio"
 msgstr "Zvuk"
 
-#: data_type.cc:28 session.cc:2486
+#: data_type.cc:28 session.cc:2451
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -991,7 +991,7 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "Nahrává se nastavení"
 
-#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1191
+#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1156
 msgid "Monitor"
 msgstr ""
 
@@ -1159,15 +1159,15 @@ msgstr "%s vstup"
 msgid "%s out"
 msgstr "%s výstup"
 
-#: io.cc:1578 session.cc:991 session.cc:1025
+#: io.cc:1578 session.cc:956 session.cc:990
 msgid "mono"
 msgstr "Mono"
 
-#: io.cc:1580 session.cc:1004 session.cc:1039
+#: io.cc:1580 session.cc:969 session.cc:1004
 msgid "L"
 msgstr "L"
 
-#: io.cc:1580 session.cc:1006 session.cc:1041
+#: io.cc:1580 session.cc:971 session.cc:1006
 msgid "R"
 msgstr "P"
 
@@ -1260,7 +1260,7 @@ msgstr "Locations: Pokus o použití neznámé polohy jako vybrané polohy"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Nesprávný uzel XML předán dál Locations::set_state"
 
-#: location.cc:1059 session.cc:1701 session.cc:6339 session_state.cc:1205
+#: location.cc:1059 session.cc:1666 session.cc:6304 session_state.cc:1205
 msgid "session"
 msgstr "Sezení"
 
@@ -1961,7 +1961,7 @@ msgid "non-port insert XML used for port plugin insert"
 msgstr ""
 "XML pro vložení ne-přípojky použito ke vložení přídavného modulu přípojky"
 
-#: port_manager.cc:295
+#: port_manager.cc:288
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -1969,25 +1969,25 @@ msgstr ""
 "Přípojka s názvem \"%1\" již existuje: Prověřte na zdvojené názvy stop/"
 "sběrnic"
 
-#: port_manager.cc:297
+#: port_manager.cc:290
 msgid ""
 "No more ports are available. You will need to stop %1 and restart with more "
 "ports if you need this many tracks."
 msgstr ""
 
-#: port_manager.cc:300
+#: port_manager.cc:293
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: Nelze zaregistrovat přípojku \"%1\": %2"
 
-#: port_manager.cc:343
+#: port_manager.cc:332
 msgid "unable to create port: %1"
 msgstr "Nelze vytvořit přípojku: %1"
 
-#: port_manager.cc:464
+#: port_manager.cc:453
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: Nelze spojit %1 (%2) s %3 (%4)"
 
-#: port_manager.cc:516 port_manager.cc:517
+#: port_manager.cc:505 port_manager.cc:506
 msgid "Re-establising port %1 failed"
 msgstr ""
 
@@ -2233,70 +2233,70 @@ msgstr "Nastavit standardní spojení"
 msgid "could not setup Click I/O"
 msgstr "Nepodařilo se nastavit vstup/výstup metronomu"
 
-#: session.cc:985
+#: session.cc:950
 #, c-format
 msgid "out %s"
 msgstr ""
 
-#: session.cc:987
+#: session.cc:952
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "Výstup %<PRIu32>"
 
-#: session.cc:1002
+#: session.cc:967
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "Výstup %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1019
+#: session.cc:984
 #, c-format
 msgid "in %s"
 msgstr ""
 
-#: session.cc:1021
+#: session.cc:986
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "Vstup %<PRIu32>"
 
-#: session.cc:1036
+#: session.cc:1001
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "Vstup %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1116
+#: session.cc:1081
 msgid "cannot connect master output %1 to %2"
 msgstr "Nelze spojit hlavní výstup %1 s %2"
 
-#: session.cc:1204
+#: session.cc:1169
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 
-#: session.cc:1238 session.cc:1369
+#: session.cc:1203 session.cc:1334
 msgid "cannot connect control input %1 to %2"
 msgstr "Nelze spojit vstup ovládání %1 s %2"
 
-#: session.cc:1258 session.cc:1388
+#: session.cc:1223 session.cc:1353
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Upřednostňovaný vstup/výstup pro sledovací sběrnici (%1) nelze najít"
 
-#: session.cc:1289 session.cc:1419
+#: session.cc:1254 session.cc:1384
 msgid "cannot connect control output %1 to %2"
 msgstr "Nelze spojit výstup ovládání %1 s %2"
 
-#: session.cc:1477
+#: session.cc:1442
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "Nelze vytvořit poslechový systém: Žádný poslech oblastí není možný"
 
-#: session.cc:1678
+#: session.cc:1643
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Sezení: Tuto polohu nelze pro automatický přepis použít (Začátek <= Konec) "
 
-#: session.cc:1705
+#: session.cc:1670
 msgid "Session: you can't use that location for session start/end)"
 msgstr ""
 
-#: session.cc:1737
+#: session.cc:1702
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -2304,31 +2304,31 @@ msgstr ""
 "Tuto polohu nelze pro automatickou smyčku použít, protože nemá žádnou, nebo "
 "má zápornou délku"
 
-#: session.cc:1920
+#: session.cc:1885
 msgid "programming error: session range removed!"
 msgstr ""
 
-#: session.cc:2192
+#: session.cc:2157
 msgid "feedback loop setup between %1 and %2"
 msgstr "Smyčka zpětné vazby rozpoznána mezi %1 a %2"
 
-#: session.cc:2453
+#: session.cc:2418
 msgid "Track "
 msgstr ""
 
-#: session.cc:2455
+#: session.cc:2420
 msgid "Audio "
 msgstr ""
 
-#: session.cc:2460
+#: session.cc:2425
 msgid "MIDI "
 msgstr ""
 
-#: session.cc:2534
+#: session.cc:2499
 msgid "Session: could not create new midi track."
 msgstr "Sezení: Nepodařilo se vytvořit novou stopu MIDI"
 
-#: session.cc:2540
+#: session.cc:2505
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2336,83 +2336,83 @@ msgstr ""
 "Nejsou dostupné další přípojky JACK. Pokud potřebujete tolik stop, musíte "
 "zastavit %1 a spustit JACK znovu s více přípojkami."
 
-#: session.cc:2581 session.cc:2584
+#: session.cc:2546 session.cc:2549
 msgid "Midi Bus"
 msgstr ""
 
-#: session.cc:2606
+#: session.cc:2571
 msgid "cannot configure new midi bus input"
 msgstr ""
 
-#: session.cc:2612
+#: session.cc:2577
 msgid "cannot configure new midi bus output"
 msgstr ""
 
-#: session.cc:2626 session.cc:3171
+#: session.cc:2591 session.cc:3136
 msgid "Session: could not create new audio route."
 msgstr "Sezení: Nepodařilo se vytvořit novou zvukovou cestu"
 
-#: session.cc:3056 session.cc:3064 session.cc:3147 session.cc:3155
+#: session.cc:3021 session.cc:3029 session.cc:3112 session.cc:3120
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "Nelze nastavit %1 nastavení vstup/%2 výstup pro novou zvukovou stopu"
 
-#: session.cc:3084
+#: session.cc:3049
 msgid "Session: could not create new audio track."
 msgstr "Sezení: Nepodařilo se vytvořit novou zvukovou stopu"
 
-#: session.cc:3122 session.cc:3125
+#: session.cc:3087 session.cc:3090
 msgid "Bus"
 msgstr "Sběrnice"
 
-#: session.cc:3241 session.cc:3251
+#: session.cc:3206 session.cc:3216
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Sezení: Cesty UINT_MAX? Nemožné!"
 
-#: session.cc:3327
+#: session.cc:3292
 msgid "Session: cannot create track/bus from template description"
 msgstr "Sezení: Nelze vytvořit stopu/sběrnici z popisu předlohy"
 
-#: session.cc:3365
+#: session.cc:3330
 msgid "Session: could not create new route from template"
 msgstr "Sezení: Nepodařilo se vytvořit novou cestu z předlohy"
 
-#: session.cc:3399
+#: session.cc:3364
 msgid "Adding new tracks/busses failed"
 msgstr "Chyba při přidávání nové stopy/sběrnice"
 
-#: session.cc:4818
+#: session.cc:4783
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr ""
 
-#: session.cc:4948 session.cc:5021
+#: session.cc:4913 session.cc:4986
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Již je %1 nahrávek pro %2, což je příliš mnoho."
 
-#: session.cc:5697
+#: session.cc:5662
 msgid "send ID %1 appears to be in use already"
 msgstr "Zdá se, že ID poslání (send) %1, se již používá"
 
-#: session.cc:5709
+#: session.cc:5674
 msgid "aux send ID %1 appears to be in use already"
 msgstr "Zdá se, že ID pomocného-poslání (aux-send) %1, se již používá"
 
-#: session.cc:5721
+#: session.cc:5686
 msgid "return ID %1 appears to be in use already"
 msgstr "Zdá se, že ID vrácení (return) %1, se již používá"
 
-#: session.cc:5733
+#: session.cc:5698
 msgid "insert ID %1 appears to be in use already"
 msgstr "Zdá se, že ID vložení (insert) %1, se již používá"
 
-#: session.cc:5859
+#: session.cc:5824
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Nelze zapsat oblast s Konec <= Začátek (např. %1 <= %2)"
 
-#: session.cc:5868
+#: session.cc:5833
 msgid "Cannot write a range with no data."
 msgstr ""
 
-#: session.cc:5910
+#: session.cc:5875
 msgid "cannot create new file \"%1\" for %2"
 msgstr ""
 
