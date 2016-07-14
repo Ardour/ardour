@@ -1180,7 +1180,7 @@ OSC::routes_list (lo_message msg)
 int
 OSC::cancel_all_solos ()
 {
-	session->clear_all_solo_state (session->get_routes());
+	session->cancel_all_solo ();
 	return 0;
 }
 
