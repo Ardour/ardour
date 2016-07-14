@@ -284,10 +284,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\midi_util.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\MIDIEvent.cpp"
 				>
 			</File>
