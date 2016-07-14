@@ -259,6 +259,7 @@ HSV::HSV (const std::string& str)
 string
 HSV::to_string () const
 {
+	PBD::LocaleGuard lg;
 	stringstream ss;
 	ss << h << ' ';
 	ss << s << ' ';
