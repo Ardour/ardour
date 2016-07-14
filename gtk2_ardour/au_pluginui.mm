@@ -47,7 +47,7 @@
 #include "keyboard.h"
 #include "utils.h"
 #include "public_editor.h"
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 #include "gtk2ardour-config.h"
 
