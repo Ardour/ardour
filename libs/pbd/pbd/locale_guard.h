@@ -26,15 +26,16 @@
 
 namespace PBD {
 
-	struct LIBPBD_API LocaleGuard {
-		public:
-			LocaleGuard ();
-			~LocaleGuard ();
+struct LIBPBD_API LocaleGuard {
+  public:
+	LocaleGuard ();
+	~LocaleGuard ();
 
-		private:
-			std::locale old_cpp;
-			char* old_c;
-	};
+  private:
+	std::locale old_cpp_locale;
+	std::locale pre_cpp_locale;
+	char const * old_c_locale;
+};
 }
 
 #endif /* __pbd_locale_guard__ */
