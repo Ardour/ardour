@@ -38,6 +38,8 @@ unit:hz0
         lv2:minimum 0.000000 ;
         lv2:maximum 1.000000 ;
         lv2:portProperty lv2:toggled ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#causesArtifacts> ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#notAutomatic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -193,6 +195,8 @@ unit:hz0
         lv2:minimum 0.000000 ;
         lv2:maximum 1.000000 ;
         lv2:portProperty lv2:toggled ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#causesArtifacts> ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#notAutomatic> ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;

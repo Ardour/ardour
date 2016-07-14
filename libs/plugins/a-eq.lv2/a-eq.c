@@ -32,6 +32,7 @@
 
 #define AEQ_URI	"urn:ardour:a-eq"
 #define BANDS	6
+#define SMALL	0.0001f
 
 #ifndef MIN
 #define MIN(A,B) ((A) < (B)) ? (A) : (B)
@@ -75,6 +76,11 @@ to_dB(double g) {
 static inline double
 from_dB(double gdb) {
 	return (exp(gdb/20.0*log(10.0)));
+}
+
+static inline bool
+is_eq(float a, float b) {
+	return (fabsf(a - b) < SMALL);
 }
 
 struct linear_svf {
@@ -141,8 +147,6 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	for (int i = 0; i < BANDS; i++)
 		linear_svf_reset(&aeq->v_filter[i]);
-
-	// TODO initialize self->v_
 
 	aeq->need_expose = true;
 #ifdef LV2_EXTENDED
@@ -370,6 +374,33 @@ static float run_linear_svf(struct linear_svf *self, float in)
 	return (float)out;
 }
 
+static void set_params(LV2_Handle instance, int band) {
+	Aeq* aeq = (Aeq*)instance;
+
+	switch (band) {
+	case 0:
+		if (aeq->v_shelftogl > 0.5) {
+			linear_svf_set_lowshelf(&aeq->v_filter[0], aeq->v_g[0], aeq->srate, aeq->v_f0[0], 0.7071068);
+		} else {
+			linear_svf_set_hp(&aeq->v_filter[0], aeq->srate, aeq->v_f0[0], 0.7071068);
+		}
+		break;
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+		linear_svf_set_peq(&aeq->v_filter[band], aeq->v_g[band], aeq->srate, aeq->v_f0[band], aeq->v_bw[band]);
+		break;
+	case 5:
+		if (aeq->v_shelftogh > 0.5) {
+			linear_svf_set_highshelf(&aeq->v_filter[5], aeq->v_g[5], aeq->srate, aeq->v_f0[5], 0.7071068);
+		} else {
+			linear_svf_set_lp(&aeq->v_filter[5], aeq->srate, aeq->v_f0[5], 0.7071068);
+		}
+		break;
+	}
+}
+
 static void
 run(LV2_Handle instance, uint32_t n_samples)
 {
@@ -378,64 +409,58 @@ run(LV2_Handle instance, uint32_t n_samples)
 	const float* const input = aeq->input;
 	float* const output = aeq->output;
 
-	float srate = aeq->srate;
 	float in0, out;
 	uint32_t i, j;
 
-	if (*(aeq->shelftogl) > 0.5) {
-		linear_svf_set_lowshelf(&aeq->v_filter[0], *(aeq->g[0]), srate, *(aeq->f0[0]), 0.7071068);
-	} else {
-		linear_svf_set_hp(&aeq->v_filter[0], srate, *(aeq->f0[0]), 0.7071068);
-	}
-	linear_svf_set_peq(&aeq->v_filter[1], *(aeq->g[1]), srate, *(aeq->f0[1]), *(aeq->bw[1]));
-	linear_svf_set_peq(&aeq->v_filter[2], *(aeq->g[2]), srate, *(aeq->f0[2]), *(aeq->bw[2]));
-	linear_svf_set_peq(&aeq->v_filter[3], *(aeq->g[3]), srate, *(aeq->f0[3]), *(aeq->bw[3]));
-	linear_svf_set_peq(&aeq->v_filter[4], *(aeq->g[4]), srate, *(aeq->f0[4]), *(aeq->bw[4]));
-
-	if (*(aeq->shelftogh) > 0.5) {
-		linear_svf_set_highshelf(&aeq->v_filter[5], *(aeq->g[5]), srate, *(aeq->f0[5]), 0.7071068);
-	} else {
-		linear_svf_set_lp(&aeq->v_filter[5], srate, *(aeq->f0[5]), 0.7071068);
-	}
+	// 15Hz time constant
+	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 15. / aeq->srate));
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
 		out = in0;
 		for (j = 0; j < BANDS; j++) {
-			if (*(aeq->filtog[j]) > 0.5)
-				out = run_linear_svf(&aeq->v_filter[j], out);
+			out = run_linear_svf(&aeq->v_filter[j], out);
 		}
 		output[i] = out * from_dB(*(aeq->master));
 	}
 
 	for (i = 0; i < BANDS; i++) {
-		if (aeq->v_f0[i] != *(aeq->f0[i])) {
-			aeq->v_f0[i] = *(aeq->f0[i]);
-			aeq->need_expose = true;
-		}
-		if (aeq->v_g[i] != *(aeq->g[i])) {
-			aeq->v_g[i] = *(aeq->g[i]);
-			aeq->need_expose = true;
-		}
-		if (i != 0 && i != 5 && aeq->v_bw[i] != *(aeq->bw[i])) {
-			aeq->v_bw[i] = *(aeq->bw[i]);
-			aeq->need_expose = true;
-		}
-		if (aeq->v_filtog[i] != *(aeq->filtog[i])) {
+		if (!is_eq(aeq->v_filtog[i], *aeq->filtog[i])) {
 			aeq->v_filtog[i] = *(aeq->filtog[i]);
+		}
+		if (!is_eq(aeq->v_f0[i], *aeq->f0[i])) {
+			aeq->v_f0[i] += tau * (*aeq->f0[i] - aeq->v_f0[i]);
 			aeq->need_expose = true;
 		}
-		if (aeq->v_shelftogl != *(aeq->shelftogl)) {
+		if (aeq->v_filtog[i] < 0.5) {
+			if (!is_eq(aeq->v_g[i], 0.f)) {
+				aeq->v_g[i] += tau * (0.0 - aeq->v_g[i]);
+				aeq->need_expose = true;
+			}
+		} else if (aeq->v_filtog[i] >= 0.5) {
+			if (!is_eq(aeq->v_g[i], *aeq->g[i])) {
+				aeq->v_g[i] += tau * (*aeq->g[i] - aeq->v_g[i]);
+				aeq->need_expose = true;
+			}
+		}
+		if (i != 0 && i != 5 && !is_eq(aeq->v_bw[i], *aeq->bw[i])) {
+			aeq->v_bw[i] += tau * (*aeq->bw[i] - aeq->v_bw[i]);
+			aeq->need_expose = true;
+		}
+		if (!is_eq(aeq->v_shelftogl, *aeq->shelftogl)) {
 			aeq->v_shelftogl = *(aeq->shelftogl);
 			aeq->need_expose = true;
 		}
-		if (aeq->v_shelftogh != *(aeq->shelftogh)) {
+		if (!is_eq(aeq->v_shelftogh, *aeq->shelftogh)) {
 			aeq->v_shelftogh = *(aeq->shelftogh);
 			aeq->need_expose = true;
 		}
-		if (aeq->v_master != *(aeq->master)) {
+		if (!is_eq(aeq->v_master, *aeq->master)) {
 			aeq->v_master = *(aeq->master);
 			aeq->need_expose = true;
+		}
+		if (aeq->need_expose == true) {
+			set_params(aeq, i);
 		}
 	}
 
@@ -540,53 +565,41 @@ calc_highshelf(Aeq* self, double omega) {
 #ifdef LV2_EXTENDED
 static float
 eq_curve (Aeq* self, float f) {
-	double complex response = 1.0;
+	double response = 1.0;
 	double SR = (double)self->srate;
 	double omega = f * 2. * M_PI / SR;
 
 	// low
-	if (self->v_filtog[0]) {
-		if (self->v_shelftogl) {
-			// lowshelf
-			response *= calc_lowshelf(self, omega);
-		} else {
-			// hp:
-			response *= calc_highpass(self, omega);
-		}
+	if (self->v_shelftogl) {
+		// lowshelf
+		response *= calc_lowshelf(self, omega);
+	} else {
+		// hp:
+		response *= calc_highpass(self, omega);
 	}
 
 	// peq1:
-	if (self->v_filtog[1]) {
-		response *= calc_peq(self, 1, omega);
-	}
+	response *= calc_peq(self, 1, omega);
 
 	// peq2:
-	if (self->v_filtog[2]) {
-		response *= calc_peq(self, 2, omega);
-	}
+	response *= calc_peq(self, 2, omega);
 
 	// peq3:
-	if (self->v_filtog[3]) {
-		response *= calc_peq(self, 3, omega);
-	}
+	response *= calc_peq(self, 3, omega);
 
 	// peq4:
-	if (self->v_filtog[4]) {
-		response *= calc_peq(self, 4, omega);
-	}
+	response *= calc_peq(self, 4, omega);
 
 	// high
-	if (self->v_filtog[5]) {
-		if (self->v_shelftogh) {
-			// highshelf:
-			response *= calc_highshelf(self, omega);
-		} else {
-			// lp:
-			response *= calc_lowpass(self, omega);
-		}
+	if (self->v_shelftogh) {
+		// highshelf:
+		response *= calc_highshelf(self, omega);
+	} else {
+		// lp:
+		response *= calc_lowpass(self, omega);
 	}
 
-	return response;
+	return (float)response;
 }
 
 static LV2_Inline_Display_Image_Surface *

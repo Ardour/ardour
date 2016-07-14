@@ -318,8 +318,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 	float* const      output0 = self->output0;
 	float* const      output1 = self->output1;
 
-	// 25Hz update
-	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 25 / self->srate));
+	// 15Hz time constant
+	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 15. / self->srate));
 
 	if (*self->mix != self->v_mix) {
 		self->v_mix += tau * ( *self->mix - self->v_mix);
