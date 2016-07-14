@@ -466,12 +466,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		passthru (bufs, start_frame, end_frame, nframes, false);
 	}
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
-		if (d) {
-			d->flush_buffers (nframes);
-		}
-	}
+	flush_processor_buffers_locked (nframes);
 
 	return 0;
 }
