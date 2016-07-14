@@ -39,8 +39,7 @@
 #endif
 
 typedef enum {
-	AEQ_SHELFTOGL = 0,
-	AEQ_FREQL,
+	AEQ_FREQL = 0,
 	AEQ_GAINL,
 	AEQ_FREQ1,
 	AEQ_GAIN1,
@@ -54,7 +53,6 @@ typedef enum {
 	AEQ_FREQ4,
 	AEQ_GAIN4,
 	AEQ_BW4,
-	AEQ_SHELFTOGH,
 	AEQ_FREQH,
 	AEQ_GAINH,
 	AEQ_MASTER,
@@ -96,8 +94,6 @@ static void linear_svf_reset(struct linear_svf *self)
 }
 
 typedef struct {
-	float* shelftogl;
-	float* shelftogh;
 	float* f0[BANDS];
 	float* g[BANDS];
 	float* bw[BANDS];
@@ -114,8 +110,6 @@ typedef struct {
 	float v_bw[BANDS];
 	float v_f0[BANDS];
 	float v_filtog[BANDS];
-	float v_shelftogl;
-	float v_shelftogh;
 	float v_master;
 
 	bool need_expose;
@@ -164,9 +158,6 @@ connect_port(LV2_Handle instance,
 	Aeq* aeq = (Aeq*)instance;
 
 	switch ((PortIndex)port) {
-	case AEQ_SHELFTOGL:
-		aeq->shelftogl = (float*)data;
-		break;
 	case AEQ_FREQL:
 		aeq->f0[0] = (float*)data;
 		break;
@@ -208,9 +199,6 @@ connect_port(LV2_Handle instance,
 		break;
 	case AEQ_BW4:
 		aeq->bw[4] = (float*)data;
-		break;
-	case AEQ_SHELFTOGH:
-		aeq->shelftogh = (float*)data;
 		break;
 	case AEQ_FREQH:
 		aeq->f0[5] = (float*)data;
@@ -260,42 +248,6 @@ activate(LV2_Handle instance)
 
 // SVF filters
 // http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
-
-static void linear_svf_set_hp(struct linear_svf *self, float sample_rate, float cutoff, float resonance)
-{
-	double f0 = (double)cutoff;
-	double q = (double)resonance;
-	double sr = (double)sample_rate;
-
-	self->g = tan(M_PI * (f0 / sr));
-	self->k = 1.0 / q;
-
-	self->a[0] = 1.0 / (1.0 + self->g * (self->g + self->k));
-	self->a[1] = self->g * self->a[0];
-	self->a[2] = self->g * self->a[1];
-
-	self->m[0] = 1.0;
-	self->m[1] = -self->k;
-	self->m[2] = -1.0;
-}
-
-static void linear_svf_set_lp(struct linear_svf *self, float sample_rate, float cutoff, float resonance)
-{
-	double f0 = (double)cutoff;
-	double q = (double)resonance;
-	double sr = (double)sample_rate;
-
-	self->g = tan(M_PI * (f0 / sr));
-	self->k = 1.0 / q;
-
-	self->a[0] = 1.0 / (1.0 + self->g * (self->g + self->k));
-	self->a[1] = self->g * self->a[0];
-	self->a[2] = self->g * self->a[1];
-
-	self->m[0] = 0.0;
-	self->m[1] = 0.0;
-	self->m[2] = 1.0;
-}
 
 static void linear_svf_set_peq(struct linear_svf *self, float gdb, float sample_rate, float cutoff, float bandwidth)
 {
@@ -379,11 +331,7 @@ static void set_params(LV2_Handle instance, int band) {
 
 	switch (band) {
 	case 0:
-		if (aeq->v_shelftogl > 0.5) {
-			linear_svf_set_lowshelf(&aeq->v_filter[0], aeq->v_g[0], aeq->srate, aeq->v_f0[0], 0.7071068);
-		} else {
-			linear_svf_set_hp(&aeq->v_filter[0], aeq->srate, aeq->v_f0[0], 0.7071068);
-		}
+		linear_svf_set_lowshelf(&aeq->v_filter[0], aeq->v_g[0], aeq->srate, aeq->v_f0[0], 0.7071068);
 		break;
 	case 1:
 	case 2:
@@ -392,11 +340,7 @@ static void set_params(LV2_Handle instance, int band) {
 		linear_svf_set_peq(&aeq->v_filter[band], aeq->v_g[band], aeq->srate, aeq->v_f0[band], aeq->v_bw[band]);
 		break;
 	case 5:
-		if (aeq->v_shelftogh > 0.5) {
-			linear_svf_set_highshelf(&aeq->v_filter[5], aeq->v_g[5], aeq->srate, aeq->v_f0[5], 0.7071068);
-		} else {
-			linear_svf_set_lp(&aeq->v_filter[5], aeq->srate, aeq->v_f0[5], 0.7071068);
-		}
+		linear_svf_set_highshelf(&aeq->v_filter[5], aeq->v_g[5], aeq->srate, aeq->v_f0[5], 0.7071068);
 		break;
 	}
 }
@@ -447,14 +391,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 			aeq->v_bw[i] += tau * (*aeq->bw[i] - aeq->v_bw[i]);
 			aeq->need_expose = true;
 		}
-		if (!is_eq(aeq->v_shelftogl, *aeq->shelftogl)) {
-			aeq->v_shelftogl = *(aeq->shelftogl);
-			aeq->need_expose = true;
-		}
-		if (!is_eq(aeq->v_shelftogh, *aeq->shelftogh)) {
-			aeq->v_shelftogh = *(aeq->shelftogh);
-			aeq->need_expose = true;
-		}
 		if (!is_eq(aeq->v_master, *aeq->master)) {
 			aeq->v_master = *(aeq->master);
 			aeq->need_expose = true;
@@ -487,38 +423,6 @@ calc_peq(Aeq* self, int i, double omega) {
 	double m1 = k * (A * A - 1.0) / A;
 
 	H = (g*k*zzm + A*(g*zp*(m1*zm) + (zm*zm + g*g*zp*zp))) / (g*k*zzm + A*(zm*zm + g*g*zp*zp));
-	return cabs(H);
-}
-
-static double
-calc_lowpass(Aeq* self, double omega) {
-	double complex H = 0.0;
-	double complex z = cexp(I * omega);
-	double complex zz = cexp(2. * I * omega);
-	double complex zm = z - 1.0;
-	double complex zp = z + 1.0;
-	double complex zzm = zz - 1.0;
-
-	double g = self->v_filter[5].g;
-	double k = self->v_filter[5].k;
-
-	H = (g*g*zp*zp) / (zm*zm + g*g*zp*zp + g*k*zzm);
-	return cabs(H);
-}
-
-static double
-calc_highpass(Aeq* self, double omega) {
-	double complex H = 0.0;
-	double complex z = cexp(I * omega);
-	double complex zz = cexp(2. * I * omega);
-	double complex zm = z - 1.0;
-	double complex zp = z + 1.0;
-	double complex zzm = zz - 1.0;
-
-	double g = self->v_filter[0].g;
-	double k = self->v_filter[0].k;
-
-	H = zm*zm / (zm*zm + g*g*zp*zp + g*k*zzm);
 	return cabs(H);
 }
 
@@ -569,35 +473,17 @@ eq_curve (Aeq* self, float f) {
 	double SR = (double)self->srate;
 	double omega = f * 2. * M_PI / SR;
 
-	// low
-	if (self->v_shelftogl) {
-		// lowshelf
-		response *= calc_lowshelf(self, omega);
-	} else {
-		// hp:
-		response *= calc_highpass(self, omega);
-	}
+	// lowshelf
+	response *= calc_lowshelf(self, omega);
 
-	// peq1:
+	// peq 1 - 4:
 	response *= calc_peq(self, 1, omega);
-
-	// peq2:
 	response *= calc_peq(self, 2, omega);
-
-	// peq3:
 	response *= calc_peq(self, 3, omega);
-
-	// peq4:
 	response *= calc_peq(self, 4, omega);
 
-	// high
-	if (self->v_shelftogh) {
-		// highshelf:
-		response *= calc_highshelf(self, omega);
-	} else {
-		// lp:
-		response *= calc_lowpass(self, omega);
-	}
+	// highshelf:
+	response *= calc_highshelf(self, omega);
 
 	return (float)response;
 }
