@@ -264,15 +264,17 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	_buffer_size = size;
 	_signal_buffer_size = signal_size;
 
-	ARDOUR::ChanCount count = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
+	// allocate separate in+out buffers, VST cannot process in-place
+	ARDOUR::ChanCount acount (_plugin->get_info()->n_inputs + _plugin->get_info()->n_outputs);
+	ARDOUR::ChanCount ccount = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
 
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
-		_collect_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
+		_bufferset.ensure_buffers (*i, acount.get (*i), _buffer_size);
+		_collect_bufferset.ensure_buffers (*i, ccount.get (*i), _buffer_size);
 	}
 
-	_bufferset.set_count (count);
-	_collect_bufferset.set_count (count);
+	_bufferset.set_count (acount);
+	_collect_bufferset.set_count (ccount);
 }
 
 void
@@ -343,6 +345,8 @@ PluginEqGui::run_impulse_analysis()
 
 	ARDOUR::ChanMapping in_map(_plugin->get_info()->n_inputs);
 	ARDOUR::ChanMapping out_map(_plugin->get_info()->n_outputs);
+	// map output buffers after input buffers (no inplace for VST)
+	out_map.offset_to (DataType::AUDIO, inputs);
 
 	_plugin->set_block_size (_buffer_size);
 	_plugin->connect_and_run(_bufferset, 0, _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
@@ -363,7 +367,7 @@ PluginEqGui::run_impulse_analysis()
 		//std::cerr << "0: no latency, copying full buffer, trivial.." << std::endl;
 		for (uint32_t i = 0; i < outputs; ++i) {
 			memcpy(_collect_bufferset.get_audio(i).data(),
-			       _bufferset.get_audio(i).data(), _buffer_size * sizeof(float));
+			       _bufferset.get_audio(inputs + i).data(), _buffer_size * sizeof(float));
 		}
 	} else {
 		//int C = 0;
@@ -386,7 +390,7 @@ PluginEqGui::run_impulse_analysis()
 				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
 				for (uint32_t i = 0; i < outputs; ++i) {
 					memcpy(_collect_bufferset.get_audio(i).data(target_offset),
-                                       		_bufferset.get_audio(i).data() + f,
+                                       		_bufferset.get_audio(inputs + i).data() + f,
                                        		length * sizeof(float));
 				}
 
@@ -402,8 +406,6 @@ PluginEqGui::run_impulse_analysis()
 					memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
 				}
 
-				in_map  = ARDOUR::ChanMapping(_plugin->get_info()->n_inputs);
-				out_map = ARDOUR::ChanMapping(_plugin->get_info()->n_outputs);
 				_plugin->connect_and_run (_bufferset, target_offset, target_offset + _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
 			}
 		} while ( frames_left > 0);
