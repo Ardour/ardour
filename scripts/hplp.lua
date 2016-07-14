@@ -228,7 +228,7 @@ function render_inline (ctx, w, max_h)
 	end
 
 	-- calc height of inline display
-	local h = math.ceil (w * 10 / 16) -- use 16:10 aspect
+	local h = 1 | math.ceil (w * 9 / 16) -- use 16:9 aspect, odd number of y pixels
 	if (h > max_h) then h = max_h end -- but at most max-height
 
 	-- ctx is a http://cairographics.org/ context
