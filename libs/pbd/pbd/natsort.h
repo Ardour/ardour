@@ -24,7 +24,7 @@
 
 namespace PBD {
 
-bool
+inline bool
 naturally_less (const char* a, const char* b)
 {
 	const char* d_a = NULL;
