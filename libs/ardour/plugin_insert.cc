@@ -2862,7 +2862,14 @@ PluginInsert::get_impulse_analysis_plugin()
 		// during init() -- most notably block_size..
 		// not great.
 		ret = plugin_factory(_plugins[0]);
-		ret->configure_io (internal_input_streams (), internal_output_streams ());
+		ChanCount out (internal_output_streams ());
+		if (ret->get_info ()->reconfigurable_io ()) {
+			// populate get_info ()->n_inputs and ->n_outputs
+			ChanCount useins;
+			ret->can_support_io_configuration (internal_input_streams (), out, &useins);
+			assert (out == internal_output_streams ());
+		}
+		ret->configure_io (internal_input_streams (), out);
 		_impulseAnalysisPlugin = ret;
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
