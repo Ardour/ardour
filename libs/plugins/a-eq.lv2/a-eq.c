@@ -492,7 +492,7 @@ static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
 	Aeq* self = (Aeq*)instance;
-	uint32_t h = MIN (w * 9 / 16, max_h);
+	uint32_t h = MIN (1 | (uint32_t)ceilf (w * 9.f / 16.f), max_h);
 
 	if (!self->display || self->w != w || self->h != h) {
 		if (self->display) cairo_surface_destroy(self->display);
@@ -510,19 +510,30 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	cairo_set_line_width(cr, 1.0);
 
-	// draw grid 5dB steps
-	const double dash2[] = {1, 3};
+	// prepare grid drawing
 	cairo_save (cr);
-	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+	const double dash2[] = {1, 3};
+	//cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_dash(cr, dash2, 2, 2);
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
 
-	for (uint32_t d = 1; d < 8; ++d) {
-		const float y = -.5 + floorf (h * (d * 5.f / 40.f));
+	// draw x-grid 6dB steps
+	for (int32_t d = -18; d <= 18; d+=6) {
+		float y = (float)h * (d / 40.0 + 0.5);
+		y = rint (y) - .5;
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
 	}
+	// draw y-axis grid 100, 1k, 10K
+	for (int32_t f = 100; f <= 10000; f *= 10) {
+		float x = w * log10 (f / 20.0) / log10 (1000.0);
+		x = rint (x) - .5;
+		cairo_move_to (cr, x, 0);
+		cairo_line_to (cr, x, h);
+		cairo_stroke (cr);
+	}
+
 	cairo_restore (cr);
 
 
