@@ -30,6 +30,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/natsort.h"
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
@@ -455,7 +456,7 @@ class DummyAudioBackend : public AudioBackend {
 		{
 			bool operator ()(const DummyPort* lhs, const DummyPort* rhs) const
 			{
-				return lhs->name () < rhs->name ();
+				return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
 			}
 		};
 
