@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 06:20-0400\n"
+"POT-Creation-Date: 2016-07-14 23:05+0200\n"
 "PO-Revision-Date: 2015-03-28 20:56+0100\n"
 "Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
 "Language-Team: \n"
@@ -2233,9 +2233,9 @@ msgstr ""
 msgid "Stem export..."
 msgstr "Export de fragments…"
 
-#: ardour_ui_ed.cc:232 editor_export_audio.cc:66
-#: export_channel_selector.cc:190 export_channel_selector.cc:578
-#: export_dialog.cc:131 export_video_dialog.cc:80
+#: ardour_ui_ed.cc:232 editor_export_audio.cc:66 export_channel_selector.cc:190
+#: export_channel_selector.cc:578 export_dialog.cc:131
+#: export_video_dialog.cc:80
 msgid "Export"
 msgstr "Exporter"
 
@@ -2928,8 +2928,7 @@ msgstr ""
 msgid "Object"
 msgstr "Objet"
 
-#: color_theme_manager.cc:129 route_group_dialog.cc:53
-#: route_group_dialog.cc:81
+#: color_theme_manager.cc:129 route_group_dialog.cc:53 route_group_dialog.cc:81
 msgid "Color"
 msgstr "Couleur"
 
@@ -3039,9 +3038,9 @@ msgstr "Vélocité"
 msgid "Time"
 msgstr "Temps"
 
-#: edit_note_dialog.cc:99 editor_regions.cc:162
-#: export_timespan_selector.cc:375 export_timespan_selector.cc:437
-#: location_ui.cc:322 midi_list_editor.cc:115 time_info_box.cc:102
+#: edit_note_dialog.cc:99 editor_regions.cc:162 export_timespan_selector.cc:375
+#: export_timespan_selector.cc:437 location_ui.cc:322 midi_list_editor.cc:115
+#: time_info_box.cc:102
 msgid "Length"
 msgstr "Durée"
 
@@ -8005,8 +8004,7 @@ msgstr "ms"
 msgid "period"
 msgstr "période"
 
-#: latency_gui.cc:72 panner_ui.cc:411 plugin_pin_dialog.cc:109
-#: plugin_ui.cc:421
+#: latency_gui.cc:72 panner_ui.cc:411 plugin_pin_dialog.cc:109 plugin_ui.cc:421
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -8246,19 +8244,19 @@ msgstr ""
 msgid "An error was encountered while launching %1"
 msgstr ""
 
-#: main.cc:344
+#: main.cc:346
 msgid " (built using "
 msgstr " (construit avec "
 
-#: main.cc:347
+#: main.cc:349
 msgid " and GCC version "
 msgstr " et GCC version "
 
-#: main.cc:357
+#: main.cc:359
 msgid "Copyright (C) 1999-2015 Paul Davis"
 msgstr ""
 
-#: main.cc:358
+#: main.cc:360
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
@@ -8266,37 +8264,37 @@ msgstr ""
 "Pour certaines parties, Copyright © Steve Harris, Ari Johnson, Brett Viren, "
 "Joel Baker, Robin Gareus"
 
-#: main.cc:360
+#: main.cc:362
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr "%1 est distribué sans AUCUNE GARANTIE"
 
-#: main.cc:361
+#: main.cc:363
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr "pas même de COMMERCIALISATION ou d'ADÉQUATION À UN BUT PARTICULIER."
 
-#: main.cc:362
+#: main.cc:364
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Ceci est un logiciel libre, et vous êtes encouragé à le distribuer "
 
-#: main.cc:363
+#: main.cc:365
 msgid "under certain conditions; see the source for copying conditions."
 msgstr ""
 "sous certaines conditions ; voir le fichier source pour les conditions de "
 "distribution."
 
-#: main.cc:368
+#: main.cc:370
 msgid "could not initialize %1."
 msgstr "impossible d'initialiser %1."
 
-#: main.cc:378
+#: main.cc:380
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr ""
 
-#: main.cc:385
+#: main.cc:387
 msgid "Could not complete pre-GUI initialization"
 msgstr ""
 
-#: main.cc:392
+#: main.cc:394
 #, fuzzy
 msgid "could not create %1 GUI"
 msgstr "IHM %1 impossible à créer"
@@ -8828,8 +8826,8 @@ msgstr ""
 msgid "pre"
 msgstr "pré"
 
-#: mixer_strip.cc:104 mixer_strip.cc:136 mixer_strip.cc:397
-#: mixer_strip.cc:1540 mixer_strip.cc:1551 rc_option_editor.cc:3140
+#: mixer_strip.cc:104 mixer_strip.cc:136 mixer_strip.cc:397 mixer_strip.cc:1540
+#: mixer_strip.cc:1551 rc_option_editor.cc:3140
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -9561,13 +9559,11 @@ msgstr "Désactivé"
 msgid "L:%3d R:%3d"
 msgstr "G : %3d D : %3d"
 
-#: mono_panner.cc:203 panner2d.cc:276 stereo_panner.cc:252
-#: stereo_panner.cc:275
+#: mono_panner.cc:203 panner2d.cc:276 stereo_panner.cc:252 stereo_panner.cc:275
 msgid "Panner|L"
 msgstr ""
 
-#: mono_panner.cc:220 panner2d.cc:277 stereo_panner.cc:250
-#: stereo_panner.cc:277
+#: mono_panner.cc:220 panner2d.cc:277 stereo_panner.cc:250 stereo_panner.cc:277
 msgid "Panner|R"
 msgstr ""
 
@@ -9576,8 +9572,8 @@ msgstr ""
 msgid "Mono Panner"
 msgstr "Pan. Mono"
 
-#: mono_panner_editor.cc:46 mono_panner_editor.cc:51
-#: stereo_panner_editor.cc:48 stereo_panner_editor.cc:53
+#: mono_panner_editor.cc:46 mono_panner_editor.cc:51 stereo_panner_editor.cc:48
+#: stereo_panner_editor.cc:53
 msgid "%"
 msgstr "%"
 
@@ -15193,84 +15189,84 @@ msgstr "Transposer le MIDI"
 msgid "Transpose"
 msgstr "Transposer"
 
-#: ui_config.cc:233 ui_config.cc:416
+#: ui_config.cc:234 ui_config.cc:417
 msgid "Loading default ui configuration file %1"
 msgstr ""
 "Chargement du fichier de style par défaut (%1) pour l'interface graphique"
 
-#: ui_config.cc:236 ui_config.cc:419
+#: ui_config.cc:237 ui_config.cc:420
 msgid "cannot read default ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier de configuration d'interface graphique par "
 "défaut « %1 »"
 
-#: ui_config.cc:239 ui_config.cc:424
+#: ui_config.cc:240 ui_config.cc:425
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 "le fichier par défaut (%1) pour la configuration de l'interface graphique "
 "n'a pas pu être chargé correctement."
 
-#: ui_config.cc:247
+#: ui_config.cc:248
 #, fuzzy
 msgid "Could not find default UI configuration file %1"
 msgstr ""
 "Chargement du fichier de style par défaut (%1) pour l'interface graphique"
 
-#: ui_config.cc:330
+#: ui_config.cc:331
 msgid "Color file for %1 not found along %2"
 msgstr ""
 
-#: ui_config.cc:337
+#: ui_config.cc:338
 msgid "Loading color file %1"
 msgstr ""
 
-#: ui_config.cc:340
+#: ui_config.cc:341
 msgid "cannot read color file \"%1\""
 msgstr ""
 
-#: ui_config.cc:345
+#: ui_config.cc:346
 msgid "color file \"%1\" not loaded successfully."
 msgstr ""
 
-#: ui_config.cc:397 ui_config.cc:480
+#: ui_config.cc:398 ui_config.cc:481
 #, fuzzy
 msgid "Color file %1 not saved"
 msgstr "Fichier de configuration %1 non sauvegardé"
 
-#: ui_config.cc:433
+#: ui_config.cc:434
 msgid "Loading user ui configuration file %1"
 msgstr ""
 "Chargement du fichier utilisateur de la configuration de l'interface "
 "graphique %1"
 
-#: ui_config.cc:436
+#: ui_config.cc:437
 msgid "cannot read ui configuration file \"%1\""
 msgstr ""
 "impossible de lire le fichier (%1) pour la configuration de l'interface "
 "graphique"
 
-#: ui_config.cc:441
+#: ui_config.cc:442
 msgid "user ui configuration file \"%1\" not loaded successfully."
 msgstr ""
 "le fichier utilisateur de configuration de l'interface graphique « %1 » n'a "
 "pas pu être chargé correctement."
 
-#: ui_config.cc:449
+#: ui_config.cc:450
 msgid "could not find any ui configuration file, canvas will look broken."
 msgstr ""
 "aucun fichier de configuration de l'interface graphique n'a éte trouvé.\n"
 "Elle aura l'air étrange."
 
-#: ui_config.cc:470
+#: ui_config.cc:471
 msgid "Config file %1 not saved"
 msgstr "Fichier de configuration %1 non sauvegardé"
 
-#: ui_config.cc:715
+#: ui_config.cc:716
 #, fuzzy
 msgid "Color %1 not found"
 msgstr "Préset de plugin %1 non trouvé"
 
-#: ui_config.cc:785
+#: ui_config.cc:786
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
 "Impossible de trouver le fichier de style « %1 » dans « %2 ». L'interface de "
