@@ -26,6 +26,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/io_processor.h"
+#include "ardour/delivery.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
@@ -53,6 +54,10 @@ class LIBARDOUR_API PortInsert : public IOProcessor
 	int set_state (const XMLNode&, int version);
 
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+
+	void flush_buffers (framecnt_t nframes) {
+		_out->flush_buffers (nframes);
+	}
 
 	framecnt_t signal_latency () const;
 

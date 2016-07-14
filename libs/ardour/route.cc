@@ -3398,6 +3398,11 @@ Route::flush_processor_buffers_locked (framecnt_t nframes)
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
 			d->flush_buffers (nframes);
+		} else {
+			boost::shared_ptr<PortInsert> p = boost::dynamic_pointer_cast<PortInsert> (*i);
+			if (p) {
+				p->flush_buffers (nframes);
+			}
 		}
 	}
 }
