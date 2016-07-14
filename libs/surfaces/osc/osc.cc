@@ -2447,7 +2447,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_gain", id, -193, lo_message_get_source (msg));
+	return sel_send_fail ("send_gain", id + 1, -193, lo_message_get_source (msg));
 }
 
 int
