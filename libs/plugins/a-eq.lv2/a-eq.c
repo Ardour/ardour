@@ -32,8 +32,6 @@
 
 #define AEQ_URI	"urn:ardour:a-eq"
 #define BANDS	6
-#define SMALL	0.0001f
-
 #ifndef MIN
 #define MIN(A,B) ((A) < (B)) ? (A) : (B)
 #endif
@@ -77,8 +75,8 @@ from_dB(double gdb) {
 }
 
 static inline bool
-is_eq(float a, float b) {
-	return (fabsf(a - b) < SMALL);
+is_eq(float a, float b, float small) {
+	return (fabsf(a - b) < small);
 }
 
 struct linear_svf {
@@ -101,6 +99,7 @@ typedef struct {
 	float* master;
 
 	float srate;
+	float tau;
 
 	float* input;
 	float* output;
@@ -109,7 +108,6 @@ typedef struct {
 	float v_g[BANDS];
 	float v_bw[BANDS];
 	float v_f0[BANDS];
-	float v_filtog[BANDS];
 	float v_master;
 
 	bool need_expose;
@@ -130,6 +128,7 @@ instantiate(const LV2_Descriptor* descriptor,
 {
 	Aeq* aeq = (Aeq*)calloc(1, sizeof(Aeq));
 	aeq->srate = rate;
+	aeq->tau = (1.0 - exp(-2.0 * M_PI * 64 * 25. / aeq->srate)); // 25Hz time constant @ 64fpp
 
 #ifdef LV2_EXTENDED
 	for (int i=0; features[i]; ++i) {
@@ -353,51 +352,78 @@ run(LV2_Handle instance, uint32_t n_samples)
 	const float* const input = aeq->input;
 	float* const output = aeq->output;
 
-	float in0, out;
-	uint32_t i, j;
+	const float tau = aeq->tau;
+	uint32_t offset = 0;
 
-	// 15Hz time constant
-	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 15. / aeq->srate));
+	while (n_samples > 0) {
+		uint32_t block = n_samples;
+		bool any_changed = false;
 
-	for (i = 0; i < n_samples; i++) {
-		in0 = input[i];
-		out = in0;
-		for (j = 0; j < BANDS; j++) {
-			out = run_linear_svf(&aeq->v_filter[j], out);
+		// TODO global en/disable
+		if (!is_eq(aeq->v_master, *aeq->master, 0.1)) {
+			aeq->v_master += tau * (*aeq->master - aeq->v_master);
+			any_changed = true;
+		} else {
+			aeq->v_master = *aeq->master;
 		}
-		output[i] = out * from_dB(*(aeq->master));
-	}
 
-	for (i = 0; i < BANDS; i++) {
-		if (!is_eq(aeq->v_filtog[i], *aeq->filtog[i])) {
-			aeq->v_filtog[i] = *(aeq->filtog[i]);
-		}
-		if (!is_eq(aeq->v_f0[i], *aeq->f0[i])) {
-			aeq->v_f0[i] += tau * (*aeq->f0[i] - aeq->v_f0[i]);
-			aeq->need_expose = true;
-		}
-		if (aeq->v_filtog[i] < 0.5) {
-			if (!is_eq(aeq->v_g[i], 0.f)) {
-				aeq->v_g[i] += tau * (0.0 - aeq->v_g[i]);
-				aeq->need_expose = true;
+		for (int i = 0; i < BANDS; ++i) {
+			bool changed = false;
+
+			if (!is_eq(aeq->v_f0[i], *aeq->f0[i], 0.1)) {
+				aeq->v_f0[i] += tau * (*aeq->f0[i] - aeq->v_f0[i]);
+				changed = true;
+			} else {
+				aeq->v_f0[i] = *aeq->f0[i];
 			}
-		} else if (aeq->v_filtog[i] >= 0.5) {
-			if (!is_eq(aeq->v_g[i], *aeq->g[i])) {
-				aeq->v_g[i] += tau * (*aeq->g[i] - aeq->v_g[i]);
-				aeq->need_expose = true;
+
+			if (*aeq->filtog[i] <= 0) {
+				if (!is_eq(aeq->v_g[i], 0.f, 0.05)) {
+					aeq->v_g[i] += tau * (0.0 - aeq->v_g[i]);
+					changed = true;
+				} else {
+					aeq->v_g[i] = 0.0;
+				}
+			} else {
+				if (!is_eq(aeq->v_g[i], *aeq->g[i], 0.05)) {
+					aeq->v_g[i] += tau * (*aeq->g[i] - aeq->v_g[i]);
+					changed = true;
+				} else {
+					aeq->v_g[i] = *aeq->g[i];
+				}
+			}
+
+			if (i != 0 && i != 5) {
+				if (!is_eq(aeq->v_bw[i], *aeq->bw[i], 0.001)) {
+					aeq->v_bw[i] += tau * (*aeq->bw[i] - aeq->v_bw[i]);
+					changed = true;
+				} else {
+					aeq->v_bw[i] = *aeq->bw[i];
+				}
+			}
+
+			if (changed) {
+				set_params(aeq, i);
+				any_changed = true;
 			}
 		}
-		if (i != 0 && i != 5 && !is_eq(aeq->v_bw[i], *aeq->bw[i])) {
-			aeq->v_bw[i] += tau * (*aeq->bw[i] - aeq->v_bw[i]);
+
+		if (any_changed) {
 			aeq->need_expose = true;
+			block = MIN (64, n_samples);
 		}
-		if (!is_eq(aeq->v_master, *aeq->master)) {
-			aeq->v_master = *(aeq->master);
-			aeq->need_expose = true;
+
+		for (uint32_t i = 0; i < block; ++i) {
+			float in0, out;
+			in0 = input[i + offset];
+			out = in0;
+			for (uint32_t j = 0; j < BANDS; j++) {
+				out = run_linear_svf(&aeq->v_filter[j], out);
+			}
+			output[i + offset] = out * from_dB(*(aeq->master));
 		}
-		if (aeq->need_expose == true) {
-			set_params(aeq, i);
-		}
+		n_samples -= block;
+		offset += block;
 	}
 
 #ifdef LV2_EXTENDED
