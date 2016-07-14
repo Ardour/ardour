@@ -136,6 +136,7 @@ UIConfiguration::parameter_changed (string param)
 void
 UIConfiguration::reset_gtk_theme ()
 {
+	LocaleGuard lg;
 	stringstream ss;
 
 	ss << "gtk_color_scheme = \"" << hex;
