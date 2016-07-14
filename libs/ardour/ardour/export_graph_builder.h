@@ -41,6 +41,7 @@ namespace AudioGrapher {
 	template <typename T> class SndfileWriter;
 	template <typename T> class SilenceTrimmer;
 	template <typename T> class TmpFile;
+	template <typename T> class TmpFileRt;
 	template <typename T> class Threader;
 	template <typename T> class AllocatingProcessContext;
 }
@@ -164,6 +165,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::LoudnessReader> LoudnessReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
 		typedef boost::shared_ptr<AudioGrapher::TmpFile<Sample> > TmpFilePtr;
+		typedef boost::shared_ptr<AudioGrapher::TmpFileRt<Sample> > TmpFileRtPtr;
 		typedef boost::shared_ptr<AudioGrapher::Threader<Sample> > ThreaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::AllocatingProcessContext<Sample> > BufferPtr;
 

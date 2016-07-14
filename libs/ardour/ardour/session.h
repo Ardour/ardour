@@ -704,7 +704,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int start_audio_export (framepos_t position);
+	int start_audio_export (framepos_t position, bool realtime = false);
 
 	PBD::Signal1<int, framecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;
@@ -1230,8 +1230,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
 	void process_audition       (pframes_t);
-	int  process_export         (pframes_t);
-	int  process_export_fw      (pframes_t);
+	void process_export         (pframes_t);
+	void process_export_fw      (pframes_t);
 
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
@@ -1268,6 +1268,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	bool _exporting;
 	bool _export_rolling;
+	bool _realtime_export;
 	framepos_t _export_preroll;
 	framepos_t _export_latency;
 

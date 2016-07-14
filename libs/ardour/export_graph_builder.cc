@@ -36,6 +36,7 @@
 #include "audiographer/general/silence_trimmer.h"
 #include "audiographer/general/threader.h"
 #include "audiographer/sndfile/tmp_file.h"
+#include "audiographer/sndfile/tmp_file_rt.h"
 #include "audiographer/sndfile/sndfile_writer.h"
 
 #include "ardour/audioengine.h"

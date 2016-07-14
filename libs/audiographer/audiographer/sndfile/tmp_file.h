@@ -35,7 +35,7 @@ class TmpFile : public SndfileWriter<T>, public SndfileReader<T>
 	~TmpFile()
 	{
 		/* explicitly close first, some OS (yes I'm looking at you windows)
-		 * cannot delet files that are still open
+		 * cannot delete files that are still open
 		 */
 		if (!filename.empty()) {
 			SndfileBase::close();

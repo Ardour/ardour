@@ -161,7 +161,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	   (the regular process() call to session->process() is not made)
 	*/
 
-	PBD::Signal1<int, pframes_t> Freewheel;
+	PBD::Signal1<void, pframes_t> Freewheel;
 
 	PBD::Signal0<void> Xrun;
 

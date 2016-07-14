@@ -104,13 +104,20 @@ Session::pre_export ()
 
 /** Called for each range that is being exported */
 int
-Session::start_audio_export (framepos_t position)
+Session::start_audio_export (framepos_t position, bool realtime)
 {
 	if (!_exporting) {
 		pre_export ();
 	}
 
-	_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
+	_realtime_export = realtime;
+
+	if (realtime) {
+		_export_preroll = nominal_frame_rate ();
+	} else {
+		_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
+	}
+
 	if (_export_preroll == 0) {
 		// must be > 0 so that transport is started in sync.
 		_export_preroll = 1;
@@ -170,12 +177,19 @@ Session::start_audio_export (framepos_t position)
 		return -1;
 	}
 
-	_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
-	_export_rolling = true;
-	return _engine.freewheel (true);
+	if (_realtime_export) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		_export_rolling = true;
+		process_function = &Session::process_export_fw;
+		return 0;
+	} else {
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		_export_rolling = true;
+		return _engine.freewheel (true);
+	}
 }
 
-int
+void
 Session::process_export (pframes_t nframes)
 {
 	if (_export_rolling && export_status->stop) {
@@ -201,26 +215,27 @@ Session::process_export (pframes_t nframes)
 	} catch (std::exception & e) {
 		error << string_compose (_("Export ended unexpectedly: %1"), e.what()) << endmsg;
 		export_status->abort (true);
-		return -1;
 	}
-
-	return 0;
 }
 
-int
+void
 Session::process_export_fw (pframes_t nframes)
 {
 	if (_export_preroll > 0) {
 
-		_engine.main_thread()->get_buffers ();
+		if (!_realtime_export) {
+			_engine.main_thread()->get_buffers ();
+		}
 		fail_roll (nframes);
-		_engine.main_thread()->drop_buffers ();
+		if (!_realtime_export) {
+			_engine.main_thread()->drop_buffers ();
+		}
 
 		_export_preroll -= std::min ((framepos_t)nframes, _export_preroll);
 
 		if (_export_preroll > 0) {
 			// clear out buffers (reverb tails etc).
-			return 0;
+			return;
 		}
 
 		set_transport_speed (1.0, 0, false);
@@ -228,29 +243,36 @@ Session::process_export_fw (pframes_t nframes)
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		post_transport ();
 
-		return 0;
+		return;
 	}
 
 	if (_export_latency > 0) {
 		framepos_t remain = std::min ((framepos_t)nframes, _export_latency);
 
-		_engine.main_thread()->get_buffers ();
+		if (!_realtime_export) {
+			_engine.main_thread()->get_buffers ();
+		}
 		process_without_events (remain);
-		_engine.main_thread()->drop_buffers ();
+		if (!_realtime_export) {
+			_engine.main_thread()->drop_buffers ();
+		}
 
 		_export_latency -= remain;
 		nframes -= remain;
 
 		if (nframes == 0) {
-			return 0;
+			return;
 		}
 	}
-
-	_engine.main_thread()->get_buffers ();
+	if (!_realtime_export) {
+		_engine.main_thread()->get_buffers ();
+	}
 	process_export (nframes);
-	_engine.main_thread()->drop_buffers ();
+	if (!_realtime_export) {
+		_engine.main_thread()->drop_buffers ();
+	}
 
-	return 0;
+	return;
 }
 
 int
@@ -279,9 +301,13 @@ Session::finalize_audio_export ()
 
 	/* Clean up */
 
-	_engine.freewheel (false);
-
-	export_freewheel_connection.disconnect();
+	if (_realtime_export) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		process_function = &Session::process_with_events;
+	} else {
+		_engine.freewheel (false);
+		export_freewheel_connection.disconnect();
+	}
 
 	_mmc->enable_send (_pre_export_mmc_enabled);
 

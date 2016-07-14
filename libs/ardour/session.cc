@@ -213,6 +213,7 @@ Session::Session (AudioEngine &eng,
 	, post_export_position (0)
 	, _exporting (false)
 	, _export_rolling (false)
+	, _realtime_export (false)
 	, _export_preroll (0)
 	, _export_latency (0)
 	, _pre_export_mmc_enabled (false)
