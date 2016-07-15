@@ -298,7 +298,11 @@ int main (int argc, char *argv[])
 #ifdef ENABLE_NLS
 	/* initialize C and C++ locales to user preference */
 	setlocale (LC_ALL, "");
-	std::locale::global (std::locale (setlocale (LC_ALL, 0)));
+	try {
+		std::locale::global (std::locale (setlocale (LC_ALL, 0)));
+	} catch (...) {
+		std::cerr << "Cannot set C++ locale\n";
+	}
 #endif
 
 	console_madness_begin();
