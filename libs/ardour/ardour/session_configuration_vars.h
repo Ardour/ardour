@@ -56,6 +56,7 @@ CONFIG_VARIABLE (std::string, timecode_generator_offset, "timecode-generator-off
 CONFIG_VARIABLE (bool, glue_new_markers_to_bars_and_beats, "glue-new-markers-to-bars-and-beats", false)
 CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", false)
 CONFIG_VARIABLE (bool, glue_new_regions_to_bars_and_beats, "glue-new-regions-to-bars-and-beats", false)
+CONFIG_VARIABLE (bool, realtime_export, "realtime-export", false)
 
 /* Video-settings are saved with the session and belong to the session.
  * headless ardour could remote control xjadeo for example.
