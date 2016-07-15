@@ -2496,7 +2496,7 @@ ProcessorBox::choose_send ()
 	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable (), _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
-	ChanCount outs = (_session->master_out())
+	ChanCount outs = (_route->n_outputs().n_audio() && _session->master_out())
 			? _session->master_out()->n_outputs()
 			: _route->n_outputs();
 
