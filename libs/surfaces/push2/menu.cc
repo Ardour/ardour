@@ -29,7 +29,7 @@ using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 #include "menu.h"
 
 Push2Menu::Push2Menu (Cairo::RefPtr<Cairo::Context> context)

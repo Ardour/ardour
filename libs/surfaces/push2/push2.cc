@@ -53,7 +53,7 @@
 #include "track_mix.h"
 #include "menu.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace std;
