@@ -496,6 +496,7 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 	_amp->apply_gain_automation(false);
 
 	silence (nframes);
+	flush_processor_buffers_locked (nframes);
 
 	framecnt_t playback_distance;
 

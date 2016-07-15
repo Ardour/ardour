@@ -3501,6 +3501,7 @@ int
 Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& /* need_butler */)
 {
 	silence (nframes);
+	flush_processor_buffers_locked (nframes);
 	return 0;
 }
 
