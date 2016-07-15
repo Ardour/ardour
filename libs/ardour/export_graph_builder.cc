@@ -318,6 +318,8 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
 					(framecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate)));
 		chunker->add_output (analyser);
+
+		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 	}
 
