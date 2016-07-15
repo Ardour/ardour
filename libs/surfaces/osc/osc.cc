@@ -552,7 +552,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
 		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
 		REGISTER_CALLBACK (serv, "/select/pan_frontback_position", "f", sel_pan_frontback);
-		REGISTER_CALLBACK (serv, "/select/pan_lfe_position", "f", sel_pan_lfe);
+		REGISTER_CALLBACK (serv, "/select/pan_lfe_control", "f", sel_pan_lfe);
 		REGISTER_CALLBACK (serv, "/select/comp_enable", "f", sel_comp_enable);
 		REGISTER_CALLBACK (serv, "/select/comp_threshold", "f", sel_comp_threshold);
 		REGISTER_CALLBACK (serv, "/select/comp_speed", "f", sel_comp_speed);
@@ -2697,7 +2697,7 @@ OSC::sel_pan_lfe (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_lfe_position", 0, lo_message_get_source (msg));
+	return sel_fail ("pan_lfe_control", 0, lo_message_get_source (msg));
 }
 
 // compressor control

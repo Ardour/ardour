@@ -140,8 +140,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			change_message ("/select/pan_frontback_position", _strip->pan_frontback_control());
 		}
 		if (_strip->pan_lfe_control ()) {
-			_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_position"), _strip->pan_lfe_control()), OSC::instance());
-			change_message ("/select/pan_lfe_position", _strip->pan_lfe_control());
+			_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
+			change_message ("/select/pan_lfe_control", _strip->pan_lfe_control());
 		}
 		// Compressor
 		if (_strip->comp_enable_controllable ()) {
@@ -220,7 +220,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 	if (feedback[13]) { // Well known controls
 		clear_strip ("/select/pan_elevation_position", .5);
 		clear_strip ("/select/pan_frontback_position", .5);
-		clear_strip ("/select/pan_lfe_position", 0);
+		clear_strip ("/select/pan_lfe_control", 0);
 		clear_strip ("/select/comp_enable", 0);
 		clear_strip ("/select/comp_threshold", 0);
 		clear_strip ("/select/comp_speed", 0);
