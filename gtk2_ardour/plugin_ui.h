@@ -153,7 +153,6 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	ArdourWindow* latency_dialog;
 
 	PluginEqGui* eqgui;
-	Gtk::Requisition pre_eq_size;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;

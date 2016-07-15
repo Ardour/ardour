@@ -710,7 +710,19 @@ PlugUIBase::toggle_description()
 	}
 
 	if (!description_expander.get_expanded()) {
+		const int child_height = description_expander.get_child ()->get_height ();
+
 		description_expander.remove();
+
+		Gtk::Window *toplevel = (Gtk::Window*) description_expander.get_ancestor (GTK_TYPE_WINDOW);
+
+		if (toplevel) {
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
+		}
+
 	}
 }
 
@@ -725,12 +737,6 @@ PlugUIBase::toggle_plugin_analysis()
 			eqgui = new PluginEqGui (insert);
 		}
 
-		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);
-
-		if (toplevel) {
-			toplevel->get_size (pre_eq_size.width, pre_eq_size.height);
-		}
-
 		plugin_analysis_expander.add (*eqgui);
 		plugin_analysis_expander.show_all ();
 		eqgui->start_listening ();
@@ -738,6 +744,7 @@ PlugUIBase::toggle_plugin_analysis()
 
 	if (!plugin_analysis_expander.get_expanded()) {
 		// Hide & remove from expander
+		const int child_height = plugin_analysis_expander.get_child ()->get_height ();
 
 		eqgui->hide ();
 		eqgui->stop_listening ();
@@ -746,7 +753,10 @@ PlugUIBase::toggle_plugin_analysis()
 		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);
 
 		if (toplevel) {
-			toplevel->resize (pre_eq_size.width, pre_eq_size.height);
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
 		}
 	}
 }
