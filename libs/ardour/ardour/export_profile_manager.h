@@ -65,6 +65,8 @@ class LIBARDOUR_API ExportProfileManager
 	void load_profile ();
 	void prepare_for_export ();
 
+	ExportType type () const { return _type; }
+
 	typedef std::list<ExportPresetPtr> PresetList;
 
 	PresetList const & get_presets () { return preset_list; }
@@ -79,7 +81,7 @@ class LIBARDOUR_API ExportProfileManager
 	typedef std::pair<PBD::UUID, std::string> FilePair;
 	typedef std::map<PBD::UUID, std::string> FileMap;
 
-	ExportType type;
+	ExportType  _type;
 	std::string xml_node_name;
 	HandlerPtr  handler;
 	Session &   session;

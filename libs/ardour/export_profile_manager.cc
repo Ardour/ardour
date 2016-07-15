@@ -58,7 +58,7 @@ namespace ARDOUR
 {
 
 ExportProfileManager::ExportProfileManager (Session & s, ExportType type)
-  : type(type)
+  : _type(type)
   , handler (s.get_export_handler())
   , session (s)
 
@@ -162,7 +162,7 @@ ExportProfileManager::prepare_for_export ()
 			}
 
 			// ...and each channel config
-			filename->include_channel_config = (type == StemExport) ||
+			filename->include_channel_config = (_type == StemExport) ||
 			                                   (channel_configs.size() > 1);
 			for(ChannelConfigStateList::iterator cc_it = channel_configs.begin(); cc_it != channel_configs.end(); ++cc_it) {
 				handler->add_export_config (*ts_it, (*cc_it)->config, (*format_it)->format, filename, b);
