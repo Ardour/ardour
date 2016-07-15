@@ -40,19 +40,13 @@ class SndfileWriter
 
 	virtual ~SndfileWriter () {}
 
-	SndfileWriter (SndfileWriter const & other)
-		: SndfileHandle (other)
-	{
-		init();
-	}
-
 	using SndfileHandle::operator=;
 
 	framecnt_t get_frames_written() const { return frames_written; }
 	void       reset_frames_written_count() { frames_written = 0; }
 
 	/// Writes data to file
-	void process (ProcessContext<T> const & c)
+	virtual void process (ProcessContext<T> const & c)
 	{
 		check_flags (*this, c);
 
@@ -88,7 +82,7 @@ class SndfileWriter
 		init();
 	}
 
-	void init()
+	virtual void init()
 	{
 		frames_written = 0;
 		add_supported_flag (ProcessContext<T>::EndOfInput);
@@ -97,6 +91,9 @@ class SndfileWriter
   protected:
 	std::string path;
 	framecnt_t frames_written;
+
+	private:
+	SndfileWriter (SndfileWriter const & other) {}
 };
 
 } // namespace

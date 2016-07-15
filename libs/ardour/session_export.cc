@@ -177,13 +177,14 @@ Session::start_audio_export (framepos_t position, bool realtime)
 		return -1;
 	}
 
+	_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+
 	if (_realtime_export) {
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		_export_rolling = true;
 		process_function = &Session::process_export_fw;
 		return 0;
 	} else {
-		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
 		_export_rolling = true;
 		return _engine.freewheel (true);
 	}
@@ -197,14 +198,18 @@ Session::process_export (pframes_t nframes)
 	}
 
 	if (_export_rolling) {
-		/* make sure we've caught up with disk i/o, since
-		we're running faster than realtime c/o JACK.
-		*/
-		_butler->wait_until_finished ();
+		if (!_realtime_export)  {
+			/* make sure we've caught up with disk i/o, since
+			 * we're running faster than realtime c/o JACK.
+			 */
+			_butler->wait_until_finished ();
+		}
 
 		/* do the usual stuff */
 
 		process_without_events (nframes);
+	} else if (_realtime_export) {
+		fail_roll (nframes); // somehow we need to silence _ALL_ output buffers
 	}
 
 	try {
@@ -221,13 +226,14 @@ Session::process_export (pframes_t nframes)
 void
 Session::process_export_fw (pframes_t nframes)
 {
+	const bool need_buffers = _engine.freewheeling ();
 	if (_export_preroll > 0) {
 
-		if (!_realtime_export) {
+		if (need_buffers) {
 			_engine.main_thread()->get_buffers ();
 		}
 		fail_roll (nframes);
-		if (!_realtime_export) {
+		if (need_buffers) {
 			_engine.main_thread()->drop_buffers ();
 		}
 
@@ -249,11 +255,11 @@ Session::process_export_fw (pframes_t nframes)
 	if (_export_latency > 0) {
 		framepos_t remain = std::min ((framepos_t)nframes, _export_latency);
 
-		if (!_realtime_export) {
+		if (need_buffers) {
 			_engine.main_thread()->get_buffers ();
 		}
 		process_without_events (remain);
-		if (!_realtime_export) {
+		if (need_buffers) {
 			_engine.main_thread()->drop_buffers ();
 		}
 
@@ -264,11 +270,12 @@ Session::process_export_fw (pframes_t nframes)
 			return;
 		}
 	}
-	if (!_realtime_export) {
+
+	if (need_buffers) {
 		_engine.main_thread()->get_buffers ();
 	}
 	process_export (nframes);
-	if (!_realtime_export) {
+	if (need_buffers) {
 		_engine.main_thread()->drop_buffers ();
 	}
 
@@ -304,10 +311,9 @@ Session::finalize_audio_export ()
 	if (_realtime_export) {
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		process_function = &Session::process_with_events;
-	} else {
-		_engine.freewheel (false);
-		export_freewheel_connection.disconnect();
 	}
+	_engine.freewheel (false);
+	export_freewheel_connection.disconnect();
 
 	_mmc->enable_send (_pre_export_mmc_enabled);
 

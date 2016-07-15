@@ -37,6 +37,7 @@
 #include "audiographer/general/threader.h"
 #include "audiographer/sndfile/tmp_file.h"
 #include "audiographer/sndfile/tmp_file_rt.h"
+#include "audiographer/sndfile/tmp_file_sync.h"
 #include "audiographer/sndfile/sndfile_writer.h"
 
 #include "ardour/audioengine.h"
@@ -434,8 +435,10 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	normalizer->add_output (threader);
 
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFile<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+	tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
+	                                           boost::bind (&Normalizer::prepare_post_processing, this));
+	tmp_file->FileFlushed.connect_same_thread (post_processing_connection,
 	                                           boost::bind (&Normalizer::start_post_processing, this));
 
 	add_child (new_config);
@@ -509,8 +512,9 @@ ExportGraphBuilder::Normalizer::process()
 }
 
 void
-ExportGraphBuilder::Normalizer::start_post_processing()
+ExportGraphBuilder::Normalizer::prepare_post_processing()
 {
+	// called in sync rt-context
 	float gain;
 	if (use_loudness) {
 		gain = normalizer->set_peak (loudness_reader->get_peak (config.format->normalize_lufs (), config.format->normalize_dbtp ()));
@@ -520,9 +524,18 @@ ExportGraphBuilder::Normalizer::start_post_processing()
 	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i).set_peak (gain);
 	}
-	tmp_file->seek (0, SEEK_SET);
 	tmp_file->add_output (normalizer);
 	parent.normalizers.push_back (this);
+}
+
+void
+ExportGraphBuilder::Normalizer::start_post_processing()
+{
+	// called in disk-thread (when exporting in realtime)
+	tmp_file->seek (0, SEEK_SET);
+	if (!AudioEngine::instance()->freewheeling ()) {
+		AudioEngine::instance()->freewheel (true);
+	}
 }
 
 /* SRC */

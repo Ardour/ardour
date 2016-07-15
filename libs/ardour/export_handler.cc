@@ -26,6 +26,7 @@
 
 #include "pbd/convert.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audiofile_tagger.h"
 #include "ardour/debug.h"
 #include "ardour/export_graph_builder.h"
@@ -232,7 +233,12 @@ ExportHandler::process (framecnt_t frames)
 		return 0;
 	} else if (normalizing) {
 		Glib::Threads::Mutex::Lock l (export_status->lock());
-		return process_normalize ();
+		if (AudioEngine::instance()->freewheeling ()) {
+			return process_normalize ();
+		} else {
+			// wait until we're freewheeling
+			return 0;
+		}
 	} else {
 		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_timespan (frames);
