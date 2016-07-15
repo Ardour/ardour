@@ -62,6 +62,7 @@ class LIBARDOUR_API ExportStatus {
 	volatile enum Progress {
 		Exporting,
 		Normalizing,
+		Encoding,
 		Tagging,
 		Uploading,
 		Command }

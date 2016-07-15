@@ -115,6 +115,7 @@ ExportGraphBuilder::reset ()
 	channels.clear ();
 	normalizers.clear ();
 	analysis_map.clear();
+	_realtime = false;
 }
 
 void
@@ -135,7 +136,7 @@ ExportGraphBuilder::set_current_timespan (boost::shared_ptr<ExportTimespan> span
 }
 
 void
-ExportGraphBuilder::add_config (FileSpec const & config)
+ExportGraphBuilder::add_config (FileSpec const & config, bool rt)
 {
 	ExportChannelConfiguration::ChannelList const & channels =
 		config.channel_config->get_channels();
@@ -143,6 +144,8 @@ ExportGraphBuilder::add_config (FileSpec const & config)
 	    it != channels.end(); ++it) {
 		(*it)->set_max_buffer_size(process_buffer_frames);
 	}
+
+	_realtime = rt;
 
 	// If the sample rate is "session rate", change it to the real value.
 	// However, we need to copy it to not change the config which is saved...
@@ -413,6 +416,7 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
 	: parent (parent)
 	, use_loudness (false)
+	, use_peak (false)
 {
 	std::string tmpfile_path = parent.session.session_directory().export_path();
 	tmpfile_path = Glib::build_filename(tmpfile_path, "XXXXXX");
@@ -424,18 +428,30 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	uint32_t const channels = config.channel_config->get_n_chans();
 	max_frames_out = 4086 - (4086 % channels); // TODO good chunk size
 	use_loudness = config.format->normalize_loudness ();
+	use_peak = config.format->normalize ();
 
 	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, channels));
-	peak_reader.reset (new PeakReader ());
-	loudness_reader.reset (new LoudnessReader (config.format->sample_rate(), channels, max_frames));
+
+	if (use_peak) {
+		peak_reader.reset (new PeakReader ());
+	}
+	if (use_loudness) {
+		loudness_reader.reset (new LoudnessReader (config.format->sample_rate(), channels, max_frames));
+	}
+
 	normalizer.reset (new AudioGrapher::Normalizer (use_loudness ? 0.0 : config.format->normalize_dbfs()));
 	threader.reset (new Threader<Sample> (parent.thread_pool));
-
 	normalizer->alloc_buffer (max_frames_out);
 	normalizer->add_output (threader);
 
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+
+	if (parent._realtime) {
+		tmp_file.reset (new TmpFileRt<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+	} else {
+		tmp_file.reset (new TmpFileSync<float> (&tmpfile_path_buf[0], format, channels, config.format->sample_rate()));
+	}
+
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
 	                                           boost::bind (&Normalizer::prepare_post_processing, this));
 	tmp_file->FileFlushed.connect_same_thread (post_processing_connection,
@@ -445,7 +461,7 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 
 	if (use_loudness) {
 		loudness_reader->add_output (tmp_file);
-	} else {
+	} else if (use_peak) {
 		peak_reader->add_output (tmp_file);
 	}
 }
@@ -455,8 +471,10 @@ ExportGraphBuilder::Normalizer::sink ()
 {
 	if (use_loudness) {
 		return loudness_reader;
+	} else if (use_peak) {
+		return peak_reader;
 	}
-	return peak_reader;
+	return tmp_file;
 }
 
 void
@@ -518,11 +536,16 @@ ExportGraphBuilder::Normalizer::prepare_post_processing()
 	float gain;
 	if (use_loudness) {
 		gain = normalizer->set_peak (loudness_reader->get_peak (config.format->normalize_lufs (), config.format->normalize_dbtp ()));
-	} else {
+	} else if (use_peak) {
 		gain = normalizer->set_peak (peak_reader->get_peak());
+	} else {
+		gain = normalizer->set_peak (0.0);
 	}
-	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i).set_peak (gain);
+	if (use_loudness || use_peak) {
+		// push info to analyzers
+		for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+			(*i).set_peak (gain);
+		}
 	}
 	tmp_file->add_output (normalizer);
 	parent.normalizers.push_back (this);
@@ -561,7 +584,7 @@ ExportGraphBuilder::SRC::sink ()
 void
 ExportGraphBuilder::SRC::add_child (FileSpec const & new_config)
 {
-	if (new_config.format->normalize()) {
+	if (new_config.format->normalize() || parent._realtime) {
 		add_child_to_list (new_config, normalized_children);
 	} else {
 		add_child_to_list (new_config, children);

@@ -53,6 +53,9 @@ class LIBARDOUR_API ExportTimespan
 	std::string range_id () const { return _range_id; }
 	void set_range_id (std::string range_id) { _range_id = range_id; }
 
+	bool realtime () const { return _realtime; }
+	void set_realtime (bool rt) { _realtime = rt; }
+
 	void set_range (framepos_t start, framepos_t end);
 	framecnt_t get_length () const { return end_frame - start_frame; }
 	framepos_t get_start () const { return start_frame; }
@@ -76,6 +79,7 @@ class LIBARDOUR_API ExportTimespan
 
 	std::string _name;
 	std::string _range_id;
+	bool        _realtime;
 
 };
 

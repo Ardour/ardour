@@ -69,13 +69,14 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	int process (framecnt_t frames, bool last_cycle);
 	bool process_normalize (); // returns true when finished
-	bool will_normalize() { return !normalizers.empty(); }
+	bool will_normalize() const { return !normalizers.empty(); }
+	bool realtime() const { return _realtime; }
 	unsigned get_normalize_cycle_count() const;
 
 	void reset ();
 	void cleanup (bool remove_out_files = false);
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
-	void add_config (FileSpec const & config);
+	void add_config (FileSpec const & config, bool rt);
 	void get_analysis_results (AnalysisResults& results);
 
   private:
@@ -175,6 +176,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FileSpec        config;
 		framecnt_t      max_frames_out;
 		bool            use_loudness;
+		bool            use_peak;
 		BufferPtr       buffer;
 		PeakReaderPtr   peak_reader;
 		TmpFilePtr      tmp_file;
@@ -264,6 +266,8 @@ class LIBARDOUR_API ExportGraphBuilder
 	std::list<Normalizer *> normalizers;
 
 	AnalysisMap analysis_map;
+
+	bool _realtime;
 
 	Glib::ThreadPool thread_pool;
 };

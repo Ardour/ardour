@@ -28,7 +28,8 @@ ExportTimespan::ExportTimespan (ExportStatusPtr status, framecnt_t frame_rate) :
 	start_frame (0),
 	end_frame (0),
 	position (0),
-	frame_rate (frame_rate)
+	frame_rate (frame_rate),
+	_realtime (false)
 {
 
 }

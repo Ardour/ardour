@@ -190,11 +190,12 @@ ExportHandler::start_timespan ()
 	graph_builder->reset ();
 	graph_builder->set_current_timespan (current_timespan);
 	handle_duplicate_format_extensions();
+	bool realtime = current_timespan->realtime ();
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		// Filenames can be shared across timespans
 		FileSpec & spec = it->second;
 		spec.filename->set_timespan (it->first);
-		graph_builder->add_config (spec);
+		graph_builder->add_config (spec, realtime);
 	}
 
 	/* start export */
@@ -202,7 +203,7 @@ ExportHandler::start_timespan ()
 	normalizing = false;
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
-	session.start_audio_export (process_position);
+	session.start_audio_export (process_position, realtime);
 }
 
 void
@@ -272,7 +273,7 @@ ExportHandler::process_timespan (framecnt_t frames)
 
 	/* Start normalizing if necessary */
 	if (last_cycle) {
-		normalizing = graph_builder->will_normalize();
+		normalizing = graph_builder->will_normalize ();
 		if (normalizing) {
 			export_status->total_normalize_cycles = graph_builder->get_normalize_cycle_count();
 			export_status->current_normalize_cycle = 0;
@@ -292,7 +293,11 @@ ExportHandler::process_normalize ()
 		finish_timespan ();
 		export_status->active_job = ExportStatus::Exporting;
 	} else {
-		export_status->active_job = ExportStatus::Normalizing;
+		if (graph_builder->realtime ()) {
+			export_status->active_job = ExportStatus::Encoding;
+		} else {
+			export_status->active_job = ExportStatus::Normalizing;
+		}
 	}
 
 	export_status->current_normalize_cycle++;
