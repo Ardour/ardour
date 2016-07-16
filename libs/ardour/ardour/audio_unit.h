@@ -170,10 +170,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
-	pframes_t _current_block_size;
 	framecnt_t _last_nframes;
-	framepos_t _transport_frame;
-	framepos_t _transport_speed;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 	bool _has_midi_input;
