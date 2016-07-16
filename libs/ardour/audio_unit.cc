@@ -955,7 +955,10 @@ AUPlugin::default_value (uint32_t port)
 framecnt_t
 AUPlugin::signal_latency () const
 {
-	return unit->Latency() * _session.frame_rate();
+	if (_current_latency < 0) {
+		_current_latency = unit->Latency() * _session.frame_rate();
+	}
+	return _current_latency;
 }
 
 void
@@ -1081,8 +1084,6 @@ AUPlugin::set_block_size (pframes_t nframes)
 	if (was_initialized) {
 		activate ();
 	}
-
-	_current_block_size = nframes;
 
 	return 0;
 }
@@ -3362,6 +3363,19 @@ AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float in
 
 	_parameter_listener_arg = arg;
 
+	// listen for latency changes
+	AudioUnitEvent event;
+	event.mEventType = kAudioUnitEvent_PropertyChange;
+	event.mArgument.mProperty.mAudioUnit = unit->AU();
+	event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_Latency;
+	event.mArgument.mProperty.mScope = kAudioUnitScope_Global;
+	event.mArgument.mProperty.mElement = 0;
+
+	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		PBD::error << "Failed to create latency event listener\n";
+		// TODO don't cache _current_latency
+	}
+
 	return 0;
 }
 
@@ -3458,6 +3472,15 @@ AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent
 void
 AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEvent* event, UInt64 /*host_time*/, Float32 new_value)
 {
+	if (event->mEventType == kAudioUnitEvent_PropertyChange) {
+		if (event->mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency) {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Latency Change Event %1 <> %1\n", new_value, unit->Latency()));
+			// TODO atomically set //_current_latency = -1;
+			_current_latency = unit->Latency() * _session.frame_rate(); // TODO: check: new_value
+		}
+		return;
+	}
+
         ParameterMap::iterator i;
 
         if ((i = parameter_map.find (event->mArgument.mParameter.mParameterID)) == parameter_map.end()) {

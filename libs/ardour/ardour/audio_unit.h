@@ -171,6 +171,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	framecnt_t _last_nframes;
+	mutable framecnt_t _current_latency;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 	bool _has_midi_input;
