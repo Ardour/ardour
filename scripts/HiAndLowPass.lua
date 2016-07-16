@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "dsp",
 	name        = "a-High and Low Pass Filter",
 	category    = "Filter",
-	license     = "MIT",
+	license     = "GPLv2",
 	author      = "Ardour Team",
 	description = [[Example Ardour Lua DSP Plugin]]
 }
@@ -61,20 +61,24 @@ function dsp_init (rate)
 
 	-- create a table of objects to share with the GUI
 	local tbl = {}
-	tbl['rb'] = rb
 	tbl['samplerate'] = rate
 	self:table ():set (tbl)
 
-	-- interpolation time constant
-	lpf = 13000 / rate
+	-- interpolation time constant, 64fpp
+	lpf = 15000 / rate
 end
 
 function dsp_configure (ins, outs)
 	assert (ins:n_audio () == outs:n_audio ())
 	local tbl = self:table ():get () -- get shared memory table
-	local rate = tbl['samplerate']
 
 	chn = ins:n_audio ()
+	cur = {0, 0, 0, 0, 0, 0}
+
+	hp = {}
+	lp = {}
+
+	collectgarbage ()
 
 	for c = 1, chn do
 		hp[c] = {}
@@ -82,11 +86,10 @@ function dsp_configure (ins, outs)
 		-- initialize filters
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
 		for k = 1,4 do
-			hp[c][k] = ARDOUR.DSP.Biquad (rate)
-			lp[c][k] = ARDOUR.DSP.Biquad (rate)
+			hp[c][k] = ARDOUR.DSP.Biquad (tbl['samplerate'])
+			lp[c][k] = ARDOUR.DSP.Biquad (tbl['samplerate'])
 		end
 	end
-	cur = {0, 0, 0, 0, 0, 0}
 end
 
 -- helper functions for parameter interpolation
@@ -133,6 +136,8 @@ end
 -- the actual DSP callback
 function dsp_run (ins, outs, n_samples)
 	assert (n_samples < 8192)
+	assert (#ins == chn)
+
 	local changed = false
 	local siz = n_samples
 	local off = 0
@@ -164,11 +169,15 @@ function dsp_run (ins, outs, n_samples)
 
 			-- initialize output
 			if hox == 0 then
+				-- high pass is disabled, just copy data.
 				ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
 			else
+				-- clear output, The filter mixes into the output buffer
 				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
 			end
 
+			-- high pass
+			-- allways run all filters so that we can interplate as needed.
 			for k = 1,4 do
 				if xfade > 0 and k > ho and k <= ho + 1 then
 					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
@@ -187,9 +196,12 @@ function dsp_run (ins, outs, n_samples)
 			xfade = lox - lo
 			assert (xfade >= 0 and xfade < 1)
 
+			-- copy output of high-pass into "processing memory"
 			ARDOUR.DSP.copy_vector (mem:to_float (off), outs[c]:offset (off), siz)
 
 			if lox > 0 then
+				-- clear output, Low-pass mixes interpolated data into output,
+				-- in which case we just keep the output
 				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
 			end
 
@@ -228,12 +240,12 @@ function round (n)
 end
 
 function freq_at_x (x, w)
-	-- x-axis pixel for given freq, power-scale
+	-- frequency in Hz at given x-axis pixel
 	return 20 * 1000 ^ (x / w)
 end
 
 function x_at_freq (f, w)
-	-- frequency at given x-axis pixel
+	-- x-axis pixel for given frequency, power-scale
 	return w * math.log (f / 20.0) / math.log (1000.0)
 end
 
@@ -246,6 +258,7 @@ end
 
 function grid_db (ctx, w, h, db)
 	-- draw horizontal grid line
+	-- note that a cairo pixel at Y spans [Y - 0.5 to Y + 0.5]
 	local y = -.5 + round (db_to_y (db, h))
 	ctx:move_to (0, y)
 	ctx:line_to (w, y)
@@ -261,8 +274,10 @@ function grid_freq (ctx, w, h, f)
 end
 
 function response (ho, lo, f)
-		local db = ho * filt['hp']:dB_at_freq (f)
-		return db + lo * filt['lp']:dB_at_freq (f)
+	-- calculate transfer function response for given
+	-- hi/po pass order at given frequency [Hz]
+	local db = ho * filt['hp']:dB_at_freq (f)
+	return db + lo * filt['lp']:dB_at_freq (f)
 end
 
 function render_inline (ctx, w, max_h)
@@ -297,8 +312,6 @@ function render_inline (ctx, w, max_h)
 	ctx:clip ()
 
 	-- set line width: 1px
-	-- Note: a cairo pixel at [1,1]  spans [0.5->1.5 , 0.5->1.5]
-	-- hence the offset -0.5 in various move_to(), line_to() calls
 	ctx:set_line_width (1.0)
 
 	-- draw grid
@@ -306,10 +319,10 @@ function render_inline (ctx, w, max_h)
 	local dash2 = C.DoubleVector ()
 	dash2:add ({1, 2})
 	dash3:add ({1, 3})
-	ctx:set_dash (dash2, 2) -- dotted line
+	ctx:set_dash (dash2, 2) -- dotted line: 1 pixel 2 space
 	ctx:set_source_rgba (.5, .5, .5, .8)
 	grid_db (ctx, w, h, 0)
-	ctx:set_dash (dash3, 2) -- dotted line
+	ctx:set_dash (dash3, 2) -- dashed line: 1 pixel 3 space
 	ctx:set_source_rgba (.5, .5, .5, .5)
 	grid_db (ctx, w, h, -12)
 	grid_db (ctx, w, h, -24)
@@ -319,16 +332,17 @@ function render_inline (ctx, w, max_h)
 	grid_freq (ctx, w, h, 10000)
 	ctx:unset_dash ()
 
+	-- draw transfer function line
 	local ho = math.floor(cur[1])
 	local lo = math.floor(cur[4])
 
-	-- draw transfer function line
 	ctx:set_source_rgba (.8, .8, .8, 1.0)
 	ctx:move_to (-.5, db_to_y (response(ho, lo, freq_at_x (0, w)), h))
 	for x = 1,w do
 		local db = response(ho, lo, freq_at_x (x, w))
 		ctx:line_to (-.5 + x, db_to_y (db, h))
 	end
+	-- stoke a line, keep the path
 	ctx:stroke_preserve ()
 
 	-- fill area to zero under the curve
