@@ -1,180 +1,182 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 # Fred Rech <f.rech@yahoo.fr>, 2014.
+# Raphaël Doursenaud <rdoursenaud@free.fr>, 2015
+# Julien Rivaud <frnchfrgg@free.fr>, 2016
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: libardour 3\n"
+"Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2015-03-28 20:54+0100\n"
-"Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
+"PO-Revision-Date: 2016-07-16 18:48+0200\n"
+"Last-Translator: Julien Rivaud <frnchfrgg@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.8.8\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-Basepath: ../\n"
+"X-Poedit-Basepath: ..\n"
 
 #: amp.cc:412
 #, c-format
 msgid "%.2fdB"
-msgstr ""
+msgstr "%.2f dB"
 
 #: analyser.cc:121 audioregion.cc:1789
 msgid "Transient Analysis failed for %1."
-msgstr ""
+msgstr "La recherche des transitoires a échoué pour %1."
 
 #: analyser.cc:121
 msgid "Audio File Source"
-msgstr ""
+msgstr "le fichier source audio"
 
 #: analysis_graph.cc:136
 msgid "%1 (%2..%3)"
-msgstr ""
+msgstr "%1 (%2..%3)"
 
 #: audio_backend.cc:31
 msgid "No Error occurred"
-msgstr ""
+msgstr "Aucune erreur"
 
 #: audio_backend.cc:33
 msgid "Failed to initialize audio backend"
-msgstr ""
+msgstr "L'initialisation du moteur audio a échoué"
 
 #: audio_backend.cc:35
 msgid "Failed to deinitialize audio backend"
-msgstr ""
+msgstr "L'arrêt du moteur audio a échoué"
 
 #: audio_backend.cc:37
 msgid "Failed to reinitialize audio backend"
-msgstr ""
+msgstr "La réinitialisation du moteur audio a échoué"
 
 #: audio_backend.cc:39
 msgid "Failed to open audio device"
-msgstr ""
+msgstr "L'ouverture du périphérique audio a échoué"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
-msgstr ""
+msgstr "La fermeture du périphérique audio a échoué"
 
 #: audio_backend.cc:43
 msgid "Audio device not valid"
-msgstr ""
+msgstr "Le périphérique audio n'est pas valide"
 
 #: audio_backend.cc:45
 msgid "Audio device unavailable"
-msgstr ""
+msgstr "Le périphérique audio n'est pas disponible"
 
 #: audio_backend.cc:47
 msgid "Audio device not connected"
-msgstr ""
+msgstr "Le périphérique audio n'est pas connecté"
 
 #: audio_backend.cc:49
 msgid "Failed to request and reserve audio device"
-msgstr ""
+msgstr "La réservation du périphérique audio a échoué"
 
 #: audio_backend.cc:51
 msgid "Audio device Input/Output error"
-msgstr ""
+msgstr "Erreur d'entrée/sortie du périphérique audio"
 
 #: audio_backend.cc:53
 msgid "Failed to open MIDI device"
-msgstr ""
+msgstr "L'ouverture du périphérique MIDI a échoué"
 
 #: audio_backend.cc:55
 msgid "Failed to close MIDI device"
-msgstr ""
+msgstr "La fermeture du périphérique MIDI a échoué."
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
-msgstr ""
+msgstr "Le périphérique MIDI n'est pas disponible"
 
 #: audio_backend.cc:59
 msgid "MIDI device not connected"
-msgstr ""
+msgstr "Le périphérique MIDI n'est pas connecté"
 
 #: audio_backend.cc:61
 msgid "MIDI device Input/Output error"
-msgstr ""
+msgstr "Erreur d'entrée/sortie du périphérique MIDI"
 
 #: audio_backend.cc:63
 msgid "Sample format is not supported"
-msgstr ""
+msgstr "Le format d'échantillon n'est pas supporté"
 
 #: audio_backend.cc:65
 msgid "Sample rate is not supported"
-msgstr ""
+msgstr "Le taux d'échantillonnage n'est pas supporté"
 
 #: audio_backend.cc:67
 msgid "Requested input latency is not supported"
-msgstr ""
+msgstr "La latence d'entrée demandée n'est pas supportée"
 
 #: audio_backend.cc:69
 msgid "Requested output latency is not supported"
-msgstr ""
+msgstr "La latence de sortie demandée n'est pas supportée"
 
 #: audio_backend.cc:71
 msgid "Period size is not supported"
-msgstr ""
+msgstr "Cette longueur de période n'est pas supportée"
 
 #: audio_backend.cc:73
 msgid "Period count is not supported"
-msgstr ""
+msgstr "Ce nombre de périodes n'est pas supporté"
 
 #: audio_backend.cc:75
 msgid "Device configuration not supported"
-msgstr ""
+msgstr "Cette configuration de périphérique(s) n'est pas supportée"
 
 #: audio_backend.cc:77
 msgid "Channel count configuration not supported"
-msgstr ""
+msgstr "Ce nombre de canaux n'est pas supporté"
 
 #: audio_backend.cc:79
 msgid "Input channel count configuration not supported"
-msgstr ""
+msgstr "Ce nombre de canaux n'est pas supporté en entrée"
 
 #: audio_backend.cc:81
 msgid "Output channel count configuration not supported"
-msgstr ""
+msgstr "Ce nombre de canaux n'est pas supporté en sortie"
 
 #: audio_backend.cc:83
 msgid "Unable to aquire realtime permissions"
-msgstr ""
+msgstr "Impossible d'obtenir les permissions temps-réel"
 
 #: audio_backend.cc:85
 msgid "Setting audio device thread priorities failed"
-msgstr ""
+msgstr "Le réglage des priorités de la tâche « périphérique audio » a échoué"
 
 #: audio_backend.cc:87
 msgid "Setting MIDI device thread priorities failed"
-msgstr ""
+msgstr "Le réglage des priorités de la tâche « périphérique MIDI » a échoué"
 
 #: audio_backend.cc:89
 msgid "Failed to start process thread"
-msgstr ""
+msgstr "Le démarrage de la tâche de traitement a échoué"
 
 #: audio_backend.cc:91
 msgid "Failed to start freewheel thread"
-msgstr ""
+msgstr "Le démarrage de la tâche de débrayage a échoué"
 
 #: audio_backend.cc:93
 msgid "Failed to register audio/midi ports"
-msgstr ""
+msgstr "Impossible de réserver les ports audio/midi"
 
 #: audio_backend.cc:95
 msgid "Failed to re-connect audio/midi ports"
-msgstr ""
+msgstr "Impossible de reconnecter les ports audio/midi"
 
 #: audio_backend.cc:97
 msgid "Out Of Memory Error"
-msgstr ""
+msgstr "Erreur: plus de mémoire"
 
 #: audio_backend.cc:99
 msgid "Could not reconnect to Audio/MIDI engine"
-msgstr ""
+msgstr "Impossible de se reconnecter au moteur audio/MIDI"
 
 #: audio_backend.cc:107 export_formats.cc:52 session.cc:6772 session.cc:6792
 msgid "None"
@@ -182,43 +184,43 @@ msgstr "Aucune"
 
 #: audio_backend.cc:109
 msgid "Default"
-msgstr ""
+msgstr "Par défaut"
 
 #: audio_diskstream.cc:257
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
 msgstr ""
-"AudioDiskstream : la liste de lecture \"%1\" n'est pas une liste de lecture "
+"AudioDiskstream : la liste de lecture \"%1\" n'est pas une liste de lecture "
 "audio"
 
 #: audio_diskstream.cc:309
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
-msgstr "AudioDiskstream %1 : aucune liste de lecture existante à copier !"
+msgstr "AudioDiskstream %1 : aucune liste de lecture existante à copier !"
 
 #: audio_diskstream.cc:880 audio_diskstream.cc:890
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
-"AudioDiskstream %1 : en rechargeant, lecture impossible de %2 depuis la "
+"AudioDiskstream %1 : en rechargeant, lecture impossible de %2 depuis la "
 "liste de lecture à l'image %3"
 
 #: audio_diskstream.cc:1053
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
-"AudioDiskstream %1 : lecture impossible de %2 depuis la  liste de lecture à "
+"AudioDiskstream %1 : lecture impossible de %2 depuis la  liste de lecture à "
 "l'image %3"
 
 #: audio_diskstream.cc:1469 audio_diskstream.cc:1488
 msgid "AudioDiskstream %1: cannot write to disk"
-msgstr "AudioDiskstream %1 : écriture sur le disque impossible"
+msgstr "AudioDiskstream %1 : écriture sur le disque impossible"
 
 #: audio_diskstream.cc:1531
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
-"AudioDiskstream \"%1\" : transfert de la capture sur le disque impossible !"
+"AudioDiskstream \"%1\" : transfert de la capture sur le disque impossible !"
 
 #: audio_diskstream.cc:1627
 msgid "%1: could not create region for complete audio file"
-msgstr "%1 : création de région pour le fichier audio complet impossible"
+msgstr "%1 : création de région pour le fichier audio complet impossible"
 
 #: audio_diskstream.cc:1659
 msgid "AudioDiskstream: could not create region for captured audio!"
@@ -226,27 +228,27 @@ msgstr "AudioDiskstream:  création de région pour l'audio capturé impossible 
 
 #: audio_diskstream.cc:1755
 msgid "programmer error: %1"
-msgstr ""
+msgstr "erreur de programmation : %1"
 
 #: audio_diskstream.cc:2012
 msgid "AudioDiskstream: channel %1 out of range"
-msgstr "AudioDiskstream : canal %1 hors intervalle"
+msgstr "AudioDiskstream : canal %1 hors intervalle"
 
 #: audio_diskstream.cc:2026 midi_diskstream.cc:1295
 msgid "%1:%2 new capture file not initialized correctly"
-msgstr "%1 : %2 nouveau fichier de capture mal initialisé"
+msgstr "%1 : %2 nouveau fichier de capture mal initialisé"
 
 #: audio_diskstream.cc:2305
 msgid "%1: cannot restore pending capture source file %2"
-msgstr "%1 : reprise de la capture suspendue %2 impossible"
+msgstr "%1 : reprise de la capture suspendue %2 impossible"
 
 #: audio_diskstream.cc:2327
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
-msgstr "%1 : nombre de sources suspendues listées incorrect - tout ignorer"
+msgstr "%1 : nombre de sources suspendues listées incorrect - tout ignorer"
 
 #: audio_diskstream.cc:2361
 msgid "%1: cannot create whole-file region from pending capture sources"
-msgstr "%1 : création de région unique pour les captures suspendues impossible"
+msgstr "%1 : création de région unique pour les captures suspendues impossible"
 
 #: audio_library.cc:82
 msgid "Could not open %1.  Audio Library not saved"
@@ -286,18 +288,16 @@ msgstr "Ce nom de liste de lecture existe déjà, merci de la renommer."
 
 #: audio_playlist_importer.cc:183
 msgid "badly-formed XML in imported playlist"
-msgstr "Liste de lecture importée : syntaxe XML incorrecte"
+msgstr "Liste de lecture importée : syntaxe XML incorrecte"
 
 #: audio_playlist_importer.cc:267
 msgid "Audio Playlists (unused)"
 msgstr "Listes de lecture Audio (inutilisées)"
 
-#: audio_playlist_source.cc:171 audiosource.cc:1046
-#: midi_playlist_source.cc:147 midi_playlist_source.cc:155
-#: midi_playlist_source.cc:162 midi_source.cc:403 plugin_insert.cc:1259
-#: rb_effect.cc:327 session.cc:5314 session.cc:5341 session.cc:5461
-#: session_handle.cc:88 sndfilesource.cc:173
-#, fuzzy
+#: audio_playlist_source.cc:171 audiosource.cc:1046 midi_playlist_source.cc:147
+#: midi_playlist_source.cc:155 midi_playlist_source.cc:162 midi_source.cc:403
+#: plugin_insert.cc:1259 rb_effect.cc:327 session.cc:5314 session.cc:5341
+#: session.cc:5461 session_handle.cc:88 sndfilesource.cc:173
 msgid "programming error: %1"
 msgstr "erreur de programmation : %1"
 
@@ -307,7 +307,7 @@ msgstr "Régions Audio"
 
 #: audio_region_importer.cc:145
 msgid "Length: "
-msgstr "Durée : "
+msgstr "Durée : "
 
 #: audio_region_importer.cc:147
 msgid ""
@@ -315,7 +315,7 @@ msgid ""
 "Position: "
 msgstr ""
 "\n"
-"Position : "
+"Position : "
 
 #: audio_region_importer.cc:149
 msgid ""
@@ -323,7 +323,7 @@ msgid ""
 "Channels: "
 msgstr ""
 "\n"
-"Canaux : "
+"Canaux : "
 
 #: audio_track.cc:177
 msgid "Unknown bundle \"%1\" listed for input of %2"
@@ -348,6 +348,8 @@ msgstr "Liste de canal d'entrée invalide dans le noeud XML (%1)"
 #: audio_track.cc:216 diskstream.cc:503 source.cc:149
 msgid "%1: this session uses destructive tracks, which are not supported"
 msgstr ""
+"%1 : cette session utilise des pistes destructrices, qui ne sont pas "
+"supportées"
 
 #: audio_track_importer.cc:68
 msgid "Audio Tracks"
@@ -355,7 +357,7 @@ msgstr "Pistes Audio"
 
 #: audio_track_importer.cc:253 audio_track_importer.cc:259
 msgid "badly-formed XML in imported track"
-msgstr "Piste importée : syntaxe XML incorrecte"
+msgstr "Piste importée : syntaxe XML incorrecte"
 
 #: audio_track_importer.cc:287
 msgid "Error Importing Audio track %1"
@@ -371,7 +373,7 @@ msgstr "Le Plugin VAMP \"%1\" ne pouvait pas être chargé"
 
 #: audioengine.cc:756
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
-msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
+msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
 
 #: audioengine.cc:762
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
@@ -379,7 +381,7 @@ msgstr ""
 
 #: audioengine.cc:841
 msgid "Could not create backend for %1: %2"
-msgstr ""
+msgstr "Impossible de créer le moteur pour %1 : %2"
 
 #: audioregion.cc:1757
 msgid ""
@@ -398,7 +400,7 @@ msgstr ""
 
 #: audioregion.cc:1789
 msgid "Audio Region"
-msgstr ""
+msgstr "Région audio"
 
 #: audiosource.cc:228
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
@@ -527,28 +529,28 @@ msgstr ""
 #: automation_list.cc:410
 msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
-"Liste d'automation : chargement des coordonnées XML impossible, tous les "
+"Liste d'automation : chargement des coordonnées XML impossible, tous les "
 "points sont ignorés"
 
 #: automation_list.cc:456
 msgid ""
 "automation list: no x-coordinate stored for control point (point ignored)"
 msgstr ""
-"Liste d'automation : pas de coordonnée x pour le point de controle (point "
+"Liste d'automation : pas de coordonnée x pour le point de controle (point "
 "ignoré)"
 
 #: automation_list.cc:462
 msgid ""
 "automation list: no y-coordinate stored for control point (point ignored)"
 msgstr ""
-"Liste d'automation : pas de coordonnée y pour le point de controle (point "
+"Liste d'automation : pas de coordonnée y pour le point de controle (point "
 "ignoré)"
 
 #: automation_list.cc:476
 msgid ""
 "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
-"Liste d'automation : le noeud XML %1 entré n'est pas de liste d'automation - "
+"Liste d'automation : le noeud XML %1 entré n'est pas de liste d'automation - "
 "ignoré"
 
 #: butler.cc:126
@@ -588,9 +590,8 @@ msgid "Control surface protocol discovered: \"%1\"\n"
 msgstr ""
 
 #: control_protocol_manager.cc:367
-#, fuzzy
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
-msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
+msgstr "ControlProtocolManager : impossible de charger le module « %1 » (%2)"
 
 #: control_protocol_manager.cc:373
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
@@ -617,7 +618,6 @@ msgid "audio"
 msgstr "Audio"
 
 #: data_type.cc:28 session.cc:2452
-#, fuzzy
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -643,7 +643,7 @@ msgstr "Pas de port possible pour l'export du canal \"%1\", canal omis"
 
 #: export_failed.cc:32
 msgid "Export failed: %1"
-msgstr "Echec d'export : %1"
+msgstr "Echec d'export : %1"
 
 #: export_filename.cc:128
 msgid "Existing export folder for this session (%1) does not exist - ignored"
@@ -666,7 +666,6 @@ msgid "Invalid date format"
 msgstr "Format de date invalide"
 
 #: export_format_manager.cc:57
-#, fuzzy
 msgid "CD"
 msgstr "CD"
 
@@ -774,7 +773,7 @@ msgstr "Pas de format d'échantillonnage"
 #: export_handler.cc:419
 #, fuzzy
 msgid "File %1 uploaded to %2"
-msgstr "Import du fichier : %1 sur %2"
+msgstr "Import du fichier : %1 sur %2"
 
 #: export_handler.cc:425
 msgid ""
@@ -783,7 +782,7 @@ msgstr ""
 
 #: export_handler.cc:551 export_handler.cc:554
 msgid "an error occurred while writing a TOC/CUE file: %1"
-msgstr "Erreur lors de l'écriture du fichier TOC/CUE : %1"
+msgstr "Erreur lors de l'écriture du fichier TOC/CUE : %1"
 
 #: export_handler.cc:844 export_handler.cc:902
 msgid "Cannot convert %1 to Latin-1 text"
@@ -795,11 +794,11 @@ msgstr "Recherche de formats d'export dans %1"
 
 #: export_profile_manager.cc:100
 msgid "Unable to create export format directory %1: %2"
-msgstr "Création du dossier de formats d'export %1 impossible : %2"
+msgstr "Création du dossier de formats d'export %1 impossible : %2"
 
 #: export_profile_manager.cc:268
 msgid "Unable to remove export preset %1: %2"
-msgstr "Impossible d'enlever le préset d'export %1 : %2"
+msgstr "Impossible d'enlever le préset d'export %1 : %2"
 
 #: export_profile_manager.cc:357
 msgid "Selection"
@@ -807,11 +806,11 @@ msgstr "Sélection"
 
 #: export_profile_manager.cc:621
 msgid "Unable to rename export format %1 to %2: %3"
-msgstr "Impossible de renommer le format d'export %1 en %2 : %3"
+msgstr "Impossible de renommer le format d'export %1 en %2 : %3"
 
 #: export_profile_manager.cc:653
 msgid "Unable to remove export profile %1: %2"
-msgstr "Impossible d'enlever le profil d'export %1 : %2"
+msgstr "Impossible d'enlever le profil d'export %1 : %2"
 
 #: export_profile_manager.cc:671
 msgid "empty format"
@@ -942,11 +941,11 @@ msgstr ""
 
 #: filter.cc:67
 msgid "filter: error creating name for new file based on %1"
-msgstr "Filtre : erreur de création du nom pour le nouveau fichier basé sur %1"
+msgstr "Filtre : erreur de création du nom pour le nouveau fichier basé sur %1"
 
 #: filter.cc:92
 msgid "filter: error creating new file %1 (%2)"
-msgstr "Filtre : erreur de création du nouveau fichier %1 (%2)"
+msgstr "Filtre : erreur de création du nouveau fichier %1 (%2)"
 
 #: find_session.cc:60
 msgid "cannot check session path %1 (%2)"
@@ -1049,11 +1048,11 @@ msgstr ""
 
 #: import.cc:475
 msgid "Import: cannot open input sound file \"%1\""
-msgstr "Import : impossible d'ouvrir le fichier Audio \"%1\""
+msgstr "Import : impossible d'ouvrir le fichier Audio \"%1\""
 
 #: import.cc:486
 msgid "Import: error opening MIDI file"
-msgstr "Import : erreur d'ouverture du fichier MIDI"
+msgstr "Import : erreur d'ouverture du fichier MIDI"
 
 #: import.cc:493
 msgid "Import: file contains no channels."
@@ -1081,15 +1080,15 @@ msgstr "%1 - aucune piste/bus à l'ID %2 à qui se connecter"
 
 #: io.cc:212
 msgid "IO: cannot disconnect port %1 from %2"
-msgstr "E/S : impossible de déconnecter le port %1 de %2"
+msgstr "E/S : impossible de déconnecter le port %1 de %2"
 
 #: io.cc:347 io.cc:435
 msgid "IO: cannot register input port %1"
-msgstr "E/S : impossible d'inscrire le port d'entrée %1"
+msgstr "E/S : impossible d'inscrire le port d'entrée %1"
 
 #: io.cc:352 io.cc:440
 msgid "IO: cannot register output port %1"
-msgstr "E/S : impossible d'inscrire le port de sortie %1"
+msgstr "E/S : impossible d'inscrire le port de sortie %1"
 
 #: io.cc:607 io.cc:668
 msgid "incorrect XML node \"%1\" passed to IO object"
@@ -1125,7 +1124,7 @@ msgstr ""
 
 #: io.cc:914
 msgid "%1: cannot create I/O ports"
-msgstr "%1 : création de ports E/S impossible"
+msgstr "%1 : création de ports E/S impossible"
 
 #: io.cc:1042 io.cc:1143
 msgid "IO: badly formed string in XML node for inputs \"%1\""
@@ -1188,7 +1187,7 @@ msgstr ""
 
 #: ladspa_plugin.cc:106
 msgid "LADSPA: plugin has gone away since discovery!"
-msgstr "LADSPA : le plugin a disparu depuis sa découverte !"
+msgstr "LADSPA : le plugin a disparu depuis sa découverte !"
 
 #: ladspa_plugin.cc:113
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
@@ -1296,7 +1295,7 @@ msgid ""
 "end: "
 msgstr ""
 "\n"
-"fin : "
+"fin : "
 
 #: location_importer.cc:146
 msgid ""
@@ -1305,7 +1304,7 @@ msgid ""
 msgstr ""
 "L'emplacement est l'intervalle-Punch, il sera importé comme intervalle "
 "normal.\n"
-"Vous pourriez renommer l'emplacement importé : "
+"Vous pourriez renommer l'emplacement importé : "
 
 #: location_importer.cc:157
 msgid ""
@@ -1314,7 +1313,7 @@ msgid ""
 msgstr ""
 "L'emplacement est un intervalle-Boucle, il sera importé comme intervalle "
 "normal.\n"
-"Vous pourriez renommer l'emplacement importé : "
+"Vous pourriez renommer l'emplacement importé : "
 
 #: location_importer.cc:168
 msgid ""
@@ -1322,7 +1321,7 @@ msgid ""
 "You may rename the imported location:"
 msgstr ""
 "Un emplacement de ce nom existe déjà.\n"
-"Vous pourriez renommer l'emplacement importé : "
+"Vous pourriez renommer l'emplacement importé : "
 
 #: ltc_file_reader.cc:96
 msgid "LTCFileReader: cannot open file \"%1\""
@@ -1346,7 +1345,7 @@ msgstr "FPS de la session ajusté de %1 à %2 du LTC."
 
 #: ltc_slave.cc:289
 msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-msgstr "Décalage FPS entre Session et LTC : Session : %2 - LTC : %1."
+msgstr "Décalage FPS entre Session et LTC : Session : %2 - LTC : %1."
 
 #: ltc_slave.cc:609
 msgid "flywheel"
@@ -1396,7 +1395,7 @@ msgstr ""
 msgid ""
 "%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
 msgstr ""
-"%1 : changement de configuration E/S %4 requis pour utiliser %2, mais le "
+"%1 : changement de configuration E/S %4 requis pour utiliser %2, mais le "
 "canal est réglé à %3"
 
 #: midi_diskstream.cc:224
@@ -1406,29 +1405,29 @@ msgstr ""
 #: midi_diskstream.cc:275
 #, fuzzy
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
-msgstr "AudioDiskstream %1 : aucune liste de lecture existante à copier !"
+msgstr "AudioDiskstream %1 : aucune liste de lecture existante à copier !"
 
 #: midi_diskstream.cc:753
 #, fuzzy
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
-"AudioDiskstream %1 : lecture impossible de %2 depuis la  liste de lecture à "
+"AudioDiskstream %1 : lecture impossible de %2 depuis la  liste de lecture à "
 "l'image %3"
 
 #: midi_diskstream.cc:890
 #, fuzzy
 msgid "MidiDiskstream %1: cannot write to disk"
-msgstr "AudioDiskstream %1 : écriture sur le disque impossible"
+msgstr "AudioDiskstream %1 : écriture sur le disque impossible"
 
 #: midi_diskstream.cc:924
 #, fuzzy
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
-"AudioDiskstream \"%1\" : transfert de la capture sur le disque impossible !"
+"AudioDiskstream \"%1\" : transfert de la capture sur le disque impossible !"
 
 #: midi_diskstream.cc:1013
 msgid "%1: could not create region for complete midi file"
-msgstr "%1 : création de région impossible pour le fichier MIDI complet"
+msgstr "%1 : création de région impossible pour le fichier MIDI complet"
 
 #: midi_diskstream.cc:1054
 msgid "MidiDiskstream: could not create region for captured midi!"
@@ -1483,9 +1482,8 @@ msgid "Missing parameter property on InterpolationStyle"
 msgstr ""
 
 #: midi_source.cc:132
-#, fuzzy
 msgid "Missing style property on InterpolationStyle"
-msgstr "Style RGBA manquant pour \"%1\""
+msgstr ""
 
 #: midi_source.cc:141
 msgid "Missing parameter property on AutomationState"
@@ -1532,9 +1530,8 @@ msgid "polarity control"
 msgstr ""
 
 #: monitor_processor.cc:546
-#, fuzzy
 msgid "solo control"
-msgstr "Ctrl"
+msgstr ""
 
 #: mtc_slave.cc:241
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
@@ -1622,7 +1619,7 @@ msgstr " \n"
 #: panner_manager.cc:140
 #, fuzzy
 msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
+msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
 
 #: panner_manager.cc:147
 msgid "PannerManager: module \"%1\" has no descriptor function."
@@ -1652,51 +1649,51 @@ msgstr ""
 
 #: parameter_descriptor.cc:201
 msgid "Note|C"
-msgstr ""
+msgstr "Do"
 
 #: parameter_descriptor.cc:202
 msgid "Note|C#"
-msgstr ""
+msgstr "Do ♯"
 
 #: parameter_descriptor.cc:203
 msgid "Note|D"
-msgstr ""
+msgstr "Ré"
 
 #: parameter_descriptor.cc:204
 msgid "Note|D#"
-msgstr ""
+msgstr "Ré ♯"
 
 #: parameter_descriptor.cc:205
 msgid "Note|E"
-msgstr ""
+msgstr "Mi"
 
 #: parameter_descriptor.cc:206
 msgid "Note|F"
-msgstr ""
+msgstr "Fa"
 
 #: parameter_descriptor.cc:207
 msgid "Note|F#"
-msgstr ""
+msgstr "Fa ♯"
 
 #: parameter_descriptor.cc:208
 msgid "Note|G"
-msgstr ""
+msgstr "Sol"
 
 #: parameter_descriptor.cc:209
 msgid "Note|G#"
-msgstr ""
+msgstr "Sol ♯"
 
 #: parameter_descriptor.cc:210
 msgid "Note|A"
-msgstr ""
+msgstr "La"
 
 #: parameter_descriptor.cc:211
 msgid "Note|A#"
-msgstr ""
+msgstr "Si ♭"
 
 #: parameter_descriptor.cc:212
 msgid "Note|B"
-msgstr ""
+msgstr "Si"
 
 #: playlist.cc:2234
 msgid "region state node has no ID, ignored"
@@ -1709,7 +1706,7 @@ msgstr ""
 #: playlist_source.cc:99
 #, fuzzy
 msgid "No playlist ID in PlaylistSource XML!"
-msgstr "Liste de lecture importée : syntaxe XML incorrecte"
+msgstr "Liste de lecture importée : syntaxe XML incorrecte"
 
 #: playlist_source.cc:118
 msgid "Could not construct playlist for PlaylistSource from session data!"
@@ -1753,9 +1750,8 @@ msgstr ""
 "Envisagez d'acheter la version complète."
 
 #: plugin_insert.cc:1148
-#, fuzzy
 msgid "programming error: "
-msgstr "erreur de programmation: "
+msgstr "erreur de programmation : "
 
 #: plugin_insert.cc:1700
 msgid "SC %1"
@@ -1806,9 +1802,8 @@ msgid "Scanning Lua DSP Processors"
 msgstr ""
 
 #: plugin_manager.cc:256
-#, fuzzy
 msgid "Scanning LV2 Plugins"
-msgstr "Recherche de greffons"
+msgstr "Recherche de greffons LV2"
 
 #: plugin_manager.cc:262
 msgid "Scanning Windows VST Plugins"
@@ -1856,7 +1851,7 @@ msgstr ""
 
 #: plugin_manager.cc:602
 msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr "LADSPA : chargement du module \"%1\" impossible (%2)"
+msgstr "LADSPA : chargement du module \"%1\" impossible (%2)"
 
 #: plugin_manager.cc:609
 msgid "LADSPA: module \"%1\" has no descriptor function."
@@ -1867,11 +1862,8 @@ msgid "--- Windows VST plugins Scan: %1"
 msgstr ""
 
 #: plugin_manager.cc:819
-#, fuzzy
 msgid "VST"
-msgstr ""
-"Type d'Éditeur de plugin inconnu (note: VST non supporté dans cette version "
-"d'%1)"
+msgstr "VST"
 
 #: plugin_manager.cc:824
 msgid "--- Windows VST plugins Scan Done"
@@ -1962,14 +1954,12 @@ msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr ""
 
 #: plugin_manager.cc:1232
-#, fuzzy
 msgid "unknown plugin type \"%1\" - ignored"
-msgstr "Type d'Éditeur de plugin inconnu"
+msgstr "Type de greffon « %1 » inconnu − ignoré"
 
 #: port.cc:504
-#, fuzzy
 msgid "could not reregister %1"
-msgstr "IHM %1 impossible à créer"
+msgstr "impossible d'inscrire à nouveau %1"
 
 #: port_insert.cc:43
 msgid "insert %1"
@@ -1998,13 +1988,12 @@ msgstr ""
 "ports si vous avez besoin d'autant de pistes."
 
 #: port_manager.cc:293
-#, fuzzy
 msgid "AudioEngine: cannot register port \"%1\": %2"
-msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
+msgstr "AudioEngine : impossible de réserver le port « %1 » (%2)"
 
 #: port_manager.cc:332
 msgid "unable to create port: %1"
-msgstr "création de port impossible : %1"
+msgstr "création de port impossible : %1"
 
 #: port_manager.cc:453
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
@@ -2028,11 +2017,11 @@ msgstr "Chargement du fichier de configuration-système %1"
 
 #: rc_configuration.cc:96
 msgid "%1: cannot read system configuration file \"%2\""
-msgstr "%1 : lecture du fichier de configuration-système \"%2\" impossible"
+msgstr "%1 : lecture du fichier de configuration-système \"%2\" impossible"
 
 #: rc_configuration.cc:101
 msgid "%1: system configuration file \"%2\" not loaded successfully."
-msgstr "%1 : échec de chargement du fichier de configuration-système \"%2\"."
+msgstr "%1 : échec de chargement du fichier de configuration-système \"%2\"."
 
 #: rc_configuration.cc:105
 msgid ""
@@ -2048,12 +2037,12 @@ msgstr "Chargement du fichier de configuration-utilisateur %1"
 
 #: rc_configuration.cc:124
 msgid "%1: cannot read configuration file \"%2\""
-msgstr "%1 : lecture du fichier de configuration \"%2\" impossible"
+msgstr "%1 : lecture du fichier de configuration \"%2\" impossible"
 
 #: rc_configuration.cc:129
 msgid "%1: user configuration file \"%2\" not loaded successfully."
 msgstr ""
-"%1 : échec de chargement du fichier de configuration-utilisateur \"%2\"."
+"%1 : échec de chargement du fichier de configuration-utilisateur \"%2\"."
 
 #: rc_configuration.cc:133
 msgid "your %1 configuration file is empty. This is not normal."
@@ -2103,7 +2092,7 @@ msgstr "Impossible de créer un nouveau nom pour la région \"%1\""
 
 #: resampled_source.cc:107
 msgid "Import: %1"
-msgstr "Import : %1"
+msgstr "Import : %1"
 
 #: resampled_source.cc:136 srcfilesource.cc:75
 msgid "Import: src_new() failed : %1"
@@ -2255,7 +2244,7 @@ msgid "could not setup Click I/O"
 msgstr ""
 
 #: session.cc:951
-#, fuzzy, c-format
+#, c-format
 msgid "out %s"
 msgstr "Sortie %s"
 
@@ -2270,7 +2259,7 @@ msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "Sortie %<PRIu32>+%<PRIu32>"
 
 #: session.cc:985
-#, fuzzy, c-format
+#, c-format
 msgid "in %s"
 msgstr "Entrée %s"
 
@@ -2293,27 +2282,25 @@ msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 
 #: session.cc:1204 session.cc:1335
-#, fuzzy
 msgid "cannot connect control input %1 to %2"
-msgstr "Connection de sortie Master %1 à %2 impossible"
+msgstr "Impossible de connecter l'entrée de contrôle %1 à %2"
 
 #: session.cc:1224 session.cc:1354
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Préférences d'E/S du bus de Monitoring introuvables"
 
 #: session.cc:1255 session.cc:1385
-#, fuzzy
 msgid "cannot connect control output %1 to %2"
-msgstr "Connection de sortie Master %1 à %2 impossible"
+msgstr "Impossible de connecter la sortie de contrôle %1 à %2"
 
 #: session.cc:1443
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
-"Création du bus d'Audition impossible : pas d'audition de région possible"
+"Création du bus d'Audition impossible : pas d'audition de région possible"
 
 #: session.cc:1644
 msgid "Session: you can't use that location for auto punch (start <= end)"
-msgstr "Session : le Punch ne peut pas utiliser cet intervalle (début <= fin)"
+msgstr "Session : le Punch ne peut pas utiliser cet intervalle (début <= fin)"
 
 #: session.cc:1671
 msgid "Session: you can't use that location for session start/end)"
@@ -2349,7 +2336,7 @@ msgstr ""
 
 #: session.cc:2500
 msgid "Session: could not create new midi track."
-msgstr "Session : création de nouvelle piste MIDI impossible."
+msgstr "Session : création de nouvelle piste MIDI impossible."
 
 #: session.cc:2506
 msgid ""
@@ -2373,7 +2360,7 @@ msgstr ""
 
 #: session.cc:2592 session.cc:3137
 msgid "Session: could not create new audio route."
-msgstr "Session : impossible de créer un nouveau routage Audio."
+msgstr "Session : impossible de créer un nouveau routage Audio."
 
 #: session.cc:3022 session.cc:3030 session.cc:3113 session.cc:3121
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
@@ -2381,10 +2368,9 @@ msgstr "Impossible de créer une piste Audio avec %1 Entrée(s) / %2 Sortie(s)"
 
 #: session.cc:3050
 msgid "Session: could not create new audio track."
-msgstr "Session : impossible de créer une nouvelle piste Audio."
+msgstr "Session : impossible de créer une nouvelle piste Audio."
 
 #: session.cc:3088 session.cc:3091
-#, fuzzy
 msgid "Bus"
 msgstr "Bus"
 
@@ -2437,9 +2423,8 @@ msgid "Cannot write a range with no data."
 msgstr ""
 
 #: session.cc:5876
-#, fuzzy
 msgid "cannot create new file \"%1\" for %2"
-msgstr "(%2) : création du répertoire %1 pour l'utilisateur %3 impossible"
+msgstr "Impossible de créer le nouveau fichier « %1 » pour %2"
 
 #: session_click.cc:162
 msgid "cannot open click soundfile %1 (%2)"
@@ -2486,7 +2471,7 @@ msgstr ""
 
 #: session_directory.cc:65
 msgid "Cannot create Session directory at path %1 Error: %2"
-msgstr "Création du répertoire de session à l'adresse % impossible Erreur : %2"
+msgstr "Création du répertoire de session à l'adresse % impossible Erreur : %2"
 
 #: session_directory.cc:82
 msgid "Session subdirectory does not exist at path %1"
@@ -2507,22 +2492,22 @@ msgstr ""
 
 #: session_events.cc:229
 msgid "Session: cannot have two events of type %1 at the same frame (%2)."
-msgstr "Session : 2 évènements simultanés de type %1 impossibles (%2)."
+msgstr "Session : 2 évènements simultanés de type %1 impossibles (%2)."
 
 #: session_export.cc:152
 msgid "%1: cannot seek to %2 for export"
-msgstr "%1 : chercher à %2 impossible pour exporter"
+msgstr "%1 : chercher à %2 impossible pour exporter"
 
 #: session_export.cc:216
 msgid "Export ended unexpectedly: %1"
-msgstr "Export inopinément fini : %1"
+msgstr "Export inopinément fini : %1"
 
 #: session_ltc.cc:221
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
 msgstr ""
-"Encodeur LTC : FPS invalide - Encodage LTC désactivé pour cette session."
+"Encodeur LTC : FPS invalide - Encodage LTC désactivé pour cette session."
 
 #: session_midi.cc:570
 msgid "Session: cannot send quarter-frame MTC message (%1)"
@@ -2562,39 +2547,39 @@ msgstr ""
 
 #: session_state.cc:475
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Pics-Audio \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Pics-Audio \"%1\" impossible (%2)"
 
 #: session_state.cc:482
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
-msgstr "Session : création du répertoire Audio \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Audio \"%1\" impossible (%2)"
 
 #: session_state.cc:489
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
-msgstr "Session : création du répertoire MIDI \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire MIDI \"%1\" impossible (%2)"
 
 #: session_state.cc:496
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Nettoyage \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Nettoyage \"%1\" impossible (%2)"
 
 #: session_state.cc:503
 msgid "Session: cannot create session export folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Export \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Export \"%1\" impossible (%2)"
 
 #: session_state.cc:510
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Analyse \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Analyse \"%1\" impossible (%2)"
 
 #: session_state.cc:517
 msgid "Session: cannot create session plugins folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Plugins \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Plugins \"%1\" impossible (%2)"
 
 #: session_state.cc:524
 msgid "Session: cannot create session externals folder \"%1\" (%2)"
-msgstr "Session : création du répertoire Externes \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire Externes \"%1\" impossible (%2)"
 
 #: session_state.cc:538
 msgid "Session: cannot create session folder \"%1\" (%2)"
-msgstr "Session : création du répertoire \"%1\" impossible (%2)"
+msgstr "Session : création du répertoire \"%1\" impossible (%2)"
 
 #: session_state.cc:569
 msgid "Error reading session template file %1 (%2)"
@@ -2651,17 +2636,15 @@ msgstr ""
 
 #: session_state.cc:942
 msgid "%1: session file \"%2\" doesn't exist!"
-msgstr "%1 : le fichier de session \"%2\" n'existe pas !"
+msgstr "%1 : le fichier de session \"%2\" n'existe pas !"
 
 #: session_state.cc:954
-#, fuzzy
 msgid "Could not understand session file %1"
-msgstr "Ce fichier de session n'a pu être lu!"
+msgstr "Impossible d'interpréter le fichier de session %1"
 
 #: session_state.cc:963
-#, fuzzy
 msgid "Session file %1 is not a session"
-msgstr "Type de fichier inconnu pour la session %1"
+msgstr "Le fichier %1 n'est pas un fichier de session"
 
 #: session_state.cc:1332
 msgid "programming error: Session: incorrect XML node sent to set_state()"
@@ -2729,7 +2712,7 @@ msgstr ""
 
 #: session_state.cc:1610
 msgid "Loaded track/bus %1"
-msgstr "Chargement de piste/bus : %1..."
+msgstr "Chargement de piste/bus : %1..."
 
 #: session_state.cc:1615
 msgid "Tracks/busses loaded;  Adding to Session"
@@ -2813,9 +2796,8 @@ msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr ""
 
 #: session_state.cc:2212
-#, fuzzy
 msgid "Could not create templates directory \"%1\" (%2)"
-msgstr "Création du dossier de formats d'export %1 impossible : %2"
+msgstr "Impossible de créer le dossier de modèles « %1 » (%2)"
 
 #: session_state.cc:2224
 msgid "Template \"%1\" already exists - new version not created"
@@ -2877,7 +2859,7 @@ msgstr ""
 
 #: session_state.cc:3674
 msgid "%1: no history file \"%2\" for this session."
-msgstr "%1 : pas de fichier d'historique \"%2\" pour cette session"
+msgstr "%1 : pas de fichier d'historique \"%2\" pour cette session"
 
 #: session_state.cc:3680
 msgid "Could not understand session history file \"%1\""
@@ -2953,7 +2935,7 @@ msgid ""
 "Recommend changing the configured options"
 msgstr ""
 "Impossible de rendre le bouclage inaudible si %1 utilise le transport JACK.\n"
-"Conseil : changer les options configurées"
+"Conseil : changer les options configurées"
 
 #: session_transport.cc:1050
 msgid "Locate called for negative sample position - ignored"
@@ -2996,17 +2978,14 @@ msgid "cannot open MIDI file %1 for write"
 msgstr ""
 
 #: sndfile_helpers.cc:34
-#, fuzzy
 msgid "WAV"
 msgstr "WAV"
 
 #: sndfile_helpers.cc:35
-#, fuzzy
 msgid "AIFF"
 msgstr "AIFF"
 
 #: sndfile_helpers.cc:36
-#, fuzzy
 msgid "CAF"
 msgstr "CAF"
 
@@ -3019,29 +2998,24 @@ msgid "FLAC"
 msgstr ""
 
 #: sndfile_helpers.cc:39
-#, fuzzy
 msgid "Ogg/Vorbis"
-msgstr "Options Ogg Vorbis"
+msgstr "Ogg/Vorbis"
 
 #: sndfile_helpers.cc:40
-#, fuzzy
 msgid "raw (no header)"
-msgstr "Modèle d'en-tête"
+msgstr "brut (sans en-tête)"
 
 #: sndfile_helpers.cc:45
-#, fuzzy
 msgid ".wav"
-msgstr "WAV"
+msgstr ".wav"
 
 #: sndfile_helpers.cc:46
-#, fuzzy
 msgid ".aiff"
-msgstr "AIFF"
+msgstr ".aiff"
 
 #: sndfile_helpers.cc:47
-#, fuzzy
 msgid ".caf"
-msgstr "CAF"
+msgstr ".caf"
 
 #: sndfile_helpers.cc:48
 msgid ".w64"
@@ -3092,9 +3066,8 @@ msgid "SndFileSource: cannot open file \"%1\" for %2"
 msgstr ""
 
 #: sndfilesource.cc:300
-#, fuzzy
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
-msgstr "Impossible d'ouvrir le fichier de session récente %1 (%2)"
+msgstr ""
 
 #: sndfilesource.cc:308
 msgid ""
@@ -3130,9 +3103,8 @@ msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 
 #: sndfilesource.cc:509 utils.cc:564 utils.cc:588 utils.cc:602 utils.cc:621
-#, fuzzy
 msgid "programming error: %1 %2"
-msgstr "erreur de programmation: %1 %2"
+msgstr "erreur de programmation : %1 %2"
 
 #: sndfilesource.cc:636 sndfilesource.cc:654
 msgid "attempt to flush a non-writable audio file source (%1)"
@@ -3157,7 +3129,7 @@ msgstr ""
 
 #: sndfilesource.cc:720
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
-msgstr "%1 : chercher à %2 impossible (erreur libsndfile : %3)"
+msgstr "%1 : chercher à %2 impossible (erreur libsndfile : %3)"
 
 #: sndfilesource.cc:830
 msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
@@ -3354,7 +3326,7 @@ msgstr "Table de Tempo"
 
 #: tempo_map_importer.cc:80
 msgid "Tempo marks: "
-msgstr "Repères de Tempo : "
+msgstr "Repères de Tempo : "
 
 #: tempo_map_importer.cc:80
 msgid ""
@@ -3362,7 +3334,7 @@ msgid ""
 "Meter marks: "
 msgstr ""
 "\n"
-"Repères de Rythme : "
+"Repères de Rythme : "
 
 #: tempo_map_importer.cc:89
 msgid ""
@@ -3402,21 +3374,18 @@ msgid "Node for Port has no \"name\" property"
 msgstr ""
 
 #: utils.cc:412 utils.cc:441
-#, fuzzy
 msgid "Splice"
-msgstr "Collant"
+msgstr ""
 
 #: utils.cc:414 utils.cc:431
-#, fuzzy
 msgid "Slide"
-msgstr "Glissant"
+msgstr "Glisser"
 
 #: utils.cc:416 utils.cc:437
 msgid "Ripple"
 msgstr ""
 
 #: utils.cc:418 utils.cc:434
-#, fuzzy
 msgid "Lock"
 msgstr "Verrouiller"
 
@@ -3440,7 +3409,7 @@ msgstr "Horloge MIDI"
 #: utils.cc:456 utils.cc:478 utils.cc:498
 #, fuzzy
 msgid "JACK"
-msgstr "Paramètres JACK de Transport et Timecode"
+msgstr "Transport JACK"
 
 #: utils.cc:460 utils.cc:495
 #, fuzzy
