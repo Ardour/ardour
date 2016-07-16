@@ -346,8 +346,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 	if ((descriptor = get_descriptor (path)) != 0) {
 
 		if (!descriptor->probe (descriptor)) {
-			DEBUG_TRACE (DEBUG::ControlProtocols,
-				     string_compose (_("Control protocol %1 not usable"), descriptor->name));
+			warning << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
 		} else {
 
 			ControlProtocolInfo* cpi = new ControlProtocolInfo ();
