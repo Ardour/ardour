@@ -39,30 +39,40 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
-	manager (manager),
-	time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
+ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager, bool multi)
+	: manager (manager)
+	, _realtime_available (true)
+	, time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
+	, realtime_checkbutton (_("Realtime Export"))
 {
 	set_session (session);
 
 	option_hbox.pack_start (time_format_label, false, false, 0);
 	option_hbox.pack_start (time_format_combo, false, false, 6);
 
-	Gtk::Button* b = Gtk::manage (new Gtk::Button (_("Select All")));
-	b->signal_clicked().connect (
-		sigc::bind (
-			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), true
-			)
-		);
-	option_hbox.pack_start (*b, false, false, 6);
+	if (multi) {
+		Gtk::Button* b = Gtk::manage (new Gtk::Button (_("Select All")));
+		b->signal_clicked().connect (
+				sigc::bind (
+					sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), true
+					)
+				);
+		option_hbox.pack_start (*b, false, false, 6);
 
-	b = Gtk::manage (new Gtk::Button (_("Deselect All")));
-	b->signal_clicked().connect (
-		sigc::bind (
-			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), false
-			)
-		);
-	option_hbox.pack_start (*b, false, false, 6);
+		b = Gtk::manage (new Gtk::Button (_("Deselect All")));
+		b->signal_clicked().connect (
+				sigc::bind (
+					sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), false
+					)
+				);
+		option_hbox.pack_start (*b, false, false, 6);
+	}
+	option_hbox.pack_start (realtime_checkbutton, false, false, 6);
+	realtime_checkbutton.set_active (session->config.get_realtime_export ());
+
+	realtime_checkbutton.signal_toggled ().connect (
+			sigc::mem_fun (*this, &ExportTimespanSelector::toggle_realtime)
+			);
 
 	range_scroller.add (range_view);
 
@@ -131,7 +141,7 @@ ExportTimespanSelector::location_sorter(Gtk::TreeModel::iterator a, Gtk::TreeMod
 }
 
 void
-ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
+ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc, bool rt)
 {
 	ExportTimespanPtr span = _session->get_export_handler()->add_timespan();
 
@@ -145,6 +155,7 @@ ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
 	span->set_range (loc->start(), loc->end());
 	span->set_name (loc->name());
 	span->set_range_id (id);
+	span->set_realtime (rt);
 	state->timespans->push_back (span);
 }
 
@@ -165,6 +176,30 @@ ExportTimespanSelector::sync_with_manager ()
 	state = manager->get_timespans().front();
 	fill_range_list ();
 	CriticalSelectionChanged();
+}
+
+void
+ExportTimespanSelector::allow_realtime_export (bool yn)
+{
+	if (_realtime_available == yn) {
+		return;
+	}
+	_realtime_available = yn;
+	realtime_checkbutton.set_sensitive (_realtime_available);
+	update_timespans ();
+}
+
+void
+ExportTimespanSelector::toggle_realtime ()
+{
+	const bool realtime = !_session->config.get_realtime_export ();
+	_session->config.set_realtime_export (realtime);
+	realtime_checkbutton.set_inconsistent (false);
+	realtime_checkbutton.set_active (realtime);
+
+	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
+		it->set_value (range_cols.realtime, realtime);
+	}
 }
 
 void
@@ -357,13 +392,18 @@ ExportTimespanSelector::set_selection_state_of_all_timespans (bool s)
 /*** ExportTimespanSelectorSingle ***/
 
 ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, std::string range_id) :
-	ExportTimespanSelector (session, manager),
+	ExportTimespanSelector (session, manager, false),
 	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	range_view.append_column_editable (_("RT"), range_cols.realtime);
 	range_view.append_column_editable (_("Range"), range_cols.name);
 
-	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (0))) {
+	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
+		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_timespans)));
+	}
+
+	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (1))) {
 		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_range_name));
 	}
 
@@ -376,9 +416,17 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 }
 
 void
+ExportTimespanSelectorSingle::allow_realtime_export (bool yn)
+{
+	ExportTimespanSelector::allow_realtime_export (yn);
+	range_view.get_column (0)->set_visible (_realtime_available);
+}
+
+void
 ExportTimespanSelectorSingle::fill_range_list ()
 {
 	if (!state) { return; }
+	const bool realtime = _session->config.get_realtime_export ();
 
 	std::string id;
 	if (!range_id.compare (X_("selection"))) {
@@ -400,11 +448,12 @@ ExportTimespanSelectorSingle::fill_range_list ()
 
 			row[range_cols.location] = *it;
 			row[range_cols.selected] = true;
+			row[range_cols.realtime] = realtime;
 			row[range_cols.name] = (*it)->name();
 			row[range_cols.label] = construct_label (*it);
 			row[range_cols.length] = construct_length (*it);
 
-			add_range_to_selection (*it);
+			add_range_to_selection (*it, false);
 
 			break;
 		}
@@ -413,19 +462,39 @@ ExportTimespanSelectorSingle::fill_range_list ()
 	set_time_format_from_state();
 }
 
+void
+ExportTimespanSelectorSingle::update_timespans ()
+{
+	state->timespans->clear();
+	const bool realtime = _session->config.get_realtime_export ();
+	bool inconsistent = false;
+
+	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
+		add_range_to_selection (it->get_value (range_cols.location), it->get_value (range_cols.realtime) && _realtime_available);
+		if (it->get_value (range_cols.realtime) != realtime) {
+			inconsistent = true;
+		}
+	}
+	realtime_checkbutton.set_inconsistent (inconsistent);
+}
+
 /*** ExportTimespanSelectorMultiple ***/
 
 ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session * session, ProfileManagerPtr manager) :
-  ExportTimespanSelector (session, manager)
+  ExportTimespanSelector (session, manager, true)
 {
 	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_view.append_column_editable ("", range_cols.selected);
+	range_view.append_column_editable (_("RT"), range_cols.realtime);
 	range_view.append_column_editable (_("Range"), range_cols.name);
 
 	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_selection)));
 	}
-	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (1))) {
+	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (1))) {
+		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_selection)));
+	}
+	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (2))) {
 		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_range_name));
 	}
 
@@ -438,9 +507,17 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 }
 
 void
+ExportTimespanSelectorMultiple::allow_realtime_export (bool yn)
+{
+	ExportTimespanSelector::allow_realtime_export (yn);
+	range_view.get_column (1)->set_visible (_realtime_available);
+}
+
+void
 ExportTimespanSelectorMultiple::fill_range_list ()
 {
 	if (!state) { return; }
+	const bool realtime = _session->config.get_realtime_export ();
 
 	range_list->clear();
 
@@ -453,6 +530,7 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 
 		row[range_cols.location] = *it;
 		row[range_cols.selected] = false;
+		row[range_cols.realtime] = realtime;
 		row[range_cols.name] = (*it)->name();
 		row[range_cols.label] = construct_label (*it);
 		row[range_cols.length] = construct_length (*it);
@@ -474,6 +552,7 @@ ExportTimespanSelectorMultiple::set_selection_from_state ()
 			if ((id == "selection" && loc == state->selection_range.get()) ||
 			    (id == loc->id().to_s())) {
 				tree_it->set_value (range_cols.selected, true);
+				tree_it->set_value (range_cols.realtime, (*it)->realtime ());
 			}
 		}
 	}
@@ -492,11 +571,17 @@ void
 ExportTimespanSelectorMultiple::update_timespans ()
 {
 	state->timespans->clear();
+	const bool realtime = _session->config.get_realtime_export ();
+	bool inconsistent = false;
 
 	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		if (it->get_value (range_cols.selected)) {
-			add_range_to_selection (it->get_value (range_cols.location));
+			add_range_to_selection (it->get_value (range_cols.location), it->get_value (range_cols.realtime) && _realtime_available);
+		}
+		if (it->get_value (range_cols.realtime) != realtime) {
+			inconsistent = true;
 		}
 	}
+	realtime_checkbutton.set_inconsistent (inconsistent);
 }
 

@@ -236,6 +236,8 @@ class TrackExportChannelSelector : public ExportChannelSelector
 
 	virtual void sync_with_manager ();
 
+	bool track_output () const { return track_output_button.get_active(); }
+
   private:
 
 	void fill_list();

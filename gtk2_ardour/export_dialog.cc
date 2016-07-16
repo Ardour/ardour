@@ -24,6 +24,7 @@
 #include <gtkmm/messagedialog.h>
 
 #include "ardour/audioregion.h"
+#include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 #include "ardour/profile.h"
@@ -96,9 +97,13 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::sync_with_manager));
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_realtime_selection));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 
 	update_warnings_and_example_filename ();
+	update_realtime_selection ();
+
+	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -205,6 +210,7 @@ ExportDialog::sync_with_manager ()
 	file_notebook->sync_with_manager ();
 
 	update_warnings_and_example_filename ();
+	update_realtime_selection ();
 }
 
 void
@@ -243,6 +249,47 @@ ExportDialog::update_warnings_and_example_filename ()
 	/* Update example filename */
 
 	file_notebook->update_example_filenames();
+}
+
+void
+ExportDialog::update_realtime_selection ()
+{
+	bool rt_ok = true;
+	switch (profile_manager->type ()) {
+		case ExportProfileManager::RegularExport:
+			break;
+		case ExportProfileManager::RangeExport:
+			break;
+		case ExportProfileManager::SelectionExport:
+			break;
+		case ExportProfileManager::RegionExport:
+			if (!profile_manager->get_channel_configs().empty ()) {
+				switch (profile_manager->get_channel_configs().front()->config->region_processing_type ()) {
+					case RegionExportChannelFactory::Raw:
+					case RegionExportChannelFactory::Fades:
+						rt_ok = false;
+						break;
+					default:
+						break;
+				}
+			}
+			break;
+		case ExportProfileManager::StemExport:
+			if (! static_cast<TrackExportChannelSelector*>(channel_selector.get())->track_output ()) {
+				rt_ok = false;
+			}
+			break;
+	}
+
+	timespan_selector->allow_realtime_export (rt_ok);
+}
+
+void
+ExportDialog::parameter_changed (std::string const& p)
+{
+	if (p == "realtime-export") {
+		update_realtime_selection ();
+	}
 }
 
 void
@@ -358,6 +405,11 @@ ExportDialog::progress_timeout ()
 		break;
 	case ExportStatus::Normalizing:
 		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
+		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		break;
+	case ExportStatus::Encoding:
+		status_text = string_compose (_("Encoding '%3' (timespan %1 of %2)"),
 		                              status->timespan, status->total_timespans, status->timespan_name);
 		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
 		break;

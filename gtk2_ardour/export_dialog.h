@@ -103,6 +103,9 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	void do_export ();
 
+	void update_realtime_selection ();
+	void parameter_changed (std::string const&);
+
 	void show_progress ();
 	gint progress_timeout ();
 
