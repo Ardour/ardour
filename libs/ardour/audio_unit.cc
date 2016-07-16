@@ -431,7 +431,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (-1)
+	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -472,7 +472,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (-1)
+	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -955,10 +955,12 @@ AUPlugin::default_value (uint32_t port)
 framecnt_t
 AUPlugin::signal_latency () const
 {
-	if (_current_latency < 0) {
-		_current_latency = unit->Latency() * _session.frame_rate();
+	guint lat = g_atomic_int_get (&_current_latency);;
+	if (lat == UINT_MAX) {
+		lat = unit->Latency() * _session.frame_rate();
+		g_atomic_int_set (&_current_latency, lat);
 	}
-	return _current_latency;
+	return lat;
 }
 
 void
@@ -3474,9 +3476,9 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
 {
 	if (event->mEventType == kAudioUnitEvent_PropertyChange) {
 		if (event->mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency) {
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Latency Change Event %1 <> %1\n", new_value, unit->Latency()));
-			// TODO atomically set //_current_latency = -1;
-			_current_latency = unit->Latency() * _session.frame_rate(); // TODO: check: new_value
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Latency Change Event %1 <> %2\n", new_value, unit->Latency()));
+			guint lat = unit->Latency() * _session.frame_rate();
+			g_atomic_int_set (&_current_latency, lat);
 		}
 		return;
 	}
