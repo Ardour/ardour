@@ -3173,6 +3173,10 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 
 		if (iop != 0) {
 			boost::shared_ptr<const IO> iop_out = iop->output();
+			if (other.get() == this && iop_out && iop->input() && iop_out->connected_to (iop->input())) {
+				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed its own return (%2)\n", iop->name(), other->name()));
+				continue;
+			}
 			if ((iop_out && other->all_inputs().fed_by (iop_out)) || iop->feeds (other)) {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (via_send_only) {
