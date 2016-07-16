@@ -5376,7 +5376,7 @@ msgstr ""
 
 #: editor_canvas_events.cc:1296 editor_drag.cc:1418
 msgid "Could not create new track after region placed in the drop zone"
-msgstr ""Impossible de créer une nouvelle piste à partir de la région placée"
+msgstr "Impossible de créer une nouvelle piste à partir de la région placée "
 "dans la zone cible"
 
 #: editor_drag.cc:1306
