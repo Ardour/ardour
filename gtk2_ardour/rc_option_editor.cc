@@ -2886,6 +2886,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
 
 	bo = new BoolOption (
 			"discover-vst-on-start",
@@ -2951,7 +2954,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
+
 	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
 
 	bo = new BoolOption (
 			"discover-audio-units",
