@@ -469,7 +469,15 @@ OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardo
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 checkedIdx=0
-deplibs=
+
+# these are dynamically loaded by NSS
+deplibs="libfreeblpriv3.so libsoftokn3.so libnsspem.so"
+cp -v $GTKSTACK_ROOT/lib/libsoftokn3.so $Libraries/
+cp -v $GTKSTACK_ROOT/lib/libfreeblpriv3.so $Libraries/
+cp -v $GTKSTACK_ROOT/lib/libnsspem.so $Libraries/
+chrpath -r foo $Libraries/libsoftokn3.so
+chrpath -r foo $Libraries/libfreeblpriv3.so
+chrpath -r foo $Libraries/libnsspem.so
 
 while [ true ] ; do
 	missing=false
