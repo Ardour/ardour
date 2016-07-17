@@ -1,5 +1,5 @@
 #include "tests/utils.h"
-#include "audiographer/sndfile/tmp_file.h"
+#include "audiographer/sndfile/tmp_file_sync.h"
 
 using namespace AudioGrapher;
 
@@ -24,7 +24,7 @@ class TmpFileTest : public CppUnit::TestFixture
 	void testProcess()
 	{
 		uint32_t channels = 2;
-		file.reset (new TmpFile<float>(SF_FORMAT_WAV | SF_FORMAT_FLOAT, channels, 44100));
+		file.reset (new TmpFileSync<float>(SF_FORMAT_WAV | SF_FORMAT_FLOAT, channels, 44100));
 		AllocatingProcessContext<float> c (random_data, frames, channels);
 		c.set_flag (ProcessContext<float>::EndOfInput);
 		file->process (c);
@@ -37,7 +37,7 @@ class TmpFileTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<TmpFile<float> > file;
+	boost::shared_ptr<TmpFileSync<float> > file;
 
 	float * random_data;
 	framecnt_t frames;
