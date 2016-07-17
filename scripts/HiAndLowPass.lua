@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-High and Low Pass Filter",
+	name        = "a-High/Low Pass Filter",
 	category    = "Filter",
 	license     = "GPLv2",
 	author      = "Ardour Team",
@@ -65,7 +65,7 @@ function dsp_init (rate)
 	self:table ():set (tbl)
 
 	-- interpolation time constant, 64fpp
-	lpf = 15000 / rate
+	lpf = 5000 / rate
 end
 
 function dsp_configure (ins, outs)
@@ -156,19 +156,17 @@ function dsp_run (ins, outs, n_samples)
 
 		local ho = math.floor(cur[1])
 		local lo = math.floor(cur[4])
-		local hox = cur[1]
-		local lox = cur[4]
 
 		-- process all channels
 		for c = 1, #ins do
 
-			local xfade = hox - ho
+			local xfade = cur[1] - ho
 			assert (xfade >= 0 and xfade < 1)
 
 			ARDOUR.DSP.copy_vector (mem:to_float (off), ins[c]:offset (off), siz)
 
 			-- initialize output
-			if hox == 0 then
+			if cur[1] == 0 then
 				-- high pass is disabled, just copy data.
 				ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
 			else
@@ -179,7 +177,7 @@ function dsp_run (ins, outs, n_samples)
 			-- high pass
 			-- allways run all filters so that we can interplate as needed.
 			for k = 1,4 do
-				if xfade > 0 and k > ho and k <= ho + 1 then
+				if xfade > 0 and k == ho + 1 then
 					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
 				end
 
@@ -187,19 +185,19 @@ function dsp_run (ins, outs, n_samples)
 
 				if k == ho and xfade == 0 then
 					ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
-				elseif k > ho and k <= ho + 1 then
+				elseif k == ho + 1 then
 					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				end
 			end
 
 			-- low pass
-			xfade = lox - lo
+			xfade = cur[4] - lo
 			assert (xfade >= 0 and xfade < 1)
 
 			-- copy output of high-pass into "processing memory"
 			ARDOUR.DSP.copy_vector (mem:to_float (off), outs[c]:offset (off), siz)
 
-			if lox > 0 then
+			if cur[4] > 0 then
 				-- clear output, Low-pass mixes interpolated data into output,
 				-- in which case we just keep the output
 				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
