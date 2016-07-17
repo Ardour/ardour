@@ -109,7 +109,7 @@ _pingback (void *arg)
 	string return_str;
 	//initialize curl
 
-	curl_global_init (CURL_GLOBAL_NOTHING);
+	curl_global_init (CURL_GLOBAL_DEFAULT);
 	c = curl_easy_init ();
 
 	curl_easy_setopt (c, CURLOPT_WRITEFUNCTION, curl_write_data);
