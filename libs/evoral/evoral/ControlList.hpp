@@ -90,11 +90,11 @@ public:
 
 	virtual boost::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc);
 
-        void dump (std::ostream&);
+	void dump (std::ostream&);
 
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
-        void copy_events (const ControlList&);
+	void copy_events (const ControlList&);
 
 	virtual void freeze();
 	virtual void thaw ();
