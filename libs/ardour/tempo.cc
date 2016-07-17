@@ -179,13 +179,13 @@ TempoSection::get_state() const
 	char buf[256];
 	LocaleGuard lg;
 
-	snprintf (buf, sizeof (buf), "%f", pulse());
+	snprintf (buf, sizeof (buf), "%lf", pulse());
 	root->add_property ("pulse", buf);
 	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("frame", buf);
-	snprintf (buf, sizeof (buf), "%f", _beats_per_minute);
+	snprintf (buf, sizeof (buf), "%lf", _beats_per_minute);
 	root->add_property ("beats-per-minute", buf);
-	snprintf (buf, sizeof (buf), "%f", _note_type);
+	snprintf (buf, sizeof (buf), "%lf", _note_type);
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
@@ -569,12 +569,12 @@ MeterSection::get_state() const
 	root->add_property ("bbt", buf);
 	snprintf (buf, sizeof (buf), "%lf", beat());
 	root->add_property ("beat", buf);
-	snprintf (buf, sizeof (buf), "%f", _note_type);
+	snprintf (buf, sizeof (buf), "%lf", _note_type);
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("frame", buf);
 	root->add_property ("lock-style", enum_2_string (position_lock_style()));
-	snprintf (buf, sizeof (buf), "%f", _divisions_per_bar);
+	snprintf (buf, sizeof (buf), "%lf", _divisions_per_bar);
 	root->add_property ("divisions-per-bar", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
