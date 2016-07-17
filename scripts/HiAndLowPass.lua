@@ -4,7 +4,7 @@ ardour {
 	category    = "Filter",
 	license     = "GPLv2",
 	author      = "Ardour Team",
-	description = [[Example Ardour Lua DSP Plugin]]
+	description = [[An Ardour High and Low Pass Filter with de-zipped controls, written in Lua]]
 }
 
 function dsp_ioconfig ()
@@ -85,6 +85,12 @@ function dsp_configure (ins, outs)
 		lp[c] = {}
 		-- initialize filters
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
+
+		-- A different Biquad is needed for each pass and channel because they
+		-- remember the last two samples seen during the last call of Biquad:run().
+		-- For continuity these have to come from the previous audio chunk of the
+		-- same channel and pass and would be clobbered if the same Biquad was
+		-- called several times by cycle.
 		for k = 1,4 do
 			hp[c][k] = ARDOUR.DSP.Biquad (tbl['samplerate'])
 			lp[c][k] = ARDOUR.DSP.Biquad (tbl['samplerate'])
@@ -160,61 +166,60 @@ function dsp_run (ins, outs, n_samples)
 		-- process all channels
 		for c = 1, #ins do
 
+			-- High Pass
 			local xfade = cur[1] - ho
 			assert (xfade >= 0 and xfade < 1)
 
+			-- prepare scratch memory
 			ARDOUR.DSP.copy_vector (mem:to_float (off), ins[c]:offset (off), siz)
 
-			-- initialize output
-			if cur[1] == 0 then
-				-- high pass is disabled, just copy data.
-				ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
-			else
-				-- clear output, The filter mixes into the output buffer
-				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
-			end
-
-			-- high pass
-			-- allways run all filters so that we can interplate as needed.
-			for k = 1,4 do
-				if xfade > 0 and k == ho + 1 then
-					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
-				end
-
+			-- run at least |ho| biquads...
+			for k = 1,ho do
 				hp[c][k]:run (mem:to_float (off), siz)
+			end
+			ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
 
-				if k == ho and xfade == 0 then
-					ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
-				elseif k == ho + 1 then
-					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
-				end
+			-- mix the output of |ho| biquads (with weight |1-xfade|)
+			-- with the output of |ho+1| biquads (with weight |xfade|)
+			if xfade > 0 then
+				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
+				hp[c][ho+1]:run (mem:to_float (off), siz)
+				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
+				ho = ho + 1 -- to avoid running another time the biguad |ho+1|
 			end
 
-			-- low pass
+			-- run remaining biquads because they need to have the correct state
+			-- in case they start affecting the next chunck of output
+			-- TODO: only run the ones that have a chance to run next cycle
+			for k = ho+1,4 do
+				hp[c][k]:run (mem:to_float (off), siz)
+			end
+
+			-- Low Pass
 			xfade = cur[4] - lo
 			assert (xfade >= 0 and xfade < 1)
 
-			-- copy output of high-pass into "processing memory"
+			-- prepare scratch memory (from high pass output)
 			ARDOUR.DSP.copy_vector (mem:to_float (off), outs[c]:offset (off), siz)
 
-			if cur[4] > 0 then
-				-- clear output, Low-pass mixes interpolated data into output,
-				-- in which case we just keep the output
-				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
+			-- run at least |lo| biquads...
+			for k = 1,ho do
+				lp[c][k]:run (mem:to_float (off), siz)
+			end
+			ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
+
+			-- mix the output of |lo| biquads (with weight |1-xfade|)
+			-- with the output of |lo+1| biquads (with weight |xfade|)
+			if xfade > 0 then
+				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
+				lp[c][lo+1]:run (mem:to_float (off), siz)
+				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
+				lo = lo + 1 -- to avoid running another time the biguad |lo+1|
 			end
 
-			for k = 1,4 do
-				if xfade > 0 and k > lo and k <= lo + 1 then
-					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
-				end
-
+			-- again, run remaining biquads
+			for k = lo+1,4 do
 				lp[c][k]:run (mem:to_float (off), siz)
-
-				if k == lo and xfade == 0 then
-					ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
-				elseif k > lo and k <= lo + 1 then
-					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
-				end
 			end
 
 		end
