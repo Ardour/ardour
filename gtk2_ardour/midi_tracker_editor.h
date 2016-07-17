@@ -60,8 +60,14 @@ namespace ARDOUR {
 
 class AutomationTimeAxisView;
 
-// Maximum number of tracks in the midi tracker editor
-#define MAX_NUMBER_OF_TRACKS 256
+// Maximum number of note and automation tracks. Temporary limit before a
+// dedicated widget is created to replace Gtk::TreeModel::ColumnRecord
+
+// Maximum number of note tracks in the midi tracker editor
+#define MAX_NUMBER_OF_NOTE_TRACKS 128
+
+// Maximum number of automation trackts in the midi tracker editor
+#define MAX_NUMBER_OF_AUTOMATION_TRACKS 4
 
 class MidiTrackerEditor : public ArdourWindow
 {
@@ -80,6 +86,7 @@ class MidiTrackerEditor : public ArdourWindow
 	struct ProcessorAutomationNode {
 		Evoral::Parameter                         what;
 		Gtk::CheckMenuItem*                       menu_item;
+		// TODO: maybe I just need to point the right column
 		// boost::shared_ptr<AutomationTimeAxisView> view;
 		MidiTrackerEditor&                        parent;
 
@@ -90,17 +97,17 @@ class MidiTrackerEditor : public ArdourWindow
 	};
 
 	struct ProcessorAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Processor> processor;
-	    bool                                 valid;
-	    Gtk::Menu*                           menu;
-	    std::vector<ProcessorAutomationNode*>     lines;
+	    boost::shared_ptr<ARDOUR::Processor>  processor;
+	    bool                                  valid;
+	    Gtk::Menu*                            menu;
+	    std::vector<ProcessorAutomationNode*> columns;
 
 	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
 		    : processor (i), valid (true), menu (0) {}
 
 	    ~ProcessorAutomationInfo ();
 	};
-	
+
 	/** Information about all automatable processor parameters that apply to
 	 *  this route.  The Amp processor is not included in this list.
 	 */
@@ -121,7 +128,8 @@ class MidiTrackerEditor : public ArdourWindow
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
-	// TODO replace AutomationTimeAxisView by AutomationTrackerView
+	// TODO replace AutomationTimeAxisView by AutomationTrackerView or column
+	// or something
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
 	boost::shared_ptr<AutomationTimeAxisView> trim_track;
 	boost::shared_ptr<AutomationTimeAxisView> mute_track;
@@ -160,25 +168,38 @@ class MidiTrackerEditor : public ArdourWindow
 	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiTrackerModelColumns()
 		{
+			add (_color);		// The background color differs when the row is
+								// on beats and bars. This is to keep track of
+								// it.
 			add (time);
-			for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; ++i) {
+			for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++) {
 				add (note_name[i]);
 				add (channel[i]);
 				add (velocity[i]);
 				add (delay[i]);
 				add (_note[i]);		// We keep that around to play the note
 			}
-			add (_color);		// The background color differs when the row is
-								// on beats and bars. This is to keep track of
-								// it.
+			for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
+				add (automation[i]);
+				add (_automation[i]);
+			}
 		};
-		Gtk::TreeModelColumn<std::string> time;
-		Gtk::TreeModelColumn<std::string> note_name[MAX_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> channel[MAX_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> velocity[MAX_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<std::string> _color;
+		Gtk::TreeModelColumn<std::string> time;
+		Gtk::TreeModelColumn<std::string> note_name[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> channel[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> velocity[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		// TODO: have a pointer to an automation object
+		//
+		// Scarily enough it seems it should be an Event<Time>, although
+		// probably better be some ARDOUR::AutomationList iterator or
+		// something. To find out more study how AutomationList turn an
+		// Event<Time> into an automation value, maybe look at how
+		// interpolation works in details.
+		Gtk::TreeModelColumn<boost::shared_ptr<TODO> > _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 	};
 
 	enum tracker_columns {
@@ -247,6 +268,7 @@ class MidiTrackerEditor : public ArdourWindow
 	void redisplay_visible_channel ();
 	void redisplay_visible_velocity ();
 	void redisplay_visible_delay ();
+	void redisplay_visible_automation ();
 	void automation_click ();
 
 	void setup_tooltips ();

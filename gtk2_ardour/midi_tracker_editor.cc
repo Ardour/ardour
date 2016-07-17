@@ -185,7 +185,7 @@ MidiTrackerEditor::show_all_automation ()
 	// 	/* Show processor automation */
 
 	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 	// 			if ((*ii)->view == 0) {
 	// 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
 	// 			}
@@ -228,7 +228,7 @@ MidiTrackerEditor::show_existing_automation ()
 	// 	/* Show processor automation */
 
 	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 	// 			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
 	// 				(*ii)->menu_item->set_active (true);
 	// 			}
@@ -266,7 +266,7 @@ MidiTrackerEditor::hide_all_automation ()
 	// 	/* Hide processor automation */
 
 	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 	// 			(*ii)->menu_item->set_active (false);
 	// 		}
 	// 	}
@@ -368,7 +368,7 @@ MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Proc
 
 		// 	pan = new ProcessorAutomationNode (*i, mitem, *this);
 
-		// 	rai->lines.push_back (pan);
+		// 	rai->columns.push_back (pan);
 
 		// } else {
 
@@ -456,7 +456,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	if (true /*gain_track*/) {
 		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_track_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		gain_automation_item->set_active (false);
+		gain_automation_item->set_active (true);
 
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
@@ -1014,7 +1014,7 @@ MidiTrackerEditor::visible_blank_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_note()
 {
-	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 1)->set_visible(i < mtm->ntracks ? visible_note : false);
 	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -1035,7 +1035,7 @@ MidiTrackerEditor::visible_note_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_channel()
 {
-	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 2)->set_visible(i < mtm->ntracks ? visible_channel : false);
 	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -1056,7 +1056,7 @@ MidiTrackerEditor::visible_channel_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_velocity()
 {
-	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 3)->set_visible(i < mtm->ntracks ? visible_velocity : false);
 	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -1077,7 +1077,7 @@ MidiTrackerEditor::visible_velocity_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_delay()
 {
-	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 4)->set_visible(i < mtm->ntracks ? visible_delay : false);
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -1093,6 +1093,13 @@ MidiTrackerEditor::visible_delay_press(GdkEventButton* ev)
 	visible_delay = !visible_delay;
 	redisplay_visible_delay();
 	return false;
+}
+
+void
+MidiTrackerEditor::redisplay_visible_automation()
+{
+	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++)
+		view.get_column(MAX_NUMBER_OF_NOTE_TRACKS + i)->set_visible(false);
 }
 
 void
@@ -1198,6 +1205,7 @@ MidiTrackerEditor::redisplay_model ()
 	redisplay_visible_channel();
 	redisplay_visible_velocity();
 	redisplay_visible_delay();
+	redisplay_visible_automation();
 }
 
 bool
@@ -1228,7 +1236,9 @@ MidiTrackerEditor::setup_matrix ()
 	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time->get_first_cell_renderer ();		
 	viewcolumn_time->add_attribute(cellrenderer_time->property_cell_background (), columns._color);
 	view.append_column (*viewcolumn_time);
-	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++) {
+
+	// Instantiate note tracks
+	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++) {
 		stringstream ss_note;
 		stringstream ss_ch;
 		stringstream ss_vel;
@@ -1244,10 +1254,10 @@ MidiTrackerEditor::setup_matrix ()
 		Gtk::TreeViewColumn* viewcolumn_velocity = new Gtk::TreeViewColumn (_(ss_vel.str().c_str()), columns.velocity[i]);
 		Gtk::TreeViewColumn* viewcolumn_delay = new Gtk::TreeViewColumn (_(ss_delay.str().c_str()), columns.delay[i]);
 
-		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note->get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel->get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity->get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay->get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note->get_first_cell_renderer ();
+		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel->get_first_cell_renderer ();
+		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity->get_first_cell_renderer ();
+		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay->get_first_cell_renderer ();
 
 		viewcolumn_note->add_attribute(cellrenderer_note->property_cell_background (), columns._color);
 		viewcolumn_channel->add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
@@ -1258,6 +1268,16 @@ MidiTrackerEditor::setup_matrix ()
 		view.append_column (*viewcolumn_channel);
 		view.append_column (*viewcolumn_velocity);
 		view.append_column (*viewcolumn_delay);
+	}
+
+	// Instantiate automation tracks
+	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
+		stringstream ss_automation;
+		ss_automation << "A" << i;
+		Gtk::TreeViewColumn* viewcolumn_automation = new Gtk::TreeViewColumn (_(ss_automation.str().c_str()), columns.automation[i]);
+		Gtk::CellRenderer* cellrenderer_automation = viewcolumn_automation->get_first_cell_renderer ();
+		viewcolumn_automation->add_attribute(cellrenderer_automation->property_cell_background (), columns._color);
+		view.append_column (*viewcolumn_automation);
 	}
 
 	view.set_headers_visible (true);
