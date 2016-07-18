@@ -4,7 +4,7 @@ ardour {
 	category    = "Filter",
 	license     = "GPLv2",
 	author      = "Ardour Team",
-	description = [[Example Ardour Lua DSP Plugin]]
+	description = [[High Low Pass filter with up to 48dB / octave]]
 }
 
 function dsp_ioconfig ()
@@ -49,7 +49,7 @@ end
 local hp = {}  -- the biquad high-pass filter instances (DSP)
 local lp = {}  -- the biquad high-pass filter instances (DSP)
 local filt = nil -- the biquad filter instance (GUI, response)
-local cur = {0, 0, 0, 0, 0, 0, 0} -- current parameters
+local cur = {0, 0, 0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
 local chn = 0 -- channel/filter count
 
@@ -64,7 +64,7 @@ function dsp_init (rate)
 	tbl['samplerate'] = rate
 	self:table ():set (tbl)
 
-	-- interpolation time constant, 64fpp
+	-- interpolation time constant, ~15Hz @ 64fpp
 	lpf = 5000 / rate
 end
 
@@ -161,7 +161,6 @@ function dsp_run (ins, outs, n_samples)
 		for c = 1, #ins do
 
 			local xfade = cur[1] - ho
-			assert (xfade >= 0 and xfade < 1)
 
 			ARDOUR.DSP.copy_vector (mem:to_float (off), ins[c]:offset (off), siz)
 
@@ -192,19 +191,18 @@ function dsp_run (ins, outs, n_samples)
 
 			-- low pass
 			xfade = cur[4] - lo
-			assert (xfade >= 0 and xfade < 1)
 
 			-- copy output of high-pass into "processing memory"
 			ARDOUR.DSP.copy_vector (mem:to_float (off), outs[c]:offset (off), siz)
 
 			if cur[4] > 0 then
-				-- clear output, Low-pass mixes interpolated data into output,
-				-- in which case we just keep the output
+				-- Clear output, Low-pass mixes interpolated data into output.
+				-- (Except if the filter is disabled (0) in which case we just keep the output.)
 				ARDOUR.DSP.memset (outs[c]:offset (off), 0, siz)
 			end
 
 			for k = 1,4 do
-				if xfade > 0 and k > lo and k <= lo + 1 then
+				if xfade > 0 and k == lo + 1 then
 					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
 				end
 
@@ -212,7 +210,7 @@ function dsp_run (ins, outs, n_samples)
 
 				if k == lo and xfade == 0 then
 					ARDOUR.DSP.copy_vector (outs[c]:offset (off), mem:to_float (off), siz)
-				elseif k > lo and k <= lo + 1 then
+				elseif k == lo + 1 then
 					ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				end
 			end
