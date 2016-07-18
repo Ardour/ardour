@@ -71,7 +71,6 @@ ColorThemeManager::ColorThemeManager ()
 		theme_list = TreeStore::create (color_theme_columns);
 
 		TreeModel::iterator selected_iter = theme_list->children().end();
-		const bool running_from_source = running_from_source_tree();
 
 		for (std::map<string,string>::iterator c = color_themes.begin(); c != color_themes.end(); ++c) {
 			TreeModel::Row row;
@@ -80,13 +79,6 @@ ColorThemeManager::ColorThemeManager ()
 			row[color_theme_columns.name] = c->first;
 
 			string color_file_name = c->second;
-
-			if (running_from_source) {
-				/* color themes from within the source tree are
-				   suffixed by "-PROGRAM-NAME" (lowercased)
-				*/
-				replace_all (color_file_name, string_compose ("-%1", downcase (PROGRAM_NAME)), "");
-			}
 
 			row[color_theme_columns.path] = color_file_name;
 
@@ -233,7 +225,7 @@ ColorThemeManager::reset_canvas_colors()
 
 	/* look for a versioned user-owned color file, and try to rename it */
 
-	basename = UIConfiguration::instance().color_file_name (true, false, true);
+	basename = UIConfiguration::instance().color_file_name (true, true);
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
 		string backup = cfile + string (X_(".old"));

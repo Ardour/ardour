@@ -127,7 +127,7 @@ UIConfiguration::parameter_changed (string param)
 	if (param == "ui-rc-file") {
 		load_rc_file (true);
 	} else if (param == "color-file") {
-		load_color_theme ();
+		load_color_theme (true);
 	}
 
 	save_state ();
@@ -218,7 +218,7 @@ UIConfiguration::pre_gui_init ()
 UIConfiguration*
 UIConfiguration::post_gui_init ()
 {
-	load_color_theme ();
+	load_color_theme (true);
 	return this;
 }
 
@@ -258,7 +258,7 @@ UIConfiguration::load_defaults ()
 }
 
 std::string
-UIConfiguration::color_file_name (bool use_my, bool with_program_name, bool with_version) const
+UIConfiguration::color_file_name (bool use_my, bool with_version) const
 {
 	string basename;
 
@@ -266,12 +266,8 @@ UIConfiguration::color_file_name (bool use_my, bool with_program_name, bool with
 		basename += "my-";
 	}
 
-	basename += color_file.get();  //this is the overall theme file, e.g. "dark"
-
-	if (with_program_name) {
-		basename += '-';
-		basename += downcase (PROGRAM_NAME);
-	}
+	//this is the overall theme file, e.g. "dark" plus "-downcase(PROGRAM_NAME)"
+	basename += color_file.get();  
 
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");
@@ -282,8 +278,27 @@ UIConfiguration::color_file_name (bool use_my, bool with_program_name, bool with
 	}
 
 	basename += color_file_suffix;
-
 	return basename;
+}
+
+int
+UIConfiguration::load_color_file (string const & path)
+{
+	XMLTree tree;
+
+	info << string_compose (_("Loading color file %1"), path) << endmsg;
+
+	if (!tree.read (path.c_str())) {
+		error << string_compose(_("cannot read color file \"%1\""), path) << endmsg;
+		return -1;
+	}
+
+	if (set_state (*tree.root(), Stateful::loading_state_version)) {
+		error << string_compose(_("color file \"%1\" not loaded successfully."), path) << endmsg;
+		return -1;
+	}
+
+	return 0;
 }
 
 int
@@ -295,35 +310,14 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 * in turn calls save_state()
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
-	const bool running_from_source = ARDOUR_UI_UTILS::running_from_source_tree ();
 
-	if (allow_own) {
-
-		PBD::Searchpath sp (user_config_directory());
-
-		/* user's own color files never have the program name in them */
-
-		if (find_file (sp, color_file_name (true, false, true), cfile)) {
-			found = true;
-		}
-
-		if (!found) {
-			if (find_file (sp, color_file_name (true, false, false), cfile)) {
-				found = true;
-			}
-		}
-
+	if (find_file (theme_search_path(), color_file_name (false, true), cfile)) {
+		found = true;
 	}
 
 	if (!found) {
-		if (find_file (theme_search_path(), color_file_name (false, running_from_source, true), cfile)) {
+		if (find_file (theme_search_path(), color_file_name (false, false), cfile)) {
 			found = true;
-		}
-
-		if (!found) {
-			if (find_file (theme_search_path(), color_file_name (false, running_from_source, false), cfile)) {
-				found = true;
-			}
 		}
 	}
 
@@ -332,20 +326,31 @@ UIConfiguration::load_color_theme (bool allow_own)
 		return -1;
 	}
 
+	(void) load_color_file (cfile);
 
-	XMLTree tree;
+	if (allow_own) {
 
-	info << string_compose (_("Loading color file %1"), cfile) << endmsg;
+		found = false;
 
-	if (!tree.read (cfile.c_str())) {
-		error << string_compose(_("cannot read color file \"%1\""), cfile) << endmsg;
-		return -1;
-	}
+		PBD::Searchpath sp (user_config_directory());
 
-	if (set_state (*tree.root(), Stateful::loading_state_version)) {
-		error << string_compose(_("color file \"%1\" not loaded successfully."), cfile) << endmsg;
-		return -1;
+		/* user's own color files never have the program name in them */
+
+		if (find_file (sp, color_file_name (true, true), cfile)) {
+			found = true;
 		}
+
+		if (!found) {
+			if (find_file (sp, color_file_name (true, false), cfile)) {
+				found = true;
+			}
+		}
+
+		if (found) {
+			(void) load_color_file (cfile);
+		}
+
+	}
 
 	ColorsChanged ();
 
@@ -390,7 +395,7 @@ UIConfiguration::store_color_theme ()
 	root->add_child_nocopy (*parent);
 
 	XMLTree tree;
-	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, false, true));;
+	std::string colorfile = Glib::build_filename (user_config_directory(), color_file_name (true, true));;
 
 	tree.set_root (root);
 
@@ -584,8 +589,6 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	XMLProperty const *name;
 	XMLProperty const *alias;
 
-	color_aliases.clear ();
-
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode const * child = *niter;
 		if (child->name() != X_("ColorAlias")) {
@@ -595,7 +598,7 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 		alias = child->property (X_("alias"));
 
 		if (name && alias) {
-			color_aliases.insert (make_pair (name->value(), alias->value()));
+			color_aliases[name->value()] = alias->value();
 		}
 	}
 }
@@ -608,7 +611,9 @@ UIConfiguration::load_colors (XMLNode const & node)
 	XMLProperty const *name;
 	XMLProperty const *color;
 
-	colors.clear ();
+	/* don't clear colors, so that we can load > 1 color file and have
+	   the subsequent ones overwrite the later ones.
+	*/
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode const * child = *niter;
@@ -621,7 +626,8 @@ UIConfiguration::load_colors (XMLNode const & node)
 		if (name && color) {
 			ArdourCanvas::Color c;
 			c = strtoul (color->value().c_str(), 0, 16);
-			colors.insert (make_pair (name->value(), c));
+			/* insert or replace color name definition */
+			colors[name->value()] =  c;
 		}
 	}
 }
@@ -635,8 +641,6 @@ UIConfiguration::load_modifiers (XMLNode const & node)
 	XMLProperty const *name;
 	XMLProperty const *mod;
 
-	modifiers.clear ();
-
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode const * child = *niter;
 		if (child->name() != X_("Modifier")) {
@@ -648,7 +652,7 @@ UIConfiguration::load_modifiers (XMLNode const & node)
 
 		if (name && mod) {
 			SVAModifier svam (mod->value());
-			modifiers.insert (make_pair (name->value(), svam));
+			modifiers[name->value()] = svam;
 		}
 	}
 }

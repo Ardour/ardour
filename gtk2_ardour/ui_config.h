@@ -53,14 +53,14 @@ private:
 	int load_state ();
 	int save_state ();
 	int load_defaults ();
-	int load_color_theme (bool allow_own=true);
+	int load_color_theme (bool allow_own);
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
 
-	std::string  color_file_name (bool use_my, bool with_program_name, bool with_version) const;
+	std::string  color_file_name (bool use_my, bool with_version) const;
 
 	typedef std::map<std::string,ArdourCanvas::Color> Colors;
 	typedef std::map<std::string,std::string> ColorAliases;
@@ -137,11 +137,12 @@ private:
 	bool colors_modified;
 	bool modifiers_modified;
 
-	int store_color_theme ();
+	int  store_color_theme ();
 	void load_color_aliases (XMLNode const &);
 	void load_colors (XMLNode const &);
 	void load_modifiers (XMLNode const &);
 	void reset_gtk_theme ();
+	int  load_color_file (std::string const &);
 	void colors_changed ();
 
 	uint32_t block_save;
