@@ -350,65 +350,6 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	return relay_key_press(&ev, &main_window);
 }
 
-string
-ARDOUR_UI_UTILS::show_gdk_event_state (int state)
-{
-	string s;
-	if (state & GDK_SHIFT_MASK) {
-		s += "+SHIFT";
-	}
-	if (state & GDK_LOCK_MASK) {
-		s += "+LOCK";
-	}
-	if (state & GDK_CONTROL_MASK) {
-		s += "+CONTROL";
-	}
-	if (state & GDK_MOD1_MASK) {
-		s += "+MOD1";
-	}
-	if (state & GDK_MOD2_MASK) {
-		s += "+MOD2";
-	}
-	if (state & GDK_MOD3_MASK) {
-		s += "+MOD3";
-	}
-	if (state & GDK_MOD4_MASK) {
-		s += "+MOD4";
-	}
-	if (state & GDK_MOD5_MASK) {
-		s += "+MOD5";
-	}
-	if (state & GDK_BUTTON1_MASK) {
-		s += "+BUTTON1";
-	}
-	if (state & GDK_BUTTON2_MASK) {
-		s += "+BUTTON2";
-	}
-	if (state & GDK_BUTTON3_MASK) {
-		s += "+BUTTON3";
-	}
-	if (state & GDK_BUTTON4_MASK) {
-		s += "+BUTTON4";
-	}
-	if (state & GDK_BUTTON5_MASK) {
-		s += "+BUTTON5";
-	}
-	if (state & GDK_SUPER_MASK) {
-		s += "+SUPER";
-	}
-	if (state & GDK_HYPER_MASK) {
-		s += "+HYPER";
-	}
-	if (state & GDK_META_MASK) {
-		s += "+META";
-	}
-	if (state & GDK_RELEASE_MASK) {
-		s += "+RELEASE";
-	}
-
-	return s;
-}
-
 Glib::RefPtr<Gdk::Pixbuf>
 ARDOUR_UI_UTILS::get_xpm (std::string name)
 {

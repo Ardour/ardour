@@ -175,6 +175,8 @@ namespace Gtkmm2ext {
 
 	LIBGTKMM2EXT_API float paned_position_as_fraction (Gtk::Paned& paned, bool h);
 	LIBGTKMM2EXT_API void  paned_set_position_as_fraction (Gtk::Paned& paned, float fraction, bool h);
+
+	LIBGTKMM2EXT_API std::string show_gdk_event_state (int state);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */
