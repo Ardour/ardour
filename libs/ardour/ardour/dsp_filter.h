@@ -151,7 +151,7 @@ namespace ARDOUR { namespace DSP {
 	 * @param max result, max value found in range
 	 * @param n_samples number of samples to analyze
 	 */
-	void peaks (float *data, float &min, float &max, uint32_t n_samples);
+	void peaks (const float *data, float &min, float &max, uint32_t n_samples);
 
 	/** non-linear power-scale meter deflection
 	 *

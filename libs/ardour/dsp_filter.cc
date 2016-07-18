@@ -67,7 +67,7 @@ ARDOUR::DSP::log_meter_coeff (float coeff) {
 }
 
 void
-ARDOUR::DSP::peaks (float *data, float &min, float &max, uint32_t n_samples) {
+ARDOUR::DSP::peaks (const float *data, float &min, float &max, uint32_t n_samples) {
 	for (uint32_t i = 0; i < n_samples; ++i) {
 		if (data[i] < min) min = data[i];
 		if (data[i] > max) max = data[i];
