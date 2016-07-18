@@ -597,7 +597,20 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 		 * happens.
 		 */
 
-		Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) kb.state());
+
+		int mod = kb.state();
+#ifdef __APPLE__
+		/* See comments in Keyboard::Keyboard about GTK handling of MOD2, META and the Command key.
+		 *
+		 * If we do not do this, GTK+ won't show the correct text for shortcuts in menus.
+		 */
+
+		if (mod & GDK_MOD2_MASK) {
+			mod =  mod | GDK_META_MASK;
+		}
+#endif
+
+		Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) mod);
 	}
 }
 
