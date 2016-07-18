@@ -36,6 +36,7 @@
 #include "pbd/pathexpand.h"
 #include "pbd/file_utils.h"
 
+#include "ardour_http.h"
 #include "bundle_env.h"
 
 #include "pbd/i18n.h"
@@ -110,11 +111,12 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
 	}
 
-        /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
-           from looking outside the bundle to find the charset.alias file.
-        */
-        g_setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
+	/* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
+		 from looking outside the bundle to find the charset.alias file.
+		 */
+	g_setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
 
+	ArdourCurl::HttpGet::setup_certificate_paths ();
 }
 
 void
