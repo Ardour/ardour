@@ -141,7 +141,8 @@ HttpGet::~HttpGet ()
 char*
 HttpGet::get (const char* url)
 {
-	if (!_curl) {
+	_status = _result = -1;
+	if (!_curl || !url) {
 		return NULL;
 	}
 
@@ -151,7 +152,9 @@ HttpGet::get (const char* url)
 
 	if (!persist) {
 		free (mem.data);
-	}
+	} // otherwise caller is expected to have free()d or re-used it.
+
+	mem.data = NULL;
 	mem.size = 0;
 
 	curl_easy_setopt (_curl, CURLOPT_URL, url);

@@ -39,7 +39,7 @@ class HttpGet {
 
 	std::string get (const std::string& url) {
 		char *rv = get (url.c_str ());
-		return rv ? std::string (rv) : std::string ();
+		return rv ? std::string (rv) : std::string ("");
 	}
 
 	char* data () const { return mem.data; }
