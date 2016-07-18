@@ -161,7 +161,7 @@ OSCRouteObserver::tick ()
 		} else {
 			now_meter = -193;
 		}
-		if (now_meter < -193) now_meter = -193;
+		if (now_meter < -144) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				string path = "/strip/meter";

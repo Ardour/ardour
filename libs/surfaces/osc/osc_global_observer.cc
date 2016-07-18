@@ -230,7 +230,7 @@ OSCGlobalObserver::tick ()
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
 		float now_meter = session->master_out()->peak_meter()->meter_level(0, MeterMCP);
-		if (now_meter < -193) now_meter = -193;
+		if (now_meter < -144) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				lo_message msg = lo_message_new ();
