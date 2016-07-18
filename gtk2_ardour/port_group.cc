@@ -633,9 +633,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	add_group_if_not_empty (other);
-	if (type != DataType::MIDI) {
-		add_group_if_not_empty (bus);
-	}
+	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
 	add_group_if_not_empty (program);
 	add_group_if_not_empty (system);
