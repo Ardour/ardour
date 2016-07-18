@@ -20,13 +20,15 @@
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
-#include "video_image_frame.h"
-#include "public_editor.h"
-#include "canvas/container.h"
-#include "utils_videotl.h"
-
 #include <gtkmm2ext/utils.h>
 #include <pthread.h>
+
+#include "canvas/container.h"
+
+#include "ardour_http.h"
+#include "public_editor.h"
+#include "utils_videotl.h"
+#include "video_image_frame.h"
 
 #include "pbd/i18n.h"
 
@@ -208,7 +210,7 @@ http_get_thread (void *arg) {
 	int timeout = 1000; // * 5ms -> 5sec
 	char *res = NULL;
 	do {
-		res=a3_curl_http_get(url, &status);
+		res = ArdourCurl::http_get (url, &status);
 		if (status == 503) Glib::usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 

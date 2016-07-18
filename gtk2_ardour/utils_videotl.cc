@@ -21,14 +21,16 @@
 #include <string>
 #include <cerrno>
 #include <gtkmm.h>
-#include <curl/curl.h>
 
 #include "pbd/error.h"
+
 #include "ardour/ardour.h"
 #include "ardour/session_directory.h"
-#include "video_image_frame.h"
-#include "utils_videotl.h"
+
+#include "ardour_http.h"
 #include "utils.h"
+#include "utils_videotl.h"
+#include "video_image_frame.h"
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
@@ -264,14 +266,13 @@ VideoUtils::video_query_info (
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			, filepath.c_str());
-	char *res = a3_curl_http_get(url, NULL);
-	if (!res) {
+	std::string res = ArdourCurl::http_get (url);
+	if (res.empty ()) {
 		return false;
 	}
 
 	std::vector<std::vector<std::string> > lines;
-	ParseCSV(std::string(res), lines);
-	free(res);
+	ParseCSV(res, lines);
 
 	if (lines.empty() || lines.at(0).empty() || lines.at(0).size() != 6) {
 		return false;
@@ -308,69 +309,3 @@ VideoUtils::video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img)
 	}
 }
 
-
-extern "C" {
-#include <curl/curl.h>
-
-	struct A3MemoryStruct {
-		char *data;
-		size_t size;
-	};
-
-	static size_t
-	WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data) {
-		size_t realsize = size * nmemb;
-		struct A3MemoryStruct *mem = (struct A3MemoryStruct *)data;
-
-		mem->data = (char *)realloc(mem->data, mem->size + realsize + 1);
-		if (mem->data) {
-			memcpy(&(mem->data[mem->size]), ptr, realsize);
-			mem->size += realsize;
-			mem->data[mem->size] = 0;
-		}
-		return realsize;
-	}
-
-	char *a3_curl_http_get (const char *u, int *status) {
-		CURL *curl;
-		CURLcode res;
-		struct A3MemoryStruct chunk;
-		long int httpstatus;
-		if (status) *status = 0;
-		if (strncmp("http://", u, 7) && strncmp("https://", u, 8)) return NULL;
-
-		chunk.data=NULL;
-		chunk.size=0;
-
-		curl = curl_easy_init();
-		if(!curl) return NULL;
-		curl_easy_setopt(curl, CURLOPT_URL, u);
-
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING);
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
-		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-#ifdef CURLERRORDEBUG
-		char curlerror[CURL_ERROR_SIZE] = "";
-		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerror);
-#endif
-
-		res = curl_easy_perform(curl);
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpstatus);
-		curl_easy_cleanup(curl);
-		if (status) *status = httpstatus;
-		if (res) {
-#ifdef CURLERRORDEBUG
-			printf("a3_curl_http_get() failed: %s\n", curlerror);
-#endif
-			return NULL;
-		}
-		if (httpstatus != 200) {
-			free (chunk.data);
-			chunk.data = NULL;
-		}
-		return (chunk.data);
-	}
-
-} /* end extern "C" */

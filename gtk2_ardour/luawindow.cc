@@ -380,7 +380,7 @@ LuaWindow::import_script ()
 	// TODO convert a few URL (eg. pastebin) to raw.
 #if 0
 	char *url = "http://pastebin.com/raw/3UMkZ6nV";
-	char *rv = a3_curl_http_get (url, 0);
+	char *rv = ArdourCurl::http_get (url, 0);
 	if (rv) {
 		new_script ();
 		Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());

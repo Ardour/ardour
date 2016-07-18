@@ -30,6 +30,7 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_http.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "region_selection.h"
@@ -347,16 +348,6 @@ const char *luasignalstr[] = {
 }; // namespace
 
 
-std::string lua_http_get (const char *u) {
-	char *rv = a3_curl_http_get (u, NULL);
-	if (!rv) {
-		return "";
-	}
-	std::string s (rv);
-	free (rv);
-	return s;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #define xstr(s) stringify(s)
@@ -549,7 +540,7 @@ LuaInstance::register_classes (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ArdourUI")
 
-		.addFunction ("curl_http_get", &lua_http_get)
+		.addFunction ("http_get", (std::string (*)(const std::string&))&ArdourCurl::http_get)
 
 		.beginStdList <ArdourMarker*> ("ArdourMarkerList")
 		.endClass ()

@@ -56,8 +56,4 @@ bool video_query_info (
 		);
 };
 
-extern "C" {
-	char *a3_curl_http_get (const char *u, int *status);
-}
-
 #endif /* __gtk_ardour_video_utils_h__ */
