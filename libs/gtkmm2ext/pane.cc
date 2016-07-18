@@ -167,6 +167,7 @@ Pane::on_remove (Widget* w)
 void
 Pane::on_size_allocate (Gtk::Allocation& alloc)
 {
+	std::cerr << "pane @ " << this << " reallocated as " << alloc.get_width() << " x " << alloc.get_height() << std::endl;
 	reallocate (alloc);
 	Container::on_size_allocate (alloc);
 }
@@ -354,6 +355,15 @@ Pane::fract_is_ok (Dividers::size_type div, float fract)
 {
 #ifdef __APPLE__
 	if (!check_fract) {
+		return true;
+	}
+
+
+	if (get_allocation().get_width() == 1 && get_allocation().get_height() == 1) {
+		/* space not * allocated - * divider being set from startup code. Let it pass,
+		   since our goal is mostly to catch drags to a position that will interfere with window
+		   resizing.
+		*/
 		return true;
 	}
 
