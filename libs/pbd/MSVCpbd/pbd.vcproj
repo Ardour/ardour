@@ -701,6 +701,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\natsort.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\pathexpand.h"
 				>
 			</File>
