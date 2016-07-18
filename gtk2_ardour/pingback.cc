@@ -28,8 +28,6 @@
 #include <sys/utsname.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 
@@ -39,31 +37,12 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/rc_configuration.h"
 
+#include "ardour_http.h"
 #include "pingback.h"
 #include "utils.h"
 
 using std::string;
 using namespace ARDOUR;
-
-static size_t
-curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
-{
-        /* we know its a string */
-
-        string* sptr = (string*) ptr;
-
-        for (size_t i = 0; i < nitems; ++i) {
-                for (size_t n = 0; n < size; ++n) {
-                        if (*bufptr == '\n') {
-                                break;
-                        }
-
-                        (*sptr) += *bufptr++;
-                }
-        }
-
-        return size * nitems;
-}
 
 struct ping_call {
     std::string version;
@@ -104,18 +83,11 @@ _query_registry (const char *regkey, const char *regval, std::string &rv) {
 static void*
 _pingback (void *arg)
 {
+	ArdourCurl::HttpGet h;
+
 	ping_call* cm = static_cast<ping_call*> (arg);
-	CURL* c;
 	string return_str;
 	//initialize curl
-
-	curl_global_init (CURL_GLOBAL_DEFAULT);
-	c = curl_easy_init ();
-
-	curl_easy_setopt (c, CURLOPT_WRITEFUNCTION, curl_write_data);
-	curl_easy_setopt (c, CURLOPT_WRITEDATA, &return_str);
-	char errbuf[CURL_ERROR_SIZE];
-	curl_easy_setopt (c, CURLOPT_ERRORBUFFER, errbuf);
 
 	string url;
 
@@ -132,10 +104,10 @@ _pingback (void *arg)
 		return 0;
 	}
 
-	char* v = curl_easy_escape (c, cm->version.c_str(), cm->version.length());
+	char* v = h.escape (cm->version.c_str(), cm->version.length());
 	url += v;
 	url += '?';
-	curl_free (v);
+	h.free (v);
 
 #ifndef PLATFORM_WINDOWS
 	struct utsname utb;
@@ -149,30 +121,30 @@ _pingback (void *arg)
 	string s;
 	char* query;
 
-	query = curl_easy_escape (c, utb.sysname, strlen (utb.sysname));
+	query = h.escape (utb.sysname, strlen (utb.sysname));
 	s = string_compose ("s=%1", query);
 	url += s;
 	url += '&';
-	curl_free (query);
+	h.free (query);
 
-	query = curl_easy_escape (c, utb.release, strlen (utb.release));
+	query = h.escape (utb.release, strlen (utb.release));
 	s = string_compose ("r=%1", query);
 	url += s;
 	url += '&';
-	curl_free (query);
+	h.free (query);
 
-	query = curl_easy_escape (c, utb.machine, strlen (utb.machine));
+	query = h.escape (utb.machine, strlen (utb.machine));
 	s = string_compose ("m=%1", query);
 	url += s;
-	curl_free (query);
+	h.free (query);
 #else
 	std::string val;
 	if (_query_registry("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
-		char* query = curl_easy_escape (c, val.c_str(), strlen (val.c_str()));
+		char* query = h.escape (val.c_str(), strlen (val.c_str()));
 		url += "r=";
 		url += query;
 		url += '&';
-		curl_free (query);
+		h.free (query);
 	} else {
 		url += "r=&";
 	}
@@ -183,11 +155,11 @@ _pingback (void *arg)
 		if (string::npos != cut) {
 			val = val.substr (0, cut);
 		}
-		char* query = curl_easy_escape (c, val.c_str(), strlen (val.c_str()));
+		char* query = h.escape (val.c_str(), strlen (val.c_str()));
 		url += "m=";
 		url += query;
 		url += '&';
-		curl_free (query);
+		h.free (query);
 	} else {
 		url += "m=&";
 	}
@@ -200,20 +172,9 @@ _pingback (void *arg)
 
 #endif /* PLATFORM_WINDOWS */
 
-	curl_easy_setopt (c, CURLOPT_URL, url.c_str());
+	return_str = h.get (url.c_str());
 
-	return_str = "";
-
-	if (curl_easy_perform (c) == 0) {
-		long http_status;
-
-		curl_easy_getinfo (c, CURLINFO_RESPONSE_CODE, &http_status);
-
-		if (http_status != 200) {
-			std::cerr << "Bad HTTP status" << std::endl;
-			return 0;
-		}
-
+	if (!return_str.empty ()) {
 		if ( return_str.length() > 140 ) { // like a tweet :)
 			std::cerr << "Announcement string is too long (probably behind a proxy)." << std::endl;
 		} else {
@@ -230,10 +191,9 @@ _pingback (void *arg)
 			}
 		}
 	} else {
-		std::cerr << "curl failed: " << errbuf << std::endl;
+		std::cerr << "curl failed: " << h.error () << std::endl;
 	}
 
-	curl_easy_cleanup (c);
 	delete cm;
 	return 0;
 }
