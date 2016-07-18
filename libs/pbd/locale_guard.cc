@@ -58,16 +58,33 @@ LocaleGuard::LocaleGuard ()
 
 		old_c_locale = strdup (current_c_locale);
 
-		/* set the C++ global/default locale to whatever we are using
-		 * now, but with "C" numeric handling.
-		 *
-		 * this also sets the C locale, so no call to setlocale() is required.
-		 */
+		try {
+			/* set the C++ global/default locale to whatever we are using
+			 * now, but with "C" numeric handling.
+			 *
+			 * this also sets the C locale, so no additional call to setlocale() is required.
+			 */
 
-		std::locale::global (std::locale (old_cpp_locale, "C", std::locale::numeric));
-		pre_cpp_locale = std::locale();
+			std::locale::global (std::locale (old_cpp_locale, "C", std::locale::numeric));
+			pre_cpp_locale = std::locale();
+			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: change C & C++ locale from '%1' => %2\n", old_cpp_locale.name(), pre_cpp_locale.name()));
 
-		DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: change locale from '%1' => %2\n", old_cpp_locale.name(), pre_cpp_locale.name()));
+		} catch (...) {
+			/* Apple in particular have historically done a
+			 * terrible job supporting setlocale and even more so
+			 * with the C++ API. Using any locale other than "C" or
+			 * "POSIX" will fail, and in the case of the C++ API, 
+			 * will throw an exception. In that case, just try to
+			 * use setlocale() to reset *only* the numeric aspect
+			 * of the current locale settings back to "C", which is
+			 * likely to work everywhere.
+			 */
+
+			setlocale (LC_NUMERIC, "C");
+			pre_cpp_locale = std::locale();
+			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: C++ locale API failed, change just C locale from '%1' => 'C' (C++ locale is %2)\n", old_c_locale, pre_cpp_locale.name()));
+		}
+
 	}
 }
 
@@ -78,16 +95,30 @@ LocaleGuard::~LocaleGuard ()
 
 	if (current_cpp_locale != pre_cpp_locale) {
 
-		PBD::error << string_compose ("LocaleGuard: someone (a plugin) changed the C++ locale from\n\t%1\nto\n\t%2\n, expect non-portable session files. Decimal OK ? %2",
+		PBD::warning << string_compose ("LocaleGuard: someone (a plugin) changed the C++ locale from\n\t%1\nto\n\t%2\n, expect non-portable session files. Decimal OK ? %2",
 		                              old_cpp_locale.name(), current_cpp_locale.name(),
 		                              (std::use_facet<std::numpunct<char> >(std::locale()).decimal_point() == '.'))
 		           << endmsg;
-		DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: someone (a plugin) changed the C++ locale (Decimal OK ? '%1'); expect non-portable session files.\n",
-		                                            (std::use_facet<std::numpunct<char> >(std::locale()).decimal_point() == '.')));
 
-		/* this resets C & C++ locales */
-		std::locale::global (old_cpp_locale);
-		DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: restore C & C++ locale: '%1'\n", std::locale().name()));
+		try {
+			/* this resets C & C++ locales */
+			std::locale::global (old_cpp_locale);
+			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: restore C & C++ locale: '%1'\n", std::locale().name()));
+		} catch (...) {
+			/* see comments in the constructor regarding the
+			 * exception.
+			 *
+			 * This should restore restore numeric handling back to
+			 * the default (which may reflect user
+			 * preferences). This probably can't fail, because
+			 * old_c_locale was already in use during the
+			 * constructor for this object.
+			 *
+			 * Still ... Apple ... locale support ... just sayin' ....
+			 */
+			setlocale (LC_NUMERIC, old_c_locale);
+			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: C++ locale API failed, restore C locale from %1 to\n'%2'\n(C++ is '%3')\n", current_c_locale, old_c_locale, std::locale().name()));
+		}
 
 	} else if (old_c_locale && (strcmp (current_c_locale, old_c_locale) != 0)) {
 
