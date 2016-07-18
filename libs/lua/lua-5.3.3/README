@@ -1,12 +1,14 @@
+This is Lua 5.3.3, released on 30 May 2016.
+
 The Lua source is imported in the repository in order to ensure that it
 is compiled with the same C++ compiler as Ardour (setjmp/longjmp, exceptions)
 and available on all platforms that Ardour is.
 
-This directory contains files from src/ directory from lua-5.3.2.
-The original source can be downloaded from http://www.lua.org/ftp/
+This directory contains files from src/ directory from lua-5.3.3.
+The original source can be downloaded from https://www.lua.org/ftp/lua-5.3.3.tar.gz
 
 
-Copyright © 1994–2015 Lua.org, PUC-Rio.
+Copyright © 1994–2016 Lua.org, PUC-Rio.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
