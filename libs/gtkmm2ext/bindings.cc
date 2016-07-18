@@ -641,10 +641,10 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 	KeybindingMap& kbm = get_keymap (op);
 	if (group) {
 		KeybindingMap::value_type new_pair = make_pair (kb, ActionInfo (action_name, group->value()));
-		kbm.insert (new_pair).first;
+		(void) kbm.insert (new_pair).first;
 	} else {
 		KeybindingMap::value_type new_pair = make_pair (kb, ActionInfo (action_name));
-		kbm.insert (new_pair).first;
+		(void) kbm.insert (new_pair).first;
 	}
 
 	if (can_save) {
