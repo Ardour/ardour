@@ -47,7 +47,6 @@
 #include <vector>
 
 #include <inttypes.h>
-#include <boost/ref.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/shared_ptr.hpp>
 

@@ -127,8 +127,8 @@ struct Stack <int &>
   static inline int& get (lua_State* L, int index)
   {
     int l = static_cast <int> (luaL_checknumber (L, index));
-    boost::reference_wrapper<int> r (l);
-    return r.get();
+    int* x = new (lua_newuserdata (L, sizeof (int))) int (l);
+    return *x;
   }
 };
 
@@ -175,8 +175,8 @@ struct Stack <unsigned int &>
   static inline unsigned int& get (lua_State* L, int index)
   {
     unsigned int l = static_cast <unsigned int> (luaL_checknumber (L, index));
-    boost::reference_wrapper<unsigned int> r (l);
-    return r.get();
+    unsigned int* x = new (lua_newuserdata (L, sizeof (unsigned int))) unsigned int (l);
+    return *x;
   }
 };
 
@@ -223,8 +223,8 @@ struct Stack <unsigned char &>
   static inline unsigned char& get (lua_State* L, int index)
   {
     unsigned char l = static_cast <unsigned char> (luaL_checknumber (L, index));
-    boost::reference_wrapper<unsigned char> r (l);
-    return r.get();
+    unsigned char* x = new (lua_newuserdata (L, sizeof (unsigned char))) unsigned char (l);
+    return *x;
   }
 };
 
@@ -271,8 +271,8 @@ struct Stack <short &>
   static inline short& get (lua_State* L, int index)
   {
     short l = static_cast <short> (luaL_checknumber (L, index));
-    boost::reference_wrapper<short> r (l);
-    return r.get();
+    short* x = new (lua_newuserdata (L, sizeof (short))) short (l);
+    return *x;
   }
 };
 
@@ -319,8 +319,8 @@ struct Stack <unsigned short &>
   static inline unsigned short& get (lua_State* L, int index)
   {
     unsigned short l = static_cast <unsigned short> (luaL_checknumber (L, index));
-    boost::reference_wrapper<unsigned short> r (l);
-    return r.get();
+    unsigned short* x = new (lua_newuserdata (L, sizeof (unsigned short))) unsigned short (l);
+    return *x;
   }
 };
 
@@ -367,8 +367,8 @@ struct Stack <long &>
   static inline long& get (lua_State* L, int index)
   {
     long l = static_cast <long> (luaL_checknumber (L, index));
-    boost::reference_wrapper<long> r (l);
-    return r.get();
+    long* x = new (lua_newuserdata (L, sizeof (long))) long (l);
+    return *x;
   }
 };
 
@@ -415,8 +415,8 @@ struct Stack <unsigned long &>
   static inline unsigned long& get (lua_State* L, int index)
   {
     unsigned long l = static_cast <unsigned long> (luaL_checknumber (L, index));
-    boost::reference_wrapper<unsigned long> r (l);
-    return r.get();
+    unsigned long* x = new (lua_newuserdata (L, sizeof (unsigned long))) unsigned long (l);
+    return *x;
   }
 };
 
@@ -463,8 +463,8 @@ struct Stack <long long &>
   static inline long long& get (lua_State* L, int index)
   {
     long long l = static_cast <long long> (luaL_checknumber (L, index));
-    boost::reference_wrapper<long long> r (l);
-    return r.get();
+    long long* x = new (lua_newuserdata (L, sizeof (long long))) long long (l);
+    return *x;
   }
 };
 
@@ -543,8 +543,8 @@ struct Stack <float &>
   static inline float& get (lua_State* L, int index)
   {
     float l = static_cast <float> (luaL_checknumber (L, index));
-    boost::reference_wrapper<float> r (l);
-    return r.get();
+    float* x = new (lua_newuserdata (L, sizeof (float))) float (l);
+    return *x;
   }
 };
 
@@ -588,8 +588,8 @@ template <> struct Stack <double &>
   static inline double& get (lua_State* L, int index)
   {
     double l = static_cast <double> (luaL_checknumber (L, index));
-    boost::reference_wrapper<double> r (l);
-    return r.get();
+    double* x = new (lua_newuserdata (L, sizeof (double))) double (l);
+    return *x;
   }
 };
 
@@ -633,8 +633,8 @@ struct Stack <bool &> {
   static inline bool& get (lua_State* L, int index)
   {
     bool l = lua_toboolean (L, index) ? true : false;
-    boost::reference_wrapper<bool> r (l);
-    return r.get();
+    bool* x = new (lua_newuserdata (L, sizeof (bool))) bool (l);
+    return *x;
   }
 };
 
@@ -701,8 +701,8 @@ struct Stack <char &>
   static inline char get (lua_State* L, int index)
   {
     char l = luaL_checkstring (L, index) [0];
-    boost::reference_wrapper<char> r (l);
-    return r.get();
+    char* x = new (lua_newuserdata (L, sizeof (char))) char (l);
+    return *x;
   }
 };
 
@@ -754,8 +754,7 @@ struct Stack <std::string &>
   {
     size_t len;
     const char *str = luaL_checklstring(L, index, &len);
-    std::string l (str, len);
-    boost::reference_wrapper<std::string> r (l);
-    return r.get();
+    std::string* x = new (lua_newuserdata (L, sizeof (std::string))) std::string (str, len);
+    return *x;
   }
 };
