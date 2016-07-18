@@ -111,7 +111,7 @@ ExportHandler::ExportHandler (Session & session)
   , session (session)
   , graph_builder (new ExportGraphBuilder (session))
   , export_status (session.get_export_status ())
-  , normalizing (false)
+  , post_processing (false)
   , cue_tracknum (0)
   , cue_indexnum (0)
 {
@@ -200,7 +200,7 @@ ExportHandler::start_timespan ()
 
 	/* start export */
 
-	normalizing = false;
+	post_processing = false;
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 	session.start_audio_export (process_position, realtime);
@@ -232,10 +232,10 @@ ExportHandler::process (framecnt_t frames)
 {
 	if (!export_status->running ()) {
 		return 0;
-	} else if (normalizing) {
+	} else if (post_processing) {
 		Glib::Threads::Mutex::Lock l (export_status->lock());
 		if (AudioEngine::instance()->freewheeling ()) {
-			return process_normalize ();
+			return post_process ();
 		} else {
 			// wait until we're freewheeling
 			return 0;
@@ -271,10 +271,10 @@ ExportHandler::process_timespan (framecnt_t frames)
 	/* Do actual processing */
 	int ret = graph_builder->process (frames_to_read, last_cycle);
 
-	/* Start normalizing if necessary */
+	/* Start post-processing/normalizing if necessary */
 	if (last_cycle) {
-		normalizing = graph_builder->will_normalize ();
-		if (normalizing) {
+		post_processing = graph_builder->need_postprocessing ();
+		if (post_processing) {
 			export_status->total_normalize_cycles = graph_builder->get_normalize_cycle_count();
 			export_status->current_normalize_cycle = 0;
 		} else {
@@ -287,9 +287,9 @@ ExportHandler::process_timespan (framecnt_t frames)
 }
 
 int
-ExportHandler::process_normalize ()
+ExportHandler::post_process ()
 {
-	if (graph_builder->process_normalize ()) {
+	if (graph_builder->post_process ()) {
 		finish_timespan ();
 		export_status->active_job = ExportStatus::Exporting;
 	} else {

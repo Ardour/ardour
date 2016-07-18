@@ -139,13 +139,13 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	typedef std::multimap<ExportTimespanPtr, FileSpec> ConfigMap;
 	ConfigMap          config_map;
 
-	bool               normalizing;
+	bool               post_processing;
 
 	/* Timespan management */
 
 	void start_timespan ();
 	int  process_timespan (framecnt_t frames);
-	int  process_normalize ();
+	int  post_process ();
 	void finish_timespan ();
 
 	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;

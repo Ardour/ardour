@@ -68,8 +68,8 @@ class LIBARDOUR_API ExportGraphBuilder
 	~ExportGraphBuilder ();
 
 	int process (framecnt_t frames, bool last_cycle);
-	bool process_normalize (); // returns true when finished
-	bool will_normalize() const { return !normalizers.empty(); }
+	bool post_process (); // returns true when finished
+	bool need_postprocessing () const { return !intermediates.empty(); }
 	bool realtime() const { return _realtime; }
 	unsigned get_normalize_cycle_count() const;
 
@@ -147,9 +147,9 @@ class LIBARDOUR_API ExportGraphBuilder
 		ShortConverterPtr short_converter;
 	};
 
-	class Normalizer {
+	class Intermediate {
 	                                        public:
-		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
+		Intermediate (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		void remove_children (bool remove_out_files);
@@ -207,7 +207,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		ExportGraphBuilder &  parent;
 		FileSpec              config;
 		boost::ptr_list<SFC>  children;
-		boost::ptr_list<Normalizer> normalized_children;
+		boost::ptr_list<Intermediate> intermediate_children;
 		SRConverterPtr        converter;
 		framecnt_t            max_frames_out;
 	};
@@ -263,7 +263,7 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	framecnt_t process_buffer_frames;
 
-	std::list<Normalizer *> normalizers;
+	std::list<Intermediate *> intermediates;
 
 	AnalysisMap analysis_map;
 

@@ -84,24 +84,24 @@ ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 }
 
 bool
-ExportGraphBuilder::process_normalize ()
+ExportGraphBuilder::post_process ()
 {
-	for (std::list<Normalizer *>::iterator it = normalizers.begin(); it != normalizers.end(); /* ++ in loop */) {
+	for (std::list<Intermediate *>::iterator it = intermediates.begin(); it != intermediates.end(); /* ++ in loop */) {
 		if ((*it)->process()) {
-			it = normalizers.erase (it);
+			it = intermediates.erase (it);
 		} else {
 			++it;
 		}
 	}
 
-	return normalizers.empty();
+	return intermediates.empty();
 }
 
 unsigned
 ExportGraphBuilder::get_normalize_cycle_count() const
 {
 	unsigned max = 0;
-	for (std::list<Normalizer *>::const_iterator it = normalizers.begin(); it != normalizers.end(); ++it) {
+	for (std::list<Intermediate *>::const_iterator it = intermediates.begin(); it != intermediates.end(); ++it) {
 		max = std::max(max, (*it)->get_normalize_cycle_count());
 	}
 	return max;
@@ -113,7 +113,7 @@ ExportGraphBuilder::reset ()
 	timespan.reset();
 	channel_configs.clear ();
 	channels.clear ();
-	normalizers.clear ();
+	intermediates.clear ();
 	analysis_map.clear();
 	_realtime = false;
 }
@@ -411,9 +411,9 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 	return config.format->sample_format() == other_config.format->sample_format();
 }
 
-/* Normalizer */
+/* Intermediate (Normalizer, TmpFile) */
 
-ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
+ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
 	: parent (parent)
 	, use_loudness (false)
 	, use_peak (false)
@@ -453,9 +453,9 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	}
 
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Normalizer::prepare_post_processing, this));
+	                                           boost::bind (&Intermediate::prepare_post_processing, this));
 	tmp_file->FileFlushed.connect_same_thread (post_processing_connection,
-	                                           boost::bind (&Normalizer::start_post_processing, this));
+	                                           boost::bind (&Intermediate::start_post_processing, this));
 
 	add_child (new_config);
 
@@ -467,7 +467,7 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 }
 
 ExportGraphBuilder::FloatSinkPtr
-ExportGraphBuilder::Normalizer::sink ()
+ExportGraphBuilder::Intermediate::sink ()
 {
 	if (use_loudness) {
 		return loudness_reader;
@@ -478,7 +478,7 @@ ExportGraphBuilder::Normalizer::sink ()
 }
 
 void
-ExportGraphBuilder::Normalizer::add_child (FileSpec const & new_config)
+ExportGraphBuilder::Intermediate::add_child (FileSpec const & new_config)
 {
 	for (boost::ptr_list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
@@ -492,7 +492,7 @@ ExportGraphBuilder::Normalizer::add_child (FileSpec const & new_config)
 }
 
 void
-ExportGraphBuilder::Normalizer::remove_children (bool remove_out_files)
+ExportGraphBuilder::Intermediate::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<SFC>::iterator iter = children.begin ();
 
@@ -503,7 +503,7 @@ ExportGraphBuilder::Normalizer::remove_children (bool remove_out_files)
 }
 
 bool
-ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
+ExportGraphBuilder::Intermediate::operator== (FileSpec const & other_config) const
 {
 	return config.format->normalize() == other_config.format->normalize() &&
 		config.format->normalize_loudness () == other_config.format->normalize_loudness() &&
@@ -516,21 +516,21 @@ ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 }
 
 unsigned
-ExportGraphBuilder::Normalizer::get_normalize_cycle_count() const
+ExportGraphBuilder::Intermediate::get_normalize_cycle_count() const
 {
 	return static_cast<unsigned>(std::ceil(static_cast<float>(tmp_file->get_frames_written()) /
 	                                       max_frames_out));
 }
 
 bool
-ExportGraphBuilder::Normalizer::process()
+ExportGraphBuilder::Intermediate::process()
 {
 	framecnt_t frames_read = tmp_file->read (*buffer);
 	return frames_read != buffer->frames();
 }
 
 void
-ExportGraphBuilder::Normalizer::prepare_post_processing()
+ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
 	// called in sync rt-context
 	float gain;
@@ -548,11 +548,11 @@ ExportGraphBuilder::Normalizer::prepare_post_processing()
 		}
 	}
 	tmp_file->add_output (normalizer);
-	parent.normalizers.push_back (this);
+	parent.intermediates.push_back (this);
 }
 
 void
-ExportGraphBuilder::Normalizer::start_post_processing()
+ExportGraphBuilder::Intermediate::start_post_processing()
 {
 	// called in disk-thread (when exporting in realtime)
 	tmp_file->seek (0, SEEK_SET);
@@ -585,7 +585,7 @@ void
 ExportGraphBuilder::SRC::add_child (FileSpec const & new_config)
 {
 	if (new_config.format->normalize() || parent._realtime) {
-		add_child_to_list (new_config, normalized_children);
+		add_child_to_list (new_config, intermediate_children);
 	} else {
 		add_child_to_list (new_config, children);
 	}
@@ -602,12 +602,12 @@ ExportGraphBuilder::SRC::remove_children (bool remove_out_files)
 		sfc_iter = children.erase (sfc_iter);
 	}
 
-	boost::ptr_list<Normalizer>::iterator norm_iter = normalized_children.begin();
+	boost::ptr_list<Intermediate>::iterator norm_iter = intermediate_children.begin();
 
-	while (norm_iter != normalized_children.end() ) {
+	while (norm_iter != intermediate_children.end() ) {
 		converter->remove_output (norm_iter->sink() );
 		norm_iter->remove_children (remove_out_files);
-		norm_iter = normalized_children.erase (norm_iter);
+		norm_iter = intermediate_children.erase (norm_iter);
 	}
 
 }
