@@ -61,8 +61,10 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		send_trim_message ("/master/trimdB", strip->trim_control());
 
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
-		pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
-		send_change_message ("/master/pan_stereo_position", strip->pan_azimuth_control());
+		if (pan_controllable) {
+			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
+			send_change_message ("/master/pan_stereo_position", strip->pan_azimuth_control());
+		}
 
 		boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
 		if (gainmode) {
@@ -230,7 +232,7 @@ OSCGlobalObserver::tick ()
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
 		float now_meter = session->master_out()->peak_meter()->meter_level(0, MeterMCP);
-		if (now_meter < -144) now_meter = -193;
+		if (now_meter < -120) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				lo_message msg = lo_message_new ();
