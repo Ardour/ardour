@@ -116,7 +116,7 @@
 #include "audiographer/routines.h"
 
 #if defined (__APPLE__)
-       #include <Carbon/Carbon.h> // For Gestalt
+#include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #include "pbd/i18n.h"
@@ -206,12 +206,8 @@ setup_hardware_optimization (bool try_optimization)
 		}
 
 #elif defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
-		SInt32 sysVersion = 0;
 
-		if (noErr != Gestalt(gestaltSystemVersion, &sysVersion))
-			sysVersion = 0;
-
-		if (sysVersion >= 0x00001040) { // Tiger at least
+		if (floor (kCFCoreFoundationVersionNumber) > kCFCoreFoundationVersionNumber10_4) { /* at least Tiger */
 			compute_peak           = veclib_compute_peak;
 			find_peaks             = veclib_find_peaks;
 			apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
