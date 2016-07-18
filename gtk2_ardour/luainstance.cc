@@ -1147,6 +1147,7 @@ LuaInstance::call_action (const int id)
 {
 	try {
 		(*_lua_call_action)(id + 1);
+		lua.collect_garbage_step ();
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
 	}

@@ -1723,6 +1723,7 @@ ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
 	Cairo::Context ctx (cr);
 	try {
 		luabridge::LuaRef rv = (*_lua_render_inline)((Cairo::Context *)&ctx, width, _max_height);
+		lua_gui.collect_garbage_step ();
 		if (rv.isTable ()) {
 			uint32_t h = rv[2];
 			return h;
