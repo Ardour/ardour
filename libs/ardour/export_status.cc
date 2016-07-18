@@ -50,8 +50,8 @@ ExportStatus::init ()
 	total_frames_current_timespan = 0;
 	processed_frames_current_timespan = 0;
 
-	total_normalize_cycles = 0;
-	current_normalize_cycle = 0;
+	total_postprocessing_cycles = 0;
+	current_postprocessing_cycle = 0;
 	result_map.clear();
 }
 

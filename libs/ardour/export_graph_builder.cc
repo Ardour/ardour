@@ -98,11 +98,11 @@ ExportGraphBuilder::post_process ()
 }
 
 unsigned
-ExportGraphBuilder::get_normalize_cycle_count() const
+ExportGraphBuilder::get_postprocessing_cycle_count() const
 {
 	unsigned max = 0;
 	for (std::list<Intermediate *>::const_iterator it = intermediates.begin(); it != intermediates.end(); ++it) {
-		max = std::max(max, (*it)->get_normalize_cycle_count());
+		max = std::max(max, (*it)->get_postprocessing_cycle_count());
 	}
 	return max;
 }
@@ -516,7 +516,7 @@ ExportGraphBuilder::Intermediate::operator== (FileSpec const & other_config) con
 }
 
 unsigned
-ExportGraphBuilder::Intermediate::get_normalize_cycle_count() const
+ExportGraphBuilder::Intermediate::get_postprocessing_cycle_count() const
 {
 	return static_cast<unsigned>(std::ceil(static_cast<float>(tmp_file->get_frames_written()) /
 	                                       max_frames_out));

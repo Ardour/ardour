@@ -71,7 +71,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	bool post_process (); // returns true when finished
 	bool need_postprocessing () const { return !intermediates.empty(); }
 	bool realtime() const { return _realtime; }
-	unsigned get_normalize_cycle_count() const;
+	unsigned get_postprocessing_cycle_count() const;
 
 	void reset ();
 	void cleanup (bool remove_out_files = false);
@@ -155,7 +155,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
-		unsigned get_normalize_cycle_count() const;
+		unsigned get_postprocessing_cycle_count() const;
 
 		/// Returns true when finished
 		bool process ();

@@ -559,7 +559,7 @@ ExportVideoDialog::audio_progress_display ()
 	switch (status->active_job) {
 		case ExportStatus::Normalizing:
 			pbar.set_text (_("Normalizing audio"));
-			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+			progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
 			progress = progress / (_twopass ? 4.0 : 3.0) + (_twopass ? .25 : 1.0 / 3.0);
 			break;
 		case ExportStatus::Exporting:

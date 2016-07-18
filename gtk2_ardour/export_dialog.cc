@@ -406,12 +406,12 @@ ExportDialog::progress_timeout ()
 	case ExportStatus::Normalizing:
 		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
 		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
 		break;
 	case ExportStatus::Encoding:
 		status_text = string_compose (_("Encoding '%3' (timespan %1 of %2)"),
 		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
 		break;
 	case ExportStatus::Tagging:
 		status_text = string_compose (_("Tagging '%3' (timespan %1 of %2)"),

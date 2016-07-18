@@ -275,8 +275,8 @@ ExportHandler::process_timespan (framecnt_t frames)
 	if (last_cycle) {
 		post_processing = graph_builder->need_postprocessing ();
 		if (post_processing) {
-			export_status->total_normalize_cycles = graph_builder->get_normalize_cycle_count();
-			export_status->current_normalize_cycle = 0;
+			export_status->total_postprocessing_cycles = graph_builder->get_postprocessing_cycle_count();
+			export_status->current_postprocessing_cycle = 0;
 		} else {
 			finish_timespan ();
 			return 0;
@@ -300,7 +300,7 @@ ExportHandler::post_process ()
 		}
 	}
 
-	export_status->current_normalize_cycle++;
+	export_status->current_postprocessing_cycle++;
 
 	return 0;
 }

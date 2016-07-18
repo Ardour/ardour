@@ -78,8 +78,8 @@ class LIBARDOUR_API ExportStatus {
 	volatile framecnt_t     total_frames_current_timespan;
 	volatile framecnt_t     processed_frames_current_timespan;
 
-	volatile uint32_t       total_normalize_cycles;
-	volatile uint32_t       current_normalize_cycle;
+	volatile uint32_t       total_postprocessing_cycles;
+	volatile uint32_t       current_postprocessing_cycle;
 
 	AnalysisResults         result_map;
 

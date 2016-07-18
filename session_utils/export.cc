@@ -124,7 +124,7 @@ static int export_session (Session *session,
 		double progress = 0.0;
 		switch (status->active_job) {
 		case ExportStatus::Normalizing:
-			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+			progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
 			printf ("* Normalizing %.1f%%      \r", 100. * progress); fflush (stdout);
 			break;
 		case ExportStatus::Exporting:
