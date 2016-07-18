@@ -4,7 +4,7 @@ ardour {
 	category    = "Filter",
 	license     = "GPLv2",
 	author      = "Ardour Team",
-	description = [[An Ardour High and Low Pass Filter with de-zipped controls, written in Lua]]
+	description = [[High and Low Pass Filter with de-zipped controls, written in Ardour-Lua]]
 }
 
 function dsp_ioconfig ()
@@ -52,6 +52,7 @@ local filt = nil -- the biquad filter instance (GUI, response)
 local cur = {0, 0, 0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
 local chn = 0 -- channel/filter count
+local lpf_chunk = 0 -- chunk size for audio processing when interpolating parameters
 
 local mem = nil -- memory x-fade buffer
 
@@ -64,8 +65,22 @@ function dsp_init (rate)
 	tbl['samplerate'] = rate
 	self:table ():set (tbl)
 
-	-- interpolation time constant, ~15Hz @ 64fpp
-	lpf = 5000 / rate
+	-- Parameter smoothing: we want to filter out parameter changes that are
+	-- faster than 15Hz, and interpolate between parameter values.
+	-- For performance reasons, we want to ensure that two consecutive values
+	-- of the interpolated "steepness" are less that 1 apart. By choosing the
+	-- interpolation chunk size to be 64 in most cases, but 32 if the rate is
+	-- strictly less than 16kHz (there's only 8kHz in standard rates), we can
+	-- ensure that steepness interpolation will never change the parameter by
+	-- more than ~0.82.
+	lpf_chunk = 64
+	if rate < 16000 then lpf_chunk = 32 end
+	-- We apply a discrete version of the standard RC low-pass, with a cutoff
+	-- frequency of 15Hz. For more information about the underlying math, see
+	-- https://en.wikipedia.org/wiki/Low-pass_filter#Discrete-time_realization
+	-- (here Δt is lpf_chunk / rate)
+	local R = 2 * math.pi * lpf_chunk * 15 -- Hz
+	lpf = R / (R + rate)
 end
 
 function dsp_configure (ins, outs)
@@ -148,12 +163,12 @@ function dsp_run (ins, outs, n_samples)
 	local siz = n_samples
 	local off = 0
 
-	-- if a parameter was changed, process at most 64 samples at a time
-	-- and interpolate parameters until the current settings match
-	-- the target values
+	-- if a parameter was changed, process at most lpf_chunk samples
+	-- at a time and interpolate parameters until the current settings
+	-- match the target values
 	if param_changed (CtrlPorts:array ()) then
 		changed = true
-		siz = 64
+		siz = lpf_chunk
 	end
 
 	while n_samples > 0 do
@@ -184,14 +199,15 @@ function dsp_run (ins, outs, n_samples)
 				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
 				hp[c][ho+1]:run (mem:to_float (off), siz)
 				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
-				ho = ho + 1 -- to avoid running another time the biguad |ho+1|
-			end
-
-			-- run remaining biquads because they need to have the correct state
-			-- in case they start affecting the next chunck of output
-			-- TODO: only run the ones that have a chance to run next cycle
-			for k = ho+1,4 do
-				hp[c][k]:run (mem:to_float (off), siz)
+				-- also run the next biquad because it needs to have the correct state
+				-- in case it start affecting the next chunck of output. Higher order
+				-- ones are guaranteed not to be needed for the next run because the
+				-- interpolated order won't increase more than 0.8 in one step thanks
+				-- to the choice of the value of |lpf|.
+				if ho + 2 <= 4 then hp[c][ho+2]:run (mem:to_float (off), siz) end
+			elseif ho + 1 <= 4 then
+				-- run the next biquad in case it is used next chunk
+				hp[c][ho+1]:run (mem:to_float (off), siz)
 			end
 
 			-- Low Pass
@@ -212,12 +228,12 @@ function dsp_run (ins, outs, n_samples)
 				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
 				lp[c][lo+1]:run (mem:to_float (off), siz)
 				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
-				lo = lo + 1 -- to avoid running another time the biguad |lo+1|
-			end
-
-			-- again, run remaining biquads
-			for k = lo+1,4 do
-				lp[c][k]:run (mem:to_float (off), siz)
+				-- also run the next biquad in case it start affecting the next
+				-- chunck of output.
+				if lo + 2 <= 4 then lp[c][lo+2]:run (mem:to_float (off), siz) end
+			elseif lo + 1 <= 4 then
+				-- run the next biquad in case it is used next chunk
+				lp[c][lo+1]:run (mem:to_float (off), siz)
 			end
 
 		end
