@@ -1682,10 +1682,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\i18n.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.h"
 				>
 			</File>

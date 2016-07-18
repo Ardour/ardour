@@ -417,10 +417,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\i18n.h"
-				>
-			</File>
-			<File
 				RelativePath="..\canvas\image.h"
 				>
 			</File>
