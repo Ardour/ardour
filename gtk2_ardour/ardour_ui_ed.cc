@@ -596,18 +596,6 @@ ARDOUR_UI::build_menu_bar ()
 	use_menubar_as_top_menubar ();
 #endif
 
-	bool wall_clock = false;
-	bool disk_space = false;
-
-	if (!Profile->get_small_screen()) {
-#ifndef __APPLE__
-		// OSX provides its own wallclock, thank you very much
-		wall_clock = true;
-#endif
-		disk_space = true;
-	}
-
-
 	hbox->pack_end (error_alert_button, false, false, 2);
 
 	hbox->pack_end (wall_clock_label, false, false, 2);
@@ -626,9 +614,10 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.add (menu_hbox);
 
 #ifndef __APPLE__
-	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), wall_clock);
+	// OSX provides its own wallclock, thank you very much
+	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), true);
 #endif
-	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
+	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
