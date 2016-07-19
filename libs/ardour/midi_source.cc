@@ -385,6 +385,23 @@ MidiSource::mark_streaming_write_completed (const Lock& lock)
 }
 
 int
+MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
+{
+	Lock newsrc_lock (newsrc->mutex ());
+
+	if (!_model) {
+		error << string_compose (_("programming error: %1"), X_("no model for MidiSource during export"));
+		return -1;
+	}
+
+	_model->write_section_to (newsrc, newsrc_lock, begin, end, true);
+
+	newsrc->flush_midi(newsrc_lock);
+
+	return 0;
+}
+
+int
 MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
 {
 	Lock newsrc_lock (newsrc->mutex ());

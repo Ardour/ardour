@@ -120,6 +120,37 @@ MidiRegion::~MidiRegion ()
 {
 }
 
+/** Export the MIDI data of the MidiRegion to a new MIDI file (SMF).
+ */
+bool
+MidiRegion::do_export (string path) const
+{
+	boost::shared_ptr<MidiSource> newsrc;
+
+	/* caller must check for pre-existing file */
+	assert (!path.empty());
+	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
+	newsrc = boost::dynamic_pointer_cast<MidiSource>(
+		SourceFactory::createWritable(DataType::MIDI, _session,
+		                              path, false, _session.frame_rate()));
+
+	BeatsFramesConverter bfc (_session.tempo_map(), _position);
+	Evoral::Beats const bbegin = bfc.from (_start);
+	Evoral::Beats const bend = bfc.from (_start + _length);
+
+	{
+		/* Lock our source since we'll be reading from it.  write_to() will
+		   take a lock on newsrc. */
+		Source::Lock lm (midi_source(0)->mutex());
+		if (midi_source(0)->export_write_to (lm, newsrc, bbegin, bend)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 /** Create a new MidiRegion that has its own version of some/all of the Source used by another.
  */
 boost::shared_ptr<MidiRegion>

@@ -61,6 +61,8 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	~MidiRegion();
 
+	bool do_export (std::string path) const;
+
 	boost::shared_ptr<MidiRegion> clone (std::string path = std::string()) const;
 	boost::shared_ptr<MidiRegion> clone (boost::shared_ptr<MidiSource>) const;
 
