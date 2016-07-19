@@ -1482,8 +1482,8 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 bool
 MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
                              const Glib::Threads::Mutex::Lock& source_lock,
-                             Evoral::Beats                     begin_time,
-                             Evoral::Beats                     end_time)
+                             TimeType                          begin_time,
+                             TimeType                          end_time)
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
@@ -1495,12 +1495,12 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		const Evoral::Event<Evoral::Beats>& ev (*i);
+		const Evoral::Event<TimeType>& ev (*i);
 
 		if (ev.time() >= begin_time && ev.time() < end_time) {
 
-			const Evoral::MIDIEvent<Evoral::Beats>* mev =
-				static_cast<const Evoral::MIDIEvent<Evoral::Beats>* > (&ev);
+			const Evoral::MIDIEvent<TimeType>* mev =
+				static_cast<const Evoral::MIDIEvent<TimeType>* > (&ev);
 
 			if (!mev) {
 				continue;
