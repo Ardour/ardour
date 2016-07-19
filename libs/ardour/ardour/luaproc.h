@@ -17,9 +17,12 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define WITH_LUAPROC_STATS
-//#define USE_TLSF
-#define USE_MALLOC
+/* print runtime and garbage-collection timing statistics */
+//#define WITH_LUAPROC_STATS
+
+/* memory allocation system, default: ReallocPool */
+//#define USE_TLSF // use TLSF instead of ReallocPool
+//#define USE_MALLOC // or plain OS provided realloc (no mlock) -- if USE_TLSF isn't defined
 
 #ifndef __ardour_luaproc_h__
 #define __ardour_luaproc_h__
