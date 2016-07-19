@@ -110,6 +110,16 @@
     [
         a lv2:InputPort, lv2:ControlPort ;
         lv2:index 8 ;
+        lv2:name "Feedback" ;
+        lv2:symbol "feedback" ;
+        lv2:default 20.000000 ;
+        lv2:minimum 0.000000 ;
+        lv2:maximum 90.000000 ;
+        unit:unit unit:pc ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 9 ;
         lv2:name "LPF" ;
         lv2:symbol "lpf" ;
         lv2:default 6000.000000 ;
@@ -120,7 +130,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 9 ;
+        lv2:index 10 ;
         lv2:name "Output Gain" ;
         lv2:symbol "gain" ;
         lv2:default 0.000000 ;
@@ -130,7 +140,7 @@
     ] ,
     [
         a lv2:OutputPort, lv2:ControlPort ;
-        lv2:index 10 ;
+        lv2:index 11 ;
         lv2:name "Delaytime" ;
         lv2:symbol "delaytime" ;
         lv2:default 0.000000 ;

@@ -42,6 +42,7 @@ typedef enum {
 	ADELAY_TIME,
 	ADELAY_DIVISOR,
 	ADELAY_WETDRY,
+	ADELAY_FEEDBACK,
 	ADELAY_LPF,
 	ADELAY_GAIN,
 	
@@ -73,6 +74,7 @@ typedef struct {
 	float* time;
 	float* divisor;
 	float* wetdry;
+	float* feedback;
 	float* lpf;
 	float* gain;
 	
@@ -81,7 +83,6 @@ typedef struct {
 	float srate;
 	float bpm;
 	float beatunit;
-	int beatuniti;
 	int bpmvalid;
 
 	uint32_t posz;
@@ -91,6 +92,7 @@ typedef struct {
 	int next;
 	float fbstate;
 	float lpfold;
+	float feedbackold;
 	float divisorold;
 	float gainold;
 	float invertold;
@@ -186,6 +188,9 @@ connect_port(LV2_Handle instance,
 		break;
 	case ADELAY_WETDRY:
 		adelay->wetdry = (float*)data;
+		break;
+	case ADELAY_FEEDBACK:
+		adelay->feedback = (float*)data;
 		break;
 	case ADELAY_LPF:
 		adelay->lpf = (float*)data;
@@ -364,6 +369,9 @@ run(LV2_Handle instance, uint32_t n_samples)
 	if (*(adelay->time) != adelay->timeold) {
 		recalc = 1;
 	}
+	if (*(adelay->feedback) != adelay->feedbackold) {
+		recalc = 1;
+	}
 	if (*(adelay->divisor) != adelay->divisorold) {
 		recalc = 1;
 	}
@@ -387,7 +395,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	xfade = 0.f;
 	for (i = 0; i < n_samples; i++) {
 		in = input[i];
-		adelay->z[adelay->posz] = in; // + feedb / 100. * fbstate;
+		adelay->z[adelay->posz] = in + *adelay->feedback / 100. * adelay->fbstate;
 		adelay->fbstate = 0.f;
 		int p = adelay->posz - adelay->tap[adelay->active]; // active line
 		if (p<0) p += MAX_DELAY;
@@ -406,6 +414,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 	}
 	adelay->lpfold = *(adelay->lpf);
+	adelay->feedbackold = *(adelay->feedback);
 	adelay->divisorold = *(adelay->divisor);
 	adelay->gainold = *(adelay->gain);
 	adelay->invertold = *(adelay->inv);
