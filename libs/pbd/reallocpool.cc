@@ -27,9 +27,12 @@
 #include "pbd/reallocpool.h"
 
 #ifdef RAP_WITH_SEGMENT_STATS
+#include <assert.h>
 #define STATS_segment collect_segment_stats();
+#define ASSERT assert
 #else
 #define STATS_segment
+#define ASSERT
 #endif
 
 #ifdef RAP_WITH_CALL_STATS
@@ -106,6 +109,8 @@ ReallocPool::~ReallocPool ()
 void *
 ReallocPool::_realloc (void *ptr, size_t oldsize, size_t newsize) {
 	void *rv = NULL;
+	ASSERT (!ptr || oldsize <= _asize (ptr));
+	oldsize = _asize (ptr); // ignore provided oldsize
 
 	if (ptr == 0 && newsize == 0) {
 		STATS_inc(_n_noop);
@@ -130,6 +135,7 @@ ReallocPool::_realloc (void *ptr, size_t oldsize, size_t newsize) {
 	}
 
 	if (newsize == oldsize) {
+		ASSERT (_asize (ptr) <= newsize);
 		STATS_inc(_n_noop);
 		return ptr;
 	}
@@ -145,7 +151,9 @@ ReallocPool::_realloc (void *ptr, size_t oldsize, size_t newsize) {
 		if ((rv = _malloc (newsize))) {
 			memcpy (rv, ptr, oldsize);
 		}
-		_free (ptr);
+		if (rv) {
+			_free (ptr);
+		}
 		STATS_if(!rv, _n_oom);
 		STATS_inc(_n_grow);
 		STATS_hist(_hist_grow, newsize);
@@ -154,6 +162,7 @@ ReallocPool::_realloc (void *ptr, size_t oldsize, size_t newsize) {
 	}
 
 	if (newsize < oldsize) {
+		ASSERT (_asize (ptr) >= newsize);
 #if 0 // re-allocate
 		if ((rv = _malloc (newsize))) {
 			memccpy (rv, ptr, newsize);
@@ -205,6 +214,7 @@ ReallocPool::_malloc (size_t s) {
 #endif
 
 	while (1) { // iterates at most once over the available pool
+		ASSERT (SEGSIZ != 0);
 		while (SEGSIZ > 0) {
 			traversed += SEGSIZ + sop;
 			if (traversed >= _poolsize) {
@@ -334,6 +344,9 @@ ReallocPool::dumpsegments ()
 	const poolsize_t sop = sizeof(poolsize_t);
 	poolsize_t *in = (poolsize_t*) p;
 	unsigned int traversed = 0;
+#ifdef RAP_WITH_CALL_STATS
+	size_t used = 0;
+#endif
 	printf ("<<<<< %s\n", _name.c_str());
 	while (1) {
 		if ((*in) > 0) {
@@ -341,6 +354,9 @@ ReallocPool::dumpsegments ()
 			printf ("0x%08x   data %p\n", traversed + sop , p + sop);
 			traversed += *in + sop;
 			p += *in + sop;
+#ifdef RAP_WITH_CALL_STATS
+			used += *in;
+#endif
 		} else if ((*in) < 0) {
 			printf ("0x%08x free %4d [+%d]\n", traversed, -*in, sop);
 			traversed += -*in + sop;
@@ -359,6 +375,9 @@ ReallocPool::dumpsegments ()
 			break;
 		}
 	}
+#ifdef RAP_WITH_CALL_STATS
+	ASSERT (_cur_used == used);
+#endif
 	printf (">>>>>\n");
 }
 
