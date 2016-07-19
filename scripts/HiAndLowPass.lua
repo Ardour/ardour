@@ -53,6 +53,7 @@ local cur = {0, 0, 0, 0, 0, 0} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
 local chn = 0 -- channel/filter count
 local lpf_chunk = 0 -- chunk size for audio processing when interpolating parameters
+local max_freq = 20000
 
 local mem = nil -- memory x-fade buffer
 
@@ -60,10 +61,15 @@ function dsp_init (rate)
 	-- allocate some mix-buffer
 	mem = ARDOUR.DSP.DspShm (8192)
 
+	-- max allowed cut-off frequency
+	max_freq = .499 * rate
+
 	-- create a table of objects to share with the GUI
 	local tbl = {}
 	tbl['samplerate'] = rate
+	tbl['max_freq'] = max_freq
 	self:table ():set (tbl)
+
 
 	-- Parameter smoothing: we want to filter out parameter changes that are
 	-- faster than 15Hz, and interpolate between parameter values.
@@ -113,6 +119,21 @@ function dsp_configure (ins, outs)
 	end
 end
 
+function santize_params (ctrl)
+	-- don't allow manual cross-fades. enforce enums
+	ctrl[1] = math.floor(ctrl[1] + .5)
+	ctrl[4] = math.floor(ctrl[4] + .5)
+
+	-- high pass, clamp range
+	ctrl[2] = math.min (max_freq, math.max (5, ctrl[2]))
+	ctrl[3] = math.min (6, math.max (0.1, ctrl[3]))
+
+	-- low pass, clamp range
+	ctrl[5] = math.min (max_freq, math.max (20, ctrl[5]))
+	ctrl[6] = math.min (6, math.max (0.1, ctrl[6]))
+	return ctrl
+end
+
 -- helper functions for parameter interpolation
 function param_changed (ctrl)
 	for p = 1,6 do
@@ -158,6 +179,7 @@ end
 function dsp_run (ins, outs, n_samples)
 	assert (n_samples < 8192)
 	assert (#ins == chn)
+	local ctrl = santize_params (CtrlPorts:array ())
 
 	local changed = false
 	local siz = n_samples
@@ -166,13 +188,13 @@ function dsp_run (ins, outs, n_samples)
 	-- if a parameter was changed, process at most lpf_chunk samples
 	-- at a time and interpolate parameters until the current settings
 	-- match the target values
-	if param_changed (CtrlPorts:array ()) then
+	if param_changed (ctrl) then
 		changed = true
 		siz = lpf_chunk
 	end
 
 	while n_samples > 0 do
-		if changed then apply_params (CtrlPorts:array ()) end
+		if changed then apply_params (ctrl) end
 		if siz > n_samples then siz = n_samples end
 
 		local ho = math.floor(cur[1])
@@ -304,11 +326,12 @@ function render_inline (ctx, w, max_h)
 		filt = {}
 		filt['hp'] = ARDOUR.DSP.Biquad (tbl['samplerate'])
 		filt['lp'] = ARDOUR.DSP.Biquad (tbl['samplerate'])
+		max_freq   = tbl['max_freq']
 	end
 
+	local ctrl = santize_params (CtrlPorts:array ())
 	-- set filter coefficients if they have changed
-	if param_changed (CtrlPorts:array ()) then
-		local ctrl = CtrlPorts:array ()
+	if param_changed (ctrl) then
 		for k = 1,6 do cur[k] = ctrl[k] end
 		filt['hp']:compute (ARDOUR.DSP.BiquadType.HighPass, cur[2], cur[3], 0)
 		filt['lp']:compute (ARDOUR.DSP.BiquadType.LowPass,  cur[5], cur[6], 0)
