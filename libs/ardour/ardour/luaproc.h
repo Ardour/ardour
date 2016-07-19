@@ -17,8 +17,9 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-//#define WITH_LUAPROC_STATS
+#define WITH_LUAPROC_STATS
 //#define USE_TLSF
+#define USE_MALLOC
 
 #ifndef __ardour_luaproc_h__
 #define __ardour_luaproc_h__

@@ -49,6 +49,8 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _mempool ("LuaProc", 2097152)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
+#elif define USE_MALLOC
+	, lua ()
 #else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
@@ -77,6 +79,8 @@ LuaProc::LuaProc (const LuaProc &other)
 	, _mempool ("LuaProc", 2097152)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
+#elif define USE_MALLOC
+	, lua ()
 #else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
