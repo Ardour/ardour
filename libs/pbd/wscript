@@ -77,6 +77,7 @@ libpbd_sources = [
     'textreceiver.cc',
     'timer.cc',
     'timing.cc',
+    'tlsf.cc',
     'transmitter.cc',
     'undo.cc',
     'uuid.cc',
