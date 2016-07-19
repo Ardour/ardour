@@ -70,11 +70,11 @@ function dsp_init (rate)
 	-- For performance reasons, we want to ensure that two consecutive values
 	-- of the interpolated "steepness" are less that 1 apart. By choosing the
 	-- interpolation chunk size to be 64 in most cases, but 32 if the rate is
-	-- strictly less than 16kHz (there's only 8kHz in standard rates), we can
+	-- strictly less than 22kHz (there's only 8kHz in standard rates), we can
 	-- ensure that steepness interpolation will never change the parameter by
-	-- more than ~0.82.
+	-- more than ~0.86.
 	lpf_chunk = 64
-	if rate < 16000 then lpf_chunk = 32 end
+	if rate < 22000 then lpf_chunk = 32 end
 	-- We apply a discrete version of the standard RC low-pass, with a cutoff
 	-- frequency of 15Hz. For more information about the underlying math, see
 	-- https://en.wikipedia.org/wiki/Low-pass_filter#Discrete-time_realization
@@ -198,11 +198,11 @@ function dsp_run (ins, outs, n_samples)
 			if xfade > 0 then
 				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
 				hp[c][ho+1]:run (mem:to_float (off), siz)
-				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
+				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				-- also run the next biquad because it needs to have the correct state
 				-- in case it start affecting the next chunck of output. Higher order
 				-- ones are guaranteed not to be needed for the next run because the
-				-- interpolated order won't increase more than 0.8 in one step thanks
+				-- interpolated order won't increase more than 0.86 in one step thanks
 				-- to the choice of the value of |lpf|.
 				if ho + 2 <= 4 then hp[c][ho+2]:run (mem:to_float (off), siz) end
 			elseif ho + 1 <= 4 then
@@ -227,7 +227,7 @@ function dsp_run (ins, outs, n_samples)
 			if xfade > 0 then
 				ARDOUR.DSP.apply_gain_to_buffer (outs[c]:offset (off), siz, 1 - xfade)
 				lp[c][lo+1]:run (mem:to_float (off), siz)
-				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, 1 - xfade)
+				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				-- also run the next biquad in case it start affecting the next
 				-- chunck of output.
 				if lo + 2 <= 4 then lp[c][lo+2]:run (mem:to_float (off), siz) end
