@@ -1483,7 +1483,8 @@ bool
 MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
                              const Glib::Threads::Mutex::Lock& source_lock,
                              TimeType                          begin_time,
-                             TimeType                          end_time)
+                             TimeType                          end_time,
+                             bool                              offset_events)
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
@@ -1495,21 +1496,17 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		const Evoral::Event<TimeType>& ev (*i);
+		if (i->time() >= begin_time && i->time() < end_time) {
 
-		if (ev.time() >= begin_time && ev.time() < end_time) {
+			Evoral::MIDIEvent<TimeType> mev (*i, true); /* copy the event */
 
-			const Evoral::MIDIEvent<TimeType>* mev =
-				static_cast<const Evoral::MIDIEvent<TimeType>* > (&ev);
-
-			if (!mev) {
-				continue;
+			if (offset_events) {
+				mev.set_time(mev.time() - begin_time);
 			}
 
+			if (mev.is_note_off()) {
 
-			if (mev->is_note_off()) {
-
-				if (!mst.active (mev->note(), mev->channel())) {
+				if (!mst.active (mev.note(), mev.channel())) {
 					/* the matching note-on was outside the
 					   time range we were given, so just
 					   ignore this note-off.
@@ -1517,18 +1514,21 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 					continue;
 				}
 
-				source->append_event_beats (source_lock, *i);
-				mst.remove (mev->note(), mev->channel());
+				source->append_event_beats (source_lock, mev);
+				mst.remove (mev.note(), mev.channel());
 
-			} else if (mev->is_note_on()) {
-				mst.add (mev->note(), mev->channel());
-				source->append_event_beats(source_lock, *i);
+			} else if (mev.is_note_on()) {
+				mst.add (mev.note(), mev.channel());
+				source->append_event_beats(source_lock, mev);
 			} else {
-				source->append_event_beats(source_lock, *i);
+				source->append_event_beats(source_lock, mev);
 			}
 		}
 	}
 
+	if (offset_events) {
+		end_time -= begin_time;
+	}
 	mst.resolve_notes (*source, source_lock, end_time);
 
 	set_percussive(old_percussive);
