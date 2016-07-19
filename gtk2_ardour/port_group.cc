@@ -375,10 +375,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	/* Sort RouteIOs by the routes' editor order keys */
 	route_ios.sort (RouteIOsComparator ());
 
-	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup.
-	   Note that if the RouteIO's bundles are multi-type, we may make new Bundles
-	   with only the ports of one type.
-	*/
+	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup. */
 
 	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
 		TimeAxisView* tv = PublicEditor::instance().axis_view_from_stripable (i->route);
@@ -392,10 +389,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 
 		for (list<boost::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
-			if (tv) {
-				g->add_bundle ((*j)->bundle(), *j, tv->color ());
-			} else {
-				g->add_bundle ((*j)->bundle(), *j);
+			/* Only add the bundle if there is at least one port
+			 * with a type that's been asked for */
+			if (type == DataType::NIL || (*j)->bundle()->nchannels().n(type) > 0) {
+				if (tv) {
+					g->add_bundle ((*j)->bundle(), *j, tv->color ());
+				} else {
+					g->add_bundle ((*j)->bundle(), *j);
+				}
 			}
 		}
 	}
