@@ -47,7 +47,11 @@ LuaProc::LuaProc (AudioEngine& engine,
                   const std::string &script)
 	: Plugin (engine, session)
 	, _mempool ("LuaProc", 2097152)
+#ifdef USE_TLSF
+	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
+#else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+#endif
 	, _lua_dsp (0)
 	, _script (script)
 	, _lua_does_channelmapping (false)
@@ -71,7 +75,11 @@ LuaProc::LuaProc (AudioEngine& engine,
 LuaProc::LuaProc (const LuaProc &other)
 	: Plugin (other)
 	, _mempool ("LuaProc", 2097152)
+#ifdef USE_TLSF
+	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
+#else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+#endif
 	, _lua_dsp (0)
 	, _script (other.script ())
 	, _lua_does_channelmapping (false)

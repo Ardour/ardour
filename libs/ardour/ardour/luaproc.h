@@ -17,6 +17,9 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+//#define WITH_LUAPROC_STATS
+//#define USE_TLSF
+
 #ifndef __ardour_luaproc_h__
 #define __ardour_luaproc_h__
 
@@ -24,7 +27,12 @@
 #include <vector>
 #include <string>
 
-#include "pbd/reallocpool.h"
+#ifdef USE_TLSF
+#  include "pbd/tlsf.h"
+#else
+#  include "pbd/reallocpool.h"
+#endif
+
 #include "pbd/stateful.h"
 
 #include "ardour/types.h"
@@ -121,7 +129,11 @@ protected:
 	const std::string& script() const { return _script; }
 
 private:
+#ifdef USE_TLSF
+	PBD::TLSF _mempool;
+#else
 	PBD::ReallocPool _mempool;
+#endif
 	LuaState lua;
 	luabridge::LuaRef * _lua_dsp;
 	std::string _script;
