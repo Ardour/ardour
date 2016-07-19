@@ -105,6 +105,11 @@ XMLNode&
 Track::state (bool full)
 {
 	XMLNode& root (Route::state (full));
+
+	root.add_child_nocopy (_monitoring_control->get_state ());
+	root.add_child_nocopy (_record_safe_control->get_state ());
+	root.add_child_nocopy (_record_enable_control->get_state ());
+
 	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
 	root.add_child_nocopy (_diskstream->get_state ());
 
@@ -141,9 +146,18 @@ Track::set_state (const XMLNode& node, int version)
 		child = *niter;
 
 		XMLProperty const * prop;
-		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
-			if (prop->value() == X_("recenable")) {
+
+		if (child->name() == Controllable::xml_node_name) {
+			if ((prop = child->property ("name")) == 0) {
+				continue;
+			}
+
+			if (prop->value() == _record_enable_control->name()) {
 				_record_enable_control->set_state (*child, version);
+			} else if (prop->value() == _record_safe_control->name()) {
+				_record_safe_control->set_state (*child, version);
+			} else if (prop->value() == _monitoring_control->name()) {
+				_monitoring_control->set_state (*child, version);
 			}
 		}
 	}
