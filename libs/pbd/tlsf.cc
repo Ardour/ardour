@@ -56,6 +56,7 @@
 #endif
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef TLSF_STATISTIC
