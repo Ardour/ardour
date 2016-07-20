@@ -2394,22 +2394,6 @@ Route::set_state (const XMLNode& node, int version)
 			} else {
 				warning << string_compose (_("Pannable state found for route (%1) without a panner!"), name()) << endmsg;
 			}
-		}  else if (child->name() == Controllable::xml_node_name) {
-			if ((prop = child->property (X_("name"))) == 0) {
-				continue;
-			}
-
-			if (prop->value() == _gain_control->name()) {
-				_gain_control->set_state (*child, version);
-			} else if (prop->value() == _solo_control->name()) {
-				_solo_control->set_state (*child, version);
-			} else if (prop->value() == _solo_safe_control->name()) {
-				_solo_safe_control->set_state (*child, version);
-			} else if (prop->value() == _solo_isolate_control->name()) {
-				_solo_isolate_control->set_state (*child, version);
-			} else if (prop->value() == _solo_control->name()) {
-				_mute_control->set_state (*child, version);
-			}
 		} else if (child->name() == Slavable::xml_node_name) {
 			Slavable::set_state (*child, version);
 		}
@@ -2467,13 +2451,24 @@ Route::set_state (const XMLNode& node, int version)
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
 
-		} else if (child->name() == Controllable::xml_node_name && (prop = child->property("name")) != 0) {
-			if (prop->value() == "solo") {
-				_solo_control->set_state (*child, version);
-			} else if (prop->value() == "mute") {
-				_mute_control->set_state (*child, version);
+		}  else if (child->name() == Controllable::xml_node_name) {
+			if ((prop = child->property (X_("name"))) == 0) {
+				continue;
 			}
 
+			if (prop->value() == _gain_control->name()) {
+				_gain_control->set_state (*child, version);
+			} else if (prop->value() == _solo_control->name()) {
+				_solo_control->set_state (*child, version);
+			} else if (prop->value() == _solo_safe_control->name()) {
+				_solo_safe_control->set_state (*child, version);
+			} else if (prop->value() == _solo_isolate_control->name()) {
+				_solo_isolate_control->set_state (*child, version);
+			} else if (prop->value() == _solo_control->name()) {
+				_mute_control->set_state (*child, version);
+			} else if (prop->value() == _phase_control->name()) {
+				_phase_control->set_state (*child, version);
+			}
 		} else if (child->name() == MuteMaster::xml_node_name) {
 			_mute_master->set_state (*child, version);
 
