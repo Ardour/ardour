@@ -89,7 +89,7 @@ RCConfiguration::load_state ()
 		}
 
 		if (statbuf.st_size != 0) {
-			info << string_compose (_("Loading system configuration file %1"), rcfile) << endl;
+			info << string_compose (_("Loading system configuration file %1"), rcfile) << endmsg;
 
 			XMLTree tree;
 			if (!tree.read (rcfile.c_str())) {
@@ -117,7 +117,7 @@ RCConfiguration::load_state ()
 		}
 
 		if (statbuf.st_size != 0) {
-			info << string_compose (_("Loading user configuration file %1"), rcfile) << endl;
+			info << string_compose (_("Loading user configuration file %1"), rcfile) << endmsg;
 
 			XMLTree tree;
 			if (!tree.read (rcfile)) {
