@@ -4510,10 +4510,17 @@ Route::setup_invisible_processors ()
 		new_processors.insert (amp, _monitor_control);
 	}
 
+	/* TRIM CONTROL */
+
+	if (_trim && _trim->active()) {
+		assert (!_trim->display_to_user ());
+		new_processors.push_front (_trim);
+	}
+
 	/* INTERNAL RETURN */
 
-	/* doing this here means that any monitor control will come just after
-	   the return.
+	/* doing this here means that any monitor control will come after
+	   the return and trim.
 	*/
 
 	if (_intreturn) {
@@ -4521,10 +4528,6 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_intreturn);
 	}
 
-	if (_trim && _trim->active()) {
-		assert (!_trim->display_to_user ());
-		new_processors.push_front (_trim);
-	}
 	/* EXPORT PROCESSOR */
 
 	if (_capturing_processor) {
