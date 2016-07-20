@@ -316,13 +316,14 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
 
-		Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = Lxg;
-		} else {
+		} else if (2.f*(Lxg-thresdb) > width) {
 			Lyg = thresdb + (Lxg-thresdb)/ratio;
 			Lyg = sanitize_denormal(Lyg);
+		} else {
+			Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
 		}
 
 		Lxl = Lxg - Lyg;
@@ -432,13 +433,14 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
 
-		Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = Lxg;
-		} else {
+		} else if (2.f*(Lxg-thresdb) > width) {
 			Lyg = thresdb + (Lxg-thresdb)/ratio;
 			Lyg = sanitize_denormal(Lyg);
+		} else {
+			Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
 		}
 
 		Lxl = Lxg - Lyg;
@@ -524,10 +526,10 @@ comp_curve (AComp* self, float xg) {
 
 	if (2.f * (xg - thresdb) < -width) {
 		yg = xg;
-	} else if (2.f * fabs (xg - thresdb) <= width) {
-		yg = xg + (1.f / ratio - 1.f ) * (xg - thresdb + width / 2.f) * (xg - thresdb + width / 2.f) / (2.f * width);
 	} else if (2.f * (xg - thresdb) > width) {
 		yg = thresdb + (xg - thresdb) / ratio;
+	} else {
+		yg = xg + (1.f / ratio - 1.f ) * (xg - thresdb + width / 2.f) * (xg - thresdb + width / 2.f) / (2.f * width);
 	}
 	return yg;
 }
