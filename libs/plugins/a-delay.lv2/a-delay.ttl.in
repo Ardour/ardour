@@ -114,7 +114,7 @@
         lv2:symbol "feedback" ;
         lv2:default 20.000000 ;
         lv2:minimum 0.000000 ;
-        lv2:maximum 90.000000 ;
+        lv2:maximum 100.000000 ;
         unit:unit unit:pc ;
     ] ,
     [

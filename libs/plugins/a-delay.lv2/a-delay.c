@@ -101,6 +101,7 @@ typedef struct {
 	float syncold;
 	float wetdryold;
 	float delaysamplesold;
+	float tau;
 
 	float A0, A1, A2, A3, A4, A5;
 	float B0, B1, B2, B3, B4, B5;
@@ -153,6 +154,8 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	adelay->srate = rate;
 	adelay->bpmvalid = 0;
+	// 25Hz time constant @ 64fpp
+	adelay->tau = (1.0 - exp(-2.0 * M_PI * 64. * 25. / adelay->srate));
 
 	return (LV2_Handle)adelay;
 }
@@ -220,6 +223,11 @@ from_dB(float gdb) {
 static inline float
 to_dB(float g) {
 	return (20.f*log10(g));
+}
+
+static inline bool
+is_eq(float a, float b, float small) {
+	return (fabsf(a - b) < small);
 }
 
 static void clearfilter(LV2_Handle instance)
@@ -345,6 +353,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float* const output = adelay->output;
 
 	float srate = adelay->srate;
+	float tau = adelay->tau;
 
 	uint32_t i;
 	float in;
@@ -375,14 +384,16 @@ run(LV2_Handle instance, uint32_t n_samples)
 	if (*(adelay->divisor) != adelay->divisorold) {
 		recalc = 1;
 	}
-	if (*(adelay->lpf) != adelay->lpfold) {
-		lpfRbj(adelay, *(adelay->lpf), srate);
+	if (!is_eq(adelay->lpfold, *adelay->lpf, 0.1)) {
+		adelay->lpfold += tau * (*adelay->lpf - adelay->lpfold);
+		recalc = 1;
 	}
 	if (*(adelay->gain) != adelay->gainold) {
 		recalc = 1;
 	}
 	
 	if (recalc) {
+		lpfRbj(adelay, adelay->lpfold, srate);
 		if (*(adelay->sync) > 0.5f && adelay->bpmvalid) {
 			*(adelay->delaytime) = adelay->beatunit * 1000.f * 60.f / (adelay->bpm * *(adelay->divisor));
 		} else {
@@ -413,7 +424,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 			adelay->posz = 0;
 		}
 	}
-	adelay->lpfold = *(adelay->lpf);
 	adelay->feedbackold = *(adelay->feedback);
 	adelay->divisorold = *(adelay->divisor);
 	adelay->gainold = *(adelay->gain);
