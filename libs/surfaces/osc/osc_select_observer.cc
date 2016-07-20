@@ -157,10 +157,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			change_message ("/select/comp_speed", _strip->comp_speed_controllable());
 		}
 		if (_strip->comp_mode_controllable ()) {
-			_strip->comp_mode_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_mode"), _strip->comp_mode_controllable()), OSC::instance());
-			change_message ("/select/comp_mode", _strip->comp_mode_controllable());
-			text_message ("/select/comp_mode_name", _strip->comp_mode_name(_strip->comp_mode_controllable()->get_value()));
-			text_message ("/select/comp_speed_name", _strip->comp_speed_name(_strip->comp_mode_controllable()->get_value()));
+			_strip->comp_mode_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::comp_mode, this), OSC::instance());
+			comp_mode ();
 		}
 		if (_strip->comp_makeup_controllable ()) {
 			_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
@@ -514,6 +512,14 @@ OSCSelectObserver::text_with_id (string path, uint32_t id, string name)
 }
 
 void
+OSCSelectObserver::comp_mode ()
+{
+	change_message ("/select/comp_mode", _strip->comp_mode_controllable());
+	text_message ("/select/comp_mode_name", _strip->comp_mode_name(_strip->comp_mode_controllable()->get_value()));
+	text_message ("/select/comp_speed_name", _strip->comp_speed_name(_strip->comp_mode_controllable()->get_value()));
+}
+
+void
 OSCSelectObserver::eq_init()
 {
 	// HPF and enable are special case, rest are in bands
@@ -557,6 +563,7 @@ OSCSelectObserver::eq_init()
 void
 OSCSelectObserver::eq_end ()
 {
+	//need to check feedback for [13]
 	eq_connections.drop_connections ();
 	clear_strip ("/select/eq_hpf", 0);
 	clear_strip ("/select/eq_enable", 0);

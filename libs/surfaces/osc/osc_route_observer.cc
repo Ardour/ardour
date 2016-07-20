@@ -55,8 +55,8 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {
-		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
-		send_monitor_status (track->monitoring_control());
+			track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
+			send_monitor_status (track->monitoring_control());
 		}
 
 		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
