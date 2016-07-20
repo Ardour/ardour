@@ -48,6 +48,7 @@ Pane::Pane (bool h)
 Pane::~Pane ()
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		c->w->remove_destroy_notify_callback (&(*c));
 		c->w->unparent ();
 	}
 }
@@ -140,9 +141,14 @@ Pane::handle_child_visibility ()
 void
 Pane::on_add (Widget* w)
 {
-	children.push_back (Child (w, 0));
+	children.push_back (Child (this, w, 0));
 
 	w->set_parent (*this);
+	/* Gtkmm 2.4 does not correctly arrange for ::on_remove() to be called
+	   for custom containers that derive from Gtk::Container. So ... we need
+	   to ensure that we hear about child destruction ourselves.
+	*/
+	w->add_destroy_notify_callback (&children.back(), &Pane::notify_child_destroyed);
 
 	w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
 	w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
@@ -152,11 +158,31 @@ Pane::on_add (Widget* w)
 	}
 }
 
+void*
+Pane::notify_child_destroyed (void* data)
+{
+	Child* child = reinterpret_cast<Child*> (data);
+	return child->pane->child_destroyed (child->w);
+}
+
+void*
+Pane::child_destroyed (Gtk::Widget* w)
+{
+	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		if (c->w == w) {
+			children.erase (c);
+			break;
+		}
+	}
+	return 0;
+}
+
 void
 Pane::on_remove (Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		if (c->w == w) {
+			w->remove_destroy_notify_callback (&(*c));
 			w->unparent ();
 			children.erase (c);
 			break;

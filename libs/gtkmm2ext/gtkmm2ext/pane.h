@@ -46,10 +46,11 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
   public:
 	struct Child
 	{
+		Pane* pane;
 		Gtk::Widget* w;
 		int32_t minsize;
 
-		Child (Gtk::Widget* widget, uint32_t ms) : w (widget), minsize (ms) {}
+		Child (Pane* p, Gtk::Widget* widget, uint32_t ms) : pane (p), w (widget), minsize (ms) {}
 	};
 
 	typedef std::list<Child> Children;
@@ -108,6 +109,9 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	void add_divider ();
 	void handle_child_visibility ();
 	bool fract_is_ok (Dividers::size_type, float fract);
+
+	static void* notify_child_destroyed (void*);
+	void* child_destroyed (Gtk::Widget*);
 };
 
 class LIBGTKMM2EXT_API HPane : public Pane
