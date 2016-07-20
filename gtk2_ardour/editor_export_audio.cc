@@ -125,9 +125,7 @@ Editor::process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<
 		::g_unlink (path.c_str());
 	}
 
-	(void) midi_region->clone (path);
-
-	return true;
+	return midi_region->do_export (path);
 }
 
 /** Export the first selected region */
