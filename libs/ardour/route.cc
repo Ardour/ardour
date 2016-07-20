@@ -229,10 +229,6 @@ Route::init ()
 		_monitor_control->activate ();
 	}
 
-	if (is_master() || is_monitor() || is_auditioner()) {
-		_mute_master->set_solo_ignore (true);
-	}
-
 	/* now that we have _meter, its safe to connect to this */
 
 	{
@@ -2352,10 +2348,6 @@ Route::set_state (const XMLNode& node, int version)
 		_strict_io = string_is_affirmative (prop->value());
 	}
 
-	if (!can_solo()) {
-		_mute_master->set_solo_ignore (true);
-	}
-
 	if (is_monitor()) {
 		/* monitor bus does not get a panner, but if (re)created
 		   via XML, it will already have one by the time we
@@ -2501,10 +2493,6 @@ Route::set_state_2X (const XMLNode& node, int version)
 	}
 
 	Stripable::set_state (node, version);
-
-	if (is_master() || is_monitor() || is_auditioner()) {
-		_mute_master->set_solo_ignore (true);
-	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (string_is_affirmative (prop->value()));
@@ -5262,7 +5250,7 @@ Route::muted_by_others_soloing () const
 		return false;
 	}
 
-	return _session.soloing() && !_solo_control->soloed() && !_solo_isolate_control->solo_isolated();
+	return  _session.soloing() && !_solo_control->soloed() && !_solo_isolate_control->solo_isolated();
 }
 
 void

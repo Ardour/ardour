@@ -84,8 +84,6 @@ SoloIsolateControl::mod_solo_isolated_by_upstream (int32_t delta)
 	}
 
 	if (solo_isolated() != old) {
-		/* solo isolated status changed */
-		_muteable.mute_master()->set_solo_ignore (solo_isolated());
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
 }
@@ -118,14 +116,12 @@ SoloIsolateControl::set_solo_isolated (bool yn, Controllable::GroupControlDispos
 
 	if (yn) {
 		if (_solo_isolated == false) {
-			_muteable.mute_master()->set_solo_ignore (true);
 			changed = true;
 		}
 		_solo_isolated = true;
 	} else {
 		if (_solo_isolated == true) {
 			_solo_isolated = false;
-			_muteable.mute_master()->set_solo_ignore (false);
 			changed = true;
 		}
 	}

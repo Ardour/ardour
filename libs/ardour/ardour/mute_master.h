@@ -33,6 +33,7 @@
 namespace ARDOUR {
 
 class Session;
+class Muteable;
 
 class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 {
@@ -47,7 +48,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 
 	static const MutePoint AllPoints;
 
-	MuteMaster (Session& s, const std::string& name);
+	MuteMaster (Session& s, Muteable&, const std::string& name);
 	~MuteMaster() {}
 
 	bool muted_by_self () const { return _muted_by_self && (_mute_point != MutePoint (0)); }
@@ -69,7 +70,6 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 
 	void set_soloed_by_self (bool yn) { _soloed_by_self = yn; }
 	void set_soloed_by_others (bool yn) { _soloed_by_others = yn; }
-	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	void set_muted_by_masters (bool);
 
@@ -80,11 +80,11 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	static const std::string xml_node_name;
 
   private:
+	Muteable* _muteable;
 	MutePoint _mute_point;
 	bool      _muted_by_self;
 	bool      _soloed_by_self;
 	bool      _soloed_by_others;
-	bool      _solo_ignore;
 	bool      _muted_by_masters;
 };
 

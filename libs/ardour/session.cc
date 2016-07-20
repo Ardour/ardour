@@ -3903,6 +3903,8 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 		if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_solo()) {
 			/* route does not get solo propagated to it */
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 excluded from solo because iso = %2 can_solo = %3\n", (*i)->name(), (*i)->solo_isolate_control()->solo_isolated(),
+			                                          (*i)->can_solo()));
 			continue;
 		}
 

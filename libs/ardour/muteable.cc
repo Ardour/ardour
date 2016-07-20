@@ -22,6 +22,6 @@
 using namespace ARDOUR;
 
 Muteable::Muteable (Session& s, std::string const & name)
-	: _mute_master (new MuteMaster (s, name))
+	: _mute_master (new MuteMaster (s, *this, name))
 {
 }

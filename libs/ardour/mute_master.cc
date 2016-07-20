@@ -36,13 +36,13 @@ const string MuteMaster::xml_node_name (X_("MuteMaster"));
 const MuteMaster::MutePoint MuteMaster::AllPoints = MuteMaster::MutePoint(
 	PreFader|PostFader|Listen|Main);
 
-MuteMaster::MuteMaster (Session& s, const std::string&)
+MuteMaster::MuteMaster (Session& s, Muteable& m, const std::string&)
 	: SessionHandleRef (s)
+	, _muteable (&m)
 	, _mute_point (MutePoint (0))
         , _muted_by_self (false)
         , _soloed_by_self (false)
         , _soloed_by_others (false)
-        , _solo_ignore (false)
 	, _muted_by_masters (0)
 {
 
@@ -166,10 +166,7 @@ MuteMaster::get_state()
 bool
 MuteMaster::muted_by_others_soloing_at (MutePoint mp) const
 {
-	/* note: this is currently called with the assumption that the owner is
-	   not soloed. it does not test for this condition.
-	*/
-	return (!_solo_ignore && _session.soloing()) && (_mute_point & mp);
+	return _muteable->muted_by_others_soloing() && (_mute_point & mp);
 }
 
 void
