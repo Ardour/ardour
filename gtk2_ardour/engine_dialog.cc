@@ -1969,8 +1969,6 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNode const * grandchild;
 	XMLProperty const * prop = NULL;
 
-	fprintf (stderr, "EngineControl::set_state\n");
-
 	if (root.name() != "AudioMIDISetup") {
 		return false;
 	}
