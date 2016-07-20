@@ -220,6 +220,7 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 	XMLNodeList nlist = root.children();
 	XMLNodeConstIterator niter;
 	XMLNode *node;
+	LocaleGuard lg;
 
 	Stateful::save_extra_xml (root);
 
