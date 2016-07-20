@@ -363,7 +363,7 @@ Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 {
 	d->dragging = false;
 
-	if (did_move) {
+	if (did_move && !children.empty()) {
 		children.front().w->queue_resize ();
 		did_move = false;
 	}
