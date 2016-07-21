@@ -320,6 +320,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_http.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_knob.cc"
 				>
 			</File>
@@ -1359,6 +1363,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ardour_dropdown.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_http.h"
 				>
 			</File>
 			<File
