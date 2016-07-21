@@ -5,19 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Ardour 3\n"
+"Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2015-03-21 14:12+0100\n"
+"POT-Creation-Date: 2016-07-21 12:29+0100\n"
+"PO-Revision-Date: 2016-07-24 16:09+0100\n"
 "Last-Translator: Colin Fletcher <colin.m.fletcher@googlemail.com>\n"
-"Language-Team:  <colin.m.fletcher@googlemail.com>\n"
-"Language: English (UK)\n"
+"Language-Team: colin.m.fletcher@googlemail.com\n"
+"Language: en_GB\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: English\n"
-"X-Poedit-Country: UNITED KINGDOM\n"
-"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.8\n"
 
 #: amp.cc:412
 #, c-format
@@ -42,15 +42,15 @@ msgstr ""
 
 #: audio_backend.cc:33
 msgid "Failed to initialize audio backend"
-msgstr ""
+msgstr "Failed to initialise audio backend"
 
 #: audio_backend.cc:35
 msgid "Failed to deinitialize audio backend"
-msgstr ""
+msgstr "Failed to deinitialise audio backend"
 
 #: audio_backend.cc:37
 msgid "Failed to reinitialize audio backend"
-msgstr ""
+msgstr "Failed to reinitialise audio backend"
 
 #: audio_backend.cc:39
 msgid "Failed to open audio device"
@@ -176,7 +176,7 @@ msgstr ""
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr ""
 
-#: audio_backend.cc:107 export_formats.cc:52 session.cc:6772 session.cc:6792
+#: audio_backend.cc:107 export_formats.cc:52 session.cc:6774 session.cc:6794
 msgid "None"
 msgstr ""
 
@@ -281,11 +281,10 @@ msgstr ""
 msgid "Audio Playlists (unused)"
 msgstr ""
 
-#: audio_playlist_source.cc:171 audiosource.cc:1046
-#: midi_playlist_source.cc:147 midi_playlist_source.cc:155
-#: midi_playlist_source.cc:162 midi_source.cc:403 plugin_insert.cc:1259
-#: rb_effect.cc:327 session.cc:5314 session.cc:5341 session.cc:5461
-#: session_handle.cc:88 sndfilesource.cc:173
+#: audio_playlist_source.cc:171 audiosource.cc:1046 midi_playlist_source.cc:147
+#: midi_playlist_source.cc:155 midi_playlist_source.cc:162 midi_source.cc:393
+#: midi_source.cc:420 plugin_insert.cc:1259 rb_effect.cc:327 session.cc:5316
+#: session.cc:5343 session.cc:5463 session_handle.cc:88 sndfilesource.cc:173
 msgid "programming error: %1"
 msgstr ""
 
@@ -379,6 +378,17 @@ msgid ""
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
+"You have requested an operation that requires audio analysis.\n"
+"\n"
+"You currently have \"auto-analyse-audio\" disabled, which means that "
+"transient data must be generated every time it is required.\n"
+"\n"
+"If you are doing work that will require transient data on a regular basis, "
+"you should probably enable \"auto-analyse-audio\" in Preferences > Audio > "
+"Regions, then quit %1 and restart.\n"
+"\n"
+"This dialogue will not display again.  But you may notice a slight delay in "
+"this and future transient-detection operations.\n"
 
 #: audioregion.cc:1789
 msgid "Audio Region"
@@ -674,11 +684,11 @@ msgstr ""
 
 #: export_format_specification.cc:609
 msgid "normalize loudness"
-msgstr ""
+msgstr "normalise loudness"
 
 #: export_format_specification.cc:611
 msgid "normalize peak"
-msgstr ""
+msgstr "normalise peak"
 
 #: export_format_specification.cc:616
 msgid "trim"
@@ -740,20 +750,20 @@ msgstr ""
 msgid "No sample format"
 msgstr ""
 
-#: export_handler.cc:419
+#: export_handler.cc:430
 msgid "File %1 uploaded to %2"
 msgstr ""
 
-#: export_handler.cc:425
+#: export_handler.cc:436
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
 
-#: export_handler.cc:551 export_handler.cc:554
+#: export_handler.cc:562 export_handler.cc:565
 msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr ""
 
-#: export_handler.cc:844 export_handler.cc:902
+#: export_handler.cc:855 export_handler.cc:913
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr ""
 
@@ -932,47 +942,47 @@ msgstr ""
 msgid "%3.1f dB"
 msgstr ""
 
-#: globals.cc:266
+#: globals.cc:262
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 
-#: globals.cc:268
+#: globals.cc:264
 msgid "Could not set system open files limit to %1"
 msgstr ""
 
-#: globals.cc:272 globals.cc:289
+#: globals.cc:268 globals.cc:285
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 
-#: globals.cc:276
+#: globals.cc:272
 msgid "Could not get system open files limit (%1)"
 msgstr ""
 
-#: globals.cc:291
+#: globals.cc:287
 msgid "Could not set system open files limit. Current limit is %1 open files"
 msgstr ""
 
-#: globals.cc:474
+#: globals.cc:470
 msgid "Loading configuration"
 msgstr ""
 
-#: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1157
+#: globals.cc:550 route.cc:182 route.cc:4146 session.cc:1157
 msgid "Monitor"
 msgstr ""
 
-#: globals.cc:555 session_state.cc:642
+#: globals.cc:551 session_state.cc:642
 msgid "Master"
 msgstr ""
 
-#: globals.cc:556
+#: globals.cc:552
 msgid "Control"
 msgstr ""
 
-#: globals.cc:557
+#: globals.cc:553
 msgid "Click"
 msgstr ""
 
-#: globals.cc:558
+#: globals.cc:554
 msgid "Mackie"
 msgstr ""
 
@@ -1221,7 +1231,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:1059 session.cc:1667 session.cc:6305 session_state.cc:1205
+#: location.cc:1059 session.cc:1667 session.cc:6307 session_state.cc:1205
 msgid "session"
 msgstr ""
 
@@ -1303,31 +1313,31 @@ msgstr ""
 msgid "Failed to instantiate Lua Processor\n"
 msgstr ""
 
-#: luaproc.cc:876
+#: luaproc.cc:888
 msgid "Failed to load Lua script from session state."
 msgstr ""
 
-#: luaproc.cc:886
+#: luaproc.cc:898
 msgid "Session State for LuaProcessor did not include a Lua script."
 msgstr ""
 
-#: luaproc.cc:890
+#: luaproc.cc:902
 msgid "Invalid/incompatible Lua script found for LuaProcessor."
 msgstr ""
 
-#: luaproc.cc:918
+#: luaproc.cc:930
 msgid "Bad node sent to LuaProc::set_state"
 msgstr ""
 
-#: luaproc.cc:928
+#: luaproc.cc:940
 msgid "LuaProc: port has no symbol, ignored"
 msgstr ""
 
-#: luaproc.cc:934
+#: luaproc.cc:946
 msgid "LuaProc: port has no value, ignored"
 msgstr ""
 
-#: luaproc.cc:1164
+#: luaproc.cc:1176
 msgid "Unable to create LuaProc presets directory"
 msgstr ""
 
@@ -2022,27 +2032,27 @@ msgstr ""
 msgid "return %1"
 msgstr ""
 
-#: route.cc:862 route.cc:2797
+#: route.cc:858 route.cc:2780
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr ""
 
-#: route.cc:884
+#: route.cc:880
 msgid "processor could not be created. Ignored."
 msgstr ""
 
-#: route.cc:2338 route.cc:2504
+#: route.cc:2334 route.cc:2491
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:2395
+#: route.cc:2387
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 
-#: route.cc:3270
+#: route.cc:3258
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr ""
 
-#: route.cc:4396
+#: route.cc:4393
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
 msgstr ""
 
@@ -2305,39 +2315,39 @@ msgstr ""
 msgid "Adding new tracks/busses failed"
 msgstr ""
 
-#: session.cc:4784
+#: session.cc:4786
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr ""
 
-#: session.cc:4914 session.cc:4987
+#: session.cc:4916 session.cc:4989
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr ""
 
-#: session.cc:5663
+#: session.cc:5665
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5675
+#: session.cc:5677
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5687
+#: session.cc:5689
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5699
+#: session.cc:5701
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:5825
+#: session.cc:5827
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:5834
+#: session.cc:5836
 msgid "Cannot write a range with no data."
 msgstr ""
 
-#: session.cc:5876
+#: session.cc:5878
 msgid "cannot create new file \"%1\" for %2"
 msgstr ""
 
@@ -2413,7 +2423,7 @@ msgstr ""
 msgid "%1: cannot seek to %2 for export"
 msgstr ""
 
-#: session_export.cc:216
+#: session_export.cc:221
 msgid "Export ended unexpectedly: %1"
 msgstr ""
 
