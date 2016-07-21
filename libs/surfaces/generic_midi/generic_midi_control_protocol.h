@@ -125,7 +125,16 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	typedef std::list<MIDIAction*> MIDIActions;
 	MIDIActions actions;
 
-	typedef std::pair<MIDIControllable*,PBD::ScopedConnection> MIDIPendingControllable;
+	struct MIDIPendingControllable {
+		MIDIControllable* mc;
+		bool own_mc;
+		PBD::ScopedConnection connection;
+
+		MIDIPendingControllable (MIDIControllable* c, bool omc)
+			: mc (c)
+			, own_mc (omc)
+		{}
+	};
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
         Glib::Threads::Mutex controllables_lock;

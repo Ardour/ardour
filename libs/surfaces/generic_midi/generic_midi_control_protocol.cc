@@ -328,8 +328,11 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 			ptmp = i;
 			++ptmp;
-			if (((*i)->first)->get_controllable() == c) {
-				(*i)->second.disconnect();
+			if (((*i)->mc)->get_controllable() == c) {
+				if ((*i)->own_mc) {
+					delete (*i)->mc;
+				}
+				(*i)->connection.disconnect();
 				delete *i;
 				pending_controllables.erase (i);
 			}
@@ -338,6 +341,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	MIDIControllable* mc = 0;
+	bool own_mc = false;
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		if ((*i)->get_controllable() && ((*i)->get_controllable()->id() == c->id())) {
@@ -348,15 +352,14 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 	if (!mc) {
 		mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
-		controllables.push_back (mc);
+		own_mc = true;
 	}
 
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 
-		MIDIPendingControllable* element = new MIDIPendingControllable;
-		element->first = mc;
-		c->LearningFinished.connect_same_thread (element->second, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
+		MIDIPendingControllable* element = new MIDIPendingControllable (mc, own_mc);
+		c->LearningFinished.connect_same_thread (element->connection, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
 
 		pending_controllables.push_back (element);
 	}
@@ -376,8 +379,8 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 		tmp = i;
 		++tmp;
 
-		if ( (*i)->first == mc) {
-			(*i)->second.disconnect();
+		if ( (*i)->mc == mc) {
+			(*i)->connection.disconnect();
 			delete *i;
 			pending_controllables.erase(i);
 		}
@@ -400,10 +403,10 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	*/
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
-		if (((*i)->first)->get_controllable() == c) {
-			(*i)->first->stop_learning ();
-			dptr = (*i)->first;
-			(*i)->second.disconnect();
+		if (((*i)->mc)->get_controllable() == c) {
+			(*i)->mc->stop_learning ();
+			dptr = (*i)->mc;
+			(*i)->connection.disconnect();
 
 			delete *i;
 			pending_controllables.erase (i);
