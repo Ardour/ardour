@@ -330,7 +330,6 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 			++ptmp;
 			if (((*i)->first)->get_controllable() == c) {
 				(*i)->second.disconnect();
-				delete (*i)->first;
 				delete *i;
 				pending_controllables.erase (i);
 			}
@@ -349,6 +348,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 	if (!mc) {
 		mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
+		controllables.push_back (mc);
 	}
 
 	{
