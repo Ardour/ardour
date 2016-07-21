@@ -253,6 +253,7 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
 	void update_panner_choices ();
+	void update_trim_control ();
 
 	void update_diskstream_display ();
 	void update_input_display ();

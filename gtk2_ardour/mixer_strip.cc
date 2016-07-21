@@ -458,6 +458,20 @@ MixerStrip::name() const
 }
 
 void
+MixerStrip::update_trim_control ()
+{
+	if (route()->trim() && route()->trim()->active() &&
+	    route()->n_inputs().n_audio() > 0) {
+		trim_control.show ();
+		trim_control.set_controllable (route()->trim()->gain_control());
+	} else {
+		trim_control.hide ();
+		boost::shared_ptr<Controllable> none;
+		trim_control.set_controllable (none);
+	}
+}
+
+void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	//the rec/monitor stuff only shows up for tracks.
@@ -563,14 +577,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		monitor_disk_button->hide ();
 	}
 
-	if (route()->trim() && route()->trim()->active()) {
-		trim_control.show ();
-		trim_control.set_controllable (route()->trim()->gain_control());
-	} else {
-		trim_control.hide ();
-		boost::shared_ptr<Controllable> none;
-		trim_control.set_controllable (none);
-	}
+	update_trim_control();
 
 	if (is_midi_track()) {
 		if (midi_input_enable_button == 0) {
@@ -1509,6 +1516,7 @@ void
 MixerStrip::io_changed_proxy ()
 {
 	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &MixerStrip::update_panner_choices));
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &MixerStrip::update_trim_control));
 }
 
 void
