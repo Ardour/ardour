@@ -440,7 +440,7 @@ public:
 		return _mute_control;
 	}
 
-	bool can_be_muted_by_others () const { return !is_master(); }
+	bool can_be_muted_by_others () const { return can_solo(); }
 	bool muted () const { return _mute_control->muted(); }
 	bool muted_by_masters () const { return _mute_control->muted_by_masters(); }
 	bool muted_by_self () const { return _mute_control->muted_by_self(); }
