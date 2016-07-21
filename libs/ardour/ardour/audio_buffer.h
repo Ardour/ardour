@@ -220,7 +220,13 @@ public:
 	 */
 	bool check_silence (pframes_t nframes, pframes_t& n) const;
 
-	void prepare () { _written = false; _silent = false; }
+	void prepare () {
+		if (!_owns_data) {
+			_data = 0;
+		}
+		_written = false;
+		_silent = false;
+	}
 	bool written() const { return _written; }
 	void set_written(bool w) { _written = w; }
 
