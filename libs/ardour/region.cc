@@ -64,6 +64,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<framepos_t> start;
 		PBD::PropertyDescriptor<framecnt_t> length;
 		PBD::PropertyDescriptor<framepos_t> position;
+		PBD::PropertyDescriptor<double> beat;
 		PBD::PropertyDescriptor<framecnt_t> sync_position;
 		PBD::PropertyDescriptor<layer_t> layer;
 		PBD::PropertyDescriptor<framepos_t> ancestral_start;
@@ -114,6 +115,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n",	Properties::length.property_id));
 	Properties::position.property_id = g_quark_from_static_string (X_("position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n",	Properties::position.property_id));
+	Properties::beat.property_id = g_quark_from_static_string (X_("beat"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for beat = %1\n",	Properties::beat.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n",	Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
@@ -154,6 +157,7 @@ Region::register_properties ()
 	add_property (_start);
 	add_property (_length);
 	add_property (_position);
+	add_property (_beat);
 	add_property (_sync_position);
 	add_property (_ancestral_start);
 	add_property (_ancestral_length);
@@ -171,6 +175,7 @@ Region::register_properties ()
 	, _start (Properties::start, (s))	\
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
+	, _beat (Properties::beat, 0.0) \
 	, _sync_position (Properties::sync_position, (s)) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
@@ -200,6 +205,7 @@ Region::register_properties ()
 	, _start(Properties::start, other->_start)		\
 	, _length(Properties::length, other->_length)		\
 	, _position(Properties::position, other->_position)	\
+	, _beat (Properties::beat, other->_beat)                \
 	, _sync_position(Properties::sync_position, other->_sync_position) \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
@@ -327,7 +333,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _beat (0.0)
 	, _layer (other->_layer)
 {
 	register_properties ();
@@ -1218,11 +1223,6 @@ Region::state ()
 
 	/* note: flags are stored by derived classes */
 
-	if (_position_lock_style != AudioTime) {
-		snprintf (buf, sizeof(buf), "%lf", _beat);
-		node->add_property ("beat", buf);
-	}
-
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
 		_sources[n]->id().print (buf, sizeof(buf));
@@ -1290,17 +1290,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	set_id (node);
 
 	if (_position_lock_style == MusicTime) {
-		if ((prop = node.property ("bbt-position")) == 0) {
-			if ((prop = node.property ("beat")) == 0) {
-				/* missing BBT info, revert to audio time locking */
-				_position_lock_style = AudioTime;
-			} else {
-				if (sscanf (prop->value().c_str(), "%lf", &_beat) != 1) {
-					_position_lock_style = AudioTime;
-				}
-			}
-
-		} else {
+		if ((prop = node.property ("bbt-position")) != 0) {
 			if (sscanf (prop->value().c_str(), "%d|%d|%d",
 				    &bbt_time.bars,
 				    &bbt_time.beats,

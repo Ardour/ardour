@@ -57,6 +57,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        start;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        ancestral_start;
@@ -373,6 +374,7 @@ class LIBARDOUR_API Region
 	PBD::Property<framepos_t>  _start;
 	PBD::Property<framecnt_t>  _length;
 	PBD::Property<framepos_t>  _position;
+	PBD::Property<double>      _beat;
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
 
@@ -431,7 +433,6 @@ class LIBARDOUR_API Region
 	framecnt_t              _last_length;
 	framepos_t              _last_position;
 	mutable RegionEditState _first_edit;
-	double                  _beat;
 	layer_t                 _layer;
 
 	void register_properties ();
