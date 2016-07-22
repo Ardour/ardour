@@ -137,11 +137,12 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		if (bufs.get_audio(i).silent()) {
-			;
+			_peak_buffer[n] = 0;
 		} else {
 			_peak_buffer[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_buffer[n]);
+			_peak_buffer[n] = std::min (_peak_buffer[n], 100.f); // cut off at +40dBFS for falloff.
 			_max_peak_signal[n] = std::max(_peak_buffer[n], _max_peak_signal[n]); // todo sync reset
-			_combined_peak =std::max(_peak_buffer[n], _combined_peak);
+			_combined_peak = std::max(_peak_buffer[n], _combined_peak);
 		}
 
 		if (do_reset_max) {
@@ -236,13 +237,22 @@ PeakMeter::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 bool
 PeakMeter::configure_io (ChanCount in, ChanCount out)
 {
+	bool changed = false;
 	if (out != in) { // always 1:1
 		return false;
+	}
+
+	if (current_meters != in) {
+		changed = true;
 	}
 
 	current_meters = in;
 
 	set_max_channels (in);
+
+	if (changed) {
+		reset_max();
+	}
 
 	return Processor::configure_io (in, out);
 }
