@@ -111,7 +111,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _step_edit_cursor_width (1.0)
 	, _step_edit_cursor_position (0.0)
 	, _channel_selection_scoped_note (0)
-	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -155,7 +154,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _step_edit_cursor_width (1.0)
 	, _step_edit_cursor_position (0.0)
 	, _channel_selection_scoped_note (0)
-	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -204,7 +202,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _step_edit_cursor_width (1.0)
 	, _step_edit_cursor_position (0.0)
 	, _channel_selection_scoped_note (0)
-	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -237,7 +234,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _step_edit_cursor_width (1.0)
 	, _step_edit_cursor_position (0.0)
 	, _channel_selection_scoped_note (0)
-	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1402,7 +1398,6 @@ MidiRegionView::~MidiRegionView ()
 	delete _note_group;
 	delete _note_diff_command;
 	delete _step_edit_cursor;
-	delete _temporary_note_group;
 }
 
 void
@@ -1421,8 +1416,11 @@ MidiRegionView::region_resized (const PropertyChange& what_changed)
 	    what_changed.contains (ARDOUR::Properties::position)) {
 		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
 	}
-	/* catch an end trim so we can live update */
+	/* catch end and start trim so we can update the view*/
 	if (!what_changed.contains (ARDOUR::Properties::start) &&
+	    what_changed.contains (ARDOUR::Properties::length)) {
+		enable_display (true);
+	} else if (what_changed.contains (ARDOUR::Properties::start) &&
 	    what_changed.contains (ARDOUR::Properties::length)) {
 		enable_display (true);
 	}
@@ -1435,7 +1433,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 
 	if (_enable_display) {
 		redisplay_model();
-		}
+	}
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if ((*x)->canvas_item()->width() >= _pixel_width) {
@@ -3980,29 +3978,18 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 void
 MidiRegionView::trim_front_starting ()
 {
-	/* Reparent the note group to the region view's parent, so that it doesn't change
-	   when the region view is trimmed.
+	/* We used to eparent the note group to the region view's parent, so that it didn't change.
+	   now we update it.
 	*/
-	_temporary_note_group = new ArdourCanvas::Container (group->parent ());
-	_temporary_note_group->move (group->position ());
-	_note_group->reparent (_temporary_note_group);
 }
 
 void
 MidiRegionView::trim_front_ending ()
 {
-	_note_group->reparent (group);
-	delete _temporary_note_group;
-	_temporary_note_group = 0;
-
 	if (_region->start() < 0) {
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}
-	/* until _start is modified on the fly during front trim,
-	   we have to redisplay the model when a start trim has finished.
-	*/
-	enable_display (true);
 }
 
 void

@@ -2856,7 +2856,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
-			rv->enable_display (false);
 			rv->region()->playlist()->clear_owned_changes ();
 
 			if (_operation == StartTrim) {

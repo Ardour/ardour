@@ -427,11 +427,6 @@ private:
 	Evoral::Beats                        _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
 
-	/** A group used to temporarily reparent _note_group to during start trims, so
-	 *  that the notes don't move with the parent region view.
-	 */
-	ArdourCanvas::Container*                 _temporary_note_group;
-
 	MouseState _mouse_state;
 	int _pressed_button;
 
