@@ -112,6 +112,8 @@ public:
 	bool lua_slot (const PBD::ID&, std::string&, std::string&, ActionHook&, ARDOUR::LuaScriptParamList&);
 	sigc::signal<void,PBD::ID,std::string,ActionHook> SlotChanged;
 
+	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
+
 private:
 	LuaInstance();
 	static LuaInstance* _instance;
@@ -132,6 +134,9 @@ private:
 
 	LuaCallbackMap _callbacks;
 	PBD::ScopedConnectionList _slotcon;
+
+	void every_point_one_seconds ();
+	sigc::connection point_one_second_connection;
 };
 
 #endif

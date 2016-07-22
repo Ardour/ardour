@@ -155,7 +155,7 @@ namespace Cairo {
 CLASSKEYS(Cairo::Context);
 CLASSKEYS(std::vector<double>);
 CLASSKEYS(std::list<ArdourMarker*>);
-CLASSKEYS(std::bitset<46ul>); // LuaSignal::LAST_SIGNAL
+CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
 CLASSKEYS(ArdourMarker*);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::LuaProc);

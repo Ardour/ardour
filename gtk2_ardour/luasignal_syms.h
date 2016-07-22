@@ -83,6 +83,9 @@ STATIC(DiskUnderrun, &ARDOUR::Diskstream::DiskUnderrun, 0)
 // Region static
 STATIC(RegionPropertyChanged, &ARDOUR::Region::RegionPropertyChanged, 2)
 
+// Timers
+STATIC(LuaTimerDS, &LuaInstance::LuaTimerDS, 0)
+
 // TODO per track/route signals,
 // TODO per plugin actions / controllables
 // TODO per region actions

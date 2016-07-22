@@ -40,6 +40,7 @@
 #include "time_axis_view.h"
 #include "selection.h"
 #include "script_selector.h"
+#include "timers.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
@@ -354,6 +355,8 @@ const char *luasignalstr[] = {
 #define stringify(s) #s
 
 using namespace ARDOUR;
+
+PBD::Signal0<void> LuaInstance::LuaTimerDS;
 
 void
 LuaInstance::register_hooks (lua_State* L)
@@ -986,12 +989,15 @@ void LuaInstance::set_session (Session* s)
 	for (LuaCallbackMap::iterator i = _callbacks.begin(); i != _callbacks.end(); ++i) {
 		i->second->set_session (s);
 	}
+	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_point_one_seconds));
 }
 
 void
 LuaInstance::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaInstance::session_going_away);
+	point_one_second_connection.disconnect ();
+
 	(*_lua_clear)();
 	for (int i = 0; i < 9; ++i) {
 		ActionChanged (i, ""); /* EMIT SIGNAL */
@@ -1002,6 +1008,12 @@ LuaInstance::session_going_away ()
 	lua_State* L = lua.getState();
 	LuaBindings::set_session (L, _session);
 	lua.do_command ("collectgarbage();");
+}
+
+void
+LuaInstance::every_point_one_seconds ()
+{
+	LuaTimerDS (); // emit signal
 }
 
 int
