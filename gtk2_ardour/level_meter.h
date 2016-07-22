@@ -109,6 +109,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
 	ARDOUR::MeterType      visible_meter_type;
+	uint32_t               midi_count;
 	uint32_t               meter_count;
 	uint32_t               max_visible_meters;
 

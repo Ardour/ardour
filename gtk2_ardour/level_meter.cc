@@ -51,6 +51,7 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, max_peak (minus_infinity())
 	, meter_type (MeterPeak)
 	, visible_meter_type (MeterType(0))
+	, midi_count (0)
 	, meter_count (0)
 	, max_visible_meters (0)
 	, color_changed (false)
@@ -254,7 +255,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
  		return; /* do it later or never */
  	}
 
-	int32_t nmidi = _meter->input_streams().n_midi();
+	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
 	thin_meter_width = thin_width;
@@ -276,6 +277,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	width = rint (width * UIConfiguration::instance().get_ui_scale());
 
 	if (   meters.size() > 0
+	    && nmidi == midi_count
 	    && nmeters == meter_count
 	    && meters[0].width == width
 	    && meters[0].length == len
@@ -450,7 +452,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
+		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type || nmidi != midi_count) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
@@ -481,6 +483,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	//show();
 	color_changed = false;
 	visible_meter_type = meter_type;
+	midi_count = nmidi;
 	meter_count = nmeters;
 }
 
