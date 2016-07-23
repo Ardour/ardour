@@ -79,6 +79,11 @@ private:
 
 	void plot_signal_amplitude_difference (Gtk::Widget *,cairo_t *);
 
+	void update_pointer_info(float, float);
+	bool analysis_area_mouseover(GdkEventMotion *);
+	bool analysis_area_mouseexit(GdkEventCrossing *);
+	bool analysis_area_mousedown(GdkEventButton *);
+
 	// Helpers
 	bool timeout_callback ();
 	void redraw_scales ();
@@ -117,6 +122,7 @@ private:
 	// gui objects
 	Gtk::DrawingArea *_analysis_area;
 	cairo_surface_t *_analysis_scale_surface;
+	Gtk::Label *_pointer_info;
 
 	// dB scale selection:
 	class dBSelectionColumns : public Gtk::TreeModel::ColumnRecord

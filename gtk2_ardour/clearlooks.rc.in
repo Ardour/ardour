@@ -1180,6 +1180,7 @@ widget "*PluginSaveButton" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
 widget "*PluginEditorButton*" style:highest "default_toggle_button"
 widget "*PluginEditorButton-active" style:highest "default_toggle_button_active"
+widget "*PluginAnalysisInfoLabel" style:highest "medium_monospace_text"
 
 widget "*BarControlSpinner" style:highest "small_spinner"
 widget "*BarControlSpinner*" style:highest "small_spinner"
