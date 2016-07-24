@@ -1667,9 +1667,9 @@ DummyAudioPort::~DummyAudioPort () {
 static std::string format_hz (float freq) {
 	std::stringstream ss;
 	if (freq >= 10000) {
-		ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "KHz";
+		ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "kHz";
 	} else if (freq >= 1000) {
-		ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "KHz";
+		ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "kHz";
 	} else {
 		ss <<  std::setprecision (1) << std::fixed << freq << "Hz";
 	}
