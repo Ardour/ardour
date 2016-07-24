@@ -175,11 +175,11 @@ FFTGraph::on_expose_event (GdkEventExpose* event)
 
 		std::stringstream ss;
 		if (freq >= 10000) {
-			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << " kHz";
 		} else if (freq >= 1000) {
-			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << " kHz";
 		} else {
-			ss <<  std::setprecision (0) << std::fixed << freq << "Hz";
+			ss <<  std::setprecision (0) << std::fixed << freq << " Hz";
 		}
 		layout->set_text (ss.str ());
 		int lw, lh;
@@ -335,9 +335,9 @@ FFTGraph::draw_scales (cairo_t* cr)
 
 		std::stringstream ss;
 		if (freq >= 10000) {
-			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "k";
 		} else if (freq >= 1000) {
-			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "k";
 		} else {
 			ss <<  std::setprecision (0) << std::fixed << freq << "Hz";
 		}
@@ -379,9 +379,9 @@ FFTGraph::draw_scales (cairo_t* cr)
 
 		std::stringstream ss;
 		if (freq >= 10000) {
-			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "k";
 		} else if (freq >= 1000) {
-			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "K";
+			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "k";
 		} else {
 			ss <<  std::setprecision (0) << std::fixed << freq << "Hz";
 		}
