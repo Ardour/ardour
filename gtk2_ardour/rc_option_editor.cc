@@ -3400,7 +3400,7 @@ RCOptionEditor::parameter_changed (string const & p)
 		_ltc_send_continuously->set_sensitive (s);
 		_ltc_volume_slider->set_sensitive (s);
 	} else if (p == "open-gui-after-adding-plugin" || p == "show-inline-display-by-default") {
-#ifdef LV2_SUPPORT
+#if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
 	}
