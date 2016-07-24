@@ -86,6 +86,7 @@
 #include "ardour/route_group.h"
 #include "ardour/session_playlists.h"
 #include "ardour/tempo.h"
+#include "ardour/trigger_track.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
 #include "ardour/vca.h"
@@ -5491,7 +5492,12 @@ Editor::add_stripables (StripableList& sl)
 			RouteTimeAxisView* rtv;
 			DataType dt = r->input()->default_type();
 
-			if (dt == ARDOUR::DataType::AUDIO) {
+			boost::shared_ptr<TriggerTrack> tt;
+
+			if ((tt = boost::dynamic_pointer_cast<TriggerTrack> (r))) {
+				cerr << "Editor skipping trigger track\n";
+				continue;
+			} else if (dt == ARDOUR::DataType::AUDIO) {
 				rtv = new AudioTimeAxisView (*this, _session, *_track_canvas);
 				rtv->set_route (r);
 			} else if (dt == ARDOUR::DataType::MIDI) {
