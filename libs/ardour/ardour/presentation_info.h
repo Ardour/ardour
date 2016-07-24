@@ -115,6 +115,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 #ifdef MIXBUS
 		Mixbus = 0x1000,
 #endif
+		TriggerTrack = 0x100,
 		/* These are for sharing Stripable states between the GUI and other
 		 * user interfaces/control surfaces
 		 */
