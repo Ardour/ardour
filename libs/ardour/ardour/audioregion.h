@@ -82,7 +82,16 @@ class LIBARDOUR_API AudioRegion : public Region
 	gain_t scale_amplitude() const { return _scale_amplitude; }
 
 	void normalize (float, float target_in_dB = 0.0f);
+
+	/** @return the maximum (linear) amplitude of the region, or a -ve
+	 *  number if the Progress object reports that the process was cancelled.
+	 */
 	double maximum_amplitude (Progress* p = 0) const;
+
+	/** @return the maximum (rms) signal power of the region, or a -1
+	 *  if the Progress object reports that the process was cancelled.
+	 */
+	double rms (Progress* p = 0) const;
 
 	bool envelope_active () const { return _envelope_active; }
 	bool fade_in_active ()  const { return _fade_in_active; }

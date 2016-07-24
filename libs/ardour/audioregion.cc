@@ -1402,9 +1402,6 @@ AudioRegion::set_scale_amplitude (gain_t g)
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
-/** @return the maximum (linear) amplitude of the region, or a -ve
- *  number if the Progress object reports that the process was cancelled.
- */
 double
 AudioRegion::maximum_amplitude (Progress* p) const
 {
@@ -1442,6 +1439,45 @@ AudioRegion::maximum_amplitude (Progress* p) const
 	}
 
 	return maxamp;
+}
+
+double
+AudioRegion::rms (Progress* p) const
+{
+	framepos_t fpos = _start;
+	framepos_t const fend = _start + _length;
+	uint32_t const n_chan = n_channels ();
+	double rms = 0;
+
+	framecnt_t const blocksize = 64 * 1024;
+	Sample buf[blocksize];
+
+	framecnt_t total = 0;
+
+	if (n_chan == 0) {
+		return 0;
+	}
+
+	while (fpos < fend) {
+		framecnt_t const to_read = min (fend - fpos, blocksize);
+		total += to_read;
+		for (uint32_t c = 0; c < n_chan; ++c) {
+			if (read_raw_internal (buf, fpos, to_read, c) != to_read) {
+				return 0;
+			}
+			for (framepos_t i = 0; i < to_read; ++i) {
+				rms += buf[i] * buf[i];
+			}
+			fpos += to_read;
+			if (p) {
+				p->set_progress (float (fpos - _start) / _length);
+				if (p->cancelled ()) {
+					return -1;
+				}
+			}
+		}
+	}
+	return sqrt (rms / (double)(total * n_chan));
 }
 
 /** Normalize using a given maximum amplitude and target, so that region
