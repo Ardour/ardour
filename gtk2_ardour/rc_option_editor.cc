@@ -2192,7 +2192,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_volume_slider->tip_widget(),
-		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
+		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
 	add_option (_("Transport/Sync"), _ltc_volume_slider);
 
@@ -3310,7 +3310,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	Gtkmm2ext::UI::instance()->set_tip
 		(mpks->tip_widget(),
-		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
+		 _("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|Metering"), mpks);
 

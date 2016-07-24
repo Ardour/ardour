@@ -64,7 +64,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Threshold"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
 	table->attach (_threshold, 1, 2, n, n + 1, Gtk::FILL);
-	table->attach (*Gtk::manage (new Gtk::Label (_("dbFS"))), 2, 3, n, n + 1, Gtk::FILL);
+	table->attach (*Gtk::manage (new Gtk::Label (_("dBFS"))), 2, 3, n, n + 1, Gtk::FILL);
 	++n;
 
 	_threshold.set_digits (1);
