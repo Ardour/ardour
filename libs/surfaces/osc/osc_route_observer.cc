@@ -248,7 +248,8 @@ OSCRouteObserver::send_change_message (string path, boost::shared_ptr<Controllab
 	} else {
 		lo_message_add_int32 (msg, ssid);
 	}
-	lo_message_add_float (msg, (float) controllable->get_value());
+	float val = controllable->get_value();
+	lo_message_add_float (msg, (float) controllable->internal_to_interface (val));
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);

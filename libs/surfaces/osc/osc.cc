@@ -1631,8 +1631,8 @@ OSC::master_set_pan_stereo_position (float position, lo_message msg)
 
 	if (s) {
 		if (s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (position, PBD::Controllable::NoGroup);
-			endposition = s->pan_azimuth_control()->get_value ();
+			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
+			endposition = s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ());
 		}
 	}
 	OSCSurface *sur = get_surface(lo_message_get_source (msg));
@@ -2316,7 +2316,8 @@ OSC::sel_pan_position (float val, lo_message msg)
 	}
 	if (s) {
 		if(s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (val, PBD::Controllable::NoGroup);
+			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return sel_fail ("pan_stereo_position", s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ()), lo_message_get_source (msg));
 			return 0;
 		}
 	}
@@ -2350,8 +2351,8 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 
 	if (s) {
 		if(s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (pos, PBD::Controllable::NoGroup);
-			return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->get_value (), lo_message_get_source (msg));
+			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (pos), PBD::Controllable::NoGroup);
+			return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ()), lo_message_get_source (msg));
 		}
 	}
 
@@ -2659,7 +2660,7 @@ OSC::sel_pan_elevation (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_elevation_position", 0.5, lo_message_get_source (msg));
+	return sel_fail ("pan_elevation_position", 0, lo_message_get_source (msg));
 }
 
 int

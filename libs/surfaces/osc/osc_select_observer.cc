@@ -216,7 +216,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 		clear_strip ("/select/meter", 0);
 	}
 	if (feedback[13]) { // Well known controls
-		clear_strip ("/select/pan_elevation_position", .5);
+		clear_strip ("/select/pan_elevation_position", 0);
 		clear_strip ("/select/pan_frontback_position", .5);
 		clear_strip ("/select/pan_lfe_control", 0);
 		clear_strip ("/select/comp_enable", 0);
