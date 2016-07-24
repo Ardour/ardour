@@ -63,7 +63,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 class LIBARDOUR_API TriggerTrack : public Track
 {
 public:
-	TriggerTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	TriggerTrack (Session&, std::string name);
 	~TriggerTrack ();
 
 	int init ();
@@ -76,6 +76,17 @@ public:
 
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
+
+	int set_mode (TrackMode m);
+	bool can_use_mode (TrackMode m, bool& bounce_required);
+
+	void freeze_me (ARDOUR::InterThreadInfo&);
+	void unfreeze ();
+	boost::shared_ptr<ARDOUR::Region> bounce (ARDOUR::InterThreadInfo&);
+	boost::shared_ptr<ARDOUR::Region> bounce_range (framepos_t, framepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool);
+	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool);
+	void set_state_part_two ();
+	boost::shared_ptr<Diskstream> diskstream_factory (const XMLNode&);
 
 	DataType data_type () const {
 		return DataType::AUDIO;

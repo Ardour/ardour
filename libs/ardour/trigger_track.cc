@@ -24,12 +24,13 @@
 #include "ardour/audio_port.h"
 #include "ardour/audioregion.h"
 #include "ardour/io.h"
+#include "ardour/session.h"
 #include "ardour/trigger_track.h"
 
 using namespace ARDOUR;
 
-TriggerTrack::TriggerTrack (Session& s, std::string name, Route::Flag f, TrackMode m)
-	: Track (s, name, f, m)
+TriggerTrack::TriggerTrack (Session& s, std::string name)
+	: Track (s, name, PresentationInfo::TriggerTrack, Normal)
 	, _trigger_queue (1024)
 {
 }
@@ -82,12 +83,12 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 	/* if next beat occurs in this process cycle, see if we have any triggers waiting
 	*/
 
-	bool run_beats = false;
+	// bool run_beats = false;
 	// bool run_bars = false;
 
-	if (next_beat >= start_frame && next_beat < end_frame) {
-		run_beats = true;
-	}
+	//if (next_beat >= start_frame && next_beat < end_frame) {
+	//run_beats = true;
+	//}
 
 	/* if there are any triggers queued, run them.
 	*/
@@ -105,7 +106,7 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 		t->bang (*this, beats_now, start_frame);
 	}
 
-	_trigger_queue.decrement_read_idx (vec.len[0] + vec.len[1]);
+	_trigger_queue.increment_read_idx (vec.len[0] + vec.len[1]);
 
 
 	/* now run all active triggers */
@@ -121,10 +122,12 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 
 	bool err = false;
 
-	for (uint32_t n = 0; !err && n < nchans; ++n) {
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
+	fill_buffers_with_input (bufs, _input, nframes);
 
-		AudioBuffer& port_buffer (_output->audio (n % _output->n_ports().n_audio())->get_audio_buffer (nframes));
-		port_buffer.silence (nframes);
+	for (uint32_t chan = 0; !err && chan < nchans; ++chan) {
+
+		AudioBuffer& buf = bufs.get_audio (chan);
 
 		for (Triggers::iterator t = active_triggers.begin(); !err && t != active_triggers.end(); ) {
 
@@ -135,7 +138,7 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 			}
 			pframes_t to_copy = nframes;
 
-			Sample* data = at->run (n, to_copy, start_frame, end_frame, need_butler);
+			Sample* data = at->run (chan, to_copy, start_frame, end_frame, need_butler);
 
 			if (!data) {
 				/* XXX need to delete the trigger/put it back in the pool */
@@ -143,9 +146,9 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 				err = true;
 			} else {
 				if (t == active_triggers.begin()) {
-					port_buffer.read_from (data, to_copy);
+					buf.read_from (data, to_copy);
 				} else {
-					port_buffer.accumulate_from (data, to_copy);
+					buf.accumulate_from (data, to_copy);
 				}
 			}
 		}
@@ -172,12 +175,19 @@ TriggerTrack::non_realtime_locate (framepos_t)
 boost::shared_ptr<Diskstream>
 TriggerTrack::create_diskstream ()
 {
-	return boost::shared_ptr<Diskstream> ();
+	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, name(), AudioDiskstream::Recordable));
 }
 
 void
-TriggerTrack::set_diskstream (boost::shared_ptr<Diskstream>)
+TriggerTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
+	Track::set_diskstream (ds);
+	_diskstream->set_track (this);
+	_diskstream->set_destructive (false);
+	_diskstream->set_record_enabled (false);
+	_diskstream->request_input_monitoring (false);
+
+	DiskstreamChanged (); /* EMIT SIGNAL */
 }
 
 int
@@ -194,10 +204,84 @@ TriggerTrack::state (bool full_state)
 }
 
 int
+TriggerTrack::set_mode (TrackMode m)
+{
+	switch (m) {
+	case NonLayered:
+	case Normal:
+		if (m != _mode) {
+			_diskstream->set_non_layered (m == NonLayered);
+			_mode = m;
+
+			TrackModeChanged (); /* EMIT SIGNAL */
+		}
+		break;
+
+	default:
+		return -1;
+	}
+
+	return 0;
+}
+bool
+TriggerTrack::can_use_mode (TrackMode m, bool& bounce_required)
+{
+	switch (m) {
+	case NonLayered:
+	case Normal:
+		bounce_required = false;
+		return true;
+	default:
+		break;
+	}
+	return false;
+}
+
+int
 TriggerTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing)
 {
 	return 0;
 }
+
+void
+TriggerTrack::freeze_me (ARDOUR::InterThreadInfo&)
+{
+}
+
+void
+TriggerTrack::unfreeze ()
+{
+}
+
+boost::shared_ptr<Region>
+TriggerTrack::bounce (ARDOUR::InterThreadInfo&)
+{
+	return boost::shared_ptr<Region> ();
+}
+
+boost::shared_ptr<Region>
+TriggerTrack::bounce_range (framepos_t, framepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool)
+{
+	return boost::shared_ptr<Region> ();
+}
+
+int
+TriggerTrack::export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
+{
+	return 0;
+}
+
+void
+TriggerTrack::set_state_part_two ()
+{
+}
+
+boost::shared_ptr<Diskstream>
+TriggerTrack::diskstream_factory (const XMLNode& node)
+{
+	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, node));
+}
+
 
 /*--------------------*/
 
@@ -245,7 +329,7 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, framepos_t start_frame,
 		return 0;
 	}
 
-	if (read_index > length) {
+	if (read_index >= length) {
 		return 0;
 	}
 
@@ -255,5 +339,9 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, framepos_t start_frame,
 
 	nframes = (pframes_t) std::min ((framecnt_t) nframes, (length - read_index));
 
-	return data[channel];
+	Sample* ret = data[channel] + read_index;
+
+	read_index += nframes;
+
+	return ret;
 }
