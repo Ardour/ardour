@@ -216,13 +216,13 @@ void
 ExportFormatManager::init_sample_rates ()
 {
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_Session, _("Session rate"))));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_8, "8 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_22_05, "22,05 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_44_1, "44,1 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48, "48 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_88_2, "88,2 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_96, "96 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_192, "192 kHz")));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_8,     string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 8))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_22_05, string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(2), 22.05))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_44_1,  string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(1), 44.1))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48,    string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 48))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_88_2,  string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(1), 88.2))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_96,    string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 96))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_192,   string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 192))));
 }
 
 void
