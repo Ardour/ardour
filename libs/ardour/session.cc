@@ -121,6 +121,7 @@
 #include "ardour/transport_master_manager.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
+#include "ardour/trigger_track.h"
 #include "ardour/user_bundle.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
@@ -2732,6 +2733,119 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 	failed:
 	if (!new_routes.empty()) {
 		add_routes (new_routes, input_auto_connect, true, order);
+	}
+
+	return ret;
+}
+
+/** Caller must not hold process lock
+ *  @param name_template string to use for the start of the name, or "" to use "Trigger".
+ */
+list< boost::shared_ptr<TriggerTrack> >
+Session::new_trigger_track (const ChanCount& input_channels, const ChanCount& output_channels, RouteGroup* route_group,
+                            uint32_t how_many, string name_template, PresentationInfo::order_t order)
+{
+	string track_name;
+	uint32_t track_id = 0;
+	string port;
+	RouteList new_routes;
+	list<boost::shared_ptr<TriggerTrack> > ret;
+
+	const string name_pattern = _("Trigger");
+	bool const use_number = (how_many != 1) || name_template.empty () || (name_template == name_pattern);
+
+	while (how_many) {
+
+		if (!find_route_name (name_template.empty() ? _(name_pattern.c_str()) : name_template, ++track_id, track_name, use_number)) {
+			error << "cannot find name for new audio track" << endmsg;
+			goto failed;
+		}
+
+		boost::shared_ptr<TriggerTrack> track;
+
+		try {
+			track.reset (new TriggerTrack (*this, track_name));
+
+			if (track->init ()) {
+				goto failed;
+			}
+
+			if (Profile->get_mixbus ()) {
+				track->set_strict_io (true);
+			}
+
+			if (ARDOUR::Profile->get_trx ()) {
+				// TRACKS considers it's not a USE CASE, it's
+				// a piece of behavior of the session model:
+				//
+				// Gain for a newly created route depends on
+				// the current output_auto_connect mode:
+				//
+				//  0 for Stereo Out mode
+				//  0 Multi Out mode
+				if (Config->get_output_auto_connect() & AutoConnectMaster) {
+					track->gain_control()->set_value (dB_to_coefficient (0), Controllable::NoGroup);
+				}
+			}
+
+			track->use_new_diskstream();
+
+			BOOST_MARK_TRACK (track);
+
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+				if (track->input()->ensure_io (input_channels, false, this)) {
+					error << string_compose (
+						_("cannot configure %1 in/%2 out configuration for new audio track"),
+						input_channels, output_channels)
+					      << endmsg;
+					goto failed;
+				}
+
+				if (track->output()->ensure_io (output_channels, false, this)) {
+					error << string_compose (
+						_("cannot configure %1 in/%2 out configuration for new audio track"),
+						input_channels, output_channels)
+					      << endmsg;
+					goto failed;
+				}
+			}
+
+			if (route_group) {
+				route_group->add (track);
+			}
+
+			track->non_realtime_input_change();
+
+			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
+
+			new_routes.push_back (track);
+			ret.push_back (track);
+		}
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new trigger track.") << endmsg;
+			goto failed;
+		}
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+
+			error << pfe.what() << endmsg;
+			goto failed;
+		}
+
+		--how_many;
+	}
+
+  failed:
+	if (!new_routes.empty()) {
+		StateProtector sp (this);
+		if (Profile->get_trx()) {
+			add_routes (new_routes, false, false, false, order);
+		} else {
+			add_routes (new_routes, true, true, false, order);
+		}
 	}
 
 	return ret;

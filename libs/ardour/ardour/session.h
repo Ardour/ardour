@@ -173,6 +173,7 @@ class TransportMaster;
 struct TransportFSM;
 class Track;
 class UI_TransportMaster;
+class TriggerTrack;
 class VCAManager;
 class WindowsVSTPlugin;
 
@@ -738,6 +739,15 @@ public:
 		PresentationInfo::order_t,
 		TrackMode mode = Normal,
 		bool input_auto_connect = true
+		);
+
+	std::list<boost::shared_ptr<TriggerTrack> > new_trigger_track (
+		const ChanCount& input_channels,
+		const ChanCount& output_channels,
+		RouteGroup* route_group,
+		uint32_t how_many,
+		std::string name_template,
+		PresentationInfo::order_t order
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
