@@ -2442,6 +2442,16 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 void
 ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 {
+	/* XXX this needs to be re-worked!
+	 *
+	 * With new pin-management "streams" is no longer correct.
+	 * p.get_info () is also incorrect for variable i/o plugins (always -1,-1).
+	 *
+	 * Since pin-management was added, this dialog will only show in a very rare
+	 * condition (non-replicated variable i/o configuration failed).
+	 *
+	 * TODO: simplify the message after the string-freeze is lifted.
+	 */
 	ArdourDialog dialog (_("Plugin Incompatibility"));
 	Label label;
 
