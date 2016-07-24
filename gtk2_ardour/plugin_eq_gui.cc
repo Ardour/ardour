@@ -450,9 +450,9 @@ PluginEqGui::update_pointer_info(float x, float y)
 	std::stringstream ss;
 	ss << std::fixed;
 	if (freq >= 10000) {
-		ss <<  std::setprecision (1) << freq / 1000 << "kHz";
+		ss <<  std::setprecision (1) << freq / 1000.0 << "kHz";
 	} else if (freq >= 1000) {
-		ss <<  std::setprecision (2) << freq / 1000 << "kHz";
+		ss <<  std::setprecision (2) << freq / 1000.0 << "kHz";
 	} else {
 		ss <<  std::setprecision (0) << freq << "Hz";
 	}
