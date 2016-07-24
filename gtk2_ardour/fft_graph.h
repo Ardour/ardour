@@ -50,6 +50,9 @@ public:
 
 	void redraw ();
 	bool on_expose_event (GdkEventExpose* event);
+	bool on_motion_notify_event (GdkEventMotion*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_button_press_event (GdkEventButton*) { return true; }
 
 	void on_size_request (Gtk::Requisition* requisition);
 	void on_size_allocate (Gtk::Allocation & alloc);
@@ -65,7 +68,7 @@ private:
 
 	void setWindowSize_internal (int windowSize);
 
-	int draw_scales (Glib::RefPtr<Gdk::Window> window);
+	int draw_scales (cairo_t*);
 
 	static const int minScaleWidth = 512;
 	static const int minScaleHeight = 420;
@@ -75,15 +78,21 @@ private:
 	static const int v_margin  = 12;
 
 	int currentScaleWidth;
-	Glib::RefPtr<Gdk::GC> graph_gc;
 
 	int width;
 	int height;
+
+	int _yoff;
+	int _ann_x;
+	int _ann_y;
+	cairo_rectangle_t _ann_area;
 
 	unsigned int _windowSize;
 	unsigned int _dataSize;
 
 	Glib::RefPtr<Pango::Layout> layout;
+	cairo_surface_t* _surface;
+
 	AnalysisWindow *_a_window;
 
 	fftwf_plan _plan;

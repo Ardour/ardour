@@ -56,13 +56,20 @@ FFTGraph::FFTGraph (int windowSize)
 	_hanning  = 0;
 	_logScale = 0;
 
+	_surface  = 0;
 	_a_window = 0;
 
 	_show_minmax       = false;
 	_show_normalized   = false;
 	_show_proportional = false;
 
+	_ann_x = _ann_y = -1;
+	_yoff = v_margin;
+	_ann_area.width = 0;
+	_ann_area.height = 0;
+
 	setWindowSize (windowSize);
+	set_events (Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK);
 }
 
 void
@@ -145,13 +152,122 @@ FFTGraph::~FFTGraph ()
 {
 	// This will free everything
 	setWindowSize (0);
+
+	if (_surface) {
+		cairo_surface_destroy (_surface);
+	}
 }
 
 bool
-FFTGraph::on_expose_event (GdkEventExpose* /*event*/)
+FFTGraph::on_expose_event (GdkEventExpose* event)
 {
-	redraw ();
+	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (get_window ()->gobj ()));
+	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
+	cairo_clip (cr);
+
+	cairo_set_source_surface(cr, _surface, 0, 0);
+	cairo_paint (cr);
+
+
+	if (_ann_x > 0 && _ann_y > 0) {
+		const float x = _ann_x - hl_margin;
+		const float freq = expf(_fft_log_base * x / currentScaleWidth) * _fft_start;
+
+		std::stringstream ss;
+		if (freq >= 10000) {
+			ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "K";
+		} else if (freq >= 1000) {
+			ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "K";
+		} else {
+			ss <<  std::setprecision (0) << std::fixed << freq << "Hz";
+		}
+		layout->set_text (ss.str ());
+		int lw, lh;
+		layout->get_pixel_size (lw, lh);
+		lw|=1; lh|=1;
+
+		const float y0 = _ann_y - lh - 7;
+
+		_ann_area.x = _ann_x - 1 - lw * .5;
+		_ann_area.y =  y0 - 1;
+		_ann_area.width = lw + 3;
+		_ann_area.height = lh + 8;
+
+		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.7);
+		cairo_rectangle (cr, _ann_x - 1 - lw * .5, y0 - 1, lw + 2, lh + 2);
+		cairo_fill (cr);
+
+		cairo_move_to (cr, _ann_x , _ann_y - 0.5);
+		cairo_rel_line_to (cr, -3.0, -5.5);
+		cairo_rel_line_to (cr, 6, 0);
+		cairo_close_path (cr);
+		cairo_fill (cr);
+
+		cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+		cairo_move_to (cr, _ann_x - lw / 2, y0);
+		pango_cairo_update_layout (cr, layout->gobj ());
+		pango_cairo_show_layout (cr, layout->gobj ());
+
+	}
+
+#ifdef HARLEQUIN_DEBUGGING
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_set_source_rgba (cr, (random() % 255) / 255.f, (random() % 255) / 255.f, 0.0, 0.5);
+	cairo_fill (cr);
+#endif
+
+	cairo_destroy (cr);
 	return true;
+}
+
+bool
+FFTGraph::on_motion_notify_event (GdkEventMotion* ev)
+{
+	gint x, y;
+
+	x = (int) floor (ev->x);
+	y = (int) floor (ev->y);
+
+	if (x <= hl_margin + 1 || x >= width  - hr_margin) {
+		x = -1;
+	}
+	if (y <= _yoff || y >= height - v_margin - 1) {
+		y = -1;
+	}
+
+	if (x == _ann_x && y == _ann_y) {
+		return true;
+	}
+	_ann_x = x;
+	_ann_y = y;
+
+	if (_ann_area.width == 0 || _ann_area.height == 0) {
+		queue_draw ();
+	} else {
+		queue_draw_area (_ann_area.x, _ann_area.y, _ann_area.width, _ann_area.height + 1);
+	}
+
+	if (_ann_x > 0 &&_ann_y > 0) {
+		queue_draw_area (_ann_x - _ann_area.width, _ann_y - _ann_area.height - 1, _ann_area.width * 2, _ann_area.height + 2);
+	}
+
+	return true;
+}
+
+bool
+FFTGraph::on_leave_notify_event (GdkEventCrossing *)
+{
+	if (_ann_x == -1 && _ann_y == -1) {
+		return true;
+	}
+	_ann_x = _ann_y = -1;
+	if (_ann_area.width == 0 || _ann_area.height == 0) {
+		queue_draw ();
+	} else {
+		queue_draw_area (_ann_area.x, _ann_area.y, _ann_area.width, _ann_area.height + 1);
+	}
+	_ann_area.width = _ann_area.height = 0;
+	return false;
 }
 
 FFTResult *
@@ -162,7 +278,6 @@ FFTGraph::prepareResult (Gdk::Color color, string trackname)
 	return res;
 }
 
-
 void
 FFTGraph::set_analysis_window (AnalysisWindow *a_window)
 {
@@ -170,48 +285,32 @@ FFTGraph::set_analysis_window (AnalysisWindow *a_window)
 }
 
 int
-FFTGraph::draw_scales (Glib::RefPtr<Gdk::Window> window)
+FFTGraph::draw_scales (cairo_t* cr)
 {
 	int label_height = v_margin;
 
-	Glib::RefPtr<Gtk::Style> style = get_style ();
-	Glib::RefPtr<Gdk::GC> black = style->get_black_gc ();
-	Glib::RefPtr<Gdk::GC> white = style->get_white_gc ();
+	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
 
-	window->draw_rectangle (black, true, 0, 0, width, height);
-
-	/**
-	 *  4          5
+	/*
+	 *  1          5
 	 *  _          _
 	 *   |        |
-	 * 1 |        | 2
+	 * 2 |        | 4
 	 *   |________|
 	 *        3
-	 **/
+	 */
 
-	// Line 1
-	window->draw_line (white, hl_margin, v_margin, hl_margin, height - v_margin);
-
-	// Line 2
-	window->draw_line (white, width - hr_margin + 1, v_margin, width - hr_margin + 1, height - v_margin);
-
-	// Line 3
-	window->draw_line (white, hl_margin, height - v_margin, width - hr_margin, height - v_margin);
-
-	// Line 4
-	window->draw_line (white, 3, v_margin, hl_margin, v_margin);
-
-	// Line 5
-	window->draw_line (white, width - hr_margin + 1, v_margin, width - 3, v_margin);
-
-
-	if (graph_gc == 0) {
-		graph_gc = GC::create (get_window ());
-	}
-
-	Color grey;
-	grey.set_rgb_p (0.2, 0.2, 0.2);
-	graph_gc->set_rgb_fg_color (grey);
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+	cairo_move_to (cr, 3                      , .5 + v_margin);
+	cairo_line_to (cr, .5 + hl_margin         , .5 + v_margin);  // 1
+	cairo_line_to (cr, .5 + hl_margin         , .5 + height - v_margin); // 2
+	cairo_line_to (cr, 1.5 + width - hr_margin, .5 + height - v_margin); // 3
+	cairo_line_to (cr, 1.5 + width - hr_margin, .5 + v_margin); // 4
+	cairo_line_to (cr, width - 3              , .5 + v_margin); // 5
+	cairo_stroke (cr);
 
 	if (layout == 0) {
 		layout = create_pango_layout ("");
@@ -253,8 +352,16 @@ FFTGraph::draw_scales (Glib::RefPtr<Gdk::Window> window)
 		if (v_margin / 2 + lh > label_height) {
 			label_height = v_margin / 2 + lh;
 		}
-		window->draw_line (graph_gc, coord, v_margin, coord, height - v_margin - 1);
-		window->draw_layout (white, coord - lw / 2, v_margin / 2, layout);
+
+		cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 1.0);
+		cairo_move_to (cr, coord, v_margin);
+		cairo_line_to (cr, coord, height - v_margin - 1);
+		cairo_stroke (cr);
+
+		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+		cairo_move_to (cr, coord - lw / 2, v_margin / 2);
+		pango_cairo_update_layout (cr, layout->gobj ());
+		pango_cairo_show_layout (cr, layout->gobj ());
 	}
 
 	// now from 1K down to 4Hz
@@ -281,6 +388,7 @@ FFTGraph::draw_scales (Glib::RefPtr<Gdk::Window> window)
 		layout->set_text (ss.str ());
 		int lw, lh;
 		layout->get_pixel_size (lw, lh);
+
 		overlap = coord - lw - 3;
 
 		if (coord - lw / 2 < hl_margin + 2) {
@@ -293,9 +401,19 @@ FFTGraph::draw_scales (Glib::RefPtr<Gdk::Window> window)
 		if (v_margin / 2 + lh > label_height) {
 			label_height = v_margin / 2 + lh;
 		}
-		window->draw_line (graph_gc, coord, v_margin, coord, height - v_margin - 1);
-		window->draw_layout (white, coord - lw / 2, v_margin / 2, layout);
+
+
+		cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 1.0);
+		cairo_move_to (cr, coord, v_margin);
+		cairo_line_to (cr, coord, height - v_margin - 1);
+		cairo_stroke (cr);
+
+		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+		cairo_move_to (cr, coord - lw / 2, v_margin / 2);
+		pango_cairo_update_layout (cr, layout->gobj ());
+		pango_cairo_show_layout (cr, layout->gobj ());
 	}
+
 	return label_height;
 }
 
@@ -304,13 +422,22 @@ FFTGraph::redraw ()
 {
 	Glib::Threads::Mutex::Lock lm  (_a_window->track_list_lock);
 
-	int yoff = draw_scales (get_window ());
+	assert (_surface);
+	cairo_t* cr = cairo_create (_surface);
 
-	if (_a_window == 0)
-		return;
+	_yoff = draw_scales (cr);
 
-	if (!_a_window->track_list_ready)
+	if (_a_window == 0) {
+		cairo_destroy (cr);
+		queue_draw ();
 		return;
+	}
+
+	if (!_a_window->track_list_ready) {
+		cairo_destroy (cr);
+		queue_draw ();
+		return;
+	}
 
 	float minf;
 	float maxf;
@@ -344,6 +471,8 @@ FFTGraph::redraw ()
 	// clamp range, > -200dBFS, at least 24dB (two y-axis labels) range
 	minf = std::max (-200.f, minf);
 	if (maxf <= minf) {
+		cairo_destroy (cr);
+		queue_draw ();
 		return;
 	}
 
@@ -352,13 +481,11 @@ FFTGraph::redraw ()
 		minf = maxf - 24.f;
 	}
 
-	cairo_t *cr;
-	cr = gdk_cairo_create (GDK_DRAWABLE (get_window ()->gobj ()));
 	cairo_set_line_width (cr, 1.5);
-	cairo_translate (cr, hl_margin + 1, yoff);
+	cairo_translate (cr, hl_margin + 1, _yoff);
 
 	float fft_pane_size_w = width  - hl_margin - hr_margin;
-	float fft_pane_size_h = height - v_margin - 1 - yoff;
+	float fft_pane_size_h = height - v_margin - 1 - _yoff;
 	double pixels_per_db = (double)fft_pane_size_h / (double)(maxf - minf);
 
 	// draw y-axis dB
@@ -497,6 +624,7 @@ FFTGraph::redraw ()
 		cairo_stroke (cr);
 	}
 	cairo_destroy (cr);
+	queue_draw ();
 }
 
 void
@@ -504,8 +632,6 @@ FFTGraph::on_size_request (Gtk::Requisition* requisition)
 {
 	width  = max (requisition->width,  minScaleWidth  + hl_margin + hr_margin);
 	height = max (requisition->height, minScaleHeight + 2 + v_margin * 2);
-
-	update_size ();
 
 	requisition->width  = width;;
 	requisition->height = height;
@@ -534,4 +660,9 @@ FFTGraph::update_size ()
 	for (unsigned int i = 1; i < _dataSize; ++i) {
 		_logScale[i] = floor (currentScaleWidth * logf (.5 * i) / _fft_log_base);
 	}
+	if (_surface) {
+		cairo_surface_destroy (_surface);
+	}
+	_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+	redraw ();
 }
