@@ -171,6 +171,9 @@ AddRouteDialog::AddRouteDialog ()
 		     ));
 	}
 
+#warning ADD TRIGGER TRACKS to builtin_types above
+	// track_bus_combo.append_text (_("Trigger Tracks"));
+
 	insert_at_combo.append_text (_("First"));
 	insert_at_combo.append_text (_("Before Selection"));
 	insert_at_combo.append_text (_("After Selection"));
@@ -577,6 +580,8 @@ AddRouteDialog::type_wanted()
 		return MidiBus;
 	} else if (str == _("MIDI Tracks")){
 		return MidiTrack;
+	} else if (str == _("Trigger Tracks")){
+		return TriggerTrack;
 	} else if (str == _("Audio Tracks")) {
 		return AudioTrack;
 	} else if (str == _("VCA Masters")) {
@@ -603,6 +608,9 @@ AddRouteDialog::maybe_update_name_template_entry ()
 	case MidiTrack:
 		/* set name of instrument or _("MIDI") */
 		instrument_changed ();
+	case TriggerTrack:
+		name_template_entry.set_text (_("Trigger"));
+		break;
 		break;
 	case AudioBus:
 	case MidiBus:
@@ -663,8 +671,20 @@ AddRouteDialog::track_type_chosen ()
 
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
-
 		break;
+
+	case TriggerTrack:
+		channel_combo.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+		instrument_combo.set_sensitive (true);
+		configuration_label.set_sensitive (false);
+		mode_label.set_sensitive (false);
+		instrument_label.set_sensitive (true);
+		route_group_combo.set_sensitive (true);
+		strict_io_combo.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
+		break;
+
 	case AudioBus:
 
 		configuration_label.set_sensitive (true);
@@ -767,6 +787,7 @@ AddRouteDialog::name_template_is_default () const
 
 	if (n == _("Audio") ||
 	    n == _("MIDI") ||
+	    n == _("Trigger") ||
 	    n == _("Bus") ||
 	    n == _("Foldback") ||
 	    n == VCA::default_name_template()) {
@@ -805,6 +826,10 @@ AddRouteDialog::mode ()
 		      << endmsg;
 		abort(); /*NOTREACHED*/
 	}
+
+	fatal << string_compose (X_("programming error: unknown track mode in add route dialog combo = %1"), str)
+	      << endmsg;
+	abort(); /*NOTREACHED*/
 	/* keep gcc happy */
 	return ARDOUR::Normal;
 }
@@ -826,6 +851,7 @@ AddRouteDialog::channels ()
 {
 	ChanCount ret;
 	switch (type_wanted()) {
+	case TriggerTrack:
 	case AudioTrack:
 	case AudioBus:
 		ret.set (DataType::AUDIO, channel_count ());
