@@ -861,12 +861,13 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
-        delete button_bindings;
+	delete button_bindings;
 	delete _routes;
 	delete _route_groups;
 	delete _track_canvas_viewport;
 	delete _drags;
 	delete nudge_clock;
+	delete _verbose_cursor;
 	delete quantize_dialog;
 	delete _summary;
 	delete _group_tabs;

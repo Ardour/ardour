@@ -1646,10 +1646,12 @@ LuaCallback::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	if (_session) {
-		lua_State* L = lua.getState();
-		LuaBindings::set_session (L, _session);
+	if (!_session) {
+		return;
 	}
+
+	lua_State* L = lua.getState();
+	LuaBindings::set_session (L, _session);
 
 	reconnect();
 }
@@ -1664,6 +1666,10 @@ LuaCallback::session_going_away ()
 	_session = 0;
 
 	drop_callback (); /* EMIT SIGNAL */
+
+	lua_State* L = lua.getState();
+	LuaBindings::set_session (L, 0);
+	lua.do_command ("collectgarbage();");
 }
 
 void

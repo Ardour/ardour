@@ -104,6 +104,7 @@ ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
 	cairo_pattern_destroy (shine_pattern);
+	delete text_color;
 }
 
 void

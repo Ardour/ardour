@@ -219,8 +219,6 @@ class TimeAxisView : public virtual AxisView
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 	Children get_child_list ();
 
-	SelectionRect* get_selection_rect(uint32_t id);
-
 	static uint32_t preset_height (Height);
 
 	protected:
@@ -319,6 +317,8 @@ class TimeAxisView : public virtual AxisView
 	static uint32_t button_height;
 	static uint32_t extra_height;
 	static int const _max_order;
+
+	SelectionRect* get_selection_rect(uint32_t id);
 
 	void compute_heights ();
 	bool maybe_set_cursor (int y);

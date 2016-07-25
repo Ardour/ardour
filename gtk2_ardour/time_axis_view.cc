@@ -929,6 +929,8 @@ TimeAxisView::order_selection_trims (ArdourCanvas::Item *item, bool put_start_on
 	}
 }
 
+// retuned rect is pushed back into the used_selection_rects list
+// in TimeAxisView::show_selection() which is the only caller.
 SelectionRect *
 TimeAxisView::get_selection_rect (uint32_t id)
 {
@@ -938,7 +940,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 		if ((*i)->id == id) {
-			return (*i);
+			SelectionRect* ret = (*i);
+			used_selection_rects.erase (i);
+			return ret;
 		}
 	}
 

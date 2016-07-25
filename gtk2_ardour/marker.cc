@@ -198,7 +198,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	case SessionEnd:
 	case RangeEnd:
-		points = new ArdourCanvas::Points ();
+		points = new ArdourCanvas::Points (); // leaks
 		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
 		points->push_back (ArdourCanvas::Duple ( M6, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH * .5));
@@ -316,6 +316,7 @@ ArdourMarker::~ArdourMarker ()
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
 	delete _track_canvas_line;
+	delete points;
 }
 
 void ArdourMarker::reparent(ArdourCanvas::Container & parent)
@@ -543,6 +544,7 @@ TempoMarker::update_height_mark (const double& ratio)
 	const double M3 = std::max(1.f, rintf(3.f * UIConfiguration::instance().get_ui_scale()));
 	const double M6 = std::max(2.f, rintf(6.f * UIConfiguration::instance().get_ui_scale()));
 
+	delete points;
 	points = new ArdourCanvas::Points ();
 	points->push_back (ArdourCanvas::Duple ( M3, top));
 	points->push_back (ArdourCanvas::Duple ( M6, min (top + (MH * .6), MH)));

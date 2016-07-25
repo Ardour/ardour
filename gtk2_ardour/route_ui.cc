@@ -85,7 +85,9 @@ boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 std::string RouteUI::program_port_prefix;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
-	: mute_menu(0)
+	: monitor_input_button (0)
+	, monitor_disk_button (0)
+	, mute_menu(0)
 	, solo_menu(0)
 	, sends_menu(0)
 	, record_menu(0)
@@ -123,6 +125,8 @@ RouteUI::~RouteUI()
 	delete comment_window;
 	delete input_selector;
 	delete output_selector;
+	delete monitor_input_button;
+	delete monitor_disk_button;
 	delete _invert_menu;
 
 	send_blink_connection.disconnect ();
@@ -182,13 +186,13 @@ RouteUI::init ()
 	show_sends_button->set_name ("send alert button");
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	monitor_input_button = manage (new ArdourButton (ArdourButton::default_elements));
+	monitor_input_button = new ArdourButton (ArdourButton::default_elements);
 	monitor_input_button->set_name ("monitor button");
 	monitor_input_button->set_text (_("In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
 
-	monitor_disk_button = manage (new ArdourButton (ArdourButton::default_elements));
+	monitor_disk_button = new ArdourButton (ArdourButton::default_elements);
 	monitor_disk_button->set_name ("monitor button");
 	monitor_disk_button->set_text (_("Disk"));
 	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");
