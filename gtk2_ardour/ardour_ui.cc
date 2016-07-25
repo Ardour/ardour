@@ -3509,7 +3509,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	{
 		Timers::TimerSuspender t;
-		flush_pending ();
+		flush_pending (10);
 	}
 
 #ifdef WINDOWS_VST_SUPPORT

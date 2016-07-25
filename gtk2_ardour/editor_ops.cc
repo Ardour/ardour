@@ -7909,7 +7909,7 @@ Editor::update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, 
 {
 	Timers::TimerSuspender t;
 	label->set_text (string_compose ("Copying %1, %2 of %3", name, n, total));
-	Gtkmm2ext::UI::instance()->flush_pending ();
+	Gtkmm2ext::UI::instance()->flush_pending (1);
 }
 
 void
@@ -7929,7 +7929,7 @@ Editor::bring_all_sources_into_session ()
 	 */
 
 	Timers::TimerSuspender t;
-	Gtkmm2ext::UI::instance()->flush_pending ();
+	Gtkmm2ext::UI::instance()->flush_pending (3);
 
 	cerr << " Do it\n";
 

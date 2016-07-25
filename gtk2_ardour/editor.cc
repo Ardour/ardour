@@ -5049,7 +5049,7 @@ Editor::first_idle ()
 			true
 			);
 		dialog->present ();
-		ARDOUR_UI::instance()->flush_pending ();
+		ARDOUR_UI::instance()->flush_pending (60);
 	}
 
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
