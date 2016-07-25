@@ -728,7 +728,7 @@ UI::popup_error (const string& text)
 }
 
 void
-UI::flush_pending ()
+UI::flush_pending (float timeout)
 {
 	if (!caller_is_ui_thread()) {
 		error << "non-UI threads cannot call UI::flush_pending()"
@@ -736,9 +736,15 @@ UI::flush_pending ()
 		return;
 	}
 
+	int64_t end = g_get_monotonic_time () + timeout * 1e6;
+
 	gtk_main_iteration();
 
 	while (gtk_events_pending()) {
+		if (timeout > 0 && end < g_get_monotonic_time ()) {
+			cerr << "UI::flush_pending timed out after " << timeout << "s.\n";
+			break;
+		}
 		gtk_main_iteration();
 	}
 }

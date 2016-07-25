@@ -136,7 +136,7 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
 	void popup_error (const std::string& text);
-	void flush_pending ();
+	void flush_pending (float timeout = 0);
 	void toggle_errors ();
 	void show_errors ();
 	void dump_errors (std::ostream&);
