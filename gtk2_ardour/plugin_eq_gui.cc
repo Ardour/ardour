@@ -808,26 +808,19 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 	float height = w->get_height();
 
 	cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
-	cairo_set_line_width (cr, 2.5);
+	cairo_set_line_width (cr, 1.5);
 
 	for (uint32_t i = 0; i < _signal_input_fft->bins()-1; i++) {
 		// x coordinate of bin i
 		x  = log10f(1.0 + (float)i / (float)_signal_input_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
 
-		float power_out = power_to_dB(_signal_output_fft->power_at_bin(i));
-		float power_in  = power_to_dB(_signal_input_fft ->power_at_bin(i));
-		float power = power_out - power_in;
+		float power_out = _signal_output_fft->power_at_bin (i) + 1e-30;
+		float power_in  = _signal_input_fft ->power_at_bin (i) + 1e-30;
+		float power = power_to_dB (power_out / power_in);
 
-		if (ISINF(power)) {
-			if (power < 0) {
-				power = _min_dB - 1.0;
-			} else {
-				power = _max_dB - 1.0;
-			}
-		} else if (ISNAN(power)) {
-			power = _min_dB - 1.0;
-		}
+		assert (!ISINF(power));
+		assert (!ISNAN(power));
 
 		float yCoeff = ( power - _min_dB) / (_max_dB - _min_dB);
 
