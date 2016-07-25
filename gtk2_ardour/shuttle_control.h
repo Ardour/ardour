@@ -64,6 +64,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	float  last_speed_displayed;
 	bool   shuttle_grabbed;
 	double shuttle_speed_on_grab;
+	double requested_speed;
 	float shuttle_fract;
 	boost::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t* pattern;

@@ -311,6 +311,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 			add_modal_grab ();
 			shuttle_grabbed = true;
 			shuttle_speed_on_grab = _session->transport_speed ();
+			requested_speed = shuttle_speed_on_grab;
 			mouse_shuttle (ev->x, true);
 			gdk_pointer_grab(ev->window,false,
 			                 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
@@ -556,6 +557,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 		speed = shuttle_max_speed * shuttle_fract;
 	}
 
+	requested_speed = speed;
 	if (zero_ok) {
 		_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
 	} else {
@@ -598,9 +600,14 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_fill (cr);
 
 	float speed = 0.0;
+	float acutal_speed = 0.0;
 
 	if (_session) {
 		speed = _session->transport_speed ();
+		acutal_speed = speed;
+		if (shuttle_grabbed) {
+			speed = requested_speed;
+		}
 	}
 
 	/* Marker */
@@ -626,24 +633,24 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 
 	char buf[32];
 
-	if (speed != 0) {
+	if (acutal_speed != 0) {
 
 		if (Config->get_shuttle_units() == Percentage) {
 
-			if (speed == 1.0) {
+			if (acutal_speed == 1.0) {
 				snprintf (buf, sizeof (buf), "%s", _("Playing"));
 			} else {
-				if (speed < 0.0) {
-					snprintf (buf, sizeof (buf), "<<< %.1f%%", -speed * 100.f);
+				if (acutal_speed < 0.0) {
+					snprintf (buf, sizeof (buf), "<<< %.1f%%", -acutal_speed * 100.f);
 				} else {
-					snprintf (buf, sizeof (buf), ">>> %.1f%%", speed * 100.f);
+					snprintf (buf, sizeof (buf), ">>> %.1f%%", acutal_speed * 100.f);
 				}
 			}
 
 		} else {
 
 			bool reversed;
-			int semi = speed_as_semitones (speed, reversed);
+			int semi = speed_as_semitones (acutal_speed, reversed);
 
 			if (reversed) {
 				snprintf (buf, sizeof (buf), _("<<< %+d semitones"), semi);
@@ -656,7 +663,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 		snprintf (buf, sizeof (buf), "%s", _("Stopped"));
 	}
 
-	last_speed_displayed = speed;
+	last_speed_displayed = acutal_speed;
 
 	const float top_text_margin = 3.0f;
 	const float side_text_margin = 5.0f;
