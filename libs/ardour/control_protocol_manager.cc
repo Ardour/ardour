@@ -43,6 +43,22 @@ using namespace PBD;
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
+
+ControlProtocolInfo::~ControlProtocolInfo ()
+{
+	if (protocol && descriptor) {
+		descriptor->destroy (descriptor, protocol);
+		protocol = 0;
+	}
+
+	delete state; state = 0;
+
+	if (descriptor) {
+		delete (Glib::Module*) descriptor->module;
+		descriptor = 0;
+	}
+}
+
 ControlProtocolManager::ControlProtocolManager ()
 {
 }
@@ -434,6 +450,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 
 			if (cpi) {
+				delete cpi->state;
 				cpi->state = new XMLNode (**citer);
 
 				if (active) {

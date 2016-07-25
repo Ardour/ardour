@@ -3471,6 +3471,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				catch (failed_constructor& err){
 					error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
 					_metrics = old_metrics;
+					old_metrics.clear();
 					break;
 				}
 
@@ -3484,6 +3485,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				catch (failed_constructor& err) {
 					error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
 					_metrics = old_metrics;
+					old_metrics.clear();
 					break;
 				}
 			}
@@ -3535,6 +3537,13 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 		}
 
 		recompute_map (_metrics);
+
+		Metrics::const_iterator d = old_metrics.begin();
+		while (d != old_metrics.end()) {
+			delete (*d);
+			++d;
+		}
+		old_metrics.clear ();
 	}
 
 	PropertyChanged (PropertyChange ());

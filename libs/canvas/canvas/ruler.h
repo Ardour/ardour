@@ -60,14 +60,18 @@ public:
 	Ruler (Item*, const Metric& m);
 	Ruler (Item*, const Metric& m, Rect const&);
 
+	virtual ~Ruler () {
+		delete _font_description;
+	}
+
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);
 	void set_metric (const Metric&);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
-        void set_divide_colors (Color top, Color bottom);
-        void set_divide_height (double);
+	void set_divide_colors (Color top, Color bottom);
+	void set_divide_height (double);
 private:
 	const Metric* _metric;
 
@@ -76,9 +80,9 @@ private:
 
 	Coord         _lower;
 	Coord         _upper;
-        double        _divide_height;
-        Color         _divider_color_top;
-        Color         _divider_color_bottom;
+	double        _divide_height;
+	Color         _divider_color_top;
+	Color         _divider_color_bottom;
 
 	Pango::FontDescription* _font_description;
 	mutable std::vector<Mark> marks;

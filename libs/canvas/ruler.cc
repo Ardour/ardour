@@ -36,7 +36,8 @@ Ruler::Ruler (Canvas* c, const Metric& m)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
-        , _divide_height (-1.0)
+	, _divide_height (-1.0)
+	, _font_description (0)
 	, _need_marks (true)
 {
 }
@@ -46,7 +47,8 @@ Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
-        , _divide_height (-1.0)
+	, _divide_height (-1.0)
+	, _font_description (0)
 	, _need_marks (true)
 {
 }
@@ -56,7 +58,8 @@ Ruler::Ruler (Item* parent, const Metric& m)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
-        , _divide_height (-1.0)
+	, _divide_height (-1.0)
+	, _font_description (0)
 	, _need_marks (true)
 {
 }
@@ -66,7 +69,8 @@ Ruler::Ruler (Item* parent, const Metric& m, Rect const& r)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
-        , _divide_height (-1.0)
+	, _divide_height (-1.0)
+	, _font_description (0)
 	, _need_marks (true)
 {
 }
@@ -85,6 +89,7 @@ void
 Ruler::set_font_description (Pango::FontDescription fd)
 {
 	begin_visual_change ();
+	delete _font_description;
 	_font_description = new Pango::FontDescription (fd);
 	end_visual_change ();
 }

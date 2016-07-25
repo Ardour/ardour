@@ -36,20 +36,21 @@ class ControlProtocolDescriptor;
 class Session;
 
 class LIBARDOUR_API ControlProtocolInfo {
-public:
-    ControlProtocolDescriptor* descriptor;
-    ControlProtocol* protocol;
-    std::string name;
-    std::string path;
-    bool requested;
-    bool mandatory;
-    bool supports_feedback;
-    XMLNode* state;
+	public:
+		ControlProtocolDescriptor* descriptor;
+		ControlProtocol* protocol;
+		std::string name;
+		std::string path;
+		bool requested;
+		bool mandatory;
+		bool supports_feedback;
+		XMLNode* state;
 
-    ControlProtocolInfo() : descriptor (0), protocol (0), requested(false),
+		ControlProtocolInfo() : descriptor (0), protocol (0), requested(false),
 		mandatory(false), supports_feedback(false), state (0)
 	{}
-    ~ControlProtocolInfo() { delete state; }
+		~ControlProtocolInfo();
+
 };
 
 class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr

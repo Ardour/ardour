@@ -146,7 +146,7 @@ pthread_set_name (const char *str)
 {
 	/* copy string and delete it when exiting */
 
-	thread_name.set (strdup (str));
+	thread_name.set (strdup (str)); // leaks
 }
 
 const char *

@@ -139,6 +139,7 @@ ControlList::~ControlList()
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
 		delete (*x);
 	}
+	_events.clear ();
 
 	delete _curve;
 }
@@ -178,6 +179,9 @@ ControlList::copy_events (const ControlList& other)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
+			delete (*x);
+		}
 		_events.clear ();
 		for (const_iterator i = other.begin(); i != other.end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
@@ -216,6 +220,9 @@ ControlList::clear ()
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
+			delete (*x);
+		}
 		_events.clear ();
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
