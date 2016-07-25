@@ -192,14 +192,12 @@ class MidiTrackerEditor : public ArdourWindow
 		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
-		// TODO: have a pointer to an automation object
-		//
-		// Scarily enough it seems it should be an Event<Time>, although
-		// probably better be some ARDOUR::AutomationList iterator or
-		// something. To find out more study how AutomationList turn an
-		// Event<Time> into an automation value, maybe look at how
-		// interpolation works in details.
-		Gtk::TreeModelColumn<boost::shared_ptr<TODO> > _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		// TODO: each column will have to be associated with an
+		// AutomationList. In order to retrieve the value at each time one may
+		// use al->eval(when). In order to retrieve the value of a point one
+		// use it->value, and it->when for its time (as to calculate the
+		// delay).
+		Gtk::TreeModelColumn<ARDOUR::AutomationList::iterator> _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 	};
 
 	enum tracker_columns {
