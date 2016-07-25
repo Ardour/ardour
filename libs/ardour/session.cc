@@ -2030,59 +2030,55 @@ framepos_t
 Session::audible_frame () const
 {
 	framepos_t ret;
-	framepos_t tf;
-	framecnt_t offset;
 
-	offset = worst_playback_latency ();
+	frameoffset_t offset = worst_playback_latency (); // - _engine.samples_since_cycle_start ();
+	offset *= transport_speed ();
 
 	if (synced_to_engine()) {
 		/* Note: this is basically just sync-to-JACK */
-		tf = _engine.transport_frame();
+		ret = _engine.transport_frame();
 	} else {
-		tf = _transport_frame;
+		ret = _transport_frame;
 	}
 
-	ret = tf;
-
-	if (!non_realtime_work_pending()) {
-
-		/* MOVING */
+	if (transport_rolling()) {
+		ret -= offset;
 
 		/* Check to see if we have passed the first guaranteed
-		   audible frame past our last start position. if not,
-		   return that last start point because in terms
-		   of audible frames, we have not moved yet.
-
-		   `Start position' in this context means the time we last
-		   either started, located, or changed transport direction.
-		*/
+		 * audible frame past our last start position. if not,
+		 * return that last start point because in terms
+		 * of audible frames, we have not moved yet.
+		 *
+		 * `Start position' in this context means the time we last
+		 * either started, located, or changed transport direction.
+		 */
 
 		if (_transport_speed > 0.0f) {
 
 			if (!play_loop || !have_looped) {
-				if (tf < _last_roll_or_reversal_location + offset) {
+				if (ret < _last_roll_or_reversal_location) {
 					return _last_roll_or_reversal_location;
 				}
+			} else {
+				// latent loops
+				Location *location = _locations->auto_loop_location();
+				frameoffset_t lo = location->start() - ret;
+				if (lo > 0) {
+					ret = location->end () - lo;
+				}
 			}
-
-
-			/* forwards */
-			ret -= offset;
 
 		} else if (_transport_speed < 0.0f) {
 
 			/* XXX wot? no backward looping? */
 
-			if (tf > _last_roll_or_reversal_location - offset) {
+			if (ret > _last_roll_or_reversal_location) {
 				return _last_roll_or_reversal_location;
-			} else {
-				/* backwards */
-				ret += offset;
 			}
 		}
 	}
 
-	return ret;
+	return std::max (0l, ret);
 }
 
 void
