@@ -648,7 +648,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 	}
 
 	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Misc"));
+	rc_option_editor->set_current_page (_("Misc/Click"));
 	return true;
 }
 
