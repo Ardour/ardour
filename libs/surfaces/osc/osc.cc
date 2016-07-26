@@ -524,12 +524,12 @@ OSC::register_callbacks()
 
 		// controls for "special" strips
 		REGISTER_CALLBACK (serv, "/master/gain", "f", master_set_gain);
-		REGISTER_CALLBACK (serv, "/master/fader", "i", master_set_fader);
+		REGISTER_CALLBACK (serv, "/master/fader", "f", master_set_fader);
 		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
 		REGISTER_CALLBACK (serv, "/master/trimdB", "f", master_set_trim);
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
-		REGISTER_CALLBACK (serv, "/monitor/fader", "i", monitor_set_fader);
+		REGISTER_CALLBACK (serv, "/monitor/fader", "f", monitor_set_fader);
 
 		// Controls for the Selected strip
 		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
@@ -585,7 +585,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter", "iiif", route_plugin_parameter);
 		// prints to cerr only
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter/print", "iii", route_plugin_parameter_print);
-		REGISTER_CALLBACK (serv, "/strip/send/gainabs", "iif", route_set_send_gain_abs);
 		REGISTER_CALLBACK (serv, "/strip/send/gain", "iif", route_set_send_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/send/fader", "iif", route_set_send_fader);
 		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
@@ -895,6 +894,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 			route_set_trim_dB (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
+		else if (!strncmp (path, "/strip/pan_stereo_position/", 27) && strlen (path) > 27) {
+			int ssid = atoi (&path[27]);
+			route_set_pan_stereo_position (ssid, argv[0]->f, msg);
+			ret = 0;
+		}
 		else if (!strncmp (path, "/strip/mute/", 12) && strlen (path) > 12) {
 			int ssid = atoi (&path[12]);
 			route_mute (ssid, argv[0]->f == 1.0, msg);
@@ -937,12 +941,17 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 		else if (!strncmp (path, "/select/send_gain/", 18) && strlen (path) > 18) {
 			int ssid = atoi (&path[18]);
-			route_mute (ssid, argv[0]->f == 1.0, msg);
+			sel_sendgain (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
 		else if (!strncmp (path, "/select/send_fader/", 19) && strlen (path) > 19) {
 			int ssid = atoi (&path[19]);
-			route_solo (ssid, argv[0]->f == 1.0, msg);
+			sel_sendfader (ssid, argv[0]->f, msg);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/select/send_enable/", 20) && strlen (path) > 20) {
+			int ssid = atoi (&path[20]);
+			sel_sendenable (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
 		else if (!strncmp (path, "/select/eq_gain/", 16) && strlen (path) > 16) {
@@ -1324,14 +1333,14 @@ OSC::global_feedback (bitset<32> feedback, lo_address addr, uint32_t gainmode)
 void
 OSC::notify_routes_added (ARDOUR::RouteList &)
 {
-	// not sure if we need this
+	// not sure if we need this PI change seems to cover
 	//recalcbanks();
 }
 
 void
 OSC::notify_vca_added (ARDOUR::VCAList &)
 {
-	// not sure if we need this
+	// not sure if we need this PI change seems to cover
 	//recalcbanks();
 }
 
@@ -1594,16 +1603,12 @@ OSC::master_set_gain (float dB)
 }
 
 int
-OSC::master_set_fader (uint32_t position)
+OSC::master_set_fader (float position)
 {
 	if (!session) return -1;
 	boost::shared_ptr<Stripable> s = session->master_out();
 	if (s) {
-		if ((position > 799.5) && (position < 800.5)) {
-			s->gain_control()->set_value (1.0, PBD::Controllable::NoGroup);
-		} else {
-			s->gain_control()->set_value (slider_position_to_gain_with_max (((float)position/1023), 2.0), PBD::Controllable::NoGroup);
-		}
+		s->gain_control()->set_value (slider_position_to_gain_with_max (position, 2.0), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
@@ -1679,16 +1684,12 @@ OSC::monitor_set_gain (float dB)
 }
 
 int
-OSC::monitor_set_fader (uint32_t position)
+OSC::monitor_set_fader (float position)
 {
 	if (!session) return -1;
 	boost::shared_ptr<Stripable> s = session->monitor_out();
 	if (s) {
-		if ((position > 799.5) && (position < 800.5)) {
-			s->gain_control()->set_value (1.0, PBD::Controllable::NoGroup);
-		} else {
-			s->gain_control()->set_value (slider_position_to_gain_with_max (((float)position/1023), 2.0), PBD::Controllable::NoGroup);
-		}
+		s->gain_control()->set_value (slider_position_to_gain_with_max (position, 2.0), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
@@ -2220,11 +2221,7 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 		return -1;
 	}
 	int ret;
-	if ((pos > 799.5) && (pos < 800.5)) {
-		ret = route_set_gain_abs (ssid, 1.0, msg);
-	} else {
-		ret = route_set_gain_abs (ssid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
-	}
+	ret = route_set_gain_abs (ssid, slider_position_to_gain_with_max (pos, 2.0), msg);
 	if (ret != 0) {
 		return route_send_fail ("fader", ssid, 0, lo_message_get_source (msg));
 	}
@@ -2243,11 +2240,7 @@ OSC::sel_fader (float val, lo_message msg)
 	}
 	if (s) {
 		float abs;
-		if ((val > 799.5) && (val < 800.5)) {
-			abs = 1.0;
-		} else {
-			abs = slider_position_to_gain_with_max ((val/1023), 2.0);
-		}
+		abs = slider_position_to_gain_with_max (val, 2.0);
 		if (s->gain_control()) {
 			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
@@ -2376,48 +2369,59 @@ OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 }
 
 int
-OSC::route_set_send_gain_abs (int ssid, int sid, float val, lo_message msg)
+OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 {
 	if (!session) {
 		return -1;
 	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
-
-	if (!s) {
-		return -1;
+	float abs;
+	if (s) {
+#ifdef MIXBUS
+		abs = val;
+#else
+		if (val < -192) {
+			abs = 0;
+		} else {
+			abs = dB_to_coefficient (val);
+		}
+		if (id > 0) {
+			--id;
+		}
+#endif
+		if (s->send_level_controllable (id)) {
+			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
-
-	/* revert to zero-based counting */
-
-	if (sid > 0) {
-		--sid;
-	}
-
-	if (s->send_level_controllable (sid)) {
-		s->send_level_controllable (sid)->set_value (val, PBD::Controllable::NoGroup);
-		return 0;
-	}
-
-	return -1;
+	return 0;
 }
 
 int
-OSC::route_set_send_gain_dB (int ssid, int sid, float val, lo_message msg)
-{
-	return route_set_send_gain_abs (ssid, sid, dB_to_coefficient (val), msg);
-}
-
-int
-OSC::route_set_send_fader (int ssid, int sid, float pos, lo_message msg)
+OSC::route_set_send_fader (int ssid, int id, float val, lo_message msg)
 {
 	if (!session) {
 		return -1;
 	}
-	if ((pos > 799.5) && (pos < 800.5)) {
-		return route_set_send_gain_abs (ssid, sid, 1.0, msg);
-	} else {
-		return route_set_send_gain_abs (ssid, sid, slider_position_to_gain_with_max ((pos/1023), 2.0), msg);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
+	float abs;
+	if (s) {
+
+		if (id > 0) {
+			--id;
+		}
+
+		if (s->send_level_controllable (id)) {
+#ifdef MIXBUS
+			abs = s->send_level_control(id)->interface_to_internal (val);
+#else
+			abs = slider_position_to_gain_with_max (val, 2.0);
+#endif
+			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
 	}
+	return 0;
 }
 
 int
@@ -2432,6 +2436,9 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 	}
 	float abs;
 	if (s) {
+#ifdef MIXBUS
+		abs = val;
+#else
 		if (val < -192) {
 			abs = 0;
 		} else {
@@ -2440,7 +2447,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-
+#endif
 		if (s->send_level_controllable (id)) {
 			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
@@ -2461,21 +2468,22 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 	}
 	float abs;
 	if (s) {
-		if ((val > 799.5) && (val < 800.5)) {
-			abs = 1.0;
-		} else {
-			abs = slider_position_to_gain_with_max ((val/1023), 2.0);
-		}
+
 		if (id > 0) {
 			--id;
 		}
 
 		if (s->send_level_controllable (id)) {
+#ifdef MIXBUS
+			abs = s->send_level_control(id)->interface_to_internal (val);
+#else
+			abs = slider_position_to_gain_with_max (val, 2.0);
+#endif
 			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_gain", id, 0, lo_message_get_source (msg));
+	return sel_send_fail ("send_fader", id, 0, lo_message_get_source (msg));
 }
 
 int

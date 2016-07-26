@@ -232,13 +232,13 @@ OSCGlobalObserver::tick ()
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
 		float now_meter = session->master_out()->peak_meter()->meter_level(0, MeterMCP);
-		if (now_meter < -120) now_meter = -193;
+		if (now_meter < -94) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				lo_message msg = lo_message_new ();
 				if (gainmode && feedback[7]) {
-					uint32_t lev1023 = (uint32_t)((now_meter + 54) * 17.05);
-					lo_message_add_int32 (msg, lev1023);
+					// change from db to 0-1
+					lo_message_add_float (msg, ((now_meter + 94) / 100));
 					lo_send_message (addr, "/master/meter", msg);
 				} else if ((!gainmode) && feedback[7]) {
 					lo_message_add_float (msg, now_meter);
@@ -287,11 +287,7 @@ OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 	lo_message msg = lo_message_new ();
 
 	if (gainmode) {
-		if (controllable->get_value() == 1) {
-			lo_message_add_int32 (msg, 800);
-		} else {
-			lo_message_add_int32 (msg, gain_to_slider_position (controllable->get_value()) * 1023);
-		}
+		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
 	} else {
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);

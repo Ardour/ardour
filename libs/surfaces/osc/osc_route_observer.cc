@@ -161,7 +161,7 @@ OSCRouteObserver::tick ()
 		} else {
 			now_meter = -193;
 		}
-		if (now_meter < -144) now_meter = -193;
+		if (now_meter < -120) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				string path = "/strip/meter";
@@ -172,8 +172,7 @@ OSCRouteObserver::tick ()
 					lo_message_add_int32 (msg, ssid);
 				}
 				if (gainmode && feedback[7]) {
-					uint32_t lev1023 = (uint32_t)((now_meter + 54) * 17.05);
-					lo_message_add_int32 (msg, lev1023);
+					lo_message_add_float (msg, ((now_meter + 94) / 100));
 					lo_send_message (addr, path.c_str(), msg);
 				} else if ((!gainmode) && feedback[7]) {
 					lo_message_add_float (msg, now_meter);
@@ -327,11 +326,7 @@ OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable
 	}
 
 	if (gainmode) {
-		if (controllable->get_value() == 1) {
-			lo_message_add_int32 (msg, 800);
-		} else {
-			lo_message_add_int32 (msg, gain_to_slider_position (controllable->get_value()) * 1023);
-		}
+		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
 	} else {
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);

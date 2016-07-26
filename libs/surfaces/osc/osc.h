@@ -108,7 +108,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		std::bitset<32> strip_types;// what strip types are a part of this bank
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
-		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1023?
+		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
 		uint32_t expand;			// Used by /select/select
 		bool expand_enable;			// use expand instead of select
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
@@ -301,11 +301,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1(jump_by_bars,f,);
 	PATH_CALLBACK1(jump_by_seconds,f,);
 	PATH_CALLBACK1(master_set_gain,f,);
-	PATH_CALLBACK1(master_set_fader,i,);
+	PATH_CALLBACK1(master_set_fader,f,);
 	PATH_CALLBACK1(master_set_trim,f,);
 	PATH_CALLBACK1(master_set_mute,i,);
 	PATH_CALLBACK1(monitor_set_gain,f,);
-	PATH_CALLBACK1(monitor_set_fader,i,);
+	PATH_CALLBACK1(monitor_set_fader,f,);
 
 #define PATH_CALLBACK1_MSG(name,arg1type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -422,13 +422,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(strip_phase,i,i);
 	PATH_CALLBACK2_MSG(strip_expand,i,i);
 	PATH_CALLBACK2_MSG(strip_gui_select,i,i);
-	PATH_CALLBACK2_MSG(route_set_gain_abs,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_fader,i,f);
 	PATH_CALLBACK2_MSG(route_set_trim_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_position,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_width,i,f);
-	PATH_CALLBACK3(route_set_send_gain_abs,i,i,f);
 	PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
 	PATH_CALLBACK3(route_set_send_fader,i,i,f);
 	PATH_CALLBACK3(route_set_send_enable,i,i,f);
@@ -454,7 +452,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_trim_dB (int rid, float dB, lo_message msg);
 	int route_set_pan_stereo_position (int rid, float left_right_fraction, lo_message msg);
 	int route_set_pan_stereo_width (int rid, float percent, lo_message msg);
-	int route_set_send_gain_abs (int rid, int sid, float val, lo_message msg);
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
 	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
 	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
@@ -473,12 +470,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 
 	int master_set_gain (float dB);
-	int master_set_fader (uint32_t position);
+	int master_set_fader (float position);
 	int master_set_trim (float dB);
 	int master_set_pan_stereo_position (float position, lo_message msg);
 	int master_set_mute (uint32_t state);
 	int monitor_set_gain (float dB);
-	int monitor_set_fader (uint32_t position);
+	int monitor_set_fader (float position);
 	int sel_recenable (uint32_t state, lo_message msg);
 	int sel_recsafe (uint32_t state, lo_message msg);
 	int sel_mute (uint32_t state, lo_message msg);

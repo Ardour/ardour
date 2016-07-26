@@ -302,8 +302,7 @@ OSCSelectObserver::tick ()
 				string path = "/select/meter";
 				lo_message msg = lo_message_new ();
 				if (gainmode && feedback[7]) {
-					uint32_t lev1023 = (uint32_t)((now_meter + 54) * 17.05);
-					lo_message_add_int32 (msg, lev1023);
+					lo_message_add_float (msg, ((now_meter + 94) / 100));
 					lo_send_message (addr, path.c_str(), msg);
 				} else if ((!gainmode) && feedback[7]) {
 					lo_message_add_float (msg, now_meter);
@@ -439,17 +438,21 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 	lo_message msg = lo_message_new ();
 
 	if (gainmode) {
-		if (controllable->get_value() == 1) {
-			lo_message_add_int32 (msg, 800);
-		} else {
-			lo_message_add_int32 (msg, gain_to_slider_position (controllable->get_value()) * 1023);
-		}
+#ifdef MIXBUS
+		lo_message_add_float (msg, controllable->internal_to_interface (val));
+#else
+		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+#endif
 	} else {
+#ifdef MIXBUS
+		lo_message_add_float (msg, val);
+#else
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);
 		} else {
 			lo_message_add_float (msg, accurate_coefficient_to_dB (controllable->get_value()));
 		}
+#endif
 	}
 
 	lo_send_message (addr, path.c_str(), msg);
@@ -465,11 +468,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 
 	if (gainmode) {
 		path = "/select/send_fader";
-		if (controllable->get_value() == 1) {
-			value = 800;
-		} else {
-			value = gain_to_slider_position (controllable->get_value());
-		}
+		value = gain_to_slider_position (controllable->get_value());
 	} else {
 		path = "/select/send_gain";
 		if (controllable->get_value() < 1e-15) {
