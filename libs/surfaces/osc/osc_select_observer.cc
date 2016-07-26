@@ -164,10 +164,6 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
 			change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
 		}
-		if (_strip->comp_redux_controllable ()) {
-			_strip->comp_redux_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_redux"), _strip->comp_redux_controllable()), OSC::instance());
-			change_message ("/select/comp_redux", _strip->comp_redux_controllable());
-		}
 
 	}
 
@@ -226,7 +222,6 @@ OSCSelectObserver::~OSCSelectObserver ()
 		text_message ("/select/comp_mode_name", " ");
 		text_message ("/select/comp_speed_name", " ");
 		clear_strip ("/select/comp_makeup", 0);
-		clear_strip ("/select/comp_redux", 0);
 	}
 	send_end();
 	eq_end();
