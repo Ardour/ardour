@@ -723,6 +723,8 @@ private:
 	std::map<std::string, OptionEditorPage*> _pages;
 
 	void add_path_to_treeview (std::string const &, Gtk::Widget&);
+	Gtk::TreeModel::iterator find_path_in_treemodel (std::string const & pn,
+	                                                 bool create_missing = false);
 	void treeview_row_selected ();
 };
 

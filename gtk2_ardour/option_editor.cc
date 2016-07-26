@@ -533,99 +533,63 @@ OptionEditor::treeview_row_selected ()
 	}
 }
 
+TreeModel::iterator
+OptionEditor::find_path_in_treemodel (std::string const & pn, bool create_missing)
+{
+	/* split page name, which is actually a path, into each component */
+
+	std::vector<std::string> components;
+	split (pn, components, '/');
+
+	/* start with top level children */
+
+	TreeModel::Children children = option_tree->children();
+	TreeModel::iterator iter;
+
+	/* foreach path component ... */
+
+	for (std::vector<std::string>::const_iterator s = components.begin(); s != components.end(); ++s) {
+
+		for (iter = children.begin(); iter != children.end(); ++iter) {
+			TreeModel::Row row = *iter;
+			const std::string row_name = row[option_columns.name];
+			if (row_name == (*s)) {
+				break;
+			}
+		}
+
+		if (iter == children.end()) {
+			/* the current component is missing; bail out or create it */
+			if (!create_missing) {
+				return option_tree->get_iter(TreeModel::Path(""));
+			} else {
+				iter = option_tree->append (children);
+				TreeModel::Row row = *iter;
+				row[option_columns.name] = *s;
+				row[option_columns.widget] = 0;
+			}
+		}
+
+		/* from now on, iter points to a valid row, either the one we found or a new one */
+		/* set children to the row's children to continue searching */
+		children = (*iter)->children ();
+
+	}
+
+	return iter;
+}
+
 void
 OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
 {
 	option_treeview.set_model (Glib::RefPtr<TreeStore>());
 
-	if (pn.find ('/') == std::string::npos) {
-		/* new top level item in tree */
+	TreeModel::iterator row_iter = find_path_in_treemodel(pn, true);
 
-		TreeModel::iterator new_row = option_tree->append ();
-		TreeModel::Row row = *new_row;
-		row[option_columns.name] = pn;
-		row[option_columns.widget] = &widget;
+	assert(row_iter);
 
-	} else {
-
-		/* find parent */
-
-		/* split page name, which is actually a path, into each
-		 * component
-		 */
-
-		std::vector<std::string> components;
-		split (pn, components, '/');
-
-		/* start with top level children */
-
-		typedef Gtk::TreeModel::Children type_children; //minimise code length.
-		type_children children = option_tree->children();
-
-		/* foreach path component ... */
-
-		for (std::vector<std::string>::const_iterator s = components.begin(); s != components.end(); ) {
-
-			bool component_found = false;
-
-			type_children::iterator iter;
-
-			/* look through the children at this level */
-
-			for (iter = children.begin(); iter != children.end(); ++iter) {
-				Gtk::TreeModel::Row row = *iter;
-
-				std::string row_name = row[option_columns.name];
-				if (row_name == (*s)) {
-
-					/* found it */
-
-					component_found = true;
-
-					/* reset children to point to
-					 * the children of this row
-					 */
-
-					children = row.children();
-					break;
-				}
-			}
-
-			if (!component_found) {
-
-				/* missing component. If it is the last
-				 * one, append a real page. Otherwise
-				 * just put an entry in the tree model
-				 * since it is a navigational/sorting
-				 * component.
-				 */
-
-				TreeModel::iterator new_row = option_tree->append (children);
-				TreeModel::Row row = *new_row;
-				row[option_columns.name] = *s;
-
-				++s;
-
-				if (s == components.end()) {
-					row[option_columns.widget] = &widget;
-				} else {
-					row[option_columns.widget] = 0;
-				}
-
-				children = row.children ();
-
-			} else {
-
-				/* component found, just move on to the
-				 * next one. children has already been
-				 * reset appropriately.
-				 */
-
-				++s;
-			}
-		}
-
-	}
+	TreeModel::Row row = *row_iter;
+	row[option_columns.widget] = &widget;
 
 	option_treeview.set_model (option_tree);
 	option_treeview.expand_all ();
