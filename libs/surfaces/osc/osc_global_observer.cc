@@ -341,7 +341,7 @@ OSCGlobalObserver::send_transport_state_changed()
 	lo_message_free (msg);
 
 	msg = lo_message_new ();
-	lo_message_add_int32 (msg, session->transport_speed() > 1.0);
+	lo_message_add_int32 (msg, (session->transport_speed() != 1.0 && session->transport_speed() > 0.0));
 	lo_send_message (addr, "/ffwd", msg);
 	lo_message_free (msg);
 
