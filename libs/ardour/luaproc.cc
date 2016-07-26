@@ -1218,7 +1218,7 @@ LuaProc::load_preset (PresetRecord r)
 				set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
 			}
 		}
-		return true;
+		return Plugin::load_preset(r);
 	}
 	return false;
 }
