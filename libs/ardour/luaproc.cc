@@ -22,7 +22,7 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/gstdio_compat.h"
-
+#include "pbd/locale_guard.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audio_buffer.h"
@@ -1214,6 +1214,7 @@ LuaProc::load_preset (PresetRecord r)
 				XMLProperty const * value = (*j)->property (X_("value"));
 				assert (index);
 				assert (value);
+				LocaleGuard lg;
 				set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
 			}
 		}
