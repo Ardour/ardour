@@ -646,7 +646,7 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
 		if (!choose_new_marker_name(markername)) {
 			return;
 		}
-		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
+		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags, get_grid_music_divisions (0));
 		begin_reversible_command (_("add marker"));
 
 		XMLNode &before = _session->locations()->get_state();
@@ -839,7 +839,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
 		if (transport_marker_menu == 0) {
-			build_range_marker_menu (loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
+			build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
 		}
 
 		marker_menu_item = item;
@@ -869,7 +869,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	} else if (loc->is_range_marker()) {
 		if (range_marker_menu == 0) {
-			build_range_marker_menu (false, false);
+			build_range_marker_menu (loc, false, false);
 		}
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
@@ -927,7 +927,7 @@ Editor::build_marker_menu (Location* loc)
 }
 
 void
-Editor::build_range_marker_menu (bool loop_or_punch, bool session)
+Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session)
 {
 	using namespace Menu_Helpers;
 
@@ -951,6 +951,14 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	items.push_back (MenuElem (_("Set Range from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
 
 	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
+	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
+	if (loc->position_lock_style() == MusicTime) {
+		glue_item->set_active ();
+	}
+	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
@@ -1217,13 +1225,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (_session->audible_frame ());
+			l->set_start (_session->audible_frame (), false, true, get_grid_music_divisions(0));
 		}
 		else {
 			if (is_start) {
-				l->set_start (_session->audible_frame ());
+				l->set_start (_session->audible_frame (), false, true, get_grid_music_divisions(0));
 			} else {
-				l->set_end (_session->audible_frame ());
+				l->set_end (_session->audible_frame (), false, true, get_grid_music_divisions(0));
 			}
 		}
 	}

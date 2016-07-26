@@ -58,7 +58,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	};
 
 	Location (Session &);
-	Location (Session &, framepos_t, framepos_t, const std::string &, Flags bits = Flags(0));
+	Location (Session &, framepos_t, framepos_t, const std::string &, Flags bits = Flags(0), const uint32_t sub_num = 0);
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
@@ -73,11 +73,11 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	framepos_t end() const { return _end; }
 	framecnt_t length() const { return _end - _start; }
 
-	int set_start (framepos_t s, bool force = false, bool allow_bbt_recompute = true);
-	int set_end (framepos_t e, bool force = false, bool allow_bbt_recompute = true);
-	int set (framepos_t start, framepos_t end, bool allow_bbt_recompute = true);
+	int set_start (framepos_t s, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
+	int set_end (framepos_t e, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
+	int set (framepos_t start, framepos_t end, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
 
-	int move_to (framepos_t pos);
+	int move_to (framepos_t pos, const uint32_t sub_num);
 
 	const std::string& name() const { return _name; }
 	void set_name (const std::string &str);
@@ -143,7 +143,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	PositionLockStyle position_lock_style() const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
-	void recompute_frames_from_bbt ();
+	void recompute_frames_from_beat ();
 
 	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
         PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
@@ -151,9 +151,9 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
   private:
 	std::string        _name;
 	framepos_t         _start;
-	double             _bbt_start;
+	double             _start_beat;
 	framepos_t         _end;
-	double             _bbt_end;
+	double             _end_beat;
 	Flags              _flags;
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
@@ -161,7 +161,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
-	void recompute_bbt_from_frames ();
+	void recompute_beat_from_frames (const uint32_t sub_num);
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */

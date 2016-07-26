@@ -419,9 +419,9 @@ Editor::nudge_forward (bool next, bool force_playhead)
 						distance = next_distance;
 					}
 					if (max_framepos - distance > loc->start() + loc->length()) {
-						loc->set_start (loc->start() + distance);
+						loc->set_start (loc->start() + distance, false, true, get_grid_music_divisions(0));
 					} else {
-						loc->set_start (max_framepos - loc->length());
+						loc->set_start (max_framepos - loc->length(), false, true, get_grid_music_divisions(0));
 					}
 				} else {
 					distance = get_nudge_distance (loc->end(), next_distance);
@@ -429,9 +429,9 @@ Editor::nudge_forward (bool next, bool force_playhead)
 						distance = next_distance;
 					}
 					if (max_framepos - distance > loc->end()) {
-						loc->set_end (loc->end() + distance);
+						loc->set_end (loc->end() + distance, false, true, get_grid_music_divisions(0));
 					} else {
-						loc->set_end (max_framepos);
+						loc->set_end (max_framepos, false, true, get_grid_music_divisions(0));
 					}
 					if (loc->is_session_range()) {
 						_session->set_end_is_free (false);
@@ -511,9 +511,9 @@ Editor::nudge_backward (bool next, bool force_playhead)
 						distance = next_distance;
 					}
 					if (distance < loc->start()) {
-						loc->set_start (loc->start() - distance);
+						loc->set_start (loc->start() - distance, false, true, get_grid_music_divisions(0));
 					} else {
-						loc->set_start (0);
+						loc->set_start (0, false, true, get_grid_music_divisions(0));
 					}
 				} else {
 					distance = get_nudge_distance (loc->end(), next_distance);
@@ -523,9 +523,9 @@ Editor::nudge_backward (bool next, bool force_playhead)
 					}
 
 					if (distance < loc->end() - loc->length()) {
-						loc->set_end (loc->end() - distance);
+						loc->set_end (loc->end() - distance, false, true, get_grid_music_divisions(0));
 					} else {
-						loc->set_end (loc->length());
+						loc->set_end (loc->length(), false, true, get_grid_music_divisions(0));
 					}
 					if (loc->is_session_range()) {
 						_session->set_end_is_free (false);
@@ -1139,7 +1139,7 @@ Editor::selected_marker_to_region_boundary (bool with_selection, int32_t dir)
 		return;
 	}
 
-	loc->move_to (target);
+	loc->move_to (target, 0);
 }
 
 void
@@ -1216,7 +1216,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 
 	pos = track_frame_to_session_frame(pos, speed);
 
-	loc->move_to (pos);
+	loc->move_to (pos, 0);
 }
 
 void
@@ -1263,7 +1263,7 @@ Editor::selected_marker_to_selection_start ()
 		return;
 	}
 
-	loc->move_to (pos);
+	loc->move_to (pos, 0);
 }
 
 void
@@ -1298,7 +1298,7 @@ Editor::selected_marker_to_selection_end ()
 		return;
 	}
 
-	loc->move_to (pos);
+	loc->move_to (pos, 0);
 }
 
 void
@@ -1358,10 +1358,10 @@ Editor::cursor_align (bool playhead_to_edit)
 			Location* loc = find_location_from_marker (*i, ignored);
 
 			if (loc->is_mark()) {
-				loc->set_start (playhead_cursor->current_frame ());
+				loc->set_start (playhead_cursor->current_frame (), false, true, get_grid_music_divisions(0));
 			} else {
 				loc->set (playhead_cursor->current_frame (),
-					  playhead_cursor->current_frame () + loc->length());
+					  playhead_cursor->current_frame () + loc->length(), true, get_grid_music_divisions(0));
 			}
 		}
 	}
@@ -2159,7 +2159,7 @@ Editor::add_location_from_selection ()
 	framepos_t end = selection->time[clicked_selection].end;
 
 	_session->locations()->next_available_name(rangename,"selection");
-	Location *location = new Location (*_session, start, end, rangename, Location::IsRangeMarker);
+	Location *location = new Location (*_session, start, end, rangename, Location::IsRangeMarker, get_grid_music_divisions(0));
 
 	begin_reversible_command (_("add marker"));
 
@@ -2182,7 +2182,7 @@ Editor::add_location_mark (framepos_t where)
 	if (!choose_new_marker_name(markername)) {
 		return;
 	}
-	Location *location = new Location (*_session, where, where, markername, Location::IsMark);
+	Location *location = new Location (*_session, where, where, markername, Location::IsMark, get_grid_music_divisions (0));
 	begin_reversible_command (_("add marker"));
 
 	XMLNode &before = _session->locations()->get_state();
@@ -2294,7 +2294,7 @@ Editor::add_locations_from_region ()
 
 		boost::shared_ptr<Region> region = (*i)->region ();
 
-		Location *location = new Location (*_session, region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
+		Location *location = new Location (*_session, region->position(), region->last_frame(), region->name(), Location::IsRangeMarker, 0);
 
 		_session->locations()->add (location, true);
 		commit = true;
@@ -2335,7 +2335,7 @@ Editor::add_location_from_region ()
 	}
 
 	// single range spanning all selected
-	Location *location = new Location (*_session, selection->regions.start(), selection->regions.end_frame(), markername, Location::IsRangeMarker);
+	Location *location = new Location (*_session, selection->regions.start(), selection->regions.end_frame(), markername, Location::IsRangeMarker, 0);
 	_session->locations()->add (location, true);
 
 	begin_reversible_command (_("add marker"));
@@ -2390,7 +2390,7 @@ Editor::set_mark ()
 		return;
 	}
 
-	_session->locations()->add (new Location (*_session, pos, 0, markername, Location::IsMark), true);
+	_session->locations()->add (new Location (*_session, pos, 0, markername, Location::IsMark, 0), true);
 }
 
 void
@@ -6105,7 +6105,7 @@ Editor::set_edit_point ()
 		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
 
 		if (loc) {
-			loc->move_to (where);
+			loc->move_to (where, get_grid_music_divisions(0));
 		}
 	}
 }
@@ -7356,9 +7356,9 @@ Editor::insert_time (
 				if ((*i)->start() >= pos) {
 					// move end first, in case we're moving by more than the length of the range
 					if (!(*i)->is_mark()) {
-						(*i)->set_end ((*i)->end() + frames);
+						(*i)->set_end ((*i)->end() + frames, false, true, get_grid_music_divisions(0));
 					}
-					(*i)->set_start ((*i)->start() + frames);
+					(*i)->set_start ((*i)->start() + frames, false, true, get_grid_music_divisions(0));
 					moved = true;
 				}
 
@@ -7500,20 +7500,20 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 						// if we're removing more time than the length of the range
 						if ((*i)->start() >= pos && (*i)->start() < pos+frames) {
 							// start is within cut
-							(*i)->set_start (pos);  // bring the start marker to the beginning of the cut
+							(*i)->set_start (pos, false, true, get_grid_music_divisions(0));  // bring the start marker to the beginning of the cut
 							moved = true;
 						} else if ((*i)->start() >= pos+frames) {
 							// start (and thus entire range) lies beyond end of cut
-							(*i)->set_start ((*i)->start() - frames); // slip the start marker back
+							(*i)->set_start ((*i)->start() - frames, false, true, get_grid_music_divisions(0)); // slip the start marker back
 							moved = true;
 						}
 						if ((*i)->end() >= pos && (*i)->end() < pos+frames) {
 							// end is inside cut
-							(*i)->set_end (pos);  // bring the end to the cut
+							(*i)->set_end (pos, false, true, get_grid_music_divisions(0));  // bring the end to the cut
 							moved = true;
 						} else if ((*i)->end() >= pos+frames) {
 							// end is beyond end of cut
-							(*i)->set_end ((*i)->end() - frames); // slip the end marker back
+							(*i)->set_end ((*i)->end() - frames, false, true, get_grid_music_divisions(0)); // slip the end marker back
 							moved = true;
 						}
 
@@ -7522,7 +7522,7 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 					loc_kill_list.push_back(*i);
 					moved = true;
 				} else if ((*i)->start() >= pos) {
-					(*i)->set_start ((*i)->start() -frames);
+					(*i)->set_start ((*i)->start() -frames, false, true, get_grid_music_divisions(0));
 					moved = true;
 				}
 
