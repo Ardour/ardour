@@ -956,22 +956,22 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 		else if (!strncmp (path, "/select/eq_gain/", 16) && strlen (path) > 16) {
 			int ssid = atoi (&path[16]);
-			route_solo (ssid, argv[0]->f == 1.0, msg);
+			sel_eq_gain (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
 		else if (!strncmp (path, "/select/eq_freq/", 16) && strlen (path) > 16) {
 			int ssid = atoi (&path[16]);
-			route_solo (ssid, argv[0]->f == 1.0, msg);
+			sel_eq_freq (ssid, argv[0]->f , msg);
 			ret = 0;
 		}
 		else if (!strncmp (path, "/select/eq_q/", 13) && strlen (path) > 13) {
 			int ssid = atoi (&path[13]);
-			route_solo (ssid, argv[0]->f == 1.0, msg);
+			sel_eq_q (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
 		else if (!strncmp (path, "/select/eq_shape/", 17) && strlen (path) > 17) {
 			int ssid = atoi (&path[17]);
-			route_solo (ssid, argv[0]->f == 1.0, msg);
+			sel_eq_shape (ssid, argv[0]->f, msg);
 			ret = 0;
 		}
 	}
