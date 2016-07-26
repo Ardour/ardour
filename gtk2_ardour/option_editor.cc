@@ -636,15 +636,12 @@ OptionEditor::add_page (std::string const & pn, Gtk::Widget& w)
 void
 OptionEditor::set_current_page (string const & p)
 {
-	int i = 0;
-	while (i < _notebook.get_n_pages ()) {
-		if (_notebook.get_tab_label_text (*_notebook.get_nth_page (i)) == p) {
-			_notebook.set_current_page (i);
-			return;
-		}
+	TreeModel::iterator row_iter = find_path_in_treemodel(p);
 
-		++i;
+	if (row_iter) {
+		option_treeview.get_selection()->select(row_iter);
 	}
+
 }
 
 
