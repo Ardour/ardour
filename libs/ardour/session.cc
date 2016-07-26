@@ -2078,7 +2078,7 @@ Session::audible_frame () const
 		}
 	}
 
-	return std::max (0l, ret);
+	return std::max ((framepos_t)0, ret);
 }
 
 void
