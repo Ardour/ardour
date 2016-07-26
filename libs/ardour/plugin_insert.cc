@@ -85,8 +85,8 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 		add_plugin (plug);
 		create_automatable_parameters ();
 		const ChanCount& sc (sidechain_input_pins ());
-		if (sc.n_audio () > 0) {
-			add_sidechain (sc.n_audio ());
+		if (sc.n_audio () > 0 || sc.n_midi () > 0) {
+			add_sidechain (sc.n_audio (), sc.n_midi ());
 		}
 	}
 }
@@ -190,14 +190,14 @@ PluginInsert::set_preset_out (const ChanCount& c)
 }
 
 bool
-PluginInsert::add_sidechain (uint32_t n_audio)
+PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 {
 	// caller must hold process lock
 	if (_sidechain) {
 		return false;
 	}
 	std::ostringstream n;
-	if (n_audio > 0) {
+	if (n_audio > 0 || n_midi > 0) {
 		n << "Sidechain " << Session::next_name_id ();
 	} else {
 		n << "TO BE RESET FROM XML";
@@ -206,7 +206,10 @@ PluginInsert::add_sidechain (uint32_t n_audio)
 	_sidechain = boost::shared_ptr<SideChain> (sc);
 	_sidechain->activate ();
 	for (uint32_t n = 0; n < n_audio; ++n) {
-		_sidechain->input()->add_port ("", owner()); // add a port, don't connect.
+		_sidechain->input()->add_port ("", owner(), DataType::AUDIO); // add a port, don't connect.
+	}
+	for (uint32_t n = 0; n < n_midi; ++n) {
+		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
 	}
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return true;
