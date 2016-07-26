@@ -27,12 +27,39 @@
 #include "ardour/session.h"
 #include "ardour/trigger_track.h"
 
+#include "ardour/sndfilesource.h"
+#include "ardour/region_factory.h"
+
 using namespace ARDOUR;
+using namespace PBD;
+using std::string;
+using std::cerr;
+using std::endl;
 
 TriggerTrack::TriggerTrack (Session& s, std::string name)
 	: Track (s, name, PresentationInfo::TriggerTrack, Normal)
 	, _trigger_queue (1024)
 {
+	PropertyList plist;
+
+	the_source.reset (new SndFileSource (_session, "/usr/share/sounds/alsa/Front_Center.wav", 0, Source::Flag (0)));
+
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, the_source->length (0));
+	plist.add (Properties::name, string ("bang"));
+	plist.add (Properties::layer, 0);
+	plist.add (Properties::layering_index, 0);
+
+	boost::shared_ptr<Region> r = RegionFactory::create (the_source, plist, false);
+	the_region = boost::dynamic_pointer_cast<AudioRegion> (r);
+
+	cerr << "Trigger track has region " << the_region->name() << " length = " << the_region->length() << endl;
+
+	/* XXX the_region/trigger will be looked up in a
+	   std::map<MIDI::byte,Trigger>
+	*/
+	the_trigger = new AudioTrigger (the_region);
+	add_trigger (the_trigger);
 }
 
 TriggerTrack::~TriggerTrack ()
@@ -57,10 +84,27 @@ TriggerTrack::init ()
 }
 
 void
+TriggerTrack::note_on (int note_number, int velocity)
+{
+	if (velocity == 0) {
+		note_off (note_number, velocity);
+		return;
+	}
+
+	queue_trigger (the_trigger);
+}
+
+void
+TriggerTrack::note_off (int note_number, int velocity)
+{
+}
+
+void
 TriggerTrack::add_trigger (Trigger* trigger)
 {
 	Glib::Threads::Mutex::Lock lm (trigger_lock);
 	all_triggers.push_back (trigger);
+	cerr << "Now have " << all_triggers.size() << " of all possible triggers\n";
 }
 
 bool
@@ -70,8 +114,26 @@ TriggerTrack::queue_trigger (Trigger* trigger)
 }
 
 int
+TriggerTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing)
+{
+	bool ignored;
+	return roll (nframes, start_frame, end_frame, state_changing, ignored);
+}
+
+int
 TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
+	/* check MIDI port input buffers for triggers */
+
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+
+	for (MidiBuffer::iterator ev = mb.begin(); ev != mb.end(); ++ev) {
+		if ((*ev).is_note_on()) {
+			cerr << "Trigger => NOTE ON!\n";
+			note_on ((*ev).note(), (*ev).velocity());
+		}
+	}
+
 	/* get tempo map */
 
 	/* find offset to next bar * and beat start
@@ -99,11 +161,15 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 	for (uint32_t n = 0; n < vec.len[0]; ++n) {
 		Trigger* t = vec.buf[0][n];
 		t->bang (*this, beats_now, start_frame);
+		active_triggers.push_back (t);
+		cerr << "Trigger goes bang at " << start_frame << endl;
 	}
 
 	for (uint32_t n = 0; n < vec.len[1]; ++n) {
 		Trigger* t = vec.buf[1][n];
 		t->bang (*this, beats_now, start_frame);
+		active_triggers.push_back (t);
+		cerr << "Trigger goes bang at " << start_frame << endl;
 	}
 
 	_trigger_queue.increment_read_idx (vec.len[0] + vec.len[1]);
@@ -125,17 +191,19 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
 	fill_buffers_with_input (bufs, _input, nframes);
 
-	for (uint32_t chan = 0; !err && chan < nchans; ++chan) {
+	for (Triggers::iterator t = active_triggers.begin(); !err && t != active_triggers.end(); ) {
 
-		AudioBuffer& buf = bufs.get_audio (chan);
 
-		for (Triggers::iterator t = active_triggers.begin(); !err && t != active_triggers.end(); ) {
+		AudioTrigger* at = dynamic_cast<AudioTrigger*> (*t);
 
-			AudioTrigger* at = dynamic_cast<AudioTrigger*> (*t);
+		if (!at) {
+			continue;
+		}
 
-			if (!at) {
-				continue;
-			}
+		for (uint32_t chan = 0; !err && chan < nchans; ++chan) {
+
+			AudioBuffer& buf = bufs.get_audio (chan);
+
 			pframes_t to_copy = nframes;
 
 			Sample* data = at->run (chan, to_copy, start_frame, end_frame, need_butler);
@@ -153,6 +221,8 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 			}
 		}
 	}
+
+	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, true);
 
 	return 0;
 }
@@ -237,12 +307,6 @@ TriggerTrack::can_use_mode (TrackMode m, bool& bounce_required)
 	return false;
 }
 
-int
-TriggerTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing)
-{
-	return 0;
-}
-
 void
 TriggerTrack::freeze_me (ARDOUR::InterThreadInfo&)
 {
@@ -296,9 +360,11 @@ AudioTrigger::AudioTrigger (boost::shared_ptr<AudioRegion> r)
 
 	const uint32_t nchans = region->n_channels();
 
+	cerr << "Trigger needs " << nchans << " channels of " << region->length() << " each\n";
+
 	for (uint32_t n = 0; n < nchans; ++n) {
 		data.push_back (new Sample (region->length()));;
-		region->read (data[n], 0, region->length(), 0);
+		// region->read (data[n], 0, region->length(), n);
 	}
 
 	length = region->length();

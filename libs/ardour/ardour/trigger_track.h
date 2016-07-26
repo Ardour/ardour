@@ -30,6 +30,11 @@
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
+namespace MIDI {
+	class Parser;
+	class EventTwoBytes;
+}
+
 namespace ARDOUR
 {
 
@@ -113,6 +118,15 @@ private:
 	Triggers all_triggers;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
+
+	void note_on (int note_number, int velocity);
+	void note_off (int note_number, int velocity);
+
+	/* XXX */
+
+	boost::shared_ptr<Source> the_source;
+	boost::shared_ptr<AudioRegion> the_region;
+	AudioTrigger* the_trigger;
 };
 
 } /* namespace ARDOUR*/
