@@ -1014,6 +1014,10 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				}
 			}
 
+			if (pi && pi->has_sidechain ()) {
+				pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+			}
+
 			if ((*i)->active()) {
 				// why?  emit  ActiveChanged() ??
 				(*i)->activate ();
