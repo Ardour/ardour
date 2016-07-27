@@ -111,20 +111,19 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> rec_safe_control() const { return boost::shared_ptr<AutomationControl>(); }
 
 	/* "well-known" controls for panning. Any or all of these may return
-         * null.
-         */
-
+	 * null.
+	 */
 	virtual boost::shared_ptr<AutomationControl> pan_azimuth_control() const = 0;
 	virtual boost::shared_ptr<AutomationControl> pan_elevation_control() const = 0;
 	virtual boost::shared_ptr<AutomationControl> pan_width_control() const = 0;
 	virtual boost::shared_ptr<AutomationControl> pan_frontback_control() const = 0;
 	virtual boost::shared_ptr<AutomationControl> pan_lfe_control() const = 0;
 
-        /* "well-known" controls for an EQ in this route. Any or all may
-         * be null. eq_band_cnt() must return 0 if there is no EQ present.
-         * Passing an @param band value >= eq_band_cnt() will guarantee the
-         * return of a null ptr (or an empty string for eq_band_name()).
-         */
+	/* "well-known" controls for an EQ in this route. Any or all may
+	 * be null. eq_band_cnt() must return 0 if there is no EQ present.
+	 * Passing an @param band value >= eq_band_cnt() will guarantee the
+	 * return of a null ptr (or an empty string for eq_band_name()).
+	 */
 	virtual uint32_t eq_band_cnt () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
@@ -134,9 +133,9 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_hpf_controllable () const = 0;
 
-        /* "well-known" controls for a compressor in this route. Any or all may
-         * be null.
-         */
+	/* "well-known" controls for a compressor in this route. Any or all may
+	 * be null.
+	 */
 	virtual boost::shared_ptr<AutomationControl> comp_enable_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_threshold_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_speed_controllable () const = 0;
@@ -144,36 +143,38 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> comp_makeup_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_redux_controllable () const = 0;
 
-        /* @param mode must be supplied by the comp_mode_controllable(). All other values
-         * result in undefined behaviour
-         */
+	/* @param mode must be supplied by the comp_mode_controllable(). All other values
+	 * result in undefined behaviour
+	 */
 	virtual std::string comp_mode_name (uint32_t mode) const = 0;
-        /* @param mode - as for comp mode name. This returns the name for the
-         * parameter/control accessed via comp_speed_controllable(), which can
-         * be mode dependent.
-         */
+
+	/* @param mode - as for comp mode name. This returns the name for the
+	 * parameter/control accessed via comp_speed_controllable(), which can
+	 * be mode dependent.
+	 */
 	virtual std::string comp_speed_name (uint32_t mode) const = 0;
 
-        /* "well-known" controls for sends to well-known busses in this route. Any or all may
-         * be null.
-         *
-         * In Mixbus, these are the sends that connect to the mixbusses.
-         * In Ardour, these are user-created sends that connect to user-created
-         * Aux busses.
-         */
+	/* "well-known" controls for sends to well-known busses in this route. Any or all may
+	 * be null.
+	 *
+	 * In Mixbus, these are the sends that connect to the mixbusses.
+	 * In Ardour, these are user-created sends that connect to user-created
+	 * Aux busses.
+	 */
 	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
-        /* for the same value of @param n, this returns the name of the send
-         * associated with the pair of controllables returned by the above two methods.
-         */
+
+	/* for the same value of @param n, this returns the name of the send
+	 * associated with the pair of controllables returned by the above two methods.
+	 */
 	virtual std::string send_name (uint32_t n) const = 0;
 
-        /* well known control that enables/disables sending to the master bus.
-         *
-         * In Ardour, this returns null.
-         * In Mixbus, it will return a suitable control, or null depending on
-         * the route.
-         */
+	/* well known control that enables/disables sending to the master bus.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
 
 	virtual bool muted_by_others_soloing () const = 0;
