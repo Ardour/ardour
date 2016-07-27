@@ -72,7 +72,7 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 		return self_soloed() || get_masters_value ();
 	}
 	bool soloed_by_others () const {
-		return _soloed_by_others_downstream || _soloed_by_others_downstream || get_masters_value ();
+		return _soloed_by_others_downstream || _soloed_by_others_upstream || get_masters_value ();
 	}
 	uint32_t soloed_by_others_upstream () const {
 		return _soloed_by_others_upstream;
