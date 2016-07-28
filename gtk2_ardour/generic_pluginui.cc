@@ -663,6 +663,38 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 	if (is_input) {
 
+		if (desc.datatype == Variant::PATH) {
+
+			/* Build a file selector button */
+
+			// Create/add controller
+			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
+			control_ui->file_button->set_title(desc.label);
+
+			if (use_knob) {
+				control_ui->knobtable = manage (new Table());
+				control_ui->pack_start(*control_ui->knobtable, true, false);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
+				control_ui->knobtable->attach (*control_ui->file_button, 0, 1, 1, 2);
+			} else {
+				control_ui->pack_start (control_ui->label, false, true);
+				control_ui->pack_start (*control_ui->file_button, true, true);
+			}
+
+			// Monitor changes from the user.
+			control_ui->file_button->signal_file_set().connect(
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_path_property),
+				           desc, control_ui->file_button));
+
+			/* Add the filebutton control to a map so that we can update it when
+			 * the corresponding property changes. This doesn't go through the usual
+			 * AutomationControls, because they don't support non-numeric values. */
+			_filepath_controls.insert(std::make_pair(desc.key, control_ui->file_button));
+
+			return control_ui;
+		}
+
+
 		/* See if there any named values for our input value */
 		control_ui->scale_points = desc.scale_points;
 
@@ -709,36 +741,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			return control_ui;
 		}
 
-		if (desc.datatype == Variant::PATH) {
-
-			/* Build a file selector button */
-
-			// Create/add controller
-			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
-			control_ui->file_button->set_title(desc.label);
-
-			if (use_knob) {
-				control_ui->knobtable = manage (new Table());
-				control_ui->pack_start(*control_ui->knobtable, true, false);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
-				control_ui->knobtable->attach (*control_ui->file_button, 0, 1, 1, 2);
-			} else {
-				control_ui->pack_start (control_ui->label, false, true);
-				control_ui->pack_start (*control_ui->file_button, true, true);
-			}
-
-			// Monitor changes from the user.
-			control_ui->file_button->signal_file_set().connect(
-				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_path_property),
-				           desc, control_ui->file_button));
-
-			/* Add the filebutton control to a map so that we can update it when
-			 * the corresponding property changes. This doesn't go through the usual
-			 * AutomationControls, because they don't support non-numeric values. */
-			_filepath_controls.insert(std::make_pair(desc.key, control_ui->file_button));
-
-			return control_ui;
-		}
 
 		/* create the controller */
 
