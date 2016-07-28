@@ -438,21 +438,13 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 	lo_message msg = lo_message_new ();
 
 	if (gainmode) {
-#ifdef MIXBUS
-		lo_message_add_float (msg, controllable->internal_to_interface (val));
-#else
 		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
-#endif
 	} else {
-#ifdef MIXBUS
-		lo_message_add_float (msg, val);
-#else
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);
 		} else {
 			lo_message_add_float (msg, accurate_coefficient_to_dB (controllable->get_value()));
 		}
-#endif
 	}
 
 	lo_send_message (addr, path.c_str(), msg);
@@ -468,14 +460,22 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 
 	if (gainmode) {
 		path = "/select/send_fader";
+#ifdef MIXBUS
+		value = controllable->internal_to_interface (controllable->get_value());
+#else
 		value = gain_to_slider_position (controllable->get_value());
+#endif
 	} else {
 		path = "/select/send_gain";
+#ifdef MIXBUS
+		value = controllable->get_value();
+#else
 		if (controllable->get_value() < 1e-15) {
 			value = -193;
 		} else {
 			value = accurate_coefficient_to_dB (controllable->get_value());
 		}
+#endif
 	}
 
 	if (feedback[2]) {
