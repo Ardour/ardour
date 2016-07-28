@@ -724,17 +724,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 						           i->second)));
 			}
 
-
-			if (use_knob) {
-				control_ui->knobtable = manage (new Table());
-				control_ui->pack_start(*control_ui->knobtable, true, false);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
-				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
-			} else {
-				control_ui->pack_start(control_ui->label, true, true);
-				control_ui->pack_start(*control_ui->combo, false, true);
-			}
-
 			update_control_display(control_ui);
 
 		} else {
@@ -779,81 +768,86 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 			adj->set_value (mcontrol->internal_to_interface(value));
 
-			if (use_knob) {
-				set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
-
-				control_ui->label.set_alignment (0.5, 0.5);
-				control_ui->knobtable = manage (new Table());
-				control_ui->pack_start(*control_ui->knobtable, true, true);
-
-				if (control_ui->clickbox) {
-					control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
-					control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-					control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
-				} else if (control_ui->spin_box) {
-					ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
-					knob->set_tooltip_prefix (desc.label + ": ");
-					knob->set_printer (insert);
-					Alignment *align = manage (new Alignment (.5, .5, 0, 0));
-					align->add (*control_ui->controller);
-					control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);
-					control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
-					control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 0, 1, SHRINK, SHRINK, 2, 0);
-				} else if (desc.toggled) {
-					Alignment *align = manage (new Alignment (.5, .5, 0, 0));
-					align->add (*control_ui->controller);
-					control_ui->knobtable->attach (*align, 0, 2, 0, 1, EXPAND, SHRINK, 2, 2);
-					control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-					control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
-				} else {
-					control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
-					control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-					control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
-				}
-
-			} else {
-
-				control_ui->pack_start (control_ui->label, true, true);
-				if (control_ui->clickbox) {
-					control_ui->pack_start (*control_ui->clickbox, false, false);
-				} else if (control_ui->spin_box) {
-					control_ui->pack_start (*control_ui->spin_box, false, false);
-					control_ui->pack_start (*control_ui->controller, false, false);
-				} else {
-					control_ui->pack_start (*control_ui->controller, false, false);
-				}
-				control_ui->pack_start (control_ui->automate_button, false, false);
-			}
-
-
-			if (mcontrol->flags () & Controllable::NotAutomatable) {
-				control_ui->automate_button.set_sensitive (false);
-				set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
-			} else {
-				control_ui->automate_button.signal_clicked.connect (sigc::bind (
-							sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
-							control_ui));
-				mcontrol->alist()->automation_state_changed.connect (
-						control_connections,
-						invalidator (*this),
-						boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
-						gui_context());
-				input_controls_with_automation.push_back (control_ui);
-			}
-
-			if (desc.toggled) {
-				control_ui->button = true;
-				ArdourButton* but = dynamic_cast<ArdourButton*>(control_ui->controller->widget ());
-				assert (but);
-				but->set_name ("pluginui toggle");
-				update_control_display(control_ui);
-			}
-
-			automation_state_changed (control_ui);
-
-			input_controls.push_back (control_ui);
-
 		}
+
+		if (use_knob) {
+			set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
+
+			control_ui->label.set_alignment (0.5, 0.5);
+			control_ui->knobtable = manage (new Table());
+			control_ui->pack_start(*control_ui->knobtable, true, true);
+
+			if (control_ui->combo) {
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
+				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
+			} else if (control_ui->clickbox) {
+				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			} else if (control_ui->spin_box) {
+				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
+				knob->set_tooltip_prefix (desc.label + ": ");
+				knob->set_printer (insert);
+				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
+				align->add (*control_ui->controller);
+				control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);
+				control_ui->knobtable->attach (*control_ui->spin_box, 0, 2, 1, 2);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 0, 1, SHRINK, SHRINK, 2, 0);
+			} else if (desc.toggled) {
+				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
+				align->add (*control_ui->controller);
+				control_ui->knobtable->attach (*align, 0, 2, 0, 1, EXPAND, SHRINK, 2, 2);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			} else {
+				control_ui->knobtable->attach (*control_ui->controller, 0, 2, 0, 1);
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
+				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
+			}
+
+		} else {
+
+			control_ui->pack_start (control_ui->label, true, true);
+			if (control_ui->combo) {
+				control_ui->pack_start(*control_ui->combo, false, true);
+			} else if (control_ui->clickbox) {
+				control_ui->pack_start (*control_ui->clickbox, false, false);
+			} else if (control_ui->spin_box) {
+				control_ui->pack_start (*control_ui->spin_box, false, false);
+				control_ui->pack_start (*control_ui->controller, false, false);
+			} else {
+				control_ui->pack_start (*control_ui->controller, false, false);
+			}
+			control_ui->pack_start (control_ui->automate_button, false, false);
+		}
+
+
+		if (mcontrol->flags () & Controllable::NotAutomatable) {
+			control_ui->automate_button.set_sensitive (false);
+			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
+		} else {
+			control_ui->automate_button.signal_clicked.connect (sigc::bind (
+						sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
+						control_ui));
+			mcontrol->alist()->automation_state_changed.connect (
+					control_connections,
+					invalidator (*this),
+					boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
+					gui_context());
+			input_controls_with_automation.push_back (control_ui);
+		}
+
+		if (desc.toggled) {
+			control_ui->button = true;
+			ArdourButton* but = dynamic_cast<ArdourButton*>(control_ui->controller->widget ());
+			assert (but);
+			but->set_name ("pluginui toggle");
+			update_control_display(control_ui);
+		}
+
+		automation_state_changed (control_ui);
+
+		input_controls.push_back (control_ui);
 
 	} else {
 
