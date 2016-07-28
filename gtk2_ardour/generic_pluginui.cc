@@ -150,6 +150,14 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	prefheight = 0;
 	build ();
+
+	/* Listen for property changes that are not notified normally because
+	 * AutomationControl has only support for numeric values currently.
+	 * The only case is Variant::PATH for now */
+	plugin->PropertyChanged.connect(*this, invalidator(*this),
+	                                boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+	                                gui_context());
+
 	main_contents.show ();
 }
 
@@ -719,16 +727,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				control_ui->pack_start (*control_ui->file_button, true, true);
 			}
 
-			// Connect signals (TODO: do this via the Control)
+			// Monitor changes from the user.
 			control_ui->file_button->signal_file_set().connect(
-				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_property),
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_path_property),
 				           desc, control_ui->file_button));
-			plugin->PropertyChanged.connect(*this, invalidator(*this),
-			                                boost::bind(&GenericPluginUI::property_changed, this, _1, _2),
-			                                gui_context());
 
-			_property_controls.insert(std::make_pair(desc.key, control_ui->file_button));
-			control_ui->file_button = control_ui->file_button;
+			/* Add the filebutton control to a map so that we can update it when
+			 * the corresponding property changes. This doesn't go through the usual
+			 * AutomationControls, because they don't support non-numeric values. */
+			_filepath_controls.insert(std::make_pair(desc.key, control_ui->file_button));
 
 			return control_ui;
 		}
@@ -1068,17 +1075,17 @@ GenericPluginUI::output_update ()
 }
 
 void
-GenericPluginUI::set_property (const ParameterDescriptor& desc,
-                               Gtk::FileChooserButton*    widget)
+GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
+                                    Gtk::FileChooserButton*    widget)
 {
 	plugin->set_property(desc.key, Variant(Variant::PATH, widget->get_filename()));
 }
 
 void
-GenericPluginUI::property_changed (uint32_t key, const Variant& value)
+GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 {
-	PropertyControls::iterator c = _property_controls.find(key);
-	if (c != _property_controls.end()) {
+	FilePathControls::iterator c = _filepath_controls.find(key);
+	if (c != _filepath_controls.end()) {
 		c->second->set_filename(value.get_path());
 	} else {
 		std::cerr << "warning: property change for property with no control" << std::endl;

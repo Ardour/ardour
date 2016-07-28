@@ -263,7 +263,9 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	std::vector<ControlUI*>   input_controls;
 	std::vector<ControlUI*>   input_controls_with_automation;
 	std::vector<ControlUI*>   output_controls;
+
 	sigc::connection screen_update_connection;
+
 	void output_update();
 
 	void build ();
@@ -291,12 +293,12 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
 
-	void set_property (const ARDOUR::ParameterDescriptor& desc,
-	                   Gtk::FileChooserButton*            widget);
-	void property_changed (uint32_t key, const ARDOUR::Variant& value);
+	typedef std::map<uint32_t, Gtk::FileChooserButton*> FilePathControls;
+	FilePathControls _filepath_controls;
+	void set_path_property (const ARDOUR::ParameterDescriptor& desc,
+	                        Gtk::FileChooserButton*            widget);
+	void path_property_changed (uint32_t key, const ARDOUR::Variant& value);
 
-	typedef std::map<uint32_t, Gtk::FileChooserButton*> PropertyControls;
-	PropertyControls _property_controls;
 };
 
 class PluginUIWindow : public ArdourWindow
