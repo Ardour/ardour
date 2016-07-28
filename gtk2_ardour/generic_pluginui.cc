@@ -272,7 +272,6 @@ GenericPluginUI::build ()
 			}
 
 			control_uis.push_back(cui);
-			input_controls_with_automation.push_back (cui);
 		}
 	}
 
@@ -835,8 +834,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
-			control_ui->automate_button.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
-			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+			control_ui->automate_button.signal_clicked.connect (sigc::bind (
+						sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
+						control_ui));
+			mcontrol->alist()->automation_state_changed.connect (
+					control_connections,
+					invalidator (*this),
+					boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
+					gui_context());
+			input_controls_with_automation.push_back (control_ui);
 		}
 
 		if (desc.toggled) {
@@ -850,7 +856,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		automation_state_changed (control_ui);
 
 		input_controls.push_back (control_ui);
-		input_controls_with_automation.push_back (control_ui);
 
 	} else if (!is_input) {
 
