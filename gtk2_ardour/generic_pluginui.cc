@@ -723,10 +723,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 						           i->second)));
 			}
 
-			mcontrol->Changed.connect(control_connections, invalidator(*this),
-			                          boost::bind(&GenericPluginUI::ui_parameter_changed,
-			                                      this, control_ui),
-			                          gui_context());
 
 			if (use_knob) {
 				control_ui->knobtable = manage (new Table());
@@ -925,7 +921,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	}
 
 	if (mcontrol) {
-		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
+		mcontrol->Changed.connect(control_connections, invalidator(*this),
+		                          boost::bind(&GenericPluginUI::ui_parameter_changed,
+		                                      this, control_ui),
+		                          gui_context());
 	}
 
 	return control_ui;
