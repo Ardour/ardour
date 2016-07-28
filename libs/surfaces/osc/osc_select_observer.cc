@@ -536,19 +536,19 @@ OSCSelectObserver::eq_init()
 			text_with_id ("/select/eq_band_name", i + 1, _strip->eq_band_name (i));
 		}
 		if (_strip->eq_gain_controllable (i)) {
-			_strip->eq_gain_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_gain"), i, _strip->eq_gain_controllable(i)), OSC::instance());
+			_strip->eq_gain_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_gain"), i + 1, _strip->eq_gain_controllable(i)), OSC::instance());
 			change_message_with_id ("/select/eq_gain", i + 1, _strip->eq_gain_controllable(i));
 		}
 		if (_strip->eq_freq_controllable (i)) {
-			_strip->eq_freq_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_freq"), i, _strip->eq_freq_controllable(i)), OSC::instance());
+			_strip->eq_freq_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_freq"), i + 1, _strip->eq_freq_controllable(i)), OSC::instance());
 			change_message_with_id ("/select/eq_freq", i + 1, _strip->eq_freq_controllable(i));
 		}
 		if (_strip->eq_q_controllable (i)) {
-			_strip->eq_q_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_q"), i, _strip->eq_q_controllable(i)), OSC::instance());
+			_strip->eq_q_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_q"), i + 1, _strip->eq_q_controllable(i)), OSC::instance());
 			change_message_with_id ("/select/eq_q", i + 1, _strip->eq_q_controllable(i));
 		}
 		if (_strip->eq_shape_controllable (i)) {
-			_strip->eq_shape_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_shape"), i, _strip->eq_shape_controllable(i)), OSC::instance());
+			_strip->eq_shape_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_shape"), i + 1, _strip->eq_shape_controllable(i)), OSC::instance());
 			change_message_with_id ("/select/eq_shape", i + 1, _strip->eq_shape_controllable(i));
 		}
 	}
