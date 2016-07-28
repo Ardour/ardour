@@ -665,6 +665,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		if (desc.datatype == Variant::PATH) {
 
+			/* We shouldn't get that type for input ports */
+			assert(param.type() == PluginPropertyAutomation);
+
 			/* Build a file selector button */
 
 			// Create/add controller
