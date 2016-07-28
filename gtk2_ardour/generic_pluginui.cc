@@ -747,6 +747,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 */
 			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
 
+			/* Control UI's don't need the rapid timer workaround */
+			control_ui->controller->stop_updating ();
+
 			/* XXX this code is not right yet, because it doesn't handle
 			   the absence of bounds in any sensible fashion.
 			*/
@@ -1037,14 +1040,9 @@ GenericPluginUI::start_updating (GdkEventAny*)
 bool
 GenericPluginUI::stop_updating (GdkEventAny*)
 {
-	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
-		(*i)->controller->stop_updating ();
-	}
-
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
-
 	return false;
 }
 
