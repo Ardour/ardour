@@ -696,6 +696,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			return control_ui;
 		}
 
+		assert(mcontrol);
 
 		/* See if there any named values for our input value */
 		control_ui->scale_points = desc.scale_points;
@@ -744,9 +745,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 * destructor, and manage() reports object hierarchy
 			 * ambiguity.
 			 */
-			if (mcontrol) {
-				control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
-			}
+			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
 
 			/* XXX this code is not right yet, because it doesn't handle
 			   the absence of bounds in any sensible fashion.
