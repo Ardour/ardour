@@ -42,7 +42,6 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/socket.h>
-#include <gtkmm/comboboxtext.h>
 #include <gtkmm/socket.h>
 
 #include "ardour/types.h"
@@ -235,7 +234,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		ArdourButton                            automate_button;
 		Gtk::Label                              label;
-		Gtk::ComboBoxText*                      combo;
+		ArdourDropdown*                         combo;
 		Gtkmm2ext::ClickBox*                    clickbox;
 		Gtk::FileChooserButton*                 file_button;
 		ArdourSpinner*                          spin_box;
@@ -280,7 +279,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	void ui_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
-	void control_combo_changed (ControlUI* cui);
+	void control_combo_changed (ControlUI* cui, float value);
 
 	void astate_clicked (ControlUI*);
 	void automation_state_changed (ControlUI*);

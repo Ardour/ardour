@@ -670,21 +670,17 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 *   b) This port is marked as being an enumeration.
 			 */
 
-			std::vector<std::string> labels;
-			for (
-				ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
-				i != control_ui->scale_points->end();
-				++i) {
-
-				labels.push_back(i->first);
+			control_ui->combo = new ArdourDropdown();
+			for (ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
+			     i != control_ui->scale_points->end();
+			     ++i) {
+				control_ui->combo->AddMenuElem(Menu_Helpers::MenuElem(
+						i->first,
+						sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
+						           control_ui,
+						           i->second)));
 			}
 
-			// TODO use ArdourDropDown
-			control_ui->combo = new Gtk::ComboBoxText();
-			set_popdown_strings(*control_ui->combo, labels);
-			control_ui->combo->signal_changed().connect(
-				sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
-				            control_ui));
 			mcontrol->Changed.connect(control_connections, invalidator(*this),
 			                          boost::bind(&GenericPluginUI::ui_parameter_changed,
 			                                      this, control_ui),
@@ -982,7 +978,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	if (cui->combo && cui->scale_points) {
 		for (ARDOUR::ScalePoints::iterator it = cui->scale_points->begin(); it != cui->scale_points->end(); ++it) {
 			if (it->second == val) {
-				cui->combo->set_active_text(it->first);
+				cui->combo->set_text(it->first);
 				break;
 			}
 		}
@@ -1006,11 +1002,10 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 }
 
 void
-GenericPluginUI::control_combo_changed (ControlUI* cui)
+GenericPluginUI::control_combo_changed (ControlUI* cui, float value)
 {
-	if (!cui->ignore_change && cui->scale_points) {
-		string value = cui->combo->get_active_text();
-		insert->automation_control (cui->parameter())->set_value ((*cui->scale_points)[value], Controllable::NoGroup);
+	if (!cui->ignore_change) {
+		insert->automation_control (cui->parameter())->set_value (value, Controllable::NoGroup);
 	}
 }
 
