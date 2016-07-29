@@ -145,8 +145,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 		}
 		// Compressor
 		if (_strip->comp_enable_controllable ()) {
-			_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
-			change_message ("/select/comp_enable", _strip->comp_enable_controllable());
+			_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
+			enable_message ("/select/comp_enable", _strip->comp_enable_controllable());
 		}
 		if (_strip->comp_threshold_controllable ()) {
 			_strip->comp_threshold_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), _strip->comp_threshold_controllable()), OSC::instance());
@@ -243,8 +243,8 @@ OSCSelectObserver::send_init()
 		}
 
 		if (_strip->send_enable_controllable (nsends)) {
-			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/send_enable"), nsends + 1, _strip->send_enable_controllable(nsends)), OSC::instance());
-			change_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
+			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), nsends + 1, _strip->send_enable_controllable(nsends)), OSC::instance());
+			enable_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
 			sends = true;
 		} else if (sends) {
 			// not used by Ardour, just mixbus so in Ardour always true
@@ -371,6 +371,18 @@ OSCSelectObserver::change_message (string path, boost::shared_ptr<Controllable> 
 }
 
 void
+OSCSelectObserver::enable_message (string path, boost::shared_ptr<Controllable> controllable)
+{
+	float val = controllable->get_value();
+	if (val) {
+		clear_strip (path, 1);
+	} else {
+		clear_strip (path, 0);
+	}
+
+}
+
+void
 OSCSelectObserver::change_message_with_id (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
 {
 	lo_message msg = lo_message_new ();
@@ -385,6 +397,17 @@ OSCSelectObserver::change_message_with_id (string path, uint32_t id, boost::shar
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::enable_message_with_id (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
+{
+	float val = controllable->get_value();
+	if (val) {
+		clear_strip_with_id (path, id, 1);
+	} else {
+		clear_strip_with_id (path, id, 0);
+	}
 }
 
 void
@@ -522,8 +545,8 @@ OSCSelectObserver::eq_init()
 		change_message ("/select/eq_hpf", _strip->eq_hpf_controllable());
 	}
 	if (_strip->eq_enable_controllable ()) {
-		_strip->eq_enable_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_enable"), _strip->eq_enable_controllable()), OSC::instance());
-		change_message ("/select/eq_enable", _strip->eq_enable_controllable());
+		_strip->eq_enable_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/eq_enable"), _strip->eq_enable_controllable()), OSC::instance());
+		enable_message ("/select/eq_enable", _strip->eq_enable_controllable());
 	}
 
 	uint32_t eq_bands = _strip->eq_band_cnt ();
