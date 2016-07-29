@@ -2,13 +2,13 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 一善鱼 <YQ-YSY@163.com> 翻译于 2016-02-01
+# 一善鱼 <YQ-YSY@163.com> 翻译于 2016-07-29
 msgid ""
 msgstr ""
-"Project-Id-Version: Ardour 4\n"
+"Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2016-03-27 10:11+0800\n"
+"POT-Creation-Date: 2016-07-25 22:30+0800\n"
+"PO-Revision-Date: 2016-07-28 22:22+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: about.cc:127
 msgid "Fons Adriaensen"
@@ -528,9 +528,10 @@ msgstr "音频总线"
 msgid "MIDI Busses"
 msgstr "MIDI 总线"
 
+#  压控放大器 Voltage Controlled Amplifier
 #: add_route_dialog.cc:82
 msgid "VCA Masters"
-msgstr ""
+msgstr "VCA 操作台"
 
 #: add_route_dialog.cc:85 add_route_dialog.cc:622
 msgid "First"
@@ -550,17 +551,17 @@ msgstr "结束点"
 
 #: add_route_dialog.cc:91
 msgid "Flexible-I/O"
-msgstr ""
+msgstr "弹性-输入/输出"
 
 #: add_route_dialog.cc:92
 msgid "Strict-I/O"
-msgstr ""
+msgstr "精确-输入/输出"
 
 #: add_route_dialog.cc:108
 msgid "Add:"
 msgstr "添加："
 
-#: add_route_dialog.cc:121 time_fx_dialog.cc:101 add_video_dialog.cc:135
+#: add_route_dialog.cc:121 time_fx_dialog.cc:101 add_video_dialog.cc:136
 #: video_server_dialog.cc:118
 msgid "<b>Options</b>"
 msgstr "<b>选项</b>"
@@ -580,7 +581,7 @@ msgstr "插入："
 
 #: add_route_dialog.cc:171
 msgid "Output Ports:"
-msgstr ""
+msgstr "输出端口："
 
 #: add_route_dialog.cc:176 rc_option_editor.cc:2474
 msgid ""
@@ -588,8 +589,10 @@ msgid ""
 "channels on a track. The number of output channels will always match the "
 "number of input channels."
 msgstr ""
+"精确-输入/输出启用后，特效处理器将不会改动在一个音轨上的声道数量。输出声道的"
+"数量将总是与输入声道的数量相匹配。"
 
-#: add_route_dialog.cc:240 add_route_dialog.cc:351 ardour_ui_ed.cc:636
+#: add_route_dialog.cc:240 add_route_dialog.cc:351 ardour_ui_ed.cc:625
 #: engine_dialog.cc:244 plugin_pin_dialog.cc:67 rc_option_editor.cc:2397
 #: rc_option_editor.cc:2399 rc_option_editor.cc:2401 rc_option_editor.cc:2419
 #: rc_option_editor.cc:2421 rc_option_editor.cc:2429 rc_option_editor.cc:2432
@@ -674,7 +677,7 @@ msgstr "八声道"
 msgid "12 Channel"
 msgstr "十二声道"
 
-#: add_route_dialog.cc:527 mixer_strip.cc:2009 mixer_strip.cc:2455
+#: add_route_dialog.cc:527 mixer_strip.cc:2017 mixer_strip.cc:2463
 msgid "Custom"
 msgstr "自定义"
 
@@ -730,11 +733,11 @@ msgstr "显示频率的功率范围"
 
 #: analysis_window.cc:49
 msgid "Fit dB range"
-msgstr ""
+msgstr "适配分贝范围"
 
 #: analysis_window.cc:50
 msgid "Proportional Spectum, -18dB"
-msgstr ""
+msgstr "比重频谱 -18dB"
 
 #: analysis_window.cc:53
 msgid "FFT analysis window"
@@ -765,6 +768,15 @@ msgstr "按钮无法显示不存在的操控状态\n"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
+# 超文本传输协议（Hyper Text Transport Protocol）
+#: ardour_http.cc:165 ardour_http.cc:179
+msgid "HTTP request failed: (%1) %2"
+msgstr "HTTP请求失败：(%1) %2"
+
+#: ardour_http.cc:169 ardour_http.cc:182
+msgid "HTTP request status: %1"
+msgstr "HTTP请求状态：%1"
+
 #: ardour_ui.cc:198
 msgid ""
 "%1 %2.x has discovered configuration files from %1 %3.x.\n"
@@ -783,7 +795,7 @@ msgstr ""
 msgid "Audition"
 msgstr "监听"
 
-#: ardour_ui.cc:284 editor_actions.cc:139 mixer_strip.cc:2205
+#: ardour_ui.cc:284 editor_actions.cc:139 mixer_strip.cc:2213
 #: monitor_section.cc:329 rc_option_editor.cc:2547 route_time_axis.cc:263
 #: route_time_axis.cc:2740 vca_master_strip.cc:212 vca_time_axis.cc:237
 msgid "Solo"
@@ -807,7 +819,7 @@ msgstr "关于"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr ""
+msgstr "范围|位置"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
@@ -873,7 +885,7 @@ msgstr ""
 
 #: ardour_ui.cc:509
 msgid "Pre-Release Warning"
-msgstr ""
+msgstr "预发布警告"
 
 #: ardour_ui.cc:513
 msgid ""
@@ -902,6 +914,25 @@ msgid ""
 "\n"
 "                http://ardour.org/support\n"
 msgstr ""
+"<b>欢迎使用预发布版本 %1 %2</b>\n"
+"\n"
+"这个版本也许仍有几处问题和故障需要完善，\n"
+"诸如在正式发布之前对通用工作流程的改进。\n"
+"以下是一些使用指南：\n"
+"\n"
+"1) 使用本软件时请 <b>不要</b> 过于期望这个版本很稳定或很可靠。\n"
+"   虽然它有可能会崩溃，但这取决于您的工作流。\n"
+"2) 请耐心等候发布关于新功能的介绍。\n"
+"3) <b>请不要使用 ardour.org 的论坛来报告错误故障。</b>.\n"
+"4) <b>请使用</b> 位于 http://tracker.ardour.org/ 的故障追踪器报告错误故障。\n"
+"   记住，请确认产品版本是 5.0-pre。\n"
+"5) <b>请使用</b> ardour-users 用户邮件列表来发布建议以及发表评论。\n"
+"6) <b>请使用</b> IRC 聊天室加入我们的关于 %1 %2 的实时讨论区。\n"
+"   您可以通过程序菜单选项里的“帮助 -> 聊天”直接访问到。\n"
+"\n"
+"还有更多的支持信息，请访问网页：\n"
+"\n"
+"                http://ardour.org/support\n"
 
 #: ardour_ui.cc:613
 msgid ""
@@ -1320,7 +1351,7 @@ msgstr "已存在一个相同名称的快照。您打算覆盖它？"
 
 #: ardour_ui.cc:2724
 msgid "Snapshot and switch"
-msgstr ""
+msgstr "快照和切换"
 
 #: ardour_ui.cc:2725 ardour_ui.cc:2776
 msgid "New session name"
@@ -1579,7 +1610,7 @@ msgstr "已删除的文件"
 msgid "Cannot read session script '%1': %2"
 msgstr "无法读取会话脚本 '%1': %2"
 
-#: ardour_ui.cc:4142 luainstance.cc:1087
+#: ardour_ui.cc:4142 luainstance.cc:1104
 msgid "Set Script Parameters"
 msgstr "设置脚本首选项"
 
@@ -1776,6 +1807,11 @@ msgid ""
 "Re-Configure the Audio Engine in\n"
 "Menu > Window > Audio/Midi Setup"
 msgstr ""
+"本会话创建于 %1 Hz 的采样率，\n"
+"但 %2  当前运行于 %3 Hz。\n"
+"音频将被录制和回放于错误的采样率。\n"
+"重新配置音频引擎请点击菜单\n"
+"菜单 > 窗口 > 音频/Midi设置"
 
 #: ardour_ui.cc:5209
 msgid ""
@@ -1791,6 +1827,17 @@ msgid ""
 "\n"
 "From now on, use the backup copy with older versions of %3"
 msgstr ""
+"%4这是个来自 %3%5 旧版本的会话\n"
+"\n"
+"%3 已经复制旧会话文件\n"
+"\n"
+"%6%1%7\n"
+"\n"
+"到\n"
+"\n"
+"%6%2%7\n"
+"\n"
+"从现在开始，使用 %3 的旧版本备份副本"
 
 #: ardour_ui.cc:5331
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
@@ -2008,7 +2055,7 @@ msgid "UI: cannot setup luawindow"
 msgstr "UI（用户界面）：无法设置 lua 窗口"
 
 #: ardour_ui_dependents.cc:269 ardour_ui_ed.cc:136 ardour_ui_ed.cc:257
-#: rc_option_editor.cc:1853 rc_option_editor.cc:3487
+#: rc_option_editor.cc:1853 rc_option_editor.cc:3494
 msgid "Preferences"
 msgstr "首选项"
 
@@ -2041,14 +2088,14 @@ msgstr "保存并关闭"
 
 #: ardour_ui_ed.cc:124
 msgid "Escape"
-msgstr ""
+msgstr "取消"
 
 #: ardour_ui_ed.cc:128
 msgid "Session"
 msgstr "会话"
 
 #: ardour_ui_ed.cc:131 editor_actions.cc:141 editor_regions.cc:163
-#: port_group.cc:468 session_option_editor.cc:82 session_option_editor.cc:89
+#: port_group.cc:469 session_option_editor.cc:82 session_option_editor.cc:89
 msgid "Sync"
 msgstr "同步"
 
@@ -2091,13 +2138,13 @@ msgstr "控制面"
 
 #: ardour_ui_ed.cc:144 rc_option_editor.cc:2847 rc_option_editor.cc:2853
 #: rc_option_editor.cc:2862 rc_option_editor.cc:2873 rc_option_editor.cc:2883
-#: rc_option_editor.cc:2945 rc_option_editor.cc:2962 rc_option_editor.cc:2978
-#: rc_option_editor.cc:2979 rc_option_editor.cc:2988 rc_option_editor.cc:3002
-#: rc_option_editor.cc:3005 rc_option_editor.cc:3013 rc_option_editor.cc:3021
+#: rc_option_editor.cc:2948 rc_option_editor.cc:2969 rc_option_editor.cc:2985
+#: rc_option_editor.cc:2986 rc_option_editor.cc:2995 rc_option_editor.cc:3009
+#: rc_option_editor.cc:3012 rc_option_editor.cc:3020 rc_option_editor.cc:3028
 msgid "Plugins"
 msgstr "插件"
 
-#: ardour_ui_ed.cc:145 rc_option_editor.cc:3169
+#: ardour_ui_ed.cc:145 rc_option_editor.cc:3176
 msgid "Metering"
 msgstr "计量"
 
@@ -2147,7 +2194,7 @@ msgstr "会话|脚本"
 
 #: ardour_ui_ed.cc:176
 msgid "Add Lua Script..."
-msgstr ""
+msgstr "添加 Lua 脚本…"
 
 #: ardour_ui_ed.cc:180
 msgid "Remove Lua Script"
@@ -2155,7 +2202,7 @@ msgstr "移除 Lua 脚本"
 
 #: ardour_ui_ed.cc:184
 msgid "Open Video..."
-msgstr ""
+msgstr "打开视频…"
 
 #: ardour_ui_ed.cc:187
 msgid "Remove Video"
@@ -2163,7 +2210,7 @@ msgstr "移除视频"
 
 #: ardour_ui_ed.cc:190
 msgid "Export to Video File..."
-msgstr ""
+msgstr "导出到视频文件…"
 
 #: ardour_ui_ed.cc:194
 msgid "Snapshot (& keep working on current version) ..."
@@ -2175,7 +2222,7 @@ msgstr "快照（并且切换到新版本）…"
 
 #: ardour_ui_ed.cc:200
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "快速快照 (并保持工作在当前版本)…"
 
 #: ardour_ui_ed.cc:203
 msgid "Quick Snapshot (& switch to new version) ..."
@@ -2186,7 +2233,7 @@ msgid "Save As..."
 msgstr "另存为…"
 
 #: ardour_ui_ed.cc:210 editor_actions.cc:1788 editor_markers.cc:908
-#: editor_snapshots.cc:136 mixer_strip.cc:1653 route_time_axis.cc:1679
+#: editor_snapshots.cc:136 mixer_strip.cc:1661 route_time_axis.cc:1679
 msgid "Rename..."
 msgstr "重命名…"
 
@@ -2214,9 +2261,9 @@ msgstr "导出为音频文件…"
 msgid "Stem export..."
 msgstr "主体导出…"
 
-#: ardour_ui_ed.cc:232 editor_export_audio.cc:66
-#: export_channel_selector.cc:190 export_channel_selector.cc:578
-#: export_dialog.cc:131 export_video_dialog.cc:80
+#: ardour_ui_ed.cc:232 editor_export_audio.cc:66 export_channel_selector.cc:190
+#: export_channel_selector.cc:578 export_dialog.cc:136
+#: export_video_dialog.cc:80
 msgid "Export"
 msgstr "导出"
 
@@ -2480,7 +2527,7 @@ msgid "Focus On Clock"
 msgstr "聚焦于计时器"
 
 #: ardour_ui_ed.cc:470 ardour_ui_ed.cc:479 audio_clock.cc:2122 editor.cc:321
-#: editor_actions.cc:610 editor_actions.cc:619 export_timespan_selector.cc:85
+#: editor_actions.cc:610 editor_actions.cc:619 export_timespan_selector.cc:95
 #: session_option_editor.cc:41 session_option_editor.cc:61
 #: session_option_editor.cc:80 session_option_editor.cc:96
 #: session_option_editor.cc:109 session_option_editor.cc:122
@@ -2505,7 +2552,7 @@ msgstr "样本"
 msgid "Punch In"
 msgstr "切入"
 
-#: ardour_ui_ed.cc:489 mixer_strip.cc:1992 mixer_strip.cc:2193 route_ui.cc:187
+#: ardour_ui_ed.cc:489 mixer_strip.cc:2000 mixer_strip.cc:2201 route_ui.cc:187
 #: time_info_box.cc:110
 msgid "In"
 msgstr "入"
@@ -2514,7 +2561,7 @@ msgstr "入"
 msgid "Punch Out"
 msgstr "切出"
 
-#: ardour_ui_ed.cc:493 mixer_strip.cc:2004 time_info_box.cc:111
+#: ardour_ui_ed.cc:493 mixer_strip.cc:2012 time_info_box.cc:111
 msgid "Out"
 msgstr "出"
 
@@ -2586,35 +2633,35 @@ msgstr "发送端 MIDI 反馈"
 msgid "Panic"
 msgstr "终止"
 
-#: ardour_ui_ed.cc:629
+#: ardour_ui_ed.cc:618
 msgid "Wall Clock"
 msgstr "计时点"
 
-#: ardour_ui_ed.cc:631
+#: ardour_ui_ed.cc:620
 msgid "Disk Space"
 msgstr "硬盘空间"
 
-#: ardour_ui_ed.cc:632
+#: ardour_ui_ed.cc:621
 msgid "DSP"
 msgstr "DSP（数字信号处理）"
 
-#: ardour_ui_ed.cc:633
+#: ardour_ui_ed.cc:622
 msgid "X-run"
 msgstr "X-run（X-运行）"
 
-#: ardour_ui_ed.cc:634
+#: ardour_ui_ed.cc:623
 msgid "Active Peak-file Work"
 msgstr "激活峰值文件工作"
 
-#: ardour_ui_ed.cc:635
+#: ardour_ui_ed.cc:624
 msgid "Buffers"
 msgstr "缓冲"
 
-#: ardour_ui_ed.cc:637
+#: ardour_ui_ed.cc:626
 msgid "Timecode Format"
 msgstr "时间码格式"
 
-#: ardour_ui_ed.cc:638
+#: ardour_ui_ed.cc:627
 msgid "File Format"
 msgstr "文件格式"
 
@@ -2665,7 +2712,7 @@ msgid "Meter"
 msgstr "节拍"
 
 #: audio_clock.cc:1878 audio_streamview.cc:117 editor_actions.cc:1092
-#: luainstance.cc:959 luainstance.cc:1575 plugin_pin_dialog.cc:859
+#: luainstance.cc:967 luainstance.cc:1593 plugin_pin_dialog.cc:859
 #: plugin_selector.cc:995 plugin_selector.cc:1016
 #: session_metadata_dialog.cc:455 session_metadata_dialog.cc:503
 #: session_metadata_dialog.cc:559 session_metadata_dialog.cc:848
@@ -2677,11 +2724,11 @@ msgstr "程序错误：%1"
 msgid "programming error: %1 %2"
 msgstr "程序错误：%1 %2"
 
-#: audio_clock.cc:2123 editor.cc:320 export_timespan_selector.cc:95
+#: audio_clock.cc:2123 editor.cc:320 export_timespan_selector.cc:105
 msgid "Bars:Beats"
 msgstr "小节:拍子"
 
-#: audio_clock.cc:2124 export_timespan_selector.cc:90
+#: audio_clock.cc:2124 export_timespan_selector.cc:100
 msgid "Minutes:Seconds"
 msgstr "分:秒"
 
@@ -2707,7 +2754,8 @@ msgid "Region gain:"
 msgstr "区域增益："
 
 #: audio_region_editor.cc:73 export_format_dialog.cc:49 export_report.cc:772
-#: export_report.cc:1185 fft_graph.cc:370
+#: export_report.cc:1185 fft_graph.cc:497 normalize_dialog.cc:49
+#: strip_silence_dialog.cc:67
 msgid "dBFS"
 msgstr "dBFS（分贝振幅）"
 
@@ -2740,7 +2788,7 @@ msgid "Set to %1 beat"
 msgid_plural "Set to %1 beats"
 msgstr[0] "设置为 %1 拍"
 
-#: automation_line.cc:292 editor_drag.cc:4388
+#: automation_line.cc:292 editor_drag.cc:4387
 msgid "automation event move"
 msgstr "自动化事件移动"
 
@@ -2805,8 +2853,8 @@ msgstr ""
 msgid "clear automation"
 msgstr "清除自动化"
 
-#: automation_time_axis.cc:547 rc_option_editor.cc:2916
-#: rc_option_editor.cc:2921 rc_option_editor.cc:2967 rc_option_editor.cc:2972
+#: automation_time_axis.cc:547 rc_option_editor.cc:2919
+#: rc_option_editor.cc:2924 rc_option_editor.cc:2974 rc_option_editor.cc:2979
 msgid "Clear"
 msgstr "清除"
 
@@ -2839,27 +2887,27 @@ msgid "Direction:"
 msgstr "方向："
 
 #: bundle_manager.cc:206 bundle_manager.cc:210 engine_dialog.cc:976
-#: mixer_strip.cc:175 mixer_strip.cc:392 mixer_strip.cc:2451
-#: rc_option_editor.cc:3135
+#: mixer_strip.cc:175 mixer_strip.cc:392 mixer_strip.cc:2459
+#: rc_option_editor.cc:3142
 msgid "Input"
 msgstr "输入"
 
 #: bundle_manager.cc:207 bundle_manager.cc:212 bundle_manager.cc:246
 #: engine_dialog.cc:978 mixer_strip.cc:179 mixer_strip.cc:396
-#: mixer_strip.cc:2454 monitor_section.cc:296 monitor_section.cc:300
-#: rc_option_editor.cc:3139
+#: mixer_strip.cc:2462 monitor_section.cc:296 monitor_section.cc:300
+#: rc_option_editor.cc:3146
 msgid "Output"
 msgstr "输出"
 
 #: bundle_manager.cc:265 editor.cc:2075 editor_actions.cc:97
-#: editor_actions.cc:107 lua_script_manager.cc:33 rc_option_editor.cc:2928
-#: rc_option_editor.cc:2942
+#: editor_actions.cc:107 lua_script_manager.cc:33 rc_option_editor.cc:2931
+#: rc_option_editor.cc:2945
 msgid "Edit"
 msgstr "编辑"
 
 #: bundle_manager.cc:266 editor.cc:5962 editor.cc:5992 editor_actions.cc:360
 #: editor_actions.cc:361 luawindow.cc:101 plugin_ui.cc:420
-#: processor_box.cc:3669 processor_box.cc:3671
+#: processor_box.cc:3681 processor_box.cc:3683
 msgid "Delete"
 msgstr "删除"
 
@@ -2891,30 +2939,29 @@ msgstr "重置恢复默认值"
 
 #: color_theme_manager.cc:62
 msgid "Color Theme"
-msgstr ""
+msgstr "颜色主题"
 
-#: color_theme_manager.cc:126
+#: color_theme_manager.cc:118
 msgid "Object"
 msgstr "对象物体"
 
-#: color_theme_manager.cc:129 route_group_dialog.cc:53
-#: route_group_dialog.cc:81
+#: color_theme_manager.cc:121 route_group_dialog.cc:53 route_group_dialog.cc:81
 msgid "Color"
 msgstr "颜色"
 
-#: color_theme_manager.cc:151
+#: color_theme_manager.cc:143
 msgid "Items"
 msgstr "条目"
 
-#: color_theme_manager.cc:152
+#: color_theme_manager.cc:144
 msgid "Palette"
 msgstr "调色板"
 
-#: color_theme_manager.cc:153
+#: color_theme_manager.cc:145
 msgid "Transparency"
 msgstr "透明度"
 
-#: color_theme_manager.cc:475
+#: color_theme_manager.cc:467
 msgid "Color Palette"
 msgstr "颜料调色板"
 
@@ -2932,7 +2979,7 @@ msgstr "数值"
 
 #: control_slave_ui.cc:50 mixer_ui.cc:254
 msgid "Control Masters"
-msgstr ""
+msgstr "控制操作台"
 
 #: control_slave_ui.cc:54
 msgid "-vca-"
@@ -2940,7 +2987,7 @@ msgstr ""
 
 #: control_slave_ui.cc:211
 msgid "Unassign All"
-msgstr ""
+msgstr "撤销指定全部"
 
 #: duplicate_routes_dialog.cc:35
 msgid "Duplicate Tracks & Busses"
@@ -3008,9 +3055,9 @@ msgstr "力度"
 msgid "Time"
 msgstr "时间"
 
-#: edit_note_dialog.cc:99 editor_regions.cc:162
-#: export_timespan_selector.cc:375 export_timespan_selector.cc:437
-#: location_ui.cc:322 midi_list_editor.cc:115 time_info_box.cc:102
+#: edit_note_dialog.cc:99 editor_regions.cc:162 export_timespan_selector.cc:415
+#: export_timespan_selector.cc:506 location_ui.cc:322 midi_list_editor.cc:115
+#: time_info_box.cc:102
 msgid "Length"
 msgstr "长度"
 
@@ -3503,15 +3550,15 @@ msgstr "选择指针和编辑点之间范围"
 msgid "Select"
 msgstr "选择"
 
-#: editor.cc:2066 editor.cc:2137 editor_actions.cc:359 processor_box.cc:3665
+#: editor.cc:2066 editor.cc:2137 editor_actions.cc:359 processor_box.cc:3677
 msgid "Cut"
 msgstr "剪切"
 
-#: editor.cc:2067 editor.cc:2138 editor_actions.cc:363 processor_box.cc:3667
+#: editor.cc:2067 editor.cc:2138 editor_actions.cc:363 processor_box.cc:3679
 msgid "Copy"
 msgstr "复制"
 
-#: editor.cc:2068 editor.cc:2139 editor_actions.cc:364 processor_box.cc:3679
+#: editor.cc:2068 editor.cc:2139 editor_actions.cc:364 processor_box.cc:3691
 msgid "Paste"
 msgstr "粘贴"
 
@@ -3809,8 +3856,8 @@ msgid "Keep Remaining"
 msgstr "保留剩余的"
 
 #: editor.cc:4150 editor_audio_import.cc:600 editor_ops.cc:6530
-#: engine_dialog.cc:2986 sfdb_freesound_mootcher.cc:69 processor_box.cc:3431
-#: processor_box.cc:3456
+#: engine_dialog.cc:2986 sfdb_freesound_mootcher.cc:69 processor_box.cc:3443
+#: processor_box.cc:3468
 msgid "Cancel"
 msgstr "取消"
 
@@ -3836,10 +3883,10 @@ msgstr "复位 #%1"
 
 #: editor.cc:5812 editor_actions.cc:481
 msgid "no action bound"
-msgstr ""
+msgstr "没有动作绑定"
 
 #: editor.cc:5961 editor.cc:5996 editor_markers.cc:998 editor_markers.cc:1018
-#: panner_ui.cc:412 processor_box.cc:3703
+#: panner_ui.cc:412 processor_box.cc:3715
 msgid "Edit..."
 msgstr "编辑…"
 
@@ -4123,7 +4170,7 @@ msgstr "指针到范围终点"
 msgid "Select All Tracks"
 msgstr "选择所有音轨"
 
-#: editor_actions.cc:198 export_timespan_selector.cc:59 processor_box.cc:3685
+#: editor_actions.cc:198 export_timespan_selector.cc:62 processor_box.cc:3697
 msgid "Deselect All"
 msgstr "反选所有"
 
@@ -4371,7 +4418,7 @@ msgstr "重做已选择部分的改动"
 msgid "Export Audio"
 msgstr "导出音频"
 
-#: editor_actions.cc:345 export_dialog.cc:424
+#: editor_actions.cc:345 export_dialog.cc:476
 msgid "Export Range"
 msgstr "导出范围"
 
@@ -4465,7 +4512,7 @@ msgstr "切换激活"
 
 #: editor_actions.cc:440 editor_actions.cc:1785 editor_markers.cc:926
 #: editor_markers.cc:999 editor_markers.cc:1019 editor_snapshots.cc:134
-#: lua_script_manager.cc:32 lua_script_manager.cc:36 mixer_strip.cc:1705
+#: lua_script_manager.cc:32 lua_script_manager.cc:36 mixer_strip.cc:1713
 #: route_time_axis.cc:870 vca_master_strip.cc:400
 msgid "Remove"
 msgstr "移除"
@@ -4876,8 +4923,8 @@ msgstr "为编辑器中已选择的音轨/总线切换MIDI输入激活"
 
 #: editor_actions.cc:1081 editor_actions.cc:1477 editor_actions.cc:1488
 #: editor_actions.cc:1541 editor_actions.cc:1552 editor_actions.cc:1599
-#: editor_actions.cc:1609 editor_regions.cc:1657 luainstance.cc:327
-#: luainstance.cc:1690
+#: editor_actions.cc:1609 editor_regions.cc:1657 luainstance.cc:330
+#: luainstance.cc:1708
 msgid "programming error: %1: %2"
 msgstr "程序错误： %1: %2"
 
@@ -4913,7 +4960,7 @@ msgstr "粘连到小节和拍子"
 msgid "Remove Sync"
 msgstr "移除同步"
 
-#: editor_actions.cc:1821 mixer_strip.cc:2192 monitor_section.cc:253
+#: editor_actions.cc:1821 mixer_strip.cc:2200 monitor_section.cc:253
 #: monitor_section.cc:321 route_time_axis.cc:264 route_time_axis.cc:550
 msgid "Mute"
 msgstr "静音"
@@ -5263,15 +5310,15 @@ msgstr ""
 msgid ""
 "Failed to load one or more of the audio files, but continuing to attempt "
 "import."
-msgstr ""
+msgstr "载入一个或多个音频文件失败，但仍在继续尝试导入中。"
 
 #: editor_pt_import.cc:178
 msgid "Success! Import should complete soon."
-msgstr ""
+msgstr " 成功！导入将很快完成。"
 
 #: editor_pt_import.cc:263
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "PT导入：UINT_MAX路由？不可能！"
 
 #: editor_canvas_events.cc:1296 editor_drag.cc:1418
 msgid "Could not create new track after region placed in the drop zone"
@@ -5289,7 +5336,7 @@ msgstr "波纹拖拽"
 msgid "create region"
 msgstr "创建区域"
 
-#: editor_drag.cc:2430 midi_region_view.cc:2859
+#: editor_drag.cc:2430 midi_region_view.cc:2857
 msgid "resize notes"
 msgstr "重设音符大小"
 
@@ -5317,75 +5364,75 @@ msgstr "差别："
 msgid "Move Video"
 msgstr "移动视频"
 
-#: editor_drag.cc:3177
+#: editor_drag.cc:3176
 msgid "move meter mark"
 msgstr "移动节拍标记"
 
-#: editor_drag.cc:3179
+#: editor_drag.cc:3178
 msgid "copy meter mark"
 msgstr "复制节拍标记"
 
-#: editor_drag.cc:3279
+#: editor_drag.cc:3278
 msgid "inactive"
-msgstr ""
+msgstr "非激活的"
 
-#: editor_drag.cc:3324
+#: editor_drag.cc:3323
 msgid "move tempo mark"
 msgstr "移动节奏标记"
 
-#: editor_drag.cc:3331
+#: editor_drag.cc:3330
 msgid "copy tempo mark"
 msgstr "复制节奏标记"
 
-#: editor_drag.cc:3462
+#: editor_drag.cc:3461
 msgid "dilate tempo"
-msgstr ""
+msgstr "扩展节奏"
 
-#: editor_drag.cc:3736
+#: editor_drag.cc:3735
 msgid "change fade in length"
 msgstr "改变淡入长度"
 
-#: editor_drag.cc:3861
+#: editor_drag.cc:3860
 msgid "change fade out length"
 msgstr "改变淡出长度"
 
-#: editor_drag.cc:4239
+#: editor_drag.cc:4238
 msgid "move marker"
 msgstr "移动标记"
 
-#: editor_drag.cc:4506 editor_drag.cc:5833
+#: editor_drag.cc:4505 editor_drag.cc:5832
 msgid "automation range move"
 msgstr "自动化范围移动"
 
-#: editor_drag.cc:4890
+#: editor_drag.cc:4889
 msgid "An error occurred while executing time stretch operation"
 msgstr "当执行时间延伸操作时出现错误"
 
-#: editor_drag.cc:5351
+#: editor_drag.cc:5350
 msgid "programming_error: %1"
 msgstr "程序错误：%1"
 
-#: editor_drag.cc:5420 editor_drag.cc:5430
+#: editor_drag.cc:5419 editor_drag.cc:5429
 msgid "new skip marker"
 msgstr "新建跳跃标记"
 
-#: editor_drag.cc:5421
+#: editor_drag.cc:5420
 msgid "skip"
 msgstr "跳跃"
 
-#: editor_drag.cc:5425 location_ui.cc:60
+#: editor_drag.cc:5424 location_ui.cc:60
 msgid "CD"
 msgstr ""
 
-#: editor_drag.cc:5426
+#: editor_drag.cc:5425
 msgid "new CD marker"
 msgstr "新建CD标记"
 
-#: editor_drag.cc:5431 editor_route_groups.cc:439 mixer_ui.cc:1840
+#: editor_drag.cc:5430 editor_route_groups.cc:439 mixer_ui.cc:1840
 msgid "unnamed"
 msgstr "未命名的"
 
-#: editor_drag.cc:5740
+#: editor_drag.cc:5739
 msgid "Automation range drag created for invalid region type"
 msgstr "为无效的区域类型已创建自动范围拖拽"
 
@@ -5434,7 +5481,7 @@ msgid "Relative Gain Changes?"
 msgstr "相关增益改变？"
 
 #: editor_route_groups.cc:103 editor_regions.cc:168 editor_routes.cc:239
-#: mixer_strip.cc:2221 meter_strip.cc:365 route_time_axis.cc:2742
+#: mixer_strip.cc:2229 meter_strip.cc:365 route_time_axis.cc:2742
 #: time_axis_view.cc:1106
 msgid "Mute|M"
 msgstr "静音|M"
@@ -5443,7 +5490,7 @@ msgstr "静音|M"
 msgid "Sharing Mute?"
 msgstr "分享静音？"
 
-#: editor_route_groups.cc:104 editor_routes.cc:240 mixer_strip.cc:2234
+#: editor_route_groups.cc:104 editor_routes.cc:240 mixer_strip.cc:2242
 #: meter_strip.cc:373 route_time_axis.cc:2739 vca_master_strip.cc:211
 #: vca_time_axis.cc:236
 msgid "Solo|S"
@@ -5500,7 +5547,7 @@ msgstr "程序错误：标记版面条目没有标记对象物体指示！"
 msgid "Confirm MIDI File Overwrite"
 msgstr "确认 MIDI 文件覆盖"
 
-#: editor_export_audio.cc:115 utils_videotl.cc:73
+#: editor_export_audio.cc:115 utils_videotl.cc:75
 msgid "A file with the same name already exists. Do you want to overwrite it?"
 msgstr "已经有一个相同名称的文件存在。您是否打算覆盖它？"
 
@@ -5599,19 +5646,19 @@ msgstr "选择范围"
 
 #: editor_markers.cc:987
 msgid "Make Ramped"
-msgstr ""
+msgstr "形成渐变"
 
 #: editor_markers.cc:989
 msgid "Make Constant"
-msgstr ""
+msgstr "形成恒量"
 
 #: editor_markers.cc:993 editor_markers.cc:1013
 msgid "Lock to Music"
-msgstr ""
+msgstr "锁定到音乐"
 
 #: editor_markers.cc:995 editor_markers.cc:1015
 msgid "Lock to Audio"
-msgstr ""
+msgstr "锁定到音频"
 
 #: editor_markers.cc:1034
 msgid "Set Punch Range"
@@ -5619,15 +5666,15 @@ msgstr "设置切换范围"
 
 #: editor_markers.cc:1391
 msgid "change meter lock style"
-msgstr ""
+msgstr "改变节拍锁定类型"
 
 #: editor_markers.cc:1414
 msgid "change tempo lock style"
-msgstr ""
+msgstr "改变节奏锁定类型"
 
 #: editor_markers.cc:1441
 msgid "change tempo type"
-msgstr ""
+msgstr "改变节奏类型"
 
 #: editor_markers.cc:1509 editor_ops.cc:2119
 msgid "New Name:"
@@ -5641,8 +5688,8 @@ msgstr "重命名标记"
 msgid "Rename Range"
 msgstr "重命名范围"
 
-#: editor_markers.cc:1521 editor_mouse.cc:2272 processor_box.cc:3192
-#: processor_box.cc:3681 route_time_axis.cc:1110 route_ui.cc:1637
+#: editor_markers.cc:1521 editor_mouse.cc:2272 processor_box.cc:3204
+#: processor_box.cc:3693 route_time_axis.cc:1110 route_ui.cc:1637
 #: vca_master_strip.cc:395
 msgid "Rename"
 msgstr "重命名"
@@ -5676,7 +5723,7 @@ msgstr "程序错误：控制点版面条目没有控制点对象物体指示！
 
 #: editor_mouse.cc:2085
 msgid "edit note(s)"
-msgstr ""
+msgstr "编辑音符"
 
 #: editor_mouse.cc:2193
 msgid "start point trim"
@@ -5786,7 +5833,7 @@ msgstr "沉降区域到底部"
 msgid "Rename Region"
 msgstr "重命名区域"
 
-#: editor_ops.cc:2796 processor_box.cc:3190 route_ui.cc:1635
+#: editor_ops.cc:2796 processor_box.cc:3202 route_ui.cc:1635
 msgid "New name:"
 msgstr "新名称："
 
@@ -6441,11 +6488,11 @@ msgstr "录制已启用"
 
 #: editor_routes.cc:238
 msgid "Rec|RS"
-msgstr ""
+msgstr "录制| RS"
 
 #: editor_routes.cc:238
 msgid "Record Safe"
-msgstr ""
+msgstr "录制安全"
 
 #: editor_routes.cc:239
 msgid "Muted"
@@ -6585,7 +6632,7 @@ msgstr "完成"
 
 #: editor_tempodisplay.cc:422
 msgid "replace meter mark"
-msgstr ""
+msgstr "替换节拍标记"
 
 #: editor_tempodisplay.cc:454
 msgid "replace tempo mark"
@@ -6974,30 +7021,30 @@ msgstr "全部不选"
 msgid "Track name"
 msgstr "音轨名称"
 
-#: export_dialog.cc:48
+#: export_dialog.cc:49
 msgid ""
 "<span color=\"#ffa755\">Some already existing files will be overwritten.</"
 "span>"
 msgstr "<span color=\"#ffa755\">一些已存在的文件将会被写入覆盖。</span>\" \""
 
-#: export_dialog.cc:49
+#: export_dialog.cc:50
 msgid "List files"
 msgstr "列表文件"
 
-#: export_dialog.cc:158 export_format_dialog.cc:67
+#: export_dialog.cc:163 export_format_dialog.cc:67
 msgid "File format"
 msgstr "文件格式"
 
-#: export_dialog.cc:159 export_timespan_selector.cc:371
-#: export_timespan_selector.cc:433
+#: export_dialog.cc:164 export_timespan_selector.cc:411
+#: export_timespan_selector.cc:502
 msgid "Time Span"
 msgstr "时间跨度"
 
-#: export_dialog.cc:160
+#: export_dialog.cc:165
 msgid "Channels"
 msgstr "声道"
 
-#: export_dialog.cc:182
+#: export_dialog.cc:187
 msgid ""
 "Export has been aborted due to an error!\n"
 "See the Log for details."
@@ -7005,51 +7052,55 @@ msgstr ""
 "导出意外中止，因为有个错误！\n"
 "详情请参阅日志。"
 
-#: export_dialog.cc:251
+#: export_dialog.cc:298
 msgid "Files that will be overwritten"
 msgstr "将会被写入覆盖的文件"
 
-#: export_dialog.cc:296
+#: export_dialog.cc:343
 msgid "Export initialization failed: %1"
 msgstr "导出初始化失败：%1"
 
-#: export_dialog.cc:306
+#: export_dialog.cc:353
 msgid "Stop Export"
 msgstr "停止导出"
 
-#: export_dialog.cc:336
+#: export_dialog.cc:383
 msgid "export"
 msgstr "导出"
 
-#: export_dialog.cc:355
+#: export_dialog.cc:402
 msgid "Exporting '%3' (timespan %1 of %2)"
 msgstr "正在导出 '%3' （时间跨度 %1 的 %2）"
 
-#: export_dialog.cc:360
+#: export_dialog.cc:407
 msgid "Normalizing '%3' (timespan %1 of %2)"
 msgstr "正在规范化 '%3'（时间跨度 %1 的 %2）"
 
-#: export_dialog.cc:365
+#: export_dialog.cc:412
+msgid "Encoding '%3' (timespan %1 of %2)"
+msgstr "正在编码 '%3'（时间跨度 %1 的 %2）"
+
+#: export_dialog.cc:417
 msgid "Tagging '%3' (timespan %1 of %2)"
 msgstr "正在标注 '%3' （时间跨度 %1 的 %2）"
 
-#: export_dialog.cc:369
+#: export_dialog.cc:421
 msgid "Uploading '%3' (timespan %1 of %2)"
 msgstr "正在上传 '%3' （时间跨度 %1 的 %2）"
 
-#: export_dialog.cc:373
+#: export_dialog.cc:425
 msgid "Running Post Export Command for '%1'"
 msgstr "正在为 '%1' 运行后置导出命令"
 
-#: export_dialog.cc:401 export_dialog.cc:403
+#: export_dialog.cc:453 export_dialog.cc:455
 msgid "<span color=\"#ffa755\">Error: "
 msgstr "<span color=\"#ffa755\">错误："
 
-#: export_dialog.cc:413
+#: export_dialog.cc:465
 msgid "<span color=\"#ffa755\">Warning: "
 msgstr "<span color=\"#ffa755\">警告："
 
-#: export_dialog.cc:415
+#: export_dialog.cc:467
 msgid ""
 "\n"
 "<span color=\"#ffa755\">Warning: "
@@ -7057,19 +7108,19 @@ msgstr ""
 "\n"
 "<span color=\"#ffa755\">警告："
 
-#: export_dialog.cc:439
+#: export_dialog.cc:491
 msgid "Export Selection"
 msgstr "导出已选择部分"
 
-#: export_dialog.cc:453
+#: export_dialog.cc:505
 msgid "Export Region"
 msgstr "导出区域"
 
-#: export_dialog.cc:462
+#: export_dialog.cc:514
 msgid "Source"
 msgstr "来源"
 
-#: export_dialog.cc:478
+#: export_dialog.cc:530
 msgid "Stem Export"
 msgstr "逆向导出"
 
@@ -7156,7 +7207,7 @@ msgstr ""
 
 #: export_filename_selector.cc:378
 msgid "%1: this is not a valid directory/folder."
-msgstr ""
+msgstr "%1这不是一个有效的目录/文件夹。"
 
 #: export_filename_selector.cc:388
 msgid "Choose export folder"
@@ -7176,20 +7227,22 @@ msgstr "标签："
 
 #: export_format_dialog.cc:42
 msgid "Normalize:"
-msgstr ""
+msgstr "规范化："
 
 #: export_format_dialog.cc:43
 msgid "Peak"
-msgstr ""
+msgstr "峰值"
 
 #: export_format_dialog.cc:44
 msgid "Loudness"
-msgstr ""
+msgstr "响度"
 
+# LUFS：欧洲广播联盟 (EBU) 指定的响度单位 
 #: export_format_dialog.cc:50
 msgid "LUFS"
 msgstr ""
 
+# dBTP最大真峰值电平
 #: export_format_dialog.cc:51
 msgid "dBTP"
 msgstr ""
@@ -7215,6 +7268,8 @@ msgid ""
 "Command to run post-export\n"
 "(%f=file path, %d=directory, %b=basename, see tooltip for more):"
 msgstr ""
+"运行后置导出的命令\n"
+"（%f=文件路径，%d=目录，%b=基本名称,，更多信息请参阅工具提示）："
 
 #: export_format_dialog.cc:65
 msgid "Compatibility"
@@ -7259,6 +7314,8 @@ msgid ""
 "peak limit. EBU-R128 normalization is only available for mono and stereo "
 "targets, true-peak works for any channel layout."
 msgstr ""
+"规范化为EBU-R128 LUFS 目标响度没有超出给定的真实峰值限制。EBU-R128 规范化仅可"
+"用于独奏和立体声目标，真实峰值适用于任何声道布局。"
 
 #: export_format_dialog.cc:152
 msgid ""
@@ -7286,6 +7343,29 @@ msgid ""
 "%Y Year\n"
 "%Z Country"
 msgstr ""
+"%a 艺术家名字\n"
+"%b 文件的基本名称\n"
+"%c 版权\n"
+"%d 文件的目录\n"
+"%f 文件的完整绝对路径\n"
+"%l 歌词作者\n"
+"%n 会话名称\n"
+"%o 指挥家\n"
+"%t 标题\n"
+"%z 组织\n"
+"%A 专辑\n"
+"%C 注释\n"
+"%E 工程师\n"
+"%G 流派\n"
+"%L 轨道数总计\n"
+"%M 混音师\n"
+"%N 时间跨度名称\n"
+"%O 作曲家\n"
+"%P 制作人\n"
+"%S 碟片副标题\n"
+"%T 轨道数量\n"
+"%Y 年份\n"
+"%Z 国家"
 
 #: export_format_dialog.cc:537
 msgid "Best (sinc)"
@@ -7457,11 +7537,11 @@ msgstr "已矫正的|Rf"
 
 #: export_report.cc:605
 msgid "Logscale"
-msgstr ""
+msgstr " 对数分度"
 
 #: export_report.cc:606
 msgid "Rectified"
-msgstr ""
+msgstr "已矫正"
 
 #: export_report.cc:738
 msgid "Hz"
@@ -7485,7 +7565,7 @@ msgstr ""
 
 #: export_report.cc:844
 msgid "Writing Export Analysis Image: %1."
-msgstr ""
+msgstr "正在写入导出分析映像：%1。"
 
 #: export_report.cc:941 sfdb_ui.cc:293 sfdb_ui.cc:409
 msgid "Could not read file: %1 (%2)."
@@ -7514,19 +7594,27 @@ msgstr ""
 msgid "-3"
 msgstr ""
 
-#: export_timespan_selector.cc:44
+#: export_timespan_selector.cc:45
 msgid "Show Times as:"
 msgstr "显示时间为："
 
-#: export_timespan_selector.cc:51 processor_box.cc:3683
+#: export_timespan_selector.cc:46
+msgid "Realtime Export"
+msgstr "实时导出"
+
+#: export_timespan_selector.cc:54 processor_box.cc:3695
 msgid "Select All"
 msgstr "选择所有"
 
-#: export_timespan_selector.cc:220 transform_dialog.cc:93
+#: export_timespan_selector.cc:255 transform_dialog.cc:93
 msgid " to "
 msgstr "到"
 
-#: export_timespan_selector.cc:364 export_timespan_selector.cc:423
+#: export_timespan_selector.cc:399 export_timespan_selector.cc:488
+msgid "RT"
+msgstr ""
+
+#: export_timespan_selector.cc:400 export_timespan_selector.cc:489
 msgid "Range"
 msgstr "范围"
 
@@ -7606,7 +7694,7 @@ msgstr "插件编辑器：无法为 %1 属性建立控制元素"
 msgid "Switches"
 msgstr "转换"
 
-#: generic_pluginui.cc:369 generic_pluginui.cc:475 processor_box.cc:3653
+#: generic_pluginui.cc:369 generic_pluginui.cc:475 processor_box.cc:3665
 msgid "Controls"
 msgstr "控制"
 
@@ -7624,7 +7712,7 @@ msgstr ""
 
 #: generic_pluginui.cc:828
 msgid "This control cannot be automated"
-msgstr ""
+msgstr "这个控制不能被自动化。"
 
 #: global_port_matrix.cc:158
 msgid "Audio Connection Manager"
@@ -7634,8 +7722,8 @@ msgstr "音频连接管理器"
 msgid "MIDI Connection Manager"
 msgstr "MIDI连接管理器"
 
-#: global_port_matrix.cc:201 io_selector.cc:211 mixer_strip.cc:863
-#: mixer_strip.cc:966 monitor_section.cc:1430 monitor_selector.cc:189
+#: global_port_matrix.cc:201 io_selector.cc:211 mixer_strip.cc:870
+#: mixer_strip.cc:973 monitor_section.cc:1430 monitor_selector.cc:189
 #: plugin_pin_dialog.cc:1757
 msgid "Disconnect"
 msgstr "撤销连接"
@@ -7658,11 +7746,11 @@ msgstr "已独奏…"
 
 #: group_tabs.cc:316
 msgid "Create New Group From..."
-msgstr ""
+msgstr "创建新分组来自于…"
 
 #: group_tabs.cc:325
 msgid "Create New Group with Master From..."
-msgstr ""
+msgstr "创建带操作台的新分组来自于…"
 
 #: group_tabs.cc:344
 msgid "Create New Group ..."
@@ -7670,7 +7758,7 @@ msgstr "创建新的分组…"
 
 #: group_tabs.cc:345
 msgid "Create New Group with Control Master ..."
-msgstr ""
+msgstr "创建带控制操作台的新分组…"
 
 #: group_tabs.cc:355
 msgid "Edit Group..."
@@ -7686,7 +7774,7 @@ msgstr "移除分组"
 
 #: group_tabs.cc:368
 msgid "Assign Group to Control Master..."
-msgstr ""
+msgstr "指定分组到控制操作台…"
 
 #: group_tabs.cc:374
 msgid "Remove Subgroup Bus"
@@ -7706,15 +7794,15 @@ msgstr "添加新的辅助总线（后置于淡化器）"
 
 #: group_tabs.cc:404
 msgid "Assign Selection to Control Master..."
-msgstr ""
+msgstr "指定已选择部分到控制操作台…"
 
 #: group_tabs.cc:415
 msgid "Assign Record Enabled to Control Master..."
-msgstr ""
+msgstr "指定录制已启用到控制操作台…"
 
 #: group_tabs.cc:426
 msgid "Assign Soloed to Control Master..."
-msgstr ""
+msgstr "指定已独奏到控制操作台…"
 
 #: group_tabs.cc:429
 msgid "Enable All Groups"
@@ -7847,7 +7935,7 @@ msgstr "搜索…"
 
 #: keyeditor.cc:82
 msgid "Print"
-msgstr ""
+msgstr "打印"
 
 #: keyeditor.cc:93
 msgid "Click to reset search string"
@@ -7855,7 +7943,7 @@ msgstr "点击重置搜索字符串"
 
 #: keyeditor.cc:97
 msgid "To remove a shortcut select an action then press this: "
-msgstr ""
+msgstr "要移除一个快捷键请选择一个动作然后按下这个："
 
 #: keyeditor.cc:109
 msgid "Reset Bindings to Defaults"
@@ -7875,14 +7963,13 @@ msgstr "区域列表"
 
 #: keyeditor.cc:543
 msgid "Could not open temporary file to print bindings (%1)"
-msgstr ""
+msgstr "无法打开临时文件用来打印绑定 (%1)"
 
 #: keyeditor.cc:561
 msgid "Could not save bindings to file (%1)"
-msgstr ""
+msgstr "无法保存绑定到文件 (%1)"
 
 #: latency_gui.cc:39
-#, fuzzy
 msgid "sample"
 msgstr "样本"
 
@@ -7894,8 +7981,7 @@ msgstr "毫秒"
 msgid "period"
 msgstr "周期"
 
-#: latency_gui.cc:72 panner_ui.cc:411 plugin_pin_dialog.cc:109
-#: plugin_ui.cc:421
+#: latency_gui.cc:72 panner_ui.cc:411 plugin_pin_dialog.cc:109 plugin_ui.cc:421
 msgid "Reset"
 msgstr "预设"
 
@@ -7909,7 +7995,7 @@ msgstr "使用 PH"
 
 #: location_ui.cc:55 location_ui.cc:58
 msgid "Goto"
-msgstr ""
+msgstr "跳到"
 
 #: location_ui.cc:63
 msgid "Glue"
@@ -8011,7 +8097,7 @@ msgstr "动作 %1"
 msgid "Unset"
 msgstr "复位"
 
-#: luainstance.cc:1079
+#: luainstance.cc:1096
 msgid "Cannot read script '%1': %2"
 msgstr "无法读取脚本 '%1': %2"
 
@@ -8021,7 +8107,7 @@ msgstr "运行"
 
 #: luawindow.cc:98
 msgid "Clear Output"
-msgstr ""
+msgstr "清除输出"
 
 #: luawindow.cc:102
 msgid "Revert"
@@ -8041,11 +8127,11 @@ msgstr "Lua除外：%1"
 
 #: luawindow.cc:342
 msgid "Deleted %1"
-msgstr ""
+msgstr "删除 %1"
 
 #: luawindow.cc:345
 msgid "Failed to delete %1"
-msgstr ""
+msgstr "删除 %1 失败"
 
 #: luawindow.cc:411
 msgid ""
@@ -8101,7 +8187,7 @@ msgstr "片段：%1"
 
 #: luawindow.cc:652
 msgid "Save as"
-msgstr ""
+msgstr "另存为"
 
 #: main.cc:88
 msgid "%1 could not connect to the audio backend."
@@ -8140,54 +8226,54 @@ msgstr ""
 msgid "An error was encountered while launching %1"
 msgstr "启动 %1 时遇到一个意外错误"
 
-#: main.cc:344
+#: main.cc:350
 msgid " (built using "
 msgstr "（构建使用 "
 
-#: main.cc:347
+#: main.cc:353
 msgid " and GCC version "
 msgstr " 和 GCC 版本 "
 
-#: main.cc:357
+#: main.cc:363
 msgid "Copyright (C) 1999-2015 Paul Davis"
 msgstr "版权 (C) 1999-2012 Paul Davis"
 
-#: main.cc:358
+#: main.cc:364
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 msgstr ""
 "部分版权 (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus"
 
-#: main.cc:360
+#: main.cc:366
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr "%1 绝对不附带任何担保"
 
-#: main.cc:361
+#: main.cc:367
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr "甚至不包括可销售性质和适用于任何特定目的的保证。"
 
-#: main.cc:362
+#: main.cc:368
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "这是自由软件，且欢迎您分发推广它，"
 
-#: main.cc:363
+#: main.cc:369
 msgid "under certain conditions; see the source for copying conditions."
 msgstr "在一定条件下；请参阅复制协议的源文件。"
 
-#: main.cc:368
+#: main.cc:374
 msgid "could not initialize %1."
 msgstr "无法初始化 %1 。"
 
-#: main.cc:378
+#: main.cc:384
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr "无法安装卸载 SIGPIPE 错误处理程序"
 
-#: main.cc:385
+#: main.cc:391
 msgid "Could not complete pre-GUI initialization"
 msgstr "无法完成先导-用户图形界面初始化"
 
-#: main.cc:392
+#: main.cc:398
 msgid "could not create %1 GUI"
 msgstr "无法创建  %1 图形用户界面"
 
@@ -8406,79 +8492,79 @@ msgstr "端口名称："
 msgid "MidiPortDialog"
 msgstr "MIDI端口对话框"
 
-#: midi_region_view.cc:859
+#: midi_region_view.cc:855
 msgid "channel edit"
 msgstr "声道编辑"
 
-#: midi_region_view.cc:895
+#: midi_region_view.cc:891
 msgid "velocity edit"
 msgstr "力度编辑"
 
-#: midi_region_view.cc:962
+#: midi_region_view.cc:958
 msgid "add note"
 msgstr "添加音符"
 
-#: midi_region_view.cc:1904
+#: midi_region_view.cc:1902
 msgid "step add"
 msgstr "步进添加"
 
-#: midi_region_view.cc:1998 midi_region_view.cc:2021
+#: midi_region_view.cc:1996 midi_region_view.cc:2019
 msgid "alter patch change"
 msgstr "更改音色变换"
 
-#: midi_region_view.cc:2057
+#: midi_region_view.cc:2055
 msgid "add patch change"
 msgstr "添加音色变换"
 
-#: midi_region_view.cc:2079 midi_region_view.cc:2080
+#: midi_region_view.cc:2077 midi_region_view.cc:2078
 msgid "move patch change"
 msgstr "移动音色变换"
 
-#: midi_region_view.cc:2092 midi_region_view.cc:2093
+#: midi_region_view.cc:2090 midi_region_view.cc:2091
 msgid "delete patch change"
 msgstr "删除音色变换"
 
-#: midi_region_view.cc:2131
+#: midi_region_view.cc:2129
 msgid "delete selection"
 msgstr "删除已选取部分"
 
-#: midi_region_view.cc:2148
+#: midi_region_view.cc:2146
 msgid "delete note"
 msgstr "删除音符"
 
-#: midi_region_view.cc:2589
+#: midi_region_view.cc:2587
 msgid "move notes"
 msgstr "移动音符"
 
-#: midi_region_view.cc:3139
+#: midi_region_view.cc:3137
 msgid "change velocities"
 msgstr "改变力度"
 
-#: midi_region_view.cc:3205
+#: midi_region_view.cc:3203
 msgid "transpose"
 msgstr "变调"
 
-#: midi_region_view.cc:3233
+#: midi_region_view.cc:3231
 msgid "change note lengths"
 msgstr "改变音符长度"
 
-#: midi_region_view.cc:3309
+#: midi_region_view.cc:3307
 msgid "nudge"
 msgstr "微调"
 
-#: midi_region_view.cc:3324
+#: midi_region_view.cc:3322
 msgid "change channel"
 msgstr "改变声道"
 
-#: midi_region_view.cc:3372
+#: midi_region_view.cc:3370
 msgid "Bank "
 msgstr "库"
 
-#: midi_region_view.cc:3374
+#: midi_region_view.cc:3372
 msgid "Channel "
 msgstr "声道"
 
-#: midi_region_view.cc:3561
+#: midi_region_view.cc:3559
 msgid "paste"
 msgstr "粘贴"
 
@@ -8714,8 +8800,8 @@ msgstr ""
 msgid "pre"
 msgstr "前置"
 
-#: mixer_strip.cc:104 mixer_strip.cc:136 mixer_strip.cc:397
-#: mixer_strip.cc:1540 mixer_strip.cc:1551 rc_option_editor.cc:3140
+#: mixer_strip.cc:104 mixer_strip.cc:136 mixer_strip.cc:397 mixer_strip.cc:1548
+#: mixer_strip.cc:1559 rc_option_editor.cc:3147
 msgid "Comments"
 msgstr "注释"
 
@@ -8747,11 +8833,11 @@ msgstr "隔离独奏"
 msgid "Lock Solo Status"
 msgstr "锁定独奏状态"
 
-#: mixer_strip.cc:208 mixer_strip.cc:2217
+#: mixer_strip.cc:208 mixer_strip.cc:2225
 msgid "SoloLock|Lock"
 msgstr "独奏锁定|锁定"
 
-#: mixer_strip.cc:209 mixer_strip.cc:2216
+#: mixer_strip.cc:209 mixer_strip.cc:2224
 msgid "Iso"
 msgstr "隔离"
 
@@ -8763,219 +8849,219 @@ msgstr "混合分组"
 msgid "Trim: "
 msgstr "修剪："
 
-#: mixer_strip.cc:393 rc_option_editor.cc:3136
+#: mixer_strip.cc:393 rc_option_editor.cc:3143
 msgid "Phase Invert"
 msgstr "相位反转"
 
-#: mixer_strip.cc:394 rc_option_editor.cc:3137
+#: mixer_strip.cc:394 rc_option_editor.cc:3144
 msgid "Record & Monitor"
 msgstr "录制和监控"
 
-#: mixer_strip.cc:395 rc_option_editor.cc:3138
+#: mixer_strip.cc:395 rc_option_editor.cc:3145
 msgid "Solo Iso / Lock"
 msgstr "独奏隔离 / 锁定"
 
-#: mixer_strip.cc:398 rc_option_editor.cc:3141
+#: mixer_strip.cc:398 rc_option_editor.cc:3148
 msgid "VCA Assigns"
-msgstr ""
+msgstr "VCA 指定"
 
-#: mixer_strip.cc:531
+#: mixer_strip.cc:545
 msgid "Show/Hide Monitoring Section"
 msgstr "显示/隐藏监控中的部分"
 
-#: mixer_strip.cc:583
+#: mixer_strip.cc:590
 msgid "Enable/Disable MIDI input"
 msgstr "用/禁用 MIDI 输入"
 
-#: mixer_strip.cc:749
+#: mixer_strip.cc:756
 msgid "Aux"
 msgstr "辅助"
 
-#: mixer_strip.cc:775
+#: mixer_strip.cc:782
 msgid "Snd"
 msgstr "声音"
 
-#: mixer_strip.cc:846 mixer_strip.cc:951 processor_box.cc:3594
+#: mixer_strip.cc:853 mixer_strip.cc:958 processor_box.cc:3606
 msgid "Not connected to audio engine - no I/O changes are possible"
 msgstr "未连接到音频引擎 —— 不可能改变输入/输出"
 
-#: mixer_strip.cc:904 mixer_strip.cc:1007
+#: mixer_strip.cc:911 mixer_strip.cc:1014
 msgid "Add %1 port"
 msgstr "添加 %1 端口"
 
-#: mixer_strip.cc:912 mixer_strip.cc:1014 monitor_section.cc:1466
+#: mixer_strip.cc:919 mixer_strip.cc:1021 monitor_section.cc:1466
 #: plugin_pin_dialog.cc:1782
 msgid "Routing Grid"
 msgstr "路由网格"
 
-#: mixer_strip.cc:1291
+#: mixer_strip.cc:1298
 msgid "MIDI "
 msgstr ""
 
-#: mixer_strip.cc:1295
+#: mixer_strip.cc:1302
 msgid "<b>INPUT</b> to %1"
 msgstr "<b>输入</b> 到 %1"
 
-#: mixer_strip.cc:1297 monitor_section.cc:1511
+#: mixer_strip.cc:1304 monitor_section.cc:1511
 msgid "<b>OUTPUT</b> from %1"
 msgstr "<b>输出</b> 来自 %1"
 
-#: mixer_strip.cc:1410 monitor_section.cc:1598
+#: mixer_strip.cc:1417 monitor_section.cc:1598
 msgid "Disconnected"
 msgstr "失去连接"
 
-#: mixer_strip.cc:1536
+#: mixer_strip.cc:1544
 msgid "Click to add/edit comments"
 msgstr "点击添加/编辑注释"
 
-#: mixer_strip.cc:1540 mixer_strip.cc:1551
+#: mixer_strip.cc:1548 mixer_strip.cc:1559
 msgid "Cmt"
 msgstr "注释"
 
-#: mixer_strip.cc:1596
+#: mixer_strip.cc:1604
 msgid "Grp"
 msgstr "分组"
 
-#: mixer_strip.cc:1599
+#: mixer_strip.cc:1607
 msgid "~G"
 msgstr ""
 
-#: mixer_strip.cc:1640 route_time_axis.cc:585 vca_master_strip.cc:396
+#: mixer_strip.cc:1648 route_time_axis.cc:585 vca_master_strip.cc:396
 msgid "Color..."
 msgstr "颜色…"
 
-#: mixer_strip.cc:1642 route_time_axis.cc:587
+#: mixer_strip.cc:1650 route_time_axis.cc:587
 msgid "Comments..."
 msgstr "注释…"
 
-#: mixer_strip.cc:1644 route_time_axis.cc:589
+#: mixer_strip.cc:1652 route_time_axis.cc:589
 msgid "Inputs..."
 msgstr "输入…"
 
-#: mixer_strip.cc:1646 route_time_axis.cc:591
+#: mixer_strip.cc:1654 route_time_axis.cc:591
 msgid "Outputs..."
 msgstr "输出…"
 
-#: mixer_strip.cc:1651
+#: mixer_strip.cc:1659
 msgid "Save As Template..."
 msgstr "保存为模板…"
 
-#: mixer_strip.cc:1657 route_group_dialog.cc:45 route_time_axis.cc:851
+#: mixer_strip.cc:1665 route_group_dialog.cc:45 route_time_axis.cc:851
 msgid "Active"
 msgstr "激活"
 
-#: mixer_strip.cc:1665 plugin_pin_dialog.cc:1011
+#: mixer_strip.cc:1673 plugin_pin_dialog.cc:1011
 msgid "Strict I/O"
-msgstr ""
+msgstr "精确输入/输出"
 
-#: mixer_strip.cc:1675 processor_box.cc:3698
+#: mixer_strip.cc:1683 processor_box.cc:3710
 msgid "Pin Connections..."
-msgstr ""
+msgstr "接口连接…"
 
-#: mixer_strip.cc:1679
+#: mixer_strip.cc:1687
 msgid "Adjust Latency..."
 msgstr "调整延迟…"
 
-#: mixer_strip.cc:1682
+#: mixer_strip.cc:1690
 msgid "Protect Against Denormals"
 msgstr "防止违背非规格化数"
 
-#: mixer_strip.cc:1701 route_time_axis.cc:867
+#: mixer_strip.cc:1709 route_time_axis.cc:867
 msgid "Duplicate..."
 msgstr "复制…"
 
-#: mixer_strip.cc:1996
+#: mixer_strip.cc:2004
 msgid "Pre"
 msgstr "前置"
 
-#: mixer_strip.cc:2000
+#: mixer_strip.cc:2008
 msgid "Post"
 msgstr "后置"
 
-#: mixer_strip.cc:2016
+#: mixer_strip.cc:2024
 msgid "Meter|In"
 msgstr "节拍|入"
 
-#: mixer_strip.cc:2020
+#: mixer_strip.cc:2028
 msgid "Meter|Pr"
 msgstr "节拍|预先"
 
-#: mixer_strip.cc:2024
+#: mixer_strip.cc:2032
 msgid "Meter|Po"
 msgstr "节拍|后置"
 
-#: mixer_strip.cc:2028
+#: mixer_strip.cc:2036
 msgid "Meter|O"
 msgstr "节拍|O"
 
-#: mixer_strip.cc:2033
+#: mixer_strip.cc:2041
 msgid "Meter|C"
 msgstr "节拍|C"
 
-#: mixer_strip.cc:2194 route_ui.cc:193
+#: mixer_strip.cc:2202 route_ui.cc:193
 msgid "Disk"
 msgstr "硬盘"
 
-#: mixer_strip.cc:2196
+#: mixer_strip.cc:2204
 msgid "Mon"
 msgstr "监控"
 
 # AFL - Aside Fade Listen. 衰减后监听
-#: mixer_strip.cc:2209 monitor_section.cc:81
+#: mixer_strip.cc:2217 monitor_section.cc:81
 msgid "AFL"
 msgstr "后置于淡化器试听"
 
 # PFL Pre-Fader-Listen衰减前监听
-#: mixer_strip.cc:2212 monitor_section.cc:82
+#: mixer_strip.cc:2220 monitor_section.cc:82
 msgid "PFL"
 msgstr "前置于淡化器试听"
 
-#: mixer_strip.cc:2222 meter_strip.cc:385
+#: mixer_strip.cc:2230 meter_strip.cc:385
 msgid "MonitorInput|I"
 msgstr "监控器输入|I"
 
-#: mixer_strip.cc:2223 meter_strip.cc:386
+#: mixer_strip.cc:2231 meter_strip.cc:386
 msgid "MonitorDisk|D"
 msgstr "监控器硬盘|D"
 
-#: mixer_strip.cc:2225
+#: mixer_strip.cc:2233
 msgid "Mon|O"
 msgstr "监控|O"
 
-#: mixer_strip.cc:2238 meter_strip.cc:377 route_time_axis.cc:2730
+#: mixer_strip.cc:2246 meter_strip.cc:377 route_time_axis.cc:2730
 #: vca_master_strip.cc:202 vca_time_axis.cc:227
 msgid "AfterFader|A"
 msgstr "后置于淡化器|A"
 
-#: mixer_strip.cc:2241
+#: mixer_strip.cc:2249
 msgid "Prefader|P"
 msgstr "前置于淡化器|P"
 
-#: mixer_strip.cc:2246
+#: mixer_strip.cc:2254
 msgid "SoloIso|I"
 msgstr "独奏隔离|I"
 
-#: mixer_strip.cc:2247
+#: mixer_strip.cc:2255
 msgid "SoloLock|L"
 msgstr "独奏锁定|L"
 
-#: mixer_strip.cc:2452
+#: mixer_strip.cc:2460
 msgid "Pre Fader"
 msgstr "前置于淡化器"
 
-#: mixer_strip.cc:2453
+#: mixer_strip.cc:2461
 msgid "Post Fader"
 msgstr "后置于淡化器"
 
-#: mixer_strip.cc:2498 meter_strip.cc:858
+#: mixer_strip.cc:2506 meter_strip.cc:858
 msgid "Change all in Group to %1"
 msgstr "改变分组里所有的到 %1"
 
-#: mixer_strip.cc:2500 meter_strip.cc:860
+#: mixer_strip.cc:2508 meter_strip.cc:860
 msgid "Change all to %1"
 msgstr "改变所有的到 %1"
 
-#: mixer_strip.cc:2502 meter_strip.cc:862
+#: mixer_strip.cc:2510 meter_strip.cc:862
 msgid "Change same track-type to %1"
 msgstr "改变相同轨道类型的到 %1"
 
@@ -9386,13 +9472,11 @@ msgstr "略过"
 msgid "L:%3d R:%3d"
 msgstr "左：%3d 右：%3d"
 
-#: mono_panner.cc:203 panner2d.cc:276 stereo_panner.cc:252
-#: stereo_panner.cc:275
+#: mono_panner.cc:203 panner2d.cc:276 stereo_panner.cc:252 stereo_panner.cc:275
 msgid "Panner|L"
 msgstr "声相器|左"
 
-#: mono_panner.cc:220 panner2d.cc:277 stereo_panner.cc:250
-#: stereo_panner.cc:277
+#: mono_panner.cc:220 panner2d.cc:277 stereo_panner.cc:250 stereo_panner.cc:277
 msgid "Panner|R"
 msgstr "声相器|右"
 
@@ -9400,8 +9484,8 @@ msgstr "声相器|右"
 msgid "Mono Panner"
 msgstr "单声道声相器"
 
-#: mono_panner_editor.cc:46 mono_panner_editor.cc:51
-#: stereo_panner_editor.cc:48 stereo_panner_editor.cc:53
+#: mono_panner_editor.cc:46 mono_panner_editor.cc:51 stereo_panner_editor.cc:48
+#: stereo_panner_editor.cc:53
 msgid "%"
 msgstr ""
 
@@ -9495,10 +9579,6 @@ msgstr "规范化区域"
 #: normalize_dialog.cc:42
 msgid "Normalize to:"
 msgstr "规范化到："
-
-#: normalize_dialog.cc:49 strip_silence_dialog.cc:67
-msgid "dbFS"
-msgstr "dbFS（分贝振幅）"
 
 #: normalize_dialog.cc:56
 msgid "Normalize each region using its own peak value"
@@ -9673,21 +9753,21 @@ msgstr "撤销已指定"
 msgid "Imported"
 msgstr "已导入"
 
-#: plugin_eq_gui.cc:85 plugin_eq_gui.cc:109
+#: plugin_eq_gui.cc:93 plugin_eq_gui.cc:117
 msgid "dB scale"
 msgstr "dB 比例"
 
-#: plugin_eq_gui.cc:116
+#: plugin_eq_gui.cc:124
 msgid "Show phase"
 msgstr "显示相位"
 
 #: plugin_pin_dialog.cc:55
 msgid "Manual Config"
-msgstr ""
+msgstr "手动设定"
 
 #: plugin_pin_dialog.cc:56
 msgid "Sidechain"
-msgstr ""
+msgstr "边链电路"
 
 #: plugin_pin_dialog.cc:57 plugin_pin_dialog.cc:59 plugin_pin_dialog.cc:61
 #: plugin_pin_dialog.cc:63 plugin_pin_dialog.cc:65 step_entry.cc:81
@@ -9702,41 +9782,41 @@ msgstr ""
 
 #: plugin_pin_dialog.cc:148
 msgid "Audio Input Pins"
-msgstr ""
+msgstr "音频输入接口"
 
 #: plugin_pin_dialog.cc:157
 msgid "MIDI Input Pins"
-msgstr ""
+msgstr "MIDI 输入接口"
 
 #: plugin_pin_dialog.cc:166
 msgid "Instances"
-msgstr ""
+msgstr "实例"
 
 #: plugin_pin_dialog.cc:176
 msgid "Audio Out"
-msgstr ""
+msgstr "音频输出"
 
 #: plugin_pin_dialog.cc:185
 msgid "MIDI Out"
-msgstr ""
+msgstr "MIDI 输出"
 
 #: plugin_pin_dialog.cc:192
 msgid "Output Presets"
-msgstr ""
+msgstr "输出预设"
 
 #: plugin_pin_dialog.cc:208
 msgid "Add Sidechain Input"
-msgstr ""
+msgstr "添加边链电路输入"
 
 #: plugin_pin_dialog.cc:478 plugin_pin_dialog.cc:482 plugin_pin_dialog.cc:486
 #: plugin_setup_dialog.cc:115 plugin_setup_dialog.cc:199
 msgid "Automatic"
-msgstr ""
+msgstr "自动化"
 
 #: plugin_pin_dialog.cc:515 plugin_setup_dialog.cc:208
 msgid "%1 Channel"
 msgid_plural "%1 Channels"
-msgstr[0] ""
+msgstr[0] "%1 声道"
 
 #: plugin_pin_dialog.cc:641 processor_box.cc:224
 msgid "Send"
@@ -9744,21 +9824,21 @@ msgstr "发送端"
 
 #: plugin_pin_dialog.cc:997
 msgid "Latency %1 spl%2 %3"
-msgstr ""
+msgstr "延迟 %1 spl%2 %3"
 
 #: plugin_pin_dialog.cc:997 plugin_pin_dialog.cc:1001
 msgid "no-inplace"
-msgstr ""
+msgstr "非原所在地"
 
 #: plugin_pin_dialog.cc:999
 msgid "Latency %1 spl"
-msgstr ""
+msgstr "延迟 %1 spl"
 
 #: plugin_pin_dialog.cc:1055
 msgid "Instance #%1"
-msgstr ""
+msgstr "实例 #%1"
 
-#: plugin_pin_dialog.cc:1700 processor_box.cc:2508
+#: plugin_pin_dialog.cc:1700 processor_box.cc:2520
 msgid "Cannot set up new send: %1"
 msgstr "无法建立新的发送端： %1"
 
@@ -9768,39 +9848,39 @@ msgstr ""
 
 #: plugin_pin_dialog.cc:1963 plugin_pin_dialog.cc:1971
 msgid "Pin Configuration: %1"
-msgstr ""
+msgstr "接口配置：%1"
 
 #: plugin_setup_dialog.cc:30
 msgid "Plugin Setup"
-msgstr ""
+msgstr "插件设置"
 
 #: plugin_setup_dialog.cc:33
 msgid "Copy I/O Map"
-msgstr ""
+msgstr "复制输入/输出映射图"
 
 #: plugin_setup_dialog.cc:50
 msgid "An Instrument plugin is already present."
-msgstr ""
+msgstr "一个乐器插件已准备就绪。"
 
 #: plugin_setup_dialog.cc:54
 msgid "Replace"
-msgstr ""
+msgstr "替换"
 
 #: plugin_setup_dialog.cc:60
 msgid "with"
-msgstr ""
+msgstr "附带"
 
 #: plugin_setup_dialog.cc:70
 msgid "I/O Pin Mapping"
-msgstr ""
+msgstr "输入/输出接口映射"
 
 #: plugin_setup_dialog.cc:79
 msgid "Configure Plugin '%1'"
-msgstr ""
+msgstr "配置插件 '%1'"
 
 #: plugin_setup_dialog.cc:90
 msgid "Output Configuration"
-msgstr ""
+msgstr "输出配置"
 
 #: plugin_selector.cc:54 plugin_selector.cc:322
 msgid "Name contains"
@@ -10061,7 +10141,7 @@ msgstr "新建预设"
 msgid "Click to allow normal use of %1 keyboard shortcuts"
 msgstr "单击允许正常使用 %1 键盘快捷键"
 
-#: plugin_ui.cc:785
+#: plugin_ui.cc:795
 msgid "(none)"
 msgstr "（无）"
 
@@ -10086,63 +10166,63 @@ msgid "Other"
 msgstr "其它"
 
 # 纵向时间码（LTC，Longitidinal time code）
-#: port_group.cc:434 port_group.cc:435
+#: port_group.cc:435 port_group.cc:436
 msgid "LTC Out"
 msgstr "LTC（纵向时间码）输出"
 
-#: port_group.cc:438 port_group.cc:439
+#: port_group.cc:439 port_group.cc:440
 msgid "LTC In"
 msgstr "LTC（纵向时间码）输入"
 
-#: port_group.cc:473
+#: port_group.cc:474
 msgid "MTC in"
 msgstr "MTC（MIDI时间码）输入"
 
-#: port_group.cc:476
+#: port_group.cc:477
 msgid "MIDI control in"
 msgstr "MIDI 控制输入"
 
-#: port_group.cc:479
+#: port_group.cc:480
 msgid "MIDI clock in"
 msgstr "MIDI 计时器输入"
 
-#: port_group.cc:482
+#: port_group.cc:483
 msgid "MMC in"
 msgstr "MMC（MIDI时间控制）输入"
 
-#: port_group.cc:486
+#: port_group.cc:487
 msgid "MTC out"
 msgstr "MTC（MIDI时间码）输出"
 
-#: port_group.cc:489
+#: port_group.cc:490
 msgid "MIDI control out"
 msgstr "MIDI 控制输出"
 
-#: port_group.cc:492
+#: port_group.cc:493
 msgid "MIDI clock out"
 msgstr "MIDI 计时器输出"
 
-#: port_group.cc:495
+#: port_group.cc:496
 msgid "MMC out"
 msgstr "MMC（MIDI时间控制）输出"
 
-#: port_group.cc:554
+#: port_group.cc:555
 msgid ":monitor"
 msgstr "：监控"
 
-#: port_group.cc:570
+#: port_group.cc:571
 msgid "system:"
 msgstr "系统："
 
-#: port_group.cc:571
+#: port_group.cc:572
 msgid "alsa_pcm:"
 msgstr ""
 
-#: port_group.cc:572
+#: port_group.cc:573
 msgid "alsa_midi:"
 msgstr ""
 
-#: port_group.cc:577
+#: port_group.cc:578
 msgid "Scene "
 msgstr "场景"
 
@@ -10207,7 +10287,7 @@ msgstr "轻弹"
 
 #: port_matrix.cc:732
 msgid "It is not possible to add a port here."
-msgstr ""
+msgstr "不可能在这里添加一个端口。"
 
 #: port_matrix.cc:733
 msgid "Cannot add port"
@@ -10215,11 +10295,11 @@ msgstr "无法添加端口"
 
 #: port_matrix.cc:757
 msgid "The last port cannot be removed"
-msgstr ""
+msgstr "最后的端口不能被移除"
 
 #: port_matrix.cc:760
 msgid "This port cannot be removed."
-msgstr ""
+msgstr "这个端口不能被移除。"
 
 #: port_matrix.cc:765
 msgid "Port removal not allowed"
@@ -10263,7 +10343,7 @@ msgstr ""
 "\n"
 "这个单声道插件已经被复制了 %1 次。"
 
-#: processor_box.cc:505 processor_box.cc:1527
+#: processor_box.cc:505 processor_box.cc:1528
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
@@ -10273,7 +10353,7 @@ msgstr ""
 "双击显示图形用户界面。\n"
 "%2+双击显示通用图形用户界面。%3"
 
-#: processor_box.cc:508 processor_box.cc:1530
+#: processor_box.cc:508 processor_box.cc:1531
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
@@ -10316,11 +10396,11 @@ msgstr "链接声相器控制"
 msgid "on"
 msgstr "开启"
 
-#: processor_box.cc:859 rc_option_editor.cc:3178 rc_option_editor.cc:3192
+#: processor_box.cc:859 rc_option_editor.cc:3185 rc_option_editor.cc:3199
 msgid "off"
 msgstr "关闭"
 
-#: processor_box.cc:1817
+#: processor_box.cc:1819
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -10328,7 +10408,7 @@ msgstr ""
 "右键点击添加/移除/编辑\n"
 "插件、插入、发送端以及更多"
 
-#: processor_box.cc:1966
+#: processor_box.cc:1968
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
@@ -10338,15 +10418,15 @@ msgstr ""
 "可能是因为插件的输入/输出配置\n"
 "无法匹配这条音轨的配置。"
 
-#: processor_box.cc:2443 processor_box.cc:2986
+#: processor_box.cc:2455 processor_box.cc:2998
 msgid "Plugin Incompatibility"
 msgstr "插件不兼容"
 
-#: processor_box.cc:2446
+#: processor_box.cc:2458
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "您试图在空位 %2 中添加插件 \"%1\" 。\n"
 
-#: processor_box.cc:2452
+#: processor_box.cc:2464
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -10354,17 +10434,17 @@ msgstr ""
 "\n"
 "此插件有：\n"
 
-#: processor_box.cc:2455
+#: processor_box.cc:2467
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI 输入\n"
 
-#: processor_box.cc:2459
+#: processor_box.cc:2471
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 音频输出\n"
 
-#: processor_box.cc:2462
+#: processor_box.cc:2474
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -10372,17 +10452,17 @@ msgstr ""
 "\n"
 "但在插入点那里有：\n"
 
-#: processor_box.cc:2465
+#: processor_box.cc:2477
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI 声道\n"
 
-#: processor_box.cc:2469
+#: processor_box.cc:2481
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 音频声道\n"
 
-#: processor_box.cc:2472
+#: processor_box.cc:2484
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -10390,7 +10470,7 @@ msgstr ""
 "\n"
 "%1 无法在此处再次插入插件.\n"
 
-#: processor_box.cc:2989
+#: processor_box.cc:3001
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -10400,19 +10480,19 @@ msgstr ""
 "要求这些插件/发送端/插入\n"
 "因为输入和输出将无法正确工作。"
 
-#: processor_box.cc:3189
+#: processor_box.cc:3201
 msgid "Rename Processor"
 msgstr "重命名处理器"
 
-#: processor_box.cc:3220
+#: processor_box.cc:3232
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr "至少有100个输入输出对象物体存在着像 %1这样的名称——名称没有改变"
 
-#: processor_box.cc:3371
+#: processor_box.cc:3383
 msgid "plugin insert constructor failed"
 msgstr "插件插入构造函数失败"
 
-#: processor_box.cc:3382
+#: processor_box.cc:3394
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -10422,7 +10502,7 @@ msgstr ""
 "可能是因为插件的输入/输出配置\n"
 "无法匹配这条音轨的配置。"
 
-#: processor_box.cc:3428
+#: processor_box.cc:3440
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -10430,15 +10510,15 @@ msgstr ""
 "您是否真的要从 %1 移除所有的处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:3432 processor_box.cc:3457
+#: processor_box.cc:3444 processor_box.cc:3469
 msgid "Yes, remove them all"
 msgstr "是的，全部移除它们"
 
-#: processor_box.cc:3434 processor_box.cc:3459
+#: processor_box.cc:3446 processor_box.cc:3471
 msgid "Remove processors"
 msgstr "移除处理器"
 
-#: processor_box.cc:3449
+#: processor_box.cc:3461
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -10446,7 +10526,7 @@ msgstr ""
 "您是否真的要从 %1 移除所有的前置于淡化器处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:3452
+#: processor_box.cc:3464
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -10454,59 +10534,59 @@ msgstr ""
 "您是否真的要从 %1 移除所有的后置于淡化器处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:3641
+#: processor_box.cc:3653
 msgid "New Plugin"
 msgstr "新建插件"
 
-#: processor_box.cc:3644
+#: processor_box.cc:3656
 msgid "New Insert"
 msgstr "新建插入"
 
-#: processor_box.cc:3647
+#: processor_box.cc:3659
 msgid "New External Send ..."
 msgstr "新建外部发送端…"
 
-#: processor_box.cc:3651
+#: processor_box.cc:3663
 msgid "New Aux Send ..."
 msgstr "新建辅助发送端…"
 
-#: processor_box.cc:3654
+#: processor_box.cc:3666
 msgid "Send Options"
 msgstr "发送端选项"
 
-#: processor_box.cc:3656
+#: processor_box.cc:3668
 msgid "Clear (all)"
 msgstr "清除（所有）"
 
-#: processor_box.cc:3658
+#: processor_box.cc:3670
 msgid "Clear (pre-fader)"
 msgstr "清除（前置于淡化器）"
 
-#: processor_box.cc:3660
+#: processor_box.cc:3672
 msgid "Clear (post-fader)"
 msgstr "清除（后置于淡化器）"
 
-#: processor_box.cc:3690
+#: processor_box.cc:3702
 msgid "Activate All"
 msgstr "激活所有"
 
-#: processor_box.cc:3692
+#: processor_box.cc:3704
 msgid "Deactivate All"
 msgstr "不激活所有"
 
-#: processor_box.cc:3694
+#: processor_box.cc:3706
 msgid "A/B Plugins"
 msgstr "A/B 插件"
 
-#: processor_box.cc:3707
+#: processor_box.cc:3719
 msgid "Edit with generic controls..."
 msgstr "以通用控制编辑…"
 
-#: processor_box.cc:4039
+#: processor_box.cc:4051
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2（通过 %3）"
 
-#: processor_box.cc:4041
+#: processor_box.cc:4053
 msgid "%1 (by %2)"
 msgstr "%1（通过 %2）"
 
@@ -10568,7 +10648,7 @@ msgstr "加重第一拍："
 
 #: rc_option_editor.cc:95
 msgid "Use default Click:"
-msgstr "使用默认计时器："
+msgstr "使用默认识别声："
 
 #: rc_option_editor.cc:101
 msgid "Click audio file:"
@@ -10892,7 +10972,7 @@ msgstr "设置可执行的视频监控"
 
 #: rc_option_editor.cc:1734
 msgid "Column %1"
-msgstr ""
+msgstr "列 %1"
 
 #: rc_option_editor.cc:1852
 msgid "%1 Preferences"
@@ -10952,7 +11032,7 @@ msgstr "当前会话的最大数量"
 
 #: rc_option_editor.cc:1941 rc_option_editor.cc:1943 rc_option_editor.cc:1945
 msgid "Misc/Click"
-msgstr ""
+msgstr "杂项/识别声"
 
 #: rc_option_editor.cc:1948
 msgid "Click gain level"
@@ -11028,7 +11108,7 @@ msgstr ""
 #: rc_option_editor.cc:2034
 msgid "Do seamless looping (not possible when slaved to MTC, LTC etc)"
 msgstr ""
-"做无缝循环（当从属于 MTC，LTC “MIDI时间码，纵向时间”诸如此类时不可能实现）"
+"做无缝循环（当从属于 MTC，LTC “MIDI时间码，纵向时间码”诸如此类时不可能实现）"
 
 #: rc_option_editor.cc:2039
 msgid ""
@@ -11163,7 +11243,8 @@ msgid ""
 msgstr ""
 "<b>启用时</b> 在从属于外部时间码时 %1 将不会变速。同步锁定表明已选中的外部时"
 "间码源与音频界面共享计时器同步（ Black &amp; Burst， Wordclock，等等）。这个"
-"选项禁用漂移补偿。播送速度被修正于 1.0。 Varispeed LTC 将被忽略且引起漂移。\n"
+"选项禁用漂移补偿。播送速度被修正于 1.0。 Varispeed LTC （纵向时间码）将被忽略"
+"且引起漂移。\n"
 "\n"
 "<b>禁用时</b> %1 将补偿潜在的漂移，不论时间码源是否共享时间同步。"
 
@@ -11214,7 +11295,8 @@ msgstr "停止时发送 LTC（纵向时间码）"
 msgid ""
 "<b>When enabled</b> %1 will continue to send LTC information even when the "
 "transport (playhead) is not moving"
-msgstr "<b>启用时</b> %1 将继续发送纵向时间码信息，即使当播送（指针）不再移动"
+msgstr ""
+"<b>启用时</b> %1 将继续发送 LTC（纵向时间码）信息，即使当播送（指针）不再移动"
 
 #: rc_option_editor.cc:2191
 msgid "LTC generator level"
@@ -11222,11 +11304,11 @@ msgstr "LTC（纵向时间码）生成器电平"
 
 #: rc_option_editor.cc:2195
 msgid ""
-"Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
-"is  0dBu ^= -18dbFS in an EBU calibrated system"
+"Specify the Peak Volume of the generated LTC signal in dBFS. A good value "
+"is  0dBu ^= -18dBFS in an EBU calibrated system"
 msgstr ""
-"以 dbFS 指定生成纵向时间码信号音量的峰值。在一个 EBU 校准系统里建议的数值是 "
-"0dBu ^= -18dbFS"
+"以 dBFS 指定生成的 LTC（纵向时间码）信号峰值音量。在一个 EBU 校正过的系统里较"
+"好的数值是 0dBu ^= -18dBFS"
 
 #: rc_option_editor.cc:2204
 msgid "Make rubberband selection rectangle snap to the grid"
@@ -11340,7 +11422,7 @@ msgstr "已存在的已选择部分和新创建的区域"
 #: rc_option_editor.cc:2348 rc_option_editor.cc:2351 rc_option_editor.cc:2360
 #: rc_option_editor.cc:2378 rc_option_editor.cc:2390 rc_option_editor.cc:2392
 msgid "Editor/Waveforms"
-msgstr ""
+msgstr "编辑器/波形"
 
 #: rc_option_editor.cc:2348
 msgid "Waveforms"
@@ -11432,7 +11514,7 @@ msgstr "自动化主控总线"
 
 #: rc_option_editor.cc:2467
 msgid "Use 'Strict-I/O' for new tracks or Busses"
-msgstr ""
+msgstr "为新的轨道或总线使用“精确输入/输出”"
 
 #: rc_option_editor.cc:2478
 msgid "Denormals"
@@ -11596,7 +11678,7 @@ msgstr "发送端 MIDI 控制反馈"
 #: rc_option_editor.cc:2756 rc_option_editor.cc:2764 rc_option_editor.cc:2772
 #: rc_option_editor.cc:2781
 msgid "MIDI/Sync"
-msgstr ""
+msgstr "MIDI/同步"
 
 #: rc_option_editor.cc:2725
 msgid "MIDI Clock"
@@ -11660,7 +11742,8 @@ msgstr ""
 msgid "Keyboard"
 msgstr "键盘"
 
-#: rc_option_editor.cc:2848 startup.cc:352
+#: rc_option_editor.cc:2848 rc_option_editor.cc:2890 rc_option_editor.cc:2960
+#: startup.cc:352
 msgid "Scan for Plugins"
 msgstr "扫描插件"
 
@@ -11691,6 +11774,10 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>当启用时</b> 在播送停止时，插件将被重置。 在播送停止时，被禁用的插件时将保"
+"持不变。\n"
+"\n"
+"这主要会影响到带有一个“小尾巴”的插件，诸如混响器。"
 
 #: rc_option_editor.cc:2879
 msgid "Make new plugins active"
@@ -11702,22 +11789,25 @@ msgid ""
 "busses. When disabled plugins will be left inactive when they are added to "
 "tracks/busses"
 msgstr ""
+"<b>当启用时</b> 当插件被添加到音轨/总线时，插件将被激活。当禁用插件时，添加到"
+"音轨/总线的插件将保持非活动状态。"
 
-#: rc_option_editor.cc:2888 rc_option_editor.cc:2896 rc_option_editor.cc:2908
-#: rc_option_editor.cc:2913 rc_option_editor.cc:2915 rc_option_editor.cc:2920
-#: rc_option_editor.cc:2927 rc_option_editor.cc:2932 rc_option_editor.cc:2941
+#: rc_option_editor.cc:2888 rc_option_editor.cc:2889 rc_option_editor.cc:2899
+#: rc_option_editor.cc:2911 rc_option_editor.cc:2916 rc_option_editor.cc:2918
+#: rc_option_editor.cc:2923 rc_option_editor.cc:2930 rc_option_editor.cc:2935
+#: rc_option_editor.cc:2944
 msgid "Plugins/VST"
-msgstr ""
+msgstr "插件/VST"
 
 #: rc_option_editor.cc:2888
 msgid "VST"
 msgstr ""
 
-#: rc_option_editor.cc:2892
+#: rc_option_editor.cc:2895
 msgid "Scan for [new] VST Plugins on Application Start"
 msgstr "在应用起点扫描 [新] VST 插件"
 
-#: rc_option_editor.cc:2898
+#: rc_option_editor.cc:2901
 msgid ""
 "<b>When enabled</b> new VST plugins are searched, tested and added to the "
 "cache index on application start. When disabled new plugins will only be "
@@ -11726,49 +11816,50 @@ msgstr ""
 "<b>启用时</b> 新的 VST 插件被搜索、测试以及添加到应用起点的缓存索引中。当禁用"
 "新插件时，仅在手动触发“扫描”时可用。"
 
-#: rc_option_editor.cc:2904
+#: rc_option_editor.cc:2907
 msgid "Verbose Plugin Scan"
 msgstr "冗长的插件扫描"
 
-#: rc_option_editor.cc:2910
+#: rc_option_editor.cc:2913
 msgid ""
 "<b>When enabled</b> additional information for every plugin is added to the "
 "Log Window."
 msgstr "<b>启用时</b>每个插件额外的信息会被添加到日志窗口。"
 
-#: rc_option_editor.cc:2918
+#: rc_option_editor.cc:2921
 msgid "VST Cache:"
 msgstr "VST 缓存："
 
-#: rc_option_editor.cc:2923
+#: rc_option_editor.cc:2926
 msgid "VST Blacklist:"
 msgstr "VST 黑名单："
 
-#: rc_option_editor.cc:2930
+#: rc_option_editor.cc:2933
 msgid "Linux VST Path:"
 msgstr "Linux VST 路径："
 
-#: rc_option_editor.cc:2935 rc_option_editor.cc:2948
+#: rc_option_editor.cc:2938 rc_option_editor.cc:2951
 msgid "Path:"
 msgstr "路径："
 
-#: rc_option_editor.cc:2944
+#: rc_option_editor.cc:2947
 msgid "Windows VST Path:"
 msgstr "Windows VST 路径："
 
-#: rc_option_editor.cc:2954 rc_option_editor.cc:2966 rc_option_editor.cc:2971
+#: rc_option_editor.cc:2958 rc_option_editor.cc:2959 rc_option_editor.cc:2973
+#: rc_option_editor.cc:2978
 msgid "Plugins/Audio Unit"
-msgstr ""
-
-#: rc_option_editor.cc:2954
-msgid "Audio Unit"
-msgstr "音频单位"
+msgstr "插件/音频单元"
 
 #: rc_option_editor.cc:2958
+msgid "Audio Unit"
+msgstr "音频单元"
+
+#: rc_option_editor.cc:2965
 msgid "Scan for AudioUnit Plugins on Application Start"
 msgstr "在应用起点扫描音频单位插件"
 
-#: rc_option_editor.cc:2964
+#: rc_option_editor.cc:2971
 msgid ""
 "<b>When enabled</b> Audio Unit Plugins are discovered on application start. "
 "When disabled AU plugins will only be available after triggering a 'Scan' "
@@ -11779,55 +11870,56 @@ msgstr ""
 "发“扫描”时可用。第一次成功的扫描将启用音频单位自动扫描，若插件发现任何崩溃的"
 "情况都将禁用自动扫描。"
 
-#: rc_option_editor.cc:2969
+#: rc_option_editor.cc:2976
 msgid "AU Cache:"
 msgstr "AU 缓存："
 
-#: rc_option_editor.cc:2974
+#: rc_option_editor.cc:2981
 msgid "AU Blacklist:"
 msgstr "AU 黑名单："
 
-#: rc_option_editor.cc:2978
+#: rc_option_editor.cc:2985
 msgid "Plugin GUI"
 msgstr "插件用户图形界面"
 
-#: rc_option_editor.cc:2982
+#: rc_option_editor.cc:2989
 msgid "Automatically open the plugin GUI when adding a new plugin"
 msgstr "添加新的插件时自动打开插件用户图形界面"
 
-#: rc_option_editor.cc:2991
+#: rc_option_editor.cc:2998
 msgid "Show Plugin Inline Display on Mixerstrip by default"
 msgstr "在混音器工具栏上默认显示插件内联显示"
 
-#: rc_option_editor.cc:2998
+#: rc_option_editor.cc:3005
 msgid ""
 "Don't automatically open the plugin GUI when the plugin has an inline "
 "display mode"
 msgstr "当插件有一个内联显示模式时，不要自动打开插件 GUI（图形用户界面）"
 
-#: rc_option_editor.cc:3005
+#: rc_option_editor.cc:3012
 msgid "Instrument"
-msgstr ""
+msgstr "乐器"
 
-#: rc_option_editor.cc:3009
+#: rc_option_editor.cc:3016
 msgid "Ask to replace existing instrument plugin"
-msgstr ""
+msgstr "问询是否替换已存在的乐器插件"
 
-#: rc_option_editor.cc:3017
+#: rc_option_editor.cc:3024
 msgid "Interactively configure instrument plugins on insert"
-msgstr ""
+msgstr "插入时交互式配置乐器插件"
 
-#: rc_option_editor.cc:3023
+#: rc_option_editor.cc:3030
 msgid ""
 "<b>When enabled</b> show a dialog to select instrument channel configuration "
 "before adding a multichannel plugin."
 msgstr ""
+"<b>当启用时</b>显示一个对话框以便于在添加一个复合声道插件前选择乐器声道配置。"
 
-#: rc_option_editor.cc:3032
+#: rc_option_editor.cc:3039
 msgid "Disable Graphics Hardware Acceleration (requires restart)"
 msgstr "禁止图形硬件加速（需要重新启动）"
 
-#: rc_option_editor.cc:3038
+#: rc_option_editor.cc:3045
 msgid ""
 "Render large parts of the application user-interface in software, instead of "
 "using 2D-graphics acceleration.\n"
@@ -11836,19 +11928,19 @@ msgstr ""
 "在软件中渲染大部分应用程序用户界面，而不是使用2D图形加速。\n"
 "在生效前需要重新启动 %1"
 
-#: rc_option_editor.cc:3039 rc_option_editor.cc:3051 rc_option_editor.cc:3054
-#: rc_option_editor.cc:3062 rc_option_editor.cc:3070 rc_option_editor.cc:3078
-#: rc_option_editor.cc:3086 rc_option_editor.cc:3097 rc_option_editor.cc:3113
-#: rc_option_editor.cc:3129 rc_option_editor.cc:3144 rc_option_editor.cc:3153
-#: rc_option_editor.cc:3161
+#: rc_option_editor.cc:3046 rc_option_editor.cc:3058 rc_option_editor.cc:3061
+#: rc_option_editor.cc:3069 rc_option_editor.cc:3077 rc_option_editor.cc:3085
+#: rc_option_editor.cc:3093 rc_option_editor.cc:3104 rc_option_editor.cc:3120
+#: rc_option_editor.cc:3136 rc_option_editor.cc:3151 rc_option_editor.cc:3160
+#: rc_option_editor.cc:3168
 msgid "Preferences|GUI"
 msgstr "首选项|图形用户界面"
 
-#: rc_option_editor.cc:3045
+#: rc_option_editor.cc:3052
 msgid "Possibly improve slow graphical performance (requires restart)"
 msgstr "可能提高缓慢的图形性能（需要重新启动）"
 
-#: rc_option_editor.cc:3050
+#: rc_option_editor.cc:3057
 msgid ""
 "Disables hardware gradient rendering on buggy video drivers (\"buggy "
 "gradients patch\").\n"
@@ -11857,130 +11949,130 @@ msgstr ""
 "在有缺陷的视频驱动上禁用硬件梯度渲染 (\"缺陷梯度补丁\").\n"
 "在生效前需要重新启动 %1"
 
-#: rc_option_editor.cc:3057
+#: rc_option_editor.cc:3064
 msgid "Use Window Manager/Desktop visibility information"
-msgstr ""
+msgstr "使用窗口管理器/桌面可视化信息"
 
-#: rc_option_editor.cc:3065
+#: rc_option_editor.cc:3072
 msgid "Graphically indicate mouse pointer hovering over various widgets"
 msgstr "当悬停在各种小部件上面时显示鼠标指针"
 
-#: rc_option_editor.cc:3073
+#: rc_option_editor.cc:3080
 msgid "Show tooltips if mouse hovers over a control"
 msgstr "如果鼠标悬停在一个控件上面时显示工具提示"
 
-#: rc_option_editor.cc:3081
+#: rc_option_editor.cc:3088
 msgid "Use name highlight bars in region displays (requires a restart)"
 msgstr "在区域显示中使用名称突出显示栏（需要重新启动）"
 
-#: rc_option_editor.cc:3089
+#: rc_option_editor.cc:3096
 msgid "Update transport clock display at FPS instead of every 100ms"
 msgstr "以 FPS 替代每 100ms 更新播送计时器显示"
 
-#: rc_option_editor.cc:3104
+#: rc_option_editor.cc:3111
 msgid "Waveform image cache size (megabytes)"
 msgstr "波形图像缓存尺寸（兆字节）"
 
-#: rc_option_editor.cc:3112
+#: rc_option_editor.cc:3119
 msgid ""
 "Increasing the cache size uses more memory to store waveform images, which "
 "can improve graphical performance."
 msgstr "增加缓存大小会使用更多的内存来存储波形图像，可以提高图形性能。"
 
-#: rc_option_editor.cc:3120
+#: rc_option_editor.cc:3127
 msgid "Lock timeout (seconds)"
 msgstr "锁定超时（秒）"
 
-#: rc_option_editor.cc:3128
+#: rc_option_editor.cc:3135
 msgid "Lock GUI after this many idle seconds (zero to never lock)"
 msgstr "在空闲这么多秒之后锁定图形用户界面（零则永不锁定）"
 
-#: rc_option_editor.cc:3146
+#: rc_option_editor.cc:3153
 msgid "Mixer Strip"
 msgstr "混音器工具栏"
 
-#: rc_option_editor.cc:3156
+#: rc_option_editor.cc:3163
 msgid "Use narrow strips in the mixer by default"
 msgstr "默认在混音器里使用细长条工具栏"
 
-#: rc_option_editor.cc:3163
+#: rc_option_editor.cc:3170
 msgid "Action Script Button Visibility"
-msgstr ""
+msgstr "动作脚本按钮可见"
 
-#: rc_option_editor.cc:3169 rc_option_editor.cc:3183 rc_option_editor.cc:3200
-#: rc_option_editor.cc:3216 rc_option_editor.cc:3232 rc_option_editor.cc:3246
-#: rc_option_editor.cc:3272 rc_option_editor.cc:3290 rc_option_editor.cc:3301
-#: rc_option_editor.cc:3308 rc_option_editor.cc:3310 rc_option_editor.cc:3318
-#: rc_option_editor.cc:3320 rc_option_editor.cc:3328 rc_option_editor.cc:3336
-#: rc_option_editor.cc:3338
+#: rc_option_editor.cc:3176 rc_option_editor.cc:3190 rc_option_editor.cc:3207
+#: rc_option_editor.cc:3223 rc_option_editor.cc:3239 rc_option_editor.cc:3253
+#: rc_option_editor.cc:3279 rc_option_editor.cc:3297 rc_option_editor.cc:3308
+#: rc_option_editor.cc:3315 rc_option_editor.cc:3317 rc_option_editor.cc:3325
+#: rc_option_editor.cc:3327 rc_option_editor.cc:3335 rc_option_editor.cc:3343
+#: rc_option_editor.cc:3345
 msgid "Preferences|Metering"
 msgstr "首选项|计量"
 
-#: rc_option_editor.cc:3173
+#: rc_option_editor.cc:3180
 msgid "Peak hold time"
 msgstr "峰值停留时间"
 
-#: rc_option_editor.cc:3179
+#: rc_option_editor.cc:3186
 msgid "short"
 msgstr "短"
 
-#: rc_option_editor.cc:3180
+#: rc_option_editor.cc:3187
 msgid "medium"
 msgstr "中"
 
-#: rc_option_editor.cc:3181
+#: rc_option_editor.cc:3188
 msgid "long"
 msgstr "长"
 
-#: rc_option_editor.cc:3187
+#: rc_option_editor.cc:3194
 msgid "DPM fall-off"
 msgstr "DPM 衰减"
 
-#: rc_option_editor.cc:3193
+#: rc_option_editor.cc:3200
 msgid "slowest [6.6dB/sec]"
 msgstr "最慢 [6.6dB/sec]"
 
-#: rc_option_editor.cc:3194
+#: rc_option_editor.cc:3201
 msgid "slow [8.6dB/sec] (BBC PPM, EBU PPM)"
 msgstr "慢 [8.6dB/sec] (BBC PPM, EBU PPM)"
 
-#: rc_option_editor.cc:3195
+#: rc_option_editor.cc:3202
 msgid "moderate [12.0dB/sec] (DIN)"
 msgstr "稳健 [12.0dB/sec] (DIN)"
 
-#: rc_option_editor.cc:3196
+#: rc_option_editor.cc:3203
 msgid "medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
 msgstr "中等 [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
 
-#: rc_option_editor.cc:3197
+#: rc_option_editor.cc:3204
 msgid "fast [20dB/sec]"
 msgstr "快 [20dB/sec]"
 
-#: rc_option_editor.cc:3198
+#: rc_option_editor.cc:3205
 msgid "very fast [32dB/sec]"
 msgstr "很快 [32dB/sec]"
 
-#: rc_option_editor.cc:3204
+#: rc_option_editor.cc:3211
 msgid "Meter line-up level; 0dBu"
 msgstr "计量排队电平；0dBu"
 
-#: rc_option_editor.cc:3209 rc_option_editor.cc:3225
+#: rc_option_editor.cc:3216 rc_option_editor.cc:3232
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
 msgstr "-24dBFS（音视频同步码 美国：4dBu = -20dBFS）"
 
-#: rc_option_editor.cc:3210 rc_option_editor.cc:3226
+#: rc_option_editor.cc:3217 rc_option_editor.cc:3233
 msgid "-20dBFS (SMPTE RP.0155)"
 msgstr "-20dBFS（音视频同步码 RP.0155）"
 
-#: rc_option_editor.cc:3211 rc_option_editor.cc:3227
+#: rc_option_editor.cc:3218 rc_option_editor.cc:3234
 msgid "-18dBFS (EBU, BBC)"
 msgstr "-18dBFS（欧洲广播联盟，英国广播公司）"
 
-#: rc_option_editor.cc:3212 rc_option_editor.cc:3228
+#: rc_option_editor.cc:3219 rc_option_editor.cc:3235
 msgid "-15dBFS (DIN)"
 msgstr "-15dBFS（德国工业标准）"
 
-#: rc_option_editor.cc:3214
+#: rc_option_editor.cc:3221
 msgid ""
 "Configure meter-marks and color-knee point for dBFS scale DPM, set reference "
 "level for IEC1/Nordic, IEC2 PPM and VU meter."
@@ -11988,93 +12080,93 @@ msgstr ""
 "配置节拍标志和转角颜色点用于 dBFS 缩放 DPM，为 IEC1/Nordic、IEC2 PPM 和 VU 节"
 "拍设置参考电平。"
 
-#: rc_option_editor.cc:3220
+#: rc_option_editor.cc:3227
 msgid "IEC1/DIN Meter line-up level; 0dBu"
 msgstr "IEC1/DIN 计量排队电平；0dBu"
 
-#: rc_option_editor.cc:3230
+#: rc_option_editor.cc:3237
 msgid "Reference level for IEC1/DIN meter."
 msgstr "IEC1/DIN 计量参考电平。"
 
-#: rc_option_editor.cc:3236
+#: rc_option_editor.cc:3243
 msgid "VU Meter standard"
 msgstr "VU 计量标准"
 
-#: rc_option_editor.cc:3241
+#: rc_option_editor.cc:3248
 msgid "0VU = -2dBu (France)"
 msgstr "0VU = -2dBu （法国）"
 
-#: rc_option_editor.cc:3242
+#: rc_option_editor.cc:3249
 msgid "0VU = 0dBu (North America, Australia)"
 msgstr "0VU = 0dBu （北美，澳洲）"
 
-#: rc_option_editor.cc:3243
+#: rc_option_editor.cc:3250
 msgid "0VU = +4dBu (standard)"
 msgstr "0VU = +4dBu （标准）"
 
-#: rc_option_editor.cc:3244
+#: rc_option_editor.cc:3251
 msgid "0VU = +8dBu"
 msgstr ""
 
-#: rc_option_editor.cc:3250
+#: rc_option_editor.cc:3257
 msgid "Peak threshold [dBFS]"
 msgstr "峰值临界值 [dBFS]"
 
-#: rc_option_editor.cc:3259
+#: rc_option_editor.cc:3266
 msgid "Default Meter Type for Master Bus"
 msgstr "主控总线的默认节拍类型"
 
-#: rc_option_editor.cc:3277
+#: rc_option_editor.cc:3284
 msgid "Default Meter Type for Busses"
 msgstr "总线的默认节拍类型"
 
-#: rc_option_editor.cc:3294
+#: rc_option_editor.cc:3301
 msgid "Default Meter Type for Tracks"
 msgstr "音轨的默认节拍类型"
 
-#: rc_option_editor.cc:3306
-msgid ""
-"Specify the audio signal level in dbFS at and above which the meter-peak "
-"indicator will flash red."
-msgstr "以 dbFS 指定音频信号电平，达到以及超过节拍峰时，值指示器将闪烁红灯。"
-
 #: rc_option_editor.cc:3313
+msgid ""
+"Specify the audio signal level in dBFS at and above which the meter-peak "
+"indicator will flash red."
+msgstr "以 dBFS 指定音频信号电平，高于计量峰值指标将闪烁红色。"
+
+#: rc_option_editor.cc:3320
 msgid "LED meter style"
 msgstr "LED 计量类型"
 
-#: rc_option_editor.cc:3318
+#: rc_option_editor.cc:3325
 msgid "Editor Meters"
-msgstr ""
+msgstr "编辑器节拍"
 
-#: rc_option_editor.cc:3323
+#: rc_option_editor.cc:3330
 msgid "Show meters on tracks in the editor"
 msgstr "在编辑器的音轨上显示节拍"
 
-#: rc_option_editor.cc:3331
+#: rc_option_editor.cc:3338
 msgid "Show at most stereo meters in the track-header"
-msgstr ""
+msgstr "在音轨头部显示大部分立体声节拍"
 
-#: rc_option_editor.cc:3336
+#: rc_option_editor.cc:3343
 msgid "Post Export Analysis"
-msgstr ""
+msgstr "后置导出分析"
 
-#: rc_option_editor.cc:3341
+#: rc_option_editor.cc:3348
 msgid "Save loudness analysis as image file"
-msgstr ""
+msgstr "保存响度分析为图像文件"
 
-#: rc_option_editor.cc:3349
+#: rc_option_editor.cc:3356
 msgid "Theme"
 msgstr "主题"
 
-#: rc_option_editor.cc:3351
+#: rc_option_editor.cc:3358
 msgid "Theme/Colors"
-msgstr ""
+msgstr "主题/颜色"
 
-#: rc_option_editor.cc:3429
+#: rc_option_editor.cc:3436
 msgid "Set Linux VST Search Path"
 msgstr "设置 Linux VST 搜索路径"
 
-#: rc_option_editor.cc:3443
+#: rc_option_editor.cc:3450
 msgid "Set Windows VST Search Path"
 msgstr "设置 Windows VST 搜索路径"
 
@@ -12086,7 +12178,7 @@ msgstr "监听此区域"
 msgid "Position:"
 msgstr "位置："
 
-#: region_editor.cc:92 add_video_dialog.cc:155
+#: region_editor.cc:92 add_video_dialog.cc:156
 msgid "End:"
 msgstr "终点："
 
@@ -12225,7 +12317,7 @@ msgstr "改良的 Kullback-Liebler"
 
 #: rhythm_ferret.cc:62
 msgid "Spectral Flux"
-msgstr ""
+msgstr "频谱流量"
 
 #: rhythm_ferret.cc:68
 msgid "Split region"
@@ -12253,7 +12345,7 @@ msgstr "检测功能"
 
 #: rhythm_ferret.cc:126
 msgid "Trigger gap (postproc)"
-msgstr ""
+msgstr "触发器间隙（后期处理）"
 
 #: rhythm_ferret.cc:131
 msgid "Peak threshold"
@@ -12265,7 +12357,7 @@ msgstr "无声临界值"
 
 #: rhythm_ferret.cc:141
 msgid "Min Inter-Onset Time"
-msgstr ""
+msgstr "最小内在启动时间"
 
 #: rhythm_ferret.cc:148
 msgid "Sensitivity"
@@ -12273,7 +12365,7 @@ msgstr "灵敏度"
 
 #: rhythm_ferret.cc:152
 msgid "Cut Pos Threshold"
-msgstr ""
+msgstr "剪切 Pos 临界值"
 
 #: rhythm_ferret.cc:157
 msgid "Operation"
@@ -12482,7 +12574,7 @@ msgstr "新建播放列表"
 
 #: route_time_axis.cc:1441
 msgid "The name \"%1\" is reserved for %2"
-msgstr ""
+msgstr "名称 \"%1\" 已经被预留给 %2"
 
 #: route_time_axis.cc:1684
 msgid "New Copy..."
@@ -12562,7 +12654,7 @@ msgstr "未连接到音频引擎 —— 无法从事录制"
 
 #: route_ui.cc:883
 msgid "Rec-Safe"
-msgstr ""
+msgstr "录制-安全"
 
 #: route_ui.cc:888
 msgid "Step Entry"
@@ -12688,11 +12780,11 @@ msgstr "模板名称："
 msgid ""
 "Left-click to invert polarity of channel %1 of this track. Right-click to "
 "show menu."
-msgstr ""
+msgstr "左键点击以反转这音轨的声道 %1 的两极。右键点击显示菜单。"
 
 #: route_ui.cc:2021
 msgid "Click to show a menu of channels to invert polarity"
-msgstr ""
+msgstr "点击显示反转两极的声道菜单"
 
 #: save_as_dialog.cc:34
 msgid "Switch to newly-saved version"
@@ -13310,7 +13402,7 @@ msgstr "RF64（WAV 兼容）"
 #: session_option_editor.cc:210 session_option_editor.cc:216
 #: session_option_editor.cc:223
 msgid "Files|Locations"
-msgstr ""
+msgstr "文件|位置"
 
 #: session_option_editor.cc:210
 msgid "File locations"
@@ -13530,11 +13622,11 @@ msgstr "音频文件"
 msgid "MIDI files"
 msgstr "MIDI 文件"
 
-#: sfdb_ui.cc:590 add_video_dialog.cc:123
+#: sfdb_ui.cc:590 add_video_dialog.cc:124
 msgid "All files"
 msgstr "所有文件"
 
-#: sfdb_ui.cc:609 add_video_dialog.cc:246
+#: sfdb_ui.cc:609 add_video_dialog.cc:247
 msgid "Browse Files"
 msgstr "浏览文件"
 
@@ -13594,7 +13686,7 @@ msgstr "类似的"
 msgid "ID"
 msgstr ""
 
-#: sfdb_ui.cc:701 add_video_dialog.cc:83
+#: sfdb_ui.cc:701 add_video_dialog.cc:84
 msgid "Filename"
 msgstr "文件名"
 
@@ -14433,16 +14525,16 @@ msgstr "一百二十八分之一"
 
 #: tempo_dialog.cc:115 tempo_dialog.cc:116
 msgid "ramped"
-msgstr ""
+msgstr "渐变"
 
 #: tempo_dialog.cc:117 tempo_dialog.cc:118
 msgid "constant"
-msgstr ""
+msgstr "恒量"
 
 #: tempo_dialog.cc:133 tempo_dialog.cc:134 tempo_dialog.cc:482
 #: tempo_dialog.cc:483
 msgid "music"
-msgstr ""
+msgstr "音乐"
 
 #: tempo_dialog.cc:161
 msgid "Beats per minute:"
@@ -14454,11 +14546,11 @@ msgstr "节奏开始位于"
 
 #: tempo_dialog.cc:201
 msgid "Lock Style:"
-msgstr ""
+msgstr "锁定类型："
 
 #: tempo_dialog.cc:209
 msgid "Tempo Type:"
-msgstr ""
+msgstr "节奏类型："
 
 #: tempo_dialog.cc:321
 msgid "incomprehensible pulse note type (%1)"
@@ -14466,11 +14558,11 @@ msgstr "不可理解的脉冲音符类型（%1）"
 
 #: tempo_dialog.cc:334
 msgid "incomprehensible tempo type (%1)"
-msgstr ""
+msgstr "不可理解的节奏类型 (%1)"
 
 #: tempo_dialog.cc:347
 msgid "incomprehensible lock style (%1)"
-msgstr ""
+msgstr "不可理解的锁定类型 (%1)"
 
 #: tempo_dialog.cc:498
 msgid "Note value:"
@@ -14478,7 +14570,7 @@ msgstr "音符值："
 
 #: tempo_dialog.cc:499
 msgid "Lock style:"
-msgstr ""
+msgstr "锁定类型："
 
 #: tempo_dialog.cc:500
 msgid "Beats per bar:"
@@ -14494,7 +14586,7 @@ msgstr "不可理解的节拍音符类型（%1）"
 
 #: tempo_dialog.cc:651
 msgid "incomprehensible meter lock style (%1)"
-msgstr ""
+msgstr "不可理解的节拍锁定类型 (%1)"
 
 #: theme_manager.cc:53
 msgid "Draw \"flat\" buttons"
@@ -14705,67 +14797,67 @@ msgstr "变调 MIDI"
 msgid "Transpose"
 msgstr "变调"
 
-#: ui_config.cc:233 ui_config.cc:416
+#: ui_config.cc:234 ui_config.cc:422
 msgid "Loading default ui configuration file %1"
 msgstr "载入默认用户界面配置文件 %1"
 
-#: ui_config.cc:236 ui_config.cc:419
+#: ui_config.cc:237 ui_config.cc:425
 msgid "cannot read default ui configuration file \"%1\""
 msgstr "无法读取默认用户界面配置文件 \"%1\""
 
-#: ui_config.cc:239 ui_config.cc:424
+#: ui_config.cc:240 ui_config.cc:430
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr "默认用户界面配置文件 \"%1\" 载入不成功。"
 
-#: ui_config.cc:247
+#: ui_config.cc:248
 msgid "Could not find default UI configuration file %1"
 msgstr "无法找到默认用户界面配置文件\"%1\""
 
-#: ui_config.cc:330
-msgid "Color file for %1 not found along %2"
-msgstr ""
-
-#: ui_config.cc:337
+#: ui_config.cc:289
 msgid "Loading color file %1"
 msgstr "载入颜色文件 %1"
 
-#: ui_config.cc:340
+#: ui_config.cc:292
 msgid "cannot read color file \"%1\""
 msgstr "无法读取颜色文件 %"
 
-#: ui_config.cc:345
+#: ui_config.cc:297
 msgid "color file \"%1\" not loaded successfully."
 msgstr "颜色文件 %1 载入不成功。"
 
-#: ui_config.cc:397 ui_config.cc:480
+#: ui_config.cc:325
+msgid "Color file for %1 not found along %2"
+msgstr "沿着 %2 找不到用于 %1 的颜色文件"
+
+#: ui_config.cc:403 ui_config.cc:486
 msgid "Color file %1 not saved"
 msgstr "尚未保存颜色文件 %1"
 
-#: ui_config.cc:433
+#: ui_config.cc:439
 msgid "Loading user ui configuration file %1"
 msgstr "载入用户界面配置文件 %1"
 
-#: ui_config.cc:436
+#: ui_config.cc:442
 msgid "cannot read ui configuration file \"%1\""
 msgstr "无法读取用户界面配置文件 \"%1\""
 
-#: ui_config.cc:441
+#: ui_config.cc:447
 msgid "user ui configuration file \"%1\" not loaded successfully."
 msgstr "用户的用户界面配置文件 \"%1\" 载入不成功。"
 
-#: ui_config.cc:449
+#: ui_config.cc:455
 msgid "could not find any ui configuration file, canvas will look broken."
 msgstr "找不到任何用户界面配置文件，版面看起来将不大美观。"
 
-#: ui_config.cc:470
+#: ui_config.cc:476
 msgid "Config file %1 not saved"
 msgstr "尚未保存配置文件 %1"
 
-#: ui_config.cc:715
+#: ui_config.cc:720
 msgid "Color %1 not found"
 msgstr "找不到颜色 %1"
 
-#: ui_config.cc:785
+#: ui_config.cc:790
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr "在搜索路径 %2 下找不到用户界面样式文件 %1。%3 看起来将不大美观。"
 
@@ -14773,45 +14865,45 @@ msgstr "在搜索路径 %2 下找不到用户界面样式文件 %1。%3 看起�
 msgid "bad XPM header %1"
 msgstr "损坏的 XPM 报头 %1"
 
-#: utils.cc:424
+#: utils.cc:365
 msgid "cannot find XPM file for %1"
 msgstr "找不到 XPM 文件提供给 %1"
 
-#: utils.cc:477 utils.cc:507 utils.cc:527
+#: utils.cc:418 utils.cc:448 utils.cc:468
 msgid "default"
 msgstr "默认"
 
-#: utils.cc:528
+#: utils.cc:469
 msgid "icon \"%1\" not found for icon set \"%2\", fallback to default"
 msgstr "找不到图标 \"%1\" 提供给图标集 \"%2\"，退回默认状态"
 
-#: utils.cc:535
+#: utils.cc:476
 msgid "cannot find icon image for %1 using %2"
 msgstr "找不到图标图像提供给 %1 使用 %2"
 
-#: utils.cc:552 utils.cc:568
+#: utils.cc:493 utils.cc:509
 msgid "Caught exception while loading icon named %1"
 msgstr "载入命名为 %1 的图标时遇到异常"
 
-#: utils.cc:818
+#: utils.cc:759
 msgid "Overwrite"
 msgstr "覆盖写入"
 
 #: vca_master_strip.cc:74 vca_time_axis.cc:49
 msgid "Solo slaves"
-msgstr ""
+msgstr "独奏从属"
 
 #: vca_master_strip.cc:79 vca_time_axis.cc:55
 msgid "Mute slaves"
-msgstr ""
+msgstr "静音从属"
 
 #: vca_master_strip.cc:83
 msgid "Hide this VCA strip"
-msgstr ""
+msgstr "隐藏这个 VCA 片段"
 
 #: vca_master_strip.cc:108 vca_master_strip.cc:418
 msgid "Click to show slaves only"
-msgstr ""
+msgstr "点击仅显示从属"
 
 #: vca_master_strip.cc:293
 msgid "A"
@@ -14823,53 +14915,53 @@ msgstr ""
 
 #: vca_master_strip.cc:398
 msgid "Drop All Slaves"
-msgstr ""
+msgstr "丢弃全部从属"
 
 #: vca_master_strip.cc:421
 msgid "Click to show normal mixer"
-msgstr ""
+msgstr "点击显示普通混音器"
 
-#: add_video_dialog.cc:54
+#: add_video_dialog.cc:55
 msgid "Set Video Track"
 msgstr "设置视频轨道"
 
-#: add_video_dialog.cc:62
+#: add_video_dialog.cc:63
 msgid "Open Video Monitor Window"
 msgstr "打开视频监控窗口"
 
-#: add_video_dialog.cc:63
+#: add_video_dialog.cc:64
 msgid "Adjust Session Framerate to Match Video Framerate"
 msgstr "调整会话帧率匹配视频帧率"
 
-#: add_video_dialog.cc:65
+#: add_video_dialog.cc:66
 msgid "Reload docroot"
 msgstr "重新载入文档根"
 
-#: add_video_dialog.cc:120
+#: add_video_dialog.cc:121
 msgid "Video files"
 msgstr "视频文件"
 
-#: add_video_dialog.cc:149
+#: add_video_dialog.cc:150
 msgid "<b>Video Information</b>"
 msgstr "<b>视频信息</b>"
 
-#: add_video_dialog.cc:152
+#: add_video_dialog.cc:153
 msgid "Start:"
 msgstr "起点："
 
-#: add_video_dialog.cc:158
+#: add_video_dialog.cc:159
 msgid "Frame rate:"
 msgstr "帧率："
 
-#: add_video_dialog.cc:161
+#: add_video_dialog.cc:162
 msgid "Aspect Ratio:"
 msgstr "长宽比："
 
-#: add_video_dialog.cc:244
+#: add_video_dialog.cc:245
 msgid "VideoServerIndex"
 msgstr "视频服务索引"
 
-#: add_video_dialog.cc:675
+#: add_video_dialog.cc:676
 msgid " %1 fps"
 msgstr ""
 
@@ -14879,7 +14971,7 @@ msgstr ""
 
 #: vca_time_axis.cc:61
 msgid "Unassign all slaves"
-msgstr ""
+msgstr "不指定全部从属"
 
 #: vca_time_axis.cc:65
 msgid "V"
@@ -14887,9 +14979,9 @@ msgstr ""
 
 #: vca_time_axis.cc:66
 msgid "Show only slaves"
-msgstr ""
+msgstr "仅显示从属"
 
-#: video_timeline.cc:472
+#: video_timeline.cc:473
 msgid ""
 "Parsing video file info failed. Is the Video Server running? Is the file "
 "readable by the Video Server? Does the docroot match? Is it a video file?"
@@ -14897,19 +14989,19 @@ msgstr ""
 "解析视频文件信息失败。视频服务器是否正在运行吗？视频服务器是否可辨识该文件？"
 "文档根是否匹配？这是一个视频文件吗？"
 
-#: video_timeline.cc:510
+#: video_timeline.cc:511
 msgid ""
 "Failed to set session-framerate: '%1' does not have a corresponding option "
 "setting in %2."
 msgstr "设置会话帧率失败：'%1' 的选项设置与在 %2 里的不一致。"
 
-#: video_timeline.cc:518
+#: video_timeline.cc:519
 msgid ""
 "Video file's framerate is not equal to %1 session timecode's framerate: '%2' "
 "vs '%3'"
 msgstr "视频文件的帧率不等于 %1 会话时间码帧率： '%2' vs '%3'"
 
-#: video_timeline.cc:591
+#: video_timeline.cc:592
 msgid ""
 "Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually "
 "means that the video server was not started by %1 and uses a different "
@@ -14918,7 +15010,7 @@ msgstr ""
 "视频文件文档根不匹配。%1: '%2'，视频服务器：'%3'。这通常意味着视频服务器未能"
 "通过 %1 启动，并且使用着一个不同的文档根。"
 
-#: video_timeline.cc:728
+#: video_timeline.cc:729
 msgid ""
 "Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
 "(a custom path to xjadeo can be specified by setting the XJREMOTE "
@@ -14933,11 +15025,11 @@ msgstr ""
 "\n"
 "请参阅 http://manual.ardour.org/video-timeline/setup/"
 
-#: video_timeline.cc:743
+#: video_timeline.cc:744
 msgid "Video-monitor 'xjadeo' cannot be launched."
 msgstr "视频监控 'xjadeo' 无法启动。"
 
-#: video_timeline.cc:775
+#: video_timeline.cc:776
 msgid ""
 "Video-monitor 'xjadeo' is too old. Please install xjadeo version 0.7.7 or "
 "later. http://xjadeo.sf.net/"
@@ -15168,11 +15260,11 @@ msgstr "设置视频服务器可执行"
 msgid "Server docroot"
 msgstr "服务器文档根"
 
-#: utils_videotl.cc:61
+#: utils_videotl.cc:63
 msgid "Destination is outside Video Server's docroot. "
 msgstr "目的地是视频服务器的文档根之外"
 
-#: utils_videotl.cc:62
+#: utils_videotl.cc:64
 msgid ""
 "The destination file path is outside of the Video Server's docroot. The file "
 "will not be readable by the Video Server. Do you still want to continue?"
@@ -15180,15 +15272,15 @@ msgstr ""
 "目的地文件路径是处在视频服务器文档根之外。这个文件将无法被视频服务器读取。您"
 "是否要继续？"
 
-#: utils_videotl.cc:65
+#: utils_videotl.cc:67
 msgid "Continue"
 msgstr "继续"
 
-#: utils_videotl.cc:72
+#: utils_videotl.cc:74
 msgid "Confirm Overwrite"
 msgstr "确认覆盖"
 
-#: utils_videotl.cc:82 utils_videotl.cc:98
+#: utils_videotl.cc:84 utils_videotl.cc:100
 msgid "Cannot create video folder \"%1\" (%2)"
 msgstr "无法创建视频文件夹 \"%1\" (%2)"
 
@@ -15401,309 +15493,3 @@ msgstr ""
 "请参阅手册，位于 %1/video-timeline/operations/#export 。\n"
 "\n"
 "在浏览器里打开手册？"
-
-#~ msgid "Display model"
-#~ msgstr "显示模式"
-
-#~ msgid "Composite graphs for each track"
-#~ msgstr "每个音轨的合成图"
-
-#~ msgid "Composite graph of all tracks"
-#~ msgstr "所有音轨的合成图"
-
-#~ msgid "Normalize values"
-#~ msgstr "规范化数值"
-
-#~ msgid "Locations"
-#~ msgstr "位置"
-
-#~ msgid "Save as..."
-#~ msgstr "另存为…"
-
-#~ msgid ""
-#~ "%4This is a session from an older version of %3%5\n"
-#~ "\n"
-#~ "%3 has copied the old session file\n"
-#~ "\n"
-#~ "%6%1%7\n"
-#~ "\n"
-#~ "to\n"
-#~ "\n"
-#~ "%6%2%7\n"
-#~ "\n"
-#~ "From now on, use the -2000 version with older versions of %3"
-#~ msgstr ""
-#~ "%4 这是一个来源于 %3%5 旧版本的会话\n"
-#~ "\n"
-#~ "%3 已经被复制到旧的会话文件\n"
-#~ "\n"
-#~ "%6%1%7\n"
-#~ "\n"
-#~ "to\n"
-#~ "\n"
-#~ "%6%2%7\n"
-#~ "\n"
-#~ "从现在开始，使用连带旧版 %3 的 -2000 版本"
-
-#~ msgid "Add Lua Script"
-#~ msgstr "添加 Lua 脚本"
-
-#~ msgid "Open Video"
-#~ msgstr "打开视频"
-
-#~ msgid "Export to Video File"
-#~ msgstr "导出为视频文件"
-
-#~ msgid "Quick Snapshot(& keep working on current version) ..."
-#~ msgstr "快速快照（并且继续在当前版本工作）…"
-
-#~ msgid "Break drag or deselect all"
-#~ msgstr "中断拖拽或全不选"
-
-#~ msgid "Manage"
-#~ msgstr "管理"
-
-#~ msgid ""
-#~ "Command to run post-export\n"
-#~ "(%f=full path & filename, %d=directory, %b=basename):"
-#~ msgstr ""
-#~ "运行后置-导出的命令\n"
-#~ "（%f=完整路径和文件名，%d=目录，%b=基本名称）："
-
-#~ msgid "Create New Group From"
-#~ msgstr "创建新的分组来自于"
-
-#~ msgid "Select an action, then press the key(s) to (re)set its shortcut"
-#~ msgstr "选择一个操作，然后按下按键来（重新）设置快捷键"
-
-#~ msgid "Clear Outtput"
-#~ msgstr "清除输出"
-
-#~ msgid "Program "
-#~ msgstr "程序"
-
-#~ msgid "*Comments*"
-#~ msgstr "*注释*"
-
-#~ msgid "*Cmt*"
-#~ msgstr "*注释*"
-
-#~ msgid "Remote Control ID..."
-#~ msgstr "防止异常违反"
-
-#~ msgid ""
-#~ "It is not possible to add a port here, as the first processor in the "
-#~ "track or buss cannot support the new configuration."
-#~ msgstr ""
-#~ "不可能在此添加一个端口，作为在音轨或总线里的第一个处理器无法支持新的配置。"
-
-#~ msgid ""
-#~ "This port cannot be removed.\n"
-#~ "Either the first plugin in the track or buss cannot accept\n"
-#~ "the new number of inputs or the last plugin has more outputs."
-#~ msgstr ""
-#~ "该端口不能被移除。\n"
-#~ "不论是新的输入号码或者最后一个插件有更多的输出，\n"
-#~ "在音轨或总线里的第一个插件都无法接受。"
-
-#~ msgid "Add Lua DSP Processor"
-#~ msgstr "添加 Lua DSP 处理器"
-
-#~ msgid ""
-#~ "Failed to instantiate Lua DSP Processor,\n"
-#~ "probably because the script is invalid (no dsp function)."
-#~ msgstr ""
-#~ "实例化 Lua DSP 处理器失败，\n"
-#~ "可能是因为该脚本无效（无 dsp 功能）。"
-
-#~ msgid ""
-#~ "Failed to add Lua DSP Processor at the given position,\n"
-#~ "probably because the I/O configuration of the plugins\n"
-#~ "could not match the configuration of this track."
-#~ msgstr ""
-#~ "在指定的位置 Lua DSP 添加处理器失败，\n"
-#~ "可能是因为插件的输入/输出配置\n"
-#~ "不匹配该音轨的配置。"
-
-#~ msgid "New Lua Proc"
-#~ msgstr "新建 Lua 处理器"
-
-#~ msgid "Control surface remote ID"
-#~ msgstr "控制面远程 ID"
-
-#~ msgid "assigned by user"
-#~ msgstr "由用户指定"
-
-#~ msgid "follows order of mixer"
-#~ msgstr "混音器按如下排序"
-
-#~ msgid "Trigger gap"
-#~ msgstr "触发间隙"
-
-#~ msgid "You cannot create a track with that name as it is reserved for %1"
-#~ msgstr "无法以此名称创建音轨，因为它被 %1 保留使用"
-
-#~ msgid "Remote Control ID"
-#~ msgstr "移除控制 ID"
-
-#~ msgid "Remote control ID:"
-#~ msgstr "移除控制 ID："
-
-#~ msgid ""
-#~ "The remote control ID of %1 is: %2\n"
-#~ "\n"
-#~ "\n"
-#~ "The remote control ID of %3 cannot be changed."
-#~ msgstr ""
-#~ " %1 的远程控制 ID 是：%2\n"
-#~ "\n"
-#~ "\n"
-#~ "%3 的远程控制 ID 无法改变。"
-
-#~ msgid "the master bus"
-#~ msgstr "主控总线"
-
-#~ msgid "the monitor bus"
-#~ msgstr "监控总线"
-
-#~ msgid ""
-#~ "The remote control ID of %5 is: %2\n"
-#~ "\n"
-#~ "\n"
-#~ "Remote Control IDs are currently determined by track/bus ordering in %6.\n"
-#~ "\n"
-#~ "%3Use the User Interaction tab of the Preferences window if you want to "
-#~ "change this%4"
-#~ msgstr ""
-#~ "%5 的远程控制标识号是：%2\n"
-#~ "\n"
-#~ "\n"
-#~ "经由音轨/总线在 %6 里的排序已确定远程控制标识号。\n"
-#~ "\n"
-#~ "如果您想改变这个 %4，那么 %3 使用首选项窗口的用户交互标签页"
-
-#~ msgid ""
-#~ "Left-click to invert (phase reverse) channel %1 of this track.  Right-"
-#~ "click to show menu."
-#~ msgstr "左键点击反转（相位反转）该音轨的声道 %1 。右键点击显示菜单。"
-
-#~ msgid "Click to show a menu of channels for inversion (phase reverse)"
-#~ msgstr "点击显示声道反转（相位反转）菜单"
-
-#~ msgid "Dark Theme"
-#~ msgstr "深暗主题"
-
-#~ msgid "Light Theme"
-#~ msgstr "明亮主题"
-
-#~ msgid "Color file %1 not found"
-#~ msgstr "找不到颜色文件 %1"
-
-#~ msgid ""
-#~ "%1%2\n"
-#~ "(built from revision %3)\n"
-#~ "%4"
-#~ msgstr ""
-#~ "%1%2\n"
-#~ "（修订自版本 %3）\n"
-#~ "%4"
-
-#~ msgid "<b>Parameters:</b>"
-#~ msgstr "<b>参数：</b>"
-
-#~ msgid ""
-#~ "Chinese:\n"
-#~ "\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
-#~ "\t YQ-YSY <yq-ysy@163.com>\n"
-#~ msgstr ""
-#~ "汉语：\n"
-#~ "\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
-#~ "\t 一善鱼 YQ-YSY <yq-ysy@163.com>\n"
-
-#~ msgid "Busses"
-#~ msgstr "总线"
-
-#~ msgid "This screen is not tall enough to display the mixer window"
-#~ msgstr "这个屏幕的高度不足以显示混音器窗口"
-
-#~ msgid "Show Toolbars"
-#~ msgstr "显示工具栏"
-
-#~ msgid "Toggle Editor+Mixer"
-#~ msgstr "切换编辑器+混音器"
-
-#~ msgid "Reattach All Tearoffs"
-#~ msgstr "重新附加所有的片段"
-
-#~ msgid "Show Logo"
-#~ msgstr "显示 Logo（商标）"
-
-#~ msgid "Loaded editor bindings from %1"
-#~ msgstr "已从 %1 载入编辑器绑定"
-
-#~ msgid "Could not find editor.bindings in search path %1"
-#~ msgstr "在搜索路径 %1 找不到编辑器绑定"
-
-#~ msgid "duplicate selection"
-#~ msgstr "复制已选择部分"
-
-#~ msgid "cut time"
-#~ msgstr "剪切时间"
-
-#~ msgid "<i>Build filename(s) from these components:</i>"
-#~ msgstr "<i>从这些组件构建文件名：</i>"
-
-#~ msgid "<small><i>Current (approximate) filename: \"%1\"</i></small>"
-#~ msgstr "<small><i>当前（近似）文件名：“%1”</i></small>"
-
-#~ msgid "Main_menu"
-#~ msgstr "主菜单"
-
-#~ msgid "redirectmenu"
-#~ msgstr "重定向菜单"
-
-#~ msgid "Editor_menus"
-#~ msgstr "编辑器菜单"
-
-#~ msgid "ProcessorMenu"
-#~ msgstr "处理器菜单"
-
-#~ msgid "Loaded mixer bindings from %1"
-#~ msgstr "从 %1 载入混音器绑定"
-
-#~ msgid "Could not find mixer.bindings in search path %1"
-#~ msgstr "在搜索路径 %1 找不到混音器绑定"
-
-#~ msgid "Allow to add monitor effect processors"
-#~ msgstr "允许添加监控效果处理器"
-
-#~ msgid "Sync/Slave"
-#~ msgstr "同步/从属"
-
-#~ msgid "Solo / mute"
-#~ msgstr "独奏 / 静音"
-
-#~ msgid "Align with Existing Material"
-#~ msgstr "与现有材料对齐"
-
-#~ msgid "Align with Capture Time"
-#~ msgstr "与捕获时间对齐"
-
-#~ msgid ""
-#~ "The remote control ID of %5 is: %2\n"
-#~ "\n"
-#~ "\n"
-#~ "Remote Control IDs are currently determined by track/bus ordering in %6.\n"
-#~ "\n"
-#~ "%3Use the User Interaction tab of the Preferences window if you want to "
-#~ "change this %4"
-#~ msgstr ""
-#~ "%5 的远程控制 ID 是：%2\n"
-#~ "\n"
-#~ "\n"
-#~ "远程控制 IDs 是由当前音轨/总线在 %6 里的排序所决定的。\n"
-#~ "\n"
-#~ "如果您想改变 %4，%3 使用首选项窗口的用户交互选项卡"
-
-#~ msgid "Contents:"
-#~ msgstr "内容："
