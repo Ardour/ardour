@@ -549,10 +549,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                    we excluded them earlier.
                                 */
 
-                                string lp = p;
+                                string lp = p, monitor = _("Monitor");
                                 boost::to_lower (lp);
+                                boost::to_lower (monitor);
 
-                                if ((lp.find (N_(":monitor")) != string::npos) &&
+                                if ((lp.find (monitor) != string::npos) &&
                                     (lp.find (lpn) != string::npos)) {
                                         ++s;
                                         continue;
@@ -568,9 +569,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				if (ph) {
 					DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
 					if (t != DataType::NIL) {
-						if (port_has_prefix (p, N_("system:")) ||
-						    port_has_prefix (p, N_("alsa_pcm:")) ||
-						    port_has_prefix (p, N_("alsa_midi:"))) {
+						if (port_has_prefix (p, X_("system:")) ||
+						    port_has_prefix (p, X_("alsa_pcm:")) ||
+						    port_has_prefix (p, X_("alsa_midi:"))) {
 							extra_system[t].push_back (p);
 						} else if (port_has_prefix (p, lpnc)) {
 							/* Hide scene ports from non-Tracks Live builds */
