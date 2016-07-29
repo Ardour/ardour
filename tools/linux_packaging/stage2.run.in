@@ -336,7 +336,7 @@ echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH"
 
-if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
+if [ ! -e ${PGM_NAME}_${ARCH}-*.tar ]; then
 	echo ""
 	echo "!!! ERROR !!! Can't locate ${ARCH} bundle file."
 	echo ""
@@ -344,7 +344,7 @@ if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
 	exit 1
 fi
 
-if ! tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2; then
+if ! tar -xf ${PGM_NAME}_${ARCH}-*.tar; then
 	echo ""
 	echo "!!! ERROR !!! Can't unpack ${ARCH} bundle file."
 	echo ""

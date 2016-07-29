@@ -75,9 +75,9 @@ if [ ! -z ${BUILDTYPE} ]; then
 	X86_64_BUNDLE="${X86_64_BUNDLE}-${BUILDTYPE}"
 fi 
 
-if [ ! -e ${X86_BUNDLE}.tar.bz2 ] ; then
+if [ ! -e ${X86_BUNDLE}.tar ] ; then
 	echo ""
-	echo "Can't locate x86 bundle file ${X86_BUNDLE}.tar.bz2"
+	echo "Can't locate x86 bundle file ${X86_BUNDLE}.tar"
 	echo ""
 elif [ ! -e ${X86_BUNDLE}.size ] ; then
 	echo ""
@@ -87,9 +87,9 @@ else
 	X86_BUNDLE_OK="T"
 fi
 
-if [ ! -e ${X86_64_BUNDLE}.tar.bz2 ]; then
+if [ ! -e ${X86_64_BUNDLE}.tar ]; then
 	echo ""
-	echo "Can't locate x86_64 bundle file ${X86_64_BUNDLE}.tar.bz2"
+	echo "Can't locate x86_64 bundle file ${X86_64_BUNDLE}.tar"
 	echo ""
 elif [ ! -e ${X86_64_BUNDLE}.size ]; then
 	echo ""
@@ -148,7 +148,7 @@ fi
 
 echo "Cleaning up any old package files for this build"
 #Get rid of any old packages of this same name.
-rm -f ${PACKAGE}.tar.bz2
+rm -f ${PACKAGE}.tar
 rm -rf ${PACKAGE}
 
 
@@ -156,12 +156,12 @@ echo "Creating new package dir..."
 mkdir ${PACKAGE}
 
 if [ "${X86_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_BUNDLE}.tar.bz2 ${PACKAGE}
+	mv ${X86_BUNDLE}.tar ${PACKAGE}
 	mv ${X86_BUNDLE}.size ${PACKAGE}/.${X86_BUNDLE}.size
 fi
 
 if [ "${X86_64_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_64_BUNDLE}.tar.bz2 ${PACKAGE}
+	mv ${X86_64_BUNDLE}.tar ${PACKAGE}
 	mv ${X86_64_BUNDLE}.size ${PACKAGE}/.${X86_64_BUNDLE}.size
 fi
 
@@ -181,7 +181,7 @@ fi
 
 if test -n "$MAKESELF"; then
 	echo "Creating self-extracting installer"
-	$MAKESELF --nocomp ${PACKAGE}/ ${PACKAGE}.run ${APPNAME} ./install.sh
+	$MAKESELF --xz --complevel 9 ${PACKAGE}/ ${PACKAGE}.run ${APPNAME} ./install.sh
 else
 	echo "Creating tarball..."
 	tar -cf ${PACKAGE}.tar ${PACKAGE}

@@ -741,8 +741,8 @@ fi
 
 echo "Building tarball ..."
 
-rm -f $APPDIR.tar.bz2
-tar -cjf $APPDIR.tar.bz2 $APPDIR
+rm -f $APPDIR.tar
+tar -cf $APPDIR.tar $APPDIR
 
 echo "Calculating bundle size"
 du -sb $APPDIR/  | awk '{print $1}' > $APPDIR.size
