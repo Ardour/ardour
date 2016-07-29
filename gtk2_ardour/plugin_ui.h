@@ -260,7 +260,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		int x0, x1, y0, y1;
 	};
 
-	std::vector<ControlUI*>   input_controls;
+	std::vector<ControlUI*>   input_controls; // workaround for preset load
 	std::vector<ControlUI*>   input_controls_with_automation;
 	std::vector<ControlUI*>   output_controls;
 
@@ -281,6 +281,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	void ui_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
+	void update_input_displays (); // workaround for preset load
 	void control_combo_changed (ControlUI* cui, float value);
 
 	void astate_clicked (ControlUI*);

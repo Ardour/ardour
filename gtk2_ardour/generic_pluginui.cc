@@ -315,6 +315,9 @@ GenericPluginUI::build ()
 	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
 	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
 	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
+
+	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
+	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
 }
 
 
@@ -847,6 +850,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		automation_state_changed (control_ui);
 
+		/* Add to the list of CUIs that need manual update to workaround
+		 * AutomationControl not knowing about preset loads */
 		input_controls.push_back (control_ui);
 
 	} else {
@@ -1011,6 +1016,18 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 			cui->adjustment->set_value (val);
 		}
 	}*/
+}
+
+void
+GenericPluginUI::update_input_displays ()
+{
+	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
+	for (vector<ControlUI*>::iterator i = input_controls.begin();
+	     i != input_controls.end();
+	     ++i) {
+		update_control_display(*i);
+	}
+	return;
 }
 
 void
