@@ -371,7 +371,7 @@ else
 	echo "Bundle unpacked"
 fi
 
-BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}${ABI}-*"`)
+BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 
 
 #######################
