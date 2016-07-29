@@ -31,6 +31,7 @@ USER_NAME=$(logname)
 
 #### Global Variables ####
 HAS_XDG="T"
+MULTABI_BUNDLE=""
 
 ########################
 # Function Definitions
@@ -229,6 +230,20 @@ case `uname -m` in
 		;;
 esac
 
+###################
+# Determine gcc ABI
+###################
+
+if -n "$MULTABI_BUNDLE"; then
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+		ABI=-gcc4
+	else
+		ABI=-gcc5
+	fi
+else
+	ABI=
+fi
+
 ####################
 # Check disk space
 ####################
@@ -237,15 +252,15 @@ esac
 # in case they are on different devices
 echo "Checking for required disk space"
 
-if [ ! -e .${PGM_NAME}_${ARCH}-*.size ]; then
+if [ ! -e .${PGM_NAME}_${ARCH}${ABI}-*.size ]; then
 	echo ""
-	echo "!!! ERROR !!! Can't locate .size file for ${ARCH} bundle."
-	echo "This package is broken or does not support ${ARCH}."
+	echo "!!! ERROR !!! Can't locate .size file for ${ARCH}${ABI} bundle."
+	echo "This package is broken or does not support ${ARCH}${ABI}."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
 else
-	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
+	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}${ABI}-*.size)
 
 	#Installer needs 2x the space since the bundle is unpacked locally and then copied
 	REQUIRED_BYTES=$(($REQUIRED_BYTES + $REQUIRED_BYTES))
@@ -281,34 +296,36 @@ fi
 # Determine C11 stdlibc++ ABI
 #############################
 
-if %REPLACE_GCC5%; then
-	# Ardour was compiled with gcc5, warn on gcc4 systems
-	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
-		echo ""
-		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-		echo ""
-		echo "${PGM_NAME} was compiled with gcc5, your system uses an older version of the"
-		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-		echo "may cause crashes."
-		echo ""
-		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-		if test "n" = $ANSWER; then
-			exit 1
+if -z "$ABI"; then
+	if %REPLACE_GCC5%; then
+		# Ardour was compiled with gcc5, warn on gcc4 systems
+		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+			echo ""
+			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+			echo ""
+			echo "${PGM_NAME} was compiled with gcc5, your system uses an older version of the"
+			echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+			echo "may cause crashes."
+			echo ""
+			ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+			if test "n" = $ANSWER; then
+				exit 1
+			fi
 		fi
-	fi
-else
-	# Ardour was compiled with gcc4, warn on gcc5 systems
-	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
-		echo ""
-		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-		echo ""
-		echo "${PGM_NAME} was compiled with gcc4, your system uses a newer version of the"
-		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-		echo "may cause crashes."
-		echo ""
-		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-		if test "n" = $ANSWER; then
-			exit 1
+	else
+		# Ardour was compiled with gcc4, warn on gcc5 systems
+		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+			echo ""
+			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+			echo ""
+			echo "${PGM_NAME} was compiled with gcc4, your system uses a newer version of the"
+			echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+			echo "may cause crashes."
+			echo ""
+			ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+			if test "n" = $ANSWER; then
+				exit 1
+			fi
 		fi
 	fi
 fi
@@ -334,19 +351,19 @@ FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
 echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 
 # untar the correct bundle for us to install
-echo "Unpacking bundle for $ARCH"
+echo "Unpacking bundle for $ARCH${ABI}"
 
-if [ ! -e ${PGM_NAME}_${ARCH}-*.tar ]; then
+if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
 	echo ""
-	echo "!!! ERROR !!! Can't locate ${ARCH} bundle file."
+	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
 fi
 
-if ! tar -xf ${PGM_NAME}_${ARCH}-*.tar; then
+if ! tar -xf ${PGM_NAME}_${ARCH}${ABI}-*.tar; then
 	echo ""
-	echo "!!! ERROR !!! Can't unpack ${ARCH} bundle file."
+	echo "!!! ERROR !!! Can't unpack ${ARCH}${ABI} bundle file."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
@@ -354,7 +371,7 @@ else
 	echo "Bundle unpacked"
 fi
 
-BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
+BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}${ABI}-*"`)
 
 
 #######################
