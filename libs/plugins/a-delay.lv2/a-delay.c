@@ -357,7 +357,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 	uint32_t i;
 	float in;
-	int delaysamples;
+	int delaysamples = 0;
 	unsigned int tmp;
 	float inv;
 	float xfade;

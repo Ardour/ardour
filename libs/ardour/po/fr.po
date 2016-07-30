@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2016-07-16 18:48+0200\n"
+"PO-Revision-Date: 2016-07-29 21:22+0200\n"
 "Last-Translator: Julien Rivaud <frnchfrgg@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -771,9 +771,8 @@ msgid "No sample format"
 msgstr "Pas de format d'échantillonnage"
 
 #: export_handler.cc:419
-#, fuzzy
 msgid "File %1 uploaded to %2"
-msgstr "Import du fichier : %1 sur %2"
+msgstr "Fichier %1 téléversé vers %2"
 
 #: export_handler.cc:425
 msgid ""
@@ -997,9 +996,8 @@ msgid "Loading configuration"
 msgstr "Chargement de la configuration"
 
 #: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1157
-#, fuzzy
 msgid "Monitor"
-msgstr ": moniteur"
+msgstr "Monitoring"
 
 #: globals.cc:555 session_state.cc:642
 #, fuzzy

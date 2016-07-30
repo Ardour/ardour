@@ -2377,6 +2377,9 @@ OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 	float abs;
 	if (s) {
+		if (id > 0) {
+			--id;
+		}
 #ifdef MIXBUS
 		abs = val;
 #else
@@ -2384,9 +2387,6 @@ OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (val);
-		}
-		if (id > 0) {
-			--id;
 		}
 #endif
 		if (s->send_level_controllable (id)) {
@@ -2413,7 +2413,7 @@ OSC::route_set_send_fader (int ssid, int id, float val, lo_message msg)
 
 		if (s->send_level_controllable (id)) {
 #ifdef MIXBUS
-			abs = s->send_level_control(id)->interface_to_internal (val);
+			abs = s->send_level_controllable(id)->interface_to_internal (val);
 #else
 			abs = slider_position_to_gain_with_max (val, 2.0);
 #endif
@@ -2436,6 +2436,9 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 	}
 	float abs;
 	if (s) {
+		if (id > 0) {
+			--id;
+		}
 #ifdef MIXBUS
 		abs = val;
 #else
@@ -2443,9 +2446,6 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (val);
-		}
-		if (id > 0) {
-			--id;
 		}
 #endif
 		if (s->send_level_controllable (id)) {
@@ -2475,7 +2475,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 
 		if (s->send_level_controllable (id)) {
 #ifdef MIXBUS
-			abs = s->send_level_control(id)->interface_to_internal (val);
+			abs = s->send_level_controllable(id)->interface_to_internal (val);
 #else
 			abs = slider_position_to_gain_with_max (val, 2.0);
 #endif

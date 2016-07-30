@@ -59,8 +59,10 @@ class OSCSelectObserver
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void enable_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void comp_mode (void);
 	void change_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
+	void enable_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void text_message (std::string path, std::string text);
 	void text_with_id (std::string path, uint32_t id, std::string name);
 	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);

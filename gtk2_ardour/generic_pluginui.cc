@@ -150,6 +150,14 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	prefheight = 0;
 	build ();
+
+	/* Listen for property changes that are not notified normally because
+	 * AutomationControl has only support for numeric values currently.
+	 * The only case is Variant::PATH for now */
+	plugin->PropertyChanged.connect(*this, invalidator(*this),
+	                                boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+	                                gui_context());
+
 	main_contents.show ();
 }
 
@@ -264,7 +272,6 @@ GenericPluginUI::build ()
 			}
 
 			control_uis.push_back(cui);
-			input_controls_with_automation.push_back (cui);
 		}
 	}
 
@@ -308,6 +315,9 @@ GenericPluginUI::build ()
 	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
 	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
 	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
+
+	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
+	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
 }
 
 
@@ -655,57 +665,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 	if (is_input) {
 
-		/* See if there any named values for our input value */
-		control_ui->scale_points = desc.scale_points;
-
-		/* If this parameter is an integer, work out the number of distinct values
-		   it can take on (assuming that lower and upper values are allowed).
-		*/
-		int const steps = desc.integer_step ? (desc.upper - desc.lower + 1) / desc.step : 0;
-
-		if (control_ui->scale_points && ((steps && int (control_ui->scale_points->size()) == steps) || desc.enumeration)) {
-
-			/* Either:
-			 *   a) There is a label for each possible value of this input, or
-			 *   b) This port is marked as being an enumeration.
-			 */
-
-			std::vector<std::string> labels;
-			for (
-				ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
-				i != control_ui->scale_points->end();
-				++i) {
-
-				labels.push_back(i->first);
-			}
-
-			// TODO use ArdourDropDown
-			control_ui->combo = new Gtk::ComboBoxText();
-			set_popdown_strings(*control_ui->combo, labels);
-			control_ui->combo->signal_changed().connect(
-				sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
-				            control_ui));
-			mcontrol->Changed.connect(control_connections, invalidator(*this),
-			                          boost::bind(&GenericPluginUI::ui_parameter_changed,
-			                                      this, control_ui),
-			                          gui_context());
-
-			if (use_knob) {
-				control_ui->knobtable = manage (new Table());
-				control_ui->pack_start(*control_ui->knobtable, true, false);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
-				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
-			} else {
-				control_ui->pack_start(control_ui->label, true, true);
-				control_ui->pack_start(*control_ui->combo, false, true);
-			}
-
-			update_control_display(control_ui);
-
-			return control_ui;
-		}
-
 		if (desc.datatype == Variant::PATH) {
+
+			/* We shouldn't get that type for input ports */
+			assert(param.type() == PluginPropertyAutomation);
 
 			/* Build a file selector button */
 
@@ -723,58 +686,92 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				control_ui->pack_start (*control_ui->file_button, true, true);
 			}
 
-			// Connect signals (TODO: do this via the Control)
+			// Monitor changes from the user.
 			control_ui->file_button->signal_file_set().connect(
-				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_property),
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_path_property),
 				           desc, control_ui->file_button));
-			plugin->PropertyChanged.connect(*this, invalidator(*this),
-			                                boost::bind(&GenericPluginUI::property_changed, this, _1, _2),
-			                                gui_context());
 
-			_property_controls.insert(std::make_pair(desc.key, control_ui->file_button));
-			control_ui->file_button = control_ui->file_button;
+			/* Add the filebutton control to a map so that we can update it when
+			 * the corresponding property changes. This doesn't go through the usual
+			 * AutomationControls, because they don't support non-numeric values. */
+			_filepath_controls.insert(std::make_pair(desc.key, control_ui->file_button));
 
 			return control_ui;
 		}
 
-		/* create the controller */
+		assert(mcontrol);
 
-		/* XXX memory leak: SliderController not destroyed by ControlUI
-		 * destructor, and manage() reports object hierarchy
-		 * ambiguity.
-		 */
-		if (mcontrol) {
-			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
-		}
+		/* See if there any named values for our input value */
+		control_ui->scale_points = desc.scale_points;
 
-		/* XXX this code is not right yet, because it doesn't handle
-		   the absence of bounds in any sensible fashion.
+		/* If this parameter is an integer, work out the number of distinct values
+		   it can take on (assuming that lower and upper values are allowed).
 		*/
+		int const steps = desc.integer_step ? (desc.upper - desc.lower + 1) / desc.step : 0;
 
-		Adjustment* adj = control_ui->controller->adjustment();
+		if (control_ui->scale_points && ((steps && int (control_ui->scale_points->size()) == steps) || desc.enumeration)) {
 
-		if (desc.integer_step && !desc.toggled) {
-			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
-			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-			if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
-				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
-			} else {
-				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
+			/* Either:
+			 *   a) There is a label for each possible value of this input, or
+			 *   b) This port is marked as being an enumeration.
+			 */
+
+			control_ui->combo = new ArdourDropdown();
+			for (ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
+			     i != control_ui->scale_points->end();
+			     ++i) {
+				control_ui->combo->AddMenuElem(Menu_Helpers::MenuElem(
+						i->first,
+						sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
+						           control_ui,
+						           i->second)));
 			}
-		} else if (desc.toggled) {
-			control_ui->controller->set_size_request (req.height, req.height);
-		} else if (use_knob) {
-			control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
+
+			update_control_display(control_ui);
+
 		} else {
-			control_ui->controller->set_size_request (200, req.height);
-			control_ui->controller->set_name (X_("ProcessorControlSlider"));
-		}
 
-		if (!desc.integer_step && !desc.toggled && use_knob) {
-			control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj, insert));
-		}
+			/* create the controller */
 
-		adj->set_value (mcontrol->internal_to_interface(value));
+			/* XXX memory leak: SliderController not destroyed by ControlUI
+			 * destructor, and manage() reports object hierarchy
+			 * ambiguity.
+			 */
+			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
+
+			/* Control UI's don't need the rapid timer workaround */
+			control_ui->controller->stop_updating ();
+
+			/* XXX this code is not right yet, because it doesn't handle
+			   the absence of bounds in any sensible fashion.
+			*/
+
+			Adjustment* adj = control_ui->controller->adjustment();
+
+			if (desc.integer_step && !desc.toggled) {
+				control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
+				Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
+				if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
+					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
+				} else {
+					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
+				}
+			} else if (desc.toggled) {
+				control_ui->controller->set_size_request (req.height, req.height);
+			} else if (use_knob) {
+				control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
+			} else {
+				control_ui->controller->set_size_request (200, req.height);
+				control_ui->controller->set_name (X_("ProcessorControlSlider"));
+			}
+
+			if (!desc.integer_step && !desc.toggled && use_knob) {
+				control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj, insert));
+			}
+
+			adj->set_value (mcontrol->internal_to_interface(value));
+
+		}
 
 		if (use_knob) {
 			set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
@@ -783,7 +780,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->knobtable = manage (new Table());
 			control_ui->pack_start(*control_ui->knobtable, true, true);
 
-			if (control_ui->clickbox) {
+			if (control_ui->combo) {
+				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
+				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
+			} else if (control_ui->clickbox) {
 				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
 				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
 				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
@@ -811,7 +811,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		} else {
 
 			control_ui->pack_start (control_ui->label, true, true);
-			if (control_ui->clickbox) {
+			if (control_ui->combo) {
+				control_ui->pack_start(*control_ui->combo, false, true);
+			} else if (control_ui->clickbox) {
 				control_ui->pack_start (*control_ui->clickbox, false, false);
 			} else if (control_ui->spin_box) {
 				control_ui->pack_start (*control_ui->spin_box, false, false);
@@ -827,8 +829,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
-			control_ui->automate_button.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
-			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+			control_ui->automate_button.signal_clicked.connect (sigc::bind (
+						sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
+						control_ui));
+			mcontrol->alist()->automation_state_changed.connect (
+					control_connections,
+					invalidator (*this),
+					boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui),
+					gui_context());
+			input_controls_with_automation.push_back (control_ui);
 		}
 
 		if (desc.toggled) {
@@ -841,10 +850,11 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		automation_state_changed (control_ui);
 
+		/* Add to the list of CUIs that need manual update to workaround
+		 * AutomationControl not knowing about preset loads */
 		input_controls.push_back (control_ui);
-		input_controls_with_automation.push_back (control_ui);
 
-	} else if (!is_input) {
+	} else {
 
 		control_ui->display = manage (new EventBox);
 		control_ui->display->set_name ("ParameterValueDisplay");
@@ -912,7 +922,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	}
 
 	if (mcontrol) {
-		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
+		mcontrol->Changed.connect(control_connections, invalidator(*this),
+		                          boost::bind(&GenericPluginUI::ui_parameter_changed,
+		                                      this, control_ui),
+		                          gui_context());
 	}
 
 	return control_ui;
@@ -982,7 +995,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	if (cui->combo && cui->scale_points) {
 		for (ARDOUR::ScalePoints::iterator it = cui->scale_points->begin(); it != cui->scale_points->end(); ++it) {
 			if (it->second == val) {
-				cui->combo->set_active_text(it->first);
+				cui->combo->set_text(it->first);
 				break;
 			}
 		}
@@ -1006,11 +1019,22 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 }
 
 void
-GenericPluginUI::control_combo_changed (ControlUI* cui)
+GenericPluginUI::update_input_displays ()
 {
-	if (!cui->ignore_change && cui->scale_points) {
-		string value = cui->combo->get_active_text();
-		insert->automation_control (cui->parameter())->set_value ((*cui->scale_points)[value], Controllable::NoGroup);
+	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
+	for (vector<ControlUI*>::iterator i = input_controls.begin();
+	     i != input_controls.end();
+	     ++i) {
+		update_control_display(*i);
+	}
+	return;
+}
+
+void
+GenericPluginUI::control_combo_changed (ControlUI* cui, float value)
+{
+	if (!cui->ignore_change) {
+		insert->automation_control (cui->parameter())->set_value (value, Controllable::NoGroup);
 	}
 }
 
@@ -1027,14 +1051,9 @@ GenericPluginUI::start_updating (GdkEventAny*)
 bool
 GenericPluginUI::stop_updating (GdkEventAny*)
 {
-	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
-		(*i)->controller->stop_updating ();
-	}
-
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
-
 	return false;
 }
 
@@ -1073,17 +1092,17 @@ GenericPluginUI::output_update ()
 }
 
 void
-GenericPluginUI::set_property (const ParameterDescriptor& desc,
-                               Gtk::FileChooserButton*    widget)
+GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
+                                    Gtk::FileChooserButton*    widget)
 {
 	plugin->set_property(desc.key, Variant(Variant::PATH, widget->get_filename()));
 }
 
 void
-GenericPluginUI::property_changed (uint32_t key, const Variant& value)
+GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 {
-	PropertyControls::iterator c = _property_controls.find(key);
-	if (c != _property_controls.end()) {
+	FilePathControls::iterator c = _filepath_controls.find(key);
+	if (c != _filepath_controls.end()) {
 		c->second->set_filename(value.get_path());
 	} else {
 		std::cerr << "warning: property change for property with no control" << std::endl;

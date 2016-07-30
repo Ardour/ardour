@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 23:19+0200\n"
+"POT-Creation-Date: 2016-07-29 20:52+0200\n"
 "PO-Revision-Date: 2016-07-14 02:04+0200\n"
 "Last-Translator: Rivaud Julien <frnchfrgg@free.fr>, 2016\n"
 "Language-Team: \n"
@@ -784,6 +784,14 @@ msgstr "Le bouton ne peut pas surveiller un élement Controllable inexistant\n"
 #: ardour_button.cc:1144
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: ardour_http.cc:165 ardour_http.cc:179
+msgid "HTTP request failed: (%1) %2"
+msgstr ""
+
+#: ardour_http.cc:169 ardour_http.cc:182
+msgid "HTTP request status: %1"
+msgstr ""
 
 #: ardour_ui.cc:198
 msgid ""
@@ -2057,17 +2065,10 @@ msgstr ""
 msgid "GUI"
 msgstr "Interface graphique"
 
-#: ardour_ui2.cc:651 rc_option_editor.cc:1874 rc_option_editor.cc:1892
-#: rc_option_editor.cc:1895 rc_option_editor.cc:1897 rc_option_editor.cc:1899
-#: rc_option_editor.cc:1907 rc_option_editor.cc:1909 rc_option_editor.cc:1917
-#: rc_option_editor.cc:1925 rc_option_editor.cc:1932 rc_option_editor.cc:1953
-#: rc_option_editor.cc:1955 rc_option_editor.cc:1964
-#: session_option_editor.cc:342 session_option_editor.cc:344
-#: session_option_editor.cc:365 session_option_editor.cc:367
-#: session_option_editor.cc:369 session_option_editor.cc:376
-#: session_option_editor.cc:383 session_option_editor.cc:387
-msgid "Misc"
-msgstr "Divers"
+#: ardour_ui2.cc:651 rc_option_editor.cc:1941 rc_option_editor.cc:1943
+#: rc_option_editor.cc:1945
+msgid "Misc/Click"
+msgstr ""
 
 #: ardour_ui_dependents.cc:118
 msgid "Setup Editor"
@@ -7159,7 +7160,11 @@ msgstr "Exportation de « %3 » (période %1 sur %2)"
 msgid "Normalizing '%3' (timespan %1 of %2)"
 msgstr "Normalisation de « %3 » (période %1 sur %2)"
 
-#: export_dialog.cc:365
+#: export_dialog.cc:412
+msgid "Encoding '%3' (timespan %1 of %2)"
+msgstr ""
+
+#: export_dialog.cc:417
 msgid "Tagging '%3' (timespan %1 of %2)"
 msgstr "Étiquetage de « %3 » (période %1 sur %2)"
 
@@ -7671,7 +7676,11 @@ msgstr ""
 msgid "Show Times as:"
 msgstr "Temps exprimés en :"
 
-#: export_timespan_selector.cc:51 processor_box.cc:3683
+#: export_timespan_selector.cc:46
+msgid "Realtime Export"
+msgstr ""
+
+#: export_timespan_selector.cc:54 processor_box.cc:3695
 msgid "Select All"
 msgstr "Sélectionner tout"
 
@@ -7679,7 +7688,11 @@ msgstr "Sélectionner tout"
 msgid " to "
 msgstr " à "
 
-#: export_timespan_selector.cc:364 export_timespan_selector.cc:423
+#: export_timespan_selector.cc:399 export_timespan_selector.cc:488
+msgid "RT"
+msgstr ""
+
+#: export_timespan_selector.cc:400 export_timespan_selector.cc:489
 msgid "Range"
 msgstr "Intervalle"
 
@@ -9705,10 +9718,6 @@ msgstr "Normaliser la région"
 msgid "Normalize to:"
 msgstr "Normaliser à :"
 
-#: normalize_dialog.cc:49 strip_silence_dialog.cc:67
-msgid "dbFS"
-msgstr "dBFS"
-
 #: normalize_dialog.cc:56
 msgid "Normalize each region using its own peak value"
 msgstr "Normaliser chaque Région selon son propre niveau de crête"
@@ -10369,24 +10378,7 @@ msgstr "Sortie de l'horloge MIDI"
 msgid "MMC out"
 msgstr "Sortie MMC"
 
-#: port_group.cc:554
-#, fuzzy
-msgid ":monitor"
-msgstr ": moniteur"
-
-#: port_group.cc:570
-msgid "system:"
-msgstr "système :"
-
-#: port_group.cc:571
-msgid "alsa_pcm:"
-msgstr ""
-
-#: port_group.cc:572
-msgid "alsa_midi:"
-msgstr ""
-
-#: port_group.cc:577
+#: port_group.cc:579
 msgid "Scene "
 msgstr ""
 
@@ -11164,6 +11156,18 @@ msgstr ""
 msgid "%1 Preferences"
 msgstr "Préférences de %1"
 
+#: rc_option_editor.cc:1874 rc_option_editor.cc:1892 rc_option_editor.cc:1895
+#: rc_option_editor.cc:1897 rc_option_editor.cc:1899 rc_option_editor.cc:1907
+#: rc_option_editor.cc:1909 rc_option_editor.cc:1917 rc_option_editor.cc:1925
+#: rc_option_editor.cc:1932 rc_option_editor.cc:1953 rc_option_editor.cc:1955
+#: rc_option_editor.cc:1964 session_option_editor.cc:342
+#: session_option_editor.cc:344 session_option_editor.cc:365
+#: session_option_editor.cc:367 session_option_editor.cc:369
+#: session_option_editor.cc:376 session_option_editor.cc:383
+#: session_option_editor.cc:387
+msgid "Misc"
+msgstr "Divers"
+
 #: rc_option_editor.cc:1874
 msgid "DSP CPU Utilization"
 msgstr "Utilisation processeur par les traitements audio"
@@ -11215,10 +11219,6 @@ msgstr "Répertoire par défaut des nouvelles sessions :"
 #: rc_option_editor.cc:1935
 msgid "Maximum number of recent sessions"
 msgstr "Nombre maximum de sessions récentes"
-
-#: rc_option_editor.cc:1941 rc_option_editor.cc:1943 rc_option_editor.cc:1945
-msgid "Misc/Click"
-msgstr ""
 
 #: rc_option_editor.cc:1948
 #, fuzzy
@@ -11511,12 +11511,11 @@ msgid "LTC generator level"
 msgstr "Niveau du générateur LTC "
 
 #: rc_option_editor.cc:2195
-#, fuzzy
 msgid ""
-"Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
-"is  0dBu ^= -18dbFS in an EBU calibrated system"
+"Specify the Peak Volume of the generated LTC signal in dBFS. A good value "
+"is  0dBu ^= -18dBFS in an EBU calibrated system"
 msgstr ""
-"Spécifie le volume de pic du signal LTC généré en dB FS. Dans un système "
+"Spécifie le volume de crête du signal LTC généré en dB FS. Dans un système "
 "étalonné en EBU (UER), une bonne valeur est : 0dBu >= -18 dB FS"
 
 #: rc_option_editor.cc:2204
@@ -12375,7 +12374,7 @@ msgstr ""
 #: rc_option_editor.cc:3306
 #, fuzzy
 msgid ""
-"Specify the audio signal level in dbFS at and above which the meter-peak "
+"Specify the audio signal level in dBFS at and above which the meter-peak "
 "indicator will flash red."
 msgstr ""
 "Spécifie le niveau du signal Audio (en dB FS) à partir duquel l'indicateur "
@@ -15202,11 +15201,7 @@ msgid "Could not find default UI configuration file %1"
 msgstr ""
 "Chargement du fichier de style par défaut (%1) pour l'interface graphique"
 
-#: ui_config.cc:331
-msgid "Color file for %1 not found along %2"
-msgstr ""
-
-#: ui_config.cc:338
+#: ui_config.cc:289
 msgid "Loading color file %1"
 msgstr "Chargement du fichier de couleur %1"
 
@@ -15218,7 +15213,11 @@ msgstr "impossible de lire le fichier de couleur \"%1\""
 msgid "color file \"%1\" not loaded successfully."
 msgstr "le fichier de couleur \"%1\" n'a pas été chargé correctement"
 
-#: ui_config.cc:398 ui_config.cc:481
+#: ui_config.cc:325
+msgid "Color file for %1 not found along %2"
+msgstr ""
+
+#: ui_config.cc:403 ui_config.cc:486
 msgid "Color file %1 not saved"
 msgstr "Fichier de couleur %1 non sauvegardé"
 
@@ -16214,21 +16213,6 @@ msgstr ""
 #~ msgid "Main_menu"
 #~ msgstr "Menu_Principal"
 
-#, fuzzy
-#~ msgid "redirectmenu"
-#~ msgstr "menuredirigé"
-
-#, fuzzy
-#~ msgid "Editor_menus"
-#~ msgstr "Menus_Éditeur"
-
-#, fuzzy
-#~ msgid "ProcessorMenu"
-#~ msgstr "MenuProcesseur"
-
-#~ msgid "Copyright (C) 1999-2012 Paul Davis"
-#~ msgstr "Copyright © 1999-2012 Paul Davis"
-
 #~ msgid "Program "
 #~ msgstr "Programme"
 
@@ -16485,12 +16469,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "<b>Add files as ...</b>"
 #~ msgstr "<b>Ajouter les fichiers...</b>"
-
-#~ msgid "Dark Theme"
-#~ msgstr "Thème sombre"
-
-#~ msgid "Light Theme"
-#~ msgstr "Thème clair"
 
 #~ msgid "Contents:"
 #~ msgstr "Contenu :"
