@@ -558,7 +558,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	if (found && imprecise) {
 		*imprecise = in;
-		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	}
 
 	if (!found && imprecise) {
@@ -658,7 +657,6 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 							lin.set (DataType::MIDI, c);
 						}
 					}
-					_info->n_inputs = lin;
 					if (io["midi_out"].type() == LUA_TNUMBER) {
 						const int c = io["midi_out"].cast<int> ();
 						if (c >= 0) {
