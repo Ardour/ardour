@@ -827,7 +827,7 @@ private:
 		string const txt = _edit_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_edit_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -839,7 +839,7 @@ private:
 		string const txt = _delete_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_delete_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -851,7 +851,7 @@ private:
 		string const txt = _copy_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_copy_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -863,7 +863,7 @@ private:
 		string const txt = _insert_note_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_insert_note_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -875,7 +875,7 @@ private:
 		string const txt = _snap_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_snap_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -887,7 +887,7 @@ private:
 		string const txt = _snap_delta_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				Keyboard::set_snap_delta_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -899,7 +899,7 @@ private:
 		string const txt = _constraint_modifier_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_constraint_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -911,7 +911,7 @@ private:
 		string const txt = _trim_contents_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_trim_contents_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -923,7 +923,7 @@ private:
 		string const txt = _trim_overlap_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_trim_overlap_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -935,7 +935,7 @@ private:
 		string const txt = _trim_anchored_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_trim_anchored_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -947,7 +947,7 @@ private:
 		string const txt = _fine_adjust_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_fine_adjust_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -959,7 +959,7 @@ private:
 		string const txt = _push_points_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_push_points_modifier (modifiers[i].modifier);
 				break;
 			}
@@ -971,7 +971,7 @@ private:
 		string const txt = _note_size_relative_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
+			if (txt == S_(modifiers[i].name)) {
 				ArdourKeyboard::set_note_size_relative_modifier (modifiers[i].modifier);
 				break;
 			}
