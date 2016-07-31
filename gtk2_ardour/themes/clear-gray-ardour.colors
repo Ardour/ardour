@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour theme-name="Clear Gray">
- <Colors>
+  <Colors>
     <Color name="color 1" value="0x20b2b2ff"/>
     <Color name="color 10" value="0xf0f0f0ff"/>
     <Color name="color 100" value="0xe49c9cff"/>
@@ -179,7 +179,7 @@
     <ColorAlias name="gtk_bg_selected" alias="color 81"/>
     <ColorAlias name="gtk_bg_tooltip" alias="color 74"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
-    <ColorAlias name="gtk_bright_indicator" alias="color 13"/>
+    <ColorAlias name="gtk_bright_indicator" alias="meter color8"/>
     <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
     <ColorAlias name="gtk_control_base" alias="color 13"/>
     <ColorAlias name="gtk_control_master" alias="color 64"/>
@@ -240,11 +240,11 @@
     <ColorAlias name="meter bar" alias="color 7"/>
     <ColorAlias name="meter color BBC" alias="color 8"/>
     <ColorAlias name="meter marker" alias="color 19"/>
-    <ColorAlias name="meterbridge label: fill" alias="color 34"/>
-    <ColorAlias name="meterbridge label: fill active" alias="color 46"/>
+    <ColorAlias name="meterbridge label: fill" alias="color 81"/>
+    <ColorAlias name="meterbridge label: fill active" alias="color 48"/>
     <ColorAlias name="meterbridge label: led" alias="meter color8"/>
     <ColorAlias name="meterbridge label: led active" alias="color 9"/>
-    <ColorAlias name="meterbridge peakindicator: fill" alias="color 34"/>
+    <ColorAlias name="meterbridge peakindicator: fill" alias="color 81"/>
     <ColorAlias name="meterbridge peakindicator: fill active" alias="meter color8"/>
     <ColorAlias name="meterbridge peakindicator: led" alias="meter color8"/>
     <ColorAlias name="meterbridge peakindicator: led active" alias="meter color8"/>
