@@ -2161,7 +2161,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 	uint32_t f             = 0;
 	bool     can_replicate = true;
-	for (DataType::iterator t = DataType::begin(); t != DataType::end() && can_replicate; ++t) {
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
 		// ignore side-chains
 		uint32_t nin = ns_inputs.get (*t);
