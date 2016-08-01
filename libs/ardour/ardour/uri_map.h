@@ -69,6 +69,7 @@ public:
 		uint32_t atom_Float;
 		uint32_t log_Error;
 		uint32_t log_Note;
+		uint32_t log_Trace;
 		uint32_t log_Warning;
 		uint32_t midi_MidiEvent;
 		uint32_t time_Position;

@@ -258,8 +258,9 @@ log_vprintf(LV2_Log_Handle /*handle*/,
 		warning << str << endmsg;
 	} else if (type == URIMap::instance().urids.log_Note) {
 		info << str << endmsg;
+	} else if (type == URIMap::instance().urids.log_Trace) {
+		DEBUG_TRACE(DEBUG::LV2, str);
 	}
-	// TODO: Toggleable log:Trace message support
 	return ret;
 }
 
