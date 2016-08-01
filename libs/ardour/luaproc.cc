@@ -384,7 +384,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	int midi_out = _has_midi_output ? 1 : 0;
 
 	// preferred setting (provided by plugin_insert)
-	assert (out.n_audio () > 0 || midi_out > 0);
 	const int preferred_out = out.n_audio ();
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
@@ -585,7 +584,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			}
 
 			assert (possible_in > 0); // all other cases will have been matched above
-			assert (possible_out !=0 || possible_in !=0); // already handled above
 
 			imprecise->set (DataType::AUDIO, possible_in);
 			if (possible_out == -1 || possible_out == -2) {
