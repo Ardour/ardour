@@ -505,11 +505,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		if (possible_in < -2) {
 			/* explicit variable number of inputs */
-			if (audio_in > -possible_in && imprecise != NULL) {
-				// hide inputs ports
-				imprecise->set (DataType::AUDIO, -possible_in);
-			}
-
 			if (audio_in > -possible_in && imprecise == NULL) {
 				/* request is too large */
 			} else if (possible_out == -1) {
