@@ -63,7 +63,7 @@ Worker::schedule(uint32_t size, const void* data)
 bool
 Worker::respond(uint32_t size, const void* data)
 {
-	if (_requests->write_space() < size + sizeof(size)) {
+	if (_responses->write_space() < size + sizeof(size)) {
 		return false;
 	}
 	if (_responses->write((const uint8_t*)&size, sizeof(size)) != sizeof(size)) {
