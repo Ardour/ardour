@@ -196,15 +196,9 @@ work_schedule(LV2_Worker_Schedule_Handle handle,
               uint32_t                   size,
               const void*                data)
 {
-	LV2Plugin* plugin = (LV2Plugin*)handle;
-	if (plugin->session().engine().freewheeling()) {
-		// Freewheeling, do the work immediately in this (audio) thread
-		return (LV2_Worker_Status)plugin->work(size, data);
-	} else {
-		// Enqueue message for the worker thread
-		return plugin->worker()->schedule(size, data) ?
-			LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
-	}
+	return (((Worker*)handle)->schedule(size, data)
+	        ? LV2_WORKER_SUCCESS
+	        : LV2_WORKER_ERR_UNKNOWN);
 }
 
 /** Called by the plugin to respond to non-RT work. */
@@ -213,15 +207,9 @@ work_respond(LV2_Worker_Respond_Handle handle,
              uint32_t                  size,
              const void*               data)
 {
-	LV2Plugin* plugin = (LV2Plugin*)handle;
-	if (plugin->session().engine().freewheeling()) {
-		// Freewheeling, respond immediately in this (audio) thread
-		return (LV2_Worker_Status)plugin->work_response(size, data);
-	} else {
-		// Enqueue response for the worker
-		return plugin->worker()->respond(size, data) ?
-			LV2_WORKER_SUCCESS : LV2_WORKER_ERR_UNKNOWN;
-	}
+	return (((Worker*)handle)->respond(size, data)
+	        ? LV2_WORKER_SUCCESS
+	        : LV2_WORKER_ERR_UNKNOWN);
 }
 
 #ifdef LV2_EXTENDED
@@ -328,6 +316,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _impl(new Impl())
 	, _features(NULL)
 	, _worker(NULL)
+	, _state_worker(NULL)
 	, _insert_id("0")
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -343,6 +332,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _impl(new Impl())
 	, _features(NULL)
 	, _worker(NULL)
+	, _state_worker(NULL)
 	, _insert_id(other._insert_id)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -477,18 +467,23 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	log->vprintf = &log_vprintf;
 	_log_feature.data = log;
 
+	const size_t ring_size = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
 	LilvNode* worker_schedule = lilv_new_uri(_world.world, LV2_WORKER__schedule);
 	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
 		LV2_Worker_Schedule* schedule = (LV2_Worker_Schedule*)malloc(
 			sizeof(LV2_Worker_Schedule));
-		size_t buf_size = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
-		_worker                     = new Worker(this, buf_size);
-		schedule->handle            = this;
+		_worker                     = new Worker(this, ring_size);
+		schedule->handle            = _worker;
 		schedule->schedule_work     = work_schedule;
 		_work_schedule_feature.data = schedule;
 		_features[n_features++]     = &_work_schedule_feature;
 	}
 	lilv_node_free(worker_schedule);
+
+	if (_has_state_interface) {
+		// Create a non-threaded worker for use by state restore
+		_state_worker = new Worker(this, ring_size, false);
+	}
 
 	_impl->instance = lilv_plugin_instantiate(plugin, rate, _features);
 	_impl->name     = lilv_plugin_get_name(plugin);
@@ -848,6 +843,7 @@ LV2Plugin::~LV2Plugin ()
 	delete _to_ui;
 	delete _from_ui;
 	delete _worker;
+	delete _state_worker;
 
 	if (_atom_ev_buffers) {
 		LV2_Evbuf**  b = _atom_ev_buffers;
@@ -1340,8 +1336,15 @@ LV2Plugin::load_preset(PresetRecord r)
 	LilvNode*  pset  = lilv_new_uri(world, r.uri.c_str());
 	LilvState* state = lilv_state_new_from_world(world, _uri_map.urid_map(), pset);
 
+	const LV2_Feature*  state_features[2]   = { NULL, NULL };
+	LV2_Worker_Schedule schedule            = { _state_worker, work_schedule };
+	const LV2_Feature   state_sched_feature = { LV2_WORKER__schedule, &schedule };
+	if (_state_worker) {
+		state_features[1] = &state_sched_feature;
+	}
+
 	if (state) {
-		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, NULL);
+		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, state_features);
 		lilv_state_free(state);
 		Plugin::load_preset(r);
 	}
@@ -1843,10 +1846,11 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 }
 
 int
-LV2Plugin::work(uint32_t size, const void* data)
+LV2Plugin::work(Worker& worker, uint32_t size, const void* data)
 {
+	Glib::Threads::Mutex::Lock lm(_work_mutex);
 	return _impl->work_iface->work(
-		_impl->instance->lv2_handle, work_respond, this, size, data);
+		_impl->instance->lv2_handle, work_respond, &worker, size, data);
 }
 
 int
@@ -2811,10 +2815,24 @@ LV2Plugin::run(pframes_t nframes)
 		}
 	}
 
+	if (_worker) {
+		// Execute work synchronously if we're freewheeling (export)
+		_worker->set_synchronous(session().engine().freewheeling());
+	}
+
+	// Run the plugin for this cycle
 	lilv_instance_run(_impl->instance, nframes);
 
-	if (_impl->work_iface) {
+	// Emit any queued worker responses (calls a plugin callback)
+	if (_state_worker) {
+		_state_worker->emit_responses();
+	}
+	if (_worker) {
 		_worker->emit_responses();
+	}
+
+	// Notify the plugin that a work run cycle is complete
+	if (_impl->work_iface) {
 		if (_impl->work_iface->end_run) {
 			_impl->work_iface->end_run(_impl->instance->lv2_handle);
 		}

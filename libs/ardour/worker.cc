@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2012 Paul Davis
+  Copyright (C) 2012-2016 Paul Davis
   Author: David Robillard
 
   This program is free software; you can redistribute it and/or modify
@@ -27,26 +27,38 @@
 
 namespace ARDOUR {
 
-Worker::Worker(Workee* workee, uint32_t ring_size)
+Worker::Worker(Workee* workee, uint32_t ring_size, bool threaded)
 	: _workee(workee)
-	, _requests(new RingBuffer<uint8_t>(ring_size))
+	, _requests(threaded ? new RingBuffer<uint8_t>(ring_size) : NULL)
 	, _responses(new RingBuffer<uint8_t>(ring_size))
 	, _response((uint8_t*)malloc(ring_size))
-	, _sem ("worker_semaphore", 0)
+	, _sem("worker_semaphore", 0)
+	, _thread(NULL)
 	, _exit(false)
-	, _thread (Glib::Threads::Thread::create(sigc::mem_fun(*this, &Worker::run)))
-{}
+	, _synchronous(!threaded)
+{
+	if (threaded) {
+		_thread = Glib::Threads::Thread::create(
+			sigc::mem_fun(*this, &Worker::run));
+	}
+}
 
 Worker::~Worker()
 {
 	_exit = true;
 	_sem.signal();
-	_thread->join();
+	if (_thread) {
+		_thread->join();
+	}
 }
 
 bool
 Worker::schedule(uint32_t size, const void* data)
 {
+	if (_synchronous || !_requests) {
+		_workee->work(*this, size, data);
+		return true;
+	}
 	if (_requests->write_space() < size + sizeof(size)) {
 		return false;
 	}
@@ -124,7 +136,7 @@ Worker::run()
 	while (true) {
 		_sem.wait();
 		if (_exit) {
-			if (buf) free(buf);
+			free(buf);
 			return;
 		}
 
@@ -163,7 +175,7 @@ Worker::run()
 			continue;  // TODO: This is probably fatal
 		}
 
-		_workee->work(size, buf);
+		_workee->work(*this, size, buf);
 	}
 }
 

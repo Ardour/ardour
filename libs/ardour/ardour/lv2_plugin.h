@@ -20,6 +20,7 @@
 #ifndef __ardour_lv2_plugin_h__
 #define __ardour_lv2_plugin_h__
 
+#include <glibmm/threads.h>
 #include <set>
 #include <string>
 #include <vector>
@@ -163,7 +164,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	URIMap&       uri_map()       { return _uri_map; }
 	const URIMap& uri_map() const { return _uri_map; }
 
-	int work(uint32_t size, const void* data);
+	int work(Worker& worker, uint32_t size, const void* data);
 	int work_response(uint32_t size, const void* data);
 
 	void                       set_property(uint32_t key, const Variant& value);
@@ -177,6 +178,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void*         _module;
 	LV2_Feature** _features;
 	Worker*       _worker;
+	Worker*       _state_worker;
 	framecnt_t    _sample_rate;
 	float*        _control_data;
 	float*        _shadow_data;
@@ -267,6 +269,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	// Created on demand so the space is only consumed if necessary
 	RingBuffer<uint8_t>* _to_ui;
 	RingBuffer<uint8_t>* _from_ui;
+
+	Glib::Threads::Mutex _work_mutex;
 
 #ifdef LV2_EXTENDED
 	const LV2_Inline_Display_Interface* _display_interface;

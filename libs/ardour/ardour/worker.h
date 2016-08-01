@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2012 Paul Davis
+  Copyright (C) 2012-2016 Paul Davis
   Author: David Robillard
 
   This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,8 @@
 
 namespace ARDOUR {
 
+class Worker;
+
 /**
    An object that needs to schedule non-RT work in the audio thread.
 */
@@ -41,7 +43,7 @@ public:
 	/**
 	   Do some work in the worker thread.
 	*/
-	virtual int work(uint32_t size, const void* data) = 0;
+	virtual int work(Worker& worker, uint32_t size, const void* data) = 0;
 
 	/**
 	   Handle a response from the worker thread in the audio thread.
@@ -50,12 +52,16 @@ public:
 };
 
 /**
-   A worker thread for non-realtime tasks scheduled in the audio thread.
+   A worker for non-realtime tasks scheduled from another thread.
+
+   A worker may be a separate thread that runs to execute scheduled work
+   asynchronously, or unthreaded, in which case work is executed immediately
+   upon scheduling by the calling thread.
 */
 class LIBARDOUR_API Worker
 {
 public:
-	Worker(Workee* workee, uint32_t ring_size);
+	Worker(Workee* workee, uint32_t ring_size, bool threaded=true);
 	~Worker();
 
 	/**
@@ -75,6 +81,16 @@ public:
 	*/
 	void emit_responses();
 
+	/**
+	   Enable or disable synchronous execution.
+
+	   If enabled, all work is performed immediately in schedule() regardless
+	   of whether or not the worker is threaded.  This is used for exporting,
+	   where we want to temporarily execute all work synchronously but the
+	   worker is typically used threaded for live rolling.
+	*/
+	void set_synchronous(bool synchronous) { _synchronous = synchronous; }
+
 private:
 	void run();
 	/**
@@ -83,19 +99,19 @@ private:
 	   Handle the unlikley edge-case, if we're called in between the
 	   responder writing 'size' and 'data'.
 
-		 @param rb the ringbuffer to check
-		 @return true if the message is complete, false otherwise
-	 */
+	   @param rb the ringbuffer to check
+	   @return true if the message is complete, false otherwise
+	*/
 	bool verify_message_completeness(RingBuffer<uint8_t>* rb);
 
 	Workee*                _workee;
 	RingBuffer<uint8_t>*   _requests;
 	RingBuffer<uint8_t>*   _responses;
 	uint8_t*               _response;
-	PBD::Semaphore  _sem;
-	bool                   _exit;
+	PBD::Semaphore         _sem;
 	Glib::Threads::Thread* _thread;
-
+	bool                   _exit;
+	bool                   _synchronous;
 };
 
 } // namespace ARDOUR
