@@ -444,12 +444,9 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		if (possible_in == 0) {
 			/* no inputs, generators & instruments */
-			if (possible_out == -1) {
-				/* any configuration possible, stereo output */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid, should be (0, -1) */
+			if (possible_out == -1 || possible_out == -2) {
+				/* any output configuration possible
+				 * out == -2 is invalid, interpreted as out == -1 */
 				FOUNDCFG (preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
@@ -462,19 +459,20 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			}
 		}
 
-		if (possible_in == -1) {
+		if (possible_in == -1 || possible_in == -2) {
 			/* wildcard for input */
-			if (possible_out == -1) {
-				/* out must match in */
+			if (possible_out == possible_in) {
+				/* either both -1 or both -2 (invalid and
+				 * interpreted as both -1): out must match in */
 				FOUNDCFG (audio_in);
-			} else if (possible_out == -2) {
-				/* any configuration possible, pick matching */
+			} else if (possible_out == -3 - possible_in) {
+				/* one is -1, the other is -2: any output configuration
+				 * possible, pick what the insert prefers */
 				FOUNDCFG (preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG (max (-possible_out, preferred_out));
-				/* and try min, too, in case the penalty is lower */
+				/* variable number of outputs up to -N,
+				 * invalid if in == -2 but we accept it anyway */
 				FOUNDCFG (min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
@@ -483,40 +481,20 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			}
 		}
 
-		if (possible_in == -2) {
-			if (possible_out == -1) {
-				/* any configuration possible, pick matching */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (-1, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* invalid,  interpret as (<-2, <-2)
-				 * variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in < -2) {
-			/* explicit variable number of inputs */
-			if (audio_in > -possible_in && imprecise == NULL) {
+		if (possible_in < -2 || possible_in > 0) {
+			/* specified number, exact or up to */
+			if (possible_in < -2 && audio_in > -possible_in && !imprecise) {
 				/* request is too large */
-			} else if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (<-2, -1) */
+			} else if (possible_in > 0 && audio_in != possible_in) {
+				/* this configuration needed exacty possible_in inputs */
+			} else if (possible_out == -1 || possible_out == -2) {
+				/* any output configuration possible
+				 * out == -2 is invalid, interpreted as out == -1 */
 				FOUNDCFG (preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
+				/* variable number of outputs up to -N
+				 * not specified if in > 0, but we accept it anyway */
 				FOUNDCFG (min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
@@ -525,26 +503,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			}
 		}
 
-		if (possible_in && (possible_in == audio_in)) {
-			/* exact number of inputs ... must match obviously */
-			if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (>0, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* > 0, < -2 is not specified
-				 * interpret as up to -N */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
 	}
 
 	if (found && imprecise) {
