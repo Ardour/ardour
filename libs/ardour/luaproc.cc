@@ -378,35 +378,15 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		return false;
 	}
 
-	bool found = false;
-	bool exact_match = false;
 	const int audio_in = in.n_audio ();
-	int midi_out = _has_midi_output ? 1 : 0;
 
 	// preferred setting (provided by plugin_insert)
 	const int preferred_out = out.n_audio ();
 
-	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-		luabridge::LuaRef io (i.value ());
-		if (!io.isTable()) {
-			continue;
-		}
-
-		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
-		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
-
-		// exact match
-		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
-			_output_configs.insert (preferred_out);
-			exact_match = true;
-			found = true;
-			break;
-		}
-	}
-
-	/* now allow potentially "imprecise" matches */
+	int midi_out = _has_midi_output ? 1 : 0;
 	int audio_out = -1;
 	float penalty = 9999;
+	bool found = false;
 
 #define FOUNDCFG(nch) {                            \
   float p = fabsf ((float)(nch) - preferred_out);  \
@@ -437,6 +417,17 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
 		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 
+		// exact match
+		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
+			_output_configs.insert (preferred_out);
+			audio_out = preferred_out;
+			/* Set penalty so low that this output configuration
+			 * will trump any other one */
+			penalty = -1;
+			found = true;
+		}
+
+		// "imprecise" matches
 		if (possible_out == 0) {
 			if (possible_in == 0) {
 				if (_has_midi_output && audio_in == 0) {
@@ -611,13 +602,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		_selected_in = in;
 	}
 
-	if (exact_match) {
-		out.set (DataType::MIDI, midi_out);
-		out.set (DataType::AUDIO, preferred_out);
-	} else {
-		out.set (DataType::MIDI, midi_out);
-		out.set (DataType::AUDIO, audio_out);
-	}
+	out.set (DataType::MIDI, midi_out);
+	out.set (DataType::AUDIO, audio_out);
 	_selected_out = out;
 
 	return true;
