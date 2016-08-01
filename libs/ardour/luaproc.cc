@@ -380,8 +380,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	bool found = false;
 	bool exact_match = false;
-	const int32_t audio_in = in.n_audio ();
-	int32_t midi_out = _has_midi_output ? 1 : 0;
+	const int audio_in = in.n_audio ();
+	int midi_out = _has_midi_output ? 1 : 0;
 
 	// preferred setting (provided by plugin_insert)
 	assert (out.n_audio () > 0 || midi_out > 0);
@@ -406,7 +406,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	}
 
 	/* now allow potentially "imprecise" matches */
-	int32_t audio_out = -1;
+	int audio_out = -1;
 	float penalty = 9999;
 
 #define FOUNDCFG(nch) {                            \
