@@ -346,10 +346,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	// caller must hold process lock (no concurrent calls to interpreter
 	_output_configs.clear ();
 
-	if (in.n_midi() > 0 && !_has_midi_input && !imprecise) {
-		return false;
-	}
-
 	lua_State* L = lua.getState ();
 	luabridge::LuaRef ioconfig = luabridge::getGlobal (L, "dsp_ioconfig");
 	if (!ioconfig.isFunction ()) {
@@ -379,6 +375,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	}
 
 	const int audio_in = in.n_audio ();
+	const int midi_in = in.n_midi ();
 
 	// preferred setting (provided by plugin_insert)
 	const int preferred_out = out.n_audio ();
@@ -416,6 +413,11 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
 		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
+		int possible_midiin = _has_midi_input ? 1 : 0;
+
+		if (midi_in > 0 && possible_midiin == 0 && !imprecise) {
+			continue;
+		}
 
 		// exact match
 		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
