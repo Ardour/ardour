@@ -1340,7 +1340,7 @@ LV2Plugin::load_preset(PresetRecord r)
 	LV2_Worker_Schedule schedule            = { _state_worker, work_schedule };
 	const LV2_Feature   state_sched_feature = { LV2_WORKER__schedule, &schedule };
 	if (_state_worker) {
-		state_features[1] = &state_sched_feature;
+		state_features[0] = &state_sched_feature;
 	}
 
 	if (state) {
