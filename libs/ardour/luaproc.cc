@@ -393,6 +393,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
     audio_out = (nch);                             \
     if (imprecise) {                               \
       *imprecise = in;                             \
+      imprecise->set (DataType::MIDI,              \
+                      possible_midiin);            \
     }                                              \
     penalty = p;                                   \
     found = true;                                  \
@@ -518,6 +520,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 			int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
 			int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
+			int possible_midiin = _has_midi_input ? 1 : 0;
 
 			if (possible_out == 0 && possible_in == 0 && _has_midi_output) {
 				assert (audio_in > 0); // no input is handled above
@@ -550,7 +553,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	}
 
 	if (imprecise) {
-		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
 		_selected_in = *imprecise;
 	} else {
 		_selected_in = in;
