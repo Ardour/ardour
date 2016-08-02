@@ -391,6 +391,9 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
   if ((nch) > preferred_out) { p *= 1.1; }         \
   if (p < penalty) {                               \
     audio_out = (nch);                             \
+    if (imprecise) {                               \
+      *imprecise = in;                             \
+    }                                              \
     penalty = p;                                   \
     found = true;                                  \
   }                                                \
@@ -505,10 +508,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	}
 
-	if (found && imprecise) {
-		*imprecise = in;
-	}
-
 	if (!found && imprecise) {
 		/* try harder */
 		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
@@ -531,7 +530,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 			assert (possible_in > 0); // all other cases will have been matched above
 
-			imprecise->set (DataType::AUDIO, possible_in);
 			if (possible_out == -1 || possible_out == -2) {
 				FOUNDCFG (2);
 			} else if (possible_out < -2) {
@@ -541,6 +539,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
 			}
+			imprecise->set (DataType::AUDIO, possible_in);
 			// ideally we'll also find the closest, best matching
 			// input configuration with minimal output penalty...
 		}
