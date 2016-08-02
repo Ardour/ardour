@@ -69,6 +69,8 @@ while [ $# -gt 0 ] ; do
 	--public)
 		SAE= ;
 		WITH_LADSPA=1;
+		WITH_HARRISON_LV2=1 ;
+		WITH_X42_LV2=1 ;
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
 		shift ;;
