@@ -380,7 +380,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	// preferred setting (provided by plugin_insert)
 	const int preferred_out = out.n_audio ();
 
-	int midi_out = _has_midi_output ? 1 : 0;
+	int midi_out = -1;
 	int audio_out = -1;
 	float penalty = 9999;
 	bool found = false;
@@ -389,6 +389,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
   _output_configs.insert (out);                    \
   if (p < penalty) {                               \
     audio_out = (out);                             \
+    midi_out = possible_midiout;                   \
     if (imprecise) {                               \
       imprecise->set (DataType::AUDIO, (in));      \
       imprecise->set (DataType::MIDI,              \
@@ -433,6 +434,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
 		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 		int possible_midiin = _has_midi_input ? 1 : 0;
+		int possible_midiout = _has_midi_output ? 1 : 0;
 
 		if (midi_in > 0 && possible_midiin == 0 && !imprecise) {
 			continue;
