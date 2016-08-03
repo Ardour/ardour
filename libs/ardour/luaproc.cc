@@ -502,55 +502,39 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		if (possible_in < -2 || possible_in > 0) {
 			/* specified number, exact or up to */
-			if (possible_in < -2 && audio_in > -possible_in && !imprecise) {
-				/* request is too large */
-			} else if (possible_in > 0 && audio_in != possible_in) {
-				/* this configuration needed exacty possible_in inputs */
+			int desired_in;
+			if (possible_in > 0) {
+				/* configuration can only match possible_in */
+				desired_in = possible_in;
+			} else {
+				/* configuration can match up to -possible_in */
+				desired_in = min (-possible_in, audio_in);
+			}
+			if (!imprecise && audio_in != desired_in) {
+				/* skip that configuration, it cannot match
+				 * the required audio input count, and we
+				 * cannot ask for change via \imprecise */
 			} else if (possible_out == -1 || possible_out == -2) {
 				/* any output configuration possible
-				 * out == -2 is invalid, interpreted as out == -1 */
-				FOUNDCFG (preferred_out);
+				 * out == -2 is invalid, interpreted as out == -1.
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* variable number of outputs up to -N
-				 * not specified if in > 0, but we accept it anyway */
-				FOUNDCFG (min (-possible_out, preferred_out));
+				 * not specified if in > 0, but we accept it anyway.
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-	}
-
-	if (!found && imprecise) {
-		/* try harder */
-		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-			luabridge::LuaRef io (i.value ());
-			if (!io.isTable()) {
-				continue;
-			}
-
-			int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
-			int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
-			int possible_midiin = _has_midi_input ? 1 : 0;
-
-
-			assert (possible_in > 0); // all other cases will have been matched above
-
-			if (possible_out == -1 || possible_out == -2) {
-				FOUNDCFG_IMPRECISE (possible_in, 2);
-			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG_IMPRECISE (possible_in, min (-possible_out, preferred_out));
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG_IMPRECISE (possible_in, possible_out);
+				/* exact number of outputs
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, possible_out);
 			}
 			// ideally we'll also find the closest, best matching
 			// input configuration with minimal output penalty...
 		}
+
 	}
 
 	if (!found) {
