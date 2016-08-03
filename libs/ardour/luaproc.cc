@@ -462,23 +462,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			continue;
 		}
 
-		if (possible_in == 0) {
-			/* no inputs, generators & instruments */
-			if (possible_out == -1 || possible_out == -2) {
-				/* any output configuration possible
-				 * out == -2 is invalid, interpreted as out == -1 */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out);
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
 		if (possible_in == -1 || possible_in == -2) {
 			/* wildcard for input */
 			if (possible_out == possible_in) {
@@ -501,10 +484,10 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			}
 		}
 
-		if (possible_in < -2 || possible_in > 0) {
+		if (possible_in < -2 || possible_in >= 0) {
 			/* specified number, exact or up to */
 			int desired_in;
-			if (possible_in > 0) {
+			if (possible_in >= 0) {
 				/* configuration can only match possible_in */
 				desired_in = possible_in;
 			} else {
