@@ -447,9 +447,10 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		// "imprecise" matches
 		if (possible_out == 0) {
-			if (possible_in == 0) {
-				if (_has_midi_output && audio_in == 0) {
-					// special case midi filters & generators
+			/* skip configurations with no audio output, unless
+			 * the plugin is a midi filter or generator */
+			if (possible_in == 0 && _has_midi_output) {
+				if (audio_in == 0) {
 					FOUNDCFG(possible_out);
 					break;
 				}
