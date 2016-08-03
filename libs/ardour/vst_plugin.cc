@@ -91,9 +91,9 @@ VSTPlugin::set_block_size (pframes_t nframes)
 }
 
 float
-VSTPlugin::default_value (uint32_t)
+VSTPlugin::default_value (uint32_t which)
 {
-	return 0;
+	return _parameter_defaults[which];
 }
 
 float
@@ -322,6 +322,9 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
 	}
+
+	desc.normal = get_parameter (which);
+	_parameter_defaults[which] = desc.normal;
 
 	return 0;
 }
