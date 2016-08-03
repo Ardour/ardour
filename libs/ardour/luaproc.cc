@@ -453,6 +453,9 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				if (audio_in == 0) {
 					FOUNDCFG(possible_out);
 					break;
+				} else if (imprecise) {
+					// TODO hide audio input from plugin
+					FOUNDCFG_IMPRECISE (possible_in, possible_out);
 				}
 			}
 			continue;
@@ -533,12 +536,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 			int possible_midiin = _has_midi_input ? 1 : 0;
 
-			if (possible_out == 0 && possible_in == 0 && _has_midi_output) {
-				assert (audio_in > 0); // no input is handled above
-				// TODO hide audio input from plugin
-				FOUNDCFG_IMPRECISE (possible_in, possible_out);
-				continue;
-			}
 
 			assert (possible_in > 0); // all other cases will have been matched above
 
