@@ -329,22 +329,24 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	lua_State* L = lua.getState ();
 	luabridge::LuaRef ioconfig = luabridge::getGlobal (L, "dsp_ioconfig");
-	if (!ioconfig.isFunction ()) {
-		return false;
-	}
 
 	luabridge::LuaRef *_iotable = NULL; // can't use reference :(
-	try {
-		luabridge::LuaRef iotable = ioconfig ();
-		if (iotable.isTable ()) {
-			_iotable = new luabridge::LuaRef (iotable);
+
+	if (ioconfig.isFunction ()) {
+		try {
+			luabridge::LuaRef iotable = ioconfig ();
+			if (iotable.isTable ()) {
+				_iotable = new luabridge::LuaRef (iotable);
+			}
+		} catch (luabridge::LuaException const& e) {
+			_iotable = NULL;
 		}
-	} catch (luabridge::LuaException const& e) {
-		return false;
 	}
 
 	if (!_iotable) {
-		return false;
+		/* empty table as default */
+		luabridge::LuaRef iotable = luabridge::newTable(L);
+		_iotable = new luabridge::LuaRef (iotable);
 	}
 
 	// now we can reference it.
@@ -352,7 +354,9 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	delete _iotable;
 
 	if ((iotable).length () < 1) {
-		return false;
+		/* empty table as only config, to get default values */
+		luabridge::LuaRef ioconf = luabridge::newTable(L);
+		iotable[1] = ioconf;
 	}
 
 	const int audio_in = in.n_audio ();
