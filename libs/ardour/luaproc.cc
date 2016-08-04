@@ -439,7 +439,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		int possible_midiin = _has_midi_input ? 1 : 0;
 		int possible_midiout = _has_midi_output ? 1 : 0;
 
-		if (midi_in > 0 && possible_midiin == 0 && !imprecise) {
+		if (midi_in != possible_midiin && !imprecise) {
 			continue;
 		}
 
