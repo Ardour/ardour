@@ -379,6 +379,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	// preferred setting (provided by plugin_insert)
 	const int preferred_out = out.n_audio ();
+	const int preferred_midiout = out.n_midi ();
 
 	int midi_out = -1;
 	int audio_out = -1;
@@ -402,8 +403,12 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 #define FOUNDCFG_IMPRECISE(in, out) {                               \
   const float p = fabsf ((float)(out) - preferred_out) *            \
                       (((out) > preferred_out) ? 1.1 : 1)           \
+                + fabsf ((float)possible_midiout - preferred_midiout) *    \
+                      ((possible_midiout - preferred_midiout) ? 0.6 : 0.5) \
                 + fabsf ((float)(in) - audio_in) *                  \
-                      (((in) > audio_in) ? 275 : 250);              \
+                      (((in) > audio_in) ? 275 : 250)               \
+                + fabsf ((float)possible_midiin - midi_in) *        \
+                      ((possible_midiin - midi_in) ? 100 : 110);    \
   FOUNDCFG_PENALTY(in, out, p);                                     \
 }
 
