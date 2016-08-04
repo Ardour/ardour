@@ -385,40 +385,39 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	float penalty = 9999;
 	bool found = false;
 
-#define FOUNDCFG_PENALTY(in, out, p) {             \
-  _output_configs.insert (out);                    \
-  if (p < penalty) {                               \
-    audio_out = (out);                             \
-    midi_out = possible_midiout;                   \
-    if (imprecise) {                               \
-      imprecise->set (DataType::AUDIO, (in));      \
-      imprecise->set (DataType::MIDI,              \
-                      possible_midiin);            \
-    }                                              \
-    penalty = p;                                   \
-    found = true;                                  \
-  }                                                \
+#define FOUNDCFG_PENALTY(in, out, p) {                              \
+  _output_configs.insert (out);                                     \
+  if (p < penalty) {                                                \
+    audio_out = (out);                                              \
+    midi_out = possible_midiout;                                    \
+    if (imprecise) {                                                \
+      imprecise->set (DataType::AUDIO, (in));                       \
+      imprecise->set (DataType::MIDI, possible_midiin);             \
+    }                                                               \
+    penalty = p;                                                    \
+    found = true;                                                   \
+  }                                                                 \
 }
 
-#define FOUNDCFG_IMPRECISE(in, out) {              \
-  float p = fabsf ((float)(out) - preferred_out);  \
-  if (in != audio_in) {                            \
-    p += 1000;                                     \
-  }                                                \
-  if ((out) > preferred_out) { p *= 1.1; }         \
-  FOUNDCFG_PENALTY(in, out, p);                    \
+#define FOUNDCFG_IMPRECISE(in, out) {                               \
+  float p = fabsf ((float)(out) - preferred_out) ;                  \
+  if (in != audio_in) {                                             \
+    p += 1000;                                                      \
+  }                                                                 \
+  if ((out) > preferred_out) { p *= 1.1; }                          \
+  FOUNDCFG_PENALTY(in, out, p);                                     \
 }
 
-#define FOUNDCFG(out)                              \
+#define FOUNDCFG(out)                                               \
   FOUNDCFG_IMPRECISE(audio_in, out)
 
-#define ANYTHINGGOES                               \
+#define ANYTHINGGOES                                                \
   _output_configs.insert (0);
 
-#define UPTO(nch) {                                \
-  for (int n = 1; n < nch; ++n) {                  \
-    _output_configs.insert (n);                    \
-  }                                                \
+#define UPTO(nch) {                                                 \
+  for (int n = 1; n < nch; ++n) {                                   \
+    _output_configs.insert (n);                                     \
+  }                                                                 \
 }
 
 	if (imprecise) {
