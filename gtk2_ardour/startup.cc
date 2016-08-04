@@ -80,23 +80,23 @@ ArdourStartup::ArdourStartup ()
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
 
-	if ((icon_pixbuf = ::get_icon (PROGRAM_NAME "-icon_48px")) == 0) {
+	if (! (icon_pixbuf = ::get_icon (PROGRAM_NAME "-icon_48px"))) {
 		throw failed_constructor();
 	}
 
 	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
 	Glib::RefPtr<Gdk::Pixbuf> icon;
 
-	if ((icon = ::get_icon (PROGRAM_NAME "-icon_16px")) != 0) {
+	if ((icon = ::get_icon (PROGRAM_NAME "-icon_16px"))) {
 		window_icons.push_back (icon);
 	}
-	if ((icon = ::get_icon (PROGRAM_NAME "-icon_22px")) != 0) {
+	if ((icon = ::get_icon (PROGRAM_NAME "-icon_22px"))) {
 		window_icons.push_back (icon);
 	}
-	if ((icon = ::get_icon (PROGRAM_NAME "-icon_32px")) != 0) {
+	if ((icon = ::get_icon (PROGRAM_NAME "-icon_32px"))) {
 		window_icons.push_back (icon);
 	}
-	if ((icon = ::get_icon (PROGRAM_NAME "-icon_48px")) != 0) {
+	if ((icon = ::get_icon (PROGRAM_NAME "-icon_48px"))) {
 		window_icons.push_back (icon);
 	}
 	if (!window_icons.empty ()) {

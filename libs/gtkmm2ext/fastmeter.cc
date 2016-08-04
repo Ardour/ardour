@@ -731,7 +731,7 @@ FastMeter::set (float lvl, float peak)
 
 	Glib::RefPtr<Gdk::Window> win;
 
-	if ((win = get_window()) == 0) {
+	if (! (win = get_window())) {
 		queue_draw ();
 		return;
 	}
