@@ -445,19 +445,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			FOUNDCFG_PENALTY(audio_in, preferred_out, -1);
 		}
 
-		// "imprecise" matches
-		if (possible_out == 0) {
-			/* skip configurations with no audio output, unless
-			 * the plugin is a midi filter or generator */
-			if (possible_in == 0 && _has_midi_output) {
-				if (audio_in == 0) {
-					FOUNDCFG(possible_out);
-					break;
-				} else if (imprecise) {
-					// TODO hide audio input from plugin
-					FOUNDCFG_IMPRECISE (possible_in, possible_out);
-				}
-			}
+		if (possible_out == 0 && possible_midiout == 0) {
+			/* skip configurations with no output at all */
 			continue;
 		}
 
