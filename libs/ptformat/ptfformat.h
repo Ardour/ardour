@@ -119,6 +119,7 @@ private:
 	bool foundin(std::string haystack, std::string needle);
 	int parse(void);
 	void unxor10(void);
+	void unxor_ptx_to_ptf(void);
 	void setrates(void);
 	void parse5header(void);
 	void parse7header(void);

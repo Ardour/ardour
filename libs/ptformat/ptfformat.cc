@@ -234,6 +234,12 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 		unxor10();
 	}
 
+	// Special case when ptx is exported to ptf in PT
+	if (v == 3) {
+		version = 11;
+		unxor_ptx_to_ptf();
+	}
+
 	if (version == 0 || version == 5 || version == 7) {
 		/* Haven't detected version yet so decipher */
 		j = 0;
@@ -303,6 +309,28 @@ PTFFormat::unxor10(void)
 			x = (x - dx) & 0xff;
 		}
 		ptfunxored[j] ^= x;
+	}
+}
+
+void
+PTFFormat::unxor_ptx_to_ptf(void)
+{
+	unsigned char keyy[16] = {	0x00,0x10,0x20,0x30,0x40,0x50,0x60,0x70,
+					0x80,0x90,0xa0,0xb0,0xc0,0xd0,0xe0,0xf0
+	};
+	uint64_t j;
+	uint8_t i;
+
+	for (i = 0, j = 0x10; j < len; j++,i++) {
+		ptfunxored[j] ^= keyy[i];
+		if ((j % 16) == 0) {
+			i = 0;
+			if (ptfunxored[j] % 2 == 0) {
+				ptfunxored[j]++;
+			} else {
+				ptfunxored[j]--;
+			}
+		}
 	}
 }
 

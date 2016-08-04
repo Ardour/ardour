@@ -4244,6 +4244,24 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	sl.sort (Stripable::PresentationOrderSorter());
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+
+		if ((*s)->presentation_info().hidden()) {
+			/* if the caller didn't explicitly ask for hidden
+			   stripables, ignore hidden ones. This matches
+			   the semantics of the pre-PresentationOrder
+			   "get by RID" logic of Ardour 4.x and earlier.
+
+			   XXX at some point we should likely reverse
+			   the logic of the flags, because asking for "the
+			   hidden stripables" is not going to be common,
+			   whereas asking for visible ones is normal.
+			*/
+
+			if (! (flags & PresentationInfo::Hidden)) {
+				continue;
+			}
+		}
+
 		if ((*s)->presentation_info().flag_match (flags)) {
 			if (match_cnt++ == n) {
 				return *s;

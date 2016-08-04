@@ -1,7 +1,7 @@
 CFLAGS = -Wall
 LOADLIBES = -ldl
 
-gcc-glibmm-abi-check:
+gcc-glibmm-abi-check: abicheck.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) \
 		-o gcc-glibmm-abi-check \
 		abicheck.c \

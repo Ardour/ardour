@@ -27,6 +27,9 @@ PROGRAM_VERSION=${major_version}
 PRODUCT_NAME=ardour
 PRODUCT_VERSION=${major_version}
 
+WITH_HARRISON_LV2=1 ;
+WITH_X42_LV2=1 ;
+
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
 	echo "arg = $1"

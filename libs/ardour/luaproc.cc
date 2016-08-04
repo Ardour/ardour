@@ -388,11 +388,13 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	const int preferred_out = out.n_audio ();
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-		assert (i.value ().type () == LUA_TTABLE);
 		luabridge::LuaRef io (i.value ());
+		if (!io.isTable()) {
+			continue;
+		}
 
-		int possible_in = io["audio_in"];
-		int possible_out = io["audio_out"];
+		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
+		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 
 		// exact match
 		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
@@ -428,11 +430,13 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 }
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-		assert (i.value ().type () == LUA_TTABLE);
 		luabridge::LuaRef io (i.value ());
+		if (!io.isTable()) {
+			continue;
+		}
 
-		int possible_in = io["audio_in"];
-		int possible_out = io["audio_out"];
+		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
+		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 
 		if (possible_out == 0) {
 			if (possible_in == 0) {
@@ -558,17 +562,18 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 	if (found && imprecise) {
 		*imprecise = in;
-		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	}
 
 	if (!found && imprecise) {
 		/* try harder */
 		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-			assert (i.value ().type () == LUA_TTABLE);
 			luabridge::LuaRef io (i.value ());
+			if (!io.isTable()) {
+				continue;
+			}
 
-			int possible_in = io["audio_in"];
-			int possible_out = io["audio_out"];
+			int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
+			int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 
 			if (possible_out == 0 && possible_in == 0 && _has_midi_output) {
 				assert (audio_in > 0); // no input is handled above
@@ -658,7 +663,6 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 							lin.set (DataType::MIDI, c);
 						}
 					}
-					_info->n_inputs = lin;
 					if (io["midi_out"].type() == LUA_TNUMBER) {
 						const int c = io["midi_out"].cast<int> ();
 						if (c >= 0) {

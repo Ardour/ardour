@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Waldorf</Manufacturer>
     <Model>Blofeld</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
         <ChannelNameSetAssign Channel="2" NameSet="Presets"/>
@@ -44,6 +44,7 @@
         <AvailableChannel Channel="15" Available="true"/>
         <AvailableChannel Channel="16" Available="true"/>
       </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
       <PatchBank Name="Presets A" ROM="false">
         <MIDICommands>
           <ControlChange Control="0" Value="0"/>
@@ -392,7 +393,7 @@
       <Patch Number="C036" Name="C036 PolySequencer" ProgramChange="35"/>
       <Patch Number="C037" Name="C037 PowerLead" ProgramChange="36"/>
       <Patch Number="C038" Name="C038 Harp" ProgramChange="37"/>
-      <Patch Number="C039" Name="C039 PPG Nylons  PROX" ProgramChange="38"/>
+      <Patch Number="C039" Name="C039 PPG Nylons PROX" ProgramChange="38"/>
       <Patch Number="C040" Name="C040 Pure Key" ProgramChange="39"/>
       <Patch Number="C041" Name="C041 PWMaster" ProgramChange="40"/>
       <Patch Number="C042" Name="C042 Qazzio" ProgramChange="41"/>
@@ -581,7 +582,7 @@
       <Patch Number="D095" Name="D095 Slow Wavetrip" ProgramChange="94"/>
       <Patch Number="D096" Name="D096 Soap" ProgramChange="95"/>
       <Patch Number="D097" Name="D097 Soar" ProgramChange="96"/>
-      <Patch Number="D098" Name="D098 Soft  Pad" ProgramChange="97"/>
+      <Patch Number="D098" Name="D098 Soft Pad" ProgramChange="97"/>
       <Patch Number="D099" Name="D099 Sonnenaufgang" ProgramChange="98"/>
       <Patch Number="D100" Name="D100 Speak _ Hold" ProgramChange="99"/>
       <Patch Number="D101" Name="D101 Straight Pad" ProgramChange="100"/>
@@ -1021,8 +1022,8 @@
       <Patch Number="H015" Name="H015 Gastrology" ProgramChange="14"/>
       <Patch Number="H016" Name="H016 HawaiGlider" ProgramChange="15"/>
       <Patch Number="H017" Name="H017 Into Mout" ProgramChange="16"/>
-      <Patch Number="H018" Name="H018 LFO  Speeddwn" ProgramChange="17"/>
-      <Patch Number="H019" Name="H019 LFO  Speedup" ProgramChange="18"/>
+      <Patch Number="H018" Name="H018 LFO Speeddwn" ProgramChange="17"/>
+      <Patch Number="H019" Name="H019 LFO Speedup" ProgramChange="18"/>
       <Patch Number="H020" Name="H020 LilaBell" ProgramChange="19"/>
       <Patch Number="H021" Name="H021 Living Water" ProgramChange="20"/>
       <Patch Number="H022" Name="H022 LosAngeles2019" ProgramChange="21"/>
@@ -1133,5 +1134,11 @@
       <Patch Number="H127" Name="H127 Zap Stick" ProgramChange="126"/>
       <Patch Number="H128" Name="H128 Zwitscher 1" ProgramChange="127"/>
     </PatchNameList>
+    <ControlNameList Name="Controls">
+        <Control Type="7bit" Number="1" Name="Modulation Wheel"/>
+        <Control Type="7bit" Number="2" Name="Breath Control"/>
+        <Control Type="7bit" Number="4" Name="Foot Control"/>
+        <Control Type="7bit" Number="5" Name="Glide Rate"/>
+    </ControlNameList>
   </MasterDeviceNames>
 </MIDINameDocument>

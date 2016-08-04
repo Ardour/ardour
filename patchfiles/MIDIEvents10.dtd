@@ -1,0 +1,195 @@
+<!--
+	XML DTD for MIDI messages
+	
+	Version 1.0, 19 January 2003
+	
+	Formal Public Identifier:
+		"-//MIDI Manufacturers Association//DTD MIDIEvents 1.0//EN"
+
+	URI:
+		"http://www.midi.org/dtds/MIDIEvents10.dtd"
+
+	Parameter entities which must be defined before use:
+		%ChannelRequired;		#IMPLIED
+									for use in contexts, where the event is always
+									rechannelized
+								#REQUIRED
+									when channel messages require Channel attribute
+
+	e.g.
+		<!ENTITY % MIDIDTD PUBLIC	"-//MIDI Manufacturers Association//DTD MIDIEvents 1.0//EN"
+									"http://www.midi.org/dtds/MIDIEvents10.dtd" >
+		%MIDIDTD;
+-->
+
+<!--
+	CHANNEL MESSAGES
+	
+	Attribute values:
+		Note, Velocity, Pressure, Control, Value, Number are all 0..127
+		except: PitchBend's Value is 0..16383
+-->
+
+<!ELEMENT NoteOn EMPTY>
+	<!ATTLIST NoteOn
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Note		NMTOKEN										#REQUIRED
+		Velocity	NMTOKEN										#REQUIRED>
+
+<!ELEMENT NoteOff EMPTY>
+	<!ATTLIST NoteOff
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Note		NMTOKEN										#REQUIRED
+		Velocity	NMTOKEN										#REQUIRED>
+
+<!ELEMENT PolyKeyPressure EMPTY>
+	<!ATTLIST PolyKeyPressure
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Note		NMTOKEN										#REQUIRED
+		Pressure	NMTOKEN										#REQUIRED>
+
+<!ELEMENT ControlChange EMPTY>
+	<!ATTLIST ControlChange
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Control		NMTOKEN										#REQUIRED
+		Value		NMTOKEN										#REQUIRED>
+
+<!ELEMENT ProgramChange EMPTY>
+	<!ATTLIST ProgramChange
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Number		NMTOKEN										#REQUIRED>
+
+<!ELEMENT ChannelKeyPressure EMPTY>
+	<!ATTLIST ChannelKeyPressure
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Pressure	NMTOKEN										#REQUIRED>
+
+<!ELEMENT PitchBendChange EMPTY>
+	<!ATTLIST PitchBendChange
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Value		NMTOKEN										#REQUIRED>
+
+<!--
+	Channel mode messages
+-->
+<!ELEMENT AllSoundOff EMPTY>
+	<!ATTLIST AllSoundOff
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!ELEMENT ResetAllControllers EMPTY>
+	<!ATTLIST ResetAllControllers
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!ELEMENT LocalControl EMPTY>
+	<!ATTLIST LocalControl
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Value		(off|on)									#REQUIRED>
+
+<!ELEMENT AllNotesOff EMPTY>
+	<!ATTLIST AllNotesOff
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!ELEMENT OmniOff EMPTY>
+	<!ATTLIST OmniOff
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!ELEMENT OmniOn EMPTY>
+	<!ATTLIST OmniOn
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!ELEMENT MonoMode EMPTY>
+	<!ATTLIST MonoMode
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Value		NMTOKEN                                     #REQUIRED>
+
+<!ELEMENT PolyMode EMPTY>
+	<!ATTLIST PolyMode
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;>
+
+<!--
+	14-bit control changes:
+		Value is 0..16383
+	
+		ControlChange14's Control is MSB 0..31
+		RPNN and NRPN are 0..16383
+-->
+
+<!ELEMENT ControlChange14 EMPTY>
+	<!ATTLIST ControlChange14
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		Control		NMTOKEN										#REQUIRED
+		Value		NMTOKEN										#REQUIRED>	
+
+<!ELEMENT RPNChange EMPTY>
+	<!ATTLIST RPNChange
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		RPN			NMTOKEN										#REQUIRED
+		Value		NMTOKEN										#REQUIRED>
+
+<!ELEMENT NRPNChange EMPTY>
+	<!ATTLIST NRPNChange
+		Channel		(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)	%ChannelRequired;
+		NRPN		NMTOKEN										#REQUIRED
+		Value		NMTOKEN										#REQUIRED>
+
+
+<!--
+	SYSTEM MESSAGES
+-->
+
+<!ELEMENT SysEx (#PCDATA | SysExDeviceID | SysExChannel)*>		
+	<!-- contains string of hex bytes without radix information, e.g.:
+	<SysEx>F0 01 02 <SysExDeviceID/> 03 04 05 <SysExChannel Multiplier="1" Offset="32"/> F7</SysEx>	
+	-->
+
+<!ELEMENT SysExDeviceID EMPTY>		<!-- Byte as a function of user-visible Device ID
+										e.g. 17 as the default on many Roland devices.
+										Most sysex messages will use this element. -->
+	<!ATTLIST SysExDeviceID
+		Multiplier	NMTOKEN	"1"
+		Offset		NMTOKEN	"0">	<!-- multiplier and offset are decimal -->	
+		
+<!ELEMENT SysExChannel	EMPTY>		<!-- Byte as a function of MIDI Channel 1-16, for
+										specialized situations where a sys-ex message
+										is being directed to a specific MIDI channel.
+										Generally only older devices require use of this. -->
+	<!ATTLIST SysExChannel
+		Multiplier	NMTOKEN	"1"
+		Offset		NMTOKEN	"0">	<!-- multiplier and offset are decimal -->
+			
+<!ELEMENT MTCQuarterFrame EMPTY>
+	<!ATTLIST MTCQuarterFrame
+		MessageType	(FrameLSNibble | FrameMSNibble |
+			SecsLSNibble  | SecsMSNibble  |
+			MinsLSNibble  | MinsMSNibble  |
+			HrsLSNibble	  | HrsMSNibbleSMPTEType)				#REQUIRED
+		DataNibble		NMTOKEN									#REQUIRED>
+
+<!ELEMENT SongPositionPointer EMPTY>
+	<!ATTLIST SongPositionPointer
+		Position	NMTOKEN		#REQUIRED>	<!-- 0-16383 -->
+
+<!ELEMENT SongSelect EMPTY>
+	<!ATTLIST SongSelect
+		Number		NMTOKEN		#REQUIRED>	<!-- 0-127 -->
+
+<!ELEMENT TuneRequest EMPTY>
+<!ELEMENT TimingClock EMPTY>
+<!ELEMENT Start EMPTY>
+<!ELEMENT Continue EMPTY>
+<!ELEMENT Stop EMPTY>
+<!ELEMENT ActiveSensing EMPTY>
+<!ELEMENT SystemReset EMPTY>
+
+<!--
+	ENTITIES
+-->
+
+<!ENTITY % MIDIChannelVoiceMessage "(NoteOn | NoteOff | PolyKeyPressure | ControlChange | ProgramChange
+	| ChannelKeyPressure | PitchBendChange)">
+<!ENTITY % MIDIChannelModeMessage "(AllSoundOff | ResetAllControllers | LocalControl | AllNotesOff
+	| OmniOff | OmniOn | MonoMode | PolyMode)">
+<!ENTITY % MIDIChannelMessage "(%MIDIChannelVoiceMessage; | %MIDIChannelModeMessage;)">
+<!ENTITY % MIDISystemMessage "(SysEx | MTCQuarterFrame | SongPositionPointer | SongSelect
+	| TuneRequest | TimingClock | Start | Continue | Stop | ActiveSensing | SystemReset)">
+<!ENTITY % MIDIMessage "(%MIDIChannelMessage; | %MIDISystemMessage; )">

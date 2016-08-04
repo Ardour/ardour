@@ -150,7 +150,7 @@
 -->
 <!ENTITY % ChannelRequired "#IMPLIED">
 <!ENTITY % MIDIDTD PUBLIC	"-//MIDI Manufacturers Association//DTD MIDIEvents 1.0//EN"
-							"http://www.midi.org/dtds/MIDIEvents10.dtd" >
+							"MIDIEvents10.dtd" >
 %MIDIDTD;
 
 <!ELEMENT MIDICommands (MIDIDelay | %MIDIChannelMessage; | SysEx)+ >

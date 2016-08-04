@@ -80,6 +80,7 @@ while [ $# -gt 0 ] ; do
 		major_version=""
 		shift ;;
 	--public)
+		WITH_HARRISON_LV2=1 ;
 		WITH_NLS=1 ;
 		WITH_LADSPA=;
 		STRIP=all ;
