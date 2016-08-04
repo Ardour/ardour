@@ -10,19 +10,14 @@ ardour {
 function dsp_ioconfig ()
 	return
 	{
-	--	{ audio_in = 0, audio_out = -1}, -- any number of channels
-	--	{ audio_in = 0, audio_out =  1}, -- values >  0, precisely N channels
-		{ audio_in = 0, audio_out =  2}, -- values >  0, precisely N channels
-		{ audio_in = 0, audio_out =  4}, -- values >  0, precisely N channels
-		{ audio_in = 0, audio_out =  8}, -- values >  0, precisely N channels
-	--	{ audio_in = 0, audio_out = -6}, -- values < -2, up to -N channels, here 1,..,6
+	--	{ midi_in = 1, audio_in = 0, audio_out = -1}, -- any number of channels
+	--	{ midi_in = 1, audio_in = 0, audio_out =  1}, -- values >  0, precisely N channels
+		{ midi_in = 1, audio_in = 0, audio_out =  2}, -- values >  0, precisely N channels
+		{ midi_in = 1, audio_in = 0, audio_out =  4}, -- values >  0, precisely N channels
+		{ midi_in = 1, audio_in = 0, audio_out =  8}, -- values >  0, precisely N channels
+	--	{ midi_in = 1, audio_in = 0, audio_out = -6}, -- values < -2, up to -N channels, here 1,..,6
 	}
 end
-
-function dsp_has_midi_input ()
-	return true
-end
-
 
 local note_table = {}
 local active_notes = {}

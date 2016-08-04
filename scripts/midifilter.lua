@@ -8,11 +8,8 @@ ardour {
 }
 
 function dsp_ioconfig ()
-	return { { audio_in = 0, audio_out = 0}, }
+	return { { midi_in = 1, midi_out = 1, audio_in = 0, audio_out = 0}, }
 end
-
-function dsp_has_midi_input () return true end
-function dsp_has_midi_output () return true end
 
 function dsp_run (_, _, n_samples)
 	assert (type(midiin) == "table")

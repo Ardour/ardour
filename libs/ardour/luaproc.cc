@@ -228,25 +228,6 @@ LuaProc::load_script ()
 		}
 	}
 
-	// query midi i/o
-	luabridge::LuaRef lua_dsp_has_midi_in = luabridge::getGlobal (L, "dsp_has_midi_input");
-	if (lua_dsp_has_midi_in.type () == LUA_TFUNCTION) {
-		try {
-			_has_midi_input = lua_dsp_has_midi_in ();
-		} catch (luabridge::LuaException const& e) {
-			;
-		}
-	}
-
-	luabridge::LuaRef lua_dsp_has_midi_out = luabridge::getGlobal (L, "dsp_has_midi_output");
-	if (lua_dsp_has_midi_out.type () == LUA_TFUNCTION) {
-		try {
-			_has_midi_output = lua_dsp_has_midi_out ();
-		} catch (luabridge::LuaException const& e) {
-			;
-		}
-	}
-
 	_ctrl_params.clear ();
 
 	luabridge::LuaRef lua_render = luabridge::getGlobal (L, "render_inline");
@@ -395,6 +376,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
       imprecise->set (DataType::AUDIO, (in));                       \
       imprecise->set (DataType::MIDI, possible_midiin);             \
     }                                                               \
+    _has_midi_input = (possible_midiin > 0);                        \
+    _has_midi_output = (possible_midiout > 0);                      \
     penalty = p;                                                    \
     found = true;                                                   \
   }                                                                 \
@@ -436,8 +419,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
 		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
-		int possible_midiin = _has_midi_input ? 1 : 0;
-		int possible_midiout = _has_midi_output ? 1 : 0;
+		int possible_midiin = io["midi_in"].isNumber() ? io["midi_in"] : 0;
+		int possible_midiout = io["midi_out"].isNumber() ? io["midi_out"] : 0;
 
 		if (midi_in != possible_midiin && !imprecise) {
 			continue;

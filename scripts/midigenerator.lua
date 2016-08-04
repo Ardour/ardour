@@ -8,10 +8,8 @@ ardour {
 }
 
 function dsp_ioconfig ()
-	return { { audio_in = 0, audio_out = 0}, }
+	return { { midi_out = 1, audio_in = 0, audio_out = 0}, }
 end
-
-function dsp_has_midi_output () return true end
 
 local tme = 0 -- sample-counter
 local seq = 1 -- sequence-step
