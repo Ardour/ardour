@@ -64,6 +64,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "processor_box.h"
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
@@ -420,6 +421,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, delete_button (_("Delete"))
 	, reset_button (_("Reset"))
 	, bypass_button (ArdourButton::led_default_elements)
+	, pin_management_button (_("Pin Connections...")) // TODO use a shorter label once the string-freeze is over.
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
 	, latency_gui (0)
@@ -433,6 +435,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	set_tooltip (save_button, _("Save the current preset"));
 	set_tooltip (delete_button, _("Delete the current preset"));
 	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
+#if 0 // string freeze is over
+	set_tooltip (pin_management_button, _("Show Plugin Pin Management Dialog"));
+#endif
 	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
 
@@ -451,6 +456,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	reset_button.set_name ("generic button");
 	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
 
+	pin_management_button.set_name ("generic button");
+	pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -656,6 +663,17 @@ void
 PlugUIBase::reset_plugin_parameters ()
 {
 	insert->reset_parameters_to_default ();
+}
+
+void
+PlugUIBase::manage_pins ()
+{
+	PluginPinWindowProxy* proxy = insert->pinmgr_proxy ();
+	if (proxy) {
+		proxy->get (true);
+		proxy->present ();
+		proxy->get ()->raise();
+	}
 }
 
 bool
