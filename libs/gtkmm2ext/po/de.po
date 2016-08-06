@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:09-0400\n"
-"PO-Revision-Date: 2016-05-13 10:38+0100\n"
+"POT-Creation-Date: 2016-08-06 14:10+0200\n"
+"PO-Revision-Date: 2016-08-06 15:49+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -61,65 +61,65 @@ msgstr "Zum Beenden drücken"
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
-#: keyboard.cc:70
+#: keyboard.cc:71
 msgid "Command"
 msgstr "Befehl"
 
-#: keyboard.cc:71 keyboard.cc:93
+#: keyboard.cc:72 keyboard.cc:94
 msgid "Control"
 msgstr "Strg"
 
-#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
 msgid "Key|Shift"
-msgstr "Key|Shift"
+msgstr "Umschalt"
 
-#: keyboard.cc:73
+#: keyboard.cc:74
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:75
+#: keyboard.cc:76
 msgid "Cmd"
-msgstr ""
+msgstr "Cmd"
 
-#: keyboard.cc:76 keyboard.cc:98
+#: keyboard.cc:77 keyboard.cc:99
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
-#: keyboard.cc:78
+#: keyboard.cc:79
 msgid "Opt"
-msgstr ""
+msgstr "Alt"
 
-#: keyboard.cc:94 keyboard.cc:99
+#: keyboard.cc:95 keyboard.cc:100
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:96
+#: keyboard.cc:97
 msgid "Windows"
 msgstr "Windows"
 
-#: keyboard.cc:101
+#: keyboard.cc:102
 msgid "Win"
-msgstr ""
+msgstr "Win"
 
-#: keyboard.cc:152 keyboard.cc:685
+#: keyboard.cc:153 keyboard.cc:628
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:696
+#: keyboard.cc:639
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
 "Fehler."
 
-#: keyboard.cc:722
+#: keyboard.cc:665
 msgid "Keyboard binding found without a name"
 msgstr "Tastenzuordnung ohne Namen gefunden"
 
-#: keyboard.cc:752
+#: keyboard.cc:695
 msgid "Cannot save key bindings to %1"
 msgstr "Kann Tastenzuordnungen nicht nach %1 sichern"
 
-#: keyboard.cc:768
+#: keyboard.cc:711
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
 
@@ -150,3 +150,4 @@ msgstr "Klicken, um an das Hauptfenster anzudocken"
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Schließen"
+
