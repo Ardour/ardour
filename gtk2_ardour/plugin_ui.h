@@ -129,6 +129,8 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	ArdourButton reset_button;
 	/** a button to bypass the plugin */
 	ArdourButton bypass_button;
+	/** and self-explaining button :) */
+	ArdourButton pin_management_button;
 	/** a button to acquire keyboard focus */
 	Gtk::EventBox focus_button;
 	/** an expander containing the plugin description */
@@ -162,6 +164,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
 	void reset_plugin_parameters ();
+	void manage_pins ();
 	bool focus_toggled(GdkEventButton*);
 	bool bypass_button_release(GdkEventButton*);
 	void toggle_description ();

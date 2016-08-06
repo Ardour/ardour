@@ -1134,11 +1134,770 @@
       <Patch Number="H127" Name="H127 Zap Stick" ProgramChange="126"/>
       <Patch Number="H128" Name="H128 Zwitscher 1" ProgramChange="127"/>
     </PatchNameList>
+    <ValueNameList Name="Minus64Plus63">
+        <Value Number="0" Name="-64"/>
+        <Value Number="1" Name="-63"/>
+        <Value Number="2" Name="-62"/>
+        <Value Number="3" Name="-61"/>
+        <Value Number="4" Name="-60"/>
+        <Value Number="5" Name="-59"/>
+        <Value Number="6" Name="-58"/>
+        <Value Number="7" Name="-57"/>
+        <Value Number="8" Name="-56"/>
+        <Value Number="9" Name="-55"/>
+        <Value Number="10" Name="-54"/>
+        <Value Number="11" Name="-53"/>
+        <Value Number="12" Name="-52"/>
+        <Value Number="13" Name="-51"/>
+        <Value Number="14" Name="-50"/>
+        <Value Number="15" Name="-49"/>
+        <Value Number="16" Name="-48"/>
+        <Value Number="17" Name="-47"/>
+        <Value Number="18" Name="-46"/>
+        <Value Number="19" Name="-45"/>
+        <Value Number="20" Name="-44"/>
+        <Value Number="21" Name="-43"/>
+        <Value Number="22" Name="-42"/>
+        <Value Number="23" Name="-41"/>
+        <Value Number="24" Name="-40"/>
+        <Value Number="25" Name="-39"/>
+        <Value Number="26" Name="-38"/>
+        <Value Number="27" Name="-37"/>
+        <Value Number="28" Name="-36"/>
+        <Value Number="29" Name="-35"/>
+        <Value Number="30" Name="-34"/>
+        <Value Number="31" Name="-33"/>
+        <Value Number="32" Name="-32"/>
+        <Value Number="33" Name="-31"/>
+        <Value Number="34" Name="-30"/>
+        <Value Number="35" Name="-29"/>
+        <Value Number="36" Name="-28"/>
+        <Value Number="37" Name="-27"/>
+        <Value Number="38" Name="-26"/>
+        <Value Number="39" Name="-25"/>
+        <Value Number="40" Name="-24"/>
+        <Value Number="41" Name="-23"/>
+        <Value Number="42" Name="-22"/>
+        <Value Number="43" Name="-21"/>
+        <Value Number="44" Name="-20"/>
+        <Value Number="45" Name="-19"/>
+        <Value Number="46" Name="-18"/>
+        <Value Number="47" Name="-17"/>
+        <Value Number="48" Name="-16"/>
+        <Value Number="49" Name="-15"/>
+        <Value Number="50" Name="-14"/>
+        <Value Number="51" Name="-13"/>
+        <Value Number="52" Name="-12"/>
+        <Value Number="53" Name="-11"/>
+        <Value Number="54" Name="-10"/>
+        <Value Number="55" Name="-9"/>
+        <Value Number="56" Name="-8"/>
+        <Value Number="57" Name="-7"/>
+        <Value Number="58" Name="-6"/>
+        <Value Number="59" Name="-5"/>
+        <Value Number="60" Name="-4"/>
+        <Value Number="61" Name="-3"/>
+        <Value Number="62" Name="-2"/>
+        <Value Number="63" Name="-1"/>
+        <Value Number="64" Name="0"/>
+        <Value Number="65" Name="+1"/>
+        <Value Number="66" Name="+2"/>
+        <Value Number="67" Name="+3"/>
+        <Value Number="68" Name="+4"/>
+        <Value Number="69" Name="+5"/>
+        <Value Number="70" Name="+6"/>
+        <Value Number="71" Name="+7"/>
+        <Value Number="72" Name="+8"/>
+        <Value Number="73" Name="+9"/>
+        <Value Number="74" Name="+10"/>
+        <Value Number="75" Name="+11"/>
+        <Value Number="76" Name="+12"/>
+        <Value Number="77" Name="+13"/>
+        <Value Number="78" Name="+14"/>
+        <Value Number="79" Name="+15"/>
+        <Value Number="80" Name="+16"/>
+        <Value Number="81" Name="+17"/>
+        <Value Number="82" Name="+18"/>
+        <Value Number="83" Name="+19"/>
+        <Value Number="84" Name="+20"/>
+        <Value Number="85" Name="+21"/>
+        <Value Number="86" Name="+22"/>
+        <Value Number="87" Name="+23"/>
+        <Value Number="88" Name="+24"/>
+        <Value Number="89" Name="+25"/>
+        <Value Number="90" Name="+26"/>
+        <Value Number="91" Name="+27"/>
+        <Value Number="92" Name="+28"/>
+        <Value Number="93" Name="+29"/>
+        <Value Number="94" Name="+30"/>
+        <Value Number="95" Name="+31"/>
+        <Value Number="96" Name="+32"/>
+        <Value Number="97" Name="+33"/>
+        <Value Number="98" Name="+34"/>
+        <Value Number="99" Name="+35"/>
+        <Value Number="100" Name="+36"/>
+        <Value Number="101" Name="+37"/>
+        <Value Number="102" Name="+38"/>
+        <Value Number="103" Name="+39"/>
+        <Value Number="104" Name="+40"/>
+        <Value Number="105" Name="+41"/>
+        <Value Number="106" Name="+42"/>
+        <Value Number="107" Name="+43"/>
+        <Value Number="108" Name="+44"/>
+        <Value Number="109" Name="+45"/>
+        <Value Number="110" Name="+46"/>
+        <Value Number="111" Name="+47"/>
+        <Value Number="112" Name="+48"/>
+        <Value Number="113" Name="+49"/>
+        <Value Number="114" Name="+50"/>
+        <Value Number="115" Name="+51"/>
+        <Value Number="116" Name="+52"/>
+        <Value Number="117" Name="+53"/>
+        <Value Number="118" Name="+54"/>
+        <Value Number="119" Name="+55"/>
+        <Value Number="120" Name="+56"/>
+        <Value Number="121" Name="+57"/>
+        <Value Number="122" Name="+58"/>
+        <Value Number="123" Name="+59"/>
+        <Value Number="124" Name="+60"/>
+        <Value Number="125" Name="+61"/>
+        <Value Number="126" Name="+62"/>
+        <Value Number="127" Name="+63"/>
+    </ValueNameList>
+    <ValueNameList Name="OscShapes">
+        <Value Number="0" Name="Off"/>
+        <Value Number="1" Name="Pulse"/>
+        <Value Number="2" Name="Sawtooth"/>
+        <Value Number="3" Name="Triangle"/>
+        <Value Number="4" Name="Sine"/>
+        <Value Number="5" Name="Alt 1"/>
+        <Value Number="6" Name="Alt 2"/>
+        <Value Number="7" Name="Resonant"/>
+        <Value Number="8" Name="Resonant 2"/>
+        <Value Number="9" Name="MatteSyn"/>
+        <Value Number="10" Name="Sqr-Sweep"/>
+        <Value Number="11" Name="Bellish"/>
+        <Value Number="12" Name="Put-Sweep"/>
+        <Value Number="13" Name="Saw-Sweep"/>
+        <Value Number="14" Name="MellowSaw"/>
+        <Value Number="15" Name="Feedback"/>
+        <Value Number="16" Name="Add Harm"/>
+        <Value Number="17" Name="Reso 3 HP"/>
+        <Value Number="18" Name="Wind Syn"/>
+        <Value Number="19" Name="High Harm"/>
+        <Value Number="20" Name="Clipper"/>
+        <Value Number="21" Name="Organ Syn"/>
+        <Value Number="22" Name="SquareSaw"/>
+        <Value Number="23" Name="Formant 1"/>
+        <Value Number="24" Name="Polated"/>
+        <Value Number="25" Name="Transient"/>
+        <Value Number="26" Name="ElectricP"/>
+        <Value Number="27" Name="Robotic"/>
+        <Value Number="28" Name="StrongHrm"/>
+        <Value Number="29" Name="PercOrgan"/>
+        <Value Number="30" Name="ClipSweep"/>
+        <Value Number="31" Name="ResoHarms"/>
+        <Value Number="32" Name="2 Echoes"/>
+        <Value Number="33" Name="Formant 2"/>
+        <Value Number="34" Name="FmntVocal"/>
+        <Value Number="35" Name="MicroSync"/>
+        <Value Number="36" Name="Micro PWM"/>
+        <Value Number="37" Name="Glassy"/>
+        <Value Number="38" Name="Square HP"/>
+        <Value Number="39" Name="Saw Sync 1"/>
+        <Value Number="40" Name="Saw Sync 2"/>
+        <Value Number="41" Name="Saw Sync 3"/>
+        <Value Number="42" Name="Pulse Sync 1"/>
+        <Value Number="43" Name="Pulse Sync 2"/>
+        <Value Number="44" Name="Pulse Sync 3"/>
+        <Value Number="45" Name="Sine Sync 1"/>
+        <Value Number="46" Name="Sine Sync 2"/>
+        <Value Number="47" Name="Sine Sync 3"/>
+        <Value Number="48" Name="PWM Pulse"/>
+        <Value Number="49" Name="PWM Saw"/>
+        <Value Number="50" Name="Fuzz Wave"/>
+        <Value Number="51" Name="Distorted"/>
+        <Value Number="52" Name="HeavyFuzz"/>
+        <Value Number="53" Name="Fuzz Sync"/>
+        <Value Number="54" Name="K+Strong1"/>
+        <Value Number="55" Name="K+Strong2"/>
+        <Value Number="56" Name="K+Strong3"/>
+        <Value Number="57" Name="1-2-3-4-5"/>
+        <Value Number="58" Name="19/twenty"/>
+        <Value Number="59" Name="Wavetrip1"/>
+        <Value Number="60" Name="Wavetrip2"/>
+        <Value Number="61" Name="Wavetrip3"/>
+        <Value Number="62" Name="Wavetrip4"/>
+        <Value Number="63" Name="MaleVoice"/>
+        <Value Number="64" Name="Low Piano"/>
+        <Value Number="65" Name="ResoSweep"/>
+        <Value Number="66" Name="Xmas Bell"/>
+        <Value Number="67" Name="FM Piano"/>
+        <Value Number="68" Name="Fat Organ"/>
+        <Value Number="69" Name="Vibes"/>
+        <Value Number="70" Name="Chorus 2"/>
+        <Value Number="71" Name="True PWM"/>
+        <Value Number="72" Name="Upper Waves"/>
+        <Value Number="73" Name="reserved"/>
+        <Value Number="74" Name="reserved"/>
+        <Value Number="75" Name="reserved"/>
+        <Value Number="76" Name="reserved"/>
+        <Value Number="77" Name="reserved"/>
+        <Value Number="78" Name="reserved"/>
+        <Value Number="79" Name="reserved"/>
+        <Value Number="80" Name="reserved"/>
+        <Value Number="81" Name="reserved"/>
+        <Value Number="82" Name="reserved"/>
+        <Value Number="83" Name="reserved"/>
+        <Value Number="84" Name="reserved"/>
+        <Value Number="85" Name="reserved"/>
+        <Value Number="86" Name="User Wavetable 80"/>
+        <Value Number="87" Name="User Wavetable 81"/>
+        <Value Number="88" Name="User Wavetable 82"/>
+        <Value Number="89" Name="User Wavetable 83"/>
+        <Value Number="90" Name="User Wavetable 84"/>
+        <Value Number="91" Name="User Wavetable 85"/>
+        <Value Number="92" Name="User Wavetable 86"/>
+        <Value Number="93" Name="User Wavetable 87"/>
+        <Value Number="94" Name="User Wavetable 88"/>
+        <Value Number="95" Name="User Wavetable 89"/>
+        <Value Number="96" Name="User Wavetable 90"/>
+        <Value Number="97" Name="User Wavetable 91"/>
+        <Value Number="98" Name="User Wavetable 92"/>
+        <Value Number="99" Name="User Wavetable 93"/>
+        <Value Number="100" Name="User Wavetable 94"/>
+        <Value Number="101" Name="User Wavetable 95"/>
+        <Value Number="102" Name="User Wavetable 96"/>
+        <Value Number="103" Name="User Wavetable 97"/>
+        <Value Number="104" Name="User Wavetable 98"/>
+        <Value Number="105" Name="User Wavetable 99"/>
+        <Value Number="106" Name="User Wavetable 100"/>
+        <Value Number="107" Name="User Wavetable 101"/>
+        <Value Number="108" Name="User Wavetable 102"/>
+        <Value Number="109" Name="User Wavetable 103"/>
+        <Value Number="110" Name="User Wavetable 104"/>
+        <Value Number="111" Name="User Wavetable 105"/>
+        <Value Number="112" Name="User Wavetable 106"/>
+        <Value Number="113" Name="User Wavetable 107"/>
+        <Value Number="114" Name="User Wavetable 108"/>
+        <Value Number="115" Name="User Wavetable 109"/>
+        <Value Number="116" Name="User Wavetable 110"/>
+        <Value Number="117" Name="User Wavetable 111"/>
+        <Value Number="118" Name="User Wavetable 112"/>
+        <Value Number="119" Name="User Wavetable 113"/>
+        <Value Number="120" Name="User Wavetable 114"/>
+        <Value Number="121" Name="User Wavetable 115"/>
+        <Value Number="122" Name="User Wavetable 116"/>
+        <Value Number="123" Name="User Wavetable 117"/>
+        <Value Number="124" Name="User Wavetable 118"/>
+        <Value Number="125" Name="-"/>
+        <Value Number="126" Name="-"/>
+        <Value Number="127" Name="-"/>
+    </ValueNameList>
+    <ValueNameList Name="LFOShapes">
+        <Value Number="0" Name="Sine"/>
+        <Value Number="1" Name="Triangle"/>
+        <Value Number="2" Name="Square"/>
+        <Value Number="3" Name="Sawtooth"/>
+        <Value Number="4" Name="Random"/>
+        <Value Number="6" Name="S&amp;H"/>
+    </ValueNameList>
+    <ValueNameList Name="OffOn">
+        <Value Number="0" Name="Off"/>
+        <Value Number="2" Name="On"/>
+    </ValueNameList>
+    <ValueNameList Name="Octaves">
+        <Value Number="16" Name="128'"/>
+        <Value Number="28" Name="64'"/>
+        <Value Number="40" Name="32'"/>
+        <Value Number="52" Name="16'"/>
+        <Value Number="64" Name="8'"/>
+        <Value Number="76" Name="4'"/>
+        <Value Number="88" Name="2'"/>
+        <Value Number="100" Name="1'"/>
+        <Value Number="112" Name="1/2'"/>
+    </ValueNameList>
+    <ValueNameList Name="Semitones">
+        <Value Number="52" Name="-12"/>
+        <Value Number="53" Name="-11"/>
+        <Value Number="54" Name="-10"/>
+        <Value Number="55" Name="-9"/>
+        <Value Number="56" Name="-8"/>
+        <Value Number="57" Name="-7"/>
+        <Value Number="58" Name="-6"/>
+        <Value Number="59" Name="-5"/>
+        <Value Number="60" Name="-4"/>
+        <Value Number="61" Name="-3"/>
+        <Value Number="62" Name="-2"/>
+        <Value Number="63" Name="-1"/>
+        <Value Number="64" Name="0"/>
+        <Value Number="65" Name="+1"/>
+        <Value Number="66" Name="+2"/>
+        <Value Number="67" Name="+3"/>
+        <Value Number="68" Name="+4"/>
+        <Value Number="69" Name="+5"/>
+        <Value Number="70" Name="+6"/>
+        <Value Number="71" Name="+7"/>
+        <Value Number="72" Name="+8"/>
+        <Value Number="73" Name="+9"/>
+        <Value Number="74" Name="+10"/>
+        <Value Number="75" Name="+11"/>
+        <Value Number="76" Name="+12"/>
+    </ValueNameList>
+    <ValueNameList Name="Balances">
+        <Value Number="0" Name="F1 64"/>
+        <Value Number="1" Name="F1 63"/>
+        <Value Number="2" Name="F1 62"/>
+        <Value Number="3" Name="F1 61"/>
+        <Value Number="4" Name="F1 60"/>
+        <Value Number="5" Name="F1 59"/>
+        <Value Number="6" Name="F1 58"/>
+        <Value Number="7" Name="F1 57"/>
+        <Value Number="8" Name="F1 56"/>
+        <Value Number="9" Name="F1 55"/>
+        <Value Number="10" Name="F1 54"/>
+        <Value Number="11" Name="F1 53"/>
+        <Value Number="12" Name="F1 52"/>
+        <Value Number="13" Name="F1 51"/>
+        <Value Number="14" Name="F1 50"/>
+        <Value Number="15" Name="F1 49"/>
+        <Value Number="16" Name="F1 48"/>
+        <Value Number="17" Name="F1 47"/>
+        <Value Number="18" Name="F1 46"/>
+        <Value Number="19" Name="F1 45"/>
+        <Value Number="20" Name="F1 44"/>
+        <Value Number="21" Name="F1 43"/>
+        <Value Number="22" Name="F1 42"/>
+        <Value Number="23" Name="F1 41"/>
+        <Value Number="24" Name="F1 40"/>
+        <Value Number="25" Name="F1 39"/>
+        <Value Number="26" Name="F1 38"/>
+        <Value Number="27" Name="F1 37"/>
+        <Value Number="28" Name="F1 36"/>
+        <Value Number="29" Name="F1 35"/>
+        <Value Number="30" Name="F1 34"/>
+        <Value Number="31" Name="F1 33"/>
+        <Value Number="32" Name="F1 32"/>
+        <Value Number="33" Name="F1 31"/>
+        <Value Number="34" Name="F1 30"/>
+        <Value Number="35" Name="F1 29"/>
+        <Value Number="36" Name="F1 28"/>
+        <Value Number="37" Name="F1 27"/>
+        <Value Number="38" Name="F1 26"/>
+        <Value Number="39" Name="F1 25"/>
+        <Value Number="40" Name="F1 24"/>
+        <Value Number="41" Name="F1 23"/>
+        <Value Number="42" Name="F1 22"/>
+        <Value Number="43" Name="F1 21"/>
+        <Value Number="44" Name="F1 20"/>
+        <Value Number="45" Name="F1 19"/>
+        <Value Number="46" Name="F1 18"/>
+        <Value Number="47" Name="F1 17"/>
+        <Value Number="48" Name="F1 16"/>
+        <Value Number="49" Name="F1 15"/>
+        <Value Number="50" Name="F1 14"/>
+        <Value Number="51" Name="F1 13"/>
+        <Value Number="52" Name="F1 12"/>
+        <Value Number="53" Name="F1 11"/>
+        <Value Number="54" Name="F1 10"/>
+        <Value Number="55" Name="F1 9"/>
+        <Value Number="56" Name="F1 8"/>
+        <Value Number="57" Name="F1 7"/>
+        <Value Number="58" Name="F1 6"/>
+        <Value Number="59" Name="F1 5"/>
+        <Value Number="60" Name="F1 4"/>
+        <Value Number="61" Name="F1 3"/>
+        <Value Number="62" Name="F1 2"/>
+        <Value Number="63" Name="F1 1"/>
+        <Value Number="64" Name="middle"/>
+        <Value Number="65" Name="F2 1"/>
+        <Value Number="66" Name="F2 2"/>
+        <Value Number="67" Name="F2 3"/>
+        <Value Number="68" Name="F2 4"/>
+        <Value Number="69" Name="F2 5"/>
+        <Value Number="70" Name="F2 6"/>
+        <Value Number="71" Name="F2 7"/>
+        <Value Number="72" Name="F2 8"/>
+        <Value Number="73" Name="F2 9"/>
+        <Value Number="74" Name="F2 10"/>
+        <Value Number="75" Name="F2 11"/>
+        <Value Number="76" Name="F2 12"/>
+        <Value Number="77" Name="F2 13"/>
+        <Value Number="78" Name="F2 14"/>
+        <Value Number="79" Name="F2 15"/>
+        <Value Number="80" Name="F2 16"/>
+        <Value Number="81" Name="F2 17"/>
+        <Value Number="82" Name="F2 18"/>
+        <Value Number="83" Name="F2 19"/>
+        <Value Number="84" Name="F2 20"/>
+        <Value Number="85" Name="F2 21"/>
+        <Value Number="86" Name="F2 22"/>
+        <Value Number="87" Name="F2 23"/>
+        <Value Number="88" Name="F2 24"/>
+        <Value Number="89" Name="F2 25"/>
+        <Value Number="90" Name="F2 26"/>
+        <Value Number="91" Name="F2 27"/>
+        <Value Number="92" Name="F2 28"/>
+        <Value Number="93" Name="F2 29"/>
+        <Value Number="94" Name="F2 30"/>
+        <Value Number="95" Name="F2 31"/>
+        <Value Number="96" Name="F2 32"/>
+        <Value Number="97" Name="F2 33"/>
+        <Value Number="98" Name="F2 34"/>
+        <Value Number="99" Name="F2 35"/>
+        <Value Number="100" Name="F2 36"/>
+        <Value Number="101" Name="F2 37"/>
+        <Value Number="102" Name="F2 38"/>
+        <Value Number="103" Name="F2 39"/>
+        <Value Number="104" Name="F2 40"/>
+        <Value Number="105" Name="F2 41"/>
+        <Value Number="106" Name="F2 42"/>
+        <Value Number="107" Name="F2 43"/>
+        <Value Number="108" Name="F2 44"/>
+        <Value Number="109" Name="F2 45"/>
+        <Value Number="110" Name="F2 46"/>
+        <Value Number="111" Name="F2 47"/>
+        <Value Number="112" Name="F2 48"/>
+        <Value Number="113" Name="F2 49"/>
+        <Value Number="114" Name="F2 50"/>
+        <Value Number="115" Name="F2 51"/>
+        <Value Number="116" Name="F2 52"/>
+        <Value Number="117" Name="F2 53"/>
+        <Value Number="118" Name="F2 54"/>
+        <Value Number="119" Name="F2 55"/>
+        <Value Number="120" Name="F2 56"/>
+        <Value Number="121" Name="F2 57"/>
+        <Value Number="122" Name="F2 58"/>
+        <Value Number="123" Name="F2 59"/>
+        <Value Number="124" Name="F2 60"/>
+        <Value Number="125" Name="F2 61"/>
+        <Value Number="126" Name="F2 62"/>
+        <Value Number="127" Name="F2 63"/>
+    </ValueNameList>
+    <ValueNameList Name="FilterTypes">
+        <Value Number="0" Name="Bypass"/>
+        <Value Number="1" Name="Low Pass 24dB"/>
+        <Value Number="2" Name="Low Pass 12dB"/>
+        <Value Number="3" Name="Band Pass 24dB"/>
+        <Value Number="4" Name="Band Pass 12dB"/>
+        <Value Number="5" Name="High Pass 24dB"/>
+        <Value Number="6" Name="High Pass 12dB"/>
+        <Value Number="7" Name="Notch 24dB"/>
+        <Value Number="8" Name="Notch 12dB"/>
+        <Value Number="9" Name="Comb+"/>
+        <Value Number="10" Name="Comb-"/>
+        <Value Number="12" Name="PPG Low Pass"/>
+    </ValueNameList>
     <ControlNameList Name="Controls">
         <Control Type="7bit" Number="1" Name="Modulation Wheel"/>
         <Control Type="7bit" Number="2" Name="Breath Control"/>
         <Control Type="7bit" Number="4" Name="Foot Control"/>
         <Control Type="7bit" Number="5" Name="Glide Rate"/>
+        <Control Type="7bit" Number="7" Name="Channel Volume"/>
+        <Control Type="7bit" Number="8" Name="Balance"/>
+        <Control Type="7bit" Number="10" Name="Pan"/>
+        <Control Type="7bit" Number="11" Name="Expression"/>
+        <Control Type="7bit" Number="12" Name="Arp Range">
+            <Values Min="0" Max="127">
+                <ValueNameList>
+                    <Value Number="0" Name="1 Octave"/>
+                    <Value Number="1" Name="2 Octaves"/>
+                    <Value Number="2" Name="3 Octaves"/>
+                    <Value Number="3" Name="4 Octaves"/>
+                    <Value Number="4" Name="5 Octaves"/>
+                    <Value Number="5" Name="6 Octaves"/>
+                    <Value Number="6" Name="7 Octaves"/>
+                    <Value Number="7" Name="8 Octaves"/>
+                    <Value Number="8" Name="9 Octaves"/>
+                    <Value Number="10" Name="10 Octaves"/>
+                </ValueNameList>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="13" Name="Arp Length">
+            <Values Min="0" Max="127">
+                <ValueNameList>
+                    <Value Number="0" Name="1 step"/>
+                    <Value Number="1" Name="2 steps"/>
+                    <Value Number="2" Name="3 steps"/>
+                    <Value Number="3" Name="4 steps"/>
+                    <Value Number="4" Name="5 steps"/>
+                    <Value Number="5" Name="6 steps"/>
+                    <Value Number="6" Name="7 steps"/>
+                    <Value Number="7" Name="8 steps"/>
+                    <Value Number="8" Name="9 steps"/>
+                    <Value Number="9" Name="10 steps"/>
+                    <Value Number="10" Name="11 steps"/>
+                    <Value Number="11" Name="12 steps"/>
+                    <Value Number="12" Name="13 steps"/>
+                    <Value Number="13" Name="14 steps"/>
+                    <Value Number="14" Name="15 steps"/>
+                    <Value Number="16" Name="16 steps"/>
+                </ValueNameList>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="14" Name="Arp Active">
+            <Values Min="0" Max="127">
+                <ValueNameList>
+                    <Value Number="0" Name="Off"/>
+                    <Value Number="1" Name="On"/>
+                    <Value Number="2" Name="One shot"/>
+                    <Value Number="4" Name="Hold"/>
+                </ValueNameList>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="15" Name="LFO 1 Shape">
+            <Values Min="0" Max="6">
+                <UsesValueNameList Name="LFOShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="16" Name="LFO 1 Speed"/>
+        <Control Type="7bit" Number="17" Name="LFO 1 Sync">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="18" Name="LFO 1 Delay"/>
+        <Control Type="7bit" Number="19" Name="LFO 2 Shape">
+            <Values Min="0" Max="6">
+                <UsesValueNameList Name="LFOShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="20" Name="LFO 2 Speed"/>
+        <Control Type="7bit" Number="21" Name="LFO 2 Sync">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="22" Name="LFO 2 Delay"/>
+        <Control Type="7bit" Number="23" Name="LFO 3 Shape">
+            <Values Min="0" Max="6">
+                <UsesValueNameList Name="LFOShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="24" Name="LFO 3 Speed"/>
+        <Control Type="7bit" Number="25" Name="LFO 3 Sync">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="26" Name="LFO 3 Delay"/>
+        <Control Type="7bit" Number="27" Name="OSC 1 Octave">
+            <Values Min="16" Max="112">
+                <UsesValueNameList Name="Octaves"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="28" Name="OSC 1 Semitone">
+            <Values Min="52" Max="76">
+                <UsesValueNameList Name="Semitones"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="29" Name="OSC 1 Detune">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="30" Name="OSC 1 FM"/>
+        <Control Type="7bit" Number="31" Name="OSC 1 Shape">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="OscShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="32" Name="Bank Select LSB"/>
+        <Control Type="7bit" Number="33" Name="OSC 1 PW"/>
+        <Control Type="7bit" Number="34" Name="OSC 1 PWM">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="35" Name="OSC 2 Octave">
+            <Values Min="16" Max="112">
+                <UsesValueNameList Name="Octaves"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="36" Name="OSC 2 Semitone">
+            <Values Min="52" Max="76">
+                <UsesValueNameList Name="Semitones"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="37" Name="OSC 2 Detune">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="38" Name="OSC 2 FM"/>
+        <Control Type="7bit" Number="39" Name="OSC 2 Shape">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="OscShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="40" Name="OSC 2 PW"/>
+        <Control Type="7bit" Number="41" Name="OSC 2 PWM">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="42" Name="OSC 3 Octave">
+            <Values Min="16" Max="112">
+                <UsesValueNameList Name="Octaves"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="43" Name="OSC 3 Semitone">
+            <Values Min="52" Max="76">
+                <UsesValueNameList Name="Semitones"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="44" Name="OSC 3 Detune">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="45" Name="OSC 3 FM"/>
+        <Control Type="7bit" Number="46" Name="OSC 3 Shape">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="OscShapes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="47" Name="OSC 3 PW"/>
+        <Control Type="7bit" Number="48" Name="OSC 3 PWM">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Minus64Plus63"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="49" Name="Sync">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="50" Name="Pitchmod"/>
+        <Control Type="7bit" Number="51" Name="Glide Mode">
+            <Values Min="0" Max="4">
+                <ValueNameList>
+                    <Value Number="0" Name="Portamento"/>
+                    <Value Number="1" Name="Fingered Portamento"/>
+                    <Value Number="2" Name="Glissando"/>
+                    <Value Number="4" Name="Fingered Glissando"/>
+                </ValueNameList>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="52" Name="OSC 1 Level"/>
+        <Control Type="7bit" Number="53" Name="OSC 1 Balance">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Balances"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="54" Name="Ringmod Level"/>
+        <Control Type="7bit" Number="55" Name="Ringmod Balance">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Balances"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="56" Name="OSC 2 Level"/>
+        <Control Type="7bit" Number="57" Name="OSC 2 Balance">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Balances"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="58" Name="OSC 3 Level"/>
+        <Control Type="7bit" Number="59" Name="OSC 3 Balance">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Balances"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="60" Name="Noise Level"/>
+        <Control Type="7bit" Number="61" Name="Noise Balance">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="Balances"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="62" Name="Noise Colour"/>
+        <Control Type="7bit" Number="64" Name="Sustain Pedal"/>
+        <Control Type="7bit" Number="65" Name="Glide Active">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="66" Name="Sostenuto">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="67" Name="Routing">
+            <Values Min="0" Max="2">
+                <ValueNameList>
+                    <Value Number="0" Name="serial"/>
+                    <Value Number="2" Name="parallel"/>
+                </ValueNameList>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="68" Name="Filter 1 Type">
+            <Values Min="0" Max="127">
+                <UsesValueNameList Name="FilterTypes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="69" Name="Filter 1 Cutoff"/>
+        <Control Type="7bit" Number="70" Name="Filter 1 Resonance"/>
+        <Control Type="7bit" Number="71" Name="Filter 1 Drive"/>
+        <Control Type="7bit" Number="72" Name="Filter 1 Keytrack"/>
+        <Control Type="7bit" Number="73" Name="Filter 1 Env. Amount"/>
+        <Control Type="7bit" Number="74" Name="Filter 1 Env. Velocity"/>
+        <Control Type="7bit" Number="75" Name="Filter 1 CutoffMod"/>
+        <Control Type="7bit" Number="76" Name="Filter 1 FM"/>
+        <Control Type="7bit" Number="77" Name="Filter 1 Pan"/>
+        <Control Type="7bit" Number="78" Name="Filter 1 Panmod"/>
+        <Control Type="7bit" Number="79" Name="Filter 2 Type">
+            <Values Min="0" Max="12">
+                <UsesValueNameList Name="FilterTypes"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="80" Name="Filter 2 Cutoff"/>
+        <Control Type="7bit" Number="81" Name="Filter 2 Resonance"/>
+        <Control Type="7bit" Number="82" Name="Filter 2 Drive"/>
+        <Control Type="7bit" Number="83" Name="Filter 2 Keytrack"/>
+        <Control Type="7bit" Number="84" Name="Filter 2 Env. Amount"/>
+        <Control Type="7bit" Number="85" Name="Filter 2 Env. Velocity"/>
+        <Control Type="7bit" Number="86" Name="Filter 2 CutoffMod"/>
+        <Control Type="7bit" Number="87" Name="Filter 2 FM"/>
+        <Control Type="7bit" Number="88" Name="Filter 2 Pan"/>
+        <Control Type="7bit" Number="89" Name="Filter 2 Panmod"/>
+        <Control Type="7bit" Number="90" Name="Amp Volume"/>
+        <Control Type="7bit" Number="91" Name="Amp Velocity"/>
+        <Control Type="7bit" Number="92" Name="Amp Mod"/>
+        <Control Type="7bit" Number="93" Name="FX 1 Mix"/>
+        <Control Type="7bit" Number="94" Name="FX 2 Mix"/>
+        <Control Type="7bit" Number="95" Name="Filter Env. Attack"/>
+        <Control Type="7bit" Number="96" Name="Filter Env. Decay"/>
+        <Control Type="7bit" Number="97" Name="Filter Env. Sustain"/>
+        <Control Type="7bit" Number="98" Name="Filter Env. Decay 2"/>
+        <Control Type="7bit" Number="99" Name="Filter Env. Sustain 2"/>
+        <Control Type="7bit" Number="100" Name="Filter Env. Release"/>
+        <Control Type="7bit" Number="101" Name="Amp Env. Attack"/>
+        <Control Type="7bit" Number="102" Name="Amp Env. Decay"/>
+        <Control Type="7bit" Number="103" Name="Amp Env. Sustain"/>
+        <Control Type="7bit" Number="104" Name="Amp Env. Decay 2"/>
+        <Control Type="7bit" Number="105" Name="Amp Env. Sustain 2"/>
+        <Control Type="7bit" Number="106" Name="Amp Env. Release"/>
+        <Control Type="7bit" Number="107" Name="Env. 3 Attack"/>
+        <Control Type="7bit" Number="108" Name="Env. 3 Decay"/>
+        <Control Type="7bit" Number="109" Name="Env. 3 Sustain"/>
+        <Control Type="7bit" Number="110" Name="Env. 3 Decay 2"/>
+        <Control Type="7bit" Number="111" Name="Env. 3 Sustain 2"/>
+        <Control Type="7bit" Number="112" Name="Env. 3 Release"/>
+        <Control Type="7bit" Number="113" Name="Env. 4 Attack"/>
+        <Control Type="7bit" Number="114" Name="Env. 4 Decay"/>
+        <Control Type="7bit" Number="115" Name="Env. 4 Sustain"/>
+        <Control Type="7bit" Number="116" Name="Env. 4 Decay 2"/>
+        <Control Type="7bit" Number="117" Name="Env. 4 Sustain 2"/>
+        <Control Type="7bit" Number="118" Name="Env. 4 Release"/>
+        <Control Type="7bit" Number="121" Name="Reset All Controllers"/>
+        <Control Type="7bit" Number="122" Name="Local Control">
+            <Values Min="0" Max="2">
+                <UsesValueNameList Name="OffOn"/>
+            </Values>
+        </Control>
+        <Control Type="7bit" Number="124" Name="Omni Mode Off"/>
+        <Control Type="7bit" Number="125" Name="Omni Mode On"/>
+        <Control Type="7bit" Number="126" Name="Poly Mode On/Off"/>
+        <Control Type="7bit" Number="127" Name="Poly Mode On"/>
     </ControlNameList>
   </MasterDeviceNames>
 </MIDINameDocument>

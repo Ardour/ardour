@@ -312,7 +312,7 @@ FFTGraph::draw_scales (cairo_t* cr)
 	cairo_line_to (cr, width - 3              , .5 + v_margin); // 5
 	cairo_stroke (cr);
 
-	if (layout == 0) {
+	if (! layout) {
 		layout = create_pango_layout ("");
 		layout->set_font_description (get_style ()->get_font ());
 	}
