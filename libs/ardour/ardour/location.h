@@ -173,7 +173,8 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	Locations (Session &);
 	~Locations ();
 
-	const LocationList& list() { return locations; }
+	const LocationList& list () const { return locations; }
+	LocationList list () { return locations; }
 
 	void add (Location *, bool make_current = false);
 	void remove (Location *);
