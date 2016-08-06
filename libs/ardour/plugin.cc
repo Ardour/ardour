@@ -426,6 +426,7 @@ Plugin::load_preset (PresetRecord r)
 	_last_preset = r;
 	_parameter_changed_since_last_preset = false;
 
+	_session.set_dirty ();
 	PresetLoaded (); /* EMIT SIGNAL */
 	return true;
 }
@@ -437,6 +438,7 @@ Plugin::clear_preset ()
 	_last_preset.label = "";
 	_parameter_changed_since_last_preset = false;
 
+	_session.set_dirty ();
 	PresetLoaded (); /* EMIT SIGNAL */
 }
 
