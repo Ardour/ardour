@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2016-05-13 12:32+0100\n"
+"PO-Revision-Date: 2016-08-06 15:36+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -1679,51 +1679,51 @@ msgstr "Panner Plugin-Knoten hat keine Typinformation!"
 
 #: parameter_descriptor.cc:201
 msgid "Note|C"
-msgstr ""
+msgstr "C"
 
 #: parameter_descriptor.cc:202
 msgid "Note|C#"
-msgstr ""
+msgstr "Cis"
 
 #: parameter_descriptor.cc:203
 msgid "Note|D"
-msgstr ""
+msgstr "D"
 
 #: parameter_descriptor.cc:204
 msgid "Note|D#"
-msgstr ""
+msgstr "Dis"
 
 #: parameter_descriptor.cc:205
 msgid "Note|E"
-msgstr ""
+msgstr "E"
 
 #: parameter_descriptor.cc:206
 msgid "Note|F"
-msgstr ""
+msgstr "F"
 
 #: parameter_descriptor.cc:207
 msgid "Note|F#"
-msgstr ""
+msgstr "Fis"
 
 #: parameter_descriptor.cc:208
 msgid "Note|G"
-msgstr ""
+msgstr "G"
 
 #: parameter_descriptor.cc:209
 msgid "Note|G#"
-msgstr ""
+msgstr "Gis"
 
 #: parameter_descriptor.cc:210
 msgid "Note|A"
-msgstr ""
+msgstr "A"
 
 #: parameter_descriptor.cc:211
 msgid "Note|A#"
-msgstr ""
+msgstr "Ais"
 
 #: parameter_descriptor.cc:212
 msgid "Note|B"
-msgstr ""
+msgstr "H"
 
 #: playlist.cc:2234
 msgid "region state node has no ID, ignored"
@@ -2165,6 +2165,8 @@ msgstr "Ungültige Solo-Isolate Propagierung: von:%1 neu:%2 - alt:%3 = delta:%4"
 #: route.cc:4396
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
 msgstr ""
+"Verstärker/Fader auf Route '%1' war nicht vorhanden. Wurde wieder "
+"hinzugefügt."
 
 #: route.cc:4994
 msgid "lo"
@@ -3051,7 +3053,7 @@ msgstr ""
 
 #: slavable.cc:100
 msgid "Master #%1 not found, assignment lost"
-msgstr ""
+msgstr "Master #%1 nicht gefunden, Zuordnung verloren"
 
 #: smf_source.cc:350
 msgid "Unable to read event prefix, corrupt MIDI ring"
@@ -3308,14 +3310,15 @@ msgstr "Kann regulären Ausdruck der Bandspur nicht zum Gebrauch auswerten (%1)"
 #: tempo.cc:98
 msgid "Legacy session detected. TempoSection XML node will be altered."
 msgstr ""
+"Altes Projekt entdeckt. XML-Knoten für TempoSection wird nicht verändert."
 
 #: tempo.cc:104
 msgid "TempoSection XML node has an illegal \"pulse\" value"
-msgstr ""
+msgstr "XML-Knoten für TempoSection enthält einen illegalen Wert für \"pulse\""
 
 #: tempo.cc:112
 msgid "TempoSection XML node has an illegal \"frame\" value"
-msgstr ""
+msgstr "XML-Knoten für TempoSection enthält einen illegalen Wert für \"frame\""
 
 #: tempo.cc:119
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
@@ -3336,7 +3339,7 @@ msgstr "TempoSection: XML-Knoten hat keine Eigenschaft \"movable\""
 
 #: tempo.cc:146
 msgid "TempoSection XML node has no \"active\" property"
-msgstr ""
+msgstr "XML-Knoten für TempoSection enthält keine Eigenschaft \"active\""
 
 #: tempo.cc:471
 msgid "MeterSection XML node has an illegal \"start\" value"
@@ -3345,26 +3348,27 @@ msgstr "MeterSection: XML-Knoten hat unzulässigen Wert für \"start\""
 #: tempo.cc:474
 msgid "Legacy session detected - MeterSection XML node will be altered."
 msgstr ""
+"Altes Projekt entdeckt. XML-Knoten für MeterSection wird nicht verändert."
 
 #: tempo.cc:481
 msgid "MeterSection XML node has an illegal \"pulse\" value"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält einen illegalen Wert für \"pulse\""
 
 #: tempo.cc:488
 msgid "MeterSection XML node has an illegal \"beat\" value"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält einen illegalen Wert für \"beat\""
 
 #: tempo.cc:495
 msgid "MeterSection XML node has no \"bbt\" property"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält  keine Eigenschaft \"bbt\""
 
 #: tempo.cc:500
 msgid "MeterSection XML node has an illegal \"bbt\" value"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält einen illegalen Wert für \"bbt\""
 
 #: tempo.cc:509
 msgid "MeterSection XML node has an illegal \"frame\" value"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält einen illegalen Wert für \"frame\""
 
 #: tempo.cc:519
 msgid ""
@@ -3377,6 +3381,8 @@ msgstr ""
 #: tempo.cc:524
 msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
 msgstr ""
+"XML-Knoten für MeterSection enthält einen illegalen Wert für"
+" \"divisions-per-bar\""
 
 #: tempo.cc:529
 msgid "MeterSection XML node has no \"note-type\" property"
@@ -3392,7 +3398,7 @@ msgstr "MeterSection: XML-Knoten hat keine Eigenschaft \"movable\""
 
 #: tempo.cc:545
 msgid "MeterSection XML node has no \"lock-style\" property"
-msgstr ""
+msgstr "XML-Knoten für MeterSection enthält  keine Eigenschaft \"lock-style\""
 
 #: tempo.cc:821
 msgid ""
@@ -3410,7 +3416,7 @@ msgstr ""
 
 #: tempo.cc:1186
 msgid "programming error: no meter section in tempo map!"
-msgstr ""
+msgstr "Programmierfehler: kein Metrum-Abschnitt in der Tempo map!"
 
 #: tempo.cc:1204 tempo.cc:1227 tempo.cc:1248
 msgid "programming error: no tempo section in tempo map!"
@@ -3475,7 +3481,7 @@ msgstr "Benutze Plugin-Platzhalter mit unbekannter E/A-Konfiguration für: "
 
 #: unknown_processor.cc:107
 msgid "Using plugin-stub with mismatching i/o configuration for: "
-msgstr ""
+msgstr "Benutze einen Plugin-Platzhalter mit falscher E/A-Konfiguration für: "
 
 #: user_bundle.cc:47
 msgid "Node for Bundle has no \"name\" property"
@@ -3557,11 +3563,11 @@ msgstr "kann Verzeichnis %1 nicht öffnen (%2)"
 #: vca.cc:43
 #, c-format
 msgid "VCA %n"
-msgstr ""
+msgstr "VCA %n"
 
 #: vca_manager.cc:166
 msgid "Cannot set state of a VCA"
-msgstr ""
+msgstr "Kann den Status eines VCA nicht setzen"
 
 #~ msgid "%d"
 #~ msgstr "%d"
