@@ -336,6 +336,14 @@ OSCSelectObserver::tick ()
 		_last_meter = now_meter;
 
 	}
+	if (feedback[1]) {
+		if (gain_timeout) {
+			if (gain_timeout == 1) {
+				text_message ("/select/name", _strip->name());
+			}
+			gain_timeout--;
+		}
+	}
 	if (feedback[13]) {
 		for (uint32_t i = 0; i < send_timeout.size(); i++) {
 			if (send_timeout[i]) {
@@ -476,6 +484,8 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 
 	if (gainmode) {
 		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+		text_message ("/select/name", to_string (accurate_coefficient_to_dB (controllable->get_value())));
+		gain_timeout = 8;
 	} else {
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);
