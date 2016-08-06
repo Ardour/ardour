@@ -53,6 +53,7 @@ class OSCSelectObserver
 	std::string path;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
+	std::vector<int> send_timeout;
 	float _last_meter;
 	uint32_t nsends;
 

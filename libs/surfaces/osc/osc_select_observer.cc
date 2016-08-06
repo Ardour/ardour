@@ -17,6 +17,7 @@
 
 */
 
+#include <vector>
 #include "boost/lambda/lambda.hpp"
 
 #include "ardour/session.h"
@@ -120,14 +121,6 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			change_message ("/select/pan_stereo_width", _strip->pan_width_control());
 		}
 
-		// detecting processor changes requires cast to route
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
-		if (r) {
-			r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
-			send_init();
-			eq_init();
-		}
-
 	}
 	if (feedback[13]) { // Well known controls
 		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
@@ -143,6 +136,16 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
 			change_message ("/select/pan_lfe_control", _strip->pan_lfe_control());
 		}
+
+		// sends and eq
+		// detecting processor changes requires cast to route
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
+		if (r) {
+			r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
+			send_init();
+			eq_init();
+		}
+
 		// Compressor
 		if (_strip->comp_enable_controllable ()) {
 			_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
@@ -238,6 +241,7 @@ OSCSelectObserver::send_init()
 		sends = false;
 		if (_strip->send_level_controllable (nsends)) {
 			_strip->send_level_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, nsends, _strip->send_level_controllable(nsends)), OSC::instance());
+			send_timeout.push_back (0);
 			send_gain (nsends, _strip->send_level_controllable(nsends));
 			sends = true;
 		}
@@ -251,7 +255,7 @@ OSCSelectObserver::send_init()
 			clear_strip_with_id ("/select/send_enable", nsends + 1, 1);
 		}
 		// this should get signalled by the route the send goes to, (TODO)
-		if (sends) { // if the gain control is there, this is too
+		if (!gainmode && sends) { // if the gain control is there, this is too
 			text_with_id ("/select/send_name", nsends + 1, _strip->send_name(nsends));
 		}
 		// Send numbers are 0 based, OSC is 1 based so this gets incremented at the end
@@ -331,6 +335,16 @@ OSCSelectObserver::tick ()
 		}
 		_last_meter = now_meter;
 
+	}
+	if (feedback[13]) {
+		for (uint32_t i = 0; i < send_timeout.size(); i++) {
+			if (send_timeout[i]) {
+				if (send_timeout[i] == 1) {
+					text_with_id ("/select/send_name", i + 1, _strip->send_name(i));
+				}
+				send_timeout[i]--;
+			}
+		}
 	}
 
 }
@@ -480,6 +494,16 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	lo_message msg = lo_message_new ();
 	string path;
 	float value;
+	float db;
+#ifdef MIXBUS
+		db = controllable->get_value();
+#else
+		if (controllable->get_value() < 1e-15) {
+			db = -193;
+		} else {
+			db = accurate_coefficient_to_dB (controllable->get_value());
+		}
+#endif
 
 	if (gainmode) {
 		path = "/select/send_fader";
@@ -488,17 +512,13 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 #else
 		value = gain_to_slider_position (controllable->get_value());
 #endif
+	text_with_id ("/select/send_name" , id + 1, to_string (db));
+	if (send_timeout.size() > id) {
+		send_timeout[id] = 8;
+	}
 	} else {
 		path = "/select/send_gain";
-#ifdef MIXBUS
-		value = controllable->get_value();
-#else
-		if (controllable->get_value() < 1e-15) {
-			value = -193;
-		} else {
-			value = accurate_coefficient_to_dB (controllable->get_value());
-		}
-#endif
+		value = db;
 	}
 
 	if (feedback[2]) {
