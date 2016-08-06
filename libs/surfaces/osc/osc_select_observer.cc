@@ -484,7 +484,7 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 
 	if (gainmode) {
 		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
-		text_message ("/select/name", to_string (accurate_coefficient_to_dB (controllable->get_value()), std::dec));
+		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		gain_timeout = 8;
 	} else {
 		if (controllable->get_value() < 1e-15) {
@@ -522,7 +522,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 #else
 		value = gain_to_slider_position (controllable->get_value());
 #endif
-	text_with_id ("/select/send_name" , id + 1, to_string (db, std::dec));
+	text_with_id ("/select/send_name" , id + 1, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db));
 	if (send_timeout.size() > id) {
 		send_timeout[id] = 8;
 	}
@@ -637,9 +637,7 @@ string
 OSCSelectObserver::set_path (string path, uint32_t id)
 {
 	if (feedback[2]) {
-  ostringstream os;
-  os << path << "/" << id;
-  path = os.str();
+		path = string_compose ("%1/%2", path, id);
 	}
 	return path;
 }
