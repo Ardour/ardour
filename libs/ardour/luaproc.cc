@@ -495,8 +495,6 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				 * Really imprecise only if desired_in != audio_in */
 				FOUNDCFG_IMPRECISE (desired_in, possible_out);
 			}
-			// ideally we'll also find the closest, best matching
-			// input configuration with minimal output penalty...
 		}
 
 	}
