@@ -50,6 +50,7 @@ ArdourDropdown::ArdourDropdown (Element e)
 	: _scrolling_disabled(false)
 {
 //	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
+	_menu.signal_size_request().connect (sigc::mem_fun(*this, &ArdourDropdown::menu_size_request));
 
 	add_elements(e);
 	add_elements(ArdourButton::Menu);
@@ -57,6 +58,11 @@ ArdourDropdown::ArdourDropdown (Element e)
 
 ArdourDropdown::~ArdourDropdown ()
 {
+}
+
+void
+ArdourDropdown::menu_size_request(Requisition *req) {
+	req->width = max(req->width, get_allocation().get_width());
 }
 
 void
