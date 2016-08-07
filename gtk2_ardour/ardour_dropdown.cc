@@ -139,7 +139,7 @@ ArdourDropdown::position_menu(int& x, int& y, bool& push_in) {
 		y = monitor.get_y() + max(0, monitor.get_height() - menu_req.height);
 	}
 
-	push_in = FALSE;
+	push_in = false;
 }
 
 bool
