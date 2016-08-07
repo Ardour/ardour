@@ -43,8 +43,6 @@ using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
-using std::max;
-using std::min;
 using namespace std;
 
 
@@ -61,11 +59,95 @@ ArdourDropdown::~ArdourDropdown ()
 {
 }
 
+void
+ArdourDropdown::position_menu(int& x, int& y, bool& push_in) {
+	 /* TODO: lacks support for rotated dropdown buttons */
+
+	if (!has_screen () || !get_has_window ()) {
+		return;
+	}
+
+	Rectangle monitor;
+	{
+		const int monitor_num = get_screen ()->get_monitor_at_window (get_window ());
+		get_screen ()->get_monitor_geometry ((monitor_num < 0) ? 0 : monitor_num,
+		                                     monitor);
+	}
+
+	const Requisition menu_req = _menu.size_request();
+	const Rectangle allocation = get_allocation();
+
+	/* The x and y position are handled separately.
+	 *
+	 * For the x position if the direction is LTR (or RTL), then we try in order:
+	 *  a) align the left (right) of the menu with the left (right) of the button
+	 *     if there's enough room until the right (left) border of the screen;
+	 *  b) align the right (left) of the menu with the right (left) of the button
+	 *     if there's enough room until the left (right) border of the screen;
+	 *  c) align the right (left) border of the menu with the right (left) border
+	 *     of the screen if there's enough space;
+	 *  d) align the left (right) border of the menu with the left (right) border
+	 *     of the screen, with the rightmost (leftmost) part of the menu that
+	 *     overflows the screen.
+	 *     XXX We always align left regardless of the direction because if x is
+	 *     left of the current monitor, the menu popup code after us notices it
+	 *     and enforces that the menu stays in the monitor that's at the left...*/
+
+	get_window ()->get_origin (x, y);
+
+	if (get_direction() == TEXT_DIR_RTL) {
+		if (monitor.get_x() <= x + allocation.get_width() - menu_req.width) {
+			/* a) align menu right and button right */
+			x += allocation.get_width() - menu_req.width;
+		} else if (x + menu_req.width <= monitor.get_x() + monitor.get_width()) {
+			/* b) align menu left and button left: nothing to do*/
+		} else if (menu_req.width > monitor.get_width()) {
+			/* c) align menu left and screen left, guaranteed to fit */
+			x = monitor.get_x();
+		} else {
+			/* d) XXX align left or the menu might change monitors */
+			x = monitor.get_x();
+		}
+	} else { /* LTR */
+		if (x + menu_req.width <= monitor.get_x() + monitor.get_width()) {
+			/* a) align menu left and button left: nothing to do*/
+		} else if (monitor.get_x() <= x + allocation.get_width() - menu_req.width) {
+			/* b) align menu right and button right */
+			x += allocation.get_width() - menu_req.width;
+		} else if (menu_req.width > monitor.get_width()) {
+			/* c) align menu right and screen right, guaranteed to fit */
+			x = monitor.get_x() + monitor.get_width() - menu_req.width;
+		} else {
+			/* d) align left */
+			x = monitor.get_x();
+		}
+	}
+
+	/* For the y position, try in order:
+	 *  a) align the top of the menu with the bottom of the button if there is
+	 *     enough room below the button;
+	 *  b) align the bottom of the menu with the top of the button if there is
+	 *     enough room above the button;
+	 *  c) align the bottom of the menu with the bottom of the monitor if there
+	 *     is enough room, but avoid moving the menu to another monitor */
+
+	if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
+		y += allocation.get_height(); /* a) */
+	} else if ((y - menu_req.height) >= monitor.get_y()) {
+		y -= menu_req.height; /* b) */
+	} else {
+		y = monitor.get_y() + max(0, monitor.get_height() - menu_req.height);
+	}
+
+	push_in = FALSE;
+}
+
 bool
 ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->type == GDK_BUTTON_PRESS) {
-		_menu.popup (1, gtk_get_current_event_time());
+		_menu.popup (sigc::mem_fun(this, &ArdourDropdown::position_menu),
+		             1, ev->time);
 	}
 	return true;
 }
