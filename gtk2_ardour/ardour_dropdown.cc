@@ -61,6 +61,8 @@ ArdourDropdown::~ArdourDropdown ()
 
 void
 ArdourDropdown::position_menu(int& x, int& y, bool& push_in) {
+	using namespace Menu_Helpers;
+
 	 /* TODO: lacks support for rotated dropdown buttons */
 
 	if (!has_screen () || !get_has_window ()) {
@@ -124,14 +126,31 @@ ArdourDropdown::position_menu(int& x, int& y, bool& push_in) {
 	}
 
 	/* For the y position, try in order:
-	 *  a) align the top of the menu with the bottom of the button if there is
+	 *  a) if there is a menu item with the same text as the button, align it
+	 *     with the button, unless that makes the menu overflow the monitor.
+	 *  b) align the top of the menu with the bottom of the button if there is
 	 *     enough room below the button;
-	 *  b) align the bottom of the menu with the top of the button if there is
+	 *  c) align the bottom of the menu with the top of the button if there is
 	 *     enough room above the button;
-	 *  c) align the bottom of the menu with the bottom of the monitor if there
+	 *  d) align the bottom of the menu with the bottom of the monitor if there
 	 *     is enough room, but avoid moving the menu to another monitor */
 
-	if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
+	const MenuList& items = _menu.items ();
+	const std::string button_text = get_text();
+	int offset = 0;
+
+	MenuList::const_iterator i = items.begin();
+	for ( ; i != items.end(); ++i) {
+		if (button_text == ((std::string) i->get_label())) {
+			break;
+		}
+		offset += i->size_request().height;
+	}
+	if (i != items.end() &&
+	    y - offset >= monitor.get_y() &&
+	    y - offset + menu_req.height <= monitor.get_y() + monitor.get_height()) {
+		y -= offset;
+	} else if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
 		y += allocation.get_height(); /* a) */
 	} else if ((y - menu_req.height) >= monitor.get_y()) {
 		y -= menu_req.height; /* b) */
