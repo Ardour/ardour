@@ -405,6 +405,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 #endif
 
 	boost::shared_ptr<Port> port;
+	vector<boost::shared_ptr<Port> > deleted_ports;
 
 	changed    = false;
 
@@ -418,10 +419,29 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 
 			assert(port);
 			_ports.remove(port);
+
+			/* hold a reference to the port so that we can ensure
+			 * that this thread, and not a JACK notification thread,
+			 * holds the final reference.
+			 */
+
+			deleted_ports.push_back (port);
 			_session.engine().unregister_port (port);
 
 			changed = true;
 		}
+
+		/* this will drop the final reference to the deleted ports,
+		 * which will in turn call their destructors, which will in
+		 * turn call the backend to unregister them.
+		 *
+		 * There will no connect/disconnect or register/unregister
+		 * callbacks from the backend until we get here, because
+		 * they are driven by the Port destructor. The destructor
+		 * will not execute until we drop the final reference,
+		 * which all happens right .... here.
+		 */
+		deleted_ports.clear ();
 
 		/* create any necessary new ports */
 		while (n_ports().get(*t) < n) {
