@@ -353,6 +353,12 @@ PortManager::register_output_port (DataType type, const string& portname, bool a
 int
 PortManager::unregister_port (boost::shared_ptr<Port> port)
 {
+	/* This is a little subtle. We do not call the backend's port
+	 * unregistration code from here. That is left for the Port
+	 * destructor. We are trying to drop references to the Port object
+	 * here, so that its destructor will run and it will unregister itself.
+	 */
+
 	/* caller must hold process lock */
 
 	{
