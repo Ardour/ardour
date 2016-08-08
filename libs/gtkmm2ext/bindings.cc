@@ -179,13 +179,15 @@ KeyboardKey::display_label () const
 
 #ifdef __APPLE__
 	/* We use both bits (MOD2|META) for Primary on OS X,
-	 * but we don't want MOD2 showing up in listings.
+	 * but we don't want MOD2 showing up in listings. So remove
+	 * it and add back META.
 	 */
 
 	if (mod & GDK_MOD2_MASK) {
-		mod &= ~GDK_MOD2_MASK;
+		mod = (mod & ~GDK_MOD2_MASK) | GDK_META_MASK;
 	}
 #endif
+
 
 	return gtk_accelerator_get_label (key(), (GdkModifierType) mod);
 }
