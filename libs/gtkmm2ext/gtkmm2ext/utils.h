@@ -29,6 +29,7 @@
 
 #include <gtkmm/container.h>
 #include <gtkmm/filechooser.h>
+#include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
 #include <gdkmm/pixbuf.h>
@@ -95,6 +96,11 @@ namespace Gtkmm2ext {
 								       int clip_width,
 								       int clip_height,
 								       Gdk::Color fg);
+
+	LIBGTKMM2EXT_API void position_menu_anchored (const Gtk::Menu* const menu,
+	                                              Gtk::Widget* const anchor,
+	                                              const std::string& selected,
+	                                              int& x, int& y, bool& push_in);
 
 	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&,
 	                          const std::vector<std::string>&);
