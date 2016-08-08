@@ -865,7 +865,10 @@ def appdata_i18n_pot(bld):
         adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
                 'ardour.appdata.xml.in.in')
         Logs.info('Updating ' + potfile)
-        subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+        try:
+                subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+        except:
+                print ('Error processing appdata pot file - ignored')
     elif bld.cmd == 'clean' and os.path.exists(potfile):
         Logs.info('Removing Ardour appdata pot file')
         os.remove(potfile)
