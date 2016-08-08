@@ -159,10 +159,67 @@ MidiTrackerEditor::~MidiTrackerEditor ()
 // Automation //
 ////////////////
 
+MidiTrackerEditor::ProcessorAutomationNode*
+MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
+{
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+
+		if ((*i)->processor == processor) {
+
+			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+				if ((*ii)->what == what) {
+					return *ii;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+/** Add an AutomationTimeAxisView to display automation for a processor's parameter */
+void
+MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
+{
+	string name;
+	ProcessorAutomationNode* pan;
+
+	if ((pan = find_processor_automation_node (processor, what)) == 0) {
+		/* session state may never have been saved with new plugin */
+		error << _("programming error: ")
+		      << string_compose (X_("processor automation column for %1:%2/%3/%4 not registered with track!"),
+                                         processor->name(), what.type(), (int) what.channel(), what.id() )
+		      << endmsg;
+		abort(); /*NOTREACHED*/
+		return;
+	}
+
+	if (pan->column) {
+		return;
+	}
+
+	// Find the next available column
+	if (available_automation_columns.empty()) {
+		error << _("programming error: ")
+		      << string_compose (X_("no more available automation column for %1:%2/%3/%4 not registered with track!"),
+                                         processor->name(), what.type(), (int) what.channel(), what.id() )
+		      << endmsg;
+		abort(); /*NOTREACHED*/
+		return;
+	}
+	std::set<size_t>::iterator it = available_automation_columns.begin();
+	pan->column = *it;
+	available_automation_columns.erase(it);
+}
+
 void
 MidiTrackerEditor::show_all_automation ()
 {
-	// Copy pasted from route_time_axis.cc
+	std::cout << "MidiTrackerEditor::show_all_automation" << std::endl;
+
+    // Copy pasted from route_time_axis.cc
+
+	// TODO: past and study MidiTimeAxisView::show_all_automation as well
 
 	// if (apply_to_selection) {
 	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_all_automation, _1, false));
@@ -182,17 +239,24 @@ MidiTrackerEditor::show_all_automation ()
 	// 	}
 
 
-	// 	/* Show processor automation */
+	/* Show processor automation */
 
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-	// 			if ((*ii)->view == 0) {
-	// 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
-	// 			}
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		std::cout << "(*i)->valid = " << (*i)->valid << std::endl;
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+			std::cout << "(*ii)->column = " << (*ii)->column << std::endl;
+			if ((*ii)->column == 0) {
+				add_processor_automation_column ((*i)->processor, (*ii)->what);
+				view.get_column((*ii)->column)->set_visible (true);
+				string name = (*i)->processor->describe_parameter ((*ii)->what);
+				view.get_column((*ii)->column)->set_title (name);
+				std::cout << "after add_processor_automation_column: name = " << name
+				          << ", (*ii)->column = " << (*ii)->column << std::endl;
+			}
 
-	// 			(*ii)->menu_item->set_active (true);
-	// 		}
-	// 	}
+			(*ii)->menu_item->set_active (true);
+		}
+	}
 
 	// 	no_redraw = false;
 
@@ -226,6 +290,20 @@ MidiTrackerEditor::show_existing_automation ()
 	// 	}
 
 	// 	/* Show processor automation */
+
+	// TODO: The solution should look like some clever merge of the 2 following code blocks
+
+	// for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 	for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+	// 		if ((*ii)->column == 0 and (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+	// 			add_processor_automation_column ((*i)->processor, (*ii)->what);
+	// 			view.get_column((*ii)->column)->set_visible (true);
+	// 			string name = processor->describe_parameter ((*ii)->what);
+	// 			view.get_column((*ii)->column)->set_title (name);
+	// 			(*ii)->menu_item->set_active (true);
+	// 		}
+	// 	}
+	// }
 
 	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
@@ -285,6 +363,7 @@ MidiTrackerEditor::setup_processor_menu_and_curves ()
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
 	route->foreach_processor (sigc::mem_fun (*this, &MidiTrackerEditor::add_processor_to_subplugin_menu));
+	// TODO: look into the following, maybe I need to enable that as well
 	// route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 }
 
@@ -362,19 +441,19 @@ MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Proc
 			mitem->set_active(true);
 		}
 
-		// if ((pan = find_processor_automation_node (processor, *i)) == 0) {
+		if ((pan = find_processor_automation_node (processor, *i)) == 0) {
 
-		// 	/* new item */
+			/* new item */
 
-		// 	pan = new ProcessorAutomationNode (*i, mitem, *this);
+			pan = new ProcessorAutomationNode (*i, mitem, *this);
 
-		// 	rai->columns.push_back (pan);
+			rai->columns.push_back (pan);
 
-		// } else {
+		} else {
 
-		// 	pan->menu_item = mitem;
+			pan->menu_item = mitem;
 
-		// }
+		}
 
 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::processor_menu_item_toggled), rai, pan));
 	}
@@ -1117,6 +1196,8 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
+		// TODO: add automation tracker matrix
+
 		mtm->set_rows_per_beat(rows_per_beat);
 		mtm->update_matrix();
 
@@ -1277,7 +1358,10 @@ MidiTrackerEditor::setup_matrix ()
 		Gtk::TreeViewColumn* viewcolumn_automation = new Gtk::TreeViewColumn (_(ss_automation.str().c_str()), columns.automation[i]);
 		Gtk::CellRenderer* cellrenderer_automation = viewcolumn_automation->get_first_cell_renderer ();
 		viewcolumn_automation->add_attribute(cellrenderer_automation->property_cell_background (), columns._color);
+		size_t column = view.get_columns().size();
 		view.append_column (*viewcolumn_automation);
+		view.get_column(column)->set_visible (false);
+		available_automation_columns.insert(column);
 	}
 
 	view.set_headers_visible (true);

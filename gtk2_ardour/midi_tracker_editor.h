@@ -67,7 +67,7 @@ class AutomationTimeAxisView;
 #define MAX_NUMBER_OF_NOTE_TRACKS 128
 
 // Maximum number of automation trackts in the midi tracker editor
-#define MAX_NUMBER_OF_AUTOMATION_TRACKS 4
+#define MAX_NUMBER_OF_AUTOMATION_TRACKS 1024
 
 class MidiTrackerEditor : public ArdourWindow
 {
@@ -86,12 +86,12 @@ class MidiTrackerEditor : public ArdourWindow
 	struct ProcessorAutomationNode {
 		Evoral::Parameter                         what;
 		Gtk::CheckMenuItem*                       menu_item;
-		// TODO: maybe I just need to point the right column
-		// boost::shared_ptr<AutomationTimeAxisView> view;
+		// corresponding column index. If set to 0 then undetermined yet
+		size_t                                    column;
 		MidiTrackerEditor&                        parent;
 
 	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, MidiTrackerEditor& p)
-		    : what (w), menu_item (mitem), parent (p) {}
+		    : what (w), menu_item (mitem), column(0), parent (p) {}
 
 	    ~ProcessorAutomationNode ();
 	};
@@ -112,6 +112,9 @@ class MidiTrackerEditor : public ArdourWindow
 	 *  this route.  The Amp processor is not included in this list.
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
+
+	/** List of column indices currently unassigned to an automation */
+	std::set<size_t> available_automation_columns;
 
 	ArdourButton                 automation_button;
 	Gtk::Menu                    subplugin_menu;
@@ -139,6 +142,10 @@ class MidiTrackerEditor : public ArdourWindow
 	Gtk::CheckMenuItem* trim_automation_item;
 	Gtk::CheckMenuItem* mute_automation_item;
 	Gtk::CheckMenuItem* pan_automation_item;
+
+	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
+
+	void add_processor_automation_column (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();
@@ -197,6 +204,9 @@ class MidiTrackerEditor : public ArdourWindow
 		// use al->eval(when). In order to retrieve the value of a point one
 		// use it->value, and it->when for its time (as to calculate the
 		// delay).
+		//
+		// The next step it seems is to study/re-enable
+		// MidiTrackerEditor::show_all_automation
 		Gtk::TreeModelColumn<ARDOUR::AutomationList::iterator> _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 	};
 

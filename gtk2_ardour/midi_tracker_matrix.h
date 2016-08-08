@@ -42,6 +42,9 @@ namespace ARDOUR {
 	class Session;
 };
 
+// TODO: probably split this class into super class TrackerMatrix, so that
+// MidiTracker and AutomationMatrix can inherit it.
+
 /**
  * Data structure holding the matrix of events for the tracker
  * representation. Plus some goodies method to generate a tracker matrix given
