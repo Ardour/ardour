@@ -940,6 +940,7 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	if (automation_menu == 0) {
 		automation_menu = manage (new Menu);
 		automation_menu->set_name ("ArdourContextMenu");
+		automation_menu->set_reserve_toggle_size(false);
 	}
 
 	MenuList& items (automation_menu->items());
@@ -954,7 +955,9 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
-	automation_menu->popup (1, gtk_get_current_event_time());
+	automation_menu->popup (
+		boost::bind (&Gtkmm2ext::position_menu_anchored, automation_menu, &cui->automate_button, "", _1, _2, _3),
+		1, gtk_get_current_event_time());
 }
 
 void
