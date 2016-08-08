@@ -3529,7 +3529,9 @@ MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContex
 	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
 	if (m != selection.midi_notes.end()) {
 		ctx.counts.increase_n_notes();
-		if (!(*m)->empty()) { commit = true; }
+		if (!(*m)->empty()) {
+			commit = true;
+		}
 		paste_internal(pos, ctx.count, ctx.times, **m);
 	}
 
@@ -3538,6 +3540,9 @@ MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContex
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
 		if (a->second->paste(pos, selection, ctx, sub_num)) {
+			if(!commit) {
+				trackview.editor().begin_reversible_command (Operations::paste);
+			}
 			commit = true;
 		}
 	}

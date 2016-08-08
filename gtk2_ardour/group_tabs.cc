@@ -341,9 +341,6 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	const VCAList vcas = _session->vca_manager().vcas ();
 
 	if (!in_tab_area) {
-		items.push_back (MenuElem (_("Create New Group ..."), sigc::bind (sigc::mem_fun(*this, &GroupTabs::run_new_group_dialog), (RouteList const *) 0, false)));
-		items.push_back (MenuElem (_("Create New Group with Control Master ..."), sigc::bind (sigc::mem_fun(*this, &GroupTabs::run_new_group_dialog), (RouteList const *) 0, true)));
-
 		/* context menu is not for a group tab, show the "create new
 		   from" items here
 		*/
