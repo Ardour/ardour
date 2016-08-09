@@ -3799,11 +3799,32 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
  *  pos can be -ve, if required.
  */
 framepos_t
-TempoMap::framepos_plus_beats (framepos_t pos, Evoral::Beats beats) const
+TempoMap::framepos_plus_beats (framepos_t frame, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, pos) + beats.to_double());
+	const TempoSection& ts = tempo_section_at_frame_locked (_metrics, frame);
+	MeterSection* prev_m = 0;
+	MeterSection* next_m = 0;
+
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		if (!(*i)->is_tempo()) {
+			if (prev_m && (*i)->frame() > frame) {
+				next_m = static_cast<MeterSection*> (*i);
+				break;
+			}
+			prev_m = static_cast<MeterSection*> (*i);
+		}
+	}
+
+	double pos_beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
+
+	/* audio locked meters fake their beat */
+	if (next_m && next_m->beat() < pos_beat) {
+		pos_beat = next_m->beat();
+	}
+
+	return frame_at_beat_locked (_metrics, pos_beat + beats.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
