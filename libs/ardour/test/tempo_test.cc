@@ -14,7 +14,7 @@ TempoTest::recomputeMapTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	map.add_meter (meterA, 0.0, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -36,7 +36,7 @@ TempoTest::recomputeMapTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
 	Tempo tempoB (240);
 	map.add_tempo (tempoB, 3.0, 0, TempoSection::Constant, MusicTime);
 	Meter meterB (3, 4);
@@ -59,9 +59,9 @@ TempoTest::rampTest ()
 	Meter meterA (4, 4);
 	Tempo tempoA (77.0, 4.0);
 	Tempo tempoB (217.0, 4.0);
-	map.add_tempo (tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
 	map.add_tempo (tempoB, 0.0, (framepos_t) 60 * sampling_rate, TempoSection::Ramp, AudioTime);
-	map.add_meter (meterA, 0.0, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
 
 	/*
 

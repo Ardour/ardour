@@ -20,8 +20,8 @@ FramewalkToBeatsTest::singleTempoTest ()
 	Tempo tempo (bpm);
 	Meter meter (4, 4);
 
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.add_tempo (tempo, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
 
 	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1).to_double();
@@ -47,7 +47,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -71,7 +71,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
 	Tempo tempoB (240);
 	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
 
@@ -104,7 +104,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 2, 160bpm at bar 3
@@ -127,7 +127,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
 	Tempo tempoB (240);
 	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
 	Tempo tempoC (160);
