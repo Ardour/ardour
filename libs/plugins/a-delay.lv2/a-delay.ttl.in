@@ -155,9 +155,7 @@ A simple delay plugin
 
     doap:name "a-Delay" ;
     doap:license "GPL v2+" ;
-    doap:maintainer <http://ardour.org/credits.html>
-
-#   ui:ui <urn:ardour:a-delay#ui>;
+    doap:maintainer <http://ardour.org/credits.html> ;
 
     lv2:microVersion 1 ;
     lv2:minorVersion 1 .

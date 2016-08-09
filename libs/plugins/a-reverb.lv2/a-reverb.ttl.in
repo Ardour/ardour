@@ -15,9 +15,9 @@
 	a doap:Project, lv2:Plugin, lv2:SpatialPlugin ;
 
 	doap:name "a-Reverb";
-	rdfs:comment "A Schroeder Reverberator"
+	rdfs:comment "A Schroeder Reverberator";
 
-	doap:maintainer <http://ardour.org/credits.html>
+	doap:maintainer <http://ardour.org/credits.html> ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 
 	lv2:microVersion 0 ; lv2:minorVersion 2 ;

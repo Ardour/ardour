@@ -149,7 +149,7 @@ A powerful stereo compressor.
 
     doap:name "a-Compressor stereo" ;
     doap:license "GPL v2+" ;
-    doap:maintainer <http://ardour.org/credits.html>
+    doap:maintainer <http://ardour.org/credits.html> ;
 
     lv2:microVersion 1 ;
     lv2:minorVersion 1 .

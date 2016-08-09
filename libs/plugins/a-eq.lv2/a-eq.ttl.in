@@ -285,9 +285,7 @@ A basic 4 band EQ.
 
     doap:name "a-EQ" ;
     doap:license "GPL v2+" ;
-    doap:maintainer <http://ardour.org/credits.html>
-
-#   ui:ui <urn:ardour:a-eq#ui>;
+    doap:maintainer <http://ardour.org/credits.html> ;
 
     lv2:microVersion 0 ;
     lv2:minorVersion 1 .

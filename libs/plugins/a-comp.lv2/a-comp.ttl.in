@@ -137,7 +137,7 @@ A powerful mono compressor.
 
     doap:name "a-Compressor" ;
 		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
-    doap:maintainer <http://ardour.org/credits.html>
+    doap:maintainer <http://ardour.org/credits.html> ;
 
     lv2:microVersion 1 ;
     lv2:minorVersion 1 .
