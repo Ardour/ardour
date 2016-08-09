@@ -37,6 +37,7 @@
 
 class BBTTest;
 class FrameposPlusBeatsTest;
+class FrameposMinusBeatsTest;
 class TempoTest;
 class XMLNode;
 
@@ -501,6 +502,7 @@ private:
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
+	friend class ::FrameposMinusBeatsTest;
 	friend class ::TempoTest;
 
 	static Tempo    _default_tempo;
