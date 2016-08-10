@@ -56,21 +56,21 @@ using namespace PBD;
 using namespace Editing;
 using Timecode::BBT_Time;
 
-///////////////////////
-// MidiTrackerMatrix //
-///////////////////////
+////////////////////////
+// MidiTrackerPattern //
+////////////////////////
 
-MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
-                                     boost::shared_ptr<ARDOUR::MidiRegion> region,
-                                     boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-                                     uint16_t rpb)
-	: TrackerMatrix(session, region), _midi_model(midi_model)
+MidiTrackerPattern::MidiTrackerPattern(ARDOUR::Session* session,
+                                       boost::shared_ptr<ARDOUR::MidiRegion> region,
+                                       boost::shared_ptr<ARDOUR::MidiModel> midi_model,
+                                       uint16_t rpb)
+	: TrackerPattern(session, region), _midi_model(midi_model)
 {
 	set_rows_per_beat(rpb);
-	update_matrix();
+	update_pattern();
 }
 
-void MidiTrackerMatrix::update_matrix()
+void MidiTrackerPattern::update_pattern()
 {
 	first_beats = find_first_row_beats();
 	last_beats = find_last_row_beats();

@@ -16,8 +16,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_gtk2_midi_tracker_matrix_h_
-#define __ardour_gtk2_midi_tracker_matrix_h_
+#ifndef __ardour_gtk2_midi_tracker_pattern_h_
+#define __ardour_gtk2_midi_tracker_pattern_h_
 
 #include <gtkmm/treeview.h>
 #include <gtkmm/table.h>
@@ -35,7 +35,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 
-#include "tracker_matrix.h"
+#include "tracker_pattern.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -45,11 +45,11 @@ namespace ARDOUR {
 };
 
 /**
- * Data structure holding the matrix of events for the tracker
- * representation. Plus some goodies method to generate a tracker matrix given
+ * Data structure holding the pattern of events for the tracker
+ * representation. Plus some goodies method to generate a tracker pattern given
  * a midi region.
  */
-class MidiTrackerMatrix : public TrackerMatrix {
+class MidiTrackerPattern : public TrackerPattern {
 public:
 	// Holds a note and its associated track number (a maximum of 4096
 	// tracks should be more than enough).
@@ -57,13 +57,13 @@ public:
 	typedef std::multimap<uint32_t, boost::shared_ptr<NoteType> > RowToNotes;
 	typedef std::pair<RowToNotes::const_iterator, RowToNotes::const_iterator> NotesRange;
 
-	MidiTrackerMatrix(ARDOUR::Session* session,
-	                  boost::shared_ptr<ARDOUR::MidiRegion> region,
-	                  boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-	                  uint16_t rpb);
+	MidiTrackerPattern(ARDOUR::Session* session,
+	                   boost::shared_ptr<ARDOUR::MidiRegion> region,
+	                   boost::shared_ptr<ARDOUR::MidiModel> midi_model,
+	                   uint16_t rpb);
 
-	// Build or rebuild the matrix (implement TrackerMatrix::update_matrix)
-	void update_matrix();
+	// Build or rebuild the pattern (implement TrackerPattern::update_pattern)
+	void update_pattern();
 
 	// Number of tracker tracks of that midi track (determined by the number of
 	// overlapping notes)
@@ -77,7 +77,7 @@ public:
 	std::vector<RowToNotes> notes_off;
 
 private:
-	boost::shared_ptr<ARDOUR::MidiModel>  _midi_model;
+	boost::shared_ptr<ARDOUR::MidiModel> _midi_model;
 };
 
-#endif /* __ardour_gtk2_midi_tracker_matrix_h_ */
+#endif /* __ardour_gtk2_midi_tracker_pattern_h_ */

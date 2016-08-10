@@ -36,7 +36,7 @@
 #include "editing.h"
 #include "midi_time_axis.h"
 
-#include "midi_tracker_matrix.h"
+#include "midi_tracker_pattern.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
@@ -258,7 +258,7 @@ class MidiTrackerEditor : public ArdourWindow
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
 	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
 
-	MidiTrackerMatrix* mtm;
+	MidiTrackerPattern* mtp;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
@@ -281,7 +281,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void setup_tooltips ();
 	void setup_toolbar ();
-	void setup_matrix ();
+	void setup_pattern ();
 	void setup_scroller ();
 	void redisplay_model ();
 

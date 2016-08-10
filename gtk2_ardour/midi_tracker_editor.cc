@@ -125,7 +125,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 
 	setup_tooltips ();
 	setup_toolbar ();
-	setup_matrix ();
+	setup_pattern ();
 	setup_scroller ();
 
 	setup_processor_menu_and_curves ();
@@ -150,7 +150,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
-	delete mtm;
+	delete mtp;
 	delete automation_action_menu;
 	delete controller_menu;
 }
@@ -1094,7 +1094,7 @@ void
 MidiTrackerEditor::redisplay_visible_note()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
-		view.get_column(i*4 + 1)->set_visible(i < mtm->ntracks ? visible_note : false);
+		view.get_column(i*4 + 1)->set_visible(i < mtp->ntracks ? visible_note : false);
 	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -1115,7 +1115,7 @@ void
 MidiTrackerEditor::redisplay_visible_channel()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
-		view.get_column(i*4 + 2)->set_visible(i < mtm->ntracks ? visible_channel : false);
+		view.get_column(i*4 + 2)->set_visible(i < mtp->ntracks ? visible_channel : false);
 	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -1136,7 +1136,7 @@ void
 MidiTrackerEditor::redisplay_visible_velocity()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
-		view.get_column(i*4 + 3)->set_visible(i < mtm->ntracks ? visible_velocity : false);
+		view.get_column(i*4 + 3)->set_visible(i < mtp->ntracks ? visible_velocity : false);
 	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -1157,7 +1157,7 @@ void
 MidiTrackerEditor::redisplay_visible_delay()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
-		view.get_column(i*4 + 4)->set_visible(i < mtm->ntracks ? visible_delay : false);
+		view.get_column(i*4 + 4)->set_visible(i < mtp->ntracks ? visible_delay : false);
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -1196,18 +1196,18 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		// TODO: add automation tracker matrix
+		// TODO: add automation tracker pattern
 
-		mtm->set_rows_per_beat(rows_per_beat);
-		mtm->update_matrix();
+		mtp->set_rows_per_beat(rows_per_beat);
+		mtp->update_pattern();
 
 		TreeModel::Row row;
 		
 		// Generate each row
-		for (uint32_t irow = 0; irow < mtm->nrows; irow++) {
+		for (uint32_t irow = 0; irow < mtp->nrows; irow++) {
 			row = *(model->append());
-			Evoral::Beats row_beats = mtm->beats_at_row(irow);
-			uint32_t row_frame = mtm->frame_at_row(irow);
+			Evoral::Beats row_beats = mtp->beats_at_row(irow);
+			uint32_t row_frame = mtp->frame_at_row(irow);
 
 			// Time
 			Timecode::BBT_Time row_bbt;
@@ -1222,7 +1222,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
-			for (size_t i = 0; i < (size_t)mtm->ntracks; i++) {
+			for (size_t i = 0; i < (size_t)mtp->ntracks; i++) {
 
 				if (visible_blank) {
 					// Fill with blank
@@ -1232,12 +1232,12 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns.delay[i]] = "-----";
 				}
 				
-				size_t notes_off_count = mtm->notes_off[i].count(irow);
-				size_t notes_on_count = mtm->notes_on[i].count(irow);
+				size_t notes_off_count = mtp->notes_off[i].count(irow);
+				size_t notes_on_count = mtp->notes_on[i].count(irow);
 
 				if (notes_on_count > 0 || notes_off_count > 0) {
-					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm->notes_off[i].find(irow);
-					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm->notes_on[i].find(irow);
+					MidiTrackerPattern::RowToNotes::const_iterator i_off = mtp->notes_off[i].find(irow);
+					MidiTrackerPattern::RowToNotes::const_iterator i_on = mtp->notes_on[i].find(irow);
 
 					// Determine whether the row is defined
 					bool undefined = (notes_off_count > 1 || notes_on_count > 1)
@@ -1248,8 +1248,8 @@ MidiTrackerEditor::redisplay_model ()
 						row[columns.note_name[i]] = undefined_str;
 					} else {
 						// Notes off
-						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm->notes_off[i].find(irow);
-						if (i_off != mtm->notes_off[i].end()) {
+						MidiTrackerPattern::RowToNotes::const_iterator i_off = mtp->notes_off[i].find(irow);
+						if (i_off != mtp->notes_off[i].end()) {
 							boost::shared_ptr<NoteType> note = i_off->second;
 							row[columns.note_name[i]] = note_off_str;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
@@ -1260,8 +1260,8 @@ MidiTrackerEditor::redisplay_model ()
 						}
 
 						// Notes on
-						MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm->notes_on[i].find(irow);
-						if (i_on != mtm->notes_on[i].end()) {
+						MidiTrackerPattern::RowToNotes::const_iterator i_on = mtp->notes_on[i].find(irow);
+						if (i_on != mtp->notes_on[i].end()) {
 							boost::shared_ptr<NoteType> note = i_on->second;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
@@ -1302,9 +1302,9 @@ MidiTrackerEditor::midi_track() const
 }
 
 void
-MidiTrackerEditor::setup_matrix ()
+MidiTrackerEditor::setup_pattern ()
 {
-	mtm = new MidiTrackerMatrix(_session, region, midi_model, rows_per_beat);
+	mtp = new MidiTrackerPattern(_session, region, midi_model, rows_per_beat);
 
 	edit_column = -1;
 	editing_renderer = 0;

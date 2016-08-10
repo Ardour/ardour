@@ -16,8 +16,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_gtk2_tracker_matrix_h_
-#define __ardour_gtk2_tracker_matrix_h_
+#ifndef __ardour_gtk2_tracker_pattern_h_
+#define __ardour_gtk2_tracker_pattern_h_
 
 #include <gtkmm/treeview.h>
 #include <gtkmm/table.h>
@@ -44,17 +44,17 @@ namespace ARDOUR {
  * Shared methods for storing and handling data for the midi, audio and
  * automation tracker editor.
  */
-class TrackerMatrix {
+class TrackerPattern {
 public:
-	TrackerMatrix(ARDOUR::Session* session,
-	              boost::shared_ptr<ARDOUR::Region> region);
+	TrackerPattern(ARDOUR::Session* session,
+	               boost::shared_ptr<ARDOUR::Region> region);
 
 	// Set the number of rows per beat. After changing that you probably need
-	// to update the matrix, see below.
+	// to update the pattern, see below.
 	void set_rows_per_beat(uint16_t rpb);
 
-	// Build or rebuild the matrix
-	virtual void update_matrix() = 0;
+	// Build or rebuild the pattern
+	virtual void update_pattern() = 0;
 
 	// Find the beats corresponding to the first row
 	Evoral::Beats find_first_row_beats();
@@ -106,4 +106,4 @@ private:
 	ARDOUR::BeatsFramesConverter _conv;	
 };
 
-#endif /* __ardour_gtk2_tracker_matrix_h_ */
+#endif /* __ardour_gtk2_tracker_pattern_h_ */
