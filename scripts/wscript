@@ -10,7 +10,6 @@ def configure(conf):
 
 def build(bld):
     scripts = bld.path.ant_glob ('*.lua', excl=['^_*'])
-    print scripts
     bld.install_files (os.path.join(bld.env['DATADIR'], 'scripts'), scripts)
 
 def options(opt):
