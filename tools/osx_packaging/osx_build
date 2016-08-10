@@ -401,6 +401,9 @@ done
 # Lua Script Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../scripts/*.lua ; do
+	  if test "${x:0:1}" = "_"; then
+			continue;
+		fi
     cp "$x" $LuaScripts
 done
 
