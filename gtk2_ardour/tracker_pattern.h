@@ -19,14 +19,6 @@
 #ifndef __ardour_gtk2_tracker_pattern_h_
 #define __ardour_gtk2_tracker_pattern_h_
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/table.h>
-#include <gtkmm/box.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/scrolledwindow.h>
-
-#include "gtkmm2ext/bindings.h"
-
 #include "evoral/types.hpp"
 
 #include "ardour/session_handle.h"

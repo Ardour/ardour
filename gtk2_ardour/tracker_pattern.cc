@@ -19,41 +19,15 @@
 #include <cmath>
 #include <map>
 
-#include <gtkmm/cellrenderercombo.h>
-
-#include "pbd/file_utils.h"
-
-#include "evoral/midi_util.h"
-#include "evoral/Note.hpp"
-
 #include "ardour/beats_frames_converter.h"
-#include "ardour/midi_model.h"
-#include "ardour/midi_region.h"
-#include "ardour/midi_source.h"
 #include "ardour/session.h"
+#include "ardour/region.h"
 #include "ardour/tempo.h"
 
-#include "gtkmm2ext/gui_thread.h"
-#include "gtkmm2ext/keyboard.h"
-#include "gtkmm2ext/actions.h"
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/rgb_macros.h"
-
-#include "ui_config.h"
-#include "midi_tracker_editor.h"
-#include "note_player.h"
-#include "tooltips.h"
-
-#include "i18n.h"
+#include "tracker_pattern.h"
 
 using namespace std;
-using namespace Gtk;
-using namespace Gtkmm2ext;
-using namespace Glib;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
-using namespace PBD;
-using namespace Editing;
 using Timecode::BBT_Time;
 
 ////////////////////
