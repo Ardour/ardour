@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "Amplifier",
+	name        = "a-Amplifier",
 	category    = "Amplifier",
 	license     = "MIT",
 	author      = "Ardour Team",

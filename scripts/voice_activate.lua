@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "dsp",
 	name        = "Voice/Level Activate",
 	category    = "Utility",
-	author      = "Ardour Team",
+	author      = "Ardour Lua Task Force",
 	license     = "MIT",
 	description = [[Roll the transport when the signal level on the plugin's input exceeds a given threshold.]]
 }

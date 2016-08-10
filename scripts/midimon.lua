@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "MIDI Monitor",
+	name        = "a-MIDI Monitor",
 	category    = "Visualization",
 	license     = "GPLv2",
 	author      = "Ardour Team",

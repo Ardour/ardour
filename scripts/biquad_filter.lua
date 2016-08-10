@@ -3,7 +3,7 @@ ardour {
 	name        = "Biquad Filter",
 	category    = "Filter",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Lua Task Force",
 	description = [[A Versatile Filter Plugin]]
 }
 

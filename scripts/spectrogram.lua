@@ -1,12 +1,10 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "Inline Spectrogram",
+	name        = "a-Inline Spectrogram",
 	category    = "Visualization",
-	license     = "GPLv2",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
-	description = [[An Example DSP Plugin to display a spectrom on the mixer strip]]
+	license     = "MIT",
+	author      = "Ardour Team",
+	description = [[Mixer strip inline spectrum display]]
 }
 
 -- return possible i/o configurations
