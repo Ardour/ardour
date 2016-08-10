@@ -1019,7 +1019,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			if ((*i)->active()) {
-				// why?  emit  ActiveChanged() ??
+				// emit ActiveChanged() and latency_changed() if needed
 				(*i)->activate ();
 			}
 

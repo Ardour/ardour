@@ -555,6 +555,13 @@ PluginInsert::activate ()
 	}
 
 	Processor::activate ();
+	/* when setting state e.g ProcessorBox::paste_processor_state ()
+	 * the plugin is not yet owned by a route.
+	 * but no matter.  Route::add_processors() will call activate () again
+	 */
+	if (!owner ()) {
+		return;
+	}
 	if (_plugin_signal_latency != signal_latency ()) {
 		_plugin_signal_latency = signal_latency ();
 		latency_changed ();
