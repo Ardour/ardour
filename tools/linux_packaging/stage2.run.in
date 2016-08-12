@@ -240,6 +240,13 @@ if test -n "$MULTABI_BUNDLE"; then
 	else
 		ABI=-gcc5
 	fi
+  # allow to manually override
+	if test "$1" = "--gcc4"; then
+		ABI=-gcc4
+	fi
+	if test "$1" = "--gcc5"; then
+		ABI=-gcc5
+	fi
 else
 	ABI=
 fi

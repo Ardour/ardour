@@ -15,14 +15,14 @@ cd "${PKG_PATH}"
 # fd 1 is stdout
 if [ ! -t 1 ]; then
 	if which xterm > /dev/null; then
-		exec xterm -e "${PKG_PATH}/.stage2.run"
+		exec xterm -e "${PKG_PATH}/.stage2.run $@"
 	elif which gnome-terminal > /dev/null; then
-		exec gnome-terminal -e "${PKG_PATH}/.stage2.run"
+		exec gnome-terminal -e "${PKG_PATH}/.stage2.run $@"
 	elif which konsole > /dev/null; then
-		exec konsole -e "${PKG_PATH}/.stage2.run"
+		exec konsole -e "${PKG_PATH}/.stage2.run $@"
 	fi
 else
-	"${PKG_PATH}/.stage2.run"
+	"${PKG_PATH}/.stage2.run" "$@"
 fi
 
 cd "${SAVED_PWD}"
