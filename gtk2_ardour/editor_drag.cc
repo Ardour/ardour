@@ -518,7 +518,7 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit, const int32_t sub_nu
 		/* not that the frame rate used here can be affected by pull up/down which
 		   might be wrong.
 		*/
-		framecnt_t len = map.frame_at_beat (map.beat_at_frame (pos) + 1.0) - pos;
+		framecnt_t len = map.frame_at_beat (max (0.0, map.beat_at_frame (pos)) + 1.0) - pos;
 		return view->add_region (grab_frame(), len, commit, sub_num);
 	}
 
