@@ -235,7 +235,7 @@ esac
 ###################
 
 if test -n "$MULTABI_BUNDLE"; then
-	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --fail --gcc5 > /dev/null"; then
+	if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --fail --gcc5; then
 		ABI=-gcc4
 	else
 		ABI=-gcc5
@@ -306,7 +306,7 @@ fi
 if test -z "$ABI"; then
 	if %REPLACE_GCC5%; then
 		# Ardour was compiled with gcc5, warn on gcc4 systems
-		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc5; then
 			echo ""
 			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 			echo ""
@@ -321,7 +321,7 @@ if test -z "$ABI"; then
 		fi
 	else
 		# Ardour was compiled with gcc4, warn on gcc5 systems
-		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc4 ; then
 			echo ""
 			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 			echo ""
