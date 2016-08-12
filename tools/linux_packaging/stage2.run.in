@@ -235,7 +235,7 @@ esac
 ###################
 
 if test -n "$MULTABI_BUNDLE"; then
-	if ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --fail --gcc4 > /dev/null"; then
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --fail --gcc5 > /dev/null"; then
 		ABI=-gcc4
 	else
 		ABI=-gcc5
