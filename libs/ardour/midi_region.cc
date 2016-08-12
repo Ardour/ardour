@@ -230,7 +230,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
-	if (!pl || position_lock_style() != MusicTime) {
+	if (!pl) {
 		return;
 	}
 
@@ -238,12 +238,42 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 	const framepos_t old_length = _length;
 	const framepos_t old_start = _start;
 
+	PropertyChange s_and_l;
+
+	if (position_lock_style() == AudioTime) {
+		recompute_position_from_lock_style (0);
+
+		/*
+		  set _start to new position in tempo map.
+
+		  The user probably expects the region contents to maintain audio position as the 
+		  tempo changes, but AFAICT this requires modifying the src file to use
+		  SMPTE timestamps with the current disk read model (?).
+
+		  We could arguably use _start to set _start_beats here,
+		  resulting in viewport-like behaviour (the contents maintain
+		  their musical position while the region is stationary).
+
+		  For now, the musical position at the region start is retained, but subsequent events
+		  will maintain their beat distance according to the map.
+		*/
+		_start = _position - _session.tempo_map().frame_at_beat (beat() - _start_beats.val().to_double());
+
+		/* _length doesn't change for audio-locked regions. update length_beats to match. */
+		_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - _session.tempo_map().beat_at_frame (_position));
+
+		s_and_l.add (Properties::start);
+		s_and_l.add (Properties::length_beats);
+
+		send_change  (s_and_l);
+		return;
+	}
+
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
 	_length = _session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position;
 
-	PropertyChange s_and_l;
 	if (old_start != _start) {
 		s_and_l.add (Properties::start);
 	}
@@ -276,10 +306,14 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 		update_length_beats (sub_num);
 	}
 
-	/* leave _length_beats alone, and change _length to reflect the state of things
-	   at the new position (tempo map may dictate a different number of frames).
-	*/
-	Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position, sub_num);
+	if (position_lock_style() == AudioTime) {
+		_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - _session.tempo_map().beat_at_frame (_position));
+	} else {
+		/* leave _length_beats alone, and change _length to reflect the state of things
+		   at the new position (tempo map may dictate a different number of frames).
+		*/
+		Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position, sub_num);
+	}
 }
 
 framecnt_t

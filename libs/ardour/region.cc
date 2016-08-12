@@ -558,7 +558,13 @@ Region::update_after_tempo_map_change (bool send)
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
-	if (!pl || _position_lock_style != MusicTime) {
+	if (!pl) {
+		return;
+	}
+
+	if (_position_lock_style == AudioTime) {
+		/* don't signal as the actual position has not chnged */
+		recompute_position_from_lock_style (0);
 		return;
 	}
 
@@ -601,9 +607,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	   Notify a length change regardless (its more efficient for MidiRegions),
 	   and when Region has a _length_beats we will need it here anyway).
 	*/
-	if (position_lock_style() == MusicTime) {
-		p_and_l.add (Properties::length);
-	}
+	p_and_l.add (Properties::length);
 
 	send_change (p_and_l);
 
