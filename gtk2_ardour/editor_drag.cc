@@ -3430,7 +3430,7 @@ void
 BBTRulerDrag::setup_pointer_frame_offset ()
 {
 	TempoMap& map (_editor->session()->tempo_map());
-	const double beat_at_frame = map.beat_at_frame (raw_grab_frame());
+	const double beat_at_frame = max (0.0, map.beat_at_frame (raw_grab_frame()));
 	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
 	double beat = 0.0;
 
