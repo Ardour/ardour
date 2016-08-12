@@ -563,8 +563,6 @@ MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 void
 MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int32_t sub_num)
 {
-	framepos_t new_start;
-
 	if (locked()) {
 		return;
 	}
@@ -587,18 +585,17 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	 */
 
 	if (_position != position) {
+		/* sets _beat to new position.*/
 		set_position_internal (position, true, sub_num);
 		what_changed.add (Properties::position);
-	}
 
-	const double new_start_beat = _start_beats.val().to_double() + beat_delta;
-	new_start = _position - _session.tempo_map().frame_at_beat (beat() - new_start_beat);
+		const double new_start_beat = _start_beats.val().to_double() + beat_delta;
+		const framepos_t new_start = _position - _session.tempo_map().frame_at_beat (beat() - new_start_beat);
 
-	if (!verify_start_and_length (new_start, length)) {
-		return;
-	}
+		if (!verify_start_and_length (new_start, length)) {
+			return;
+		}
 
-	if (_start != new_start) {
 		_start_beats = Evoral::Beats (new_start_beat);
 		what_changed.add (Properties::start_beats);
 
@@ -607,6 +604,11 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	}
 
 	if (_length != length) {
+
+		if (!verify_start_and_length (_start, length)) {
+			return;
+		}
+
 		set_length_internal (length, sub_num);
 		what_changed.add (Properties::length);
 		what_changed.add (Properties::length_beats);
