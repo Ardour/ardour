@@ -1454,6 +1454,14 @@ TempoMap::metric_at (BBT_Time bbt) const
 	return m;
 }
 
+/** Returns the beat duration corresponding to the supplied frame, possibly returning a negative value.
+ * @param frame The session frame position.
+ * @return The beat duration according to the tempo map at the supplied frame.
+ * If the supplied frame lies before the first meter, the returned beat duration will be negative.
+ * The returned beat is obtained using the first meter and the continuation of the tempo curve (backwards).
+ *
+ * This function uses both tempo and meter.
+ */
 double
 TempoMap::beat_at_frame (const framecnt_t& frame) const
 {
@@ -1461,7 +1469,7 @@ TempoMap::beat_at_frame (const framecnt_t& frame) const
 	return beat_at_frame_locked (_metrics, frame);
 }
 
-/* meter / tempo section based */
+/* This function uses both tempo and meter.*/
 double
 TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
 {
@@ -1478,9 +1486,7 @@ TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame)
 			prev_m = static_cast<MeterSection*> (*i);
 		}
 	}
-	if (frame < prev_m->frame()) {
-		return 0.0;
-	}
+
 	const double beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
 
 	/* audio locked meters fake their beat */
@@ -2977,6 +2983,15 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 	MetricPositionChanged (); // Emit Signal
 }
 
+/** Returns the exact beat subdivision closest to the supplied frame, possibly returning a negative value.
+ * @param frame  The session frame position.
+ * @param sub_num The requested beat subdivision to use when rounding the frame position.
+ * @return The beat position of the supplied frame.
+ * If the supplied frame lies before the first meter, the return will be negative.
+ * The returned beat is obtained using the first meter and the continuation of the tempo curve (backwards).
+ *
+ * This function uses both tempo and meter.
+ */
 double
 TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
 {
@@ -2989,6 +3004,7 @@ double
 TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num)
 {
 	double beat = beat_at_frame_locked (metrics, frame);
+
 	if (sub_num > 1) {
 		beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
 	} else if (sub_num == 1) {
@@ -3009,7 +3025,7 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double tick_at_time = beat_at_frame_locked (_metrics, pos) * BBT_Time::ticks_per_beat;
+	const double tick_at_time = max (0.0, beat_at_frame_locked (_metrics, pos)) * BBT_Time::ticks_per_beat;
 	const double bbt_ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
 	const double total_beats = (tick_at_time + bbt_ticks) / BBT_Time::ticks_per_beat;
 
@@ -3032,7 +3048,7 @@ framepos_t
 TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	uint32_t ticks = (uint32_t) floor (beat_at_frame_locked (_metrics, fr) * BBT_Time::ticks_per_beat);
+	uint32_t ticks = (uint32_t) floor (max (0.0, beat_at_frame_locked (_metrics, fr)) * BBT_Time::ticks_per_beat);
 	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
 	uint32_t ticks_one_subdivisions_worth = (uint32_t) BBT_Time::ticks_per_beat / sub_num;
 
@@ -3715,7 +3731,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 						bbt.beats = 1;
 					}
 				}
-				pair<double, BBT_Time> start = make_pair (beat_at_frame_locked (_metrics, m->frame()), bbt);
+				pair<double, BBT_Time> start = make_pair (max (0.0, beat_at_frame_locked (_metrics, m->frame())), bbt);
 				m->set_beat (start);
 				m->set_pulse (pulse_at_frame_locked (_metrics, m->frame()));
 				meter = m;
@@ -3803,28 +3819,7 @@ TempoMap::framepos_plus_beats (framepos_t frame, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const TempoSection& ts = tempo_section_at_frame_locked (_metrics, frame);
-	MeterSection* prev_m = 0;
-	MeterSection* next_m = 0;
-
-	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-		if (!(*i)->is_tempo()) {
-			if (prev_m && (*i)->frame() > frame) {
-				next_m = static_cast<MeterSection*> (*i);
-				break;
-			}
-			prev_m = static_cast<MeterSection*> (*i);
-		}
-	}
-
-	double pos_beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
-
-	/* audio locked meters fake their beat */
-	if (next_m && next_m->beat() < pos_beat) {
-		pos_beat = next_m->beat();
-	}
-
-	return frame_at_beat_locked (_metrics, pos_beat + beats.to_double());
+	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */

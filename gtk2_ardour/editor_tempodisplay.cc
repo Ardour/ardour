@@ -279,7 +279,7 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, frame
 
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-	const double lower_beat = floor (_session->tempo_map().beat_at_frame (leftmost)) - 1.0;
+	const double lower_beat = floor (max (0.0, _session->tempo_map().beat_at_frame (leftmost))) - 1.0;
 	_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost);
 }
 

@@ -117,7 +117,7 @@ StepEditor::prepare_step_edit_region ()
 
 		const Meter& m = _mtv.session()->tempo_map().meter_at_frame (step_edit_insert_position);
 
-		double baf = _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position);
+		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position));
 		double next_bar_in_beats =  baf + m.divisions_per_bar();
 		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
 		framecnt_t len = next_bar_pos - step_edit_insert_position;
