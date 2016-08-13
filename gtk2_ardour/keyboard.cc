@@ -41,14 +41,26 @@ using Gtkmm2ext::Keyboard;
 #ifdef __APPLE__
 guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 #else
-guint ArdourKeyboard::constraint_mod = Keyboard::SecondaryModifier;
+guint ArdourKeyboard::constraint_mod = Keyboard::TertiaryModifier;
 #endif
+
+/* TrimDrag::start_grab() */
 guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
+
+/* TrimDrag::motion() */
 guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
-guint ArdourKeyboard::trim_anchored_mod = Keyboard::TertiaryModifier;
-guint ArdourKeyboard::fine_adjust_mod = Keyboard::SecondaryModifier;
-guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier;
-guint ArdourKeyboard::note_size_relative_mod = Keyboard::PrimaryModifier;
+
+/* TrimDrag::start_grab() */
+guint ArdourKeyboard::trim_anchored_mod = Keyboard::PrimaryModifier|Keyboard::TertiaryModifier;
+
+/* ControlPointDrag::motion() && LineDrag::motion()*/
+guint ArdourKeyboard::fine_adjust_mod = Keyboard::PrimaryModifier|Keyboard::SecondaryModifier;
+
+/* ControlPointDrag::start_grab() && MarkerDrag::motion() */
+guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier|Keyboard::Level4Modifier;
+
+/* NoteResizeDrag::start_grab() */
+guint ArdourKeyboard::note_size_relative_mod = Keyboard::TertiaryModifier;
 
 ArdourKeyboard::ArdourKeyboard (ARDOUR_UI& ardour_ui) : ui (ardour_ui)
 {
