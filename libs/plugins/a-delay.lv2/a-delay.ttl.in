@@ -15,7 +15,8 @@
 <urn:ardour:a-delay>
     a lv2:Plugin, doap:Project, lv2:DelayPlugin ;
 
-    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable>;
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
+		lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
 
     lv2:requiredFeature <http://lv2plug.in/ns/ext/options#options> ,
                         <http://lv2plug.in/ns/ext/urid#map> ;
@@ -86,16 +87,16 @@
         lv2:portProperty <http://lv2plug.in/ns/ext/port-props#hasStrictBounds> ;
         lv2:portProperty lv2:enumeration ;
         lv2:portProperty lv2:integer ;
-        lv2:scalePoint [ rdfs:label "a - Whole note"; rdf:value 1 ] ;
-        lv2:scalePoint [ rdfs:label "b - Half note"; rdf:value 2 ] ;
-        lv2:scalePoint [ rdfs:label "c - ♩"; rdf:value 4 ] ;
-        lv2:scalePoint [ rdfs:label "d - ♪"; rdf:value 8 ] ;
-        lv2:scalePoint [ rdfs:label "e - ♬"; rdf:value 16 ] ;
-        lv2:scalePoint [ rdfs:label "f - 32nd note"; rdf:value 32 ] ;
-        lv2:scalePoint [ rdfs:label "g - ♩³ (Triplet)"; rdf:value 6 ] ;
-        lv2:scalePoint [ rdfs:label "h - ♪³ (Triplet)"; rdf:value 12 ] ;
-        lv2:scalePoint [ rdfs:label "i - ♬³ (Triplet)"; rdf:value 24 ] ;
-        lv2:scalePoint [ rdfs:label "j - 32nd note (Triplet)"; rdf:value 48 ] ;
+        lv2:scalePoint [ rdfs:label "a - Whole note" ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "b - Half note" ; rdf:value 2 ] ;
+        lv2:scalePoint [ rdfs:label "c - ♩" ; rdf:value 4 ] ;
+        lv2:scalePoint [ rdfs:label "d - ♪" ; rdf:value 8 ] ;
+        lv2:scalePoint [ rdfs:label "e - ♬" ; rdf:value 16 ] ;
+        lv2:scalePoint [ rdfs:label "f - 32nd note" ; rdf:value 32 ] ;
+        lv2:scalePoint [ rdfs:label "g - ♩³ (Triplet)" ; rdf:value 6 ] ;
+        lv2:scalePoint [ rdfs:label "h - ♪³ (Triplet)" ; rdf:value 12 ] ;
+        lv2:scalePoint [ rdfs:label "i - ♬³ (Triplet)" ; rdf:value 24 ] ;
+        lv2:scalePoint [ rdfs:label "j - 32nd note (Triplet)" ; rdf:value 48 ] ;
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;

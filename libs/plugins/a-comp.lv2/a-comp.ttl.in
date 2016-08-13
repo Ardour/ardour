@@ -13,7 +13,8 @@
 <urn:ardour:a-comp>
     a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
-    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable>;
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
+		lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
 
     lv2:port [
         a lv2:InputPort, lv2:ControlPort ;
@@ -122,7 +123,7 @@
         lv2:index 10 ;
         lv2:symbol "lv2_sidechain_in" ;
         lv2:name "Sidechain Input" ;
-        lv2:portProperty lv2:isSideChain;
+        lv2:portProperty lv2:isSideChain ;
     ],
     [
         a lv2:OutputPort, lv2:AudioPort ;
