@@ -5032,25 +5032,36 @@ Editor::normalize_region ()
 	   obtain the maximum amplitude of them all.
 	*/
 	list<double> max_amps;
+	list<double> rms_vals;
 	double max_amp = 0;
+	double max_rms = 0;
+	bool use_rms = dialog.constrain_rms ();
+
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView const * arv = dynamic_cast<AudioRegionView const *> (*i);
-		if (arv) {
-			dialog.descend (1.0 / regions);
-			double const a = arv->audio_region()->maximum_amplitude (&dialog);
-
-			if (a == -1) {
-				/* the user cancelled the operation */
-				return;
-			}
-
-			max_amps.push_back (a);
-			max_amp = max (max_amp, a);
-			dialog.ascend ();
+		if (!arv) {
+			continue;
 		}
+		dialog.descend (1.0 / regions);
+		double const a = arv->audio_region()->maximum_amplitude (&dialog);
+		if (use_rms) {
+			double r = arv->audio_region()->rms (&dialog);
+			max_rms = max (max_rms, r);
+			rms_vals.push_back (r);
+		}
+
+		if (a == -1) {
+			/* the user cancelled the operation */
+			return;
+		}
+
+		max_amps.push_back (a);
+		max_amp = max (max_amp, a);
+		dialog.ascend ();
 	}
 
 	list<double>::const_iterator a = max_amps.begin ();
+	list<double>::const_iterator l = rms_vals.begin ();
 	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
@@ -5061,9 +5072,21 @@ Editor::normalize_region ()
 
 		arv->region()->clear_changes ();
 
-		double const amp = dialog.normalize_individually() ? *a : max_amp;
+		double amp = dialog.normalize_individually() ? *a : max_amp;
+		double target = dialog.target_peak (); // dB
 
-		arv->audio_region()->normalize (amp, dialog.target ());
+		if (use_rms) {
+			double const amp_rms = dialog.normalize_individually() ? *l : max_rms;
+			const double t_rms = dialog.target_rms ();
+			const gain_t c_peak = dB_to_coefficient (target);
+			const gain_t c_rms  = dB_to_coefficient (t_rms);
+			if ((amp_rms / c_rms) > (amp / c_peak)) {
+				amp = amp_rms;
+				target = t_rms;
+			}
+		}
+
+		arv->audio_region()->normalize (amp, target);
 
 		if (!in_command) {
 			begin_reversible_command (_("normalize"));
@@ -5072,6 +5095,7 @@ Editor::normalize_region ()
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 
 		++a;
+		++l;
 	}
 
 	if (in_command) {
