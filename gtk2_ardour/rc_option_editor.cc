@@ -563,6 +563,28 @@ public:
 		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
+		col = 1;
+
+		/* push points */
+		set_popdown_strings (_push_points_combo, dumb);
+		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
+
+		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Push points using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
 
 		l = manage (left_aligned_label (_("When Beginning a Trim:")));
 		l->set_name ("OptionEditorHeading");
@@ -769,28 +791,6 @@ public:
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
-
-		++row;
-		col = 1;
-
-		/* push points */
-		set_popdown_strings (_push_points_combo, dumb);
-		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
-
-		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
-				_push_points_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
-
-		l = manage (left_aligned_label (_("Push points using:")));
-		l->set_name ("OptionsLabel");
-
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		_box->pack_start (*t, false, false);
 	}
