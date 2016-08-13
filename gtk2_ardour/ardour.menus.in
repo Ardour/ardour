@@ -130,6 +130,7 @@
       <menu action="MarkerMenu">
         <menuitem action='add-location-from-playhead'/>
         <menuitem action='remove-location-from-playhead'/>
+        <menuitem action='toggle-location-at-playhead'/>
         <separator/>
         <menuitem action='goto-mark-1'/>
         <menuitem action='goto-mark-2'/>

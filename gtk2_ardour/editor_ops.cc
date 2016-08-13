@@ -2243,19 +2243,29 @@ Editor::set_session_end_from_playhead ()
 	_session->set_end_is_free (false);
 }
 
+
+void
+Editor::toggle_location_at_playhead_cursor ()
+{
+	if (!do_remove_location_at_playhead_cursor())
+	{
+		add_location_from_playhead_cursor();
+	}
+}
+
 void
 Editor::add_location_from_playhead_cursor ()
 {
 	add_location_mark (_session->audible_frame());
 }
 
-void
-Editor::remove_location_at_playhead_cursor ()
+bool
+Editor::do_remove_location_at_playhead_cursor ()
 {
+	bool removed = false;
 	if (_session) {
 		//set up for undo
 		XMLNode &before = _session->locations()->get_state();
-		bool removed = false;
 
 		//find location(s) at this time
 		Locations::LocationList locs;
@@ -2275,6 +2285,13 @@ Editor::remove_location_at_playhead_cursor ()
 			commit_reversible_command ();
 		}
 	}
+	return removed;
+}
+
+void
+Editor::remove_location_at_playhead_cursor ()
+{
+	do_remove_location_at_playhead_cursor ();
 }
 
 /** Add a range marker around each selected region */
