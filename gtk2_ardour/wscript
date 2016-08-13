@@ -849,6 +849,7 @@ def build(bld):
                     'ARDOUR_EXEC' : str (bld.env['lwrcase_dirname']),
                     'ARDOUR_ICON' : str (bld.env['lwrcase_dirname']),
                     'VERSION': str (bld.env['VERSION']),
+                    'DATE': str (bld.env['DATE']),
     }
 
     if bld.env['FREEDESKTOP']:
