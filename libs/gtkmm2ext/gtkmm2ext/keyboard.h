@@ -51,6 +51,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	int set_state (const XMLNode&, int version);
 
 	virtual void setup_keybindings () = 0;
+	static void reset_relevant_modifier_key_mask ();
 
 	typedef std::vector<uint32_t> State;
 	typedef uint32_t ModifierMask;
@@ -183,6 +184,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	int reset_bindings ();
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;
+	static sigc::signal0<void> RelevantModifierKeysChanged;
 
   protected:
 	static Keyboard* _the_keyboard;

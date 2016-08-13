@@ -33,7 +33,7 @@ class ARDOUR_UI;
 class ArdourKeyboard : public Gtkmm2ext::Keyboard
 {
   public:
-	ArdourKeyboard(ARDOUR_UI& ardour_ui) : ui(ardour_ui) {}
+	ArdourKeyboard(ARDOUR_UI&);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -43,6 +43,8 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	static Selection::Operation selection_type (guint state);
 
 	ARDOUR_UI& ui;
+
+	void reset_relevant_modifier_key_mask ();
 
 	/** @param state The button state from a GdkEvent.
 	 *  @return true if the modifier state indicates snap modifier
