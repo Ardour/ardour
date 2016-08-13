@@ -300,6 +300,25 @@ ArdourKeyboard::indicates_snap_delta (guint state)
 	return (contains_d && ((contains_s && d_contains_s) || !contains_s));
 }
 
+/* Constraint and copy modifiers are both in effect at the beginning of some drags, and may be set ambiguously */
+bool
+ArdourKeyboard::indicates_copy (guint state)
+{
+	const bool contains_c = Keyboard::modifier_state_contains (state, Keyboard::CopyModifier);
+	const bool equals_cs = Keyboard::modifier_state_equals (state, constraint_modifier ());
+
+	return  contains_c && !equals_cs;
+}
+
+bool
+ArdourKeyboard::indicates_constraint (guint state)
+{
+	const bool contains_cs = Keyboard::modifier_state_contains (state, constraint_modifier ());
+	const bool equals_c = Keyboard::modifier_state_equals (state, Keyboard::CopyModifier);
+
+	return contains_cs && !equals_c;
+}
+
 void
 ArdourKeyboard::set_constraint_modifier (guint mod)
 {

@@ -56,6 +56,16 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	 */
 	static bool indicates_snap_delta (guint state);
 
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates copy modifier
+	 */
+	static bool indicates_copy (guint state);
+
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates constraint modifier
+	 */
+	static bool indicates_constraint (guint state);
+
 	static void set_constraint_modifier (guint);
 	/** @return Modifier mask to constrain drags in a particular direction;
 	 */

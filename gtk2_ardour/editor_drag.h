@@ -282,6 +282,7 @@ private:
 	 */
 	ARDOUR::frameoffset_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
+	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
 
 class RegionDrag;

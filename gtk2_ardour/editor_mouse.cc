@@ -684,7 +684,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			new TempoMarkerDrag (
 				this,
 				item,
-				Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)
+				ArdourKeyboard::indicates_copy (event->button.state)
 				),
 			event
 			);
@@ -697,7 +697,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			new MeterMarkerDrag (
 				this,
 				item,
-				Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)
+				ArdourKeyboard::indicates_copy (event->button.state)
 				),
 			event
 			);
@@ -718,9 +718,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MinsecRulerItem:
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
-			&& !Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+			&& !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+		} else if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new BBTRulerDrag (this, item), event);
 		}
 		return true;
@@ -963,7 +963,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 				/* click on a normal region view */
-				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+				if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_copy_drag (item, event, clicked_regionview);
 				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 					add_region_brush_drag (item, event, clicked_regionview);
@@ -1164,7 +1164,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseObject:
 		switch (item_type) {
 		case RegionItem:
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+			if (ArdourKeyboard::indicates_copy (event->button.state)) {
 				add_region_copy_drag (item, event, clicked_regionview);
 			} else {
 				add_region_drag (item, event, clicked_regionview);

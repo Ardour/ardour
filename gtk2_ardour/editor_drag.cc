@@ -237,6 +237,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
 	, _snap_delta (0)
+	, _constraint_pressed (false)
 {
 
 }
@@ -261,6 +262,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
 
 	/* we set up x/y dragging constraints on first move */
+	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
 	_raw_grab_frame = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 
@@ -420,14 +422,14 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				if (Config->get_edit_mode() != Lock) {
 					if (event->motion.state & Gdk::BUTTON2_MASK) {
 						// if dragging with button2, the motion is x constrained, with constraint modifier it is y constrained
-						if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+						if (_constraint_pressed) {
 							_x_constrained = false;
 							_y_constrained = true;
 						} else {
 							_x_constrained = true;
 							_y_constrained = false;
 						}
-					} else if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+					} else if (_constraint_pressed) {
 						// if dragging normally, the motion is constrained to the first direction of movement.
 						if (_initially_vertical) {
 							_x_constrained = true;
@@ -3343,7 +3345,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	}
 
-	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* use vertical movement to alter tempo .. should be log */
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		stringstream strs;
@@ -3469,7 +3471,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		pf = adjusted_current_frame (event);
 	}
 
-	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer frame */
 		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_pulse (_pulse), pf, _pulse);
 	}
