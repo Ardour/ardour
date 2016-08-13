@@ -543,12 +543,13 @@ public:
 		/* constraint modifier */
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
 #ifdef __APPLE__
 								     Keyboard::primary_modifier_name (),
 #else
-								     Keyboard::secondary_modifier_name (),
+								     Keyboard::tertiary_modifier_name (),
 #endif
 								     restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
@@ -571,8 +572,9 @@ public:
 		set_popdown_strings (_push_points_combo, dumb);
 		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
 
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
 				_push_points_combo.set_active_text (S_(modifiers[x].name));
@@ -619,8 +621,10 @@ public:
 		/* anchored trim */
 		set_popdown_strings (_trim_anchored_combo, dumb);
 		_trim_anchored_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_anchored_modifier_chosen));
+
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::tertiary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_trim_anchored_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
 				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
@@ -664,7 +668,7 @@ public:
 		set_popdown_strings (_note_size_relative_combo, dumb);
 		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_note_size_relative_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
 				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
@@ -692,9 +696,9 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef __APPLE__
-		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
-		std::string mod_str = Keyboard::secondary_modifier_name();
+		mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
@@ -778,7 +782,7 @@ public:
 		set_popdown_strings (_fine_adjust_combo, dumb);
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::tertiary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_fine_adjust_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
