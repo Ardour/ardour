@@ -994,7 +994,6 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
 	}
 
 	if (!solved && recompute) {
-		warning << "Adding tempo may have left the tempo map unsolved." << endmsg;
 		recompute_map (_metrics);
 	}
 
@@ -1990,7 +1989,6 @@ TempoMap::bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) 
 		bbt.bars = 1;
 		bbt.beats = 1;
 		bbt.ticks = 0;
-		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
 		return bbt;
 	}
 
