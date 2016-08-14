@@ -79,13 +79,28 @@ uint32_t TrackerPattern::row_at_beats(Evoral::Beats beats)
 	return (beats - first_beats + half_row).to_double() * rows_per_beat;
 }
 
+uint32_t TrackerPattern::row_at_frame(framepos_t frame)
+{
+	return row_at_beats (_conv.from (frame));
+}
+
 uint32_t TrackerPattern::row_at_beats_min_delay(Evoral::Beats beats)
 {
 	Evoral::Beats tpr_minus_1 = Evoral::Beats::ticks(_ticks_per_row - 1);
 	return (beats - first_beats + tpr_minus_1).to_double() * rows_per_beat;
 }
 
+uint32_t TrackerPattern::row_at_frame_min_delay(framepos_t frame)
+{
+	return row_at_beats_min_delay(_conv.from (frame));
+}
+
 uint32_t TrackerPattern::row_at_beats_max_delay(Evoral::Beats beats)
 {
 	return (beats - first_beats).to_double() * rows_per_beat;
+}
+
+uint32_t TrackerPattern::row_at_frame_max_delay(framepos_t frame)
+{
+	return row_at_beats_max_delay (_conv.from (frame));
 }

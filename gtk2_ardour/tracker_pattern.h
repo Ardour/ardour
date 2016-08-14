@@ -20,8 +20,10 @@
 #define __ardour_gtk2_tracker_pattern_h_
 
 #include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 #include "ardour/session_handle.h"
+#include "ardour/beats_frames_converter.h"
 
 #include "ardour_dropdown.h"
 #include "ardour_window.h"
@@ -68,13 +70,22 @@ public:
 	// is _ticks_per_row/2.
 	uint32_t row_at_beats(Evoral::Beats beats);
 
+	// Like row_at_beats but use frame instead of beats
+	uint32_t row_at_frame(framepos_t frame);
+
 	// Return the row index assuming the beats is allowed to have the minimum
 	// negative delay (1 - _ticks_per_row).
 	uint32_t row_at_beats_min_delay(Evoral::Beats beats);
 
+	// Like row_at_beats_min_delay but use frame instead of beats
+	uint32_t row_at_frame_min_delay(framepos_t frame);
+
 	// Return the row index assuming the beats is allowed to have the maximum
 	// positive delay (_ticks_per_row - 1).
 	uint32_t row_at_beats_max_delay(Evoral::Beats beats);
+
+	// Like row_at_beats_max_delay but use frame instead of beats
+	uint32_t row_at_frame_max_delay(framepos_t frame);
 
 	// Number of rows per beat
 	uint8_t rows_per_beat;
