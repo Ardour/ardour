@@ -123,12 +123,12 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 
 	register_actions ();
 
+	setup_processor_menu_and_curves ();
+
 	setup_tooltips ();
 	setup_toolbar ();
 	setup_pattern ();
 	setup_scroller ();
-
-	setup_processor_menu_and_curves ();
 
 	set_beats_per_row_to (SnapToBeatDiv4);
 
@@ -1196,8 +1196,6 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		// TODO: add automation tracker pattern
-
 		mtp->set_rows_per_beat(rows_per_beat);
 		mtp->update_pattern();
 
@@ -1304,7 +1302,7 @@ MidiTrackerEditor::midi_track() const
 void
 MidiTrackerEditor::setup_pattern ()
 {
-	mtp = new MidiTrackerPattern(_session, region, midi_model, rows_per_beat);
+	mtp = new MidiTrackerPattern(_session, region, midi_model);
 
 	edit_column = -1;
 	editing_renderer = 0;

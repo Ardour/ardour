@@ -41,12 +41,9 @@ using Timecode::BBT_Time;
 
 MidiTrackerPattern::MidiTrackerPattern(ARDOUR::Session* session,
                                        boost::shared_ptr<ARDOUR::MidiRegion> region,
-                                       boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-                                       uint16_t rpb)
+                                       boost::shared_ptr<ARDOUR::MidiModel> midi_model)
 	: TrackerPattern(session, region), _midi_model(midi_model)
 {
-	set_rows_per_beat(rpb);
-	update_pattern();
 }
 
 void MidiTrackerPattern::update_pattern()

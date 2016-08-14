@@ -42,12 +42,10 @@ public:
 	// tracks should be more than enough).
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 	typedef std::multimap<uint32_t, boost::shared_ptr<NoteType> > RowToNotes;
-	typedef std::pair<RowToNotes::const_iterator, RowToNotes::const_iterator> NotesRange;
 
 	MidiTrackerPattern(ARDOUR::Session* session,
 	                   boost::shared_ptr<ARDOUR::MidiRegion> region,
-	                   boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-	                   uint16_t rpb);
+	                   boost::shared_ptr<ARDOUR::MidiModel> midi_model);
 
 	// Build or rebuild the pattern (implement TrackerPattern::update_pattern)
 	void update_pattern();
