@@ -67,7 +67,7 @@ public:
 		coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
 	}
 
-	double  when;
+	double  when; // absolute time in samples
 	double  value;
 	double* coeff; ///< double[4] allocated by Curve as needed
 };
