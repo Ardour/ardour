@@ -66,7 +66,7 @@ public:
 
 	void what_has_data(std::set<Parameter>&) const;
 
-        Glib::Threads::Mutex& control_lock() const { return _control_lock; }
+	Glib::Threads::Mutex& control_lock() const { return _control_lock; }
 
 protected:
 	virtual void control_list_marked_dirty () {}
