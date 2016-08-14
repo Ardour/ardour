@@ -773,6 +773,10 @@ def options(opt):
                     help='Turn on PT session import option')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option(
+        '--qm-dsp-include', type='string', action='store',
+        dest='qm_dsp_include', default='/usr/include/qm-dsp',
+        help='directory where the header files of qm-dsp can be found')
 
     for i in children:
         opt.recurse(i)
@@ -933,6 +937,8 @@ def configure(conf):
 
     if Options.options.use_external_libs:
         conf.define('USE_EXTERNAL_LIBS', 1)
+        conf.env.append_value(
+            'CXXFLAGS', '-I' + Options.options.qm_dsp_include)
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
