@@ -23,7 +23,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <sigc++/sigc++.h>
+#include <pbd/signals.h>
 
 #include "pbd/libpbd_visibility.h"
 
@@ -41,7 +41,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 
 	Transmitter (Channel);
 
-	sigc::signal<void,Channel, const char *> &sender() {
+	PBD::Signal2<void,Channel, const char *> &sender() {
 		return *send;
 	}
 
@@ -53,12 +53,12 @@ class LIBPBD_API Transmitter : public std::stringstream
 
   private:
 	Channel channel;
-	sigc::signal<void, Channel, const char *> *send;
+	PBD::Signal2<void, Channel, const char *> *send;
 
-	sigc::signal<void, Channel, const char *> info;
-	sigc::signal<void, Channel, const char *> warning;
-	sigc::signal<void, Channel, const char *> error;
-	sigc::signal<void, Channel, const char *> fatal;
+	PBD::Signal2<void, Channel, const char *> info;
+	PBD::Signal2<void, Channel, const char *> warning;
+	PBD::Signal2<void, Channel, const char *> error;
+	PBD::Signal2<void, Channel, const char *> fatal;
 };
 
 /* for EGCS 2.91.66, if this function is not compiled within the same
