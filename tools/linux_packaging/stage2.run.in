@@ -657,7 +657,10 @@ elif which jackdbus > /dev/null; then
 	JACK_INSTALLED="i"
 else
 	echo ""
-	echo "The program Jack is missing from this system. Jack is a required component of $PGM_NAME."
+	echo "The program Jack is missing from this system."
+	echo ""
+	echo "Jack is a very useful utility to allow you to interconnect $PGM_NAME and other audio/MIDI applications."
+	echo "You can use $PGM_NAME without it, but you may find it useful to have around."
 	echo ""
 
 	ANSWER=$(VaildateYesNoQuestion "Install jack using system software repository?")
