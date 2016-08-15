@@ -5564,6 +5564,10 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 frameoffset_t
 NoteDrag::total_dx (const guint state) const
 {
+	if (_x_constrained) {
+		return 0;
+	}
+
 	/* dx in frames */
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
 
@@ -5610,6 +5614,10 @@ NoteDrag::total_dx (const guint state) const
 int8_t
 NoteDrag::total_dy () const
 {
+	if (_y_constrained) {
+		return 0;
+	}
+
 	MidiStreamView* msv = _region->midi_stream_view ();
 	double const y = _region->midi_view()->y_position ();
 	/* new current note */
@@ -5629,8 +5637,8 @@ NoteDrag::motion (GdkEvent * event, bool)
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
-	double const tdx = _editor->sample_to_pixel (dx) - _cumulative_dx;
-	double const tdy = -dy * _note_height - _cumulative_dy;
+	double const tdx = _x_constrained ? 0 : _editor->sample_to_pixel (dx) - _cumulative_dx;
+	double const tdy = _y_constrained ? 0 : -dy * _note_height - _cumulative_dy;
 
 	if (tdx || tdy) {
 		_cumulative_dx += tdx;
@@ -5638,17 +5646,19 @@ NoteDrag::motion (GdkEvent * event, bool)
 
 		int8_t note_delta = total_dy();
 
-		_region->move_selection (tdx, tdy, note_delta);
+		if (tdx || tdy) {
+			_region->move_selection (tdx, tdy, note_delta);
 
-		/* the new note value may be the same as the old one, but we
-		 * don't know what that means because the selection may have
-		 * involved more than one note and we might be doing something
-		 * odd with them. so show the note value anyway, always.
-		 */
+			/* the new note value may be the same as the old one, but we
+			 * don't know what that means because the selection may have
+			 * involved more than one note and we might be doing something
+			 * odd with them. so show the note value anyway, always.
+			 */
 
-		uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
+			uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
 
-		_region->show_verbose_cursor_for_new_note_value (_primary->note(), new_note);
+			_region->show_verbose_cursor_for_new_note_value (_primary->note(), new_note);
+		}
 	}
 }
 
