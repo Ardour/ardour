@@ -111,12 +111,12 @@ namespace ARDOUR {
 	*/
 
 	enum InsertMergePolicy {
-		InsertMergeReject,  // no overlaps allowed
-		InsertMergeRelax,   // we just don't care about overlaps
-		InsertMergeReplace, // replace old with new
-		InsertMergeTruncateExisting, // shorten existing to avoid overlap
-		InsertMergeTruncateAddition, // shorten new to avoid overlap
-		InsertMergeExtend   // extend new (or old) to the range of old+new
+		InsertMergeReject,  ///< no overlaps allowed
+		InsertMergeRelax,   ///< we just don't care about overlaps
+		InsertMergeReplace, ///< replace old with new
+		InsertMergeTruncateExisting, ///< shorten existing to avoid overlap
+		InsertMergeTruncateAddition, ///< shorten new to avoid overlap
+		InsertMergeExtend   ///< extend new (or old) to the range of old+new
 	};
 
 	/** See evoral/Parameter.hpp
