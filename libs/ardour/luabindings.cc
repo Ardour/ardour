@@ -587,6 +587,12 @@ LuaBindings::common (lua_State* L)
 		// stub RouteGroup* is needed for new_audio_track()
 		.endClass ()
 
+		.deriveClass <PresentationInfo, PBD::Stateful> ("PresentationInfo")
+		.addFunction ("color", &PresentationInfo::color)
+		.addFunction ("set_color", &PresentationInfo::set_color)
+		.addFunction ("order", &PresentationInfo::order)
+		.endClass ()
+
 		.deriveWSPtrClass <Stripable, SessionObject> ("Stripable")
 		.addCast<Route> ("to_route")
 		.addFunction ("is_auditioner", &Stripable::is_auditioner)
@@ -603,6 +609,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("trim_control", &Stripable::trim_control)
 		.addFunction ("rec_enable_control", &Stripable::rec_enable_control)
 		.addFunction ("rec_safe_control", &Stripable::rec_safe_control)
+		.addFunction ("set_presentation_order", &Stripable::set_presentation_order)
+		.addFunction ("presentation_info_ptr", &Stripable::presentation_info_ptr)
+
 		.endClass ()
 
 		.deriveWSPtrClass <Route, Stripable> ("Route")
