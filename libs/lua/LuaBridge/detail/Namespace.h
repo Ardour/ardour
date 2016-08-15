@@ -783,13 +783,12 @@ private:
       return *this;
     }
 
-#if 0 // unused
     //--------------------------------------------------------------------------
     /**
       Add or replace a property member.
     */
     template <class TG, class TS>
-    Class <T>& addProperty (char const* name, TG (T::* get) () const, void (T::* set) (TS))
+    Class <T>& addProperty (char const* name, TG (T::* get) () const, bool (T::* set) (TS))
     {
       // Add to __propget in class and const tables.
       {
@@ -808,7 +807,7 @@ private:
         // Add to __propset in class table.
         rawgetfield (L, -2, "__propset");
         assert (lua_istable (L, -1));
-        typedef void (T::* set_t) (TS);
+        typedef bool (T::* set_t) (TS);
         new (lua_newuserdata (L, sizeof (set_t))) set_t (set);
         lua_pushcclosure (L, &CFunc::CallMember <set_t>::f, 1);
         rawsetfield (L, -2, name);
@@ -818,6 +817,7 @@ private:
       return *this;
     }
 
+#if 0 // unused
     // read-only
     template <class TG>
     Class <T>& addProperty (char const* name, TG (T::* get) () const)
@@ -835,6 +835,7 @@ private:
 
       return *this;
     }
+#endif
 
     //--------------------------------------------------------------------------
     /**
@@ -848,7 +849,7 @@ private:
       argument respectively.
     */
     template <class TG, class TS>
-    Class <T>& addProperty (char const* name, TG (*get) (T const*), void (*set) (T*, TS))
+    Class <T>& addProperty (char const* name, TG (*get) (T const*), bool (*set) (T*, TS))
     {
       // Add to __propget in class and const tables.
       {
@@ -878,6 +879,7 @@ private:
       return *this;
     }
 
+#if 0 // unused
     // read-only
     template <class TG, class TS>
     Class <T>& addProperty (char const* name, TG (*get) (T const*))
@@ -1545,6 +1547,7 @@ public:
 
       If the set function is omitted or null, the property is read-only.
   */
+#if 0 // unused
   template <class TG, class TS>
   Namespace& addProperty (char const* name, TG (*get) (), void (*set)(TS) = 0)
   {
@@ -1576,6 +1579,7 @@ public:
 
     return *this;
   }
+#endif
 
   //----------------------------------------------------------------------------
   /**
