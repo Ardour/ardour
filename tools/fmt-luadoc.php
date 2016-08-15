@@ -91,7 +91,7 @@ function arg2lua ($argtype, $flags = 0) {
 	$arg = preg_replace ('/ $/', '', $arg);
 
 	# filter out basic types
-	$builtin = array ('float', 'double', 'bool', 'std::string', 'int', 'long', 'unsigned long', 'unsigned int', 'unsigned char', 'char', 'void', 'char*', 'unsigned char*', 'void*');
+	$builtin = array ('float', 'double', 'bool', 'std::string', 'int', 'short', 'long', 'unsigned int', 'unsigned short', 'unsigned long', 'unsigned char', 'char', 'void', 'char*', 'unsigned char*', 'void*');
 	if (in_array ($arg, $builtin)) {
 		return array ($arg => $flags);
 	}
@@ -259,6 +259,13 @@ foreach ($doc as $b) {
 			'name' => luafn2class ($b['lua']),
 			'args' => decl2args ($b['ldec']),
 			'cand' => canonical_ctor ($b)
+		);
+		break;
+	case "Property":
+		checkclass ($b);
+		$classlist[luafn2class ($b['lua'])]['props'][] = array (
+			'name' => $b['lua'],
+			'ret'  => arg2lua (datatype ($b['ldec']))
 		);
 		break;
 	case "Data Member":
@@ -686,6 +693,17 @@ function format_class_members ($ns, $cl, &$dups) {
 		}
 	}
 
+	# print properties - if any
+	if (isset ($cl['props'])) {
+		usort ($cl['props'], 'name_sort_cb');
+		$rv.= ' <tr><th colspan="3">Properties</th></tr>'.NL;
+		foreach ($cl['props'] as $f) {
+			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
+			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
+			$rv.= '</td><td class="fill"></td></tr>'.NL;
+		}
+	}
+	return $rv;
 	# print data members - if any
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');

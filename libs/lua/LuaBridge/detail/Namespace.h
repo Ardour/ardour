@@ -790,6 +790,7 @@ private:
     template <class TG, class TS>
     Class <T>& addProperty (char const* name, TG (T::* get) () const, bool (T::* set) (TS))
     {
+      DATADOC ("Property", name, get)
       // Add to __propget in class and const tables.
       {
         rawgetfield (L, -2, "__propget");
