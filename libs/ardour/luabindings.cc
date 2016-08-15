@@ -171,6 +171,9 @@ CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanMapping);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::LuaTableRef);
+CLASSKEYS(PBD::Configuration);
+CLASSKEYS(ARDOUR::PresentationInfo);
+CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(PBD::ID);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::PluginInfo);
@@ -275,6 +278,9 @@ LuaBindings::common (lua_State* L)
 
 		.deriveClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructible")
 		.endClass ()
+
+		.deriveClass <PBD::Configuration, PBD::Stateful> ("Configuration")
+		.endClass()
 
 		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
 		.endClass ()
@@ -1182,6 +1188,25 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_buffer_size", &AudioEngine::set_buffer_size)
 		.addFunction ("get_last_backend_error", &AudioEngine::get_last_backend_error)
 		.endClass()
+
+		.deriveClass <SessionConfiguration, PBD::Configuration> ("SessionConfiguration")
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+#define CONFIG_VARIABLE(Type,var,name,value) \
+		.addFunction ("get_" # var, &SessionConfiguration::get_##var) \
+		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
+		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
+
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
+		.addFunction ("get_" # var, &SessionConfiguration::get_##var) \
+		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
+		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
+
+#include "ardour/session_configuration_vars.h"
+
+#undef CONFIG_VARIABLE
+#undef CONFIG_VARIABLE_SPECIAL
+		.endClass()
 		.endNamespace ();
 
 	// basic representation of Session
@@ -1242,6 +1267,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("worst_input_latency", &Session::worst_input_latency)
 		.addFunction ("worst_track_latency", &Session::worst_track_latency)
 		.addFunction ("worst_playback_latency", &Session::worst_playback_latency)
+		.addFunction ("cfg", &Session::cfg)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")

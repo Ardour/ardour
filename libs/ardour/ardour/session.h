@@ -1007,6 +1007,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	SessionConfiguration config;
 
+	SessionConfiguration* cfg () { return &config; }
+
 	bool exporting () const {
 		return _exporting;
 	}
