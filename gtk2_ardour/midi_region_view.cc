@@ -4122,18 +4122,19 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_fr
 {
 	PublicEditor& editor = trackview.editor ();
 	const Evoral::Beats grid_beats = get_grid_beats(p);
-	const Evoral::Beats p_beat = max (Evoral::Beats(), region_frames_to_region_beats (p));
-
-	grid_frames = region_beats_to_region_frames (p_beat + grid_beats) - region_beats_to_region_frames (p_beat);
+	Evoral::Beats p_beat = max (Evoral::Beats(), region_frames_to_region_beats (p));
+	const double rem = fmod (p_beat.to_double(), grid_beats.to_double());
 
 	/* Hack so that we always snap to the note that we are over, instead of snapping
 	   to the next one if we're more than halfway through the one we're over.
 	*/
-	if (editor.snap_mode() == SnapNormal && p >= grid_frames / 2) {
-		p -= grid_frames / 2;
+	if (editor.snap_mode() == SnapNormal && rem >= grid_beats.to_double() / 2.0) {
+		p_beat -= Evoral::Beats(grid_beats.to_double() / 2.0);
 	}
 
-	return snap_frame_to_frame (p);
+	const framepos_t snap_me = trackview.session()->tempo_map().frame_at_beat (p_beat.to_double() + _region->beat()) - _region->position();
+
+	return snap_frame_to_frame (snap_me);
 }
 
 ChannelMode
