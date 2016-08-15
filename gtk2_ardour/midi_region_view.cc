@@ -1716,8 +1716,9 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double x0 = trackview.editor().sample_to_pixel (note_start_frames);
 	double x1;
 	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
-	double y1;/* trim note display to not overlap the end of its region */
+	double y1;
 
+	/* trim note display to not overlap the end of its region */
 	if (note->length() > 0) {
 		Evoral::Beats note_end_time = note->end_time();
 
