@@ -603,13 +603,13 @@ then
 	
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
-	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
+	chmod ugo+rwx "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
 else
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
-	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
+	chmod ugo+rwx "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
 fi
 
 echo ""
