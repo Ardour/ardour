@@ -310,10 +310,10 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 }
 
 void
-Gtkmm2ext::position_menu_anchored (const Gtk::Menu* const menu,
+_position_menu_anchored (int& x, int& y, bool& push_in,
+                                   const Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
-                                   const std::string& selected,
-                                   int& x, int& y, bool& push_in) {
+                                   const std::string& selected) {
 	using namespace Gdk;
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -414,6 +414,18 @@ Gtkmm2ext::position_menu_anchored (const Gtk::Menu* const menu,
 	}
 
 	push_in = false;
+}
+
+void
+Gtkmm2ext::anchored_menu_popup (Gtk::Menu* const menu,
+                                Gtk::Widget* const anchor,
+                                const std::string& selected,
+                                guint button, guint32 time) {
+	menu->popup(
+		sigc::bind (sigc::ptr_fun(&_position_menu_anchored),
+		            menu, anchor, selected),
+		button,
+		time);
 }
 
 void

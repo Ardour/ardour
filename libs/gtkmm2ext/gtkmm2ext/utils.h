@@ -97,10 +97,10 @@ namespace Gtkmm2ext {
 								       int clip_height,
 								       Gdk::Color fg);
 
-	LIBGTKMM2EXT_API void position_menu_anchored (const Gtk::Menu* const menu,
-	                                              Gtk::Widget* const anchor,
-	                                              const std::string& selected,
-	                                              int& x, int& y, bool& push_in);
+	LIBGTKMM2EXT_API void anchored_menu_popup (Gtk::Menu* const menu,
+	                                           Gtk::Widget* const anchor,
+	                                           const std::string& selected,
+	                                           guint button, guint32 time);
 
 	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&,
 	                          const std::vector<std::string>&);

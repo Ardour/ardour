@@ -38,7 +38,6 @@ class ArdourDropdown : public ArdourButton
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll*);
-	void position_menu(int&, int&, bool&);
 	void menu_size_request(Gtk::Requisition*);
 
 	void clear_items ();

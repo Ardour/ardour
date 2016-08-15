@@ -67,17 +67,11 @@ ArdourDropdown::menu_size_request(Requisition *req) {
 	req->width = max(req->width, get_allocation().get_width());
 }
 
-void
-ArdourDropdown::position_menu(int& x, int& y, bool& push_in) {
-    Gtkmm2ext::position_menu_anchored (&_menu, this, get_text(), x, y, push_in);
-}
-
 bool
 ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->type == GDK_BUTTON_PRESS) {
-		_menu.popup (sigc::mem_fun(this, &ArdourDropdown::position_menu),
-		             1, ev->time);
+		Gtkmm2ext::anchored_menu_popup(&_menu, this, get_text(), 1, ev->time);
 	}
 	return true;
 }

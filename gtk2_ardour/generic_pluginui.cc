@@ -955,9 +955,7 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
-	automation_menu->popup (
-		boost::bind (&Gtkmm2ext::position_menu_anchored, automation_menu, &cui->automate_button, "", _1, _2, _3),
-		1, gtk_get_current_event_time());
+	anchored_menu_popup(automation_menu, &cui->automate_button, "", 1, gtk_get_current_event_time());
 }
 
 void
