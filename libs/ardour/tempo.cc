@@ -3143,7 +3143,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double beat_at_framepos = beat_at_frame_locked (_metrics, frame);
+	const double beat_at_framepos = max (0.0, beat_at_frame_locked (_metrics, frame));
 	BBT_Time bbt (bbt_at_beat_locked (_metrics, beat_at_framepos));
 
 	switch (type) {
