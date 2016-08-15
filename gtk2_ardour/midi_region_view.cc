@@ -3747,9 +3747,12 @@ MidiRegionView::update_ghost_note (double x, double y)
 
 	/* calculate time in beats relative to start of source */
 	const Evoral::Beats length = get_grid_beats(unsnapped_frame);
-	const Evoral::Beats time   = std::max(
+	const uint32_t divisions   = editor.get_grid_music_divisions (0);
+
+	Evoral::Beats time         = std::max(
 		Evoral::Beats(),
-		absolute_frames_to_source_beats (f + _region->position ()));
+		Evoral::Beats (trackview.session()->tempo_map().exact_beat_at_frame (f + _region->position(), divisions))
+		- (_region->beat() - midi_region()->start_beats().to_double()));
 
 	_ghost_note->note()->set_time (time);
 	_ghost_note->note()->set_length (length);
