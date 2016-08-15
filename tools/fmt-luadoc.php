@@ -703,7 +703,7 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 		}
 	}
-	return $rv;
+
 	# print data members - if any
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');
