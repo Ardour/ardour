@@ -190,6 +190,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _latency_control_port;  ///< Special output set by ardour
 	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
+	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
+	double        _current_bpm;
 	PBD::ID       _insert_id;
 	std::string   _plugin_state_dir;
 	uint32_t      _patch_port_in_index;

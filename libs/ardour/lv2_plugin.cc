@@ -2416,14 +2416,28 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 
 			if (valid && (flags & PORT_INPUT)) {
-				Timecode::BBT_Time bbt;
 				if ((flags & PORT_POSITION)) {
+					Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
+					double bpm = tmetric.tempo().beats_per_minute();
+					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
+					               + (bbt.beats - 1)
+					               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);
+					beatpos *= tmetric.meter().note_divisor() / 4.0;
+#if 0 // DEBUG
+					// XXX BUG beats_per_minute() is most recent fixed tempo -- not ramped
+					printf("POS:%ld <> %ld SPD: %f <> %f BBT: %f <> %f  BPM: %f <> %f\n",
+							start, _next_cycle_start,
+							speed, _next_cycle_speed,
+							beatpos, _next_cycle_beat,
+							bpm, _current_bpm);
+#endif
 					if (start != _next_cycle_start ||
-					    speed != _next_cycle_speed) {
-						// Transport has changed, write position at cycle start
-						bbt = tmap.bbt_at_frame (start);
+							speed != _next_cycle_speed ||
+							rint (1000 * beatpos) != rint(1000 * _next_cycle_beat) ||
+							bpm != _current_bpm) {
+						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, speed, start, 0);
+								tmetric, bbt, speed, start, 0);
 					}
 				}
 
@@ -2452,6 +2466,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						++m;
 					} else {
 						tmetric.set_metric(metric);
+						Timecode::BBT_Time bbt;
 						bbt = tmap.bbt_at_pulse (metric->pulse());
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, speed,
@@ -2707,6 +2722,21 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	// Update expected transport information for next cycle so we can detect changes
 	_next_cycle_speed = speed;
 	_next_cycle_start = end;
+
+	{
+		/* keep track of lv2:timePosition like plugins can do.
+		 * Note: for no-midi plugins, we only ever send information at cycle-start,
+		 * so it needs to be realative to that.
+		 */
+		TempoMetric t = tmap.metric_at(start);
+		_current_bpm = t.tempo().beats_per_minute();
+		Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
+		double beatpos = (bbt.bars - 1) * t.meter().divisions_per_bar()
+		               + (bbt.beats - 1)
+		               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);
+		beatpos *= tmetric.meter().note_divisor() / 4.0;
+		_next_cycle_beat = beatpos + nframes * speed * _current_bpm / (60.f * _session.frame_rate());
+	}
 
 	if (_latency_control_port) {
 		framecnt_t new_latency = signal_latency ();
