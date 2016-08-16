@@ -69,9 +69,9 @@ Manager::register_window (ProxyBase* info)
 			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
 		}
 
-		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
-			 info->action_name().c_str(), info->menu_name().c_str(),
-			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
+		ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
+		                                                              info->action_name().c_str(), info->menu_name().c_str(),
+		                                                              sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info));
 
 		info->signal_map.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_mapped), info));
 		info->signal_unmap.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_unmapped), info));
