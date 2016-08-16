@@ -1583,7 +1583,12 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 		WeakRouteList r;
 		r.push_back (route ());
 		group_menu->build (r);
-		group_menu->menu()->popup (1, ev->time);
+
+		RouteGroup *rg = _route->route_group();
+
+		Gtkmm2ext::anchored_menu_popup(group_menu->menu(), &group_button,
+		                               rg ? rg->name() : _("No Group"),
+		                               1, ev->time);
 	}
 
 	return true;
