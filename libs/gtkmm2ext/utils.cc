@@ -396,7 +396,8 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 
 	MenuList::const_iterator i = items.begin();
 	for ( ; i != items.end(); ++i) {
-		if (selected == ((std::string) i->get_label())) {
+		const Label* label_widget = dynamic_cast<const Label*>(i->get_child());
+		if (label_widget && selected == ((std::string) label_widget->get_label())) {
 			break;
 		}
 		offset += i->size_request().height;
