@@ -311,6 +311,12 @@ def enoify (major, minor):
             return "\\n\\\"Before and After Science\\\""
         elif minor == 1:
             return "\\n\\\"After the Heat\\\""
+        elif minor == 2:
+            return "\\n\\\"Music for Airports\\\""
+        elif minor == 3:
+            return "\\n\\\"Music for Films\\\""
+        elif minor == 4:
+            return "\\n\\\"In a Land of Clear Colours\\\""
     return "\\\"\\\""
 
 def options(opt):
