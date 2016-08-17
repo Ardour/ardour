@@ -287,7 +287,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void update_input_displays (); // workaround for preset load
 	void control_combo_changed (ControlUI* cui, float value);
 
-	void astate_clicked (ControlUI*);
+	bool astate_button_event (GdkEventButton* ev, ControlUI*);
 	void automation_state_changed (ControlUI*);
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void set_all_automation (ARDOUR::AutoState state);

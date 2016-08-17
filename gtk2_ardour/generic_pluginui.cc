@@ -830,9 +830,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
-			control_ui->automate_button.signal_clicked.connect (sigc::bind (
-						sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
-						control_ui));
+			control_ui->automate_button.signal_button_press_event().connect (
+					sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_button_event),
+					            control_ui),
+					false);
 			mcontrol->alist()->automation_state_changed.connect (
 					control_connections,
 					invalidator (*this),
@@ -932,9 +933,13 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	return control_ui;
 }
 
-void
-GenericPluginUI::astate_clicked (ControlUI* cui)
+bool
+GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 {
+	if (ev->button != 1) {
+		return true;
+	}
+
 	using namespace Menu_Helpers;
 
 	if (automation_menu == 0) {
@@ -955,7 +960,10 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
-	anchored_menu_popup(automation_menu, &cui->automate_button, "", 1, gtk_get_current_event_time());
+	anchored_menu_popup(automation_menu, &cui->automate_button, cui->automate_button.get_text(),
+	                    1, ev->time);
+
+	return true;
 }
 
 void
