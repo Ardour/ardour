@@ -209,7 +209,7 @@ intptr_t Session::vst_callback (
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (tm.tempo());
+				const Tempo& t (session->tempo_map().tempo_at_frame (now));
 				timeinfo->tempo = t.beats_per_minute ();
 				newflags |= (kVstTempoValid);
 			}

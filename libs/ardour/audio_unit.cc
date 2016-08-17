@@ -1825,7 +1825,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	}
 
 	if (outCurrentTempo) {
-		*outCurrentTempo = floor (metric.tempo().beats_per_minute());
+		*outCurrentTempo = floor (session->tempo_map().tempo_at_frame (transport_frame + input_offset).beats_per_minute());
 	}
 
 	return noErr;
