@@ -4916,3 +4916,23 @@ Session::save_as (SaveAs& saveas)
 
 	return 0;
 }
+
+void
+Session::undo (uint32_t n)
+{
+	if (actively_recording()) {
+		return;
+	}
+
+	_history.undo (n);
+}
+
+void
+Session::redo (uint32_t n)
+{
+	if (actively_recording()) {
+		return;
+	}
+
+	_history.redo (n);
+}

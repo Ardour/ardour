@@ -874,13 +874,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
 	 */
-	void undo (uint32_t n) {
-		_history.undo (n);
-	}
-
-	void redo (uint32_t n) {
-		_history.redo (n);
-	}
+	void undo (uint32_t n);
+	/** Redo some transactions.
+	 * @param n Number of transactions to undo.
+	 */
+	void redo (uint32_t n);
 
 	UndoHistory& history() { return _history; }
 
