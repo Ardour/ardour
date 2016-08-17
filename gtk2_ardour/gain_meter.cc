@@ -768,7 +768,9 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 	switch (ev->button) {
 		case 1:
 			gain_astate_propagate = Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier));
-			gain_astate_menu.popup (1, ev->time);
+			Gtkmm2ext::anchored_menu_popup(&gain_astate_menu,
+			                               &gain_automation_state_button,
+			                               "", 1, ev->time);
 			break;
 		default:
 			break;
