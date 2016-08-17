@@ -429,6 +429,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time bbt_at_beat (const double& beats);
 
 	double pulse_at_bbt (const Timecode::BBT_Time& bbt);
+	double pulse_at_bbt_rt (const Timecode::BBT_Time& bbt);
 	Timecode::BBT_Time bbt_at_pulse (const double& pulse);
 
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
@@ -447,6 +448,10 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
 	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
 	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+
+	double quarter_note_at_frame (const framepos_t frame);
+	double quarter_note_at_frame_rt (const framepos_t frame);
+	framepos_t frame_at_quarter_note (const double quarter_note);
 
 	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);

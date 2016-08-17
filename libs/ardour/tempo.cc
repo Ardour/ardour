@@ -1862,6 +1862,18 @@ TempoMap::pulse_at_bbt (const Timecode::BBT_Time& bbt)
 }
 
 double
+TempoMap::pulse_at_bbt_rt (const Timecode::BBT_Time& bbt)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	if (!lm.locked()) {
+		throw std::logic_error ("TempoMap::pulse_at_bbt_rt() could not lock tempo map");
+	}
+
+	return pulse_at_bbt_locked (_metrics, bbt);
+}
+
+double
 TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const
 {
 	/* CALLER HOLDS READ LOCK */
@@ -1975,7 +1987,7 @@ TempoMap::bbt_at_frame_rt (framepos_t frame)
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
-		throw std::logic_error ("TempoMap::bbt_time_rt() could not lock tempo map");
+		throw std::logic_error ("TempoMap::bbt_at_frame_rt() could not lock tempo map");
 	}
 
 	return bbt_at_frame_locked (_metrics, frame);
@@ -2074,6 +2086,52 @@ TempoMap::frame_at_bbt_locked (const Metrics& metrics, const BBT_Time& bbt) cons
 	/* HOLD THE READER LOCK */
 
 	const framepos_t ret = frame_at_beat_locked (metrics, beat_at_bbt_locked (metrics, bbt));
+	return ret;
+}
+
+/**
+ * Returns the distance from 0 in quarter pulses at the supplied frame.
+ *
+ * Plugin APIs don't count ticks in the same way PROGRAM_NAME does.
+ * We use ticks per beat whereas the rest of the world uses ticks per quarter note.
+ * This is more or less the VST's ppqPos (a scalar you use to obtain tick position
+ * in whatever ppqn you're using).
+ *
+ * @param frame The distance in frames relative to session 0 whose quarter note distance you would like.
+ * @return The quarter note (quarter pulse) distance from session 0 to the supplied frame. Ignores meter.
+*/
+
+double
+TempoMap::quarter_note_at_frame (const framepos_t frame)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	const double ret = pulse_at_frame_locked (_metrics, frame) * 4.0;
+
+	return ret;
+}
+
+double
+TempoMap::quarter_note_at_frame_rt (const framepos_t frame)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		throw std::logic_error ("TempoMap::quarter_note_at_frame_rt() could not lock tempo map");
+	}
+
+	const double ret = pulse_at_frame_locked (_metrics, frame) * 4.0;
+
+	return ret;
+}
+
+framepos_t
+TempoMap::frame_at_quarter_note (const double quarter_note)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	const framepos_t ret = frame_at_pulse_locked (_metrics, quarter_note / 4.0);
+
 	return ret;
 }
 
