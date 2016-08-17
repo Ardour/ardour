@@ -4,7 +4,7 @@
 <!-- Created by The Eighth at 08-17-2016 2:17 p.m -->
 
 <!-- Warning! This map designed to use with Ardour's built-in equalizer plugin ("a-EQ"). So I bound all Midimix's volume knobs to e-EQ actions. Place a-EQ before faders or each track in a bank and you good to go. Since Midimix has only 3 volume knobs per track, I bound all middle knobs to four gains of an equaliser. That means that each middle knob controls a gain of all middle frequencies.  --> 
-
+<!-- Add "a-EQ" plugin to all tracks you want to operate with before applying this map. Otherwise, it will not work as it should. -->
 <!-- "Send all" button is not used here at all. Keep that in mind -->
 
 <!-- This line should define the number of tracks in a bank -->
