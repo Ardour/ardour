@@ -2276,6 +2276,7 @@ write_position(LV2_Atom_Forge*     forge,
                const TempoMetric&  t,
                Timecode::BBT_Time& bbt,
                double              speed,
+               double              bpm,
                framepos_t          position,
                framecnt_t          offset)
 {
@@ -2300,7 +2301,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_key(forge, urids.time_beatsPerBar);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
-	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
+	lv2_atom_forge_float(forge, bpm);
 #else
 	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
 	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
@@ -2317,7 +2318,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_property_head(forge, urids.time_beatsPerBar, 0);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_property_head(forge, urids.time_beatsPerMinute, 0);
-	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
+	lv2_atom_forge_float(forge, bpm);
 #endif
 
 	LV2_Evbuf_Iterator    end  = lv2_evbuf_end(buf);
@@ -2346,7 +2347,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 	if (_bpm_control_port) {
-		*_bpm_control_port = tmetric.tempo().beats_per_minute();
+		*_bpm_control_port = tmap.tempo_at_frame (start).beats_per_minute();
 	}
 
 #ifdef LV2_EXTENDED
@@ -2418,26 +2419,18 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
 					Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
-					double bpm = tmetric.tempo().beats_per_minute();
+					double bpm = tmap.tempo_at_frame (start).beats_per_minute();
 					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
 					               + (bbt.beats - 1)
 					               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);
 					beatpos *= tmetric.meter().note_divisor() / 4.0;
-#if 0 // DEBUG
-					// XXX BUG beats_per_minute() is most recent fixed tempo -- not ramped
-					printf("POS:%ld <> %ld SPD: %f <> %f BBT: %f <> %f  BPM: %f <> %f\n",
-							start, _next_cycle_start,
-							speed, _next_cycle_speed,
-							beatpos, _next_cycle_beat,
-							bpm, _current_bpm);
-#endif
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
 							rint (1000 * beatpos) != rint(1000 * _next_cycle_beat) ||
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-								tmetric, bbt, speed, start, 0);
+								tmetric, bbt, speed, bpm, start, 0);
 					}
 				}
 
@@ -2468,8 +2461,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						tmetric.set_metric(metric);
 						Timecode::BBT_Time bbt;
 						bbt = tmap.bbt_at_pulse (metric->pulse());
+						double bpm = tmap.tempo_at_frame (start/*XXX*/).beats_per_minute();
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, speed,
+						               tmetric, bbt, speed, bpm,
 						               metric->frame(),
 						               metric->frame() - start);
 						++metric_i;
@@ -2729,7 +2723,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * so it needs to be realative to that.
 		 */
 		TempoMetric t = tmap.metric_at(start);
-		_current_bpm = t.tempo().beats_per_minute();
+		_current_bpm = tmap.tempo_at_frame (start).beats_per_minute();
 		Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
 		double beatpos = (bbt.bars - 1) * t.meter().divisions_per_bar()
 		               + (bbt.beats - 1)
