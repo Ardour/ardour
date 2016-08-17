@@ -110,9 +110,9 @@ initReverb (b_reverb *r, const double rate)
 	r->end[1][3] = 2251 + stereowidth;
 
 	/* all pass filters right */
-	r->end[0][4] = 347 + stereowidth;
-	r->end[0][5] = 113 + stereowidth;
-	r->end[0][6] = 37 + stereowidth;
+	r->end[1][4] = 347 + stereowidth;
+	r->end[1][5] = 113 + stereowidth;
+	r->end[1][6] = 37 + stereowidth;
 
 	for (int i = 0; i < RV_NZ; ++i) {
 		r->delays[0][i] = NULL;
