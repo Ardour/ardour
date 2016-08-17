@@ -119,6 +119,13 @@ using Gtkmm2ext::Keyboard;
 void
 Editor::undo (uint32_t n)
 {
+	if (_session && _session->actively_recording()) {
+		/* no undo allowed while recording. Session will check also,
+		   but we don't even want to get to that.
+		*/
+		return;
+	}
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
@@ -136,12 +143,19 @@ Editor::undo (uint32_t n)
 void
 Editor::redo (uint32_t n)
 {
+	if (_session && _session->actively_recording()) {
+		/* no redo allowed while recording. Session will check also,
+		   but we don't even want to get to that.
+		*/
+		return;
+	}
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
 
 	if (_session) {
-		_session->redo (n);
+	_session->redo (n);
 		if (_session->redo_depth() == 0) {
 			redo_action->set_sensitive(false);
 		}
