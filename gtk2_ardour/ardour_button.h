@@ -124,6 +124,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void on_realize ();
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_grab_broken_event(GdkEventGrabBroken*);
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
 	bool on_key_release_event (GdkEventKey *);

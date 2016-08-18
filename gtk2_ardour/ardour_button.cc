@@ -97,6 +97,8 @@ ArdourButton::ArdourButton (Element e)
 	, _pattern_height (0)
 {
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	/* This is not provided by gtkmm */
+	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
@@ -140,6 +142,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	set_text (str);
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
+	/* This is not provided by gtkmm */
+	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
 }
 
 ArdourButton::~ArdourButton()
@@ -1058,6 +1062,16 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 	}
 
 	return CairoWidget::on_leave_notify_event (ev);
+}
+
+bool
+ArdourButton::on_grab_broken_event(GdkEventGrabBroken* grab_broken_event) {
+	/* Our implicit grab due to a button_press was broken by another grab:
+	 * the button will not get any button_release event if the mouse leaves
+	 * while the grab is taken, so unpress ourselves */
+	_grabbed = false;
+	CairoWidget::set_dirty ();
+	return true;
 }
 
 void
