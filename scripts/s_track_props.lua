@@ -32,7 +32,7 @@ function factory () return function ()
 			t:set_comment ("This is a Drum Track", nil)
 
 			-- and set the fader to -7dB  == 10 ^ (0.05 * -7)
-			t:amp():gain_control():set_value (10 ^ (0.05 * -7), PBD.GroupControlDisposition.NoGroup)
+			t:gain_control():set_value (10 ^ (0.05 * -7), PBD.GroupControlDisposition.NoGroup)
 		end
 	end
 end end
