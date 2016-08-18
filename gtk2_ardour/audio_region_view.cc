@@ -275,14 +275,6 @@ AudioRegionView::init (bool wfd)
 
 	setup_waveform_visibility ();
 
-	/* reset_width_dependent_items() does this:
-	if (frame_handle_start) {
-		frame_handle_start->raise_to_top ();
-	}
-	if (frame_handle_end) {
-		frame_handle_end->raise_to_top ();
-	}
-	*/
 	/* XXX sync mark drag? */
 }
 
