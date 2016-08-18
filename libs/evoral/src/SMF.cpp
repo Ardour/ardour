@@ -338,6 +338,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 	bool const store_id = (
 		c == MIDI_CMD_NOTE_ON ||
 		c == MIDI_CMD_NOTE_OFF ||
+		c == MIDI_CMD_NOTE_PRESSURE ||
 		c == MIDI_CMD_PGM_CHANGE ||
 		(c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
 	                       );

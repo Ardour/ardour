@@ -933,6 +933,8 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 			ev.time(), double ((0x7F & ev.pitch_bender_msb()) << 7
 			                   | (0x7F & ev.pitch_bender_lsb())),
 			evid);
+	} else if (ev.is_poly_pressure()) {
+		append_control_unlocked (Parameter (ev.event_type(), ev.channel(), ev.poly_note()), ev.time(), ev.poly_pressure(), evid);
 	} else if (ev.is_channel_pressure()) {
 		append_control_unlocked(
 			Parameter(ev.event_type(), ev.channel()),
