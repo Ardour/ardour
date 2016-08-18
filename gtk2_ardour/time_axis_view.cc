@@ -738,7 +738,10 @@ TimeAxisView::popup_display_menu (guint32 when)
 	conditionally_add_to_selection ();
 
 	build_display_menu ();
-	display_menu->popup (1, when);
+
+	if (!display_menu->items().empty()) {
+		display_menu->popup (1, when);
+	}
 }
 
 void
