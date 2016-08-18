@@ -353,7 +353,6 @@ MixerStrip::init ()
 	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::number_button_button_press), false);
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
-	name_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_release), false);
 
 	group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::select_route_group), false);
 
@@ -1726,28 +1725,19 @@ MixerStrip::build_route_ops_menu ()
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 3) {
+	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
-		route_ops_menu->popup (1, ev->time);
+		if (ev->button == 1) {
+			Gtkmm2ext::anchored_menu_popup(route_ops_menu, &name_button, "",
+			                               1, ev->time);
+		} else {
+			route_ops_menu->popup (3, ev->time);
+		}
 
 		return true;
-	}
-
-	return false;
-}
-
-gboolean
-MixerStrip::name_button_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 1) {
-		list_route_operations ();
-
-		/* do not allow rename if the track is record-enabled */
-		rename_menu_item->set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
-		route_ops_menu->popup (1, ev->time);
 	}
 
 	return false;

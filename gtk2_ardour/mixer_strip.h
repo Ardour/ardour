@@ -264,7 +264,6 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	Gtk::Menu* route_ops_menu;
 	void build_route_ops_menu ();
 	gboolean name_button_button_press (GdkEventButton*);
-	gboolean name_button_button_release (GdkEventButton*);
 	gboolean number_button_button_press (GdkEventButton*);
 	void list_route_operations ();
 
