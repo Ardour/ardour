@@ -178,9 +178,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	playlist_button.set_name ("route button");
 	automation_button.set_name ("route button");
 
-	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
-	playlist_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
-	automation_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
+	route_group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
+	playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click), false);
+	automation_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click), false);
 
 	if (is_track()) {
 
@@ -379,7 +379,7 @@ RouteTimeAxisView::setup_processor_menu_and_curves ()
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 }
 
-gint
+bool
 RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -393,9 +393,15 @@ RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 	r.push_back (route ());
 
 	route_group_menu->build (r);
-	route_group_menu->menu()->popup (ev->button, ev->time);
+	if (ev->button == 1) {
+		Gtkmm2ext::anchored_menu_popup(route_group_menu->menu(),
+		                               &route_group_button,
+		                               "", 1, ev->time);
+	} else {
+		route_group_menu->menu()->popup (ev->button, ev->time);
+	}
 
-	return false;
+	return true;
 }
 
 void
@@ -472,20 +478,31 @@ RouteTimeAxisView::take_name_changed (void *src)
 	}
 }
 
-void
-RouteTimeAxisView::playlist_click ()
+bool
+RouteTimeAxisView::playlist_click (GdkEventButton *ev)
 {
+	if (ev->button != 1) {
+		return true;
+	}
+
 	build_playlist_menu ();
 	conditionally_add_to_selection ();
-	playlist_action_menu->popup (1, gtk_get_current_event_time());
+	Gtkmm2ext::anchored_menu_popup(playlist_action_menu, &playlist_button,
+	                               "", 1, ev->time);
+	return true;
 }
 
-void
-RouteTimeAxisView::automation_click ()
+bool
+RouteTimeAxisView::automation_click (GdkEventButton *ev)
 {
+	if (ev->button != 1) {
+		return true;
+	}
+
 	conditionally_add_to_selection ();
 	build_automation_action_menu (false);
-	automation_action_menu->popup (1, gtk_get_current_event_time());
+	Gtkmm2ext::anchored_menu_popup(automation_action_menu, &automation_button,
+	                               "", 1, ev->time);
 }
 
 void
