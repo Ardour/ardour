@@ -37,6 +37,7 @@
 #include "midi_time_axis.h"
 
 #include "midi_tracker_pattern.h"
+#include "automation_tracker_pattern.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
@@ -113,8 +114,14 @@ class MidiTrackerEditor : public ArdourWindow
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
 
-	/** List of column indices currently unassigned to an automation */
+	// List of column indices currently unassigned to an automation
 	std::set<size_t> available_automation_columns;
+
+	// Map column index to automation parameter
+	std::map<size_t, Evoral::Parameter> col2param;
+
+	// Map column index to automation track index
+	std::map<size_t, size_t> col2autotrack;
 
 	ArdourButton                 automation_button;
 	Gtk::Menu                    subplugin_menu;
@@ -259,6 +266,7 @@ class MidiTrackerEditor : public ArdourWindow
 	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
 
 	MidiTrackerPattern* mtp;
+	AutomationTrackerPattern* atp;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;

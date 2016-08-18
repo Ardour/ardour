@@ -151,6 +151,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
 	delete mtp;
+	delete atp;
 	delete automation_action_menu;
 	delete controller_menu;
 }
@@ -210,6 +211,9 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	std::set<size_t>::iterator it = available_automation_columns.begin();
 	pan->column = *it;
 	available_automation_columns.erase(it);
+
+	// Associate that column to the parameter
+	col2param[pan->column] = what;
 }
 
 void
@@ -238,7 +242,6 @@ MidiTrackerEditor::show_all_automation ()
 	// 		}
 	// 	}
 
-
 	/* Show processor automation */
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
@@ -264,6 +267,8 @@ MidiTrackerEditor::show_all_automation ()
 
 	// 	request_redraw ();
 	// }
+
+	redisplay_model ();
 }
 
 void
@@ -1199,10 +1204,18 @@ MidiTrackerEditor::redisplay_model ()
 		mtp->set_rows_per_beat(rows_per_beat);
 		mtp->update_pattern();
 
+		atp->set_rows_per_beat(rows_per_beat);
+		atp->update_pattern();
+
 		TreeModel::Row row;
+
+		// Make sure that midi and automation regions start at the same frame
+		assert (mtp->frame_at_row(0) == atp->frame_at_row(0));
 		
+		uint32_t nrows = std::max(mtp->nrows, atp->nrows);
+
 		// Generate each row
-		for (uint32_t irow = 0; irow < mtp->nrows; irow++) {
+		for (uint32_t irow = 0; irow < nrows; irow++) {
 			row = *(model->append());
 			Evoral::Beats row_beats = mtp->beats_at_row(irow);
 			uint32_t row_frame = mtp->frame_at_row(irow);
@@ -1220,6 +1233,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
+			// Render midi notes pattern
 			for (size_t i = 0; i < (size_t)mtp->ntracks; i++) {
 
 				if (visible_blank) {
@@ -1254,7 +1268,7 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
 							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
 							if (delay_ticks != 0)
-								row[columns.delay[i]] = to_string(delay_ticks);
+								row[columns.delay[i]] = to_string (delay_ticks);
 						}
 
 						// Notes on
@@ -1275,6 +1289,41 @@ MidiTrackerEditor::redisplay_model ()
 					}
 				}
 			}
+
+			// Render automation pattern
+			for (std::map<size_t, Evoral::Parameter>::const_iterator cp_it = col2param.begin(); cp_it != col2param.end(); ++cp_it) {
+				size_t col_idx = cp_it->first;
+				size_t i = col2autotrack[col_idx];
+				const Evoral::Parameter& param = cp_it->second;
+				const AutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
+				size_t auto_count = r2at.count(irow);
+
+				if (visible_blank) {
+					// Fill with blank
+					row[columns.automation[i]] = "---";
+				}
+
+				// TODO
+				//
+				// 1. add automation delay
+				//
+				// 2. add automation interpolation
+
+				if (auto_count > 0) {
+					bool undefined = auto_count > 1;
+					if (undefined) {
+						row[columns.automation[i]] = undefined_str;
+					} else {
+						AutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
+						if (auto_it != r2at.end()) {
+							double auto_value = (*auto_it->second)->value;
+							row[columns.automation[i]] = to_string (auto_value);
+							// Keep the automation iterator around for editing it
+							row[columns._automation[i]] = auto_it->second;
+						}
+					}
+				}
+			}
 		}
 	}
 	view.set_model (model);
@@ -1284,7 +1333,8 @@ MidiTrackerEditor::redisplay_model ()
 	redisplay_visible_channel();
 	redisplay_visible_velocity();
 	redisplay_visible_delay();
-	redisplay_visible_automation();
+	// TODO fix redisplay_visible_automation
+	// redisplay_visible_automation();
 }
 
 bool
@@ -1303,6 +1353,16 @@ void
 MidiTrackerEditor::setup_pattern ()
 {
 	mtp = new MidiTrackerPattern(_session, region, midi_model);
+
+	// Get automation controls
+	AutomationControlSet acs;
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+			string name = (*i)->processor->describe_parameter ((*ii)->what);
+			acs.insert(boost::dynamic_pointer_cast<AutomationControl>((*i)->processor->control((*ii)->what)));
+		}
+	}
+	atp = new AutomationTrackerPattern(_session, region, acs);
 
 	edit_column = -1;
 	editing_renderer = 0;
@@ -1360,6 +1420,7 @@ MidiTrackerEditor::setup_pattern ()
 		view.append_column (*viewcolumn_automation);
 		view.get_column(column)->set_visible (false);
 		available_automation_columns.insert(column);
+		col2autotrack[column] = i;
 	}
 
 	view.set_headers_visible (true);
