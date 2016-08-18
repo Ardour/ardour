@@ -162,6 +162,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
 
 	gain_astate_menu.set_name ("ArdourContextMenu");
+	gain_astate_menu.set_reserve_toggle_size(false);
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
