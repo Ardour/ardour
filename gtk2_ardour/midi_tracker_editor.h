@@ -120,6 +120,10 @@ class MidiTrackerEditor : public ArdourWindow
 	// Map column index to automation parameter
 	std::map<size_t, Evoral::Parameter> col2param;
 
+	// Map Parameter to AutomationControl
+	typedef std::map<Evoral::Parameter, boost::shared_ptr<ARDOUR::AutomationControl> > Parameter2AutomationControl;
+	Parameter2AutomationControl param2actrl;
+
 	// Map column index to automation track index
 	std::map<size_t, size_t> col2autotrack;
 
@@ -153,6 +157,8 @@ class MidiTrackerEditor : public ArdourWindow
 	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
 	void add_processor_automation_column (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
+
+	void build_param2actrl ();
 
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();

@@ -125,6 +125,8 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 
 	setup_processor_menu_and_curves ();
 
+	build_param2actrl ();
+
 	setup_tooltips ();
 	setup_toolbar ();
 	setup_pattern ();
@@ -1316,11 +1318,19 @@ MidiTrackerEditor::redisplay_model ()
 					} else {
 						AutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
 						if (auto_it != r2at.end()) {
-							double auto_value = (*auto_it->second)->value;
-							row[columns.automation[i]] = to_string (auto_value);
+							double auto_val = (*auto_it->second)->value;
+							row[columns.automation[i]] = to_string (auto_val);
 							// Keep the automation iterator around for editing it
 							row[columns._automation[i]] = auto_it->second;
 						}
+					}
+				} else {
+					// Interpolation
+					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
+					if (alist->interpolation() != Evoral::ControlList::Discrete) {
+						double inter_auto_val = alist->eval(row_frame);
+						// TODO change the color (grey or such)
+						row[columns.automation[i]] = to_string (inter_auto_val);
 					}
 				}
 			}
@@ -1350,18 +1360,25 @@ MidiTrackerEditor::midi_track() const
 }
 
 void
+MidiTrackerEditor::build_param2actrl ()
+{
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+			string name = (*i)->processor->describe_parameter ((*ii)->what);
+			param2actrl[(*ii)->what] = boost::dynamic_pointer_cast<AutomationControl>((*i)->processor->control((*ii)->what));
+		}
+	}
+}
+
+void
 MidiTrackerEditor::setup_pattern ()
 {
 	mtp = new MidiTrackerPattern(_session, region, midi_model);
 
 	// Get automation controls
 	AutomationControlSet acs;
-	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-			string name = (*i)->processor->describe_parameter ((*ii)->what);
-			acs.insert(boost::dynamic_pointer_cast<AutomationControl>((*i)->processor->control((*ii)->what)));
-		}
-	}
+	for (Parameter2AutomationControl::const_iterator it = param2actrl.begin(); it != param2actrl.end(); ++it)
+		acs.insert(it->second);
 	atp = new AutomationTrackerPattern(_session, region, acs);
 
 	edit_column = -1;
