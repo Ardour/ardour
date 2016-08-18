@@ -503,6 +503,7 @@ RouteTimeAxisView::automation_click (GdkEventButton *ev)
 	build_automation_action_menu (false);
 	Gtkmm2ext::anchored_menu_popup(automation_action_menu, &automation_button,
 	                               "", 1, ev->time);
+	return true;
 }
 
 void
