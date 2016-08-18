@@ -48,7 +48,7 @@ void AutomationTrackerPattern::update_pattern()
 		boost::shared_ptr<AutomationList> al = (*actrl)->alist();
 		const Evoral::Parameter& param = (*actrl)->parameter();
 		// Build automation pattern
-		for (AutomationList::const_iterator it = al->begin(); it != al->end(); ++it) {
+		for (AutomationList::iterator it = al->begin(); it != al->end(); ++it) {
 			framepos_t frame = (*it)->when;
 			uint32_t row = row_at_frame(frame);
 			if (automations[param].count(row) == 0)

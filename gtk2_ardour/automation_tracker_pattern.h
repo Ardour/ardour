@@ -37,8 +37,8 @@ typedef std::set<boost::shared_ptr<ARDOUR::AutomationControl> > AutomationContro
  */
 class AutomationTrackerPattern : public TrackerPattern {
 public:
-	typedef ARDOUR::AutomationList::const_iterator AutomationListConstIt;
-	typedef std::multimap<uint32_t, AutomationListConstIt> RowToAutomationIt;
+	typedef ARDOUR::AutomationList::iterator AutomationListIt;
+	typedef std::multimap<uint32_t, AutomationListIt> RowToAutomationIt;
 
 	AutomationTrackerPattern(ARDOUR::Session* session,
 	                         boost::shared_ptr<ARDOUR::Region> region,
