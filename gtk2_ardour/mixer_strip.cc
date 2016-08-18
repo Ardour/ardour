@@ -918,7 +918,9 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
-		output_menu.popup (1, ev->time);
+		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "",
+		                               1, ev->time);
+
 		break;
 	}
 
@@ -1020,7 +1022,8 @@ MixerStrip::input_press (GdkEventButton *ev)
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
 
-		input_menu.popup (1, ev->time);
+		Gtkmm2ext::anchored_menu_popup(&input_menu, &input_button, "",
+		                               1, ev->time);
 
 		break;
 	}
