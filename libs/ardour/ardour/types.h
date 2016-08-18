@@ -146,6 +146,7 @@ namespace ARDOUR {
 		MidiPgmChangeAutomation,
 		MidiPitchBenderAutomation,
 		MidiChannelPressureAutomation,
+		MidiNotePressureAutomation,
 		MidiSystemExclusiveAutomation,
 		FadeInAutomation,
 		FadeOutAutomation,

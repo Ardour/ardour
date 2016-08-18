@@ -157,6 +157,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MidiPgmChangeAutomation);
 	REGISTER_ENUM (MidiPitchBenderAutomation);
 	REGISTER_ENUM (MidiChannelPressureAutomation);
+	REGISTER_ENUM (MidiNotePressureAutomation);
 	REGISTER_ENUM (MidiSystemExclusiveAutomation);
 	REGISTER_ENUM (FadeInAutomation);
 	REGISTER_ENUM (FadeOutAutomation);

@@ -96,6 +96,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
 		lower  = 0.0;
 		normal = 0.0;
 		upper  = 127.0;

@@ -115,6 +115,7 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 		break;
 	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break;
 	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break;
+	case MidiNotePressureAutomation: return Evoral::ControlList::Linear; break;
 	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break;
 	default: assert(false);
 	}
@@ -192,6 +193,13 @@ EventTypeMap::from_symbol(const string& str) const
 		assert(channel < 16);
 		p_id = 0;
 		p_channel = channel;
+	} else if (str.length() > 19 && str.substr(0, 19) == "midi-note-pressure-") {
+		p_type = MidiNotePressureAutomation;
+		uint32_t channel = 0;
+		sscanf(str.c_str(), "midi-note-pressure-%d-%d", &channel, &p_id);
+		assert(channel < 16);
+		assert(p_id < 127);
+		p_channel = channel;
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
@@ -250,6 +258,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return string_compose("midi-pitch-bender-%1", int(param.channel()));
 	} else if (t == MidiChannelPressureAutomation) {
 		return string_compose("midi-channel-pressure-%1", int(param.channel()));
+	} else if (t == MidiChannelPressureAutomation) {
+		return string_compose("midi-note-pressure-%1-%2", int(param.channel()), param.id());
 	} else {
 		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
 		return "";
