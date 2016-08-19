@@ -1090,7 +1090,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automation_run (bufs, start_frame, end_frame, speed, nframes);
 		} else {
-			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, false);
+			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, lm.locked());
 		}
 
 	} else {
