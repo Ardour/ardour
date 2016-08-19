@@ -1688,6 +1688,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 {
 	ControlPoint* cp;
 	ArdourMarker * marker;
+	MeterMarker* m_marker = 0;
+	TempoMarker* t_marker = 0;
 	double fraction;
         bool ret = true;
 
@@ -1745,9 +1747,22 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		entered_marker = marker;
 		marker->set_color_rgba (UIConfiguration::instance().color ("entered marker"));
-		// fall through
+		break;
+
 	case MeterMarkerItem:
+		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = m_marker;
+		m_marker->set_enter_color ();
+		break;
+
 	case TempoMarkerItem:
+		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = t_marker;
+		t_marker->set_enter_color ();
 		break;
 
 	case FadeInHandleItem:
@@ -1822,6 +1837,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
 	ArdourMarker *marker;
+	TempoMarker *t_marker;
+	MeterMarker *m_marker;
 	Location *loc;
 	bool is_start;
 	bool ret = true;
@@ -1854,9 +1871,22 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
 			location_flags_changed (loc);
 		}
-		// fall through
+		break;
+
 	case MeterMarkerItem:
+		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = 0;
+		m_marker->set_leave_color ();
+		break;
+
 	case TempoMarkerItem:
+		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = 0;
+		t_marker->set_leave_color ();
 		break;
 
 	case FadeInTrimHandleItem:

@@ -556,6 +556,26 @@ TempoMarker::update_height_mark (const double& ratio)
 	mark->set (*points);
 }
 
+void
+TempoMarker::set_enter_color ()
+{
+	if (_tempo.position_lock_style() == MusicTime) {
+		set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+	} else {
+		set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+	}
+}
+
+void
+TempoMarker::set_leave_color ()
+{
+	if (_tempo.position_lock_style() == MusicTime) {
+		set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+	} else {
+		set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+	}
+}
+
 /***********************************************************************/
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
@@ -569,5 +589,25 @@ MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent,
 
 MeterMarker::~MeterMarker ()
 {
+}
+
+void
+MeterMarker::set_enter_color ()
+{
+	if (_meter.position_lock_style() == MusicTime) {
+		set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+	} else {
+		set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+	}
+}
+
+void
+MeterMarker::set_leave_color ()
+{
+	if (_meter.position_lock_style() == MusicTime) {
+		set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+	} else {
+		set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+	}
 }
 
