@@ -1833,7 +1833,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			double const next_beat = cail (tmap.quarter_note_at_frame (transport_frame + input_offset));
+			double const next_beat = ceil (tmap.quarter_note_at_frame (transport_frame + input_offset));
 			framepos_t const next_beat_frame = tmap.frame_at_quarter_note (next_beat);
 
 			*outDeltaSampleOffsetToNextBeat = next_beat_frame - (transport_frame + input_offset);
