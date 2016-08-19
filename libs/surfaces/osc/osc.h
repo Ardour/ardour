@@ -129,6 +129,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [10] - Send Playhead position as samples
 		 * [11] - Send Playhead position as minutes seconds
 		 * [12]	- Send Playhead position like primary/secondary GUI clocks
+		 * [13] - Send well known feedback (for /select/command
 		 */
 
 
@@ -139,6 +140,19 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string get_server_url ();
 	void set_debug_mode (OSCDebugMode m) { _debugmode = m; }
 	OSCDebugMode get_debug_mode () { return _debugmode; }
+	int get_portmode() { return address_only; }
+	void set_portmode (int pm) { address_only = pm; }
+	int get_banksize () { return default_banksize; }
+	void set_banksize (int bs) {default_banksize = bs; }
+	int get_gainmode() { return default_gainmode; }
+	void set_gainmode (int gm) { default_gainmode = gm; }
+	int get_defaultstrip() { return default_strip; }
+	void set_defaultstrip (int st) { default_strip = st; }
+	int get_defaultfeedback() { return default_feedback; }
+	void set_defaultfeedback (int fb) { default_feedback = fb; }
+	void clear_devices ();
+	std::string get_remote_port () { return remote_port; }
+	void set_remote_port (std::string pt) { remote_port = pt; }
 
   protected:
         void thread_init ();

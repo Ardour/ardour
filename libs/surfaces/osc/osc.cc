@@ -1219,40 +1219,7 @@ OSC::refresh_surface (lo_message msg)
 {
 	if (address_only) {
 		// get rid of all surfaces and observers.
-		for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
-
-			OSCRouteObserver* rc;
-
-			if ((rc = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
-				delete *x;
-				x = route_observers.erase (x);
-			} else {
-				++x;
-			}
-		}
-		// Should maybe do global_observers too
-		for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end();) {
-
-			OSCGlobalObserver* gc;
-
-			if ((gc = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
-				delete *x;
-				x = global_observers.erase (x);
-			} else {
-				++x;
-			}
-		}
-		// delete select observers
-		for (uint32_t it = 0; it < _surface.size(); ++it) {
-			OSCSurface* sur = &_surface[it];
-			OSCSelectObserver* so;
-			if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
-				delete so;
-			}
-		}
-		// add one from msg + port - Nope get_surface will do that for us
-		// but we do want to clear out surfaces
-		_surface.clear();
+		clear_devices();
 	}
 	OSCSurface *s = get_surface(get_address (msg));
 	// restart all observers
@@ -1260,6 +1227,43 @@ OSC::refresh_surface (lo_message msg)
 	return 0;
 }
 
+void
+OSC::clear_devices ()
+{
+	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
+
+		OSCRouteObserver* rc;
+
+		if ((rc = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+			delete *x;
+			x = route_observers.erase (x);
+		} else {
+			++x;
+		}
+	}
+	// Should maybe do global_observers too
+	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end();) {
+
+		OSCGlobalObserver* gc;
+
+		if ((gc = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
+			delete *x;
+			x = global_observers.erase (x);
+		} else {
+			++x;
+		}
+	}
+	// delete select observers
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		OSCSurface* sur = &_surface[it];
+		OSCSelectObserver* so;
+		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
+			delete so;
+		}
+	}
+	// clear out surfaces
+	_surface.clear();
+}
 
 int
 OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo_message msg)
@@ -3143,8 +3147,8 @@ OSC::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.add_property("debugmode", (int) _debugmode); // TODO: enum2str
-	node.add_property ("address_only", address_only);
-	node.add_property ("remote_port", remote_port);
+	node.add_property ("address-only", address_only);
+	node.add_property ("remote-port", remote_port);
 	node.add_property ("banksize", default_banksize);
 	node.add_property ("striptypes", default_strip);
 	node.add_property ("feedback", default_feedback);
@@ -3176,13 +3180,13 @@ OSC::set_state (const XMLNode& node, int version)
 	if (p) {
 		_debugmode = OSCDebugMode (PBD::atoi(p->value ()));
 	}
-	p = node.property (X_("address_only"));
+	p = node.property (X_("address-only"));
 	if (p) {
 		address_only = OSCDebugMode (PBD::atoi(p->value ()));
 	}
-	p = node.property (X_("remote_port"));
+	p = node.property (X_("remote-port"));
 	if (p) {
-		remote_port = OSCDebugMode (PBD::atoi(p->value ()));
+		remote_port = p->value ();
 	}
 	p = node.property (X_("banksize"));
 	if (p) {
