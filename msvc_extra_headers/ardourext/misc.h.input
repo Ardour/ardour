@@ -252,17 +252,17 @@ inline int64_t abs(int64_t val) throw()
 #endif
 
 #if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
-extern  double round(double x);
-extern  float roundf(float x);
-
 // Emulate some C99 math functions which MSVC itself didn't
 // implement until later in life.
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
 extern  double expm1(double x);
 extern  double log1p(double x);
+extern  double round(double x);
+extern  float roundf(float x);
 #endif
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 extern  double log2 (double x);
+extern  double trunc(double x);
 #endif
 #endif
 
