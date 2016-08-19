@@ -309,17 +309,44 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
-	/* Special keys that we want to handle in
-	   any dialog, no matter whether it uses
-	   the regular set of accelerators or not
-	*/
+	if (event->type == GDK_KEY_RELEASE) {
 
-	if (event->type == GDK_KEY_RELEASE && modifier_state_equals (event->state, PrimaryModifier)) {
-		switch (event->keyval) {
-		case GDK_w:
-			close_current_dialog ();
-			ret = true;
-			break;
+		State::iterator k = find (state.begin(), state.end(), keyval);
+
+		if (k != state.end()) {
+			/* this cannot change the ordering, so need to sort */
+			state.erase (k);
+			if (state.empty()) {
+				DEBUG_TRACE (DEBUG::Keyboard, "no keys down\n");
+			} else {
+#ifndef NDEBUG
+				if (DEBUG_ENABLED(DEBUG::Keyboard)) {
+					DEBUG_STR_DECL(a);
+					DEBUG_STR_APPEND(a, "keyboard, keys still down: ");
+					for (State::iterator i = state.begin(); i != state.end(); ++i) {
+						DEBUG_STR_APPEND(a, gdk_keyval_name (*i));
+						DEBUG_STR_APPEND(a, ',');
+					}
+					DEBUG_STR_APPEND(a, '\n');
+					DEBUG_TRACE (DEBUG::Keyboard, DEBUG_STR(a).str());
+				}
+			}
+#endif /* NDEBUG */
+		}
+
+		if (modifier_state_equals (event->state, PrimaryModifier)) {
+
+			/* Special keys that we want to handle in
+			   any dialog, no matter whether it uses
+			   the regular set of accelerators or not
+			*/
+
+			switch (event->keyval) {
+			case GDK_w:
+				close_current_dialog ();
+				ret = true;
+				break;
+			}
 		}
 	}
 
