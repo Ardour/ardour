@@ -112,6 +112,11 @@ set_language_preference ()
 void
 no_app_nap ()
 {
+
+#ifndef NSActivityLatencyCritical
+#define NSActivityLatencyCritical 0xFF00000000ULL
+#endif
+
 	if ( [ [ NSProcessInfo processInfo ] respondsToSelector:@selector(beginActivityWithOptions:reason:) ] ) {
 		cout << "Disabling MacOS AppNap\n";
 		[ [ NSProcessInfo processInfo] beginActivityWithOptions:NSActivityLatencyCritical reason:@"realtime audio" ];
