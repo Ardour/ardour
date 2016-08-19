@@ -159,6 +159,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string _osc_url_file;
 	bool _send_route_changes;
 	OSCDebugMode _debugmode;
+	bool address_only;
+	std::string remote_port;
+	uint32_t default_banksize;
+	uint32_t default_strip;
+	uint32_t default_feedback;
+	uint32_t default_gainmode;
 	bool tick;
 	bool bank_dirty;
 	bool global_init;
@@ -175,6 +181,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// end "Application Hook" handles
 
 	std::string get_unix_server_url ();
+	lo_address get_address (lo_message msg);
 	OSCSurface * get_surface (lo_address addr);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
@@ -213,6 +220,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(transport_frame);
 	PATH_CALLBACK_MSG(transport_speed);
 	PATH_CALLBACK_MSG(record_enabled);
+	PATH_CALLBACK_MSG(refresh_surface);
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);
 
@@ -468,6 +476,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
+	int refresh_surface (lo_message msg);
 
 	int master_set_gain (float dB);
 	int master_set_fader (float position);
