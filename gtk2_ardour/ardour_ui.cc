@@ -851,24 +851,15 @@ XMLNode&
 ARDOUR_UI::get_transport_controllable_state ()
 {
 	XMLNode* node = new XMLNode(X_("TransportControllables"));
-	char buf[64];
 
-	roll_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("roll"), buf);
-	stop_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("stop"), buf);
-	goto_start_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("goto_start"), buf);
-	goto_end_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("goto_end"), buf);
-	auto_loop_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("auto_loop"), buf);
-	play_selection_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("play_selection"), buf);
-	rec_controllable->id().print (buf, sizeof (buf));
-	node->add_property (X_("rec"), buf);
-	shuttle_box.controllable()->id().print (buf, sizeof (buf));
-	node->add_property (X_("shuttle"), buf);
+	node->add_property (X_("roll"), roll_controllable->id().to_s());
+	node->add_property (X_("stop"), stop_controllable->id().to_s());
+	node->add_property (X_("goto_start"), goto_start_controllable->id().to_s());
+	node->add_property (X_("goto_end"), goto_end_controllable->id().to_s());
+	node->add_property (X_("auto_loop"), auto_loop_controllable->id().to_s());
+	node->add_property (X_("play_selection"), play_selection_controllable->id().to_s());
+	node->add_property (X_("rec"), rec_controllable->id().to_s());
+	node->add_property (X_("shuttle"), shuttle_box.controllable()->id().to_s());
 
 	return *node;
 }

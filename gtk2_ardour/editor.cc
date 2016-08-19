@@ -2593,8 +2593,7 @@ Editor::get_state ()
 	char buf[32];
 	LocaleGuard lg;
 
-	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node->add_property ("id", id().to_s ());
 
 	node->add_child_nocopy (Tabbable::get_state());
 
