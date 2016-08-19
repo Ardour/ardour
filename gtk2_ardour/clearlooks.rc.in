@@ -127,8 +127,8 @@ style "default" = "medium_text"
 
   text[NORMAL]        = @texts
   text[PRELIGHT]      = @texts
-  text[ACTIVE]        = @fg_selected
-  text[INSENSITIVE]   = shade(0.7, @lightest) /* text color for focused selected text */
+  text[INSENSITIVE]   = shade(0.7, @lightest)
+  text[ACTIVE]        = @fg_selected          /* text color for focused selected text */
   text[SELECTED]      = @fg_selected          /* text color for non-focused selected text */
 
   #engine specific tweaks
@@ -151,13 +151,11 @@ style "entry"
 
   base[NORMAL]      = @bases
   base[PRELIGHT]    = @bases
-  base[INSENSITIVE] = @bases
   base[ACTIVE]      = @bases
   base[SELECTED]    = @bg_selected
 
   text[NORMAL]      = @texts
   text[PRELIGHT]    = @texts
-  text[INSENSITIVE] = shade (0.92, @texts)
   text[ACTIVE]      = @texts
   text[SELECTED]    = @fg_selected
 }
