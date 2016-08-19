@@ -245,6 +245,7 @@
 		<ColorAlias name="meter bar" alias="color 67"/>
 		<ColorAlias name="meter color BBC" alias="color 1"/>
 		<ColorAlias name="meter marker" alias="color 108"/>
+		<ColorAlias name="meter marker music" alias="color 5"/>
 		<ColorAlias name="meterbridge label: fill" alias="color 42"/>
 		<ColorAlias name="meterbridge label: fill active" alias="color 1"/>
 		<ColorAlias name="meterbridge label: led" alias="color 9"/>

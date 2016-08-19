@@ -91,8 +91,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
-								 *(const_cast<MeterSection*>(ms))));
+			if (ms->position_lock_style() == MusicTime) {
+				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf,
+									 *(const_cast<MeterSection*>(ms))));
+			} else {
+				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
+									 *(const_cast<MeterSection*>(ms))));
+			}
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
 				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->beats_per_minute(), ts->note_type());
