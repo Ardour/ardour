@@ -330,8 +330,8 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 					DEBUG_STR_APPEND(a, '\n');
 					DEBUG_TRACE (DEBUG::Keyboard, DEBUG_STR(a).str());
 				}
-			}
 #endif /* NDEBUG */
+			}
 		}
 
 		if (modifier_state_equals (event->state, PrimaryModifier)) {
