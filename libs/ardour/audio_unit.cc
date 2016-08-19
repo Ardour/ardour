@@ -1858,7 +1858,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		bbt.beats = 1;
 		bbt.ticks = 0;
 
-		*outCurrentMeasureDownBeat = tmap..pulse_at_bbt (bbt) * 4.0;
+		*outCurrentMeasureDownBeat = tmap.pulse_at_bbt (bbt) * 4.0;
 	}
 
 	return noErr;
