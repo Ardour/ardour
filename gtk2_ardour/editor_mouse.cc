@@ -1754,7 +1754,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = m_marker;
-		m_marker->set_enter_color ();
+		if (m_marker->meter().position_lock_style() == MusicTime) {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+		} else {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+		}
 		break;
 
 	case TempoMarkerItem:
@@ -1762,7 +1766,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = t_marker;
-		t_marker->set_enter_color ();
+		if (t_marker->tempo().position_lock_style() == MusicTime) {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+		} else {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+		}
 		break;
 
 	case FadeInHandleItem:
@@ -1878,7 +1886,11 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			break;
 		}
 		entered_marker = 0;
-		m_marker->set_leave_color ();
+		if (m_marker->meter().position_lock_style() == MusicTime) {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+		} else {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+		}
 		break;
 
 	case TempoMarkerItem:
@@ -1886,7 +1898,11 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			break;
 		}
 		entered_marker = 0;
-		t_marker->set_leave_color ();
+		if (t_marker->tempo().position_lock_style() == MusicTime) {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+		} else {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+		}
 		break;
 
 	case FadeInTrimHandleItem:

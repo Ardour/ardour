@@ -146,9 +146,6 @@ class TempoMarker : public ArdourMarker
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
 
 	void update_height_mark (const double& ratio);
-	void set_enter_color();
-	void set_leave_color();
-
   private:
 	ARDOUR::TempoSection& _tempo;
 };
@@ -160,9 +157,6 @@ class MeterMarker : public ArdourMarker
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }
-
-	void set_enter_color();
-	void set_leave_color();
 
   private:
 	ARDOUR::MeterSection& _meter;
