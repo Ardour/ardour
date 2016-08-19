@@ -230,6 +230,7 @@ LIBPBD_API int				__cdecl         gettimeofday(struct timeval *__restrict tv, __
 LIBPBD_API ssize_t			PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
 LIBPBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
 LIBPBD_API int				PBD_APICALLTYPE poll(struct pollfd *fds, nfds_t nfds, int timeout);
+LIBPBD_API float			PBD_APICALLTYPE roundf(float x);
 LIBPBD_API double			PBD_APICALLTYPE round(double x);
 LIBPBD_API double			PBD_APICALLTYPE trunc(double x);
 

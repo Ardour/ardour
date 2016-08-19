@@ -225,6 +225,24 @@ ssize_t ret;
 
 //***************************************************************
 //
+//	roundf()
+//
+// Emulates roundf() using floorf().
+//
+//	Returns:
+//
+//    On Success: The largest integer that is less than or
+//                equal to 'x'.
+//    On Failure: None
+//
+LIBPBD_API float PBD_APICALLTYPE
+roundf(float x)
+{
+	return (floorf(x));
+}
+
+//***************************************************************
+//
 //	round()
 //
 // Emulates round() using floor().
