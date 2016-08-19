@@ -588,15 +588,17 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	// don't lock to avoid deadlock because we're triggered by
 	// AutomationControl::Changed() while the automation lock is taken
 
+	AutoState state = insert->get_parameter_automation_state (cui->parameter());
+
+	cui->automate_button.set_active((state != ARDOUR::Off));
+
 	if (cui->knobtable) {
 		cui->automate_button.set_text (
-				GainMeterBase::astate_string (
-					insert->get_parameter_automation_state (cui->parameter()))
-				);
+				GainMeterBase::astate_string (state));
 		return;
 	}
 
-	switch (insert->get_parameter_automation_state (cui->parameter()) & (ARDOUR::Off|Play|Touch|Write)) {
+	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
 		cui->automate_button.set_text (S_("Automation|Manual"));
 		break;
