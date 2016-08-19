@@ -177,6 +177,7 @@ CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(PBD::ID);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(ARDOUR::MonitorProcessor);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
@@ -824,8 +825,8 @@ LuaBindings::common (lua_State* L)
 		.addCast<IOProcessor> ("to_ioprocessor")
 		.addCast<UnknownProcessor> ("to_unknownprocessor")
 		.addCast<Amp> ("to_amp")
-#if 0 // those objects are not yet bound
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
+#if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
 		.addCast<DelayLine> ("to_delayline")
 		.addCast<PeakMeter> ("to_meter")
@@ -931,6 +932,35 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Amp, Processor> ("Amp")
 		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
+		.endClass ()
+
+		.deriveWSPtrClass <MonitorProcessor, Processor> ("MonitorProcessor")
+		.addFunction ("set_cut_all", &MonitorProcessor::set_cut_all)
+		.addFunction ("set_dim_all", &MonitorProcessor::set_dim_all)
+		.addFunction ("set_polarity", &MonitorProcessor::set_polarity)
+		.addFunction ("set_cut", &MonitorProcessor::set_cut)
+		.addFunction ("set_dim", &MonitorProcessor::set_dim)
+		.addFunction ("set_solo", &MonitorProcessor::set_solo)
+		.addFunction ("set_mono", &MonitorProcessor::set_mono)
+		.addFunction ("dim_level", &MonitorProcessor::dim_level)
+		.addFunction ("solo_boost_level", &MonitorProcessor::solo_boost_level)
+		.addFunction ("dimmed", &MonitorProcessor::dimmed)
+		.addFunction ("soloed", &MonitorProcessor::soloed)
+		.addFunction ("inverted", &MonitorProcessor::inverted)
+		.addFunction ("cut", &MonitorProcessor::cut)
+		.addFunction ("cut_all", &MonitorProcessor::cut_all)
+		.addFunction ("dim_all", &MonitorProcessor::dim_all)
+		.addFunction ("mono", &MonitorProcessor::mono)
+		.addFunction ("monitor_active", &MonitorProcessor::monitor_active)
+		.addFunction ("channel_cut_control", &MonitorProcessor::channel_cut_control)
+		.addFunction ("channel_dim_control", &MonitorProcessor::channel_dim_control)
+		.addFunction ("channel_polarity_control", &MonitorProcessor::channel_polarity_control)
+		.addFunction ("channel_solo_control", &MonitorProcessor::channel_solo_control)
+		.addFunction ("dim_control", &MonitorProcessor::dim_control)
+		.addFunction ("cut_control", &MonitorProcessor::cut_control)
+		.addFunction ("mono_control", &MonitorProcessor::mono_control)
+		.addFunction ("dim_level_control", &MonitorProcessor::dim_level_control)
+		.addFunction ("solo_boost_control", &MonitorProcessor::solo_boost_control)
 		.endClass ()
 
 		.deriveWSPtrClass <UnknownProcessor, Processor> ("UnknownProcessor")
