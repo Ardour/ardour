@@ -545,9 +545,7 @@ public:
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
 		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
-						    (string_compose (_("At the beginning of a drag, applies vertical constraint (mostly)."
-								       " Holding down after grabbing an object but before the first move constrains the"
-								       " drag to the direction of the first movement. <b>Recommended Setting: %1</b>%2"),
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
 #ifdef __APPLE__
 								     Keyboard::primary_modifier_name (),
 #else

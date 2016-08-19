@@ -264,15 +264,6 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
-	if (_constraint_pressed) {
-		/* if constraint was indicated at the beginning of the drag, constrain x.
-		   if the user presses these modifiers after this point in time (first move),
-		   the drag will be constrained to the first direction of motion.
-		*/
-		_x_constrained = true;
-		_y_constrained = false;
-	}
-
 	_raw_grab_frame = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 
 	setup_pointer_frame_offset ();
@@ -438,7 +429,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 							_x_constrained = true;
 							_y_constrained = false;
 						}
-					} else if (!_constraint_pressed && ArdourKeyboard::indicates_constraint (event->button.state)) {
+					} else if (_constraint_pressed) {
 						// if dragging normally, the motion is constrained to the first direction of movement.
 						if (_initially_vertical) {
 							_x_constrained = true;
