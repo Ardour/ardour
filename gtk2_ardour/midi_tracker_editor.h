@@ -188,39 +188,41 @@ class MidiTrackerEditor : public ArdourWindow
 	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiTrackerModelColumns()
 		{
-			add (_color);		// The background color differs when the row is
-								// on beats and bars. This is to keep track of
-								// it.
+			// The background color differs when the row is on beats and
+			// bars. This is to keep track of it.
+			add (_background_color);
 			add (time);
 			for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++) {
 				add (note_name[i]);
+				add (_note_foreground_color[i]);
 				add (channel[i]);
+				add (_channel_foreground_color[i]);
 				add (velocity[i]);
+				add (_velocity_foreground_color[i]);
 				add (delay[i]);
+				add (_delay_foreground_color[i]);
 				add (_note[i]);		// We keep that around to play the note
 			}
 			for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
 				add (automation[i]);
 				add (_automation[i]);
+				add (_automation_foreground_color[i]);
 			}
 		};
-		Gtk::TreeModelColumn<std::string> _color;
+		Gtk::TreeModelColumn<std::string> _background_color;
 		Gtk::TreeModelColumn<std::string> time;
 		Gtk::TreeModelColumn<std::string> note_name[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> _note_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<std::string> channel[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> _channel_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<std::string> velocity[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> _velocity_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_NOTE_TRACKS];
+		Gtk::TreeModelColumn<std::string> _delay_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
-		// TODO: each column will have to be associated with an
-		// AutomationList. In order to retrieve the value at each time one may
-		// use al->eval(when). In order to retrieve the value of a point one
-		// use it->value, and it->when for its time (as to calculate the
-		// delay).
-		//
-		// The next step it seems is to study/re-enable
-		// MidiTrackerEditor::show_all_automation
 		Gtk::TreeModelColumn<ARDOUR::AutomationList::iterator> _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _automation_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 	};
 
 	enum tracker_columns {

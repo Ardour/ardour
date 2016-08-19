@@ -1230,7 +1230,7 @@ MidiTrackerEditor::redisplay_model ()
 			row[columns.time] = ss.str();
 
 			// If the row is on a beat the color differs
-			row[columns._color] = row_beats == row_beats.round_up_to_beat() ?
+			row[columns._background_color] = row_beats == row_beats.round_up_to_beat() ?
 				"#202020" : "#101010";
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
@@ -1245,6 +1245,12 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns.velocity[i]] = "---";
 					row[columns.delay[i]] = "-----";
 				}
+
+				// Grey out infoless cells
+				row[columns._note_foreground_color[i]] = "#404040";
+				row[columns._channel_foreground_color[i]] = "#404040";
+				row[columns._velocity_foreground_color[i]] = "#404040";
+				row[columns._delay_foreground_color[i]] = "#404040";
 				
 				size_t notes_off_count = mtp->notes_off[i].count(irow);
 				size_t notes_on_count = mtp->notes_on[i].count(irow);
@@ -1260,6 +1266,7 @@ MidiTrackerEditor::redisplay_model ()
 
 					if (undefined) {
 						row[columns.note_name[i]] = undefined_str;
+						row[columns._note_foreground_color[i]] = "#f0f0f0";
 					} else {
 						// Notes off
 						MidiTrackerPattern::RowToNotes::const_iterator i_off = mtp->notes_off[i].find(irow);
@@ -1268,9 +1275,14 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.note_name[i]] = note_off_str;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
+							row[columns._note_foreground_color[i]] = "#f0f0f0";
+							row[columns._channel_foreground_color[i]] = "#f0f0f0";
+							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
 							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
-							if (delay_ticks != 0)
+							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
+								row[columns._delay_foreground_color[i]] = "#f0f0f0";
+							}
 						}
 
 						// Notes on
@@ -1280,10 +1292,14 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
+							row[columns._note_foreground_color[i]] = "#f0f0f0";
+							row[columns._channel_foreground_color[i]] = "#f0f0f0";
+							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
 
 							int64_t delay_ticks = (note->time() - row_beats).to_relative_ticks();
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
+								row[columns._delay_foreground_color[i]] = "#f0f0f0";
 							}
 							// Keep the note around for playing it
 							row[columns._note[i]] = note;
@@ -1305,11 +1321,7 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns.automation[i]] = "---";
 				}
 
-				// TODO
-				//
-				// 1. add automation delay
-				//
-				// 2. add automation interpolation
+				// TODO: add automation delay
 
 				if (auto_count > 0) {
 					bool undefined = auto_count > 1;
@@ -1324,13 +1336,14 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns._automation[i]] = auto_it->second;
 						}
 					}
+					row[columns._automation_foreground_color[i]] = "#f0f0f0";
 				} else {
 					// Interpolation
 					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
 					if (alist->interpolation() != Evoral::ControlList::Discrete) {
 						double inter_auto_val = alist->eval(row_frame);
-						// TODO change the color (grey or such)
 						row[columns.automation[i]] = to_string (inter_auto_val);
+						row[columns._automation_foreground_color[i]] = "#404040";
 					}
 				}
 			}
@@ -1390,7 +1403,7 @@ MidiTrackerEditor::setup_pattern ()
 
 	Gtk::TreeViewColumn* viewcolumn_time  = new Gtk::TreeViewColumn (_("Time"), columns.time);
 	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time->get_first_cell_renderer ();		
-	viewcolumn_time->add_attribute(cellrenderer_time->property_cell_background (), columns._color);
+	viewcolumn_time->add_attribute(cellrenderer_time->property_cell_background (), columns._background_color);
 	view.append_column (*viewcolumn_time);
 
 	// Instantiate note tracks
@@ -1410,15 +1423,19 @@ MidiTrackerEditor::setup_pattern ()
 		Gtk::TreeViewColumn* viewcolumn_velocity = new Gtk::TreeViewColumn (_(ss_vel.str().c_str()), columns.velocity[i]);
 		Gtk::TreeViewColumn* viewcolumn_delay = new Gtk::TreeViewColumn (_(ss_delay.str().c_str()), columns.delay[i]);
 
-		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note->get_first_cell_renderer ();
-		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel->get_first_cell_renderer ();
-		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity->get_first_cell_renderer ();
-		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay->get_first_cell_renderer ();
+		Gtk::CellRendererText* cellrenderer_note = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_note->get_first_cell_renderer ());
+		Gtk::CellRendererText* cellrenderer_channel = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_channel->get_first_cell_renderer ());
+		Gtk::CellRendererText* cellrenderer_velocity = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_velocity->get_first_cell_renderer ());
+		Gtk::CellRendererText* cellrenderer_delay = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_delay->get_first_cell_renderer ());
 
-		viewcolumn_note->add_attribute(cellrenderer_note->property_cell_background (), columns._color);
-		viewcolumn_channel->add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
-		viewcolumn_velocity->add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
-		viewcolumn_delay->add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
+		viewcolumn_note->add_attribute(cellrenderer_note->property_cell_background (), columns._background_color);
+		viewcolumn_note->add_attribute(cellrenderer_note->property_foreground (), columns._note_foreground_color[i]);
+		viewcolumn_channel->add_attribute(cellrenderer_channel->property_cell_background (), columns._background_color);
+		viewcolumn_channel->add_attribute(cellrenderer_channel->property_foreground (), columns._channel_foreground_color[i]);
+		viewcolumn_velocity->add_attribute(cellrenderer_velocity->property_cell_background (), columns._background_color);
+		viewcolumn_velocity->add_attribute(cellrenderer_velocity->property_foreground (), columns._velocity_foreground_color[i]);
+		viewcolumn_delay->add_attribute(cellrenderer_delay->property_cell_background (), columns._background_color);
+		viewcolumn_delay->add_attribute(cellrenderer_delay->property_foreground (), columns._delay_foreground_color[i]);
 
 		view.append_column (*viewcolumn_note);
 		view.append_column (*viewcolumn_channel);
@@ -1431,8 +1448,9 @@ MidiTrackerEditor::setup_pattern ()
 		stringstream ss_automation;
 		ss_automation << "A" << i;
 		Gtk::TreeViewColumn* viewcolumn_automation = new Gtk::TreeViewColumn (_(ss_automation.str().c_str()), columns.automation[i]);
-		Gtk::CellRenderer* cellrenderer_automation = viewcolumn_automation->get_first_cell_renderer ();
-		viewcolumn_automation->add_attribute(cellrenderer_automation->property_cell_background (), columns._color);
+		Gtk::CellRendererText* cellrenderer_automation = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_automation->get_first_cell_renderer ());
+		viewcolumn_automation->add_attribute(cellrenderer_automation->property_cell_background (), columns._background_color);
+		viewcolumn_automation->add_attribute(cellrenderer_automation->property_foreground (), columns._automation_foreground_color[i]);
 		size_t column = view.get_columns().size();
 		view.append_column (*viewcolumn_automation);
 		view.get_column(column)->set_visible (false);
