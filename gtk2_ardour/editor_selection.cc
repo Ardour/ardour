@@ -879,7 +879,12 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 		if (!regions.empty()) {
 			selection->add (regions);
 			commit = true;
+		} else if (selection->regions.empty() && !selection->selected (clicked_regionview)) {
+			/* ensure that at least the clicked regionview is selected. */
+			selection->set (clicked_regionview);
+			commit = true;
 		}
+
 	}
 
 out:
