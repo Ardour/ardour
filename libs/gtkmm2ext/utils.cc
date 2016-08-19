@@ -314,7 +314,6 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
                                    const Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
                                    const std::string& selected) {
-	using namespace Gdk;
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
@@ -324,7 +323,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		return;
 	}
 
-	Rectangle monitor;
+	Gdk::Rectangle monitor;
 	{
 		const int monitor_num = anchor->get_screen ()->get_monitor_at_window (
 				anchor->get_window ());
@@ -333,7 +332,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	}
 
 	const Requisition menu_req = menu->size_request();
-	const Rectangle allocation = anchor->get_allocation();
+	const Gdk::Rectangle allocation = anchor->get_allocation();
 
 	/* The x and y position are handled separately.
 	 *
