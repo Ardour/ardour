@@ -20,11 +20,6 @@
 #include <ostream>
 #include <stdio.h>
 
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS
-#endif
-#include <inttypes.h>
-
 #include "pbd/id.h"
 #include "pbd/string_convert.h"
 
@@ -69,12 +64,6 @@ bool
 ID::string_assign (string str)
 {
 	return string_to_uint64 (str, _id);
-}
-
-void
-ID::print (char* buf, uint32_t bufsize) const
-{
-	snprintf (buf, bufsize, "%" PRIu64, _id);
 }
 
 std::string
