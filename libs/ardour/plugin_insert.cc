@@ -77,6 +77,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _strict_io (false)
 	, _custom_cfg (false)
 	, _maps_from_state (false)
+	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
 {
 	/* the first is the master */
