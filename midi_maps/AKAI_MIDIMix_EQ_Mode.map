@@ -38,9 +38,9 @@
   <Binding channel="1" ctl="24"  uri="/route/plugin/parameter B3 1 2"/>
   <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 4"/>
   <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 7"/>
-  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B4 1 10"/>
-  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B5 1 13"/>
-  <Binding channel="1" ctl="26"  uri="/route/plugin/parameter B6 1 16"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 10"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 13"/>
+  <Binding channel="1" ctl="26"  uri="/route/plugin/parameter B3 1 16"/>
   <Binding channel="1" note="7" uri="/route/mute B3"/>
   <Binding channel="1" note="27" uri="/route/solo B3"/>
   <Binding channel="1" note="9" uri="/route/recenable B3"/>
