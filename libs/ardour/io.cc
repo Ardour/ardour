@@ -557,8 +557,7 @@ IO::state (bool /*full_state*/)
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
+	node->add_property ("id", id ().to_s ());
 	node->add_property ("direction", enum_2_string (_direction));
 	node->add_property ("default-type", _default_type.to_string());
 

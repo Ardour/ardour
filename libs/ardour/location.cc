@@ -575,8 +575,7 @@ Location::get_state ()
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
 	}
 
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
+	node->add_property ("id", id ().to_s ());
 	node->add_property ("name", name());
 	snprintf (buf, sizeof (buf), "%" PRId64, start());
 	node->add_property ("start", buf);

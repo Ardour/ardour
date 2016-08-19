@@ -1255,7 +1255,6 @@ XMLNode&
 Region::state ()
 {
 	XMLNode *node = new XMLNode ("Region");
-	char buf[64];
 	char buf2[64];
 	LocaleGuard lg;
 	const char* fe = NULL;
@@ -1273,8 +1272,7 @@ Region::state ()
 		i->second->get_value (*node);
 	}
 
-	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node->add_property ("id", id ().to_s ());
 	node->add_property ("type", _type.to_string());
 
 	switch (_first_edit) {
@@ -1298,14 +1296,12 @@ Region::state ()
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		_sources[n]->id().print (buf, sizeof(buf));
-		node->add_property (buf2, buf);
+		node->add_property (buf2, _sources[n]->id().to_s ());
 	}
 
 	for (uint32_t n=0; n < _master_sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
-		_master_sources[n]->id().print (buf, sizeof (buf));
-		node->add_property (buf2, buf);
+		node->add_property (buf2, _master_sources[n]->id ().to_s ());
 	}
 
 	/* Only store nested sources for the whole-file region that acts

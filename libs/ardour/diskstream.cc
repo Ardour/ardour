@@ -482,8 +482,7 @@ Diskstream::get_state ()
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("playlist", _playlist->name());
 	node->add_property("name", _name);
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
+	node->add_property ("id", id ().to_s ());
 	snprintf (buf, sizeof(buf), "%f", _visible_speed);
 	node->add_property ("speed", buf);
         node->add_property ("capture-alignment", enum_2_string (_alignment_choice));

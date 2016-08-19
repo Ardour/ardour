@@ -248,8 +248,7 @@ MidiTrack::state(bool full_state)
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			inode = new XMLNode (X_("processor"));
-			(*i)->id.print (buf, sizeof(buf));
-			inode->add_property (X_("id"), buf);
+			inode->add_property (X_("id"), id().to_s ());
 			inode->add_child_copy ((*i)->state);
 
 			freeze_node->add_child_nocopy (*inode);

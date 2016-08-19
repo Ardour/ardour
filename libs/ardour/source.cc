@@ -99,8 +99,7 @@ Source::get_state ()
 	node->add_property ("name", name());
 	node->add_property ("type", _type.to_string());
 	node->add_property (X_("flags"), enum_2_string (_flags));
-	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node->add_property ("id", id().to_s());
 
 	if (_timestamp != 0) {
 		snprintf (buf, sizeof (buf), "%ld", _timestamp);

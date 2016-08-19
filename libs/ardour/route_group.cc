@@ -239,9 +239,7 @@ RouteGroup::get_state ()
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
 
-	char buf[64];
-	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node->add_property ("id", id().to_s());
 
 	add_properties (*node);
 

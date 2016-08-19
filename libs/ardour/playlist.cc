@@ -2333,8 +2333,7 @@ Playlist::state (bool full_state)
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("type"), _type.to_string());
 
-	_orig_track_id.print (buf, sizeof (buf));
-	node->add_property (X_("orig-track-id"), buf);
+	node->add_property (X_("orig-track-id"), _orig_track_id.to_s ());
 
 	string shared_ids;
 	list<PBD::ID>::const_iterator it = _shared_with_ids.begin();

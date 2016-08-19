@@ -113,8 +113,7 @@ Processor::state (bool full_state)
 	XMLNode* node = new XMLNode (state_node_name);
 	char buf[64];
 
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
+	node->add_property("id", id().to_s ());
 	node->add_property("name", _name);
 	node->add_property("active", active() ? "yes" : "no");
 

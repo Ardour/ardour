@@ -77,8 +77,7 @@ PlaylistSource::add_state (XMLNode& node)
 {
 	char buf[64];
 
-	_playlist->id().print (buf, sizeof (buf));
-	node.add_property ("playlist", buf);
+	node.add_property ("playlist", _playlist->id ().to_s ());
 	snprintf (buf, sizeof (buf), "%" PRIi64, _playlist_offset);
 	node.add_property ("offset", buf);
 	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);

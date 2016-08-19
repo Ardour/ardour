@@ -1274,12 +1274,9 @@ Session::state (bool full_state)
 			XMLNode* ca = node->add_child (X_("CompoundAssociations"));
 
 			for (RegionFactory::CompoundAssociations::iterator i = cassocs.begin(); i != cassocs.end(); ++i) {
-				char buf[64];
 				XMLNode* can = new XMLNode (X_("CompoundAssociation"));
-				i->first->id().print (buf, sizeof (buf));
-				can->add_property (X_("copy"), buf);
-				i->second->id().print (buf, sizeof (buf));
-				can->add_property (X_("original"), buf);
+				can->add_property (X_("copy"), i->first->id().to_s());
+				can->add_property (X_("original"), i->second->id().to_s());
 				ca->add_child_nocopy (*can);
 			}
 		}
