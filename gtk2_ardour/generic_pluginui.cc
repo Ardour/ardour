@@ -555,7 +555,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	, meterinfo (0)
 	, knobtable (0)
 {
-	automate_button.set_name ("PluginAutomateButton");
+	automate_button.set_name ("plugin automation state button");
 	set_tooltip (automate_button, _("Automation control"));
 
 	/* XXX translators: use a string here that will be at least as long
