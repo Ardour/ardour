@@ -121,8 +121,7 @@ Controllable::get_state ()
 
 	node->add_property (X_("name"), _name);
 
-	id().print (buf, sizeof (buf));
-	node->add_property (X_("id"), buf);
+	node->add_property (X_("id"), id().to_s());
 	node->add_property (X_("flags"), enum_2_string (_flags));
 	snprintf (buf, sizeof (buf), "%2.12f", get_save_value());
         node->add_property (X_("value"), buf);
