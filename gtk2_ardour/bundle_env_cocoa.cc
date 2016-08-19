@@ -50,6 +50,7 @@ using namespace ARDOUR;
 using namespace std;
 
 extern void set_language_preference (); // cocoacarbon.mm
+extern void no_app_nap (); // cocoacarbon.mm
 
 static void
 setup_logging(void)
@@ -81,6 +82,10 @@ setup_logging(void)
 void
 fixup_bundle_environment (int argc, char* argv[], string & localedir)
 {
+	/* do this even for non-bundle runtimes */
+
+	no_app_nap ();
+
 	if (!g_getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}

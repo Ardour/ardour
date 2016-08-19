@@ -106,3 +106,14 @@ set_language_preference ()
         setenv ("LANG", [nslocale UTF8String], 0);
 	CFRelease (cflocale);
 }
+
+	/* Prevent "App Nap" */
+
+void
+no_app_nap ()
+{
+	if ( [ [ NSProcessInfo processInfo ] respondsToSelector:@selector(beginActivityWithOptions:reason:) ] ) {
+		cout << "Disabling MacOS AppNap\n";
+		[ [ NSProcessInfo processInfo] beginActivityWithOptions:NSActivityLatencyCritical reason:@"realtime audio" ];
+	}
+}
