@@ -760,7 +760,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 				}
 			} else if (desc.toggled) {
-				control_ui->controller->set_size_request (req.height, req.height);
+				ArdourButton* but = dynamic_cast<ArdourButton*> (control_ui->controller->widget());
+				assert(but);
+				but->set_tweaks(ArdourButton::Square);
 			} else if (use_knob) {
 				control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
 			} else {
