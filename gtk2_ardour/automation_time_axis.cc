@@ -159,6 +159,12 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this,
 						&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 
+	/* XXX translators: use a string here that will be at least as long
+	   as the longest automation label (see ::automation_state_changed()
+	   below). be sure to include a descender.
+	*/
+	auto_dropdown.set_sizing_text(_("Mgnual"));
+
 	hide_button.set_icon (ArdourIcon::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
