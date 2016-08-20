@@ -39,7 +39,7 @@ UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", 
 UI_CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 UI_CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 UI_CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
-UI_CONFIG_VARIABLE (long, font_scale, "font-scale", 102400.0)
+UI_CONFIG_VARIABLE (int32_t, font_scale, "font-scale", 102400)
 UI_CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 UI_CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
 UI_CONFIG_VARIABLE (ARDOUR::WaveformScale, waveform_scale, "waveform-scale", Linear)
