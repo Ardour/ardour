@@ -292,6 +292,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void set_all_automation (ARDOUR::AutoState state);
 
+	void knob_size_request(Gtk::Requisition* req, ControlUI* cui);
+
 	/* XXX: remove */
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);

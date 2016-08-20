@@ -664,8 +664,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	control_ui->label.set_name ("PluginParameterLabel");
 	control_ui->set_spacing (5);
 
-	Gtk::Requisition req (control_ui->automate_button.size_request());
-
 	if (is_input) {
 
 		if (desc.datatype == Variant::PATH) {
@@ -764,7 +762,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				assert(but);
 				but->set_tweaks(ArdourButton::Square);
 			} else if (use_knob) {
-				control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
+				/* Delay size request so that styles are gotten right */
+				control_ui->controller->widget()->signal_size_request().connect(
+						sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::knob_size_request), control_ui));
 			} else {
 				control_ui->controller->set_size_request (200, -1);
 				control_ui->controller->set_name (X_("ProcessorControlSlider"));
@@ -936,6 +936,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 	return control_ui;
 }
+
+void
+GenericPluginUI::knob_size_request(Gtk::Requisition* req, ControlUI* cui) {
+	Gtk::Requisition astate_req (cui->automate_button.size_request());
+	const int size = (int) (astate_req.height * 1.5);
+	req->width = max(req->width, size);
+	req->height = max(req->height, size);
+}
+
 
 bool
 GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
