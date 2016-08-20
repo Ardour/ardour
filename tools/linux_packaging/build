@@ -394,7 +394,8 @@ done
 # Lua Scripts Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../scripts/*.lua ; do
-	  if test "${x:0:1}" = "_"; then
+		BN=$(basename $x)
+	  if test "${BN:0:1}" = "_"; then
 			continue;
 		fi
     cp "$x" $LuaScripts
