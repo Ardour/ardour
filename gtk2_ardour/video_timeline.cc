@@ -22,7 +22,6 @@
 #include "ardour/tempo.h"
 
 #include "pbd/file_utils.h"
-#include "pbd/convert.h"
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
