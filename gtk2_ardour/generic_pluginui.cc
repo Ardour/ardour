@@ -766,7 +766,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else if (use_knob) {
 				control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
 			} else {
-				control_ui->controller->set_size_request (200, req.height);
+				control_ui->controller->set_size_request (200, -1);
 				control_ui->controller->set_name (X_("ProcessorControlSlider"));
 			}
 
