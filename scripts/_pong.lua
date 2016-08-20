@@ -20,29 +20,30 @@ function dsp_params ()
 	}
 end
 
-local gametime
-local fps
-local ball_x, ball_y
-local dx, dy
-local pingsound
-local lotsound
-local pingnote
+local fps -- audio samples per game-step
+local game_time -- counts up to fps
+local ball_x, ball_y -- ball position [0..1]
+local dx, dy -- current ball speed
+local lost_sound -- audio-sample counter for game-over [0..3*fps]
+local ping_sound -- audio-sample counter for ping-sound [0..fps]
+local ping_phase -- ping note phase
+local ping_pitch
 
 function dsp_init (rate)
 	self:shmem ():allocate (4)
 	self:shmem ():clear ()
 	fps = rate / 25
-	pingnote = 352 / rate
+	ping_pitch = 752 / rate
 	ball_x = 0.5
 	ball_y = 0
 	dx = 0.011
-	dy = 0.021
+	dy = 0.0237
 end
 
 function dsp_configure (ins, outs)
-	gametime = fps
-	pingsound = fps
-	lostsound = 3 * fps
+	game_time  = fps -- start the ball immediately (notfiy GUI)
+	ping_sound = fps -- set to end of synth cycle
+	lost_sound = 3 * fps
 end
 
 function dsp_run (ins, outs, n_samples)
@@ -50,34 +51,38 @@ function dsp_run (ins, outs, n_samples)
 	local shmem = self:shmem ()
 	local state = shmem:to_float (0):array () -- "cast" into lua-table
 
-	local changed = false
-	gametime = gametime + n_samples
+	local changed = false -- flag to notify GUI on every game-step
+	game_time = game_time + n_samples
 
 	-- simple game engine
-	while gametime > fps do
+	while game_time > fps do
 		changed = true
-		gametime = gametime - fps
+		game_time = game_time - fps
 
+		-- move the ball
 		ball_x = ball_x + dx
 		ball_y = ball_y + dy
 
+		-- reflect left/right
 		if ball_x >= 1 or ball_x <= 0 then dx = -dx end
+
+		-- single player (reflect top) -- TODO "stereo" version, 2 ctrls
 		if ball_y <= 0 then dy = - dy end
 
 		if ball_y > 1 then
-			local bar = ctrl[1]
+			local bar = ctrl[1] -- get bar position
 			if math.abs (bar - ball_x) < 0.1 then
 				dy = - dy
 				ball_y = 1.0
 				dx = dx + 0.1 * (bar - ball_x)
 				-- queue sound (unless it's playing)
-				if (pingsound > fps) then
-					pingsound = 0
+				if (ping_sound >= fps) then
+					ping_sound = 0
+					ping_phase = 0
 				end
-				phase = 0
 			else
 				-- game over
-				lostsound = 0
+				lost_sound = 0
 				ball_y = 0
 				dx = 0.011
 			end
@@ -85,31 +90,38 @@ function dsp_run (ins, outs, n_samples)
 	end
 
 	-- simple synth -- TODO Optimize
-	if pingsound <= fps then
-		for s = 1, n_samples do
-			pingsound = pingsound + 1
-			if pingsound > fps then goto note_end end
-			phase = phase + pingnote
-			local snd = 0.7 * math.sin(6.283185307 * phase) * math.sin (3.141592 * pingsound / fps)
-			for c = 1,#outs do
-				-- don't copy this code, it's quick/dirty and not efficient
-				outs[c]:array()[s] = outs[c]:array()[s] + snd
-			end
-			::note_end::
+	if ping_sound < fps then
+		local abufs = {}
+		for c = 1,#outs do
+			abufs[c] = outs[c]:array();
 		end
+		for s = 1, n_samples do
+			ping_sound = ping_sound + 1
+			ping_phase = ping_phase + ping_pitch
+			local snd = 0.7 * math.sin(6.283185307 * ping_phase) * math.sin (3.141592 * ping_sound / fps)
+			for c = 1,#outs do
+				abufs[c][s] = abufs[c][s] + snd
+			end
+			if ping_sound >= fps then goto ping_end end
+		end
+		::ping_end::
 	end
 
-	if lostsound <= 3 * fps then
+	if lost_sound < 3 * fps then
+		local abufs = {}
+		for c = 1,#outs do
+			abufs[c] = outs[c]:array();
+		end
 		for s = 1, n_samples do
-			lostsound = lostsound + 1
-			if lostsound > 3 * fps then goto noise_end end
+			lost_sound = lost_sound + 1
+			-- -12dBFS white noise
 			local snd = 0.5 * (math.random () - 0.5)
 			for c = 1,#outs do
-				-- don't copy this code, it's quick/dirty and not efficient
-				outs[c]:array()[s] = outs[c]:array()[s] + snd
+				abufs[c][s] = abufs[c][s] + snd
 			end
-			::noise_end::
+			if lost_sound >= 3 * fps then goto noise_end end
 		end
+		::noise_end::
 	end
 
 	if changed then
