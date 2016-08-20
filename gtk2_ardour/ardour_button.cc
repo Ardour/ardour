@@ -965,6 +965,11 @@ ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
 	_update_colors = true;
 	CairoWidget::set_dirty ();
+	_char_pixel_width = 0;
+	_char_pixel_height = 0;
+	if (is_realized()) {
+		queue_resize ();
+	}
 }
 
 void
