@@ -95,6 +95,7 @@ ArdourButton::ArdourButton (Element e)
 	, _ellipsis (Pango::ELLIPSIZE_NONE)
 	, _update_colors (true)
 	, _pattern_height (0)
+	, _sizing_text("")
 {
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	/* This is not provided by gtkmm */
@@ -138,6 +139,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _ellipsis (Pango::ELLIPSIZE_NONE)
 	, _update_colors (true)
 	, _pattern_height (0)
+	, _sizing_text("")
 {
 	set_text (str);
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
@@ -186,6 +188,24 @@ ArdourButton::set_text (const std::string& str)
 	ensure_layout ();
 	if (_layout && _layout->get_text() != _text) {
 		_layout->set_text (_text);
+		/* on_size_request() will fill in _text_width/height
+		 * so queue it even if _sizing_text != "" */
+		queue_resize ();
+	}
+}
+
+void
+ArdourButton::set_sizing_text (const std::string& str)
+{
+	if (_sizing_text == str) {
+		return;
+	}
+	_sizing_text = str;
+	if (!is_realized()) {
+		return;
+	}
+	ensure_layout ();
+	if (_layout) {
 		queue_resize ();
 	}
 }
@@ -525,8 +545,10 @@ ArdourButton::on_realize()
 {
 	CairoWidget::on_realize ();
 	ensure_layout ();
-	if (_layout && _layout->get_text() != _text) {
-		_layout->set_text (_text);
+	if (_layout) {
+		if (_layout->get_text() != _text) {
+			_layout->set_text (_text);
+		}
 		queue_resize ();
 	}
 }
@@ -547,27 +569,34 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & Text) {
 
+		ensure_layout();
+		_layout->set_text (_text);
+		/* render() needs the size of the displayed text */
+		_layout->get_pixel_size (_text_width, _text_height);
+
 		if (_tweaks & OccasionalText) {
 
 			/* size should not change based on presence or absence
 			 * of text.
 			 */
 
-			if (!_text.empty()) {
-				ensure_layout ();
-				_layout->set_text (_text);
-				_layout->get_pixel_size (_text_width, _text_height);
-			}
-
-		} else if (!_text.empty()) {
-
-			//if _layout does not exist, char_pixel_height() creates it,
+		} else { //if (!_text.empty() || !_sizing_text.empty()) {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
-			assert (_layout);
-			_layout->get_pixel_size (_text_width, _text_height);
 			req->width += rint(1.75 * char_pixel_width()); // padding
-			req->width += _text_width;
+
+			if (!_sizing_text.empty()) {
+				_layout->set_text (_sizing_text); /* use sizing text */
+			}
+
+			int sizing_text_width = 0, sizing_text_height = 0;
+			_layout->get_pixel_size (sizing_text_width, sizing_text_height);
+
+			req->width += sizing_text_width;
+
+			if (!_sizing_text.empty()) {
+				_layout->set_text (_text); /* restore display text */
+			}
 		}
 
 		/* XXX hack (surprise). Deal with two common rotation angles */

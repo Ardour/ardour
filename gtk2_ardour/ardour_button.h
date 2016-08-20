@@ -91,6 +91,12 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
 
+    /* Sets the text used for size request computation. Pass an
+     * empty string to return to the default behavior which uses
+     * the currently displayed text for measurement. */
+	void set_sizing_text (const std::string&);
+	const std::string& get_sizing_text () {return _sizing_text;}
+
 	sigc::signal<void, GdkEventButton*> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
@@ -136,6 +142,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
+	std::string                 _sizing_text;
 	Element                     _elements;
 	Gtkmm2ext::ArdourIcon::Icon _icon;
 	Tweaks                      _tweaks;
