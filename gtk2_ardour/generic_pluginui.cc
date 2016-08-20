@@ -563,7 +563,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	   below). be sure to include a descender.
 	*/
 
-	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 12, 6);
+	automate_button.set_sizing_text(_("Mgnual"));
 
 	ignore_change = false;
 	update_pending = false;
@@ -777,7 +777,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		if (use_knob) {
-			set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
+			control_ui->automate_button.set_sizing_text("M");
 
 			control_ui->label.set_alignment (0.5, 0.5);
 			control_ui->knobtable = manage (new Table());
