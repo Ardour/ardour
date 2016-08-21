@@ -26,6 +26,7 @@ end
 
 -- Game State (for this instance)
 -- NOTE: these variables are for the DSP part (not shared with the GUI instance)
+local sample_rate -- sample-rate
 local fps -- audio samples per game-step
 local game_time -- counts up to fps
 local game_score
@@ -41,6 +42,7 @@ function dsp_init (rate)
 	self:shmem ():allocate (3)
 	self:shmem ():clear ()
 	-- initialize some variables
+	sample_rate = rate
 	fps = rate / 25
 	ping_pitch = 752 / rate
 	ball_x = 0.5
@@ -53,6 +55,15 @@ function dsp_init (rate)
 	lost_sound = 3 * fps
 end
 
+function queue_beep ()
+	-- queue 'ping' sound (unless one is already playing to prevent clicks)
+	if (ping_sound >= fps) then
+		ping_sound = 0
+		ping_phase = 0
+		local midi_note = math.floor (60 + math.random () * 24)
+		ping_pitch = (440 / 32) * 2^((midi_note - 10.0) / 12.0) / sample_rate
+	end
+end
 
 -- callback: process "n_samples" of audio
 -- ins, outs are http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
@@ -84,13 +95,20 @@ function dsp_run (ins, outs, n_samples)
 		ball_y = ball_y + dy * ctrl[3]
 
 		-- reflect left/right
-		if ball_x >= 1 or ball_x <= 0 then dx = -dx end
-		-- keep the ball in the field
-		if ball_x >= 1 then ball_x = 1 end
-		if ball_x <= 0 then ball_x = 0 end
+		if ball_x >= 1 or ball_x <= 0 then
+			dx = -dx
+			queue_beep ()
+		end
 
 		-- single player (reflect top) -- TODO "stereo" version, 2 ctrls :)
-		if ball_y <= 0 then dy = - dy y = 0 end
+		if ball_y <= 0 then
+			dy = - dy y = 0
+			queue_beep ()
+		end
+
+		-- keep the ball in the field at all times
+		if ball_x >= 1 then ball_x = 1 end
+		if ball_x <= 0 then ball_x = 0 end
 
 		-- bottom edge
 		if ball_y > 1 then
@@ -102,12 +120,8 @@ function dsp_run (ins, outs, n_samples)
 				dx = dx - 0.04 * (bar - ball_x)
 				-- make sure it's moving (not stuck on borders)
 				if math.abs (dx) < 0.0001 then dx = 0.0001 end
-				-- queue 'ping' sound (unless it's already playing to prevent clicks)
-				if (ping_sound >= fps) then
-					ping_sound = 0
-					ping_phase = 0
-				end
 				game_score = game_score + 1
+				queue_beep ()
 			else
 				-- game over, reset game
 				lost_sound = 0 -- re-start noise
