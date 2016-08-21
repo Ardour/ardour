@@ -1284,6 +1284,8 @@ If you still wish to quit, please use the\n\n\
 	*/
 	save_ardour_state ();
 
+	key_editor->disconnect ();
+
 	close_all_dialogs ();
 
 	if (_session) {
