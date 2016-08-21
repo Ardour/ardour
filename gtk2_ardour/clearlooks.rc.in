@@ -151,11 +151,13 @@ style "entry"
 
   base[NORMAL]      = @bases
   base[PRELIGHT]    = @bases
+  base[INSENSITIVE] = shade(1.0, @background)
   base[ACTIVE]      = @bases
   base[SELECTED]    = @bg_selected
 
   text[NORMAL]      = @texts
   text[PRELIGHT]    = @texts
+  text[INSENSITIVE] = shade(0.7, @lightest)
   text[ACTIVE]      = @texts
   text[SELECTED]    = @fg_selected
 }
