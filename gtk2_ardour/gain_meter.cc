@@ -477,15 +477,9 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
-	{
-		// Switch to user's preferred locale so that
-		// if they use different LC_NUMERIC conventions,
-		// we will honor them.
-
-		PBD::LocaleGuard lg;
-		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
-			return;
-		}
+	// Use the user's preferred locale/LC_NUMERIC setting
+	if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
+		return;
 	}
 
 	/* clamp to displayable values */
