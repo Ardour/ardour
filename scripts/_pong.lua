@@ -24,6 +24,7 @@ function dsp_params ()
 end
 
 
+-- Game State (for this instance)
 -- NOTE: these variables are for the DSP part (not shared with the GUI instance)
 local fps -- audio samples per game-step
 local game_time -- counts up to fps
@@ -32,7 +33,7 @@ local ball_x, ball_y -- ball position [0..1]
 local dx, dy -- current ball speed
 local lost_sound -- audio-sample counter for game-over [0..3*fps]
 local ping_sound -- audio-sample counter for ping-sound [0..fps]
-local ping_phase -- ping note phase
+local ping_phase -- ping note phase-difference per sample
 local ping_pitch
 
 function dsp_init (rate)
@@ -47,20 +48,23 @@ function dsp_init (rate)
 	dx = 0.00367
 	dy = 0.01063
 	game_score = 0
-	game_time  = fps -- start the ball immediately (notfiy GUI)
+	game_time  = fps -- start the ball immediately (notify GUI)
 	ping_sound = fps -- set to end of synth cycle
 	lost_sound = 3 * fps
 end
 
+
+-- callback: process "n_samples" of audio
+-- ins, outs are http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
+-- pointers to the audio buffers
 function dsp_run (ins, outs, n_samples)
 	local ctrl = CtrlPorts:array () -- get control port array (read/write)
-	local shmem = self:shmem ()
-	local state = shmem:to_float (0):array () -- "cast" into lua-table
 
 	local changed = false -- flag to notify GUI on every game-step
 	game_time = game_time + n_samples
 
 	-- reset (allow to write automation from a given start-point)
+	-- ctrl[2] corresponds to the  "Reset" input control
 	if ctrl[2] > 0 then
 		game_time = 0
 		ball_x = 0.5
@@ -105,11 +109,11 @@ function dsp_run (ins, outs, n_samples)
 				end
 				game_score = game_score + 1
 			else
-				-- game over
-				lost_sound = 0
+				-- game over, reset game
+				lost_sound = 0 -- re-start noise
 				ball_y = 0
-				dx = 0.00367
 				game_score = 0
+				dx = 0.00367
 			end
 		end
 	end
@@ -119,7 +123,7 @@ function dsp_run (ins, outs, n_samples)
 		-- check if output and input buffers for this channel are identical
 		-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
 		if not ins[c]:sameinstance (outs[c]) then
-			-- fast (accellerated) memcpy
+			-- fast (accelerated) copy
 			-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 			ARDOUR.DSP.copy_vector (out[c], ins[c], n_samples)
 		end
@@ -165,9 +169,14 @@ function dsp_run (ins, outs, n_samples)
 	end
 
 	if changed then
+		-- notify the GUI
+		local shmem = self:shmem () -- get the shared memory region
+		local state = shmem:to_float (0):array () -- "cast" into lua-table
+		-- update data..
 		state[1] = ball_x
 		state[2] = ball_y
 		state[3] = game_score
+		-- ..and wake up the UI
 		self:queue_draw ()
 	end
 end
@@ -176,11 +185,11 @@ end
 -------------------------------------------------------------------------------
 --- inline display
 
-local txt = nil -- cache pango context (in GUI context)
+local txt = nil -- cache font description (in GUI context)
 
 function render_inline (ctx, w, max_h)
 	local ctrl = CtrlPorts:array () -- control port array
-	local shmem = self:shmem () -- shared memory region
+	local shmem = self:shmem () -- shared memory region (game state from DSP)
 	local state = shmem:to_float (0):array () -- cast to lua-table
 
 	if (w > max_h) then
@@ -196,12 +205,15 @@ function render_inline (ctx, w, max_h)
 		txt = Cairo.PangoLayout (ctx, "Mono 10px")
 	end
 
+	-- ctx is-a http://manual.ardour.org/lua-scripting/class_reference/#Cairo:Context
+	-- 2D vector graphics http://cairographics.org/
+
 	-- clear background
 	ctx:rectangle (0, 0, w, h)
 	ctx:set_source_rgba (.2, .2, .2, 1.0)
 	ctx:fill ()
 
-	-- print score
+	-- print the current score
 	if (state[3] > 0) then
 		txt:set_text (string.format ("%.0f", state[3]));
 		local tw, th = txt:get_pixel_size ()
