@@ -203,13 +203,13 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	a = new Gtk::Alignment (0, 0.5, 0, 1);
 	a->add (_input_or_output);
 	t->attach (*Gtk::manage (a), 1, 2, 1, 2);
-	_input_or_output.append_text (_("Playback"));
-	_input_or_output.append_text (_("Capture"));
+	_input_or_output.append_text (_("Destination"));
+	_input_or_output.append_text (_("Source"));
 
 	if (bundle->ports_are_inputs()) {
-		_input_or_output.set_active_text (_("Capture"));
+		_input_or_output.set_active_text (_("Source"));
 	} else {
-		_input_or_output.set_active_text (_("Playback"));
+		_input_or_output.set_active_text (_("Destination"));
 	}
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
@@ -243,7 +243,7 @@ BundleEditor::input_or_output_changed ()
 {
 	_bundle->remove_ports_from_channels ();
 
-	if (_input_or_output.get_active_text() == _("Capture")) {
+	if (_input_or_output.get_active_text() == _("Source")) {
 		_bundle->set_ports_are_outputs ();
 	} else {
 		_bundle->set_ports_are_inputs ();
