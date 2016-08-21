@@ -218,7 +218,6 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
 
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 	show_all ();
 
 	signal_key_press_event().connect (sigc::mem_fun (_matrix, &BundleEditorMatrix::key_press));
@@ -309,9 +308,6 @@ BundleManager::BundleManager (Session* session)
 	_tree_view.signal_row_activated().connect (
 		sigc::mem_fun (*this, &BundleManager::row_activated)
 		);
-
-	Gtk::Button* close_but = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
-	close_but->signal_clicked ().connect (sigc::mem_fun (*this, &Gtk::Window::hide));
 
 	set_button_sensitivity ();
 
