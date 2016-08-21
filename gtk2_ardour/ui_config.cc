@@ -160,18 +160,6 @@ void
 UIConfiguration::reset_dpi ()
 {
 	long val = get_font_scale();
-	set_pango_fontsize ();
-	/* Xft rendering */
-
-	gtk_settings_set_long_property (gtk_settings_get_default(),
-					"gtk-xft-dpi", val, "ardour");
-	DPIReset(); //Emit Signal
-}
-
-void
-UIConfiguration::set_pango_fontsize ()
-{
-	long val = get_font_scale();
 
 	/* FT2 rendering - used by GnomeCanvas, sigh */
 
@@ -182,6 +170,12 @@ UIConfiguration::set_pango_fontsize ()
 	/* Cairo rendering, in case there is any */
 
 	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+
+	/* Xft rendering */
+
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", val, "ardour");
+	DPIReset(); //Emit Signal
 }
 
 float
