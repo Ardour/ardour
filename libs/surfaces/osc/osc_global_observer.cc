@@ -37,10 +37,10 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 	: gainmode (gm)
 	,feedback (fb)
 {
+	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	session = &s;
+	_last_frame = -1;
 	if (feedback[4]) {
-		addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
-		session = &s;
-		_last_frame = -1;
 
 		// connect to all the things we want to send feed back from
 
