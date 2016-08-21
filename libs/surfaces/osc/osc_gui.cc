@@ -115,7 +115,7 @@ void
 OSC::tear_down_gui ()
 {
 	if (gui) {
-		Gtk::Widget *w = static_cast<Gtk::VBox*>(gui)->get_parent();
+		Gtk::Widget *w = static_cast<Gtk::Notebook*>(gui)->get_parent();
 		if (w) {
 			w->hide();
 			delete w;
@@ -144,12 +144,14 @@ OSC_GUI::OSC_GUI (OSC& p)
 	: cp (p)
 {
 	int n = 0; // table row
+	uint32_t def_feedback;
+	uint32_t def_strip;
 	Table* table = manage (new Table);
 	Label* label;
 	Button* button;
 	Button* fbbutton;
 	Button* stbutton;
-	table->set_row_spacings (4);
+	table->set_row_spacings (10);
 	table->set_col_spacings (6);
 	table->set_border_width (12);
 
@@ -205,7 +207,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	table->attach (striptypes_spin, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	striptypes_spin.set_range (0, 0x3ff);
 	striptypes_spin.set_increments (1, 10);
-	striptypes_spin.set_value (cp.get_defaultstrip());
+	def_strip = cp.get_defaultstrip();
+	striptypes_spin.set_value (def_strip);
 
 	++n;
 
@@ -216,7 +219,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	table->attach (feedback_spin, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	feedback_spin.set_range (0, 0x3fff);
 	feedback_spin.set_increments (1, 10);
-	feedback_spin.set_value (cp.get_defaultfeedback());
+	def_feedback = cp.get_defaultfeedback();
+	feedback_spin.set_value (def_feedback);
 	++n;
 
 	// Gain Mode
@@ -267,9 +271,9 @@ OSC_GUI::OSC_GUI (OSC& p)
 	// Strip Types Calculate Page
 	int stn = 0; // table row
 	Table* sttable = manage (new Table);
-	sttable->set_row_spacings (4);
+	sttable->set_row_spacings (8);
 	sttable->set_col_spacings (6);
-	sttable->set_border_width (12);
+	sttable->set_border_width (25);
 
 	// show our url
 	label = manage (new Gtk::Label(_("Select Desired Types of Tracks")));
@@ -278,10 +282,10 @@ OSC_GUI::OSC_GUI (OSC& p)
 
 	label = manage (new Gtk::Label(_("Strip Types Value:")));
 	label->set_alignment(1, .5);
-	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	calculate_strip_types ();
 	current_strip_types.set_width_chars(10);
-	sttable->attach (current_strip_types, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	sttable->attach (current_strip_types, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Audio Tracks:")));
@@ -289,6 +293,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (audio_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	audio_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	audio_tracks.set_active(def_strip & 1);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Midi Tracks:")));
@@ -296,6 +301,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (midi_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	midi_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	midi_tracks.set_active(def_strip & 2);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Audio Buses:")));
@@ -303,6 +309,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (audio_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	audio_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	audio_buses.set_active(def_strip & 4);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Midi Buses:")));
@@ -310,6 +317,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (midi_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	midi_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	midi_buses.set_active(def_strip & 8);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Control Masters:")));
@@ -317,6 +325,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (control_masters, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	control_masters.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	control_masters.set_active(def_strip & 16);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Master (use /master instead):")));
@@ -324,6 +333,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (master_type, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	master_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	master_type.set_active(def_strip & 32);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Monitor (use /monitor instead):")));
@@ -331,6 +341,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (monitor_type, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	monitor_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	monitor_type.set_active(def_strip & 64);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Selected Tracks (use for selected tracks only):")));
@@ -338,6 +349,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (selected_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	selected_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	selected_tracks.set_active(def_strip & 256);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Hidden Tracks:")));
@@ -345,10 +357,11 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (hidden_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	hidden_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_strip_types));
+	hidden_tracks.set_active(def_strip & 512);
 	++stn;
 
 	stbutton = manage (new Gtk::Button(_("Use Value as Strip Types Default")));
-	sttable->attach (*stbutton, 0, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	sttable->attach (*stbutton, 0, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	stbutton->signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::push_strip_types));
 
 
@@ -370,10 +383,10 @@ OSC_GUI::OSC_GUI (OSC& p)
 
 	label = manage (new Gtk::Label(_("Feedback Value:")));
 	label->set_alignment(1, .5);
-	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	calculate_feedback ();
 	current_feedback.set_width_chars(10);
-	fbtable->attach (current_feedback, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	fbtable->attach (current_feedback, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Strip Buttons:")));
@@ -381,6 +394,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (strip_buttons_button, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	strip_buttons_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	strip_buttons_button.set_active(def_feedback & 1);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Strip Controls:")));
@@ -388,6 +402,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (strip_control_button, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	strip_control_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	strip_control_button.set_active(def_feedback & 2);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Use SSID as Path Extension:")));
@@ -395,6 +410,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (ssid_as_path, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	ssid_as_path.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	ssid_as_path.set_active(def_feedback & 4);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Use Heart Beat:")));
@@ -402,6 +418,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (heart_beat, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	heart_beat.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	heart_beat.set_active(def_feedback & 8);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Master Section:")));
@@ -409,6 +426,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (master_fb, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	master_fb.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	master_fb.set_active(def_feedback & 16);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Play Head Position as Bar and Beat:")));
@@ -416,6 +434,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (bar_and_beat, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	bar_and_beat.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	bar_and_beat.set_active(def_feedback & 32);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Play Head Position as SMPTE Time:")));
@@ -423,6 +442,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (smpte, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	smpte.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	smpte.set_active(def_feedback & 64);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Metering as a Float:")));
@@ -430,6 +450,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (meter_float, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	meter_float.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	meter_float.set_active(def_feedback & 128);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Metering as a LED Strip:")));
@@ -437,6 +458,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (meter_led, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	meter_led.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	meter_led.set_active(def_feedback & 256);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Signal Present:")));
@@ -444,6 +466,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (signal_present, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	signal_present.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	signal_present.set_active(def_feedback & 512);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Play Head Position as Samples:")));
@@ -451,6 +474,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (hp_samples, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	hp_samples.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	hp_samples.set_active(def_feedback & 1024);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Playhead Position as Minutes Seconds:")));
@@ -458,6 +482,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (hp_min_sec, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	hp_min_sec.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	hp_min_sec.set_active(def_feedback & 2048);
 	++fn;
 
 	label = manage (new Gtk::Label(_("Playhead Position as per GUI Clock:")));
@@ -473,10 +498,11 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	fbtable->attach (select_fb, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	select_fb.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::calculate_feedback));
+	select_fb.set_active(def_feedback & 8192);
 	++fn;
 
 	fbbutton = manage (new Gtk::Button(_("Use Value as Feedback Default")));
-	fbtable->attach (*fbbutton, 0, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (*fbbutton, 0, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
 	fbbutton->signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::push_feedback));
 
 
