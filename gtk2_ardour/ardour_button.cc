@@ -58,7 +58,8 @@ ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
 
 ArdourButton::ArdourButton (Element e)
-	: _elements (e)
+	: _sizing_text("")
+	, _elements (e)
 	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
@@ -95,7 +96,6 @@ ArdourButton::ArdourButton (Element e)
 	, _ellipsis (Pango::ELLIPSIZE_NONE)
 	, _update_colors (true)
 	, _pattern_height (0)
-	, _sizing_text("")
 {
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	/* This is not provided by gtkmm */
@@ -103,7 +103,8 @@ ArdourButton::ArdourButton (Element e)
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
-	: _elements (e)
+	: _sizing_text("")
+	, _elements (e)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -139,7 +140,6 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _ellipsis (Pango::ELLIPSIZE_NONE)
 	, _update_colors (true)
 	, _pattern_height (0)
-	, _sizing_text("")
 {
 	set_text (str);
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
