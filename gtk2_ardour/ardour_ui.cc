@@ -3971,7 +3971,7 @@ ARDOUR_UI::cleanup_peakfiles ()
 }
 
 PresentationInfo::order_t
-ARDOUR_UI::translate_order (AddRouteDialog::InsertAt place)
+ARDOUR_UI::translate_order (RouteDialogs::InsertAt place)
 {
 	if (editor->get_selection().tracks.empty()) {
 		return PresentationInfo::max_order;
@@ -3984,18 +3984,18 @@ ARDOUR_UI::translate_order (AddRouteDialog::InsertAt place)
 	  the highest order key in the selection + 1 (if available).
 	*/
 
-	if (place == AddRouteDialog::AfterSelection) {
+	if (place == RouteDialogs::AfterSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.back());
 		if (rtav) {
 			order_hint = rtav->route()->presentation_info().order();
 			order_hint++;
 		}
-	} else if (place == AddRouteDialog::BeforeSelection) {
+	} else if (place == RouteDialogs::BeforeSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.front());
 		if (rtav) {
 			order_hint = rtav->route()->presentation_info().order();
 		}
-	} else if (place == AddRouteDialog::First) {
+	} else if (place == RouteDialogs::First) {
 		order_hint = 0;
 	} else {
 		/* leave order_hint at max_order */

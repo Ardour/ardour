@@ -614,9 +614,11 @@ AddRouteDialog::new_group_dialog_finished (int r, RouteGroupDialog* d)
 	delete_when_idle (d);
 }
 
-AddRouteDialog::InsertAt
+RouteDialogs::InsertAt
 AddRouteDialog::insert_at ()
 {
+	using namespace RouteDialogs;
+
 	std::string str = insert_at_combo.get_active_text();
 
 	if (str == _("First")) {

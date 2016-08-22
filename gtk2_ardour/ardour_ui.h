@@ -91,6 +91,7 @@
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "rc_option_editor.h"
+#include "route_dialogs.h"
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -680,7 +681,7 @@ private:
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();
-	ARDOUR::PresentationInfo::order_t translate_order (AddRouteDialog::InsertAt);
+	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
 	int         create_mixer ();
 	int         create_editor ();
