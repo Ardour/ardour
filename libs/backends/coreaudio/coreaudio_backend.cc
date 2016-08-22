@@ -820,6 +820,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 			pthread_attr_destroy (&attr);
 			return -1;
 		}
+		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
 		pthread_attr_destroy (&attr);
 	}
 
