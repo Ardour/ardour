@@ -4063,9 +4063,9 @@ ARDOUR_UI::add_route_dialog_finished (int r)
 
 	if (!template_path.empty()) {
 		if (add_route_dialog->name_template_is_default())  {
-			_session->new_route_from_template (count, PresentationInfo::max_order, template_path, string());
+			_session->new_route_from_template (count, order, template_path, string());
 		} else {
-			_session->new_route_from_template (count, PresentationInfo::max_order, template_path, add_route_dialog->name_template());
+			_session->new_route_from_template (count, order, template_path, add_route_dialog->name_template());
 		}
 		return;
 	}
