@@ -58,10 +58,12 @@ end
 function queue_beep ()
 	-- queue 'ping' sound (unless one is already playing to prevent clicks)
 	if (ping_sound >= fps) then
+		-- major scale, 2 octaves
+		local scale = { 0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24 }
+		local midi_note = 60 + scale[1 + math.floor (math.random () * 14)]
+		ping_pitch = (440 / 32) * 2^((midi_note - 10.0) / 12.0) / sample_rate
 		ping_sound = 0
 		ping_phase = 0
-		local midi_note = math.floor (60 + math.random () * 24)
-		ping_pitch = (440 / 32) * 2^((midi_note - 10.0) / 12.0) / sample_rate
 	end
 end
 
@@ -139,7 +141,7 @@ function dsp_run (ins, outs, n_samples)
 		if not ins[c]:sameinstance (outs[c]) then
 			-- fast (accelerated) copy
 			-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
-			ARDOUR.DSP.copy_vector (out[c], ins[c], n_samples)
+			ARDOUR.DSP.copy_vector (outs[c], ins[c], n_samples)
 		end
 	end
 
