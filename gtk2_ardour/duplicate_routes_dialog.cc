@@ -22,6 +22,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "duplicate_routes_dialog.h"
 #include "selection.h"
@@ -170,7 +171,7 @@ DuplicateRouteDialog::on_response (int response)
 		}
 
 		XMLNode& state (rui->route()->get_state());
-		RouteList rl = _session->new_route_from_template (cnt, state, std::string(), playlist_action);
+		RouteList rl = _session->new_route_from_template (cnt, ARDOUR_UI::instance()->translate_order (insert_at()), state, std::string(), playlist_action);
 
 		/* normally the state node would be added to a parent, and
 		 * ownership would transfer. Because we don't do that here,

@@ -377,6 +377,8 @@ public:
 
 	Gtkmm2ext::ActionMap global_actions;
 
+	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
+
 protected:
 	friend class PublicEditor;
 
@@ -681,7 +683,6 @@ private:
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();
-	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
 	int         create_mixer ();
 	int         create_editor ();
