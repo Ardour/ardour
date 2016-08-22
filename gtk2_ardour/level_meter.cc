@@ -313,7 +313,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		b[1] = UIConfiguration::instance().color ("meter background top");
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
-		if (n < nmidi) {
+		if ((uint32_t) n < nmidi) {
 			c[0] = UIConfiguration::instance().color ("midi meter color0");
 			c[1] = UIConfiguration::instance().color ("midi meter color1");
 			c[2] = UIConfiguration::instance().color ("midi meter color2");
