@@ -22,6 +22,7 @@
 
 #include <gtkmm/entry.h>
 #include <gtkmm/box.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
@@ -29,6 +30,7 @@
 #include "ardour/types.h"
 
 #include "ardour_dialog.h"
+#include "route_dialogs.h"
 
 namespace ARDOUR {
 class Session;
@@ -58,7 +60,11 @@ class DuplicateRouteDialog : public ArdourDialog
 	void on_response (int);
 
 	uint32_t count() const;
+	RouteDialogs::InsertAt insert_at();
 	ARDOUR::PlaylistDisposition playlist_disposition() const;
+
+   private:
+	Gtk::ComboBoxText insert_at_combo;
 };
 
 #endif /* __gtk_ardour_duplicate_route_dialog_h__ */
