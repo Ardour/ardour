@@ -247,16 +247,22 @@ MidiTrackerEditor::show_all_automation ()
 	/* Show processor automation */
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		std::cout << "(*i)->valid = " << (*i)->valid << std::endl;
+		std::cout << "[show_all_automation] "
+		          << "(*i)->valid = " << (*i)->valid << std::endl;
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-			std::cout << "(*ii)->column = " << (*ii)->column << std::endl;
-			if ((*ii)->column == 0) {
+			size_t column = (*ii)->column;
+			std::cout << "[show_all_automation] "
+			          << "column = " << column << std::endl;
+			if (column == 0) {
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
-				view.get_column((*ii)->column)->set_visible (true);
+				column = (*ii)->column;
+				visible_automation_columns.insert (column);
 				string name = (*i)->processor->describe_parameter ((*ii)->what);
-				view.get_column((*ii)->column)->set_title (name);
-				std::cout << "after add_processor_automation_column: name = " << name
-				          << ", (*ii)->column = " << (*ii)->column << std::endl;
+				view.get_column(column)->set_title (name);
+				std::cout << "[show_all_automation] "
+				          << "after add_processor_automation_column: name = "
+				          << name
+				          << ", column = " << column << std::endl;
 			}
 
 			(*ii)->menu_item->set_active (true);
@@ -444,7 +450,7 @@ MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Proc
 
 		_subplugin_menu_map[*i] = mitem;
 
-		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
+		if (is_in(*i, has_visible_automation)) {
 			mitem->set_active(true);
 		}
 
@@ -1165,6 +1171,7 @@ MidiTrackerEditor::redisplay_visible_delay()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 4)->set_visible(i < mtp->ntracks ? visible_delay : false);
+	redisplay_visible_automation_delay ();
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -1184,8 +1191,25 @@ MidiTrackerEditor::visible_delay_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_automation()
 {
-	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++)
-		view.get_column(MAX_NUMBER_OF_NOTE_TRACKS + i)->set_visible(false);
+	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
+		size_t col = automation_col_offset + 2 * i;
+		bool is_visible = is_in(col, visible_automation_columns);
+		std::cout << "[redisplay_visible_automation] "
+		          << "col = " << col
+		          << ", is_visible = " << is_visible << std::endl;
+		view.get_column(col)->set_visible(is_visible);
+	}
+	redisplay_visible_automation_delay();
+}
+
+void
+MidiTrackerEditor::redisplay_visible_automation_delay()
+{
+	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
+		size_t col = automation_col_offset + 2 * i;
+		bool is_visible = visible_delay && is_in(col, visible_automation_columns);
+		view.get_column(col + 1)->set_visible(is_visible);
+	}
 }
 
 void
@@ -1316,9 +1340,12 @@ MidiTrackerEditor::redisplay_model ()
 				const AutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
+				row[columns._automation_delay_foreground_color[i]] = "#404040";
+
 				if (visible_blank) {
 					// Fill with blank
 					row[columns.automation[i]] = "---";
+					row[columns.automation_delay[i]] = "-----";
 				}
 
 				// TODO: add automation delay
@@ -1332,6 +1359,11 @@ MidiTrackerEditor::redisplay_model ()
 						if (auto_it != r2at.end()) {
 							double auto_val = (*auto_it->second)->value;
 							row[columns.automation[i]] = to_string (auto_val);
+							int64_t delay_ticks = 1; // TODO
+							if (delay_ticks != 0) {
+								row[columns.automation_delay[i]] = to_string (delay_ticks);
+								row[columns._automation_delay_foreground_color[i]] = "#f0f0f0";
+							}
 							// Keep the automation iterator around for editing it
 							row[columns._automation[i]] = auto_it->second;
 						}
@@ -1356,8 +1388,7 @@ MidiTrackerEditor::redisplay_model ()
 	redisplay_visible_channel();
 	redisplay_visible_velocity();
 	redisplay_visible_delay();
-	// TODO fix redisplay_visible_automation
-	// redisplay_visible_automation();
+	redisplay_visible_automation();
 }
 
 bool
@@ -1443,19 +1474,38 @@ MidiTrackerEditor::setup_pattern ()
 		view.append_column (*viewcolumn_delay);
 	}
 
+	automation_col_offset = view.get_columns().size();
+
 	// Instantiate automation tracks
 	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
 		stringstream ss_automation;
+		stringstream ss_automation_delay;
 		ss_automation << "A" << i;
+		ss_automation_delay << "Delay";
+
 		Gtk::TreeViewColumn* viewcolumn_automation = new Gtk::TreeViewColumn (_(ss_automation.str().c_str()), columns.automation[i]);
+		Gtk::TreeViewColumn* viewcolumn_automation_delay = new Gtk::TreeViewColumn (_(ss_automation_delay.str().c_str()), columns.automation_delay[i]);
+
 		Gtk::CellRendererText* cellrenderer_automation = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_automation->get_first_cell_renderer ());
+		Gtk::CellRendererText* cellrenderer_automation_delay = dynamic_cast<Gtk::CellRendererText*> (viewcolumn_automation_delay->get_first_cell_renderer ());
+
 		viewcolumn_automation->add_attribute(cellrenderer_automation->property_cell_background (), columns._background_color);
 		viewcolumn_automation->add_attribute(cellrenderer_automation->property_foreground (), columns._automation_foreground_color[i]);
+		viewcolumn_automation_delay->add_attribute(cellrenderer_automation_delay->property_cell_background (), columns._background_color);
+		viewcolumn_automation_delay->add_attribute(cellrenderer_automation_delay->property_foreground (), columns._automation_delay_foreground_color[i]);
+
 		size_t column = view.get_columns().size();
 		view.append_column (*viewcolumn_automation);
-		view.get_column(column)->set_visible (false);
-		available_automation_columns.insert(column);
 		col2autotrack[column] = i;
+		available_automation_columns.insert(column);
+		view.get_column(column)->set_visible (false);
+		std::cout << "[setup_pattern] name = " << ss_automation.str()
+		          << ", column = " << column << std::endl;
+
+		column = view.get_columns().size();
+		view.append_column (*viewcolumn_automation_delay);
+		view.get_column(column)->set_visible (false);
+		std::cout << "Delay" << ", column = " << column << std::endl;
 	}
 
 	view.set_headers_visible (true);

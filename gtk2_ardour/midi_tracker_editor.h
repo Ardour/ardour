@@ -68,7 +68,21 @@ class AutomationTimeAxisView;
 #define MAX_NUMBER_OF_NOTE_TRACKS 128
 
 // Maximum number of automation trackts in the midi tracker editor
-#define MAX_NUMBER_OF_AUTOMATION_TRACKS 1024
+#define MAX_NUMBER_OF_AUTOMATION_TRACKS 16
+
+// Test if element is in container
+template<typename C>
+bool is_in(const typename C::value_type& element, const C& container)
+{
+	return container.find(element) != container.end();
+}
+
+// Test if key is in map
+template<typename M>
+bool is_key_in(const typename M::key_type& key, const M& map)
+{
+	return map.find(key) != map.end();
+}
 
 class MidiTrackerEditor : public ArdourWindow
 {
@@ -114,11 +128,17 @@ class MidiTrackerEditor : public ArdourWindow
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
 
+	// Column index of the first automation
+	size_t automation_col_offset;
+
 	// List of column indices currently unassigned to an automation
 	std::set<size_t> available_automation_columns;
 
 	// Map column index to automation parameter
 	std::map<size_t, Evoral::Parameter> col2param;
+
+	// Keep track of all visible automation columns
+	std::set<size_t> visible_automation_columns;
 
 	// Map Parameter to AutomationControl
 	typedef std::map<Evoral::Parameter, boost::shared_ptr<ARDOUR::AutomationControl> > Parameter2AutomationControl;
@@ -207,22 +227,26 @@ class MidiTrackerEditor : public ArdourWindow
 				add (automation[i]);
 				add (_automation[i]);
 				add (_automation_foreground_color[i]);
+				add (automation_delay[i]);
+				add (_automation_delay_foreground_color[i]);
 			}
 		};
 		Gtk::TreeModelColumn<std::string> _background_color;
 		Gtk::TreeModelColumn<std::string> time;
 		Gtk::TreeModelColumn<std::string> note_name[MAX_NUMBER_OF_NOTE_TRACKS];
-		Gtk::TreeModelColumn<std::string> _note_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _note_foreground_color[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> channel[MAX_NUMBER_OF_NOTE_TRACKS];
-		Gtk::TreeModelColumn<std::string> _channel_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _channel_foreground_color[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> velocity[MAX_NUMBER_OF_NOTE_TRACKS];
-		Gtk::TreeModelColumn<std::string> _velocity_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _velocity_foreground_color[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_NOTE_TRACKS];
-		Gtk::TreeModelColumn<std::string> _delay_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _delay_foreground_color[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_NOTE_TRACKS];
 		Gtk::TreeModelColumn<std::string> automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<ARDOUR::AutomationList::iterator> _automation[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 		Gtk::TreeModelColumn<std::string> _automation_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> automation_delay[MAX_NUMBER_OF_AUTOMATION_TRACKS];
+		Gtk::TreeModelColumn<std::string> _automation_delay_foreground_color[MAX_NUMBER_OF_AUTOMATION_TRACKS];
 	};
 
 	enum tracker_columns {
@@ -293,6 +317,7 @@ class MidiTrackerEditor : public ArdourWindow
 	void redisplay_visible_velocity ();
 	void redisplay_visible_delay ();
 	void redisplay_visible_automation ();
+	void redisplay_visible_automation_delay ();
 	void automation_click ();
 
 	void setup_tooltips ();
