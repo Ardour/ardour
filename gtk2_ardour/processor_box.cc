@@ -1548,9 +1548,11 @@ ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
 	// select processor, then call (private)
 	//_entry._parent->processor_button_press_event (ev, &_entry);
 	if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			cerr << "Open generic\n";
 			_entry._parent->generic_edit_processor (_entry.processor ());
 		} else {
+			cerr << "Open custom\n";
 			_entry._parent->edit_processor (_entry.processor ());
 		}
 		return true;
