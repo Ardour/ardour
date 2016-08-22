@@ -245,8 +245,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 * @param pd Playlist disposition
 	 * @return list of newly created routes
 	 */
-	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
-	RouteList new_route_from_template (uint32_t how_many, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
+	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
+	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
 
 	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);

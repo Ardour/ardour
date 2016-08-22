@@ -3158,7 +3158,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base, PlaylistDisposition pd)
+Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, const std::string& template_path, const std::string& name_base,
+                                  PlaylistDisposition pd)
 {
 	XMLTree tree;
 
@@ -3166,11 +3167,11 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		return RouteList();
 	}
 
-	return new_route_from_template (how_many, *tree.root(), name_base, pd);
+	return new_route_from_template (how_many, insert_at, *tree.root(), name_base, pd);
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
+Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
 {
 	RouteList ret;
 	uint32_t number = 0;
@@ -3340,9 +3341,9 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false, PresentationInfo::max_order);
+			add_routes (ret, false, false, false, insert_at);
 		} else {
-			add_routes (ret, true, true, false, PresentationInfo::max_order);
+			add_routes (ret, true, true, false, insert_at);
 		}
 		IO::enable_connecting ();
 	}
