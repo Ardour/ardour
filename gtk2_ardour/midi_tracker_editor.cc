@@ -1302,7 +1302,7 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns._note_foreground_color[i]] = "#f0f0f0";
 							row[columns._channel_foreground_color[i]] = "#f0f0f0";
 							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
-							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
+							int64_t delay_ticks = mtp->delay_ticks(note->end_time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
 								row[columns._delay_foreground_color[i]] = "#f0f0f0";
@@ -1320,7 +1320,7 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns._channel_foreground_color[i]] = "#f0f0f0";
 							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
 
-							int64_t delay_ticks = (note->time() - row_beats).to_relative_ticks();
+							int64_t delay_ticks = mtp->delay_ticks(note->time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
 								row[columns._delay_foreground_color[i]] = "#f0f0f0";
@@ -1348,8 +1348,6 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns.automation_delay[i]] = "-----";
 				}
 
-				// TODO: add automation delay
-
 				if (auto_count > 0) {
 					bool undefined = auto_count > 1;
 					if (undefined) {
@@ -1359,7 +1357,8 @@ MidiTrackerEditor::redisplay_model ()
 						if (auto_it != r2at.end()) {
 							double auto_val = (*auto_it->second)->value;
 							row[columns.automation[i]] = to_string (auto_val);
-							int64_t delay_ticks = 1; // TODO
+							double auto_when = (*auto_it->second)->when;
+							int64_t delay_ticks = atp->delay_ticks((framepos_t)auto_when, irow);
 							if (delay_ticks != 0) {
 								row[columns.automation_delay[i]] = to_string (delay_ticks);
 								row[columns._automation_delay_foreground_color[i]] = "#f0f0f0";
