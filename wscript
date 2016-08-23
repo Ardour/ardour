@@ -204,6 +204,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/libltc',
+        'libs/fluidsynth',
         'libs/lua',
         'libs/ptformat',
         # core ardour libraries

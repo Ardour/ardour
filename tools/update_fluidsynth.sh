@@ -1,0 +1,99 @@
+#!/bin/sh
+
+if ! test -f wscript || ! test -d gtk2_ardour || ! test -d libs/fluidsynth/;then
+	echo "This script needs to run from ardour's top-level src tree"
+	exit 1
+fi
+
+if test -z "`which rsync`" -o -z "`which git`"; then
+	echo "this script needs rsync and git"
+	exit 1
+fi
+
+ASRC=`pwd`
+set -e
+
+TMP=`mktemp -d`
+test -d "$TMP"
+echo $TMP
+
+trap "rm -rf $TMP" EXIT
+
+cd $TMP
+git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
+
+FSR=fs-git/fluidsynth/
+
+rsync -auc --info=progress2 \
+	${FSR}src/midi/fluid_midi.c \
+	${FSR}src/midi/fluid_midi.h \
+	${FSR}src/rvoice/fluid_adsr_env.c \
+	${FSR}src/rvoice/fluid_adsr_env.h \
+	${FSR}src/rvoice/fluid_chorus.c \
+	${FSR}src/rvoice/fluid_chorus.h \
+	${FSR}src/rvoice/fluid_iir_filter.c \
+	${FSR}src/rvoice/fluid_iir_filter.h \
+	${FSR}src/rvoice/fluid_lfo.c \
+	${FSR}src/rvoice/fluid_lfo.h \
+	${FSR}src/rvoice/fluid_phase.h \
+	${FSR}src/rvoice/fluid_rev.c \
+	${FSR}src/rvoice/fluid_rev.h \
+	${FSR}src/rvoice/fluid_rvoice.c \
+	${FSR}src/rvoice/fluid_rvoice_dsp.c \
+	${FSR}src/rvoice/fluid_rvoice_event.c \
+	${FSR}src/rvoice/fluid_rvoice_event.h \
+	${FSR}src/rvoice/fluid_rvoice.h \
+	${FSR}src/rvoice/fluid_rvoice_mixer.c \
+	${FSR}src/rvoice/fluid_rvoice_mixer.h \
+	${FSR}src/sfloader/fluid_defsfont.c \
+	${FSR}src/sfloader/fluid_defsfont.h \
+	${FSR}src/sfloader/fluid_sfont.h \
+	${FSR}src/synth/fluid_chan.c \
+	${FSR}src/synth/fluid_chan.h \
+	${FSR}src/synth/fluid_event.c \
+	${FSR}src/synth/fluid_event_priv.h \
+	${FSR}src/synth/fluid_event_queue.h \
+	${FSR}src/synth/fluid_gen.c \
+	${FSR}src/synth/fluid_gen.h \
+	${FSR}src/synth/fluid_mod.c \
+	${FSR}src/synth/fluid_mod.h \
+	${FSR}src/synth/fluid_synth.c \
+	${FSR}src/synth/fluid_synth.h \
+	${FSR}src/synth/fluid_tuning.c \
+	${FSR}src/synth/fluid_tuning.h \
+	${FSR}src/synth/fluid_voice.c \
+	${FSR}src/synth/fluid_voice.h \
+	${FSR}src/utils/fluid_conv.c \
+	${FSR}src/utils/fluid_conv.h \
+	${FSR}src/utils/fluid_hash.c \
+	${FSR}src/utils/fluid_hash.h \
+	${FSR}src/utils/fluid_list.c \
+	${FSR}src/utils/fluid_list.h \
+	${FSR}src/utils/fluid_ringbuffer.c \
+	${FSR}src/utils/fluid_ringbuffer.h \
+	${FSR}src/utils/fluid_settings.c \
+	${FSR}src/utils/fluid_settings.h \
+	${FSR}src/utils/fluidsynth_priv.h \
+	${FSR}src/utils/fluid_sys.c \
+	${FSR}src/utils/fluid_sys.h \
+	\
+	"$ASRC/libs/fluidsynth/src/"
+
+rsync -auc --info=progress2 \
+	--exclude fluidsynth.h \
+	${FSR}include/fluidsynth/event.h  \
+	${FSR}include/fluidsynth/gen.h  \
+	${FSR}include/fluidsynth/log.h \
+	${FSR}include/fluidsynth/midi.h \
+	${FSR}include/fluidsynth/misc.h  \
+	${FSR}include/fluidsynth/mod.h \
+	${FSR}include/fluidsynth/settings.h \
+	${FSR}include/fluidsynth/sfont.h \
+	${FSR}include/fluidsynth/synth.h \
+	${FSR}include/fluidsynth/types.h \
+	${FSR}include/fluidsynth/voice.h \
+	\
+	"$ASRC/libs/fluidsynth/fluidsynth/"
+
+cd "$ASRC"
+patch -p1 < tools/ardour_fluidsynth.diff
