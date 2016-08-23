@@ -3071,8 +3071,18 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
 		Timecode::BBT_Time bbt = bbt_at_beat_locked (metrics, beat);
 		bbt.beats = 1;
 		bbt.ticks = 0;
-		beat = beat_at_bbt_locked (metrics, bbt);
+
+		const double prev_b = beat_at_bbt_locked (_metrics, bbt);
+		++bbt.bars;
+		const double next_b = beat_at_bbt_locked (_metrics, bbt);
+
+		if ((beat - prev_b) > (next_b - prev_b) / 2.0) {
+			beat = next_b;
+		} else {
+			beat = prev_b;
+		}
 	}
+
 	return beat;
 }
 
