@@ -2774,26 +2774,23 @@ void
 TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& sub_num)
 {
 	Metrics future_map;
-	bool was_musical = ts->position_lock_style() == MusicTime;
-
-	if (sub_num == 0 && was_musical) {
-		/* if we're not snapping to music,
-		   AudioTime and MusicTime may be treated identically.
-		*/
-		ts->set_position_lock_style (AudioTime);
-	}
 
 	if (ts->position_lock_style() == MusicTime) {
 		{
 			/* if we're snapping to a musical grid, set the pulse exactly instead of via the supplied frame. */
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-			const double beat = exact_beat_at_frame_locked (future_map, frame, sub_num);
-			double pulse = pulse_at_beat_locked (future_map, beat);
 
-			if (solve_map_pulse (future_map, tempo_copy, pulse)) {
-				solve_map_pulse (_metrics, ts, pulse);
-				recompute_meters (_metrics);
+			tempo_copy->set_position_lock_style (AudioTime);
+
+			if (solve_map_frame (future_map, tempo_copy, frame)) {
+				const double beat = exact_beat_at_frame_locked (future_map, frame, sub_num);
+				const double pulse = pulse_at_beat_locked (future_map, beat);
+
+				if (solve_map_pulse (future_map, tempo_copy, pulse)) {
+					solve_map_pulse (_metrics, ts, pulse);
+					recompute_meters (_metrics);
+				}
 			}
 		}
 
@@ -2802,15 +2799,35 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 		{
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+
 			if (solve_map_frame (future_map, tempo_copy, frame)) {
-				solve_map_frame (_metrics, ts, frame);
-				recompute_meters (_metrics);
+				if (sub_num != 0) {
+					/* We're moving the object that defines the grid while snapping to it...
+					 * Placing the ts at the beat corresponding to the requested frame may shift the
+					 * grid in such a way that the mouse is left hovering over a completerly different division,
+					 * causing jittering when the mouse next moves (esp. large tempo deltas).
+					 * To avoid this, place the ts at the requested frame in a dummy map
+					 * then find the closest beat subdivision to that frame in the dummy.
+					 * This alters the snap behaviour slightly in that we snap to beat divisions
+					 * in the future map rather than the existing one.
+					 */
+					const double beat = exact_beat_at_frame_locked (future_map, frame, sub_num);
+					const double pulse = pulse_at_beat_locked (future_map, beat);
+
+					if (solve_map_pulse (future_map, tempo_copy, pulse)) {
+						/* snapping to a grid. force MusicTime temporarily. */
+						ts->set_position_lock_style (MusicTime);
+						solve_map_pulse (_metrics, ts, pulse);
+						ts->set_position_lock_style (AudioTime);
+
+						recompute_meters (_metrics);
+					}
+				} else {
+					solve_map_frame (_metrics, ts, frame);
+					recompute_meters (_metrics);
+				}
 			}
 		}
-	}
-
-	if (sub_num == 0 && was_musical) {
-		ts->set_position_lock_style (MusicTime);
 	}
 
 	Metrics::const_iterator d = future_map.begin();
