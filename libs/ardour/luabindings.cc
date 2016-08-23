@@ -36,6 +36,7 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/fluid_synth.h"
 #include "ardour/interthread_info.h"
 #include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
@@ -169,6 +170,7 @@ CLASSKEYS(ARDOUR::LuaOSC::Address);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanMapping);
+CLASSKEYS(ARDOUR::FluidSynth);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(PBD::Configuration);
@@ -1476,6 +1478,20 @@ LuaBindings::dsp (lua_State* L)
 		.beginClass <Session> ("Session")
 		.addFunction ("get_scratch_buffers", &Session::get_scratch_buffers)
 		.addFunction ("get_silent_buffers", &Session::get_silent_buffers)
+		.endClass ()
+		.endNamespace ();
+
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginClass <FluidSynth> ("FluidSynth")
+		.addConstructor <void (*) (float, int)> ()
+		.addFunction ("load_sf2", &FluidSynth::load_sf2)
+		.addFunction ("synth", &FluidSynth::synth)
+		.addFunction ("midi_event", &FluidSynth::midi_event)
+		.addFunction ("panic", &FluidSynth::panic)
+		.addFunction ("select_program", &FluidSynth::select_program)
+		.addFunction ("program_count", &FluidSynth::program_count)
+		.addFunction ("program_name", &FluidSynth::program_name)
 		.endClass ()
 		.endNamespace ();
 

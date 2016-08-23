@@ -664,6 +664,8 @@ LuaProc::connect_and_run (BufferSet& bufs,
 						luabridge::LuaRef lua_midi_event (luabridge::newTable (L));
 						lua_midi_event["time"] = 1 + (*m).time();
 						lua_midi_event["data"] = lua_midi_data;
+						lua_midi_event["bytes"] = data;
+						lua_midi_event["size"] = ev.size();
 						lua_midi_src_tbl[e] = lua_midi_event;
 					}
 				}
