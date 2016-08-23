@@ -87,6 +87,12 @@ public:
 	// Like row_at_beats_max_delay but use frame instead of beats
 	uint32_t row_at_frame_max_delay(framepos_t frame);
 
+	// Return an event's delay in a certain row in ticks
+	int64_t delay_ticks(const Evoral::Beats& event_time, uint32_t irow);
+
+	// Like above but uses fram instead of beats
+	int64_t delay_ticks(framepos_t frame, uint32_t irow);
+
 	// Number of rows per beat
 	uint8_t rows_per_beat;
 
