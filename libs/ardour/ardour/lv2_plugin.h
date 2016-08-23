@@ -312,7 +312,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	void init (const void* c_plugin, framecnt_t rate);
 	void allocate_atom_event_buffers ();
-	void run (pframes_t nsamples);
+	void run (pframes_t nsamples, bool sync_work = false);
 
 	void load_supported_properties(PropertyDescriptors& descs);
 

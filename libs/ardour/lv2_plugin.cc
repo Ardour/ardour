@@ -558,6 +558,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 #ifdef HAVE_LILV_0_16_0
 	// Load default state
+	if (_worker) {
+		/* immediately schedule any work,
+		 * so that state restore later will not find a busy
+		 * worker.  latency_compute_run() flushes any replies
+		 */
+		_worker->set_synchronous(true);
+	}
 	LilvState* state = lilv_state_new_from_world(
 		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
 	if (state && _has_state_interface) {
@@ -2830,7 +2837,7 @@ LV2Plugin::get_scale_points(uint32_t port_index) const
 }
 
 void
-LV2Plugin::run(pframes_t nframes)
+LV2Plugin::run(pframes_t nframes, bool sync_work)
 {
 	uint32_t const N = parameter_count();
 	for (uint32_t i = 0; i < N; ++i) {
@@ -2841,7 +2848,7 @@ LV2Plugin::run(pframes_t nframes)
 
 	if (_worker) {
 		// Execute work synchronously if we're freewheeling (export)
-		_worker->set_synchronous(session().engine().freewheeling());
+		_worker->set_synchronous(sync_work || session().engine().freewheeling());
 	}
 
 	// Run the plugin for this cycle
@@ -2902,7 +2909,7 @@ LV2Plugin::latency_compute_run()
 		port_index++;
 	}
 
-	run(bufsize);
+	run(bufsize, true);
 	deactivate();
 	if (was_activated) {
 		activate();
