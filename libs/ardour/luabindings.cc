@@ -195,6 +195,7 @@ CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(void);
 CLASSKEYS(float);
+CLASSKEYS(unsigned char);
 
 #endif // end windows special case
 
