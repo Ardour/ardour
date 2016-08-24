@@ -229,6 +229,7 @@ children = [
         'export',
         'midi_maps',
         'mcp',
+        'osc',
         'patchfiles',
         'scripts',
         'headless',
