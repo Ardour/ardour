@@ -1,0 +1,67 @@
+@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+@prefix unit:  <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
+@prefix work:  <http://lv2plug.in/ns/ext/worker#> .
+
+<http://ardour.org/credits.html>
+	a foaf:Person ;
+	foaf:name "Ardour Team" ;
+	foaf:homepage <http://ardour.org/> .
+
+<urn:ardour:a-fluidsynth:sf2file>
+	a lv2:Parameter ;
+	rdfs:label "SF2 File" ;
+	rdfs:range atom:Path .
+
+<urn:ardour:a-fluidsynth>
+	a doap:Project, lv2:InstrumentPlugin, lv2:Plugin ;
+
+	doap:name "a-Fluid Synth" ;
+	rdfs:comment "SF2 Synthesizer using Fluidsynth" ;
+
+	doap:maintainer <http://ardour.org/credits.html> ;
+	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
+
+	lv2:microVersion 2 ; lv2:minorVersion 0 ;
+
+	lv2:requiredFeature urid:map, work:schedule ;
+	lv2:extensionData work:interface, state:interface ;
+	lv2:optionalFeature lv2:hardRTCapable;
+
+	patch:writable <urn:ardour:a-fluidsynth:sf2file> ;
+
+    lv2:port [
+        a lv2:InputPort, atom:AtomPort ;
+        atom:bufferType atom:Sequence ;
+				atom:supports patch:Message, midi:MidiEvent;
+				lv2:designation lv2:control ;
+        lv2:index 0 ;
+        lv2:symbol "control" ;
+        lv2:name "Midi In" ;
+    ] , [
+        a lv2:OutputPort, atom:AtomPort ;
+        atom:bufferType atom:Sequence ;
+				atom:supports patch:Message;
+				lv2:designation lv2:control ;
+        lv2:index 1 ;
+        lv2:symbol "notify" ;
+        lv2:name "UI Notifications" ;
+    ] , [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 2 ;
+        lv2:symbol "outL" ;
+        lv2:name "Out Left" ;
+    ] , [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 3 ;
+        lv2:symbol "outR" ;
+        lv2:name "Output Right" ;
+    ] .
