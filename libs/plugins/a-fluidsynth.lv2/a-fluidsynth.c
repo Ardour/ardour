@@ -281,7 +281,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 
 	/* initialize plugin state */
 
-	self->panic = true;
+	self->panic = false;
 	self->inform_ui = false;
 	self->initialized = false;
 	self->reinit_in_progress = false;
@@ -327,7 +327,7 @@ connect_port (LV2_Handle instance,
 }
 
 static void
-activate (LV2_Handle instance)
+deactivate (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
 	self->panic = true;
@@ -352,8 +352,6 @@ run (LV2_Handle instance, uint32_t n_samples)
 	} else if (self->panic) {
 		fluid_synth_all_notes_off (self->synth, -1);
 		fluid_synth_all_sounds_off (self->synth, -1);
-		//fluid_synth_reset_reverb (self->synth);
-		//fluid_synth_reset_chorus (self->synth);
 		self->panic = false;
 	}
 
@@ -506,6 +504,13 @@ work (LV2_Handle                  instance,
 	}
 
 	self->initialized = load_sf2 (self, self->queue_sf2_file_path);
+
+	if (self->initialized) {
+		fluid_synth_all_notes_off (self->synth, -1);
+		fluid_synth_all_sounds_off (self->synth, -1);
+		self->panic = false;
+	}
+
 	respond (handle, 1, "");
 	return LV2_WORKER_SUCCESS;
 }
@@ -519,7 +524,6 @@ work_response (LV2_Handle  instance,
 	self->reinit_in_progress = false;
 	self->queue_reinit = false;
 	self->inform_ui = true;
-	self->panic = true;
 
 	if (self->initialized) {
 		strcpy (self->current_sf2_file_path, self->queue_sf2_file_path);
@@ -607,9 +611,9 @@ static const LV2_Descriptor descriptor = {
 	AFS_URN,
 	instantiate,
 	connect_port,
-	activate,
-	run,
 	NULL,
+	run,
+	deactivate,
 	cleanup,
 	extension_data
 };
