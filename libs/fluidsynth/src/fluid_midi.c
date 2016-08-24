@@ -34,7 +34,7 @@ static int fluid_midi_event_length(unsigned char event);
 static char* fluid_file_read_full(fluid_file fp, size_t* length);
 #define READ_FULL_INITIAL_BUFLEN 1024
 
-
+#if 0 // disable file I/O with Ardour
 /***************************************************************
  *
  *                      MIDIFILE
@@ -760,6 +760,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
 {
     return midifile->division;
 }
+#endif
 
 /******************************************************
  *
@@ -1030,7 +1031,7 @@ fluid_midi_event_set_sysex(fluid_midi_event_t *evt, void *data, int size, int dy
  *
  *     fluid_track_t
  */
-
+#if 0 // disable fluid file player in Ardour
 /*
  * new_fluid_track
  */
@@ -1115,7 +1116,6 @@ fluid_track_get_duration(fluid_track_t *track)
     return time;
 }
 
-#if 0
 /*
  * fluid_track_count_events
  */
@@ -1133,7 +1133,6 @@ fluid_track_count_events(fluid_track_t *track, int *on, int *off)
     }
     return FLUID_OK;
 }
-#endif
 
 /*
  * fluid_track_add_event
@@ -1940,3 +1939,4 @@ fluid_midi_event_length(unsigned char event)
     }
     return 1;
 }
+#endif

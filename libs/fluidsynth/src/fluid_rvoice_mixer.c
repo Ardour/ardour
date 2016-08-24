@@ -29,7 +29,7 @@
 #define SYNTH_REVERB_CHANNEL 0
 #define SYNTH_CHORUS_CHANNEL 1
 
-#define ENABLE_MIXER_THREADS 1
+#undef ENABLE_MIXER_THREADS // Ardour does the multithreading -- synth.cpu-cores defaults to 1
 
 // If less than x voices, the thread overhead is larger than the gain,
 // so don't activate the thread(s).

@@ -950,6 +950,7 @@ fluid_ostream_printf (fluid_ostream_t out, char* format, ...)
 #endif
 }
 
+#if 0 // Ardour says: no, thanks
 int fluid_server_socket_join(fluid_server_socket_t *server_socket)
 {
   return fluid_thread_join (server_socket->thread);
@@ -1293,4 +1294,5 @@ int delete_fluid_server_socket(fluid_server_socket_t *server_socket)
   return FLUID_OK;
 }
 
+#endif
 #endif
