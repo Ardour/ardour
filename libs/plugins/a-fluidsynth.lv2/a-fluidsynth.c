@@ -521,15 +521,16 @@ work_response (LV2_Handle  instance,
                const void* data)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
-	self->reinit_in_progress = false;
-	self->queue_reinit = false;
-	self->inform_ui = true;
 
 	if (self->initialized) {
 		strcpy (self->current_sf2_file_path, self->queue_sf2_file_path);
 	} else {
 		self->current_sf2_file_path[0] = 0;
 	}
+
+	self->reinit_in_progress = false;
+	self->inform_ui = true;
+	self->queue_reinit = false;
 	return LV2_WORKER_SUCCESS;
 }
 
