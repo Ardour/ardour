@@ -1905,12 +1905,10 @@ XMLNode&
 AudioDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
-	char buf[64] = "";
 	LocaleGuard lg;
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	snprintf (buf, sizeof(buf), "%u", (unsigned int) c->size());
-	node.add_property ("channels", buf);
+	node.set_property ("channels", (uint32_t)c->size());
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {
 
@@ -1919,7 +1917,7 @@ AudioDiskstream::get_state ()
 
 		for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = capturing_sources.begin(); i != capturing_sources.end(); ++i) {
 			cs_grandchild = new XMLNode (X_("file"));
-			cs_grandchild->add_property (X_("path"), (*i)->path());
+			cs_grandchild->set_property (X_("path"), (*i)->path());
 			cs_child->add_child_nocopy (*cs_grandchild);
 		}
 
@@ -1928,14 +1926,13 @@ AudioDiskstream::get_state ()
 		Location* pi;
 
 		if (_session.preroll_record_punch_enabled ()) {
-			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_punch_pos ());
+			cs_child->set_property (X_("at"), _session.preroll_record_punch_pos());
 		} else if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
-			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
+			cs_child->set_property (X_("at"), pi->start());
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());
+			cs_child->set_property (X_("at"), _session.transport_frame());
 		}
 
-		cs_child->add_property (X_("at"), buf);
 		node.add_child_nocopy (*cs_child);
 	}
 
@@ -1945,10 +1942,8 @@ AudioDiskstream::get_state ()
 int
 AudioDiskstream::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	uint32_t nchans = 1;
 	XMLNode* capture_pending_node = 0;
 	LocaleGuard lg;
 
@@ -1970,9 +1965,8 @@ AudioDiskstream::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("channels")) != 0) {
-		nchans = atoi (prop->value().c_str());
-	}
+	uint32_t nchans = 1;
+	node.get_property ("channels", nchans);
 
 	// create necessary extra channels
 	// we are always constructed with one and we always need one
@@ -1988,8 +1982,6 @@ AudioDiskstream::set_state (const XMLNode& node, int version)
 
 		remove_channel (_n_channels.n_audio() - nchans);
 	}
-
-
 
 	if (!destructive() && capture_pending_node) {
 		/* destructive streams have one and only one source per channel,
