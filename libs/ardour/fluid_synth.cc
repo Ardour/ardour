@@ -75,6 +75,9 @@ FluidSynth::load_sf2 (const std::string& fn)
 
 	 sfont->iteration_start (sfont);
 	 for (count = 0; sfont->iteration_next (sfont, &preset) != 0; ++count) {
+		 if (count < 16) {
+			 fluid_synth_program_select (_synth, count, _synth_id, preset.get_banknum (&preset), preset.get_num (&preset));
+		 }
 		 _presets.push_back (BankProgram (
 					 preset.get_name (&preset),
 					 preset.get_banknum (&preset),
@@ -84,8 +87,6 @@ FluidSynth::load_sf2 (const std::string& fn)
 	 if (count == 0) {
 		 return false;
 	 }
-
-	 select_program (0, 0);
 
 	 return true;
 }
