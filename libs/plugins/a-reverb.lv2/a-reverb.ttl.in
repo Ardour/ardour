@@ -12,7 +12,7 @@
 	foaf:homepage <http://ardour.org/> .
 
 <urn:ardour:a-reverb>
-	a doap:Project, lv2:Plugin, lv2:SpatialPlugin ;
+	a doap:Project, lv2:Plugin, lv2:ReverbPlugin ;
 
 	doap:name "a-Reverb" ;
 	rdfs:comment "A Schroeder Reverberator" ;
