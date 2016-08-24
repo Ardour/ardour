@@ -60,44 +60,44 @@ FluidSynth::~FluidSynth ()
 bool
 FluidSynth::load_sf2 (const std::string& fn)
 {
-	 _synth_id = fluid_synth_sfload (_synth, fn.c_str (), 1);
-	 if (_synth_id == FLUID_FAILED) {
-		 return false;
-	 }
+	_synth_id = fluid_synth_sfload (_synth, fn.c_str (), 1);
+	if (_synth_id == FLUID_FAILED) {
+		return false;
+	}
 
-	 fluid_sfont_t* const sfont = fluid_synth_get_sfont_by_id (_synth, _synth_id);
-	 if (!sfont) {
-		 return false;
-	 }
+	fluid_sfont_t* const sfont = fluid_synth_get_sfont_by_id (_synth, _synth_id);
+	if (!sfont) {
+		return false;
+	}
 
-	 size_t count;
-	 fluid_preset_t preset;
+	size_t count;
+	fluid_preset_t preset;
 
-	 sfont->iteration_start (sfont);
-	 for (count = 0; sfont->iteration_next (sfont, &preset) != 0; ++count) {
-		 if (count < 16) {
-			 fluid_synth_program_select (_synth, count, _synth_id, preset.get_banknum (&preset), preset.get_num (&preset));
-		 }
-		 _presets.push_back (BankProgram (
-					 preset.get_name (&preset),
-					 preset.get_banknum (&preset),
-					 preset.get_num (&preset)));
-	 }
+	sfont->iteration_start (sfont);
+	for (count = 0; sfont->iteration_next (sfont, &preset) != 0; ++count) {
+		if (count < 16) {
+			fluid_synth_program_select (_synth, count, _synth_id, preset.get_banknum (&preset), preset.get_num (&preset));
+		}
+		_presets.push_back (BankProgram (
+					preset.get_name (&preset),
+					preset.get_banknum (&preset),
+					preset.get_num (&preset)));
+	}
 
-	 if (count == 0) {
-		 return false;
-	 }
+	if (count == 0) {
+		return false;
+	}
 
-	 /* boostrap synth engine. The first call re-initializes the choruscw
-		* (fluid_rvoice_mixer_set_samplerate) which is not rt-safe.
-		*/
-	 float l[1024];
-	 float r[1024];
-	 fluid_synth_all_notes_off (self->synth, -1);
-	 fluid_synth_all_sounds_off (self->synth, -1);
-	 fluid_synth_write_float (self->synth, 1024, l, 0, 1, r, 0, 1);
+	/* boostrap synth engine. The first call re-initializes the chorus
+	 * (fluid_rvoice_mixer_set_samplerate) which is not rt-safe.
+	 */
+	float l[1024];
+	float r[1024];
+	fluid_synth_all_notes_off (self->synth, -1);
+	fluid_synth_all_sounds_off (self->synth, -1);
+	fluid_synth_write_float (self->synth, 1024, l, 0, 1, r, 0, 1);
 
-	 return true;
+	return true;
 }
 
 bool
