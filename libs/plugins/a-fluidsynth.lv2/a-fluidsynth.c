@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define AFS_URN "urn:ardour:a-fluidsynth"
 
@@ -49,7 +50,20 @@ enum {
 	FS_PORT_CONTROL = 0,
 	FS_PORT_NOTIFY,
 	FS_PORT_OUT_L,
-	FS_PORT_OUT_R
+	FS_PORT_OUT_R,
+	FS_OUT_GAIN,
+	FS_REV_ENABLE,
+	FS_REV_ROOMSIZE,
+	FS_REV_DAMPING,
+	FS_REV_WIDTH,
+	FS_REV_LEVEL,
+	FS_CHR_ENABLE,
+	FS_CHR_N,
+	FS_CHR_SPEED,
+	FS_CHR_DEPTH,
+	FS_CHR_LEVEL,
+	FS_CHR_TYPE,
+	FS_PORT_LAST
 };
 
 enum {
@@ -61,7 +75,9 @@ typedef struct {
 	/* ports */
 	const LV2_Atom_Sequence* control;
   LV2_Atom_Sequence*       notify;
-	float*                   output[2];
+
+	float* p_ports[FS_PORT_LAST];
+	float  v_ports[FS_PORT_LAST];
 
 	/* fluid synth */
 	fluid_settings_t* settings;
@@ -104,6 +120,7 @@ typedef struct {
 /* *****************************************************************************
  * helpers
  */
+
 static bool
 load_sf2 (AFluidSynth* self, const char* fn)
 {
@@ -150,14 +167,13 @@ parse_patch_msg (AFluidSynth* self, const LV2_Atom_Object* obj)
 		return NULL;
 	}
 
-	lv2_atom_object_get(obj, self->patch_value, &file_path, 0);
+	lv2_atom_object_get (obj, self->patch_value, &file_path, 0);
 	if (!file_path || file_path->type != self->atom_Path) {
 		return NULL;
 	}
 
 	return file_path;
 }
-
 
 static void
 inform_ui (AFluidSynth* self)
@@ -168,13 +184,21 @@ inform_ui (AFluidSynth* self)
 
 	LV2_Atom_Forge_Frame frame;
 	lv2_atom_forge_frame_time (&self->forge, 0);
-	x_forge_object(&self->forge, &frame, 1, self->patch_Set);
+	x_forge_object (&self->forge, &frame, 1, self->patch_Set);
 	lv2_atom_forge_property_head (&self->forge, self->patch_property, 0);
 	lv2_atom_forge_urid (&self->forge, self->afs_sf2file);
 	lv2_atom_forge_property_head (&self->forge, self->patch_value, 0);
-	lv2_atom_forge_path( &self->forge, self->current_sf2_file_path, strlen(self->current_sf2_file_path));
+	lv2_atom_forge_path (&self->forge, self->current_sf2_file_path, strlen (self->current_sf2_file_path));
 
 	lv2_atom_forge_pop (&self->forge, &frame);
+}
+
+static float
+db_to_coeff (float db)
+{
+	if (db <= -80) { return 0; }
+	else if (db >=  20) { return 10; }
+	return powf (10.f, .05f * db);
 }
 
 /* *****************************************************************************
@@ -294,11 +318,10 @@ connect_port (LV2_Handle instance,
 		case FS_PORT_NOTIFY:
 			self->notify = (LV2_Atom_Sequence*)data;
 			break;
-		case FS_PORT_OUT_L:
-			self->output[0] = (float*)data;
-			break;
-		case FS_PORT_OUT_R:
-			self->output[1] = (float*)data;
+		default:
+			if (port < FS_PORT_LAST) {
+				self->p_ports[port] = (float*)data;
+			}
 			break;
 	}
 }
@@ -324,12 +347,62 @@ run (LV2_Handle instance, uint32_t n_samples)
 	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
 
 	if (!self->initialized || self->reinit_in_progress) {
-		memset (self->output[0], 0, n_samples * sizeof (float));
-		memset (self->output[1], 0, n_samples * sizeof (float));
+		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
+		memset (self->p_ports[FS_PORT_OUT_R], 0, n_samples * sizeof (float));
 	} else if (self->panic) {
 		fluid_synth_all_notes_off (self->synth, -1);
 		fluid_synth_all_sounds_off (self->synth, -1);
+		//fluid_synth_reset_reverb (self->synth);
+		//fluid_synth_reset_chorus (self->synth);
 		self->panic = false;
+	}
+
+	if (self->initialized && !self->reinit_in_progress) {
+		bool rev_change = false;
+		bool chr_change = false;
+		// TODO clamp values to ranges
+		if (self->v_ports[FS_OUT_GAIN] != *self->p_ports[FS_OUT_GAIN]) {
+			fluid_synth_set_gain (self->synth, db_to_coeff (*self->p_ports[FS_OUT_GAIN]));
+		}
+		if (self->v_ports[FS_REV_ENABLE] != *self->p_ports[FS_REV_ENABLE]) {
+			fluid_synth_set_reverb_on (self->synth, *self->p_ports[FS_REV_ENABLE] > 0 ? 1 : 0);
+			rev_change = true;
+		}
+		if (self->v_ports[FS_CHR_ENABLE] != *self->p_ports[FS_CHR_ENABLE]) {
+			fluid_synth_set_chorus_on (self->synth, *self->p_ports[FS_CHR_ENABLE] > 0 ? 1 : 0);
+			chr_change = true;
+		}
+
+		for (uint32_t p = FS_REV_ROOMSIZE; p <= FS_REV_LEVEL && !rev_change; ++p) {
+			if (self->v_ports[p] != *self->p_ports[p]) {
+				rev_change = true;
+			}
+		}
+		for (uint32_t p = FS_CHR_N; p <= FS_CHR_TYPE && !chr_change; ++p) {
+			if (self->v_ports[p] != *self->p_ports[p]) {
+				chr_change = true;
+			}
+		}
+
+		if (rev_change) {
+			fluid_synth_set_reverb (self->synth,
+					*self->p_ports[FS_REV_ROOMSIZE],
+					*self->p_ports[FS_REV_DAMPING],
+					*self->p_ports[FS_REV_WIDTH],
+					*self->p_ports[FS_REV_LEVEL]);
+		}
+
+		if (chr_change) {
+			fluid_synth_set_chorus (self->synth,
+					rintf (*self->p_ports[FS_CHR_N]),
+					db_to_coeff (*self->p_ports[FS_CHR_LEVEL]),
+					*self->p_ports[FS_CHR_SPEED],
+					*self->p_ports[FS_CHR_DEPTH],
+					(*self->p_ports[FS_CHR_TYPE] > 0) ? FLUID_CHORUS_MOD_SINE : FLUID_CHORUS_MOD_TRIANGLE);
+		}
+		for (uint32_t p = FS_OUT_GAIN; p < FS_PORT_LAST; ++p) {
+			self->v_ports[p] = *self->p_ports[p];
+		}
 	}
 
 	uint32_t offset = 0;
@@ -349,7 +422,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 					self->queue_sf2_file_path[1023] = '\0';
 					self->reinit_in_progress = true;
 					int magic = 0x4711;
-					self->schedule->schedule_work (self->schedule->handle, sizeof(int), &magic);
+					self->schedule->schedule_work (self->schedule->handle, sizeof (int), &magic);
 				}
 			}
 		}
@@ -362,8 +435,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 				fluid_synth_write_float (
 						self->synth,
 						ev->time.frames - offset,
-						&self->output[0][offset], 0, 1,
-						&self->output[1][offset], 0, 1);
+						&self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
+						&self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
 			}
 
 			offset = ev->time.frames;
@@ -384,7 +457,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 	if (self->queue_reinit && !self->reinit_in_progress) {
 		self->reinit_in_progress = true;
 		int magic = 0x4711;
-		self->schedule->schedule_work (self->schedule->handle, sizeof(int), &magic);
+		self->schedule->schedule_work (self->schedule->handle, sizeof (int), &magic);
 	}
 
 	/* inform the GUI */
@@ -397,8 +470,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 		fluid_synth_write_float (
 				self->synth,
 				n_samples - offset,
-				&self->output[0][offset], 0, 1,
-				&self->output[1][offset], 0, 1);
+				&self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
+				&self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
 	}
 }
 
@@ -424,7 +497,7 @@ work (LV2_Handle                  instance,
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
 
-  if (size != sizeof(int)) {
+  if (size != sizeof (int)) {
 		return LV2_WORKER_ERR_UNKNOWN;
 	}
 	int magic = *((const int*)data);
