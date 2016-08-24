@@ -36,6 +36,8 @@
 #include "pbd/memento_command.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
+#include "pbd/enum_convert.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/debug.h"
 #include "ardour/diskstream.h"
@@ -45,6 +47,7 @@
 #include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 #include <locale.h>
@@ -52,6 +55,10 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(Diskstream::Flag);
+}
 
 ARDOUR::framecnt_t Diskstream::disk_read_chunk_frames = default_disk_read_chunk_frames ();
 ARDOUR::framecnt_t Diskstream::disk_write_chunk_frames = default_disk_write_chunk_frames ();
@@ -476,32 +483,28 @@ XMLNode&
 Diskstream::get_state ()
 {
 	XMLNode* node = new XMLNode ("Diskstream");
-        char buf[64];
 	LocaleGuard lg;
 
-	node->add_property ("flags", enum_2_string (_flags));
-	node->add_property ("playlist", _playlist->name());
-	node->add_property("name", _name);
-	node->add_property ("id", id ().to_s ());
-	snprintf (buf, sizeof(buf), "%f", _visible_speed);
-	node->add_property ("speed", buf);
-        node->add_property ("capture-alignment", enum_2_string (_alignment_choice));
-	node->add_property ("record-safe", _record_safe ? "yes" : "no");
+	node->set_property ("flags", _flags);
+	node->set_property ("playlist", _playlist->name());
+	node->set_property ("name", name());
+	node->set_property ("id", id ());
+	node->set_property ("speed", _visible_speed);
+	node->set_property ("capture-alignment", _alignment_choice);
+	node->set_property ("record-safe", _record_safe);
 
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
 	}
-
-        return *node;
+	return *node;
 }
 
 int
 Diskstream::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
+	std::string name;
+	if (node.get_property ("name", name)) {
+		_name = name;
 	}
 
 	if (deprecated_io_node) {
@@ -510,20 +513,18 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		set_id (node);
 	}
 
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	}
+	node.get_property ("flags", _flags);
 
 	if (Profile->get_trx() && (_flags & Destructive)) {
 		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
 		return -1;
 	}
 
-        if ((prop = node.property (X_("capture-alignment"))) != 0) {
-                set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
-        } else {
-                set_align_choice (Automatic, true);
-        }
+	AlignChoice achoice = Automatic;
+	node.get_property (X_("capture-alignment"), achoice);
+	set_align_choice (achoice, true);
+
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("playlist")) == 0) {
 		return -1;
@@ -533,16 +534,16 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	if ((prop = node.property ("speed")) != 0) {
-		double sp = atof (prop->value().c_str());
-
+	double sp;
+	if (node.get_property ("speed", sp)) {
 		if (realtime_set_speed (sp, false)) {
 			non_realtime_set_speed ();
 		}
 	}
 
-	if ((prop = node.property ("record-safe")) != 0) {
-	    _record_safe = PBD::string_is_affirmative (prop->value()) ? 1 : 0;
+	bool record_safe;
+	if (node.get_property ("record-safe", record_safe)) {
+	  _record_safe = record_safe ? 1 : 0;
 	}
 
 	return 0;
