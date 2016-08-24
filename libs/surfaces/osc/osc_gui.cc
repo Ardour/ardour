@@ -24,6 +24,8 @@
 #include <vector>
 //#include <glibmm/miscutils.h>
 
+#include <errno.h>
+
 #include "pbd/file_utils.h"
 
 #include <gtkmm/box.h>
