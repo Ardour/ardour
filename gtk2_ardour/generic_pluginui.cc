@@ -222,7 +222,7 @@ void
 GenericPluginUI::build ()
 {
 	std::vector<ControlUI *> control_uis;
-	bool grid = true;
+	bool grid = plugin->parameter_count() > 0;
 
 	// Build a ControlUI for each control port
 	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
@@ -273,6 +273,8 @@ GenericPluginUI::build ()
 			}
 
 			control_uis.push_back(cui);
+		} else {
+			grid = false;
 		}
 	}
 
@@ -525,6 +527,8 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	} else {
 		delete output_table;
 	}
+	show_all();
+
 }
 
 void
