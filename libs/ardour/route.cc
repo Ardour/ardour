@@ -2815,6 +2815,7 @@ Route::set_processor_state (const XMLNode& node)
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		/* re-assign _processors w/o process-lock.
 		 * if there's an IO-processor present in _processors but
@@ -2822,7 +2823,6 @@ Route::set_processor_state (const XMLNode& node)
 		 * a process lock.
 		 */
 		_processors = new_order;
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
 		if (must_configure) {
 			configure_processors_unlocked (0, &lm);
