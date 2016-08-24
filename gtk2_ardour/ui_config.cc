@@ -49,6 +49,7 @@
 #include "ardour/search_paths.h"
 #include "ardour/revision.h"
 #include "ardour/utils.h"
+#include "ardour/types_convert.h"
 
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gtk_ui.h"

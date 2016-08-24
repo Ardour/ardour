@@ -35,6 +35,7 @@
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 

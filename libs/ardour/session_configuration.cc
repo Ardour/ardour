@@ -27,6 +27,7 @@
 #include "pbd/pathexpand.h"
 
 #include "ardour/types.h"
+#include "ardour/types_convert.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_configuration.h"
 #include "ardour/utils.h"

@@ -111,11 +111,3 @@ ConfigVariableBase::miss ()
 	// placeholder for any debugging desired when a config variable
 	// is set but to the same value as it already has
 }
-
-/* Specialisation of ConfigVariable to deal with float (-inf etc)
- * http://stackoverflow.com/questions/23374095/should-a-stringstream-parse-infinity-as-an-infinite-value
- */
-template<> void
-ConfigVariable<float>::set_from_string (std::string const & s) {
-	value = std::strtof (s.c_str(), NULL);
-}

@@ -104,6 +104,7 @@
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 #include "ardour/track.h"
+#include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
