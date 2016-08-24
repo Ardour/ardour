@@ -26,10 +26,13 @@
 #include "ardour/automation_list.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/evoral_types_convert.h"
+#include "ardour/types_convert.h"
 #include "evoral/Curve.hpp"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
+#include "pbd/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -302,41 +305,34 @@ XMLNode&
 AutomationList::state (bool full)
 {
 	XMLNode* root = new XMLNode (X_("AutomationList"));
-	char buf[64];
 	LocaleGuard lg;
 
-	root->add_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
-
-	root->add_property ("id", id().to_s());
-
-	snprintf (buf, sizeof (buf), "%.12g", _default_value);
-	root->add_property ("default", buf);
-	snprintf (buf, sizeof (buf), "%.12g", _min_yval);
-	root->add_property ("min-yval", buf);
-	snprintf (buf, sizeof (buf), "%.12g", _max_yval);
-	root->add_property ("max-yval", buf);
-
-	root->add_property ("interpolation-style", enum_2_string (_interpolation));
+	root->set_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
+	root->set_property ("id", id());
+	root->set_property ("default", _default_value);
+	root->set_property ("min-yval", _min_yval);
+	root->set_property ("max-yval", _max_yval);
+	root->set_property ("interpolation-style", _interpolation);
 
 	if (full) {
-                /* never serialize state with Write enabled - too dangerous
-                   for the user's data
-                */
-                if (_state != Write) {
-                        root->add_property ("state", auto_state_to_string (_state));
-                } else {
+		/* never serialize state with Write enabled - too dangerous
+		   for the user's data
+		*/
+		if (_state != Write) {
+			root->set_property ("state", _state);
+		} else {
 			if (_events.empty ()) {
-				root->add_property ("state", auto_state_to_string (Off));
+				root->set_property ("state", Off);
 			} else {
-				root->add_property ("state", auto_state_to_string (Touch));
+				root->set_property ("state", Touch);
 			}
-                }
+		}
 	} else {
 		/* never save anything but Off for automation state to a template */
-		root->add_property ("state", auto_state_to_string (Off));
+		root->set_property ("state", Off);
 	}
 
-	root->add_property ("style", auto_style_to_string (_style));
+	root->set_property ("style", _style);
 
 	if (!_events.empty()) {
 		root->add_child_nocopy (serialize_events());
@@ -425,7 +421,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;
 	XMLNodeIterator niter;
-	XMLProperty const * prop;
 
 	if (node.name() == X_("events")) {
 		/* partial state setting*/
@@ -443,26 +438,23 @@ AutomationList::set_state (const XMLNode& node, int version)
 
 		const XMLNodeList& elist = node.children();
 		XMLNodeConstIterator i;
-		XMLProperty const * prop;
-		pframes_t x;
-		double y;
 
-                ControlList::freeze ();
+		ControlList::freeze ();
 		clear ();
 
 		for (i = elist.begin(); i != elist.end(); ++i) {
 
-			if ((prop = (*i)->property ("x")) == 0) {
+			pframes_t x;
+			if (!(*i)->get_property ("x", x)) {
 				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
 				continue;
 			}
-			x = atoi (prop->value().c_str());
 
-			if ((prop = (*i)->property ("y")) == 0) {
+			double y;
+			if (!(*i)->get_property ("y", y)) {
 				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
 				continue;
 			}
-			y = atof (prop->value().c_str());
 
 			fast_simple_add (x, y);
 		}
@@ -482,49 +474,39 @@ AutomationList::set_state (const XMLNode& node, int version)
 		AutomationListCreated(this);
 	}
 
-	if ((prop = node.property (X_("automation-id"))) != 0){
-		_parameter = EventTypeMap::instance().from_symbol(prop->value());
+	std::string value;
+	if (node.get_property (X_("automation-id"), value)) {
+		_parameter = EventTypeMap::instance().from_symbol(value);
 	} else {
 		warning << "Legacy session: automation list has no automation-id property." << endmsg;
 	}
 
-	if ((prop = node.property (X_("interpolation-style"))) != 0) {
-		_interpolation = (InterpolationStyle)string_2_enum(prop->value(), _interpolation);
-	} else {
+	if (!node.get_property (X_("interpolation-style"), _interpolation)) {
 		_interpolation = Linear;
 	}
 
-	if ((prop = node.property (X_("default"))) != 0){
-		_default_value = atof (prop->value().c_str());
-	} else {
+	if (!node.get_property (X_("default"), _default_value)) {
 		_default_value = 0.0;
 	}
 
-	if ((prop = node.property (X_("style"))) != 0) {
-		_style = string_to_auto_style (prop->value());
-	} else {
+	if (!node.get_property (X_("style"), _style)) {
 		_style = Absolute;
 	}
 
-	if ((prop = node.property (X_("state"))) != 0) {
-		_state = string_to_auto_state (prop->value());
-                if (_state == Write) {
-                        _state = Off;
-                }
-		automation_state_changed(_state);
+	if (node.get_property (X_("state"), _state)) {
+		if (_state == Write) {
+			_state = Off;
+		}
+		automation_state_changed (_state);
 	} else {
 		_state = Off;
 	}
 
-	if ((prop = node.property (X_("min-yval"))) != 0) {
-		_min_yval = atof (prop->value ().c_str());
-	} else {
+	if (!node.get_property (X_("min-yval"), _min_yval)) {
 		_min_yval = FLT_MIN;
 	}
 
-	if ((prop = node.property (X_("max-yval"))) != 0) {
-		_max_yval = atof (prop->value ().c_str());
-	} else {
+	if (!node.get_property (X_("max-yval"), _max_yval)) {
 		_max_yval = FLT_MAX;
 	}
 
