@@ -93,9 +93,9 @@ FluidSynth::load_sf2 (const std::string& fn)
 	 */
 	float l[1024];
 	float r[1024];
-	fluid_synth_all_notes_off (self->synth, -1);
-	fluid_synth_all_sounds_off (self->synth, -1);
-	fluid_synth_write_float (self->synth, 1024, l, 0, 1, r, 0, 1);
+	fluid_synth_all_notes_off (_synth, -1);
+	fluid_synth_all_sounds_off (_synth, -1);
+	fluid_synth_write_float (_synth, 1024, l, 0, 1, r, 0, 1);
 
 	return true;
 }
