@@ -987,9 +987,7 @@ void
 GenericPluginUI::set_all_automation (AutoState as)
 {
 	for (vector<ControlUI*>::iterator i = input_controls_with_automation.begin(); i != input_controls_with_automation.end(); ++i) {
-		if ((*i)->controller || (*i)->button) {
-			set_automation_state (as, (*i));
-		}
+		set_automation_state (as, (*i));
 	}
 }
 
