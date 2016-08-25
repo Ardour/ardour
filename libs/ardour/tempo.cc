@@ -32,6 +32,7 @@
 #include "ardour/debug.h"
 #include "ardour/lmath.h"
 #include "ardour/tempo.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 #include <locale.h>
@@ -61,6 +62,34 @@ MetricSection::minute_at_frame (const framepos_t& frame) const
 
 /***********************************************************************/
 
+bool
+ARDOUR::bbt_time_to_string (const BBT_Time& bbt, std::string& str)
+{
+	char buf[256];
+	int retval = snprintf (buf, sizeof(buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats,
+	                       bbt.ticks);
+
+	if (retval <= 0 || retval >= (int)sizeof(buf)) {
+		return false;
+	}
+
+	str = buf;
+	return true;
+}
+
+bool
+ARDOUR::string_to_bbt_time (const std::string& str, BBT_Time& bbt)
+{
+	if (sscanf (str.c_str (), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats,
+	            &bbt.ticks) == 3) {
+		return true;
+	}
+	return false;
+}
+
+
+/***********************************************************************/
+
 double
 Meter::frames_per_grid (const Tempo& tempo, framecnt_t sr) const
 {
@@ -82,6 +111,44 @@ Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
 
 /***********************************************************************/
 
+void
+MetricSection::add_state_to_node(XMLNode& node) const
+{
+	node.set_property ("pulse", _pulse);
+	node.set_property ("frame", frame());
+	node.set_property ("movable", !_initial);
+	node.set_property ("lock-style", _position_lock_style);
+}
+
+int
+MetricSection::set_state (const XMLNode& node, int /*version*/)
+{
+	node.get_property ("pulse", _pulse);
+
+	framepos_t frame;
+	if (node.get_property ("frame", frame)) {
+		set_minute (minute_at_frame (frame));
+	}
+
+	bool tmp;
+	if (!node.get_property ("movable", tmp)) {
+		error << _("TempoSection XML node has no \"movable\" property") << endmsg;
+		throw failed_constructor();
+	}
+	_initial = !tmp;
+
+	if (!node.get_property ("lock-style", _position_lock_style)) {
+		if (!initial()) {
+			_position_lock_style = MusicTime;
+		} else {
+			_position_lock_style = AudioTime;
+		}
+	}
+	return 0;
+}
+
+/***********************************************************************/
+
 const string TempoSection::xml_state_node_name = "Tempo";
 
 TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
@@ -93,71 +160,47 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	, _clamped (false)
 	, _legacy_end (false)
 {
-	XMLProperty const * prop;
 	LocaleGuard lg;
-	BBT_Time bbt;
-	double pulse;
-	uint32_t frame;
 
 	_legacy_bbt = BBT_Time (0, 0, 0);
 
-	if ((prop = node.property ("start")) != 0) {
-		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
-			    &bbt.bars,
-			    &bbt.beats,
-			    &bbt.ticks) == 3) {
+	BBT_Time bbt;
+	std::string start_bbt;
+	if (node.get_property ("start", start_bbt)) {
+		if (string_to_bbt_time (start_bbt, bbt)) {
 			/* legacy session - start used to be in bbt*/
 			_legacy_bbt = bbt;
-			pulse = -1.0;
+			set_pulse(-1.0);
 			info << _("Legacy session detected. TempoSection XML node will be altered.") << endmsg;
 		}
 	}
 
-	if ((prop = node.property ("pulse")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1) {
-			error << _("TempoSection XML node has an illegal \"pulse\" value") << endmsg;
-		}
-	}
+	// Don't worry about return value, exception will be thrown on error
+	MetricSection::set_state (node, Stateful::loading_state_version);
 
-	set_pulse (pulse);
-
-	if ((prop = node.property ("frame")) != 0) {
-		if (sscanf (prop->value().c_str(), "%" PRIu32, &frame) != 1) {
-			error << _("TempoSection XML node has an illegal \"frame\" value") << endmsg;
-			throw failed_constructor();
-		} else {
-			set_minute (minute_at_frame (frame));
-		}
-	}
-
-	/* XX replace old beats-per-minute name with note-types-per-minute */
-	if ((prop = node.property ("beats-per-minute")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &_note_types_per_minute) != 1 || _note_types_per_minute < 0.0) {
-			error << _("TempoSection XML node has an illegal \"beats-per-minute\" value") << endmsg;
+	if (node.get_property ("beats-per-minute", _note_types_per_minute)) {
+		if (_note_types_per_minute < 0.0) {
+			error << _("TempoSection XML node has an illegal \"beats_per_minute\" value") << endmsg;
 			throw failed_constructor();
 		}
 	}
 
-	if ((prop = node.property ("note-type")) == 0) {
-		/* older session, make note type be quarter by default */
-		_note_type = 4.0;
-	} else {
-		if (sscanf (prop->value().c_str(), "%lf", &_note_type) != 1 || _note_type < 1.0) {
+	if (node.get_property ("note-type", _note_type)) {
+		if (_note_type < 1.0) {
 			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
 			throw failed_constructor();
 		}
-	}
-
-	if ((prop = node.property ("clamped")) == 0) {
-		warning << _("TempoSection XML node has no \"clamped\" property") << endmsg;
-		set_clamped (false);
 	} else {
-		set_clamped (string_is_affirmative (prop->value()));
+		/* older session, make note type be quarter by default */
+		_note_type = 4.0;
 	}
 
-	/* XX replace old end-beats-per-minute name with note-types-per-minute */
-	if ((prop = node.property ("end-beats-per-minute")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &_end_note_types_per_minute) != 1 || _end_note_types_per_minute < 0.0) {
+	if (!node.get_property ("clamped", _clamped)) {
+		_clamped = false;
+	}
+
+	if (node.get_property ("end-beats-per-minute", _end_note_types_per_minute)) {
+		if (_end_note_types_per_minute < 0.0) {
 			info << _("TempoSection XML node has an illegal \"in-beats-per-minute\" value") << endmsg;
 			//throw failed_constructor();
 			_end_note_types_per_minute = _note_types_per_minute;
@@ -167,47 +210,24 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 		_legacy_end = true;
 	}
 
-	if ((prop = node.property ("tempo-type")) != 0) {
-		TempoSection::Type old_type;
-
-		old_type = Type (string_2_enum (prop->value(), old_type));
+	TempoSection::Type old_type;
+	if (!node.get_property ("tempo-type", old_type)) {
 		if (old_type == TempoSection::Constant) {
 			_end_note_types_per_minute = _note_types_per_minute;
 		}
 	}
 
-	if ((prop = node.property ("movable")) == 0) {
-		error << _("TempoSection XML node has no \"movable\" property") << endmsg;
-		throw failed_constructor();
-	}
-
-	set_initial (!string_is_affirmative (prop->value()));
-
-	if ((prop = node.property ("active")) == 0) {
+	if (!node.get_property ("active", _active)) {
 		warning << _("TempoSection XML node has no \"active\" property") << endmsg;
-		set_active(true);
-	} else {
-		set_active (string_is_affirmative (prop->value()));
+		_active = true;
 	}
 
-	if ((prop = node.property ("lock-style")) == 0) {
-		if (!initial()) {
-			set_position_lock_style (MusicTime);
-		} else {
-			set_position_lock_style (AudioTime);
-		}
-	} else {
-		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
-	}
-
-	if ((prop = node.property ("locked-to-meter")) == 0) {
+	if (!node.get_property ("locked-to-meter", _locked_to_meter)) {
 		if (initial()) {
 			set_locked_to_meter (true);
 		} else {
 			set_locked_to_meter (false);
 		}
-	} else {
-		set_locked_to_meter (string_is_affirmative (prop->value()));
 	}
 
 	/* 5.5 marked initial tempo as not locked to meter. this should always be true anyway */
@@ -220,27 +240,16 @@ XMLNode&
 TempoSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
-	char buf[256];
 	LocaleGuard lg;
 
-	snprintf (buf, sizeof (buf), "%lf", pulse());
-	root->add_property ("pulse", buf);
-	snprintf (buf, sizeof (buf), "%li", frame());
-	root->add_property ("frame", buf);
-	snprintf (buf, sizeof (buf), "%lf", _note_types_per_minute);
-	root->add_property ("beats-per-minute", buf);
-	snprintf (buf, sizeof (buf), "%lf", _note_type);
-	root->add_property ("note-type", buf);
-	snprintf (buf, sizeof (buf), "%s", _clamped?"yes":"no");
-	root->add_property ("clamped", buf);
-	snprintf (buf, sizeof (buf), "%lf", _end_note_types_per_minute);
-	root->add_property ("end-beats-per-minute", buf);
-	snprintf (buf, sizeof (buf), "%s", !initial()?"yes":"no");
-	root->add_property ("movable", buf);
-	snprintf (buf, sizeof (buf), "%s", active()?"yes":"no");
-	root->add_property ("active", buf);
-	root->add_property ("lock-style", enum_2_string (position_lock_style()));
-	root->add_property ("locked-to-meter", locked_to_meter()?"yes":"no");
+	MetricSection::add_state_to_node (*root);
+
+	root->set_property ("beats-per-minute", _note_types_per_minute);
+	root->set_property ("note-type", _note_type);
+	root->set_property ("clamped", _clamped);
+	root->set_property ("end-beats-per-minute", _end_note_types_per_minute);
+	root->set_property ("active", _active);
+	root->set_property ("locked-to-meter", _locked_to_meter);
 
 	return *root;
 }
@@ -542,102 +551,59 @@ const string MeterSection::xml_state_node_name = "Meter";
 MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 	: MetricSection (0.0, 0, MusicTime, false, sample_rate), Meter (TempoMap::default_meter())
 {
-	XMLProperty const * prop;
 	LocaleGuard lg;
-	BBT_Time bbt;
-	double pulse = 0.0;
-	double beat = 0.0;
-	framepos_t frame = 0;
 	pair<double, BBT_Time> start;
 
-	if ((prop = node.property ("start")) != 0) {
-		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
-		    &bbt.bars,
-		    &bbt.beats,
-		    &bbt.ticks) < 3) {
-			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
-		} else {
+	BBT_Time bbt;
+	std::string bbt_str;
+	if (node.get_property ("start", bbt_str)) {
+		if (string_to_bbt_time (bbt_str, bbt)) {
 			/* legacy session - start used to be in bbt*/
 			info << _("Legacy session detected - MeterSection XML node will be altered.") << endmsg;
-			pulse = -1.0;
-		}
-	}
-
-	if ((prop = node.property ("pulse")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1) {
-			error << _("MeterSection XML node has an illegal \"pulse\" value") << endmsg;
-		}
-	}
-	set_pulse (pulse);
-
-	if ((prop = node.property ("beat")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &beat) != 1) {
-			error << _("MeterSection XML node has an illegal \"beat\" value") << endmsg;
-		}
-	}
-
-	start.first = beat;
-
-	if ((prop = node.property ("bbt")) == 0) {
-		warning << _("MeterSection XML node has no \"bbt\" property") << endmsg;
-	} else if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
-		    &bbt.bars,
-		    &bbt.beats,
-		    &bbt.ticks) < 3) {
-		error << _("MeterSection XML node has an illegal \"bbt\" value") << endmsg;
-		throw failed_constructor();
-	}
-
-	start.second = bbt;
-	set_beat (start);
-
-	if ((prop = node.property ("frame")) != 0) {
-		if (sscanf (prop->value().c_str(), "%li", &frame) != 1) {
-			error << _("MeterSection XML node has an illegal \"frame\" value") << endmsg;
-			throw failed_constructor();
+			set_pulse(-1.0);
 		} else {
-			set_minute (minute_at_frame (frame));
+			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
 		}
 	}
+
+	MetricSection::set_state (node, Stateful::loading_state_version);
+
+	start.first = 0.0;
+	node.get_property ("beat", start.first);
+
+	if (node.get_property ("bbt", bbt_str)) {
+		if (!string_to_bbt_time (bbt_str, start.second)) {
+			error << _("MeterSection XML node has an illegal \"bbt\" value") << endmsg;
+			throw failed_constructor();
+		}
+	} else {
+		warning << _("MeterSection XML node has no \"bbt\" property") << endmsg;
+	}
+
+	set_beat (start);
 
 	/* beats-per-bar is old; divisions-per-bar is new */
 
-	if ((prop = node.property ("divisions-per-bar")) == 0) {
-		if ((prop = node.property ("beats-per-bar")) == 0) {
+	if (!node.get_property ("divisions-per-bar", _divisions_per_bar)) {
+		if (!node.get_property ("beats-per-bar", _divisions_per_bar)) {
 			error << _("MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" property") << endmsg;
 			throw failed_constructor();
 		}
 	}
-	if (sscanf (prop->value().c_str(), "%lf", &_divisions_per_bar) != 1 || _divisions_per_bar < 0.0) {
+
+	if (_divisions_per_bar < 0.0) {
 		error << _("MeterSection XML node has an illegal \"divisions-per-bar\" value") << endmsg;
 		throw failed_constructor();
 	}
 
-	if ((prop = node.property ("note-type")) == 0) {
+	if (!node.get_property ("note-type", _note_type)) {
 		error << _("MeterSection XML node has no \"note-type\" property") << endmsg;
 		throw failed_constructor();
 	}
-	if (sscanf (prop->value().c_str(), "%lf", &_note_type) != 1 || _note_type < 0.0) {
+
+	if (_note_type < 0.0) {
 		error << _("MeterSection XML node has an illegal \"note-type\" value") << endmsg;
 		throw failed_constructor();
-	}
-
-	if ((prop = node.property ("movable")) == 0) {
-		error << _("MeterSection XML node has no \"movable\" property") << endmsg;
-		throw failed_constructor();
-	}
-
-	set_initial (!string_is_affirmative (prop->value()));
-
-	if ((prop = node.property ("lock-style")) == 0) {
-		warning << _("MeterSection XML node has no \"lock-style\" property") << endmsg;
-		if (!initial()) {
-			set_position_lock_style (MusicTime);
-		} else {
-			set_position_lock_style (AudioTime);
-		}
-	} else {
-		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
 	}
 }
 
@@ -645,27 +611,16 @@ XMLNode&
 MeterSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
-	char buf[256];
 	LocaleGuard lg;
 
-	snprintf (buf, sizeof (buf), "%lf", pulse());
-	root->add_property ("pulse", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
-		  bbt().bars,
-		  bbt().beats,
-		  bbt().ticks);
-	root->add_property ("bbt", buf);
-	snprintf (buf, sizeof (buf), "%lf", beat());
-	root->add_property ("beat", buf);
-	snprintf (buf, sizeof (buf), "%lf", _note_type);
-	root->add_property ("note-type", buf);
-	snprintf (buf, sizeof (buf), "%li", frame());
-	root->add_property ("frame", buf);
-	root->add_property ("lock-style", enum_2_string (position_lock_style()));
-	snprintf (buf, sizeof (buf), "%lf", _divisions_per_bar);
-	root->add_property ("divisions-per-bar", buf);
-	snprintf (buf, sizeof (buf), "%s", !initial()?"yes":"no");
-	root->add_property ("movable", buf);
+	MetricSection::add_state_to_node (*root);
+
+	std::string bbt_str;
+	bbt_time_to_string (_bbt, bbt_str);
+	root->set_property ("bbt", bbt_str);
+	root->set_property ("beat", beat());
+	root->set_property ("note-type", _note_type);
+	root->set_property ("divisions-per-bar", _divisions_per_bar);
 
 	return *root;
 }

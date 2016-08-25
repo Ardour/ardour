@@ -27,6 +27,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/undo.h"
+#include "pbd/enum_convert.h"
 
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
@@ -45,6 +46,10 @@ namespace ARDOUR {
 
 class Meter;
 class TempoMap;
+
+// Find a better place for these
+LIBARDOUR_API bool bbt_time_to_string (const Timecode::BBT_Time& bbt, std::string& str);
+LIBARDOUR_API bool string_to_bbt_time (const std::string& str, Timecode::BBT_Time& bbt);
 
 /** Tempo, the speed at which musical time progresses (BPM). */
 class LIBARDOUR_API Tempo {
@@ -149,12 +154,17 @@ class LIBARDOUR_API MetricSection {
 	*/
 	virtual XMLNode& get_state() const = 0;
 
+	virtual int set_state (const XMLNode&, int version);
+
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
 	bool is_tempo () const { return _is_tempo; }
 
 	framepos_t frame_at_minute (const double& time) const;
 	double minute_at_frame (const framepos_t& frame) const;
+
+protected:
+	void add_state_to_node (XMLNode& node) const;
 
 private:
 
@@ -184,7 +194,7 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 	}
 
 	const Timecode::BBT_Time& bbt() const { return _bbt; }
-        const double& beat () const { return _beat; }
+	const double& beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
 
 private:
@@ -614,5 +624,9 @@ private:
 LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Meter&);
 LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Tempo&);
 LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::MetricSection&);
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT (ARDOUR::TempoSection::Type)
+}
 
 #endif /* __ardour_tempo_h__ */
