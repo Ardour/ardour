@@ -287,3 +287,16 @@ index faf2772..74b9f4b 100644
  #if HAVE_STRING_H
  #include <string.h>
  #endif
+diff --git a/libs/fluidsynth/src/fluidsynth_priv.h b/libs/fluidsynth/src/fluidsynth_priv.h
+index 74b9f4b..d29ba8a 100644
+--- a/libs/fluidsynth/src/fluidsynth_priv.h
++++ b/libs/fluidsynth/src/fluidsynth_priv.h
+@@ -105,8 +105,6 @@
+ #endif
+ 
+ #if HAVE_WINDOWS_H
+-#include <winsock2.h>
+-#include <ws2tcpip.h>
+ #include <windows.h>
+ #endif
+ 
