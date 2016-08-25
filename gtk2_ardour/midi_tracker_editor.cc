@@ -218,6 +218,11 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	col2param[pan->column] = what;
 }
 
+// TODO:
+//
+// 1. This menu needs to be persistent between sessions.
+//
+// 2. Should also be fixed for the track/piano roll view.
 void
 MidiTrackerEditor::show_all_automation ()
 {
