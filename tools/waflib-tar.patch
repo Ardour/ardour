@@ -1,0 +1,11 @@
+--- .waf-1.6.11-06ee4b7efbeab1252ed3b11499834d2a/waflib/Scripting.py~	2016-07-14 16:34:10.741387174 -0400
++++ .waf-1.6.11-06ee4b7efbeab1252ed3b11499834d2a/waflib/Scripting.py	2016-08-11 11:45:11.833131519 -0400
+@@ -252,7 +252,7 @@
+ 		return node.abspath()
+ 	def add_tar_file(self,x,tar):
+ 		p=self.get_tar_path(x)
+-		tinfo=tar.gettarinfo(name=p,arcname=self.get_tar_prefix()+'/'+x.path_from(self.base_path))
++		tinfo=tar.gettarinfo(name=p,arcname=self.get_tar_prefix()+'/'+(x.path_from(self.base_path)).decode ('utf8'))
+ 		tinfo.uid=0
+ 		tinfo.gid=0
+ 		tinfo.uname='root'
