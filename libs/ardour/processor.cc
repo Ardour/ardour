@@ -24,6 +24,7 @@
 #include <string>
 
 #include "pbd/xml++.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/automatable.h"
 #include "ardour/chan_count.h"
@@ -111,11 +112,10 @@ XMLNode&
 Processor::state (bool full_state)
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	char buf[64];
 
-	node->add_property("id", id().to_s ());
-	node->add_property("name", _name);
-	node->add_property("active", active() ? "yes" : "no");
+	node->set_property("id", id());
+	node->set_property("name", name());
+	node->set_property("active", active());
 
 	if (_extra_xml){
 		node->add_child_copy (*_extra_xml);
@@ -130,8 +130,7 @@ Processor::state (bool full_state)
 		}
 	}
 
-	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
-	node->add_property("user-latency", buf);
+	node->set_property("user-latency", _user_latency);
 
 	return *node;
 }
@@ -179,17 +178,16 @@ Processor::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLProperty const * prop;
-	XMLProperty const * legacy_active = 0;
-	bool leave_name_alone = (node.property ("ignore-name") != 0);
-
-	if (!leave_name_alone) {
+	bool ignore_name;
+	// Only testing for the presence of the property not value
+	if (!node.get_property("ignore-name", ignore_name)) {
+		string name;
 		// may not exist for legacy 3.0 sessions
-		if ((prop = node.property ("name")) != 0) {
+		if (node.get_property ("name", name)) {
 			/* don't let derived classes have a crack at set_name,
 			   as some (like Send) will screw with the one we suggest.
 			*/
-			Processor::set_name (prop->value());
+			Processor::set_name (name);
 		}
 
 		set_id (node);
@@ -200,11 +198,12 @@ Processor::set_state (const XMLNode& node, int version)
 
 	Stateful::save_extra_xml (node);
 
+	XMLProperty const * prop = 0;
+	XMLProperty const * legacy_active = 0;
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Automation")) {
-
-			XMLProperty const * prop;
 
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));
@@ -237,9 +236,7 @@ Processor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property ("user-latency")) != 0) {
-		_user_latency = atoi (prop->value ());
-	}
+	node.get_property ("user-latency", _user_latency);
 
 	return 0;
 }
