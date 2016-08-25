@@ -46,7 +46,7 @@ LuaProc::LuaProc (AudioEngine& engine,
                   Session& session,
                   const std::string &script)
 	: Plugin (engine, session)
-	, _mempool ("LuaProc", 2097152)
+	, _mempool ("LuaProc", 3145728)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
@@ -76,7 +76,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 
 LuaProc::LuaProc (const LuaProc &other)
 	: Plugin (other)
-	, _mempool ("LuaProc", 2097152)
+	, _mempool ("LuaProc", 3145728)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
