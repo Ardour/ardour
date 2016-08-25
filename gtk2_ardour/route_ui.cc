@@ -1210,7 +1210,7 @@ RouteUI::update_solo_display ()
 	}
 
 	if (solo_safe_led) {
-		if (_route->solo_sate_control()->solo_safe()) {
+		if (_route->solo_safe_control()->solo_safe()) {
 			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_safe_led->unset_active_state ();
