@@ -268,10 +268,8 @@ VSTPlugin::add_state (XMLNode* root) const
 
 		for (int32_t n = 0; n < _plugin->numParams; ++n) {
 			char index[64];
-			char val[32];
 			snprintf (index, sizeof (index), "param-%d", n);
-			snprintf (val, sizeof (val), "%.12g", _plugin->getParameter (_plugin, n));
-			parameters->add_property (index, val);
+			parameters->set_property (index, _plugin->getParameter (_plugin, n));
 		}
 
 		root->add_child_nocopy (*parameters);
@@ -312,12 +310,11 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
 			int32_t param;
-			float val;
 
 			sscanf ((*i)->name().c_str(), "param-%d", &param);
-			sscanf ((*i)->value().c_str(), "%f", &val);
+			float value = string_to<float>((*i)->value());
 
-			_plugin->setParameter (_plugin, param, val);
+			_plugin->setParameter (_plugin, param, value);
 		}
 
 		ret = 0;
@@ -467,11 +464,10 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	XMLNode* root = t->root ();
 
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		XMLProperty const * label = (*i)->property (X_("label"));
+		std::string label;
+		(*i)->get_property (X_("label"), label);
 
-		assert (label);
-
-		if (label->value() != r.label) {
+		if (label != r.label) {
 			continue;
 		}
 
@@ -502,15 +498,17 @@ VSTPlugin::load_user_preset (PresetRecord r)
 
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
-						XMLProperty const * index = (*j)->property (X_("index"));
-						XMLProperty const * value = (*j)->property (X_("value"));
+					uint32_t index;
+					float value;
 
-						assert (index);
-						assert (value);
-						const uint32_t p = atoi (index->value().c_str());
-						const float v = atof (value->value().c_str ());
-						set_parameter (p, v);
-						PresetPortSetValue (p, v); /* EMIT SIGNAL */
+					if (!(*j)->get_property (X_("index"), index) ||
+					    !(*j)->get_property (X_("value"), value)) {
+					  // flag error and continue?
+						assert (false);
+					}
+
+					set_parameter (index, value);
+					PresetPortSetValue (index, value); /* EMIT SIGNAL */
 				}
 			}
 			return true;
@@ -550,8 +548,8 @@ VSTPlugin::do_save_preset (string name)
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		p = new XMLNode (X_("ChunkPreset"));
-		p->add_property (X_("uri"), uri);
-		p->add_property (X_("label"), name);
+		p->set_property (X_("uri"), uri);
+		p->set_property (X_("label"), name);
 		gchar* data = get_chunk (true);
 		p->add_content (string (data));
 		g_free (data);
@@ -559,14 +557,14 @@ VSTPlugin::do_save_preset (string name)
 	} else {
 
 		p = new XMLNode (X_("Preset"));
-		p->add_property (X_("uri"), uri);
-		p->add_property (X_("label"), name);
+		p->set_property (X_("uri"), uri);
+		p->set_property (X_("label"), name);
 
 		for (uint32_t i = 0; i < parameter_count(); ++i) {
 			if (parameter_is_input (i)) {
 				XMLNode* c = new XMLNode (X_("Parameter"));
-				c->add_property (X_("index"), string_compose ("%1", i));
-				c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
+				c->set_property (X_("index"), i);
+				c->set_property (X_("value"), get_parameter (i));
 				p->add_child_nocopy (*c);
 			}
 		}
@@ -832,14 +830,14 @@ VSTPlugin::find_presets ()
 	if (t) {
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+			std::string uri;
+			std::string label;
 
-			XMLProperty const * uri = (*i)->property (X_("uri"));
-			XMLProperty const * label = (*i)->property (X_("label"));
+			if (!(*i)->get_property (X_("uri"), uri) || !(*i)->get_property (X_("label"), label)) {
+				assert(false);
+			}
 
-			assert (uri);
-			assert (label);
-
-			PresetRecord r (uri->value(), label->value(), true);
+			PresetRecord r (uri, label, true);
 			_presets.insert (make_pair (r.uri, r));
 		}
 	}
