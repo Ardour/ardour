@@ -273,8 +273,6 @@ GenericPluginUI::build ()
 			}
 
 			control_uis.push_back(cui);
-		} else {
-			grid = false;
 		}
 	}
 
