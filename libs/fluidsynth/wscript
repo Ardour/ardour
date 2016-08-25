@@ -35,7 +35,7 @@ def build(bld):
     bld (export_includes = ['fluidsynth'],
          name = 'libfluidsynth_includes'
          )
-    bld.stlib (source = [
+    obj = bld.stlib (source = [
         'src/fluid_midi.c',
         'src/fluid_adsr_env.c',
         'src/fluid_chorus.c',
@@ -68,6 +68,14 @@ def build(bld):
                uselib = 'GLIB',
                defines = [ 'HAVE_CONFIG_H', 'DEFAULT_SOUNDFONT=""' ]
                )
+
+    # wine-gcc hacks:
+    # defining __MINGW32__ for wine-gcc is a workaround for fluidsynth's include
+    # strategy (which is made for mingw or windows) without it
+    # winsock2.h will complain about undeclared "u_short"
+    # we also need to explicitly define  _WIN32
+    if bld.is_defined('WINDOWS_VST_SUPPORT') and not bld.env['build_target'] == 'mingw':
+        obj.defines += [ '_WIN32', '__MINGW32__' ]
 
 def shutdown():
     autowaf.shutdown()
