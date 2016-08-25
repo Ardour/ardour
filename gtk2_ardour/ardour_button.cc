@@ -649,7 +649,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
-	} else if (_text_width > 0 && !(_elements & (Menu | Indicator))) {
+	} else if (_sizing_text.empty() && _text_width > 0 && !(_elements & (Menu | Indicator))) {
 		// properly centered text for those elements that are centered
 		// (no sub-pixel offset)
 		if ((req->width - _text_width) & 1) { ++req->width; }
