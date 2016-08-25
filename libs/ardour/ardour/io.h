@@ -30,6 +30,7 @@
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
@@ -257,5 +258,9 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 };
 
 } // namespace ARDOUR
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT (ARDOUR::IO::Direction)
+}
 
 #endif /*__ardour_io_h__ */

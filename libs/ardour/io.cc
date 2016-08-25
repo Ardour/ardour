@@ -31,6 +31,7 @@
 #include "pbd/replace_all.h"
 #include "pbd/unknown_type.h"
 #include "pbd/enumwriter.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
@@ -41,6 +42,7 @@
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 
 #include "pbd/i18n.h"
@@ -550,24 +552,22 @@ XMLNode&
 IO::state (bool /*full_state*/)
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	char buf[64];
-	string str;
 	int n;
 	LocaleGuard lg;
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
-	node->add_property("name", _name);
-	node->add_property ("id", id ().to_s ());
-	node->add_property ("direction", enum_2_string (_direction));
-	node->add_property ("default-type", _default_type.to_string());
+	node->set_property ("name", name());
+	node->set_property ("id", id ());
+	node->set_property ("direction", _direction);
+	node->set_property ("default-type", _default_type);
 
 	if (!_pretty_name_prefix.empty ()) {
-		node->add_property("pretty-name", _pretty_name_prefix);
+		node->set_property("pretty-name", _pretty_name_prefix);
 	}
 
 	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 		XMLNode* n = new XMLNode ("Bundle");
-		n->add_property ("name", (*i)->bundle->name ());
+		n->set_property ("name", (*i)->bundle->name ());
 		node->add_child_nocopy (*n);
 	}
 
@@ -576,8 +576,8 @@ IO::state (bool /*full_state*/)
 		vector<string> connections;
 
 		XMLNode* pnode = new XMLNode (X_("Port"));
-		pnode->add_property (X_("type"), i->type().to_string());
-		pnode->add_property (X_("name"), i->name());
+		pnode->set_property (X_("type"), i->type());
+		pnode->set_property (X_("name"), i->name());
 
 		if (i->get_connections (connections)) {
 			vector<string>::const_iterator ci;
@@ -594,7 +594,7 @@ IO::state (bool /*full_state*/)
 
 				XMLNode* cnode = new XMLNode (X_("Connection"));
 
-				cnode->add_property (X_("other"), _session.engine().make_port_name_relative (*ci));
+				cnode->set_property (X_("other"), _session.engine().make_port_name_relative (*ci));
 				pnode->add_child_nocopy (*cnode);
 			}
 		}
@@ -602,8 +602,7 @@ IO::state (bool /*full_state*/)
 		node->add_child_nocopy (*pnode);
 	}
 
-	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
-	node->add_property (X_("user-latency"), buf);
+	node->set_property (X_("user-latency"), _user_latency);
 
 	return *node;
 }
@@ -617,7 +616,6 @@ IO::set_state (const XMLNode& node, int version)
 	 */
 	assert (version >= 3000);
 
-	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	LocaleGuard lg;
 
@@ -631,28 +629,26 @@ IO::set_state (const XMLNode& node, int version)
 	}
 
 	bool ignore_name = node.property ("ignore-name");
-	if ((prop = node.property ("name")) != 0 && !ignore_name) {
-		set_name (prop->value());
+	std::string name;
+	if (node.get_property ("name", name) && !ignore_name) {
+		set_name (name);
 	}
 
-	if ((prop = node.property (X_("default-type"))) != 0) {
-		_default_type = DataType(prop->value());
+	if (node.get_property (X_("default-type"), _default_type)) {
 		assert(_default_type != DataType::NIL);
 	}
 
 	set_id (node);
 
-	if ((prop = node.property ("direction")) != 0) {
-		_direction = (Direction) string_2_enum (prop->value(), _direction);
-	}
+	node.get_property ("direction", _direction);
 
 	if (create_ports (node, version)) {
 		return -1;
 	}
 
 	// after create_ports, updates names
-	if ((prop = node.property ("pretty-name")) != 0) {
-		set_pretty_name (prop->value());
+	if (node.get_property ("pretty-name", name)) {
+		set_pretty_name (name);
 	}
 
 	if (connecting_legal) {
@@ -670,9 +666,7 @@ IO::set_state (const XMLNode& node, int version)
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
-	if ((prop = node.property ("user-latency")) != 0) {
-		_user_latency = atoi (prop->value ());
-	}
+	node.get_property ("user-latency", _user_latency);
 
 	return 0;
 }
@@ -1007,7 +1001,7 @@ void
 IO::prepare_for_reset (XMLNode& node, const std::string& name)
 {
 	/* reset name */
-	node.add_property ("name", name);
+	node.set_property ("name", name);
 
 	/* now find connections and reset the name of the port
 	   in one so that when we re-use it it will match
@@ -1633,13 +1627,13 @@ IO::name_from_state (const XMLNode& node)
 void
 IO::set_name_in_state (XMLNode& node, const string& new_name)
 {
-	node.add_property (X_("name"), new_name);
+	node.set_property (X_("name"), new_name);
 	XMLNodeList children = node.children ();
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Port")) {
 			string const old_name = (*i)->property(X_("name"))->value();
 			string const old_name_second_part = old_name.substr (old_name.find_first_of ("/") + 1);
-			(*i)->add_property (X_("name"), string_compose ("%1/%2", new_name, old_name_second_part));
+			(*i)->set_property (X_("name"), string_compose ("%1/%2", new_name, old_name_second_part));
 		}
 	}
 }
