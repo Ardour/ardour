@@ -347,7 +347,6 @@ void
 LadspaPlugin::add_state (XMLNode* root) const
 {
 	XMLNode *child;
-	char buf[32];
 	LocaleGuard lg;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
@@ -356,10 +355,8 @@ LadspaPlugin::add_state (XMLNode* root) const
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 
 			child = new XMLNode("Port");
-			snprintf(buf, sizeof(buf), "%u", i);
-			child->add_property("number", string(buf));
-			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
-			child->add_property("value", string(buf));
+			child->set_property("number", i);
+			child->set_property("value", _shadow_data[i]);
 			root->add_child_nocopy (*child);
 		}
 	}
@@ -374,12 +371,8 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 #ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
-	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-	const char *port;
-	const char *data;
-	uint32_t port_id;
 #endif
 	LocaleGuard lg;
 
@@ -396,21 +389,20 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 		child = *iter;
 
-		if ((prop = child->property("number")) != 0) {
-			port = prop->value().c_str();
-		} else {
+		uint32_t port_id;
+		float value;
+
+		if (!child->get_property ("number", port_id)) {
 			warning << _("LADSPA: no ladspa port number") << endmsg;
 			continue;
 		}
-		if ((prop = child->property("value")) != 0) {
-			data = prop->value().c_str();
-		} else {
+
+		if (!child->get_property ("value", value)) {
 			warning << _("LADSPA: no ladspa port data") << endmsg;
 			continue;
 		}
 
-		sscanf (port, "%" PRIu32, &port_id);
-		set_parameter (port_id, atof(data));
+		set_parameter (port_id, value);
 	}
 #endif
 
