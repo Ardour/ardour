@@ -174,6 +174,7 @@ static const char* authors[] = {
 	N_("André Nusser"),
 	N_("Bent Bisballe Nyeng"),
 	N_("Jack O'Quin"),
+	N_("Len Ovens"),
 	N_("Pavel Potocek"),
 	N_("Nimal Ratnayake"),
 	N_("Julien Rivaud"),
