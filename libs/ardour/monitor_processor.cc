@@ -17,7 +17,6 @@
 
 */
 
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
@@ -112,64 +111,58 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
                 return ret;
         }
 
-        XMLProperty const * prop;
-
-        if ((prop = node.property (X_("type"))) == 0) {
+        std::string type_name;
+        if (!node.get_property (X_("type"), type_name)) {
                 error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings have no type information"))
                       << endmsg;
                 return -1;
         }
 
-        if (prop->value() != X_("monitor")) {
+        if (type_name != X_("monitor")) {
                 error << string_compose (X_("programming error: %1"), X_("MonitorProcessor given unknown XML settings"))
                       << endmsg;
                 return -1;
         }
 
-        if ((prop = node.property (X_("channels"))) == 0) {
+        uint32_t channels = 0;
+        if (!node.get_property (X_("channels"), channels)) {
                 error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings are missing a channel cnt"))
                       << endmsg;
                 return -1;
         }
 
-        allocate_channels (atoi (prop->value()));
+        allocate_channels (channels);
 
-        if ((prop = node.property (X_("dim-level"))) != 0) {
-                gain_t val = atof (prop->value());
+        // need to check that these conversions are working as expected
+        gain_t val;
+        if (node.get_property (X_("dim-level"), val)) {
                 _dim_level = val;
         }
 
-        if ((prop = node.property (X_("solo-boost-level"))) != 0) {
-                gain_t val = atof (prop->value());
+        if (node.get_property (X_("solo-boost-level"), val)) {
                 _solo_boost_level = val;
         }
 
-        if ((prop = node.property (X_("cut-all"))) != 0) {
-                bool val = string_is_affirmative (prop->value());
-                _cut_all = val;
+        bool bool_val;
+        if (node.get_property (X_("cut-all"), bool_val)) {
+                _cut_all = bool_val;
         }
-        if ((prop = node.property (X_("dim-all"))) != 0) {
-                bool val = string_is_affirmative (prop->value());
-                _dim_all = val;
+
+        if (node.get_property (X_("dim-all"), bool_val)) {
+                _dim_all = bool_val;
         }
-        if ((prop = node.property (X_("mono"))) != 0) {
-                bool val = string_is_affirmative (prop->value());
-                _mono = val;
+
+        if (node.get_property (X_("mono"), bool_val)) {
+                _mono = bool_val;
         }
 
         for (XMLNodeList::const_iterator i = node.children().begin(); i != node.children().end(); ++i) {
 
                 if ((*i)->name() == X_("Channel")) {
-                        if ((prop = (*i)->property (X_("id"))) == 0) {
-                                error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings are missing an ID"))
-                                      << endmsg;
-                                return -1;
-                        }
 
                         uint32_t chn;
-
-                        if (sscanf (prop->value().c_str(), "%u", &chn) != 1) {
-                                error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings has an unreadable channel ID"))
+                        if (!(*i)->get_property (X_("id"), chn)) {
+                                error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings are missing an ID"))
                                       << endmsg;
                                 return -1;
                         }
@@ -181,30 +174,32 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
                         }
                         ChannelRecord& cr (*_channels[chn]);
 
-                        if ((prop = (*i)->property ("cut")) != 0) {
-                                if (string_is_affirmative (prop->value())){
+                        bool gain_coeff_zero;
+                        if ((*i)->get_property ("cut", gain_coeff_zero)) {
+                                if (gain_coeff_zero) {
                                         cr.cut = GAIN_COEFF_ZERO;
                                 } else {
                                         cr.cut = GAIN_COEFF_UNITY;
                                 }
                         }
 
-                        if ((prop = (*i)->property ("dim")) != 0) {
-                                bool val = string_is_affirmative (prop->value());
-                                cr.dim = val;
+                        bool dim;
+                        if ((*i)->get_property ("dim", dim)) {
+                                cr.dim = dim;
                         }
 
-                        if ((prop = (*i)->property ("invert")) != 0) {
-                                if (string_is_affirmative (prop->value())) {
+                        bool invert_polarity;
+                        if ((*i)->get_property ("invert", invert_polarity)) {
+                                if (invert_polarity) {
                                         cr.polarity = -1.0f;
                                 } else {
                                         cr.polarity = 1.0f;
                                 }
                         }
 
-                        if ((prop = (*i)->property ("solo")) != 0) {
-                                bool val = string_is_affirmative (prop->value());
-                                cr.soloed = val;
+                        bool soloed;
+                        if ((*i)->get_property ("solo", soloed)) {
+                                cr.soloed = soloed;
                         }
                 }
         }
@@ -228,45 +223,39 @@ MonitorProcessor::state (bool full)
 {
 	LocaleGuard lg;
 	XMLNode& node(Processor::state(full));
-	char buf[64];
 
 	/* this replaces any existing "type" property */
 
-	node.add_property (X_("type"), X_("monitor"));
+	node.set_property (X_("type"), X_("monitor"));
 
-    snprintf (buf, sizeof(buf), "%.12g", _dim_level.val());
-    node.add_property (X_("dim-level"), buf);
+	node.set_property (X_ ("dim-level"), (float)_dim_level.val ());
+	node.set_property (X_ ("solo-boost-level"), (float)_solo_boost_level.val ());
 
-    snprintf (buf, sizeof(buf), "%.12g", _solo_boost_level.val());
-    node.add_property (X_("solo-boost-level"), buf);
+	node.set_property (X_("cut-all"), _cut_all.val());
+	node.set_property (X_("dim-all"), _dim_all.val());
+	node.set_property (X_("mono"), _mono.val());
 
-    node.add_property (X_("cut-all"), (_cut_all ? "yes" : "no"));
-    node.add_property (X_("dim-all"), (_dim_all ? "yes" : "no"));
-    node.add_property (X_("mono"), (_mono ? "yes" : "no"));
+	node.set_property (X_("channels"), (uint32_t)_channels.size ());
 
-    uint32_t limit = _channels.size();
+	XMLNode* chn_node;
+	uint32_t chn = 0;
 
-    snprintf (buf, sizeof (buf), "%u", limit);
-    node.add_property (X_("channels"), buf);
+	for (vector<ChannelRecord*>::const_iterator x = _channels.begin (); x != _channels.end ();
+	     ++x, ++chn) {
+		chn_node = new XMLNode (X_("Channel"));
 
-    XMLNode* chn_node;
-    uint32_t chn = 0;
+		chn_node->set_property ("id", chn);
 
-    for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x, ++chn) {
-        chn_node = new XMLNode (X_("Channel"));
+		// implicitly cast these to bool
+		chn_node->set_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY);
+		chn_node->set_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY);
+		chn_node->set_property (X_("dim"), (*x)->dim == true);
+		chn_node->set_property (X_("solo"), (*x)->soloed == true);
 
-        snprintf (buf, sizeof (buf), "%u", chn);
-        chn_node->add_property ("id", buf);
+		node.add_child_nocopy (*chn_node);
+	}
 
-        chn_node->add_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY ? "no" : "yes");
-        chn_node->add_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY ? "no" : "yes");
-        chn_node->add_property (X_("dim"), (*x)->dim ? "yes" : "no");
-        chn_node->add_property (X_("solo"), (*x)->soloed ? "yes" : "no");
-
-        node.add_child_nocopy (*chn_node);
-    }
-
-    return node;
+	return node;
 }
 
 void
