@@ -1227,7 +1227,6 @@ XMLNode&
 MidiDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
-	char buf[64];
 	LocaleGuard lg;
 
 	if (_write_source && _session.get_record_enabled()) {
@@ -1236,7 +1235,7 @@ MidiDiskstream::get_state ()
 		XMLNode* cs_grandchild;
 
 		cs_grandchild = new XMLNode (X_("file"));
-		cs_grandchild->add_property (X_("path"), _write_source->path());
+		cs_grandchild->set_property (X_("path"), _write_source->path());
 		cs_child->add_child_nocopy (*cs_grandchild);
 
 		/* store the location where capture will start */
@@ -1244,14 +1243,13 @@ MidiDiskstream::get_state ()
 		Location* pi;
 
 		if (_session.preroll_record_punch_enabled ()) {
-			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_punch_pos ());
+			cs_child->set_property (X_("at"), _session.preroll_record_punch_pos());
 		} else if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
-			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
+			cs_child->set_property (X_("at"), pi->start());
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());
+			cs_child->set_property (X_("at"), _session.transport_frame());
 		}
 
-		cs_child->add_property (X_("at"), buf);
 		node.add_child_nocopy (*cs_child);
 	}
 
