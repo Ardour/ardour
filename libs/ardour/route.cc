@@ -32,7 +32,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -71,6 +71,7 @@
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_isolate_control.h"
+#include "ardour/types_convert.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
 #include "ardour/vca.h"
@@ -2316,24 +2317,22 @@ Route::state(bool full_state)
 
 	XMLNode *node = new XMLNode("Route");
 	ProcessorList::iterator i;
-	char buf[32];
 
-	node->add_property ("id", id ().to_s ());
-	node->add_property ("name", _name);
-	node->add_property("default-type", _default_type.to_string());
-	node->add_property ("strict-io", _strict_io);
+	node->set_property ("id", id ());
+	node->set_property ("name", name());
+	node->set_property ("default-type", _default_type);
+	node->set_property ("strict-io", _strict_io);
 
 	node->add_child_nocopy (_presentation_info.get_state());
 
-	node->add_property("active", _active?"yes":"no");
-	string p;
-	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
-	node->add_property("meter-point", enum_2_string (_meter_point));
+	node->set_property ("active", _active);
+	node->set_property ("denormal-protection", _denormal_protection);
+	node->set_property ("meter-point", _meter_point);
 
-	node->add_property("meter-type", enum_2_string (_meter_type));
+	node->set_property ("meter-type", _meter_type);
 
 	if (_route_group) {
-		node->add_property("route-group", _route_group->name());
+		node->set_property ("route-group", _route_group->name());
 	}
 
 	node->add_child_nocopy (_solo_control->get_state ());
@@ -2392,7 +2391,7 @@ Route::state(bool full_state)
 	if (_custom_meter_position_noted) {
 		boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
 		if (after) {
-			node->add_property (X_("processor-after-last-custom-meter"), after->id().to_s());
+			node->set_property (X_("processor-after-last-custom-meter"), after->id());
 		}
 	}
 
@@ -2415,15 +2414,15 @@ Route::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
-	XMLProperty const * prop;
 
 	if (node.name() != "Route"){
 		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
 		return -1;
 	}
 
-	if ((prop = node.property (X_("name"))) != 0) {
-		Route::set_name (prop->value());
+	std::string route_name;
+	if (node.get_property (X_("name"), route_name)) {
+		Route::set_name (route_name);
 	}
 
 	set_id (node);
@@ -2431,9 +2430,7 @@ Route::set_state (const XMLNode& node, int version)
 
 	Stripable::set_state (node, version);
 
-	if ((prop = node.property (X_("strict-io"))) != 0) {
-		_strict_io = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("strict-io"), _strict_io);
 
 	if (is_monitor()) {
 		/* monitor bus does not get a panner, but if (re)created
@@ -2455,13 +2452,14 @@ Route::set_state (const XMLNode& node, int version)
 		child = *niter;
 
 		if (child->name() == IO::state_node_name) {
-			if ((prop = child->property (X_("direction"))) == 0) {
+			std::string direction;
+			if (!child->get_property (X_("direction"), direction)) {
 				continue;
 			}
 
-			if (prop->value() == "Input") {
+			if (direction == "Input") {
 				_input->set_state (*child, version);
-			} else if (prop->value() == "Output") {
+			} else if (direction == "Output") {
 				_output->set_state (*child, version);
 			}
 
@@ -2478,17 +2476,15 @@ Route::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property (X_("meter-point"))) != 0) {
-		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
+	MeterPoint mp;
+	if (node.get_property (X_("meter-point"), mp)) {
 		set_meter_point (mp, true);
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
 	}
 
-	if ((prop = node.property (X_("meter-type"))) != 0) {
-		_meter_type = MeterType (string_2_enum (prop->value (), _meter_type));
-	}
+	node.get_property (X_("meter-type"), _meter_type);
 
 	_initial_io_setup = false;
 
@@ -2497,22 +2493,25 @@ Route::set_state (const XMLNode& node, int version)
 	// this looks up the internal instrument in processors
 	reset_instrument_info();
 
-	if ((prop = node.property (X_("denormal-protection"))) != 0) {
-		set_denormal_protection (string_is_affirmative (prop->value()));
+	bool denormal_protection;
+	if (node.get_property (X_("denormal-protection"), denormal_protection)) {
+		set_denormal_protection (denormal_protection);
 	}
 
 	/* convert old 3001 state */
-	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		_phase_control->set_phase_invert (boost::dynamic_bitset<> (prop->value ()));
+	std::string phase_invert_str;
+	if (node.get_property (X_("phase-invert"), phase_invert_str)) {
+		_phase_control->set_phase_invert (boost::dynamic_bitset<> (phase_invert_str));
 	}
 
-	if ((prop = node.property (X_("active"))) != 0) {
-		bool yn = string_is_affirmative (prop->value());
-		set_active (yn, this);
+	bool is_active;
+	if (node.get_property (X_("active"), is_active)) {
+		set_active (is_active, this);
 	}
 
-	if ((prop = node.property (X_("processor-after-last-custom-meter"))) != 0) {
-		PBD::ID id (prop->value ());
+	std::string id_string;
+	if (node.get_property (X_("processor-after-last-custom-meter"), id_string)) {
+		PBD::ID id (id_string);
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::const_iterator i = _processors.begin ();
 		while (i != _processors.end() && (*i)->id() != id) {
@@ -2536,24 +2535,25 @@ Route::set_state (const XMLNode& node, int version)
 			_comment = cmt->content();
 
 		}  else if (child->name() == Controllable::xml_node_name) {
-			if ((prop = child->property (X_("name"))) == 0) {
+			std::string control_name;
+			if (!child->get_property (X_("name"), control_name)) {
 				continue;
 			}
 
-			if (prop->value() == _gain_control->name()) {
+			if (control_name == _gain_control->name()) {
 				_gain_control->set_state (*child, version);
-			} else if (prop->value() == _solo_control->name()) {
+			} else if (control_name == _solo_control->name()) {
 				_solo_control->set_state (*child, version);
-			} else if (prop->value() == _solo_safe_control->name()) {
+			} else if (control_name == _solo_safe_control->name()) {
 				_solo_safe_control->set_state (*child, version);
-			} else if (prop->value() == _solo_isolate_control->name()) {
+			} else if (control_name == _solo_isolate_control->name()) {
 				_solo_isolate_control->set_state (*child, version);
-			} else if (prop->value() == _mute_control->name()) {
+			} else if (control_name == _mute_control->name()) {
 				_mute_control->set_state (*child, version);
-			} else if (prop->value() == _phase_control->name()) {
+			} else if (control_name == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
 			} else {
-				Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
+				Evoral::Parameter p = EventTypeMap::instance().from_symbol (control_name);
 				if (p.type () >= MidiCCAutomation && p.type () < MidiSystemExclusiveAutomation) {
 					boost::shared_ptr<AutomationControl> ac = automation_control (p, true);
 					if (ac) {
@@ -4071,7 +4071,7 @@ Route::set_name (const string& str)
 void
 Route::set_name_in_state (XMLNode& node, string const & name, bool rename_playlist)
 {
-	node.add_property (X_("name"), name);
+	node.set_property (X_("name"), name);
 
 	XMLNodeList children = node.children();
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
@@ -4082,17 +4082,17 @@ Route::set_name_in_state (XMLNode& node, string const & name, bool rename_playli
 
 		} else if ((*i)->name() == X_("Processor")) {
 
-			XMLProperty const * role = (*i)->property (X_("role"));
-			if (role && role->value() == X_("Main")) {
-				(*i)->add_property (X_("name"), name);
+			std::string str;
+			if ((*i)->get_property (X_("role"), str) && str == X_("Main")) {
+				(*i)->set_property (X_("name"), name);
 			}
 
 		} else if ((*i)->name() == X_("Diskstream")) {
 
 			if (rename_playlist) {
-				(*i)->add_property (X_("playlist"), string_compose ("%1.1", name).c_str());
+				(*i)->set_property (X_("playlist"), string_compose ("%1.1", name).c_str());
 			}
-			(*i)->add_property (X_("name"), name);
+			(*i)->set_property (X_("name"), name);
 
 		}
 	}
