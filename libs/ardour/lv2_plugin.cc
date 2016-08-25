@@ -1298,21 +1298,19 @@ LV2Plugin::add_state(XMLNode* root) const
 	assert(_insert_id != PBD::ID("0"));
 
 	XMLNode*    child;
-	char        buf[32];
 	LocaleGuard lg;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input(i) && parameter_is_control(i)) {
 			child = new XMLNode("Port");
-			child->add_property("symbol", port_symbol(i));
-			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
-			child->add_property("value", string(buf));
+			child->set_property("symbol", port_symbol(i));
+			child->set_property("value", _shadow_data[i]);
 			root->add_child_nocopy(*child);
 		}
 	}
 
 	if (!_plugin_state_dir.empty()) {
-		root->add_property("template-dir", _plugin_state_dir);
+		root->set_property("template-dir", _plugin_state_dir);
 	}
 
 	if (_has_state_interface) {
@@ -1368,7 +1366,7 @@ LV2Plugin::add_state(XMLNode* root) const
 			saved_state = _state_version;
 		}
 
-		root->add_property("state-dir", string_compose("state%1", saved_state));
+		root->set_property("state-dir", string_compose("state%1", saved_state));
 	}
 }
 
@@ -2004,12 +2002,8 @@ int
 LV2Plugin::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList          nodes;
-	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode*             child;
-	const char*          sym;
-	const char*          value;
-	uint32_t             port_id;
 	LocaleGuard          lg;
 
 	if (node.name() != state_node_name()) {
@@ -2029,14 +2023,15 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		child = *iter;
 
-		if ((prop = child->property("symbol")) != 0) {
-			sym = prop->value().c_str();
-		} else {
+		std::string sym;
+		if (!child->get_property("symbol", sym)) {
 			warning << _("LV2: port has no symbol, ignored") << endmsg;
 			continue;
 		}
 
 		map<string, uint32_t>::iterator i = _port_indices.find(sym);
+
+		uint32_t port_id;
 
 		if (i != _port_indices.end()) {
 			port_id = i->second;
@@ -2045,31 +2040,32 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			continue;
 		}
 
-		if ((prop = child->property("value")) != 0) {
-			value = prop->value().c_str();
-		} else {
+		float val;
+		if (!child->get_property("value", val)) {
 			warning << _("LV2: port has no value, ignored") << endmsg;
 			continue;
 		}
 
-		set_parameter(port_id, atof(value));
+		set_parameter(port_id, val);
 	}
 
-	if ((prop = node.property("template-dir")) != 0) {
-		set_state_dir (prop->value ());
+	std::string template_dir;
+	if (node.get_property("template-dir", template_dir)) {
+		set_state_dir (template_dir);
 	}
 
 	_state_version = 0;
-	if ((prop = node.property("state-dir")) != 0) {
-		if (sscanf(prop->value().c_str(), "state%u", &_state_version) != 1) {
+	std::string state_dir;
+	if (node.get_property("state-dir", state_dir) != 0) {
+		if (sscanf(state_dir.c_str(), "state%u", &_state_version) != 1) {
 			error << string_compose(
 				"LV2: failed to parse state version from \"%1\"",
-				prop->value()) << endmsg;
+				state_dir) << endmsg;
 		}
 
 		std::string state_file = Glib::build_filename(
 			plugin_dir(),
-			Glib::build_filename(prop->value(), "state.ttl"));
+			Glib::build_filename(state_dir, "state.ttl"));
 
 		LilvState* state = lilv_state_new_from_file(
 			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
