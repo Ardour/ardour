@@ -25,6 +25,7 @@
 
 #include <glibmm/threads.h>
 #include "pbd/xml++.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/debug.h"
 #include "ardour/filter.h"
@@ -1258,7 +1259,6 @@ Region::state ()
 	XMLNode *node = new XMLNode ("Region");
 	char buf2[64];
 	LocaleGuard lg;
-	const char* fe = NULL;
 
 	/* custom version of 'add_properties (*node);'
 	 * skip values that have have dedicated save functions
@@ -1273,8 +1273,10 @@ Region::state ()
 		i->second->get_value (*node);
 	}
 
-	node->add_property ("id", id ().to_s ());
-	node->add_property ("type", _type.to_string());
+	node->set_property ("id", id ());
+	node->set_property ("type", _type);
+
+	std::string fe;
 
 	switch (_first_edit) {
 	case EditChangesNothing:
@@ -1291,18 +1293,18 @@ Region::state ()
 		break;
 	}
 
-	node->add_property ("first-edit", fe);
+	node->set_property ("first-edit", fe);
 
 	/* note: flags are stored by derived classes */
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		node->add_property (buf2, _sources[n]->id().to_s ());
+		node->set_property (buf2, _sources[n]->id());
 	}
 
 	for (uint32_t n=0; n < _master_sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
-		node->add_property (buf2, _master_sources[n]->id ().to_s ());
+		node->set_property (buf2, _master_sources[n]->id ());
 	}
 
 	/* Only store nested sources for the whole-file region that acts
@@ -1350,7 +1352,6 @@ Region::set_state (const XMLNode& node, int version)
 int
 Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
 {
-	XMLProperty const * prop;
 	Timecode::BBT_Time bbt_time;
 
 	Stateful::save_extra_xml (node);
@@ -1360,8 +1361,9 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	set_id (node);
 
 	if (_position_lock_style == MusicTime) {
-		if ((prop = node.property ("bbt-position")) != 0) {
-			if (sscanf (prop->value().c_str(), "%d|%d|%d",
+		std::string bbt_str;
+		if (node.get_property ("bbt-position", bbt_str)) {
+			if (sscanf (bbt_str.c_str(), "%d|%d|%d",
 				    &bbt_time.bars,
 				    &bbt_time.beats,
 				    &bbt_time.ticks) != 3) {
@@ -1391,8 +1393,9 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	}
 
 	/* Quick fix for 2.x sessions when region is muted */
-	if ((prop = node.property (X_("flags")))) {
-		if (string::npos != prop->value().find("Muted")){
+	std::string flags;
+	if (node.get_property (X_("flags"), flags)) {
+		if (string::npos != flags.find("Muted")){
 			set_muted (true);
 		}
 	}
