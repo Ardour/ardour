@@ -141,6 +141,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _in_key (true)
 	, octave_shift (0)
 	, percussion (false)
+	, _pressure_mode (AfterTouch)
 {
 	context = Cairo::Context::create (frame_buffer);
 
@@ -709,6 +710,19 @@ void
 Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 {
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("Sysex, %1 bytes\n", sz));
+	MidiByteArray msg (sz, raw_bytes);
+	MidiByteArray aftertouch_mode_response (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0x0, 0xF7);
+	MidiByteArray polypress_mode_response (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0x1, 0xF7);
+
+	if (msg == aftertouch_mode_response) {
+		_pressure_mode = AfterTouch;
+		PressureModeChange (AfterTouch);
+		cerr << "Pressure mod eis after\n";
+	} else if (msg == polypress_mode_response) {
+		_pressure_mode = PolyPressure;
+		PressureModeChange (PolyPressure);
+		cerr << "Pressure mod eis poly\n";
+	}
 }
 
 void
@@ -1336,7 +1350,7 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 
 		g_usleep (100000);
                 DEBUG_TRACE (DEBUG::FaderPort, "device now connected for both input and output\n");
-                // connected ();
+                connected ();
 
 	} else {
 		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both) or not yet fully connected\n");
@@ -1347,6 +1361,12 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  end\n");
 
 	return true; /* connection status changed */
+}
+
+void
+Push2::connected ()
+{
+	request_pressure_mode ();
 }
 
 boost::shared_ptr<Port>
@@ -1734,4 +1754,30 @@ Push2::set_current_layout (Push2Layout* layout)
 	if (_current_layout) {
 		_current_layout->on_show ();
 	}
+}
+
+void
+Push2::request_pressure_mode ()
+{
+	MidiByteArray msg (8, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0xF7);
+	write (msg);
+}
+
+void
+Push2::set_pressure_mode (PressureMode pm)
+{
+	MidiByteArray msg (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1E, 0x0, 0xF7);
+
+	switch (pm) {
+	case AfterTouch:
+		/* nothing to do, message is correct */
+		break;
+	case PolyPressure:
+		msg[7] = 0x1;
+		break;
+	default:
+		return;
+	}
+
+	write (msg);
 }

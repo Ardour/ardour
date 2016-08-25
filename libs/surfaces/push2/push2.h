@@ -303,6 +303,11 @@ class Push2 : public ARDOUR::ControlProtocol
 		KnobBorder,
 	};
 
+	enum PressureMode {
+		AfterTouch,
+		PolyPressure,
+	};
+
   public:
 	Push2 (ARDOUR::Session&);
 	~Push2 ();
@@ -355,6 +360,10 @@ class Push2 : public ARDOUR::ControlProtocol
 	static const int cols;
 	static const int rows;
 
+	PressureMode pressure_mode () const { return _pressure_mode; }
+	void set_pressure_mode (PressureMode);
+	PBD::Signal1<void,PressureMode> PressureModeChange;
+	
   private:
 	libusb_device_handle *handle;
 	uint8_t   frame_header[16];
@@ -540,6 +549,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	int connection_state;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnection port_connection;
+	void connected ();
 
 	/* GUI */
 
@@ -574,6 +584,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	typedef std::map<ColorName,uint32_t> Colors;
 	Colors colors;
 	void fill_color_table ();
+
+	PressureMode _pressure_mode;
+	void request_pressure_mode ();
 };
 
 } /* namespace */
