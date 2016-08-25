@@ -49,7 +49,7 @@
 #include "tooltips.h"
 #include "axis_view.h"
 
-#include "i18n.h"
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -1314,7 +1314,7 @@ MidiTrackerEditor::redisplay_model ()
 						if (i_on != mtp->notes_on[i].end()) {
 							boost::shared_ptr<NoteType> note = i_on->second;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
-							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
+							row[columns.note_name[i]] = ParameterDescriptor::midi_note_name (note->note());
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
 							row[columns._note_foreground_color[i]] = "#f0f0f0";
 							row[columns._channel_foreground_color[i]] = "#f0f0f0";
