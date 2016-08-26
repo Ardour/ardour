@@ -116,7 +116,7 @@ public:
 	}
 
 	void get_value (XMLNode & node) const {
-                node.add_property (property_name(), to_string (_current));
+		node.set_property (property_name (), _current);
 	}
 
 
@@ -139,8 +139,8 @@ public:
 
 	void get_changes_as_xml (XMLNode* history_node) const {
 		XMLNode* node = history_node->add_child (property_name());
-                node->add_property ("from", to_string (_old));
-                node->add_property ("to", to_string (_current));
+		node->set_property ("from", _old);
+		node->set_property ("to", _current);
 	}
 
 	void get_changes_as_properties (PropertyList& changes, Command *) const {
