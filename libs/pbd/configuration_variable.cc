@@ -37,8 +37,8 @@ ConfigVariableBase::add_to_node (XMLNode& node)
 	const std::string v = get_as_string ();
 	DEBUG_TRACE (DEBUG::Configuration, string_compose ("Config variable %1 stored as [%2]\n", _name, v));
 	XMLNode* child = new XMLNode ("Option");
-	child->add_property ("name", _name);
-	child->add_property ("value", v);
+	child->set_property ("name", _name);
+	child->set_property ("value", v);
 	node.add_child_nocopy (*child);
 }
 
@@ -49,10 +49,10 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 
 		/* ardour.rc */
 
-		const XMLProperty* prop;
 		XMLNodeList nlist;
 		XMLNodeConstIterator niter;
 		XMLNode const * child;
+		std::string str;
 
 		nlist = node.children();
 
@@ -61,13 +61,11 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 			child = *niter;
 
 			if (child->name() == "Option") {
-				if ((prop = child->property ("name")) != 0) {
-					if (prop->value() == _name) {
-						if ((prop = child->property ("value")) != 0) {
-							set_from_string (prop->value());
-							return true;
-						}
+				if (child->get_property ("name", str) && str == _name) {
+					if (child->get_property ("value", str)) {
+						set_from_string (str);
 					}
+					return true;
 				}
 			}
 		}
@@ -79,7 +77,7 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 		XMLNodeList olist;
 		XMLNodeConstIterator oiter;
 		XMLNode* option;
-		const XMLProperty* opt_prop;
+		std::string str;
 
 		olist = node.children();
 
@@ -88,8 +86,8 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 			option = *oiter;
 
 			if (option->name() == _name) {
-				if ((opt_prop = option->property ("val")) != 0) {
-					set_from_string (opt_prop->value());
+				if (option->get_property ("val", str)) {
+					set_from_string (str);
 					return true;
 				}
 			}
