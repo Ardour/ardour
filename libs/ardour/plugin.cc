@@ -467,21 +467,9 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 int
 Plugin::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * p = node.property (X_("last-preset-uri"));
-	if (p) {
-		_last_preset.uri = p->value ();
-	}
-
-	p = node.property (X_("last-preset-label"));
-	if (p) {
-		_last_preset.label = p->value ();
-	}
-
-	p = node.property (X_("parameter-changed-since-last-preset"));
-	if (p) {
-		_parameter_changed_since_last_preset = string_is_affirmative (p->value ());
-	}
-
+	node.get_property (X_("last-preset-uri"), _last_preset.uri);
+	node.get_property (X_("last-preset-label"), _last_preset.label);
+	node.get_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
 	return 0;
 }
 
@@ -491,9 +479,9 @@ Plugin::get_state ()
 	XMLNode* root = new XMLNode (state_node_name ());
 	LocaleGuard lg;
 
-	root->add_property (X_("last-preset-uri"), _last_preset.uri);
-	root->add_property (X_("last-preset-label"), _last_preset.label);
-	root->add_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset ? X_("yes") : X_("no"));
+	root->set_property (X_("last-preset-uri"), _last_preset.uri);
+	root->set_property (X_("last-preset-label"), _last_preset.label);
+	root->set_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
 
 #ifndef NO_PLUGIN_STATE
 	add_state (root);
