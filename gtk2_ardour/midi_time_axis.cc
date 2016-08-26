@@ -1613,6 +1613,10 @@ MidiTimeAxisView::contents_height_changed ()
 void
 MidiTimeAxisView::playback_channel_mode_changed ()
 {
+	/* Invalidate the controller automation menu */
+	delete controller_menu;
+	controller_menu = 0;
+	/* Update the button text */
 	switch (midi_track()->get_playback_channel_mode()) {
 	case AllChannels:
 		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("all")));
