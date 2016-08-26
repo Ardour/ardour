@@ -135,13 +135,9 @@ UndoTransaction::redo ()
 XMLNode &UndoTransaction::get_state()
 {
     XMLNode *node = new XMLNode ("UndoTransaction");
-    stringstream ss;
-    ss << _timestamp.tv_sec;
-    node->add_property("tv_sec", ss.str());
-    ss.str("");
-    ss << _timestamp.tv_usec;
-    node->add_property("tv_usec", ss.str());
-    node->add_property("name", _name);
+    node->set_property("tv_sec", (int64_t)_timestamp.tv_sec);
+    node->set_property("tv_usec", (int64_t)_timestamp.tv_usec);
+    node->set_property("name", _name);
 
     list<Command*>::iterator it;
     for (it=actions.begin(); it!=actions.end(); it++)
