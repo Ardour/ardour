@@ -21,6 +21,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/enum_convert.h"
+
 #include "ardour/interthread_info.h"
 #include "ardour/recordable.h"
 #include "ardour/route.h"
@@ -260,5 +262,9 @@ private:
 };
 
 }; /* namespace ARDOUR*/
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Track::FreezeState);
+}
 
 #endif /* __ardour_track_h__ */
