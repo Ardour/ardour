@@ -1298,6 +1298,21 @@ private:
       return *this;
     }
 
+    WSPtrClass <T>& addEqualCheck ()
+    {
+      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::WPtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "isnil"); // class table
+
+      set_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "isnil"); // class table
+
+      return *this;
+    }
 
     Namespace endClass ()
     {
@@ -1652,7 +1667,8 @@ public:
   WSPtrClass <T> beginWSPtrClass (char const* name)
   {
     return WSPtrClass <T> (name, this)
-      .addNullCheck();
+      .addNullCheck()
+      .addEqualCheck();
   }
 
   //----------------------------------------------------------------------------

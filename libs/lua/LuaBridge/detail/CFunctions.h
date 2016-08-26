@@ -401,7 +401,6 @@ struct CFunc
     }
   };
 
-
   template <class T>
   struct PtrNullCheck
   {
@@ -424,6 +423,38 @@ struct CFunc
       if (t) {
         T* const tt = t.get();
         rv = (tt == 0);
+      }
+      Stack <bool>::push (L, rv);
+      return 1;
+    }
+  };
+
+  template <class T>
+  struct PtrEqualCheck
+  {
+    static int f (lua_State* L)
+    {
+      boost::shared_ptr<T> t0 = luabridge::Stack<boost::shared_ptr<T> >::get (L, 1);
+      boost::shared_ptr<T> t1 = luabridge::Stack<boost::shared_ptr<T> >::get (L, 2);
+      Stack <bool>::push (L, t0 == t1);
+      return 1;
+    }
+  };
+
+  template <class T>
+  struct WPtrEqualCheck
+  {
+    static int f (lua_State* L)
+    {
+      bool rv = false;
+      boost::weak_ptr<T> tw0 = luabridge::Stack<boost::weak_ptr<T> >::get (L, 1);
+      boost::weak_ptr<T> tw1 = luabridge::Stack<boost::weak_ptr<T> >::get (L, 2);
+      boost::shared_ptr<T> const t0 = tw0.lock();
+      boost::shared_ptr<T> const t1 = tw1.lock();
+      if (t0 && t1) {
+        T* const tt0 = t0.get();
+        T* const tt1 = t1.get();
+        rv = (tt0 == tt1);
       }
       Stack <bool>::push (L, rv);
       return 1;
