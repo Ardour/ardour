@@ -79,14 +79,12 @@ XMLNode&
 AudioPlaylistSource::get_state ()
 {
 	XMLNode& node (AudioSource::get_state ());
-	char buf[64];
 
 	/* merge PlaylistSource state */
 
 	PlaylistSource::add_state (node);
 
-	snprintf (buf, sizeof (buf), "%" PRIu32, _playlist_channel);
-	node.add_property ("channel", buf);
+	node.set_property ("channel", _playlist_channel);
 
 	return node;
 }
@@ -108,16 +106,13 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 		}
 	}
 
-	XMLProperty const * prop;
 	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
 
 	AudioSource::_length = extent.second - extent.first;
 
-	if ((prop = node.property (X_("channel"))) == 0) {
+	if (!node.get_property (X_("channel"), _playlist_channel)) {
 		throw failed_constructor ();
 	}
-
-	sscanf (prop->value().c_str(), "%" PRIu32, &_playlist_channel);
 
 	ensure_buffers_for_level (_level, _session.frame_rate());
 
