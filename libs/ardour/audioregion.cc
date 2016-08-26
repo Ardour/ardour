@@ -770,11 +770,9 @@ XMLNode&
 AudioRegion::get_basic_state ()
 {
 	XMLNode& node (Region::state ());
-	char buf[64];
 	LocaleGuard lg;
 
-	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
-	node.add_property ("channels", buf);
+	node.set_property ("channels", (uint32_t)_sources.size());
 
 	return node;
 }
@@ -802,7 +800,7 @@ AudioRegion::state ()
 	}
 
 	if (default_env) {
-		child->add_property ("default", "yes");
+		child->set_property ("default", "yes");
 	} else {
 		child->add_child_nocopy (_envelope->get_state ());
 	}
@@ -810,7 +808,7 @@ AudioRegion::state ()
 	child = node.add_child (X_("FadeIn"));
 
 	if (_default_fade_in) {
-		child->add_property ("default", "yes");
+		child->set_property ("default", "yes");
 	} else {
 		child->add_child_nocopy (_fade_in->get_state ());
 	}
@@ -823,7 +821,7 @@ AudioRegion::state ()
 	child = node.add_child (X_("FadeOut"));
 
 	if (_default_fade_out) {
-		child->add_property ("default", "yes");
+		child->set_property ("default", "yes");
 	} else {
 		child->add_child_nocopy (_fade_out->get_state ());
 	}
@@ -840,7 +838,6 @@ int
 AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
-	XMLProperty const * prop;
 	LocaleGuard lg;
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
@@ -857,10 +854,10 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 	Region::_set_state (node, version, what_changed, false);
 
-	if ((prop = node.property ("scale-gain")) != 0) {
-		float a = atof (prop->value().c_str());
-		if (a != _scale_amplitude) {
-			_scale_amplitude = a;
+	float val;
+	if (node.get_property ("scale-gain", val)) {
+		if (val != _scale_amplitude) {
+			_scale_amplitude = val;
 			what_changed.add (Properties::scale_amplitude);
 		}
 	}
@@ -890,7 +887,8 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 			_fade_in->clear ();
 
-			if (((prop = child->property ("default")) != 0 && string_is_affirmative (prop->value())) || (prop = child->property ("steepness")) != 0) {
+			bool is_default;
+			if ((child->get_property ("default", is_default) && is_default) || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
@@ -899,19 +897,17 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			if ((prop = child->property ("active")) != 0) {
-				if (string_is_affirmative (prop->value())) {
-					set_fade_in_active (true);
-				} else {
-					set_fade_in_active (false);
-				}
+			bool is_active;
+			if (child->get_property ("active", is_active)) {
+				set_fade_in_active (is_active);
 			}
 
 		} else if (child->name() == "FadeOut") {
 
 			_fade_out->clear ();
 
-			if (((prop = child->property ("default")) != 0 && (string_is_affirmative (prop->value()))) || (prop = child->property ("steepness")) != 0) {
+			bool is_default;
+			if ((child->get_property ("default", is_default) && is_default) || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_out ();
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
@@ -920,12 +916,9 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			if ((prop = child->property ("active")) != 0) {
-				if (string_is_affirmative (prop->value())) {
-					set_fade_out_active (true);
-				} else {
-					set_fade_out_active (false);
-				}
+			bool is_active;
+			if (child->get_property ("active", is_active)) {
+				set_fade_out_active (is_active);
 			}
 
 		} else if ( (child->name() == "InverseFadeIn") || (child->name() == "InvFadeIn")  ) {
