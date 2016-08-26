@@ -461,6 +461,66 @@ struct CFunc
     }
   };
 
+  template <class C, typename T>
+  static int getPtrProperty (lua_State* L)
+  {
+    boost::shared_ptr<C> cp = luabridge::Stack<boost::shared_ptr<C> >::get (L, 1);
+    C const* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "shared_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    Stack <T>::push (L, c->**mp);
+    return 1;
+  }
+
+  template <class C, typename T>
+  static int getWPtrProperty (lua_State* L)
+  {
+    boost::weak_ptr<C> cw = luabridge::Stack<boost::weak_ptr<C> >::get (L, 1);
+    boost::shared_ptr<C> const cp = cw.lock();
+    if (!cp) {
+      return luaL_error (L, "cannot lock weak_ptr");
+    }
+    C const* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "weak_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    Stack <T>::push (L, c->**mp);
+    return 1;
+  }
+
+  template <class C, typename T>
+  static int setPtrProperty (lua_State* L)
+  {
+    boost::shared_ptr<C> cp = luabridge::Stack<boost::shared_ptr<C> >::get (L, 1);
+    C* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "shared_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    c->**mp = Stack <T>::get (L, 2);
+    return 0;
+  }
+
+  template <class C, typename T>
+  static int setWPtrProperty (lua_State* L)
+  {
+    boost::weak_ptr<C> cw = luabridge::Stack<boost::weak_ptr<C> >::get (L, 1);
+    boost::shared_ptr<C> cp = cw.lock();
+    if (!cp) {
+      return luaL_error (L, "cannot lock weak_ptr");
+    }
+    C* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "weak_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    c->**mp = Stack <T>::get (L, 2);
+    return 0;
+  }
+
   template <class MemFnPtr, class T,
            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
   struct CallMemberWPtr

@@ -1314,6 +1314,66 @@ private:
       return *this;
     }
 
+    template <class U>
+    WSPtrClass <T>& addData (char const* name, const U T::* mp, bool isWritable = true)
+    {
+      DATADOC ("Data Member", name, mp)
+      typedef const U T::*mp_t;
+
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      // Add to __propget in class and const tables.
+      {
+        rawgetfield (L, -2, "__propget");
+        rawgetfield (L, -4, "__propget");
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::getWPtrProperty <T,U>, 1);
+        lua_pushvalue (L, -1);
+        rawsetfield (L, -4, name);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 2);
+      }
+
+      if (isWritable)
+      {
+        // Add to __propset in class table.
+        rawgetfield (L, -2, "__propset");
+        assert (lua_istable (L, -1));
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::setWPtrProperty <T,U>, 1);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 1);
+      }
+
+      set_shared_class ();
+      assert (lua_istable (L, -1));
+      // Add to __propget in class and const tables.
+      {
+        rawgetfield (L, -2, "__propget");
+        rawgetfield (L, -4, "__propget");
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::getPtrProperty <T,U>, 1);
+        lua_pushvalue (L, -1);
+        rawsetfield (L, -4, name);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 2);
+      }
+
+      if (isWritable)
+      {
+        // Add to __propset in class table.
+        rawgetfield (L, -2, "__propset");
+        assert (lua_istable (L, -1));
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::setPtrProperty <T,U>, 1);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 1);
+      }
+
+      return *this;
+    }
+
+
     Namespace endClass ()
     {
       return Namespace (this);
