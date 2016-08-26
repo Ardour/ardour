@@ -180,6 +180,8 @@ CLASSKEYS(PBD::ID);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::PluginInfo);
 CLASSKEYS(ARDOUR::MonitorProcessor);
+CLASSKEYS(ARDOUR::Plugin::PresetRecord);
+CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
@@ -456,6 +458,16 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
 		.addVoidConstructor ()
+		.addData ("name", &PluginInfo::name, false)
+		.addData ("category", &PluginInfo::category, false)
+		.addData ("creator", &PluginInfo::creator, false)
+		.addData ("path", &PluginInfo::path, false)
+		.addData ("n_inputs", &PluginInfo::n_inputs, false)
+		.addData ("n_outputs", &PluginInfo::n_outputs, false)
+		.addData ("type", &PluginInfo::type, false)
+		.addData ("unique_id", &PluginInfo::unique_id, false)
+		.addFunction ("is_instrument", &PluginInfo::is_instrument)
+		.addFunction ("get_presets", &PluginInfo::get_presets)
 		.endClass ()
 
 		.beginNamespace ("Route")
@@ -811,6 +823,8 @@ LuaBindings::common (lua_State* L)
 		.addData ("valid", &Plugin::PresetRecord::valid, false)
 		.endClass ()
 
+		.beginStdVector <Plugin::PresetRecord> ("PresetVector").endClass ()
+
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
 		.endClass ()
@@ -867,6 +881,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("load_preset", &Plugin::load_preset)
 		.addFunction ("parameter_is_input", &Plugin::parameter_is_input)
 		.addFunction ("get_docs", &Plugin::get_docs)
+		.addFunction ("get_info", &Plugin::get_info)
 		.addFunction ("get_parameter_docs", &Plugin::get_parameter_docs)
 		.addRefFunction ("get_parameter_descriptor", &Plugin::get_parameter_descriptor)
 		.endClass ()
