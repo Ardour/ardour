@@ -143,7 +143,21 @@ private:
 	Gtk::Table    mode_packer;
 	Gtk::VBox     custom_packer;
 
+	struct PressureModeColumns : public Gtk::TreeModel::ColumnRecord {
+		PressureModeColumns() {
+			add (mode);
+			add (name);
+		}
+		Gtk::TreeModelColumn<Push2::PressureMode>  mode;
+		Gtk::TreeModelColumn<std::string> name;
+	};
+	PressureModeColumns pressure_mode_columns;
+	Glib::RefPtr<Gtk::ListStore> build_pressure_mode_columns ();
+	Gtk::ComboBox pressure_mode_selector;
+	Gtk::Label pressure_mode_label;
+
 	void reprogram_pad_scale ();
+	void reprogram_pressure_mode ();
 };
 
 }

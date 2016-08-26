@@ -90,6 +90,7 @@ P2GUI::P2GUI (Push2& p)
 	, mode_label (_("Mode (Scale)"))
 	, inkey_button (_("In-Key Mode"))
 	, mode_packer (3, 3)
+	, pressure_mode_label (_("Pressure Mode"))
 {
 	set_border_width (12);
 
@@ -131,6 +132,10 @@ P2GUI::P2GUI (Push2& p)
 	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
+	table.attach (pressure_mode_label, 0, 1, row, row+1, AttachOptions (0), AttachOptions (0));
+	table.attach (pressure_mode_selector, 1, 2, row, row+1, AttachOptions (FILL|EXPAND), AttachOptions (0));
+	row++;
+
 	hpacker.pack_start (table, true, true);
 
 	pad_table.set_spacings (3);
@@ -162,6 +167,11 @@ P2GUI::P2GUI (Push2& p)
 	pad_notebook.append_page (pad_table, _("Pad Layout"));
 	pad_notebook.append_page (mode_packer, _("Modes/Scales"));
 	pad_notebook.append_page (custom_packer, _("Custom"));
+
+	pressure_mode_selector.set_model (build_pressure_mode_columns());
+	pressure_mode_selector.pack_start (pressure_mode_columns.name);
+	pressure_mode_selector.set_active ((int) p2.pressure_mode());
+	pressure_mode_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pressure_mode));
 
 	root_note_octave_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
 	root_note_selector.signal_changed().connect (sigc::mem_fun (*this, &P2GUI::reprogram_pad_scale));
@@ -465,6 +475,23 @@ P2GUI::build_pad_table ()
 }
 
 Glib::RefPtr<Gtk::ListStore>
+P2GUI::build_pressure_mode_columns ()
+{
+	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (pressure_mode_columns);
+	TreeModel::Row row;
+
+	row = *store->append();
+	row[pressure_mode_columns.name] = _("AfterTouch (Channel Pressure)");
+	row[pressure_mode_columns.mode] = Push2::AfterTouch;
+
+	row = *store->append();
+	row[pressure_mode_columns.name] = _("Polyphonic Pressure (Note Pressure)");
+	row[pressure_mode_columns.mode] = Push2::PolyPressure;
+
+	return store;
+}
+
+Glib::RefPtr<Gtk::ListStore>
 P2GUI::build_mode_columns ()
 {
 	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (mode_columns);
@@ -719,4 +746,25 @@ P2GUI::reprogram_pad_scale ()
 	inkey = inkey_button.get_active ();
 
 	p2.set_pad_scale (root, octave, mode, inkey);
+}
+
+void
+P2GUI::reprogram_pressure_mode ()
+{
+	Gtk::TreeModel::iterator iter = pressure_mode_selector.get_active();
+	Push2::PressureMode pm;
+
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		if (row) {
+			pm = row[pressure_mode_columns.mode];
+		} else {
+			pm = Push2::AfterTouch;
+		}
+	} else {
+		pm = Push2::AfterTouch;
+	}
+
+	cerr << "Reprogram pm to " << pm << endl;
+	p2.set_pressure_mode (pm);
 }
