@@ -184,6 +184,7 @@ CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
@@ -820,6 +821,8 @@ LuaBindings::common (lua_State* L)
 		.addData ("logarithmic", &ParameterDescriptor::logarithmic)
 		.addStaticFunction ("midi_note_name", &ParameterDescriptor::midi_note_name)
 		.endClass ()
+
+		.beginStdVector <boost::shared_ptr<ARDOUR::Processor> > ("ProcessorVector").endClass ()
 
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
 		.addCast<Automatable> ("to_automatable")
