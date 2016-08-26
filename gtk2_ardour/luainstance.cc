@@ -814,11 +814,12 @@ using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace std;
 
-#ifndef NDEBUG
 static void _lua_print (std::string s) {
+#ifndef NDEBUG
 	std::cout << "LuaInstance: " << s << "\n";
-}
 #endif
+	PBD::info << "LuaInstance: " << s << endmsg;
+}
 
 LuaInstance* LuaInstance::_instance = 0;
 
@@ -834,9 +835,7 @@ LuaInstance::instance ()
 
 LuaInstance::LuaInstance ()
 {
-#ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
-#endif
 	init ();
 
 	LuaScriptParamList args;
@@ -1293,9 +1292,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	ActionHook ah;
 	try {
 		LuaState l;
-#ifndef NDEBUG
 		l.Print.connect (&_lua_print);
-#endif
 		lua_State* L = l.getState();
 		register_hooks (L);
 		l.do_command ("function ardour () end");
@@ -1491,9 +1488,7 @@ LuaCallback::get_state (void)
 void
 LuaCallback::init (void)
 {
-#ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
-#endif
 
 	lua.do_command (
 			"function ScriptManager ()"
