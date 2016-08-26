@@ -42,6 +42,7 @@
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source.h"
+#include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
 #include "pbd/i18n.h"
@@ -163,38 +164,39 @@ AudioTrack::deprecated_use_diskstream_connections ()
 		return 0;
 	}
 
-	XMLProperty const * prop;
 	XMLNode& node (*diskstream->deprecated_io_node);
 
 	/* don't do this more than once. */
 
 	diskstream->deprecated_io_node = 0;
 
-	if ((prop = node.property ("gain")) != 0) {
-		_amp->gain_control()->set_value (atof (prop->value().c_str()), PBD::Controllable::NoGroup);
+	float val;
+	if (node.get_property ("gain", val)) {
+		_amp->gain_control()->set_value (val, PBD::Controllable::NoGroup);
 	}
 
-	if ((prop = node.property ("input-connection")) != 0) {
-		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
+	std::string str;
+	if (node.get_property ("input-connection", str)) {
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (str);
 
 		if (c == 0) {
-			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), str, _name) << endmsg;
 
 			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
 				error << _("No input bundles available as a replacement")
 			        << endmsg;
 				return -1;
 			} else {
-				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), str)
 			       << endmsg;
 			}
 		}
 
 		_input->connect_ports_to_bundle (c, true, this);
 
-	} else if ((prop = node.property ("inputs")) != 0) {
-		if (_input->set_ports (prop->value())) {
-			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
+	} else if (node.get_property ("inputs", str)) {
+		if (_input->set_ports (str)) {
+			error << string_compose(_("improper input channel list in XML node (%1)"), str) << endmsg;
 			return -1;
 		}
 	}
@@ -205,11 +207,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property (X_("mode"))) != 0) {
-		_mode = TrackMode (string_2_enum (prop->value(), _mode));
-	} else {
+	if (!node.get_property (X_("mode"), _mode)) {
 		_mode = Normal;
 	}
 
@@ -246,12 +244,12 @@ AudioTrack::state (bool full_state)
 		XMLNode* inode;
 
 		freeze_node = new XMLNode (X_("freeze-info"));
-		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
-		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
+		freeze_node->set_property ("playlist", _freeze_record.playlist->name());
+		freeze_node->set_property ("state", _freeze_record.state);
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			inode = new XMLNode (X_("processor"));
-			inode->add_property (X_ ("id"), (*i)->id.to_s ());
+			inode->set_property (X_ ("id"), (*i)->id.to_s ());
 			inode->add_child_copy ((*i)->state);
 
 			freeze_node->add_child_nocopy (*inode);
@@ -260,7 +258,7 @@ AudioTrack::state (bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	root.add_property (X_("mode"), enum_2_string (_mode));
+	root.set_property (X_("mode"), _mode);
 
 	return root;
 }
@@ -301,9 +299,7 @@ AudioTrack::set_state_part_two ()
 			}
 		}
 
-		if ((prop = fnode->property (X_("state"))) != 0) {
-			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
-		}
+		fnode->get_property (X_("state"), _freeze_record.state);
 
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
