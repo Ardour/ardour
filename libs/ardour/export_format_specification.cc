@@ -20,18 +20,28 @@
 
 #include "ardour/export_format_specification.h"
 
-#include <sstream>
-
 #include "ardour/export_format_compatibility.h"
 #include "ardour/export_formats.h"
 #include "ardour/session.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
-#include "pbd/convert.h"
+#include "pbd/enum_convert.h"
+#include "pbd/string_convert.h"
+#include "pbd/types_convert.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::FormatId)
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::SampleRate)
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::SampleFormat)
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::DitherType)
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::SRCQuality)
+	DEFINE_ENUM_CONVERT (ARDOUR::ExportFormatBase::Type)
+}
 
 namespace ARDOUR
 {
@@ -60,25 +70,25 @@ ExportFormatSpecification::Time::get_state ()
 
 	XMLNode * node = new XMLNode ("Duration");
 
-	node->add_property ("format", enum_2_string (type));
+	node->set_property ("format", type);
 
 	switch (type) {
 	  case Timecode:
-		node->add_property ("hours", to_string (timecode.hours, std::dec));
-		node->add_property ("minutes", to_string (timecode.minutes, std::dec));
-		node->add_property ("seconds", to_string (timecode.seconds, std::dec));
-		node->add_property ("frames", to_string (timecode.frames, std::dec));
+		node->set_property ("hours", timecode.hours);
+		node->set_property ("minutes", timecode.minutes);
+		node->set_property ("seconds", timecode.seconds);
+		node->set_property ("frames", timecode.frames);
 		break;
 	  case BBT:
-		node->add_property ("bars", to_string (bbt.bars, std::dec));
-		node->add_property ("beats", to_string (bbt.beats, std::dec));
-		node->add_property ("ticks", to_string (bbt.ticks, std::dec));
+		node->set_property ("bars", bbt.bars);
+		node->set_property ("beats", bbt.beats);
+		node->set_property ("ticks", bbt.ticks);
 		break;
 	  case Frames:
-		node->add_property ("frames", to_string (frames, std::dec));
+		node->set_property ("frames", frames);
 		break;
 	  case Seconds:
-		node->add_property ("seconds", to_string (seconds, std::dec));
+		node->set_property ("seconds", seconds);
 		break;
 	}
 
@@ -88,63 +98,32 @@ ExportFormatSpecification::Time::get_state ()
 int
 ExportFormatSpecification::Time::set_state (const XMLNode & node)
 {
-	XMLProperty const * prop;
-
-	prop = node.property ("format");
-
-	if (!prop) { return -1; }
-
-	type = (Type) string_2_enum (prop->value(), Type);
+	if (!node.get_property ("format", type)) {
+		return -1;
+	}
 
 	switch (type) {
-	  case Timecode:
-		if ((prop = node.property ("hours"))) {
-			timecode.hours = atoi (prop->value());
-		}
-
-		if ((prop = node.property ("minutes"))) {
-			timecode.minutes = atoi (prop->value());
-		}
-
-		if ((prop = node.property ("seconds"))) {
-			timecode.seconds = atoi (prop->value());
-		}
-
-		if ((prop = node.property ("frames"))) {
-			timecode.frames = atoi (prop->value());
-		}
-
+	case Timecode:
+		node.get_property ("hours", timecode.hours);
+		node.get_property ("minutes", timecode.minutes);
+		node.get_property ("seconds", timecode.seconds);
+		node.get_property ("frames", timecode.frames);
 		break;
 
-	  case BBT:
-		if ((prop = node.property ("bars"))) {
-			bbt.bars = atoi (prop->value());
-		}
-
-		if ((prop = node.property ("beats"))) {
-			bbt.beats = atoi (prop->value());
-		}
-
-		if ((prop = node.property ("ticks"))) {
-			bbt.ticks = atoi (prop->value());
-		}
-
+	case BBT:
+		node.get_property ("bars", bbt.bars);
+		node.get_property ("beats", bbt.beats);
+		node.get_property ("ticks", bbt.ticks);
 		break;
 
-	  case Frames:
-		if ((prop = node.property ("frames"))) {
-			std::istringstream iss (prop->value());
-			iss >> frames;
-		}
-
+	case Frames:
+		node.get_property ("frames", frames);
 		break;
 
-	  case Seconds:
-		if ((prop = node.property ("seconds"))) {
-			seconds = atof (prop->value());
-		}
-
+	case Seconds:
+		node.get_property ("seconds", seconds);
 		break;
+
 	}
 
 	return 0;
@@ -276,62 +255,62 @@ ExportFormatSpecification::get_state ()
 	XMLNode * node;
 	XMLNode * root = new XMLNode ("ExportFormatSpecification");
 
-	root->add_property ("name", _name);
-	root->add_property ("id", _id.to_s());
-	root->add_property ("with-cue", _with_cue ? "true" : "false");
-	root->add_property ("with-toc", _with_toc ? "true" : "false");
-	root->add_property ("with-mp4chaps", _with_mp4chaps ? "true" : "false");
-	root->add_property ("command", _command);
-	root->add_property ("analyse", _analyse ? "true" : "false");
-	root->add_property ("soundcloud-upload", _soundcloud_upload ? "true" : "false");
+	root->set_property ("name", _name);
+	root->set_property ("id", _id.to_s());
+	root->set_property ("with-cue", _with_cue);
+	root->set_property ("with-toc", _with_toc);
+	root->set_property ("with-mp4chaps", _with_mp4chaps);
+	root->set_property ("command", _command);
+	root->set_property ("analyse", _analyse);
+	root->set_property ("soundcloud-upload", _soundcloud_upload);
 
 	node = root->add_child ("Encoding");
-	node->add_property ("id", enum_2_string (format_id()));
-	node->add_property ("type", enum_2_string (type()));
-	node->add_property ("extension", extension());
-	node->add_property ("name", _format_name);
-	node->add_property ("has-sample-format", has_sample_format ? "true" : "false");
-	node->add_property ("channel-limit", to_string (_channel_limit, std::dec));
+	node->set_property ("id", format_id());
+	node->set_property ("type", type());
+	node->set_property ("extension", extension());
+	node->set_property ("name", _format_name);
+	node->set_property ("has-sample-format", has_sample_format);
+	node->set_property ("channel-limit", _channel_limit);
 
 	node = root->add_child ("SampleRate");
-	node->add_property ("rate", to_string (sample_rate(), std::dec));
+	node->set_property ("rate", sample_rate());
 
 	node = root->add_child ("SRCQuality");
-	node->add_property ("quality", enum_2_string (src_quality()));
+	node->set_property ("quality", src_quality());
 
 	XMLNode * enc_opts = root->add_child ("EncodingOptions");
 
-	add_option (enc_opts, "sample-format", enum_2_string (sample_format()));
-	add_option (enc_opts, "dithering", enum_2_string (dither_type()));
-	add_option (enc_opts, "tag-metadata", _tag ? "true" : "false");
-	add_option (enc_opts, "tag-support", supports_tagging ? "true" : "false");
-	add_option (enc_opts, "broadcast-info", _has_broadcast_info ? "true" : "false");
+	add_option (enc_opts, "sample-format", to_string(sample_format()));
+	add_option (enc_opts, "dithering", to_string (dither_type()));
+	add_option (enc_opts, "tag-metadata", to_string (_tag));
+	add_option (enc_opts, "tag-support", to_string (supports_tagging));
+	add_option (enc_opts, "broadcast-info", to_string (_has_broadcast_info));
 
 	XMLNode * processing = root->add_child ("Processing");
 
 	node = processing->add_child ("Normalize");
-	node->add_property ("enabled", normalize() ? "true" : "false");
-	node->add_property ("loudness", normalize_loudness() ? "yes" : "no");
-	node->add_property ("dbfs", to_string (normalize_dbfs(), std::dec));
-	node->add_property ("lufs", to_string (normalize_lufs(), std::dec));
-	node->add_property ("dbtp", to_string (normalize_dbtp(), std::dec));
+	node->set_property ("enabled", normalize());
+	node->set_property ("loudness", normalize_loudness());
+	node->set_property ("dbfs", normalize_dbfs());
+	node->set_property ("lufs", normalize_lufs());
+	node->set_property ("dbtp", normalize_dbtp());
 
 	XMLNode * silence = processing->add_child ("Silence");
 	XMLNode * start = silence->add_child ("Start");
 	XMLNode * end = silence->add_child ("End");
 
 	node = start->add_child ("Trim");
-	node->add_property ("enabled", trim_beginning() ? "true" : "false");
+	node->set_property ("enabled", trim_beginning());
 
 	node = start->add_child ("Add");
-	node->add_property ("enabled", _silence_beginning.not_zero() ? "true" : "false");
+	node->set_property ("enabled", _silence_beginning.not_zero());
 	node->add_child_nocopy (_silence_beginning.get_state());
 
 	node = end->add_child ("Trim");
-	node->add_property ("enabled", trim_end() ? "true" : "false");
+	node->set_property ("enabled", trim_end());
 
 	node = end->add_child ("Add");
-	node->add_property ("enabled", _silence_end.not_zero() ? "true" : "false");
+	node->set_property ("enabled", _silence_end.not_zero());
 	node->add_child_nocopy (_silence_end.get_state());
 
 	return *root;
@@ -340,97 +319,71 @@ ExportFormatSpecification::get_state ()
 int
 ExportFormatSpecification::set_state (const XMLNode & root)
 {
-	XMLProperty const * prop;
 	XMLNode const * child;
-	string value;
+	string str;
 	LocaleGuard lg;
 
-	if ((prop = root.property ("name"))) {
-		_name = prop->value();
+	root.get_property ("name", _name);
+
+	if (root.get_property ("id", str)) {
+		_id = str;
 	}
 
-	if ((prop = root.property ("id"))) {
-		_id = prop->value();
-	}
-
-	if ((prop = root.property ("with-cue"))) {
-		_with_cue = string_is_affirmative (prop->value());
-	} else {
+	if (!root.get_property ("with-cue", _with_cue)) {
 		_with_cue = false;
 	}
 
-	if ((prop = root.property ("with-toc"))) {
-		_with_toc = string_is_affirmative (prop->value());
-	} else {
+	if (!root.get_property ("with-toc", _with_toc)) {
 		_with_toc = false;
 	}
 
-	if ((prop = root.property ("with-mp4chaps"))) {
-		_with_mp4chaps = string_is_affirmative (prop->value());
-	} else {
+	if (!root.get_property ("with-mp4chaps", _with_mp4chaps)) {
 		_with_mp4chaps = false;
 	}
 
-	if ((prop = root.property ("command"))) {
-		_command = prop->value();
-	} else {
+	if (!root.get_property ("command", _command)) {
 		_command = "";
 	}
 
-	if ((prop = root.property ("analyse"))) {
-		_analyse = string_is_affirmative (prop->value());
-	} else {
+	if (!root.get_property ("analyse", _analyse)) {
 		_analyse = false;
 	}
 
-	if ((prop = root.property ("soundcloud-upload"))) {
-		_soundcloud_upload = string_is_affirmative (prop->value());
-	} else {
+	if (!root.get_property ("soundcloud-upload", _soundcloud_upload)) {
 		_soundcloud_upload = false;
 	}
 
 	/* Encoding and SRC */
 
 	if ((child = root.child ("Encoding"))) {
-		if ((prop = child->property ("id"))) {
-			set_format_id ((FormatId) string_2_enum (prop->value(), FormatId));
+		FormatId fid;
+		if (child->get_property ("id", fid)) {
+			set_format_id (fid);
 		}
 
-		if ((prop = child->property ("type"))) {
-			set_type ((Type) string_2_enum (prop->value(), Type));
+		ExportFormatBase::Type type;
+		if (child->get_property ("type", type)) {
+			set_type (type);
 		}
 
-		if ((prop = child->property ("extension"))) {
-			set_extension (prop->value());
+		if (child->get_property ("extension", str)) {
+			set_extension (str);
 		}
 
-		if ((prop = child->property ("name"))) {
-			_format_name = prop->value();
-		}
-
-		if ((prop = child->property ("has-sample-format"))) {
-			has_sample_format = string_is_affirmative (prop->value());
-		}
-
-		if ((prop = child->property ("has-sample-format"))) {
-			has_sample_format = string_is_affirmative (prop->value());
-		}
-
-		if ((prop = child->property ("channel-limit"))) {
-			_channel_limit = atoi (prop->value());
-		}
+		child->get_property ("name", _format_name);
+		child->get_property ("has-sample-format", has_sample_format);
+		child->get_property ("channel-limit", _channel_limit);
 	}
 
 	if ((child = root.child ("SampleRate"))) {
-		if ((prop = child->property ("rate"))) {
-			set_sample_rate ( (SampleRate) string_2_enum (prop->value(), SampleRate));
+		SampleRate rate;
+		if (child->get_property ("rate", rate)) {
+			set_sample_rate (rate);
 		}
 	}
 
 	if ((child = root.child ("SRCQuality"))) {
-		if ((prop = child->property ("quality"))) {
-			_src_quality = (SRCQuality) string_2_enum (prop->value(), SRCQuality);
-		}
+		child->get_property ("quality", _src_quality);
 	}
 
 	/* Encoding options */
@@ -438,9 +391,9 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	if ((child = root.child ("EncodingOptions"))) {
 		set_sample_format ((SampleFormat) string_2_enum (get_option (child, "sample-format"), SampleFormat));
 		set_dither_type ((DitherType) string_2_enum (get_option (child, "dithering"), DitherType));
-		set_tag (!(get_option (child, "tag-metadata").compare ("true")));
-		supports_tagging = (!(get_option (child, "tag-support").compare ("true")));
-		_has_broadcast_info = (!(get_option (child, "broadcast-info").compare ("true")));
+		set_tag (string_to<bool>(get_option (child, "tag-metadata")));
+		supports_tagging = string_to<bool>(get_option (child, "tag-support"));
+		_has_broadcast_info = string_to<bool>(get_option (child, "broadcast-info"));
 	}
 
 	/* Processing */
@@ -449,30 +402,13 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	if (!proc) { std::cerr << X_("Could not load processing for export format") << std::endl; return -1; }
 
 	if ((child = proc->child ("Normalize"))) {
-		if ((prop = child->property ("enabled"))) {
-			_normalize = (!prop->value().compare ("true"));
-		}
-
+		child->get_property ("enabled", _normalize);
 		// old formats before ~ 4.7-930ish
-		if ((prop = child->property ("target"))) {
-			_normalize_dbfs = atof (prop->value());
-		}
-
-		if ((prop = child->property ("loudness"))) {
-			_normalize_loudness = string_is_affirmative (prop->value());
-		}
-
-		if ((prop = child->property ("dbfs"))) {
-			_normalize_dbfs = atof (prop->value());
-		}
-
-		if ((prop = child->property ("lufs"))) {
-			_normalize_lufs = atof (prop->value());
-		}
-
-		if ((prop = child->property ("dbtp"))) {
-			_normalize_dbtp = atof (prop->value());
-		}
+		child->get_property ("target", _normalize_dbfs);
+		child->get_property ("loudness", _normalize_loudness);
+		child->get_property ("dbfs", _normalize_dbfs);
+		child->get_property ("lufs", _normalize_lufs);
+		child->get_property ("dbtp", _normalize_dbtp);
 	}
 
 	XMLNode const * silence = proc->child ("Silence");
@@ -485,40 +421,33 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	/* Silence start */
 
 	if ((child = start->child ("Trim"))) {
-		if ((prop = child->property ("enabled"))) {
-			_trim_beginning = (!prop->value().compare ("true"));
-		}
+		child->get_property ("enabled", _trim_beginning);
 	}
 
+	bool enabled;
 	if ((child = start->child ("Add"))) {
-		if ((prop = child->property ("enabled"))) {
-			if (!prop->value().compare ("true")) {
-				if ((child = child->child ("Duration"))) {
-					_silence_beginning.set_state (*child);
-				}
-			} else {
-				_silence_beginning.type = Time::Timecode;
+		if (child->get_property ("enabled", enabled) && enabled) {
+			if ((child = child->child ("Duration"))) {
+				_silence_beginning.set_state (*child);
 			}
+		} else {
+			_silence_beginning.type = Time::Timecode;
 		}
 	}
 
 	/* Silence end */
 
 	if ((child = end->child ("Trim"))) {
-		if ((prop = child->property ("enabled"))) {
-			_trim_end = (!prop->value().compare ("true"));
-		}
+		child->get_property ("enabled", _trim_end);
 	}
 
 	if ((child = end->child ("Add"))) {
-		if ((prop = child->property ("enabled"))) {
-			if (!prop->value().compare ("true")) {
-				if ((child = child->child ("Duration"))) {
-					_silence_end.set_state (*child);
-				}
-			} else {
-				_silence_end.type = Time::Timecode;
+		if (child->get_property ("enabled", enabled) && enabled) {
+			if ((child = child->child ("Duration"))) {
+				_silence_end.set_state (*child);
 			}
+		} else {
+				_silence_end.type = Time::Timecode;
 		}
 	}
 
@@ -706,8 +635,8 @@ void
 ExportFormatSpecification::add_option (XMLNode * node, std::string const & name, std::string const & value)
 {
 	node = node->add_child ("Option");
-	node->add_property ("name", name);
-	node->add_property ("value", value);
+	node->set_property ("name", name);
+	node->set_property ("value", value);
 }
 
 std::string
@@ -716,11 +645,10 @@ ExportFormatSpecification::get_option (XMLNode const * node, std::string const &
 	XMLNodeList list (node->children ("Option"));
 
 	for (XMLNodeList::iterator it = list.begin(); it != list.end(); ++it) {
-		XMLProperty const * prop = (*it)->property ("name");
-		if (prop && !name.compare (prop->value())) {
-			prop = (*it)->property ("value");
-			if (prop) {
-				return prop->value();
+		std::string str;
+		if ((*it)->get_property ("name", str) && name == str) {
+			if ((*it)->get_property ("value", str)) {
+				return str;
 			}
 		}
 	}
