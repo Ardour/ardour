@@ -454,6 +454,16 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Gtkmm2ext::Bindings* bindings;
 	static void register_actions();
 
+	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
+
+	static ProcSelection current_processor_selection () {
+		ProcSelection ps;
+		if (_current_processor_box) {
+			_current_processor_box->get_selected_processors (ps);
+		}
+		return ps;
+	}
+
 #ifndef NDEBUG
 	static bool show_all_processors;
 #endif
@@ -534,8 +544,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void compute_processor_sort_keys ();
 
 	void ab_plugins ();
-
-	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
 
 	void cut_processors (const ProcSelection&);
 	void copy_processors (const ProcSelection&);

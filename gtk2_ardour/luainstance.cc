@@ -37,6 +37,7 @@
 #include "luainstance.h"
 #include "luasignal.h"
 #include "marker.h"
+#include "processor_box.h"
 #include "time_axis_view.h"
 #include "selection.h"
 #include "script_selector.h"
@@ -349,6 +350,16 @@ const char *luasignalstr[] = {
 }; // namespace
 
 
+/** special cases for Ardour's Mixer UI */
+namespace LuaMixer {
+
+	ProcessorBox::ProcSelection
+	processor_selection (lua_State* L) {
+		return ProcessorBox::current_processor_selection ();
+	}
+
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #define xstr(s) stringify(s)
@@ -544,6 +555,8 @@ LuaInstance::register_classes (lua_State* L)
 		.beginNamespace ("ArdourUI")
 
 		.addFunction ("http_get", (std::string (*)(const std::string&))&ArdourCurl::http_get)
+
+		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 
 		.beginStdList <ArdourMarker*> ("ArdourMarkerList")
 		.endClass ()
