@@ -45,8 +45,8 @@ typedef enum {
 	ADELAY_FEEDBACK,
 	ADELAY_LPF,
 	ADELAY_GAIN,
-	
 	ADELAY_DELAYTIME,
+	ADELAY_ENABLE,
 } PortIndex;
 
 
@@ -79,6 +79,7 @@ typedef struct {
 	float* gain;
 	
 	float* delaytime;
+	float* enable;
 
 	float srate;
 	float bpm;
@@ -154,8 +155,7 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	adelay->srate = rate;
 	adelay->bpmvalid = 0;
-	// 25Hz time constant @ 64fpp
-	adelay->tau = (1.0 - exp(-2.0 * M_PI * 64. * 25. / adelay->srate));
+	adelay->tau = (1.0 - exp (-2.f * M_PI * 25.f / adelay->srate));
 
 	return (LV2_Handle)adelay;
 }
@@ -203,6 +203,9 @@ connect_port(LV2_Handle instance,
 		break;
 	case ADELAY_DELAYTIME:
 		adelay->delaytime = (float*)data;
+		break;
+	case ADELAY_ENABLE:
+		adelay->enable = (float*)data;
 		break;
 	}
 }
@@ -352,8 +355,18 @@ run(LV2_Handle instance, uint32_t n_samples)
 	const float* const input = adelay->input;
 	float* const output = adelay->output;
 
-	float srate = adelay->srate;
-	float tau = adelay->tau;
+	const float srate = adelay->srate;
+	const float tau = adelay->tau;
+
+	float wetdry_target = *adelay->wetdry / 100.f;
+	float gain_target = from_dB(*adelay->gain);
+	float wetdry = adelay->wetdryold;
+	float gain = adelay->gainold;
+
+	if (*adelay->enable <= 0) {
+		wetdry_target = 0.f;
+		gain_target = 1.0;
+	}
 
 	uint32_t i;
 	float in;
@@ -362,6 +375,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float inv;
 	float xfade;
 	int recalc;
+
+	// TODO LPF
 	if (*(adelay->inv) < 0.5) {
 		inv = -1.f;
 	} else {
@@ -385,10 +400,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 		recalc = 1;
 	}
 	if (!is_eq(adelay->lpfold, *adelay->lpf, 0.1)) {
-		adelay->lpfold += tau * (*adelay->lpf - adelay->lpfold);
-		recalc = 1;
-	}
-	if (*(adelay->gain) != adelay->gainold) {
+		float  tc = (1.0 - exp (-2.f * M_PI * n_samples * 25.f / adelay->srate));
+		adelay->lpfold += tc * (*adelay->lpf - adelay->lpfold);
 		recalc = 1;
 	}
 	
@@ -419,20 +432,29 @@ run(LV2_Handle instance, uint32_t n_samples)
 			if (p<0) p += MAX_DELAY;
 			adelay->fbstate += adelay->z[p] * xfade;
 		}
-		output[i] = from_dB(*(adelay->gain)) * ((100.-*(adelay->wetdry)) / 100. * in + *(adelay->wetdry) / 100. * -inv * runfilter(adelay, adelay->fbstate));
+
+		wetdry += tau * (wetdry_target - wetdry) + 1e-12;
+		gain += tau * (gain_target - gain) + 1e-12;
+
+		output[i] = (1.f - wetdry) * in;
+		output[i] += wetdry * -inv * runfilter(adelay, adelay->fbstate);
+		output[i] *= gain;
+
 		if (++(adelay->posz) >= MAX_DELAY) {
 			adelay->posz = 0;
 		}
 	}
+
 	adelay->feedbackold = *(adelay->feedback);
 	adelay->divisorold = *(adelay->divisor);
-	adelay->gainold = *(adelay->gain);
 	adelay->invertold = *(adelay->inv);
 	adelay->timeold = *(adelay->time);
 	adelay->syncold = *(adelay->sync);
-	adelay->wetdryold = *(adelay->wetdry);
+	adelay->wetdryold = wetdry;
+	adelay->gainold = gain;
 	adelay->delaytimeold = *(adelay->delaytime);
 	adelay->delaysamplesold = delaysamples;
+
 	if (recalc) {
 		tmp = adelay->active;
 		adelay->active = adelay->next;
