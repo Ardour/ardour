@@ -44,11 +44,11 @@ typedef enum {
 	ACOMP_SIDECHAIN,
 	ACOMP_ENABLE,
 
-	ACOMP_INPUT,
-	ACOMP_SC,
-	ACOMP_OUTPUT,
-	ACOMP_STEREO_INPUT,
-	ACOMP_STEREO_OUTPUT,
+	ACOMP_A0,
+	ACOMP_A1,
+	ACOMP_A2,
+	ACOMP_A3,
+	ACOMP_A4,
 } PortIndex;
 
 typedef struct {
@@ -133,50 +133,89 @@ connect_port(LV2_Handle instance,
 	AComp* acomp = (AComp*)instance;
 
 	switch ((PortIndex)port) {
-	case ACOMP_ATTACK:
-		acomp->attack = (float*)data;
+		case ACOMP_ATTACK:
+			acomp->attack = (float*)data;
+			break;
+		case ACOMP_RELEASE:
+			acomp->release = (float*)data;
+			break;
+		case ACOMP_KNEE:
+			acomp->knee = (float*)data;
+			break;
+		case ACOMP_RATIO:
+			acomp->ratio = (float*)data;
+			break;
+		case ACOMP_THRESHOLD:
+			acomp->thresdb = (float*)data;
+			break;
+		case ACOMP_MAKEUP:
+			acomp->makeup = (float*)data;
+			break;
+		case ACOMP_GAINR:
+			acomp->gainr = (float*)data;
+			break;
+		case ACOMP_OUTLEVEL:
+			acomp->outlevel = (float*)data;
+			break;
+		case ACOMP_SIDECHAIN:
+			acomp->sidechain = (float*)data;
+			break;
+		case ACOMP_ENABLE:
+			acomp->enable = (float*)data;
+			break;
+		default:
+			break;
+	}
+}
+
+static void
+connect_mono(LV2_Handle instance,
+             uint32_t port,
+             void* data)
+{
+	AComp* acomp = (AComp*)instance;
+	connect_port (instance, port, data);
+
+	switch ((PortIndex)port) {
+		case ACOMP_A0:
+			acomp->input0 = (float*)data;
+			break;
+		case ACOMP_A1:
+			acomp->sc = (float*)data;
+			break;
+		case ACOMP_A2:
+			acomp->output0 = (float*)data;
+			break;
+	default:
 		break;
-	case ACOMP_RELEASE:
-		acomp->release = (float*)data;
-		break;
-	case ACOMP_KNEE:
-		acomp->knee = (float*)data;
-		break;
-	case ACOMP_RATIO:
-		acomp->ratio = (float*)data;
-		break;
-	case ACOMP_THRESHOLD:
-		acomp->thresdb = (float*)data;
-		break;
-	case ACOMP_MAKEUP:
-		acomp->makeup = (float*)data;
-		break;
-	case ACOMP_GAINR:
-		acomp->gainr = (float*)data;
-		break;
-	case ACOMP_OUTLEVEL:
-		acomp->outlevel = (float*)data;
-		break;
-	case ACOMP_SIDECHAIN:
-		acomp->sidechain = (float*)data;
-		break;
-	case ACOMP_ENABLE:
-		acomp->enable = (float*)data;
-		break;
-	case ACOMP_INPUT:
-		acomp->input0 = (float*)data;
-		break;
-	case ACOMP_SC:
-		acomp->sc = (float*)data;
-		break;
-	case ACOMP_OUTPUT:
-		acomp->output0 = (float*)data;
-		break;
-	case ACOMP_STEREO_INPUT:
-		acomp->input1 = (float*)data;
-		break;
-	case ACOMP_STEREO_OUTPUT:
-		acomp->output1 = (float*)data;
+	}
+}
+
+static void
+connect_stereo(LV2_Handle instance,
+               uint32_t port,
+               void* data)
+{
+	AComp* acomp = (AComp*)instance;
+	connect_port (instance, port, data);
+
+	switch ((PortIndex)port) {
+		case ACOMP_A0:
+			acomp->input0 = (float*)data;
+			break;
+		case ACOMP_A1:
+			acomp->input1 = (float*)data;
+			break;
+		case ACOMP_A2:
+			acomp->sc = (float*)data;
+			break;
+		case ACOMP_A3:
+			acomp->output0 = (float*)data;
+			break;
+		case ACOMP_A4:
+			acomp->output1 = (float*)data;
+			break;
+	default:
 		break;
 	}
 }
@@ -642,7 +681,7 @@ extension_data(const char* uri)
 static const LV2_Descriptor descriptor_mono = {
 	ACOMP_URI,
 	instantiate,
-	connect_port,
+	connect_mono,
 	activate,
 	run_mono,
 	deactivate,
@@ -653,7 +692,7 @@ static const LV2_Descriptor descriptor_mono = {
 static const LV2_Descriptor descriptor_stereo = {
 	ACOMP_STEREO_URI,
 	instantiate,
-	connect_port,
+	connect_stereo,
 	activate,
 	run_stereo,
 	deactivate,
