@@ -19,7 +19,7 @@
 #include <iostream>
 
 #ifndef PI
-#define PI (3.14159265358979232846)
+#define PI (3.14159265358979323846)
 #endif
 
 TonalEstimator::TonalEstimator()
