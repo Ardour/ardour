@@ -1304,12 +1304,12 @@ private:
       set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::WPtrEqualCheck <T>::f, 0);
-      rawsetfield (L, -3, "isnil"); // class table
+      rawsetfield (L, -3, "sameinstance"); // class table
 
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
-      rawsetfield (L, -3, "isnil"); // class table
+      rawsetfield (L, -3, "sameinstance"); // class table
 
       return *this;
     }
@@ -1886,7 +1886,8 @@ public:
     return WSPtrClass <T> (name, this,
         ClassInfo <boost::shared_ptr<U> >::getStaticKey (),
         ClassInfo <boost::weak_ptr<U> >::getStaticKey ())
-      .addNullCheck();
+      .addNullCheck()
+      .addEqualCheck();
   }
 
 };
