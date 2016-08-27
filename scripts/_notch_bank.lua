@@ -94,7 +94,7 @@ function dsp_run (ins, outs, n_samples)
 				-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:Biquad
 				-- for a list of available types, see
 				-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR.DSP.Biquad.Type
-				filters[c][i]:compute (ARDOUR.DSP.BiquadType.Notch, freq * i, qual, 0)
+				filters[c][i]:compute (ARDOUR.DSP.BiquadType.Notch, freq * i, qual * i, 0)
 			end
 		end
 	end
