@@ -155,9 +155,9 @@ PannerShell::get_state ()
 {
 	XMLNode* node = new XMLNode ("PannerShell");
 
-	node->add_property (X_("bypassed"), _bypassed ? X_("yes") : X_("no"));
-	node->add_property (X_("user-panner"), _user_selected_panner_uri);
-	node->add_property (X_("linked-to-route"), _panlinked ? X_("yes") : X_("no"));
+	node->set_property (X_("bypassed"), _bypassed);
+	node->set_property (X_("user-panner"), _user_selected_panner_uri);
+	node->set_property (X_("linked-to-route"), _panlinked);
 
 	if (_panner && _is_send) {
 		node->add_child_nocopy (_panner->get_state ());
@@ -171,31 +171,29 @@ PannerShell::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children ();
 	XMLNodeConstIterator niter;
-	XMLProperty const * prop;
+	bool yn;
+	std::string str;
 	LocaleGuard lg;
 
-	if ((prop = node.property (X_("bypassed"))) != 0) {
-		set_bypassed (string_is_affirmative (prop->value ()));
+	if (node.get_property (X_("bypassed"), yn)) {
+		set_bypassed (yn);
 	}
 
-	if ((prop = node.property (X_("linked-to-route"))) != 0) {
+	if (node.get_property (X_("linked-to-route"), yn)) {
 		if (!ARDOUR::Profile->get_mixbus()) {
-			_panlinked = string_is_affirmative (prop->value ());
+			_panlinked = yn;
 		}
 	}
 
-	if ((prop = node.property (X_("user-panner"))) != 0) {
-		_user_selected_panner_uri = prop->value ();
-	}
+	node.get_property (X_("user-panner"), _user_selected_panner_uri);
 
 	_panner.reset ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Panner")) {
-
-			if ((prop = (*niter)->property (X_("uri")))) {
-				PannerInfo* p = PannerManager::instance().get_by_uri(prop->value());
+			if ((*niter)->get_property (X_("uri"), str)) {
+				PannerInfo* p = PannerManager::instance().get_by_uri(str);
 				if (p) {
 					_panner.reset (p->descriptor.factory (
 								_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
@@ -217,13 +215,13 @@ PannerShell::set_state (const XMLNode& node, int version)
 			}
 
 			else /* backwards compatibility */
-			if ((prop = (*niter)->property (X_("type")))) {
+			if ((*niter)->get_property (X_("type"), str)) {
 
 				list<PannerInfo*>::iterator p;
 				PannerManager& pm (PannerManager::instance());
 
 				for (p = pm.panner_info.begin(); p != pm.panner_info.end(); ++p) {
-					if (prop->value() == (*p)->descriptor.name) {
+					if (str == (*p)->descriptor.name) {
 
 						/* note that we assume that all the stream panners
 						   are of the same type. pretty good
@@ -255,7 +253,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 
 				if (p == pm.panner_info.end()) {
 					error << string_compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
-					                         prop->value())
+					                         str)
 					      << endmsg;
 				}
 
