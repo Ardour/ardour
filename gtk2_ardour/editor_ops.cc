@@ -6359,6 +6359,59 @@ Editor::set_punch_from_selection ()
 }
 
 void
+Editor::set_auto_punch_range ()
+{
+	// auto punch in/out button from a single button
+	// If Punch In is unset, set punch range from playhead to end, enable punch in
+	// If Punch In is set, the next punch sets Punch Out, unless the playhead has been
+	//   rewound beyond the Punch In marker, in which case that marker will be moved back
+	//   to the current playhead position.
+	// If punch out is set, it clears the punch range and Punch In/Out buttons
+
+	if (_session == 0) {
+		return;
+	}
+
+	Location* tpl = transport_punch_location();
+	framepos_t now = playhead_cursor->current_frame();
+	framepos_t begin = now;
+	framepos_t end = _session->current_end_frame();
+
+	if (!_session->config.get_punch_in()) {
+		// First Press - set punch in and create range from here to eternity
+		set_punch_range (begin, end, _("Auto Punch In"));
+		_session->config.set_punch_in(true);
+	} else if (tpl && !_session->config.get_punch_out()) {
+		// Second press - update end range marker and set punch_out
+		if (now < tpl->start()) {
+			// playhead has been rewound - move start back  and pretend nothing happened
+			begin = now;
+			set_punch_range (begin, end, _("Auto Punch In/Out"));
+		} else {
+			// normal case for 2nd press - set the punch out
+			end = playhead_cursor->current_frame ();
+			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
+			_session->config.set_punch_out(true);
+		}
+	} else 	{
+		if (_session->config.get_punch_out()) {
+			_session->config.set_punch_out(false);
+		}
+
+		if (_session->config.get_punch_in()) {
+			_session->config.set_punch_in(false);
+		}
+
+		if (tpl)
+		{
+			// third press - unset punch in/out and remove range
+			_session->locations()->remove(tpl);
+		}
+	}
+
+}
+
+void
 Editor::set_session_extents_from_selection ()
 {
 	if (_session == 0) {
