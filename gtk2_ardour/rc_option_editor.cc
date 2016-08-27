@@ -1860,14 +1860,6 @@ RCOptionEditor::RCOptionEditor ()
         , _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
-	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
-	if (node) {
-		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
-		   (Gtk::StateType) here !!!
-		*/
-		Tabbable::set_state (*node, Stateful::loading_state_version);
-	}
-
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 
 	/* MISC */
@@ -3368,6 +3360,14 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	parameter_changed ("sync-source");
 	parameter_changed ("use-monitor-bus");
 	parameter_changed ("open-gui-after-adding-plugin");
+
+	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
+	if (node) {
+		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
+		   (Gtk::StateType) here !!!
+		*/
+		Tabbable::set_state (*node, Stateful::loading_state_version);
+	}
 }
 
 void
