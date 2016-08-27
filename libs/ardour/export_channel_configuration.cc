@@ -45,15 +45,15 @@ ExportChannelConfiguration::get_state ()
 	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
 	XMLNode * channel;
 
-	root->add_property ("split", get_split() ? "true" : "false");
-	root->add_property ("channels", to_string (get_n_chans(), std::dec));
+	root->set_property ("split", get_split());
+	root->set_property ("channels", get_n_chans());
 
 	switch (region_type) {
 	case RegionExportChannelFactory::None:
 		// Do nothing
 		break;
 	default:
-		root->add_property ("region-processing", enum_2_string (region_type));
+		root->set_property ("region-processing", enum_2_string (region_type));
 		break;
 	}
 
@@ -62,7 +62,7 @@ ExportChannelConfiguration::get_state ()
 		channel = root->add_child ("Channel");
 		if (!channel) { continue; }
 
-		channel->add_property ("number", to_string (i, std::dec));
+		channel->set_property ("number", i);
 		(*c_it)->get_state (channel);
 
 		++i;
@@ -74,15 +74,15 @@ ExportChannelConfiguration::get_state ()
 int
 ExportChannelConfiguration::set_state (const XMLNode & root)
 {
-	XMLProperty const * prop;
-
-	if ((prop = root.property ("split"))) {
-		set_split (!prop->value().compare ("true"));
+	bool yn;
+	if (root.get_property ("split", yn)) {
+		set_split (yn);
 	}
 
-	if ((prop = root.property ("region-processing"))) {
+	std::string str;
+	if (root.get_property ("region-processing", str)) {
 		set_region_processing_type ((RegionExportChannelFactory::Type)
-			string_2_enum (prop->value(), RegionExportChannelFactory::Type));
+			string_2_enum (str, RegionExportChannelFactory::Type));
 	}
 
 	XMLNodeList channels = root.children ("Channel");
