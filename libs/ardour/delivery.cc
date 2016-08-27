@@ -20,7 +20,7 @@
 #include <algorithm>
 
 #include "pbd/enumwriter.h"
-#include "pbd/convert.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -35,6 +35,10 @@
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Delivery::Role);
+}
 
 namespace ARDOUR { class Panner; }
 
@@ -356,14 +360,14 @@ Delivery::state (bool full_state)
 	XMLNode& node (IOProcessor::state (full_state));
 
 	if (_role & Main) {
-		node.add_property("type", "main-outs");
+		node.set_property("type", "main-outs");
 	} else if (_role & Listen) {
-		node.add_property("type", "listen");
+		node.set_property("type", "listen");
 	} else {
-		node.add_property("type", "delivery");
+		node.set_property("type", "delivery");
 	}
 
-	node.add_property("role", enum_2_string(_role));
+	node.set_property("role", _role);
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
@@ -378,14 +382,11 @@ Delivery::state (bool full_state)
 int
 Delivery::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	if (IOProcessor::set_state (node, version)) {
 		return -1;
 	}
 
-	if ((prop = node.property ("role")) != 0) {
-		_role = Role (string_2_enum (prop->value(), _role));
+	if (node.get_property ("role", _role)) {
 		// std::cerr << this << ' ' << _name << " set role to " << enum_2_string (_role) << std::endl;
 	} else {
 		// std::cerr << this << ' ' << _name << " NO ROLE INFO\n";
