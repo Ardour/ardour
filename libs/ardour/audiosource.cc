@@ -133,7 +133,7 @@ AudioSource::get_state ()
 	XMLNode& node (Source::get_state());
 
 	if (_captured_for.length()) {
-		node.add_property ("captured-for", _captured_for);
+		node.set_property ("captured-for", _captured_for);
 	}
 
 	return node;
@@ -142,12 +142,7 @@ AudioSource::get_state ()
 int
 AudioSource::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("captured-for")) != 0) {
-		_captured_for = prop->value();
-	}
-
+	node.get_property ("captured-for", _captured_for);
 	return 0;
 }
 
