@@ -39,6 +39,7 @@
 #include "editor.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
+#include "enums_convert.h"
 #include "gui_thread.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
@@ -271,7 +272,7 @@ void
 Editor::maybe_add_mixer_strip_width (XMLNode& node)
 {
 	if (current_mixer_strip) {
-		node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
+		node.set_property ("mixer-width", editor_mixer_strip_width);
 	}
 }
 

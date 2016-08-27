@@ -280,32 +280,30 @@ Mixer_UI::Mixer_UI ()
 
 
 	XMLNode const * settings = ARDOUR_UI::instance()->mixer_settings();
-	XMLProperty const * prop;
 	float fract;
 
 	{
 		LocaleGuard lg;
 
-		if (!settings || ((prop = settings->property ("mixer-rhs-pane1-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
-			rhs_pane1.set_divider (0, 0.6f);
-		} else {
-			rhs_pane1.set_divider (0, fract);
+		if (!settings || !settings->get_property ("mixer-rhs-pane1-pos", fract) || fract  > 1.0) {
+			fract = 0.6f;
 		}
-		if (!settings || ((prop = settings->property ("mixer-rhs-pane2-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
-			rhs_pane2.set_divider (0, 0.7f);
-		} else {
-			rhs_pane2.set_divider (0, fract);
+		rhs_pane1.set_divider (0, fract);
+
+		if (!settings || !settings->get_property ("mixer-rhs-pane2-pos", fract) || fract > 1.0) {
+			fract = 0.7f;
 		}
-		if (!settings || ((prop = settings->property ("mixer-list-hpane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
-			list_hpane.set_divider (0, 0.2f);
-		} else {
-			list_hpane.set_divider (0, fract);
+		rhs_pane2.set_divider (0, fract);
+
+		if (!settings || !settings->get_property ("mixer-list-hpane-pos", fract) || fract > 1.0) {
+			fract = 0.2f;
 		}
-		if (!settings || ((prop = settings->property ("mixer-inner-pane-pos")) == 0)  || ((fract = atof (prop->value())) > 1.0)) {
-			inner_pane.set_divider (0, 0.8f);
-		} else {
-			inner_pane.set_divider (0, atof (prop->value()));
+		list_hpane.set_divider (0, fract);
+
+		if (!settings || !settings->get_property ("mixer-inner-pane-pos", fract) || fract > 1.0) {
+			fract = 0.8f;
 		}
+		inner_pane.set_divider (0, fract);
 	}
 
 	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
@@ -2069,27 +2067,22 @@ private:
 int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
 	LocaleGuard lg;
+	bool yn;
 
 	Tabbable::set_state (node, version);
 
-	if ((prop = node.property ("narrow-strips"))) {
-		if (string_is_affirmative (prop->value())) {
+	if (node.get_property ("narrow-strips", yn)) {
+		if (yn) {
 			set_strip_width (Narrow);
 		} else {
 			set_strip_width (Wide);
 		}
 	}
 
-	if ((prop = node.property ("show-mixer"))) {
-		if (string_is_affirmative (prop->value())) {
-		       _visible = true;
-		}
-	}
+	node.get_property ("show-mixer", _visible);
 
-	if ((prop = node.property ("maximised"))) {
-		bool yn = string_is_affirmative (prop->value());
+	if (node.get_property ("maximised", yn)) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalMixer"));
 		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -2099,8 +2092,7 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property ("show-mixer-list"))) {
-		bool yn = string_is_affirmative (prop->value());
+	if (node.get_property ("show-mixer-list", yn)) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMixerList"));
 		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -2118,11 +2110,11 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		const XMLNodeList& kids = plugin_order->children("PluginInfo");
 		XMLNodeConstIterator i;
 		for (i = kids.begin(); i != kids.end(); ++i) {
-			if ((prop = (*i)->property ("unique-id"))) {
-				std::string unique_id = prop->value();
+			std::string unique_id;
+			if ((*i)->get_property ("unique-id", unique_id)) {
 				order.push_back (unique_id);
-				if ((prop = (*i)->property ("expanded"))) {
-					favorite_ui_state[unique_id] = string_is_affirmative (prop->value());
+				if ((*i)->get_property ("expanded", yn)) {
+					favorite_ui_state[unique_id] = yn;
 				}
 			}
 		}
@@ -2137,34 +2129,29 @@ XMLNode&
 Mixer_UI::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Mixer"));
-	char buf[128];
 	LocaleGuard lg;
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%f", rhs_pane1.get_divider());
-	node->add_property(X_("mixer-rhs-pane1-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", rhs_pane2.get_divider());
-	node->add_property(X_("mixer-rhs_pane2-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", list_hpane.get_divider());
-	node->add_property(X_("mixer-list-hpane-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%f", inner_pane.get_divider());
-	node->add_property(X_("mixer-inner-pane-pos"), string(buf));
+	node->set_property (X_("mixer-rhs-pane1-pos"), rhs_pane1.get_divider());
+	node->set_property (X_("mixer-rhs_pane2-pos"), rhs_pane2.get_divider());
+	node->set_property (X_("mixer-list-hpane-pos"), list_hpane.get_divider());
+	node->set_property (X_("mixer-inner-pane-pos"),  inner_pane.get_divider());
 
-	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
-	node->add_property ("show-mixer", _visible ? "yes" : "no");
-	node->add_property ("show-mixer-list", _show_mixer_list ? "yes" : "no");
-	node->add_property ("maximised", _maximised ? "yes" : "no");
+	node->set_property ("narrow-strips", (_strip_width == Narrow));
+	node->set_property ("show-mixer", _visible);
+	node->set_property ("show-mixer-list", _show_mixer_list);
+	node->set_property ("maximised", _maximised);
 
 	store_current_favorite_order ();
 	XMLNode* plugin_order = new XMLNode ("PluginOrder");
-	int cnt = 0;
+	uint32_t cnt = 0;
 	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
 		XMLNode* p = new XMLNode ("PluginInfo");
-		p->add_property ("sort", cnt);
-		p->add_property ("unique-id", (*i)->unique_id);
+		p->set_property ("sort", cnt);
+		p->set_property ("unique-id", (*i)->unique_id);
 		if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
-			p->add_property ("expanded", favorite_ui_state[(*i)->unique_id]);
+			p->set_property ("expanded", favorite_ui_state[(*i)->unique_id]);
 		}
 		plugin_order->add_child_nocopy (*p);
 	}
