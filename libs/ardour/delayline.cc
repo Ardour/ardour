@@ -347,6 +347,6 @@ XMLNode&
 DelayLine::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
-	node.add_property("type", "delay");
+	node.set_property("type", "delay");
 	return node;
 }
