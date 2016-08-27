@@ -368,13 +368,13 @@ Amp::state (bool full_state)
 int
 Amp::set_state (const XMLNode& node, int version)
 {
-        XMLNode* gain_node;
+	XMLNode* gain_node;
 
 	Processor::set_state (node, version);
 
-        if ((gain_node = node.child (Controllable::xml_node_name.c_str())) != 0) {
-                _gain_control->set_state (*gain_node, version);
-        }
+	if ((gain_node = node.child (Controllable::xml_node_name.c_str ())) != 0) {
+		_gain_control->set_state (*gain_node, version);
+	}
 
 	return 0;
 }
