@@ -759,25 +759,22 @@ void
 LuaProc::add_state (XMLNode* root) const
 {
 	XMLNode*    child;
-	char        buf[32];
 	LocaleGuard lg;
 
 	gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
 	std::string b64s (b64);
 	g_free (b64);
 	XMLNode* script_node = new XMLNode (X_("script"));
-	script_node->add_property (X_("lua"), LUA_VERSION);
-	script_node->add_property (X_("origin"), _origin);
+	script_node->set_property (X_("lua"), LUA_VERSION);
+	script_node->set_property (X_("origin"), _origin);
 	script_node->add_content (b64s);
 	root->add_child_nocopy (*script_node);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input(i) && parameter_is_control(i)) {
 			child = new XMLNode("Port");
-			snprintf(buf, sizeof(buf), "%u", i);
-			child->add_property("id", std::string(buf));
-			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
-			child->add_property("value", std::string(buf));
+			child->set_property("id", i);
+			child->set_property("value", _shadow_data[i]);
 			root->add_child_nocopy(*child);
 		}
 	}
@@ -828,12 +825,8 @@ LuaProc::set_state (const XMLNode& node, int version)
 {
 #ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
-	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-	const char *value;
-	const char *port;
-	uint32_t port_id;
 #endif
 	LocaleGuard lg;
 
@@ -852,20 +845,21 @@ LuaProc::set_state (const XMLNode& node, int version)
 	nodes = node.children ("Port");
 	for (iter = nodes.begin(); iter != nodes.end(); ++iter) {
 		child = *iter;
-		if ((prop = child->property("id")) != 0) {
-			port = prop->value().c_str();
-		} else {
+
+		uint32_t port_id;
+		float value;
+
+		if (!child->get_property("id", port_id)) {
 			warning << _("LuaProc: port has no symbol, ignored") << endmsg;
 			continue;
 		}
-		if ((prop = child->property("value")) != 0) {
-			value = prop->value().c_str();
-		} else {
+
+		if (!child->get_property("value", value)) {
 			warning << _("LuaProc: port has no value, ignored") << endmsg;
 			continue;
 		}
-		sscanf (port, "%" PRIu32, &port_id);
-		set_parameter (port_id, atof(value));
+
+		set_parameter (port_id, value);
 	}
 #endif
 
@@ -1121,23 +1115,25 @@ LuaProc::load_preset (PresetRecord r)
 
 	XMLNode* root = t->root ();
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		XMLProperty const * label = (*i)->property (X_("label"));
-		assert (label);
-		if (label->value() != r.label) {
+		std::string str;
+		if (!(*i)->get_property (X_("label"), str)) {
+			assert (false);
+		}
+		if (str != r.label) {
 			continue;
 		}
 
 		for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 			if ((*j)->name() == X_("Parameter")) {
-				XMLProperty const * index = (*j)->property (X_("index"));
-				XMLProperty const * value = (*j)->property (X_("value"));
-				assert (index);
-				assert (value);
+				uint32_t index;
+				float value;
+				if (!(*j)->get_property (X_("index"), index) ||
+				    !(*j)->get_property (X_("value"), value)) {
+					assert (false);
+				}
 				LocaleGuard lg;
-				const uint32_t p = atoi (index->value().c_str());
-				const float v = atof (value->value().c_str ());
-				set_parameter (p, v);
-				PresetPortSetValue (p, v); /* EMIT SIGNAL */
+				set_parameter (index, value);
+				PresetPortSetValue (index, value); /* EMIT SIGNAL */
 			}
 		}
 		return Plugin::load_preset(r);
@@ -1159,14 +1155,14 @@ LuaProc::do_save_preset (std::string name) {
 	std::string uri (preset_name_to_uri (name));
 
 	XMLNode* p = new XMLNode (X_("Preset"));
-	p->add_property (X_("uri"), uri);
-	p->add_property (X_("label"), name);
+	p->set_property (X_("uri"), uri);
+	p->set_property (X_("label"), name);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input (i)) {
 			XMLNode* c = new XMLNode (X_("Parameter"));
-			c->add_property (X_("index"), string_compose ("%1", i));
-			c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
+			c->set_property (X_("index"), i);
+			c->set_property (X_("value"), get_parameter (i));
 			p->add_child_nocopy (*c);
 		}
 	}
@@ -1199,14 +1195,14 @@ LuaProc::find_presets ()
 	if (t) {
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+			std::string uri;
+			std::string label;
 
-			XMLProperty const * uri = (*i)->property (X_("uri"));
-			XMLProperty const * label = (*i)->property (X_("label"));
+			if (!(*i)->get_property (X_("uri"), uri) || !(*i)->get_property (X_("label"), label)) {
+				assert (false);
+			}
 
-			assert (uri);
-			assert (label);
-
-			PresetRecord r (uri->value(), label->value(), true);
+			PresetRecord r (uri, label, true);
 			_presets.insert (make_pair (r.uri, r));
 		}
 	}
