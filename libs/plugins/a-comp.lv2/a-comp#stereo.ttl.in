@@ -110,19 +110,24 @@
         lv2:minimum 0 ;
         lv2:maximum 1 ;
         lv2:portProperty lv2:integer, lv2:toggled ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 9 ;
+        lv2:name "Enable" ;
+        lv2:symbol "enable" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
+        lv2:designation <http://ardour.org/lv2/processing#enable>;
     ] ;
 
     lv2:port [
         a lv2:InputPort, lv2:AudioPort ;
-        lv2:index 9 ;
+        lv2:index 10 ;
         lv2:symbol "in_1" ;
         lv2:name "Audio Input 1" ;
-    ] ,
-    [
-        a lv2:InputPort, lv2:AudioPort ;
-        lv2:index 10 ;
-        lv2:symbol "in_2" ;
-        lv2:name "Audio Input 2" ;
     ] ,
     [
         a lv2:InputPort, lv2:AudioPort ;
@@ -138,8 +143,14 @@
         lv2:name "Audio Output 1" ;
     ],
     [
-        a lv2:OutputPort, lv2:AudioPort ;
+        a lv2:InputPort, lv2:AudioPort ;
         lv2:index 13 ;
+        lv2:symbol "in_2" ;
+        lv2:name "Audio Input 2" ;
+    ] ,
+    [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 14 ;
         lv2:symbol "out_2" ;
         lv2:name "Audio Output 2" ;
     ] ;

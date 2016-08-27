@@ -27,6 +27,10 @@
 #define ACOMP_URI		"urn:ardour:a-comp"
 #define ACOMP_STEREO_URI	"urn:ardour:a-comp#stereo"
 
+#ifndef M_PI
+#  define M_PI 3.14159265358979323846
+#endif
+
 typedef enum {
 	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
@@ -38,30 +42,14 @@ typedef enum {
 	ACOMP_GAINR,
 	ACOMP_OUTLEVEL,
 	ACOMP_SIDECHAIN,
+	ACOMP_ENABLE,
 
 	ACOMP_INPUT,
 	ACOMP_SC,
 	ACOMP_OUTPUT,
-} PortIndexMono;
-
-typedef enum {
-	ACOMP_STEREO_ATTACK = 0,
-	ACOMP_STEREO_RELEASE,
-	ACOMP_STEREO_KNEE,
-	ACOMP_STEREO_RATIO,
-	ACOMP_STEREO_THRESHOLD,
-	ACOMP_STEREO_MAKEUP,
-
-	ACOMP_STEREO_GAINR,
-	ACOMP_STEREO_OUTLEVEL,
-	ACOMP_STEREO_SIDECHAIN,
-
-	ACOMP_STEREO_INPUT0,
-	ACOMP_STEREO_INPUT1,
-	ACOMP_STEREO_SC,
-	ACOMP_STEREO_OUTPUT0,
-	ACOMP_STEREO_OUTPUT1,
-} PortIndexStereo;
+	ACOMP_STEREO_INPUT,
+	ACOMP_STEREO_OUTPUT,
+} PortIndex;
 
 typedef struct {
 	float* attack;
@@ -74,6 +62,7 @@ typedef struct {
 	float* gainr;
 	float* outlevel;
 	float* sidechain;
+	float* enable;
 
 	float* input0;
 	float* input1;
@@ -85,6 +74,9 @@ typedef struct {
 	float old_yl;
 	float old_y1;
 	float old_yg;
+
+	float makeup_gain;
+	float tau;
 
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
@@ -124,6 +116,7 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	acomp->srate = rate;
 	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
+	acomp->tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
 #endif
@@ -133,13 +126,13 @@ instantiate(const LV2_Descriptor* descriptor,
 
 
 static void
-connect_port_mono(LV2_Handle instance,
+connect_port(LV2_Handle instance,
              uint32_t port,
              void* data)
 {
 	AComp* acomp = (AComp*)instance;
 
-	switch ((PortIndexMono)port) {
+	switch ((PortIndex)port) {
 	case ACOMP_ATTACK:
 		acomp->attack = (float*)data;
 		break;
@@ -167,6 +160,9 @@ connect_port_mono(LV2_Handle instance,
 	case ACOMP_SIDECHAIN:
 		acomp->sidechain = (float*)data;
 		break;
+	case ACOMP_ENABLE:
+		acomp->enable = (float*)data;
+		break;
 	case ACOMP_INPUT:
 		acomp->input0 = (float*)data;
 		break;
@@ -176,57 +172,10 @@ connect_port_mono(LV2_Handle instance,
 	case ACOMP_OUTPUT:
 		acomp->output0 = (float*)data;
 		break;
-	}
-}
-
-static void
-connect_port_stereo(LV2_Handle instance,
-             uint32_t port,
-             void* data)
-{
-	AComp* acomp = (AComp*)instance;
-
-	switch ((PortIndexStereo)port) {
-	case ACOMP_STEREO_ATTACK:
-		acomp->attack = (float*)data;
-		break;
-	case ACOMP_STEREO_RELEASE:
-		acomp->release = (float*)data;
-		break;
-	case ACOMP_STEREO_KNEE:
-		acomp->knee = (float*)data;
-		break;
-	case ACOMP_STEREO_RATIO:
-		acomp->ratio = (float*)data;
-		break;
-	case ACOMP_STEREO_THRESHOLD:
-		acomp->thresdb = (float*)data;
-		break;
-	case ACOMP_STEREO_MAKEUP:
-		acomp->makeup = (float*)data;
-		break;
-	case ACOMP_STEREO_GAINR:
-		acomp->gainr = (float*)data;
-		break;
-	case ACOMP_STEREO_OUTLEVEL:
-		acomp->outlevel = (float*)data;
-		break;
-	case ACOMP_STEREO_SIDECHAIN:
-		acomp->sidechain = (float*)data;
-		break;
-	case ACOMP_STEREO_INPUT0:
-		acomp->input0 = (float*)data;
-		break;
-	case ACOMP_STEREO_INPUT1:
+	case ACOMP_STEREO_INPUT:
 		acomp->input1 = (float*)data;
 		break;
-	case ACOMP_STEREO_SC:
-		acomp->sc = (float*)data;
-		break;
-	case ACOMP_STEREO_OUTPUT0:
-		acomp->output0 = (float*)data;
-		break;
-	case ACOMP_STEREO_OUTPUT1:
+	case ACOMP_STEREO_OUTPUT:
 		acomp->output1 = (float*)data;
 		break;
 	}
@@ -280,13 +229,24 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float lgaininp = 0.f;
 	float Lgain = 1.f;
 	float Lxg, Lxl, Lyg, Lyl, Ly1;
-	int usesidechain = (*(acomp->sidechain) < 0.5) ? 0 : 1;
+	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
 	float in0;
 	float sc0;
-	float ratio = *(acomp->ratio);
-	float thresdb = *(acomp->thresdb);
+
+	float ratio = *acomp->ratio;
+	float thresdb = *acomp->thresdb;
+	float makeup_target = from_dB(*acomp->makeup);
+	float makeup_gain = acomp->makeup_gain;
+
+	const const float tau = acomp->tau;
+
+	if (*acomp->enable <= 0) {
+		ratio = 1.f;
+		thresdb = 0.f;
+		makeup_target = 1.f;
+	}
 
 #ifdef LV2_EXTENDED
 	if (acomp->v_knee != *acomp->knee) {
@@ -294,13 +254,13 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		acomp->need_expose = true;
 	}
 
-	if (acomp->v_ratio != *acomp->ratio) {
-		acomp->v_ratio = *acomp->ratio;
+	if (acomp->v_ratio != ratio) {
+		acomp->v_ratio = ratio;
 		acomp->need_expose = true;
 	}
 
-	if (acomp->v_thresdb != *acomp->thresdb) {
-		acomp->v_thresdb = *acomp->thresdb;
+	if (acomp->v_thresdb != thresdb) {
+		acomp->v_thresdb = thresdb;
 		acomp->need_expose = true;
 	}
 #endif
@@ -341,7 +301,9 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		*(acomp->gainr) = Lyl;
 
 		lgaininp = in0 * Lgain;
-		output[i] = lgaininp * from_dB(*(acomp->makeup));
+
+		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
+		output[i] = lgaininp * makeup_gain;
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
 
@@ -353,6 +315,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
 	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
@@ -362,7 +325,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		// >= 1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - *acomp->makeup;
+		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -393,15 +356,26 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float rgaininp = 0.f;
 	float Lgain = 1.f;
 	float Lxg, Lxl, Lyg, Lyl, Ly1;
-	int usesidechain = (*(acomp->sidechain) < 0.5) ? 0 : 1;
+	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
 	float in0;
 	float in1;
 	float sc0;
 	float maxabslr;
-	float ratio = *(acomp->ratio);
-	float thresdb = *(acomp->thresdb);
+
+	float ratio = *acomp->ratio;
+	float thresdb = *acomp->thresdb;
+	float makeup_target = from_dB(*acomp->makeup);
+	float makeup_gain = acomp->makeup_gain;
+
+	const const float tau = acomp->tau;
+
+	if (*acomp->enable <= 0) {
+		ratio = 1.f;
+		thresdb = 0.f;
+		makeup_target = 1.f;
+	}
 
 #ifdef LV2_EXTENDED
 	if (acomp->v_knee != *acomp->knee) {
@@ -409,13 +383,13 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		acomp->need_expose = true;
 	}
 
-	if (acomp->v_ratio != *acomp->ratio) {
-		acomp->v_ratio = *acomp->ratio;
+	if (acomp->v_ratio != ratio) {
+		acomp->v_ratio = ratio;
 		acomp->need_expose = true;
 	}
 
-	if (acomp->v_thresdb != *acomp->thresdb) {
-		acomp->v_thresdb = *acomp->thresdb;
+	if (acomp->v_thresdb != thresdb) {
+		acomp->v_thresdb = thresdb;
 		acomp->need_expose = true;
 	}
 #endif
@@ -459,8 +433,11 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
-		output0[i] = lgaininp * from_dB(*(acomp->makeup));
-		output1[i] = rgaininp * from_dB(*(acomp->makeup));
+
+		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
+
+		output0[i] = lgaininp * makeup_gain;
+		output1[i] = rgaininp * makeup_gain;
 
 		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
 
@@ -472,6 +449,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
 	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
@@ -481,7 +459,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		// >= 1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - *acomp->makeup;
+		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -664,7 +642,7 @@ extension_data(const char* uri)
 static const LV2_Descriptor descriptor_mono = {
 	ACOMP_URI,
 	instantiate,
-	connect_port_mono,
+	connect_port,
 	activate,
 	run_mono,
 	deactivate,
@@ -675,7 +653,7 @@ static const LV2_Descriptor descriptor_mono = {
 static const LV2_Descriptor descriptor_stereo = {
 	ACOMP_STEREO_URI,
 	instantiate,
-	connect_port_stereo,
+	connect_port,
 	activate,
 	run_stereo,
 	deactivate,
