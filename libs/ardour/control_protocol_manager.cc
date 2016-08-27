@@ -239,7 +239,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	delete cpi.state;
 	cpi.state = new XMLNode (cpi.protocol->get_state());
-	cpi.state->add_property (X_("active"), "no");
+	cpi.state->set_property (X_("active"), "no");
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
@@ -435,7 +435,6 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
-	XMLProperty const * prop;
 
 	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
@@ -446,23 +445,20 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 
 		if (child->name() == X_("Protocol")) {
 
-			if ((prop = child->property (X_("active"))) == 0) {
+			bool active;
+			std::string name;
+			if (!child->get_property (X_("active"), active) ||
+			    !child->get_property (X_("name"), name)) {
 				continue;
 			}
 
-			bool active = string_is_affirmative (prop->value());
-
-			if ((prop = child->property (X_("name"))) == 0) {
-				continue;
-			}
-
-			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (cpi) {
 				delete cpi->state;
 				cpi->state = new XMLNode (**citer);
 
-				std::cerr << "protocol " << prop->value() << " active ? " << active << std::endl;
+				std::cerr << "protocol " << name << " active ? " << active << std::endl;
 
 				if (active) {
 					if (_session) {
@@ -478,7 +474,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 					}
 				}
 			} else {
-				std::cerr << "protocol " << prop->value() << " not found\n";
+				std::cerr << "protocol " << name << " not found\n";
 			}
 		}
 	}
@@ -496,16 +492,16 @@ ControlProtocolManager::get_state ()
 
 		if ((*i)->protocol) {
 			XMLNode& child_state ((*i)->protocol->get_state());
-			child_state.add_property (X_("active"), "yes");
+			child_state.set_property (X_("active"), "yes");
 			root->add_child_nocopy (child_state);
 		} else if ((*i)->state) {
 			XMLNode* child_state = new XMLNode (*(*i)->state);
-			child_state->add_property (X_("active"), "no");
+			child_state->set_property (X_("active"), "no");
 			root->add_child_nocopy (*child_state);
 		} else {
 			XMLNode* child_state = new XMLNode (X_("Protocol"));
-			child_state->add_property (X_("name"), (*i)->name);
-			child_state->add_property (X_("active"), "no");
+			child_state->set_property (X_("name"), (*i)->name);
+			child_state->set_property (X_("active"), "no");
 			root->add_child_nocopy (*child_state);
 		}
 
