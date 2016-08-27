@@ -239,6 +239,7 @@ typedef enum {
 	AR_OUTPUT1    = 3,
 	AR_MIX        = 4,
 	AR_ROOMSZ     = 5,
+	AR_ENABLE     = 6,
 } PortIndex;
 
 typedef struct {
@@ -249,10 +250,12 @@ typedef struct {
 
 	float* mix;
 	float* roomsz;
+	float* enable;
 
 	float v_mix;
 	float v_roomsz;
 	float srate;
+	float tau;
 
 	b_reverb r;
 } AReverb;
@@ -275,6 +278,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->v_roomsz = 0.75;
 	self->v_mix = 0.1;
 	self->srate = rate;
+	self->tau = 1.f - expf (-2.f * M_PI * 64.f * 15.f / self->srate); // 15Hz, 64fpp
 
 	return (LV2_Handle)self;
 }
@@ -305,6 +309,9 @@ connect_port (LV2_Handle instance,
 		case AR_ROOMSZ:
 			self->roomsz = (float*)data;
 			break;
+		case AR_ENABLE:
+			self->enable = (float*)data;
+			break;
 	}
 }
 
@@ -318,23 +325,52 @@ run (LV2_Handle instance, uint32_t n_samples)
 	float* const      output0 = self->output0;
 	float* const      output1 = self->output1;
 
-	// 15Hz time constant
-	const float tau = (1.0 - exp(-2.0 * M_PI * n_samples * 15. / self->srate));
+	const float tau = self->tau;
+	const float mix = *self->enable <= 0 ? 0 : *self->mix;
 
-	if (*self->mix != self->v_mix) {
-		self->v_mix += tau * ( *self->mix - self->v_mix);
-		self->r.wet = self->v_mix;
-		self->r.dry = 1.0 - self->v_mix;
-	}
-	if (*self->roomsz != self->v_roomsz) {
-		self->v_roomsz += tau * ( *self->roomsz - self->v_roomsz);
-		self->r.gain[0] = 0.773 * self->v_roomsz;
-		self->r.gain[1] = 0.802 * self->v_roomsz;
-		self->r.gain[2] = 0.753 * self->v_roomsz;
-		self->r.gain[3] = 0.733 * self->v_roomsz;
+	uint32_t remain = n_samples;
+	uint32_t offset = 0;
+	uint32_t iterpolate = 0;
+
+	if (fabsf (mix - self->v_mix) < .01) { // 40dB
+		self->v_mix = mix;
+	} else {
+		iterpolate |= 1;
 	}
 
-	reverb (&self->r, input0, input1, output0, output1, n_samples);
+	if (fabsf (*self->roomsz  - self->v_roomsz) < .01) {
+		self->v_roomsz = *self->roomsz;
+	} else {
+		iterpolate |= 2;
+	}
+
+	while (remain > 0) {
+		uint32_t p_samples = remain;
+		if (iterpolate && p_samples > 64) {
+			p_samples = 64;
+		}
+
+		if (iterpolate & 1) {
+			self->v_mix += tau * (mix - self->v_mix);
+			self->r.wet = self->v_mix;
+			self->r.dry = 1.0 - self->v_mix;
+		}
+		if (iterpolate & 2) {
+			self->v_roomsz += tau * ( *self->roomsz - self->v_roomsz);
+			self->r.gain[0] = 0.773 * self->v_roomsz;
+			self->r.gain[1] = 0.802 * self->v_roomsz;
+			self->r.gain[2] = 0.753 * self->v_roomsz;
+			self->r.gain[3] = 0.733 * self->v_roomsz;
+		}
+
+		reverb (&self->r,
+				&input0[offset], &input1[offset],
+				&output0[offset], &output1[offset],
+				p_samples);
+
+		offset += p_samples;
+		remain -= p_samples;
+	}
 }
 
 static void

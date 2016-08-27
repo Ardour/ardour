@@ -72,4 +72,15 @@
 		lv2:default 0.5 ;
 		lv2:minimum 0.5 ;
 		lv2:maximum 1.0 ;
-	] .
+	],
+	[
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 6 ;
+		lv2:name "Enable" ;
+		lv2:symbol "enable" ;
+		lv2:default 1 ;
+		lv2:minimum 0 ;
+		lv2:maximum 1 ;
+		lv2:portProperty lv2:integer, lv2:toggled ;
+		lv2:designation <http://ardour.org/lv2/processing#enable>;
+	];
