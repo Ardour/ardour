@@ -359,7 +359,7 @@ XMLNode&
 Amp::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
-	node.add_property("type", _gain_control->parameter().type() == GainAutomation ? "amp" : "trim");
+	node.set_property("type", _gain_control->parameter().type() == GainAutomation ? "amp" : "trim");
 	node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
