@@ -1882,7 +1882,7 @@ RCOptionEditor::RCOptionEditor ()
                 procs->add (0, _("all available processors"));
 
                 for (uint32_t i = 1; i <= hwcpus; ++i) {
-                        procs->add (i, string_compose (_("%1 processors"), i));
+	                procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
                 }
 
 		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
@@ -3491,7 +3491,7 @@ RCOptionEditor::populate_sync_options ()
 Gtk::Window*
 RCOptionEditor::use_own_window (bool and_fill_it)
 {
-	bool new_window = !own_window();
+	bool new_window = !own_window ();
 
 	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
 
