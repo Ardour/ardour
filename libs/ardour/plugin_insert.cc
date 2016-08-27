@@ -25,7 +25,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/audio_buffer.h"
 #include "ardour/automation_list.h"
@@ -2345,9 +2345,9 @@ PluginInsert::state (bool full)
 {
 	XMLNode& node = Processor::state (full);
 
-	node.add_property("type", _plugins[0]->state_node_name());
-	node.add_property("unique-id", _plugins[0]->unique_id());
-	node.add_property("count", string_compose("%1", _plugins.size()));
+	node.set_property("type", _plugins[0]->state_node_name());
+	node.set_property("unique-id", _plugins[0]->unique_id());
+	node.set_property("count", (uint32_t)_plugins.size());
 
 	/* remember actual i/o configuration (for later placeholder
 	 * in case the plugin goes missing) */
@@ -2357,7 +2357,7 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (* _preset_out.state (X_("PresetOutput")));
 
 	/* save custom i/o config */
-	node.add_property("custom", _custom_cfg ? "yes" : "no");
+	node.set_property("custom", _custom_cfg);
 	for (uint32_t pc = 0; pc < get_count(); ++pc) {
 		char tmp[128];
 		snprintf (tmp, sizeof(tmp), "InputMap-%d", pc);
@@ -2393,22 +2393,18 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 
 	for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
 		if ((*iter)->name() == Controllable::xml_node_name) {
-			XMLProperty const * prop;
 
 			uint32_t p = (uint32_t)-1;
 #ifdef LV2_SUPPORT
-			if ((prop = (*iter)->property (X_("symbol"))) != 0) {
+			std::string str;
+			if ((*iter)->get_property (X_("symbol"), str)) {
 				boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
 				if (lv2plugin) {
-					p = lv2plugin->port_index(prop->value().c_str());
+					p = lv2plugin->port_index(str.c_str());
 				}
 			}
 #endif
-			if (p == (uint32_t)-1 && (prop = (*iter)->property (X_("parameter"))) != 0) {
-				p = atoi (prop->value());
-			}
-
-			if (p != (uint32_t)-1) {
+			if (p == (uint32_t)-1 && (*iter)->get_property (X_("parameter"), p)) {
 
 				/* this may create the new controllable */
 
@@ -2434,36 +2430,34 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
-	XMLProperty const * prop;
 	ARDOUR::PluginType type;
 
-	if ((prop = node.property ("type")) == 0) {
+	std::string str;
+	if (!node.get_property ("type", str)) {
 		error << _("XML node describing plugin is missing the `type' field") << endmsg;
 		return -1;
 	}
 
-	if (prop->value() == X_("ladspa") || prop->value() == X_("Ladspa")) { /* handle old school sessions */
+	if (str == X_("ladspa") || str == X_("Ladspa")) { /* handle old school sessions */
 		type = ARDOUR::LADSPA;
-	} else if (prop->value() == X_("lv2")) {
+	} else if (str == X_("lv2")) {
 		type = ARDOUR::LV2;
-	} else if (prop->value() == X_("windows-vst")) {
+	} else if (str == X_("windows-vst")) {
 		type = ARDOUR::Windows_VST;
-	} else if (prop->value() == X_("lxvst")) {
+	} else if (str == X_("lxvst")) {
 		type = ARDOUR::LXVST;
-	} else if (prop->value() == X_("mac-vst")) {
+	} else if (str == X_("mac-vst")) {
 		type = ARDOUR::MacVST;
-	} else if (prop->value() == X_("audiounit")) {
+	} else if (str == X_("audiounit")) {
 		type = ARDOUR::AudioUnit;
-	} else if (prop->value() == X_("luaproc")) {
+	} else if (str == X_("luaproc")) {
 		type = ARDOUR::Lua;
 	} else {
-		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
-				  prop->value())
-		      << endmsg;
+		error << string_compose (_("unknown plugin type %1 in plugin insert state"), str) << endmsg;
 		return -1;
 	}
 
-	prop = node.property ("unique-id");
+	XMLProperty const * prop = node.property ("unique-id");
 
 	if (prop == 0) {
 #ifdef WINDOWS_VST_SUPPORT
@@ -2556,9 +2550,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		set_control_ids (node, version);
 	}
 
-	if ((prop = node.property ("count")) != 0) {
-		sscanf (prop->value().c_str(), "%u", &count);
-	}
+	node.get_property ("count", count);
 
 	if (_plugins.size() != count) {
 		for (uint32_t n = 1; n < count; ++n) {
@@ -2571,9 +2563,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	PBD::ID new_id = this->id();
 	PBD::ID old_id = this->id();
 
-	if ((prop = node.property ("id")) != 0) {
-		old_id = prop->value ();
-	}
+	node.get_property ("id", old_id);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -2636,9 +2626,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		set_parameter_state_2X (node, version);
 	}
 
-	if ((prop = node.property (X_("custom"))) != 0) {
-		_custom_cfg = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("custom"), _custom_cfg);
 
 	uint32_t in_maps = 0;
 	uint32_t out_maps = 0;
@@ -2742,10 +2730,8 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 		}
 
 		XMLNodeList cnodes;
-		XMLProperty const * cprop;
 		XMLNodeConstIterator iter;
 		XMLNode *child;
-		const char *port;
 		uint32_t port_id;
 
 		cnodes = (*niter)->children ("port");
@@ -2754,14 +2740,10 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 
 			child = *iter;
 
-			if ((cprop = child->property("number")) != 0) {
-				port = cprop->value().c_str();
-			} else {
+			if (!child->get_property("number", port_id)) {
 				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
 				continue;
 			}
-
-			sscanf (port, "%" PRIu32, &port_id);
 
 			if (port_id >= _plugins[0]->parameter_count()) {
 				warning << _("PluginInsert: Auto: port id out of range") << endmsg;
@@ -2897,15 +2879,12 @@ PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 XMLNode&
 PluginInsert::PluginControl::get_state ()
 {
-	stringstream ss;
-
 	XMLNode& node (AutomationControl::get_state());
-	ss << parameter().id();
-	node.add_property (X_("parameter"), ss.str());
+	node.set_property (X_("parameter"), parameter().id());
 #ifdef LV2_SUPPORT
 	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
 	if (lv2plugin) {
-		node.add_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
+		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
 	}
 #endif
 
@@ -2962,11 +2941,8 @@ PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Contro
 XMLNode&
 PluginInsert::PluginPropertyControl::get_state ()
 {
-	stringstream ss;
-
 	XMLNode& node (AutomationControl::get_state());
-	ss << parameter().id();
-	node.add_property (X_("property"), ss.str());
+	node.set_property (X_("property"), parameter().id());
 	node.remove_property (X_("value"));
 
 	return node;
