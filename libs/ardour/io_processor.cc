@@ -110,30 +110,26 @@ IOProcessor::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
 
-	if (_own_input) {
-		node.add_property ("own-input", "yes");
-		if (_input) {
+	node.set_property ("own-input", _own_input);
+
+	if (_input) {
+		if (_own_input) {
 			XMLNode& i (_input->state (full_state));
 			// i.name() = X_("output");
 			node.add_child_nocopy (i);
-		}
-	} else {
-		node.add_property ("own-input", "no");
-		if (_input) {
-			node.add_property ("input", _input->name());
+		} else {
+			node.set_property ("input", _input->name ());
 		}
 	}
 
-	if (_own_output) {
-		node.add_property ("own-output", "yes");
-		if (_output) {
+	node.set_property ("own-output", _own_output);
+
+	if (_output) {
+		if (_own_output) {
 			XMLNode& o (_output->state (full_state));
 			node.add_child_nocopy (o);
-		}
-	} else {
-		node.add_property ("own-output", "no");
-		if (_output) {
-			node.add_property ("output", _output->name());
+		} else {
+			node.set_property ("output", _output->name ());
 		}
 	}
 
@@ -154,13 +150,8 @@ IOProcessor::set_state (const XMLNode& node, int version)
 
 	bool ignore_name = node.property ("ignore-name");
 
-	if ((prop = node.property ("own-input")) != 0) {
-		_own_input = string_is_affirmative (prop->value());
-	}
-
-	if ((prop = node.property ("own-output")) != 0) {
-		_own_output = string_is_affirmative (prop->value());
-	}
+	node.get_property ("own-input", _own_input);
+	node.get_property ("own-output", _own_output);
 
 	/* don't attempt to set state for a proxied IO that we don't own */
 
@@ -169,17 +160,13 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	const string instr = enum_2_string (IO::Input);
 	const string outstr = enum_2_string (IO::Output);
 
+	std::string str;
 	if (_own_input && _input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			XMLProperty const * prop;
-			if ((prop = (*niter)->property ("name")) != 0) {
-				if (_name == prop->value() || ignore_name) {
-					if ((prop = (*niter)->property ("direction")) != 0) {
-						if (prop->value() == instr) {
-							io_node = (*niter);
-							break;
-						}
-					}
+			if ((*niter)->get_property ("name", str) && _name == str || ignore_name) {
+				if ((*niter)->get_property ("direction", str) && str == instr) {
+					io_node = (*niter);
+					break;
 				}
 			}
 		}
@@ -201,15 +188,10 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	if (_own_output && _output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "IO") {
-				XMLProperty const * prop;
-				if ((prop = (*niter)->property ("name")) != 0) {
-					if (_name == prop->value() || ignore_name) {
-						if ((prop = (*niter)->property ("direction")) != 0) {
-							if (prop->value() == outstr) {
-								io_node = (*niter);
-								break;
-							}
-						}
+				if ((*niter)->get_property ("name", str) && _name == str || ignore_name) {
+					if ((*niter)->get_property ("direction", str) && str == outstr) {
+						io_node = (*niter);
+						break;
 					}
 				}
 			}
@@ -310,8 +292,8 @@ IOProcessor::disconnect ()
 void
 IOProcessor::prepare_for_reset (XMLNode &state, const std::string& name)
 {
-	state.add_property ("ignore-bitslot", "1");
-	state.add_property ("ignore-name", "1");
+	state.set_property ("ignore-bitslot", true);
+	state.set_property ("ignore-name", true);
 
 	XMLNode* io_node = state.child (IO::state_node_name.c_str());
 
