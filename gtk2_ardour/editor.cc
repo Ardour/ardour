@@ -98,6 +98,7 @@
 #include "crossfade_edit.h"
 #include "debug.h"
 #include "editing.h"
+#include "editing_convert.h"
 #include "editor.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
@@ -108,6 +109,7 @@
 #include "editor_routes.h"
 #include "editor_snapshots.h"
 #include "editor_summary.h"
+#include "enums_convert.h"
 #include "export_report.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -671,10 +673,9 @@ Editor::Editor ()
 	/* Pick up some settings we need to cache, early */
 
 	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
-	XMLProperty* prop;
 
-	if (settings && (prop = settings->property ("notebook-shrunk"))) {
-		_notebook_shrunk = string_is_affirmative (prop->value ());
+	if (settings) {
+		settings->get_property ("notebook-shrunk", _notebook_shrunk);
 	}
 
 	editor_summary_pane.set_check_divider_position (true);
@@ -739,20 +740,17 @@ Editor::Editor ()
 	{
 		LocaleGuard lg;
 
-		if (!settings || ((prop = settings->property ("edit-horizontal-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
+		if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
 			/* initial allocation is 90% to canvas, 10% to notebook */
-			edit_pane.set_divider (0, 0.90);
-		} else {
-			edit_pane.set_divider (0, fract);
+			fract = 0.90;
 		}
+		edit_pane.set_divider (0, fract);
 
-		if (!settings || ((prop = settings->property ("edit-vertical-pane-pos")) == 0) || ((fract = atof (prop->value())) > 1.0)) {
+		if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
 			/* initial allocation is 90% to canvas, 10% to summary */
-			editor_summary_pane.set_divider (0, 0.90);
-		} else {
-
-			editor_summary_pane.set_divider (0, fract);
+			fract = 0.90;
 		}
+		editor_summary_pane.set_divider (0, fract);
 	}
 
 	global_vpacker.set_spacing (2);
@@ -2344,18 +2342,17 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 int
 Editor::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
 	set_id (node);
 	PBD::Unwinder<bool> nsi (no_save_instant, true);
 	LocaleGuard lg;
+	bool yn;
 
 	Tabbable::set_state (node, version);
 
-	if (_session && (prop = node.property ("playhead"))) {
-		framepos_t pos;
-		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
-		if (pos >= 0) {
-			playhead_cursor->set_position (pos);
+	framepos_t ph_pos;
+	if (_session && node.get_property ("playhead", ph_pos)) {
+		if (ph_pos >= 0) {
+			playhead_cursor->set_position (ph_pos);
 		} else {
 			warning << _("Playhead position stored with a negative value - ignored (use zero instead)") << endmsg;
 			playhead_cursor->set_position (0);
@@ -2364,86 +2361,70 @@ Editor::set_state (const XMLNode& node, int version)
 		playhead_cursor->set_position (0);
 	}
 
-	if ((prop = node.property ("mixer-width"))) {
-		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
-	}
+	node.get_property ("mixer-width", editor_mixer_strip_width);
 
-	if ((prop = node.property ("zoom-focus"))) {
-		zoom_focus_selection_done ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
-	} else {
-		zoom_focus_selection_done (zoom_focus);
-	}
+	node.get_property ("zoom-focus", zoom_focus);
+	zoom_focus_selection_done (zoom_focus);
 
-	if ((prop = node.property ("zoom"))) {
+	double z;
+	if (node.get_property ("zoom", z)) {
 		/* older versions of ardour used floating point samples_per_pixel */
-		double f = PBD::atof (prop->value());
-		reset_zoom (llrintf (f));
+		reset_zoom (llrintf (z));
 	} else {
 		reset_zoom (samples_per_pixel);
 	}
 
-	if ((prop = node.property ("visible-track-count"))) {
-		set_visible_track_count (PBD::atoi (prop->value()));
+	int32_t cnt;
+	if (node.get_property ("visible-track-count", cnt)) {
+		set_visible_track_count (cnt);
 	}
 
-	if ((prop = node.property ("snap-to"))) {
-		snap_type_selection_done ((SnapType) string_2_enum (prop->value(), _snap_type));
-		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
-	} else {
-		set_snap_to (_snap_type);
+	SnapType snap_type;
+	if (!node.get_property ("snap-to", snap_type)) {
+		snap_type = _snap_type;
 	}
+	set_snap_to (snap_type);
 
-	if ((prop = node.property ("snap-mode"))) {
-		snap_mode_selection_done((SnapMode) string_2_enum (prop->value(), _snap_mode));
+	SnapMode sm;
+	if (node.get_property ("snap-mode", sm)) {
+		snap_mode_selection_done(sm);
 		/* set text of Dropdown. in case _snap_mode == SnapOff (default)
 		 * snap_mode_selection_done() will only mark an already active item as active
 		 * which does not trigger set_text().
 		 */
-		set_snap_mode ((SnapMode) string_2_enum (prop->value(), _snap_mode));
+		set_snap_mode (sm);
 	} else {
 		set_snap_mode (_snap_mode);
 	}
 
-	if ((prop = node.property ("internal-snap-to"))) {
-		internal_snap_type = (SnapType) string_2_enum (prop->value(), internal_snap_type);
-	}
+	node.get_property ("internal-snap-to", internal_snap_type);
+	node.get_property ("internal-snap-mode", internal_snap_mode);
+	node.get_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 
-	if ((prop = node.property ("internal-snap-mode"))) {
-		internal_snap_mode = (SnapMode) string_2_enum (prop->value(), internal_snap_mode);
-	}
-
-	if ((prop = node.property ("pre-internal-snap-to"))) {
-		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
-	}
-
-	if ((prop = node.property ("pre-internal-snap-mode"))) {
-		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
-	}
-
-	if ((prop = node.property ("mouse-mode"))) {
-		MouseMode m = str2mousemode(prop->value());
+	std::string mm_str;
+	if (node.get_property ("mouse-mode", mm_str)) {
+		MouseMode m = str2mousemode(mm_str);
 		set_mouse_mode (m, true);
 	} else {
 		set_mouse_mode (MouseObject, true);
 	}
 
-	if ((prop = node.property ("left-frame")) != 0) {
-		framepos_t pos;
-		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
-			if (pos < 0) {
-				pos = 0;
-			}
-			reset_x_origin (pos);
+	framepos_t lf_pos;
+	if (node.get_property ("left-frame", lf_pos)) {
+		if (lf_pos < 0) {
+			lf_pos = 0;
 		}
+		reset_x_origin (lf_pos);
 	}
 
-	if ((prop = node.property ("y-origin")) != 0) {
-		reset_y_origin (atof (prop->value ()));
+	double y_origin;
+	if (node.get_property ("y-origin", y_origin)) {
+		reset_y_origin (y_origin);
 	}
 
-	if ((prop = node.property ("join-object-range"))) {
+	if (node.get_property ("join-object-range", yn)) {
 		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
-		bool yn = string_is_affirmative (prop->value());
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 			tact->set_active (!yn);
@@ -2452,39 +2433,34 @@ Editor::set_state (const XMLNode& node, int version)
 		set_mouse_mode(mouse_mode, true);
 	}
 
-	if ((prop = node.property ("edit-point"))) {
-		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
+	EditPoint ep;
+	if (node.get_property ("edit-point", ep)) {
+		set_edit_point_preference (ep, true);
 	} else {
 		set_edit_point_preference (_edit_point);
 	}
 
-	if ((prop = node.property ("show-measures"))) {
-		bool yn = string_is_affirmative (prop->value());
-		_show_measures = yn;
-	}
+	node.get_property ("show-measures", _show_measures);
 
-	if ((prop = node.property ("follow-playhead"))) {
-		bool yn = string_is_affirmative (prop->value());
+	if (node.get_property ("follow-playhead", yn)) {
 		set_follow_playhead (yn);
 	}
 
-	if ((prop = node.property ("stationary-playhead"))) {
-		bool yn = string_is_affirmative (prop->value());
+	if (node.get_property ("stationary-playhead", yn)) {
 		set_stationary_playhead (yn);
 	}
 
-	if ((prop = node.property ("region-list-sort-type"))) {
-		RegionListSortType st;
-		_regions->reset_sort_type ((RegionListSortType) string_2_enum (prop->value(), st), true);
+	RegionListSortType sort_type;
+	if (node.get_property ("region-list-sort-type", sort_type)) {
+		_regions->reset_sort_type (sort_type, true);
 	}
 
-	if ((prop = node.property ("show-editor-mixer"))) {
+	if (node.get_property ("show-editor-mixer", yn)) {
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 		assert (act);
 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		bool yn = string_is_affirmative (prop->value());
 
 		/* do it twice to force the change */
 
@@ -2492,13 +2468,12 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
-	if ((prop = node.property ("show-editor-list"))) {
+	if (node.get_property ("show-editor-list", yn)) {
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
 		assert (act);
 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		bool yn = string_is_affirmative (prop->value());
 
 		/* do it twice to force the change */
 
@@ -2506,15 +2481,15 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
-	if ((prop = node.property (X_("editor-list-page")))) {
-		_the_notebook.set_current_page (atoi (prop->value ()));
+	int32_t el_page;
+	if (node.get_property (X_("editor-list-page"), el_page)) {
+		_the_notebook.set_current_page (el_page);
 	}
 
-	if ((prop = node.property (X_("show-marker-lines")))) {
+	if (node.get_property (X_("show-marker-lines"), yn)) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-marker-lines"));
 		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		bool yn = string_is_affirmative (prop->value ());
 
 		tact->set_active (!yn);
 		tact->set_active (yn);
@@ -2527,8 +2502,7 @@ Editor::set_state (const XMLNode& node, int version)
 		_locations->set_state (**i);
 	}
 
-	if ((prop = node.property ("maximised"))) {
-		bool yn = string_is_affirmative (prop->value());
+	if (node.get_property ("maximised", yn)) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalEditor"));
 		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -2538,10 +2512,9 @@ Editor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property ("nudge-clock-value"))) {
-		framepos_t f;
-		sscanf (prop->value().c_str(), "%" PRId64, &f);
-		nudge_clock->set (f);
+	framepos_t nudge_clock_value;
+	if (node.get_property ("nudge-clock-value", nudge_clock_value)) {
+		nudge_clock->set (nudge_clock_value);
 	} else {
 		nudge_clock->set_mode (AudioClock::Timecode);
 		nudge_clock->set (_session->frame_rate() * 5, true);
@@ -2553,7 +2526,6 @@ Editor::set_state (const XMLNode& node, int version)
 		 * those that are linked to a private variable may need changing
 		 */
 		RefPtr<Action> act;
-		bool yn;
 
 		act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 		if (act) {
@@ -2590,78 +2562,68 @@ XMLNode&
 Editor::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Editor"));
-	char buf[32];
 	LocaleGuard lg;
 
-	node->add_property ("id", id().to_s ());
+	node->set_property ("id", id().to_s ());
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%f", edit_pane.get_divider ());
-	node->add_property("edit-horizontal-pane-pos", string(buf));
-	node->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
-	snprintf(buf,sizeof(buf), "%f", editor_summary_pane.get_divider());
-	node->add_property("edit-vertical-pane-pos", string(buf));
+	node->set_property("edit-horizontal-pane-pos", edit_pane.get_divider ());
+	node->set_property("notebook-shrunk", _notebook_shrunk);
+	node->set_property("edit-vertical-pane-pos", editor_summary_pane.get_divider());
 
 	maybe_add_mixer_strip_width (*node);
 
-	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
+	node->set_property ("zoom-focus", zoom_focus);
 
-	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
-	node->add_property ("zoom", buf);
-	node->add_property ("snap-to", enum_2_string (_snap_type));
-	node->add_property ("snap-mode", enum_2_string (_snap_mode));
-	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
-	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
-	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
-	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
-	node->add_property ("edit-point", enum_2_string (_edit_point));
-	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
-	node->add_property ("visible-track-count", buf);
+	node->set_property ("zoom", samples_per_pixel);
+	node->set_property ("snap-to", _snap_type);
+	node->set_property ("snap-mode", _snap_mode);
+	node->set_property ("internal-snap-to", internal_snap_type);
+	node->set_property ("internal-snap-mode", internal_snap_mode);
+	node->set_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
+	node->set_property ("edit-point", _edit_point);
+	node->set_property ("visible-track-count", _visible_track_count);
 
-	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
-	node->add_property ("playhead", buf);
-	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
-	node->add_property ("left-frame", buf);
-	snprintf (buf, sizeof (buf), "%f", vertical_adjustment.get_value ());
-	node->add_property ("y-origin", buf);
+	node->set_property ("playhead", playhead_cursor->current_frame ());
+	node->set_property ("left-frame", leftmost_frame);
+	node->set_property ("y-origin", vertical_adjustment.get_value ());
 
-	node->add_property ("show-measures", _show_measures ? "yes" : "no");
-	node->add_property ("maximised", _maximised ? "yes" : "no");
-	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
-	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
-	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
-	node->add_property ("mouse-mode", enum2str(mouse_mode));
-	node->add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
+	node->set_property ("show-measures", _show_measures);
+	node->set_property ("maximised", _maximised);
+	node->set_property ("follow-playhead", _follow_playhead);
+	node->set_property ("stationary-playhead", _stationary_playhead);
+	node->set_property ("region-list-sort-type", _regions->sort_type ());
+	node->set_property ("mouse-mode", mouse_mode);
+	node->set_property ("join-object-range", smart_mode_action->get_active ());
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
+		node->set_property (X_("show-editor-mixer"), tact->get_active());
 	}
 
 	act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
+		node->set_property (X_("show-editor-list"), tact->get_active());
 	}
 
-	snprintf (buf, sizeof (buf), "%d", _the_notebook.get_current_page ());
-	node->add_property (X_("editor-list-page"), buf);
+	node->set_property (X_("editor-list-page"), _the_notebook.get_current_page ());
 
-        if (button_bindings) {
-                XMLNode* bb = new XMLNode (X_("Buttons"));
-                button_bindings->save (*bb);
-                node->add_child_nocopy (*bb);
-        }
+	if (button_bindings) {
+		XMLNode* bb = new XMLNode (X_("Buttons"));
+		button_bindings->save (*bb);
+		node->add_child_nocopy (*bb);
+	}
 
-	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
+	node->set_property (X_("show-marker-lines"), _show_marker_lines);
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
 
-	snprintf (buf, sizeof (buf), "%" PRId64, nudge_clock->current_duration());
-	node->add_property ("nudge-clock-value", buf);
+	node->set_property ("nudge-clock-value", nudge_clock->current_duration());
 
 	node->add_child_nocopy (LuaInstance::instance()->get_action_state());
 	node->add_child_nocopy (LuaInstance::instance()->get_hook_state());
