@@ -110,7 +110,7 @@ function dsp_run (ins, outs, n_samples)
 	for c = 1, chn do
 		-- when not processing in-place, copy the data from input to output first
 		if not ins[c]:sameinstance (outs[c]) then
-			ARDOUR.DSP.copy_vector (outs[c], outs[c], n_samples)
+			ARDOUR.DSP.copy_vector (outs[c], ins[c], n_samples)
 		end
 
 		-- run all stages, in-place on the output buffer
