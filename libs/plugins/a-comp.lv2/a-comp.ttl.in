@@ -109,7 +109,7 @@
         lv2:default 0.000000 ;
         lv2:minimum 0.000000 ;
         lv2:maximum 1.000000 ;
-        lv2:portProperty lv2:toggled ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
     ] ;
 
     lv2:port [
