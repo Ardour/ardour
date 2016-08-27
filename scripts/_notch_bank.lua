@@ -19,7 +19,7 @@ function dsp_params ()
 	return
 	{
 		{ ["type"] = "input", name = "Base Freq", min = 10, max = 1000, default = 100, unit="Hz", logarithmic = true },
-		{ ["type"] = "input", name = "Quality", min = 1.0, max = 16.0, default = 8.0 },
+		{ ["type"] = "input", name = "Quality", min = 1.0, max = 100.0, default = 8.0, logarithmic = true },
 		{ ["type"] = "input", name = "Stages", min = 1.0, max = 100, default = 8.0, integer = true },
 	}
 end
