@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include "ardour/chan_count.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -38,9 +39,11 @@ ChanCount::ChanCount(const XMLNode& node)
 	XMLNodeConstIterator iter = node.children().begin();
 	for ( ; iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_(state_node_name)) {
-			const string& type_str  = (*iter)->property("type")->value();
-			const string& count_str = (*iter)->property("count")->value();
-			set(DataType(type_str), atol(count_str.c_str()));
+			DataType type(DataType::NIL);
+			uint32_t count;
+			(*iter)->get_property("type", type);
+			(*iter)->get_property("count", count);
+			set(type, count);
 		}
 	}
 }
@@ -65,8 +68,8 @@ ChanCount::state(const std::string& name) const
 		uint32_t count = get(*t);
 		if (count > 0) {
 			XMLNode* n = new XMLNode(X_(state_node_name));
-			n->add_property("type", (*t).to_string());
-			n->add_property("count", count);
+			n->set_property("type", *t);
+			n->set_property("count", count);
 			node->add_child_nocopy(*n);
 		}
 	}
