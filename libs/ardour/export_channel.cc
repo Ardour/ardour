@@ -90,7 +90,7 @@ PortExportChannel::get_state (XMLNode * node) const
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		boost::shared_ptr<Port> p = it->lock ();
 		if (p && (port_node = node->add_child ("Port"))) {
-			port_node->add_property ("name", p->name());
+			port_node->set_property ("name", p->name());
 		}
 	}
 }
@@ -98,11 +98,10 @@ PortExportChannel::get_state (XMLNode * node) const
 void
 PortExportChannel::set_state (XMLNode * node, Session & session)
 {
-	XMLProperty const * prop;
 	XMLNodeList xml_ports = node->children ("Port");
 	for (XMLNodeList::iterator it = xml_ports.begin(); it != xml_ports.end(); ++it) {
-		if ((prop = (*it)->property ("name"))) {
-			std::string const & name = prop->value();
+		std::string name;
+		if ((*it)->get_property ("name", name)) {
 			boost::shared_ptr<AudioPort> port = boost::dynamic_pointer_cast<AudioPort> (session.engine().get_port_by_name (name));
 			if (port) {
 				ports.insert (port);
