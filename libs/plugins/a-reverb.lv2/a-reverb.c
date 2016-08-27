@@ -32,6 +32,13 @@
 #define RV_NZ 7
 #define DENORMAL_PROTECT (1e-14)
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 typedef struct {
 	float* delays[2][RV_NZ]; /**< delay line buffer */
 
@@ -164,10 +171,15 @@ reverb (b_reverb* r,
 	for (size_t i = 0; i < n_samples; ++i) {
 		int j;
 		float y;
-		const float xo0 = *xp0++;
-		const float xo1 = *xp1++;
+		float xo0 = *xp0++;
+		float xo1 = *xp1++;
+		if (!isfinite_local(xo0) || fabsf (xo0) > 10.f) { xo0 = 0; }
+		if (!isfinite_local(xo1) || fabsf (xo1) > 10.f) { xo1 = 0; }
+		xo0 += DENORMAL_PROTECT;
+		xo1 += DENORMAL_PROTECT;
 		const float x0 = y_1_0 + (inputGain * xo0);
 		const float x1 = y_1_1 + (inputGain * xo1);
+
 		float xa = 0.0;
 		float xb = 0.0;
 		/* First we do four feedback comb filters (ie parallel delay lines,
@@ -219,6 +231,11 @@ reverb (b_reverb* r,
 
 		*yp1++ = ((wet * y) + (dry * xo1));
 	}
+
+	if (!isfinite_local(y_1_0)) { y_1_0 = 0; }
+	if (!isfinite_local(yy1_1)) { yy1_0 = 0; }
+	if (!isfinite_local(y_1_1)) { y_1_1 = 0; }
+	if (!isfinite_local(yy1_1)) { yy1_1 = 0; }
 
 	r->y_1_0 = y_1_0 + DENORMAL_PROTECT;
 	r->yy1_0 = yy1_0 + DENORMAL_PROTECT;

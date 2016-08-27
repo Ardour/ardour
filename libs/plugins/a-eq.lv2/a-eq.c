@@ -23,6 +23,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 #ifdef LV2_EXTENDED
@@ -90,6 +97,13 @@ struct linear_svf {
 static void linear_svf_reset(struct linear_svf *self)
 {
 	self->s[0] = self->s[1] = 0.0;
+}
+
+static void linear_svf_protect(struct linear_svf *self)
+{
+	if (!isfinite_local (self->s[0]) || !isfinite_local (self->s[1])) {
+		linear_svf_reset (self);
+	}
 }
 
 typedef struct {
@@ -430,6 +444,10 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 		n_samples -= block;
 		offset += block;
+	}
+
+	for (uint32_t j = 0; j < BANDS; j++) {
+		linear_svf_protect(&aeq->v_filter[j]);
 	}
 
 #ifdef LV2_EXTENDED
