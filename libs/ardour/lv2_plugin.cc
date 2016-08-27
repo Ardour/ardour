@@ -1095,8 +1095,8 @@ LV2Plugin::get_layout (uint32_t which, UILayoutHint& h) const
 		case 15: h.x0 = 13; h.x1 = 14; h.y0 = 0; h.y1 = 1; break; // Gain H
 		case 22: h.x0 = 13; h.x1 = 14; h.y0 = 5; h.y1 = 6; break; // enable H
 
-
-		case 16: h.x0 = 14; h.x1 = 15; h.y0 = 4; h.y1 = 6; break; // Master Gain
+		case 16: h.x0 = 14; h.x1 = 15; h.y0 = 1; h.y1 = 3; break; // Master Gain
+		case 23: h.x0 = 14; h.x1 = 15; h.y0 = 5; h.y1 = 6; break; // Master Enable
 		default:
 			return false;
 	}
