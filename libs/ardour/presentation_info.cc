@@ -21,8 +21,8 @@
 
 #include <cassert>
 
-#include "pbd/convert.h"
 #include "pbd/debug.h"
+#include "pbd/enum_convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -32,6 +32,10 @@
 #include "ardour/presentation_info.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::PresentationInfo::Flag);
+}
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -150,9 +154,9 @@ XMLNode&
 PresentationInfo::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	node->add_property ("order", PBD::to_string (_order, std::dec));
-	node->add_property ("flags", enum_2_string (_flags));
-	node->add_property ("color", PBD::to_string (_color, std::dec));
+	node->set_property ("order", _order);
+	node->set_property ("flags", _flags);
+	node->set_property ("color", _color);
 
 	return *node;
 }
@@ -164,28 +168,27 @@ PresentationInfo::set_state (XMLNode const& node, int /* version */)
 		return -1;
 	}
 
-	XMLProperty const* prop;
 	PropertyChange pc;
 
-	if ((prop = node.property (X_("order"))) != 0) {
-		order_t o = atoi (prop->value());
+	order_t o;
+	if (node.get_property (X_("order"), o)) {
 		if (o != _order) {
 			pc.add (Properties::order);
 			_order = o;
 		}
-		_order = atoi (prop->value());
+		_order = o; // huh?
 	}
 
-	if ((prop = node.property (X_("flags"))) != 0) {
-		Flag f = Flag (string_2_enum (prop->value(), f));
+	Flag f;
+	if (node.get_property (X_("flags"), f)) {
 		if ((f&Hidden) != (_flags&Hidden)) {
 			pc.add (Properties::hidden);
 		}
 		_flags = f;
 	}
 
-	if ((prop = node.property (X_("color"))) != 0) {
-		color_t c = atoi (prop->value());
+	color_t c;
+	if (node.get_property (X_("color"), c)) {
 		if (c != _color) {
 			pc.add (Properties::color);
 			_color = c;
@@ -207,9 +210,8 @@ PresentationInfo::get_flags (XMLNode const& node)
 		XMLNode* child = *niter;
 
 		if (child->name() == PresentationInfo::state_node_name) {
-			XMLProperty const* prop = child->property (X_("flags"));
-			if (prop) {
-				Flag f = (Flag) string_2_enum (prop->value(), f);
+			Flag f;
+			if (child->get_property (X_("flags"), f)) {
 				return f;
 			}
 		}
