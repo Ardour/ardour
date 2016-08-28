@@ -19,6 +19,7 @@
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
@@ -295,12 +296,12 @@ InternalSend::state (bool full)
 
 	/* this replaces any existing "type" property */
 
-	node.add_property ("type", "intsend");
+	node.set_property ("type", "intsend");
 
 	if (_send_to) {
-		node.add_property ("target", _send_to->id().to_s());
+		node.set_property ("target", _send_to->id());
 	}
-	node.add_property ("allow-feedback", _allow_feedback);
+	node.set_property ("allow-feedback", _allow_feedback);
 
 	return node;
 }
@@ -314,15 +315,11 @@ InternalSend::get_state()
 int
 InternalSend::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	init_gain ();
 
 	Send::set_state (node, version);
 
-	if ((prop = node.property ("target")) != 0) {
-
-		_send_to_id = prop->value();
+	if (node.get_property ("target", _send_to_id)) {
 
 		/* if we're loading a session, the target route may not have been
 		   create yet. make sure we defer till we are sure that it should
@@ -336,9 +333,7 @@ InternalSend::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property (X_("allow-feedback"))) != 0) {
-		_allow_feedback = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("allow-feedback"), _allow_feedback);
 
 	return 0;
 }
