@@ -143,12 +143,12 @@ XMLNode&
 Port::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name);
-	root->add_property ("tag", _tagname);
+	root->set_property ("tag", _tagname);
 
 	if (_flags == IsInput) {
-		root->add_property ("mode", "input");
+		root->set_property ("mode", "input");
 	} else {
-		root->add_property ("mode", "output");
+		root->set_property ("mode", "output");
 	}
 
 #if 0
