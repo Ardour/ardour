@@ -35,6 +35,7 @@
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/track.h"
+#include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
 #include "pbd/i18n.h"
@@ -112,7 +113,7 @@ Track::state (bool full)
 	root.add_child_nocopy (_record_safe_control->get_state ());
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
-	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
+	root.set_property (X_("saved-meter-point"), _saved_meter_point);
 	root.add_child_nocopy (_diskstream->get_state ());
 
 	return root;
@@ -147,28 +148,23 @@ Track::set_state (const XMLNode& node, int version)
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child = *niter;
 
-		XMLProperty const * prop;
-
 		if (child->name() == Controllable::xml_node_name) {
-			if ((prop = child->property ("name")) == 0) {
+			std::string name;
+			if (!child->get_property ("name", name)) {
 				continue;
 			}
 
-			if (prop->value() == _record_enable_control->name()) {
+			if (name == _record_enable_control->name()) {
 				_record_enable_control->set_state (*child, version);
-			} else if (prop->value() == _record_safe_control->name()) {
+			} else if (name == _record_safe_control->name()) {
 				_record_safe_control->set_state (*child, version);
-			} else if (prop->value() == _monitoring_control->name()) {
+			} else if (name == _monitoring_control->name()) {
 				_monitoring_control->set_state (*child, version);
 			}
 		}
 	}
 
-	XMLProperty const * prop;
-
-	if ((prop = node.property (X_("saved-meter-point"))) != 0) {
-		_saved_meter_point = MeterPoint (string_2_enum (prop->value(), _saved_meter_point));
-	} else {
+	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
 		_saved_meter_point = _meter_point;
 	}
 
