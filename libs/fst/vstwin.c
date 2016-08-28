@@ -374,6 +374,9 @@ fst_exit (void)
 int
 fst_run_editor (VSTState* fst, void* window_parent)
 {
+	/* For safety, remove any pre-existing editor window */ 
+	fst_destroy_editor (fst);
+	
 	if (fst->windows_window == NULL) {
 		HMODULE hInst;
 		HWND window;
