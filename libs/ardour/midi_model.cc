@@ -33,6 +33,7 @@
 #include "midi++/events.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/evoral_types_convert.h"
 #include "ardour/midi_automation_list_binder.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
@@ -41,6 +42,12 @@
 #include "ardour/types.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::MidiModel::NoteDiffCommand::Property);
+	DEFINE_ENUM_CONVERT(ARDOUR::MidiModel::SysExDiffCommand::Property);
+	DEFINE_ENUM_CONVERT(ARDOUR::MidiModel::PatchChangeDiffCommand::Property);
+}
 
 using namespace std;
 using namespace ARDOUR;
@@ -448,41 +455,12 @@ MidiModel::NoteDiffCommand::marshal_note(const NotePtr note)
 {
 	XMLNode* xml_note = new XMLNode("note");
 
-	{
-		ostringstream id_str(ios::ate);
-		id_str << int(note->id());
-		xml_note->add_property("id", id_str.str());
-	}
-
-	{
-		ostringstream note_str(ios::ate);
-		note_str << int(note->note());
-		xml_note->add_property("note", note_str.str());
-	}
-
-	{
-		ostringstream channel_str(ios::ate);
-		channel_str << int(note->channel());
-		xml_note->add_property("channel", channel_str.str());
-	}
-
-	{
-		ostringstream time_str(ios::ate);
-		time_str << note->time();
-		xml_note->add_property("time", time_str.str());
-	}
-
-	{
-		ostringstream length_str(ios::ate);
-		length_str << note->length();
-		xml_note->add_property("length", length_str.str());
-	}
-
-	{
-		ostringstream velocity_str(ios::ate);
-		velocity_str << (unsigned int) note->velocity();
-		xml_note->add_property("velocity", velocity_str.str());
-	}
+	xml_note->set_property ("id", note->id ());
+	xml_note->set_property ("note", note->note ());
+	xml_note->set_property ("channel", note->channel ());
+	xml_note->set_property ("time", note->time ());
+	xml_note->set_property ("length", note->length ());
+	xml_note->set_property ("velocity", note->velocity ());
 
 	return *xml_note;
 }
@@ -490,58 +468,38 @@ MidiModel::NoteDiffCommand::marshal_note(const NotePtr note)
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
 MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 {
-	unsigned int note;
-	XMLProperty const * prop;
-	unsigned int channel;
-	MidiModel::TimeType time;
-	MidiModel::TimeType length;
-	unsigned int velocity;
-	gint id;
-
-	if ((prop = xml_note->property("id")) != 0) {
-		istringstream id_str(prop->value());
-		id_str >> id;
-	} else {
+	Evoral::event_id_t id;
+	if (!xml_note->get_property ("id", id)) {
 		error << "note information missing ID value" << endmsg;
 		id = -1;
 	}
 
-	if ((prop = xml_note->property("note")) != 0) {
-		istringstream note_str(prop->value());
-		note_str >> note;
-	} else {
+	uint8_t note;
+	if (!xml_note->get_property("note", note)) {
 		warning << "note information missing note value" << endmsg;
 		note = 127;
 	}
 
-	if ((prop = xml_note->property("channel")) != 0) {
-		istringstream channel_str(prop->value());
-		channel_str >> channel;
-	} else {
+	uint8_t channel;
+	if (!xml_note->get_property("channel", channel)) {
 		warning << "note information missing channel" << endmsg;
 		channel = 0;
 	}
 
-	if ((prop = xml_note->property("time")) != 0) {
-		istringstream time_str(prop->value());
-		time_str >> time;
-	} else {
+	MidiModel::TimeType time;
+	if (!xml_note->get_property("time", time)) {
 		warning << "note information missing time" << endmsg;
 		time = MidiModel::TimeType();
 	}
 
-	if ((prop = xml_note->property("length")) != 0) {
-		istringstream length_str(prop->value());
-		length_str >> length;
-	} else {
+	MidiModel::TimeType length;
+	if (!xml_note->get_property("length", length)) {
 		warning << "note information missing length" << endmsg;
 		length = MidiModel::TimeType(1);
 	}
 
-	if ((prop = xml_note->property("velocity")) != 0) {
-		istringstream velocity_str(prop->value());
-		velocity_str >> velocity;
-	} else {
+	uint8_t velocity;
+	if (!xml_note->get_property("velocity", velocity)) {
 		warning << "note information missing velocity" << endmsg;
 		velocity = 127;
 	}
@@ -559,36 +517,25 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 
 	/* first, the change itself */
 
-	xml_change->add_property ("property", enum_2_string (change.property));
+	xml_change->set_property ("property", change.property);
 
-	{
-		ostringstream old_value_str (ios::ate);
-		if (change.property == StartTime || change.property == Length) {
-			old_value_str << change.old_value.get_beats();
-		} else {
-			old_value_str << change.old_value.get_int();
-		}
-		xml_change->add_property ("old", old_value_str.str());
+	if (change.property == StartTime || change.property == Length) {
+		xml_change->set_property ("old", change.old_value.get_beats ());
+	} else {
+		xml_change->set_property ("old", change.old_value.get_int ());
 	}
 
-	{
-		ostringstream new_value_str (ios::ate);
-		if (change.property == StartTime || change.property == Length) {
-			new_value_str << change.new_value.get_beats();
-		} else {
-			new_value_str << change.new_value.get_int();
-		}
-		xml_change->add_property ("new", new_value_str.str());
+	if (change.property == StartTime || change.property == Length) {
+		xml_change->set_property ("new", change.new_value.get_beats ());
+	} else {
+		xml_change->set_property ("new", change.new_value.get_int ());
 	}
 
-	ostringstream id_str;
 	if (change.note) {
-		id_str << change.note->id();
-		xml_change->add_property ("id", id_str.str());
+		xml_change->set_property ("id", change.note->id());
 	} else if (change.note_id) {
 		warning << _("Change has no note, using note ID") << endmsg;
-		id_str << change.note_id;
-		xml_change->add_property ("id", id_str.str());
+		xml_change->set_property ("id", change.note_id);
 	} else {
 		error << _("Change has no note or note ID") << endmsg;
 	}
@@ -599,51 +546,39 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 MidiModel::NoteDiffCommand::NoteChange
 MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
-	XMLProperty const * prop;
 	NoteChange change;
 	change.note_id = 0;
 
-	if ((prop = xml_change->property("property")) != 0) {
-		change.property = (Property) string_2_enum (prop->value(), change.property);
-	} else {
+	if (!xml_change->get_property("property", change.property)) {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if ((prop = xml_change->property ("id")) == 0) {
+	int note_id;
+	if (!xml_change->get_property ("id", note_id)) {
 		error << _("No NoteID found for note property change - ignored") << endmsg;
 		return change;
 	}
 
-	gint note_id = atoi (prop->value().c_str());
-
-	if ((prop = xml_change->property ("old")) != 0) {
-		istringstream old_str (prop->value());
-		if (change.property == StartTime || change.property == Length) {
-			Evoral::Beats old_time;
-			old_str >> old_time;
-			change.old_value = old_time;
-		} else {
-			int integer_value_so_that_istream_does_the_right_thing;
-			old_str >> integer_value_so_that_istream_does_the_right_thing;
-			change.old_value = integer_value_so_that_istream_does_the_right_thing;
-		}
+	int old_val;
+	Evoral::Beats old_time;
+	if ((change.property == StartTime || change.property == Length) &&
+	    xml_change->get_property ("old", old_time)) {
+		change.old_value = old_time;
+	} else if (xml_change->get_property ("old", old_val)) {
+		change.old_value = old_val;
 	} else {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if ((prop = xml_change->property ("new")) != 0) {
-		istringstream new_str (prop->value());
-		if (change.property == StartTime || change.property == Length) {
-			Evoral::Beats new_time;
-			new_str >> new_time;
-			change.new_value = Variant(new_time);
-		} else {
-			int integer_value_so_that_istream_does_the_right_thing;
-			new_str >> integer_value_so_that_istream_does_the_right_thing;
-			change.new_value = integer_value_so_that_istream_does_the_right_thing;
-		}
+	int new_val;
+	Evoral::Beats new_time;
+	if ((change.property == StartTime || change.property == Length) &&
+	    xml_change->get_property ("new", new_time)) {
+		change.new_value = new_time;
+	} else if (xml_change->get_property ("new", new_val)) {
+		change.new_value = new_val;
 	} else {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
@@ -723,7 +658,7 @@ XMLNode&
 MidiModel::NoteDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (NOTE_DIFF_COMMAND_ELEMENT);
-	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
 	for_each(_changes.begin(), _changes.end(),
@@ -852,23 +787,10 @@ MidiModel::SysExDiffCommand::marshal_change (const Change& change)
 
 	/* first, the change itself */
 
-	xml_change->add_property ("property", enum_2_string (change.property));
-
-	{
-		ostringstream old_value_str (ios::ate);
-		old_value_str << change.old_time;
-		xml_change->add_property ("old", old_value_str.str());
-	}
-
-	{
-		ostringstream new_value_str (ios::ate);
-		new_value_str << change.new_time;
-		xml_change->add_property ("new", new_value_str.str());
-	}
-
-	ostringstream id_str;
-	id_str << change.sysex->id();
-	xml_change->add_property ("id", id_str.str());
+	xml_change->set_property ("property", change.property);
+	xml_change->set_property ("old", change.old_time);
+	xml_change->set_property ("new", change.new_time);
+	xml_change->set_property ("id", change.sysex->id());
 
 	return *xml_change;
 }
@@ -876,35 +798,25 @@ MidiModel::SysExDiffCommand::marshal_change (const Change& change)
 MidiModel::SysExDiffCommand::Change
 MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
-	XMLProperty const * prop;
 	Change change;
 
-	if ((prop = xml_change->property ("property")) != 0) {
-		change.property = (Property) string_2_enum (prop->value(), change.property);
-	} else {
+	if (!xml_change->get_property ("property", change.property)) {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if ((prop = xml_change->property ("id")) == 0) {
+	int sysex_id;
+	if (!xml_change->get_property ("id", sysex_id)) {
 		error << _("No SysExID found for sys-ex property change - ignored") << endmsg;
 		return change;
 	}
 
-	gint sysex_id = atoi (prop->value().c_str());
-
-	if ((prop = xml_change->property ("old")) != 0) {
-		istringstream old_str (prop->value());
-		old_str >> change.old_time;
-	} else {
+	if (!xml_change->get_property ("old", change.old_time)) {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if ((prop = xml_change->property ("new")) != 0) {
-		istringstream new_str (prop->value());
-		new_str >> change.new_time;
-	} else {
+	if (!xml_change->get_property ("new", change.new_time)) {
 		fatal << "!!!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -946,7 +858,7 @@ XMLNode&
 MidiModel::SysExDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (SYSEX_DIFF_COMMAND_ELEMENT);
-	diff_command->add_property ("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property ("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
 	for_each (_changes.begin(), _changes.end(),
@@ -1152,35 +1064,11 @@ MidiModel::PatchChangeDiffCommand::marshal_patch_change (constPatchChangePtr p)
 {
 	XMLNode* n = new XMLNode ("patch-change");
 
-	{
-		ostringstream s (ios::ate);
-		s << int (p->id ());
-		n->add_property ("id", s.str());
-	}
-
-	{
-		ostringstream s (ios::ate);
-		s << p->time ();
-		n->add_property ("time", s.str ());
-	}
-
-	{
-		ostringstream s (ios::ate);
-		s << int (p->channel ());
-		n->add_property ("channel", s.str ());
-	}
-
-	{
-		ostringstream s (ios::ate);
-		s << int (p->program ());
-		n->add_property ("program", s.str ());
-	}
-
-	{
-		ostringstream s (ios::ate);
-		s << int (p->bank ());
-		n->add_property ("bank", s.str ());
-	}
+	n->set_property ("id", p->id ());
+	n->set_property ("time", p->time ());
+	n->set_property ("channel", p->channel ());
+	n->set_property ("program", p->program ());
+	n->set_property ("bank", p->bank ());
 
 	return *n;
 }
@@ -1190,44 +1078,29 @@ MidiModel::PatchChangeDiffCommand::marshal_change (const Change& c)
 {
 	XMLNode* n = new XMLNode (X_("Change"));
 
-	n->add_property (X_("property"), enum_2_string (c.property));
+	n->set_property (X_("property"), c.property);
 
-	{
-		ostringstream s (ios::ate);
-		if (c.property == Time) {
-			s << c.old_time;
-		} else if (c.property == Channel) {
-			s << c.old_channel;
-		} else if (c.property == Program) {
-			s << int (c.old_program);
-		} else if (c.property == Bank) {
-			s << c.old_bank;
-		}
-
-		n->add_property (X_("old"), s.str ());
+	if (c.property == Time) {
+		n->set_property (X_("old"), c.old_time);
+	} else if (c.property == Channel) {
+		n->set_property (X_("old"), c.old_channel);
+	} else if (c.property == Program) {
+		n->set_property (X_("old"), c.old_program);
+	} else if (c.property == Bank) {
+		n->set_property (X_("old"), c.old_bank);
 	}
 
-	{
-		ostringstream s (ios::ate);
-
-		if (c.property == Time) {
-			s << c.new_time;
-		} else if (c.property == Channel) {
-			s << c.new_channel;
-		} else if (c.property == Program) {
-			s << int (c.new_program);
-		} else if (c.property == Bank) {
-			s << c.new_bank;
-		}
-
-		n->add_property (X_("new"), s.str ());
+	if (c.property == Time) {
+		n->set_property (X_ ("new"), c.new_time);
+	} else if (c.property == Channel) {
+		n->set_property (X_ ("new"), c.new_channel);
+	} else if (c.property == Program) {
+		n->set_property (X_ ("new"), c.new_program);
+	} else if (c.property == Bank) {
+		n->set_property (X_ ("new"), c.new_bank);
 	}
 
-	{
-		ostringstream s;
-		s << c.patch->id ();
-		n->add_property ("id", s.str ());
-	}
+	n->set_property ("id", c.patch->id ());
 
 	return *n;
 }
@@ -1235,41 +1108,32 @@ MidiModel::PatchChangeDiffCommand::marshal_change (const Change& c)
 MidiModel::PatchChangePtr
 MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
-	XMLProperty const * prop;
-	XMLProperty const * prop_id;
 	Evoral::event_id_t id = 0;
+	if (!n->get_property ("id", id)) {
+		assert(false);
+	}
+
 	Evoral::Beats time = Evoral::Beats();
-	int channel = 0;
+	if (!n->get_property ("time", time)) {
+		// warning??
+	}
+
+	uint8_t channel = 0;
+	if (!n->get_property ("channel", channel)) {
+		// warning??
+	}
+
 	int program = 0;
+	if (!n->get_property ("program", program)) {
+		// warning??
+	}
+
 	int bank = 0;
-
-	if ((prop_id = n->property ("id")) != 0) {
-		istringstream s (prop_id->value());
-		s >> id;
-	}
-
-	if ((prop = n->property ("time")) != 0) {
-		istringstream s (prop->value ());
-		s >> time;
-	}
-
-	if ((prop = n->property ("channel")) != 0) {
-		istringstream s (prop->value ());
-		s >> channel;
-	}
-
-	if ((prop = n->property ("program")) != 0) {
-		istringstream s (prop->value ());
-		s >> program;
-	}
-
-	if ((prop = n->property ("bank")) != 0) {
-		istringstream s (prop->value ());
-		s >> bank;
+	if (!n->get_property ("bank", bank)) {
+		// warning??
 	}
 
 	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
-	assert(prop_id);
 	p->set_id (id);
 	return p;
 }
@@ -1277,57 +1141,25 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 MidiModel::PatchChangeDiffCommand::Change
 MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 {
-	XMLProperty const * prop;
 	Change c;
-	int an_int;
+	Evoral::event_id_t id;
 
-	prop = n->property ("property");
-	assert (prop);
-	c.property = (Property) string_2_enum (prop->value(), c.property);
-
-	prop = n->property ("id");
-	assert (prop);
-	Evoral::event_id_t const id = atoi (prop->value().c_str());
-
-	/* we need to load via an int intermediate for all properties that are
-	   actually uint8_t (char/byte).
-	*/
-
-	prop = n->property ("old");
-	assert (prop);
-	{
-		istringstream s (prop->value ());
-		if (c.property == Time) {
-			s >> c.old_time;
-		} else if (c.property == Channel) {
-			s >> an_int;
-			c.old_channel = an_int;
-		} else if (c.property == Program) {
-			s >> an_int;
-			c.old_program = an_int;
-		} else if (c.property == Bank) {
-			s >> an_int;
-			c.old_bank = an_int;
-		}
+	if (!n->get_property ("property", c.property) || !n->get_property ("id", id)) {
+		assert(false);
 	}
 
-	prop = n->property ("new");
-	assert (prop);
-	{
-		istringstream s (prop->value ());
+	if ((c.property == Time && !n->get_property ("old", c.old_time)) ||
+	    (c.property == Channel && !n->get_property ("old", c.old_channel)) ||
+	    (c.property == Program && !n->get_property ("old", c.old_program)) ||
+	    (c.property == Bank && !n->get_property ("old", c.old_bank))) {
+		assert (false);
+	}
 
-		if (c.property == Time) {
-			s >> c.new_time;
-		} else if (c.property == Channel) {
-			s >> an_int;
-			c.new_channel = an_int;
-		} else if (c.property == Program) {
-			s >> an_int;
-			c.new_program = an_int;
-		} else if (c.property == Bank) {
-			s >> an_int;
-			c.new_bank = an_int;
-		}
+	if ((c.property == Time && !n->get_property ("new", c.new_time)) ||
+	    (c.property == Channel && !n->get_property ("new", c.new_channel)) ||
+	    (c.property == Program && !n->get_property ("new", c.new_program)) ||
+	    (c.property == Bank && !n->get_property ("new", c.new_bank))) {
+		assert (false);
 	}
 
 	c.patch = _model->find_patch_change (id);
@@ -1371,7 +1203,7 @@ XMLNode &
 MidiModel::PatchChangeDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (PATCH_CHANGE_DIFF_COMMAND_ELEMENT);
-	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
 	for_each (_added.begin(), _added.end(),
