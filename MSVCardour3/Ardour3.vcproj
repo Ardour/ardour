@@ -2106,6 +2106,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\route_dialogs.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\route_group_dialog.h"
 				>
 			</File>
