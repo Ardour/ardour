@@ -331,7 +331,7 @@ Tabbable::get_state()
 {
 	XMLNode& node (WindowProxy::get_state());
 
-	node.add_property (X_("tabbed"),  tabbed() ? X_("yes") : X_("no"));
+	node.set_property (X_("tabbed"),  tabbed());
 
 	return node;
 }
@@ -353,10 +353,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 	XMLNode* window_node = node.child ("Window");
 
 	if (window_node) {
-		XMLProperty const * prop = window_node->property (X_("tabbed"));
-		if (prop) {
-			tab_requested_by_state = PBD::string_is_affirmative (prop->value());
-		}
+		window_node->get_property (X_("tabbed"), tab_requested_by_state);
 	}
 
 	if (!_visible) {
