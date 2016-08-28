@@ -61,6 +61,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/openuri.h"
 #include "pbd/stl_delete.h"
+#include "pbd/types_convert.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
@@ -125,6 +126,7 @@ typedef uint64_t microseconds_t;
 
 #include "about.h"
 #include "editing.h"
+#include "enums_convert.h"
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "ambiguous_file_dialog.h"
@@ -819,31 +821,31 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* /*conf*/)
 void
 ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 {
-	XMLProperty const * prop;
+	std::string str;
 
-	if ((prop = node.property ("roll")) != 0) {
-		roll_controllable->set_id (prop->value());
+	if (node.get_property ("roll", str)){
+		roll_controllable->set_id (str);
 	}
-	if ((prop = node.property ("stop")) != 0) {
-		stop_controllable->set_id (prop->value());
+	if (node.get_property ("stop", str)) {
+		stop_controllable->set_id (str);
 	}
-	if ((prop = node.property ("goto-start")) != 0) {
-		goto_start_controllable->set_id (prop->value());
+	if (node.get_property ("goto-start", str)) {
+		goto_start_controllable->set_id (str);
 	}
-	if ((prop = node.property ("goto-end")) != 0) {
-		goto_end_controllable->set_id (prop->value());
+	if (node.get_property ("goto-end", str)) {
+		goto_end_controllable->set_id (str);
 	}
-	if ((prop = node.property ("auto-loop")) != 0) {
-		auto_loop_controllable->set_id (prop->value());
+	if (node.get_property ("auto-loop", str)) {
+		auto_loop_controllable->set_id (str);
 	}
-	if ((prop = node.property ("play-selection")) != 0) {
-		play_selection_controllable->set_id (prop->value());
+	if (node.get_property ("play-selection", str)) {
+		play_selection_controllable->set_id (str);
 	}
-	if ((prop = node.property ("rec")) != 0) {
-		rec_controllable->set_id (prop->value());
+	if (node.get_property ("rec", str)) {
+		rec_controllable->set_id (str);
 	}
-	if ((prop = node.property ("shuttle")) != 0) {
-		shuttle_box.controllable()->set_id (prop->value());
+	if (node.get_property ("shuttle", str)) {
+		shuttle_box.controllable()->set_id (str);
 	}
 }
 
@@ -852,14 +854,14 @@ ARDOUR_UI::get_transport_controllable_state ()
 {
 	XMLNode* node = new XMLNode(X_("TransportControllables"));
 
-	node->add_property (X_("roll"), roll_controllable->id().to_s());
-	node->add_property (X_("stop"), stop_controllable->id().to_s());
-	node->add_property (X_("goto_start"), goto_start_controllable->id().to_s());
-	node->add_property (X_("goto_end"), goto_end_controllable->id().to_s());
-	node->add_property (X_("auto_loop"), auto_loop_controllable->id().to_s());
-	node->add_property (X_("play_selection"), play_selection_controllable->id().to_s());
-	node->add_property (X_("rec"), rec_controllable->id().to_s());
-	node->add_property (X_("shuttle"), shuttle_box.controllable()->id().to_s());
+	node->set_property (X_("roll"), roll_controllable->id());
+	node->set_property (X_("stop"), stop_controllable->id());
+	node->set_property (X_("goto_start"), goto_start_controllable->id());
+	node->set_property (X_("goto_end"), goto_end_controllable->id());
+	node->set_property (X_("auto_loop"), auto_loop_controllable->id());
+	node->set_property (X_("play_selection"), play_selection_controllable->id());
+	node->set_property (X_("rec"), rec_controllable->id());
+	node->set_property (X_("shuttle"), shuttle_box.controllable()->id());
 
 	return *node;
 }
@@ -3728,8 +3730,8 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	/* Put the playhead at 0 and scroll fully left */
 	n = new_session->instant_xml (X_("Editor"));
 	if (n) {
-		n->add_property (X_("playhead"), X_("0"));
-		n->add_property (X_("left-frame"), X_("0"));
+		n->set_property (X_("playhead"), X_("0"));
+		n->set_property (X_("left-frame"), X_("0"));
 	}
 
 	set_session (new_session);
@@ -4508,11 +4510,11 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 
 	if (video_timeline->video_file_info(path, local_file)) {
 		XMLNode* node = new XMLNode(X_("Videotimeline"));
-		node->add_property (X_("Filename"), path);
-		node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
-		node->add_property (X_("LocalFile"), local_file?X_("1"):X_("0"));
+		node->set_property (X_("Filename"), path);
+		node->set_property (X_("AutoFPS"), auto_set_session_fps);
+		node->set_property (X_("LocalFile"), local_file);
 		if (orig_local_file) {
-			node->add_property (X_("OriginalVideoFile"), orig_path);
+			node->set_property (X_("OriginalVideoFile"), orig_path);
 		} else {
 			node->remove_property (X_("OriginalVideoFile"));
 		}
@@ -5099,9 +5101,9 @@ ARDOUR_UI::store_clock_modes ()
 	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
 		XMLNode* child = new XMLNode (X_("Clock"));
 
-		child->add_property (X_("name"), (*x)->name());
-		child->add_property (X_("mode"), enum_2_string ((*x)->mode()));
-		child->add_property (X_("on"), ((*x)->off() ? X_("no") : X_("yes")));
+		child->set_property (X_("name"), (*x)->name());
+		child->set_property (X_("mode"), (*x)->mode());
+		child->set_property (X_("on"), (*x)->on());
 
 		node->add_child_nocopy (*child);
 	}
