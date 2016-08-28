@@ -73,10 +73,8 @@ XMLNode&
 Return::state(bool full)
 {
 	XMLNode& node = IOProcessor::state(full);
-	char buf[32];
-	node.add_property ("type", "return");
-	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
-	node.add_property ("bitslot", buf);
+	node.set_property ("type", "return");
+	node.set_property ("bitslot", _bitslot);
 
 	return node;
 }
@@ -86,7 +84,6 @@ Return::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	XMLProperty const * prop;
 	const XMLNode* insert_node = &node;
 
 	/* Return has regular IO automation (gain, pan) */
@@ -102,12 +99,13 @@ Return::set_state (const XMLNode& node, int version)
 	IOProcessor::set_state (*insert_node, version);
 
 	if (!node.property ("ignore-bitslot")) {
-		if ((prop = node.property ("bitslot")) == 0) {
-			_bitslot = _session.next_return_id();
-		} else {
+		uint32_t bitslot;
+		if (node.get_property ("bitslot", bitslot)) {
 			_session.unmark_return_id (_bitslot);
-			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_bitslot = bitslot;
 			_session.mark_return_id (_bitslot);
+		} else {
+			_bitslot = _session.next_return_id();
 		}
 	}
 
