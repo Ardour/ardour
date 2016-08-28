@@ -270,9 +270,9 @@ Pannerbalance::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 Pannerbalance::get_state ()
 {
 	XMLNode& root (Panner::get_state ());
-	root.add_property (X_("uri"), _descriptor.panner_uri);
+	root.set_property (X_("uri"), _descriptor.panner_uri);
 	/* this is needed to allow new sessions to load with old Ardour: */
-	root.add_property (X_("type"), _descriptor.name);
+	root.set_property (X_("type"), _descriptor.name);
 	return root;
 }
 

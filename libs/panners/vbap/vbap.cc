@@ -366,9 +366,9 @@ XMLNode&
 VBAPanner::get_state ()
 {
 	XMLNode& node (Panner::get_state());
-	node.add_property (X_("uri"), _descriptor.panner_uri);
+	node.set_property (X_("uri"), _descriptor.panner_uri);
 	/* this is needed to allow new sessions to load with old Ardour: */
-	node.add_property (X_("type"), _descriptor.name);
+	node.set_property (X_("type"), _descriptor.name);
 	return node;
 }
 
