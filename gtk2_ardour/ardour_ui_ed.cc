@@ -772,7 +772,7 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (*node);
 
 	XMLNode* window_node = new XMLNode (X_("UI"));
-	window_node->add_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
+	window_node->set_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
 
 	/* main window */
 
@@ -781,10 +781,10 @@ ARDOUR_UI::save_ardour_state ()
 	_main_window.get_size (mw, mh);
 
 	XMLNode main_window_node (X_("Main"));
-	main_window_node.add_property (X_("x"), PBD::to_string (mx, std::dec));
-	main_window_node.add_property (X_("y"), PBD::to_string (my, std::dec));
-	main_window_node.add_property (X_("w"), PBD::to_string (mw, std::dec));
-	main_window_node.add_property (X_("h"), PBD::to_string (mh, std::dec));
+	main_window_node.set_property (X_("x"), mx);
+	main_window_node.set_property (X_("y"), my);
+	main_window_node.set_property (X_("w"), mw);
+	main_window_node.set_property (X_("h"), mh);
 
 	string current_tab;
 	int current_page_number = _tabs.get_current_page ();
@@ -796,7 +796,7 @@ ARDOUR_UI::save_ardour_state ()
 		current_tab = "preferences";
 	}
 
-	main_window_node.add_property (X_("current-tab"), current_tab);
+	main_window_node.set_property (X_("current-tab"), current_tab);
 
 	/* Windows */
 
