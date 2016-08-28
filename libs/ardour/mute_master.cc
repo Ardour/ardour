@@ -20,13 +20,17 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::MuteMaster::MutePoint);
+}
 
 using namespace ARDOUR;
 using namespace std;
@@ -139,17 +143,11 @@ MuteMaster::set_mute_points (MutePoint mp)
 int
 MuteMaster::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
+	node.get_property ("mute-point", _mute_point);
 
-	if ((prop = node.property ("mute-point")) != 0) {
-		_mute_point = (MutePoint) string_2_enum (prop->value(), _mute_point);
+	if (!node.get_property ("muted", _muted_by_self)) {
+		_muted_by_self = (_mute_point != MutePoint (0));
 	}
-
-	if ((prop = node.property ("muted")) != 0) {
-		_muted_by_self = PBD::string_is_affirmative (prop->value());
-	} else {
-                _muted_by_self = (_mute_point != MutePoint (0));
-        }
 
 	return 0;
 }
@@ -158,8 +156,8 @@ XMLNode&
 MuteMaster::get_state()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	node->add_property ("mute-point", enum_2_string (_mute_point));
-	node->add_property ("muted", (_muted_by_self ? X_("yes") : X_("no")));
+	node->set_property ("mute-point", _mute_point);
+	node->set_property ("muted", _muted_by_self);
 	return *node;
 }
 
