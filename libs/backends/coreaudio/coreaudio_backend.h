@@ -434,7 +434,8 @@ class CoreAudioBackend : public AudioBackend {
 	uint32_t _systemic_audio_output_latency;
 
 	/* coreaudio specific  */
-	uint32_t name_to_id(std::string) const;
+	enum DeviceFilter { All, Input, Output, Duplex };
+	uint32_t name_to_id(std::string, DeviceFilter filter = All) const;
 
 	/* processing */
 	float  _dsp_load;
