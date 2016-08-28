@@ -121,6 +121,12 @@
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+#elif defined _MSC_VER
+
+#define STDIN_FILENO  _fileno(stdin)
+#define STDOUT_FILENO _fileno(stdout)
+#define STDERR_FILENO _fileno(stderr)
+
 #endif
 
 /* Darwin special defines (taken from config_macosx.h) */
