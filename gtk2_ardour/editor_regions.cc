@@ -40,6 +40,7 @@
 #include "audio_clock.h"
 #include "editor.h"
 #include "editing.h"
+#include "editing_convert.h"
 #include "keyboard.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -1529,13 +1530,13 @@ EditorRegions::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("RegionList"));
 
-	node->add_property (X_("sort-type"), enum_2_string (_sort_type));
+	node->set_property (X_("sort-type"), _sort_type);
 
 	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
 	bool const ascending = RefPtr<RadioAction>::cast_dynamic(act)->get_active ();
-	node->add_property (X_("sort-ascending"), ascending ? "yes" : "no");
-	node->add_property (X_("show-all"), toggle_full_action()->get_active() ? "yes" : "no");
-	node->add_property (X_("show-automatic-regions"), _show_automatic_regions ? "yes" : "no");
+	node->set_property (X_("sort-ascending"), ascending);
+	node->set_property (X_("show-all"), toggle_full_action()->get_active());
+	node->set_property (X_("show-automatic-regions"), _show_automatic_regions);
 
 	return *node;
 }
@@ -1549,10 +1550,8 @@ EditorRegions::set_state (const XMLNode & node)
 		return;
 	}
 
-	XMLProperty const * p = node.property (X_("sort-type"));
-
-	if (p) {
-		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
+	Editing::RegionListSortType t;
+	if (node.get_property (X_("sort-type"), t)) {
 
 		if (_sort_type != t) {
 			changed = true;
@@ -1563,10 +1562,8 @@ EditorRegions::set_state (const XMLNode & node)
 		ract->set_active ();
 	}
 
-	p = node.property (X_("sort-ascending"));
-
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
+	bool yn;
+	if (node.get_property (X_("sort-ascending"), yn)) {
 		SortType old_sort_type;
 		int old_sort_column;
 
@@ -1588,10 +1585,7 @@ EditorRegions::set_state (const XMLNode & node)
 		RefPtr<RadioAction>::cast_dynamic(act)->set_active ();
 	}
 
-	p = node.property (X_("show-all"));
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
-
+	if (node.get_property (X_("show-all"), yn)) {
 		if (expanded != yn) {
 			changed = true;
 		}
@@ -1600,10 +1594,7 @@ EditorRegions::set_state (const XMLNode & node)
 		toggle_full_action()->set_active (yn);
 	}
 
-	p = node.property (X_("show-automatic-regions"));
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
-
+	if (node.get_property (X_("show-automatic-regions"), yn)) {
 		if (yn != _show_automatic_regions) {
 			_show_automatic_regions = yn;
 			toggle_show_auto_regions_action()->set_active (yn);
