@@ -90,19 +90,19 @@ MidiSource::get_state ()
 	XMLNode& node (Source::get_state());
 
 	if (_captured_for.length()) {
-		node.add_property ("captured-for", _captured_for);
+		node.set_property ("captured-for", _captured_for);
 	}
 
 	for (InterpolationStyleMap::const_iterator i = _interpolation_style.begin(); i != _interpolation_style.end(); ++i) {
 		XMLNode* child = node.add_child (X_("InterpolationStyle"));
-		child->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
-		child->add_property (X_("style"), enum_2_string (i->second));
+		child->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
+		child->set_property (X_("style"), enum_2_string (i->second));
 	}
 
 	for (AutomationStateMap::const_iterator i = _automation_state.begin(); i != _automation_state.end(); ++i) {
 		XMLNode* child = node.add_child (X_("AutomationState"));
-		child->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
-		child->add_property (X_("state"), enum_2_string (i->second));
+		child->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
+		child->set_property (X_("state"), enum_2_string (i->second));
 	}
 
 	return node;
@@ -111,40 +111,38 @@ MidiSource::get_state ()
 int
 MidiSource::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
-	if ((prop = node.property ("captured-for")) != 0) {
-		_captured_for = prop->value();
-	}
+	node.get_property ("captured-for", _captured_for);
 
+	std::string str;
 	XMLNodeList children = node.children ();
 	for (XMLNodeConstIterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("InterpolationStyle")) {
-			if ((prop = (*i)->property (X_("parameter"))) == 0) {
+			if (!(*i)->get_property (X_("parameter"), str)) {
 				error << _("Missing parameter property on InterpolationStyle") << endmsg;
 				return -1;
 			}
-			Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
+			Evoral::Parameter p = EventTypeMap::instance().from_symbol (str);
 
-			if ((prop = (*i)->property (X_("style"))) == 0) {
+			if (!(*i)->get_property (X_("style"), str)) {
 				error << _("Missing style property on InterpolationStyle") << endmsg;
 				return -1;
 			}
-			Evoral::ControlList::InterpolationStyle s = static_cast<Evoral::ControlList::InterpolationStyle>(
-				string_2_enum (prop->value(), s));
+			Evoral::ControlList::InterpolationStyle s =
+			    static_cast<Evoral::ControlList::InterpolationStyle>(string_2_enum (str, s));
 			set_interpolation_of (p, s);
 
 		} else if ((*i)->name() == X_("AutomationState")) {
-			if ((prop = (*i)->property (X_("parameter"))) == 0) {
+			if (!(*i)->get_property (X_("parameter"), str)) {
 				error << _("Missing parameter property on AutomationState") << endmsg;
 				return -1;
 			}
-			Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
+			Evoral::Parameter p = EventTypeMap::instance().from_symbol (str);
 
-			if ((prop = (*i)->property (X_("state"))) == 0) {
+			if (!(*i)->get_property (X_("state"), str)) {
 				error << _("Missing state property on AutomationState") << endmsg;
 				return -1;
 			}
-			AutoState s = static_cast<AutoState> (string_2_enum (prop->value(), s));
+			AutoState s = static_cast<AutoState>(string_2_enum (str, s));
 			set_automation_state_of (p, s);
 		}
 	}
