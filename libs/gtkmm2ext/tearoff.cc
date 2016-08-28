@@ -266,56 +266,42 @@ TearOff::torn_off() const
 void
 TearOff::add_state (XMLNode& node) const
 {
-        node.add_property ("tornoff", (_torn ? "yes" : "no"));
+	node.set_property ("tornoff", _torn);
 
-        if (own_window_width > 0) {
-                char buf[32];
-
-                snprintf (buf, sizeof (buf), "%d", own_window_width);
-                node.add_property ("width", buf);
-                snprintf (buf, sizeof (buf), "%d", own_window_height);
-                node.add_property ("height", buf);
-                snprintf (buf, sizeof (buf), "%d", own_window_xpos);
-                node.add_property ("xpos", buf);
-                snprintf (buf, sizeof (buf), "%d", own_window_ypos);
-                node.add_property ("ypos", buf);
-        }
+	if (own_window_width > 0) {
+		node.set_property ("width", own_window_width);
+		node.set_property ("height", own_window_height);
+		node.set_property ("xpos", own_window_xpos);
+		node.set_property ("ypos", own_window_ypos);
+	}
 }
 
 void
 TearOff::set_state (const XMLNode& node)
 {
-        Glib::RefPtr<Gdk::Window> win;
-        XMLProperty const * prop;
+	Glib::RefPtr<Gdk::Window> win;
 
-        if ((prop = node.property (X_("tornoff"))) == 0) {
-                return;
-        }
+	bool tornoff;
+	if (!node.get_property (X_("tornoff"), tornoff)) {
+		return;
+	}
 
-        if (prop->value() == "yes") {
-                tear_it_off ();
-        } else {
-                put_it_back ();
-        }
+	if (tornoff) {
+		tear_it_off ();
+	} else {
+		put_it_back ();
+	}
 
-        if ((prop = node.property (X_("width"))) != 0) {
-                sscanf (prop->value().c_str(), "%d", &own_window_width);
-        }
-        if ((prop = node.property (X_("height"))) != 0) {
-                sscanf (prop->value().c_str(), "%d", &own_window_height);
-        }
-        if ((prop = node.property (X_("xpos"))) != 0) {
-                sscanf (prop->value().c_str(), "%d", &own_window_xpos);
-        }
-        if ((prop = node.property (X_("ypos"))) != 0) {
-                sscanf (prop->value().c_str(), "%d", &own_window_ypos);
-        }
+	node.get_property (X_("width"), own_window_width);
+	node.get_property (X_("height"), own_window_height);
+	node.get_property (X_("xpos"), own_window_xpos);
+	node.get_property (X_("ypos"), own_window_ypos);
 
-        if (own_window.is_realized()) {
-                own_window.set_default_size (own_window_width, own_window_height);
-                own_window.move (own_window_xpos, own_window_ypos);
-        }
-        /* otherwise do it once the window is realized, see below */
+	if (own_window.is_realized ()) {
+		own_window.set_default_size (own_window_width, own_window_height);
+		own_window.move (own_window_xpos, own_window_ypos);
+	}
+	/* otherwise do it once the window is realized, see below */
 }
 
 void
