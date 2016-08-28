@@ -53,7 +53,7 @@ Slavable::get_state () const
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 		child = new XMLNode (X_("Master"));
-		child->add_property (X_("number"), to_string (*i, std::dec));
+		child->set_property (X_("number"), *i);
 		node->add_child_nocopy (*child);
 	}
 
@@ -72,9 +72,8 @@ Slavable::set_state (XMLNode const& node, int version)
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Master")) {
-			XMLProperty const* prop = (*i)->property (X_("number"));
-			if (prop) {
-				uint32_t n = atoi (prop->value());
+			uint32_t n;
+			if ((*i)->get_property (X_("number"), n)) {
 				_masters.insert (n);
 			}
 		}
