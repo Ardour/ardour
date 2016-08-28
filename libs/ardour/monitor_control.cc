@@ -17,6 +17,7 @@
 */
 
 #include "ardour/monitor_control.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -59,7 +60,7 @@ XMLNode&
 MonitorControl::get_state ()
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
-	node.add_property (X_("monitoring"), enum_2_string (_monitoring));
+	node.set_property (X_("monitoring"), _monitoring);
 	return node;
 }
 
@@ -68,11 +69,7 @@ MonitorControl::set_state (XMLNode const & node, int version)
 {
 	SlavableAutomationControl::set_state (node, version);
 
-	const XMLProperty* prop;
-
-	if ((prop = node.property (X_("monitoring"))) != 0) {
-		_monitoring = MonitorChoice (string_2_enum (prop->value(), _monitoring));
-	} else {
+	if (!node.get_property (X_("monitoring"), _monitoring)) {
 		_monitoring = MonitorAuto;
 	}
 
