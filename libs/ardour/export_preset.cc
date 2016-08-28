@@ -29,13 +29,13 @@ ExportPreset::ExportPreset (string filename, Session & s) :
   session (s), global (filename), local (0)
 {
 	XMLNode * root;
+	std::string str;
 	if ((root = global.root())) {
-		XMLProperty const * prop;
-		if ((prop = root->property ("id"))) {
-			set_id (prop->value());
+		if (root->get_property ("id", str)) {
+			set_id (str);
 		}
-		if ((prop = root->property ("name"))) {
-			set_name (prop->value());
+		if (root->get_property ("name", str)) {
+			set_name (str);
 		}
 
 		XMLNode * instant_xml = get_instant_xml ();
@@ -58,10 +58,10 @@ ExportPreset::set_name (string const & name)
 
 	XMLNode * node;
 	if ((node = global.root())) {
-		node->add_property ("name", name);
+		node->set_property ("name", name);
 	}
 	if (local) {
-		local->add_property ("name", name);
+		local->set_property ("name", name);
 	}
 }
 
@@ -72,10 +72,10 @@ ExportPreset::set_id (string const & id)
 
 	XMLNode * node;
 	if ((node = global.root())) {
-		node->add_property ("id", id);
+		node->set_property ("id", id);
 	}
 	if (local) {
-		local->add_property ("id", id);
+		local->set_property ("id", id);
 	}
 }
 
@@ -105,7 +105,7 @@ ExportPreset::save (std::string const & filename)
 	save_instant_xml ();
 
 	if (global.root()) {
-                global.set_filename (filename);
+		global.set_filename (filename);
 		global.write ();
 	}
 }
