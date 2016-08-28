@@ -227,20 +227,20 @@ SoloControl::set_state (XMLNode const & node, int version)
 		return -1;
 	}
 
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("self-solo")) != 0) {
-		set_self_solo (string_is_affirmative (prop->value()));
+	bool yn;
+	if (node.get_property ("self-solo", yn)) {
+		set_self_solo (yn);
 	}
 
-	if ((prop = node.property ("soloed-by-upstream")) != 0) {
+	uint32_t val;
+	if (node.get_property ("soloed-by-upstream", val)) {
 		_soloed_by_others_upstream = 0; // needed for mod_.... () to work
-		mod_solo_by_others_upstream (atoi (prop->value()));
+		mod_solo_by_others_upstream (val);
 	}
 
-	if ((prop = node.property ("soloed-by-downstream")) != 0) {
+	if (node.get_property ("soloed-by-downstream", val)) {
 		_soloed_by_others_downstream = 0; // needed for mod_.... () to work
-		mod_solo_by_others_downstream (atoi (prop->value()));
+		mod_solo_by_others_downstream (val);
 	}
 
 	return 0;
@@ -251,12 +251,9 @@ SoloControl::get_state ()
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
 
-	node.add_property (X_("self-solo"), _self_solo ? X_("yes") : X_("no"));
-	char buf[32];
-	snprintf (buf, sizeof(buf), "%d",  _soloed_by_others_upstream);
-	node.add_property (X_("soloed-by-upstream"), buf);
-	snprintf (buf, sizeof(buf), "%d",  _soloed_by_others_downstream);
-	node.add_property (X_("soloed-by-downstream"), buf);
+	node.set_property (X_("self-solo"), _self_solo);
+	node.set_property (X_("soloed-by-upstream"), _soloed_by_others_upstream);
+	node.set_property (X_("soloed-by-downstream"), _soloed_by_others_downstream);
 
 	return node;
 }
