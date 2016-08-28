@@ -18,6 +18,7 @@
 */
 
 #include "ardour/user_bundle.h"
+#include "ardour/types_convert.h"
 #include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -41,14 +42,13 @@ ARDOUR::UserBundle::UserBundle (XMLNode const & node, bool i)
 int
 ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 {
-	XMLProperty const * name;
-
-	if ((name = node.property ("name")) == 0) {
+	std::string str;
+	if (!node.get_property ("name", str)) {
 		PBD::error << _("Node for Bundle has no \"name\" property") << endmsg;
 		return -1;
 	}
 
-	set_name (name->value ());
+	set_name (str);
 
 	XMLNodeList const channels = node.children ();
 
@@ -60,18 +60,18 @@ ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 			return -1;
 		}
 
-		if ((name = (*i)->property ("name")) == 0) {
+		if ((*i)->get_property ("name", str)) {
 			PBD::error << _("Node for Channel has no \"name\" property") << endmsg;
 			return -1;
 		}
 
-		XMLProperty const * type;
-		if ((type = (*i)->property ("type")) == 0) {
+		DataType type(DataType::NIL);
+		if (!(*i)->get_property ("type", type)) {
 			PBD::error << _("Node for Channel has no \"type\" property") << endmsg;
 			return -1;
 		}
 
-		add_channel (name->value (), DataType (type->value()));
+		add_channel (str, type);
 
 		XMLNodeList const ports = (*i)->children ();
 
@@ -81,12 +81,12 @@ ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 				return -1;
 			}
 
-			if ((name = (*j)->property ("name")) == 0) {
+			if (!(*j)->get_property ("name", str)) {
 				PBD::error << _("Node for Port has no \"name\" property") << endmsg;
 				return -1;
 			}
 
-			add_port_to_channel (n, name->value ());
+			add_port_to_channel (n, str);
 		}
 
 		++n;
@@ -106,19 +106,19 @@ ARDOUR::UserBundle::get_state ()
 		node = new XMLNode ("OutputBundle");
 	}
 
-	node->add_property ("name", name ());
+	node->set_property ("name", name ());
 
 	{
 		Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 		for (std::vector<Channel>::iterator i = _channel.begin(); i != _channel.end(); ++i) {
 			XMLNode* c = new XMLNode ("Channel");
-			c->add_property ("name", i->name);
-			c->add_property ("type", i->type.to_string());
+			c->set_property ("name", i->name);
+			c->set_property ("type", i->type);
 
 			for (PortList::iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
 				XMLNode* p = new XMLNode ("Port");
-				p->add_property ("name", *j);
+				p->set_property ("name", *j);
 				c->add_child_nocopy (*p);
 			}
 
