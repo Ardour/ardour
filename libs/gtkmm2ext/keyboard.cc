@@ -168,26 +168,16 @@ XMLNode&
 Keyboard::get_state (void)
 {
 	XMLNode* node = new XMLNode ("Keyboard");
-	char buf[32];
 
-	snprintf (buf, sizeof (buf), "%d", CopyModifier);
-	node->add_property ("copy-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", edit_but);
-	node->add_property ("edit-button", buf);
-	snprintf (buf, sizeof (buf), "%d", edit_mod);
-	node->add_property ("edit-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", delete_but);
-	node->add_property ("delete-button", buf);
-	snprintf (buf, sizeof (buf), "%d", delete_mod);
-	node->add_property ("delete-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", snap_mod);
-	node->add_property ("snap-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", snap_delta_mod);
-	node->add_property ("snap-delta-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", insert_note_but);
-	node->add_property ("insert-note-button", buf);
-	snprintf (buf, sizeof (buf), "%d", insert_note_mod);
-	node->add_property ("insert-note-modifier", buf);
+	node->set_property ("copy-modifier", CopyModifier);
+	node->set_property ("edit-button", edit_but);
+	node->set_property ("edit-modifier", edit_mod);
+	node->set_property ("delete-button", delete_but);
+	node->set_property ("delete-modifier", delete_mod);
+	node->set_property ("snap-modifier", snap_mod);
+	node->set_property ("snap-delta-modifier", snap_delta_mod);
+	node->set_property ("insert-note-button", insert_note_but);
+	node->set_property ("insert-note-modifier", insert_note_mod);
 
 	return *node;
 }
@@ -195,43 +185,15 @@ Keyboard::get_state (void)
 int
 Keyboard::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("copy-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &CopyModifier);
-	}
-
-	if ((prop = node.property ("edit-button")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &edit_but);
-	}
-
-	if ((prop = node.property ("edit-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &edit_mod);
-	}
-
-	if ((prop = node.property ("delete-button")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &delete_but);
-	}
-
-	if ((prop = node.property ("delete-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &delete_mod);
-	}
-
-	if ((prop = node.property ("snap-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &snap_mod);
-	}
-
-	if ((prop = node.property ("snap-delta-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &snap_delta_mod);
-	}
-
-	if ((prop = node.property ("insert-note-button")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &insert_note_but);
-	}
-
-	if ((prop = node.property ("insert-note-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &insert_note_mod);
-	}
+	node.get_property ("copy-modifier", CopyModifier);
+	node.get_property ("edit-button", edit_but);
+	node.get_property ("edit-modifier", edit_mod);
+	node.get_property ("delete-button", delete_but);
+	node.get_property ("delete-modifier", delete_mod);
+	node.get_property ("snap-modifier", snap_mod);
+	node.get_property ("snap-delta-modifier", snap_delta_mod);
+	node.get_property ("insert-note-button", insert_note_but);
+	node.get_property ("insert-note-modifier", insert_note_mod);
 
 	return 0;
 }
@@ -690,7 +652,7 @@ Keyboard::store_keybindings (string const & path)
 
 	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
 		bnode = new XMLNode (X_("Bindings"));
-		bnode->add_property (X_("name"), (*b)->name());
+		bnode->set_property (X_("name"), (*b)->name());
 		(*b)->save (*bnode);
 		node->add_child_nocopy (*bnode);
 	}
