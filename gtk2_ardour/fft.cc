@@ -140,6 +140,6 @@ FFT::~FFT()
 	fftwf_destroy_plan(_plan);
 	free(_power_at_bin);
 	free(_phase_at_bin);
-	free(_fftOutput);
-	free(_fftInput);
+	fftwf_free(_fftOutput);
+	fftwf_free(_fftInput);
 }
