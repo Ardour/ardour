@@ -216,16 +216,14 @@ XMLNode&
 Send::state (bool full)
 {
 	XMLNode& node = Delivery::state(full);
-	char buf[32];
 
-	node.add_property ("type", "send");
-	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
+	node.set_property ("type", "send");
 
 	if (_role != Listen) {
-		node.add_property ("bitslot", buf);
+		node.set_property ("bitslot", _bitslot);
 	}
 
-	node.add_property("selfdestruct", _remove_on_disconnect ? "yes" : "no");
+	node.set_property ("selfdestruct", _remove_on_disconnect);
 
 	node.add_child_nocopy (_amp->state (full));
 
@@ -261,11 +259,11 @@ Send::set_state (const XMLNode& node, int version)
 		} else {
 			if (_role == Delivery::Aux) {
 				_session.unmark_aux_send_id (_bitslot);
-				sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_aux_send_id (_bitslot);
 			} else if (_role == Delivery::Send) {
 				_session.unmark_send_id (_bitslot);
-				sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_send_id (_bitslot);
 			} else {
 				// bitslot doesn't matter but make it zero anyway
@@ -274,9 +272,7 @@ Send::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property (X_("selfdestruct"))) != 0) {
-		_remove_on_disconnect = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("selfdestruct"), _remove_on_disconnect);
 
 	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
