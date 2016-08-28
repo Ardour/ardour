@@ -3361,12 +3361,12 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 						 */
 						XMLProperty const * target = (*i)->property (X_("target"));
 						if (!target) {
-							(*i)->add_property ("type", "dangling-aux-send");
+							(*i)->set_property ("type", "dangling-aux-send");
 							continue;
 						}
 						boost::shared_ptr<Route> r = route_by_id (target->value());
 						if (!r || boost::dynamic_pointer_cast<Track>(r)) {
-							(*i)->add_property ("type", "dangling-aux-send");
+							(*i)->set_property ("type", "dangling-aux-send");
 							continue;
 						}
 					}
@@ -3374,20 +3374,18 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 						(*i)->remove_property (X_("bitslot"));
 					}
 					else if (role && (role->value() == X_("Send") || role->value() == X_("Aux"))) {
-						char buf[32];
 						Delivery::Role xrole;
 						uint32_t bitslot = 0;
 						xrole = Delivery::Role (string_2_enum (role->value(), xrole));
 						std::string name = Send::name_and_id_new_send(*this, xrole, bitslot, false);
-						snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
 						(*i)->remove_property (X_("bitslot"));
 						(*i)->remove_property (X_("name"));
-						(*i)->add_property ("bitslot", buf);
-						(*i)->add_property ("name", name);
+						(*i)->set_property ("bitslot", bitslot);
+						(*i)->set_property ("name", name);
 					}
 					else if (type && type->value() == X_("intreturn")) {
 						(*i)->remove_property (X_("bitslot"));
-						(*i)->add_property ("ignore-bitslot", "1");
+						(*i)->set_property ("ignore-bitslot", "1");
 					}
 					else if (type && type->value() == X_("return")) {
 						// Return::set_state() generates a new one
@@ -3396,7 +3394,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 					else if (type && type->value() == X_("port")) {
 						// PortInsert::set_state() handles the bitslot
 						(*i)->remove_property (X_("bitslot"));
-						(*i)->add_property ("ignore-name", "1");
+						(*i)->set_property ("ignore-name", "1");
 					}
 				}
 			}

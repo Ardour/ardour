@@ -71,7 +71,7 @@
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 #include "pbd/localtime_r.h"
 #include "pbd/unwind.h"
 
@@ -126,6 +126,7 @@
 #include "ardour/template_utils.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
+#include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -979,22 +980,21 @@ Session::load_state (string snapshot_name)
 		return -1;
 	}
 
-	XMLProperty const * prop;
-
-	if ((prop = root.property ("version")) == 0) {
-		/* no version implies very old version of Ardour */
-		Stateful::loading_state_version = 1000;
-	} else {
-		if (prop->value().find ('.') != string::npos) {
+	std::string version;
+	if (root.get_property ("version", version)) {
+		if (version.find ('.') != string::npos) {
 			/* old school version format */
-			if (prop->value()[0] == '2') {
+			if (version[0] == '2') {
 				Stateful::loading_state_version = 2000;
 			} else {
 				Stateful::loading_state_version = 3000;
 			}
 		} else {
-			Stateful::loading_state_version = atoi (prop->value());
+			Stateful::loading_state_version = string_to<int32_t>(version);
 		}
+	} else {
+		/* no version implies very old version of Ardour */
+		Stateful::loading_state_version = 1000;
 	}
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
@@ -1134,23 +1134,20 @@ Session::state (bool full_state)
 	XMLNode* node = new XMLNode("Session");
 	XMLNode* child;
 
-	char buf[16];
-	snprintf(buf, sizeof(buf), "%d", CURRENT_SESSION_FILE_VERSION);
-	node->add_property("version", buf);
+	node->set_property("version", CURRENT_SESSION_FILE_VERSION);
 
 	child = node->add_child ("ProgramVersion");
-	child->add_property("created-with", created_with);
+	child->set_property("created-with", created_with);
 
 	std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
-	child->add_property("modified-with", modified_with);
+	child->set_property("modified-with", modified_with);
 
 	/* store configuration settings */
 
 	if (full_state) {
 
-		node->add_property ("name", _name);
-		snprintf (buf, sizeof (buf), "%" PRId64, _base_frame_rate);
-		node->add_property ("sample-rate", buf);
+		node->set_property ("name", _name);
+		node->set_property ("sample-rate", _base_frame_rate);
 
 		if (session_dirs.size() > 1) {
 
@@ -1182,25 +1179,21 @@ Session::state (bool full_state)
 		}
 	}
 
-	node->add_property ("end-is-free", _session_range_end_is_free ? X_("yes") : X_("no"));
+	node->set_property ("end-is-free", _session_range_end_is_free);
 
 	/* save the ID counter */
 
-	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
-	node->add_property ("id-counter", buf);
+	node->set_property ("id-counter", ID::counter());
 
-	snprintf (buf, sizeof (buf), "%u", name_id_counter ());
-	node->add_property ("name-counter", buf);
+	node->set_property ("name-counter", name_id_counter ());
 
 	/* save the event ID counter */
 
-	snprintf (buf, sizeof (buf), "%d", Evoral::event_id_counter());
-	node->add_property ("event-counter", buf);
+	node->set_property ("event-counter", Evoral::event_id_counter());
 
 	/* save the VCA counter */
 
-	snprintf (buf, sizeof (buf), "%" PRIu32, VCA::get_next_vca_number());
-	node->add_property ("vca-counter", buf);
+	node->set_property ("vca-counter", VCA::get_next_vca_number());
 
 	/* various options */
 
@@ -1275,8 +1268,8 @@ Session::state (bool full_state)
 
 			for (RegionFactory::CompoundAssociations::iterator i = cassocs.begin(); i != cassocs.end(); ++i) {
 				XMLNode* can = new XMLNode (X_("CompoundAssociation"));
-				can->add_property (X_("copy"), i->first->id().to_s());
-				can->add_property (X_("original"), i->second->id().to_s());
+				can->set_property (X_("copy"), i->first->id());
+				can->set_property (X_("original"), i->second->id());
 				ca->add_child_nocopy (*can);
 			}
 		}
@@ -1403,7 +1396,7 @@ Session::state (bool full_state)
 		g_free (b64);
 
 		XMLNode* script_node = new XMLNode (X_("Script"));
-		script_node->add_property (X_("lua"), LUA_VERSION);
+		script_node->set_property (X_("lua"), LUA_VERSION);
 		script_node->add_content (b64s);
 		node->add_child_nocopy (*script_node);
 	}
@@ -1424,7 +1417,6 @@ Session::set_state (const XMLNode& node, int version)
 	LocaleGuard lg;
 	XMLNodeList nlist;
 	XMLNode* child;
-	XMLProperty const * prop;
 	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
@@ -1434,13 +1426,10 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value ();
-	}
+	node.get_property ("name", _name);
 
-	if ((prop = node.property (X_("sample-rate"))) != 0) {
+	if (node.get_property (X_("sample-rate"), _base_frame_rate)) {
 
-		_base_frame_rate = atoi (prop->value());
 		_nominal_frame_rate = _base_frame_rate;
 
 		assert (AudioEngine::instance()->running ());
@@ -1454,21 +1443,16 @@ Session::set_state (const XMLNode& node, int version)
 
 	created_with = "unknown";
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
-		if ((prop = child->property (X_("created-with"))) != 0) {
-			created_with = prop->value ();
-		}
+		child->get_property (X_("created-with"), created_with);
 	}
 
 	setup_raid_path(_session_dir->root_path());
 
-	if ((prop = node.property (X_("end-is-free"))) != 0) {
-		_session_range_end_is_free = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("end-is-free"), _session_range_end_is_free);
 
-	if ((prop = node.property (X_("id-counter"))) != 0) {
-		uint64_t x;
-		sscanf (prop->value().c_str(), "%" PRIu64, &x);
-		ID::init_counter (x);
+	uint64_t counter;
+	if (node.get_property (X_("id-counter"), counter)) {
+		ID::init_counter (counter);
 	} else {
 		/* old sessions used a timebased counter, so fake
 		   the startup ID counter based on a standard
@@ -1479,18 +1463,16 @@ Session::set_state (const XMLNode& node, int version)
 		ID::init_counter (now);
 	}
 
-	if ((prop = node.property (X_("name-counter"))) != 0) {
-		init_name_id_counter (atoi (prop->value()));
+	if (node.get_property (X_("name-counter"), counter)) {
+		init_name_id_counter (counter);
 	}
 
-	if ((prop = node.property (X_("event-counter"))) != 0) {
-		Evoral::init_event_id_counter (atoi (prop->value()));
+	if (node.get_property (X_("event-counter"), counter)) {
+		Evoral::init_event_id_counter (counter);
 	}
 
-	if ((prop = node.property (X_("vca-counter"))) != 0) {
-		uint32_t x;
-		sscanf (prop->value().c_str(), "%" PRIu32, &x);
-		VCA::set_next_vca_number (x);
+	if (node.get_property (X_("vca-counter"), counter)) {
+		VCA::set_next_vca_number (counter);
 	} else {
 		VCA::set_next_vca_number (1);
 	}
@@ -1734,11 +1716,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 	XMLNode* ds_child = find_named_node (node, X_("Diskstream"));
 
 	DataType type = DataType::AUDIO;
-	XMLProperty const * prop = node.property("default-type");
-
-	if (prop) {
-		type = DataType (prop->value());
-	}
+	node.get_property("default-type", type);
 
 	assert (type != DataType::NIL);
 
@@ -1791,11 +1769,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 	}
 
 	DataType type = DataType::AUDIO;
-	XMLProperty const * prop = node.property("default-type");
-
-	if (prop) {
-		type = DataType (prop->value());
-	}
+	node.get_property("default-type", type);
 
 	assert (type != DataType::NIL);
 
@@ -1989,9 +1963,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 		return boost::shared_ptr<AudioRegion>();
 	}
 
-	if ((prop = node.property (X_("channels"))) != 0) {
-		nchans = atoi (prop->value().c_str());
-	}
+	node.get_property (X_("channels"), nchans);
 
 	if ((prop = node.property ("name")) == 0) {
 		cerr << "no name for this region\n";
@@ -2230,7 +2202,7 @@ retry:
 				if (rl != relocation.end ()) {
 					std::string newpath = Glib::build_filename (rl->second, Glib::path_get_basename (err.path));
 					if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
-						srcnode.add_property ("origin", newpath);
+						srcnode.set_property ("origin", newpath);
 						try_replace_abspath = false;
 						goto retry;
 					}
@@ -2262,7 +2234,7 @@ retry:
 							/* replace origin, in XML */
 							std::string newpath = Glib::build_filename (
 									_missing_file_replacement, Glib::path_get_basename (err.path));
-							srcnode.add_property ("origin", newpath);
+							srcnode.set_property ("origin", newpath);
 							relocation[Glib::path_get_dirname (err.path)] = _missing_file_replacement;
 							_missing_file_replacement = "";
 						}
@@ -4237,7 +4209,7 @@ Session::save_snapshot_name (const std::string & n)
 	instant_xml ("LastUsedSnapshot");
 
 	XMLNode* last_used_snapshot = new XMLNode ("LastUsedSnapshot");
-	last_used_snapshot->add_property ("name", string(n));
+	last_used_snapshot->set_property ("name", n);
 	add_instant_xml (*last_used_snapshot, false);
 }
 
