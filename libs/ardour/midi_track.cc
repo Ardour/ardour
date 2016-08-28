@@ -30,7 +30,7 @@
 #endif
 
 #include "pbd/enumwriter.h"
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 #include "evoral/midi_util.h"
 
 #include "ardour/beats_frames_converter.h"
@@ -52,6 +52,7 @@
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
 #include "pbd/i18n.h"
@@ -165,15 +166,11 @@ MidiTrack::midi_diskstream() const
 int
 MidiTrack::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	/* This must happen before Track::set_state(), as there will be a buffer
 	   fill during that call, and we must fill buffers using the correct
 	   _note_mode.
 	*/
-	if ((prop = node.property (X_("note-mode"))) != 0) {
-		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
-	} else {
+	if (!node.get_property (X_("note-mode"), _note_mode)) {
 		_note_mode = Sustained;
 	}
 
@@ -184,24 +181,23 @@ MidiTrack::set_state (const XMLNode& node, int version)
 	// No destructive MIDI tracks (yet?)
 	_mode = Normal;
 
-	if ((prop = node.property ("input-active")) != 0) {
-		set_input_active (string_is_affirmative (prop->value()));
+	bool yn;
+	if (node.get_property ("input-active", yn)) {
+		set_input_active (yn);
 	}
 
 	ChannelMode playback_channel_mode = AllChannels;
 	ChannelMode capture_channel_mode = AllChannels;
 
-	if ((prop = node.property ("playback-channel-mode")) != 0) {
-		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), playback_channel_mode));
-	}
-	if ((prop = node.property ("capture-channel-mode")) != 0) {
-		capture_channel_mode = ChannelMode (string_2_enum(prop->value(), capture_channel_mode));
-	}
-	if ((prop = node.property ("channel-mode")) != 0) {
+	node.get_property ("playback-channel-mode", playback_channel_mode);
+	node.get_property ("capture-channel-mode", capture_channel_mode);
+
+	if (node.get_property ("channel-mode", playback_channel_mode)) {
 		/* 3.0 behaviour where capture and playback modes were not separated */
-		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), playback_channel_mode));
 		capture_channel_mode = playback_channel_mode;
 	}
+
+	XMLProperty const * prop;
 
 	unsigned int playback_channel_mask = 0xffff;
 	unsigned int capture_channel_mask = 0xffff;
@@ -243,12 +239,12 @@ MidiTrack::state(bool full_state)
 		XMLNode* inode;
 
 		freeze_node = new XMLNode (X_("freeze-info"));
-		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
-		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
+		freeze_node->set_property ("playlist", _freeze_record.playlist->name());
+		freeze_node->set_property ("state", _freeze_record.state);
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			inode = new XMLNode (X_("processor"));
-			inode->add_property (X_("id"), id().to_s ());
+			inode->set_property (X_("id"), id());
 			inode->add_child_copy ((*i)->state);
 
 			freeze_node->add_child_nocopy (*inode);
@@ -257,16 +253,16 @@ MidiTrack::state(bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	root.add_property("playback_channel-mode", enum_2_string(get_playback_channel_mode()));
-	root.add_property("capture_channel-mode", enum_2_string(get_capture_channel_mode()));
+	root.set_property("playback_channel-mode", get_playback_channel_mode());
+	root.set_property("capture_channel-mode", get_capture_channel_mode());
 	snprintf (buf, sizeof(buf), "0x%x", get_playback_channel_mask());
-	root.add_property("playback-channel-mask", buf);
+	root.set_property("playback-channel-mask", std::string(buf));
 	snprintf (buf, sizeof(buf), "0x%x", get_capture_channel_mask());
-	root.add_property("capture-channel-mask", buf);
+	root.set_property("capture-channel-mask", std::string(buf));
 
-	root.add_property ("note-mode", enum_2_string (_note_mode));
-	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
-	root.add_property ("input-active", (_input_active ? "yes" : "no"));
+	root.set_property ("note-mode", _note_mode);
+	root.set_property ("step-editing", _step_editing);
+	root.set_property ("input-active", _input_active);
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		if (boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
@@ -283,7 +279,6 @@ void
 MidiTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
-	XMLProperty const * prop;
 	LocaleGuard lg;
 
 	/* This is called after all session state has been restored but before
@@ -303,20 +298,19 @@ MidiTrack::set_state_part_two ()
 		}
 		_freeze_record.processor_info.clear ();
 
-		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (prop->value());
+		std::string str;
+		if (fnode->get_property (X_("playlist"), str)) {
+			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (str);
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
 			} else {
 				_freeze_record.playlist.reset();
 				_freeze_record.state = NoFreeze;
-			return;
+				return;
 			}
 		}
 
-		if ((prop = fnode->property (X_("state"))) != 0) {
-			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
-		}
+		fnode->get_property (X_("state"), _freeze_record.state);
 
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
@@ -326,13 +320,13 @@ MidiTrack::set_state_part_two ()
 				continue;
 			}
 
-			if ((prop = (*citer)->property (X_("id"))) == 0) {
+			if (!(*citer)->get_property (X_("id"), str)) {
 				continue;
 			}
 
 			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
 										   boost::shared_ptr<Processor>());
-			frii->id = prop->value ();
+			frii->id = str;
 			_freeze_record.processor_info.push_back (frii);
 		}
 	}
