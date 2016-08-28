@@ -269,7 +269,7 @@ index cc440aa..8977ed6 100644
    tuning->pitch[key] = pitch;
  }
 diff --git b/libs/fluidsynth/src/fluidsynth_priv.h a/libs/fluidsynth/src/fluidsynth_priv.h
-index faf2772..74b9f4b 100644
+index faf2772..b01618d 100644
 --- b/libs/fluidsynth/src/fluidsynth_priv.h
 +++ a/libs/fluidsynth/src/fluidsynth_priv.h
 @@ -28,14 +28,6 @@
@@ -287,11 +287,7 @@ index faf2772..74b9f4b 100644
  #if HAVE_STRING_H
  #include <string.h>
  #endif
-diff --git a/libs/fluidsynth/src/fluidsynth_priv.h b/libs/fluidsynth/src/fluidsynth_priv.h
-index 74b9f4b..d29ba8a 100644
---- a/libs/fluidsynth/src/fluidsynth_priv.h
-+++ b/libs/fluidsynth/src/fluidsynth_priv.h
-@@ -105,8 +105,6 @@
+@@ -113,8 +105,6 @@
  #endif
  
  #if HAVE_WINDOWS_H
@@ -300,3 +296,16 @@ index 74b9f4b..d29ba8a 100644
  #include <windows.h>
  #endif
  
+@@ -131,6 +121,12 @@
+ #define STDOUT_FILENO 1
+ #define STDERR_FILENO 2
+ 
++#elif defined _MSC_VER
++
++#define STDIN_FILENO  _fileno(stdin)
++#define STDOUT_FILENO _fileno(stdout)
++#define STDERR_FILENO _fileno(stderr)
++
+ #endif
+ 
+ /* Darwin special defines (taken from config_macosx.h) */
