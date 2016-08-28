@@ -217,7 +217,7 @@
 #endif
 
 #ifdef _MSC_VER
-#define HAVE_IO_H
+#define HAVE_IO_H 1
 #endif
 
 /* Define to 1 if your processor stores words with the most significant byte
