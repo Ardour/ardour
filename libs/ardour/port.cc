@@ -563,12 +563,12 @@ Port::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name);
 
-	root->add_property (X_("name"), AudioEngine::instance()->make_port_name_relative (name()));
+	root->set_property (X_("name"), AudioEngine::instance()->make_port_name_relative (name()));
 
 	if (receives_input()) {
-		root->add_property (X_("direction"), X_("input"));
+		root->set_property (X_("direction"), X_("input"));
 	} else {
-		root->add_property (X_("direction"), X_("output"));
+		root->set_property (X_("direction"), X_("output"));
 	}
 
 	vector<string> c;
@@ -577,7 +577,7 @@ Port::get_state () const
 
 	for (vector<string>::const_iterator i = c.begin(); i != c.end(); ++i) {
 		XMLNode* child = new XMLNode (X_("Connection"));
-		child->add_property (X_("other"), *i);
+		child->set_property (X_("other"), *i);
 		root->add_child_nocopy (*child);
 	}
 
@@ -587,14 +587,13 @@ Port::get_state () const
 int
 Port::set_state (const XMLNode& node, int)
 {
-	XMLProperty const * prop;
-
 	if (node.name() != state_node_name) {
 		return -1;
 	}
 
-	if ((prop = node.property (X_("name"))) != 0) {
-		set_name (prop->value());
+	std::string str;
+	if (node.get_property (X_("name"), str)) {
+		set_name (str);
 	}
 
 	const XMLNodeList& children (node.children());
@@ -607,11 +606,11 @@ Port::set_state (const XMLNode& node, int)
 			continue;
 		}
 
-		if ((prop = (*c)->property (X_("other"))) == 0) {
+		if (!(*c)->get_property (X_("other"), str)) {
 			continue;
 		}
 
-		_connections.insert (prop->value());
+		_connections.insert (str);
 	}
 
 	return 0;
