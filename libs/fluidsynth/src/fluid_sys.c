@@ -19,7 +19,6 @@
  */
 
 #include "fluid_sys.h"
-#include <io.h>
 
 
 #if WITH_READLINE

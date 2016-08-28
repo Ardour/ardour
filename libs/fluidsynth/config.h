@@ -216,6 +216,10 @@
 #define SUPPORTS_VLA 1 
 #endif
 
+#ifdef _MSC_VER
+#define HAVE_IO_H
+#endif
+
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 /* #undef WORDS_BIGENDIAN */
