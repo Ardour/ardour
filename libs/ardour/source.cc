@@ -33,14 +33,20 @@
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/enumwriter.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/debug.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/transient_detector.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Source::Flag);
+}
 
 using namespace std;
 using namespace ARDOUR;
@@ -94,16 +100,14 @@ XMLNode&
 Source::get_state ()
 {
 	XMLNode *node = new XMLNode ("Source");
-	char buf[64];
 
-	node->add_property ("name", name());
-	node->add_property ("type", _type.to_string());
-	node->add_property (X_("flags"), enum_2_string (_flags));
-	node->add_property ("id", id().to_s());
+	node->set_property ("name", name());
+	node->set_property ("type", _type);
+	node->set_property (X_("flags"), _flags);
+	node->set_property ("id", id());
 
 	if (_timestamp != 0) {
-		snprintf (buf, sizeof (buf), "%ld", _timestamp);
-		node->add_property ("timestamp", buf);
+		node->set_property ("timestamp", (int64_t)_timestamp);
 	}
 
 	return *node;
@@ -112,10 +116,9 @@ Source::get_state ()
 int
 Source::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
+	std::string str;
+	if (node.get_property ("name", str)) {
+		_name = str;
 	} else {
 		return -1;
 	}
@@ -124,23 +127,19 @@ Source::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("type")) != 0) {
-		_type = DataType(prop->value());
+	node.get_property ("type", _type);
+
+	int64_t t;
+	if (node.get_property ("timestamp", t)) {
+		_timestamp = t;
 	}
 
-	if ((prop = node.property ("timestamp")) != 0) {
-		sscanf (prop->value().c_str(), "%ld", &_timestamp);
-	}
-
-	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	} else {
+	if (!node.get_property (X_("flags"), _flags)) {
 		_flags = Flag (0);
-
 	}
 
 	/* old style, from the period when we had DestructiveFileSource */
-	if ((prop = node.property (X_("destructive"))) != 0) {
+	if (node.get_property (X_("destructive"), str)) {
 		_flags = Flag (_flags | Destructive);
 	}
 
