@@ -48,7 +48,7 @@ XMLNode&
 SideChain::state (bool full)
 {
 	XMLNode& node = IOProcessor::state (full);
-	node.add_property ("type", "sidechain");
+	node.set_property ("type", "sidechain");
 	return node;
 }
 
