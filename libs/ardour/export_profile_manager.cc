@@ -29,8 +29,8 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/enumwriter.h"
+#include "pbd/enum_convert.h"
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_format_specification.h"
@@ -49,6 +49,10 @@
 #include "ardour/broadcast_info.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::ExportProfileManager::TimeFormat);
+}
 
 using namespace std;
 using namespace Glib;
@@ -423,14 +427,14 @@ ExportProfileManager::TimespanStatePtr
 ExportProfileManager::deserialize_timespan (XMLNode & root)
 {
 	TimespanStatePtr state (new TimespanState (selection_range, ranges));
-	XMLProperty const * prop;
 
 	XMLNodeList spans = root.children ("Range");
 	for (XMLNodeList::iterator node_it = spans.begin(); node_it != spans.end(); ++node_it) {
 
-		prop = (*node_it)->property ("id");
-		if (!prop) { continue; }
-		string id = prop->value();
+		std::string id;
+		if (!(*node_it)->get_property ("id", id)) {
+			continue;
+		}
 
 		Location * location = 0;
 		for (LocationList::iterator it = ranges->begin(); it != ranges->end(); ++it) {
@@ -450,9 +454,7 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 		state->timespans->push_back (timespan);
 	}
 
-	if ((prop = root.property ("format"))) {
-		state->time_format = (TimeFormat) string_2_enum (prop->value(), TimeFormat);
-	}
+	root.get_property ("format", state->time_format);
 
 	if (state->timespans->empty()) {
 		return TimespanStatePtr();
@@ -470,11 +472,11 @@ ExportProfileManager::serialize_timespan (TimespanStatePtr state)
 	update_ranges ();
 	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
 		if ((span = root.add_child ("Range"))) {
-			span->add_property ("id", (*it)->range_id());
+			span->set_property ("id", (*it)->range_id());
 		}
 	}
 
-	root.add_property ("format", enum_2_string (state->time_format));
+	root.set_property ("format", state->time_format);
 
 	return root;
 }
@@ -727,7 +729,7 @@ ExportProfileManager::serialize_format (FormatStatePtr state)
 	XMLNode * root = new XMLNode ("ExportFormat");
 
 	string id = state->format ? state->format->id().to_s() : "";
-	root->add_property ("id", id);
+	root->set_property ("id", id);
 
 	return *root;
 }
