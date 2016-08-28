@@ -93,8 +93,8 @@ Patch::get_state (void)
 
 	/* XXX this is totally wrong */
 
-	node->add_property("Number", string_compose ("%1", _id.program()));
-	node->add_property("Name",   _name);
+	node->set_property("Number", _id.program());
+	node->set_property("Name",   _name);
 
 	/*
 	typedef std::list< boost::shared_ptr< Evoral::Event<Evoral::Beats> > > PatchMidiCommands;
@@ -151,8 +151,8 @@ XMLNode&
 Note::get_state (void)
 {
 	XMLNode* node = new XMLNode("Note");
-	node->add_property("Number", _number);
-	node->add_property("Name",   _name);
+	node->set_property("Number", _number);
+	node->set_property("Name",   _name);
 
 	return *node;
 }
@@ -180,7 +180,7 @@ XMLNode&
 NoteNameList::get_state (void)
 {
 	XMLNode* node = new XMLNode("NoteNameList");
-	node->add_property("Name", _name);
+	node->set_property("Name", _name);
 
 	return *node;
 }
@@ -234,9 +234,9 @@ XMLNode&
 Control::get_state (void)
 {
 	XMLNode* node = new XMLNode("Control");
-	node->add_property("Type",   _type);
-	node->add_property("Number", _number);
-	node->add_property("Name",   _name);
+	node->set_property("Type",   _type);
+	node->set_property("Number", _number);
+	node->set_property("Name",   _name);
 
 	return *node;
 }
@@ -276,7 +276,7 @@ XMLNode&
 ControlNameList::get_state (void)
 {
 	XMLNode* node = new XMLNode("ControlNameList");
-	node->add_property("Name", _name);
+	node->set_property("Name", _name);
 
 	return *node;
 }
@@ -320,8 +320,8 @@ XMLNode&
 Value::get_state (void)
 {
 	XMLNode* node = new XMLNode("Value");
-	node->add_property("Number", _number);
-	node->add_property("Name",   _name);
+	node->set_property("Number", _number);
+	node->set_property("Name",   _name);
 
 	return *node;
 }
@@ -340,7 +340,7 @@ XMLNode&
 ValueNameList::get_state (void)
 {
 	XMLNode* node = new XMLNode("ValueNameList");
-	node->add_property("Name", _name);
+	node->set_property("Name", _name);
 
 	return *node;
 }
@@ -405,7 +405,7 @@ XMLNode&
 PatchBank::get_state (void)
 {
 	XMLNode* node = new XMLNode("PatchBank");
-	node->add_property("Name",   _name);
+	node->set_property("Name",   _name);
 	XMLNode* patch_name_list = node->add_child("PatchNameList");
 	for (PatchNameList::iterator patch = _patch_name_list.begin();
 	    patch != _patch_name_list.end();
@@ -524,7 +524,7 @@ XMLNode&
 ChannelNameSet::get_state (void)
 {
 	XMLNode* node = new XMLNode("ChannelNameSet");
-	node->add_property("Name",   _name);
+	node->set_property("Name",   _name);
 
 	XMLNode* available_for_channels = node->add_child("AvailableForChannels");
 	assert(available_for_channels);
@@ -533,12 +533,12 @@ ChannelNameSet::get_state (void)
 		XMLNode* available_channel = available_for_channels->add_child("AvailableChannel");
 		assert(available_channel);
 
-		available_channel->add_property("Channel", (long) channel);
+		available_channel->set_property("Channel", channel);
 
 		if (_available_for_channels.find(channel) != _available_for_channels.end()) {
-			available_channel->add_property("Available", "true");
+			available_channel->set_property("Available", "true");
 		} else {
-			available_channel->add_property("Available", "false");
+			available_channel->set_property("Available", "false");
 		}
 	}
 
@@ -615,14 +615,14 @@ XMLNode&
 CustomDeviceMode::get_state(void)
 {
 	XMLNode* custom_device_mode = new XMLNode("CustomDeviceMode");
-	custom_device_mode->add_property("Name",   _name);
+	custom_device_mode->set_property("Name",   _name);
 	XMLNode* channel_name_set_assignments =
 		custom_device_mode->add_child("ChannelNameSetAssignments");
 	for (int i = 0; i < 15 && !_channel_name_set_assignments[i].empty(); i++) {
 		XMLNode* channel_name_set_assign =
 			channel_name_set_assignments->add_child("ChannelNameSetAssign");
-		channel_name_set_assign->add_property("Channel", i + 1);
-		channel_name_set_assign->add_property("NameSet", _channel_name_set_assignments[i]);
+		channel_name_set_assign->set_property("Channel", i + 1);
+		channel_name_set_assign->set_property("NameSet", _channel_name_set_assignments[i]);
 	}
 
 	return *custom_device_mode;
