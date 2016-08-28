@@ -70,7 +70,7 @@ InternalReturn::state (bool full)
 {
 	XMLNode& node (Return::state (full));
 	/* override type */
-	node.add_property("type", "intreturn");
+	node.set_property("type", "intreturn");
 	return node;
 }
 
