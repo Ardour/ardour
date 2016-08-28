@@ -27,7 +27,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 #include "pbd/enumwriter.h"
 
 #include "ardour/playlist.h"
@@ -75,14 +75,10 @@ PlaylistSource::~PlaylistSource ()
 void
 PlaylistSource::add_state (XMLNode& node)
 {
-	char buf[64];
-
-	node.add_property ("playlist", _playlist->id ().to_s ());
-	snprintf (buf, sizeof (buf), "%" PRIi64, _playlist_offset);
-	node.add_property ("offset", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);
-	node.add_property ("length", buf);
-	node.add_property ("original", id().to_s());
+	node.set_property ("playlist", _playlist->id ());
+	node.set_property ("offset", _playlist_offset);
+	node.set_property ("length", _playlist_length);
+	node.set_property ("original", id());
 
 	node.add_child_nocopy (_playlist->get_state());
 }
@@ -120,32 +116,31 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 
 	/* other properties */
 
-	if ((prop = node.property (X_("name"))) == 0) {
+	std::string name;
+	if (!node.get_property (X_("name"), name)) {
 		throw failed_constructor ();
 	}
 
-	set_name (prop->value());
+	set_name (name);
 
-	if ((prop = node.property (X_("offset"))) == 0) {
-		throw failed_constructor ();
-	}
-	sscanf (prop->value().c_str(), "%" PRIi64, &_playlist_offset);
-
-	if ((prop = node.property (X_("length"))) == 0) {
+	if (!node.get_property (X_("offset"), _playlist_offset)) {
 		throw failed_constructor ();
 	}
 
-	sscanf (prop->value().c_str(), "%" PRIu64, &_playlist_length);
+	if (!node.get_property (X_("length"), _playlist_length)) {
+		throw failed_constructor ();
+	}
 
 	/* XXX not quite sure why we set our ID back to the "original" one
 	   here. october 2011, paul
 	*/
 
-	if ((prop = node.property (X_("original"))) == 0) {
+	std::string str;
+	if (!node.get_property (X_("original"), str)) {
 		throw failed_constructor ();
 	}
 
-	set_id (prop->value());
+	set_id (str);
 
 	_level = _playlist->max_source_level () + 1;
 
