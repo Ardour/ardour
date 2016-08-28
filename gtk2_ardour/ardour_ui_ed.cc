@@ -770,8 +770,7 @@ ARDOUR_UI::resize_text_widgets ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	if (editor && primary_clock) {
-		editor->present ();
+	if (primary_clock) {
 		primary_clock->focus ();
 	}
 }
