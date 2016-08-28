@@ -294,17 +294,17 @@ Editor::store_ruler_visibility ()
 {
 	XMLNode* node = new XMLNode(X_("RulerVisibility"));
 
-	node->add_property (X_("timecode"), ruler_timecode_action->get_active() ? "yes": "no");
-	node->add_property (X_("bbt"), ruler_bbt_action->get_active() ? "yes": "no");
-	node->add_property (X_("samples"), ruler_samples_action->get_active() ? "yes": "no");
-	node->add_property (X_("minsec"), ruler_minsec_action->get_active() ? "yes": "no");
-	node->add_property (X_("tempo"), ruler_tempo_action->get_active() ? "yes": "no");
-	node->add_property (X_("meter"), ruler_meter_action->get_active() ? "yes": "no");
-	node->add_property (X_("marker"), ruler_marker_action->get_active() ? "yes": "no");
-	node->add_property (X_("rangemarker"), ruler_range_action->get_active() ? "yes": "no");
-	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
-	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
-	node->add_property (X_("videotl"), ruler_video_action->get_active() ? "yes": "no");
+	node->set_property (X_("timecode"), ruler_timecode_action->get_active());
+	node->set_property (X_("bbt"), ruler_bbt_action->get_active());
+	node->set_property (X_("samples"), ruler_samples_action->get_active());
+	node->set_property (X_("minsec"), ruler_minsec_action->get_active());
+	node->set_property (X_("tempo"), ruler_tempo_action->get_active());
+	node->set_property (X_("meter"), ruler_meter_action->get_active());
+	node->set_property (X_("marker"), ruler_marker_action->get_active());
+	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
+	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
+	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
+	node->set_property (X_("videotl"), ruler_video_action->get_active());
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
@@ -313,84 +313,42 @@ Editor::store_ruler_visibility ()
 void
 Editor::restore_ruler_visibility ()
 {
-	XMLProperty const * prop;
 	XMLNode * node = _session->extra_xml (X_("RulerVisibility"));
 
 	no_ruler_shown_update = true;
 
+	bool yn;
 	if (node) {
-		if ((prop = node->property ("timecode")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_timecode_action->set_active (true);
-			} else {
-				ruler_timecode_action->set_active (false);
-			}
+		if (node->get_property ("timecode", yn)) {
+			ruler_timecode_action->set_active (yn);
 		}
-		if ((prop = node->property ("bbt")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_bbt_action->set_active (true);
-			} else {
-				ruler_bbt_action->set_active (false);
-			}
+		if (node->get_property ("bbt", yn)) {
+			ruler_bbt_action->set_active (yn);
 		}
-		if ((prop = node->property ("samples")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_samples_action->set_active (true);
-			} else {
-				ruler_samples_action->set_active (false);
-			}
+		if (node->get_property ("samples", yn)) {
+			ruler_samples_action->set_active (yn);
 		}
-		if ((prop = node->property ("minsec")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_minsec_action->set_active (true);
-			} else {
-				ruler_minsec_action->set_active (false);
-			}
+		if (node->get_property ("minsec", yn)) {
+			ruler_minsec_action->set_active (yn);
 		}
-		if ((prop = node->property ("tempo")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_tempo_action->set_active (true);
-			} else {
-				ruler_tempo_action->set_active (false);
-			}
+		if (node->get_property ("tempo", yn)) {
+			ruler_tempo_action->set_active (yn);
 		}
-		if ((prop = node->property ("meter")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_meter_action->set_active (true);
-			} else {
-				ruler_meter_action->set_active (false);
-			}
+		if (node->get_property ("meter", yn)) {
+			ruler_meter_action->set_active (yn);
 		}
-		if ((prop = node->property ("marker")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_marker_action->set_active (true);
-			} else {
-				ruler_marker_action->set_active (false);
-			}
+		if (node->get_property ("marker", yn)) {
+			ruler_marker_action->set_active (yn);
 		}
-		if ((prop = node->property ("rangemarker")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_range_action->set_active (true);
-			} else {
-				ruler_range_action->set_active (false);
-			}
+		if (node->get_property ("rangemarker", yn)) {
+			ruler_range_action->set_active (yn);
+		}
+		if (node->get_property ("transportmarker", yn)) {
+			ruler_loop_punch_action->set_active (yn);
 		}
 
-		if ((prop = node->property ("transportmarker")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_loop_punch_action->set_active (true);
-			} else {
-				ruler_loop_punch_action->set_active (false);
-			}
-		}
-
-		if ((prop = node->property ("cdmarker")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_cd_marker_action->set_active (true);
-			} else {
-				ruler_cd_marker_action->set_active (false);
-			}
-
+		if (node->get_property ("cdmarker", yn)) {
+				ruler_cd_marker_action->set_active (yn);
 		} else {
 			// this _session doesn't yet know about the cdmarker ruler
 			// as a benefit to the user who doesn't know the feature exists, show the ruler if
@@ -405,12 +363,8 @@ Editor::restore_ruler_visibility ()
 			}
 		}
 
-		if ((prop = node->property ("videotl")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				ruler_video_action->set_active (true);
-			} else {
-				ruler_video_action->set_active (false);
-			}
+		if (node->get_property ("videotl", yn)) {
+			ruler_video_action->set_active (yn);
 		}
 
 	}
