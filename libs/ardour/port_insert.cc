@@ -168,14 +168,10 @@ XMLNode&
 PortInsert::state (bool full)
 {
 	XMLNode& node = IOProcessor::state(full);
-	char buf[32];
-	node.add_property ("type", "port");
-	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
-	node.add_property ("bitslot", buf);
-	snprintf (buf, sizeof (buf), "%" PRId64, _measured_latency);
-	node.add_property("latency", buf);
-	snprintf (buf, sizeof (buf), "%u", _session.get_block_size());
-	node.add_property("block-size", buf);
+	node.set_property ("type", "port");
+	node.set_property ("bitslot", _bitslot);
+	node.set_property ("latency", _measured_latency);
+	node.set_property ("block-size", _session.get_block_size());
 
 	return node;
 }
@@ -186,7 +182,6 @@ PortInsert::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
-	XMLProperty const * prop;
 
 	const XMLNode* insert_node = &node;
 
@@ -200,35 +195,33 @@ PortInsert::set_state (const XMLNode& node, int version)
 
 	IOProcessor::set_state (*insert_node, version);
 
-	if ((prop = node.property ("type")) == 0) {
+	std::string type_str;
+	if (!node.get_property ("type", type_str)) {
 		error << _("XML node describing port insert is missing the `type' field") << endmsg;
 		return -1;
 	}
 
-	if (prop->value() != "port") {
+	if (type_str != "port") {
 		error << _("non-port insert XML used for port plugin insert") << endmsg;
 		return -1;
 	}
 
 	uint32_t blocksize = 0;
-	if ((prop = node.property ("block-size")) != 0) {
-		sscanf (prop->value().c_str(), "%u", &blocksize);
-	}
+	node.get_property ("block-size", blocksize);
 
 	//if the jack period is the same as when the value was saved, we can recall our latency..
-	if ( (_session.get_block_size() == blocksize) && (prop = node.property ("latency")) != 0) {
-		uint32_t latency = 0;
-		sscanf (prop->value().c_str(), "%u", &latency);
-		_measured_latency = latency;
+	if ( (_session.get_block_size() == blocksize) ) {
+		node.get_property ("latency", _measured_latency);
 	}
 
 	if (!node.property ("ignore-bitslot")) {
-		if ((prop = node.property ("bitslot")) == 0) {
-			_bitslot = _session.next_insert_id();
-		} else {
+		uint32_t bitslot;
+		if (node.get_property ("bitslot", bitslot)) {
 			_session.unmark_insert_id (_bitslot);
-			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_bitslot = bitslot;
 			_session.mark_insert_id (_bitslot);
+		} else {
+			_bitslot = _session.next_insert_id();
 		}
 	}
 
