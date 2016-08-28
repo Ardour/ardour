@@ -499,7 +499,7 @@ XMLNode&
 SMFSource::get_state ()
 {
 	XMLNode& node = MidiSource::get_state();
-	node.add_property (X_("origin"), _origin);
+	node.set_property (X_("origin"), _origin);
 	return node;
 }
 
