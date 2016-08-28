@@ -314,6 +314,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\osc_gui.h"
+				>
+			</File>
+			<File
 				RelativePath="..\osc_route_observer.h"
 				>
 			</File>
