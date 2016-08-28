@@ -25,7 +25,7 @@
 #include <ctime>
 #include <list>
 
-#include "pbd/convert.h"
+#include "pbd/types_convert.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
@@ -35,8 +35,13 @@
 #include "ardour/session.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/tempo.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Location::Flags);
+}
 
 using namespace std;
 using namespace ARDOUR;
@@ -556,8 +561,8 @@ Location::cd_info_node(const string & name, const string & value)
 {
 	XMLNode* root = new XMLNode("CD-Info");
 
-	root->add_property("name", name);
-	root->add_property("value", value);
+	root->set_property("name", name);
+	root->set_property("value", value);
 
 	return *root;
 }
@@ -567,7 +572,6 @@ XMLNode&
 Location::get_state ()
 {
 	XMLNode *node = new XMLNode ("Location");
-	char buf[64];
 
 	typedef map<string, string>::const_iterator CI;
 
@@ -575,23 +579,17 @@ Location::get_state ()
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
 	}
 
-	node->add_property ("id", id ().to_s ());
-	node->add_property ("name", name());
-	snprintf (buf, sizeof (buf), "%" PRId64, start());
-	node->add_property ("start", buf);
-	snprintf (buf, sizeof (buf), "%" PRId64, end());
-	node->add_property ("end", buf);
-
+	node->set_property ("id", id ());
+	node->set_property ("name", name());
+	node->set_property ("start", start());
+	node->set_property ("end", end());
 	if (position_lock_style() == MusicTime) {
-		snprintf (buf, sizeof (buf), "%lf", _start_beat);
-		node->add_property ("start-beat", buf);
-		snprintf (buf, sizeof (buf), "%lf", _end_beat);
-		node->add_property ("end-beat", buf);
+		node->set_property ("start-beat", _start_beat);
+		node->set_property ("end-beat", _end_beat);
 	}
-
-	node->add_property ("flags", enum_2_string (_flags));
-	node->add_property ("locked", (_locked ? "yes" : "no"));
-	node->add_property ("position-lock-style", enum_2_string (_position_lock_style));
+	node->set_property ("flags", _flags);
+	node->set_property ("locked", _locked);
+	node->set_property ("position-lock-style", _position_lock_style);
 
 	if (_scene_change) {
 		node->add_child_nocopy (_scene_change->get_state());
@@ -603,8 +601,6 @@ Location::get_state ()
 int
 Location::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	XMLNodeList cd_list = node.children();
 	XMLNodeConstIterator cd_iter;
 	XMLNode *cd_node;
@@ -621,46 +617,40 @@ Location::set_state (const XMLNode& node, int version)
 		warning << _("XML node for Location has no ID information") << endmsg;
 	}
 
-	if ((prop = node.property ("name")) == 0) {
+	std::string str;
+	if (!node.get_property ("name", str)) {
 		error << _("XML node for Location has no name information") << endmsg;
 		return -1;
 	}
 
-	set_name (prop->value());
-
-	if ((prop = node.property ("start")) == 0) {
-		error << _("XML node for Location has no start information") << endmsg;
-		return -1;
-	}
+	set_name (str);
 
 	/* can't use set_start() here, because _end
 	   may make the value of _start illegal.
 	*/
 
-	sscanf (prop->value().c_str(), "%" PRId64, &_start);
+	if (!node.get_property ("start", _start)) {
+		error << _("XML node for Location has no start information") << endmsg;
+		return -1;
+	}
 
-	if ((prop = node.property ("end")) == 0) {
+	if (!node.get_property ("end", _end)) {
 		error << _("XML node for Location has no end information") << endmsg;
 		return -1;
 	}
 
-	sscanf (prop->value().c_str(), "%" PRId64, &_end);
+	Flags old_flags (_flags);
 
-	if ((prop = node.property ("flags")) == 0) {
+	if (!node.get_property ("flags", _flags)) {
 		error << _("XML node for Location has no flags information") << endmsg;
 		return -1;
 	}
-
-	Flags old_flags (_flags);
-	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	if (old_flags != _flags) {
 		FlagsChanged ();
 	}
 
-	if ((prop = node.property ("locked")) != 0) {
-		_locked = string_is_affirmative (prop->value());
-	} else {
+	if (!node.get_property ("locked", _locked)) {
 		_locked = false;
 	}
 
@@ -672,25 +662,18 @@ Location::set_state (const XMLNode& node, int version)
 			continue;
 		}
 
-		if ((prop = cd_node->property ("name")) != 0) {
-			cd_name = prop->value();
-		} else {
+		if (!cd_node->get_property ("name", cd_name)) {
 			throw failed_constructor ();
 		}
 
-		if ((prop = cd_node->property ("value")) != 0) {
-			cd_value = prop->value();
-		} else {
+		if (!cd_node->get_property ("value", cd_value)) {
 			throw failed_constructor ();
 		}
-
 
 		cd_info[cd_name] = cd_value;
 	}
 
-	if ((prop = node.property ("position-lock-style")) != 0) {
-		_position_lock_style = PositionLockStyle (string_2_enum (prop->value(), _position_lock_style));
-	}
+	node.get_property ("position-lock-style", _position_lock_style);
 
 	XMLNode* scene_child = find_named_node (node, SceneChange::xml_node_name);
 
@@ -702,19 +685,8 @@ Location::set_state (const XMLNode& node, int version)
 		recompute_beat_from_frames (0);
 	} else{
 		/* music */
-		bool has_beat = false;
-
-		if ((prop = node.property ("start-beat")) != 0) {
-			sscanf (prop->value().c_str(), "%lf", &_start_beat);
-			has_beat = true;
-		}
-
-		if ((prop = node.property ("end-beat")) != 0) {
-			sscanf (prop->value().c_str(), "%lf", &_end_beat);
-			has_beat = true;
-		}
-
-		if (!has_beat) {
+		if (!node.get_property ("start-beat", _start_beat) ||
+		    !node.get_property ("end-beat", _end_beat)) {
 			recompute_beat_from_frames (0);
 		}
 	}
