@@ -730,16 +730,16 @@ Bindings::save (XMLNode& root)
 		}
 
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("key"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("key"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		presses->add_child_nocopy (*child);
 	}
 
 	for (MouseButtonBindingMap::iterator k = button_press_bindings.begin(); k != button_press_bindings.end(); ++k) {
 		XMLNode* child;
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("button"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("button"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		presses->add_child_nocopy (*child);
 	}
 
@@ -753,16 +753,16 @@ Bindings::save (XMLNode& root)
 		}
 
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("key"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("key"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		releases->add_child_nocopy (*child);
 	}
 
 	for (MouseButtonBindingMap::iterator k = button_release_bindings.begin(); k != button_release_bindings.end(); ++k) {
 		XMLNode* child;
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("button"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("button"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		releases->add_child_nocopy (*child);
 	}
 
