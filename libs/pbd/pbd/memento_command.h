@@ -82,7 +82,7 @@ public:
 	}
 
 	void add_state (XMLNode* node) {
-		node->add_property ("obj_id", _object.id().to_s());
+		node->set_property ("obj_id", _object.id().to_s());
 	}
 
 	void object_died () {
@@ -153,7 +153,7 @@ public:
 		XMLNode* node = new XMLNode(name);
 		_binder->add_state (node);
 
-		node->add_property ("type_name", _binder->type_name ());
+		node->set_property ("type_name", _binder->type_name ());
 
 		if (before) {
 			node->add_child_copy(*before);
