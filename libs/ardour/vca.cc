@@ -114,8 +114,8 @@ XMLNode&
 VCA::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	node->add_property (X_("name"), _name);
-	node->add_property (X_("number"), _number);
+	node->set_property (X_("name"), name());
+	node->set_property (X_("number"), _number);
 
 	node->add_child_nocopy (_presentation_info.get_state());
 
@@ -132,35 +132,30 @@ VCA::get_state ()
 int
 VCA::set_state (XMLNode const& node, int version)
 {
-	XMLProperty const* prop;
-
 	Stripable::set_state (node, version);
 
-	if ((prop = node.property ("name")) != 0) {
-		set_name (prop->value());
+	std::string str;
+	if (node.get_property ("name", str)) {
+		set_name (str);
 	}
 
-	if ((prop = node.property ("number")) != 0) {
-		_number = atoi (prop->value());
-	}
+	node.get_property ("number", _number);
 
 	XMLNodeList const &children (node.children());
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == Controllable::xml_node_name) {
 
-			XMLProperty* prop = (*i)->property ("name");
-
-			if (!prop) {
+			if (!(*i)->get_property ("name", str)) {
 				continue;
 			}
 
-			if (prop->value() == _gain_control->name()) {
+			if (str == _gain_control->name()) {
 				_gain_control->set_state (**i, version);
 			}
-			if (prop->value() == _solo_control->name()) {
+			if (str == _solo_control->name()) {
 				_solo_control->set_state (**i, version);
 			}
-			if (prop->value() == _mute_control->name()) {
+			if (str == _mute_control->name()) {
 				_mute_control->set_state (**i, version);
 			}
 		} else if ((*i)->name() == Slavable::xml_node_name) {
