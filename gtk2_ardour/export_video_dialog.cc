@@ -371,20 +371,18 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
 	bool filenameset = false;
 	if (node) {
-		if (node->property(X_("OriginalVideoFile"))) {
-			std::string filename = node->property(X_("OriginalVideoFile"))->value();
+		std::string filename;
+		if (node->get_property(X_("OriginalVideoFile"), filename)) {
 			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
 				invid_path_entry.set_text (filename);
 				filenameset = true;
 			}
 		}
-		if (!filenameset
-				&& node->property(X_("Filename"))
-				&& node->property(X_("LocalFile"))
-				&& node->property(X_("LocalFile"))->value() == X_("1")
-		   )
-		{
-			std::string filename = node->property(X_("Filename"))->value();
+
+		bool local_file;
+
+		if (!filenameset && node->get_property (X_("Filename"), filename) &&
+		    node->get_property (X_("LocalFile"), local_file) && local_file) {
 			if (filename.at(0) != G_DIR_SEPARATOR)
 			{
 				filename = Glib::build_filename (_session->session_directory().video_path(), filename);
@@ -402,55 +400,78 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	node = _session->extra_xml (X_("Videoexport"));
 	if (node) {
-		XMLProperty const * prop;
-		prop = node->property (X_("ChangeGeometry"));
-		if (prop) { scale_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("KeepAspect"));
-		if (prop) { scale_aspect.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("ChangeAspect"));
-		if (prop) { aspect_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("NormalizeAudio"));
-		if (prop) { normalize_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("TwoPassEncode"));
-		if (prop) { twopass_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("CodecOptimzations"));
-		if (prop) { optimizations_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("Deinterlace"));
-		if (prop) { deinterlace_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("BFrames"));
-		if (prop) { bframes_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("ChangeFPS"));
-		if (prop) { fps_checkbox.set_active(atoi(prop->value())?true:false); }
-		prop = node->property (X_("Metadata"));
-		if (prop) { meta_checkbox.set_active(atoi(prop->value())?true:false); }
+		bool yn;
+		if (node->get_property (X_("ChangeGeometry"), yn)) {
+			scale_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("KeepAspect"), yn)) {
+			scale_aspect.set_active (yn);
+		}
+		if (node->get_property (X_("ChangeAspect"), yn)) {
+			aspect_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("NormalizeAudio"), yn)) {
+			normalize_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("TwoPassEncode"), yn)) {
+			twopass_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("CodecOptimzations"), yn)) {
+			optimizations_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("Deinterlace"), yn)) {
+			deinterlace_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("BFrames"), yn)) {
+			bframes_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("ChangeFPS"), yn)) {
+			fps_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("Metadata"), yn)) {
+			meta_checkbox.set_active (yn);
+		}
 
-		prop = node->property (X_("Format"));
-		if (prop && !prop->value().empty()) { change_file_extension( "." + prop->value()); }
+		std::string str;
+		if (node->get_property (X_("Format"), str) && !str.empty()) {
+			change_file_extension ("." + str);
+		}
 
 		_suspend_signals = true;
-		prop = node->property (X_("Width"));
-		if (prop) { width_spinner.set_value(atoi(prop->value())); }
-		prop = node->property (X_("Height"));
-		if (prop) { height_spinner.set_value(atoi(prop->value())); }
+		double val;
+		if (node->get_property (X_("Width"), val)) {
+			width_spinner.set_value (val);
+		}
+		if (node->get_property (X_("Height"), val)) {
+			height_spinner.set_value (val);
+		}
 		_suspend_signals = false;
 
-		prop = node->property (X_("FPS"));
-		if (prop && fps_checkbox.get_active()) { tcfps = atof(prop->value()); }
+		if (fps_checkbox.get_active () && node->get_property (X_("FPS"), val)) {
+			tcfps = val;
+		}
 
-		prop = node->property (X_("Preset"));
-		if (prop) { preset_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("VCodec"));
-		if (prop) { video_codec_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("ACodec"));
-		if (prop) { audio_codec_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("VBitrate"));
-		if (prop) { video_bitrate_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("ABitrate"));
-		if (prop) { audio_bitrate_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("AspectRatio"));
-		if (prop) { aspect_combo.set_active_text(prop->value()); }
-		prop = node->property (X_("SampleRate"));
-		if (prop) { audio_samplerate_combo.set_active_text(prop->value()); }
+		if (node->get_property (X_("Preset"), str)) {
+			preset_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("VCodec"), str)) {
+			video_codec_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("ACodec"), str)) {
+			audio_codec_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("VBitrate"), str)) {
+			video_bitrate_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("ABitrate"), str)) {
+			audio_bitrate_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("AspectRatio"), str)) {
+			aspect_combo.set_active_text (str);
+		}
+		if (node->get_property (X_("SampleRate"), str)) {
+			audio_samplerate_combo.set_active_text (str);
+		}
 	}
 
 	if      (fabs(tcfps - 23.976) < 0.01) { fps_combo.set_active(0); }
@@ -484,30 +505,30 @@ ExportVideoDialog::get_state ()
 {
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode (X_("Videoexport"));
-	node->add_property (X_("ChangeGeometry"), scale_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("KeepAspect"), scale_aspect.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("ChangeAspect"), aspect_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("NormalizeAudio"), normalize_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("TwoPassEncode"), twopass_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("CodecOptimzations"), optimizations_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("Deinterlace"), deinterlace_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("BFrames"), bframes_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("ChangeFPS"), fps_checkbox.get_active() ? X_("1") : X_("0"));
-	node->add_property (X_("Metadata"), meta_checkbox.get_active() ? X_("1") : X_("0"));
+	node->set_property (X_("ChangeGeometry"), scale_checkbox.get_active());
+	node->set_property (X_("KeepAspect"), scale_aspect.get_active());
+	node->set_property (X_("ChangeAspect"), aspect_checkbox.get_active());
+	node->set_property (X_("NormalizeAudio"), normalize_checkbox.get_active());
+	node->set_property (X_("TwoPassEncode"), twopass_checkbox.get_active());
+	node->set_property (X_("CodecOptimzations"), optimizations_checkbox.get_active());
+	node->set_property (X_("Deinterlace"), deinterlace_checkbox.get_active());
+	node->set_property (X_("BFrames"), bframes_checkbox.get_active());
+	node->set_property (X_("ChangeFPS"), fps_checkbox.get_active());
+	node->set_property (X_("Metadata"), meta_checkbox.get_active());
 
-	node->add_property (X_("Format"), get_file_extension(outfn_path_entry.get_text()));
+	node->set_property (X_("Format"), get_file_extension(outfn_path_entry.get_text()));
 
-	node->add_property (X_("Width"), width_spinner.get_value());
-	node->add_property (X_("Height"), height_spinner.get_value());
+	node->set_property (X_("Width"), width_spinner.get_value());
+	node->set_property (X_("Height"), height_spinner.get_value());
 
-	node->add_property (X_("Preset"), preset_combo.get_active_text());
-	node->add_property (X_("VCodec"), video_codec_combo.get_active_text());
-	node->add_property (X_("ACodec"), audio_codec_combo.get_active_text());
-	node->add_property (X_("VBitrate"), video_bitrate_combo.get_active_text());
-	node->add_property (X_("ABitrate"), audio_bitrate_combo.get_active_text());
-	node->add_property (X_("AspectRatio"), aspect_combo.get_active_text());
-	node->add_property (X_("SampleRate"), audio_samplerate_combo.get_active_text());
-	node->add_property (X_("FPS"), fps_combo.get_active_text());
+	node->set_property (X_("Preset"), preset_combo.get_active_text());
+	node->set_property (X_("VCodec"), video_codec_combo.get_active_text());
+	node->set_property (X_("ACodec"), audio_codec_combo.get_active_text());
+	node->set_property (X_("VBitrate"), video_bitrate_combo.get_active_text());
+	node->set_property (X_("ABitrate"), audio_bitrate_combo.get_active_text());
+	node->set_property (X_("AspectRatio"), aspect_combo.get_active_text());
+	node->set_property (X_("SampleRate"), audio_samplerate_combo.get_active_text());
+	node->set_property (X_("FPS"), fps_combo.get_active_text());
 
 	return *node;
 }
