@@ -370,10 +370,10 @@ UIConfiguration::store_color_theme ()
 	XMLNode* parent = new XMLNode (X_("Colors"));
 	for (Colors::const_iterator i = colors.begin(); i != colors.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("Color"));
-		node->add_property (X_("name"), i->first);
+		node->set_property (X_("name"), i->first);
 		stringstream ss;
 		ss << "0x" << setw (8) << setfill ('0') << hex << i->second;
-		node->add_property (X_("value"), ss.str());
+		node->set_property (X_("value"), ss.str());
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -381,8 +381,8 @@ UIConfiguration::store_color_theme ()
 	parent = new XMLNode (X_("ColorAliases"));
 	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("ColorAlias"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("alias"), i->second);
+		node->set_property (X_("name"), i->first);
+		node->set_property (X_("alias"), i->second);
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -390,8 +390,8 @@ UIConfiguration::store_color_theme ()
 	parent = new XMLNode (X_("Modifiers"));
 	for (Modifiers::const_iterator i = modifiers.begin(); i != modifiers.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("Modifier"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("modifier"), i->second.to_string());
+		node->set_property (X_("name"), i->first);
+		node->set_property (X_("modifier"), i->second.to_string());
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
