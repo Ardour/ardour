@@ -686,8 +686,7 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 	hpacker.pack_start (notebook(), true, true);
 	pack_start (hpacker, true, true);
 
-	hpacker.show_all ();
-	show ();
+	show_all ();
 }
 
 OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str)
