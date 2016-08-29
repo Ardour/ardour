@@ -486,7 +486,6 @@ Meterbridge::session_going_away ()
 int
 Meterbridge::set_state (const XMLNode& node)
 {
-	XMLProperty const * prop;
 	XMLNode* geometry;
 
 	m_width = default_width;
@@ -496,43 +495,23 @@ Meterbridge::set_state (const XMLNode& node)
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
-		XMLProperty const * prop;
-
-		if ((prop = geometry->property("x_size")) == 0) {
-			prop = geometry->property ("x-size");
+		if (!geometry->get_property ("x_size", m_width)) {
+			geometry->get_property ("x-size", m_width);
 		}
-		if (prop) {
-			m_width = atoi(prop->value());
+		if (!geometry->get_property("y_size", m_height)) {
+			geometry->get_property ("y-size", m_height);
 		}
-		if ((prop = geometry->property("y_size")) == 0) {
-			prop = geometry->property ("y-size");
+		if (!geometry->get_property ("x_pos", m_root_x)) {
+			geometry->get_property ("x-pos", m_root_x);
 		}
-		if (prop) {
-			m_height = atoi(prop->value());
-		}
-
-		if ((prop = geometry->property ("x_pos")) == 0) {
-			prop = geometry->property ("x-pos");
-		}
-		if (prop) {
-			m_root_x = atoi (prop->value());
-
-		}
-		if ((prop = geometry->property ("y_pos")) == 0) {
-			prop = geometry->property ("y-pos");
-		}
-		if (prop) {
-			m_root_y = atoi (prop->value());
+		if (!geometry->get_property ("y_pos", m_root_y)) {
+			geometry->get_property ("y-pos", m_root_y);
 		}
 	}
 
 	set_window_pos_and_size ();
 
-	if ((prop = node.property ("show-meterbridge"))) {
-		if (string_is_affirmative (prop->value())) {
-		       _visible = true;
-		}
-	}
+	node.get_property ("show-meterbridge", _visible);
 
 	return 0;
 }
@@ -540,7 +519,6 @@ Meterbridge::set_state (const XMLNode& node)
 XMLNode&
 Meterbridge::get_state (void)
 {
-	char buf[32];
 	XMLNode* node = new XMLNode ("Meterbridge");
 
 	if (is_realized() && _visible) {
@@ -548,17 +526,13 @@ Meterbridge::get_state (void)
 	}
 
 	XMLNode* geometry = new XMLNode ("geometry");
-	snprintf(buf, sizeof(buf), "%d", m_width);
-	geometry->add_property(X_("x_size"), string(buf));
-	snprintf(buf, sizeof(buf), "%d", m_height);
-	geometry->add_property(X_("y_size"), string(buf));
-	snprintf(buf, sizeof(buf), "%d", m_root_x);
-	geometry->add_property(X_("x_pos"), string(buf));
-	snprintf(buf, sizeof(buf), "%d", m_root_y);
-	geometry->add_property(X_("y_pos"), string(buf));
+	geometry->set_property(X_("x_size"), m_width);
+	geometry->set_property(X_("y_size"), m_height);
+	geometry->set_property(X_("x_pos"), m_root_x);
+	geometry->set_property(X_("y_pos"), m_root_y);
 	node->add_child_nocopy (*geometry);
 
-	node->add_property ("show-meterbridge", _visible ? "yes" : "no");
+	node->set_property ("show-meterbridge", _visible);
 	return *node;
 }
 
