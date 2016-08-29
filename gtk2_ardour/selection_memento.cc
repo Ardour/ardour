@@ -36,16 +36,12 @@ XMLNode&
 SelectionMemento::get_state () {
 
 	XMLNode* node = new XMLNode ("SelectionMemento");
-	char buf[32];
 	PublicEditor& editor = PublicEditor::instance();
 
-	node->add_property ("mouse-mode", enum2str(editor.current_mouse_mode()));
-	snprintf (buf, sizeof(buf), "%" PRId64, editor.get_current_zoom());
-	node->add_property ("zoom", buf);
-	snprintf (buf, sizeof (buf), "%" PRIi64, editor.leftmost_sample());
-	node->add_property ("left-frame", buf);
-	snprintf (buf, sizeof (buf), "%f", editor.get_y_origin());
-	node->add_property ("y-origin", buf);
+	node->set_property ("mouse-mode", enum2str(editor.current_mouse_mode()));
+	node->set_property ("zoom", editor.get_current_zoom());
+	node->set_property ("left-frame", editor.leftmost_sample());
+	node->set_property ("y-origin", editor.get_y_origin());
 
 	node->add_child_nocopy (editor.get_selection().get_state());
 	return *node;
@@ -54,35 +50,34 @@ SelectionMemento::get_state () {
 int
 SelectionMemento::set_state (const XMLNode& node, int /*version*/) {
 
-	XMLProperty const * prop;
 	PublicEditor& editor = PublicEditor::instance();
 	if (node.name() != X_("SelectionMemento")) {
 		return -1;
 	}
 
-	if ((prop = node.property ("mouse-mode"))) {
-		Editing::MouseMode m = Editing::str2mousemode(prop->value());
+	std::string str;
+	if (node.get_property ("mouse-mode", str)) {
+		Editing::MouseMode m = Editing::str2mousemode (str);
 		editor.set_mouse_mode (m, true);
 	}
 
-	if ((prop = node.property ("zoom"))) {
+	float zoom;
+	if (node.get_property ("zoom", zoom)) {
 		/* older versions of ardour used floating point samples_per_pixel */
-		double f = PBD::atof (prop->value());
-		editor.reset_zoom (llrintf (f));
+		editor.reset_zoom (llrintf (zoom));
 	}
 
-	if ((prop = node.property ("left-frame")) != 0) {
-		framepos_t pos;
-		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
-			if (pos < 0) {
-				pos = 0;
-			}
-			editor.reset_x_origin (pos);
+	framepos_t pos;
+	if (node.get_property ("left-frame", pos)) {
+		if (pos < 0) {
+			pos = 0;
 		}
+		editor.reset_x_origin (pos);
 	}
 
-	if ((prop = node.property ("y-origin")) != 0) {
-		editor.reset_y_origin (atof (prop->value ().c_str()));
+	double y_origin;
+	if (node.get_property ("y-origin", y_origin)) {
+		editor.reset_y_origin (y_origin);
 	}
 
 	XMLNodeList children = node.children ();
