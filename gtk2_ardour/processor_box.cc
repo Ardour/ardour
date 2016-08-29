@@ -27,7 +27,6 @@
 
 #include <sigc++/bind.h>
 
-#include "pbd/convert.h"
 #include "canvas/utils.h"
 
 #include <glibmm/miscutils.h>
@@ -971,8 +970,8 @@ void
 ProcessorEntry::Control::add_state (XMLNode* node) const
 {
 	XMLNode* c = new XMLNode (X_("Object"));
-	c->add_property (X_("id"), state_id ());
-	c->add_property (X_("visible"), _visible);
+	c->set_property (X_("id"), state_id ());
+	c->set_property (X_("visible"), _visible);
 	node->add_child_nocopy (*c);
 }
 
@@ -981,8 +980,10 @@ ProcessorEntry::Control::set_state (XMLNode const * node)
 {
 	XMLNode* n = GUIObjectState::get_node (node, state_id ());
 	if (n) {
-		XMLProperty const * p = n->property (X_("visible"));
-		set_visible (p && string_is_affirmative (p->value ()));
+		bool visible;
+		if (n->get_property (X_("visible"), visible)) {
+			set_visible (visible);
+		}
 	} else {
 		set_visible (false);
 	}
@@ -4263,7 +4264,7 @@ ProcessorWindowProxy::get_state ()
 {
 	XMLNode *node;
 	node = &ProxyBase::get_state();
-	node->add_property (X_("custom-ui"), is_custom? X_("yes") : X_("no"));
+	node->set_property (X_("custom-ui"), is_custom);
 	return *node;
 }
 
@@ -4273,18 +4274,15 @@ ProcessorWindowProxy::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeList children = node.children ();
 	XMLNodeList::const_iterator i = children.begin ();
 	while (i != children.end()) {
-		XMLProperty const * prop = (*i)->property (X_("name"));
-		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+		std::string name;
+		if ((*i)->name() == X_("Window") && (*i)->get_property (X_("name"), name) && name == _name) {
 			break;
 		}
 		++i;
 	}
 
 	if (i != children.end()) {
-		XMLProperty const * prop;
-		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
-			want_custom = PBD::string_is_affirmative (prop->value ());
-		}
+		(*i)->get_property (X_("custom-ui"), want_custom);
 	}
 
 	return ProxyBase::set_state (node, 0);
