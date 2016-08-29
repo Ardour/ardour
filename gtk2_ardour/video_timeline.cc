@@ -22,6 +22,7 @@
 #include "ardour/tempo.h"
 
 #include "pbd/file_utils.h"
+#include "pbd/types_convert.h"
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
@@ -90,7 +91,7 @@ VideoTimeLine::save_session ()
 
 	XMLNode* node = new XMLNode(X_("Videomonitor"));
 	if (!node) return;
-	node->add_property (X_("active"), (vmonitor && vmonitor->is_started())?"yes":"no");
+	node->set_property (X_("active"), (vmonitor && vmonitor->is_started()));
 	_session->add_extra_xml (*node);
 
 	if (vmonitor) {
@@ -103,11 +104,11 @@ VideoTimeLine::save_session ()
 	/* VTL settings */
 	node = _session->extra_xml (X_("Videotimeline"));
 	if (!node) return;
-	node->add_property (X_("id"), id().to_s());
-	node->add_property (X_("Height"), editor->get_videotl_bar_height());
-	node->add_property (X_("VideoOffsetLock"), video_offset_lock?X_("1"):X_("0"));
-	node->add_property (X_("VideoOffset"), video_offset);
-	node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
+	node->set_property (X_("id"), id());
+	node->set_property (X_("Height"), editor->get_videotl_bar_height());
+	node->set_property (X_("VideoOffsetLock"), video_offset_lock);
+	node->set_property (X_("VideoOffset"), video_offset);
+	node->set_property (X_("AutoFPS"), auto_set_session_fps);
 }
 
 /* close and save settings */
@@ -156,9 +157,9 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 
 	set_id(*node);
 
-	XMLProperty const * proph = node->property (X_("Height"));
-	if (proph) {
-		editor->set_video_timeline_height(atoi(proph->value()));
+	int height;
+	if (node->get_property (X_("Height"), height)) {
+		editor->set_video_timeline_height(height);
 	}
 #if 0 /* TODO THINK: set FPS first time only ?! */
 	XMLProperty const * propasfps = node->property (X_("AutoFPS"));
@@ -167,28 +168,22 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	}
 #endif
 
-	XMLProperty const * propoffset = node->property (X_("VideoOffset"));
-	if (propoffset) {
-		video_offset = atoll(propoffset->value());
+	if (node->get_property (X_("VideoOffset"), video_offset)) {
 		video_offset_p = video_offset;
 	}
 
-	XMLProperty const * proplock = node->property (X_("VideoOffsetLock"));
-	if (proplock) {
-		video_offset_lock = atoi(proplock->value())?true:false;
-	}
+	node->get_property (X_("VideoOffsetLock"), video_offset_lock);
+	node->get_property (X_("LocalFile"), local_file);
 
-	XMLProperty const * localfile = node->property (X_("LocalFile"));
-	if (localfile) {
-		local_file = atoi(localfile->value())?true:false;
+	std::string filename;
+	if (node->get_property (X_("Filename"), filename)) {
+		video_file_info (filename, local_file);
 	}
-
-	XMLProperty const * propf = node->property (X_("Filename"));
-	video_file_info(propf->value(), local_file);
 
 	if ((node = _session->extra_xml (X_("Videomonitor")))) {
-		XMLProperty const * prop = node->property (X_("active"));
-		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
+		bool active;
+		if (node->get_property (X_("active"), active) && active && found_xjadeo () &&
+		    !video_filename.empty () && local_file) {
 			open_video_monitor();
 		}
 	}
@@ -226,10 +221,7 @@ int
 VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 {
 	LocaleGuard lg;
-	XMLProperty const * propoffset = node.property (X_("VideoOffset"));
-	if (propoffset) {
-		video_offset = atoll(propoffset->value());
-	}
+	node.get_property (X_("VideoOffset"), video_offset);
 	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
 	return 0;
 }
@@ -239,7 +231,7 @@ VideoTimeLine::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Videotimeline"));
 	LocaleGuard lg;
-	node->add_property (X_("VideoOffset"), video_offset_p);
+	node->set_property (X_("VideoOffset"), video_offset_p);
 	return *node;
 }
 
@@ -881,8 +873,10 @@ VideoTimeLine::open_video_monitor() {
 		if (_session) {
 			XMLNode* node = _session->extra_xml (X_("Videomonitor"));
 			if (node) {
-				XMLProperty const * prop = node->property (X_("active"));
-				if (prop && prop->value() != "yes") _session->set_dirty ();
+				bool active;
+				if (node->get_property (X_("active"), active) && !active) {
+					_session->set_dirty ();
+				}
 			} else {
 				_session->set_dirty ();
 			}
