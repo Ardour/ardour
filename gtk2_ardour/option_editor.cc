@@ -524,11 +524,13 @@ OptionEditor::treeview_row_selected ()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection = option_treeview.get_selection();
 	TreeModel::iterator iter = selection->get_selected();
-	if(iter) {
+
+	if (iter) {
 		TreeModel::Row row = *iter;
 		Gtk::Widget* w = row[option_columns.widget];
 		if (w) {
 			_notebook.set_current_page (_notebook.page_num (*w));
+			cerr << "OE: set current page to " << _notebook.page_num (*w) << endl;
 		}
 	}
 }
