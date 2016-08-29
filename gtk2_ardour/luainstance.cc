@@ -1239,7 +1239,7 @@ LuaInstance::get_action_state ()
 	g_free (b64);
 
 	XMLNode* script_node = new XMLNode (X_("ActionScript"));
-	script_node->add_property (X_("lua"), LUA_VERSION);
+	script_node->set_property (X_("lua"), LUA_VERSION);
 	script_node->add_content (b64s);
 
 	return *script_node;
@@ -1613,10 +1613,10 @@ LuaCallback::get_state (void)
 	g_free (b64);
 
 	XMLNode* script_node = new XMLNode (X_("LuaCallback"));
-	script_node->add_property (X_("lua"), LUA_VERSION);
-	script_node->add_property (X_("id"), _id.to_s ());
-	script_node->add_property (X_("name"), _name);
-	script_node->add_property (X_("signals"), _signals.to_string ());
+	script_node->set_property (X_("lua"), LUA_VERSION);
+	script_node->set_property (X_("id"), _id.to_s ());
+	script_node->set_property (X_("name"), _name);
+	script_node->set_property (X_("signals"), _signals.to_string ());
 	script_node->add_content (b64s);
 	return *script_node;
 }
