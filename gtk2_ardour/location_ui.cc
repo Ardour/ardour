@@ -27,6 +27,7 @@
 
 #include "ardour_ui.h"
 #include "clock_group.h"
+#include "enums_convert.h"
 #include "main_clock.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -1151,7 +1152,7 @@ XMLNode &
 LocationUI::get_state () const
 {
 	XMLNode* node = new XMLNode (_state_node_name);
-	node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
+	node->set_property (X_("clock-mode"), _clock_group->clock_mode ());
 	return *node;
 }
 
@@ -1161,11 +1162,11 @@ LocationUI::set_state (const XMLNode& node)
 	if (node.name() != _state_node_name) {
 		return -1;
 	}
-	XMLProperty const* p = node.property (X_("clock-mode"));
-	if (!p) {
+
+	if (!node.get_property (X_("clock-mode"), _mode)) {
 		return -1;
 	}
-	_mode = (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
+
 	_mode_set = true;
 	_clock_group->set_clock_mode (_mode);
 	return 0;
@@ -1183,12 +1184,10 @@ LocationUI::clock_mode_from_session_instant_xml ()
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 
-	XMLProperty const * p = node->property (X_("clock-mode"));
-	if (!p) {
+	if (!node->get_property (X_("clock-mode"), _mode)) {
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 
-	_mode = (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
 	_mode_set = true;
 	return _mode;
 }
