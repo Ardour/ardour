@@ -3368,6 +3368,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		*/
 		Tabbable::set_state (*node, Stateful::loading_state_version);
 	}
+
+	notebook().show_all ();
 }
 
 void
