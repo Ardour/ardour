@@ -328,8 +328,8 @@ ControlProtocol::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 
-	node->add_property ("name", _name);
-	node->add_property ("feedback", get_feedback() ? "yes" : "no");
+	node->set_property ("name", _name);
+	node->set_property ("feedback", get_feedback());
 
 	return *node;
 }
@@ -337,10 +337,9 @@ ControlProtocol::get_state ()
 int
 ControlProtocol::set_state (XMLNode const & node, int /* version */)
 {
-	const XMLProperty* prop;
-
-	if ((prop = node.property ("feedback")) != 0) {
-		set_feedback (string_is_affirmative (prop->value()));
+	bool feedback;
+	if (node.get_property ("feedback", feedback)) {
+		set_feedback (feedback);
 	}
 
 	return 0;
