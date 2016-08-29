@@ -657,8 +657,8 @@ ProcessorEntry::add_control_state (XMLNode* node) const
 
 	if (_plugin_display) {
 		XMLNode* c = new XMLNode (X_("Object"));
-		c->add_property (X_("id"), X_("InlineDisplay"));
-		c->add_property (X_("visible"), _plugin_display->is_visible ());
+		c->set_property (X_("id"), X_("InlineDisplay"));
+		c->set_property (X_("visible"), _plugin_display->is_visible ());
 		node->add_child_nocopy (*c);
 	}
 }
@@ -672,12 +672,14 @@ ProcessorEntry::set_control_state (XMLNode const * node)
 
 	if (_plugin_display) {
 		XMLNode* n = GUIObjectState::get_node (node, X_("InlineDisplay"));
-		XMLProperty const * p = n ? n->property (X_("visible")) : NULL;
-		if (p) {
-			if (string_is_affirmative (p->value ())) {
-				_plugin_display->show();
+		if (!n) return;
+
+		bool visible;
+		if (n->get_property (X_("visible"), visible)) {
+			if (visible) {
+				_plugin_display->show ();
 			} else {
-				_plugin_display->hide();
+				_plugin_display->hide ();
 			}
 		}
 	}
