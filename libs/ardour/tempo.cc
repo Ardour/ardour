@@ -1560,7 +1560,7 @@ TempoMap::tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 			}
 			if ((prev_t) && t->frame() > frame) {
 				/* t is the section past frame */
-				const double ret_bpm = prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type();
+				const double ret_bpm = prev_t->tempo_at_frame (frame, _frame_rate) * 4.0;
 				const Tempo ret_tempo (ret_bpm, prev_t->note_type());
 				return ret_tempo;
 			}
@@ -1591,7 +1591,7 @@ framepos_t
 TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const
 {
 	TempoSection* prev_t = 0;
-	const double tempo_ppm = tempo.beats_per_minute() / tempo.note_type();
+	const double tempo_ppm = tempo.beats_per_minute() / 4.0;
 
 	Metrics::const_iterator i;
 
@@ -1604,14 +1604,14 @@ TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 				continue;
 			}
 
-			const double t_ppm = t->beats_per_minute() / t->note_type();
+			const double t_ppm = t->beats_per_minute() / 4.0;
 
 			if (t_ppm == tempo_ppm) {
 				return t->frame();
 			}
 
 			if (prev_t) {
-				const double prev_t_ppm = prev_t->beats_per_minute() / prev_t->note_type();
+				const double prev_t_ppm = prev_t->beats_per_minute() / 4.0;
 
 				if ((t_ppm > tempo_ppm && prev_t_ppm < tempo_ppm) || (t_ppm < tempo_ppm && prev_t_ppm > tempo_ppm)) {
 					return prev_t->frame_at_tempo (tempo_ppm, prev_t->pulse(), _frame_rate);
@@ -1635,7 +1635,7 @@ TempoMap::tempo_at_beat (const double& beat) const
 	const TempoSection* prev_t = &tempo_section_at_beat_locked (_metrics, beat);
 	const double note_type = prev_t->note_type();
 
-	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()) * note_type, note_type);
+	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()) * 4.0, note_type);
 }
 
 double
@@ -3567,7 +3567,7 @@ TempoMap::frames_per_beat_at (const framepos_t& frame, const framecnt_t& sr) con
 	}
 
 	if (ts_after) {
-		return  (60.0 * _frame_rate) / (ts_at->tempo_at_frame (frame, _frame_rate) * ts_at->note_type());
+		return  (60.0 * _frame_rate) / (ts_at->tempo_at_frame (frame, _frame_rate) * 4.0);
 	}
 	/* must be treated as constant tempo */
 	return ts_at->frames_per_beat (_frame_rate);
