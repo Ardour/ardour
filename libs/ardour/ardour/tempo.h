@@ -363,6 +363,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
+	framepos_t round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 
 	void set_length (framepos_t frames);
 
@@ -446,12 +447,16 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
 	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
+	framepos_t framepos_plus_qn (framepos_t, Evoral::Beats) const;
 	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
 	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+	Evoral::Beats framewalk_to_qn (framepos_t pos, framecnt_t distance) const;
 
 	double quarter_note_at_frame (const framepos_t frame);
 	double quarter_note_at_frame_rt (const framepos_t frame);
 	framepos_t frame_at_quarter_note (const double quarter_note);
+	double quarter_note_at_beat (const double beat);
+	double beat_at_quarter_note (const double beat);
 
 	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
@@ -459,6 +464,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
 
 	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
+	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
@@ -489,6 +495,10 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
+	framepos_t frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note);
+	double quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame);
+	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat);
+
 	const TempoSection& tempo_section_at_frame_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
@@ -504,6 +514,7 @@ private:
 	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
 
 	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
+	double exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;

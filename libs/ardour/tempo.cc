@@ -2106,7 +2106,15 @@ TempoMap::quarter_note_at_frame (const framepos_t frame)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
-	const double ret = pulse_at_frame_locked (_metrics, frame) * 4.0;
+	const double ret = quarter_note_at_frame_locked (_metrics, frame);
+
+	return ret;
+}
+
+double
+TempoMap::quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame)
+{
+	const double ret = pulse_at_frame_locked (metrics, frame) * 4.0;
 
 	return ret;
 }
@@ -2130,7 +2138,43 @@ TempoMap::frame_at_quarter_note (const double quarter_note)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
-	const framepos_t ret = frame_at_pulse_locked (_metrics, quarter_note / 4.0);
+	const framepos_t ret = frame_at_quarter_note_locked (_metrics, quarter_note);
+
+	return ret;
+}
+
+framepos_t
+TempoMap::frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note)
+{
+	const framepos_t ret = frame_at_pulse_locked (metrics, quarter_note / 4.0);
+
+	return ret;
+}
+
+double
+TempoMap::quarter_note_at_beat (const double beat)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	const double ret = quarter_note_at_beat_locked (_metrics, beat);
+
+	return ret;
+}
+
+double
+TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat)
+{
+	const double ret = pulse_at_beat_locked (metrics, beat) * 4.0;
+
+	return ret;
+}
+
+double
+TempoMap::beat_at_quarter_note (const double quarter_note)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+
+	const double ret = beat_at_pulse_locked (_metrics, quarter_note / 4.0);
 
 	return ret;
 }
@@ -3102,6 +3146,43 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
 
 	return beat;
 }
+double
+TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return exact_qn_at_frame_locked (_metrics, frame, sub_num);
+}
+
+double
+TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num)
+{
+	double qn = quarter_note_at_frame_locked (metrics, frame);
+
+	if (sub_num > 1) {
+		qn = floor (qn) + (floor (((qn - floor (qn)) * (double) sub_num) + 0.5) / sub_num);
+	} else if (sub_num == 1) {
+		/* snap to quarter note */
+		qn = floor (qn + 0.5);
+	} else if (sub_num == -1) {
+		/* snap to  bar */
+		Timecode::BBT_Time bbt = bbt_at_pulse_locked (metrics, qn / 4.0);
+		bbt.beats = 1;
+		bbt.ticks = 0;
+
+		const double prev_b = pulse_at_bbt_locked (_metrics, bbt) * 4.0;
+		++bbt.bars;
+		const double next_b = pulse_at_bbt_locked (_metrics, bbt) * 4.0;
+
+		if ((qn - prev_b) > (next_b - prev_b) / 2.0) {
+			qn = next_b;
+		} else {
+			qn = prev_b;
+		}
+	}
+
+	return qn;
+}
 
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
@@ -3219,6 +3300,102 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 	}
 
 	const framepos_t ret_frame = frame_at_beat_locked (_metrics, beats + (ticks / BBT_Time::ticks_per_beat));
+
+	return ret_frame;
+}
+
+framepos_t
+TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	uint32_t ticks = (uint32_t) floor (max (0.0, quarter_note_at_frame_locked (_metrics, fr)) * BBT_Time::ticks_per_beat);
+	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
+	uint32_t ticks_one_subdivisions_worth = (uint32_t) BBT_Time::ticks_per_beat / sub_num;
+
+	ticks -= beats * BBT_Time::ticks_per_beat;
+
+	if (dir > 0) {
+		/* round to next (or same iff dir == RoundUpMaybe) */
+
+		uint32_t mod = ticks % ticks_one_subdivisions_worth;
+
+		if (mod == 0 && dir == RoundUpMaybe) {
+			/* right on the subdivision, which is fine, so do nothing */
+
+		} else if (mod == 0) {
+			/* right on the subdivision, so the difference is just the subdivision ticks */
+			ticks += ticks_one_subdivisions_worth;
+
+		} else {
+			/* not on subdivision, compute distance to next subdivision */
+
+			ticks += ticks_one_subdivisions_worth - mod;
+		}
+
+		if (ticks >= BBT_Time::ticks_per_beat) {
+			ticks -= BBT_Time::ticks_per_beat;
+		}
+	} else if (dir < 0) {
+
+		/* round to previous (or same iff dir == RoundDownMaybe) */
+
+		uint32_t difference = ticks % ticks_one_subdivisions_worth;
+
+		if (difference == 0 && dir == RoundDownAlways) {
+			/* right on the subdivision, but force-rounding down,
+			   so the difference is just the subdivision ticks */
+			difference = ticks_one_subdivisions_worth;
+		}
+
+		if (ticks < difference) {
+			ticks = BBT_Time::ticks_per_beat - ticks;
+		} else {
+			ticks -= difference;
+		}
+
+	} else {
+		/* round to nearest */
+		double rem;
+
+		/* compute the distance to the previous and next subdivision */
+
+		if ((rem = fmod ((double) ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
+
+			/* closer to the next subdivision, so shift forward */
+
+			ticks = lrint (ticks + (ticks_one_subdivisions_worth - rem));
+
+			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", ticks));
+
+			if (ticks > BBT_Time::ticks_per_beat) {
+				++beats;
+				ticks -= BBT_Time::ticks_per_beat;
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", beats));
+			}
+
+		} else if (rem > 0) {
+
+			/* closer to previous subdivision, so shift backward */
+
+			if (rem > ticks) {
+				if (beats == 0) {
+					/* can't go backwards past zero, so ... */
+					return 0;
+				}
+				/* step back to previous beat */
+				--beats;
+				ticks = lrint (BBT_Time::ticks_per_beat - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", beats));
+			} else {
+				ticks = lrint (ticks - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", ticks));
+			}
+		} else {
+			/* on the subdivision, do nothing */
+		}
+	}
+
+	const framepos_t ret_frame = frame_at_quarter_note_locked (_metrics, beats + (ticks / BBT_Time::ticks_per_beat));
 
 	return ret_frame;
 }
@@ -3904,6 +4081,13 @@ TempoMap::framepos_plus_beats (framepos_t frame, Evoral::Beats beats) const
 
 	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
 }
+framepos_t
+TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats beats) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
+}
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
@@ -3950,6 +4134,13 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	return Evoral::Beats (beat_at_frame_locked (_metrics, pos + distance) - beat_at_frame_locked (_metrics, pos));
 }
 
+Evoral::Beats
+TempoMap::framewalk_to_qn (framepos_t pos, framecnt_t distance) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return Evoral::Beats (beat_at_frame_locked (_metrics, pos + distance) - beat_at_frame_locked (_metrics, pos));
+}
 struct bbtcmp {
     bool operator() (const BBT_Time& a, const BBT_Time& b) {
 	    return a < b;
