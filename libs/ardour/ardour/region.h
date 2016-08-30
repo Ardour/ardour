@@ -58,6 +58,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            pulse;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        ancestral_start;
@@ -177,6 +178,8 @@ class LIBARDOUR_API Region
 
 	double beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
+	double pulse () const { return _pulse; }
+	void set_pulse (double pulse) { _pulse = pulse; }
 
 	void suspend_property_changes ();
 
@@ -375,6 +378,7 @@ class LIBARDOUR_API Region
 	PBD::Property<framecnt_t>  _length;
 	PBD::Property<framepos_t>  _position;
 	PBD::Property<double>      _beat;
+	PBD::Property<double>      _pulse;
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
 
