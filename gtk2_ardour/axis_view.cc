@@ -98,19 +98,23 @@ AxisView::set_gui_property (const std::string& property_name, const std::string&
 bool
 AxisView::marked_for_display () const
 {
-	string const v = gui_property ("visible");
-	return (v == "" || PBD::string_is_affirmative (v));
+	bool visible;
+	if (!get_gui_property ("visible", visible)) {
+		return true;
+	}
+	return visible;
 }
 
 bool
 AxisView::set_marked_for_display (bool yn)
 {
-	string const v = gui_property ("visible");
-	if (v == "" || yn != PBD::string_is_affirmative (v)) {
-		set_gui_property ("visible", yn);
-		return true; // things changed
+	bool visible;
+	if (get_gui_property ("visible", visible) && visible == yn) {
+		return false; // nothing changed
 	}
-	return false;
+
+	set_gui_property ("visible", yn);
+	return true; // things changed
 }
 
 GUIObjectState&
