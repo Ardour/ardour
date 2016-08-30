@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-/** Takes a positive duration in beats and considers it as a distance from the origin
+/** Takes a positive duration in quarter-note beats and considers it as a distance from the origin
  *  supplied to the constructor.  Returns the equivalent number of frames,
  *  taking tempo changes into account.
  */
@@ -38,20 +38,20 @@ BeatsFramesConverter::to (Evoral::Beats beats) const
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.framepos_plus_beats (_origin_b, beats) - _origin_b;
+	return _tempo_map.framepos_plus_qn (_origin_b, beats) - _origin_b;
 }
 
 /** Takes a duration in frames and considers it as a distance from the origin
- *  supplied to the constructor.  Returns the equivalent number of beats,
+ *  supplied to the constructor.  Returns the equivalent number of quarter-note beats,
  *  taking tempo changes into account.
  */
 Evoral::Beats
 BeatsFramesConverter::from (framepos_t frames) const
 {
-	return _tempo_map.framewalk_to_beats (_origin_b, frames);
+	return _tempo_map.framewalk_to_qn (_origin_b, frames);
 }
 
-/** As above, but with beats in double instead (for GUI). */
+/** As above, but with quarter-note beats in double instead (for GUI). */
 framepos_t
 DoubleBeatsFramesConverter::to (double beats) const
 {
@@ -60,14 +60,14 @@ DoubleBeatsFramesConverter::to (double beats) const
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.framepos_plus_beats (_origin_b, Evoral::Beats(beats)) - _origin_b;
+	return _tempo_map.framepos_plus_qn (_origin_b, Evoral::Beats(beats)) - _origin_b;
 }
 
-/** As above, but with beats in double instead (for GUI). */
+/** As above, but with quarter-note beats in double instead (for GUI). */
 double
 DoubleBeatsFramesConverter::from (framepos_t frames) const
 {
-	return _tempo_map.framewalk_to_beats (_origin_b, frames).to_double();
+	return _tempo_map.framewalk_to_qn (_origin_b, frames).to_double();
 }
 
 } /* namespace ARDOUR */

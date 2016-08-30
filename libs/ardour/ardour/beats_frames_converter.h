@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class TempoMap;
 
-/** Converter between beats and frames.  Takes distances in beats or frames
+/** Converter between quarter-note beats and frames.  Takes distances in quarter-note beats or frames
  *  from some origin (supplied to the constructor in frames), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
@@ -51,7 +51,7 @@ private:
 	TempoMap& _tempo_map;
 };
 
-/** Converter between beats and frames.  Takes distances in beats or frames
+/** Converter between quarter-note beats and frames.  Takes distances in quarter-note beats or frames
  *  from some origin (supplied to the constructor in frames), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
