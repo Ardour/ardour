@@ -543,10 +543,12 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	   so it was detached above
 	*/
 
+	bool single_track_selected = (!for_selection || _editor.get_selection().tracks.size() == 1);
+
 	if (!subplugin_menu.items().empty()) {
 		items.push_back (SeparatorElem ());
 		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
-		items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
+		items.back().set_sensitive (single_track_selected);
 	}
 
 	/* Add any route automation */
@@ -554,8 +556,8 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (gain_track) {
 		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &RouteTimeAxisView::update_gain_track_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-		                                  string_is_affirmative (gain_track->gui_property ("visible")));
+		gain_automation_item->set_active (single_track_selected &&
+		                                  string_to<bool>(gain_track->gui_property ("visible")));
 
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
@@ -563,8 +565,8 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (trim_track) {
 		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &RouteTimeAxisView::update_trim_track_visibility)));
 		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		trim_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-		                                  string_is_affirmative (trim_track->gui_property ("visible")));
+		trim_automation_item->set_active (single_track_selected &&
+		                                  string_to<bool>(trim_track->gui_property ("visible")));
 
 		_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
 	}
@@ -572,8 +574,8 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (mute_track) {
 		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &RouteTimeAxisView::update_mute_track_visibility)));
 		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-		                                  string_is_affirmative (mute_track->gui_property ("visible")));
+		mute_automation_item->set_active (single_track_selected &&
+		                                  string_to<bool>(mute_track->gui_property ("visible")));
 
 		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 	}
@@ -581,8 +583,8 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (!pan_tracks.empty()) {
 		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &RouteTimeAxisView::update_pan_track_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-						 string_is_affirmative (pan_tracks.front()->gui_property ("visible")));
+		pan_automation_item->set_active (single_track_selected &&
+		                                 string_to<bool>(pan_tracks.front()->gui_property ("visible")));
 
 		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
