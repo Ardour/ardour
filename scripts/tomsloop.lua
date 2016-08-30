@@ -5,13 +5,11 @@ ardour { ["type"] = "EditorAction", name = "Tom's Loop",
 }
 
 -- for minimal configuration in dialogue
--- ============================================================================
 function action_params ()
 	return { ["times"]   = { title = "Number of copies to add", default = "1"}, }
 end
 
 -- main method, every custom (i.e. non-ardour) method must be defined *inside* factory()
--- ============================================================================
 function factory (params) return function ()
 	-- get options
 	local p = params or {}
@@ -126,9 +124,9 @@ function factory (params) return function ()
 	end
 
 	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " frames) to playhead @ frame # " .. playhead)
+	::errorout::
 
 -- when this script is called as an action, the output will be printed to the ardour log window
--- ============================================================================
 	function print_help()
 		print("")
 		print("---------------------------------------------------------------------")
@@ -276,6 +274,5 @@ function factory (params) return function ()
 		print("See also: Lua Action Bounce+Replace Regions")
 		print("")
 	end -- print_help()
-	::errorout::
-end -- factory()
-end -- end of lua script
+end -- end of anonymous action script function
+end -- end of script factory
