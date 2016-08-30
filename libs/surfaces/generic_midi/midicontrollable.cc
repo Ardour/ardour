@@ -25,6 +25,7 @@
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
+#include "pbd/types_convert.h"
 #include "pbd/compose.h"
 
 #include "midi++/types.h" // Added by JE - 06-01-2009. All instances of 'byte' changed to 'MIDI::byte' (for clarification)
@@ -719,25 +720,24 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 int
 MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
 	int xx;
 
-	if ((prop = node.property ("event")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
+	std::string str;
+	if (node.get_property ("event", str)) {
+		sscanf (str.c_str(), "0x%x", &xx);
 		control_type = (MIDI::eventType) xx;
 	} else {
 		return -1;
 	}
 
-	if ((prop = node.property ("channel")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &xx);
-		control_channel = (MIDI::channel_t) xx;
+	if (node.get_property ("channel", xx)) {
+		control_channel = xx;
 	} else {
 		return -1;
 	}
 
-	if ((prop = node.property ("additional")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
+	if (node.get_property ("additional", str)) {
+		sscanf (str.c_str(), "0x%x", &xx);
 		control_additional = (MIDI::byte) xx;
 	} else {
 		return -1;
@@ -756,18 +756,17 @@ MIDIControllable::get_state ()
 	XMLNode* node = new XMLNode ("MIDIControllable");
 
 	if (_current_uri.empty()) {
-                node->add_property ("id", controllable->id().to_s());
+		node->set_property ("id", controllable->id ());
 	} else {
-		node->add_property ("uri", _current_uri);
-        }
+		node->set_property ("uri", _current_uri);
+	}
 
 	if (controllable) {
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
-		node->add_property ("event", buf);
-		snprintf (buf, sizeof(buf), "%d", (int) control_channel);
-		node->add_property ("channel", buf);
+		node->set_property ("event", (const char *)buf);
+		node->set_property ("channel", (int16_t)control_channel);
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
-		node->add_property ("additional", buf);
+		node->set_property ("additional", (const char *)buf);
 	}
 
 	return *node;
