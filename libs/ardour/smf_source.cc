@@ -434,6 +434,8 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 	}
 
 	_length_beats = max(_length_beats, time);
+	/* midi is in quarter note format as distinct from ardour beat */
+	_length_pulse = _length_beats.to_double() / 4.0;
 
 	const Evoral::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
@@ -483,6 +485,8 @@ SMFSource::append_event_frames (const Glib::Threads::Mutex::Lock& lock,
 	}
 
 	_length_beats = max(_length_beats, ev_time_beats);
+	/* midi is in quarter note format as distinct from ardour beat */
+	_length_pulse = _length_beats.to_double() / 4.0;
 
 	const Evoral::Beats last_time_beats  = converter.from (_last_ev_time_frames);
 	const Evoral::Beats delta_time_beats = ev_time_beats - last_time_beats;
@@ -695,6 +699,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 				size = scratch_size;
 
 				_length_beats = max(_length_beats, event_time);
+				/* midi is in quarter note format as distinct from ardour beat */
+				_length_pulse = _length_beats.to_double() / 4.0;
 			}
 
 			/* event ID's must immediately precede the event they are for */

@@ -63,6 +63,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
+	, _length_pulse(0.0)
 	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
@@ -74,6 +75,7 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
+	, _length_pulse(0.0)
 	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
@@ -194,11 +196,13 @@ MidiSource::midi_read (const Lock&                        lm,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
-		       double                             beat,
-		       double                             start_beat) const
+		       const double                       pulse,
+		       const double                       start_pulse) const
 {
 	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
-
+	const int32_t tpb = Timecode::BBT_Time::ticks_per_beat;
+	const double pulse_tick_res = floor ((pulse * 4.0 * tpb) + 0.5) / tpb;
+	const double start_qn = (pulse - start_pulse) * 4.0;
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
 	                             source_start, start, cnt, tracker, name()));
@@ -250,7 +254,7 @@ MidiSource::midi_read (const Lock&                        lm,
 			 * some way (maybe keep an iterator per playlist).
 			 */
 			for (i = _model->begin(); i != _model->end(); ++i) {
-				if (i->time().to_double() + (beat - start_beat) >= beat) {
+				if (floor (((i->time().to_double() + start_qn) * tpb) + 0.5) / tpb >= pulse_tick_res) {
 					break;
 				}
 			}
@@ -265,8 +269,8 @@ MidiSource::midi_read (const Lock&                        lm,
 
 		// Copy events in [start, start + cnt) into dst
 		for (; i != _model->end(); ++i) {
-			const framecnt_t time_frames = _session.tempo_map().frame_at_beat (i->time().to_double() + (beat - start_beat));
 
+			const framecnt_t time_frames = _session.tempo_map().frame_at_quarter_note (i->time().to_double() + start_qn);
 			if (time_frames < start + cnt + source_start) {
 				if (filter && filter->filter(i->buffer(), i->size())) {
 					DEBUG_TRACE (DEBUG::MidiSourceIO,
@@ -346,8 +350,10 @@ MidiSource::mark_write_starting_now (framecnt_t position,
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
-	BeatsFramesConverter converter(_session.tempo_map(), position);
+	TempoMap& map (_session.tempo_map());
+	BeatsFramesConverter converter(map, position);
 	_length_beats = converter.from(capture_length);
+	_length_pulse = map.pulse_at_frame (position + capture_length) - map.pulse_at_frame (position);
 }
 
 void
