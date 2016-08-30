@@ -28,6 +28,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/types_convert.h"
 #include "pbd/xml++.h"
 #include "pbd/compose.h"
 
@@ -198,13 +199,12 @@ GenericMidiControlProtocol::reload_maps ()
 
 		MapInfo mi;
 
-		XMLProperty const * prop = tree.root()->property ("name");
-
-		if (!prop) {
+		std::string str;
+		if (!tree.root()->get_property ("name", str)) {
 			continue;
 		}
 
-		mi.name = prop->value ();
+		mi.name = str;
 		mi.path = fullpath;
 
 		map_info.push_back (mi);
@@ -580,17 +580,13 @@ XMLNode&
 GenericMidiControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	char buf[32];
 
-	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
-	node.add_property (X_("feedback_interval"), buf);
-	snprintf (buf, sizeof (buf), "%d", _threshold);
-	node.add_property (X_("threshold"), buf);
-
-	node.add_property (X_("motorized"), _motorised ? "yes" : "no");
+	node.set_property (X_("feedback_interval"), _feedback_interval);
+	node.set_property (X_("threshold"), _threshold);
+	node.set_property (X_("motorized"), _motorised);
 
 	if (!_current_binding.empty()) {
-		node.add_property ("binding", _current_binding);
+		node.set_property ("binding", _current_binding);
 	}
 
 	XMLNode* children = new XMLNode (X_("Controls"));
@@ -618,31 +614,20 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	const XMLProperty* prop;
 
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
 	}
 
-	if ((prop = node.property ("feedback_interval")) != 0) {
-		if (sscanf (prop->value().c_str(), "%" PRIu64, &_feedback_interval) != 1) {
-			_feedback_interval = 10000;
-		}
-	} else {
+	if (!node.get_property ("feedback_interval", _feedback_interval)) {
 		_feedback_interval = 10000;
 	}
 
-	if ((prop = node.property ("threshold")) != 0) {
-		if (sscanf (prop->value().c_str(), "%d", &_threshold) != 1) {
-			_threshold = 10;
-		}
-	} else {
+	if (!node.get_property ("threshold", _threshold)) {
 		_threshold = 10;
 	}
 
-	if ((prop = node.property ("motorized")) != 0) {
-		_motorised = string_is_affirmative (prop->value ());
-	} else {
+	if (!node.get_property ("motorized", _motorised)) {
 		_motorised = false;
 	}
 
@@ -660,10 +645,11 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		pending_controllables.clear ();
 	}
 
+	std::string str;
 	// midi map has to be loaded first so learned binding can go on top
-	if ((prop = node.property ("binding")) != 0) {
+	if (node.get_property ("binding", str)) {
 		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (prop->value() == (*x).name) {
+			if (str == (*x).name) {
 				load_bindings ((*x).path);
 				break;
 			}
@@ -684,9 +670,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 			if (!nlist.empty()) {
 				for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-					if ((prop = (*niter)->property ("id")) != 0) {
+					PBD::ID id;
+					if ((*niter)->get_property ("id", id)) {
 
-						ID id = prop->value ();
 						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
 						Controllable* c = Controllable::by_id (id);
 
@@ -764,25 +750,18 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 	for (citer = children.begin(); citer != children.end(); ++citer) {
 
 		if ((*citer)->name() == "DeviceInfo") {
-			const XMLProperty* prop;
 
-			if ((prop = (*citer)->property ("bank-size")) != 0) {
-				_bank_size = atoi (prop->value());
+			if ((*citer)->get_property ("bank-size", _bank_size)) {
 				_current_bank = 0;
 			}
 
-			if ((prop = (*citer)->property ("motorized")) != 0) {
-				_motorised = string_is_affirmative (prop->value ());
-			} else {
+			if (!(*citer)->get_property ("motorized", _motorised)) {
 				_motorised = false;
 			}
 
-			if ((prop = (*citer)->property ("threshold")) != 0) {
-				_threshold = atoi (prop->value ());
-			} else {
+			if (!(*citer)->get_property ("threshold", _threshold)) {
 				_threshold = 10;
 			}
-
 		}
 
 		if ((*citer)->name() == "Binding") {
@@ -806,12 +785,12 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				}
 
 			} else if (child->property ("action")) {
-                                MIDIAction* ma;
+				MIDIAction* ma;
 
 				if ((ma = create_action (*child)) != 0) {
 					actions.push_back (ma);
 				}
-                        }
+			}
 		}
 	}
 
