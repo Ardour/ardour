@@ -2112,7 +2112,7 @@ TempoMap::quarter_note_at_frame (const framepos_t frame)
 }
 
 double
-TempoMap::quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame)
+TempoMap::quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame) const
 {
 	const double ret = pulse_at_frame_locked (metrics, frame) * 4.0;
 
@@ -2144,7 +2144,7 @@ TempoMap::frame_at_quarter_note (const double quarter_note)
 }
 
 framepos_t
-TempoMap::frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note)
+TempoMap::frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const
 {
 	const framepos_t ret = frame_at_pulse_locked (metrics, quarter_note / 4.0);
 
@@ -2162,7 +2162,7 @@ TempoMap::quarter_note_at_beat (const double beat)
 }
 
 double
-TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat)
+TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const
 {
 	const double ret = pulse_at_beat_locked (metrics, beat) * 4.0;
 
@@ -4082,11 +4082,11 @@ TempoMap::framepos_plus_beats (framepos_t frame, Evoral::Beats beats) const
 	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
 }
 framepos_t
-TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats beats) const
+TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats quarter_note) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
+	return frame_at_quarter_note_locked (_metrics, quarter_note_at_frame_locked (_metrics, frame) + quarter_note.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
@@ -4139,7 +4139,7 @@ TempoMap::framewalk_to_qn (framepos_t pos, framecnt_t distance) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return Evoral::Beats (beat_at_frame_locked (_metrics, pos + distance) - beat_at_frame_locked (_metrics, pos));
+	return Evoral::Beats (quarter_note_at_frame_locked (_metrics, pos + distance) - quarter_note_at_frame_locked (_metrics, pos));
 }
 struct bbtcmp {
     bool operator() (const BBT_Time& a, const BBT_Time& b) {
