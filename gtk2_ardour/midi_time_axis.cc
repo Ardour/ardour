@@ -314,7 +314,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			*i, route_id, has_parameter, parameter);
 		if (p && route_id == _route->id () && has_parameter) {
 			const std::string& visible = gui_object_state().get_string (*i, X_("visible"));
-			create_automation_child (parameter, string_is_affirmative (visible));
+			create_automation_child (parameter, string_to<bool> (visible));
 		}
 	}
 }
