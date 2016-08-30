@@ -179,9 +179,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	set_tooltip(auto_dropdown, _("automation state"));
 	set_tooltip(hide_button, _("hide track"));
 
-	const string str = gui_property ("height");
-	if (!str.empty()) {
-		set_height (atoi (str));
+	uint32_t height;
+	if (get_gui_property ("height", height)) {
+		set_height (height);
 	} else {
 		set_height (preset_height (HeightNormal));
 	}
