@@ -89,7 +89,7 @@ XMLNode&
 WiimoteControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	node.add_property (X_("feedback"), "0");
+	node.set_property (X_("feedback"), "0");
 	return node;
 }
 
