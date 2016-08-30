@@ -141,10 +141,6 @@ public:
 
 	bool has_property_with_value (const std::string&, const std::string&) const;
 
-	XMLProperty* add_property(const char* name, const std::string& value);
-	XMLProperty* add_property(const char* name, const char* value = "");
-	XMLProperty* add_property(const char* name, const long value);
-
 	bool set_property (const char* name, const std::string& value);
 
 	bool set_property (const char* name, const char* cstr) {

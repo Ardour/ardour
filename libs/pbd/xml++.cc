@@ -286,7 +286,7 @@ XMLNode::operator= (const XMLNode& from)
 	const XMLPropertyList& props = from.properties ();
 
 	for (XMLPropertyConstIterator prop_iter = props.begin (); prop_iter != props.end (); ++prop_iter) {
-		add_property ((*prop_iter)->name ().c_str (), (*prop_iter)->value ());
+		set_property ((*prop_iter)->name ().c_str (), (*prop_iter)->value ());
 	}
 
 	const XMLNodeList& nodes = from.children ();
@@ -551,8 +551,8 @@ XMLNode::has_property_with_value (const string& name, const string& value) const
 	return false;
 }
 
-XMLProperty*
-XMLNode::add_property(const char* name, const string& value)
+bool
+XMLNode::set_property(const char* name, const string& value)
 {
 	XMLPropertyIterator iter = _proplist.begin();
 
@@ -573,26 +573,6 @@ XMLNode::add_property(const char* name, const string& value)
 	_proplist.insert(_proplist.end(), new_property);
 
 	return new_property;
-}
-
-XMLProperty*
-XMLNode::add_property(const char* n, const char* v)
-{
-	string vs(v);
-	return add_property(n, vs);
-}
-
-XMLProperty*
-XMLNode::add_property(const char* name, const long value)
-{
-	char str[64];
-	snprintf(str, sizeof(str), "%ld", value);
-	return add_property(name, str);
-}
-
-bool
-XMLNode::set_property(const char* name, const string& str) {
-	return add_property (name, str);
 }
 
 bool
@@ -713,7 +693,7 @@ readnode(xmlNodePtr node)
 		if (attr->children) {
 			content = (char*)attr->children->content;
 		}
-		tmp->add_property((const char*)attr->name, content);
+		tmp->set_property((const char*)attr->name, content);
 	}
 
 	if (node->content) {
