@@ -3674,23 +3674,23 @@ XMLNode&
 OSC::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	node.add_property("debugmode", (int) _debugmode); // TODO: enum2str
-	node.add_property ("address-only", address_only);
-	node.add_property ("remote-port", remote_port);
-	node.add_property ("banksize", default_banksize);
-	node.add_property ("striptypes", default_strip);
-	node.add_property ("feedback", default_feedback);
-	node.add_property ("gainmode", default_gainmode);
+	node.set_property ("debugmode", (int32_t) _debugmode); // TODO: enum2str
+	node.set_property ("address-only", address_only);
+	node.set_property ("remote-port", remote_port);
+	node.set_property ("banksize", default_banksize);
+	node.set_property ("striptypes", default_strip);
+	node.set_property ("feedback", default_feedback);
+	node.set_property ("gainmode", default_gainmode);
 	if (_surface.size()) {
 		XMLNode* config = new XMLNode (X_("Configurations"));
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
 			OSCSurface* sur = &_surface[it];
 			XMLNode* devnode = new XMLNode (X_("Configuration"));
-			devnode->add_property (X_("url"), sur->remote_url);
-			devnode->add_property (X_("bank-size"), sur->bank_size);
-			devnode->add_property (X_("strip-types"), sur->strip_types.to_ulong());
-			devnode->add_property (X_("feedback"), sur->feedback.to_ulong());
-			devnode->add_property (X_("gainmode"), sur->gainmode);
+			devnode->set_property (X_("url"), sur->remote_url);
+			devnode->set_property (X_("bank-size"), sur->bank_size);
+			devnode->set_property (X_("strip-types"), (uint64_t)sur->strip_types.to_ulong());
+			devnode->set_property (X_("feedback"), (uint64_t)sur->feedback.to_ulong());
+			devnode->set_property (X_("gainmode"), sur->gainmode);
 			config->add_child_nocopy (*devnode);
 		}
 		node.add_child_nocopy (*config);
@@ -3704,68 +3704,48 @@ OSC::set_state (const XMLNode& node, int version)
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
 	}
-	XMLProperty const * p = node.property (X_("debugmode"));
-	if (p) {
-		_debugmode = OSCDebugMode (PBD::atoi(p->value ()));
+	int32_t debugmode;
+	if (node.get_property (X_("debugmode"), debugmode)) {
+		_debugmode = OSCDebugMode (debugmode);
 	}
-	p = node.property (X_("address-only"));
-	if (p) {
-		address_only = OSCDebugMode (PBD::atoi(p->value ()));
-	}
-	p = node.property (X_("remote-port"));
-	if (p) {
-		remote_port = p->value ();
-	}
-	p = node.property (X_("banksize"));
-	if (p) {
-		default_banksize = OSCDebugMode (PBD::atoi(p->value ()));
-	}
-	p = node.property (X_("striptypes"));
-	if (p) {
-		default_strip = OSCDebugMode (PBD::atoi(p->value ()));
-	}
-	p = node.property (X_("feedback"));
-	if (p) {
-		default_feedback = OSCDebugMode (PBD::atoi(p->value ()));
-	}
-	p = node.property (X_("gainmode"));
-	if (p) {
-		default_gainmode = OSCDebugMode (PBD::atoi(p->value ()));
-	}
+
+	node.get_property (X_("address-only"), address_only);
+	node.get_property (X_("remote-port"), remote_port);
+	node.get_property (X_("banksize"), default_banksize);
+	node.get_property (X_("striptypes"), default_strip);
+	node.get_property (X_("feedback"), default_feedback);
+	node.get_property (X_("gainmode"), default_gainmode);
+
 	XMLNode* cnode = node.child (X_("Configurations"));
 
 	if (cnode) {
 		XMLNodeList const& devices = cnode->children();
 		for (XMLNodeList::const_iterator d = devices.begin(); d != devices.end(); ++d) {
-			XMLProperty const * prop = (*d)->property (X_("url"));
-			if (prop) {
-				OSCSurface s;
-				bank_dirty = true;
-				s.remote_url = prop->value();
-				prop = (*d)->property (X_("bank-size"));
-				if (prop) {
-					s.bank_size = atoi (prop->value().c_str());
-				}
-				prop = (*d)->property (X_("strip-types"));
-				if (prop) {
-					s.strip_types = atoi (prop->value().c_str());
-				}
-				prop = (*d)->property (X_("feedback"));
-				if (prop) {
-					s.feedback = atoi (prop->value().c_str());
-				}
-				prop = (*d)->property (X_("gainmode"));
-				if (prop) {
-					s.gainmode = atoi (prop->value().c_str());
-				}
-				s.bank = 1;
-				s.sel_obs = 0;
-				s.expand = 0;
-				s.expand_enable = false;
-				s.strips = get_sorted_stripables(s.strip_types, s.cue);
-				s.nstrips = s.strips.size();
-				_surface.push_back (s);
+			OSCSurface s;
+			if (!(*d)->get_property (X_("url"), s.remote_url)) {
+				continue;
 			}
+
+			bank_dirty = true;
+
+			(*d)->get_property (X_("bank-size"), s.bank_size);
+
+			uint64_t bits;
+			if ((*d)->get_property (X_ ("strip-types"), bits)) {
+				s.strip_types = bits;
+			}
+			if ((*d)->get_property (X_("feedback"), bits)) {
+				s.feedback = bits;
+			}
+			(*d)->get_property (X_("gainmode"), s.gainmode);
+
+			s.bank = 1;
+			s.sel_obs = 0;
+			s.expand = 0;
+			s.expand_enable = false;
+			s.strips = get_sorted_stripables (s.strip_types, s.cue);
+			s.nstrips = s.strips.size ();
+			_surface.push_back (s);
 		}
 	}
 	global_init = true;
