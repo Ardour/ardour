@@ -357,7 +357,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 
 	_start = other->_start + offset;
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_pulse = _session.tempo_map().pulse_at_beat (_beat);
+	_pulse = _session.tempo_map().exact_qn_at_frame (_position, sub_num) / 4.0;
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -555,7 +555,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 
 		if (_position_lock_style == MusicTime) {
 			_beat = _session.tempo_map().beat_at_frame (_position);
-			_pulse = _session.tempo_map().pulse_at_beat (_beat);
+			_pulse = _session.tempo_map().pulse_at_frame (_position);
 		}
 
 		send_change (Properties::position_lock_style);
@@ -602,7 +602,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	} else {
 		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
 		_beat = beat;
-		_pulse = _session.tempo_map().pulse_at_beat (_beat);
+		_pulse = _session.tempo_map().exact_qn_at_frame (pos, sub_num) / 4.0;
 		set_position_internal (pos, false, sub_num);
 	}
 
@@ -675,7 +675,11 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 
 		if (allow_bbt_recompute) {
 			recompute_position_from_lock_style (sub_num);
+		} else {
+			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
+			_pulse = _session.tempo_map().exact_qn_at_frame (_position, sub_num) / 4.0;
 		}
+
 		/* check that the new _position wouldn't make the current
 		   length impossible - if so, change the length.
 
@@ -692,7 +696,7 @@ void
 Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_pulse = _session.tempo_map().pulse_at_beat (_beat);
+	_pulse = _session.tempo_map().exact_qn_at_frame (_position, sub_num) / 4.0;
 }
 
 void
