@@ -324,9 +324,9 @@ public:
 	 * \param t time in frames relative to the position of the region
 	 * \param y vertical position in pixels
 	 * \param length duration of the note in beats
-	 * \param snap_t true to snap t to the grid, otherwise false.
+	 * \param state the keyboard modifier mask for the canvas event (click).
 	 */
-	void create_note_at (framepos_t t, double y, Evoral::Beats length, bool snap_t);
+	void create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.
@@ -462,8 +462,8 @@ private:
 	void update_sustained (Note *, bool update_ghost_regions = true);
 	void update_hit (Hit *, bool update_ghost_regions = true);
 
-	void create_ghost_note (double, double);
-	void update_ghost_note (double, double);
+	void create_ghost_note (double, double, uint32_t state);
+	void update_ghost_note (double, double, uint32_t state);
 
 	MidiListEditor* _list_editor;
 	bool _no_sound_notes;
@@ -494,7 +494,7 @@ private:
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
-	void enter_internal ();
+	void enter_internal (uint32_t state);
 	void leave_internal ();
 	void hide_verbose_cursor ();
 
@@ -508,7 +508,7 @@ private:
 
 	bool _mouse_changed_selection;
 
-	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
+	Evoral::Beats snap_frame_to_grid_underneath (framepos_t p, int32_t divisions) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 
