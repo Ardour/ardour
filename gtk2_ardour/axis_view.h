@@ -63,20 +63,29 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 	 */
 	std::string gui_property (const std::string& property_name) const;
 
+	bool get_gui_property (const std::string& property_name, std::string& value) const;
+
+	template <typename T>
+	bool get_gui_property (const std::string& property_name, T& value) const
+	{
+		std::string str = gui_property (property_name);
+
+		if (!str.empty ()) {
+			return PBD::string_to<T>(str, value);
+		}
+		return false;
+	}
+
+	void set_gui_property (const std::string& property_name, const std::string& value);
+
 	void set_gui_property (const std::string& property_name, const char* value) {
-		property_hashtable.erase(property_name);
-		property_hashtable.emplace(property_name, value);
-		gui_object_state().set_property (state_id(), property_name, value);
+		set_gui_property (property_name, std::string(value));
 	}
 
-	void set_gui_property (const std::string& property_name, const std::string& value) {
-		set_gui_property (property_name, value.c_str());
-	}
-
-	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
-		property_hashtable.erase(property_name);
-		property_hashtable.emplace(property_name, PBD::to_string(value));
-		gui_object_state().set_property<T> (state_id(), property_name, value);
+	template <typename T>
+	void set_gui_property (const std::string& property_name, const T& value)
+	{
+		set_gui_property (property_name, PBD::to_string(value));
 	}
 
 	void cleanup_gui_properties () {

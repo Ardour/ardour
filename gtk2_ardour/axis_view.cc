@@ -75,6 +75,27 @@ AxisView::gui_property (const string& property_name) const
 }
 
 bool
+AxisView::get_gui_property (const std::string& property_name, std::string& value) const
+{
+	std::string str = gui_property(property_name);
+
+	if (!str.empty()) {
+		value = str;
+		return true;
+	}
+
+	return false;
+}
+
+void
+AxisView::set_gui_property (const std::string& property_name, const std::string& value)
+{
+	property_hashtable.erase (property_name);
+	property_hashtable.emplace (property_name, value);
+	gui_object_state ().set_property (state_id (), property_name, value);
+}
+
+bool
 AxisView::marked_for_display () const
 {
 	string const v = gui_property ("visible");
