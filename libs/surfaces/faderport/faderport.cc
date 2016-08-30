@@ -835,11 +835,10 @@ FaderPort::set_state (const XMLNode& node, int version)
 
 	for (XMLNodeList::const_iterator n = node.children().begin(); n != node.children().end(); ++n) {
 		if ((*n)->name() == X_("Button")) {
-			XMLProperty const * prop = (*n)->property (X_("id"));
-			if (!prop) {
+			int32_t xid;
+			if (!(*n)->get_property (X_("id"), xid)) {
 				continue;
 			}
-			int xid = atoi (prop->value());
 			ButtonMap::iterator b = buttons.find (ButtonID (xid));
 			if (b == buttons.end()) {
 				continue;
@@ -1041,13 +1040,8 @@ FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, bool onoff
 int
 FaderPort::Button::set_state (XMLNode const& node)
 {
-	const XMLProperty* prop = node.property ("id");
-	if (!prop) {
-		return -1;
-	}
-
-	int xid = atoi (prop->value());
-	if (xid != id) {
+	int32_t xid;
+	if (!node.get_property ("id", xid) || xid != id) {
 		return -1;
 	}
 
@@ -1059,16 +1053,16 @@ FaderPort::Button::set_state (XMLNode const& node)
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
-		string propname;
 
-		propname = sp->first + X_("-press");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), true, sp->second);
+		string propname = sp->first + X_("-press");
+		string value;
+		if (node.get_property (propname.c_str(), value)) {
+			set_action (value, true, sp->second);
 		}
 
 		propname = sp->first + X_("-release");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), false, sp->second);
+		if (node.get_property (propname.c_str(), value)) {
+			set_action (value, false, sp->second);
 		}
 	}
 
@@ -1079,10 +1073,8 @@ XMLNode&
 FaderPort::Button::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Button"));
-	char buf[16];
-	snprintf (buf, sizeof (buf), "%d", id);
 
-	node->add_property (X_("id"), buf);
+	node->set_property (X_("id"), to_string<int32_t>(id));
 
 	ToDoMap::const_iterator x;
 	ToDo null;
@@ -1098,13 +1090,13 @@ FaderPort::Button::get_state () const
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
 		if ((x = on_press.find (sp->second)) != on_press.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
 			}
 		}
 
 		if ((x = on_release.find (sp->second)) != on_release.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
 			}
 		}
 	}
