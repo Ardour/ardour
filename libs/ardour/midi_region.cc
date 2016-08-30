@@ -55,6 +55,8 @@ namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<Evoral::Beats> start_beats;
 		PBD::PropertyDescriptor<Evoral::Beats> length_beats;
+		PBD::PropertyDescriptor<double> start_pulse;
+		PBD::PropertyDescriptor<double> length_pulse;
 	}
 }
 
@@ -65,6 +67,10 @@ MidiRegion::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-beats = %1\n", Properties::start_beats.property_id));
 	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
+	Properties::start_pulse.property_id = g_quark_from_static_string (X_("start-pulse"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-pulse = %1\n", Properties::start_pulse.property_id));
+	Properties::length_pulse.property_id = g_quark_from_static_string (X_("length-pulse"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-pulse = %1\n", Properties::length_pulse.property_id));
 }
 
 void
@@ -72,6 +78,8 @@ MidiRegion::register_properties ()
 {
 	add_property (_start_beats);
 	add_property (_length_beats);
+	add_property (_start_pulse);
+	add_property (_length_pulse);
 }
 
 /* Basic MidiRegion constructor (many channels) */
@@ -79,6 +87,8 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
+	, _start_pulse (Properties::start_pulse, 0)
+	, _length_pulse (Properties::length_pulse, midi_source(0)->length_pulse())
 {
 	register_properties ();
 
@@ -92,6 +102,8 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, other->_length_beats)
+	, _start_pulse (Properties::start_pulse, other->_start_pulse)
+	, _length_pulse (Properties::length_pulse, other->_length_pulse)
 {
 	//update_length_beats ();
 	register_properties ();
@@ -106,8 +118,12 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	: Region (other, offset, sub_num)
 	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, other->_length_beats)
+	, _start_pulse (Properties::start_pulse, 0)
+	, _length_pulse (Properties::length_pulse, other->_length_pulse)
 {
 	_start_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame ((other->_position + offset), sub_num) - other->beat()) + other->_start_beats;
+	_start_pulse = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) / 4.0) - (other->pulse() + other->_start_pulse);
+
 	update_length_beats (sub_num);
 	register_properties ();
 
@@ -191,10 +207,13 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::start_beats, _start_beats);
 	plist.add (Properties::length, _length);
 	plist.add (Properties::length_beats, _length_beats);
+	plist.add (Properties::start_pulse, _start_pulse);
+	plist.add (Properties::length_pulse, _length_pulse);
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true)));
 	ret->set_beat (beat());
+	ret->set_pulse (pulse());
 
 	return ret;
 }
@@ -216,6 +235,7 @@ void
 MidiRegion::set_start_beats_from_start_frames ()
 {
 	_start_beats = Evoral::Beats (beat() - _session.tempo_map().beat_at_frame (_position - _start));
+	_start_pulse = pulse() - _session.tempo_map().pulse_at_frame (_position - _start);
 }
 
 void
@@ -261,6 +281,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 
 		/* _length doesn't change for audio-locked regions. update length_beats to match. */
 		_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - _session.tempo_map().beat_at_frame (_position));
+		_length_pulse = _session.tempo_map().pulse_at_frame (_position + _length) - _session.tempo_map().pulse_at_frame (_position);
 
 		s_and_l.add (Properties::start);
 		s_and_l.add (Properties::length_beats);
@@ -272,7 +293,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
-	_length = _session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position;
+	_length = _session.tempo_map().frame_at_pulse (pulse() + _length_pulse) - _position;
 
 	if (old_start != _start) {
 		s_and_l.add (Properties::start);
@@ -291,6 +312,7 @@ void
 MidiRegion::update_length_beats (const int32_t sub_num)
 {
 	_length_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame (_position + _length, sub_num) - beat());
+	_length_pulse = (_session.tempo_map().exact_qn_at_frame (_position + _length, sub_num) / 4.0) - pulse();
 }
 
 void
@@ -308,11 +330,12 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 
 	if (position_lock_style() == AudioTime) {
 		_length_beats = Evoral::Beats (_session.tempo_map().beat_at_frame (_position + _length) - _session.tempo_map().beat_at_frame (_position));
+		_length_pulse = _session.tempo_map().pulse_at_frame (_position + _length) - _session.tempo_map().pulse_at_frame (_position);
 	} else {
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames).
 		*/
-		Region::set_length_internal (_session.tempo_map().frame_at_beat (beat() + _length_beats.val().to_double()) - _position, sub_num);
+		Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + _length_pulse) - _position, sub_num);
 	}
 }
 
@@ -383,6 +406,9 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	  << " _position = " << _position
 	  << " _start = " << _start
 	  << " intoffset = " << internal_offset
+	  << " pulse = " << pulse()
+	  << " start_pulse = " << start_pulse()
+	  << " start_beat = " << _start_beats
 	  << endl;
 	*/
 
@@ -397,8 +423,8 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 			tracker,
 			filter,
 			_filtered_parameters,
-			beat(),
-			_start_beats.val().to_double()
+			pulse(),
+			start_pulse()
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}
@@ -548,6 +574,7 @@ MidiRegion::fix_negative_start ()
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
 	_start_beats = Evoral::Beats();
+	_start_pulse = 0.0;
 }
 
 void
@@ -575,6 +602,8 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	*/
 	const double pos_beat = _session.tempo_map().exact_beat_at_frame (position, sub_num);
 	const double beat_delta = pos_beat - beat();
+	const double pos_pulse = _session.tempo_map().exact_qn_at_frame (position, sub_num) / 4.0;
+	const double pulse_delta = pos_pulse - pulse();
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
@@ -590,7 +619,8 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 		what_changed.add (Properties::position);
 
 		const double new_start_beat = _start_beats.val().to_double() + beat_delta;
-		const framepos_t new_start = _position - _session.tempo_map().frame_at_beat (beat() - new_start_beat);
+		const double new_start_pulse = _start_pulse + pulse_delta;
+		const framepos_t new_start = _position - _session.tempo_map().frame_at_pulse (pulse() - new_start_pulse);
 
 		if (!verify_start_and_length (new_start, length)) {
 			return;
@@ -598,6 +628,9 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 
 		_start_beats = Evoral::Beats (new_start_beat);
 		what_changed.add (Properties::start_beats);
+
+		_start_pulse = new_start_pulse;
+		what_changed.add (Properties::start_pulse);
 
 		set_start_internal (new_start, sub_num);
 		what_changed.add (Properties::start);
