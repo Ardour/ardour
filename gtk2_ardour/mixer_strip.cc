@@ -57,6 +57,7 @@
 #include "ardour/vca_manager.h"
 
 #include "ardour_window.h"
+#include "enums_convert.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
@@ -741,9 +742,9 @@ MixerStrip::set_stuff_from_route ()
 {
 	/* if width is not set, it will be set by the MixerUI or editor */
 
-	string str = gui_property ("strip-width");
-	if (!str.empty()) {
-		set_width_enum (Width (string_2_enum (str, _width)), this);
+	Width width;
+	if (get_gui_property ("strip-width", width)) {
+		set_width_enum (width, this);
 	}
 }
 
@@ -762,7 +763,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	_width = w;
 
 	if (_width_owner == this) {
-		set_gui_property ("strip-width", enum_2_string (_width));
+		set_gui_property ("strip-width", _width);
 	}
 
 	set_button_names ();
@@ -838,12 +839,7 @@ void
 MixerStrip::set_packed (bool yn)
 {
 	_packed = yn;
-
-	if (_packed) {
-		set_gui_property ("visible", true);
-	} else {
-		set_gui_property ("visible", false);
-	}
+	set_gui_property ("visible", _packed);
 }
 
 
