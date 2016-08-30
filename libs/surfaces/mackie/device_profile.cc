@@ -172,24 +172,12 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 					b = _button_map.insert (_button_map.end(), std::pair<Button::ID,ButtonActions> (bid, ButtonActions()));
 				}
 
-				if ((prop = (*i)->property ("plain")) != 0) {
-					b->second.plain = prop->value ();
-				}
-				if ((prop = (*i)->property ("control")) != 0) {
-					b->second.control = prop->value ();
-				}
-				if ((prop = (*i)->property ("shift")) != 0) {
-					b->second.shift = prop->value ();
-				}
-				if ((prop = (*i)->property ("option")) != 0) {
-					b->second.option = prop->value ();
-				}
-				if ((prop = (*i)->property ("cmdalt")) != 0) {
-					b->second.cmdalt = prop->value ();
-				}
-				if ((prop = (*i)->property ("shiftcontrol")) != 0) {
-					b->second.shiftcontrol = prop->value ();
-				}
+				(*i)->get_property ("plain", b->second.plain);
+				(*i)->get_property ("control", b->second.control);
+				(*i)->get_property ("shift", b->second.shift);
+				(*i)->get_property ("option", b->second.option);
+				(*i)->get_property ("cmdalt", b->second.cmdalt);
+				(*i)->get_property ("shiftcontrol", b->second.shiftcontrol);
 			}
 		}
 	}
@@ -205,7 +193,7 @@ DeviceProfile::get_state () const
 	XMLNode* node = new XMLNode ("MackieDeviceProfile");
 	XMLNode* child = new XMLNode ("Name");
 
-	child->add_property ("value", name());
+	child->set_property ("value", name());
 	node->add_child_nocopy (*child);
 
 	if (_button_map.empty()) {
@@ -218,25 +206,25 @@ DeviceProfile::get_state () const
 	for (ButtonActionMap::const_iterator b = _button_map.begin(); b != _button_map.end(); ++b) {
 		XMLNode* n = new XMLNode ("Button");
 
-		n->add_property ("name", Button::id_to_name (b->first));
+		n->set_property ("name", Button::id_to_name (b->first));
 
 		if (!b->second.plain.empty()) {
-			n->add_property ("plain", b->second.plain);
+			n->set_property ("plain", b->second.plain);
 		}
 		if (!b->second.control.empty()) {
-			n->add_property ("control", b->second.control);
+			n->set_property ("control", b->second.control);
 		}
 		if (!b->second.shift.empty()) {
-			n->add_property ("shift", b->second.shift);
+			n->set_property ("shift", b->second.shift);
 		}
 		if (!b->second.option.empty()) {
-			n->add_property ("option", b->second.option);
+			n->set_property ("option", b->second.option);
 		}
 		if (!b->second.cmdalt.empty()) {
-			n->add_property ("cmdalt", b->second.cmdalt);
+			n->set_property ("cmdalt", b->second.cmdalt);
 		}
 		if (!b->second.shiftcontrol.empty()) {
-			n->add_property ("shiftcontrol", b->second.shiftcontrol);
+			n->set_property ("shiftcontrol", b->second.shiftcontrol);
 		}
 
 		buttons->add_child_nocopy (*n);
