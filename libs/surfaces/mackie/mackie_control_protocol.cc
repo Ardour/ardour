@@ -975,7 +975,7 @@ MackieControlProtocol::update_configuration_state ()
 	}
 
 	XMLNode* devnode = new XMLNode (X_("Configuration"));
-	devnode->add_property (X_("name"), _device_info.name());
+	devnode->set_property (X_("name"), _device_info.name());
 
 	configuration_state->remove_nodes_and_delete (X_("name"), _device_info.name());
 	configuration_state->add_child_nocopy (*devnode);
@@ -995,18 +995,15 @@ MackieControlProtocol::get_state()
 	XMLNode& node (ControlProtocol::get_state());
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state init\n");
-	char buf[16];
 
 	// add current bank
-	snprintf (buf, sizeof (buf), "%d", _current_initial_bank);
-	node.add_property (X_("bank"), buf);
+	node.set_property (X_("bank"), _current_initial_bank);
 
 	// ipMIDI base port (possibly not used)
-	snprintf (buf, sizeof (buf), "%d", _ipmidi_base);
-	node.add_property (X_("ipmidi-base"), buf);
+	node.set_property (X_("ipmidi-base"), _ipmidi_base);
 
-	node.add_property (X_("device-profile"), _device_profile.name());
-	node.add_property (X_("device-name"), _device_info.name());
+	node.set_property (X_("device-profile"), _device_profile.name());
+	node.set_property (X_("device-name"), _device_info.name());
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1032,29 +1029,27 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::set_state: active %1\n", active()));
 
-	int retval = 0;
-	const XMLProperty* prop;
-	uint32_t bank = 0;
-
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
 	}
 
-	if ((prop = node.property (X_("ipmidi-base"))) != 0) {
-		set_ipmidi_base (atoi (prop->value()));
+	uint16_t ipmidi_base;
+	if (node.get_property (X_("ipmidi-base"), ipmidi_base)) {
+		set_ipmidi_base (ipmidi_base);
 	}
 
+	uint32_t bank = 0;
 	// fetch current bank
-	if ((prop = node.property (X_("bank"))) != 0) {
-		bank = atoi (prop->value());
+	node.get_property (X_("bank"), bank);
+
+	std::string device_name;
+	if (node.get_property (X_("device-name"), device_name)) {
+		set_device_info (device_name);
 	}
 
-	if ((prop = node.property (X_("device-name"))) != 0) {
-		set_device_info (prop->value());
-	}
-
-	if ((prop = node.property (X_("device-profile"))) != 0) {
-		if (prop->value().empty()) {
+	std::string device_profile_name;
+	if (node.get_property (X_("device-profile"), device_profile_name)) {
+		if (device_profile_name.empty()) {
 			string default_profile_name;
 
 			/* start by looking for a user-edited profile for the current device name */
@@ -1084,8 +1079,8 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 			set_profile (default_profile_name);
 
 		} else {
-			if (profile_exists (prop->value())) {
-				set_profile (prop->value());
+			if (profile_exists (device_profile_name)) {
+				set_profile (device_profile_name);
 			} else {
 				set_profile (DeviceProfile::default_profile_name);
 			}
@@ -1106,7 +1101,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::set_state done\n");
 
-	return retval;
+	return 0;
 }
 
 string
