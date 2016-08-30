@@ -248,7 +248,7 @@ XMLNode&
 Surface::get_state()
 {
 	XMLNode* node = new XMLNode (X_("Surface"));
-	node->add_property (X_("name"), _name);
+	node->set_property (X_("name"), _name);
 	node->add_child_nocopy (_port->get_state());
 	return *node;
 }
@@ -262,12 +262,10 @@ Surface::set_state (const XMLNode& node, int version)
 	XMLNode* mynode = 0;
 
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-		XMLProperty const* prop = (*c)->property (X_("name"));
-		if (prop) {
-			if (prop->value() == _name) {
-				mynode = *c;
-				break;
-			}
+		std::string name;
+		if ((*c)->get_property (X_("name"), name) && name == _name) {
+			mynode = *c;
+			break;
 		}
 	}
 
