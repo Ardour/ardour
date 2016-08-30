@@ -51,6 +51,7 @@
 #include "streamview.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
+#include "enums_convert.h"
 #include "public_editor.h"
 #include "audio_region_editor.h"
 #include "audio_streamview.h"
@@ -1298,11 +1299,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		pending_peak_data->hide ();
 
 		/* Restore stacked coverage */
-		std::string str = trackview.gui_property ("layer-display");
-		if (!str.empty()) {
-			LayerDisplay layer_display;
-			update_coverage_frames (LayerDisplay (string_2_enum (str, layer_display)));
-		}
+		LayerDisplay layer_display;
+		if (trackview.get_gui_property ("layer-display", layer_display)) {
+			update_coverage_frames (layer_display);
+	  }
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
