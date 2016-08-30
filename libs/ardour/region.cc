@@ -65,6 +65,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<framecnt_t> length;
 		PBD::PropertyDescriptor<framepos_t> position;
 		PBD::PropertyDescriptor<double> beat;
+		PBD::PropertyDescriptor<double> pulse;
 		PBD::PropertyDescriptor<framecnt_t> sync_position;
 		PBD::PropertyDescriptor<layer_t> layer;
 		PBD::PropertyDescriptor<framepos_t> ancestral_start;
@@ -117,6 +118,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n",	Properties::position.property_id));
 	Properties::beat.property_id = g_quark_from_static_string (X_("beat"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for beat = %1\n",	Properties::beat.property_id));
+	Properties::pulse.property_id = g_quark_from_static_string (X_("pulse"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for pulse = %1\n",	Properties::pulse.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n",	Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
@@ -158,6 +161,7 @@ Region::register_properties ()
 	add_property (_length);
 	add_property (_position);
 	add_property (_beat);
+	add_property (_pulse);
 	add_property (_sync_position);
 	add_property (_ancestral_start);
 	add_property (_ancestral_length);
@@ -176,6 +180,7 @@ Region::register_properties ()
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
 	, _beat (Properties::beat, 0.0) \
+	, _pulse (Properties::pulse, 0.0) \
 	, _sync_position (Properties::sync_position, (s)) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
@@ -206,6 +211,7 @@ Region::register_properties ()
 	, _length(Properties::length, other->_length)		\
 	, _position(Properties::position, other->_position)	\
 	, _beat (Properties::beat, other->_beat)                \
+	, _pulse (Properties::pulse, other->_pulse)		\
 	, _sync_position(Properties::sync_position, other->_sync_position) \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
@@ -292,6 +298,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 
 	_start = other->_start;
 	_beat = other->_beat;
+	_pulse = other->_pulse;
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
@@ -350,6 +357,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 
 	_start = other->_start + offset;
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
+	_pulse = _session.tempo_map().pulse_at_beat (_beat);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -547,6 +555,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 
 		if (_position_lock_style == MusicTime) {
 			_beat = _session.tempo_map().beat_at_frame (_position);
+			_pulse = _session.tempo_map().pulse_at_beat (_beat);
 		}
 
 		send_change (Properties::position_lock_style);
@@ -593,6 +602,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	} else {
 		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
 		_beat = beat;
+		_pulse = _session.tempo_map().pulse_at_beat (_beat);
 		set_position_internal (pos, false, sub_num);
 	}
 
@@ -682,6 +692,7 @@ void
 Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
+	_pulse = _session.tempo_map().pulse_at_beat (_beat);
 }
 
 void
@@ -1302,6 +1313,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 				_position_lock_style = AudioTime;
 			} else {
 				_beat = _session.tempo_map().beat_at_bbt (bbt_time);
+				_pulse = _session.tempo_map().pulse_at_beat (_beat);
 			}
 		}
 	}
