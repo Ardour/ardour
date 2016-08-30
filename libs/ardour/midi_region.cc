@@ -121,8 +121,8 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	, _start_pulse (Properties::start_pulse, 0)
 	, _length_pulse (Properties::length_pulse, other->_length_pulse)
 {
-	_start_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame ((other->_position + offset), sub_num) - other->beat()) + other->_start_beats;
-	_start_pulse = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) / 4.0) - (other->pulse() + other->_start_pulse);
+	_start_beats = Evoral::Beats (_session.tempo_map().exact_beat_at_frame (other->_position + offset, sub_num) - other->beat()) + other->_start_beats;
+	_start_pulse = ((_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) / 4.0) - other->_pulse) + other->_start_pulse;
 
 	update_length_beats (sub_num);
 	register_properties ();
