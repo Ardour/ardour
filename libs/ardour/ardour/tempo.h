@@ -495,9 +495,9 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	framepos_t frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note);
-	double quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame);
-	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat);
+	framepos_t frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const;
+	double quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame) const;
+	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const;
 
 	const TempoSection& tempo_section_at_frame_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
