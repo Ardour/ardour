@@ -34,6 +34,8 @@ namespace ARDOUR {
 	namespace Properties {
 		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> start_beats;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> length_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<double> start_pulse;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<double> length_pulse;
 	}
 }
 
@@ -105,6 +107,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	void fix_negative_start ();
 	Evoral::Beats start_beats () {return _start_beats.val(); }
  	Evoral::Beats length_beats () {return _length_beats.val(); }
+	double start_pulse () const {return _start_pulse; }
+	double length_pulse () const {return _length_pulse; }
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
@@ -115,6 +119,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	friend class RegionFactory;
 	PBD::Property<Evoral::Beats> _start_beats;
 	PBD::Property<Evoral::Beats> _length_beats;
+	PBD::Property<double> _start_pulse;
+	PBD::Property<double> _length_pulse;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
