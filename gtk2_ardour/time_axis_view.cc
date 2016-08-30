@@ -590,9 +590,7 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	TOP_LEVEL_WIDGET.property_height_request () = h;
 	height = h;
 
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", height);
-	set_gui_property ("height", buf);
+	set_gui_property ("height", height);
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_height ();
