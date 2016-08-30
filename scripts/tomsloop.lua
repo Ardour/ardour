@@ -124,7 +124,6 @@ function factory (params) return function ()
 	end
 
 	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " frames) to playhead @ frame # " .. playhead)
-	::errorout::
 
 -- when this script is called as an action, the output will be printed to the ardour log window
 	function print_help()
@@ -274,5 +273,6 @@ function factory (params) return function ()
 		print("See also: Lua Action Bounce+Replace Regions")
 		print("")
 	end -- print_help()
+	::errorout::
 end -- end of anonymous action script function
 end -- end of script factory
