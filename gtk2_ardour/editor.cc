@@ -2853,55 +2853,55 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 		break;
 
 	case SnapToBeatDiv128:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 128, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 128, direction);
 		break;
 	case SnapToBeatDiv64:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 64, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 64, direction);
 		break;
 	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 32, direction);
 		break;
 	case SnapToBeatDiv28:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 28, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 28, direction);
 		break;
 	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 24, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 24, direction);
 		break;
 	case SnapToBeatDiv20:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 20, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 20, direction);
 		break;
 	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 16, direction);
 		break;
 	case SnapToBeatDiv14:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 14, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 14, direction);
 		break;
 	case SnapToBeatDiv12:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 12, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 12, direction);
 		break;
 	case SnapToBeatDiv10:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 10, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 10, direction);
 		break;
 	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 8, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 8, direction);
 		break;
 	case SnapToBeatDiv7:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 7, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 7, direction);
 		break;
 	case SnapToBeatDiv6:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 6, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 6, direction);
 		break;
 	case SnapToBeatDiv5:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 5, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 5, direction);
 		break;
 	case SnapToBeatDiv4:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 4, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 4, direction);
 		break;
 	case SnapToBeatDiv3:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 3, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 3, direction);
 		break;
 	case SnapToBeatDiv2:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 2, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 2, direction);
 		break;
 
 	case SnapToMark:
