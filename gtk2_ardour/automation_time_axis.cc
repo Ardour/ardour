@@ -828,13 +828,13 @@ int
 AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
 	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
-		XMLProperty const * shown = node.property (X_("shown"));
-		if (shown) {
-			bool yn = string_is_affirmative (shown->value ());
-			if (yn) {
+
+		bool shown;
+		if (node.get_property (X_("shown"), shown)) {
+			if (shown) {
 				_canvas_display->show (); /* FIXME: necessary? show_at? */
+				set_gui_property ("visible", shown);
 			}
-			set_gui_property ("visible", yn);
 		} else {
 			set_gui_property ("visible", false);
 		}
@@ -869,11 +869,9 @@ AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Aut
 			const XMLNode* gui_node = ac->extra_xml ("GUI");
 
 			if (gui_node) {
-				XMLProperty const * prop = gui_node->property ("shown");
-				if (prop) {
-					if (string_is_affirmative (prop->value())) {
-						visible.insert (i->first);
-					}
+				bool shown;
+				if (gui_node->get_property ("shown", shown) && shown) {
+					visible.insert (i->first);
 				}
 			}
 		}
