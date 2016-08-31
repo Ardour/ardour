@@ -240,124 +240,96 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 
 	/* name is mandatory */
 	if ((child = node.child ("Name")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_name = prop->value();
-		} else {
+		if (!child->get_property ("value", _name)) {
 			return -1;
 		}
 	}
 
 	/* strip count is mandatory */
 	if ((child = node.child ("Strips")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			if ((_strip_cnt = atoi (prop->value().c_str())) == 0) {
-				_strip_cnt = 8;
-			}
+		if (!child->get_property ("value", _strip_cnt)) {
+			_strip_cnt = 8;
 		}
 	} else {
 		return -1;
 	}
 
 	if ((child = node.child ("Extenders")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			if ((_extenders = atoi (prop->value().c_str())) == 0) {
-				_extenders = 0;
-			}
+		if (!child->get_property ("value", _extenders)) {
+			_extenders = 0;
 		}
 	}
 
 	if ((child = node.child ("MasterPosition")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			if ((_master_position = atoi (prop->value().c_str())) == 0) {
-				_master_position = 0;
-			} else if (_master_position > 0) {
-				_master_position --;
+		if (child->get_property ("value", _master_position)) {
+			if (_master_position > 0) {
+				_master_position--;
 			}
+		} else {
+			_master_position = 0;
 		}
 	}
 
 	if ((child = node.child ("TwoCharacterDisplay")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_two_character_display = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_two_character_display);
 	}
 
 	if ((child = node.child ("MasterFader")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_master_fader = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_master_fader);
 	}
 
 	if ((child = node.child ("TimecodeDisplay")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_timecode_display = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_timecode_display);
 	} else {
 		_has_timecode_display = false;
 	}
 
 	if ((child = node.child ("GlobalControls")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_global_controls = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_global_controls);
 	} else {
 		_has_global_controls = false;
 	}
 
 	if ((child = node.child ("JogWheel")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_jog_wheel = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_jog_wheel);
 	} else {
 		_has_jog_wheel = false;
 	}
 
 	if ((child = node.child ("TouchSenseFaders")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_touch_sense_faders = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_touch_sense_faders);
 	} else {
 		_has_touch_sense_faders = false;
 	}
 
 	if ((child = node.child ("UsesIPMIDI")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_uses_ipmidi = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _uses_ipmidi);
 	} else {
 		_uses_ipmidi = false;
 	}
 
 	if ((child = node.child ("NoHandShake")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_no_handshake = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _no_handshake);
 	} else {
 		_no_handshake = false;
 	}
 
 	if ((child = node.child ("HasMeters")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_meters = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_meters);
 	} else {
 		_has_meters = true;
 	}
 
 	if ((child = node.child ("HasSeparateMeters")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_has_separate_meters = string_is_affirmative (prop->value());
-		}
+		child->get_property ("value", _has_separate_meters);
 	} else {
 		_has_separate_meters = false;
 	}
 
 	if ((child = node.child ("LogicControlButtons")) != 0) {
-		if ((prop = child->property ("value")) != 0) {
-			_uses_logic_control_buttons = string_is_affirmative (prop->value());
-
+		if (child->get_property ("value", _uses_logic_control_buttons)) {
 			if (_uses_logic_control_buttons) {
-				logic_control_buttons();
+				logic_control_buttons ();
 			} else {
 				mackie_control_buttons ();
 			}
@@ -368,43 +340,37 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		XMLNodeConstIterator i;
 		const XMLNodeList& nlist (child->children());
 
+		std::string name;
 		for (i = nlist.begin(); i != nlist.end(); ++i) {
-			if ((*i)->name() == "GlobalButton") {
-				if ((prop = (*i)->property ("name")) != 0) {
-					int id = Button::name_to_id (prop->value());
+			if ((*i)->name () == "GlobalButton") {
+				if ((*i)->get_property ("name", name)) {
+					int id = Button::name_to_id (name);
 					if (id >= 0) {
-						Button::ID bid = (Button::ID) id;
-						if ((prop = (*i)->property ("id")) != 0) {
-							int val = strtol (prop->value().c_str(), 0, 0);
-							std::map<Button::ID,GlobalButtonInfo>::iterator b = _global_buttons.find (bid);
-							if (b != _global_buttons.end()) {
-								b->second.id = val;
-
-								if ((prop = (*i)->property ("label")) != 0) {
-									b->second.label = prop->value();
-								}
+						Button::ID bid = (Button::ID)id;
+						int32_t id;
+						if ((*i)->get_property ("id", id)) {
+							std::map<Button::ID, GlobalButtonInfo>::iterator b = _global_buttons.find (bid);
+							if (b != _global_buttons.end ()) {
+								b->second.id = id;
+								(*i)->get_property ("label", b->second.label);
 							}
 						}
 					}
-
 				}
-
-			} else if ((*i)->name() == "StripButton") {
-				if ((prop = (*i)->property ("name")) != 0) {
-					int id = Button::name_to_id (prop->value());
+			} else if ((*i)->name () == "StripButton") {
+				if ((*i)->get_property ("name", name)) {
+					int id = Button::name_to_id (name);
 					if (id >= 0) {
-						Button::ID bid = (Button::ID) id;
-						if ((prop = (*i)->property ("baseid")) != 0) {
-							int val = strtol (prop->value().c_str(), 0, 0);
-							std::map<Button::ID,StripButtonInfo>::iterator b = _strip_buttons.find (bid);
-							if (b != _strip_buttons.end()) {
-								b->second.base_id = val;
+						Button::ID bid = (Button::ID)id;
+						int32_t base_id;
+						if ((*i)->get_property ("baseid", base_id)) {
+							std::map<Button::ID, StripButtonInfo>::iterator b = _strip_buttons.find (bid);
+							if (b != _strip_buttons.end ()) {
+								b->second.base_id = base_id;
 							}
 						}
 					}
-
 				}
-
 			}
 		}
 	}
