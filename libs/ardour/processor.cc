@@ -227,7 +227,7 @@ Processor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	bool const a = string_is_affirmative (prop->value ()) && !_session.get_bypass_all_loaded_plugins();
+	bool const a = string_to<bool> (prop->value ()) && !_session.get_bypass_all_loaded_plugins();
 	if (_active != a) {
 		if (a) {
 			activate ();
