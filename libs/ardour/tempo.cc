@@ -590,32 +590,31 @@ MeterSection::get_state() const
   https://www.youtube.com/watch?v=9wQK6zMJOoQ
 
   Tempo is the rate of the musical pulse.
-  Meters divide the pulses into measures and beats.
+  Meter divides pulse into measures and beats.
 
-  TempoSections - provide pulses in the form of beats_per_minute() and note_type() where note_type is the division of a whole pulse,
-  and beats_per_minute is the number of note_types in one minute (unlike what its name suggests).
-  Note that Tempo::beats_per_minute() has nothing to do with musical beats. It has been left that way because
-  a shorter one hasn't been found yet (pulse_divisions_per_minute()?).
+  TempoSection - provides pulse in the form of beats_per_minute() - the number of quarter notes in one minute.
+  Note that 'beats' in Tempo::beats_per_minute() are quarter notes (pulse based). In the rest of tempo map,
+  'beat' usually refers to accumulated BBT beats (pulse and meter based).
 
-  MeterSecions - divide pulses into measures (via divisions_per_bar) and beats (via note_divisor).
+  MeterSecion - divides pulse into measures (via divisions_per_bar) and beats (via note_divisor).
 
-  Both tempos and meters have a pulse position and a frame position.
-  Meters also have a beat position, which is always 0.0 for the first meter.
-  TempoSections and MeterSections may be locked to either audio or music (position lock style).
+  Both tempo and meter have a pulse position and a frame position.
+  Meters also have a beat position, which is always 0.0 for the first one.
+  TempoSection and MeterSection may be locked to either audio or music (position lock style).
   The lock style determines the 'true' position of the section wich is used to calculate the other postion parameters of the section.
 
   The first tempo and first meter are special. they must move together, and must be locked to audio.
   Audio locked tempos which lie before the first meter are made inactive.
   They will be re-activated if the first meter is again placed before them.
 
-  With tepo sections potentially being ramped, meters provide a way of mapping beats to whole pulses without
+  With tempo sections potentially being ramped, meters provide a way of mapping beats to whole pulses without
   referring to the tempo function(s) involved as the distance in whole pulses between a meter and a subsequent beat is
   sb->beat() - meter->beat() / meter->note_divisor().
   Because every meter falls on a known pulse, (derived from its bar), the rest is easy as the duration in pulses between
   two meters is of course
   (meater_b->bar - meter_a->bar) * meter_a->divisions_per_bar / meter_a->note_divisor.
 
-  Below, beat calculations are based on meter sections and all pulse and tempo calculations are based on tempo sections.
+  Beat calculations are based on meter sections and all pulse and tempo calculations are based on tempo sections.
   Beat to frame conversion of course requires the use of meter and tempo.
 
   Remembering that ramped tempo sections interact, it is important to avoid referring to any other tempos when moving tempo sections,
@@ -637,7 +636,7 @@ MeterSection::get_state() const
   Music and Audio
 
   Music and audio-locked objects may seem interchangeable on the surface, but when translating
-  between audio samples and beats, keep in mind that a sample is only a quantised approximation
+  between audio samples and beat, remember that a sample is only a quantised approximation
   of the actual time (in minutes) of a beat.
   Thus if a gui user points to the frame occupying the start of a music-locked object on 1|3|0, it does not
   mean that this frame is the actual location in time of 1|3|0.
