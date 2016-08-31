@@ -495,7 +495,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 			XMLProperty const * p = (*i)->property (X_("active"));
 			assert (p);
 
-			if (!string_is_affirmative (p->value())) {
+			if (!string_to<bool> (p->value())) {
 				continue;
 			}
 
