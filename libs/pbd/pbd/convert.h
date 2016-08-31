@@ -57,8 +57,6 @@ to_string (T t, std::ios_base & (*f)(std::ios_base&))
 	return oss.str();
 }
 
-LIBPBD_API bool string_is_affirmative (const std::string&);
-
 LIBPBD_API const char* sgettext (const char *, const char *);
 
 } //namespace PBD
