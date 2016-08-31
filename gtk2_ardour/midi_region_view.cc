@@ -2587,9 +2587,9 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-		double const qn_note_start = (_region->pulse() - midi_region()->start_pulse()) * 4.0;
-		framepos_t new_frames = map.frame_at_quarter_note (qn_note_start + (*i)->note()->time().to_double()) + dt;
-		Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - qn_note_start);
+		double const start_qn = (_region->pulse() - midi_region()->start_pulse()) * 4.0;
+		framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
+		Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
 		if (new_time < 0) {
 			continue;
 		}
