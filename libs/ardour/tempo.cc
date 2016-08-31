@@ -3445,12 +3445,14 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 		break;
 
 	case Beat:
+		const double qn_at_frame = max (0.0, quarter_note_at_frame_locked (_metrics, frame));
+
 		if (dir < 0) {
-			return frame_at_beat_locked (_metrics, floor (beat_at_framepos));
+			return frame_at_quarter_note_locked (_metrics, floor (qn_at_frame));
 		} else if (dir > 0) {
-			return frame_at_beat_locked (_metrics, ceil (beat_at_framepos));
+			return frame_at_quarter_note_locked (_metrics, ceil (qn_at_frame));
 		} else {
-			return frame_at_beat_locked (_metrics, floor (beat_at_framepos + 0.5));
+			return frame_at_quarter_note_locked (_metrics, floor (qn_at_frame + 0.5));
 		}
 		break;
 	}
