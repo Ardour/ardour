@@ -1706,6 +1706,10 @@ TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 			if (prev_t && t->frame() > frame) {
 				/*the previous ts is the one containing the frame */
 				const double ret = prev_t->pulse_at_frame (frame, _frame_rate);
+				/* audio locked section in new meter*/
+				if (t->pulse() < ret) {
+					return t->pulse();
+				}
 				return ret;
 			}
 			prev_t = t;
