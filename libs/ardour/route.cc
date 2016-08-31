@@ -877,7 +877,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_is_affirmative (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user () ) )
+				if ( string_to<bool> (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user () ) )
 					processor->activate();
 				else
 					processor->deactivate();
@@ -2595,13 +2595,13 @@ Route::set_state_2X (const XMLNode& node, int version)
 	Stripable::set_state (node, version);
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
-		set_denormal_protection (string_is_affirmative (prop->value()));
+		set_denormal_protection (string_to<bool> (prop->value()));
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
 
 		bool first = true;
-		bool muted = string_is_affirmative (prop->value());
+		bool muted = string_to<bool> (prop->value());
 
 		if (muted) {
 
@@ -2609,7 +2609,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 			if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
 
-				if (string_is_affirmative (prop->value())){
+				if (string_to<bool> (prop->value())){
 					mute_point = mute_point + "PreFader";
 					first = false;
 				}
@@ -2617,7 +2617,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 			if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
 
-				if (string_is_affirmative (prop->value())){
+				if (string_to<bool> (prop->value())){
 
 					if (!first) {
 						mute_point = mute_point + ",";
@@ -2630,7 +2630,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 			if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
 
-				if (string_is_affirmative (prop->value())){
+				if (string_to<bool> (prop->value())){
 
 					if (!first) {
 						mute_point = mute_point + ",";
@@ -2643,7 +2643,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 			if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
 
-				if (string_is_affirmative (prop->value())){
+				if (string_to<bool> (prop->value())){
 
 					if (!first) {
 						mute_point = mute_point + ",";
@@ -2685,7 +2685,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 			set_id (*child);
 
 			if ((prop = child->property (X_("active"))) != 0) {
-				bool yn = string_is_affirmative (prop->value());
+				bool yn = string_to<bool> (prop->value());
 				_active = !yn; // force switch
 				set_active (yn, this);
 			}
