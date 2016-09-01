@@ -1305,10 +1305,9 @@ TimeAxisView::reset_visual_state ()
 {
 	/* this method is not required to trigger a global redraw */
 
-	string str = gui_property ("height");
-
-	if (!str.empty()) {
-		set_height (atoi (str));
+	uint32_t height;
+	if (get_gui_property ("height", height)) {
+		set_height (height);
 	} else {
 		set_height (preset_height (HeightNormal));
 	}
