@@ -677,7 +677,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 			recompute_position_from_lock_style (sub_num);
 		} else {
 			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
-			_pulse = _session.tempo_map().exact_qn_at_frame (_position, sub_num) / 4.0;
+			_pulse = _session.tempo_map().pulse_at_beat (_beat);
 		}
 
 		/* check that the new _position wouldn't make the current
