@@ -76,7 +76,6 @@ private:
 	// Strip types calculator
 	uint32_t def_strip;
 	void calculate_strip_types ();
-	void push_strip_types ();
 	Gtk::Label current_strip_types;
 	Gtk::CheckButton audio_tracks;
 	Gtk::CheckButton midi_tracks;
@@ -91,7 +90,6 @@ private:
 	// feedback calculator
 	uint32_t def_feedback;
 	void calculate_feedback ();
-	void push_feedback ();
 	Gtk::Label current_feedback;
 	Gtk::CheckButton strip_buttons_button;
 	Gtk::CheckButton strip_control_button;

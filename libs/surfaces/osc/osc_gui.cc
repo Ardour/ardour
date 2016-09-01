@@ -647,13 +647,6 @@ OSC_GUI::calculate_feedback ()
 }
 
 void
-OSC_GUI::push_feedback ()
-{
-	cp.set_defaultfeedback (fbvalue);
-	save_user ();
-}
-
-void
 OSC_GUI::calculate_strip_types ()
 {
 	stvalue = 0;
@@ -692,13 +685,6 @@ OSC_GUI::calculate_strip_types ()
 }
 
 void
-OSC_GUI::push_strip_types ()
-{
-	cp.set_defaultstrip (stvalue);
-	save_user ();
-}
-
-void
 OSC_GUI::set_bitsets ()
 {
 	if (preset_busy) {
@@ -706,8 +692,9 @@ OSC_GUI::set_bitsets ()
 	}
 	calculate_strip_types ();
 	calculate_feedback ();
-	push_strip_types ();
-	push_feedback ();
+	cp.set_defaultstrip (stvalue);
+	cp.set_defaultfeedback (fbvalue);
+	save_user ();
 }
 
 void
@@ -766,7 +753,6 @@ OSC_GUI::save_user ()
 	if (preset_busy) {
 		return;
 	}
-	preset_combo.set_active (2);
 	std::string fullpath = user_preset_directory();
 
 	if (g_mkdir_with_parents (fullpath.c_str(), 0755) < 0) {
@@ -812,6 +798,7 @@ OSC_GUI::save_user ()
 	if (!tree.write (fullpath)) {
 		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
 	}
+	preset_combo.set_active (2);
 
 }
 
