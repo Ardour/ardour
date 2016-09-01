@@ -2733,14 +2733,8 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	if (switch_to_it) {
 		prompter.set_initial_text (_session->snap_name());
 	} else {
-		char timebuf[128];
-		time_t n;
-		struct tm local_time;
-
-		time (&n);
-		localtime_r (&n, &local_time);
-		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
-		prompter.set_initial_text (timebuf);
+		Glib::DateTime tm (g_date_time_new_now_local ());
+		prompter.set_initial_text (tm.format ("%FT%H.%M.%S"));
 	}
 
 	bool finished = false;
