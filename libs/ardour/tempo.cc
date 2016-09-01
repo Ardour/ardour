@@ -3103,12 +3103,17 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 	MetricPositionChanged (); // Emit Signal
 }
 
-/** Returns the exact beat subdivision closest to the supplied frame, possibly returning a negative value.
+/** Returns the exact beat corresponding to the bar, beat or quarter note subdivision nearest to
+ * the supplied frame, possibly returning a negative value.
  * @param frame  The session frame position.
- * @param sub_num The requested beat subdivision to use when rounding the frame position.
+ * @param sub_num The subdivision to use when rounding the beat.
+ * A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
+ * Positive integers indicate quarter note (non BBT) divisions.
+ * 0 indicates that the returned beat should not be rounded.
  * @return The beat position of the supplied frame.
- * If the supplied frame lies before the first meter, the return will be negative.
- * The returned beat is obtained using the first meter and the continuation of the tempo curve (backwards).
+ * If the supplied frame lies before the first meter, the return will be negative,
+ * in which case the returned beat uses the first meter (for BBT subdivisions) and
+ * the continuation of the tempo curve (backwards).
  *
  * This function uses both tempo and meter.
  */
@@ -3121,34 +3126,25 @@ TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
 }
 
 double
-TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num)
+TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t divisions)
 {
-	double beat = beat_at_frame_locked (metrics, frame);
-
-	if (sub_num > 1) {
-		beat = floor (beat) + (floor (((beat - floor (beat)) * (double) sub_num) + 0.5) / sub_num);
-	} else if (sub_num == 1) {
-		/* snap to beat */
-		beat = floor (beat + 0.5);
-	} else if (sub_num == -1) {
-		/* snap to  bar */
-		Timecode::BBT_Time bbt = bbt_at_beat_locked (metrics, beat);
-		bbt.beats = 1;
-		bbt.ticks = 0;
-
-		const double prev_b = beat_at_bbt_locked (_metrics, bbt);
-		++bbt.bars;
-		const double next_b = beat_at_bbt_locked (_metrics, bbt);
-
-		if ((beat - prev_b) > (next_b - prev_b) / 2.0) {
-			beat = next_b;
-		} else {
-			beat = prev_b;
-		}
-	}
-
-	return beat;
+	return beat_at_pulse_locked (_metrics, exact_qn_at_frame_locked (metrics, frame, divisions) / 4.0);
 }
+
+/** Returns the exact quarter note corresponding to the bar, beat or quarter note subdivision nearest to
+ * the supplied frame, possibly returning a negative value.
+ * @param frame  The session frame position.
+ * @param sub_num The subdivision to use when rounding the quarter note.
+ * A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
+ * Positive integers indicate quarter note (non BBT) divisions.
+ * 0 indicates that the returned quarter note should not be rounded.
+ * @return The quarter note position of the supplied frame.
+ * If the supplied frame lies before the first meter, the return will be negative,
+ * in which case the returned quarter note uses the first meter (for BBT subdivisions) and
+ * the continuation of the tempo curve (backwards).
+ *
+ * This function uses both tempo and meter.
+ */
 double
 TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num)
 {
@@ -3165,8 +3161,8 @@ TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& fr
 	if (sub_num > 1) {
 		qn = floor (qn) + (floor (((qn - floor (qn)) * (double) sub_num) + 0.5) / sub_num);
 	} else if (sub_num == 1) {
-		/* snap to quarter note */
-		qn = floor (qn + 0.5);
+		/* the gui requested exact musical (BBT) beat */
+		qn = quarter_note_at_beat (floor (beat_at_frame_locked (metrics, frame) + 0.5));
 	} else if (sub_num == -1) {
 		/* snap to  bar */
 		Timecode::BBT_Time bbt = bbt_at_pulse_locked (metrics, qn / 4.0);
