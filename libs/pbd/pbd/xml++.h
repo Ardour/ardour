@@ -36,11 +36,27 @@
 #include <libxml/tree.h>
 #include <boost/shared_ptr.hpp>
 
+#include <glibmm/ustring.h>
+
+#include "pbd/string_convert.h"
 #include "pbd/libpbd_visibility.h"
 
 class XMLTree;
 class XMLNode;
-class XMLProperty;
+
+class LIBPBD_API XMLProperty {
+public:
+	XMLProperty(const std::string& n, const std::string& v = std::string());
+	~XMLProperty();
+
+	const std::string& name() const { return _name; }
+	const std::string& value() const { return _value; }
+	const std::string& set_value(const std::string& v) { return _value = v; }
+
+private:
+	std::string _name;
+	std::string _value;
+};
 
 typedef std::vector<XMLNode *>                   XMLNodeList;
 typedef std::vector<boost::shared_ptr<XMLNode> > XMLSharedNodeList;
@@ -129,6 +145,40 @@ public:
 	XMLProperty* add_property(const char* name, const char* value = "");
 	XMLProperty* add_property(const char* name, const long value);
 
+	bool set_property (const char* name, const std::string& value);
+
+	bool set_property (const char* name, const char* cstr) {
+		return set_property (name, std::string(cstr));
+	}
+
+	bool set_property (const char* name, const Glib::ustring& ustr)
+	{
+		return set_property (name, ustr.raw ());
+	}
+
+	template<class T>
+	bool set_property (const char* name, const T& value)
+	{
+		std::string str;
+		if (!PBD::to_string<T> (value, str)) {
+			return false;
+		}
+		return set_property(name, str);
+	}
+
+	bool get_property (const char* name, std::string& value) const;
+
+	template <class T>
+	bool get_property (const char* name, T& value) const
+	{
+		XMLProperty const* const prop = property (name);
+		if (!prop) {
+			return false;
+		}
+
+		return PBD::string_to<T> (prop->value (), value);
+	}
+
 	void remove_property(const std::string&);
 	void remove_property_recursively(const std::string&);
 
@@ -150,20 +200,6 @@ private:
 	mutable XMLNodeList _selected_children;
 
 	void clear_lists ();
-};
-
-class LIBPBD_API XMLProperty {
-public:
-	XMLProperty(const std::string& n, const std::string& v = std::string());
-	~XMLProperty();
-
-	const std::string& name() const { return _name; }
-	const std::string& value() const { return _value; }
-	const std::string& set_value(const std::string& v) { return _value = v; }
-
-private:
-	std::string _name;
-	std::string _value;
 };
 
 class LIBPBD_API XMLException: public std::exception {

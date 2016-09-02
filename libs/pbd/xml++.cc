@@ -590,6 +590,23 @@ XMLNode::add_property(const char* name, const long value)
 	return add_property(name, str);
 }
 
+bool
+XMLNode::set_property(const char* name, const string& str) {
+	return add_property (name, str);
+}
+
+bool
+XMLNode::get_property(const char* name, std::string& value) const
+{
+	XMLProperty const* const prop = property (name);
+	if (!prop)
+		return false;
+
+	value = prop->value ();
+
+	return true;
+}
+
 void
 XMLNode::remove_property(const string& name)
 {
