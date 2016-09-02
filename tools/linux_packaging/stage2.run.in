@@ -251,6 +251,21 @@ else
 	ABI=
 fi
 
+####################################
+# Check if bundle is for this system
+####################################
+
+if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
+	echo ""
+	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
+	echo "The installer detected the system as ${ARCH}${ABI}, but this bundle"
+	echo "does not contain the files needed for that configuration."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
+
 ####################
 # Check disk space
 ####################
@@ -359,14 +374,6 @@ echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH${ABI}"
-
-if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
-	echo ""
-	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
 
 if ! tar -xf ${PGM_NAME}_${ARCH}${ABI}-*.tar; then
 	echo ""
