@@ -1669,9 +1669,7 @@ TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) con
 		if (!(*i)->is_tempo()) {
 			m = static_cast<MeterSection*> (*i);
 			if (prev_m && m->pulse() > pulse) {
-				if (((pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat() > m->beat()) {
-					break;
-				}
+				break;
 			}
 			prev_m = m;
 		}
@@ -1754,7 +1752,7 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 	/* must be treated as constant, irrespective of _type */
 	double const dtime = (pulse - prev_t->pulse()) * prev_t->frames_per_pulse (_frame_rate);
 
-	return (framecnt_t) floor (dtime) + prev_t->frame();
+	return (framepos_t) floor (dtime) + prev_t->frame();
 }
 
 double
@@ -2107,7 +2105,7 @@ TempoMap::frame_at_bbt_locked (const Metrics& metrics, const BBT_Time& bbt) cons
 double
 TempoMap::quarter_note_at_frame (const framepos_t frame)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	const double ret = quarter_note_at_frame_locked (_metrics, frame);
 
@@ -2139,7 +2137,7 @@ TempoMap::quarter_note_at_frame_rt (const framepos_t frame)
 framepos_t
 TempoMap::frame_at_quarter_note (const double quarter_note)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	const framepos_t ret = frame_at_quarter_note_locked (_metrics, quarter_note);
 
@@ -2157,7 +2155,7 @@ TempoMap::frame_at_quarter_note_locked (const Metrics& metrics, const double qua
 double
 TempoMap::quarter_note_at_beat (const double beat)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	const double ret = quarter_note_at_beat_locked (_metrics, beat);
 
@@ -2175,9 +2173,16 @@ TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat
 double
 TempoMap::beat_at_quarter_note (const double quarter_note)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double ret = beat_at_pulse_locked (_metrics, quarter_note / 4.0);
+	const double ret = beat_at_quarter_note_locked (_metrics, quarter_note);
+
+	return ret;
+}
+double
+TempoMap::beat_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const
+{
+	const double ret = beat_at_pulse_locked (metrics, quarter_note / 4.0);
 
 	return ret;
 }

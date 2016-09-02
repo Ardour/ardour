@@ -70,7 +70,7 @@ class LIBARDOUR_API Tempo {
 		return (60.0 * sr) / _beats_per_minute;
 	}
 	double frames_per_pulse (framecnt_t sr) const {
-		return (_note_type * 60.0 * sr) / _beats_per_minute;
+		return (4.0 * 60.0 * sr) / _beats_per_minute;
 	}
 
   protected:
@@ -414,7 +414,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	const Meter& meter_at_frame (framepos_t) const;
 
-	/* you probably only need to use pulses when moving tempos */
 	double pulse_at_beat (const double& beat) const;
 	double beat_at_pulse (const double& pulse) const;
 
@@ -498,6 +497,7 @@ private:
 	framepos_t frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const;
 	double quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame) const;
 	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const;
+	double beat_at_quarter_note_locked (const Metrics& metrics, const double beat) const;
 
 	const TempoSection& tempo_section_at_frame_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
