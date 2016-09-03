@@ -3474,7 +3474,7 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		return;
 	}
 
-	while (pos < upper) {
+	while (pos >= 0 && pos < upper) {
 		pos = frame_at_beat_locked (_metrics, cnt);
 		const TempoSection tempo = tempo_section_at_frame_locked (_metrics, pos);
 		const MeterSection meter = meter_section_at_frame_locked (_metrics, pos);
