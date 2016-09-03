@@ -70,7 +70,7 @@ class LIBARDOUR_API Tempo {
 		return (60.0 * sr) / _beats_per_minute;
 	}
 	double frames_per_pulse (framecnt_t sr) const {
-		return (4.0 * 60.0 * sr) / _beats_per_minute;
+		return (_note_type * 60.0 * sr) / _beats_per_minute;
 	}
 
   protected:
