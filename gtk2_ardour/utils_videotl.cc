@@ -23,6 +23,7 @@
 #include <gtkmm.h>
 
 #include "pbd/error.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/ardour.h"
 #include "ardour/session_directory.h"
@@ -286,9 +287,9 @@ VideoUtils::video_query_info (
 	}
 	if (atoi(lines.at(0).at(0)) != 1) return false; // version
 	video_start_offset = 0.0;
-	video_aspect_ratio = atof (lines.at(0).at(3));
-	video_file_fps = atof (lines.at(0).at(4));
-	video_duration = atoll(lines.at(0).at(5));
+	video_aspect_ratio = string_to<double>(lines.at(0).at(3));
+	video_file_fps = string_to<double>(lines.at(0).at(4));
+	video_duration = string_to<int64_t>(lines.at(0).at(5));
 
 	if (video_aspect_ratio < 0.01 || video_file_fps < 0.01) {
 		/* catch errors early, aspect == 0 or fps == 0 will
