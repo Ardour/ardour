@@ -18,7 +18,6 @@
 */
 
 #include "pbd/error.h"
-#include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
 
 #include "ardour/amp.h"
@@ -221,7 +220,6 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 XMLNode&
 MonitorProcessor::state (bool full)
 {
-	LocaleGuard lg;
 	XMLNode& node(Processor::state(full));
 
 	/* this replaces any existing "type" property */
