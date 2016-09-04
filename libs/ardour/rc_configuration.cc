@@ -173,7 +173,6 @@ XMLNode&
 RCConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -194,7 +193,6 @@ XMLNode&
 RCConfiguration::get_variables ()
 {
 	XMLNode* node;
-	LocaleGuard lg;
 
 	node = new XMLNode ("Config");
 
@@ -221,7 +219,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 	XMLNodeList nlist = root.children();
 	XMLNodeConstIterator niter;
 	XMLNode *node;
-	LocaleGuard lg;
 
 	Stateful::save_extra_xml (root);
 
