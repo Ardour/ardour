@@ -23,7 +23,6 @@
 #include <algorithm>
 
 #include <pbd/controllable.h>
-#include <pbd/locale_guard.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
