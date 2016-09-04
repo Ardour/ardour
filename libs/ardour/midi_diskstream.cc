@@ -1227,7 +1227,6 @@ XMLNode&
 MidiDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
-	LocaleGuard lg;
 
 	if (_write_source && _session.get_record_enabled()) {
 
@@ -1262,7 +1261,6 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLNode* capture_pending_node = 0;
-	LocaleGuard lg;
 
 	/* prevent write sources from being created */
 
