@@ -738,22 +738,17 @@ Editor::Editor ()
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	float fract;
-
-	{
-		LocaleGuard lg;
-
-		if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
-			/* initial allocation is 90% to canvas, 10% to notebook */
-			fract = 0.90;
-		}
-		edit_pane.set_divider (0, fract);
-
-		if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
-			/* initial allocation is 90% to canvas, 10% to summary */
-			fract = 0.90;
-		}
-		editor_summary_pane.set_divider (0, fract);
+	if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
+		/* initial allocation is 90% to canvas, 10% to notebook */
+		fract = 0.90;
 	}
+	edit_pane.set_divider (0, fract);
+
+	if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
+		/* initial allocation is 90% to canvas, 10% to summary */
+		fract = 0.90;
+	}
+	editor_summary_pane.set_divider (0, fract);
 
 	global_vpacker.set_spacing (2);
 	global_vpacker.set_border_width (0);
@@ -2333,7 +2328,6 @@ Editor::set_state (const XMLNode& node, int version)
 {
 	set_id (node);
 	PBD::Unwinder<bool> nsi (no_save_instant, true);
-	LocaleGuard lg;
 	bool yn;
 
 	Tabbable::set_state (node, version);
@@ -2551,7 +2545,6 @@ XMLNode&
 Editor::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Editor"));
-	LocaleGuard lg;
 
 	node->set_property ("id", id().to_s ());
 
