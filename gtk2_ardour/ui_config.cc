@@ -41,7 +41,6 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
-#include "pbd/locale_guard.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
@@ -137,7 +136,6 @@ UIConfiguration::parameter_changed (string param)
 void
 UIConfiguration::reset_gtk_theme ()
 {
-	LocaleGuard lg;
 	std::string color_scheme_string("gtk_color_scheme = \"");
 
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
@@ -362,7 +360,6 @@ int
 UIConfiguration::store_color_theme ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -409,7 +406,6 @@ UIConfiguration::store_color_theme ()
 int
 UIConfiguration::load_state ()
 {
-	LocaleGuard lg; // a single guard for all 3 configs
 	bool found = false;
 
 	std::string rcfile;
@@ -499,7 +495,6 @@ XMLNode&
 UIConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -517,7 +512,6 @@ XMLNode&
 UIConfiguration::get_variables (std::string which_node)
 {
 	XMLNode* node;
-	LocaleGuard lg;
 
 	node = new XMLNode (which_node);
 
@@ -536,7 +530,6 @@ UIConfiguration::get_variables (std::string which_node)
 int
 UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
-	LocaleGuard lg;
 	/* this can load a generic UI configuration file or a colors file */
 
 	if (root.name() != "Ardour") {
@@ -634,7 +627,6 @@ UIConfiguration::load_colors (XMLNode const & node)
 void
 UIConfiguration::load_modifiers (XMLNode const & node)
 {
-	PBD::LocaleGuard lg;
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
