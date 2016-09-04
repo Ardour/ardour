@@ -770,7 +770,6 @@ XMLNode&
 AudioRegion::get_basic_state ()
 {
 	XMLNode& node (Region::state ());
-	LocaleGuard lg;
 
 	node.set_property ("channels", (uint32_t)_sources.size());
 
@@ -782,7 +781,6 @@ AudioRegion::state ()
 {
 	XMLNode& node (get_basic_state());
 	XMLNode *child;
-	LocaleGuard lg;
 
 	child = node.add_child ("Envelope");
 
@@ -838,7 +836,6 @@ int
 AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
-	LocaleGuard lg;
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
 	suspend_property_changes ();
