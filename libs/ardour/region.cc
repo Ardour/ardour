@@ -1258,7 +1258,6 @@ Region::state ()
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf2[64];
-	LocaleGuard lg;
 
 	/* custom version of 'add_properties (*node);'
 	 * skip values that have have dedicated save functions
