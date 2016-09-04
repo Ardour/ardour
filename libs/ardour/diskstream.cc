@@ -483,7 +483,6 @@ XMLNode&
 Diskstream::get_state ()
 {
 	XMLNode* node = new XMLNode ("Diskstream");
-	LocaleGuard lg;
 
 	node->set_property ("flags", _flags);
 	node->set_property ("playlist", _playlist->name());
