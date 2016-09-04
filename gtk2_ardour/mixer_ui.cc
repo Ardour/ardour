@@ -280,33 +280,28 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.add (global_hpacker);
 	list_hpane.set_child_minsize (list_vpacker, 1);
 
-
 	XMLNode const * settings = ARDOUR_UI::instance()->mixer_settings();
 	float fract;
 
-	{
-		LocaleGuard lg;
-
-		if (!settings || !settings->get_property ("mixer-rhs-pane1-pos", fract) || fract  > 1.0) {
-			fract = 0.6f;
-		}
-		rhs_pane1.set_divider (0, fract);
-
-		if (!settings || !settings->get_property ("mixer-rhs-pane2-pos", fract) || fract > 1.0) {
-			fract = 0.7f;
-		}
-		rhs_pane2.set_divider (0, fract);
-
-		if (!settings || !settings->get_property ("mixer-list-hpane-pos", fract) || fract > 1.0) {
-			fract = 0.2f;
-		}
-		list_hpane.set_divider (0, fract);
-
-		if (!settings || !settings->get_property ("mixer-inner-pane-pos", fract) || fract > 1.0) {
-			fract = 0.8f;
-		}
-		inner_pane.set_divider (0, fract);
+	if (!settings || !settings->get_property ("mixer-rhs-pane1-pos", fract) || fract > 1.0) {
+		fract = 0.6f;
 	}
+	rhs_pane1.set_divider (0, fract);
+
+	if (!settings || !settings->get_property ("mixer-rhs-pane2-pos", fract) || fract > 1.0) {
+		fract = 0.7f;
+	}
+	rhs_pane2.set_divider (0, fract);
+
+	if (!settings || !settings->get_property ("mixer-list-hpane-pos", fract) || fract > 1.0) {
+		fract = 0.2f;
+	}
+	list_hpane.set_divider (0, fract);
+
+	if (!settings || !settings->get_property ("mixer-inner-pane-pos", fract) || fract > 1.0) {
+		fract = 0.8f;
+	}
+	inner_pane.set_divider (0, fract);
 
 	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
 	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
@@ -2103,7 +2098,6 @@ private:
 int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg;
 	bool yn;
 
 	Tabbable::set_state (node, version);
@@ -2173,7 +2167,6 @@ XMLNode&
 Mixer_UI::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Mixer"));
-	LocaleGuard lg;
 
 	node->add_child_nocopy (Tabbable::get_state());
 
