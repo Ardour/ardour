@@ -87,8 +87,6 @@ VideoTimeLine::save_session ()
 		return;
 	}
 
-	LocaleGuard lg;
-
 	XMLNode* node = new XMLNode(X_("Videomonitor"));
 	if (!node) return;
 	node->set_property (X_("active"), (vmonitor && vmonitor->is_started()));
@@ -145,7 +143,6 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	if (!_session) { return ; }
 
 	_session->SessionSaveUnderway.connect_same_thread (sessionsave, boost::bind (&VideoTimeLine::save_session, this));
-	LocaleGuard lg;
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
 
@@ -220,7 +217,6 @@ VideoTimeLine::save_undo ()
 int
 VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg;
 	node.get_property (X_("VideoOffset"), video_offset);
 	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
 	return 0;
@@ -230,7 +226,6 @@ XMLNode&
 VideoTimeLine::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Videotimeline"));
-	LocaleGuard lg;
 	node->set_property (X_("VideoOffset"), video_offset_p);
 	return *node;
 }
