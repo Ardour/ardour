@@ -173,7 +173,6 @@ PannerShell::set_state (const XMLNode& node, int version)
 	XMLNodeConstIterator niter;
 	bool yn;
 	std::string str;
-	LocaleGuard lg;
 
 	if (node.get_property (X_("bypassed"), yn)) {
 		set_bypassed (yn);
