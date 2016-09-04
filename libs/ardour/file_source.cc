@@ -237,30 +237,30 @@ bool
 FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
 		  bool& isnew, uint16_t& /* chan */, string& found_path)
 {
-	bool ret = false;
-        string keeppath;
+	string keeppath;
 
 	isnew = false;
 
-        if (!Glib::path_is_absolute (path)) {
-                vector<string> hits;
-                string fullpath;
+	if (!Glib::path_is_absolute(path)) {
+		vector<string> hits;
+		string fullpath;
 		std::vector<std::string> dirs = s.source_search_path (type);
 
-                if (dirs.size() == 0) {
-                        error << _("FileSource: search path not set") << endmsg;
-                        goto out;
-                }
+		if (dirs.size() == 0) {
+			error << _("FileSource: search path not set") << endmsg;
+			return false;
+		}
 
-                for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 
-                        fullpath = Glib::build_filename (*i, path);
+			fullpath = Glib::build_filename(*i, path);
 
-                        if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-                                keeppath = fullpath;
-                                hits.push_back (fullpath);
-                        }
-                }
+			if (Glib::file_test(fullpath,
+			                    Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+				keeppath = fullpath;
+				hits.push_back(fullpath);
+			}
+		}
 
 		/* Remove duplicate inodes from the list of ambiguous files, since if there are symlinks
 		   in the session path it is possible to arrive at the same file via more than one path.
@@ -289,58 +289,58 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			}
 		}
 
-                if (de_duped_hits.size() > 1) {
+		if (de_duped_hits.size() > 1) {
 
 			/* more than one match: ask the user */
 
-                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).get_value_or (-1);
+			int which =
+			    FileSource::AmbiguousFileName(path, de_duped_hits).get_value_or(-1);
 
-                        if (which < 0) {
-                                goto out;
-                        } else {
-                                keeppath = de_duped_hits[which];
-                        }
+			if (which < 0) {
+				return false;
+			} else {
+				keeppath = de_duped_hits[which];
+			}
 
-                } else if (de_duped_hits.size() == 0) {
+		} else if (de_duped_hits.size() == 0) {
 
 			/* no match: error */
 
-                        if (must_exist) {
+			if (must_exist) {
 				/* do not generate an error here, leave that to
 				   whoever deals with the false return value.
 				*/
-                                goto out;
-                        } else {
-                                isnew = true;
-                        }
-                } else {
+				return false;
+			} else {
+				isnew = true;
+			}
+		} else {
 
 			/* only one match: happy days */
 
 			keeppath = de_duped_hits[0];
 		}
 
-       } else {
-                keeppath = path;
-        }
+	} else {
+		keeppath = path;
+	}
 
-        /* Current find() is unable to parse relative path names to yet non-existant
-           sources. QuickFix(tm)
-        */
+	/* Current find() is unable to parse relative path names to yet non-existant
+	   sources. QuickFix(tm)
+	*/
 
 	if (keeppath.empty()) {
 		if (must_exist) {
-                        error << "FileSource::find(), keeppath = \"\", but the file must exist" << endl;
-                } else {
-                        keeppath = path;
-                }
-        }
+			error << "FileSource::find(), keeppath = \"\", but the file must exist"
+			      << endl;
+		} else {
+			keeppath = path;
+		}
+	}
 
-        found_path = keeppath;
-        ret = true;
+	found_path = keeppath;
 
-  out:
-	return ret;
+	return true;
 }
 
 /** Find the actual source file based on \a filename.

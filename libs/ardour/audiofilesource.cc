@@ -141,6 +141,11 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 		throw failed_constructor ();
 	}
 
+	if (Glib::path_is_absolute(_origin) &&
+	    Glib::file_test(_origin, Glib::FILE_TEST_EXISTS)) {
+		_path = _origin;
+	}
+
 	if (init (_path, must_exist)) {
 		throw failed_constructor ();
 	}
