@@ -773,31 +773,31 @@ OSC_GUI::save_user ()
 	XMLNode* node = new XMLNode ("OSCPreset");
 	XMLNode* child = new XMLNode ("Name");
 
-	child->add_property ("value", "User");
+	child->set_property ("value", "User");
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("PortMode");
-	child->add_property ("value", cp.get_portmode());
+	child->set_property ("value", cp.get_portmode());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Remote-Port");
-	child->add_property ("value", cp.get_remote_port());
+	child->set_property ("value", cp.get_remote_port());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Bank-Size");
-	child->add_property ("value", cp.get_banksize());
+	child->set_property ("value", cp.get_banksize());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Strip-Types");
-	child->add_property ("value", cp.get_defaultstrip());
+	child->set_property ("value", cp.get_defaultstrip());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Feedback");
-	child->add_property ("value", cp.get_defaultfeedback());
+	child->set_property ("value", cp.get_defaultfeedback());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Gain-Mode");
-	child->add_property ("value", cp.get_gainmode());
+	child->set_property ("value", cp.get_gainmode());
 	node->add_child_nocopy (*child);
 
 	XMLTree tree;
