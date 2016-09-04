@@ -22,7 +22,6 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/gstdio_compat.h"
-#include "pbd/locale_guard.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audio_buffer.h"
@@ -759,7 +758,6 @@ void
 LuaProc::add_state (XMLNode* root) const
 {
 	XMLNode*    child;
-	LocaleGuard lg;
 
 	gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
 	std::string b64s (b64);
@@ -828,7 +826,6 @@ LuaProc::set_state (const XMLNode& node, int version)
 	XMLNodeConstIterator iter;
 	XMLNode *child;
 #endif
-	LocaleGuard lg;
 
 	if (_script.empty ()) {
 		if (set_script_from_state (node)) {
@@ -1131,7 +1128,6 @@ LuaProc::load_preset (PresetRecord r)
 				    !(*j)->get_property (X_("value"), value)) {
 					assert (false);
 				}
-				LocaleGuard lg;
 				set_parameter (index, value);
 				PresetPortSetValue (index, value); /* EMIT SIGNAL */
 			}
