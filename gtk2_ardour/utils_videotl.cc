@@ -267,7 +267,6 @@ VideoUtils::video_query_info (
 		double &video_aspect_ratio
 		)
 {
-	LocaleGuard lg;
 	char url[2048];
 
 	snprintf(url, sizeof(url), "%s%sinfo/?file=%s&format=csv"
