@@ -172,7 +172,6 @@ Pannable::get_state ()
 XMLNode&
 Pannable::state (bool /*full*/)
 {
-	LocaleGuard lg;
 	XMLNode* node = new XMLNode (X_("Pannable"));
 
 	node->add_child_nocopy (pan_azimuth_control->get_state());
