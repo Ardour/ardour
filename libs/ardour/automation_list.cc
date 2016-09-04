@@ -342,7 +342,6 @@ XMLNode&
 AutomationList::state (bool full)
 {
 	XMLNode* root = new XMLNode (X_("AutomationList"));
-	LocaleGuard lg;
 
 	root->set_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 	root->set_property ("id", id());
@@ -464,7 +463,6 @@ AutomationList::deserialize_events (const XMLNode& node)
 int
 AutomationList::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg;
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;
 	XMLNodeIterator niter;
