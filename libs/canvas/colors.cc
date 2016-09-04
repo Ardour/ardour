@@ -23,7 +23,6 @@
 #include <cfloat>
 
 #include "pbd/failed_constructor.h"
-#include "pbd/locale_guard.h"
 #include "pbd/string_convert.h"
 
 #include "canvas/colors.h"
@@ -259,7 +258,6 @@ HSV::HSV (const std::string& str)
 string
 HSV::to_string () const
 {
-	PBD::LocaleGuard lg;
 	stringstream ss;
 	ss << PBD::to_string(h) << ' ';
 	ss << PBD::to_string(s) << ' ';
@@ -597,7 +595,6 @@ SVAModifier::from_string (string const & str)
 string
 SVAModifier::to_string () const
 {
-	PBD::LocaleGuard lg;
 	stringstream ss;
 
 	switch (type) {
