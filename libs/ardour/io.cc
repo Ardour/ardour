@@ -553,7 +553,6 @@ IO::state (bool /*full_state*/)
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	int n;
-	LocaleGuard lg;
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	node->set_property ("name", name());
@@ -615,9 +614,6 @@ IO::set_state (const XMLNode& node, int version)
 	 * by the caller.
 	 */
 	assert (version >= 3000);
-
-	XMLNodeConstIterator iter;
-	LocaleGuard lg;
 
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.
