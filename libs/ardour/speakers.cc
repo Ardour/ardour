@@ -17,7 +17,6 @@
 */
 
 #include "pbd/error.h"
-#include "pbd/locale_guard.h"
 
 #include "ardour/speaker.h"
 #include "ardour/speakers.h"
@@ -243,7 +242,6 @@ XMLNode&
 Speakers::get_state ()
 {
         XMLNode* node = new XMLNode (X_("Speakers"));
-        LocaleGuard lg;
 
         for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
                 XMLNode* speaker = new XMLNode (X_("Speaker"));
@@ -262,7 +260,6 @@ int
 Speakers::set_state (const XMLNode& node, int /*version*/)
 {
         XMLNodeConstIterator i;
-        LocaleGuard lg;
 
         _speakers.clear ();
 
