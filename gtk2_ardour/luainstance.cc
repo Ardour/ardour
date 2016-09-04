@@ -1143,7 +1143,6 @@ LuaInstance::every_point_one_seconds ()
 int
 LuaInstance::set_state (const XMLNode& node)
 {
-	LocaleGuard lg;
 	XMLNode* child;
 
 	if ((child = find_named_node (node, "ActionScript"))) {
@@ -1276,7 +1275,6 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 XMLNode&
 LuaInstance::get_action_state ()
 {
-	LocaleGuard lg;
 	std::string saved;
 	{
 		luabridge::LuaRef savedstate ((*_lua_save)());
