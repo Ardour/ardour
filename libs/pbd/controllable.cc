@@ -21,7 +21,6 @@
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
-#include "pbd/locale_guard.h"
 #include "pbd/types_convert.h"
 #include "pbd/string_convert.h"
 
@@ -109,7 +108,6 @@ XMLNode&
 Controllable::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	LocaleGuard lg;
 
 	/* Waves' "Pressure3" has a parameter called "µ-iness"
 	 * which causes a  parser error : Input is not proper UTF-8, indicate encoding !
@@ -135,8 +133,6 @@ Controllable::get_state ()
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg;
-
 	Stateful::save_extra_xml (node);
 
 	set_id (node);
