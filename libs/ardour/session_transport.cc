@@ -444,12 +444,6 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
-		/* non_realtime_locate() calls Automatable::transport_located()
-		 * for every route. This eventually calls
-		 * ARDOUR::AutomationList::state () which has a LocaleGuard,
-		 * and would switch locales forth/back every time.
-		 */
-		LocaleGuard lg;
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
@@ -498,7 +492,6 @@ Session::butler_transport_work ()
 		/* don't seek if locate will take care of that in non_realtime_stop() */
 
 		if (!(ptw & PostTransportLocate)) {
-			LocaleGuard lg; // see note for non_realtime_locate() above
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 				(*i)->non_realtime_locate (_transport_frame);
 
@@ -608,7 +601,6 @@ Session::non_realtime_locate ()
 
 
 	{
-		LocaleGuard lg; // see note for non_realtime_locate() above
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (_transport_frame);
@@ -875,7 +867,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
 
 	{
-		LocaleGuard lg; // see note for non_realtime_locate() above
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
