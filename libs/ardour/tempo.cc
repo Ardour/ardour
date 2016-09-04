@@ -159,8 +159,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	, _locked_to_meter (false)
 	, _clamped (false)
 {
-	LocaleGuard lg;
-
 	_legacy_bbt = BBT_Time (0, 0, 0);
 
 	BBT_Time bbt;
@@ -242,7 +240,6 @@ XMLNode&
 TempoSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
-	LocaleGuard lg;
 
 	MetricSection::add_state_to_node (*root);
 
@@ -553,7 +550,6 @@ const string MeterSection::xml_state_node_name = "Meter";
 MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 	: MetricSection (0.0, 0, MusicTime, false, sample_rate), Meter (TempoMap::default_meter())
 {
-	LocaleGuard lg;
 	pair<double, BBT_Time> start;
 	start.first = 0.0;
 
@@ -612,7 +608,6 @@ XMLNode&
 MeterSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
-	LocaleGuard lg;
 
 	MetricSection::add_state_to_node (*root);
 
