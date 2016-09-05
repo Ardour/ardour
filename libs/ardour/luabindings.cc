@@ -168,6 +168,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(ARDOUR::LuaOSC::Address);
 CLASSKEYS(ARDOUR::Session);
+CLASSKEYS(ARDOUR::PeakMeter);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanMapping);
 CLASSKEYS(ARDOUR::FluidSynth);
@@ -704,6 +705,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("soloed", &Route::soloed)
 		.addFunction ("amp", &Route::amp)
 		.addFunction ("trim", &Route::trim)
+		.addFunction ("peak_meter", (boost::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
+		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
@@ -845,6 +848,7 @@ LuaBindings::common (lua_State* L)
 		.addCast<IOProcessor> ("to_ioprocessor")
 		.addCast<UnknownProcessor> ("to_unknownprocessor")
 		.addCast<Amp> ("to_amp")
+		.addCast<PeakMeter> ("to_peakmeter")
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
 #if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
@@ -953,6 +957,12 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Amp, Processor> ("Amp")
 		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
+		.endClass ()
+
+		.deriveWSPtrClass <PeakMeter, Processor> ("PeakMeter")
+		.addFunction ("meter_level", &PeakMeter::meter_level)
+		.addFunction ("set_type", &PeakMeter::set_type)
+		.addFunction ("reset_max", &PeakMeter::reset_max)
 		.endClass ()
 
 		.deriveWSPtrClass <MonitorProcessor, Processor> ("MonitorProcessor")
@@ -1160,6 +1170,32 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("SrcQuality")
 		.addConst ("SrcBest", ARDOUR::SrcQuality(SrcBest))
+		.endNamespace ()
+
+		.beginNamespace ("MeterType")
+		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
+		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
+		.addConst ("MeterMaxPeak", ARDOUR::MeterType(MeterMaxPeak))
+		.addConst ("MeterPeak", ARDOUR::MeterType(MeterPeak))
+		.addConst ("MeterKrms", ARDOUR::MeterType(MeterKrms))
+		.addConst ("MeterK20", ARDOUR::MeterType(MeterK20))
+		.addConst ("MeterK14", ARDOUR::MeterType(MeterK14))
+		.addConst ("MeterIEC1DIN", ARDOUR::MeterType(MeterIEC1DIN))
+		.addConst ("MeterIEC1NOR", ARDOUR::MeterType(MeterIEC1NOR))
+		.addConst ("MeterIEC2BBC", ARDOUR::MeterType(MeterIEC2BBC))
+		.addConst ("MeterIEC2EBU", ARDOUR::MeterType(MeterIEC2EBU))
+		.addConst ("MeterVU", ARDOUR::MeterType(MeterVU))
+		.addConst ("MeterK12", ARDOUR::MeterType(MeterK12))
+		.addConst ("MeterPeak0dB", ARDOUR::MeterType(MeterPeak0dB))
+		.addConst ("MeterMCP", ARDOUR::MeterType(MeterMCP))
+		.endNamespace ()
+
+		.beginNamespace ("MeterPoint")
+		.addConst ("MeterInput", ARDOUR::MeterPoint(MeterInput))
+		.addConst ("MeterPreFader", ARDOUR::MeterPoint(MeterPreFader))
+		.addConst ("MeterPostFader", ARDOUR::MeterPoint(MeterPostFader))
+		.addConst ("MeterOutput", ARDOUR::MeterPoint(MeterOutput))
+		.addConst ("MeterCustom", ARDOUR::MeterPoint(MeterCustom))
 		.endNamespace ()
 
 		.beginNamespace ("PortFlags")
