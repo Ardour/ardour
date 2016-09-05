@@ -1174,7 +1174,6 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("MeterType")
 		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
-		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
 		.addConst ("MeterMaxPeak", ARDOUR::MeterType(MeterMaxPeak))
 		.addConst ("MeterPeak", ARDOUR::MeterType(MeterPeak))
 		.addConst ("MeterKrms", ARDOUR::MeterType(MeterKrms))
