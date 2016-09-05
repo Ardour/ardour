@@ -50,6 +50,7 @@
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
+#include "pbd/locale_guard.h"
 
 #include <glibmm.h>
 #include <glibmm/threads.h>

@@ -27,6 +27,7 @@
 #include <gtkmm/messagedialog.h>
 
 #include "pbd/error.h"
+#include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
 #include "pbd/unwind.h"
 #include "pbd/failed_constructor.h"
