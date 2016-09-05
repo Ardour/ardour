@@ -36,6 +36,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/locale_guard.h"
 #include "pbd/replace_all.h"
 #include "pbd/xml++.h"
 

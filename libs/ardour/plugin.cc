@@ -40,6 +40,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
 
 #include "ardour/buffer_set.h"

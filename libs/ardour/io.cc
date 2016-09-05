@@ -31,6 +31,7 @@
 #include "pbd/replace_all.h"
 #include "pbd/unknown_type.h"
 #include "pbd/enumwriter.h"
+#include "pbd/locale_guard.h"
 #include "pbd/types_convert.h"
 
 #include "ardour/audioengine.h"

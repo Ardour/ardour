@@ -31,7 +31,6 @@
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/locale_guard.h"
 #include "pbd/stateful.h"
 
 #include "ardour/libardour_visibility.h"
