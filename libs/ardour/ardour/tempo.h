@@ -62,7 +62,7 @@ class LIBARDOUR_API Tempo {
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
 	double note_type () const { return _note_type; }
-	double pulses_per_minute () const { return _beats_per_minute / 4.0; }
+	double pulses_per_minute () const { return _beats_per_minute / _note_type; }
 	/** audio samples per beat
 	 * @param sr samplerate
 	 */
