@@ -138,23 +138,23 @@ void
 UIConfiguration::reset_gtk_theme ()
 {
 	LocaleGuard lg;
-	stringstream ss;
-
-	ss << "gtk_color_scheme = \"" << hex;
+	std::string color_scheme_string("gtk_color_scheme = \"");
 
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
 
 		if (g->first.find ("gtk_") == 0) {
 			const string gtk_name = g->first.substr (4);
-			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
+			ArdourCanvas::Color a_color = color (g->second);
+
+			color_scheme_string += gtk_name + ":#" + color_to_hex_string_no_alpha (a_color) + ';';
 		}
 	}
 
-	ss << '"' << dec << endl;
+	color_scheme_string += '"';
 
 	/* reset GTK color scheme */
 
-	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
+	Gtk::Settings::get_default()->property_gtk_color_scheme() = color_scheme_string;
 }
 
 void
@@ -242,7 +242,6 @@ UIConfiguration::load_defaults ()
 	} else {
 		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
 	}
-
 
 	if (ret == 0) {
 		/* reload color theme */
@@ -371,9 +370,7 @@ UIConfiguration::store_color_theme ()
 	for (Colors::const_iterator i = colors.begin(); i != colors.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("Color"));
 		node->set_property (X_("name"), i->first);
-		stringstream ss;
-		ss << "0x" << setw (8) << setfill ('0') << hex << i->second;
-		node->set_property (X_("value"), ss.str());
+		node->set_property (X_("value"), color_to_hex_string (i->second));
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -798,4 +795,29 @@ UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 	info << "Loading ui configuration file " << rc_file_path << endmsg;
 
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
+}
+
+std::string
+UIConfiguration::color_to_hex_string (ArdourCanvas::Color c)
+{
+	char buf[16];
+	int retval = g_snprintf (buf, sizeof(buf), "%08x", c);
+
+	if (retval < 0 || retval >= (int)sizeof(buf)) {
+		assert(false);
+	}
+	return buf;
+}
+
+std::string
+UIConfiguration::color_to_hex_string_no_alpha (ArdourCanvas::Color c)
+{
+	c >>= 8; // shift/remove alpha
+	char buf[16];
+	int retval = g_snprintf (buf, sizeof(buf), "%06x", c);
+
+	if (retval < 0 || retval >= (int)sizeof(buf)) {
+		assert(false);
+	}
+	return buf;
 }

@@ -83,6 +83,9 @@ private:
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 	ArdourCanvas::SVAModifier modifier (const std::string&) const;
 
+	static std::string color_to_hex_string (ArdourCanvas::Color c);
+	static std::string color_to_hex_string_no_alpha (ArdourCanvas::Color c);
+
 	sigc::signal<void>  ColorsChanged;
 
 	void reset_dpi ();
