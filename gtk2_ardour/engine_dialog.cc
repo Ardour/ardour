@@ -1482,13 +1482,13 @@ EngineControl::set_nperiods_popdown_strings ()
 	}
 
 	for (vector<uint32_t>::const_iterator x = np.begin(); x != np.end(); ++x) {
-		s.push_back (nperiods_as_string (*x));
+		s.push_back (to_string (*x));
 	}
 
 	set_popdown_strings (nperiods_combo, s);
 
 	if (!s.empty()) {
-		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size())); // XXX 
+		set_active_text_if_present (nperiods_combo, to_string (backend->period_size())); // XXX
 	}
 
 	update_sensitivity ();
@@ -1610,15 +1610,6 @@ EngineControl::bufsize_as_string (uint32_t sz)
 {
 	return string_compose (P_("%1 sample", "%1 samples", sz), to_string(sz));
 }
-
-string
-EngineControl::nperiods_as_string (uint32_t np)
-{
-	char buf[8];
-	snprintf (buf, sizeof (buf), "%u", np);
-	return buf;
-}
-
 
 void
 EngineControl::sample_rate_changed ()
@@ -1886,7 +1877,7 @@ EngineControl::maybe_display_saved_state ()
 		}
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
 
-		set_active_text_if_present (nperiods_combo, nperiods_as_string (state->n_periods));
+		set_active_text_if_present (nperiods_combo, to_string(state->n_periods));
 		/* call this explicitly because we're ignoring changes to
 		   the controls at this point.
 		 */
@@ -2203,7 +2194,7 @@ EngineControl::set_current_state (const State& state)
 		sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 	}
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
-	set_active_text_if_present (nperiods_combo, nperiods_as_string (state->n_periods));
+	set_active_text_if_present (nperiods_combo, to_string (state->n_periods));
 	input_latency.set_value (state->input_latency);
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
@@ -3041,7 +3032,7 @@ EngineControl::engine_running ()
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
 	if (backend->can_set_period_size ()) {
-		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size()));
+		set_active_text_if_present (nperiods_combo, to_string (backend->period_size()));
 	}
 
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
