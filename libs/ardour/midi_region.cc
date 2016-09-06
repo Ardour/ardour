@@ -439,10 +439,18 @@ MidiRegion::set_state (const XMLNode& node, int version)
 		if (position_lock_style() == AudioTime) {
 			update_length_beats (0);
 		}
-	}
 
-	_start_pulse = _start_beats.val().to_double() / 4.0;
-	_length_pulse = _length_beats.val().to_double() / 4.0;
+		if (_session.midi_regions_use_bbt_beats()) {
+			info << _("Updating midi region start and length beats") << endmsg;
+			TempoMap& map (_session.tempo_map());
+			_start_beats = Evoral::Beats ((map.pulse_at_beat (_beat) - map.pulse_at_beat (_beat - _start_beats.val().to_double())) * 4.0);
+			_length_beats = Evoral::Beats ((map.pulse_at_beat (_beat + _length_beats.val().to_double()) - map.pulse_at_beat (_beat)) * 4.0);
+
+		}
+
+		_start_pulse = _start_beats.val().to_double() / 4.0;
+		_length_pulse = _length_beats.val().to_double() / 4.0;
+	}
 
 	return ret;
 }
