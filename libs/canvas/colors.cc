@@ -246,15 +246,6 @@ HSV::HSV (Color c)
 	color_to_hsva (c, h, s, v, a);
 }
 
-HSV::HSV (const std::string& str)
-{
-	stringstream ss (str);
-	ss >> h;
-	ss >> s;
-	ss >> v;
-	ss >> a;
-}
-
 string
 HSV::to_string () const
 {

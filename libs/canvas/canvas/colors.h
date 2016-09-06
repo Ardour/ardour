@@ -77,7 +77,6 @@ struct LIBCANVAS_API HSV
 	HSV ();
 	HSV (double h, double s, double v, double a = 1.0);
 	HSV (Color);
-	HSV (const std::string&);
 
 	double h;
 	double s;
