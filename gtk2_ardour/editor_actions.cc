@@ -1747,6 +1747,17 @@ Editor::reset_focus (Gtk::Widget* w)
 	w = w->get_parent ();
 
 	while (w) {
+
+		if (w->is_toplevel()) {
+			/* Setting the focus widget to a Gtk::Window causes all
+			 * subsequent calls to ::has_focus() on the nominal
+			 * focus widget in that window to return
+			 * false. Workaround: never set focus to the toplevel
+			 * itself.
+			 */
+			break;
+		}
+
 		if (w->get_can_focus ()) {
 			Window* win = dynamic_cast<Window*> (top);
 			win->set_focus (*w);
