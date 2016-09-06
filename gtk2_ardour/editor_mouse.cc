@@ -47,6 +47,7 @@
 #include "ardour/types.h"
 
 #include "actions.h"
+#include "ardour_ui.h"
 #include "editor.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
@@ -2510,7 +2511,7 @@ Editor::escape ()
 		selection->clear ();
 	}
 
-	reset_focus (&contents());
+	ARDOUR_UI::instance()->reset_focus (&contents());
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top
