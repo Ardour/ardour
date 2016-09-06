@@ -1009,7 +1009,7 @@ Session::load_state (string snapshot_name)
 				const double modified_with_version = atof (modified_with.substr ( modified_with.find(" ", 0) + 1, string::npos).c_str());
 				const int modified_with_revision = atoi (modified_with.substr (modified_with.find("-", 0) + 1, string::npos).c_str());
 
-				if (modified_with_version <= 5.3 && !(modified_with_version == 5.3 && modified_with_revision >= 42)) {
+				if (modified_with_version <= 5.3 && !(modified_with_version == 5.3 && modified_with_revision > 42)) {
 					_midi_regions_use_bbt_beats = true;
 				}
 			}
