@@ -38,10 +38,12 @@
 #include "ardour/types.h"
 
 #include "audio_clock.h"
-#include "utils.h"
-#include "keyboard.h"
 #include "gui_thread.h"
+#include "keyboard.h"
+#include "public_editor.h"
 #include "ui_config.h"
+#include "utils.h"
+
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -709,15 +711,8 @@ AudioClock::drop_focus ()
 	Keyboard::magic_widget_drop_focus ();
 
 	if (has_focus()) {
-
 		/* move focus back to the default widget in the top level window */
-
-		Widget* top = get_toplevel();
-
-		if (top->is_toplevel ()) {
-			Window* win = dynamic_cast<Window*> (top);
-			win->grab_focus ();
-		}
+		PublicEditor::instance().reset_focus (this);
 	}
 }
 
