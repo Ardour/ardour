@@ -929,7 +929,6 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, ui
 	if (!mr) {
 		return;
 	}
-	TempoMap& map (trackview.session()->tempo_map());
 
 	// Start of note in frames relative to region start
 	const int32_t divisions = trackview.editor().get_grid_music_divisions (state);
