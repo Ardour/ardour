@@ -1276,8 +1276,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void naturalize_region ();
 
-	void reset_focus (Gtk::Widget*);
-
 	void split_region ();
 
 	void delete_ ();

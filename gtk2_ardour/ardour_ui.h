@@ -219,6 +219,8 @@ public:
 	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
 
+	void reset_focus (Gtk::Widget*);
+
 	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible frame, false, and the edit point as

@@ -1727,54 +1727,6 @@ Editor::parameter_changed (std::string p)
 }
 
 void
-Editor::reset_focus (Gtk::Widget* w)
-{
-	/* this resets focus to the first focusable parent of the given widget,
-	 * or, if there is no focusable parent, cancels focus in the toplevel
-	 * window that the given widget is packed into (if there is one).
-	 */
-
-	if (!w) {
-		return;
-	}
-
-	Gtk::Widget* top = w->get_toplevel();
-
-	if (!top || !top->is_toplevel()) {
-		return;
-	}
-
-	w = w->get_parent ();
-
-	while (w) {
-
-		if (w->is_toplevel()) {
-			/* Setting the focus widget to a Gtk::Window causes all
-			 * subsequent calls to ::has_focus() on the nominal
-			 * focus widget in that window to return
-			 * false. Workaround: never set focus to the toplevel
-			 * itself.
-			 */
-			break;
-		}
-
-		if (w->get_can_focus ()) {
-			Window* win = dynamic_cast<Window*> (top);
-			win->set_focus (*w);
-			return;
-		}
-		w = w->get_parent ();
-	}
-
-	/* no focusable parent found, cancel focus in top level window.
-	   C++ API cannot be used for this. Thanks, references.
-	 */
-
-	gtk_window_set_focus (GTK_WINDOW(top->gobj()), 0);
-
-}
-
-void
 Editor::reset_canvas_action_sensitivity (bool onoff)
 {
 	if (_edit_point != EditAtMouse) {
