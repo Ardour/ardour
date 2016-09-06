@@ -572,7 +572,7 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
-	CairoWidget::set_focus_handler (sigc::mem_fun (*this, &Editor::reset_focus));
+	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
 	_summary = new EditorSummary (this);
 
@@ -1182,7 +1182,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 			/* leaving window, so reset focus, thus ending any and
 			   all text entry operations.
 			*/
-			reset_focus (&contents());
+			ARDOUR_UI::instance()->reset_focus (&contents());
 			break;
 		}
 		break;

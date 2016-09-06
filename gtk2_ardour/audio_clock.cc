@@ -37,10 +37,10 @@
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
+#include "ardour_ui.h"
 #include "audio_clock.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "public_editor.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -712,7 +712,7 @@ AudioClock::drop_focus ()
 
 	if (has_focus()) {
 		/* move focus back to the default widget in the top level window */
-		PublicEditor::instance().reset_focus (this);
+		ARDOUR_UI::instance()->reset_focus (this);
 	}
 }
 
