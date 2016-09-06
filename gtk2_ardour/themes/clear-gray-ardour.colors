@@ -175,7 +175,7 @@
     <ColorAlias name="gtk_audio_track" alias="color 25"/>
     <ColorAlias name="gtk_automation_track_header" alias="color 48"/>
     <ColorAlias name="gtk_background" alias="color 87"/>
-    <ColorAlias name="gtk_bases" alias="color 22"/>
+    <ColorAlias name="gtk_bases" alias="color 88"/>
     <ColorAlias name="gtk_bg_selected" alias="color 81"/>
     <ColorAlias name="gtk_bg_tooltip" alias="color 74"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
