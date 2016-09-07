@@ -1768,6 +1768,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	framepos_t leftmost_after_zoom = 0;
 	framepos_t where;
 	bool in_track_canvas;
+	bool use_mouse_frame = true;
 	framecnt_t nfpp;
 	double l;
 
@@ -1828,18 +1829,13 @@ Editor::temporal_zoom (framecnt_t fpp)
 	case ZoomFocusMouse:
 		/* try to keep the mouse over the same point in the display */
 
-		if (!mouse_frame (where, in_track_canvas)) {
-			/* use playhead instead */
-			where = playhead_cursor->current_frame ();
+		if (_drags->active()) {
+			where = _drags->current_pointer_frame ();
+		} else if (!mouse_frame (where, in_track_canvas)) {
+			use_mouse_frame = false;
+		}
 
-			if (where < half_page_size) {
-				leftmost_after_zoom = 0;
-			} else {
-				leftmost_after_zoom = where - half_page_size;
-			}
-
-		} else {
-
+		if (use_mouse_frame) {
 			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
@@ -1849,8 +1845,16 @@ Editor::temporal_zoom (framecnt_t fpp)
 			} else {
 				leftmost_after_zoom = (framepos_t) l;
 			}
-		}
+		} else {
+			/* use playhead instead */
+			where = playhead_cursor->current_frame ();
 
+			if (where < half_page_size) {
+				leftmost_after_zoom = 0;
+			} else {
+				leftmost_after_zoom = where - half_page_size;
+			}
+		}
 		break;
 
 	case ZoomFocusEdit:
