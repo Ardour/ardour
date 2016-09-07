@@ -906,7 +906,9 @@ AudioEngine::stop (bool for_latency)
 		stop_engine = false;
 	} else {
 		if (_backend->stop ()) {
-			pl.release ();
+			if (pl.locked ()) { 
+                            pl.release ();
+                        }
 			return -1;
 		}
 	}
