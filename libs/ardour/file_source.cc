@@ -228,10 +228,10 @@ FileSource::move_to_trash (const string& trash_dir_name)
 
 /** Find the actual source file based on \a filename.
  *
- * If the source is within the session tree, \a filename should be a simple filename (no slashes).
- * If the source is external, \a filename should be a full path.
+ * If the source is within the session tree, \a path should be a simple filename (no slashes).
+ * If the source is external, \a path should be a full path.
  * In either case, found_path is set to the complete absolute path of the source file.
- * \return true iff the file was found.
+ * \return true if the file was found.
  */
 bool
 FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
