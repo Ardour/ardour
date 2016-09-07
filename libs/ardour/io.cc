@@ -756,6 +756,7 @@ IO::find_possible_bundle (const string &desired_name)
 		string possible_name;
 		bool stereo = false;
 		string::size_type last_non_digit_pos;
+		std::string bundle_number_str;
 
 		error << string_compose(_("Unknown bundle \"%1\" listed for %2 of %3"), desired_name, bundle_type_name, _name)
 		      << endmsg;
@@ -766,9 +767,8 @@ IO::find_possible_bundle (const string &desired_name)
 		last_non_digit_pos = desired_name.find_last_not_of(digits);
 
 		if (last_non_digit_pos != string::npos) {
-			stringstream s;
-			s << desired_name.substr(last_non_digit_pos);
-			s >> bundle_number;
+			bundle_number_str = desired_name.substr(last_non_digit_pos);
+			bundle_number = string_to<int32_t>(bundle_number_str);
 		}
 
 		// see if it's a stereo connection e.g. "in 3+4"
@@ -780,9 +780,8 @@ IO::find_possible_bundle (const string &desired_name)
 
 			if (left_last_non_digit_pos != string::npos) {
 				int left_bundle_number = 0;
-				stringstream s;
-				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
-				s >> left_bundle_number;
+				bundle_number_str = desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
+				left_bundle_number = string_to<int32_t>(bundle_number_str);
 
 				if (left_bundle_number > 0 && left_bundle_number + 1 == bundle_number) {
 					bundle_number--;
@@ -807,14 +806,11 @@ IO::find_possible_bundle (const string &desired_name)
 			if (bundle_number & mask) {
 				bundle_number &= ~mask;
 
-				stringstream s;
-				s << default_name << " " << bundle_number + 1;
+				std::string possible_name = default_name + " " + to_string(bundle_number + 1);
 
 				if (stereo) {
-					s << "+" << bundle_number + 2;
+					possible_name += "+" + to_string(bundle_number + 2);
 				}
-
-				possible_name = s.str();
 
 				if ((c = _session.bundle_by_name (possible_name)) != 0) {
 					break;
