@@ -4376,9 +4376,8 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		if (icsd_docroot == X_("/") || icsd_docroot == X_("C:\\")) {
 			Config->set_video_advanced_setup(false);
 		} else {
-			std::ostringstream osstream;
-			osstream << "http://127.0.0.1:" << video_server_dialog->get_listenport() << "/";
-			Config->set_video_server_url(osstream.str());
+			std::string url_str = "http://127.0.0.1:" + to_string(video_server_dialog->get_listenport()) + "/";
+			Config->set_video_server_url(url_str);
 			Config->set_video_server_docroot(icsd_docroot);
 			Config->set_video_advanced_setup(true);
 		}
