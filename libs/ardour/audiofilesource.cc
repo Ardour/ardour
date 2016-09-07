@@ -131,7 +131,10 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
 }
 
 
-/** Constructor used for existing internal-to-session files via XML.  File must exist. */
+/** Constructor used for existing files via XML.  File must exist. If _origin
+ * is an absolute path after ::set_state(), then the file is external to the
+ * session.
+ */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source (s, node)
 	, AudioSource (s, node)
@@ -139,6 +142,11 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
+	}
+
+	if (Glib::path_is_absolute (_origin)) {
+		_path = _origin;
+		must_exist = true;
 	}
 
 	if (init (_path, must_exist)) {
