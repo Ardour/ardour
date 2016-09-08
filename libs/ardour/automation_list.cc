@@ -347,12 +347,10 @@ AutomationList::serialize_events ()
 	XMLNode* node = new XMLNode (X_("events"));
 	stringstream str;
 
-	str.precision(15);  //10 digits is enough digits for 24 hours at 96kHz
-
 	for (iterator xx = _events.begin(); xx != _events.end(); ++xx) {
-		str << (double) (*xx)->when;
+		str << PBD::to_string ((*xx)->when);
 		str << ' ';
-		str <<(double) (*xx)->value;
+		str << PBD::to_string ((*xx)->value);
 		str << '\n';
 	}
 
@@ -384,17 +382,19 @@ AutomationList::deserialize_events (const XMLNode& node)
 
 	stringstream str (content_node->content());
 
+	std::string x_str;
+	std::string y_str;
 	double x;
 	double y;
 	bool ok = true;
 
 	while (str) {
-		str >> x;
-		if (!str) {
+		str >> x_str;
+		if (!str || !PBD::string_to<double> (x_str, x)) {
 			break;
 		}
-		str >> y;
-		if (!str) {
+		str >> y_str;
+		if (!str || !PBD::string_to<double> (y_str, y)) {
 			ok = false;
 			break;
 		}
