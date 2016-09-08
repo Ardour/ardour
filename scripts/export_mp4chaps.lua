@@ -14,17 +14,17 @@ is not created.
 This is a bit more convenient than the export option, as one does not
 have to wait for the export.
 ]],
-        license = "GPLv2"
+	license = "GPLv2"
 }
 
 function factory (unused_params) return function ()
 
-        fr = Session:frame_rate()
+	fr = Session:frame_rate()
 	chaps = {}
 
-        for l in Session:locations():list():iter() do
-                name = l:name()
-                if not l:is_mark() or string.find(name, "^xrun%d*$") then
+	for l in Session:locations():list():iter() do
+		name = l:name()
+		if not l:is_mark() or string.find(name, "^xrun%d*$") then
 			goto next end
 
 		t = l:start()
@@ -37,7 +37,7 @@ function factory (unused_params) return function ()
 		ms = math.floor(r*1000/fr)
 		table.insert(chaps, string.format("%02d:%02d:%02d.%03d %s\n", h, m, s, ms, name))
 		::next::
-        end
+	end
 
 	if next(chaps) == nil then
 		goto out end
@@ -49,7 +49,7 @@ function factory (unused_params) return function ()
 	for i, line in ipairs(chaps) do
 		file:write(line)
 	end
-        file:close()
+	file:close()
 
 	::out::
 end end
