@@ -7989,6 +7989,8 @@ Editor::toggle_midi_input_active (bool flip_others)
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
 
+static bool ok_fine (GdkEventAny*) { return true; }
+
 void
 Editor::lock ()
 {
@@ -7997,6 +7999,7 @@ Editor::lock ()
 
 		Gtk::Image* padlock = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("padlock_closed")));
 		lock_dialog->get_vbox()->pack_start (*padlock);
+		lock_dialog->signal_delete_event ().connect (sigc::ptr_fun (ok_fine));
 
 		ArdourButton* b = manage (new ArdourButton);
 		b->set_name ("lock button");
@@ -8012,6 +8015,8 @@ Editor::lock ()
 	_main_menu_disabler = new MainMenuDisabler;
 
 	lock_dialog->present ();
+
+	lock_dialog->get_window()->set_decorations (Gdk::WMDecoration (0));
 }
 
 void
