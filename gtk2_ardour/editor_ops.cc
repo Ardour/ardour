@@ -5049,7 +5049,7 @@ Editor::normalize_region ()
 
 	NormalizeDialog dialog (rs.size() > 1);
 
-	if (dialog.run () == RESPONSE_CANCEL) {
+	if (dialog.run () != RESPONSE_ACCEPT) {
 		return;
 	}
 
