@@ -96,6 +96,11 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		void critical_selection_changed ();
 		void analysis_changed ();
 
+		void on_show ();
+		void on_hide ();
+		void store_state ();
+		void restore_state ();
+
 		ARDOUR::ExportProfileManager::FormatStatePtr   format_state;
 		ARDOUR::ExportProfileManager::FilenameStatePtr filename_state;
 		ManagerPtr                                     profile_manager;

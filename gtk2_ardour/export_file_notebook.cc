@@ -113,9 +113,52 @@ ExportFileNotebook::update_soundcloud_upload ()
 }
 
 void
+ExportFileNotebook::FilePage::on_show ()
+{
+	VBox::on_show ();
+	restore_state ();
+}
+
+void
+ExportFileNotebook::FilePage::on_hide ()
+{
+	VBox::on_hide ();
+	store_state ();
+}
+
+void
 ExportFileNotebook::FilePage::analysis_changed ()
 {
 	format_state->format->set_analyse (analysis_button.get_active ());
+}
+
+void
+ExportFileNotebook::FilePage::store_state ()
+{
+	XMLNode node (X_("ExportFile"));
+	node.add_property ("analyze-audio", analysis_button.get_active () ? "yes" : "no");
+	node.add_property ("soundcloud-upload", soundcloud_upload_button.get_active () ? "yes" : "no");
+	Config->add_instant_xml (node);
+}
+
+void
+ExportFileNotebook::FilePage::restore_state ()
+{
+	XMLNode* node = Config->instant_xml (X_("ExportFile"));
+
+	if (!node) {
+		return;
+	}
+
+	XMLProperty const* prop;
+
+	if ((prop = node->property ("analyze-audio")) != 0) {
+		analysis_button.set_active (string_is_affirmative (prop->value()));
+	}
+
+	if ((prop = node->property ("soundcloud-upload")) != 0) {
+		soundcloud_upload_button.set_active (string_is_affirmative (prop->value()));
+	}
 }
 
 void
