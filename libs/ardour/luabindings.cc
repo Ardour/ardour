@@ -528,6 +528,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <Location, PBD::StatefulDestructible> ("Location")
+		.addFunction ("name", &Location::name)
 		.addFunction ("locked", &Location::locked)
 		.addFunction ("lock", &Location::lock)
 		.addFunction ("unlock", &Location::unlock)
