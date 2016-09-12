@@ -65,17 +65,17 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		}
 
 		if (ev_time >= end) {
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
+			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
 		} else if (ev_time < start) {
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
+			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
 			break;
 		} else {
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
+			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
 
 		ev_time -= start;
-		ev_time += offset;
+		//ev_time += offset;
 
 		/* we're good to go ahead and read the data now but since we
 		 * have the prefix data already, just skip over that
@@ -91,7 +91,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
 		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
-				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
+				DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
 				break;
 			}
 			error << "MRB: Unable to reserve space in buffer, event skipped" << endmsg;
@@ -103,7 +103,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		bool success = read_contents (ev_size, write_loc);
 
 #ifndef NDEBUG
-		if (DEBUG_ENABLED (DEBUG::MidiDiskstreamIO)) {
+		if (DEBUG_ENABLED (DEBUG::MidiRingBuffer)) {
 			DEBUG_STR_DECL(a);
 			DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3)", ev_time, start, offset));
 			for (size_t i=0; i < ev_size; ++i) {
@@ -113,7 +113,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 				DEBUG_STR_APPEND(a,' ');
 			}
 			DEBUG_STR_APPEND(a,'\n');
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, DEBUG_STR(a).str());
+			DEBUG_TRACE (DEBUG::MidiRingBuffer, DEBUG_STR(a).str());
 		}
 #endif
 
