@@ -45,7 +45,7 @@ function factory (unused_params) return function ()
 	table.insert(chaps, "00:00:00.000 Intro\n")
 	table.sort(chaps)
 
-	file = io.open(string.format("%s/export/mp4chaps.txt", Session:path()), "w")
+	file = io.open(ARDOUR.LuaAPI.build_filename (Session:path(), "export", "mp4chaps.txt"), "w")
 	for i, line in ipairs(chaps) do
 		file:write(line)
 	end
