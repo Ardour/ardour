@@ -1468,6 +1468,7 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
 		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
+		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
 }
