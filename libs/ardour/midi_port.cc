@@ -27,6 +27,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/session.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -232,8 +233,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED (DEBUG::MidiIO)) {
+				const Session* s = AudioEngine::instance()->session();
+				const framepos_t now = (s ? s->transport_frame() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %1 pop event    @ %2 sz %3 ", _buffer, ev.time(), ev.size()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev.time(), ev.size(),
+				                                    now + ev.time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
