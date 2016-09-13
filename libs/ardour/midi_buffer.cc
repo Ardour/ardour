@@ -109,19 +109,40 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 		assert (_size == 0);
 	}
 
-	framecnt_t offset = Port::port_offset();
-
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
-		if (ev.time() >= offset && ev.time() < (nframes + offset)) {
-			push_back (ev);
+
+		if (dst_offset >= 0) {
+			/* Positive offset: shifting events from internal
+			   buffer view of time (always relative to to start of
+			   current possibly split cycle) to from global/port
+			   view of time (always relative to start of process
+			   cycle).
+
+			   Check it is within range of this (split) cycle, then shift.
+			*/
+			if (ev.time() >= 0 && ev.time() < nframes) {
+				push_back (ev.time() + dst_offset, ev.size(), ev.buffer());
+			} else {
+				cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << ": ";
+			}
 		} else {
-			cerr << "MIDI event @ " <<  ev.time() << " skipped, not within range "
-			     << offset << " .. " << (nframes + offset) << ":";
-				for (size_t xx = 0; xx < ev.size(); ++xx) {
-					cerr << ' ' << hex << (int) ev.buffer()[xx];
-				}
-				cerr << dec << endl;
+			/* Negative offset: shifting events from global/port
+			   view of time (always relative to start of process
+			   cycle) back to internal buffer view of time (always
+			   relative to to start of current possibly split
+			   cycle.
+
+			   Shift first, then check it is within range of this
+			   (split) cycle.
+			*/
+			const framepos_t evtime = ev.time() + dst_offset;
+
+			if (evtime >= 0 && evtime < nframes) {
+				push_back (evtime, ev.size(), ev.buffer());
+			} else {
+				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev.time() << " + " << dst_offset << ") skipped, not within range 0 .. " << nframes << ": ";
+			}
 		}
 	}
 
