@@ -515,7 +515,7 @@ Delivery::transport_stopped (framepos_t now)
 void
 Delivery::realtime_locate ()
 {
-        if (_output) {
+	if (_output) {
                 PortSet& ports (_output->ports());
 
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
