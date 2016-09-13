@@ -1455,46 +1455,47 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			   beyond the loop end.
 			*/
 
-			_playback_buf->resolve_tracker (dst, split_cycle_offset);
+			_playback_buf->resolve_tracker (dst, 0);
 		}
-
-		_playback_buf->skip_to (effective_start);
 
 		/* for split-cycles we need to offset the events */
 
 		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
+
 			/* end of loop is within the range we are reading, so
 			   split the read in two, and lie about the location
 			   for the 2nd read
 			*/
+
 			framecnt_t first, second;
 
 			first = loc->end() - effective_start;
 			second = nframes - first;
 
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read for eff %1 end %2: %3 and %4\n",
-									      effective_start, loc->end(), first, second));
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read for eff %1 end %2: %3 and %4, cycle offset %5\n",
+			                                                      effective_start, loc->end(), first, second));
 
 			if (first) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
 										      effective_start, first));
-				events_read = _playback_buf->read (dst, effective_start, first, split_cycle_offset);
+				events_read = _playback_buf->read (dst, effective_start, first);
 			}
 
 			if (second) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
 										      loc->start(), second));
-				events_read += _playback_buf->read (dst, loc->start(), second, split_cycle_offset);
+				events_read += _playback_buf->read (dst, loc->start(), second);
 			}
 
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 									      effective_start, nframes));
-			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes, split_cycle_offset);
+			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
 		}
 	} else {
 		_playback_buf->skip_to (playback_sample);
-		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes, split_cycle_offset);
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("playback buffer read, from %1 to %2 (%3)", playback_sample, playback_sample + nframes, nframes));
+		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
 	}
 
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
