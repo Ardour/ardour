@@ -169,6 +169,16 @@ private:
 /** Ardour Session */
 class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
+  private:
+	enum SubState {
+		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
+		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
+		StopPendingCapture    = 0x4,
+		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
+		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
+		PendingLocate         = 0x20,
+	};
+
   public:
 	enum RecordState {
 		Disabled = 0,
@@ -426,6 +436,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
+	bool declick_out_pending() const { return static_cast<bool>(transport_sub_state&(PendingDeclickOut)); }
 	bool transport_locked () const;
 
 	int wipe ();
@@ -1150,15 +1161,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static guint _name_id_counter;
 	static void init_name_id_counter (guint n);
 	static unsigned int name_id_counter ();
-
-	enum SubState {
-		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
-		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
-		StopPendingCapture    = 0x4,
-		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
-		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
-		PendingLocate         = 0x20,
-	};
 
 	/* stuff used in process() should be close together to
 	   maximise cache hits
