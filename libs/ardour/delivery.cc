@@ -301,7 +301,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
-				_output->copy_to_outputs (bufs, *t, nframes, ports.port(0)->port_offset());
+				_output->copy_to_outputs (bufs, *t, nframes, Port::port_offset());
 			}
 		}
 
