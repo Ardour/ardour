@@ -37,7 +37,7 @@ namespace ARDOUR {
  */
 template<typename T>
 size_t
-MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset, bool stop_on_overflow_in_dst)
+MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset, bool stop_on_overflow_in_dst)
 {
 	if (this->read_space() == 0) {
 		return 0;
@@ -100,8 +100,8 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		}
 
 		// write MIDI buffer contents
-		bool success = read_contents (ev_size, write_loc);
 
+		bool success = read_contents (ev_size, write_loc);
 #ifndef NDEBUG
 		if (DEBUG_ENABLED (DEBUG::MidiRingBuffer)) {
 			DEBUG_STR_DECL(a);
@@ -116,7 +116,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, DEBUG_STR(a).str());
 		}
 #endif
-
 		if (success) {
 			_tracker.track(write_loc);
 			++count;
