@@ -106,7 +106,7 @@ void Mootcher::ensureWorkingDir ()
 size_t Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
 	int realsize = (int)(size * nmemb);
-	struct MemoryStruct *mem = (struct MemoryStruct *)data;
+	struct SfdbMemoryStruct *mem = (struct SfdbMemoryStruct *)data;
 
 	mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
 
@@ -161,7 +161,7 @@ void Mootcher::setcUrlOptions()
 std::string Mootcher::doRequest(std::string uri, std::string params)
 {
 	std::string result;
-	struct MemoryStruct xml_page;
+	struct SfdbMemoryStruct xml_page;
 	xml_page.memory = NULL;
 	xml_page.size = 0;
 

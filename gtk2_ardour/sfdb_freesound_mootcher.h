@@ -48,7 +48,7 @@
 #include "curl/curl.h"
 
 //--- struct to store XML file
-struct MemoryStruct {
+struct SfdbMemoryStruct {
 	char *memory;
 	size_t size;
 };
