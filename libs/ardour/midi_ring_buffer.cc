@@ -75,7 +75,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 		}
 
 		ev_time -= start;
-		//ev_time += offset;
+		ev_time += offset;
 
 		/* we're good to go ahead and read the data now but since we
 		 * have the prefix data already, just skip over that
