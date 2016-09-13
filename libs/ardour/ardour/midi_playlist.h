@@ -70,6 +70,7 @@ public:
 	 * @param buf Destination for events.
 	 * @param start First frame of read range.
 	 * @param cnt Number of frames in read range.
+	 * @param loop_range If non-null, all event times will be mapped into this loop range.
 	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
 	 * channel is backed by a separate region, not MIDI channels, which all
 	 * exist in the same region and are not handled here).
@@ -78,6 +79,7 @@ public:
 	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
 	                 framepos_t                     start,
 	                 framecnt_t                     cnt,
+	                 Evoral::Range<framepos_t>*     loop_range,
 	                 uint32_t                       chan_n = 0,
 	                 MidiChannelFilter*             filter = NULL);
 

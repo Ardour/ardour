@@ -377,7 +377,7 @@ Plugin::resolve_midi ()
 	*/
 
 	_pending_stop_events.get_midi(0).clear ();
-	_tracker.resolve_notes (_pending_stop_events.get_midi (0), /* split cycle offset*/ Port::port_offset());
+	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
 	_have_pending_stop_events = true;
 }
 

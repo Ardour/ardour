@@ -360,7 +360,8 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 	framepos_t            loop_start  = 0;
 	framepos_t            loop_end    = 0;
 	framepos_t            loop_length = 0;
-	get_location_times(loop_loc, &loop_start, &loop_end, &loop_length);
+
+	get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
 
 	adjust_capture_position = 0;
 
@@ -506,7 +507,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		playback_distance = nframes;
 	}
 
-	if (need_disk_signal) {
+	if (need_disk_signal && !_session.declick_out_pending()) {
 		/* copy the diskstream data to all output buffers */
 
 		MidiBuffer& mbuf (bufs.get_midi (0));
@@ -703,42 +704,48 @@ int
 MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 {
 	framecnt_t this_read   = 0;
-	bool       reloop      = false;
 	framepos_t loop_end    = 0;
 	framepos_t loop_start  = 0;
 	framecnt_t loop_length = 0;
-	Location*  loc         = 0;
+	Location*  loc         = loop_location;
+	framepos_t effective_start = start;
+	Evoral::Range<framepos_t>*  loop_range (0);
 
 	MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
 	MidiChannelFilter* filter = mt ? &mt->playback_filter() : NULL;
 
-	if (!reversed) {
+	frameoffset_t loop_offset = 0;
 
-		loc = loop_location;
-		get_location_times(loc, &loop_start, &loop_end, &loop_length);
-
-		/* if we are looping, ensure that the first frame we read is at the correct
-		   position within the loop.
-		*/
-
-		if (loc && (start >= loop_end)) {
-			//cerr << "start adjusted from " << start;
-			start = loop_start + ((start - loop_start) % loop_length);
-			//cerr << "to " << start << endl;
-		}
-		// cerr << "start is " << start << " end " << start+dur << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
+	if (!reversed && loc) {
+		get_location_times (loc, &loop_start, &loop_end, &loop_length);
 	}
 
 	while (dur) {
 
 		/* take any loop into account. we can't read past the end of the loop. */
 
-		if (loc && (loop_end - start <= dur)) {
-			this_read = loop_end - start;
-			// cerr << "reloop true: thisread: " << this_read << "  dur: " << dur << endl;
-			reloop = true;
+		if (loc && !reversed) {
+
+			if (!loop_range) {
+				loop_range = new Evoral::Range<framepos_t> (loop_start, loop_end-1); // inclusive semantics require -1
+			}
+
+			/* if we are (seamlessly) looping, ensure that the first frame we read is at the correct
+			   position within the loop.
+			*/
+
+			effective_start = loop_range->squish (effective_start);
+
+			if ((loop_end - effective_start) <= dur) {
+				/* too close to end of loop to read "dur", so
+				   shorten it.
+				*/
+				this_read = loop_end - effective_start;
+			} else {
+				this_read = dur;
+			}
+
 		} else {
-			reloop = false;
 			this_read = dur;
 		}
 
@@ -746,9 +753,11 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 			break;
 		}
 
-		this_read = min(dur,this_read);
+		this_read = min (dur,this_read);
 
-		if (midi_playlist()->read (*_playback_buf, start, this_read, 0, filter) != this_read) {
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS ::read at %1 for %2 loffset %3\n", effective_start, this_read, loop_offset));
+
+		if (midi_playlist()->read (*_playback_buf, effective_start, this_read, loop_range, 0, filter) != this_read) {
 			error << string_compose(
 					_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"),
 					id(), this_read, start) << endmsg;
@@ -765,14 +774,16 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 
 		} else {
 
-			/* if we read to the end of the loop, go back to the beginning */
-			if (reloop) {
-				// Synthesize LoopEvent here, because the next events
-				// written will have non-monotonic timestamps.
-				start = loop_start;
-			} else {
-				start += this_read;
-			}
+			/* adjust passed-by-reference argument (note: this is
+			   monotonic and does not reflect looping.
+			*/
+			start += this_read;
+
+			/* similarly adjust effective_start, but this may be
+			   readjusted for seamless looping as we continue around
+			   the loop.
+			*/
+			effective_start += this_read;
 		}
 
 		dur -= this_read;
@@ -795,6 +806,10 @@ MidiDiskstream::do_refill ()
 	size_t  write_space = _playback_buf->write_space();
 	bool    reversed    = (_visible_speed * _session.transport_speed()) < 0.0f;
 
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS refill, write space = %1 file frame = %2\n",
+	                                                      write_space, file_frame));
+
+	/* no space to write */
 	if (write_space == 0) {
 		return 0;
 	}
@@ -808,21 +823,14 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-	/* no space to write */
-	if (_playback_buf->write_space() == 0) {
-		return 0;
-	}
-
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+
 	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
 		return 0;
 	}
 
 	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
-
-	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
-	//	<< frames_written - frames_read << endl;
 
 	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
 	to_read = min (to_read, (framecnt_t) write_space);
@@ -1077,7 +1085,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				_write_source->drop_references ();
 				_write_source.reset();
 			}
- 		}
+		}
 
 	}
 
@@ -1428,25 +1436,21 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 	Location* loc = loop_location;
 
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
-		             "%1 MDS pre-read read %8 @ %4..%5 from %2 write to %3, LOOPED ? %6-%7\n", _name,
+		             "%1 MDS pre-read read %8 offset = %9 @ %4..%5 from %2 write to %3, LOOPED ? %6 .. %7\n", _name,
 		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes,
-			     (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes));
+		             (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes, Port::port_offset()));
 
-        // cerr << "================\n";
-        // _playback_buf->dump (cerr);
-        // cerr << "----------------\n";
+	//cerr << "======== PRE ========\n";
+	//_playback_buf->dump (cerr);
+	//cerr << "----------------\n";
 
 	size_t events_read = 0;
-	const size_t split_cycle_offset = Port::port_offset ();
 
 	if (loc) {
 		framepos_t effective_start;
 
-		if (playback_sample >= loc->end()) {
-			effective_start = loc->start() + ((playback_sample - loc->end()) % loc->length());
-		} else {
-			effective_start = playback_sample;
-		}
+		Evoral::Range<framepos_t> loop_range (loc->start(), loc->end() - 1);
+		effective_start = loop_range.squish (playback_sample);
 
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
 
@@ -1505,6 +1509,10 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			     _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
 
 	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
+
+	//cerr << "======== POST ========\n";
+	//_playback_buf->dump (cerr);
+	//cerr << "----------------\n";
 }
 
 bool

@@ -27,6 +27,7 @@
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "evoral/Sequence.hpp"
+#include "evoral/Range.hpp"
 #include "ardour/ardour.h"
 #include "ardour/buffer.h"
 #include "ardour/source.h"
@@ -82,14 +83,17 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * \param source_start Start position of the SOURCE in this read context.
 	 * \param start Start of range to be read.
 	 * \param cnt Length of range to be read (in audio frames).
+	 * \param loop_range If non-null, all event times will be mapped into this loop range.
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
 	 * \param filtered Parameters whose MIDI messages will not be returned.
 	 */
+
 	virtual framecnt_t midi_read (const Lock&                        lock,
 	                              Evoral::EventSink<framepos_t>&     dst,
 	                              framepos_t                         source_start,
 	                              framepos_t                         start,
 	                              framecnt_t                         cnt,
+	                              Evoral::Range<framepos_t>*         loop_range,
 	                              MidiStateTracker*                  tracker,
 	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered,
@@ -210,6 +214,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                                  framepos_t                     position,
 	                                  framepos_t                     start,
 	                                  framecnt_t                     cnt,
+	                                  Evoral::Range<framepos_t>*     loop_range,
 	                                  MidiStateTracker*              tracker,
 	                                  MidiChannelFilter*             filter) const = 0;
 
