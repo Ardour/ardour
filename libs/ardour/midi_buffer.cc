@@ -95,7 +95,7 @@ MidiBuffer::copy(MidiBuffer const * const copy)
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
 void
-MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset, framecnt_t /* src_offset*/)
+MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset, frameoffset_t /* src_offset*/)
 {
 	assert (src.type() == DataType::MIDI);
 	assert (&src != this);
@@ -129,7 +129,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_off
 }
 
 void
-MidiBuffer::merge_from (const Buffer& src, framecnt_t /*nframes*/, framecnt_t /*dst_offset*/, framecnt_t /*src_offset*/)
+MidiBuffer::merge_from (const Buffer& src, framecnt_t /*nframes*/, frameoffset_t /*dst_offset*/, frameoffset_t /*src_offset*/)
 {
 	const MidiBuffer* mbuf = dynamic_cast<const MidiBuffer*>(&src);
 	assert (mbuf);
@@ -580,4 +580,3 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 
 	return true;
 }
-
