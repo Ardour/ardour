@@ -206,7 +206,7 @@ MidiStateTracker::dump (ostream& o)
 		for (int x = 0; x < 128; ++x) {
 			if (_active_notes[c * 128 + x]) {
 				o << "Channel " << c+1 << " Note " << x << " is on ("
-				  << (int) _active_notes[c*128+x] <<  "times)\n";
+				  << (int) _active_notes[c*128+x] <<  " times)\n";
 			}
 		}
 	}
