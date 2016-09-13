@@ -37,7 +37,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/convert.h"
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/md5.h"
