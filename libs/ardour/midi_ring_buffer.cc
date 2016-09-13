@@ -230,7 +230,7 @@ MidiRingBuffer<T>::dump(ostream& str)
 	size_t rspace;
 
 	if ((rspace = this->read_space()) == 0) {
-		str << "MRB::dump: empty\n";
+		str << this << " MRB::dump: empty\n";
 		return;
 	}
 
