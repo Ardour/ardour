@@ -55,11 +55,19 @@ get_url (void* arg)
 
 	curl = curl_easy_init ();
 	curl_easy_setopt (curl, CURLOPT_URL, r->url);
-
-	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_callback);
-	curl_easy_setopt (curl, CURLOPT_WRITEDATA, (void*) &r->mp);
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+	/* get size */
+	if (r->mp.progress) {
+		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+		curl_easy_perform (curl);
+		curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &r->mp.length);
+	}
+
+	curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_callback);
+	curl_easy_setopt (curl, CURLOPT_WRITEDATA, (void*) &r->mp);
 	curl_easy_perform (curl);
 	curl_easy_cleanup (curl);
 
@@ -92,7 +100,11 @@ ar_read (struct archive* a, void* d, const void** buff)
 		memmove (p->data, &p->data[rv], p->size - rv);
 	}
 	p->size -= rv;
+	p->processed += rv;
 	*buff = p->buf;
+	if (p->progress) {
+		p->progress->progress (p->processed, p->length);
+	}
 	p->unlock ();
 	return rv;
 }
@@ -130,13 +142,18 @@ setup_archive ()
 	return a;
 }
 
-
 FileArchive::FileArchive (const std::string& url)
 	: _req (url)
 {
 	if (!_req.url) {
 		fprintf (stderr, "Invalid Archive URL/filename\n");
 		throw failed_constructor ();
+	}
+
+	if (_req.is_remote ()) {
+		_req.mp.progress = this;
+	} else {
+		_req.mp.progress = 0;
 	}
 }
 
@@ -175,6 +192,12 @@ std::vector<std::string>
 FileArchive::contents_file ()
 {
 	struct archive* a = setup_archive ();
+	GStatBuf statbuf;
+	if (!g_stat (_req.url, &statbuf)) {
+		_req.mp.length = statbuf.st_size;
+	} else {
+		_req.mp.length = -1;
+	}
 	if (ARCHIVE_OK != archive_read_open_filename (a, _req.url, 8192)) {
 		fprintf (stderr, "Error opening archive: %s\n", archive_error_string(a));
 		return std::vector<std::string> ();
@@ -200,6 +223,12 @@ int
 FileArchive::extract_file ()
 {
 	struct archive* a = setup_archive ();
+	GStatBuf statbuf;
+	if (!g_stat (_req.url, &statbuf)) {
+		_req.mp.length = statbuf.st_size;
+	} else {
+		_req.mp.length = -1;
+	}
 	if (ARCHIVE_OK != archive_read_open_filename (a, _req.url, 8192)) {
 		fprintf (stderr, "Error opening archive: %s\n", archive_error_string(a));
 		return -1;
@@ -228,6 +257,11 @@ FileArchive::get_contents (struct archive* a)
 	struct archive_entry* entry;
 	for (;;) {
 		int r = archive_read_next_header (a, &entry);
+		if (!_req.mp.progress) {
+			// file i/o -- not URL
+			const uint64_t read = archive_filter_bytes (a, -1);
+			progress (read, _req.mp.length);
+		}
 		if (r == ARCHIVE_EOF) {
 			break;
 		}
@@ -257,6 +291,12 @@ FileArchive::do_extract (struct archive* a)
 
 	for (;;) {
 		int r = archive_read_next_header (a, &entry);
+		if (!_req.mp.progress) {
+			// file i/o -- not URL
+			const uint64_t read = archive_filter_bytes (a, -1);
+			progress (read, _req.mp.length);
+		}
+
 		if (r == ARCHIVE_EOF) {
 			break;
 		}

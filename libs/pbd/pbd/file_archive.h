@@ -38,17 +38,17 @@ class LIBPBD_API FileArchive
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
 
-		//PBD::Signal2<void, size_t, size_t> progress; // TODO
+		PBD::Signal2<void, size_t, size_t> progress; // TODO
 
 		struct MemPipe {
 			public:
 				MemPipe ()
 					: data (NULL)
-					, size (0)
-					, done (false)
+					, progress (0)
 				{
 					pthread_mutex_init (&_lock, NULL);
 					pthread_cond_init (&_ready, NULL);
+					reset ();
 				}
 
 				~MemPipe ()
@@ -68,6 +68,8 @@ class LIBPBD_API FileArchive
 					data = 0;
 					size = 0;
 					done = false;
+					processed = 0;
+					length = -1;
 					unlock ();
 				}
 
@@ -80,6 +82,10 @@ class LIBPBD_API FileArchive
 				uint8_t* data;
 				size_t   size;
 				bool     done;
+
+				double   processed;
+				double   length;
+				FileArchive* progress;
 
 			private:
 				pthread_mutex_t _lock;
