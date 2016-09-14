@@ -85,6 +85,9 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 
 		void update_example_filename();
 
+		void update_analysis_button ();
+		void update_soundcloud_upload_button ();
+
 		ARDOUR::ExportProfileManager::FormatStatePtr   get_format_state () const { return format_state; }
 		ARDOUR::ExportProfileManager::FilenameStatePtr get_filename_state () const { return filename_state; }
 
@@ -95,11 +98,9 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		void update_tab_label ();
 		void critical_selection_changed ();
 		void analysis_changed ();
+		void soundcloud_upload_changed ();
 
-		void on_show ();
 		void on_hide ();
-		void store_state ();
-		void restore_state ();
 
 		ARDOUR::ExportProfileManager::FormatStatePtr   format_state;
 		ARDOUR::ExportProfileManager::FilenameStatePtr filename_state;
@@ -123,6 +124,8 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Alignment          tab_close_alignment;
 		Gtk::Button             tab_close_button;
 		uint32_t                tab_number;
+
+		bool                    save_format_on_hide;
 	};
 };
 
