@@ -3307,7 +3307,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		if (0 == g_stat ((*x).c_str(), &statbuf)) {
 
 			if (::g_rename ((*x).c_str(), newpath.c_str()) != 0) {
-				error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, strerror (errno)) << endmsg;
+				error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, g_strerror (errno)) << endmsg;
 				continue;
 			}
 
@@ -3324,7 +3324,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 				if (::g_unlink (peakpath.c_str()) != 0) {
 					error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-															 peakpath, _path, strerror (errno))
+															 peakpath, _path, g_strerror (errno))
 						  << endmsg;
 					/* try to back out */
 					::g_rename (newpath.c_str(), _path.c_str());
