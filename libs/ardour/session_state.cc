@@ -3306,7 +3306,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		if (0 == g_stat ((*x).c_str(), &statbuf)) {
 
-			if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
+			if (::g_rename ((*x).c_str(), newpath.c_str()) != 0) {
 				error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, strerror (errno)) << endmsg;
 				continue;
 			}
@@ -3327,7 +3327,7 @@ Session::cleanup_sources (CleanupReport& rep)
 															 peakpath, _path, strerror (errno))
 						  << endmsg;
 					/* try to back out */
-					::rename (newpath.c_str(), _path.c_str());
+					::g_rename (newpath.c_str(), _path.c_str());
 					goto out;
 				}
 			}
