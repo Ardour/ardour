@@ -96,6 +96,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 	: ArdourWindow (reg->name())
 	, automation_action_menu(0)
 	, controller_menu (0)
+	, gain_column (0)
 	, midi_time_axis_view(mtv)
 	, route(rou)
 	, myactions (X_("Tracking"))
@@ -180,9 +181,29 @@ MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
+void
+MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
+{
+	// Find the next available column
+	if (available_automation_columns.empty()) {
+		error << _("programming error: ")
+		      << string_compose (X_("no more available automation column for %1/%2/%3"),
+		                         param.type(), (int) param.channel(), param.id() )
+		      << endmsg;
+		abort(); /*NOTREACHED*/
+		return;
+	}
+	std::set<size_t>::iterator it = available_automation_columns.begin();
+	size_t column = *it;
+	available_automation_columns.erase(it);
+
+	// Associate that column to the parameter
+	col2param[column] = param;
+}
+
 /** Add an AutomationTimeAxisView to display automation for a processor's parameter */
 void
-MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
+MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor> processor, const Evoral::Parameter& what)
 {
 	string name;
 	ProcessorAutomationNode* pan;
@@ -191,7 +212,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 		/* session state may never have been saved with new plugin */
 		error << _("programming error: ")
 		      << string_compose (X_("processor automation column for %1:%2/%3/%4 not registered with track!"),
-                                         processor->name(), what.type(), (int) what.channel(), what.id() )
+		                         processor->name(), what.type(), (int) what.channel(), what.id() )
 		      << endmsg;
 		abort(); /*NOTREACHED*/
 		return;
@@ -204,8 +225,8 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	// Find the next available column
 	if (available_automation_columns.empty()) {
 		error << _("programming error: ")
-		      << string_compose (X_("no more available automation column for %1:%2/%3/%4 not registered with track!"),
-                                         processor->name(), what.type(), (int) what.channel(), what.id() )
+		      << string_compose (X_("no more available automation column for %1:%2/%3/%4"),
+		                         processor->name(), what.type(), (int) what.channel(), what.id() )
 		      << endmsg;
 		abort(); /*NOTREACHED*/
 		return;
@@ -226,7 +247,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 void
 MidiTrackerEditor::show_all_automation ()
 {
-	std::cout << "MidiTrackerEditor::show_all_automation" << std::endl;
+	// std::cout << "MidiTrackerEditor::show_all_automation" << std::endl;
 
     // Copy pasted from route_time_axis.cc
 
@@ -252,23 +273,23 @@ MidiTrackerEditor::show_all_automation ()
 	/* Show processor automation */
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		std::cout << "[show_all_automation] "
-		          << "(*i)->valid = " << (*i)->valid << std::endl;
+		// std::cout << "[show_all_automation] "
+		//           << "(*i)->valid = " << (*i)->valid << std::endl;
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 			size_t column = (*ii)->column;
-			std::cout << "[show_all_automation] "
-			          << "column = " << column << std::endl;
+			// std::cout << "[show_all_automation] "
+			//           << "column = " << column << std::endl;
 			if (column == 0) {
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
 				column = (*ii)->column;
-				visible_automation_columns.insert (column);
 				string name = (*i)->processor->describe_parameter ((*ii)->what);
 				view.get_column(column)->set_title (name);
-				std::cout << "[show_all_automation] "
-				          << "after add_processor_automation_column: name = "
-				          << name
-				          << ", column = " << column << std::endl;
+				// std::cout << "[show_all_automation] "
+				//           << "after add_processor_automation_column: name = "
+				//           << name
+				//           << ", column = " << column << std::endl;
 			}
+			visible_automation_columns.insert (column);
 
 			(*ii)->menu_item->set_active (true);
 		}
@@ -550,8 +571,8 @@ MidiTrackerEditor::build_automation_action_menu ()
 
 	/* Add any route automation */
 
-	if (true /*gain_track*/) {
-		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_track_visibility)));
+	if (true) {
+		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_column_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		gain_automation_item->set_active (true);
 
@@ -559,7 +580,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	}
 
 	if (false /*trim_track*/) {
-		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_track_visibility)));
+		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_column_visibility)));
 		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		trim_automation_item->set_active (false);
 
@@ -567,7 +588,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	}
 
 	if (true /*mute_track*/) {
-		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_track_visibility)));
+		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_column_visibility)));
 		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		mute_automation_item->set_active (false);
 
@@ -575,7 +596,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	}
 
 	if (true /*!pan_tracks.empty()*/) {
-		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_track_visibility)));
+		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_column_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		pan_automation_item->set_active (false);
 
@@ -997,23 +1018,24 @@ MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl
 }
 
 void
-MidiTrackerEditor::update_gain_track_visibility ()
+MidiTrackerEditor::update_gain_column_visibility ()
 {
-	// bool const showit = gain_automation_item->get_active();
+	bool const showit = gain_automation_item->get_active();
 
-	// if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
-	// 	gain_track->set_marked_for_display (showit);
+	if (gain_column == 0)
+		add_automation_column(Evoral::Parameter(GainAutomation));
 
-	// 	/* now trigger a redisplay */
+	if (showit)
+		visible_automation_columns.insert (gain_column);
+	else
+		visible_automation_columns.erase (gain_column);
 
-	// 	if (!no_redraw) {
-	// 		 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-	// 	}
-	// }
+	/* now trigger a redisplay */
+	redisplay_model ();
 }
 
 void
-MidiTrackerEditor::update_trim_track_visibility ()
+MidiTrackerEditor::update_trim_column_visibility ()
 {
 	// bool const showit = trim_automation_item->get_active();
 
@@ -1029,7 +1051,7 @@ MidiTrackerEditor::update_trim_track_visibility ()
 }
 
 void
-MidiTrackerEditor::update_mute_track_visibility ()
+MidiTrackerEditor::update_mute_column_visibility ()
 {
 	// bool const showit = mute_automation_item->get_active();
 
@@ -1045,7 +1067,7 @@ MidiTrackerEditor::update_mute_track_visibility ()
 }
 
 void
-MidiTrackerEditor::update_pan_track_visibility ()
+MidiTrackerEditor::update_pan_column_visibility ()
 {
 	// bool const showit = pan_automation_item->get_active();
 	// bool changed = false;
@@ -1199,9 +1221,9 @@ MidiTrackerEditor::redisplay_visible_automation()
 	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
 		size_t col = automation_col_offset + 2 * i;
 		bool is_visible = is_in(col, visible_automation_columns);
-		std::cout << "[redisplay_visible_automation] "
-		          << "col = " << col
-		          << ", is_visible = " << is_visible << std::endl;
+		// std::cout << "[redisplay_visible_automation] "
+		//           << "col = " << col
+		//           << ", is_visible = " << is_visible << std::endl;
 		view.get_column(col)->set_visible(is_visible);
 	}
 	redisplay_visible_automation_delay();
@@ -1410,9 +1432,13 @@ MidiTrackerEditor::midi_track() const
 void
 MidiTrackerEditor::build_param2actrl ()
 {
+	// Gain
+	param2actrl[Evoral::Parameter(GainAutomation)] =  route->gain_control();
+
+	// Processors
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-			string name = (*i)->processor->describe_parameter ((*ii)->what);
+			// string name = (*i)->processor->describe_parameter ((*ii)->what); // for debugging
 			param2actrl[(*ii)->what] = boost::dynamic_pointer_cast<AutomationControl>((*i)->processor->control((*ii)->what));
 		}
 	}
@@ -1503,13 +1529,13 @@ MidiTrackerEditor::setup_pattern ()
 		col2autotrack[column] = i;
 		available_automation_columns.insert(column);
 		view.get_column(column)->set_visible (false);
-		std::cout << "[setup_pattern] name = " << ss_automation.str()
-		          << ", column = " << column << std::endl;
+		// std::cout << "[setup_pattern] name = " << ss_automation.str()
+		//           << ", column = " << column << std::endl;
 
 		column = view.get_columns().size();
 		view.append_column (*viewcolumn_automation_delay);
 		view.get_column(column)->set_visible (false);
-		std::cout << "Delay" << ", column = " << column << std::endl;
+		// std::cout << "Delay" << ", column = " << column << std::endl;
 	}
 
 	view.set_headers_visible (true);

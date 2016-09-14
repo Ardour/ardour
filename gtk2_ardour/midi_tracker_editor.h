@@ -1,5 +1,5 @@
 /*
-    Copyleft (C) 2015 Nil Geisweiller
+    Copyright (C) 2015 Nil Geisweiller
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -65,10 +65,10 @@ class AutomationTimeAxisView;
 // dedicated widget is created to replace Gtk::TreeModel::ColumnRecord
 
 // Maximum number of note tracks in the midi tracker editor
-#define MAX_NUMBER_OF_NOTE_TRACKS 128
+#define MAX_NUMBER_OF_NOTE_TRACKS 64
 
 // Maximum number of automation trackts in the midi tracker editor
-#define MAX_NUMBER_OF_AUTOMATION_TRACKS 16
+#define MAX_NUMBER_OF_AUTOMATION_TRACKS 64
 
 // Test if element is in container
 template<typename C>
@@ -105,7 +105,7 @@ class MidiTrackerEditor : public ArdourWindow
 		size_t                                    column;
 		MidiTrackerEditor&                        parent;
 
-	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, MidiTrackerEditor& p)
+		ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, MidiTrackerEditor& p)
 		    : what (w), menu_item (mitem), column(0), parent (p) {}
 
 	    ~ProcessorAutomationNode ();
@@ -154,7 +154,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
 	/** parameter -> menu item map for the main automation menu */
-	ParameterMenuMap _main_automation_menu_map;
+	ParameterMenuMap _main_automation_menu_map;  // TODO: implement!
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
 	/** parameter -> menu item map for the channel command items */
@@ -162,9 +162,9 @@ class MidiTrackerEditor : public ArdourWindow
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
-	// TODO replace AutomationTimeAxisView by AutomationTrackerView or column
+	// TODO: replace AutomationTimeAxisView by AutomationTrackerView or column
 	// or something
-	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	size_t gain_column;
 	boost::shared_ptr<AutomationTimeAxisView> trim_track;
 	boost::shared_ptr<AutomationTimeAxisView> mute_track;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
@@ -176,7 +176,8 @@ class MidiTrackerEditor : public ArdourWindow
 
 	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
-	void add_processor_automation_column (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
+	void add_automation_column (const Evoral::Parameter& param);
+	void add_processor_automation_column (boost::shared_ptr<ARDOUR::Processor> processor, const Evoral::Parameter& what);
 
 	void build_param2actrl ();
 
@@ -196,10 +197,10 @@ class MidiTrackerEditor : public ArdourWindow
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 
-	void update_gain_track_visibility ();
-	void update_trim_track_visibility ();
-	void update_mute_track_visibility ();
-	void update_pan_track_visibility ();
+	void update_gain_column_visibility ();
+	void update_trim_column_visibility ();
+	void update_mute_column_visibility ();
+	void update_pan_column_visibility ();
 
 	////////////////////////////
     // Other (to sort out)	  //
