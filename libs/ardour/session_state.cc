@@ -3304,37 +3304,34 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
-		if (0 == g_stat ((*x).c_str(), &statbuf)) {
-
-			if (::g_rename ((*x).c_str(), newpath.c_str()) != 0) {
-				error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, g_strerror (errno)) << endmsg;
-				continue;
-			}
-
-			/* see if there an easy to find peakfile for this file, and remove it.
-			 */
-
-					string base = Glib::path_get_basename (*x);
-					base += "%A"; /* this is what we add for the channel suffix of all native files,
-									 or for the first channel of embedded files. it will miss
-									 some peakfiles for other channels
-								  */
-			string peakpath = construct_peak_filepath (base);
-
-			if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-				if (::g_unlink (peakpath.c_str()) != 0) {
-					error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-															 peakpath, _path, g_strerror (errno))
-						  << endmsg;
-					/* try to back out */
-					::g_rename (newpath.c_str(), _path.c_str());
-					goto out;
-				}
-			}
-
-			rep.paths.push_back (*x);
-			rep.space += statbuf.st_size;
+		if ((g_stat ((*x).c_str(), &statbuf) != 0) || (::g_rename ((*x).c_str(), newpath.c_str()) != 0)) {
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x),
+			                         newpath, g_strerror (errno)) << endmsg;
+			continue;
 		}
+
+		/* see if there an easy to find peakfile for this file, and remove it.
+		 */
+
+		string base = Glib::path_get_basename (*x);
+		base += "%A"; /* this is what we add for the channel suffix of all native files,
+		                 or for the first channel of embedded files. it will miss
+		                 some peakfiles for other channels
+		               */
+		string peakpath = construct_peak_filepath (base);
+
+		if (Glib::file_test (peakpath.c_str (), Glib::FILE_TEST_EXISTS)) {
+			if (::g_unlink (peakpath.c_str ()) != 0) {
+				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"), peakpath, _path,
+				                         g_strerror (errno)) << endmsg;
+				/* try to back out */
+				::g_rename (newpath.c_str (), _path.c_str ());
+				goto out;
+			}
+		}
+
+		rep.paths.push_back (*x);
+		rep.space += statbuf.st_size;
 	}
 
 	/* dump the history list */
