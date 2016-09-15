@@ -94,6 +94,7 @@ public:
 	                          framepos_t                     position,
 	                          framepos_t                     start,
 	                          framecnt_t                     cnt,
+	                          Evoral::Range<framepos_t>*     loop_range,
 	                          MidiStateTracker*              tracker,
 	                          MidiChannelFilter*             filter) const;
 

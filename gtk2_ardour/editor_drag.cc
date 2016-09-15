@@ -3087,10 +3087,11 @@ TrimDrag::aborted (bool movement_occurred)
 	   behind which may be slightly odd from the user's point of view.
 	*/
 
-	finished (0, true);
+	GdkEvent ev;
+	finished (&ev, true);
 
 	if (movement_occurred) {
-		_editor->undo ();
+		_editor->session()->undo (1);
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {

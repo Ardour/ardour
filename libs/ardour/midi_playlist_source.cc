@@ -125,7 +125,9 @@ framecnt_t
 MidiPlaylistSource::read_unlocked (const Lock& lock,
 				   Evoral::EventSink<framepos_t>& dst,
 				   framepos_t /*position*/,
-				   framepos_t start, framecnt_t cnt,
+				   framepos_t start,
+                                   framecnt_t cnt,
+                                   Evoral::Range<framepos_t>* loop_range,
 				   MidiStateTracker*,
 				   MidiChannelFilter*) const
 {
@@ -135,7 +137,7 @@ MidiPlaylistSource::read_unlocked (const Lock& lock,
 		return 0;
 	}
 
-	return mp->read (dst, start, cnt);
+	return mp->read (dst, start, cnt, loop_range);
 }
 
 framecnt_t

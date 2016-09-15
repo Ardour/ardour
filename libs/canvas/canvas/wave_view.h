@@ -18,6 +18,9 @@
 
 */
 
+#ifndef __CANVAS_WAVE_VIEW_H__
+#define __CANVAS_WAVE_VIEW_H__
+
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>
@@ -408,4 +411,6 @@ public:
         static DrawingRequestQueue request_queue;
 };
 
-}
+} // namespace ArdourCanvas
+
+#endif // __CANVAS_WAVE_VIEW_H__

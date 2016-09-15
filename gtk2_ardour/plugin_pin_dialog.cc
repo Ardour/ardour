@@ -2021,6 +2021,11 @@ PluginPinDialog::add_processor (boost::weak_ptr<Processor> p)
 		return;
 	}
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+#ifdef MIXBUS
+	if (pi && pi->is_channelstrip ()) {
+		pi.reset ();
+	}
+#endif
 	if (pi) {
 		ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
 		vbox->pack_start (*ppw.back());

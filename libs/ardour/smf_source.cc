@@ -215,6 +215,7 @@ SMFSource::read_unlocked (const Lock&                    lock,
                           framepos_t const               source_start,
                           framepos_t                     start,
                           framecnt_t                     duration,
+                          Evoral::Range<framepos_t>*     loop_range,
                           MidiStateTracker*              tracker,
                           MidiChannelFilter*             filter) const
 {
@@ -287,6 +288,10 @@ SMFSource::read_unlocked (const Lock&                    lock,
 		   is in session frames.
 		*/
 		const framepos_t ev_frame_time = converter.to(Evoral::Beats::ticks_at_rate(time, ppqn())) + source_start;
+
+		if (loop_range) {
+			loop_range->squish (ev_frame_time);
+		}
 
 		if (ev_frame_time < start + duration) {
 			if (!filter || !filter->filter(ev_buffer, ev_size)) {
@@ -793,5 +798,3 @@ SMFSource::prevent_deletion ()
 
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
-
-

@@ -346,6 +346,26 @@ ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
 	return 4;
 }
 
+int
+ARDOUR::LuaAPI::build_filename (lua_State *L)
+{
+	std::vector<std::string> elem;
+	int top = lua_gettop(L);
+	if (top < 1) {
+    return luaL_argerror (L, 1, "invalid number of arguments, build_filename (path, ...)");
+	}
+	for (int i = 1; i <= top; ++i) {
+		int lt = lua_type (L, i);
+		if (lt != LUA_TSTRING) {
+			return luaL_argerror (L, i, "invalid argument type, expected string");
+		}
+		elem.push_back (luaL_checkstring(L, i));
+	}
+
+	luabridge::Stack<std::string>::push (L, Glib::build_filename (elem));
+	return 1;
+}
+
 luabridge::LuaRef::Proxy&
 luabridge::LuaRef::Proxy::clone_instance (const void* classkey, void* p) {
   lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_tableRef);

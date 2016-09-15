@@ -41,8 +41,8 @@ public:
 	~MidiBuffer();
 
 	void silence (framecnt_t nframes, framecnt_t offset = 0);
-	void read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
-	void merge_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
+	void read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0);
+	void merge_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0);
 
 	void copy(const MidiBuffer& copy);
 	void copy(MidiBuffer const * const);

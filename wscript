@@ -970,6 +970,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18', mandatory=True)
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'libarchive', uselib_store='ARCHIVE', atleast_version='3.0.0', mandatory=True)
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26', mandatory=True)
     autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6', mandatory=True)
     autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.1', mandatory=True)
@@ -998,6 +999,11 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
+        if conf.options.cxx11:
+            conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CFLAGS', '-DWIN32')
+            conf.env.append_value('CXXFLAGS', '-DWIN32')
         conf.env.append_value('LIB', 'pthread')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')

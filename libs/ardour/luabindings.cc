@@ -528,6 +528,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <Location, PBD::StatefulDestructible> ("Location")
+		.addFunction ("name", &Location::name)
 		.addFunction ("locked", &Location::locked)
 		.addFunction ("lock", &Location::lock)
 		.addFunction ("unlock", &Location::unlock)
@@ -557,6 +558,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("first_mark_after", &Locations::first_mark_after)
 		.addFunction ("first_mark_before", &Locations::first_mark_before)
 		.addFunction ("first_mark_at", &Locations::mark_at)
+		.addFunction ("remove", &Locations::remove)
 		.addRefFunction ("marks_either_side", &Locations::marks_either_side)
 		.addRefFunction ("find_all_between", &Locations::find_all_between)
 		.endClass ()
@@ -1467,6 +1469,7 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
 		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
+		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
 }

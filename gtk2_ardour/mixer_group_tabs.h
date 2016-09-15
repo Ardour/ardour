@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_mixer_group_tabs_h__
+#define __gtk_ardour_mixer_group_tabs_h__
+
 #include "group_tabs.h"
 
 class Mixer_UI;
@@ -39,3 +42,5 @@ private:
 
 	Mixer_UI* _mixer;
 };
+
+#endif // __gtk_ardour_mixer_group_tabs_h__

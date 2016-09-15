@@ -17,6 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef __CANVAS_FLAG_H__
+#define __CANVAS_FLAG_H__
+
 #include <pangomm/fontdescription.h>
 
 #include "canvas/visibility.h"
@@ -54,3 +57,5 @@ private:
 };
 
 }
+
+#endif // __CANVAS_FLAG_H__

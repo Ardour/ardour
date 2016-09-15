@@ -113,9 +113,26 @@ ExportFileNotebook::update_soundcloud_upload ()
 }
 
 void
+ExportFileNotebook::FilePage::on_hide ()
+{
+	VBox::on_hide ();
+	if (save_format_on_hide) {
+		profile_manager->save_format_to_disk (format_state->format);
+		save_format_on_hide = false;
+	}
+}
+
+void
 ExportFileNotebook::FilePage::analysis_changed ()
 {
 	format_state->format->set_analyse (analysis_button.get_active ());
+	save_format_on_hide = true;
+}
+
+void
+ExportFileNotebook::FilePage::update_analysis_button ()
+{
+	analysis_button.set_active (format_state->format->analyse());
 }
 
 void
@@ -199,7 +216,8 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
   filename_label (_("Location"), Gtk::ALIGN_LEFT),
   soundcloud_upload_button (_("Upload to Soundcloud")),
   analysis_button (_("Analyze Exported Audio")),
-  tab_number (number)
+  tab_number (number),
+  save_format_on_hide(false)
 {
 	set_border_width (12);
 
@@ -232,6 +250,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	format_selector.set_state (format_state, s);
 	filename_selector.set_state (filename_state, s);
 	analysis_button.set_active (format_state->format->analyse());
+	soundcloud_upload_button.set_active (format_state->format->soundcloud_upload());
 
 	/* Signals */
 
@@ -249,6 +268,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
 
 	soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*parent, &ExportFileNotebook::update_soundcloud_upload));
+	soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::soundcloud_upload_changed));
 	analysis_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::analysis_changed));
 	/* Tab widget */
 
@@ -293,6 +313,18 @@ ExportFileNotebook::FilePage::get_soundcloud_upload () const
 }
 
 void
+ExportFileNotebook::FilePage::soundcloud_upload_changed ()
+{
+	save_format_on_hide = true;
+}
+
+void
+ExportFileNotebook::FilePage::update_soundcloud_upload_button ()
+{
+	soundcloud_upload_button.set_active (format_state->format->soundcloud_upload());
+}
+
+void
 ExportFileNotebook::FilePage::save_format_to_manager (FormatPtr format)
 {
 	profile_manager->save_format_to_disk (format);
@@ -334,5 +366,7 @@ ExportFileNotebook::FilePage::critical_selection_changed ()
 {
 	update_tab_label();
 	update_example_filename();
+	update_analysis_button();
+	update_soundcloud_upload_button();
 	CriticalSelectionChanged();
 }

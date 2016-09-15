@@ -32,6 +32,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits MidiSourceIO;
 		LIBARDOUR_API extern DebugBits MidiPlaylistIO;
 		LIBARDOUR_API extern DebugBits MidiDiskstreamIO;
+		LIBARDOUR_API extern DebugBits MidiRingBuffer;
 		LIBARDOUR_API extern DebugBits SnapBBT;
 		LIBARDOUR_API extern DebugBits Latency;
 		LIBARDOUR_API extern DebugBits LatencyCompensation;

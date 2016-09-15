@@ -257,7 +257,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 		/*
 		  set _start to new position in tempo map.
 
-		  The user probably expects the region contents to maintain audio position as the 
+		  The user probably expects the region contents to maintain audio position as the
 		  tempo changes, but AFAICT this requires modifying the src file to use
 		  SMPTE timestamps with the current disk read model (?).
 
@@ -334,18 +334,24 @@ framecnt_t
 MidiRegion::read_at (Evoral::EventSink<framepos_t>& out,
                      framepos_t                     position,
                      framecnt_t                     dur,
+                     Evoral::Range<framepos_t>*     loop_range,
                      uint32_t                       chan_n,
                      NoteMode                       mode,
                      MidiStateTracker*              tracker,
                      MidiChannelFilter*             filter) const
 {
-	return _read_at (_sources, out, position, dur, chan_n, mode, tracker, filter);
+	return _read_at (_sources, out, position, dur, loop_range, chan_n, mode, tracker, filter);
 }
 
 framecnt_t
-MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out,
+                            framepos_t                  position,
+                            framecnt_t                  dur,
+                            Evoral::Range<framepos_t>*  loop_range,
+                            uint32_t                    chan_n,
+                            NoteMode                    mode) const
 {
-	return _read_at (_master_sources, out, position, dur, chan_n, mode); /* no tracker */
+	return _read_at (_master_sources, out, position, dur, loop_range, chan_n, mode); /* no tracker */
 }
 
 framecnt_t
@@ -353,6 +359,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
                       Evoral::EventSink<framepos_t>& dst,
                       framepos_t                     position,
                       framecnt_t                     dur,
+                      Evoral::Range<framepos_t>*     loop_range,
                       uint32_t                       chan_n,
                       NoteMode                       mode,
                       MidiStateTracker*              tracker,
@@ -392,30 +399,34 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 	src->set_note_mode(lm, mode);
 
-	/*
-	  cerr << "MR " << name () << " read @ " << position << " * " << to_read
-	  << " _position = " << _position
-	  << " _start = " << _start
-	  << " intoffset = " << internal_offset
-	  << " pulse = " << pulse()
-	  << " start_pulse = " << start_pulse()
-	  << " start_beat = " << _start_beats
-	  << endl;
-	*/
+#if 0
+	cerr << "MR " << name () << " read @ " << position << " + " << to_read
+	     << " dur was " << dur
+	     << " len " << _length
+	     << " l-io " << (_length - internal_offset)
+	     << " _position = " << _position
+	     << " _start = " << _start
+	     << " intoffset = " << internal_offset
+	     << " pulse = " << pulse()
+	     << " start_pulse = " << start_pulse()
+	     << " start_beat = " << _start_beats
+	     << endl;
+#endif
 
 	/* This call reads events from a source and writes them to `dst' timed in session frames */
 
 	if (src->midi_read (
 		    lm, // source lock
-			dst, // destination buffer
-			_position - _start, // start position of the source in session frames
-			_start + internal_offset, // where to start reading in the source
-			to_read, // read duration in frames
-			tracker,
-			filter,
-			_filtered_parameters,
-			pulse(),
-			start_pulse()
+		    dst, // destination buffer
+		    _position - _start, // start position of the source in session frames
+		    _start + internal_offset, // where to start reading in the source
+		    to_read, // read duration in frames
+		    loop_range,
+		    tracker,
+		    filter,
+		    _filtered_parameters,
+		    pulse(),
+		    start_pulse()
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}

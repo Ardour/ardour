@@ -1639,7 +1639,13 @@ MixerStrip::help_count_plugins (boost::weak_ptr<Processor> p)
 	if (!processor || !processor->display_to_user()) {
 		return;
 	}
-	if (boost::dynamic_pointer_cast<PluginInsert> (processor)) {
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+#ifdef MIXBUS
+	if (pi && pi->is_channelstrip ()) {
+		return;
+	}
+#endif
+	if (pi) {
 		++_plugin_insert_cnt;
 	}
 }

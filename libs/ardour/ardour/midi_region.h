@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "evoral/Beats.hpp"
+#include "evoral/Range.hpp"
 
 #include "ardour/ardour.h"
 #include "ardour/region.h"
@@ -75,6 +76,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	framecnt_t read_at (Evoral::EventSink<framepos_t>& dst,
 	                    framepos_t position,
 	                    framecnt_t dur,
+	                    Evoral::Range<framepos_t>* loop_range,
 	                    uint32_t  chan_n = 0,
 	                    NoteMode  mode = Sustained,
 	                    MidiStateTracker* tracker = 0,
@@ -83,6 +85,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	framecnt_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
 	                           framecnt_t dur,
+	                           Evoral::Range<framepos_t>* loop_range,
 	                           uint32_t  chan_n = 0,
 	                           NoteMode  mode = Sustained) const;
 
@@ -130,6 +133,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	framecnt_t _read_at (const SourceList&, Evoral::EventSink<framepos_t>& dst,
 	                     framepos_t position,
 	                     framecnt_t dur,
+	                     Evoral::Range<framepos_t>* loop_range,
 	                     uint32_t chan_n = 0,
 	                     NoteMode mode = Sustained,
 	                     MidiStateTracker* tracker = 0,

@@ -47,6 +47,7 @@ libpbd_sources = [
     'epa.cc',
     'error.cc',
     'ffs.cc',
+    'file_archive.cc',
     'file_utils.cc',
     'fpu.cc',
     'id.cc',
@@ -134,7 +135,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
-    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
+    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         if 'cocoa_open_uri.mm' not in obj.source:

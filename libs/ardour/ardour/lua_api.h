@@ -130,6 +130,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
 	 */
 	int hsla_to_rgba (lua_State *lua);
+
+	/* Creates a filename from a series of elements using the correct separator for filenames.
+	 *
+	 * No attempt is made to force the resulting filename to be an absolute path.
+	 * If the first element is a relative path, the result will be a relative path.
+	 */
+	int build_filename (lua_State *lua);
+
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {

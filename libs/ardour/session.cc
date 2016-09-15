@@ -37,7 +37,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/convert.h"
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/md5.h"
@@ -6367,6 +6366,7 @@ Session::start_time_changed (framepos_t old)
 	if (l && l->start() == old) {
 		l->set_start (s->start(), true);
 	}
+	set_dirty ();
 }
 
 void
@@ -6386,6 +6386,7 @@ Session::end_time_changed (framepos_t old)
 	if (l && l->end() == old) {
 		l->set_end (s->end(), true);
 	}
+	set_dirty ();
 }
 
 std::vector<std::string>

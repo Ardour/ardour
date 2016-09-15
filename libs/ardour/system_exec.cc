@@ -25,7 +25,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/system_exec.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 char * SystemExec::_vfork_exec_wrapper = NULL;
 
@@ -78,3 +78,5 @@ SystemExec::SystemExec (std::string c, const std::map<char, std::string> subs)
 }
 
 SystemExec::~SystemExec() { }
+
+} // namespace ARDOUR

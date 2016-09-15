@@ -110,6 +110,7 @@ framecnt_t
 MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
                     framepos_t                     start,
                     framecnt_t                     dur,
+                    Evoral::Range<framepos_t>*     loop_range,
                     unsigned                       chan_n,
                     MidiChannelFilter*             filter)
 {
@@ -190,7 +191,11 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 		}
 
 		/* Read from region into target. */
-		mr->read_at (tgt, start, dur, chan_n, _note_mode, &tracker->tracker, filter);
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("read from %1 at %2 for %3 LR %4 .. %5\n",
+		                                                    mr->name(), start, dur, 
+		                                                    (loop_range ? loop_range->from : -1),
+		                                                    (loop_range ? loop_range->to : -1)));
+		mr->read_at (tgt, start, dur, loop_range, chan_n, _note_mode, &tracker->tracker, filter);
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
 
@@ -202,7 +207,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 			             string_compose ("\t%1 ended, resolve notes and delete (%2) tracker\n",
 			                             mr->name(), ((new_tracker) ? "new" : "old")));
 
-			tracker->tracker.resolve_notes (tgt, (*i)->last_frame());
+			tracker->tracker.resolve_notes (tgt, loop_range ? loop_range->squish ((*i)->last_frame()) : (*i)->last_frame());
 			if (!new_tracker) {
 				_note_trackers.erase (t);
 			}
