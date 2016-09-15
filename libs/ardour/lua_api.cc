@@ -177,14 +177,13 @@ ARDOUR::LuaAPI::set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uin
 }
 
 float
-ARDOUR::LuaAPI::get_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which)
+ARDOUR::LuaAPI::get_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, bool &ok)
 {
+	ok=false;
 	boost::shared_ptr<Plugin> plugin = pi->plugin();
-	if (!plugin) { return NULL; }
-
-	bool ok=false;
+	if (!plugin) { return 0; }
 	uint32_t controlid = plugin->nth_parameter (which, ok);
-	if (!ok) { return NULL; }
+	if (!ok) { return 0; }
 	return plugin->get_parameter ( controlid );
 }
 

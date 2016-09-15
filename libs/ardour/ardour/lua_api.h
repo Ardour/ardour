@@ -96,10 +96,11 @@ namespace ARDOUR { namespace LuaAPI {
 	/** get a plugin control parameter value
 	 *
 	 * @param proc Plugin-Insert
-	 * @param which control-input to query (starting at 0)
+	 * @param which control port to query (starting at 0, including ports of type input and output)
+	 * @param boolean variable contains true or false after call returned. to be checked by caller before using value.
 	 * @returns value
 	 */
-	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which);
+	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
 
 	/**
 	 * A convenience function to get a Automation Lists and ParamaterDescriptor
