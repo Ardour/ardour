@@ -37,7 +37,7 @@ BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
-
+: ${HARRISONLV2=harrison_lv2s-n}
 
 if [ $# -eq 0 ] ; then
 	echo ""
@@ -628,10 +628,10 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	mkdir -p $APPLIB/LV2
 
 	curl -s -S --fail -# \
-		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${HARCH}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
+		-z "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
+		-o "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${HARCH}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then

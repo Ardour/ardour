@@ -25,6 +25,7 @@ PRINT_SYSDEPS=
 WITH_NLS=
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
+: ${HARRISONLV2=harrison_lv2s-n}
 
 . ../define_versions.sh
 
@@ -606,13 +607,13 @@ fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -#  \
-		-z "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
-		-o "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${OSX_BENSID}.zip"
+		-z "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
+		-o "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${OSX_BENSID}.zip"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip"
+		"${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip"
 fi
 
 if test x$WITH_HARVID != x ; then

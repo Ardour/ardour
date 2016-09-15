@@ -16,7 +16,9 @@ test -f gtk2_ardour/wscript || exit 1
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
 : ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
+
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
+: ${HARRISONLV2=harrison_lv2s-n}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
@@ -265,10 +267,10 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	echo "Including Harrison LV2s"
 
 	curl -s -S --fail -# \
-		-z "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
-		-o "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${WARCH}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/harrison_lv2s.${WARCH}.zip"
+		-z "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
+		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${WARCH}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
