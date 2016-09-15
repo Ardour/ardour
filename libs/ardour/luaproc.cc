@@ -1035,7 +1035,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	luabridge::push <LuaProc *> (LG, this);
 	lua_setglobal (LG, "self");
 
-	luabridge::push <float *> (LG, _shadow_data);
+	luabridge::push <float *> (LG, _control_data);
 	lua_setglobal (LG, "CtrlPorts");
 }
 ////////////////////////////////////////////////////////////////////////////////
