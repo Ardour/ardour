@@ -296,6 +296,18 @@ if test -n "$MIXBUS"; then
 		"$ALIBDIR/vamp/harrison_vamp.dll"
 fi
 
+################################################################################
+
+if test x$DEMO_SESSION_URL != x ; then
+	mkdir -p $Shared/sessions
+	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
+	for demo in $DEMO_SESSIONS; do
+		curl -s -S --fail -# -o $Shared/sessions/$demo $DEMO_SESSION_URL/$demo
+	done
+fi
+
+################################################################################
+
 ( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
 
 ################################################################################
