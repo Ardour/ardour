@@ -593,6 +593,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter", "iiif", route_plugin_parameter);
 		// prints to cerr only
 		REGISTER_CALLBACK (serv, "/strip/plugin/parameter/print", "iii", route_plugin_parameter_print);
+		REGISTER_CALLBACK (serv, "/strip/plugin/activate", "ii", route_plugin_activate);
+		REGISTER_CALLBACK (serv, "/strip/plugin/deactivate", "ii", route_plugin_deactivate);
 		REGISTER_CALLBACK (serv, "/strip/send/gain", "iif", route_set_send_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/send/fader", "iif", route_set_send_fader);
 		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
@@ -2718,6 +2720,74 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 		cerr << "lower value:   " << pd.lower << "\n";
 		cerr << "upper value:   " << pd.upper << "\n";
 	}
+
+	return 0;
+}
+
+int
+OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
+{
+	if (!session)
+		return -1;
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
+
+	if (!redi) {
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	pi->activate();
+
+	return 0;
+}
+
+int
+OSC::route_plugin_deactivate (int ssid, int piid, lo_message msg)
+{
+	if (!session)
+		return -1;
+	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
+
+	if (!redi) {
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	pi->deactivate();
 
 	return 0;
 }
