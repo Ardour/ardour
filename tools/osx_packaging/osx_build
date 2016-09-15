@@ -20,7 +20,6 @@ MIXBUS32C=
 WITH_HARVID=1
 WITH_HARRISON_LV2=
 WITH_X42_LV2=
-WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
@@ -39,7 +38,6 @@ while [ $# -gt 0 ] ; do
 
 	--sae)
 		SAE=1 ;
-		WITH_LADSPA=1;
 		STRIP= ;
 		PRODUCT_PKG_DIR=ArdourSAE ;
 		APPNAME=Ardour ;
@@ -49,7 +47,6 @@ while [ $# -gt 0 ] ; do
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
 		SAE= ;
-		WITH_LADSPA=;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
@@ -60,7 +57,6 @@ while [ $# -gt 0 ] ; do
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
 		SAE= ;
-		WITH_LADSPA=;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		APPNAME=Mixbus32C-${major_version} ;
@@ -68,25 +64,22 @@ while [ $# -gt 0 ] ; do
 		shift ;;
 	--public)
 		SAE= ;
-		WITH_LADSPA=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone) SAE= ;
-		WITH_LADSPA=1;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Ardour ;
 		shift ;;
-	--test) SAE= ; WITH_LADSPA=; STRIP= ; shift ;;
+	--test) SAE= ; STRIP= ; shift ;;
 
 	#
 	# specific build flags
 	#
 
 	--noharvid) WITH_HARVID= ; shift ;;
-	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
@@ -347,20 +340,6 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
 (cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so)
 
-
-if test x$WITH_LADSPA != x ; then
-    if test x$SAE != x ; then
-	plugdir=sae_ladspa
-    elif test x$MIXBUS != x ; then
-	plugdir=mixbus_ladspa
-    else
-	plugdir=ladspa
-    fi
-    if [ -d $plugdir -a "x$(ls $plugdir)" != x ] ; then 
-        echo "Copying `ls $plugdir | wc -l` plugins ..."
-        cp -r $plugdir/* $Plugins
-    fi
-fi
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces

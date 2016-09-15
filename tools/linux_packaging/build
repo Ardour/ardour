@@ -24,7 +24,6 @@ fi
 MIXBUS=
 WITH_HARRISON_LV2=
 WITH_X42_LV2=
-WITH_LADSPA=0
 WITH_HARVID=
 STRIP=all
 PRINT_SYSDEPS=
@@ -36,6 +35,7 @@ GCC5ABI=false
 USEWINE=false
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
+
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
 
@@ -61,7 +61,6 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
@@ -72,7 +71,6 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all
 		APPNAME=Mixbus32C ;
 		VENDOR=Harrison ;
@@ -82,23 +80,20 @@ while [ $# -gt 0 ] ; do
 	--public)
 		WITH_HARRISON_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all ;
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
 		WITH_NLS= ;
-		WITH_LADSPA=1;
 		STRIP=all;
 		shift ;;
-	--test) WITH_LADSPA=; STRIP= ; shift ;;
+	--test) STRIP= ; shift ;;
 
 	#
 	# specific build flags
 	#
 
 	--nojack) INTERNAL_JACK= ; shift ;;
-	--noladspa) WITH_LADSPA= ; shift ;;
 	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
@@ -360,20 +355,6 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 
 cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
 (cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
-
-# LADSPA
-if test x$WITH_LADSPA != x ; then
-	if test x$MIXBUS != x ; then
-		plugdir=mixbus_ladspa
-	else
-		plugdir=ladspa
-	fi
-	echo "Copying `ls $plugdir | wc -l` plugins ..."
-	if [ -d $plugdir ] ; then
-		mkdir -p $Plugins
-		cp -r $plugdir/* $Plugins
-	fi
-fi
 
 # Control Surfaces
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
