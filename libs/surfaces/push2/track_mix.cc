@@ -115,7 +115,7 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
 		}
 
 		knobs[n] = new Push2Knob (p2, this);
-		knobs[n]->set_position (60 + (Push2Canvas::inter_button_spacing()*n), 95);
+		knobs[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
 		knobs[n]->set_radius (25);
 	}
 

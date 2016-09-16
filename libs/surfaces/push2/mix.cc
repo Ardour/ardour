@@ -116,7 +116,7 @@ MixLayout::MixLayout (Push2& p, Session& s)
 		backgrounds.push_back (r);
 
 		knobs[n] = new Push2Knob (p2, this);
-		knobs[n]->set_position (60 + (n*Push2Canvas::inter_button_spacing()), 95);
+		knobs[n]->set_position (Duple (60 + (n*Push2Canvas::inter_button_spacing()), 95));
 		knobs[n]->set_radius (25);
 	}
 

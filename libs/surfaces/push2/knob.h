@@ -56,7 +56,6 @@ public:
 	void set_text_color (ArdourCanvas::Color);
 	void set_arc_start_color (ArdourCanvas::Color);
 	void set_arc_end_color (ArdourCanvas::Color);
-	void set_position (double x, double y);
 	void set_radius (double r);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
