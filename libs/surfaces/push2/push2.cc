@@ -51,6 +51,7 @@
 #include "mix.h"
 #include "push2.h"
 #include "scale.h"
+#include "splash.h"
 #include "track_mix.h"
 
 #include "pbd/i18n.h"
@@ -126,7 +127,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _modifier_state (None)
 	, splash_start (0)
 	, _current_layout (0)
-	, drawn_layout (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
 	, _mode (MusicalMode::IonianMajor)
@@ -228,10 +228,11 @@ Push2::open ()
 	}
 
 	try {
-		_canvas = new Push2Canvas (*this, 160, 960);
+		_canvas = new Push2Canvas (*this, 960, 160);
 		mix_layout = new MixLayout (*this, *session);
 		scale_layout = new ScaleLayout (*this, *session);
 		track_mix_layout = new TrackMixLayout (*this, *session);
+		splash_layout = new SplashLayout (*this, *session);
 	} catch (...) {
 		error << _("Cannot construct Canvas for display") << endmsg;
 		libusb_release_interface (handle, 0x00);
@@ -279,8 +280,6 @@ Push2::open ()
 
 	connect_to_parser ();
 
-	_canvas->splash ();
-
 	return 0;
 }
 
@@ -317,12 +316,17 @@ Push2::close ()
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
 
-	_current_layout = 0;
-	drawn_layout = 0;
+	if (_current_layout) {
+		_canvas->root()->remove (_current_layout);
+		_current_layout = 0;
+	}
+
 	delete mix_layout;
 	mix_layout = 0;
 	delete scale_layout;
 	scale_layout = 0;
+	delete splash_layout;
+	splash_layout = 0;
 
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
@@ -449,6 +453,14 @@ Push2::stop ()
 	return 0;
 }
 
+
+void
+Push2::splash ()
+{
+	set_current_layout (splash_layout);
+	splash_start = get_microseconds ();
+}
+
 bool
 Push2::vblank ()
 {
@@ -458,15 +470,13 @@ Push2::vblank ()
 
 		if (get_microseconds() - splash_start > 3000000) {
 			splash_start = 0;
+			DEBUG_TRACE (DEBUG::Push2, "splash interval ended, switch to mix layout\n");
+			set_current_layout (mix_layout);
 		}
-
-		return true;
-
-	} else {
-
-		_canvas->vblank();
-
 	}
+
+	_canvas->vblank();
+
 	return true;
 }
 
@@ -519,7 +529,6 @@ Push2::set_active (bool yn)
 		init_touch_strip ();
 		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
 		splash ();
-		set_current_layout (mix_layout);
 
 	} else {
 
@@ -1106,11 +1115,6 @@ Push2::end_shift ()
 	}
 }
 
-void
-Push2::splash ()
-{
-}
-
 bool
 Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 {
@@ -1600,6 +1604,8 @@ Push2::set_current_layout (Push2Layout* layout)
 		_current_layout->show ();
 		_canvas->root()->add (_current_layout);
 	}
+
+	_canvas->request_redraw ();
 }
 
 void

@@ -21,12 +21,17 @@
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
+
 #include "canvas.h"
 #include "layout.h"
 #include "push2.h"
 
 using namespace ArdourCanvas;
 using namespace ArdourSurface;
+using namespace PBD;
 
 const int Push2Canvas::pixels_per_row = 1024;
 
@@ -62,6 +67,7 @@ Push2Canvas::vblank ()
 	/* re-render dirty areas, if any */
 
 	if (expose ()) {
+		DEBUG_TRACE (DEBUG::Push2, "re-blit to device frame buffer\n");
 		/* something rendered, update device_frame_buffer */
 		blit_to_device_frame_buffer ();
 	}
@@ -94,10 +100,12 @@ Push2Canvas::request_redraw (Rect const & r)
 {
 	Cairo::RectangleInt cr;
 
-	cr.x = r.x1;
-	cr.y = r.y1;
+	cr.x = r.x0;
+	cr.y = r.y0;
 	cr.width = r.width();
 	cr.width = r.height();
+
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("invalidate rect %1\n", r));
 
 	expose_region->do_union (cr);
 
@@ -115,6 +123,8 @@ Push2Canvas::expose ()
 
 	const int nrects = expose_region->get_num_rectangles ();
 
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("expose with %1 rects\n", nrects));
+
 	for (int n = 0; n < nrects; ++n) {
 		Cairo::RectangleInt r = expose_region->get_rectangle (n);
 		context->rectangle (r.x, r.y, r.width, r.height);
@@ -126,10 +136,16 @@ Push2Canvas::expose ()
 
 	if (layout) {
 		Cairo::RectangleInt r = expose_region->get_extents();
+		Rect rr (r.x, r.y, r.x + r.width, r.y + r.height);
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("render layout with %1\n", rr));
 		layout->render (Rect (r.x, r.y, r.x + r.width, r.y + r.height), context);
 	}
 
 	context->reset_clip ();
+
+	/* why is there no "reset()" method for Cairo::Region? */
+
+	expose_region = Cairo::Region::create ();
 
 	return true;
 }
@@ -187,4 +203,17 @@ Push2Canvas::blit_to_device_frame_buffer ()
 	}
 
 	return 0;
+}
+
+void
+Push2Canvas::request_size (Duple)
+{
+	/* fixed size canvas */
+}
+
+Rect
+Push2Canvas::visible_area () const
+{
+	/* may need to get more sophisticated once we do scrolling */
+	return Rect (0, 0, 960, 160);
 }

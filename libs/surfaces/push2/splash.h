@@ -38,6 +38,9 @@ class SplashLayout : public Push2Layout
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
+	void strip_vpot (int, int) {}
+	void strip_vpot_touch (int, bool) {}
+
   private:
 	Cairo::RefPtr<Cairo::ImageSurface> img;
 };

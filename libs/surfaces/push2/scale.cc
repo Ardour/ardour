@@ -67,6 +67,8 @@ ScaleLayout::~ScaleLayout ()
 void
 ScaleLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("scale render %1\n", area));
+
 	context->set_source_rgb (0.764, 0.882, 0.882);
 	context->rectangle (0, 0, 960, 160);
 	context->fill ();

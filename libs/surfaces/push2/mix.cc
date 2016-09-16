@@ -146,6 +146,8 @@ MixLayout::show ()
 void
 MixLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("mix render %1\n", area));
+
 	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
 	context->rectangle (0, 0, display_width(), display_height());
 	context->fill ();

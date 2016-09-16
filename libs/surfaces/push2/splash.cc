@@ -24,6 +24,7 @@
 #include "pbd/i18n.h"
 #include "pbd/search_path.h"
 
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 
 #include "splash.h"
@@ -50,9 +51,15 @@ SplashLayout::SplashLayout (Push2& p, Session& s)
 	img = Cairo::ImageSurface::create_from_png (splash_file);
 }
 
+SplashLayout::~SplashLayout ()
+{
+}
+
 void
 SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("splash render %1\n", area));
+
 	int rows = display_height ();
 	int cols = display_width ();
 

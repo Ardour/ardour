@@ -515,10 +515,10 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	mutable Glib::Threads::Mutex layout_lock;
 	Push2Layout* _current_layout;
-	Push2Layout* drawn_layout;
 	Push2Layout* mix_layout;
 	Push2Layout* scale_layout;
 	Push2Layout* track_mix_layout;
+	Push2Layout* splash_layout;
 	void set_current_layout (Push2Layout*);
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;

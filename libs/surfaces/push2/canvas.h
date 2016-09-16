@@ -47,8 +47,6 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	void request_redraw (ArdourCanvas::Rect const &);
 	bool vblank ();
 
-	void splash ();
-
 	Cairo::RefPtr<Cairo::Context> image_context() { return context; }
 
 	int rows() const { return _rows; }
