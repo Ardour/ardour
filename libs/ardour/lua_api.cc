@@ -157,6 +157,98 @@ ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType t
 }
 
 bool
+ARDOUR::LuaAPI::set_plugin_input_parameter_value_named(boost::shared_ptr<Processor> proc, const string& name, float val)
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!pi) { return false; }
+	boost::shared_ptr<Plugin> plugin = pi->plugin();
+	if (!plugin) { return false; }
+
+	bool test=false;
+	uint32_t controlid=0;
+	ParameterDescriptor pd;
+
+	for (uint32_t param_index = 0; param_index < plugin->parameter_count(); ++param_index)
+	{
+		controlid = plugin->nth_parameter (param_index, test);
+		if (!test)
+		{
+			break;
+		}
+		else
+		{
+			//skip output ports
+			if (!plugin->parameter_is_input (controlid)) { continue; }
+			string param_name=pi->describe_parameter(Evoral::Parameter(PluginAutomation, 0, controlid));
+			if (param_name.compare(name) != 0) { continue; }
+			if (plugin->get_parameter_descriptor (controlid, pd) != 0) { continue; }
+			if (val < pd.lower || val > pd.upper) { break; }
+			boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
+			c->set_value (val, PBD::Controllable::NoGroup);
+			return true;
+		}
+	}
+	return false;
+}
+
+float
+ARDOUR::LuaAPI::get_plugin_parameter_value_named(boost::shared_ptr<Processor> proc, int type, const string& name, bool &ok)
+{
+	ok=false;
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!pi) { return 0; }
+	boost::shared_ptr<Plugin> plugin = pi->plugin();
+	if (!plugin) { return 0; }
+
+	bool test=false;
+	uint32_t controlid=0;
+	ParameterDescriptor pd;
+
+	for (uint32_t param_index = 0; param_index < plugin->parameter_count(); ++param_index)
+	{
+		controlid = plugin->nth_parameter (param_index, test);
+		if (!test)
+		{
+			return 0;
+		}
+		else
+		{
+			if(type==0) //input
+			{
+				//skip output ports
+				if (!plugin->parameter_is_input (controlid)) { continue; }
+			}
+			else if(type==1) //output
+			{
+				//skip input ports
+				if (plugin->parameter_is_input (controlid)) { continue; }
+			}
+			else
+			{
+				return 0;
+			}
+			string param_name=pi->describe_parameter(Evoral::Parameter(PluginAutomation, 0, controlid));
+			if (param_name.compare(name) != 0) { continue; }
+			ok=true;
+			return plugin->get_parameter ( controlid );
+		}
+	}
+	return 0;
+}
+
+float
+ARDOUR::LuaAPI::get_plugin_input_parameter_value_named(boost::shared_ptr<Processor> proc, const string& name, bool &ok)
+{
+	return get_plugin_parameter_value_named(proc,0,name,ok);
+}
+
+float
+ARDOUR::LuaAPI::get_plugin_output_parameter_value_named(boost::shared_ptr<Processor> proc, const string& name, bool &ok)
+{
+	return get_plugin_parameter_value_named(proc,1,name,ok);
+}
+
+bool
 ARDOUR::LuaAPI::set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, float val)
 {
 	boost::shared_ptr<Plugin> plugin = pi->plugin();
@@ -262,7 +354,7 @@ ARDOUR::LuaOSC::Address::send (lua_State *L)
 
 	int top = lua_gettop(L);
 	if (top < 3) {
-    return luaL_argerror (L, 1, "invalid number of arguments, :send (path, type, ...)");
+		return luaL_argerror (L, 1, "invalid number of arguments, :send (path, type, ...)");
 	}
 
 	const char* path = luaL_checkstring (L, 2);
@@ -270,7 +362,7 @@ ARDOUR::LuaOSC::Address::send (lua_State *L)
 	assert (path && type);
 
 	if ((int) strlen(type) != top - 3) {
-    return luaL_argerror (L, 3, "type description does not match arguments");
+		return luaL_argerror (L, 3, "type description does not match arguments");
 	}
 
 	lo_message msg = lo_message_new ();
@@ -283,7 +375,7 @@ ARDOUR::LuaOSC::Address::send (lua_State *L)
 			case LUA_TSTRING:
 				if (t == LO_STRING) {
 					ok = lo_message_add_string (msg, luaL_checkstring(L, i));
-				} else if (t ==  LO_CHAR) {
+				} else if (t == LO_CHAR) {
 					char c = luaL_checkstring (L, i) [0];
 					ok = lo_message_add_char (msg, c);
 				}
@@ -372,7 +464,7 @@ ARDOUR::LuaAPI::build_filename (lua_State *L)
 	std::vector<std::string> elem;
 	int top = lua_gettop(L);
 	if (top < 1) {
-    return luaL_argerror (L, 1, "invalid number of arguments, build_filename (path, ...)");
+		return luaL_argerror (L, 1, "invalid number of arguments, build_filename (path, ...)");
 	}
 	for (int i = 1; i <= top; ++i) {
 		int lt = lua_type (L, i);
@@ -388,14 +480,14 @@ ARDOUR::LuaAPI::build_filename (lua_State *L)
 
 luabridge::LuaRef::Proxy&
 luabridge::LuaRef::Proxy::clone_instance (const void* classkey, void* p) {
-  lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_tableRef);
-  lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_keyRef);
+	lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_tableRef);
+	lua_rawgeti (m_L, LUA_REGISTRYINDEX, m_keyRef);
 
 	luabridge::UserdataPtr::push_raw (m_L, p, classkey);
 
-  lua_rawset (m_L, -3);
-  lua_pop (m_L, 1);
-  return *this;
+	lua_rawset (m_L, -3);
+	lua_pop (m_L, 1);
+	return *this;
 }
 
 LuaTableRef::LuaTableRef () {}
@@ -471,7 +563,7 @@ LuaTableRef::set (lua_State* L)
 							s.c = classkey;
 							s.p = luabridge::Userdata::get_ptr (L, -2);
 						}
-					}  else {
+					} else {
 						lua_pop (L, 2);
 					}
 
