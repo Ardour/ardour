@@ -3556,9 +3556,9 @@ Editor::commit_reversible_command ()
 			cerr << "Please call begin_reversible_command() before commit_reversible_command()." << endl;
 		} else {
 			before.pop_back();
+			_session->commit_reversible_command ();
 		}
 
-		_session->commit_reversible_command ();
 	}
 }
 
