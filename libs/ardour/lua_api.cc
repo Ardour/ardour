@@ -195,6 +195,15 @@ ARDOUR::LuaAPI::set_processor_param (boost::shared_ptr<Processor> proc, uint32_t
 	return set_plugin_insert_param (pi, which, val);
 }
 
+float
+ARDOUR::LuaAPI::get_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, bool &ok)
+{
+	ok=false;
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!pi) { return false; }
+	return get_plugin_insert_param (pi, which, ok);
+}
+
 int
 ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 {
