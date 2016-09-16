@@ -74,6 +74,42 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
 
+	/** set a plugin control-input parameter value by name
+	 *
+	 * @param proc Plugin-Processor
+	 * @param name name of control-input to set
+	 * @param value value to set
+	 * @returns true on success, false on error or out-of-bounds value
+	 */
+	bool set_plugin_input_parameter_value_named(boost::shared_ptr<Processor> proc, const std::string& name, float val);
+
+	/** get a plugin control parameter value by name
+	 *
+	 * @param proc Plugin-Processor
+	 * @param name name of control port to query
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_plugin_parameter_value_named(boost::shared_ptr<Processor> proc, int type, const std::string& name, bool &ok);
+
+	/** get a plugin control-input parameter value by name
+	 *
+	 * @param proc Plugin-Processor
+	 * @param name name of control-input port to query
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_plugin_input_parameter_value_named(boost::shared_ptr<Processor> proc, const std::string& name, bool &ok);
+
+	/** get a plugin control-output parameter value by name
+	 *
+	 * @param proc Plugin-Processor
+	 * @param name name of control-output port to query
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_plugin_output_parameter_value_named(boost::shared_ptr<Processor> proc, const std::string& name, bool &ok);
+
 	/** set a plugin control-input parameter value
 	 *
 	 * @param proc Plugin-Processor
@@ -82,6 +118,16 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
 	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float val);
+
+	/** get a plugin control parameter value
+	 *
+	 * @param proc Plugin-Processor
+	 * @param which control port to set (starting at 0, including ports of type input and output))
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, bool &ok);
+
 	/** set a plugin control-input parameter value
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
@@ -92,6 +138,15 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
 	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
+
+	/** get a plugin control parameter value
+	 *
+	 * @param proc Plugin-Insert
+	 * @param which control port to query (starting at 0, including ports of type input and output)
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
 
 	/**
 	 * A convenience function to get a Automation Lists and ParamaterDescriptor
