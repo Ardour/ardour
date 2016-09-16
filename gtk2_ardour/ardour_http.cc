@@ -105,6 +105,22 @@ WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data) {
 	return realsize;
 }
 
+static size_t headerCallback (char* ptr, size_t size, size_t nmemb, void* data)
+{
+	size_t realsize = size * nmemb;
+	struct HttpGet::HeaderInfo *nfo = (struct HttpGet::HeaderInfo*)data;
+	std::string header (static_cast<const char*>(ptr), realsize);
+	std::string::size_type index = header.find (':', 0);
+	if (index != std::string::npos) {
+		std::string k = header.substr (0, index);
+		std::string v = header.substr (index + 2);
+		k.erase(k.find_last_not_of (" \n\r\t")+1);
+		v.erase(v.find_last_not_of (" \n\r\t")+1);
+		nfo->h[k] = v;
+	}
+
+	return realsize;
+}
 
 HttpGet::HttpGet (bool p, bool ssl)
 	: persist (p)
@@ -116,6 +132,8 @@ HttpGet::HttpGet (bool p, bool ssl)
 
 	curl_easy_setopt (_curl, CURLOPT_WRITEDATA, (void *)&mem);
 	curl_easy_setopt (_curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+	curl_easy_setopt (_curl, CURLOPT_HEADERDATA, (void *)&nfo);
+	curl_easy_setopt (_curl, CURLOPT_HEADERFUNCTION, headerCallback);
 	curl_easy_setopt (_curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING);
 	curl_easy_setopt (_curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
 	curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1);

@@ -21,6 +21,7 @@
 
 #include <curl/curl.h>
 #include <string>
+#include <map>
 
 namespace ArdourCurl {
 
@@ -35,6 +36,10 @@ class HttpGet {
 		size_t size;
 	};
 
+	struct HeaderInfo {
+		std::map<std::string, std::string> h;
+	};
+
 	char* get (const char* url);
 
 	std::string get (const std::string& url) {
@@ -46,6 +51,8 @@ class HttpGet {
 	size_t data_size () const { return mem.size; }
 
 	long int status () const { return _status; }
+
+	std::map<std::string, std::string> header () const { return nfo.h; }
 
 	char* escape (const char* s, int l) const {
 		return curl_easy_escape (_curl, s, l);
@@ -76,6 +83,7 @@ class HttpGet {
 	char error_buffer[CURL_ERROR_SIZE];
 
 	struct MemStruct mem;
+	struct HeaderInfo nfo;
 
 	static const char* ca_path;
 	static const char* ca_info;
