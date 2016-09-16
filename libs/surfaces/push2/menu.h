@@ -19,20 +19,30 @@
 #ifndef __ardour_push2_menu_h__
 #define __ardour_push2_menu_h__
 
-#include <cairomm/context.h>
-#include <cairomm/surface.h>
+namespace Cairo {
+	class Context;
+	class Region;
+}
+
 #include <pangomm/layout.h>
 
 #include "pbd/signals.h"
 
+#include "canvas/container.h"
+
+namespace ArdourCanvas {
+	class Text;
+	class Rectangle;
+}
+
 namespace ArdourSurface {
 
-class Push2Menu {
+class Push2Menu : public ArdourCanvas::Container
+{
    public:
-	Push2Menu (Cairo::RefPtr<Cairo::Context>);
+	Push2Menu (ArdourCanvas::Item* parent);
 
-	void redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
-	bool dirty () const { return _dirty; }
+	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	void fill_column (int col, std::vector<std::string>);
 	void set_active (int col, int index);
@@ -45,7 +55,8 @@ class Push2Menu {
    private:
 	struct Column {
 		std::vector<std::string> text;
-		Glib::RefPtr<Pango::Layout> layout;
+		ArdourCanvas::Rectangle* active_bg;
+		ArdourCanvas::Text* lines;
 		int top;
 		int active;
 	};
@@ -56,9 +67,7 @@ class Push2Menu {
 	void set_text (int col, int top);
 
 	int nrows;
-	double baseline;
-
-	mutable bool _dirty;
+	mutable double baseline;
 };
 
 } // namespace

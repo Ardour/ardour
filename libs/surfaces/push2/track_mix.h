@@ -27,6 +27,10 @@ namespace ARDOUR {
 	class Stripable;
 }
 
+namespace ArdourCanvas {
+	class Text;
+}
+
 namespace ArdourSurface {
 
 class Push2Knob;
@@ -34,13 +38,14 @@ class Push2Knob;
 class TrackMixLayout : public Push2Layout
 {
    public:
-	TrackMixLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
+	TrackMixLayout (Push2& p, ARDOUR::Session&);
 	~TrackMixLayout ();
 
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
-	bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
-	void on_show ();
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+
+	void show ();
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
@@ -53,8 +58,8 @@ class TrackMixLayout : public Push2Layout
 	PBD::ScopedConnectionList stripable_connections;
 	bool _dirty;
 
-	Glib::RefPtr<Pango::Layout> upper_layout[8];
-	Glib::RefPtr<Pango::Layout> lower_layout[8];
+	std::vector<ArdourCanvas::Text*> upper_text;
+	std::vector<ArdourCanvas::Text*> lower_text;
 
 	Push2Knob* knobs[8];
 

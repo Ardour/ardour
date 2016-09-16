@@ -16,10 +16,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_push2_scale_layout_h__
-#define __ardour_push2_scale_layout_h__
+#ifndef __ardour_push2_splash_h__
+#define __ardour_push2_splash_h__
+
+#include <cairomm/surface.h>
 
 #include "layout.h"
+#include "push2.h"
 
 namespace ARDOUR {
 	class Stripable;
@@ -27,25 +30,18 @@ namespace ARDOUR {
 
 namespace ArdourSurface {
 
-class ScaleLayout : public Push2Layout
+class SplashLayout : public Push2Layout
 {
    public:
-	ScaleLayout (Push2& p, ARDOUR::Session&);
-	~ScaleLayout ();
+	SplashLayout (Push2& p, ARDOUR::Session&);
+	~SplashLayout ();
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
-	void button_upper (uint32_t n);
-	void button_lower (uint32_t n);
-
-	void strip_vpot (int, int);
-	void strip_vpot_touch (int, bool);
-
-   private:
-	Push2Menu* scale_menu;
-	void build_scale_menu ();
+  private:
+	Cairo::RefPtr<Cairo::ImageSurface> img;
 };
 
 } /* namespace */
 
-#endif /* __ardour_push2_scale_layout_h__ */
+#endif /* __ardour_push2_splash_h__ */

@@ -25,6 +25,12 @@
 
 #include <cairomm/refptr.h>
 
+#include "canvas/container.h"
+
+namespace Cairo {
+	class Region;
+}
+
 namespace ARDOUR {
 	class Session;
 }
@@ -37,17 +43,16 @@ namespace ArdourSurface {
 
 class Push2;
 
-class Push2Layout : public sigc::trackable
+class Push2Layout : public sigc::trackable, public ArdourCanvas::Container
 {
   public:
 	Push2Layout (Push2& p, ARDOUR::Session& s);
 	virtual ~Push2Layout ();
 
-	bool mapped() const;
+	int display_width () const;
+	int display_height () const;
 
-	virtual bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const = 0;
-	virtual void on_show () {}
-	virtual void on_hide () {}
+	void compute_bounding_box () const;
 
 	virtual void button_upper (uint32_t n) {}
 	virtual void button_lower (uint32_t n) {}

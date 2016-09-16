@@ -16,6 +16,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cairomm/region.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
@@ -51,37 +52,26 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace ArdourCanvas;
 
-ScaleLayout::ScaleLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> context)
+ScaleLayout::ScaleLayout (Push2& p, Session& s)
 	: Push2Layout (p, s)
 {
-	build_scale_menu (context);
+	build_scale_menu ();
 }
 
 ScaleLayout::~ScaleLayout ()
 {
 }
 
-bool
-ScaleLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
+void
+ScaleLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bool draw = false;
-
-	if (scale_menu->dirty()) {
-		draw = true;
-	}
-
-	if (!draw) {
-		return false;
-	}
-
 	context->set_source_rgb (0.764, 0.882, 0.882);
 	context->rectangle (0, 0, 960, 160);
 	context->fill ();
 
-	scale_menu->redraw (context, force);
-
-	return true;
+	scale_menu->render (area, context);
 }
 
 void
@@ -109,11 +99,11 @@ ScaleLayout::strip_vpot_touch (int, bool)
 }
 
 void
-ScaleLayout::build_scale_menu (Cairo::RefPtr<Cairo::Context> context)
+ScaleLayout::build_scale_menu ()
 {
 	vector<string> v;
 
-	scale_menu = new Push2Menu (context);
+	scale_menu = new Push2Menu (this);
 
 	v.push_back ("Dorian");
 	v.push_back ("IonianMajor");

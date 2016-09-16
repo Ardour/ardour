@@ -16,6 +16,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cairomm/region.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
@@ -42,9 +43,11 @@
 #include "ardour/vca_manager.h"
 
 #include "canvas/colors.h"
+#include "canvas/rectangle.h"
 
 #include "gtkmm2ext/gui_thread.h"
 
+#include "canvas.h"
 #include "mix.h"
 #include "knob.h"
 #include "push2.h"
@@ -57,17 +60,22 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace ArdourCanvas;
 
-MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> context)
+MixLayout::MixLayout (Push2& p, Session& s)
 	: Push2Layout (p, s)
-	, _dirty (true)
 	, bank_start (0)
 	, vpot_mode (Volume)
 {
+	selection_bg = new Rectangle (this);
+	selection_bg->hide ();
+
 	Pango::FontDescription fd2 ("Sans 10");
 	for (int n = 0; n < 8; ++n) {
-		upper_layout[n] = Pango::Layout::create (context);
-		upper_layout[n]->set_font_description (fd2);
+		Text* t = new Text (this);
+		upper_text.push_back (t);
+		t->set_font_description (fd2);
+		t->set_color (p2.get_color (Push2::ParameterName));
 
 		string txt;
 		switch (n) {
@@ -96,18 +104,19 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 			txt = _("E Sends");
 			break;
 		}
-		upper_layout[n]->set_text (txt);
-	}
+		t->set (txt);
 
-	Pango::FontDescription fd3 ("Sans 10");
-	for (int n = 0; n < 8; ++n) {
-		lower_layout[n] = Pango::Layout::create (context);
-		lower_layout[n]->set_font_description (fd3);
-	}
+		t = new Text (this);
+		lower_text.push_back (t);
+		t->set_font_description (fd2);
+		t->set_color (p2.get_color (Push2::ParameterName));
 
-	for (int n = 0; n < 8; ++n) {
-		knobs[n] = new Push2Knob (p2, context);
-		knobs[n]->set_position (60 + (n*120), 95);
+		Rectangle* r = new Rectangle (this);
+		r->set (Rect (10 + (n*Push2Canvas::inter_button_spacing()) - 5, 2, Push2Canvas::inter_button_spacing(), 21));
+		backgrounds.push_back (r);
+
+		knobs[n] = new Push2Knob (p2, this);
+		knobs[n]->set_position (60 + (n*Push2Canvas::inter_button_spacing()), 95);
 		knobs[n]->set_radius (25);
 	}
 
@@ -119,14 +128,14 @@ MixLayout::MixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> contex
 
 MixLayout::~MixLayout ()
 {
-	for (int n = 0; n < 8; ++n) {
-		delete knobs[n];
-	}
+	// Item destructor deletes all children
 }
 
 void
-MixLayout::on_show ()
+MixLayout::show ()
 {
+	Item::show ();
+
 	mode_button->set_color (Push2::LED::White);
 	mode_button->set_state (Push2::LED::OneShot24th);
 	p2.write (mode_button->state_msg());
@@ -134,116 +143,19 @@ MixLayout::on_show ()
 	switch_bank (bank_start);
 }
 
-bool
-MixLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
+void
+MixLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bool children_dirty = false;
-
-	for (int n = 0; n < 8; ++n) {
-		if (knobs[n]->dirty()) {
-			children_dirty = true;
-			break;
-		}
-	}
-
-	for (int n = 0; n < 8; ++n) {
-		if (stripable[n]) {
-
-			string shortname = short_version (stripable[n]->name(), 10);
-			string text;
-			boost::shared_ptr<AutomationControl> ac;
-			ac = stripable[n]->solo_control();
-			if (ac && ac->get_value()) {
-				text += "* ";
-			}
-			boost::shared_ptr<MuteControl> mc;
-			mc = stripable[n]->mute_control ();
-			if (mc) {
-				if (mc->muted_by_self_or_masters()) {
-					text += "! ";
-				} else if (mc->muted_by_others_soloing()) {
-					text += "- "; // it would be nice to use Unicode mute"\uD83D\uDD07 ";
-				}
-			}
-			text += shortname;
-
-			if (text != lower_layout[n]->get_text()) {
-				lower_layout[n]->set_text (text);
-				children_dirty = true;
-			}
-		}
-	}
-
-	if (!children_dirty && !_dirty && !force) {
-		return false;
-	}
-
 	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
-	context->rectangle (0, 0, p2.cols, p2.rows);
+	context->rectangle (0, 0, display_width(), display_height());
 	context->fill ();
 
-	set_source_rgb (context, p2.get_color (Push2::ParameterName));
-
-	for (int n = 0; n < 8; ++n) {
-
-		if (upper_layout[n]->get_text().empty()) {
-			continue;
-		}
-
-		/* Draw highlight box */
-
-		uint32_t color = p2.get_color (Push2::ParameterName);
-
-		if (n == (int) vpot_mode) {
-			set_source_rgb (context, color);
-			context->rectangle (10 + (n*120) - 5, 2, 120, 21);
-			context->fill();
-			set_source_rgb (context, ArdourCanvas::contrasting_text_color (color));
-		}  else {
-			set_source_rgb (context, color);
-		}
-
-		context->move_to (10 + (n*120), 2);
-		upper_layout[n]->update_from_cairo_context (context);
-		upper_layout[n]->show_in_cairo_context (context);
-	}
-
 	context->move_to (0, 22.5);
-	context->line_to (p2.cols, 22.5);
+	context->line_to (display_width(), 22.5);
 	context->set_line_width (1.0);
 	context->stroke ();
 
-	for (int n = 0; n < 8; ++n) {
-		knobs[n]->redraw (context, force);
-	}
-
-	for (int n = 0; n < 8; ++n) {
-
-		if (lower_layout[n]->get_text().empty()) {
-			continue;
-		}
-
-		if (stripable[n]) {
-			uint32_t color = stripable[n]->presentation_info().color();
-
-			if (stripable[n]->presentation_info().selected()) {
-				set_source_rgb (context, color);
-				context->rectangle (10 + (n*120) - 5, 137, 120, 21);
-				context->fill();
-				set_source_rgb (context, ArdourCanvas::contrasting_text_color (color));
-			}  else {
-				set_source_rgb (context, color);
-			}
-
-			context->move_to (10 + (n*120), 140);
-			lower_layout[n]->update_from_cairo_context (context);
-			lower_layout[n]->show_in_cairo_context (context);
-		}
-	}
-
-	_dirty = false;
-
-	return true;
+	render_children (area, context);
 }
 
 void
@@ -466,12 +378,53 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, int wh
 			return;
 		}
 
-		/* cancel string, which will cause a redraw on the next update
-		 * cycle. The redraw will reflect selected status
-		 */
-
-		lower_layout[which]->set_text (string());
+		if (stripable[which]->presentation_info().selected()) {
+			selection_bg->show ();
+			selection_bg->set_fill_color (stripable[which]->presentation_info().color());
+			selection_bg->set (Rect (10  + (which*Push2Canvas::inter_button_spacing()) - 5, 137,
+			                         10 + (which*Push2Canvas::inter_button_spacing()) - 5 + Push2Canvas::inter_button_spacing(),
+			                         137 + 21));
+			lower_text[which]->set_color (ArdourCanvas::contrasting_text_color (selection_bg->fill_color()));
+		} else {
+			selection_bg->hide ();
+			lower_text[which]->set_color (stripable[which]->presentation_info().color());
+		}
 	}
+}
+
+void
+MixLayout::solo_changed (uint32_t n)
+{
+	solo_mute_changed (n);
+}
+
+void
+MixLayout::mute_changed (uint32_t n)
+{
+	solo_mute_changed (n);
+}
+
+void
+MixLayout::solo_mute_changed (uint32_t n)
+{
+	string shortname = short_version (stripable[n]->name(), 10);
+	string text;
+	boost::shared_ptr<AutomationControl> ac;
+	ac = stripable[n]->solo_control();
+	if (ac && ac->get_value()) {
+		text += "* ";
+	}
+	boost::shared_ptr<MuteControl> mc;
+	mc = stripable[n]->mute_control ();
+	if (mc) {
+		if (mc->muted_by_self_or_masters()) {
+			text += "! ";
+		} else if (mc->muted_by_others_soloing()) {
+			text += "- "; // it would be nice to use Unicode mute"\uD83D\uDD07 ";
+		}
+	}
+	text += shortname;
+	lower_text[n]->set (text);
 }
 
 void
@@ -499,6 +452,11 @@ MixLayout::switch_bank (uint32_t base)
 		/* some missing strips; new bank the same or more empty stripables than the old one, do
 		   nothing since we had already reached the end.
 		*/
+		for (int n = 0; n < 8; ++n) {
+			upper_text[n]->hide ();
+			lower_text[n]->hide ();
+			backgrounds[n]->hide ();
+		}
 		return;
 	}
 
@@ -512,13 +470,25 @@ MixLayout::switch_bank (uint32_t base)
 
 	for (int n = 0; n < 8; ++n) {
 		if (!stripable[n]) {
+			upper_text[n]->hide ();
+			lower_text[n]->hide ();
+			backgrounds[n]->hide ();
 			continue;
 		}
+
+		upper_text[n]->show ();
+		lower_text[n]->show ();
+		backgrounds[n]->show ();
+		backgrounds[n]->set_fill_color (stripable[n]->presentation_info().color());
 
 		/* stripable goes away? refill the bank, starting at the same point */
 
 		stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
 		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
+		stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
+		stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
+
+		solo_mute_changed (n);
 
 		Push2::Button* b;
 

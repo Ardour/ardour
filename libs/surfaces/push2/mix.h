@@ -26,6 +26,11 @@ namespace ARDOUR {
 	class Stripable;
 }
 
+namespace ArdourCanvas {
+	class Rectangle;
+	class Text;
+}
+
 namespace ArdourSurface {
 
 class Push2Knob;
@@ -33,11 +38,11 @@ class Push2Knob;
 class MixLayout : public Push2Layout
 {
    public:
-	MixLayout (Push2& p, ARDOUR::Session&, Cairo::RefPtr<Cairo::Context>);
+	MixLayout (Push2& p, ARDOUR::Session&);
 	~MixLayout ();
 
-	bool redraw (Cairo::RefPtr<Cairo::Context>, bool force) const;
-	void on_show ();
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	void show ();
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
@@ -53,8 +58,10 @@ class MixLayout : public Push2Layout
 
   private:
 	mutable bool _dirty;
-	Glib::RefPtr<Pango::Layout> upper_layout[8];
-	Glib::RefPtr<Pango::Layout> lower_layout[8];
+	std::vector<ArdourCanvas::Text*> upper_text;
+	std::vector<ArdourCanvas::Text*> lower_text;
+	std::vector<ArdourCanvas::Rectangle*> backgrounds;
+	ArdourCanvas::Rectangle* selection_bg;
 	Push2Knob* knobs[8];
 
 	/* stripables */
@@ -80,6 +87,10 @@ class MixLayout : public Push2Layout
 	Push2::Button* mode_button;
 	VPotMode vpot_mode;
 	void show_vpot_mode ();
+
+	void solo_changed (uint32_t n);
+	void mute_changed (uint32_t n);
+	void solo_mute_changed (uint32_t n);
 };
 
 } /* namespace */

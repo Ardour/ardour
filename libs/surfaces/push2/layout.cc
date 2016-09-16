@@ -16,14 +16,17 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "canvas.h"
 #include "layout.h"
 #include "push2.h"
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
+using namespace ArdourCanvas;
 
 Push2Layout::Push2Layout (Push2& p, Session& s)
-	: p2 (p)
+	: Container (p.canvas())
+	, p2 (p)
 	, session (s)
 {
 }
@@ -32,8 +35,24 @@ Push2Layout::~Push2Layout ()
 {
 }
 
-bool
-Push2Layout::mapped () const
+void
+Push2Layout::compute_bounding_box () const
 {
-	return p2.current_layout() == this;
+	/* all layouts occupy at least the full screen, even if their combined
+	 * child boxes do not.
+	 */
+	_bounding_box = Rect (0, 0, display_width(), display_height());
+	_bounding_box_dirty = false;
+}
+
+int
+Push2Layout::display_height() const
+{
+	return p2.canvas()->rows();
+}
+
+int
+Push2Layout::display_width() const
+{
+	return p2.canvas()->cols();
 }

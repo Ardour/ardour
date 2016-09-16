@@ -16,6 +16,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cairomm/region.h>
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
@@ -23,6 +24,7 @@
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/i18n.h"
 #include "pbd/search_path.h"
 #include "pbd/enumwriter.h"
 
@@ -43,70 +45,77 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "canvas.h"
 #include "knob.h"
 #include "menu.h"
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
 
-#include "pbd/i18n.h"
-
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace ArdourCanvas;
 
-TrackMixLayout::TrackMixLayout (Push2& p, Session& s, Cairo::RefPtr<Cairo::Context> context)
+TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
 	: Push2Layout (p, s)
-	, _dirty (true)
 {
 	Pango::FontDescription fd2 ("Sans 10");
 
 	for (int n = 0; n < 8; ++n) {
-		upper_layout[n] = Pango::Layout::create (context);
-		upper_layout[n]->set_font_description (fd2);
+		Text* t = new Text (this);
+		t->set_font_description (fd2);
+		t->set_color (p2.get_color (Push2::ParameterName));
+		t->set_position ( Duple (10 + (n*Push2Canvas::inter_button_spacing()), 2));
 
-		lower_layout[n] = Pango::Layout::create (context);
-		lower_layout[n]->set_font_description (fd2);
+		upper_text.push_back (t);
+
+		t = new Text (this);
+		t->set_font_description (fd2);
+		t->set_color (p2.get_color (Push2::ParameterName));
+		t->set_position (Duple (10 + (n*Push2Canvas::inter_button_spacing()), 140));
+
+		lower_text.push_back (t);
 
 		switch (n) {
 		case 0:
-			upper_layout[n]->set_text (_("TRACK VOLUME"));
-			lower_layout[n]->set_text (_("MUTE"));
+			upper_text[n]->set (_("TRACK VOLUME"));
+			lower_text[n]->set (_("MUTE"));
 			break;
 		case 1:
-			upper_layout[n]->set_text (_("TRACK PAN"));
-			lower_layout[n]->set_text (_("SOLO"));
+			upper_text[n]->set (_("TRACK PAN"));
+			lower_text[n]->set (_("SOLO"));
 			break;
 		case 2:
-			upper_layout[n]->set_text (_("TRACK WIDTH"));
-			lower_layout[n]->set_text (_("REC-ENABLE"));
+			upper_text[n]->set (_("TRACK WIDTH"));
+			lower_text[n]->set (_("REC-ENABLE"));
 			break;
 		case 3:
-			upper_layout[n]->set_text (_("TRACK TRIM"));
-			lower_layout[n]->set_text (_("IN"));
+			upper_text[n]->set (_("TRACK TRIM"));
+			lower_text[n]->set (_("IN"));
 			break;
 		case 4:
-			upper_layout[n]->set_text (_(""));
-			lower_layout[n]->set_text (_("DISK"));
+			upper_text[n]->set (_(""));
+			lower_text[n]->set (_("DISK"));
 			break;
 		case 5:
-			upper_layout[n]->set_text (_(""));
-			lower_layout[n]->set_text (_("SOLO ISO"));
+			upper_text[n]->set (_(""));
+			lower_text[n]->set (_("SOLO ISO"));
 			break;
 		case 6:
-			upper_layout[n]->set_text (_(""));
-			lower_layout[n]->set_text (_("SOLO LOCK"));
+			upper_text[n]->set (_(""));
+			lower_text[n]->set (_("SOLO LOCK"));
 			break;
 		case 7:
-			upper_layout[n]->set_text (_(""));
-			lower_layout[n]->set_text (_(""));
+			upper_text[n]->set (_(""));
+			lower_text[n]->set (_(""));
 			break;
 		}
 
-		knobs[n] = new Push2Knob (p2, context);
-		knobs[n]->set_position (60 + (120*n), 95);
+		knobs[n] = new Push2Knob (p2, this);
+		knobs[n]->set_position (60 + (Push2Canvas::inter_button_spacing()*n), 95);
 		knobs[n]->set_radius (25);
 	}
 
@@ -129,62 +138,24 @@ TrackMixLayout::selection_changed ()
 	}
 }
 void
-TrackMixLayout::on_show ()
+TrackMixLayout::show ()
 {
 	selection_changed ();
 }
 
-bool
-TrackMixLayout::redraw (Cairo::RefPtr<Cairo::Context> context, bool force) const
+void
+TrackMixLayout::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bool children_dirty = false;
-
-	for (int n = 0; n < 8; ++n) {
-		if (knobs[n]->dirty()) {
-			children_dirty = true;
-			break;
-		}
-	}
-
-	if (!children_dirty) {
-		return false;
-	}
-
 	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
-	context->rectangle (0, 0, p2.cols, p2.rows);
+	context->rectangle (0, 0, display_width(), display_height());
 	context->fill ();
 
-	for (int n = 0; n < 8; ++n) {
-
-		if (!upper_layout[n]->get_text().empty()) {
-
-			/* Draw highlight box */
-
-			uint32_t color = p2.get_color (Push2::ParameterName);
-			set_source_rgb (context, color);
-
-			context->move_to (10 + (n*120), 2);
-			upper_layout[n]->update_from_cairo_context (context);
-			upper_layout[n]->show_in_cairo_context (context);
-		}
-
-		if (!lower_layout[n]->get_text().empty()) {
-			context->move_to (10 + (n*120), 140);
-			lower_layout[n]->update_from_cairo_context (context);
-			lower_layout[n]->show_in_cairo_context (context);
-		}
-	}
-
 	context->move_to (0, 22.5);
-	context->line_to (p2.cols, 22.5);
+	context->line_to (display_width(), 22.5);
 	context->set_line_width (1.0);
 	context->stroke ();
 
-	for (int n = 0; n < 8; ++n) {
-		knobs[n]->redraw (context, force);
-	}
-
-	return true;
+	Container::render_children (area, context);
 }
 
 void

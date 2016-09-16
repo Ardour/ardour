@@ -27,8 +27,6 @@
 
 #include <libusb.h>
 
-#include <cairomm/refptr.h>
-
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 
@@ -41,11 +39,6 @@
 
 #include "midi_byte_array.h"
 #include "mode.h"
-
-namespace Cairo {
-	class ImageSurface;
-	class Context;
-}
 
 namespace Pango {
 	class Layout;
@@ -74,6 +67,7 @@ public:
 class P2GUI;
 class Push2Menu;
 class Push2Layout;
+class Push2Canvas;
 
 class Push2 : public ARDOUR::ControlProtocol
             , public AbstractUI<Push2Request>
@@ -341,6 +335,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool in_key() const { return _in_key; }
 
 	Push2Layout* current_layout() const;
+	Push2Canvas* canvas() const { return _canvas; }
 
 	enum ModifierState {
 		None = 0,
@@ -357,33 +352,20 @@ class Push2 : public ARDOUR::ControlProtocol
 	uint8_t get_color_index (uint32_t rgb);
 	uint32_t get_color (ColorName);
 
-	static const int cols;
-	static const int rows;
-
 	PressureMode pressure_mode () const { return _pressure_mode; }
 	void set_pressure_mode (PressureMode);
 	PBD::Signal1<void,PressureMode> PressureModeChange;
-	
+
+	libusb_device_handle* usb_handle() const { return handle; }
+
   private:
 	libusb_device_handle *handle;
-	uint8_t   frame_header[16];
-	uint16_t* device_frame_buffer;
-	int  device_buffer;
-	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
-	sigc::connection vblank_connection;
-	sigc::connection periodic_connection;
-
 	ModifierState _modifier_state;
-
-	static const int pixels_per_row;
 
 	void do_request (Push2Request*);
 	int stop ();
 	int open ();
 	int close ();
-	bool redraw ();
-	int blit_to_device_frame_buffer ();
-	bool vblank ();
 
 	void relax () {}
 
@@ -431,6 +413,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+
+	sigc::connection periodic_connection;
 	bool periodic ();
 
 	void thread_init ();
@@ -517,12 +501,15 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<ARDOUR::Stripable> master;
 	boost::shared_ptr<ARDOUR::Stripable> monitor;
 
-	/* Cairo graphics context */
-
-	Cairo::RefPtr<Cairo::Context> context;
+	sigc::connection vblank_connection;
+	bool vblank ();
 
 	void splash ();
 	ARDOUR::microseconds_t splash_start;
+
+	/* the canvas */
+
+	Push2Canvas* _canvas;
 
 	/* Layouts */
 

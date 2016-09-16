@@ -33,7 +33,6 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/filesystem_paths.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
@@ -45,13 +44,14 @@
 
 #include "canvas/colors.h"
 
-#include "push2.h"
+#include "canvas.h"
 #include "gui.h"
 #include "layout.h"
-#include "scale.h"
-#include "mix.h"
-#include "track_mix.h"
 #include "menu.h"
+#include "mix.h"
+#include "push2.h"
+#include "scale.h"
+#include "track_mix.h"
 
 #include "pbd/i18n.h"
 
@@ -62,10 +62,6 @@ using namespace Glib;
 using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.cc" // instantiate template
-
-const int Push2::cols = 960;
-const int Push2::rows = 160;
-const int Push2::pixels_per_row = 1024;
 
 #define ABLETON 0x2982
 #define PUSH2   0x1967
@@ -127,8 +123,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
 	, handle (0)
-	, device_buffer (0)
-	, frame_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cols, rows))
 	, _modifier_state (None)
 	, splash_start (0)
 	, _current_layout (0)
@@ -143,7 +137,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	, percussion (false)
 	, _pressure_mode (AfterTouch)
 {
-	context = Cairo::Context::create (frame_buffer);
 
 	build_maps ();
 	build_color_map ();
@@ -234,15 +227,17 @@ Push2::open ()
 		return -1;
 	}
 
-	device_frame_buffer = new uint16_t[rows*pixels_per_row];
-
-	memset (device_frame_buffer, 0, sizeof (uint16_t) * rows * pixels_per_row);
-
-	frame_header[0] = 0xef;
-	frame_header[1] = 0xcd;
-	frame_header[2] = 0xab;
-	frame_header[3] = 0x89;
-	memset (&frame_header[4], 0, 12);
+	try {
+		_canvas = new Push2Canvas (*this, 160, 960);
+		mix_layout = new MixLayout (*this, *session);
+		scale_layout = new ScaleLayout (*this, *session);
+		track_mix_layout = new TrackMixLayout (*this, *session);
+	} catch (...) {
+		error << _("Cannot construct Canvas for display") << endmsg;
+		libusb_release_interface (handle, 0x00);
+		libusb_close (handle);
+		return -1;
+	}
 
 	/* setup ports */
 
@@ -284,9 +279,7 @@ Push2::open ()
 
 	connect_to_parser ();
 
-	mix_layout = new MixLayout (*this, *session, context);
-	scale_layout = new ScaleLayout (*this, *session, context);
-	track_mix_layout = new TrackMixLayout (*this, *session, context);
+	_canvas->splash ();
 
 	return 0;
 }
@@ -321,7 +314,6 @@ Push2::close ()
 	_input_port = 0;
 	_output_port = 0;
 
-	vblank_connection.disconnect ();
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
 
@@ -337,9 +329,6 @@ Push2::close ()
 		libusb_close (handle);
 		handle = 0;
 	}
-
-	delete [] device_frame_buffer;
-	device_frame_buffer = 0;
 
 	return 0;
 }
@@ -460,63 +449,8 @@ Push2::stop ()
 	return 0;
 }
 
-/** render host-side frame buffer (a Cairo ImageSurface) to the current
- * device-side frame buffer. The device frame buffer will be pushed to the
- * device on the next call to vblank()
- */
-
-int
-Push2::blit_to_device_frame_buffer ()
-{
-	/* ensure that all drawing has been done before we fetch pixel data */
-
-	frame_buffer->flush ();
-
-	const int stride = 3840; /* bytes per row for Cairo::FORMAT_ARGB32 */
-	const uint8_t* data = frame_buffer->get_data ();
-
-	/* fill frame buffer (320kB) */
-
-	uint16_t* fb = (uint16_t*) device_frame_buffer;
-
-	for (int row = 0; row < rows; ++row) {
-
-		const uint8_t* dp = data + row * stride;
-
-		for (int col = 0; col < cols; ++col) {
-
-			/* fetch r, g, b (range 0..255). Ignore alpha */
-
-			const int r = (*((const uint32_t*)dp) >> 16) & 0xff;
-			const int g = (*((const uint32_t*)dp) >> 8) & 0xff;
-			const int b = *((const uint32_t*)dp) & 0xff;
-
-			/* convert to 5 bits, 6 bits, 5 bits, respectively */
-			/* generate 16 bit BGB565 value */
-
-			*fb++ = (r >> 3) | ((g & 0xfc) << 3) | ((b & 0xf8) << 8);
-
-			/* the push2 docs state that we should xor the pixel
-			 * data. Doing so doesn't work correctly, and not doing
-			 * so seems to work fine (colors roughly match intended
-			 * values).
-			 */
-
-			dp += 4;
-		}
-
-		/* skip 128 bytes to next line. This is filler, used to avoid line borders occuring in the middle of 512
-		   byte USB buffers
-		*/
-
-		fb += 64; /* 128 bytes = 64 int16_t */
-	}
-
-	return 0;
-}
-
 bool
-Push2::redraw ()
+Push2::vblank ()
 {
 	if (splash_start) {
 
@@ -524,50 +458,15 @@ Push2::redraw ()
 
 		if (get_microseconds() - splash_start > 3000000) {
 			splash_start = 0;
-		} else {
-			return false;
 		}
+
+		return true;
+
+	} else {
+
+		_canvas->vblank();
+
 	}
-
-	Glib::Threads::Mutex::Lock lm (layout_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked()) {
-		/* can't get layout, no re-render needed */
-		return false;
-	}
-
-	bool render_needed = false;
-
-	if (drawn_layout != _current_layout) {
-		render_needed = true;
-	}
-
-	bool dirty = _current_layout->redraw (context, render_needed);
-	drawn_layout = _current_layout;
-
-	return dirty || render_needed;
-}
-
-bool
-Push2::vblank ()
-{
-	int transferred = 0;
-	const int timeout_msecs = 1000;
-	int err;
-
-	if ((err = libusb_bulk_transfer (handle, 0x01, frame_header, sizeof (frame_header), &transferred, timeout_msecs))) {
-		return false;
-	}
-
-	if (redraw()) {
-		/* things changed */
-		blit_to_device_frame_buffer ();
-	}
-
-	if ((err = libusb_bulk_transfer (handle, 0x01, (uint8_t*) device_frame_buffer , 2 * rows * pixels_per_row, &transferred, timeout_msecs))) {
-		return false;
-	}
-
 	return true;
 }
 
@@ -1210,60 +1109,6 @@ Push2::end_shift ()
 void
 Push2::splash ()
 {
-	std::string splash_file;
-
-	Searchpath rc (ARDOUR::ardour_data_search_path());
-	rc.add_subdirectory_to_paths ("resources");
-
-	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
-		cerr << "Cannot find splash screen image file\n";
-		throw failed_constructor();
-	}
-
-	Cairo::RefPtr<Cairo::ImageSurface> img = Cairo::ImageSurface::create_from_png (splash_file);
-
-	double x_ratio = (double) img->get_width() / (cols - 20);
-	double y_ratio = (double) img->get_height() / (rows - 20);
-	double scale = min (x_ratio, y_ratio);
-
-	/* background */
-
-	context->set_source_rgb (0.764, 0.882, 0.882);
-	context->paint ();
-
-	/* image */
-
-	context->save ();
-	context->translate (5, 5);
-	context->scale (scale, scale);
-	context->set_source (img, 0, 0);
-	context->paint ();
-	context->restore ();
-
-	/* text */
-
-	Glib::RefPtr<Pango::Layout> some_text = Pango::Layout::create (context);
-
-	Pango::FontDescription fd ("Sans 38");
-	some_text->set_font_description (fd);
-	some_text->set_text (string_compose ("%1 %2", PROGRAM_NAME, VERSIONSTRING));
-
-	context->move_to (200, 10);
-	context->set_source_rgb (0, 0, 0);
-	some_text->update_from_cairo_context (context);
-	some_text->show_in_cairo_context (context);
-
-	Pango::FontDescription fd2 ("Sans Italic 18");
-	some_text->set_font_description (fd2);
-	some_text->set_text (_("Ableton Push 2 Support"));
-
-	context->move_to (200, 80);
-	context->set_source_rgb (0, 0, 0);
-	some_text->update_from_cairo_context (context);
-	some_text->show_in_cairo_context (context);
-
-	splash_start = get_microseconds ();
-	blit_to_device_frame_buffer ();
 }
 
 bool
@@ -1730,7 +1575,7 @@ Push2::fill_color_table ()
 
 }
 
-uint32_t
+ArdourCanvas::Color
 Push2::get_color (ColorName name)
 {
 	Colors::iterator c = colors.find (name);
@@ -1745,14 +1590,15 @@ void
 Push2::set_current_layout (Push2Layout* layout)
 {
 	if (_current_layout) {
-		_current_layout->on_hide ();
+		_current_layout->hide ();
+		_canvas->root()->remove (_current_layout);
 	}
 
 	_current_layout = layout;
-	drawn_layout = 0;
 
 	if (_current_layout) {
-		_current_layout->on_show ();
+		_current_layout->show ();
+		_canvas->root()->add (_current_layout);
 	}
 }
 
