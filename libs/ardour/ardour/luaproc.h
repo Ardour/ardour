@@ -173,6 +173,8 @@ private:
 	ChanCount _configured_in;
 	ChanCount _configured_out;
 
+	bool      _configured;
+
 	ChanCount _selected_in;
 	ChanCount _selected_out;
 

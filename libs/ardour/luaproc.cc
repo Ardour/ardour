@@ -61,6 +61,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
+	, _configured (false)
 	, _has_midi_input (false)
 	, _has_midi_output (false)
 {
@@ -91,6 +92,7 @@ LuaProc::LuaProc (const LuaProc &other)
 	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
+	, _configured (false)
 	, _has_midi_input (false)
 	, _has_midi_output (false)
 {
@@ -526,7 +528,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 	_info->n_outputs = _selected_out;
 
 	// configure the DSP if needed
-	if (in != _configured_in || out != _configured_out) {
+	if (in != _configured_in || out != _configured_out || !_configured) {
 		lua_State* L = lua.getState ();
 		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
 		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
@@ -563,6 +565,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 					_info->n_inputs = lin;
 					_info->n_outputs = lout;
 				}
+				_configured = true;
 			} catch (luabridge::LuaException const& e) {
 				PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
