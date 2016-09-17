@@ -633,7 +633,6 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 		tree.write();
 	}
 
-	FormatListChanged ();
 	return new_path;
 }
 
