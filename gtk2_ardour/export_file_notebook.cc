@@ -113,20 +113,10 @@ ExportFileNotebook::update_soundcloud_upload ()
 }
 
 void
-ExportFileNotebook::FilePage::on_hide ()
-{
-	VBox::on_hide ();
-	if (save_format_on_hide) {
-		profile_manager->save_format_to_disk (format_state->format);
-		save_format_on_hide = false;
-	}
-}
-
-void
 ExportFileNotebook::FilePage::analysis_changed ()
 {
 	format_state->format->set_analyse (analysis_button.get_active ());
-	save_format_on_hide = true;
+	profile_manager->save_format_to_disk (format_state->format);
 }
 
 void
@@ -216,8 +206,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
   filename_label (_("Location"), Gtk::ALIGN_LEFT),
   soundcloud_upload_button (_("Upload to Soundcloud")),
   analysis_button (_("Analyze Exported Audio")),
-  tab_number (number),
-  save_format_on_hide(false)
+  tab_number (number)
 {
 	set_border_width (12);
 
@@ -315,7 +304,7 @@ ExportFileNotebook::FilePage::get_soundcloud_upload () const
 void
 ExportFileNotebook::FilePage::soundcloud_upload_changed ()
 {
-	save_format_on_hide = true;
+	profile_manager->save_format_to_disk (format_state->format);
 }
 
 void

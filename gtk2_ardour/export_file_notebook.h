@@ -100,8 +100,6 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		void analysis_changed ();
 		void soundcloud_upload_changed ();
 
-		void on_hide ();
-
 		ARDOUR::ExportProfileManager::FormatStatePtr   format_state;
 		ARDOUR::ExportProfileManager::FilenameStatePtr filename_state;
 		ManagerPtr                                     profile_manager;
@@ -124,8 +122,6 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Alignment          tab_close_alignment;
 		Gtk::Button             tab_close_button;
 		uint32_t                tab_number;
-
-		bool                    save_format_on_hide;
 	};
 };
 
