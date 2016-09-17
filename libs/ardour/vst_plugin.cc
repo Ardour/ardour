@@ -52,6 +52,21 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
 
+VSTPlugin::VSTPlugin (const VSTPlugin& other)
+	: Plugin (other)
+	, _handle (other._handle)
+	, _state (other._state)
+	, _plugin (other._plugin)
+	, _pi (other._pi)
+	, _num (other._num)
+	, _midi_out_buf (other._midi_out_buf)
+	, _transport_frame (0)
+	, _transport_speed (0.f)
+	, _parameter_defaults (other._parameter_defaults)
+{
+	memset (&_timeInfo, 0, sizeof(_timeInfo));
+}
+
 VSTPlugin::~VSTPlugin ()
 {
 
@@ -153,8 +168,12 @@ int
 VSTPlugin::set_chunk (gchar const * data, bool single)
 {
 	gsize size = 0;
+	int r = 0;
 	guchar* raw_data = g_base64_decode (data, &size);
-	int const r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+	{
+		Glib::Threads::Mutex::Lock lm (_lock);
+		r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+	}
 	g_free (raw_data);
 	return r;
 }
@@ -543,6 +562,17 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
+
+	Glib::Threads::Mutex::Lock lm (_state_lock, Glib::Threads::TRY_LOCK);
+	if (!lm.locked()) {
+		/* by convention 'effSetChunk' should not be called while processing
+		 * http://www.reaper.fm/sdk/vst/vst_ext.php
+		 *
+		 * All VSTs don't use in-place, PluginInsert::connect_and_run()
+		 * does clear output buffers, so we can just return.
+		 */
+		return 0;
+	}
 
 	_transport_frame = start;
 	_transport_speed = speed;

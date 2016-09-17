@@ -40,6 +40,7 @@ class LIBARDOUR_API VSTPlugin : public Plugin
 {
 public:
 	VSTPlugin (AudioEngine &, Session &, VSTHandle *);
+	VSTPlugin (const VSTPlugin& other);
 	virtual ~VSTPlugin ();
 
 	void activate ();
@@ -119,6 +120,8 @@ protected:
 	framepos_t _transport_frame;
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
+
+	Glib::Threads::Mutex _state_lock;
 };
 
 }
