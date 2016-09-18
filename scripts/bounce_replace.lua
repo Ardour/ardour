@@ -44,7 +44,7 @@ function factory (params) return function ()
 		-- remove old region..
 		playlist:remove_region (r);
 		-- ..and add the newly bounced one
-		playlist:add_region (region, r:position (), 1, false)
+		playlist:add_region (region, r:position (), 1, false, 0)
 
 		-- create a diff of the performed work, add it to the session's undo stack
 		-- and check if it is not empty
