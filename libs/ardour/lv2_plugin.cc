@@ -166,6 +166,7 @@ public:
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
 	LilvNode* bufz_nominalBlockLength;
+	LilvNode* bufz_coarseBlockLength;
 #endif
 
 #ifdef HAVE_LV2_1_10_0
@@ -545,9 +546,15 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_nodes_free(required_features);
 #endif
 
-#ifdef LV2_EXTENDED
 	LilvNodes* optional_features = lilv_plugin_get_optional_features (plugin);
+#ifdef HAVE_LV2_1_2_0
+	if (lilv_nodes_contains (optional_features, _world.bufz_coarseBlockLength)) {
+		_no_sample_accurate_ctrl = true;
+	}
+#endif
+#ifdef LV2_EXTENDED
 	if (lilv_nodes_contains (optional_features, _world.lv2_noSampleAccurateCtrl)) {
+		/* deprecated 2016-Sep-18 in favor of bufz_coarseBlockLength */
 		_no_sample_accurate_ctrl = true;
 	}
 	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
@@ -2784,9 +2791,17 @@ LV2Plugin::parameter_is_input(uint32_t param) const
 uint32_t
 LV2Plugin::designated_bypass_port ()
 {
-#ifdef LV2_EXTENDED
 	const LilvPort* port = NULL;
-	LilvNode* designation = lilv_new_uri (_world.world, LV2_PROCESSING_URI__enable);
+	LilvNode* designation = lilv_new_uri (_world.world, LV2_CORE_PREFIX "enabled");
+	port = lilv_plugin_get_port_by_designation (
+			_impl->plugin, _world.lv2_InputPort, designation);
+	lilv_node_free(designation);
+	if (port) {
+		return lilv_port_get_index (_impl->plugin, port);
+	}
+#ifdef LV2_EXTENDED
+	/* deprecated on 2016-Sep-18 in favor of lv2:enabled */
+	designation = lilv_new_uri (_world.world, LV2_PROCESSING_URI__enable);
 	port = lilv_plugin_get_port_by_designation (
 			_impl->plugin, _world.lv2_InputPort, designation);
 	lilv_node_free(designation);
@@ -2988,7 +3003,7 @@ LV2World::LV2World()
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
 #ifdef LV2_EXTENDED
-	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls");
+	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls"); // deprecated 2016-09-18
 	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
@@ -2998,6 +3013,7 @@ LV2World::LV2World()
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
+	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
 #endif
 
 }
@@ -3008,6 +3024,7 @@ LV2World::~LV2World()
 		return;
 	}
 #ifdef HAVE_LV2_1_2_0
+	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
