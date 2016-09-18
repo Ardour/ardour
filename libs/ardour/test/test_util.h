@@ -43,4 +43,6 @@ extern void create_and_start_dummy_backend ();
 extern void stop_and_destroy_backend ();
 extern ARDOUR::Session* load_session (std::string, std::string);
 
+void get_utf8_test_strings (std::vector<std::string>& results);
+
 #endif
