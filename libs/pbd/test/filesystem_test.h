@@ -11,7 +11,8 @@ class FilesystemTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (testFindFilesMatchingPattern);
 	CPPUNIT_TEST (testClearDirectory);
 	CPPUNIT_TEST (testRemoveDirectory);
-	CPPUNIT_TEST (testCanonicalPath);
+	CPPUNIT_TEST (testCanonicalPathASCII);
+	CPPUNIT_TEST (testCanonicalPathUTF8);
 	CPPUNIT_TEST (testTouchFile);
 	CPPUNIT_TEST (testStatFile);
 	CPPUNIT_TEST_SUITE_END ();
@@ -24,7 +25,8 @@ public:
 	void testFindFilesMatchingPattern ();
 	void testClearDirectory ();
 	void testRemoveDirectory ();
-	void testCanonicalPath ();
+	void testCanonicalPathASCII ();
+	void testCanonicalPathUTF8 ();
 	void testTouchFile ();
 	void testStatFile ();
 };
