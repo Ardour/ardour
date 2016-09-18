@@ -1324,7 +1324,9 @@ If you still wish to quit, please use the\n\n\
 	*/
 	save_ardour_state ();
 
-	key_editor->disconnect ();
+	if (key_editor.get (false)) {
+		key_editor->disconnect ();
+	}
 
 	close_all_dialogs ();
 
