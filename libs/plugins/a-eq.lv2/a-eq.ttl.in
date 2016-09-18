@@ -274,7 +274,7 @@ unit:hz0
         lv2:minimum 0 ;
         lv2:maximum 1 ;
         lv2:portProperty lv2:integer, lv2:toggled ;
-        lv2:designation <http://ardour.org/lv2/processing#enable>;
+        lv2:designation lv2:enabled;
     ];
 
     lv2:port [
