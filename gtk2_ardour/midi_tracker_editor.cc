@@ -97,6 +97,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 	, automation_action_menu(0)
 	, controller_menu (0)
 	, gain_column (0)
+	, mute_column (0)
 	, midi_time_axis_view(mtv)
 	, route(rou)
 	, myactions (X_("Tracking"))
@@ -588,7 +589,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
 
-	if (false /*trim_track*/) {
+	if (false /*trim_track*/ /* TODO: what is that? */) {
 		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_column_visibility)));
 		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		trim_automation_item->set_active (false);
@@ -599,7 +600,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	if (true /*mute_track*/) {
 		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_column_visibility)));
 		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		mute_automation_item->set_active (false);
+		mute_automation_item->set_active (is_mute_visible());
 
 		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 	}
@@ -1033,10 +1034,17 @@ MidiTrackerEditor::is_gain_visible()
 		!= visible_automation_columns.end();
 };
 
+bool
+MidiTrackerEditor::is_mute_visible()
+{
+	return visible_automation_columns.find(mute_column)
+		!= visible_automation_columns.end();
+};
+
 void
 MidiTrackerEditor::update_gain_column_visibility ()
 {
-	bool const showit = gain_automation_item->get_active();
+	const bool showit = gain_automation_item->get_active();
 
 	if (gain_column == 0)
 		gain_column = add_automation_column(Evoral::Parameter(GainAutomation));
@@ -1069,17 +1077,18 @@ MidiTrackerEditor::update_trim_column_visibility ()
 void
 MidiTrackerEditor::update_mute_column_visibility ()
 {
-	// bool const showit = mute_automation_item->get_active();
+	const bool showit = mute_automation_item->get_active();
 
-	// if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
-	// 	mute_track->set_marked_for_display (showit);
+	if (mute_column == 0)
+		mute_column = add_automation_column(Evoral::Parameter(MuteAutomation));
 
-	// 	/* now trigger a redisplay */
+	if (showit)
+		visible_automation_columns.insert (mute_column);
+	else
+		visible_automation_columns.erase (mute_column);
 
-	// 	if (!no_redraw) {
-	// 		 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-	// 	}
-	// }
+	/* now trigger a redisplay */
+	redisplay_model ();
 }
 
 void
@@ -1414,11 +1423,11 @@ MidiTrackerEditor::redisplay_model ()
 				} else {
 					// Interpolation
 					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
-					if (alist->interpolation() != Evoral::ControlList::Discrete) {
+					// if (alist->interpolation() != Evoral::ControlList::Discrete) {
 						double inter_auto_val = alist->eval(row_frame);
 						row[columns.automation[i]] = to_string (inter_auto_val);
 						row[columns._automation_foreground_color[i]] = "#404040";
-					}
+					// }
 				}
 			}
 		}
@@ -1450,6 +1459,9 @@ MidiTrackerEditor::build_param2actrl ()
 {
 	// Gain
 	param2actrl[Evoral::Parameter(GainAutomation)] =  route->gain_control();
+
+	// Mute
+	param2actrl[Evoral::Parameter(MuteAutomation)] =  route->mute_control();
 
 	// Processors
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {

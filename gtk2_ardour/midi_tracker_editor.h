@@ -165,11 +165,9 @@ class MidiTrackerEditor : public ArdourWindow
 	ParameterMenuMap _controller_menu_map;
 
 	size_t gain_column;
-	// TODO: replace AutomationTimeAxisView by AutomationTrackerView or column
-	// or something
-	boost::shared_ptr<AutomationTimeAxisView> trim_track;
-	boost::shared_ptr<AutomationTimeAxisView> mute_track;
-	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
+	size_t trim_track;
+	size_t mute_column;
+	size_t pan_tracks;
 
 	Gtk::CheckMenuItem* gain_automation_item;
 	Gtk::CheckMenuItem* trim_automation_item;
@@ -203,6 +201,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	// Return true if the gain column is visible
 	bool is_gain_visible ();
+	bool is_mute_visible ();
 	void update_gain_column_visibility ();
 	void update_trim_column_visibility ();
 	void update_mute_column_visibility ();
