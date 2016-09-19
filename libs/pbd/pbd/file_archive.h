@@ -38,6 +38,9 @@ class LIBPBD_API FileArchive
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
 
+		int create (const std::string& srcdir);
+		int create (const std::map <std::string, std::string>& filemap);
+
 		PBD::Signal2<void, size_t, size_t> progress; // TODO
 
 		struct MemPipe {

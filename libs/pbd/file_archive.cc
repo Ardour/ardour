@@ -19,7 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstdio>
+#include <fcntl.h>
+#include <sys/stat.h>
 
+#include <glib.h>
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
@@ -29,6 +32,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_archive.h"
+#include "pbd/file_utils.h"
 
 using namespace PBD;
 
@@ -329,4 +333,105 @@ FileArchive::do_extract (struct archive* a)
 	archive_write_close(ext);
 	archive_write_free(ext);
 	return rv;
+}
+
+
+int
+FileArchive::create (const std::string& srcdir)
+{
+	if (_req.is_remote ()) {
+		return -1;
+	}
+
+	std::string parent = Glib::path_get_dirname (srcdir);
+	size_t p_len = parent.size () + 1;
+
+	Searchpath sp (srcdir);
+	std::vector<std::string> files;
+	find_files_matching_pattern (files, sp, "*");
+
+	std::map<std::string, std::string> filemap;
+
+	for (std::vector<std::string>::const_iterator f = files.begin (); f != files.end (); ++f) {
+		assert (f->size () > p_len);
+		filemap[*f] = f->substr (p_len);
+	}
+
+	return create (filemap);
+}
+
+int
+FileArchive::create (const std::map<std::string, std::string>& filemap)
+{
+	struct archive *a;
+	struct archive_entry *entry;
+
+	size_t read_bytes = 0;
+	size_t total_bytes = 0;
+
+	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
+		GStatBuf statbuf;
+		if (g_stat (f->first.c_str(), &statbuf)) {
+			continue;
+		}
+		total_bytes += statbuf.st_size;
+	}
+
+	if (total_bytes == 0) {
+		return -1;
+	}
+
+	progress (0, total_bytes);
+
+	a = archive_write_new ();
+	archive_write_set_format_pax_restricted (a);
+	archive_write_add_filter_lzma (a);
+	archive_write_open_filename (a, _req.url);
+	entry = archive_entry_new ();
+
+	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
+		char buf[8192];
+		const char* filepath = f->first.c_str ();
+		const char* filename = f->second.c_str ();
+
+		GStatBuf statbuf;
+		if (g_stat (filepath, &statbuf)) {
+			continue;
+		}
+
+		archive_entry_clear (entry);
+
+#ifdef PLATFORM_WINDOWS
+		archive_entry_set_size (entry, statbuf.st_size);
+		archive_entry_set_atime (entry, statbuf.st_atime, 0);
+		archive_entry_set_ctime (entry, statbuf.st_ctime, 0);
+		archive_entry_set_mtime (entry, statbuf.st_mtime, 0);
+#else
+		archive_entry_copy_stat (entry, &statbuf);
+#endif
+
+		archive_entry_set_pathname (entry, filename);
+		archive_entry_set_filetype (entry, AE_IFREG);
+		archive_entry_set_perm (entry, 0644);
+
+		archive_write_header (a, entry);
+
+		int fd = g_open (filepath, O_RDONLY, 0444);
+		assert (fd >= 0);
+
+		ssize_t len = read (fd, buf, sizeof (buf));
+		while (len > 0) {
+			read_bytes += len;
+			archive_write_data (a, buf, len);
+			progress (read_bytes, total_bytes);
+			len = read (fd, buf, sizeof (buf));
+		}
+		close (fd);
+	}
+
+	archive_entry_free (entry);
+	archive_write_close (a);
+	archive_write_free (a);
+
+	return 0;
 }
