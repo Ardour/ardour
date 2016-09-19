@@ -103,7 +103,7 @@ Push2Canvas::request_redraw (Rect const & r)
 	cr.x = r.x0;
 	cr.y = r.y0;
 	cr.width = r.width();
-	cr.width = r.height();
+	cr.height = r.height();
 
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("invalidate rect %1\n", r));
 

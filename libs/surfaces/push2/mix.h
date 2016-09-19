@@ -57,7 +57,6 @@ class MixLayout : public Push2Layout
 	void strip_vpot_touch (int, bool);
 
   private:
-	mutable bool _dirty;
 	std::vector<ArdourCanvas::Text*> upper_text;
 	std::vector<ArdourCanvas::Text*> lower_text;
 	std::vector<ArdourCanvas::Rectangle*> backgrounds;
@@ -73,7 +72,7 @@ class MixLayout : public Push2Layout
 	PBD::ScopedConnectionList session_connections;
 	void stripables_added ();
 
-	void stripable_property_change (PBD::PropertyChange const& what_changed, int which);
+	void stripable_property_change (PBD::PropertyChange const& what_changed, uint32_t which);
 
 	void switch_bank (uint32_t base);
 
@@ -91,6 +90,8 @@ class MixLayout : public Push2Layout
 	void solo_changed (uint32_t n);
 	void mute_changed (uint32_t n);
 	void solo_mute_changed (uint32_t n);
+	void show_selection (uint32_t n);
+	void hide_selection (uint32_t n);
 };
 
 } /* namespace */

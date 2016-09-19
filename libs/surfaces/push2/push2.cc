@@ -729,7 +729,7 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 void
 Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+	// DEBUG_TRACE (DEBUG::Push2, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
 
 	if (ev->velocity == 0) {
 		handle_midi_note_off_message (parser, ev);
@@ -811,7 +811,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 void
 Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+	// DEBUG_TRACE (DEBUG::Push2, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
 
 	if (ev->note_number < 11) {
 		/* theoretically related to encoder touch start/end, but
@@ -1446,12 +1446,6 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 		}
 	}
 
-	if (new_pad_target) {
-		cerr << "new midi pad target " << new_pad_target->name() << endl;
-	} else {
-		cerr << "no midi pad target\n";
-	}
-
 	if (current_midi_track == new_pad_target) {
 		/* nothing to do */
 		return;
@@ -1465,7 +1459,6 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	/* disconnect from pad port, if appropriate */
 
 	if (current_midi_track && pad_port) {
-		cerr << "Disconnect pads from " << current_midi_track->name() << endl;
 		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
 	}
 
@@ -1474,7 +1467,6 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	 */
 
 	if (new_pad_target && pad_port) {
-		cerr << "Reconnect pads to " << new_pad_target->name() << endl;
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 		current_pad_target = new_pad_target;
 	} else {

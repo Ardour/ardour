@@ -346,6 +346,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	ModifierState modifier_state() const { return _modifier_state; }
 
 	Button* button_by_id (ButtonID);
+	static std::string button_name_by_id (ButtonID);
 
 	void write (const MidiByteArray&);
 
