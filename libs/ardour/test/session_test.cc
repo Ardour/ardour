@@ -85,3 +85,74 @@ SessionTest::new_session_from_template ()
 	delete template_session;
 	stop_and_destroy_backend ();
 }
+
+void
+SessionTest::open_session_utf8_path ()
+{
+	std::vector<std::string> utf8_strings;
+
+	get_utf8_test_strings (utf8_strings);
+
+	CPPUNIT_ASSERT (!utf8_strings.empty());
+
+	const string test_dir = new_test_output_dir ("open_session_utf8_path");
+
+	for (std::vector<std::string>::const_iterator i = utf8_strings.begin (); i != utf8_strings.end ();
+	     ++i) {
+
+		const string session_name (*i);
+		std::string new_session_dir = Glib::build_filename (test_dir, session_name);
+		bool new_session_failed = false;
+
+		CPPUNIT_ASSERT (!Glib::file_test (new_session_dir, Glib::FILE_TEST_EXISTS));
+
+		create_and_start_dummy_backend ();
+
+		ARDOUR::Session* session = 0;
+
+		try {
+			session = new Session (*AudioEngine::instance(), new_session_dir, session_name);
+
+			CPPUNIT_ASSERT (session);
+
+			session->save_state ("");
+
+		} catch(...) {
+			new_session_failed = true;
+
+			std::cerr << "Failed to create new session using name : " << *i << std::endl;
+		}
+
+		delete session;
+		session = 0;
+		stop_and_destroy_backend ();
+
+		CPPUNIT_ASSERT (!new_session_failed);
+
+		if (new_session_failed) break;
+
+		create_and_start_dummy_backend ();
+
+		bool open_session_failed = false;
+
+		try {
+			// reopen same session to check that it opens without error
+			session = new Session (*AudioEngine::instance (), new_session_dir, session_name);
+
+			CPPUNIT_ASSERT (session);
+		} catch (...) {
+			open_session_failed = true;
+
+			std::cerr << "Failed to open session using name : " << *i << std::endl;
+		}
+
+		delete session;
+		session = 0;
+		stop_and_destroy_backend ();
+
+		CPPUNIT_ASSERT (!open_session_failed);
+
+		if (open_session_failed) break;
+	}
+
+}
