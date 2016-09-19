@@ -392,8 +392,6 @@ FilesystemTest::testCanonicalPathUTF8 ()
 
 	get_utf8_test_strings (utf8_strings);
 
-	bool conversion_failed = false;
-
 	for (std::vector<std::string>::const_iterator i = utf8_strings.begin (); i != utf8_strings.end ();
 	     ++i) {
 
@@ -403,24 +401,11 @@ FilesystemTest::testCanonicalPathUTF8 ()
 
 		string relative_path = Glib::build_filename (".", *i);
 
-		// PBD::canonical_path can throw if Glib::locale_from_utf8 fails
-		try {
+		string canonical_path = PBD::canonical_path (relative_path);
 
-			string canonical_path = PBD::canonical_path (relative_path);
-
-			cerr << "PBD::canonical_path succeeded for path: " << canonical_path << endl;
-			// If successful check that it resolved to the absolute path
-			CPPUNIT_ASSERT (absolute_path == canonical_path);
-
-		} catch (const Glib::ConvertError& err) {
-			cerr << "Character set conversion failed: " << err.what () << endl;
-			cerr << "PBD::canonical_path failed for path containing string: " << *i << endl;
-			conversion_failed = true;
-		}
-
+		// Check that it resolved to the absolute path
+		CPPUNIT_ASSERT (absolute_path == canonical_path);
 	}
-
-	CPPUNIT_ASSERT (conversion_failed != true);
 
 #endif
 }
