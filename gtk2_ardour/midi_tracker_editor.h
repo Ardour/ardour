@@ -16,6 +16,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+// TODO: take care of midi automation
+
 #ifndef __ardour_gtk2_midi_tracker_editor_h_
 #define __ardour_gtk2_midi_tracker_editor_h_
 
@@ -162,9 +164,9 @@ class MidiTrackerEditor : public ArdourWindow
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
+	size_t gain_column;
 	// TODO: replace AutomationTimeAxisView by AutomationTrackerView or column
 	// or something
-	size_t gain_column;
 	boost::shared_ptr<AutomationTimeAxisView> trim_track;
 	boost::shared_ptr<AutomationTimeAxisView> mute_track;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
@@ -176,7 +178,9 @@ class MidiTrackerEditor : public ArdourWindow
 
 	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
-	void add_automation_column (const Evoral::Parameter& param);
+	// Assign an automation parameter to a column and return the corresponding
+	// column index
+	size_t add_automation_column (const Evoral::Parameter& param);
 	void add_processor_automation_column (boost::shared_ptr<ARDOUR::Processor> processor, const Evoral::Parameter& what);
 
 	void build_param2actrl ();
@@ -197,6 +201,8 @@ class MidiTrackerEditor : public ArdourWindow
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 
+	// Return true if the gain column is visible
+	bool is_gain_visible ();
 	void update_gain_column_visibility ();
 	void update_trim_column_visibility ();
 	void update_mute_column_visibility ();

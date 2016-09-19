@@ -100,7 +100,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 	, midi_time_axis_view(mtv)
 	, route(rou)
 	, myactions (X_("Tracking"))
-	, visible_blank (false)
+	, visible_blank (true)
 	, visible_note (true)
 	, visible_channel (false)
 	, visible_velocity (true)
@@ -181,7 +181,7 @@ MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
-void
+size_t
 MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 {
 	// Find the next available column
@@ -191,7 +191,7 @@ MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 		                         param.type(), (int) param.channel(), param.id() )
 		      << endmsg;
 		abort(); /*NOTREACHED*/
-		return;
+		return 0;
 	}
 	std::set<size_t>::iterator it = available_automation_columns.begin();
 	size_t column = *it;
@@ -199,13 +199,21 @@ MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 
 	// Associate that column to the parameter
 	col2param[column] = param;
+
+	// Set the column title
+	string name = route->describe_parameter (param);
+	view.get_column(column)->set_title (name);
+
+	std::cout << "add_automation_column: name = " << name
+	          << ", column = " << column << std::endl;
+
+	return column;
 }
 
 /** Add an AutomationTimeAxisView to display automation for a processor's parameter */
 void
 MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor> processor, const Evoral::Parameter& what)
 {
-	string name;
 	ProcessorAutomationNode* pan;
 
 	if ((pan = find_processor_automation_node (processor, what)) == 0) {
@@ -237,6 +245,13 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 
 	// Associate that column to the parameter
 	col2param[pan->column] = what;
+
+	// Set the column title
+	string name = processor->describe_parameter (what);
+	view.get_column(pan->column)->set_title (name);
+
+	std::cout << "add_processor_automation_column: name = " << name
+	          << ", column = " << pan->column << std::endl;
 }
 
 // TODO:
@@ -282,12 +297,6 @@ MidiTrackerEditor::show_all_automation ()
 			if (column == 0) {
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
 				column = (*ii)->column;
-				string name = (*i)->processor->describe_parameter ((*ii)->what);
-				view.get_column(column)->set_title (name);
-				// std::cout << "[show_all_automation] "
-				//           << "after add_processor_automation_column: name = "
-				//           << name
-				//           << ", column = " << column << std::endl;
 			}
 			visible_automation_columns.insert (column);
 
@@ -574,7 +583,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	if (true) {
 		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_column_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		gain_automation_item->set_active (true);
+		gain_automation_item->set_active (is_gain_visible());
 
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
@@ -1017,13 +1026,20 @@ MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl
 	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 }
 
+bool
+MidiTrackerEditor::is_gain_visible()
+{
+	return visible_automation_columns.find(gain_column)
+		!= visible_automation_columns.end();
+};
+
 void
 MidiTrackerEditor::update_gain_column_visibility ()
 {
 	bool const showit = gain_automation_item->get_active();
 
 	if (gain_column == 0)
-		add_automation_column(Evoral::Parameter(GainAutomation));
+		gain_column = add_automation_column(Evoral::Parameter(GainAutomation));
 
 	if (showit)
 		visible_automation_columns.insert (gain_column);
@@ -1221,10 +1237,10 @@ MidiTrackerEditor::redisplay_visible_automation()
 	for (size_t i = 0; i < MAX_NUMBER_OF_AUTOMATION_TRACKS; i++) {
 		size_t col = automation_col_offset + 2 * i;
 		bool is_visible = is_in(col, visible_automation_columns);
+		view.get_column(col)->set_visible(is_visible);
 		// std::cout << "[redisplay_visible_automation] "
 		//           << "col = " << col
 		//           << ", is_visible = " << is_visible << std::endl;
-		view.get_column(col)->set_visible(is_visible);
 	}
 	redisplay_visible_automation_delay();
 }
