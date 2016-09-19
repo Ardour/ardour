@@ -361,6 +361,65 @@ get_absolute_path (const std::string & p)
 	return Glib::build_filename (Glib::get_current_dir(), p);
 }
 
+string
+canonical_path (const std::string& path)
+{
+#ifdef PLATFORM_WINDOWS
+	wchar_t resolved_wpath[_MAX_PATH];
+
+	// sizeof(wchar_t) is 2 bytes using gcc/mingw and VC++ but 4 bytes using gcc/linux
+	assert (sizeof(wchar_t) == 2);
+
+	wchar_t* wfilepath = (wchar_t*)g_utf8_to_utf16 (path.c_str(), -1, NULL, NULL, NULL);
+
+	if (wfilepath == NULL) {
+		DEBUG_TRACE (
+		    DEBUG::FileUtils,
+		    string_compose ("PBD::canonical_path: Unable to convert path from utf8 to utf16 : %1\n",
+		                    path));
+		return path;
+	}
+
+	if (_wfullpath (resolved_wpath, wfilepath, _MAX_PATH) == NULL) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose ("PBD::canonical_path: Unable to resolve %1\n", wfilepath));
+		return path;
+	}
+
+	gchar* resolved_utf8_path =
+	    g_utf16_to_utf8 (reinterpret_cast<const gunichar2*>(resolved_wpath), -1, NULL, NULL, NULL);
+
+	if (resolved_utf8_path == NULL) {
+		DEBUG_TRACE (
+		    DEBUG::FileUtils,
+		    string_compose ("PBD::canonical_path: Unable to convert path from utf16 to utf8 : %1\n",
+		                    resolved_wpath));
+		return path;
+	}
+
+	const string retval(resolved_utf8_path);
+
+	g_free (wfilepath);
+	g_free (resolved_utf8_path);
+
+	return retval;
+
+#else
+	char buf[PATH_MAX+1];
+
+	if (realpath (path.c_str(), buf) == NULL) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose ("PBD::canonical_path: Unable to resolve %1: %2\n", path,
+		                             g_strerror (errno)));
+		return path;
+	}
+	DEBUG_TRACE (DEBUG::FileUtils,
+	             string_compose ("PBD::canonical_path %1 resolved to: %2\n", path, string (buf)));
+
+	return string (buf);
+#endif
+}
+
 std::string
 get_suffix (const std::string & p)
 {
