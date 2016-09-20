@@ -20,7 +20,7 @@
 #include <alsa/asoundlib.h>
 #include <glib.h>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "ardouralsautil/devicelist.h"
 
 using namespace std;
@@ -48,7 +48,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
 
 		devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
+		devname += PBD::to_string (cardnum);
 
 		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
 
@@ -85,7 +85,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 					continue;
 				}
 				devname += ',';
-				devname += PBD::to_string (device, std::dec);
+				devname += PBD::to_string (device);
 				devices.insert (std::make_pair (card_name, devname));
 			}
 
@@ -103,7 +103,7 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
 		snd_ctl_t *handle;
 		std::string devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
+		devname += PBD::to_string (cardnum);
 		if (snd_ctl_open (&handle, devname.c_str (), 0) >= 0 && snd_ctl_card_info (handle, cinfo) >= 0) {
 			int device = -1;
 			while (snd_ctl_rawmidi_next_device (handle, &device) >= 0 && device >= 0) {
@@ -147,7 +147,7 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname = "hw:";
 						devname += snd_ctl_card_info_get_id (cinfo);
 						devname += ",";
-						devname += PBD::to_string (device, std::dec);
+						devname += PBD::to_string (device);
 
 						std::string card_name;
 						card_name = snd_rawmidi_info_get_name (info);
@@ -162,9 +162,9 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname = "hw:";
 						devname += snd_ctl_card_info_get_id (cinfo);
 						devname += ",";
-						devname += PBD::to_string (device, std::dec);
+						devname += PBD::to_string (device);
 						devname += ",";
-						devname += PBD::to_string (sub, std::dec);
+						devname += PBD::to_string (sub);
 
 						std::string card_name = sub_name;
 						card_name += " (";
@@ -223,9 +223,9 @@ ARDOUR::get_alsa_sequencer_names (std::map<std::string, std::string>& devices)
 			card_name += ")";
 
 			std::string devname;
-			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo), std::dec);
+			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo));
 			devname += ":";
-			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo), std::dec);
+			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo));
 			devices.insert (std::make_pair (card_name, devname));
 		}
 	}
