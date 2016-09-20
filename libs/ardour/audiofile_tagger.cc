@@ -22,7 +22,7 @@
 
 #include "ardour/session_metadata.h"
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
@@ -118,7 +118,7 @@ AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMeta
 	tag.addField ("MIXER", TL_STR(metadata.mixer()));
 	tag.addField ("COMPILATION", TL_STR(metadata.compilation()));
 	tag.addField ("DISCSUBTITLE", TL_STR(metadata.disc_subtitle()));
-	tag.addField ("DISCNUMBER", to_string (metadata.disc_number(), std::dec));
+	tag.addField ("DISCNUMBER", to_string (metadata.disc_number()));
 
 	// No field for total discs or tracks
 
