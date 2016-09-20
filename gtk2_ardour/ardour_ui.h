@@ -684,6 +684,7 @@ private:
 
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
+	void archive_session ();
 	void rename_session ();
 
 	int         create_mixer ();

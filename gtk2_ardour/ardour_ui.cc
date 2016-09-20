@@ -163,6 +163,7 @@ typedef uint64_t microseconds_t;
 #include "route_params_ui.h"
 #include "save_as_dialog.h"
 #include "script_selector.h"
+#include "session_archive_dialog.h"
 #include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
@@ -2695,6 +2696,32 @@ ARDOUR_UI::save_session_as ()
 	if (!sa.include_media) {
 		unload_session (false);
 		load_session (sa.final_session_folder_name, sa.new_name);
+	}
+}
+
+void
+ARDOUR_UI::archive_session ()
+{
+	if (!_session) {
+		return;
+	}
+
+	time_t n;
+	time (&n);
+	Glib::DateTime gdt (Glib::DateTime::create_now_local (n));
+
+	SessionArchiveDialog sad;
+	sad.set_name (_session->name() + gdt.format ("_%F_%H%M%S"));
+	int response = sad.run ();
+
+	if (response != Gtk::RESPONSE_OK) {
+		sad.hide ();
+		return;
+	}
+
+	if (_session->archive_session (sad.target_folder(), sad.name(), &sad)) {
+		MessageDialog msg (_("Session Archiving failed."));
+		msg.run ();
 	}
 }
 

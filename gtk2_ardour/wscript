@@ -226,6 +226,7 @@ gtk2_ardour_sources = [
         'selection.cc',
         'selection_memento.cc',
         'send_ui.cc',
+        'session_archive_dialog.cc',
         'session_dialog.cc',
         'session_import_dialog.cc',
         'session_metadata_dialog.cc',
