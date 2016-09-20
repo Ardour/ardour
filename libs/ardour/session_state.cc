@@ -66,6 +66,7 @@
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
@@ -102,6 +103,7 @@
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/progress.h"
 #include "ardour/profile.h"
 #include "ardour/proxy_controllable.h"
 #include "ardour/recent_sessions.h"
@@ -4927,6 +4929,249 @@ Session::save_as (SaveAs& saveas)
 	}
 
 	return 0;
+}
+
+static void set_progress (Progress* p, size_t n, size_t t)
+{
+	p->set_progress (float (n) / float(t));
+}
+
+int
+Session::archive_session (const std::string& dest, const std::string& name, Progress* progress)
+{
+	if (dest.empty () || name.empty ()) {
+		return -1;
+	}
+
+	/* save current values */
+	bool was_dirty = dirty ();
+	string old_path = _path;
+	string old_name = _name;
+	string old_snapshot = _current_snapshot_name;
+	string old_sd = _session_dir->root_path();
+	string old_config_search_path[DataType::num_types];
+	old_config_search_path[DataType::AUDIO] = config.get_audio_search_path ();
+	old_config_search_path[DataType::MIDI]  = config.get_midi_search_path ();
+
+	/* ensure that session-path is included in search-path */
+	bool ok = false;
+	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		if ((*sd).path == old_path) {
+			ok = true;
+		}
+	}
+	if (!ok) {
+		return -1;
+	}
+
+	/* create temporary dir to save session to */
+#ifdef PLATFORM_WINDOWS
+	char tmp[256] = "C:\\TEMP\\";
+	GetTempPath (sizeof (tmp), tmp);
+#else
+	char const* tmp = getenv("TMPDIR");
+	if (!tmp) {
+		tmp = "/tmp/";
+	}
+#endif
+	if ((strlen (tmp) + 21) > 1024) {
+		return -1;
+	}
+
+	char tmptpl[1024];
+	strcpy (tmptpl, tmp);
+	strcat (tmptpl, "ardourarchive-XXXXXX");
+	char*  tmpdir = g_mkdtemp (tmptpl);
+
+	if (!tmpdir) {
+		return -1;
+	}
+
+	std::string to_dir = std::string (tmpdir);
+
+	/* switch session directory temporarily */
+	(*_session_dir) = to_dir;
+
+	if (!_session_dir->create()) {
+		(*_session_dir) = old_sd;
+		remove_directory (to_dir);
+		return -1;
+	}
+
+	/* prepare archive */
+	string archive = Glib::build_filename (dest, name + ".tar.xz");
+
+#ifndef NDEBUG
+	cout << "ARCHIVE: " << archive << "\n";
+#endif
+
+	PBD::ScopedConnectionList progress_connection;
+	PBD::FileArchive ar (archive);
+	if (progress) {
+		ar.progress.connect_same_thread (progress_connection, boost::bind (&set_progress, progress, _1, _2));
+	}
+
+	/* collect files to archive */
+	std::map<string,string> filemap;
+
+	vector<string> do_not_copy_extensions;
+	do_not_copy_extensions.push_back (statefile_suffix);
+	do_not_copy_extensions.push_back (pending_suffix);
+	do_not_copy_extensions.push_back (backup_suffix);
+	do_not_copy_extensions.push_back (temp_suffix);
+	do_not_copy_extensions.push_back (history_suffix);
+
+	vector<string> blacklist_dirs;
+	blacklist_dirs.push_back (string (peak_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (analysis_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (dead_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (export_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
+
+	// TODO: *force* state-save even if not changed, retain state-dir
+	//blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
+
+	/* index files relevant for this session */
+	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		vector<string> files;
+
+		size_t prefix_len = (*sd).path.size();
+		if (prefix_len > 0 && (*sd).path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+			++prefix_len;
+		}
+
+		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+
+		static const std::string audiofile_dir_string = string (sound_dir_name) + G_DIR_SEPARATOR;
+		static const std::string videofile_dir_string = string (video_dir_name) + G_DIR_SEPARATOR;
+		static const std::string midifile_dir_string  = string (midi_dir_name)  + G_DIR_SEPARATOR;
+
+		for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
+			std::string from = *i;
+
+#ifdef __APPLE__
+			string filename = Glib::path_get_basename (from);
+			std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);
+			if (filename == ".DS_STORE") {
+				continue;
+			}
+#endif
+
+			if (from.find (audiofile_dir_string) != string::npos) {
+				// TODO optionally .flac encode
+				filemap[from] = make_new_media_path (from, name, name);
+			} else if (from.find (midifile_dir_string) != string::npos) {
+				filemap[from] = make_new_media_path (from, name, name);
+			} else if (from.find (videofile_dir_string) != string::npos) {
+				filemap[from] = make_new_media_path (from, name, name);
+			} else {
+				bool do_copy = true;
+				for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
+					if (from.find (*v) != string::npos) {
+						do_copy = false;
+						break;
+					}
+				}
+				for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
+					if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+						do_copy = false;
+						break;
+					}
+				}
+
+				if (do_copy) {
+					filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
+				}
+			}
+		}
+	}
+
+	/* include external media */
+	{
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+			if (!fs) {
+				continue;
+			}
+			if (fs->within_session()) {
+				continue;
+			}
+
+			if (fs->type () != DataType::AUDIO) {
+				continue;
+			}
+
+			std::string from = fs->path();
+			filemap[from] = make_new_media_path (from, name, name);
+			remove_dir_from_search_path (Glib::path_get_dirname (from), DataType::AUDIO);
+		}
+	}
+
+	/* write session file */
+	_path = to_dir;
+	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
+
+	// this messes up LV2 plugin state.. state-dir XXX
+	save_state (name, false, false, false);
+	save_default_options ();
+
+	size_t prefix_len = _path.size();
+	if (prefix_len > 0 && _path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+		++prefix_len;
+	}
+
+	/* collect session-state files */
+	vector<string> files;
+	do_not_copy_extensions.clear ();
+	do_not_copy_extensions.push_back (history_suffix);
+
+	blacklist_dirs.clear ();
+	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
+
+	find_files_matching_filter (files, to_dir, accept_all_files, 0, false, true, true);
+	for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
+		std::string from = *i;
+		bool do_copy = true;
+		for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
+			if (from.find (*v) != string::npos) {
+				do_copy = false;
+				break;
+			}
+		}
+		for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
+			if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+				do_copy = false;
+				break;
+			}
+		}
+		if (do_copy) {
+			filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
+		}
+	}
+
+	/* restore original values */
+	_path = old_path;
+	_name = old_name;
+	set_snapshot_name (old_snapshot);
+	(*_session_dir) = old_sd;
+	if (was_dirty) {
+		set_dirty ();
+	}
+	config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
+	config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
+
+#ifndef NDEBUG
+	/* done  -- now zip */
+	for (std::map<string,string>::const_iterator i = filemap.begin(); i != filemap.end (); ++i) {
+		cout << "archive " << (*i).first << " as " << (*i).second << "\n";
+	}
+#endif
+
+	int rv = ar.create (filemap);
+	remove_directory (to_dir);
+
+	return rv;
 }
 
 void

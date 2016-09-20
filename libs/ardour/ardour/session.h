@@ -134,6 +134,7 @@ class PluginInfo;
 class Port;
 class PortInsert;
 class ProcessThread;
+class Progress;
 class Processor;
 class Region;
 class Return;
@@ -516,6 +517,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 * @return zero on success
 	 */
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
+
+	int archive_session (const std::string&, const std::string&, Progress* p = 0);
+
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name, bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
