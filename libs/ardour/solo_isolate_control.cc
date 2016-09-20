@@ -154,8 +154,12 @@ SoloIsolateControl::get_value () const
 }
 
 int
-SoloIsolateControl::set_state (XMLNode const & node, int)
+SoloIsolateControl::set_state (XMLNode const & node, int version)
 {
+	if (SlavableAutomationControl::set_state(node, version)) {
+		return -1;
+	}
+
 	XMLProperty const * prop;
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
