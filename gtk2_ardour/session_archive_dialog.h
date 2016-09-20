@@ -1,0 +1,53 @@
+/*
+    Copyright (C) 2015 Paul Davis
+    Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#ifndef _gtkardour_session_archive_dialog_h_
+#define _gtkardour_session_archive_dialog_h_
+
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/filechooserbutton.h>
+#include <gtkmm/progressbar.h>
+
+#include "ardour_dialog.h"
+#include "progress_reporter.h"
+
+class SessionArchiveDialog : public ArdourDialog, public ProgressReporter
+{
+public:
+	SessionArchiveDialog ();
+
+	std::string target_folder () const;
+	std::string name () const;
+	void        set_name (std::string);
+
+
+private:
+	Gtk::FileChooserButton target_folder_selector;
+	Gtk::Entry name_entry;
+	Gtk::ComboBoxText zip_ext;
+	Gtk::ProgressBar progress_bar;
+
+	void name_entry_changed ();
+	void update_progress_gui (float);
+};
+
+#endif /* __ardour_gtk_tempo_dialog_h__ */
