@@ -2460,7 +2460,7 @@ Route::set_state (const XMLNode& node, int version)
 				_solo_safe_control->set_state (*child, version);
 			} else if (prop->value() == _solo_isolate_control->name()) {
 				_solo_isolate_control->set_state (*child, version);
-			} else if (prop->value() == _solo_control->name()) {
+			} else if (prop->value() == _mute_control->name()) {
 				_mute_control->set_state (*child, version);
 			} else if (prop->value() == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
