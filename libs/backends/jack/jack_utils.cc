@@ -45,7 +45,7 @@
 
 #include "pbd/epa.h"
 #include "pbd/error.h"
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 
@@ -714,7 +714,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 	if (options.timeout) {
 		args.push_back ("-t");
-		args.push_back (to_string (options.timeout, std::dec));
+		args.push_back (to_string (options.timeout));
 	}
 
 	if (options.no_mlock) {
@@ -722,13 +722,13 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	}
 
 	args.push_back ("-p");
-	args.push_back (to_string(options.ports_max, std::dec));
+	args.push_back (to_string(options.ports_max));
 
 	if (options.realtime) {
 		args.push_back ("-R");
 		if (options.priority != 0) {
 			args.push_back ("-P");
-			args.push_back (to_string(options.priority, std::dec));
+			args.push_back (to_string(options.priority));
 		}
 	} else {
 		args.push_back ("-r");
@@ -810,45 +810,45 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 		if (options.input_channels) {
 			args.push_back ("-i");
-			args.push_back (to_string (options.input_channels, std::dec));
+			args.push_back (to_string (options.input_channels));
 		}
 
 		if (options.output_channels) {
 			args.push_back ("-o");
-			args.push_back (to_string (options.output_channels, std::dec));
+			args.push_back (to_string (options.output_channels));
 		}
 
 		if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
 			args.push_back ("-n");
-			args.push_back (to_string (options.num_periods, std::dec));
+			args.push_back (to_string (options.num_periods));
 		}
 	} else {
 		// jackd dummy backend
 		if (options.input_channels) {
 			args.push_back ("-C");
-			args.push_back (to_string (options.input_channels, std::dec));
+			args.push_back (to_string (options.input_channels));
 		}
 
 		if (options.output_channels) {
 			args.push_back ("-P");
-			args.push_back (to_string (options.output_channels, std::dec));
+			args.push_back (to_string (options.output_channels));
 		}
 	}
 
 	args.push_back ("-r");
-	args.push_back (to_string (options.samplerate, std::dec));
+	args.push_back (to_string (options.samplerate));
 
 	args.push_back ("-p");
-	args.push_back (to_string (options.period_size, std::dec));
+	args.push_back (to_string (options.period_size));
 
 	if (get_jack_audio_driver_supports_latency_adjustment (options.driver)) {
 		if (options.input_latency) {
 			args.push_back ("-I");
-			args.push_back (to_string (options.input_latency, std::dec));
+			args.push_back (to_string (options.input_latency));
 		}
 		if (options.output_latency) {
 			args.push_back ("-O");
-			args.push_back (to_string (options.output_latency, std::dec));
+			args.push_back (to_string (options.output_latency));
 		}
 	}
 
