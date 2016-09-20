@@ -25,8 +25,8 @@
 #include "ardour/session.h"
 
 #include "pbd/controllable.h"
-#include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/string_convert.h"
 
 #include <sstream>
 #include <algorithm>
@@ -99,7 +99,7 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
 	XMLNode * remote_control = xml_track.child ("RemoteControl");
 	if (remote_control && (prop = remote_control->property ("id"))) {
 		uint32_t control_id = session.ntracks() + session.nbusses() + 1;
-		prop->set_value (to_string (control_id, std::dec));
+		prop->set_value (to_string (control_id));
 	}
 
 	xml_track.remove_nodes_and_delete ("Extra");
