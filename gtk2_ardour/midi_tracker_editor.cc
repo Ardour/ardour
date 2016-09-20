@@ -101,7 +101,6 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 	, midi_time_axis_view(mtv)
 	, route(rou)
 	, myactions (X_("Tracking"))
-	, visible_blank (true)
 	, visible_note (true)
 	, visible_channel (false)
 	, visible_velocity (true)
@@ -1138,23 +1137,6 @@ MidiTrackerEditor::register_actions ()
 	myactions.register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-beat"), _("Beats Per Row to Beat"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeat)));
 }
 
-bool
-MidiTrackerEditor::visible_blank_press(GdkEventButton* ev)
-{
-	/* ignore double/triple clicks */
-	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
-		return true;
-	}
-
-	visible_blank = !visible_blank;
-	if (visible_blank)
-		visible_blank_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	else
-		visible_blank_button.set_active_state (Gtkmm2ext::Off);
-	redisplay_model ();
-	return false;
-}
-
 void
 MidiTrackerEditor::redisplay_visible_note()
 {
@@ -1314,13 +1296,11 @@ MidiTrackerEditor::redisplay_model ()
 			// Render midi notes pattern
 			for (size_t i = 0; i < (size_t)mtp->ntracks; i++) {
 
-				if (visible_blank) {
-					// Fill with blank
-					row[columns.note_name[i]] = "----";
-					row[columns.channel[i]] = "--";
-					row[columns.velocity[i]] = "---";
-					row[columns.delay[i]] = "-----";
-				}
+				// Fill with blank
+				row[columns.note_name[i]] = "----";
+				row[columns.channel[i]] = "--";
+				row[columns.velocity[i]] = "---";
+				row[columns.delay[i]] = "-----";
 
 				// Grey out infoless cells
 				row[columns._note_foreground_color[i]] = "#404040";
@@ -1394,11 +1374,9 @@ MidiTrackerEditor::redisplay_model ()
 
 				row[columns._automation_delay_foreground_color[i]] = "#404040";
 
-				if (visible_blank) {
-					// Fill with blank
-					row[columns.automation[i]] = "---";
-					row[columns.automation_delay[i]] = "-----";
-				}
+				// Fill with blank
+				row[columns.automation[i]] = "---";
+				row[columns.automation_delay[i]] = "-----";
 
 				if (auto_count > 0) {
 					bool undefined = auto_count > 1;
@@ -1585,15 +1563,6 @@ MidiTrackerEditor::setup_toolbar ()
 	beats_per_row_selector.show ();
 	toolbar.pack_start (beats_per_row_selector, false, false);
 
-	// Add visible blank button
-	visible_blank_button.set_name ("visible blank button");
-	visible_blank_button.set_text (S_("---|-"));
-	visible_blank_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_blank_button.set_active_state (visible_blank ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	visible_blank_button.show ();
-	visible_blank_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_blank_press), false);
-	toolbar.pack_start (visible_blank_button, false, false);
-
 	// Add visible note button
 	visible_note_button.set_name ("visible note button");
 	visible_note_button.set_text (S_("Note|N"));
@@ -1679,7 +1648,6 @@ void
 MidiTrackerEditor::setup_tooltips ()
 {
 	set_tooltip (beats_per_row_selector, _("Beats Per Row"));
-	set_tooltip (visible_blank_button, _("Toggle Blank Visibility"));
 	set_tooltip (visible_note_button, _("Toggle Note Visibility"));
 	set_tooltip (visible_channel_button, _("Toggle Channel Visibility"));
 	set_tooltip (visible_velocity_button, _("Toggle Velocity Visibility"));

@@ -288,12 +288,10 @@ class MidiTrackerEditor : public ArdourWindow
 	ArdourDropdown               beats_per_row_selector;
 	std::vector<std::string>     beats_per_row_strings;
 	uint8_t                      rows_per_beat;
-	ArdourButton                 visible_blank_button;
 	ArdourButton                 visible_note_button;
 	ArdourButton                 visible_channel_button;
 	ArdourButton                 visible_velocity_button;
 	ArdourButton                 visible_delay_button;
-	bool                         visible_blank;
 	bool                         visible_note;
 	bool                         visible_channel;
 	bool                         visible_velocity;
@@ -313,7 +311,6 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void register_actions ();
 
-	bool visible_blank_press (GdkEventButton*);
 	bool visible_note_press (GdkEventButton*);
 	bool visible_channel_press (GdkEventButton*);
 	bool visible_velocity_press (GdkEventButton*);
