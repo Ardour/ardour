@@ -23,7 +23,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
@@ -109,5 +109,5 @@ ElementImporter::rate_convert_samples (framecnt_t samples) const
 string
 ElementImporter::rate_convert_samples (string const & samples) const
 {
-	return to_string (rate_convert_samples (atoi (samples)), std::dec);
+	return to_string (rate_convert_samples (string_to<uint32_t>(samples)));
 }
