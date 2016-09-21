@@ -49,8 +49,10 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
                                      const Evoral::Parameter&                  parameter,
                                      const ParameterDescriptor&                desc,
                                      boost::shared_ptr<ARDOUR::AutomationList> list,
-                                     const string&                             name)
-	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name)
+                                     const string&                             name,
+                                     Controllable::Flag                        flags)
+
+	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name, flags)
 	, Evoral::Control(parameter, desc, list)
 	, _session(session)
 	, _desc(desc)
@@ -123,7 +125,7 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	Control::set_double (value, _session.transport_frame(), to_list);
 
 	//AutomationType at = (AutomationType) _parameter.type();
-	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value 
+	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
 	//<< " (was " << old_value << ") @ " << this << std::endl;
 
 	Changed (true, gcd);

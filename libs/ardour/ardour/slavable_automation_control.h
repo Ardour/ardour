@@ -29,10 +29,12 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 {
     public:
 	SlavableAutomationControl(ARDOUR::Session&,
-	                  const Evoral::Parameter&                  parameter,
-	                  const ParameterDescriptor&                desc,
-	                  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
-	                  const std::string&                        name="");
+	                          const Evoral::Parameter&                  parameter,
+	                          const ParameterDescriptor&                desc,
+	                          boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+	                          const std::string&                        name="",
+	                          PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
+		);
 
 	double get_value () const;
 
