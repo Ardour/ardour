@@ -24,7 +24,7 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/localtime_r.h"
 
@@ -209,7 +209,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 	if (include_revision) {
 		path += filename_empty ? "" : "_";
 		path += "r";
-		path += to_string (revision, std::dec);
+		path += to_string (revision);
 		filename_empty = false;
 	}
 
@@ -228,7 +228,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 	if (include_channel) {
 		path += filename_empty ? "" : "_";
 		path += "channel";
-		path += to_string (channel, std::dec);
+		path += to_string (channel);
 		filename_empty = false;
 	}
 
