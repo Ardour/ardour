@@ -17,7 +17,7 @@
 
 */
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/mute_control.h"
 #include "ardour/profile.h"
@@ -155,7 +155,7 @@ VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
 	mute_button.set_controllable (_vca->mute_control());
 
 	/* VCA number never changes */
-	number_label.set_text (to_string (_vca->number(), std::dec));
+	number_label.set_text (PBD::to_string (_vca->number()));
 
 	set_height (preset_height (HeightNormal));
 
