@@ -39,188 +39,253 @@ using namespace ArdourCanvas;
 #include "pbd/i18n.h"
 #include "menu.h"
 
-Push2Menu::Push2Menu (Item* parent)
+Push2Menu::Push2Menu (Item* parent, vector<string> s)
 	: Container (parent)
 	, baseline (-1)
+	, ncols (0)
+	, nrows (0)
+	, wrap (true)
+	, first (0)
+	, last (0)
+	, _active (UINT32_MAX)
 {
-	Pango::FontDescription fd2 ("Sans 10");
+	Pango::FontDescription fd ("Sans 10");
 
 	if (baseline < 0) {
 		Push2Canvas* p2c = dynamic_cast<Push2Canvas*> (canvas());
 		Glib::RefPtr<Pango::Layout> throwaway = Pango::Layout::create (p2c->image_context());
-		throwaway->set_font_description (fd2);
+		throwaway->set_font_description (fd);
 		throwaway->set_text (X_("Hg")); /* ascender + descender) */
 		int h, w;
 		throwaway->get_pixel_size (w, h);
 		baseline = h;
-		// nrows = Push2::rows / baseline;
 	}
 
+	active_bg = new Rectangle (this);
 
-	for (int n = 0; n < 8; ++n) {
+	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
 		Text* t = new Text (this);
-		t->set_font_description (fd2);
-		t->set_color (rgba_to_color (0.23, 0.0, 0.349, 1.0));
-
-		const double x = 10.0 + (n * Push2Canvas::inter_button_spacing());
-		const double y = 2.0;
-		t->set_position (Duple (x, y));
-
-		Rectangle* r = new Rectangle (this);
-		r->set (Rect (x, y, x + Push2Canvas::inter_button_spacing(), y + baseline));
-
-		columns[n].lines = t;
-		columns[n].active_bg = r;
-		columns[n].top = -1;
-		columns[n].active = -1;
+		t->set_font_description (fd);
+		t->set (*si);
+		displays.push_back (t);
 	}
+
 }
 
 void
-Push2Menu::fill_column (int col, vector<string> v)
+Push2Menu::set_layout (int c, int r)
 {
-	if (col < 0 || col > 7) {
-		return;
-	}
+	ncols = c;
+	nrows = r;
 
-	columns[col].text = v;
-
-	if (v.empty()) {
-		columns[col].active = -1;
-	} else {
-		columns[col].active = 0;
-	}
-
-	set_text (col, 0);
+	set_active (_active);
+	rearrange (_active);
 }
 
 void
-Push2Menu::set_text (int col, int top_row)
+Push2Menu::rearrange (uint32_t initial_display)
 {
-	if (top_row > (int) columns[col].text.size() - nrows || top_row < 0) {
+	if (initial_display >= displays.size()) {
 		return;
 	}
 
-	if (top_row == columns[col].top) {
-		return;
+	vector<Text*>::iterator i = displays.begin();
+
+	/* move to first */
+
+	for (uint32_t n = 0; n < initial_display; ++n) {
+		(*i)->hide ();
+		++i;
 	}
 
+	uint32_t index = initial_display;
+	uint32_t col = 0;
+	uint32_t row = 0;
+	bool active_shown = false;
 
-	vector<string>::iterator s = columns[col].text.begin();
-	s += top_row;
+	while (i != displays.end()) {
 
-	string rows;
+		Coord x = col * Push2Canvas::inter_button_spacing();
+		Coord y = 2 + (row * baseline);
 
-	while (true) {
-		rows += *s;
-		++s;
-		if (s != columns[col].text.end()) {
-			rows += '\n';
-		} else {
-			break;
+		(*i)->set_position (Duple (x, y));
+
+		if (index == _active) {
+			active_bg->set (Rect (x - 1, y - 1,
+			                      x - 1 + Push2Canvas::inter_button_spacing(), y - 1 + baseline));
+			active_bg->show ();
+			active_shown = true;
 		}
-	}
 
-	columns[col].lines->set (rows);
-	columns[col].top = top_row;
+		(*i)->show ();
+		last = index;
+		++i;
+		++index;
 
-	redraw ();
-}
-
-void
-Push2Menu::scroll (int col, int dir)
-{
-	if (dir > 0) {
-		set_text (col, columns[col].top + 1);
-	} else {
-		set_text (col, columns[col].top - 1);
-	}
-
-	redraw ();
-}
-
-void
-Push2Menu::set_active (int col, int index)
-{
-	if (col < 0 || col > 7) {
-		columns[col].active_bg->hide ();
-		return;
-	}
-
-	if (index < 0 || index > (int) columns[col].text.size()) {
-		columns[col].active_bg->hide ();
-		return;
-	}
-
-	columns[col].active = index;
-	int effective_row = columns[col].active - columns[col].top;
-
-	/* Move active bg */
-
-	Duple p (columns[col].active_bg->position());
-
-	columns[col].active_bg->set (Rect (p.x, p.y + (effective_row * baseline),
-	                                   p.x + Push2Canvas::inter_button_spacing(), p.y + baseline));
-	columns[col].active_bg->show ();
-
-	if (columns[col].active < nrows/2) {
-		set_text (col, 0);
-	} else {
-		set_text (col, columns[col].active - (nrows/2) + 1);
-	}
-
-	ActiveChanged (); /* emit signal */
-
-	redraw ();
-}
-
-void
-Push2Menu::step_active (int col, int dir)
-{
-	if (col < 0 || col > 7) {
-		return;
-	}
-
-	if (columns[col].text.empty()) {
-		return;
-	}
-
-
-	if (dir < 0) {
-		if (columns[col].active == -1) {
-			set_active (col, -1);
-		} else {
-			columns[col].active = columns[col].active - 1;
-			if (columns[col].active < 0) {
-				set_active (col, columns[col].text.size() - 1);
+		if (++row >= nrows) {
+			row = 0;
+			if (++col >= ncols) {
+				/* no more to display */
+				break;
 			}
 		}
-	} else {
-		if (columns[col].active == -1) {
-			set_active (col, 0);
-		} else {
-			columns[col].active = columns[col].active + 1;
-			if (columns[col].active >= (int) columns[col].text.size()) {
-				set_active (col, 0);
-			}
-		}
+
 	}
 
-	redraw ();
+	while (i != displays.end()) {
+		(*i)->hide ();
+		++i;
+	}
+
+	if (!active_shown) {
+		active_bg->hide ();
+	}
+
+	first = initial_display;
+
+	Rearranged (); /* EMIT SIGNAL */
 }
 
-int
-Push2Menu::get_active (int col)
+void
+Push2Menu::scroll (Direction dir, bool page)
 {
-	if (col < 0 || col > 7) {
-		return -1;
-	}
+	switch (dir) {
+	case DirectionUp:
+		if (_active == 0) {
+			if (wrap) {
+				set_active (displays.size() - 1);
+			}
+		} else {
+			set_active (_active - 1);
+		}
+		break;
 
-	return columns[col].active;
+	case DirectionDown:
+		if (_active == displays.size() - 1) {
+			if (wrap) {
+				set_active (0);
+			}
+		} else {
+			set_active (_active + 1);
+		}
+		break;
+
+	case DirectionLeft:
+		if (page) {
+			set_active (max (0, (int) (first - (nrows * ncols))));
+		} else {
+			if (_active / nrows == 0) {
+				/* in the first column, go to last column, same row */
+				if (wrap) {
+					set_active (displays.size() - 1 - active_row ());
+				}
+			} else {
+				/* move to same row, previous column */
+				set_active (_active - nrows);
+			}
+		}
+		break;
+
+	case DirectionRight:
+		if (page) {
+			set_active (min ((uint32_t) displays.size(), first + (nrows * ncols)));
+		} else {
+			if (_active / nrows == ncols) {
+				/* in the last column, go to same row in first column */
+				if (wrap) {
+				set_active (active_row());
+				}
+			} else {
+				/* move to same row, next column */
+				set_active (_active + nrows);
+			}
+		}
+		break;
+	}
 }
 
 void
 Push2Menu::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	render_children (area, context);
+}
+
+void
+Push2Menu::set_active (uint32_t index)
+{
+	if (index == _active) {
+		return;
+	}
+
+	if (index >= displays.size()) {
+		active_bg->hide ();
+		return;
+	}
+
+	/* set text color for old active item, and the new one */
+
+	if (_active <= displays.size()) {
+		displays[_active]->set_color (text_color);
+	}
+
+	displays[index]->set_color (contrast_color);
+
+	Duple p = displays[index]->position ();
+
+	active_bg->set (Rect (p.x - 1, p.y - 1, p.x - 1 + Push2Canvas::inter_button_spacing(), p.y - 1 + baseline ));
+	active_bg->show ();
+	_active = index;
+
+	if (_active < first) {
+
+		/* we jumped before current visible range : try to put its column first
+		 */
+
+		rearrange (active_top());
+
+	} else if (_active > last) {
+
+		/* we jumped after current visible range : try putting its
+		 * column last
+		 */
+
+		rearrange (active_top() - ((ncols - 1) * nrows));
+	}
+
+	ActiveChanged (); /* EMIT SIGNAL */
+}
+
+void
+Push2Menu::set_text_color (Color c)
+{
+	text_color = c;
+
+	for (vector<Text*>::iterator t = displays.begin(); t != displays.end(); ++t) {
+		(*t)->set_color (c);
+	}
+
+}
+
+void
+Push2Menu::set_active_color (Color c)
+{
+	active_color = c;
+	contrast_color = contrasting_text_color (active_color);
+	if (active_bg) {
+		active_bg->set_fill_color (c);
+	}
+
+	if (_active < displays.size()) {
+		displays[_active]->set_color (contrast_color);
+	}
+}
+
+void
+Push2Menu::set_font_description (Pango::FontDescription fd)
+{
+	font_description = fd;
+
+	for (vector<Text*>::iterator t = displays.begin(); t != displays.end(); ++t) {
+		(*t)->set_font_description (fd);
+	}
 }

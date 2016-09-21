@@ -19,12 +19,14 @@
 #ifndef __ardour_push2_menu_h__
 #define __ardour_push2_menu_h__
 
+#include <vector>
+
 namespace Cairo {
 	class Context;
 	class Region;
 }
 
-#include <pangomm/layout.h>
+#include <pangomm/fontdescription.h>
 
 #include "pbd/signals.h"
 
@@ -40,34 +42,57 @@ namespace ArdourSurface {
 class Push2Menu : public ArdourCanvas::Container
 {
    public:
-	Push2Menu (ArdourCanvas::Item* parent);
+	Push2Menu (ArdourCanvas::Item* parent, std::vector<std::string>);
 
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 
-	void fill_column (int col, std::vector<std::string>);
-	void set_active (int col, int index);
-	void step_active (int col, int dir);
-	int get_active (int col);
+	void set_wrap (bool);
+	void set_active (uint32_t index);
+
+	uint32_t active () const { return _active; }
+	uint32_t items() const { return displays.size(); }
+
+	uint32_t rows() const { return nrows; }
+	uint32_t cols() const { return ncols; }
+
+	void set_layout (int cols, int rows);
+	void set_font_description (Pango::FontDescription);
+	void set_text_color (ArdourCanvas::Color);
+	void set_active_color (ArdourCanvas::Color);
+
+	bool can_scroll_left() const { return first >= nrows; }
+	bool can_scroll_right() const { return last < displays.size() - 1; }
+
+	enum Direction { DirectionUp, DirectionDown, DirectionLeft, DirectionRight };
+	void scroll (Direction, bool page = false);
 
 	PBD::Signal0<void> ActiveChanged;
-	PBD::Signal0<void> Selected;
+	PBD::Signal0<void> Rearranged;
 
    private:
-	struct Column {
-		std::vector<std::string> text;
-		ArdourCanvas::Rectangle* active_bg;
-		ArdourCanvas::Text* lines;
-		int top;
-		int active;
-	};
+	std::vector<ArdourCanvas::Text*> displays;
+	ArdourCanvas::Rectangle* active_bg;
 
-	Column  columns[8];
+	void rearrange (uint32_t initial_display);
 
-	void scroll (int col, int dir);
-	void set_text (int col, int top);
+	double   baseline;
+	int      row_start;
+	int      col_start;
+	uint32_t ncols;
+	uint32_t nrows;
+	bool     wrap;
+	uint32_t first;
+	uint32_t last;
+	uint32_t _active;
 
-	int nrows;
-	mutable double baseline;
+	ArdourCanvas::Color text_color;
+	ArdourCanvas::Color active_color;
+	ArdourCanvas::Color contrast_color;
+	Pango::FontDescription font_description;
+
+	inline int active_row () const { return _active % nrows; }
+	inline int active_col () const { return (_active / nrows); }
+	inline int active_top () const { return active_col() * nrows; }
 };
 
 } // namespace
