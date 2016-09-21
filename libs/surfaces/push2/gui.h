@@ -48,8 +48,6 @@ public:
 	P2GUI (Push2&);
 	~P2GUI ();
 
-	void build_pad_table ();
-
 private:
 	Push2& p2;
 	PBD::ScopedConnectionList p2_connections;
@@ -95,54 +93,6 @@ private:
 	void build_available_action_menu ();
 	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
 
-	/* Pads */
-
-	Gtk::Table pad_table;
-
-	/* root notes */
-
-	Gtk::Adjustment root_note_octave_adjustment;
-	Gtk::SpinButton root_note_octave;
-	Gtk::Label root_note_octave_label;
-
-	void root_note_octave_adjustment_changed ();
-
-	struct NoteColumns : public Gtk::TreeModel::ColumnRecord {
-		NoteColumns () {
-			add (number);
-			add (name);
-		}
-		Gtk::TreeModelColumn<int>         number;
-		Gtk::TreeModelColumn<std::string> name;
-	};
-	NoteColumns note_columns;
-	Glib::RefPtr<Gtk::ListStore> build_note_columns ();
-	Gtk::ComboBox root_note_selector;
-	Gtk::Label root_note_label;
-
-	void root_note_changed ();
-
-	/* modes/scales */
-
-	struct ModeColumns : public Gtk::TreeModel::ColumnRecord {
-		ModeColumns () {
-			add (mode);
-			add (name);
-		}
-		Gtk::TreeModelColumn<MusicalMode::Type>  mode;
-		Gtk::TreeModelColumn<std::string> name;
-	};
-	ModeColumns mode_columns;
-	Glib::RefPtr<Gtk::ListStore> build_mode_columns ();
-	Gtk::ComboBox mode_selector;
-	Gtk::Label mode_label;
-
-	Gtk::CheckButton inkey_button;
-
-	Gtk::Notebook pad_notebook;
-	Gtk::Table    mode_packer;
-	Gtk::VBox     custom_packer;
-
 	struct PressureModeColumns : public Gtk::TreeModel::ColumnRecord {
 		PressureModeColumns() {
 			add (mode);
@@ -156,7 +106,6 @@ private:
 	Gtk::ComboBox pressure_mode_selector;
 	Gtk::Label pressure_mode_label;
 
-	void reprogram_pad_scale ();
 	void reprogram_pressure_mode ();
 };
 
