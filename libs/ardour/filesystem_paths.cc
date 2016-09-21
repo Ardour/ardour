@@ -20,8 +20,8 @@
 #include <iostream>
 
 #include "pbd/compose.h"
-#include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/string_convert.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -46,7 +46,7 @@ static std::string
 user_config_directory_name (int version = -1)
 {
 	if (version < 0) {
-		version = atoi (X_(PROGRAM_VERSION));
+		version = string_to<int32_t>(X_(PROGRAM_VERSION));
 	}
 
 	/* ARDOUR::Profile may not be available when this is
@@ -313,7 +313,7 @@ been_here_before_path (int version)
 		version = atoi (PROGRAM_VERSION);
 	}
 
-	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version, std::dec));
+	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version));
 }
 
 
