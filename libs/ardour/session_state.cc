@@ -5002,10 +5002,6 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 	/* prepare archive */
 	string archive = Glib::build_filename (dest, name + ".tar.xz");
 
-#ifndef NDEBUG
-	cout << "ARCHIVE: " << archive << "\n";
-#endif
-
 	PBD::ScopedConnectionList progress_connection;
 	PBD::FileArchive ar (archive);
 	if (progress) {
@@ -5032,8 +5028,27 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
 
+	// TODO: build Source list once
+	// add option to only include *used* sources (see Session::cleanup_sources)
+
 	if (compress_audio != NO_ENCODE) {
 		Glib::Threads::Mutex::Lock lm (source_lock);
+		size_t total_size = 0;
+		if (progress) {
+			for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+				if (!afs) {
+					continue;
+				}
+				if (afs->readable_length () == 0) {
+					continue;
+				}
+				total_size += afs->readable_length ();
+			}
+			progress->set_progress (2); // set to "encoding"
+			progress->set_progress (0);
+		}
+
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
 			if (!afs) {
@@ -5049,16 +5064,25 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
 			g_mkdir_with_parents (Glib::path_get_dirname (new_path).c_str (), 0755);
 
-			// TODO: set progress to "encoding", use total readable_length () somehow.
-			// .. or a custom progress report like save-as.
+			if (progress) {
+				progress->descend ((float)afs->readable_length () / total_size);
+			}
 			try {
-				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, NULL /*progress*/);
+				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
 				afs->replace_file (new_path);
 				delete ns;
 			} catch (...) {
 				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
 			}
+			if (progress) {
+				progress->ascend ();
+			}
 		}
+	}
+
+	if (progress) {
+		progress->set_progress (-1); // set to "archiving"
+		progress->set_progress (0);
 	}
 
 	/* index files relevant for this session */
@@ -5195,13 +5219,6 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 	for (std::map<boost::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
 		i->first->replace_file (i->second);
 	}
-
-#ifndef NDEBUG
-	/* done  -- now zip */
-	for (std::map<string,string>::const_iterator i = filemap.begin(); i != filemap.end (); ++i) {
-		cout << "archive " << (*i).first << " as " << (*i).second << "\n";
-	}
-#endif
 
 	int rv = ar.create (filemap);
 	remove_directory (to_dir);
