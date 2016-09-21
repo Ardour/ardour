@@ -566,8 +566,7 @@ save (LV2_Handle                instance,
 	char* apath = map_path->abstract_path (map_path->handle, self->current_sf2_file_path);
 	store (handle, self->afs_sf2file,
 			apath, strlen (apath) + 1,
-			self->atom_Path,
-			LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
+			self->atom_Path, LV2_STATE_IS_POD);
 
 	return LV2_STATE_SUCCESS;
 }
