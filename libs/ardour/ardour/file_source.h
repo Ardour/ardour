@@ -79,6 +79,7 @@ public:
 	const std::string& origin() const { return _origin; }
 
 	virtual void set_path (const std::string&);
+	void replace_file (const std::string&);
 
 	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 

@@ -556,6 +556,15 @@ FileSource::set_path (const std::string& newpath)
 	}
 }
 
+
+void
+FileSource::replace_file (const std::string& newpath)
+{
+	close ();
+	_path = newpath;
+	_name = Glib::path_get_basename (newpath);
+}
+
 void
 FileSource::inc_use_count ()
 {
