@@ -17,9 +17,9 @@
 
 */
 
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/boost_debug.h"
 #include "ardour/session.h"
@@ -78,7 +78,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			string name = name_template;
 
 			if (name.find ("%n")) {
-				string sn = PBD::to_string (num, std::dec);
+				string sn = PBD::to_string (num);
 				replace_all (name, "%n", sn);
 			}
 
