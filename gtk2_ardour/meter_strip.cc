@@ -804,7 +804,7 @@ MeterStrip::name_changed () {
 			number_label.set_text("-");
 			number_label.hide();
 		} else {
-			number_label.set_text (PBD::to_string (track_number, std::dec));
+			number_label.set_text (PBD::to_string (track_number));
 			number_label.show();
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
