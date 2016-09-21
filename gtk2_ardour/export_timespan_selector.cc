@@ -27,7 +27,7 @@
 #include "ardour/export_timespan.h"
 
 #include "pbd/enumwriter.h"
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include <sstream>
 #include <iomanip>
@@ -241,8 +241,8 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 		break;
 
 	  case AudioClock::Frames:
-		start = to_string (start_frame, std::dec);
-		end = to_string (end_frame, std::dec);
+		start = to_string (start_frame);
+		end = to_string (end_frame);
 		break;
 	}
 
