@@ -708,3 +708,15 @@ MixLayout::stripables_added ()
 	/* reload current bank */
 	switch_bank (bank_start);
 }
+
+void
+MixLayout::button_down ()
+{
+	p2.scroll_dn_1_track ();
+}
+
+void
+MixLayout::button_up ()
+{
+	p2.scroll_up_1_track ();
+}

@@ -127,6 +127,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _modifier_state (None)
 	, splash_start (0)
 	, _current_layout (0)
+	, _previous_layout (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
 	, _mode (MusicalMode::IonianMajor)
@@ -338,6 +339,22 @@ Push2::close ()
 }
 
 void
+Push2::strip_buttons_off ()
+{
+	ButtonID strip_buttons[] = { Upper1, Upper2, Upper3, Upper4, Upper5, Upper6, Upper7, Upper8,
+	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8, };
+
+	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
+		Button* b = id_button_map[strip_buttons[n]];
+
+		b->set_color (LED::Black);
+		b->set_state (LED::OneShot24th);
+		write (b->state_msg());
+	}
+}
+
+
+void
 Push2::init_buttons (bool startup)
 {
 	/* This is a list of buttons that we want lit because they do something
@@ -365,16 +382,7 @@ Push2::init_buttons (bool startup)
 	 * color to reflect various conditions
 	 */
 
-	ButtonID strip_buttons[] = { Upper1, Upper2, Upper3, Upper4, Upper5, Upper6, Upper7, Upper8,
-	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8, };
-
-	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
-		Button* b = id_button_map[strip_buttons[n]];
-
-		b->set_color (LED::Black);
-		b->set_state (LED::OneShot24th);
-		write (b->state_msg());
-	}
+	strip_buttons_off ();
 
 	if (startup) {
 
@@ -434,7 +442,6 @@ Push2::request_factory (uint32_t num_requests)
 void
 Push2::do_request (Push2Request * req)
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("doing request type %1\n", req->type));
 	if (req->type == CallSlot) {
 
 		call_slot (MISSING_INVALIDATOR, req->the_slot);
@@ -466,9 +473,9 @@ Push2::vblank ()
 {
 	if (splash_start) {
 
-		/* display splash for 3 seconds */
+		/* display splash for 2 seconds */
 
-		if (get_microseconds() - splash_start > 3000000) {
+		if (get_microseconds() - splash_start > 2000000) {
 			splash_start = 0;
 			DEBUG_TRACE (DEBUG::Push2, "splash interval ended, switch to mix layout\n");
 			set_current_layout (mix_layout);
@@ -1370,14 +1377,14 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 		}
 	}
 
-	PadChange (); /* EMIT SIGNAL */
-
 	/* store state */
 
 	_scale_root = original_root;
 	_root_octave = octave;
 	_in_key = inkey;
 	_mode = mode;
+
+	ScaleChange (); /* EMIT SIGNAL */
 }
 
 void
@@ -1417,8 +1424,6 @@ Push2::set_percussive_mode (bool yn)
 	}
 
 	percussion = true;
-
-	PadChange (); /* EMIT SIGNAL */
 }
 
 Push2Layout*
@@ -1588,16 +1593,31 @@ Push2::set_current_layout (Push2Layout* layout)
 	if (_current_layout) {
 		_current_layout->hide ();
 		_canvas->root()->remove (_current_layout);
+		_previous_layout = _current_layout;
 	}
+
+	/* turn off all strip buttons - let new layout set them if it
+	 * wants/needs to
+	 */
+
+	strip_buttons_off ();
 
 	_current_layout = layout;
 
 	if (_current_layout) {
-		_current_layout->show ();
 		_canvas->root()->add (_current_layout);
+		_current_layout->show ();
 	}
 
 	_canvas->request_redraw ();
+}
+
+void
+Push2::use_previous_layout ()
+{
+	if (_previous_layout) {
+		set_current_layout (_previous_layout);
+	}
 }
 
 void

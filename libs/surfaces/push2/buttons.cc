@@ -239,13 +239,13 @@ Push2::button_recenable ()
 void
 Push2::button_up ()
 {
-	scroll_up_1_track ();
+	_current_layout->button_up ();
 }
 
 void
 Push2::button_down ()
 {
-	scroll_dn_1_track ();
+	_current_layout->button_down ();
 }
 
 void
@@ -563,9 +563,11 @@ void
 Push2::button_scale_press ()
 {
 	if (_current_layout != scale_layout) {
-		set_current_layout (_current_layout);
+		set_current_layout (scale_layout);
 	} else {
-		set_current_layout (mix_layout);
+		if (ControlProtocol::first_selected_stripable()) {
+			set_current_layout (mix_layout);
+		}
 	}
 }
 
@@ -573,11 +575,9 @@ void
 Push2::button_mix_press ()
 {
 	if (_current_layout == track_mix_layout) {
-		cerr << "back to mix\n";
 		set_current_layout (mix_layout);
 	} else {
 		if (ControlProtocol::first_selected_stripable()) {
-			cerr << "back to trackmix\n";
 			set_current_layout (track_mix_layout);
 		}
 	}

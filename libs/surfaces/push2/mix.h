@@ -46,6 +46,8 @@ class MixLayout : public Push2Layout
 
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
+	void button_down ();
+	void button_up ();
 	void button_left ();
 	void button_right ();
 	void button_select_press ();

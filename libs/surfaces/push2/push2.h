@@ -328,6 +328,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	PBD::Signal0<void> PadChange;
 
 	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
+	PBD::Signal0<void> ScaleChange;
 
 	MusicalMode::Type mode() const { return  _mode; }
 	int scale_root() const { return _scale_root; }
@@ -335,6 +336,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool in_key() const { return _in_key; }
 
 	Push2Layout* current_layout() const;
+	void         use_previous_layout ();
+
 	Push2Canvas* canvas() const { return _canvas; }
 
 	enum ModifierState {
@@ -347,6 +350,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	Button* button_by_id (ButtonID);
 	static std::string button_name_by_id (ButtonID);
+
+	void strip_buttons_off ();
 
 	void write (const MidiByteArray&);
 
@@ -516,6 +521,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	mutable Glib::Threads::Mutex layout_lock;
 	Push2Layout* _current_layout;
+	Push2Layout* _previous_layout;
 	Push2Layout* mix_layout;
 	Push2Layout* scale_layout;
 	Push2Layout* track_mix_layout;

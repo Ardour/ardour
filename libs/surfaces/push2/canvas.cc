@@ -105,7 +105,7 @@ Push2Canvas::request_redraw (Rect const & r)
 	cr.width = r.width();
 	cr.height = r.height();
 
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("invalidate rect %1\n", r));
+	// DEBUG_TRACE (DEBUG::Push2, string_compose ("invalidate rect %1\n", r));
 
 	expose_region->do_union (cr);
 
@@ -123,7 +123,7 @@ Push2Canvas::expose ()
 
 	const int nrects = expose_region->get_num_rectangles ();
 
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("expose with %1 rects\n", nrects));
+	//DEBUG_TRACE (DEBUG::Push2, string_compose ("expose with %1 rects\n", nrects));
 
 	for (int n = 0; n < nrects; ++n) {
 		Cairo::RectangleInt r = expose_region->get_rectangle (n);
@@ -135,9 +135,13 @@ Push2Canvas::expose ()
 	Push2Layout* layout = p2.current_layout();
 
 	if (layout) {
+		/* all layouts cover (at least) the full size of the video
+		   display, so we do not need to check if the layout intersects
+		   the bounding box of the full expose region.
+		*/
 		Cairo::RectangleInt r = expose_region->get_extents();
 		Rect rr (r.x, r.y, r.x + r.width, r.y + r.height);
-		DEBUG_TRACE (DEBUG::Push2, string_compose ("render layout with %1\n", rr));
+		//DEBUG_TRACE (DEBUG::Push2, string_compose ("render layout with %1\n", rr));
 		layout->render (Rect (r.x, r.y, r.x + r.width, r.y + r.height), context);
 	}
 
