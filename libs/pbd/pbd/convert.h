@@ -23,8 +23,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iostream>
+
 #include <glibmm/ustring.h>
 
 #include "pbd/libpbd_visibility.h"
@@ -48,14 +47,6 @@ LIBPBD_API std::string length2string (const int64_t frames, const double sample_
 
 LIBPBD_API std::vector<std::string> internationalize (const char *, const char **);
 LIBPBD_API bool strings_equal_ignore_case (const std::string& a, const std::string& b);
-
-template <class T> std::string /*LIBPBD_API*/
-to_string (T t, std::ios_base & (*f)(std::ios_base&))
-{
-	std::ostringstream oss;
-	oss << f << t;
-	return oss.str();
-}
 
 LIBPBD_API const char* sgettext (const char *, const char *);
 
