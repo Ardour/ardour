@@ -232,6 +232,63 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn)
 	}
 }
 
+/** Constructor to losslessly compress existing source to flac */
+SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const string& path, bool use16bits, Progress* progress)
+	: Source(s, DataType::AUDIO, path, Flag ((other.flags () | default_writable_flags | NoPeakFile) & ~RF64_RIFF))
+	, AudioFileSource (s, path, "", Flag ((other.flags () | default_writable_flags | NoPeakFile) & ~RF64_RIFF), /*unused*/ FormatFloat, /*unused*/ WAVE64)
+	, _sndfile (0)
+	, _broadcast_info (0)
+	, _capture_start (false)
+	, _capture_end (false)
+	, file_pos (0)
+	, xfade_buf (0)
+{
+	if (other.readable_length () == 0) {
+		throw failed_constructor();
+	}
+
+	assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+
+	_channel = other.channel ();
+	init_sndfile ();
+
+	_file_is_new = true;
+
+	_info.channels = other.n_channels();
+	_info.samplerate = other.sample_rate ();
+	_info.format = SF_FORMAT_FLAC | (use16bits ? SF_FORMAT_PCM_16 : SF_FORMAT_PCM_24);
+
+	/* flac is either read or write -- never both,
+	 * so we need to special-case ::open () */
+#ifdef PLATFORM_WINDOWS
+	int fd = g_open (_path.c_str(), O_CREAT | O_RDWR, 0644);
+#else
+	int fd = ::open (_path.c_str(), O_CREAT | O_RDWR, 0644);
+#endif
+	if (fd == -1) {
+		throw failed_constructor();
+	}
+
+	_sndfile = sf_open_fd (fd, SFM_WRITE, &_info, true);
+
+	if (_sndfile == 0) {
+		throw failed_constructor();
+	}
+
+	/* copy file */
+	Sample buf[8192];
+	framecnt_t off = 0;
+	framecnt_t len = other.read (buf, off, 8192, /*channel*/0);
+	while (len > 0) {
+		write (buf, len);
+		off += len;
+		len = other.read (buf, off, 8192, /*channel*/0);
+		if (progress) {
+			progress->set_progress ((float) off / other.readable_length ());
+		}
+	}
+}
+
 void
 SndFileSource::init_sndfile ()
 {
@@ -285,7 +342,12 @@ SndFileSource::open ()
 		return -1;
 	}
 
-	_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
+	if (_info.format & SF_FORMAT_FLAC) {
+		assert (!writable());
+		_sndfile = sf_open_fd (fd, SFM_READ, &_info, true);
+	} else {
+		_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
+	}
 
 	if (_sndfile == 0) {
 		char errbuf[1024];
@@ -714,7 +776,10 @@ SndFileSource::set_header_timeline_position ()
 framecnt_t
 SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 {
-	if (_sndfile == 0 || sf_seek (_sndfile, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
+	if (_info.format & SF_FORMAT_FLAC) {
+		assert (_length == frame_pos);
+	}
+	else if (_sndfile == 0 || sf_seek (_sndfile, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3)"), _path, frame_pos, errbuf) << endmsg;
