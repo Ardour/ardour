@@ -1850,7 +1850,7 @@ MixerStrip::name_changed ()
 		if (track_number == 0) {
 			number_label.set_text ("-");
 		} else {
-			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+			number_label.set_text (PBD::to_string (abs(_route->track_number ())));
 		}
 	} else {
 		number_label.set_text ("");
