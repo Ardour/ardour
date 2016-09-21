@@ -36,7 +36,7 @@ using std::max;
 using std::min;
 
 ArdourCanvas::Color
-change_alpha (Color c, double a)
+ArdourCanvas::change_alpha (Color c, double a)
 {
 	return ((c & ~0xff) | (lrintf (a*255.0) & 0xff));
 }
