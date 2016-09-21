@@ -18,7 +18,7 @@
 
 #include <gtkmm/stock.h>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
@@ -87,7 +87,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	solo_mute_box.pack_start (mute_button, true, true);
 	solo_mute_box.pack_start (solo_button, true, true);
 
-	number_label.set_text (to_string (v->number(), std::dec));
+	number_label.set_text (PBD::to_string (v->number()));
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_no_show_all ();
 	number_label.set_name ("generic button");
