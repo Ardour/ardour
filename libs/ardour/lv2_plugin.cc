@@ -109,6 +109,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+bool LV2Plugin::force_state_save = false;
+
 class LV2World : boost::noncopyable {
 public:
 	LV2World ();
@@ -1248,7 +1250,7 @@ LV2Plugin::add_state(XMLNode* root) const
 			0,
 			NULL);
 
-		if (!_plugin_state_dir.empty()
+		if (!_plugin_state_dir.empty() || force_state_save
 		    || !_impl->state
 		    || !lilv_state_equals(state, _impl->state)) {
 			lilv_state_save(_world.world,
@@ -1259,13 +1261,19 @@ LV2Plugin::add_state(XMLNode* root) const
 			                new_dir.c_str(),
 			                "state.ttl");
 
-			if (_plugin_state_dir.empty()) {
+			if (force_state_save) {
+				// archive or save-as
+				lilv_state_free(state);
+				--_state_version;
+			}
+			else if (_plugin_state_dir.empty()) {
 				// normal session save
 				lilv_state_free(_impl->state);
 				_impl->state = state;
 			} else {
 				// template save (dedicated state-dir)
 				lilv_state_free(state);
+				--_state_version;
 			}
 		} else {
 			// State is identical, decrement version and nuke directory

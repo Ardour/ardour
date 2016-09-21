@@ -63,6 +63,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
+	static bool force_state_save;
+
 	std::string unique_id () const;
 	const char* uri () const;
 	const char* label () const;
