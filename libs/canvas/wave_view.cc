@@ -158,7 +158,7 @@ WaveView::~WaveView ()
 string
 WaveView::debug_name() const
 {
-	return _region->name() + string (":") + PBD::to_string (_channel+1, std::dec);
+	return _region->name() + string (":") + PBD::to_string (_channel+1);
 }
 
 void
