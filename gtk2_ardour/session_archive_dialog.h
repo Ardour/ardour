@@ -37,18 +37,18 @@ public:
 
 	std::string target_folder () const;
 	std::string name () const;
+	ARDOUR::Session::ArchiveEncode encode_option () const;
 
-	ARDOUR::Session::ArchiveEncode encode_option () const {
-		return ARDOUR::Session::FLAC_16BIT;
-	}
-
-	void        set_name (std::string);
-
+	void  set_name (const std::string&);
+	void  set_target_folder (const std::string&);
+	void  set_encode_option (ARDOUR::Session::ArchiveEncode);
 
 private:
 	Gtk::FileChooserButton target_folder_selector;
-	Gtk::Entry name_entry;
-	Gtk::ComboBoxText zip_ext;
+	Gtk::Entry             name_entry;
+	Gtk::ComboBoxText      format_selector;
+	Gtk::ComboBoxText      encode_selector;
+
 	Gtk::ProgressBar progress_bar;
 
 	void name_entry_changed ();

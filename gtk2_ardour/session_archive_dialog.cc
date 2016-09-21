@@ -41,15 +41,20 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	HBox* hbox;
 	Label* label;
 
-	zip_ext.append_text (".tar.xz");
-	zip_ext.set_active_text (".tar.xz");
+	format_selector.append_text (".tar.xz");
+	format_selector.set_active_text (".tar.xz");
+
+	encode_selector.append_text (_("None"));
+	encode_selector.append_text (_("FLAC 16bit"));
+	encode_selector.append_text (_("FLAC 24bit"));
+	encode_selector.set_active_text ("FLAC 16bit"); // TODO remember
 
 	hbox = manage (new HBox);
 	hbox->set_spacing (6);
 	label = manage (new Label (_("Archive Name")));
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (name_entry, true, true);
-	hbox->pack_start (zip_ext, false, false);
+	hbox->pack_start (format_selector, false, false);
 	vbox->pack_start (*hbox, false, false);
 
 	hbox = manage (new HBox);
@@ -59,8 +64,14 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	hbox->pack_start (target_folder_selector, true, true);
 	vbox->pack_start (*hbox, false, false);
 
+	hbox = manage (new HBox);
+	hbox->set_spacing (6);
+	label = manage (new Label (_("Audio Compression")));
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (encode_selector, true, true);
+	vbox->pack_start (*hbox, false, false);
+
 	vbox->pack_start (progress_bar, true, true, 12);
-	progress_bar.set_text (_("Archiving"));
 
 	vbox->show_all ();
 	progress_bar.hide ();
@@ -85,7 +96,7 @@ SessionArchiveDialog::name_entry_changed ()
 		return;
 	}
 
-	std::string dir = Glib::build_filename (target_folder(), name_entry.get_text());
+	std::string dir = Glib::build_filename (target_folder(), name_entry.get_text() + format_selector.get_active_text ());
 
 	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
 		set_response_sensitive (RESPONSE_OK, false);
@@ -101,6 +112,13 @@ SessionArchiveDialog::target_folder () const
 	return target_folder_selector.get_filename ();
 }
 
+void
+SessionArchiveDialog::set_target_folder (const std::string& name)
+{
+	target_folder_selector.set_current_folder (name);
+	name_entry_changed ();
+}
+
 string
 SessionArchiveDialog::name () const
 {
@@ -108,10 +126,39 @@ SessionArchiveDialog::name () const
 }
 
 void
-SessionArchiveDialog::set_name (std::string name)
+SessionArchiveDialog::set_name (const std::string& name)
 {
 	name_entry.set_text (name);
 	name_entry_changed ();
+}
+
+ARDOUR::Session::ArchiveEncode
+SessionArchiveDialog::encode_option () const
+{
+	string codec = encode_selector.get_active_text ();
+	if (codec == _("FLAC 16bit")) {
+		return ARDOUR::Session::FLAC_16BIT;
+	}
+	if (codec == _("FLAC 24bit")) {
+		return ARDOUR::Session::FLAC_24BIT;
+	}
+	return ARDOUR::Session::NO_ENCODE;
+}
+
+void
+SessionArchiveDialog::set_encode_option (ARDOUR::Session::ArchiveEncode e)
+{
+	switch (e) {
+		case ARDOUR::Session::FLAC_16BIT:
+			encode_selector.set_active_text (_("FLAC 16bit"));
+			break;
+		case ARDOUR::Session::FLAC_24BIT:
+			encode_selector.set_active_text (_("FLAC 24bit"));
+			break;
+		default:
+			encode_selector.set_active_text (_("None"));
+			break;
+	}
 }
 
 void
@@ -120,5 +167,13 @@ SessionArchiveDialog::update_progress_gui (float p)
 	set_response_sensitive (RESPONSE_OK, false);
 	set_response_sensitive (RESPONSE_CANCEL, false);
 	progress_bar.show ();
+	if (p < 0) {
+		progress_bar.set_text (_("Archiving Session"));
+		return;
+	}
+	if (p > 1.0) {
+		progress_bar.set_text (_("Encoding Audio"));
+		return;
+	}
 	progress_bar.set_fraction (p);
 }
