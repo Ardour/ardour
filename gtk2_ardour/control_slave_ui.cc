@@ -20,7 +20,7 @@
 
 #include <gtkmm/menu.h>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/session.h"
 #include "ardour/stripable.h"
@@ -234,7 +234,7 @@ ControlSlaveUI::add_vca_button (boost::shared_ptr<VCA> vca)
 	vca_button->set_name (X_("vca assign"));
 	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::specific_vca_button_release), vca->number()), false);
-	vca_button->set_text (PBD::to_string (vca->number(), std::dec));
+	vca_button->set_text (PBD::to_string (vca->number()));
 	vca_button->set_fixed_colors (vca->presentation_info().color(), vca->presentation_info().color ());
 
 	vca->presentation_info().PropertyChanged.connect (master_connections, invalidator (*this), boost::bind (&ControlSlaveUI::master_property_changed, this, _1), gui_context());
