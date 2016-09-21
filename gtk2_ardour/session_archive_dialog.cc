@@ -69,7 +69,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	add_button (Stock::OK, RESPONSE_OK);
 
 	target_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
-	target_folder_selector.set_current_folder (Config->get_default_session_parent_dir ());
+	target_folder_selector.set_current_folder (Config->get_default_session_parent_dir ()); // TODO get/set default_archive_dir
 	name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionArchiveDialog::name_entry_changed));
 	target_folder_selector.signal_current_folder_changed().connect (sigc::mem_fun (*this, &SessionArchiveDialog::name_entry_changed));
 	target_folder_selector.signal_selection_changed().connect (sigc::mem_fun (*this, &SessionArchiveDialog::name_entry_changed));
@@ -117,6 +117,8 @@ SessionArchiveDialog::set_name (std::string name)
 void
 SessionArchiveDialog::update_progress_gui (float p)
 {
+	set_response_sensitive (RESPONSE_OK, false);
+	set_response_sensitive (RESPONSE_CANCEL, false);
 	progress_bar.show ();
 	progress_bar.set_fraction (p);
 }

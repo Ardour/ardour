@@ -37,6 +37,11 @@ public:
 
 	std::string target_folder () const;
 	std::string name () const;
+
+	ARDOUR::Session::ArchiveEncode encode_option () const {
+		return ARDOUR::Session::FLAC_16BIT;
+	}
+
 	void        set_name (std::string);
 
 
