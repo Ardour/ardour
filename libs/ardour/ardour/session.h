@@ -518,7 +518,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 */
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
 
-	int archive_session (const std::string&, const std::string&, Progress* p = 0);
+	enum ArchiveEncode {
+		NO_ENCODE,
+		FLAC_16BIT,
+		FLAC_24BIT
+	};
+
+	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, Progress* p = 0);
 
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name, bool replace_existing = false);

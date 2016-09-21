@@ -92,6 +92,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
@@ -4937,7 +4938,7 @@ static void set_progress (Progress* p, size_t n, size_t t)
 }
 
 int
-Session::archive_session (const std::string& dest, const std::string& name, Progress* progress)
+Session::archive_session (const std::string& dest, const std::string& name, ArchiveEncode compress_audio, Progress* progress)
 {
 	if (dest.empty () || name.empty ()) {
 		return -1;
@@ -5027,9 +5028,38 @@ Session::archive_session (const std::string& dest, const std::string& name, Prog
 	blacklist_dirs.push_back (string (dead_dir_name) + G_DIR_SEPARATOR);
 	blacklist_dirs.push_back (string (export_dir_name) + G_DIR_SEPARATOR);
 	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
 
-	// TODO: *force* state-save even if not changed, retain state-dir
-	//blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
+	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
+
+	if (compress_audio != NO_ENCODE) {
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+			if (!afs) {
+				continue;
+			}
+			if (afs->readable_length () == 0) {
+				continue;
+			}
+
+			orig_sources[afs] = afs->path();
+
+			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
+			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
+			g_mkdir_with_parents (Glib::path_get_dirname (new_path).c_str (), 0755);
+
+			// TODO: set progress to "encoding", use total readable_length () somehow.
+			// .. or a custom progress report like save-as.
+			try {
+				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, NULL /*progress*/);
+				afs->replace_file (new_path);
+				delete ns;
+			} catch (...) {
+				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
+			}
+		}
+	}
 
 	/* index files relevant for this session */
 	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
@@ -5058,8 +5088,9 @@ Session::archive_session (const std::string& dest, const std::string& name, Prog
 #endif
 
 			if (from.find (audiofile_dir_string) != string::npos) {
-				// TODO optionally .flac encode
-				filemap[from] = make_new_media_path (from, name, name);
+				if (!compress_audio != NO_ENCODE) {
+					filemap[from] = make_new_media_path (from, name, name);
+				}
 			} else if (from.find (midifile_dir_string) != string::npos) {
 				filemap[from] = make_new_media_path (from, name, name);
 			} else if (from.find (videofile_dir_string) != string::npos) {
@@ -5112,8 +5143,8 @@ Session::archive_session (const std::string& dest, const std::string& name, Prog
 	_path = to_dir;
 	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
 
-	// this messes up LV2 plugin state.. state-dir XXX
-	save_state (name, false, false, false);
+	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, true);
+	save_state (name);
 	save_default_options ();
 
 	size_t prefix_len = _path.size();
@@ -5160,6 +5191,10 @@ Session::archive_session (const std::string& dest, const std::string& name, Prog
 	}
 	config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
 	config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
+
+	for (std::map<boost::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
+		i->first->replace_file (i->second);
+	}
 
 #ifndef NDEBUG
 	/* done  -- now zip */
