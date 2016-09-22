@@ -135,6 +135,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, octave_shift (0)
 	, percussion (false)
 	, _pressure_mode (AfterTouch)
+	, selection_color (LED::Green)
 {
 
 	build_maps ();
@@ -1315,8 +1316,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 					pad->filtered = notenum;
 
 					if ((notenum % 12) == original_root) {
-						pad->set_color (LED::Green);
-						pad->perma_color = LED::Green;
+						pad->set_color (selection_color);
+						pad->perma_color = selection_color;
 					} else {
 						pad->set_color (LED::White);
 						pad->perma_color = LED::White;
@@ -1353,8 +1354,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 			if (mode_map.find (note) != mode_map.end()) {
 
 				if ((note % 12) == original_root) {
-					pad->set_color (LED::Green);
-					pad->perma_color = LED::Green;
+					pad->set_color (selection_color);
+					pad->perma_color = selection_color;
 				} else {
 					pad->set_color (LED::White);
 					pad->perma_color = LED::White;
@@ -1472,9 +1473,13 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	if (new_pad_target && pad_port) {
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 		current_pad_target = new_pad_target;
+		selection_color = get_color_index (new_pad_target->presentation_info().color());
 	} else {
 		current_pad_target.reset ();
+		selection_color = LED::Green;
 	}
+
+	reset_pad_colors ();
 }
 
 Push2::Button*
