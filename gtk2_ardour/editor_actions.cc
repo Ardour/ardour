@@ -748,6 +748,11 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
+
+
+	/* MIDI stuff */
+	reg_sens (editor_actions, "quantize", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+
 }
 
 void
@@ -1825,7 +1830,7 @@ Editor::register_region_actions ()
 		);
 
 	/* Duplicate selected regions */
-	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), false));
+	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_regions), 1));
 
 	/* Open the dialogue to duplicate selected regions multiple times */
 	reg_sens (
