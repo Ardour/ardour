@@ -6190,8 +6190,8 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
-	const double qaf = map.quarter_note_at_frame (pf);
-	double eqaf;
+	double eqaf = map.exact_qn_at_frame (pf, divisions);
+
 	if (divisions != 0) {
 		bool success = false;
 		Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
@@ -6199,17 +6199,16 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			grid_beats = Evoral::Beats(1);
 		}
 
-		eqaf = map.exact_qn_at_frame (pf, divisions);
+		const double qaf = map.quarter_note_at_frame (pf);
 
 		/* Hack so that we always snap to the note that we are over, instead of snapping
 		   to the next one if we're more than halfway through the one we're over.
 		*/
-		const double rem = fmod (qaf, grid_beats.to_double());
-		if (rem >= grid_beats.to_double() / 2.0) {
+
+		const double rem = eqaf - qaf;
+		if (rem >= 0.0 && eqaf - grid_beats.to_double() > _region_view->region()->pulse() * 4.0) {
 			eqaf -= grid_beats.to_double();
 		}
-	} else {
-		eqaf = qaf;
 	}
 
 	_note[0] = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
@@ -6257,7 +6256,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	const double qn_length = map.quarter_note_at_frame (start_sess_rel + length) - map.quarter_note_at_frame (start_sess_rel);
 
 	Evoral::Beats qn_length_beats = max (one_tick, Evoral::Beats (qn_length));
-	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state);
+	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state, false);
 }
 
 double

@@ -551,7 +551,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					group->canvas_to_item (event_x, event_y);
 
 					Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x) + _region->position());
-					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state);
+					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state, true);
 				} else {
 					clear_editor_note_selection ();
 				}
@@ -561,7 +561,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseDraw:
 			{
 				Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x) + _region->position());
-				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state);
+				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state, true);
 				break;
 			}
 		default:
@@ -916,7 +916,7 @@ MidiRegionView::show_list_editor ()
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state)
+MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state, bool shift_snap)
 {
 	if (length < 2 * DBL_EPSILON) {
 		return;
@@ -932,7 +932,7 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, ui
 
 	// Start of note in frames relative to region start
 	const int32_t divisions = trackview.editor().get_grid_music_divisions (state);
-	Evoral::Beats beat_time = snap_frame_to_grid_underneath (t, divisions);
+	Evoral::Beats beat_time = snap_frame_to_grid_underneath (t, divisions, shift_snap);
 
 	const double  note     = view->y_to_note(y);
 	const uint8_t chan     = mtv->get_channel_for_add();
@@ -3743,7 +3743,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	framepos_t const unsnapped_frame = editor.pixel_to_sample (x);
 
 	const int32_t divisions = editor.get_grid_music_divisions (state);
-	const double snapped_region_qn = snap_frame_to_grid_underneath (unsnapped_frame, divisions).to_double();
+	const double snapped_region_qn = snap_frame_to_grid_underneath (unsnapped_frame, divisions, true).to_double();
 
 	Evoral::Beats snapped_beats = Evoral::Beats (snapped_region_qn);
 	/* calculate time in beats relative to start of source */
@@ -4116,12 +4116,12 @@ MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
  *  @return beat duration of p snapped to the grid subdivision underneath it.
  */
 Evoral::Beats
-MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, int32_t divisions) const
+MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, bool shift_snap) const
 {
 	TempoMap& map (trackview.session()->tempo_map());
 	double eqaf = map.exact_qn_at_frame (p + _region->position(), divisions);
 
-	if (divisions != 0) {
+	if (divisions != 0 && shift_snap) {
 		const double qaf = map.quarter_note_at_frame (p + _region->position());
 		/* Hack so that we always snap to the note that we are over, instead of snapping
 		   to the next one if we're more than halfway through the one we're over.

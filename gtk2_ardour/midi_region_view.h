@@ -325,8 +325,9 @@ public:
 	 * \param y vertical position in pixels
 	 * \param length duration of the note in beats
 	 * \param state the keyboard modifier mask for the canvas event (click).
+	 * \param shift_snap true alters snap behavior to round down always (false if the gui has already done that).
 	 */
-	void create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state);
+	void create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state, bool shift_snap);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.
@@ -508,7 +509,7 @@ private:
 
 	bool _mouse_changed_selection;
 
-	Evoral::Beats snap_frame_to_grid_underneath (framepos_t p, int32_t divisions) const;
+	Evoral::Beats snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, bool shift_snap) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 
