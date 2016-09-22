@@ -198,12 +198,12 @@ MidiSource::midi_read (const Lock&                        lm,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
 		       const double                       pulse,
-		       const double                       start_pulse) const
+		       const double                       start_beats) const
 {
 	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
 	const int32_t tpb = Timecode::BBT_Time::ticks_per_beat;
 	const double pulse_tick_res = floor ((pulse * 4.0 * tpb) + 0.5) / tpb;
-	const double start_qn = (pulse - start_pulse) * 4.0;
+	const double start_qn = (pulse * 4.0) - start_beats;
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",

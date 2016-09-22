@@ -107,11 +107,10 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void fix_negative_start ();
 	Evoral::Beats start_beats () {return _start_beats.val(); }
+	void set_start_beats (const Evoral::Beats start_beats) {_start_beats = start_beats; }
  	Evoral::Beats length_beats () {return _length_beats.val(); }
-	double start_pulse () const {return _start_pulse; }
-	void set_start_pulse (const double start_pulse) {_start_pulse = start_pulse; }
-	double length_pulse () const {return _length_pulse; }
-	void set_length_pulse (const double length_pulse) {_length_pulse = length_pulse; }
+	void set_length_beats (const Evoral::Beats length_beats) {_length_beats = length_beats; }
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
@@ -122,9 +121,6 @@ class LIBARDOUR_API MidiRegion : public Region
 	friend class RegionFactory;
 	PBD::Property<Evoral::Beats> _start_beats;
 	PBD::Property<Evoral::Beats> _length_beats;
-
-	double _start_pulse;
-	double _length_pulse;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);

@@ -98,7 +98,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered,
 				      const double                       pulse,
-				      const double                       start_pulse) const;
+				      const double                       start_beats) const;
 
 	/** Write data from a MidiRingBuffer to this source.
 	 *  @param source Source to read from.

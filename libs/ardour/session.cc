@@ -317,7 +317,6 @@ Session::Session (AudioEngine &eng,
 	, _midi_ports (0)
 	, _mmc (0)
 	, _vca_manager (new VCAManager (*this))
-	, _midi_regions_use_bbt_beats (false)
 {
 	uint32_t sr = 0;
 
@@ -477,10 +476,10 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 #endif
-	_midi_regions_use_bbt_beats = false;
 
 	_is_new = false;
 	session_loaded ();
+
 	BootMessage (_("Session loading complete"));
 }
 

@@ -1149,8 +1149,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	VCAManager& vca_manager() { return *_vca_manager; }
 
-	bool midi_regions_use_bbt_beats () { return _midi_regions_use_bbt_beats; }
-
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2030,8 +2028,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 
 	std::string created_with;
-
-	bool _midi_regions_use_bbt_beats;
 };
 
 

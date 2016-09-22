@@ -1003,20 +1003,6 @@ Session::load_state (string snapshot_name)
 				return -1;
 			}
 		}
-	} else {
-		XMLNode* child;
-		if ((child = find_named_node (root, "ProgramVersion")) != 0) {
-			if ((prop = child->property ("modified-with")) != 0) {
-				std::string modified_with = prop->value ();
-
-				const double modified_with_version = atof (modified_with.substr ( modified_with.find(" ", 0) + 1, string::npos).c_str());
-				const int modified_with_revision = atoi (modified_with.substr (modified_with.find("-", 0) + 1, string::npos).c_str());
-
-				if (modified_with_version <= 5.3 && !(modified_with_version == 5.3 && modified_with_revision > 42)) {
-					_midi_regions_use_bbt_beats = true;
-				}
-			}
-		}
 	}
 
 	save_snapshot_name (snapshot_name);
