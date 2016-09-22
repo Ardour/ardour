@@ -2000,6 +2000,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* duplication */
 
 	void duplicate_range (bool with_dialog);
+	void duplicate_regions (float times);
 
 	/** computes the timeline frame (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).

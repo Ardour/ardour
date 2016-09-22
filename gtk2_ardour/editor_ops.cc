@@ -4823,6 +4823,13 @@ Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 }
 
 void
+Editor::duplicate_regions (float times)
+{
+	RegionSelection rs (get_regions_from_selection_and_entered());
+	duplicate_some_regions (rs, times);
+}
+
+void
 Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
 	if (regions.empty ()) {
