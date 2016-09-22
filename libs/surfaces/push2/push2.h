@@ -37,6 +37,8 @@
 #include "control_protocol/control_protocol.h"
 #include "control_protocol/types.h"
 
+#include "canvas/colors.h"
+
 #include "midi_byte_array.h"
 #include "mode.h"
 
@@ -355,8 +357,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void write (const MidiByteArray&);
 
-	uint8_t get_color_index (uint32_t rgb);
-	uint32_t get_color (ColorName);
+	uint8_t get_color_index (ArdourCanvas::Color rgba);
+	ArdourCanvas::Color get_color (ColorName);
 
 	PressureMode pressure_mode () const { return _pressure_mode; }
 	void set_pressure_mode (PressureMode);
@@ -567,7 +569,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* color map (device side) */
 
-	typedef std::map<uint32_t,uint8_t> ColorMap;
+	typedef std::map<ArdourCanvas::Color,uint8_t> ColorMap;
 	typedef std::stack<uint8_t> ColorMapFreeList;
 	ColorMap color_map;
 	ColorMapFreeList color_map_free_list;
@@ -575,12 +577,15 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* our own colors */
 
-	typedef std::map<ColorName,uint32_t> Colors;
+	typedef std::map<ColorName,ArdourCanvas::Color> Colors;
 	Colors colors;
 	void fill_color_table ();
+	void reset_pad_colors ();
 
 	PressureMode _pressure_mode;
 	void request_pressure_mode ();
+
+	uint8_t selection_color;
 };
 
 } /* namespace */
