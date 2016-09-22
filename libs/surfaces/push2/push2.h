@@ -593,6 +593,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void request_pressure_mode ();
 
 	uint8_t selection_color;
+	uint8_t contrast_color;
 };
 
 } /* namespace */

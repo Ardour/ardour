@@ -136,6 +136,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, percussion (false)
 	, _pressure_mode (AfterTouch)
 	, selection_color (LED::Green)
+	, contrast_color (LED::Green)
 {
 
 	build_maps ();
@@ -817,10 +818,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 			pad->set_state (LED::OneShot24th);
 			write (pad->state_msg());
 		} else if (pad->do_when_pressed == Pad::FlashOff) {
-			/* XXX really need to pick a contrasting color from
-			   selection color here.
-			*/
-			pad->set_color (LED::Green);
+			pad->set_color (contrast_color);
 			pad->set_state (LED::OneShot24th);
 			write (pad->state_msg());
 		}
@@ -1530,9 +1528,11 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 		current_pad_target = new_pad_target;
 		selection_color = get_color_index (new_pad_target->presentation_info().color());
+		contrast_color = get_color_index (ArdourCanvas::HSV (new_pad_target->presentation_info().color()).opposite().color());
 	} else {
 		current_pad_target.reset ();
 		selection_color = LED::Green;
+		contrast_color = LED::Green;
 	}
 
 	reset_pad_colors ();
