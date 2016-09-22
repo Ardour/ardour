@@ -42,8 +42,6 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/colors.h"
-
 #include "canvas.h"
 #include "gui.h"
 #include "layout.h"
