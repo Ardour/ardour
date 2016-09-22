@@ -81,12 +81,6 @@ ScaleLayout::ScaleLayout (Push2& p, Session& s)
 	chromatic_text->set_color (p2.get_color (Push2::LightBackground));
 	chromatic_text->set (_("Chromatic"));
 
-	fixed_text = new Text (this);
-	fixed_text->set_font_description (fd2);
-	fixed_text->set_position (Duple (10 + (7 * Push2Canvas::inter_button_spacing()), 140));
-	fixed_text->set_color (p2.get_color (Push2::LightBackground));
-	fixed_text->set (_("Fixed"));
-
 	for (int n = 0; n < 8; ++n) {
 
 		/* text labels for root notes etc.*/
@@ -291,7 +285,24 @@ ScaleLayout::button_right ()
 void
 ScaleLayout::show ()
 {
+	Push2::Button* b;
+
 	last_vpot = -1;
+
+	b = p2.button_by_id (Push2::Upper1);
+	b->set_color (Push2::LED::White);
+	b->set_state (Push2::LED::OneShot24th);
+	p2.write (b->state_msg());
+
+	b = p2.button_by_id (Push2::Upper8);
+	b->set_color (Push2::LED::White);
+	b->set_state (Push2::LED::OneShot24th);
+	p2.write (b->state_msg());
+
+	b = p2.button_by_id (Push2::Lower1);
+	b->set_color (Push2::LED::White);
+	b->set_state (Push2::LED::OneShot24th);
+	p2.write (b->state_msg());
 
 	/* all root buttons should be dimly lit */
 
@@ -299,7 +310,7 @@ ScaleLayout::show ()
 	                                   Push2::Lower2, Push2::Lower3, Push2::Lower4, Push2::Lower5, Push2::Lower6, Push2::Lower7, };
 
 	for (size_t n = 0; n < sizeof (root_buttons) / sizeof (root_buttons[0]); ++n) {
-		Push2::Button* b = p2.button_by_id (root_buttons[n]);
+		b = p2.button_by_id (root_buttons[n]);
 
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);

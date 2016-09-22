@@ -25,10 +25,13 @@
 
 namespace ARDOUR {
 	class Stripable;
+	class AutomationControl;
 }
 
 namespace ArdourCanvas {
+	class Rectangle;
 	class Text;
+	class Line;
 }
 
 namespace ArdourSurface {
@@ -46,9 +49,11 @@ class TrackMixLayout : public Push2Layout
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
 	void show ();
-
+	void hide ();
 	void button_upper (uint32_t n);
 	void button_lower (uint32_t n);
+	void button_left ();
+	void button_right ();
 
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
@@ -56,14 +61,18 @@ class TrackMixLayout : public Push2Layout
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList stripable_connections;
-	bool _dirty;
 
+	ArdourCanvas::Rectangle* bg;
+	ArdourCanvas::Line* upper_line;
 	std::vector<ArdourCanvas::Text*> upper_text;
 	std::vector<ArdourCanvas::Text*> lower_text;
+	ArdourCanvas::Text* name_text;
+	uint8_t selection_color;
 
 	Push2Knob* knobs[8];
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
+	void simple_control_change (boost::shared_ptr<ARDOUR::AutomationControl> ac, Push2::ButtonID bid);
 
 	PBD::ScopedConnection selection_connection;
 	void selection_changed ();
@@ -71,6 +80,13 @@ class TrackMixLayout : public Push2Layout
 	void drop_stripable ();
 	void name_changed ();
 	void color_changed ();
+
+	void solo_change ();
+	void mute_change ();
+	void rec_enable_change ();
+	void solo_iso_change ();
+	void solo_safe_change ();
+	void monitoring_change ();
 };
 
 } /* namespace */

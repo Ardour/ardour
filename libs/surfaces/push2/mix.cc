@@ -45,6 +45,7 @@
 
 #include "canvas/colors.h"
 #include "canvas/rectangle.h"
+#include "canvas/line.h"
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -68,8 +69,17 @@ MixLayout::MixLayout (Push2& p, Session& s)
 	, bank_start (0)
 	, vpot_mode (Volume)
 {
-	selection_bg = new Rectangle (this);
-	selection_bg->hide ();
+	/* background */
+
+	bg = new Rectangle (this);
+	bg->set (Rect (0, 0, display_width(), display_height()));
+	bg->set_fill_color (p2.get_color (Push2::DarkBackground));
+
+	/* upper line */
+
+	upper_line = new Line (this);
+	upper_line->set (Duple (0, 22.5), Duple (display_width(), 22.5));
+	upper_line->set_outline_color (p2.get_color (Push2::LightBackground));
 
 	Pango::FontDescription fd2 ("Sans 10");
 	for (int n = 0; n < 8; ++n) {
@@ -79,7 +89,11 @@ MixLayout::MixLayout (Push2& p, Session& s)
 		Rectangle* r = new Rectangle (this);
 		Coord x0 = 10 + (n*Push2Canvas::inter_button_spacing()) - 5;
 		r->set (Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
-		backgrounds.push_back (r);
+		upper_backgrounds.push_back (r);
+
+		r = new Rectangle (this);
+		r->set (Rect (x0, 137, x0 + Push2Canvas::inter_button_spacing(), 137 + 21));
+		lower_backgrounds.push_back (r);
 
 		/* text labels for knob function*/
 
@@ -148,36 +162,31 @@ MixLayout::~MixLayout ()
 void
 MixLayout::show ()
 {
-	Container::show ();
+	Push2::ButtonID upper_buttons[] = { Push2::Upper1, Push2::Upper2, Push2::Upper3, Push2::Upper4,
+	                                    Push2::Upper5, Push2::Upper6, Push2::Upper7, Push2::Upper8 };
 
-	mode_button->set_color (Push2::LED::White);
-	mode_button->set_state (Push2::LED::OneShot24th);
-	p2.write (mode_button->state_msg());
+
+	for (size_t n = 0; n < sizeof (upper_buttons) / sizeof (upper_buttons[0]); ++n) {
+		Push2::Button* b = p2.button_by_id (upper_buttons[n]);
+
+		if (b != mode_button) {
+			b->set_color (Push2::LED::DarkGray);
+		} else {
+			b->set_color (Push2::LED::White);
+		}
+		b->set_state (Push2::LED::OneShot24th);
+		p2.write (b->state_msg());
+	}
 
 	switch_bank (bank_start);
+
+	Container::show ();
 }
 
 void
 MixLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	DEBUG_TRACE (DEBUG::Push2, string_compose ("mix render %1\n", area));
-
-	/* draw background */
-
-	set_source_rgb (context, p2.get_color (Push2::DarkBackground));
-	context->rectangle (0, 0, display_width(), display_height());
-	context->fill ();
-
-	/* draw line across top (below labels) */
-
-	context->move_to (0, 22.5);
-	context->line_to (display_width(), 22.5);
-	context->set_line_width (1.0);
-	context->stroke ();
-
-	/* show the kids ... */
-
-	render_children (area, context);
+	Container::render (area, context);
 }
 
 void
@@ -238,9 +247,11 @@ MixLayout::show_vpot_mode ()
 	p2.write (mode_button->state_msg());
 
 	for (int s = 0; s < 8; ++s) {
-		backgrounds[s]->hide ();
+		upper_backgrounds[s]->hide ();
 		upper_text[s]->set_color (p2.get_color (Push2::ParameterName));
 	}
+
+	uint32_t n = 0;
 
 	boost::shared_ptr<AutomationControl> ac;
 	switch (vpot_mode) {
@@ -253,9 +264,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[0]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[0]->show ();
-		upper_text[0]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 0;
 		break;
 	case PanAzimuth:
 		for (int s = 0; s < 8; ++s) {
@@ -267,9 +276,7 @@ MixLayout::show_vpot_mode ()
 
 			}
 		}
-		backgrounds[1]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[1]->show ();
-		upper_text[1]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 1;
 		break;
 	case PanWidth:
 		for (int s = 0; s < 8; ++s) {
@@ -281,9 +288,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[2]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[2]->show ();
-		upper_text[2]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 2;
 		break;
 	case Send1:
 		for (int s = 0; s < 8; ++s) {
@@ -295,9 +300,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[3]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[3]->show ();
-		upper_text[3]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 3;
 		break;
 	case Send2:
 		for (int s = 0; s < 8; ++s) {
@@ -309,9 +312,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[4]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[4]->show ();
-		upper_text[4]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 4;
 		break;
 	case Send3:
 		for (int s = 0; s < 8; ++s) {
@@ -323,9 +324,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[5]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[5]->show ();
-		upper_text[5]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 5;
 		break;
 	case Send4:
 		for (int s = 0; s < 8; ++s) {
@@ -337,9 +336,7 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[6]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[6]->show ();
-		upper_text[6]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 6;
 		break;
 	case Send5:
 		for (int s = 0; s < 8; ++s) {
@@ -351,13 +348,16 @@ MixLayout::show_vpot_mode ()
 			}
 			knobs[s]->remove_flag (Push2Knob::ArcToZero);
 		}
-		backgrounds[7]->set_fill_color (p2.get_color (Push2::ParameterName));
-		backgrounds[7]->show ();
-		upper_text[7]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+		n = 7;
 		break;
 	default:
 		break;
 	}
+
+	upper_backgrounds[n]->set_fill_color (p2.get_color (Push2::ParameterName));
+	upper_backgrounds[n]->set_outline_color (p2.get_color (Push2::ParameterName));
+	upper_backgrounds[n]->show ();
+	upper_text[n]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
 }
 
 void
@@ -452,17 +452,15 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 void
 MixLayout::show_selection (uint32_t n)
 {
-	selection_bg->show ();
-	selection_bg->set_fill_color (stripable[n]->presentation_info().color());
-	const Coord x0 = 10  + (n * Push2Canvas::inter_button_spacing()) - 5;
-	selection_bg->set (Rect (x0, 137, x0 + Push2Canvas::inter_button_spacing(), 137 + 21));
-	lower_text[n]->set_color (ArdourCanvas::contrasting_text_color (selection_bg->fill_color()));
+	lower_backgrounds[n]->show ();
+	lower_backgrounds[n]->set_fill_color (stripable[n]->presentation_info().color());
+	lower_text[n]->set_color (ArdourCanvas::contrasting_text_color (lower_backgrounds[n]->fill_color()));
 }
 
 void
 MixLayout::hide_selection (uint32_t n)
 {
-	selection_bg->hide ();
+	lower_backgrounds[n]->hide ();
 	if (stripable[n]) {
 		lower_text[n]->set_color (stripable[n]->presentation_info().color());
 	}
@@ -520,13 +518,6 @@ MixLayout::switch_bank (uint32_t base)
 		}
 	}
 
-	if (!different) {
-		/* some missing strips; new bank the same or more empty stripables than the old one, do
-		   nothing since we had already reached the end.
-		*/
-		return;
-	}
-
 	if (!s[0]) {
 		/* not even the first stripable exists, do nothing */
 		return;
@@ -541,32 +532,38 @@ MixLayout::switch_bank (uint32_t base)
 	bank_start = base;
 
 	for (int n = 0; n < 8; ++n) {
+
 		if (!stripable[n]) {
 			lower_text[n]->hide ();
 			hide_selection (n);
-			continue;
-		}
-
-		lower_text[n]->show ();
-
-		/* stripable goes away? refill the bank, starting at the same point */
-
-		stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
-		stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
-		stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
-		stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
-
-		if (stripable[n]->presentation_info().selected()) {
-			show_selection (n);
 		} else {
-			hide_selection (n);
+
+			lower_text[n]->show ();
+
+			/* stripable goes away? refill the bank, starting at the same point */
+
+			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
+			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
+			stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
+			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
+
+			if (stripable[n]->presentation_info().selected()) {
+				show_selection (n);
+			} else {
+				hide_selection (n);
+			}
+
+			/* this will set lower text to the correct value (basically
+			   the stripable name)
+			*/
+
+			solo_mute_changed (n);
+
+			knobs[n]->set_text_color (stripable[n]->presentation_info().color());
+			knobs[n]->set_arc_start_color (stripable[n]->presentation_info().color());
+			knobs[n]->set_arc_end_color (stripable[n]->presentation_info().color());
 		}
 
-		/* this will set lower text to the correct value (basically
-		   the stripable name)
-		*/
-
-		solo_mute_changed (n);
 
 		Push2::Button* b;
 
@@ -597,13 +594,14 @@ MixLayout::switch_bank (uint32_t base)
 			break;
 		}
 
-		b->set_color (p2.get_color_index (stripable[n]->presentation_info().color()));
+		if (stripable[n]) {
+			b->set_color (p2.get_color_index (stripable[n]->presentation_info().color()));
+		} else {
+			b->set_color (Push2::LED::Black);
+		}
+
 		b->set_state (Push2::LED::OneShot24th);
 		p2.write (b->state_msg());
-
-		knobs[n]->set_text_color (stripable[n]->presentation_info().color());
-		knobs[n]->set_arc_start_color (stripable[n]->presentation_info().color());
-		knobs[n]->set_arc_end_color (stripable[n]->presentation_info().color());
 	}
 
 	show_vpot_mode ();

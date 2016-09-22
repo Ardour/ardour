@@ -300,6 +300,7 @@ int
 Push2::close ()
 {
 	init_buttons (false);
+	strip_buttons_off ();
 
 	/* wait for button data to be flushed */
 	AsyncMIDIPort* asp;
@@ -377,12 +378,6 @@ Push2::init_buttons (bool startup)
 		b->set_state (LED::OneShot24th);
 		write (b->state_msg());
 	}
-
-	/* Strip buttons should all be off (black) by default. They will change
-	 * color to reflect various conditions
-	 */
-
-	strip_buttons_off ();
 
 	if (startup) {
 
@@ -813,15 +808,9 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		Pad* pad = pi->second;
 
-		if (pad->do_when_pressed == Pad::FlashOn) {
-			pad->set_color (LED::White);
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
-		} else if (pad->do_when_pressed == Pad::FlashOff) {
-			pad->set_color (contrast_color);
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
-		}
+		pad->set_color (contrast_color);
+		pad->set_state (LED::OneShot24th);
+		write (pad->state_msg());
 	}
 }
 
@@ -1654,12 +1643,6 @@ Push2::set_current_layout (Push2Layout* layout)
 		_canvas->root()->remove (_current_layout);
 		_previous_layout = _current_layout;
 	}
-
-	/* turn off all strip buttons - let new layout set them if it
-	 * wants/needs to
-	 */
-
-	strip_buttons_off ();
 
 	_current_layout = layout;
 

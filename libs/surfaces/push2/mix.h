@@ -29,6 +29,7 @@ namespace ARDOUR {
 namespace ArdourCanvas {
 	class Rectangle;
 	class Text;
+	class Line;
 }
 
 namespace ArdourSurface {
@@ -59,10 +60,12 @@ class MixLayout : public Push2Layout
 	void strip_vpot_touch (int, bool);
 
   private:
+	ArdourCanvas::Rectangle* bg;
+	ArdourCanvas::Line* upper_line;
 	std::vector<ArdourCanvas::Text*> upper_text;
 	std::vector<ArdourCanvas::Text*> lower_text;
-	std::vector<ArdourCanvas::Rectangle*> backgrounds;
-	ArdourCanvas::Rectangle* selection_bg;
+	std::vector<ArdourCanvas::Rectangle*> upper_backgrounds;
+	std::vector<ArdourCanvas::Rectangle*> lower_backgrounds;
 	Push2Knob* knobs[8];
 
 	/* stripables */
