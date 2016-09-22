@@ -684,6 +684,9 @@ PortManager::silence (pframes_t nframes, Session *s)
 		if (s && i->second == s->ltc_output_port ()) {
 			continue;
 		}
+		if (boost::dynamic_pointer_cast<AsyncMIDIPort>(i->second)) {
+			continue;
+		}
 		if (i->second->sends_output()) {
 			i->second->get_buffer(nframes).silence(nframes);
 		}
