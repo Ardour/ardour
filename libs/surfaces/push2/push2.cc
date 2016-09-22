@@ -1513,16 +1513,16 @@ Push2::button_by_id (ButtonID bid)
 }
 
 uint8_t
-Push2::get_color_index (uint32_t rgb)
+Push2::get_color_index (ArdourCanvas::Color rgba)
 {
-	ColorMap::iterator i = color_map.find (rgb);
+	ColorMap::iterator i = color_map.find (rgba);
 
 	if (i != color_map.end()) {
 		return i->second;
 	}
 
 	int r, g, b, a;
-	UINT_TO_RGBA (rgb, &r, &g, &b, &a);
+	UINT_TO_RGBA (rgba, &r, &g, &b, &a);
 	int w = 204; /* not sure where/when we should get this value */
 
 	/* get a free index */
@@ -1555,7 +1555,7 @@ Push2::get_color_index (uint32_t rgb)
 	write (palette_msg);
 	write (update_pallette_msg);
 
-	color_map[index] = rgb;
+	color_map[rgba] = index;
 
 	return index;
 }
