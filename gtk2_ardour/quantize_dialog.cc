@@ -112,7 +112,7 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	snap_end_button.set_active (false);
 
 	get_vbox()->pack_start (*table);
-	show_all ();
+	get_vbox()->show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Quantize"), RESPONSE_OK);
