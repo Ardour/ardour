@@ -793,24 +793,37 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 		return;
 	}
 
-	/* Pad */
+	/* Pad illuminations */
 
-	NNPadMap::iterator pi = nn_pad_map.find (ev->note_number);
+	NNPadMap::const_iterator pm = nn_pad_map.find (ev->note_number);
 
-	if (pi == nn_pad_map.end()) {
+	if (pm == nn_pad_map.end()) {
 		return;
 	}
 
-	Pad* pad = pi->second;
+	const Pad * const pad_pressed = pm->second;
 
-	if (pad->do_when_pressed == Pad::FlashOn) {
-		pad->set_color (LED::White);
-		pad->set_state (LED::OneShot24th);
-		write (pad->state_msg());
-	} else if (pad->do_when_pressed == Pad::FlashOff) {
-		pad->set_color (LED::Black);
-		pad->set_state (LED::OneShot24th);
-		write (pad->state_msg());
+	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
+
+	if (pads_with_note.first == fn_pad_map.end()) {
+		return;
+	}
+
+	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
+		Pad* pad = pi->second;
+
+		if (pad->do_when_pressed == Pad::FlashOn) {
+			pad->set_color (LED::White);
+			pad->set_state (LED::OneShot24th);
+			write (pad->state_msg());
+		} else if (pad->do_when_pressed == Pad::FlashOff) {
+			/* XXX really need to pick a contrasting color from
+			   selection color here.
+			*/
+			pad->set_color (LED::Green);
+			pad->set_state (LED::OneShot24th);
+			write (pad->state_msg());
+		}
 	}
 }
 
@@ -827,22 +840,34 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		return;
 	}
 
-	NNPadMap::iterator pi = nn_pad_map.find (ev->note_number);
+	/* Pad illuminations */
 
-	if (pi == nn_pad_map.end()) {
+	NNPadMap::const_iterator pm = nn_pad_map.find (ev->note_number);
+
+	if (pm == nn_pad_map.end()) {
 		return;
 	}
 
-	Pad* pad = pi->second;
+	const Pad * const pad_pressed = pm->second;
 
-	if (pad->do_when_pressed == Pad::FlashOn) {
-		pad->set_color (LED::Black);
-		pad->set_state (LED::OneShot24th);
-		write (pad->state_msg());
-	} else if (pad->do_when_pressed == Pad::FlashOff) {
-		pad->set_color (pad->perma_color);
-		pad->set_state (LED::OneShot24th);
-		write (pad->state_msg());
+	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
+
+	if (pads_with_note.first == fn_pad_map.end()) {
+		return;
+	}
+
+	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
+		Pad* pad = pi->second;
+
+		if (pad->do_when_pressed == Pad::FlashOn) {
+			pad->set_color (LED::Black);
+			pad->set_state (LED::OneShot24th);
+			write (pad->state_msg());
+		} else if (pad->do_when_pressed == Pad::FlashOff) {
+			pad->set_color (pad->perma_color);
+			pad->set_state (LED::OneShot24th);
+			write (pad->state_msg());
+		}
 	}
 }
 
@@ -1298,10 +1323,13 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 		}
 	}
 
+	fn_pad_map.clear ();
+
 	if (inkey) {
 
 		vector<int>::iterator notei;
 		int row_offset = 0;
+
 		for (int row = 0; row < 8; ++row) {
 
 			/* Ableton's grid layout wraps the available notes in the scale
@@ -1320,6 +1348,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 					notenum = *notei;
 					pad->filtered = notenum;
+
+					fn_pad_map.insert (make_pair (notenum, pad));
 
 					if ((notenum % 12) == original_root) {
 						pad->set_color (selection_color);
@@ -1357,6 +1387,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 			 */
 
 			pad->filtered = root_start + (note - 36);
+
+			fn_pad_map.insert (make_pair (pad->filtered, pad));
 
 			if (mode_map.find (note) != mode_map.end()) {
 

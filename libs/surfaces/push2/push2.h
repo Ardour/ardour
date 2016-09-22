@@ -392,9 +392,16 @@ class Push2 : public ARDOUR::ControlProtocol
 	void init_buttons (bool startup);
 	void init_touch_strip ();
 
-	/* map of Pads by note number */
+	/* map of Pads by note number (the "fixed" note number sent by the
+	 * hardware, not the note number generated if the pad is touched)
+	 */
 	typedef std::map<int,Pad*> NNPadMap;
 	NNPadMap nn_pad_map;
+
+	/* map of Pads by note number they generate (their "filtered" value)
+	 */
+	typedef std::multimap<int,Pad*> FNPadMap;
+	FNPadMap fn_pad_map;
 
 	void set_button_color (ButtonID, uint8_t color_index);
 	void set_button_state (ButtonID, LED::State);
