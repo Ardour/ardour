@@ -263,27 +263,24 @@ XMLNode::clear_lists ()
 XMLNode&
 XMLNode::operator= (const XMLNode& from)
 {
-	if (&from != this) {
+	if (&from == this) {
+		return *this;
+	}
 
-		XMLPropertyList props;
-		XMLPropertyIterator curprop;
-		XMLNodeList nodes;
-		XMLNodeIterator curnode;
+	clear_lists ();
 
-		clear_lists ();
+	_name = from.name ();
+	set_content (from.content ());
 
-		_name = from.name();
-		set_content(from.content());
+	const XMLPropertyList& props = from.properties ();
 
-		props = from.properties();
-		for (curprop = props.begin(); curprop != props.end(); ++curprop) {
-			add_property((*curprop)->name().c_str(), (*curprop)->value());
-		}
+	for (XMLPropertyConstIterator prop_iter = props.begin (); prop_iter != props.end (); ++prop_iter) {
+		add_property ((*prop_iter)->name ().c_str (), (*prop_iter)->value ());
+	}
 
-		nodes = from.children();
-		for (curnode = nodes.begin(); curnode != nodes.end(); ++curnode) {
-			add_child_copy(**curnode);
-		}
+	const XMLNodeList& nodes = from.children ();
+	for (XMLNodeConstIterator child_iter = nodes.begin (); child_iter != nodes.end (); ++child_iter) {
+		add_child_copy (**child_iter);
 	}
 
 	return *this;
@@ -693,10 +690,6 @@ readnode(xmlNodePtr node)
 static void
 writenode(xmlDocPtr doc, XMLNode* n, xmlNodePtr p, int root = 0)
 {
-	XMLPropertyList props;
-	XMLPropertyIterator curprop;
-	XMLNodeList children;
-	XMLNodeIterator curchild;
 	xmlNodePtr node;
 
 	if (root) {
@@ -710,14 +703,18 @@ writenode(xmlDocPtr doc, XMLNode* n, xmlNodePtr p, int root = 0)
 		xmlNodeSetContentLen(node, (const xmlChar*)n->content().c_str(), n->content().length());
 	}
 
-	props = n->properties();
-	for (curprop = props.begin(); curprop != props.end(); ++curprop) {
-		xmlSetProp(node, (const xmlChar*) (*curprop)->name().c_str(), (const xmlChar*) (*curprop)->value().c_str());
+	const XMLPropertyList& props = n->properties();
+
+	for (XMLPropertyConstIterator prop_iter = props.begin (); prop_iter != props.end ();
+	     ++prop_iter) {
+		xmlSetProp (node, (const xmlChar*)(*prop_iter)->name ().c_str (),
+		            (const xmlChar*)(*prop_iter)->value ().c_str ());
 	}
 
-	children = n->children();
-	for (curchild = children.begin(); curchild != children.end(); ++curchild) {
-		writenode(doc, *curchild, node);
+	const XMLNodeList& children = n->children ();
+	for (XMLNodeConstIterator child_iter = children.begin (); child_iter != children.end ();
+	     ++child_iter) {
+		writenode (doc, *child_iter, node);
 	}
 }
 
