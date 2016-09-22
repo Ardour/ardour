@@ -1249,6 +1249,12 @@ Push2::pad_note (int row, int col) const
 }
 
 void
+Push2::reset_pad_colors ()
+{
+	set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+}
+
+void
 Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
 	MusicalMode m (mode);
@@ -1333,6 +1339,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 					pad->filtered = -1;
 				}
 
+				pad->set_state (LED::OneShot24th);
 				write (pad->state_msg());
 			}
 		}
@@ -1372,6 +1379,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 			}
 
+			pad->set_state (LED::OneShot24th);
 			write (pad->state_msg());
 		}
 	}
