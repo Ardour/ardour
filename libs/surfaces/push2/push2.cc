@@ -1386,12 +1386,28 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 	/* store state */
 
-	_scale_root = original_root;
-	_root_octave = octave;
-	_in_key = inkey;
-	_mode = mode;
+	bool changed = false;
 
-	ScaleChange (); /* EMIT SIGNAL */
+	if (_scale_root != original_root) {
+		_scale_root = original_root;
+		changed = true;
+	}
+	if (_root_octave != octave) {
+		_root_octave = octave;
+		changed = true;
+	}
+	if (_in_key != inkey) {
+		_in_key = inkey;
+		changed = true;
+	}
+	if (_mode != mode) {
+		_mode = mode;
+		changed = true;
+	}
+
+	if (changed) {
+		ScaleChange (); /* EMIT SIGNAL */
+	}
 }
 
 void
