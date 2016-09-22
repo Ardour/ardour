@@ -188,8 +188,8 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (Clip, 113, &Push2::button_clip);
 	MAKE_WHITE_BUTTON (Convert, 35);
 	MAKE_WHITE_BUTTON (DoubleLoop, 117);
-	MAKE_WHITE_BUTTON (Quantize, 116);
-	MAKE_WHITE_BUTTON (Duplicate, 88);
+	MAKE_WHITE_BUTTON_PRESS (Quantize, 116, &Push2::button_quantize);
+	MAKE_WHITE_BUTTON_PRESS (Duplicate, 88, &Push2::button_duplicate);
 	MAKE_WHITE_BUTTON_PRESS (New, 87, &Push2::button_new);
 	MAKE_WHITE_BUTTON_PRESS (FixedLength, 90, &Push2::button_fixed_length);
 	MAKE_WHITE_BUTTON_PRESS (Up, 46, &Push2::button_up);
@@ -209,6 +209,147 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (PageLeft, 62, &Push2::button_page_left);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Shift, 49, &Push2::button_shift_press, &Push2::button_shift_release, &Push2::button_shift_long_press);
 	MAKE_WHITE_BUTTON_PRESS_RELEASE_LONG (Select, 48, &Push2::button_select_press, &Push2::button_select_release, &Push2::button_select_long_press);
+}
+
+std::string
+Push2::button_name_by_id (ButtonID id)
+{
+	switch (id) {
+	case TapTempo:
+		return "TapTempo";
+	case Metronome:
+		return "Metronome";
+	case Upper1:
+		return "Upper1";
+	case Upper2:
+		return "Upper2";
+	case Upper3:
+		return "Upper3";
+	case Upper4:
+		return "Upper4";
+	case Upper5:
+		return "Upper5";
+	case Upper6:
+		return "Upper6";
+	case Upper7:
+		return "Upper7";
+	case Upper8:
+		return "Upper8";
+	case Setup:
+		return "Setup";
+	case User:
+		return "User";
+	case Delete:
+		return "Delete";
+	case AddDevice:
+		return "AddDevice";
+	case Device:
+		return "Device";
+	case Mix:
+		return "Mix";
+	case Undo:
+		return "Undo";
+	case AddTrack:
+		return "AddTrack";
+	case Browse:
+		return "Browse";
+	case Clip:
+		return "Clip";
+	case Mute:
+		return "Mute";
+	case Solo:
+		return "Solo";
+	case Stop:
+		return "Stop";
+	case Lower1:
+		return "Lower1";
+	case Lower2:
+		return "Lower2";
+	case Lower3:
+		return "Lower3";
+	case Lower4:
+		return "Lower4";
+	case Lower5:
+		return "Lower5";
+	case Lower6:
+		return "Lower6";
+	case Lower7:
+		return "Lower7";
+	case Lower8:
+		return "Lower8";
+	case Master:
+		return "Master";
+	case Convert:
+		return "Convert";
+	case DoubleLoop:
+		return "DoubleLoop";
+	case Quantize:
+		return "Quantize";
+	case Duplicate:
+		return "Duplicate";
+	case New:
+		return "New";
+	case FixedLength:
+		return "FixedLength";
+	case Automate:
+		return "Automate";
+	case RecordEnable:
+		return "RecordEnable";
+	case Play:
+		return "Play";
+	case Fwd32ndT:
+		return "Fwd32ndT";
+	case Fwd32nd:
+		return "Fwd32nd";
+	case Fwd16thT:
+		return "Fwd16thT";
+	case Fwd16th:
+		return "Fwd16th";
+	case Fwd8thT:
+		return "Fwd8thT";
+	case Fwd8th:
+		return "Fwd8th";
+	case Fwd4trT:
+		return "Fwd4trT";
+	case Fwd4tr:
+		return "Fwd4tr";
+	case Up:
+		return "Up";
+	case Right:
+		return "Right";
+	case Down:
+		return "Down";
+	case Left:
+		return "Left";
+	case Repeat:
+		return "Repeat";
+	case Accent:
+		return "Accent";
+	case Scale:
+		return "Scale";
+	case Layout:
+		return "Layout";
+	case Note:
+		return "Note";
+	case Session:
+		return "Session";
+	case OctaveUp:
+		return "OctaveUp";
+	case PageRight:
+		return "PageRight";
+	case OctaveDown:
+		return "OctaveDown";
+	case PageLeft:
+		return "PageLeft";
+	case Shift:
+		return "Shift";
+	case Select:
+		return "Select";
+	default:
+		break;
+	}
+
+	return "???";
 }
 
 void
@@ -599,143 +740,14 @@ Push2::button_master ()
 	}
 }
 
-std::string
-Push2::button_name_by_id (ButtonID id)
+void
+Push2::button_quantize ()
 {
-	switch (id) {
-	case TapTempo:
-		return "TapTempo";
-	case Metronome:
-		return "Metronome";
-	case Upper1:
-		return "Upper1";
-	case Upper2:
-		return "Upper2";
-	case Upper3:
-		return "Upper3";
-	case Upper4:
-		return "Upper4";
-	case Upper5:
-		return "Upper5";
-	case Upper6:
-		return "Upper6";
-	case Upper7:
-		return "Upper7";
-	case Upper8:
-		return "Upper8";
-	case Setup:
-		return "Setup";
-	case User:
-		return "User";
-	case Delete:
-		return "Delete";
-	case AddDevice:
-		return "AddDevice";
-	case Device:
-		return "Device";
-	case Mix:
-		return "Mix";
-	case Undo:
-		return "Undo";
-	case AddTrack:
-		return "AddTrack";
-	case Browse:
-		return "Browse";
-	case Clip:
-		return "Clip";
-	case Mute:
-		return "Mute";
-	case Solo:
-		return "Solo";
-	case Stop:
-		return "Stop";
-	case Lower1:
-		return "Lower1";
-	case Lower2:
-		return "Lower2";
-	case Lower3:
-		return "Lower3";
-	case Lower4:
-		return "Lower4";
-	case Lower5:
-		return "Lower5";
-	case Lower6:
-		return "Lower6";
-	case Lower7:
-		return "Lower7";
-	case Lower8:
-		return "Lower8";
-	case Master:
-		return "Master";
-	case Convert:
-		return "Convert";
-	case DoubleLoop:
-		return "DoubleLoop";
-	case Quantize:
-		return "Quantize";
-	case Duplicate:
-		return "Duplicate";
-	case New:
-		return "New";
-	case FixedLength:
-		return "FixedLength";
-	case Automate:
-		return "Automate";
-	case RecordEnable:
-		return "RecordEnable";
-	case Play:
-		return "Play";
-	case Fwd32ndT:
-		return "Fwd32ndT";
-	case Fwd32nd:
-		return "Fwd32nd";
-	case Fwd16thT:
-		return "Fwd16thT";
-	case Fwd16th:
-		return "Fwd16th";
-	case Fwd8thT:
-		return "Fwd8thT";
-	case Fwd8th:
-		return "Fwd8th";
-	case Fwd4trT:
-		return "Fwd4trT";
-	case Fwd4tr:
-		return "Fwd4tr";
-	case Up:
-		return "Up";
-	case Right:
-		return "Right";
-	case Down:
-		return "Down";
-	case Left:
-		return "Left";
-	case Repeat:
-		return "Repeat";
-	case Accent:
-		return "Accent";
-	case Scale:
-		return "Scale";
-	case Layout:
-		return "Layout";
-	case Note:
-		return "Note";
-	case Session:
-		return "Session";
-	case OctaveUp:
-		return "OctaveUp";
-	case PageRight:
-		return "PageRight";
-	case OctaveDown:
-		return "OctaveDown";
-	case PageLeft:
-		return "PageLeft";
-	case Shift:
-		return "Shift";
-	case Select:
-		return "Select";
-	default:
-		break;
-	}
+	access_action ("Editor/quantize");
+}
 
-	return "???";
+void
+Push2::button_duplicate ()
+{
+	access_action ("Editor/duplicate-range");
 }
