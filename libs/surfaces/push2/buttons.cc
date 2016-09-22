@@ -141,7 +141,7 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON_PRESS (Lower6, 25, &Push2::button_lower_6);
 	MAKE_COLOR_BUTTON_PRESS (Lower7, 26, &Push2::button_lower_7);
 	MAKE_COLOR_BUTTON_PRESS (Lower8, 27, &Push2::button_lower_8);
-	MAKE_COLOR_BUTTON (Master, 28);
+	MAKE_COLOR_BUTTON_PRESS (Master, 28, &Push2::button_master);
 	MAKE_COLOR_BUTTON_PRESS (Mute, 60, &Push2::button_mute);
 	MAKE_COLOR_BUTTON_PRESS_RELEASE_LONG (Solo, 61, &Push2::relax, &Push2::button_solo, &Push2::button_solo_long_press);
 	MAKE_COLOR_BUTTON_PRESS (Stop, 29, &Push2::button_stop);
@@ -580,6 +580,22 @@ Push2::button_mix_press ()
 		if (ControlProtocol::first_selected_stripable()) {
 			set_current_layout (track_mix_layout);
 		}
+	}
+}
+
+void
+Push2::button_master ()
+{
+	boost::shared_ptr<Stripable> master = session->master_out();
+
+	if (!master) {
+		return;
+	}
+
+	ControlProtocol::SetStripableSelection (master);
+
+	if (_current_layout != track_mix_layout) {
+		set_current_layout (track_mix_layout);
 	}
 }
 

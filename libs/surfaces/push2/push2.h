@@ -469,6 +469,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_fwd4 ();
 	void button_add_track ();
 	void button_stop ();
+	void button_master ();
 	void button_shift_press ();
 	void button_shift_release ();
 	void button_shift_long_press ();
