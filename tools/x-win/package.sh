@@ -19,6 +19,7 @@ test -f gtk2_ardour/wscript || exit 1
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
@@ -269,7 +270,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${WARCH}.zip"
+		"${HARRISONDSPURL}/${HARRISONLV2}.${WARCH}.zip"
 	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
 fi
 
@@ -280,7 +281,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		-o "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
+		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
 
 	cp "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/${HARRISONCHANNELSTRIP}.dll"
@@ -290,7 +291,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		-o "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${WARCH}.dll"
+		"${HARRISONDSPURL}/harrison_vamp.${WARCH}.dll"
 
 	cp "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		"$ALIBDIR/vamp/harrison_vamp.dll"

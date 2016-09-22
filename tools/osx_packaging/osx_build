@@ -26,6 +26,7 @@ WITH_NLS=
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp}
 
 . ../define_versions.sh
 
@@ -609,7 +610,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
 		-o "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${OSX_BENSID}.zip"
+		"${HARRISONDSPURL}/${HARRISONLV2}.${OSX_BENSID}.zip"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
@@ -683,7 +684,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
 		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so"
+		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so"
 
 	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/${HARRISONCHANNELSTRIP}.so"
@@ -693,7 +694,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
 		-o "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${OSX_BENSID}.dylib"
+		"${HARRISONDSPURL}/harrison_vamp.${OSX_BENSID}.dylib"
 
 	cp "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/harrison_vamp.dylib"

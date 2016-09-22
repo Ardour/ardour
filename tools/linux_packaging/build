@@ -38,6 +38,7 @@ NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libe
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp}
 
 if [ $# -eq 0 ] ; then
 	echo ""
@@ -630,7 +631,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
 		-o "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONLV2}.${HARCH}.zip"
+		"${HARRISONDSPURL}/${HARRISONLV2}.${HARCH}.zip"
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip"
 fi
 
@@ -641,7 +642,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
 		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${HARCH}.so"
+		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${HARCH}.so"
 
 	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
 		$APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
@@ -657,7 +658,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		-o "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${VAMPARCH}.so"
+		"${HARRISONDSPURL}/harrison_vamp.${VAMPARCH}.so"
 
 	cp "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		$APPLIB/harrison_vamp.so
