@@ -1100,6 +1100,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\session_archive_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\session_dialog.cc"
 				>
 			</File>
@@ -2175,6 +2179,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\send_ui.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\session_archive_dialog.h"
 				>
 			</File>
 			<File
