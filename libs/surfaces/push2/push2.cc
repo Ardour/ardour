@@ -42,6 +42,8 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "canvas/colors.h"
+
 #include "canvas.h"
 #include "gui.h"
 #include "layout.h"
@@ -1542,9 +1544,15 @@ Push2::get_color_index (ArdourCanvas::Color rgba)
 		return i->second;
 	}
 
-	int r, g, b, a;
-	UINT_TO_RGBA (rgba, &r, &g, &b, &a);
-	int w = 204; /* not sure where/when we should get this value */
+	double dr, dg, db, da;
+	int r, g, b;
+	ArdourCanvas::color_to_rgba (rgba, dr, dg, db, da);
+	int w = 126; /* not sure where/when we should get this value */
+
+
+	r = (int) floor (255.0 * dr);
+	g = (int) floor (255.0 * dg);
+	b = (int) floor (255.0 * db);
 
 	/* get a free index */
 
@@ -1560,20 +1568,28 @@ Push2::get_color_index (ArdourCanvas::Color rgba)
 		color_map_free_list.pop();
 	}
 
-	MidiByteArray palette_msg (17, 0xf0, 0x00 , 0x21, 0x1d, 0x01, 0x01, 0x03, 0x7D, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x01, 0x7E, 0x00, 0xF7);
-	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
-
+	MidiByteArray palette_msg (17,
+	                           0xf0,
+	                           0x00 , 0x21, 0x1d, 0x01, 0x01, 0x03, /* reset palette header */
+	                           0x00, /* index = 7 */
+	                           0x00, 0x00, /* r = 8 & 9 */
+	                           0x00, 0x00, /* g = 10 & 11 */
+	                           0x00, 0x00, /* b = 12 & 13 */
+	                           0x00, 0x00, /* w (a?) = 14 & 15*/
+	                           0xf7);
 	palette_msg[7] = index;
 	palette_msg[8] = r & 0x7f;
-	palette_msg[9] = r & 0x1;
+	palette_msg[9] = (r & 0x80) >> 7;
 	palette_msg[10] = g & 0x7f;
-	palette_msg[11] = g & 0x1;
+	palette_msg[11] = (g & 0x80) >> 7;
 	palette_msg[12] = b & 0x7f;
-	palette_msg[13] = b & 0x1;
+	palette_msg[13] = (b & 0x80) >> 7;
 	palette_msg[14] = w & 0x7f;
-	palette_msg[15] = w & 0x1;
+	palette_msg[15] = w & 0x80;
 
 	write (palette_msg);
+
+	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
 	write (update_pallette_msg);
 
 	color_map[rgba] = index;
