@@ -1537,6 +1537,14 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	/* disconnect from pad port, if appropriate */
 
 	if (current_midi_track && pad_port) {
+
+		/* XXX this could possibly leave dangling MIDI notes.
+		 *
+		 * A general libardour fix is required. It isn't obvious
+		 * how note resolution can be done unless disconnecting
+		 * becomes "slow" (i.e. deferred for as long as it takes
+		 * to resolve notes).
+		 */
 		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
 	}
 
