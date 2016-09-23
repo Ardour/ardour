@@ -751,7 +751,7 @@ TimeAxisView::set_selected (bool yn)
 		return;
 	}
 
-	Selectable::set_selected (yn);
+	AxisView::set_selected (yn);
 
 	if (_selected) {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);
