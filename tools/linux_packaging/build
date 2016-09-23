@@ -38,7 +38,7 @@ NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libe
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
 
 if [ $# -eq 0 ] ; then
 	echo ""

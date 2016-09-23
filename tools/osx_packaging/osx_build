@@ -26,7 +26,7 @@ WITH_NLS=
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
 
 . ../define_versions.sh
 
