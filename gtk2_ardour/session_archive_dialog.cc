@@ -33,6 +33,7 @@ using namespace ARDOUR;
 SessionArchiveDialog::SessionArchiveDialog ()
 	: ArdourDialog (_("Zip/Archive Session"))
 	, ProgressReporter ()
+	, only_used_checkbox (_("Exclude unused audio sources"))
 {
 	VBox* vbox = get_vbox();
 
@@ -70,6 +71,8 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (encode_selector, true, true);
 	vbox->pack_start (*hbox, false, false);
+
+	vbox->pack_start (only_used_checkbox, false, false);
 
 	vbox->pack_start (progress_bar, true, true, 12);
 
@@ -130,6 +133,18 @@ SessionArchiveDialog::set_name (const std::string& name)
 {
 	name_entry.set_text (name);
 	name_entry_changed ();
+}
+
+bool
+SessionArchiveDialog::only_used_sources () const
+{
+	return only_used_checkbox.get_active ();
+}
+
+void
+SessionArchiveDialog::set_only_used_sources (bool en)
+{
+	only_used_checkbox.set_active (en);
 }
 
 ARDOUR::Session::ArchiveEncode

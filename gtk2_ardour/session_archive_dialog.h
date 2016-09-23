@@ -38,16 +38,19 @@ public:
 	std::string target_folder () const;
 	std::string name () const;
 	ARDOUR::Session::ArchiveEncode encode_option () const;
+	bool only_used_sources () const;
 
-	void  set_name (const std::string&);
-	void  set_target_folder (const std::string&);
-	void  set_encode_option (ARDOUR::Session::ArchiveEncode);
+	void set_name (const std::string&);
+	void set_target_folder (const std::string&);
+	void set_encode_option (ARDOUR::Session::ArchiveEncode);
+	void set_only_used_sources (bool);
 
 private:
 	Gtk::FileChooserButton target_folder_selector;
 	Gtk::Entry             name_entry;
 	Gtk::ComboBoxText      format_selector;
 	Gtk::ComboBoxText      encode_selector;
+	Gtk::CheckButton       only_used_checkbox;
 
 	Gtk::ProgressBar progress_bar;
 
