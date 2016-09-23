@@ -35,11 +35,13 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/dsp_filter.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
 #include "ardour/monitor_control.h"
+#include "ardour/meter.h"
 #include "ardour/session.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
@@ -55,6 +57,7 @@
 #include "canvas.h"
 #include "knob.h"
 #include "menu.h"
+#include "meter.h"
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
@@ -137,6 +140,9 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
 	name_text->set_font_description (fd);
 	name_text->set_position (Duple (10 + (4*Push2Canvas::inter_button_spacing()), 2));
 
+	meter = new Meter (this, 24, 32, Meter::Horizontal, 200);
+	meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 50));
+
 	ControlProtocol::StripableSelectionChanged.connect (selection_connection, invalidator (*this), boost::bind (&TrackMixLayout::selection_changed, this), &p2);
 }
 
@@ -155,6 +161,7 @@ TrackMixLayout::selection_changed ()
 		set_stripable (s);
 	}
 }
+
 void
 TrackMixLayout::show ()
 {
@@ -491,4 +498,21 @@ TrackMixLayout::strip_vpot_touch (int n, bool touching)
 			ac->stop_touch (true, session.audible_frame());
 		}
 	}
+}
+
+void
+TrackMixLayout::update_meters ()
+{
+	if (!stripable) {
+		return;
+	}
+
+	boost::shared_ptr<PeakMeter> peak_meter = stripable->peak_meter ();
+
+	if (!peak_meter) {
+		return;
+	}
+
+	const float mpeak = peak_meter->meter_level (0, MeterPeak);
+	meter->set (DSP::log_meter (mpeak));
 }

@@ -480,6 +480,8 @@ Push2::vblank ()
 		}
 	}
 
+	track_mix_layout->update_meters ();
+
 	_canvas->vblank();
 
 	return true;

@@ -37,6 +37,7 @@ namespace ArdourCanvas {
 namespace ArdourSurface {
 
 class Push2Knob;
+class Meter;
 
 class TrackMixLayout : public Push2Layout
 {
@@ -58,6 +59,8 @@ class TrackMixLayout : public Push2Layout
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
 
+	void update_meters ();
+
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList stripable_connections;
@@ -70,6 +73,7 @@ class TrackMixLayout : public Push2Layout
 	uint8_t selection_color;
 
 	Push2Knob* knobs[8];
+	Meter* meter;
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
 	void simple_control_change (boost::shared_ptr<ARDOUR::AutomationControl> ac, Push2::ButtonID bid);

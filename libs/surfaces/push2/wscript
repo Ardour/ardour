@@ -31,6 +31,7 @@ def build(bld):
 	    layout.cc
 	    mode.cc
 	    menu.cc
+	    meter.cc
 	    mix.cc
 	    scale.cc
 	    splash.cc

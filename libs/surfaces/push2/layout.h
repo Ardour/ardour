@@ -68,6 +68,8 @@ class Push2Layout : public sigc::trackable, public ArdourCanvas::Container
 	virtual void strip_vpot (int, int) = 0;
 	virtual void strip_vpot_touch (int, bool) = 0;
 
+	virtual void update_meters () {}
+
   protected:
 	Push2& p2;
 	ARDOUR::Session& session;
