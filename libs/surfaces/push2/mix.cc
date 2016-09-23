@@ -44,8 +44,9 @@
 #include "ardour/vca_manager.h"
 
 #include "canvas/colors.h"
-#include "canvas/rectangle.h"
 #include "canvas/line.h"
+#include "canvas/rectangle.h"
+#include "canvas/text.h"
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -400,15 +401,9 @@ MixLayout::strip_vpot (int n, int delta)
 	boost::shared_ptr<Controllable> ac = knobs[n]->controllable();
 
 	if (ac) {
-		if (ac->is_gain_like()) {
-			/* 128 steps from fader position 0 to 1.0 ..
-			 */
-			const double new_fader_position = min (1.0, max (0.0, ac->internal_to_interface (ac->get_value()) + ((1.0 / 128.0) * delta)));
-			ac->set_value (ac->interface_to_internal (new_fader_position), PBD::Controllable::UseGroup);
-		} else {
-			/* 128 steps from min to max */
-			ac->set_value (ac->get_value() + (((ac->upper() - ac->lower()) / 128.0) * delta) , PBD::Controllable::UseGroup);
-		}
+		ac->set_value (ac->interface_to_internal (
+			               min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + (delta/256.0)))),
+		               PBD::Controllable::UseGroup);
 	}
 }
 

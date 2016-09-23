@@ -1094,7 +1094,11 @@ Push2::other_vpot (int n, int delta)
 		click_gain = session->click_gain();
 		if (click_gain) {
 			boost::shared_ptr<AutomationControl> ac = click_gain->gain_control();
-			ac->set_value (ac->interface_to_internal (ac->internal_to_interface (ac->get_value()) + (delta/128.0)), PBD::Controllable::UseGroup);
+			if (ac) {
+				ac->set_value (ac->interface_to_internal (
+					               min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + (delta/256.0)))),
+				               PBD::Controllable::UseGroup);
+			}
 		}
 		break;
 	case 2:
@@ -1102,7 +1106,9 @@ Push2::other_vpot (int n, int delta)
 		if (master) {
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
-				ac->set_value (ac->interface_to_internal (ac->internal_to_interface (ac->get_value()) + (delta/128.0)), PBD::Controllable::UseGroup);
+				ac->set_value (ac->interface_to_internal (
+					               min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + (delta/256.0)))),
+				               PBD::Controllable::UseGroup);
 			}
 		}
 		break;
