@@ -3088,7 +3088,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		   capture files.
 		*/
 
-		if (!i->second->used() && (i->second->length(i->second->timeline_position() > 0))) {
+		if (!i->second->used() && (i->second->length(i->second->timeline_position()) > 0)) {
 			dead_sources.push_back (i->second);
 			i->second->drop_references ();
 		}
