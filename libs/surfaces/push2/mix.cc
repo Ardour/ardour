@@ -430,6 +430,18 @@ MixLayout::strip_vpot_touch (int n, bool touching)
 void
 MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32_t which)
 {
+	if (what_changed.contains (Properties::color)) {
+		lower_backgrounds[which]->set_fill_color (stripable[which]->presentation_info().color());
+
+		if (stripable[which]->presentation_info().selected()) {
+			lower_text[which]->set_fill_color (contrasting_text_color (stripable[which]->presentation_info().color()));
+			/* might not be a MIDI track, in which case this will
+			   do nothing
+			*/
+			p2.update_selection_color ();
+		}
+	}
+
 	if (what_changed.contains (Properties::hidden)) {
 		switch_bank (bank_start);
 	}
@@ -655,7 +667,6 @@ MixLayout::button_select_release ()
 	} else {
 
 		if (p2.modifier_state() & Push2::ModShift) {
-			std::cerr << "select prev\n";
 			/* select prev */
 
 			if (selected == 0) {
@@ -682,7 +693,6 @@ MixLayout::button_select_release ()
 
 		} else {
 
-			std::cerr << "select next\n";
 			/* select next */
 
 			if (selected == 7) {
