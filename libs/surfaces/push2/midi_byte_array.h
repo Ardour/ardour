@@ -52,6 +52,8 @@ public:
 
 	MidiByteArray( size_t count, MIDI::byte array[] );
 
+	bool compare_n (const MidiByteArray& other, MidiByteArray::size_type len) const;
+
 	/**
 		Accepts a preceding count, and then a list of bytes
 	*/

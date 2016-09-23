@@ -94,3 +94,22 @@ MidiByteArray & operator <<  (MidiByteArray & mba, const std::string & st)
 	mba.insert (mba.end(), st.begin(), st.end());
 	return mba;
 }
+
+bool
+MidiByteArray::compare_n (const MidiByteArray& other, MidiByteArray::size_type n) const
+{
+	MidiByteArray::const_iterator us = begin();
+	MidiByteArray::const_iterator them = other.begin();
+
+	while (n && us != end() && them != other.end()) {
+		if ((*us) != (*them)) {
+			return false;
+		}
+		--n;
+		++us;
+		++them;
+	}
+
+	return true;
+}
+	
