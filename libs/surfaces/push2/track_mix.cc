@@ -48,8 +48,9 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/rectangle.h"
 #include "canvas/line.h"
+#include "canvas/rectangle.h"
+#include "canvas/text.h"
 
 #include "canvas.h"
 #include "knob.h"
