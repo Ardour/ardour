@@ -47,7 +47,7 @@ Push2Menu::Push2Menu (Item* parent, vector<string> s)
 	, wrap (true)
 	, first (0)
 	, last (0)
-	, _active (UINT32_MAX)
+	, _active (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -213,7 +213,7 @@ Push2Menu::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) cons
 void
 Push2Menu::set_active (uint32_t index)
 {
-	if (index == _active) {
+	if (!parent() || (index == _active)) {
 		return;
 	}
 
