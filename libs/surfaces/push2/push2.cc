@@ -1275,6 +1275,21 @@ Push2::pad_note (int row, int col) const
 }
 
 void
+Push2::update_selection_color ()
+{
+	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
+
+	if (!current_midi_track) {
+		return;
+	}
+
+	selection_color = get_color_index (current_midi_track->presentation_info().color());
+	contrast_color = get_color_index (ArdourCanvas::HSV (current_midi_track->presentation_info().color()).opposite().color());
+
+	reset_pad_colors ();
+}
+
+void
 Push2::reset_pad_colors ()
 {
 	set_pad_scale (_scale_root, _root_octave, _mode, _in_key);

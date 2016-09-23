@@ -329,6 +329,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	int pad_note (int row, int col) const;
 	PBD::Signal0<void> PadChange;
 
+	void update_selection_color ();
+
 	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
 	PBD::Signal0<void> ScaleChange;
 
