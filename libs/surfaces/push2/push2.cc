@@ -622,18 +622,30 @@ void
 Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 {
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("Sysex, %1 bytes\n", sz));
-	MidiByteArray msg (sz, raw_bytes);
-	MidiByteArray aftertouch_mode_response (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0x0, 0xF7);
-	MidiByteArray polypress_mode_response (9, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x1F, 0x1, 0xF7);
 
-	if (msg == aftertouch_mode_response) {
-		_pressure_mode = AfterTouch;
-		PressureModeChange (AfterTouch);
-		cerr << "Pressure mod eis after\n";
-	} else if (msg == polypress_mode_response) {
-		_pressure_mode = PolyPressure;
-		PressureModeChange (PolyPressure);
-		cerr << "Pressure mod eis poly\n";
+	if (sz < 8) {
+		return;
+	}
+
+	MidiByteArray msg (sz, raw_bytes);
+	MidiByteArray push2_sysex_header (6, 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01);
+
+	if (!push2_sysex_header.compare_n (msg, 6)) {
+		return;
+	}
+
+	switch (msg[6]) {
+	case 0x1f: /* pressure mode */
+		if (msg[7] == 0x0) {
+			_pressure_mode = AfterTouch;
+			PressureModeChange (AfterTouch);
+			cerr << "Pressure mode is after\n";
+		} else {
+			_pressure_mode = PolyPressure;
+			PressureModeChange (PolyPressure);
+			cerr << "Pressure mode is poly\n";
+		}
+		break;
 	}
 }
 
