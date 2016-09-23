@@ -29,6 +29,7 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "canvas/colors.h"
+#include "canvas/text.h"
 
 #include "knob.h"
 #include "push2.h"
@@ -44,18 +45,19 @@ using namespace ArdourCanvas;
 Push2Knob::Element Push2Knob::default_elements = Push2Knob::Element (Push2Knob::Arc);
 
 Push2Knob::Push2Knob (Push2& p, Item* parent, Element e, Flags flags)
-	: Item (parent)
+	: Container (parent)
 	, p2 (p)
 	, _elements (e)
 	, _flags (flags)
 	, _r (0)
 	, _val (0)
 	, _normal (0)
-	, text (this)
 {
 	Pango::FontDescription fd ("Sans 10");
-	text.set_font_description (fd);
-	text.set_position (Duple (0, -20)); /* changed when radius changes */
+
+	text = new Text (this);
+	text->set_font_description (fd);
+	text->set_position (Duple (0, -20)); /* changed when radius changes */
 
 	/* typically over-ridden */
 
@@ -71,33 +73,16 @@ Push2Knob::~Push2Knob ()
 void
 Push2Knob::set_text_color (Color c)
 {
-	text.set_color (c);
+	text->set_color (c);
 }
 
 void
 Push2Knob::set_radius (double r)
 {
 	_r = r;
-	text.set_position (Duple (-_r, -_r - 20));
+	text->set_position (Duple (-_r, -_r - 20));
+	_bounding_box_dirty = true;
 	redraw ();
-}
-
-void
-Push2Knob::compute_bounding_box () const
-{
-	if (!_canvas || _r == 0) {
-		_bounding_box = boost::optional<Rect> ();
-		_bounding_box_dirty = false;
-		return;
-	}
-
-	if (_bounding_box_dirty) {
-		Rect r = Rect (0, 0, _r * 2.0, _r * 2.0);
-		_bounding_box = r;
-		_bounding_box_dirty = false;
-	}
-
-	add_child_bounding_boxes ();
 }
 
 void
@@ -244,6 +229,24 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	render_children (area, context);
 }
 
+ void
+Push2Knob::compute_bounding_box () const
+{
+	if (!_canvas || _r == 0) {
+		_bounding_box = boost::optional<Rect> ();
+		_bounding_box_dirty = false;
+		return;
+	}
+
+	if (_bounding_box_dirty) {
+		Rect r = Rect (_position.x - _r, _position.y - _r, _position.x + _r, _position.y + _r);
+		_bounding_box = r;
+		_bounding_box_dirty = false;
+	}
+
+	add_child_bounding_boxes ();
+}
+
 void
 Push2Knob::set_controllable (boost::shared_ptr<AutomationControl> c)
 {
@@ -273,7 +276,7 @@ Push2Knob::set_pan_azimuth_text (double pos)
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * (1.0 - pos)), (int) rint (100.0 * pos));
-	text.set (buf);
+	text->set (buf);
 }
 
 void
@@ -281,7 +284,7 @@ Push2Knob::set_pan_width_text (double val)
 {
 	char buf[16];
 	snprintf (buf, sizeof (buf), "%d%%", (int) floor (val*100));
-	text.set (buf);
+	text->set (buf);
 }
 
 void
@@ -294,7 +297,7 @@ Push2Knob::set_gain_text (double)
 	*/
 
 	snprintf (buf, sizeof (buf), "%.1f dB", accurate_coefficient_to_dB (_controllable->get_value()));
-	text.set (buf);
+	text->set (buf);
 }
 
 void
@@ -319,7 +322,7 @@ Push2Knob::controllable_changed ()
 			break;
 
 		default:
-			text.set (std::string());
+			text->set (std::string());
 		}
 	}
 

@@ -8,8 +8,11 @@
 
 #include "pbd/signals.h"
 
-#include "canvas/item.h"
-#include "canvas/text.h"
+#include "canvas/container.h"
+
+namespace ArdourCanvas {
+	class Text;
+}
 
 namespace ARDOUR {
 	class AutomationControl;
@@ -24,7 +27,7 @@ namespace ArdourSurface {
 
 class Push2;
 
-class Push2Knob : public sigc::trackable, public ArdourCanvas::Item
+class Push2Knob : public sigc::trackable, public ArdourCanvas::Container
 {
 public:
 	enum Element {
@@ -77,7 +80,7 @@ public:
 	ArdourCanvas::Color text_color;
 	ArdourCanvas::Color arc_start_color;
 	ArdourCanvas::Color arc_end_color;
-	ArdourCanvas::Text  text;
+	ArdourCanvas::Text* text;
 
 	void set_pan_azimuth_text (double);
 	void set_pan_width_text (double);
