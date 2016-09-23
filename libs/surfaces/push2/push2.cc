@@ -30,6 +30,7 @@
 #include "timecode/time.h"
 #include "timecode/bbt_time.h"
 
+#include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -1083,17 +1084,25 @@ Push2::set_state (const XMLNode & node, int version)
 void
 Push2::other_vpot (int n, int delta)
 {
+	boost::shared_ptr<Amp> click_gain;
 	switch (n) {
 	case 0:
+		/* tempo control */
 		break;
 	case 1:
+		/* metronome gain control */
+		click_gain = session->click_gain();
+		if (click_gain) {
+			boost::shared_ptr<AutomationControl> ac = click_gain->gain_control();
+			ac->set_value (ac->interface_to_internal (ac->internal_to_interface (ac->get_value()) + (delta/128.0)), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 2:
 		/* master gain control */
 		if (master) {
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
-				ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
+				ac->set_value (ac->interface_to_internal (ac->internal_to_interface (ac->get_value()) + (delta/128.0)), PBD::Controllable::UseGroup);
 			}
 		}
 		break;
