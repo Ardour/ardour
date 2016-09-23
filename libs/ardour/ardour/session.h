@@ -524,7 +524,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		FLAC_24BIT
 	};
 
-	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, Progress* p = 0);
+	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, bool only_used_sources = false, Progress* p = 0);
 
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name, bool replace_existing = false);

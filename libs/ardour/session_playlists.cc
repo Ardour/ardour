@@ -505,13 +505,16 @@ SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
 }
 
 void
-SessionPlaylists::foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor)
+SessionPlaylists::foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor, bool incl_unused)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	for (List::iterator i = playlists.begin(); i != playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			functor (*i);
 		}
+	}
+	if (!incl_unused) {
+		return;
 	}
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
 		if (!(*i)->hidden()) {

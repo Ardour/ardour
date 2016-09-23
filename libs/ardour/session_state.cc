@@ -4924,7 +4924,11 @@ static void set_progress (Progress* p, size_t n, size_t t)
 }
 
 int
-Session::archive_session (const std::string& dest, const std::string& name, ArchiveEncode compress_audio, Progress* progress)
+Session::archive_session (const std::string& dest,
+                          const std::string& name,
+                          ArchiveEncode compress_audio,
+                          bool only_used_sources,
+                          Progress* progress)
 {
 	if (dest.empty () || name.empty ()) {
 		return -1;
@@ -5014,34 +5018,68 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
 
-	// TODO: build Source list once
-	// add option to only include *used* sources (see Session::cleanup_sources)
+	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
+	if (only_used_sources) {
+		playlists->sync_all_regions_with_regions ();
+		playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+	}
 
-	if (compress_audio != NO_ENCODE) {
+	// collect audio sources for this session, calc total size for encoding
+	// add option to only include *used* sources (see Session::cleanup_sources)
+	size_t total_size = 0;
+	{
 		Glib::Threads::Mutex::Lock lm (source_lock);
-		size_t total_size = 0;
-		if (progress) {
-			for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-				if (!afs) {
-					continue;
-				}
-				if (afs->readable_length () == 0) {
-					continue;
-				}
-				total_size += afs->readable_length ();
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+			if (!afs || afs->readable_length () == 0) {
+				continue;
 			}
+
+			if (only_used_sources) {
+				if (!afs->used()) {
+					continue;
+				}
+				if (sources_used_by_this_snapshot.find (afs) == sources_used_by_this_snapshot.end ()) {
+					continue;
+				}
+			}
+
+			std::string from = afs->path();
+
+			if (compress_audio != NO_ENCODE) {
+				total_size += afs->readable_length ();
+			} else {
+				if (afs->within_session()) {
+					filemap[from] = make_new_media_path (from, name, name);
+				} else {
+					filemap[from] = make_new_media_path (from, name, name);
+					remove_dir_from_search_path (Glib::path_get_dirname (from), DataType::AUDIO);
+				}
+			}
+		}
+	}
+
+	/* encode audio */
+	if (compress_audio != NO_ENCODE) {
+		if (progress) {
 			progress->set_progress (2); // set to "encoding"
 			progress->set_progress (0);
 		}
 
+		Glib::Threads::Mutex::Lock lm (source_lock);
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs) {
+			if (!afs || afs->readable_length () == 0) {
 				continue;
 			}
-			if (afs->readable_length () == 0) {
-				continue;
+
+			if (only_used_sources) {
+				if (!afs->used()) {
+					continue;
+				}
+				if (sources_used_by_this_snapshot.find (afs) == sources_used_by_this_snapshot.end ()) {
+					continue;
+				}
 			}
 
 			orig_sources[afs] = afs->path();
@@ -5053,6 +5091,7 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 			if (progress) {
 				progress->descend ((float)afs->readable_length () / total_size);
 			}
+
 			try {
 				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
 				afs->replace_file (new_path);
@@ -5060,6 +5099,7 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 			} catch (...) {
 				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
 			}
+
 			if (progress) {
 				progress->ascend ();
 			}
@@ -5098,9 +5138,7 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 #endif
 
 			if (from.find (audiofile_dir_string) != string::npos) {
-				if (!compress_audio != NO_ENCODE) {
-					filemap[from] = make_new_media_path (from, name, name);
-				}
+				; // handled above
 			} else if (from.find (midifile_dir_string) != string::npos) {
 				filemap[from] = make_new_media_path (from, name, name);
 			} else if (from.find (videofile_dir_string) != string::npos) {
@@ -5124,28 +5162,6 @@ Session::archive_session (const std::string& dest, const std::string& name, Arch
 					filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
 				}
 			}
-		}
-	}
-
-	/* include external media */
-	{
-		Glib::Threads::Mutex::Lock lm (source_lock);
-		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
-			if (!fs) {
-				continue;
-			}
-			if (fs->within_session()) {
-				continue;
-			}
-
-			if (fs->type () != DataType::AUDIO) {
-				continue;
-			}
-
-			std::string from = fs->path();
-			filemap[from] = make_new_media_path (from, name, name);
-			remove_dir_from_search_path (Glib::path_get_dirname (from), DataType::AUDIO);
 		}
 	}
 
