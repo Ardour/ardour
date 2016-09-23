@@ -1470,6 +1470,8 @@ Push2::set_percussive_mode (bool yn)
 
 	int drum_note = 36;
 
+	fn_pad_map.clear ();
+
 	for (int row = 0; row < 8; ++row) {
 
 		for (int col = 0; col < 4; ++col) {
