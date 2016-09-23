@@ -215,10 +215,13 @@ XMLTree::write_buffer() const
 	return retval;
 }
 
+static const int PROPERTY_RESERVE_COUNT = 16;
+
 XMLNode::XMLNode(const string& n)
 	: _name(n)
 	, _is_content(false)
 {
+	_proplist.reserve (PROPERTY_RESERVE_COUNT);
 }
 
 XMLNode::XMLNode(const string& n, const string& c)
@@ -226,10 +229,12 @@ XMLNode::XMLNode(const string& n, const string& c)
 	, _is_content(true)
 	, _content(c)
 {
+	_proplist.reserve (PROPERTY_RESERVE_COUNT);
 }
 
 XMLNode::XMLNode(const XMLNode& from)
 {
+	_proplist.reserve (PROPERTY_RESERVE_COUNT);
 	*this = from;
 }
 
