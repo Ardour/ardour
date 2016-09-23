@@ -29,7 +29,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 #include <cstdio>
 #include <cstdarg>
 
@@ -50,7 +49,6 @@ typedef XMLNodeList::const_iterator              XMLNodeConstIterator;
 typedef std::vector<XMLProperty*>                XMLPropertyList;
 typedef XMLPropertyList::iterator                XMLPropertyIterator;
 typedef XMLPropertyList::const_iterator          XMLPropertyConstIterator;
-typedef std::map<std::string, XMLProperty*>      XMLPropertyMap;
 
 class LIBPBD_API XMLTree {
 public:
@@ -149,7 +147,6 @@ private:
 	std::string         _content;
 	XMLNodeList         _children;
 	XMLPropertyList     _proplist;
-	XMLPropertyMap      _propmap;
 	mutable XMLNodeList _selected_children;
 
 	void clear_lists ();

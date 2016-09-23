@@ -245,7 +245,6 @@ XMLNode::clear_lists ()
 	XMLPropertyIterator curprop;
 
 	_selected_children.clear ();
-	_propmap.clear ();
 
 	for (curchild = _children.begin(); curchild != _children.end();	++curchild) {
 		delete *curchild;
@@ -469,87 +468,99 @@ XMLNode::add_content(const string& c)
 }
 
 XMLProperty const *
-XMLNode::property(const char* n) const
+XMLNode::property(const char* name) const
 {
-	string ns(n);
-	map<string,XMLProperty*>::const_iterator iter;
+	XMLPropertyConstIterator iter = _proplist.begin();
 
-	if ((iter = _propmap.find(ns)) != _propmap.end()) {
-		return iter->second;
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			return *iter;
+		}
+		++iter;
 	}
 
 	return 0;
 }
 
 XMLProperty const *
-XMLNode::property(const string& ns) const
+XMLNode::property(const string& name) const
 {
-	map<string,XMLProperty*>::const_iterator iter;
+	XMLPropertyConstIterator iter = _proplist.begin();
 
-	if ((iter = _propmap.find(ns)) != _propmap.end()) {
-		return iter->second;
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			return *iter;
+		}
+		++iter;
 	}
-
 	return 0;
 }
 
 XMLProperty *
-XMLNode::property(const char* n)
+XMLNode::property(const char* name)
 {
-	string ns(n);
-	map<string,XMLProperty*>::iterator iter;
+	XMLPropertyIterator iter = _proplist.begin();
 
-	if ((iter = _propmap.find(ns)) != _propmap.end()) {
-		return iter->second;
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			return *iter;
+		}
+		++iter;
 	}
-
 	return 0;
 }
 
 XMLProperty *
-XMLNode::property(const string& ns)
+XMLNode::property(const string& name)
 {
-	map<string,XMLProperty*>::iterator iter;
+	XMLPropertyIterator iter = _proplist.begin();
 
-	if ((iter = _propmap.find(ns)) != _propmap.end()) {
-		return iter->second;
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			return *iter;
+		}
+		++iter;
 	}
 
 	return 0;
 }
 
 bool
-XMLNode::has_property_with_value (const string& key, const string& value) const
+XMLNode::has_property_with_value (const string& name, const string& value) const
 {
-	map<string,XMLProperty*>::const_iterator iter = _propmap.find(key);
-	if (iter != _propmap.end()) {
-		const XMLProperty* p = (iter->second);
-		return (p && p->value() == value);
+	XMLPropertyConstIterator iter = _proplist.begin();
+
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name && (*iter)->value() == value) {
+			return true;
+		}
+		++iter;
 	}
 	return false;
 }
 
 XMLProperty*
-XMLNode::add_property(const char* n, const string& v)
+XMLNode::add_property(const char* name, const string& value)
 {
-	string ns(n);
-        map<string,XMLProperty*>::iterator iter;
+	XMLPropertyIterator iter = _proplist.begin();
 
-        if ((iter = _propmap.find(ns)) != _propmap.end()) {
-                iter->second->set_value (v);
-                return iter->second;
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			(*iter)->set_value (value);
+			return *iter;
+		}
+		++iter;
 	}
 
-	XMLProperty* tmp = new XMLProperty(ns, v);
+	XMLProperty* new_property = new XMLProperty(name, value);
 
-	if (!tmp) {
+	if (!new_property) {
 		return 0;
 	}
 
-	_propmap[tmp->name()] = tmp;
-	_proplist.insert(_proplist.end(), tmp);
+	_proplist.insert(_proplist.end(), new_property);
 
-	return tmp;
+	return new_property;
 }
 
 XMLProperty*
@@ -568,16 +579,18 @@ XMLNode::add_property(const char* name, const long value)
 }
 
 void
-XMLNode::remove_property(const string& n)
+XMLNode::remove_property(const string& name)
 {
-	if (_propmap.find(n) != _propmap.end()) {
-		XMLProperty* p = _propmap[n];
-		XMLPropertyIterator i = std::find(_proplist.begin(), _proplist.end(), p);
-		if (i != _proplist.end ()) {
-			_proplist.erase (i);
+	XMLPropertyIterator iter = _proplist.begin();
+
+	while (iter != _proplist.end()) {
+		if ((*iter)->name() == name) {
+			XMLProperty* property = *iter;
+			_proplist.erase (iter);
+			delete property;
+			break;
 		}
-		delete p;
-		_propmap.erase(n);
+		++iter;
 	}
 }
 
