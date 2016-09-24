@@ -111,6 +111,8 @@ class LIBARDOUR_API MidiRegion : public Region
  	Evoral::Beats length_beats () {return _length_beats.val(); }
 	void set_length_beats (const Evoral::Beats length_beats) {_length_beats = length_beats; }
 
+	void clobber_sources (boost::shared_ptr<MidiSource> source);
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
