@@ -604,10 +604,10 @@ MidiTrackerEditor::build_automation_action_menu ()
 		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 	}
 
-	if (true /*!pan_tracks.empty()*/) {
-		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_column_visibility)));
+	if (true /*pan_tracks*/) {
+		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_columns_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		pan_automation_item->set_active (false);
+		pan_automation_item->set_active (is_pan_visible());
 
 		set<Evoral::Parameter> const & params = route->pannable()->what_can_be_automated ();
 		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
@@ -1040,6 +1040,13 @@ MidiTrackerEditor::is_mute_visible()
 		!= visible_automation_columns.end();
 };
 
+bool
+MidiTrackerEditor::is_pan_visible()
+{
+	// TODO
+	return false;
+};
+
 void
 MidiTrackerEditor::update_gain_column_visibility ()
 {
@@ -1091,20 +1098,21 @@ MidiTrackerEditor::update_mute_column_visibility ()
 }
 
 void
-MidiTrackerEditor::update_pan_column_visibility ()
+MidiTrackerEditor::update_pan_columns_visibility ()
 {
-	// bool const showit = pan_automation_item->get_active();
-	// bool changed = false;
+	const bool showit = pan_automation_item->get_active();
 
-	// for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
-	// 	if ((*i)->set_marked_for_display (showit)) {
-	// 		changed = true;
-	// 	}
-	// }
+	if (pan_columns.empty())
+		pan_columns;// TODO = add_automation_column(Evoral::Parameter(MuteAutomation));
 
-	// if (changed) {
-	// 	_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-	// }
+	// TODO
+	if (showit)
+		visible_automation_columns.insert (mute_column);
+	else
+		visible_automation_columns.erase (mute_column);
+
+	/* now trigger a redisplay */
+	redisplay_model ();
 }
 
 /////////////////////////
@@ -1440,6 +1448,12 @@ MidiTrackerEditor::build_param2actrl ()
 
 	// Mute
 	param2actrl[Evoral::Parameter(MuteAutomation)] =  route->mute_control();
+
+	// Pan
+	set<Evoral::Parameter> const & pan_params = route->pannable()->what_can_be_automated ();
+	for (set<Evoral::Parameter>::const_iterator p = pan_params.begin(); p != pan_params.end(); ++p) {
+		param2actrl[*p] = route->pannable()->automation_control(*p);
+	}
 
 	// Processors
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {

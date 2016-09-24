@@ -16,7 +16,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-// TODO: take care of midi automation
+// TODO:
+//
+// 1. Take care of pan automation.
+//
+// 2. Take care of midi automation.
+//
+// 3. Update show all automations.
+//
+// 4. Update show existing automations.
+//
+// 5. Make sure the timings are correctly calculated when the region is
+//    temporarily shifted.
+//
+// 6, Look into this trim thing.
 
 #ifndef __ardour_gtk2_midi_tracker_editor_h_
 #define __ardour_gtk2_midi_tracker_editor_h_
@@ -97,8 +110,8 @@ class MidiTrackerEditor : public ArdourWindow
   private:
 
 	///////////////////
-    // Automation	 //
-    ///////////////////
+	// Automation	 //
+	///////////////////
 
 	struct ProcessorAutomationNode {
 		Evoral::Parameter                         what;
@@ -165,9 +178,9 @@ class MidiTrackerEditor : public ArdourWindow
 	ParameterMenuMap _controller_menu_map;
 
 	size_t gain_column;
-	size_t trim_track;
+	size_t trim_column; // TODO
 	size_t mute_column;
-	size_t pan_tracks;
+	std::vector<size_t> pan_columns;
 
 	Gtk::CheckMenuItem* gain_automation_item;
 	Gtk::CheckMenuItem* trim_automation_item;
@@ -202,14 +215,15 @@ class MidiTrackerEditor : public ArdourWindow
 	// Return true if the gain column is visible
 	bool is_gain_visible ();
 	bool is_mute_visible ();
+	bool is_pan_visible ();
 	void update_gain_column_visibility ();
 	void update_trim_column_visibility ();
 	void update_mute_column_visibility ();
-	void update_pan_column_visibility ();
+	void update_pan_columns_visibility ();
 
 	////////////////////////////
-    // Other (to sort out)	  //
-    ////////////////////////////
+	// Other (to sort out)	  //
+	////////////////////////////
 
 	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiTrackerModelColumns()
@@ -331,7 +345,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	bool is_midi_track () const;
 	boost::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
-	
+
 	// Beats per row corresponds to a SnapType. I could have user an integer
 	// directly but I prefer to use the SnapType to be more consistent with the
 	// main editor.
