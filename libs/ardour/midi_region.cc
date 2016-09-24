@@ -500,6 +500,23 @@ MidiRegion::midi_source (uint32_t n) const
 	return boost::dynamic_pointer_cast<MidiSource>(source(n));
 }
 
+/* don't use this. hopefully it will go away.
+   currently used by headless-chicken session utility.
+*/
+void
+MidiRegion::clobber_sources (boost::shared_ptr<MidiSource> s)
+{
+       drop_sources();
+
+       _sources.push_back (s);
+       s->inc_use_count ();
+       _master_sources.push_back (s);
+       s->inc_use_count ();
+
+       s->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(s)));
+
+}
+
 void
 MidiRegion::model_changed ()
 {
