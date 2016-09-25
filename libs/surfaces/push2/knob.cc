@@ -111,7 +111,11 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	float value_x = cos (value_angle);
 	float value_y = sin (value_angle);
 
-	context->translate (_position.x, _position.y);  //after this, everything is based on the center of the knob
+	/* translate so that all coordinates are based on the center of the
+	 * knob (which is also its position()
+	 */
+	Duple origin = item_to_window (Duple (0, 0));
+	context->translate (origin.x, origin.y);
 	context->begin_new_path ();
 
 	float center_radius = 0.48*scale;
@@ -133,7 +137,6 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		context->set_line_width (progress_width);
 		context->arc (0, 0, progress_radius, start_angle, end_angle);
 		context->stroke ();
-
 
 		double red_start, green_start, blue_start, astart;
 		double red_end, green_end, blue_end, aend;
@@ -318,6 +321,7 @@ Push2Knob::controllable_changed ()
 
 		case ARDOUR::GainAutomation:
 		case ARDOUR::BusSendLevel:
+		case ARDOUR::TrimAutomation:
 			set_gain_text (_val);
 			break;
 
