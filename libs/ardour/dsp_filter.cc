@@ -53,7 +53,7 @@ ARDOUR::DSP::mmult (float *data, float *mult, const uint32_t n_samples) {
 
 float
 ARDOUR::DSP::log_meter (float power) {
-	// compare to gtk2_ardour/logmeter.h
+	// compare to libs/ardour/log_meter.h
 	static const float lower_db = -192.f;
 	static const float upper_db = 0.f;
 	static const float non_linearity = 8.0;
