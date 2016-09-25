@@ -192,6 +192,7 @@ public:
 
 	/* nested item ("grouping") API */
 	void add (Item *);
+	void add_front (Item *);
 	void remove (Item *);
         void clear (bool with_delete = false);
 	std::list<Item*> const & items () const {

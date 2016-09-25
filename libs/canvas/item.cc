@@ -868,6 +868,17 @@ Item::add (Item* i)
 }
 
 void
+Item::add_front (Item* i)
+{
+	/* XXX should really notify canvas about this */
+
+	_items.push_front (i);
+	i->reparent (this);
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+}
+
+void
 Item::remove (Item* i)
 {
 
