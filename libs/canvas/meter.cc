@@ -505,10 +505,13 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 	Cairo::RectangleInt background;
 	Cairo::RectangleInt area_r;
 
-	area_r.x = area.x0;
-	area_r.y = area.y0;
-	area_r.width = area.width();
-	area_r.height = area.height();
+	/* convert expose area back to item coordinate space */
+	Rect area2 = window_to_item (area);
+
+	area_r.x = area2.x0;
+	area_r.y = area2.y0;
+	area_r.width = area2.width();
+	area_r.height = area2.height();
 
 	context->set_source_rgb (0, 0, 0); // black
 	rounded_rectangle (context, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -537,8 +540,8 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 
 	if (!r1->empty()) {
 		Cairo::RectangleInt i (r1->get_extents ());
-		context->rectangle (i.x, i.y, i.width, i.height);
 		context->set_source (bgpattern);
+		context->rectangle (i.x, i.y, i.width, i.height);
 		context->fill ();
 	}
 
@@ -548,8 +551,8 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 	if (!r2->empty()) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		Cairo::RectangleInt i (r2->get_extents ());
-		context->rectangle (i.x, i.y, i.width, i.height);
 		context->set_source (fgpattern);
+		context->rectangle (i.x, i.y, i.width, i.height);
 		context->fill ();
 	}
 
@@ -594,7 +597,6 @@ Meter::horizontal_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 
 	/* convert expose area back to item coordinate space */
 	Rect area2 = window_to_item (area);
-
 
 	/* create a Cairo object so that we can use intersect and Region */
 	area_r.x = area2.x0;
