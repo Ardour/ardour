@@ -717,12 +717,10 @@ Meter::set (float lvl, float peak)
 	}
 
 	if (orientation == Vertical) {
-		//queue_vertical_redraw (old_level);
+		queue_vertical_redraw (old_level);
 	} else {
-		//queue_horizontal_redraw (old_level);
+		queue_horizontal_redraw (old_level);
 	}
-
-	redraw ();
 }
 
 void
