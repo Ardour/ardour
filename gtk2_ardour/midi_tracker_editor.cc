@@ -61,6 +61,38 @@ using namespace PBD;
 using namespace Editing;
 using Timecode::BBT_Time;
 
+//////////
+// TODO //
+//////////
+//
+// - [ ] Take care of pan automation
+//       - [ ] what is the difference between pannable and panner?
+//       - [ ] Apparently I need to create pan tracks in order to work.
+//             UPDATE: it seems uncorrelated with that.
+//
+// - [ ] Take care of midi automation.
+//
+// - [ ] Update show_all_automation.
+//
+// - [ ] Update show_existing_automation.
+//
+// - [ ] Update hide_all_automation.
+//
+// - [ ] Make sure the timings are correctly calculated when the region is
+//       temporarily shifted.
+//
+// - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
+//
+// - [ ] Move the hardwired colors in preference global menu.
+//
+// - [ ] Support audio tracks.
+//
+// - [ ] Support multiple tracks and regions.
+//
+// - [ ] Support editing.
+//
+// - [ ] Create a dedicated Gtk widget instead of Gtk::TreeView.
+
 ///////////////////////
 // MidiTrackerEditor //
 ///////////////////////
@@ -588,7 +620,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
 
-	if (false /*trim_track*/ /* TODO: what is that? */) {
+	if (false /*trim_track*/ /* TODO: support audio track */) {
 		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_column_visibility)));
 		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		trim_automation_item->set_active (false);
@@ -1043,8 +1075,13 @@ MidiTrackerEditor::is_mute_visible()
 bool
 MidiTrackerEditor::is_pan_visible()
 {
-	// TODO
-	return false;
+	bool visible = not pan_columns.empty();
+	for (std::vector<size_t>::const_iterator it = pan_columns.begin(); it != pan_columns.end(); ++it) {
+		visible = visible_automation_columns.find(*it) != visible_automation_columns.end();
+		if (not visible)
+			break;
+	}
+	return visible;
 };
 
 void
@@ -1102,14 +1139,19 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 {
 	const bool showit = pan_automation_item->get_active();
 
-	if (pan_columns.empty())
-		pan_columns;// TODO = add_automation_column(Evoral::Parameter(MuteAutomation));
+	if (pan_columns.empty()) {
+		set<Evoral::Parameter> const & params = route->pannable()->what_can_be_automated ();
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {		
+			pan_columns.push_back(add_automation_column(*p));
+		}
+	}
 
-	// TODO
-	if (showit)
-		visible_automation_columns.insert (mute_column);
-	else
-		visible_automation_columns.erase (mute_column);
+	for (std::vector<size_t>::const_iterator it = pan_columns.begin(); it != pan_columns.end(); ++it) {
+		if (showit)
+			visible_automation_columns.insert (*it);
+		else
+			visible_automation_columns.erase (*it);
+	}
 
 	/* now trigger a redisplay */
 	redisplay_model ();

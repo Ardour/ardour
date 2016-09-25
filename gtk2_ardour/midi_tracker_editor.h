@@ -16,21 +16,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-// TODO:
-//
-// 1. Take care of pan automation.
-//
-// 2. Take care of midi automation.
-//
-// 3. Update show all automations.
-//
-// 4. Update show existing automations.
-//
-// 5. Make sure the timings are correctly calculated when the region is
-//    temporarily shifted.
-//
-// 6, Look into this trim thing.
-
 #ifndef __ardour_gtk2_midi_tracker_editor_h_
 #define __ardour_gtk2_midi_tracker_editor_h_
 
@@ -178,7 +163,7 @@ class MidiTrackerEditor : public ArdourWindow
 	ParameterMenuMap _controller_menu_map;
 
 	size_t gain_column;
-	size_t trim_column; // TODO
+	size_t trim_column; // TODO: support audio tracks
 	size_t mute_column;
 	std::vector<size_t> pan_columns;
 
