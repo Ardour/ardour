@@ -32,12 +32,13 @@ namespace ArdourCanvas {
 	class Rectangle;
 	class Text;
 	class Line;
+	class VBox;
 }
 
 namespace ArdourSurface {
 
 class Push2Knob;
-class Meter;
+class LevelMeter;
 
 class TrackMixLayout : public Push2Layout
 {
@@ -73,7 +74,7 @@ class TrackMixLayout : public Push2Layout
 	uint8_t selection_color;
 
 	Push2Knob* knobs[8];
-	Meter* meter;
+	LevelMeter* meter;
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
 	void simple_control_change (boost::shared_ptr<ARDOUR::AutomationControl> ac, Push2::ButtonID bid);

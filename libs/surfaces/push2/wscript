@@ -26,12 +26,12 @@ def build(bld):
 	    interface.cc
             midi_byte_array.cc
             leds.cc
+            level_meter.cc
 	    gui.cc
 	    knob.cc
 	    layout.cc
 	    mode.cc
 	    menu.cc
-	    meter.cc
 	    mix.cc
 	    scale.cc
 	    splash.cc

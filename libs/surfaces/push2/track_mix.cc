@@ -50,14 +50,16 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "canvas/box.h"
 #include "canvas/line.h"
+#include "canvas/meter.h"
 #include "canvas/rectangle.h"
 #include "canvas/text.h"
 
 #include "canvas.h"
 #include "knob.h"
+#include "level_meter.h"
 #include "menu.h"
-#include "meter.h"
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
@@ -140,7 +142,7 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
 	name_text->set_font_description (fd);
 	name_text->set_position (Duple (10 + (4*Push2Canvas::inter_button_spacing()), 2));
 
-	meter = new Meter (this, 24, 32, Meter::Horizontal, 200);
+	meter = new LevelMeter (p2, this, 200, ArdourCanvas::Meter::Horizontal);
 	meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 50));
 
 	ControlProtocol::StripableSelectionChanged.connect (selection_connection, invalidator (*this), boost::bind (&TrackMixLayout::selection_changed, this), &p2);
@@ -426,6 +428,10 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 		solo_iso_change ();
 		solo_safe_change ();
 		monitoring_change ();
+
+		meter->set_meter (stripable->peak_meter ().get());
+	} else {
+		meter->set_meter (0);
 	}
 }
 
@@ -507,12 +513,5 @@ TrackMixLayout::update_meters ()
 		return;
 	}
 
-	boost::shared_ptr<PeakMeter> peak_meter = stripable->peak_meter ();
-
-	if (!peak_meter) {
-		return;
-	}
-
-	const float mpeak = peak_meter->meter_level (0, MeterPeak);
-	meter->set (DSP::log_meter (mpeak));
+	meter->update_meters ();
 }
