@@ -817,7 +817,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 }
 
 void
-Item::add_child_bounding_boxes() const
+Item::add_child_bounding_boxes (bool include_hidden) const
 {
 	boost::optional<Rect> self;
 	Rect bbox;
@@ -830,7 +830,7 @@ Item::add_child_bounding_boxes() const
 
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 
-		if (!(*i)->visible()) {
+		if (!(*i)->visible() && !include_hidden) {
 			continue;
 		}
 

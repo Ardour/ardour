@@ -295,7 +295,7 @@ protected:
 	/* our items, from lowest to highest in the stack */
 	std::list<Item*> _items;
 
-	void add_child_bounding_boxes() const;
+	void add_child_bounding_boxes (bool include_hidden = false) const;
 	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	Duple scroll_offset() const;
