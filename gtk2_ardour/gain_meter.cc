@@ -20,6 +20,7 @@
 #include <limits.h>
 
 #include "ardour/amp.h"
+#include "ardour/logmeter.h"
 #include "ardour/route_group.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
@@ -35,7 +36,6 @@
 #include "pbd/stacktrace.h"
 
 #include "gain_meter.h"
-#include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"

@@ -21,6 +21,7 @@
 
 #include <sigc++/bind.h>
 
+#include "ardour/logmeter.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
@@ -34,7 +35,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
-#include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
 #include "tooltips.h"

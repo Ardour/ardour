@@ -36,6 +36,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
 #include "ardour/dB.h"
+#include "ardour/logmeter.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
@@ -44,7 +45,6 @@
 
 #include "audio_clock.h"
 #include "export_report.h"
-#include "logmeter.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"

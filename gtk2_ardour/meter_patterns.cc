@@ -24,9 +24,10 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
+#include "ardour/logmeter.h"
 #include <ardour/rc_configuration.h>
+
 #include "utils.h"
-#include "logmeter.h"
 #include "meter_patterns.h"
 #include "ui_config.h"
 

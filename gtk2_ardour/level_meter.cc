@@ -20,13 +20,13 @@
 #include <limits.h>
 
 #include "ardour/meter.h"
+#include "ardour/logmeter.h"
 
 #include <gtkmm2ext/utils.h>
 #include "pbd/fastlog.h"
 
 #include "level_meter.h"
 #include "utils.h"
-#include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
