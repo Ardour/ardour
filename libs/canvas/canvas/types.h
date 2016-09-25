@@ -31,7 +31,7 @@
 #include "canvas/visibility.h"
 
 namespace Cairo {
- 	class Context;
+	class Context;
 }
 
 namespace ArdourCanvas
@@ -140,6 +140,11 @@ struct LIBCANVAS_API Rect
 		return Rect (x0 - amount, y0 - amount,
 			     canvas_safe_add (x1, amount),
 			     canvas_safe_add (y1, amount));
+	}
+	Rect expand (Distance top, Distance right, Distance bottom, Distance left) const throw () {
+		return Rect (x0 - left, y0 - top,
+			     canvas_safe_add (x1, right),
+			     canvas_safe_add (y1, bottom));
 	}
 
 	Rect shrink (Distance amount) const throw () {
