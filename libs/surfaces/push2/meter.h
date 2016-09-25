@@ -87,8 +87,6 @@ class Meter : public ArdourCanvas::Item {
 	Orientation orientation;
 	mutable Cairo::RectangleInt pixrect;
 	mutable Cairo::RectangleInt last_peak_rect;
-	gint request_width;
-	gint request_height;
 	unsigned long hold_cnt;
 	unsigned long hold_state;
 	bool bright_hold;
@@ -105,19 +103,13 @@ class Meter : public ArdourCanvas::Item {
 
 	static bool no_rgba_overlay;
 
-	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
-		int, int, int *, float *, int, bool);
-	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
-		int, int, int *, float *, int);
-	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_meter (
-		int, int, int *, float *, int);
+	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (int, int, int *, float *, int, bool);
+	static Cairo::RefPtr<Cairo::Pattern> vertical_meter_pattern (int, int, int *, float *, int);
+	static Cairo::RefPtr<Cairo::Pattern> horizontal_meter_pattern (int, int, int *, float *, int);
 
-	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
-		int, int, int *, bool, bool);
-	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
-		int, int, int *, bool);
-	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_background (
-		int, int, int *, bool);
+	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (int, int, int *, bool, bool);
+	static Cairo::RefPtr<Cairo::Pattern> vertical_background (int, int, int *, bool);
+	static Cairo::RefPtr<Cairo::Pattern> horizontal_background (int, int, int *, bool);
 
 	struct Pattern10MapKey {
 		Pattern10MapKey (

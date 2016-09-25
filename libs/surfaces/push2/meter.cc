@@ -28,12 +28,13 @@
 #include <glibmm.h>
 
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/rgb_macros.h>
 
 #include "canvas/canvas.h"
-#include "meter.h"
+#include "canvas/utils.h"
+#include "canvas/colors.h"
 
-#define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
-#define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
+#include "meter.h"
 
 using namespace Glib;
 using namespace Gtkmm2ext;
@@ -112,13 +113,13 @@ Meter::Meter (Item* parent, long hold, unsigned long dimen, Orientation o, int l
 	if (orientation == Vertical) {
 		pixheight = len;
 		pixwidth = dimen;
-		fgpattern = request_vertical_meter(pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, _bgc, false);
+		fgpattern = vertical_meter_pattern (pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
+		bgpattern = vertical_background (pixwidth + 2, pixheight + 2, _bgc, false);
 	} else {
 		pixheight = dimen;
 		pixwidth = len;
-		fgpattern = request_horizontal_meter(pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, _bgc, false);
+		fgpattern = horizontal_meter_pattern (pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
+		bgpattern = horizontal_background (pixwidth + 2, pixheight + 2, _bgc, false);
 	}
 
 	pixrect.width = pixwidth;
@@ -347,7 +348,7 @@ Meter::generate_meter_background (int width, int height, int *clr, bool shade, b
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-Meter::request_vertical_meter (int width, int height, int *clr, float *stp, int styleflags)
+Meter::vertical_meter_pattern (int width, int height, int *clr, float *stp, int styleflags)
 {
 	height = max(height, min_pattern_metric_size);
 	height = min(height, max_pattern_metric_size);
@@ -364,15 +365,14 @@ Meter::request_vertical_meter (int width, int height, int *clr, float *stp, int 
 	}
 	// TODO flush pattern cache if it gets too large
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
-		width, height, clr, stp, styleflags, false);
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (width, height, clr, stp, styleflags, false);
 	vm_pattern_cache[key] = p;
 
 	return p;
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-Meter::request_vertical_background (int width, int height, int *bgc, bool shade)
+Meter::vertical_background (int width, int height, int *bgc, bool shade)
 {
 	height = max(height, min_pattern_metric_size);
 	height = min(height, max_pattern_metric_size);
@@ -380,20 +380,20 @@ Meter::request_vertical_background (int width, int height, int *bgc, bool shade)
 
 	const PatternBgMapKey key (width, height, bgc[0], bgc[1], shade);
 	PatternBgMap::iterator i;
+
 	if ((i = vb_pattern_cache.find (key)) != vb_pattern_cache.end()) {
 		return i->second;
 	}
 	// TODO flush pattern cache if it gets too large
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
-		width, height, bgc, shade, false);
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (width, height, bgc, shade, false);
 	vb_pattern_cache[key] = p;
 
 	return p;
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-Meter::request_horizontal_meter (int width, int height, int *clr, float *stp, int styleflags)
+Meter::horizontal_meter_pattern (int width, int height, int *clr, float *stp, int styleflags)
 {
 	width = max(width, min_pattern_metric_size);
 	width = min(width, max_pattern_metric_size);
@@ -410,16 +410,14 @@ Meter::request_horizontal_meter (int width, int height, int *clr, float *stp, in
 	}
 	// TODO flush pattern cache if it gets too large
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
-		height, width, clr, stp, styleflags, true);
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (height, width, clr, stp, styleflags, true);
 
 	hm_pattern_cache[key] = p;
 	return p;
 }
 
 Cairo::RefPtr<Cairo::Pattern>
-Meter::request_horizontal_background(
-		int width, int height, int *bgc, bool shade)
+Meter::horizontal_background (int width, int height, int *bgc, bool shade)
 {
 	width = max(width, min_pattern_metric_size);
 	width = min(width, max_pattern_metric_size);
@@ -432,8 +430,7 @@ Meter::request_horizontal_background(
 	}
 	// TODO flush pattern cache if it gets too large
 
-	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
-		height, width, bgc, shade, true);
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (height, width, bgc, shade, true);
 
 	hb_pattern_cache[key] = p;
 
@@ -493,6 +490,11 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
+	/* translate so that item coordinates match window coordinates */
+	Duple origin (0, 0);
+	origin = item_to_window (origin);
+	context->translate (origin.x, origin.y);
+
 	Cairo::RefPtr<Cairo::Region> r1 = Cairo::Region::create (area_r);
 	r1->intersect (background);
 
@@ -542,6 +544,8 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
+
+	context->translate (-origin.x, -origin.y);
 }
 
 void
@@ -551,48 +555,61 @@ Meter::horizontal_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 	Cairo::RectangleInt background;
 	Cairo::RectangleInt area_r;
 
+	/* convert expose area back to item coordinate space */
 	Rect area2 = window_to_item (area);
 
+
+	/* create a Cairo object so that we can use intersect and Region */
 	area_r.x = area2.x0;
 	area_r.y = area2.y0;
 	area_r.width = area2.width();
 	area_r.height = area2.height();
 
+	/* draw the edge (rounded corners) */
 	context->set_source_rgb (0, 0, 0); // black
 	rounded_rectangle (context, 0, 0, pixwidth + 2, pixheight + 2, 2);
 	context->stroke ();
 
+	/* horizontal meter extends from left to right. Compute the right edge */
 	right_of_meter = (gint) floor (pixwidth * current_level);
 
-	/* reset the height & origin of the rect that needs to show the pixbuf
-	 */
-
+	/* reset the width the rect that needs to show the pattern of the meter */
 	pixrect.width = right_of_meter;
 
+	/* compute a rect for the part of the meter that is all background */
 	background.x = 1 + right_of_meter;
 	background.y = 1;
 	background.width = pixwidth - right_of_meter;
 	background.height = pixheight;
 
-	Cairo::RefPtr<Cairo::Region> r1 = Cairo::Region::create (area_r);
-	r1->intersect (background);
+	/* translate so that item coordinates match window coordinates */
+	Duple origin (0, 0);
+	origin = item_to_window (origin);
+	context->translate (origin.x, origin.y);
 
-	if (!r1->empty()) {
-		Cairo::RectangleInt i (r1->get_extents ());
-		context->rectangle (i.x, i.y, i.width, i.height);
+	Cairo::RefPtr<Cairo::Region> r;
+
+	r = Cairo::Region::create (area_r);
+	r->intersect (background);
+
+	if (!r->empty()) {
+		/* draw the background part */
+		Cairo::RectangleInt i (r->get_extents ());
 		context->set_source (bgpattern);
+		context->rectangle (i.x, i.y, i.width, i.height);
 		context->fill ();
+
 	}
 
-	Cairo::RefPtr<Cairo::Region> r2  = Cairo::Region::create (area_r);
-	r2->intersect (pixrect);
+	r  = Cairo::Region::create (area_r);
+	r->intersect (pixrect);
 
-	if (!r2->empty()) {
-		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
-		Cairo::RectangleInt i (r2->get_extents ());
-		cerr << "h-render-fg: " << i.x << ", " << i.y << ' ' << i.width << " + " << i.height << endl;
-		context->rectangle (i.x, i.y, i.width, i.height);
+	if (!r->empty()) {
+		// draw the part of the meter image that we need.
+		Cairo::RectangleInt i (r->get_extents ());
+		Duple d (i.x, i.y);
 		context->set_source (fgpattern);
+		context->rectangle (i.x, i.y, i.width, i.height);
 		context->fill ();
 	}
 
@@ -622,6 +639,8 @@ Meter::horizontal_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
+
+	context->translate (-origin.x, -origin.y);
 }
 
 void
@@ -827,9 +846,9 @@ Meter::set_highlight (bool onoff)
 	}
 	highlight = onoff;
 	if (orientation == Vertical) {
-		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
+		bgpattern = vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
 	} else {
-		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
+		bgpattern = horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
 	}
 	redraw ();
 }
