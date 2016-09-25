@@ -142,8 +142,19 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
 	name_text->set_font_description (fd);
 	name_text->set_position (Duple (10 + (4*Push2Canvas::inter_button_spacing()), 2));
 
-	meter = new LevelMeter (p2, this, 200, ArdourCanvas::Meter::Horizontal);
-	meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 50));
+	meter = new LevelMeter (p2, this, 300, ArdourCanvas::Meter::Horizontal);
+	meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 30));
+
+	Pango::FontDescription fd2 ("Sans 18");
+	bbt_text = new Text (this);
+	bbt_text->set_font_description (fd2);
+	bbt_text->set_color (p2.get_color (Push2::LightBackground));
+	bbt_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 60));
+
+	minsec_text = new Text (this);
+	minsec_text->set_font_description (fd2);
+	minsec_text->set_color (p2.get_color (Push2::LightBackground));
+	minsec_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 90));
 
 	ControlProtocol::StripableSelectionChanged.connect (selection_connection, invalidator (*this), boost::bind (&TrackMixLayout::selection_changed, this), &p2);
 }
@@ -158,6 +169,10 @@ TrackMixLayout::~TrackMixLayout ()
 void
 TrackMixLayout::selection_changed ()
 {
+	if (!parent()) {
+		return;
+	}
+
 	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
 	if (s) {
 		set_stripable (s);
@@ -267,16 +282,15 @@ TrackMixLayout::button_right ()
 void
 TrackMixLayout::simple_control_change (boost::shared_ptr<AutomationControl> ac, Push2::ButtonID bid)
 {
-	if (!ac) {
+	if (!ac || !parent()) {
 		return;
 	}
 
 	Push2::Button* b = p2.button_by_id (bid);
 
-	if (!bid) {
+	if (!b) {
 		return;
 	}
-
 
 	if (ac->get_value()) {
 		b->set_color (selection_color);
@@ -288,23 +302,61 @@ TrackMixLayout::simple_control_change (boost::shared_ptr<AutomationControl> ac, 
 }
 
 void
-TrackMixLayout::solo_change ()
+TrackMixLayout::solo_mute_change ()
 {
 	if (!stripable) {
 		return;
 	}
 
-	simple_control_change (stripable->solo_control(), Push2::Lower2);
-}
+	Push2::Button* b = p2.button_by_id (Push2::Lower2);
 
-void
-TrackMixLayout::mute_change ()
-{
-	if (!stripable) {
-		return;
+	if (b) {
+		boost::shared_ptr<SoloControl> sc = stripable->solo_control();
+
+		if (sc) {
+			if (sc->soloed_by_self_or_masters()) {
+				b->set_color (selection_color);
+				b->set_state (Push2::LED::OneShot24th);
+			} else if (sc->soloed_by_others_upstream() || sc->soloed_by_others_downstream()) {
+				b->set_color (selection_color);
+				b->set_state (Push2::LED::Blinking8th);
+			} else {
+				b->set_color (Push2::LED::DarkGray);
+				b->set_state (Push2::LED::OneShot24th);
+			}
+		} else {
+			b->set_color (Push2::LED::DarkGray);
+			b->set_state (Push2::LED::OneShot24th);
+		}
+
+		p2.write (b->state_msg());
 	}
 
-	simple_control_change (stripable->mute_control(), Push2::Lower1);
+	b = p2.button_by_id (Push2::Lower1);
+
+	if (b) {
+		boost::shared_ptr<MuteControl> mc = stripable->mute_control();
+
+		if (mc) {
+			if (mc->muted_by_self_or_masters()) {
+				b->set_color (selection_color);
+				b->set_state (Push2::LED::OneShot24th);
+			} else if (mc->muted_by_others_soloing()) {
+				b->set_color (selection_color);
+				b->set_state (Push2::LED::Blinking8th);
+			} else {
+				b->set_color (Push2::LED::DarkGray);
+				b->set_state (Push2::LED::OneShot24th);
+			}
+
+		} else {
+			b->set_color (Push2::LED::DarkGray);
+			b->set_state (Push2::LED::OneShot24th);
+		}
+
+		p2.write (b->state_msg());
+	}
+
 }
 
 void
@@ -396,8 +448,8 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 		stripable->PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
 		stripable->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
 
-		stripable->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_change, this), &p2);
-		stripable->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::mute_change, this), &p2);
+		stripable->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &p2);
+		stripable->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &p2);
 		stripable->solo_isolate_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_iso_change, this), &p2);
 		stripable->solo_safe_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_safe_change, this), &p2);
 
@@ -422,8 +474,7 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 
 		name_changed ();
 		color_changed ();
-		solo_change ();
-		mute_change ();
+		solo_mute_change ();
 		rec_enable_change ();
 		solo_iso_change ();
 		solo_safe_change ();
@@ -447,7 +498,7 @@ TrackMixLayout::name_changed ()
 {
 	if (stripable) {
 		/* poor-man's right justification */
-		char buf[96];
+		char buf[92];
 		snprintf (buf, sizeof (buf), "%*s", (int) sizeof (buf) - 1, stripable->name().c_str());
 		name_text->set (buf);
 	}
@@ -514,4 +565,56 @@ TrackMixLayout::update_meters ()
 	}
 
 	meter->update_meters ();
+}
+
+void
+TrackMixLayout::update_clocks ()
+{
+	framepos_t pos = session.audible_frame();
+	bool negative = false;
+
+	if (pos < 0) {
+		pos = -pos;
+		negative = true;
+	}
+
+	char buf[16];
+	Timecode::BBT_Time BBT = session.tempo_map().bbt_at_frame (pos);
+
+#define BBT_BAR_CHAR "|"
+
+	if (negative) {
+		snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
+			  BBT.bars, BBT.beats, BBT.ticks);
+	} else {
+		snprintf (buf, sizeof (buf), " %03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
+			  BBT.bars, BBT.beats, BBT.ticks);
+	}
+
+	bbt_text->set (buf);
+
+	framecnt_t left;
+	int hrs;
+	int mins;
+	int secs;
+	int millisecs;
+
+	const double frame_rate = session.frame_rate ();
+
+	left = pos;
+	hrs = (int) floor (left / (frame_rate * 60.0f * 60.0f));
+	left -= (framecnt_t) floor (hrs * frame_rate * 60.0f * 60.0f);
+	mins = (int) floor (left / (frame_rate * 60.0f));
+	left -= (framecnt_t) floor (mins * frame_rate * 60.0f);
+	secs = (int) floor (left / (float) frame_rate);
+	left -= (framecnt_t) floor ((double)(secs * frame_rate));
+	millisecs = floor (left * 1000.0 / (float) frame_rate);
+
+	if (negative) {
+		snprintf (buf, sizeof (buf), "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	} else {
+		snprintf (buf, sizeof (buf), " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	}
+
+	minsec_text->set (buf);
 }

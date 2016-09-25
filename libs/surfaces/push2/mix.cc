@@ -51,8 +51,9 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "canvas.h"
-#include "mix.h"
 #include "knob.h"
+#include "level_meter.h"
+#include "mix.h"
 #include "push2.h"
 #include "utils.h"
 
@@ -83,6 +84,7 @@ MixLayout::MixLayout (Push2& p, Session& s)
 	upper_line->set_outline_color (p2.get_color (Push2::LightBackground));
 
 	Pango::FontDescription fd2 ("Sans 10");
+
 	for (int n = 0; n < 8; ++n) {
 
 		/* background for text labels for knob function */
@@ -133,11 +135,10 @@ MixLayout::MixLayout (Push2& p, Session& s)
 		t->set (txt);
 		upper_text.push_back (t);
 
-		/* knobs */
+		/* GainMeters */
 
-		knobs[n] = new Push2Knob (p2, this);
-		knobs[n]->set_position (Duple (60 + (n*Push2Canvas::inter_button_spacing()), 95));
-		knobs[n]->set_radius (25);
+		gain_meter[n] = new GainMeter (this, p2);
+		gain_meter[n]->set_position (Duple (40 + (n * Push2Canvas::inter_button_spacing()), 95));
 
 		/* stripable names */
 
@@ -259,95 +260,110 @@ MixLayout::show_vpot_mode ()
 	case Volume:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->gain_control());
+				gain_meter[s]->knob->set_controllable (stripable[s]->gain_control());
+				boost::shared_ptr<PeakMeter> pm = stripable[s]->peak_meter(); 
+				if (pm) {
+					gain_meter[s]->meter->set_meter (pm.get());
+				} else {
+					gain_meter[s]->meter->set_meter (0);
+				}
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->meter->set_meter (0);
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->show ();
 		}
 		n = 0;
 		break;
 	case PanAzimuth:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->pan_azimuth_control());
-				knobs[s]->add_flag (Push2Knob::ArcToZero);
+				gain_meter[s]->knob->set_controllable (stripable[s]->pan_azimuth_control());
+				gain_meter[s]->knob->add_flag (Push2Knob::ArcToZero);
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
+			gain_meter[s]->meter->hide ();
 		}
 		n = 1;
 		break;
 	case PanWidth:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->pan_width_control());
+				gain_meter[s]->knob->set_controllable (stripable[s]->pan_width_control());
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 2;
 		break;
 	case Send1:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->send_level_controllable (0));
+				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (0));
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 3;
 		break;
 	case Send2:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->send_level_controllable (1));
+				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (1));
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 4;
 		break;
 	case Send3:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->send_level_controllable (2));
+				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (2));
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 5;
 		break;
 	case Send4:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->send_level_controllable (3));
+				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (3));
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 6;
 		break;
 	case Send5:
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
-				knobs[s]->set_controllable (stripable[s]->send_level_controllable (4));
+				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (4));
 			} else {
-				knobs[s]->set_controllable (boost::shared_ptr<AutomationControl>());
+				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
 			}
-			knobs[s]->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
+			gain_meter[s]->meter->hide ();
 		}
 		n = 7;
 		break;
@@ -398,7 +414,7 @@ MixLayout::button_lower (uint32_t n)
 void
 MixLayout::strip_vpot (int n, int delta)
 {
-	boost::shared_ptr<Controllable> ac = knobs[n]->controllable();
+	boost::shared_ptr<Controllable> ac = gain_meter[n]->knob->controllable();
 
 	if (ac) {
 		ac->set_value (ac->interface_to_internal (
@@ -566,9 +582,9 @@ MixLayout::switch_bank (uint32_t base)
 
 			solo_mute_changed (n);
 
-			knobs[n]->set_text_color (stripable[n]->presentation_info().color());
-			knobs[n]->set_arc_start_color (stripable[n]->presentation_info().color());
-			knobs[n]->set_arc_end_color (stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_text_color (stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_arc_start_color (stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_arc_end_color (stripable[n]->presentation_info().color());
 		}
 
 
@@ -731,4 +747,27 @@ void
 MixLayout::button_up ()
 {
 	p2.scroll_up_1_track ();
+}
+
+void
+MixLayout::update_meters ()
+{
+	if (vpot_mode != Volume) {
+		return;
+	}
+
+	for (uint32_t n = 0; n < 8; ++n) {
+		gain_meter[n]->meter->update_meters ();
+	}
+}
+
+MixLayout::GainMeter::GainMeter (Item* parent, Push2& p2)
+	: Container (parent)
+{
+	knob = new Push2Knob (p2, this);
+	knob->set_radius (25);
+	/* leave position at (0,0) */
+
+	meter = new LevelMeter (p2, this, 90, ArdourCanvas::Meter::Vertical);
+	meter->set_position (Duple (40, -60));
 }

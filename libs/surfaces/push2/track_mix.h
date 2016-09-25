@@ -61,6 +61,7 @@ class TrackMixLayout : public Push2Layout
 	void strip_vpot_touch (int, bool);
 
 	void update_meters ();
+	void update_clocks ();
 
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
@@ -71,6 +72,8 @@ class TrackMixLayout : public Push2Layout
 	std::vector<ArdourCanvas::Text*> upper_text;
 	std::vector<ArdourCanvas::Text*> lower_text;
 	ArdourCanvas::Text* name_text;
+	ArdourCanvas::Text* bbt_text;
+	ArdourCanvas::Text* minsec_text;
 	uint8_t selection_color;
 
 	Push2Knob* knobs[8];
@@ -86,8 +89,7 @@ class TrackMixLayout : public Push2Layout
 	void name_changed ();
 	void color_changed ();
 
-	void solo_change ();
-	void mute_change ();
+	void solo_mute_change ();
 	void rec_enable_change ();
 	void solo_iso_change ();
 	void solo_safe_change ();

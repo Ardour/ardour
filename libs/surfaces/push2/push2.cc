@@ -480,7 +480,10 @@ Push2::vblank ()
 		}
 	}
 
-	track_mix_layout->update_meters ();
+	if (_current_layout) {
+		_current_layout->update_meters ();
+		_current_layout->update_clocks ();
+	}
 
 	_canvas->vblank();
 

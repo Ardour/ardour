@@ -35,6 +35,7 @@ namespace ArdourCanvas {
 namespace ArdourSurface {
 
 class Push2Knob;
+class LevelMeter;
 
 class MixLayout : public Push2Layout
 {
@@ -59,6 +60,8 @@ class MixLayout : public Push2Layout
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
 
+	void update_meters ();
+
   private:
 	ArdourCanvas::Rectangle* bg;
 	ArdourCanvas::Line* upper_line;
@@ -66,7 +69,15 @@ class MixLayout : public Push2Layout
 	std::vector<ArdourCanvas::Text*> lower_text;
 	std::vector<ArdourCanvas::Rectangle*> upper_backgrounds;
 	std::vector<ArdourCanvas::Rectangle*> lower_backgrounds;
-	Push2Knob* knobs[8];
+
+	struct GainMeter : public ArdourCanvas::Container {
+		GainMeter (Item* parent, Push2&);
+
+		Push2Knob* knob;
+		LevelMeter* meter;
+	};
+
+	GainMeter* gain_meter[8];
 
 	/* stripables */
 
