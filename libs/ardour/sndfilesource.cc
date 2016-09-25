@@ -342,7 +342,7 @@ SndFileSource::open ()
 		return -1;
 	}
 
-	if (_info.format & SF_FORMAT_FLAC) {
+	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
 		assert (!writable());
 		_sndfile = sf_open_fd (fd, SFM_READ, &_info, true);
 	} else {
@@ -776,7 +776,7 @@ SndFileSource::set_header_timeline_position ()
 framecnt_t
 SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 {
-	if (_info.format & SF_FORMAT_FLAC) {
+	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
 		assert (_length == frame_pos);
 	}
 	else if (_sndfile == 0 || sf_seek (_sndfile, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
