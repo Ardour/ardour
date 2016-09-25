@@ -43,6 +43,7 @@ Box::Box (Item* parent, Orientation o)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
+	, homogenous (false)
 {
 	self = new Rectangle (this);
 	self->set_outline (false);
@@ -56,6 +57,7 @@ Box::Box (Item* parent, Duple const & p, Orientation o)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
+	, homogenous (false)
 {
 	self = new Rectangle (this);
 	self->set_outline (false);
@@ -170,7 +172,7 @@ Box::reposition_children ()
 			boost::optional<Rect> bb = (*i)->bounding_box();
 			if (bb) {
 				largest_height = std::max (largest_height, bb.get().height());
-				largest_width = std::max (largest_height, bb.get().width());
+				largest_width = std::max (largest_width, bb.get().width());
 			}
 		}
 	}
@@ -204,6 +206,7 @@ Box::reposition_children ()
 			}
 
 			previous_edge = previous_edge.translate (Duple (0, spacing + shift));
+
 		} else {
 
 			Distance shift = 0;
@@ -226,7 +229,7 @@ Box::reposition_children ()
 				}
 			}
 
-			previous_edge = previous_edge.translate (Duple (0, spacing + shift));
+			previous_edge = previous_edge.translate (Duple (spacing + shift, 0));
 		}
 	}
 
