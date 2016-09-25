@@ -29,9 +29,11 @@
 
 #include "canvas/item.h"
 
-namespace ArdourSurface {
+namespace ArdourCanvas {
 
-class Meter : public ArdourCanvas::Item {
+class Canvas;
+
+class Meter : public Item {
   public:
 	enum Orientation {
 		Horizontal,
@@ -39,6 +41,22 @@ class Meter : public ArdourCanvas::Item {
 	};
 
 	Meter (Item* parent,
+	       long hold_cnt, unsigned long width, Orientation, int len=0,
+	       int clr0=0x008800ff, int clr1=0x008800ff,
+	       int clr2=0x00ff00ff, int clr3=0x00ff00ff,
+	       int clr4=0xffaa00ff, int clr5=0xffaa00ff,
+	       int clr6=0xffff00ff, int clr7=0xffff00ff,
+	       int clr8=0xff0000ff, int clr9=0xff0000ff,
+	       int bgc0=0x333333ff, int bgc1=0x444444ff,
+	       int bgh0=0x991122ff, int bgh1=0x551111ff,
+	       float stp0 = 55.0, // log_meter(-18);
+	       float stp1 = 77.5, // log_meter(-9);
+	       float stp2 = 92.5, // log_meter(-3); // 95.0, // log_meter(-2);
+	       float stp3 = 100.0,
+	       int styleflags = 3
+		);
+
+	Meter (ArdourCanvas::Canvas* canvas,
 	       long hold_cnt, unsigned long width, Orientation, int len=0,
 	       int clr0=0x008800ff, int clr1=0x008800ff,
 	       int clr2=0x00ff00ff, int clr3=0x00ff00ff,
@@ -94,6 +112,15 @@ class Meter : public ArdourCanvas::Item {
 	float current_peak;
 	float current_user_level;
 	bool highlight;
+
+	void init (int clr0, int clr1, int clr2, int clr3,
+	           int clr4, int clr5, int clr6, int clr7,
+	           int clr8, int clr9,
+	           int bgc0, int bgc1,
+	           int bgh0, int bgh1,
+	           float stp0, float stp1,
+	           float stp2, float stp3,
+	           int dimen, int len);
 
 	void vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 	void queue_vertical_redraw (float old_level);

@@ -31,16 +31,14 @@
 #include <gtkmm2ext/rgb_macros.h>
 
 #include "canvas/canvas.h"
-#include "canvas/utils.h"
 #include "canvas/colors.h"
-
-#include "meter.h"
+#include "canvas/meter.h"
+#include "canvas/utils.h"
 
 using namespace Glib;
-using namespace Gtkmm2ext;
 using namespace std;
 using namespace ArdourCanvas;
-using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 
 int Meter::min_pattern_metric_size = 16;
 int Meter::max_pattern_metric_size = 1024;
@@ -73,6 +71,45 @@ Meter::Meter (Item* parent, long hold, unsigned long dimen, Orientation o, int l
 	, current_level(0)
 	, current_peak(0)
 	, highlight(false)
+{
+	init (clr0, clr1, clr2, clr3, clr4, clr5, clr6, clr7, clr8, clr9, bgc0, bgc1, bgh0, bgh1, stp0, stp1, stp2,  stp3, dimen, len);
+}
+
+Meter::Meter (Canvas* canvas, long hold, unsigned long dimen, Orientation o, int len,
+		int clr0, int clr1, int clr2, int clr3,
+		int clr4, int clr5, int clr6, int clr7,
+		int clr8, int clr9,
+		int bgc0, int bgc1,
+		int bgh0, int bgh1,
+		float stp0, float stp1,
+		float stp2, float stp3,
+		int styleflags
+		)
+	: Item (canvas)
+	, pixheight(0)
+	, pixwidth(0)
+	, _styleflags(styleflags)
+	, orientation(o)
+	, hold_cnt(hold)
+	, hold_state(0)
+	, bright_hold(false)
+	, current_level(0)
+	, current_peak(0)
+	, highlight(false)
+{
+	init (clr0, clr1, clr2, clr3, clr4, clr5, clr6, clr7, clr8, clr9, bgc0, bgc1, bgh0, bgh1, stp0, stp1, stp2,  stp3, dimen, len);
+}
+
+void
+Meter::init (int clr0, int clr1, int clr2, int clr3,
+             int clr4, int clr5, int clr6, int clr7,
+             int clr8, int clr9,
+             int bgc0, int bgc1,
+             int bgh0, int bgh1,
+             float stp0, float stp1,
+             float stp2, float stp3,
+             int dimen,
+             int len)
 {
 	last_peak_rect.width = 0;
 	last_peak_rect.height = 0;
