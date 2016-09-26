@@ -82,7 +82,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 }
 
 boost::shared_ptr<MidiSource>
-ensure_per_region_source (Session* session, string newsrc_path, boost::shared_ptr<MidiRegion> region)
+ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region, string newsrc_path)
 {
 	boost::shared_ptr<MidiSource> newsrc;
 
@@ -139,7 +139,7 @@ ensure_per_region_source (Session* session, string newsrc_path, boost::shared_pt
 }
 
 boost::shared_ptr<MidiSource>
-ensure_per_source_source (Session* session, string newsrc_path, boost::shared_ptr<MidiRegion> region)
+ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region, string newsrc_path)
 {
 	boost::shared_ptr<MidiSource> newsrc;
 
@@ -215,10 +215,17 @@ apply_one_source_per_region_fix (Session* session)
 		boost::shared_ptr<MidiRegion> mr = 0;
 
 		if ((mr = boost::dynamic_pointer_cast<MidiRegion>((*i).second)) != 0) {
+
+			if (!mr->midi_source()->writable()) {
+				/* we know the midi dir is writable, so this region is external. leave it alone*/
+				cout << mr->source()->name() << "is not writable. skipping." << endl;
+				continue;
+			}
+
 			reset_start_and_length (session, mr);
 			string newsrc_filename = mr->name() +  "-a54-compat.mid";
 			string newsrc_path = Glib::build_filename (session->session_directory().midi_path(), newsrc_filename);
-			boost::shared_ptr<MidiSource> newsrc = ensure_per_region_source (session, newsrc_path, mr);
+			boost::shared_ptr<MidiSource> newsrc = ensure_per_region_source (session, mr, newsrc_path);
 			mr->clobber_sources (newsrc);
 		}
 	}
@@ -242,13 +249,19 @@ apply_one_source_per_source_fix (Session* session)
 		map<PBD::ID, boost::shared_ptr<MidiSource> >::iterator src_it;
 
 		if ((mr = boost::dynamic_pointer_cast<MidiRegion>((*i).second)) != 0) {
+
+			if (!mr->midi_source()->writable()) {
+				cout << mr->source()->name() << "is not writable. skipping." << endl;
+				continue;
+			}
+
 			reset_start_and_length (session, mr);
 
 			if ((src_it = old_source_to_new.find (mr->midi_source()->id())) == old_source_to_new.end()) {
 				string newsrc_filename = mr->source()->name() +  "-a54-compat.mid";
 				string newsrc_path = Glib::build_filename (session->session_directory().midi_path(), newsrc_filename);
 
-				boost::shared_ptr<MidiSource> newsrc = ensure_per_source_source (session, newsrc_path, mr);
+				boost::shared_ptr<MidiSource> newsrc = ensure_per_source_source (session, mr, newsrc_path);
 
 				old_source_to_new.insert (make_pair (mr->midi_source()->id(), newsrc));
 
@@ -564,9 +577,14 @@ int main (int argc, char* argv[])
 		SessionUtils::init();
 		Session* s = 0;
 
-		cout <<  UTILNAME << ": Loading snapshot." << endl;
+		cout << UTILNAME << ": Loading snapshot." << endl;
 
 		s = SessionUtils::load_session (argv[optind], argv[optind+1]);
+
+		if (!PBD::exists_and_writable (Glib::path_get_dirname (session_dir->midi_path()))) {
+			cout << UTILNAME << ": the directory " << session_dir->midi_path() << " must be writable. exiting." << endl;
+			session_fail (s);
+		}
 
 		/* save new snapshot and prevent alteration of the original by switching to it.
 		   we know these files don't yet exist.
