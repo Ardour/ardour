@@ -1407,6 +1407,25 @@ Editor::set_session (Session *t)
 		break;
 	}
 
+	/* catch up on selection of stripables (other selection state is lost
+	 * when a session is closed
+	 */
+
+	StripableList sl;
+	TrackViewList tl;
+	_session->get_stripables (sl);
+	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+		if ((*s)->presentation_info().selected()) {
+			RouteTimeAxisView* rtav = get_route_view_by_route_id ((*s)->id());
+			if (rtav) {
+				tl.push_back (rtav);
+			}
+		}
+	}
+	if (!tl.empty()) {
+		selection->set (tl);
+	}
+
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
 	_session->register_with_memento_command_factory(_selection_memento->id(), _selection_memento);
