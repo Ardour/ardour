@@ -101,6 +101,9 @@ public:
 
 	XMLNode& operator= (const XMLNode& other);
 
+	bool operator== (const XMLNode& other) const;
+	bool operator!= (const XMLNode& other) const;
+
 	const std::string& name() const { return _name; }
 
 	bool          is_content() const { return _is_content; }
