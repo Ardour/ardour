@@ -80,7 +80,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 }
 
 boost::shared_ptr<MidiSource>
-ensure_per_region_source (Session* session, std::string newsrc_path, boost::shared_ptr<MidiRegion> region)
+ensure_per_region_source (Session* session, string newsrc_path, boost::shared_ptr<MidiRegion> region)
 {
 	boost::shared_ptr<MidiSource> newsrc;
 
@@ -93,7 +93,7 @@ ensure_per_region_source (Session* session, std::string newsrc_path, boost::shar
 			SourceFactory::createExternal(DataType::MIDI, *session,
 						      newsrc_path, 1, flags));
 		if (!newsrc) {
-			std::cout << UTILNAME << "An error occurred creating external source from " << newsrc_path << " exiting." << std::endl;
+			cout << UTILNAME << "An error occurred creating external source from " << newsrc_path << " exiting." << endl;
 			session_fail (session);
 		}
 
@@ -106,8 +106,8 @@ ensure_per_region_source (Session* session, std::string newsrc_path, boost::shar
 
 		newsrc->set_state (*node, PBD::Stateful::loading_state_version);
 
-		std::cout << UTILNAME << ": Using existing midi source file : " << newsrc_path << std::endl;
-		std::cout << "for region : " << region->name() << std::endl;
+		cout << UTILNAME << ": Using existing midi source file " << newsrc_path << endl;
+		cout << "for region : " << region->name() << endl;
 
 	} else {
 		newsrc = boost::dynamic_pointer_cast<MidiSource>(
@@ -115,7 +115,7 @@ ensure_per_region_source (Session* session, std::string newsrc_path, boost::shar
 						      newsrc_path, false, session->frame_rate()));
 
 		if (!newsrc) {
-			std::cout << UTILNAME << "An error occurred creating writeable source " << newsrc_path << " exiting." << std::endl;
+			cout << UTILNAME << "An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
 			session_fail (session);
 		}
 
@@ -123,8 +123,8 @@ ensure_per_region_source (Session* session, std::string newsrc_path, boost::shar
 
 		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats().to_double() / 4.0));
 
-		std::cout << UTILNAME << ": Created new midi source file " << newsrc_path << std::endl;
-		std::cout << "for region : " <<  region->name() << std::endl;
+		cout << UTILNAME << ": Created new midi source file " << newsrc_path << endl;
+		cout << "for region : " <<  region->name() << endl;
 
 	}
 
@@ -132,7 +132,7 @@ ensure_per_region_source (Session* session, std::string newsrc_path, boost::shar
 }
 
 boost::shared_ptr<MidiSource>
-ensure_per_source_source (Session* session, std::string newsrc_path, boost::shared_ptr<MidiRegion> region)
+ensure_per_source_source (Session* session, string newsrc_path, boost::shared_ptr<MidiRegion> region)
 {
 	boost::shared_ptr<MidiSource> newsrc;
 
@@ -146,19 +146,19 @@ ensure_per_source_source (Session* session, std::string newsrc_path, boost::shar
 						      newsrc_path, 1, flags));
 
 		if (!newsrc) {
-			std::cout << UTILNAME << "An error occurred creating external source from " << newsrc_path << " exiting." << std::endl;
+			cout << UTILNAME << "An error occurred creating external source from " << newsrc_path << " exiting." << endl;
 			session_fail (session);
 		}
 
-		std::cout << UTILNAME << ": Using existing midi source file " << newsrc_path << std::endl;
-		std::cout << "for source : " <<  region->midi_source(0)->name() << std::endl;
+		cout << UTILNAME << ": Using existing midi source file " << newsrc_path << endl;
+		cout << "for source : " <<  region->midi_source(0)->name() << endl;
 	} else {
 
 		newsrc = boost::dynamic_pointer_cast<MidiSource>(
 			SourceFactory::createWritable(DataType::MIDI, *session,
 						      newsrc_path, false, session->frame_rate()));
 		if (!newsrc) {
-			std::cout << UTILNAME << "An error occurred creating writeable source " << newsrc_path << " exiting." << std::endl;
+			cout << UTILNAME << "An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
 			session_fail (session);
 		}
 
@@ -166,8 +166,8 @@ ensure_per_source_source (Session* session, std::string newsrc_path, boost::shar
 
 		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats().to_double() / 4.0));
 
-		std::cout << UTILNAME << ": Created new midi source file " << newsrc_path << std::endl;
-		std::cout << "for source : " <<  region->midi_source(0)->name() << std::endl;
+		cout << UTILNAME << ": Created new midi source file " << newsrc_path << endl;
+		cout << "for source : " <<  region->midi_source(0)->name() << endl;
 
 	}
 
@@ -186,7 +186,7 @@ reset_start_and_length (Session* session, boost::shared_ptr<MidiRegion> region)
 	region->set_length_beats (Evoral::Beats ((map.pulse_at_beat (region->beat() + region->length_beats().to_double())
 						  - map.pulse_at_beat (region->beat())) * 4.0));
 
-	std::cout << UTILNAME << ": Reset start and length beats for region : " << region->name() << std::endl;
+	cout << UTILNAME << ": Reset start and length beats for region : " << region->name() << endl;
 }
 
 bool
@@ -238,11 +238,6 @@ apply_one_source_per_source_fix (Session* session)
 
 				boost::shared_ptr<MidiSource> newsrc = ensure_per_source_source (session, newsrc_path, mr);
 
-				if (!newsrc) {
-					std::cout << UTILNAME << ": an error occurred while creating a new source. exiting" << std::endl;
-					session_fail (session);
-				}
-
 				old_id_to_new_source.insert (make_pair (mr->midi_source()->id(), newsrc));
 
 				mr->midi_source(0)->set_name (newsrc->name());
@@ -251,7 +246,7 @@ apply_one_source_per_source_fix (Session* session)
 	}
 
 	/* remove new sources from the session. current snapshot is saved.*/
-	std::cout << UTILNAME << ": clearing new sources." << std::endl;
+	cout << UTILNAME << ": clearing new sources." << endl;
 
 	for (map<PBD::ID, boost::shared_ptr<MidiSource> >::iterator i = old_id_to_new_source.begin(); i != old_id_to_new_source.end(); ++i) {
 		session->remove_source (boost::weak_ptr<MidiSource> ((*i).second));
@@ -280,10 +275,11 @@ If a session is determined to be affected by the bug, the program will take one 
 The first is to write a new MIDI source file for every existing MIDI source in the supplied snapshot.\n\
 In the second approach, each MIDI region have its source converted and placed in the session midifiles directory\n\
 as a new source (one source file per region).\n\
-The second method is only used if the first approach cannot guarantee that the results would match the input snapshot.\n\n\
+The second method is only offered if the first approach cannot logically ensure that the results would match the input snapshot.\n\
+Using the first method even if the second method is offered will usually match the input exactly (partly due to a characteristic of the bug).\n\n\
 Both methods update MIDI region properties and save a new snapshot in the supplied session-dir, optionally using a supplied snapshot name (-o).\n\
 The new snapshot may be used on Ardour-5.4.\n\n\
-Running this utility will not alter any existing files, but it is recommended that you run it on a backup of the session directory.\n\n\
+Running this utility should not alter any existing files, but it is recommended that you run it on a backup of the session directory.\n\n\
 EXAMPLE:\n\
 ardour5-headless-chicken -o bantam ~/studio/leghorn leghorn\n\
 will create a new snapshot file ~/studio/leghorn/bantam.ardour from ~/studio/leghorn/leghorn.ardour\n\
@@ -303,7 +299,7 @@ If a MIDI session only contains quarter note meter divisors, it will be unaffect
 
 int main (int argc, char* argv[])
 {
-	std::string outfile;
+	string outfile;
 	bool force = false;
 
 	const char *optstring = "hfo:r:V";
@@ -358,20 +354,20 @@ int main (int argc, char* argv[])
 
 	XMLTree* state_tree;
 
-	std::string xmlpath(argv[optind]);
+	string xmlpath(argv[optind]);
 	string out_snapshot_name;
 
 	if (!outfile.empty()) {
 		string file_test_path = Glib::build_filename (argv[optind], outfile + statefile_suffix);
 		if (Glib::file_test (file_test_path, Glib::FILE_TEST_EXISTS)) {
-			std::cout << UTILNAME << ": session file " << file_test_path << " already exists!" << std::endl;
+			cout << UTILNAME << ": session file " << file_test_path << " already exists!" << endl;
                         ::exit (EXIT_FAILURE);
 		}
 		out_snapshot_name = outfile;
 	} else {
 		string file_test_path = Glib::build_filename (argv[optind], snapshot_name + "-a54-compat" + statefile_suffix);
 		if (Glib::file_test (file_test_path, Glib::FILE_TEST_EXISTS)) {
-			std::cout << UTILNAME << ": session file " << file_test_path << " already exists!" << std::endl;
+			cout << UTILNAME << ": session file " << file_test_path << " already exists!" << endl;
                         ::exit (EXIT_FAILURE);
 		}
 		out_snapshot_name = snapshot_name + "-a54-compat";
@@ -382,7 +378,7 @@ int main (int argc, char* argv[])
 	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
 		/* there is pending state from a crashed capture attempt */
-		std::cout << UTILNAME << ": There seems to be pending state for snapshot : " << snapshot_name << std::endl;
+		cout << UTILNAME << ": There seems to be pending state for snapshot : " << snapshot_name << endl;
 
 	}
 
@@ -391,7 +387,7 @@ int main (int argc, char* argv[])
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		xmlpath = Glib::build_filename (argv[optind], legalize_for_path (argv[optind+1]) + ".ardour");
 		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-			std::cout << UTILNAME << ": session file " << xmlpath << " doesn't exist!" << std::endl;
+			cout << UTILNAME << ": session file " << xmlpath << " doesn't exist!" << endl;
                         ::exit (EXIT_FAILURE);
                 }
         }
@@ -401,12 +397,12 @@ int main (int argc, char* argv[])
 	bool writable = PBD::exists_and_writable (xmlpath) && PBD::exists_and_writable(Glib::path_get_dirname(xmlpath));
 
 	if (!writable) {
-		std::cout << UTILNAME << ": Error : The session directory must exist and be writable." << std::endl;
+		cout << UTILNAME << ": Error : The session directory must exist and be writable." << endl;
 		return -1;
 	}
 
 	if (!state_tree->read (xmlpath)) {
-		std::cout << UTILNAME << ": Could not understand session file " << xmlpath << std::endl;
+		cout << UTILNAME << ": Could not understand session file " << xmlpath << endl;
 		delete state_tree;
 		state_tree = 0;
 		::exit (EXIT_FAILURE);
@@ -415,7 +411,7 @@ int main (int argc, char* argv[])
 	XMLNode const & root (*state_tree->root());
 
 	if (root.name() != X_("Session")) {
-		std::cout << UTILNAME << ": Session file " << xmlpath<< " is not a session" << std::endl;
+		cout << UTILNAME << ": Session file " << xmlpath<< " is not a session" << endl;
 		delete state_tree;
 		state_tree = 0;
 		::exit (EXIT_FAILURE);
@@ -425,19 +421,19 @@ int main (int argc, char* argv[])
 
 	if ((prop = root.property ("version")) == 0) {
 		/* no version implies very old version of Ardour */
-		std::cout << UTILNAME << ": The session " << snapshot_name << " has no version or is too old to be affected. exiting." << std::endl;
+		cout << UTILNAME << ": The session " << snapshot_name << " has no version or is too old to be affected. exiting." << endl;
 		::exit (EXIT_FAILURE);
 	} else {
 		if (prop->value().find ('.') != string::npos) {
 			/* old school version format */
-			std::cout << UTILNAME << ": The session " << snapshot_name << " is too old to be affected. exiting." << std::endl;
+			cout << UTILNAME << ": The session " << snapshot_name << " is too old to be affected. exiting." << endl;
 			::exit (EXIT_FAILURE);
 		} else {
 			PBD::Stateful::loading_state_version = atoi (prop->value().c_str());
 		}
 	}
 
-	std::cout <<  UTILNAME << ": Checking snapshot : " << snapshot_name << " in directory : " << session_dir->root_path() << std::endl;
+	cout <<  UTILNAME << ": Checking snapshot : " << snapshot_name << " in directory : " << session_dir->root_path() << endl;
 
 	bool midi_regions_use_bbt_beats = false;
 
@@ -445,7 +441,7 @@ int main (int argc, char* argv[])
 		XMLNode* child;
 		if ((child = find_named_node (root, "ProgramVersion")) != 0) {
 			if ((prop = child->property ("modified-with")) != 0) {
-				std::string modified_with = prop->value ();
+				string modified_with = prop->value ();
 
 				const double modified_with_version = atof (modified_with.substr ( modified_with.find(" ", 0) + 1, string::npos).c_str());
 				const int modified_with_revision = atoi (modified_with.substr (modified_with.find("-", 0) + 1, string::npos).c_str());
@@ -481,12 +477,12 @@ int main (int argc, char* argv[])
 			}
 		}
 	} else {
-		std::cout << UTILNAME << ": Session file " <<  xmlpath << " has no TempoMap node. exiting." << std::endl;
+		cout << UTILNAME << ": Session file " <<  xmlpath << " has no TempoMap node. exiting." << endl;
 		::exit (EXIT_FAILURE);
 	}
 
 	if (all_metrum_divisors_are_quarters && !force) {
-		std::cout << UTILNAME << ": The session " << snapshot_name << " is clear for use in 5.4 (all divisors are quarters). Use -f to override." << std::endl;
+		cout << UTILNAME << ": The session " << snapshot_name << " is clear for use in 5.4 (all divisors are quarters). Use -f to override." << endl;
 		::exit (EXIT_FAILURE);
 	}
 
@@ -495,14 +491,14 @@ int main (int argc, char* argv[])
 	divisor_list.unique();
 
 	if (divisor_list.size() == 1) {
-		std::cout  << UTILNAME << ": Snapshot " << snapshot_name << " will be converted using one new file per source." << std::endl;
-		std::cout  << "To continue with per-source conversion press enter s. q to quit." << std::endl;
+		cout  << UTILNAME << ": Snapshot " << snapshot_name << " will be converted using one new file per source." << endl;
+		cout  << "To continue with per-source conversion press enter s. q to quit." << endl;
 
 		while (1) {
-			std::cout  << "[s/q]" << std::endl;
+			cout  << "[s/q]" << endl;
 
 			string input;
-			getline (std::cin, input);
+			getline (cin, input);
 
 			if (input == "s") {
 				break;
@@ -517,18 +513,18 @@ int main (int argc, char* argv[])
 		one_source_file_per_source = true;
 	} else {
 
-		std::cout  << UTILNAME << ": Snapshot " << snapshot_name << " contains multiple meter note divisors." << std::endl;
-		std::cout  << "per-region source conversion guarantees that the output snapshot will be identical to the original," << std::endl;
-		std::cout  << "however regions in the new snapshot will no longer share sources." << std::endl;
-		std::cout  << "In many (but not all) cases per-source conversion will work equally well." << std::endl;
-		std::cout  << "It is recommended that you test a snapshot created with the per-source method before using per-region conversion." << std::endl;
-		std::cout  << "To continue with per-region conversion enter r. For per-source conversion, enter s. q to quit." << std::endl;
+		cout  << UTILNAME << ": Snapshot " << snapshot_name << " contains multiple meter note divisors." << endl;
+		cout  << "per-region source conversion ensures that the output snapshot will be identical to the original," << endl;
+		cout  << "however regions in the new snapshot will no longer share sources." << endl;
+		cout  << "In many (but not all) cases per-source conversion will work equally well." << endl;
+		cout  << "It is recommended that you test a snapshot created with the per-source method before using per-region conversion." << endl;
+		cout  << "To continue with per-region conversion enter r. For per-source conversion, enter s. q to quit." << endl;
 
 		while (1) {
-			std::cout  << "[r/s/q]" << std::endl;
+			cout  << "[r/s/q]" << endl;
 
 			string input;
-			getline (std::cin, input);
+			getline (cin, input);
 
 			if (input == "s") {
 				one_source_file_per_source = true;
@@ -549,13 +545,13 @@ int main (int argc, char* argv[])
 	if (midi_regions_use_bbt_beats || force) {
 
 		if (force) {
-			std::cout << UTILNAME << ": Forced update of snapshot : " << snapshot_name << std::endl;
+			cout << UTILNAME << ": Forced update of snapshot : " << snapshot_name << endl;
 		}
 
 		SessionUtils::init();
 		Session* s = 0;
 
-		std::cout <<  UTILNAME << ": Loading snapshot." << std::endl;
+		cout <<  UTILNAME << ": Loading snapshot." << endl;
 
 		s = SessionUtils::load_session (argv[optind], argv[optind+1]);
 
@@ -563,40 +559,40 @@ int main (int argc, char* argv[])
 		   we know these files don't yet exist.
 		*/
 		if (s->save_state (out_snapshot_name, false, true)) {
-			std::cout << UTILNAME << ": Could not save new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << std::endl;
+			cout << UTILNAME << ": Could not save new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << endl;
 
 			session_fail (s);
 		}
 
-		std::cout << UTILNAME << ": Saved new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << std::endl;
+		cout << UTILNAME << ": Saved new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << endl;
 
 		if (one_source_file_per_source) {
-			std::cout << UTILNAME << ": Will create one MIDI file per source." << std::endl;
+			cout << UTILNAME << ": Will create one MIDI file per source." << endl;
 
 			if (!apply_one_source_per_source_fix (s)) {
-				std::cout << UTILNAME << ": The snapshot " << snapshot_name << " is clear for use in 5.4 (no midi regions). exiting." << std::endl;
+				cout << UTILNAME << ": The snapshot " << snapshot_name << " is clear for use in 5.4 (no midi regions). exiting." << endl;
 				session_fail (s);
 			}
 		} else {
-			std::cout << UTILNAME << ": Will create one MIDI file per midi region." << std::endl;
+			cout << UTILNAME << ": Will create one MIDI file per midi region." << endl;
 
 			if (!apply_one_source_per_region_fix (s)) {
-				std::cout << UTILNAME << ": The snapshot " << snapshot_name << " is clear for use in 5.4 (no midi regions). exiting."  << std::endl;
+				cout << UTILNAME << ": The snapshot " << snapshot_name << " is clear for use in 5.4 (no midi regions). exiting."  << endl;
 				session_fail (s);
 			}
 
 			if (s->save_state (out_snapshot_name, false, true)) {
-				std::cout << UTILNAME << ": Could not save snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << std::endl;
+				cout << UTILNAME << ": Could not save snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << endl;
 				session_fail (s);
 			}
-			std::cout << UTILNAME << ": Saved new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << std::endl;
+			cout << UTILNAME << ": Saved new snapshot: " << out_snapshot_name << " in " << session_dir->root_path() << endl;
 		}
 
 		SessionUtils::unload_session(s);
 		SessionUtils::cleanup();
-		std::cout << UTILNAME << ": Snapshot " << out_snapshot_name << " is ready for use in 5.4" << std::endl;
+		cout << UTILNAME << ": Snapshot " << out_snapshot_name << " is ready for use in 5.4" << endl;
 	} else {
-		std::cout << UTILNAME << ": The snapshot " << snapshot_name << " doesn't require any change for use in 5.4. Use -f to override." << std::endl;
+		cout << UTILNAME << ": The snapshot " << snapshot_name << " doesn't require any change for use in 5.4. Use -f to override." << endl;
 		::exit (EXIT_FAILURE);
 	}
 
