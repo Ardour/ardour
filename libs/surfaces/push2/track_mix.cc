@@ -182,8 +182,6 @@ TrackMixLayout::selection_changed ()
 void
 TrackMixLayout::show ()
 {
-	selection_changed ();
-
 	Push2::ButtonID lower_buttons[] = { Push2::Lower1, Push2::Lower2, Push2::Lower3, Push2::Lower4,
 	                                    Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8 };
 
@@ -193,6 +191,8 @@ TrackMixLayout::show ()
 		b->set_state (Push2::LED::OneShot24th);
 		p2.write (b->state_msg());
 	}
+
+	selection_changed ();
 
 	Container::show ();
 }

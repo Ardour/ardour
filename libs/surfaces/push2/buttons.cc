@@ -737,6 +737,8 @@ Push2::button_master ()
 
 	if (_current_layout != track_mix_layout) {
 		set_current_layout (track_mix_layout);
+	} else {
+		set_current_layout (_previous_layout);
 	}
 }
 
