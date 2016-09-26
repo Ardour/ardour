@@ -58,6 +58,8 @@ bool
 write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::shared_ptr<MidiSource> source,
 				 const Glib::Threads::Mutex::Lock& source_lock, const double session_offset)
 {
+	assert (source->empty());
+
 	const bool old_percussive = bbt_source->model()->percussive();
 
 	bbt_source->model()->set_percussive (false);
@@ -119,6 +121,11 @@ ensure_per_region_source (Session* session, string newsrc_path, boost::shared_pt
 			session_fail (session);
 		}
 
+		if (!newsrc->empty()) {
+			cout << UTILNAME << "An error occurred/ " << newsrc->name() << " is not empty. exiting." << endl;
+			session_fail (session);
+		}
+
 		Source::Lock newsrc_lock (newsrc->mutex());
 
 		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats().to_double() / 4.0));
@@ -159,6 +166,11 @@ ensure_per_source_source (Session* session, string newsrc_path, boost::shared_pt
 						      newsrc_path, false, session->frame_rate()));
 		if (!newsrc) {
 			cout << UTILNAME << "An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
+			session_fail (session);
+		}
+
+		if (!newsrc->empty()) {
+			cout << UTILNAME << "An error occurred/ " << newsrc->name() << " is not empty. exiting." << endl;
 			session_fail (session);
 		}
 
@@ -223,7 +235,7 @@ apply_one_source_per_source_fix (Session* session)
 		return false;
 	}
 
-	map<PBD::ID, boost::shared_ptr<MidiSource> > old_id_to_new_source;
+	map<PBD::ID, boost::shared_ptr<MidiSource> > old_source_to_new;
 	/* for every midi region, ensure a converted source exists. */
 	for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 		boost::shared_ptr<MidiRegion> mr = 0;
@@ -232,13 +244,13 @@ apply_one_source_per_source_fix (Session* session)
 		if ((mr = boost::dynamic_pointer_cast<MidiRegion>((*i).second)) != 0) {
 			reset_start_and_length (session, mr);
 
-			if ((src_it = old_id_to_new_source.find (mr->midi_source()->id())) == old_id_to_new_source.end()) {
+			if ((src_it = old_source_to_new.find (mr->midi_source()->id())) == old_source_to_new.end()) {
 				string newsrc_filename = mr->source()->name() +  "-a54-compat.mid";
 				string newsrc_path = Glib::build_filename (session->session_directory().midi_path(), newsrc_filename);
 
 				boost::shared_ptr<MidiSource> newsrc = ensure_per_source_source (session, newsrc_path, mr);
 
-				old_id_to_new_source.insert (make_pair (mr->midi_source()->id(), newsrc));
+				old_source_to_new.insert (make_pair (mr->midi_source()->id(), newsrc));
 
 				mr->midi_source(0)->set_name (newsrc->name());
 			}
@@ -248,7 +260,7 @@ apply_one_source_per_source_fix (Session* session)
 	/* remove new sources from the session. current snapshot is saved.*/
 	cout << UTILNAME << ": clearing new sources." << endl;
 
-	for (map<PBD::ID, boost::shared_ptr<MidiSource> >::iterator i = old_id_to_new_source.begin(); i != old_id_to_new_source.end(); ++i) {
+	for (map<PBD::ID, boost::shared_ptr<MidiSource> >::iterator i = old_source_to_new.begin(); i != old_source_to_new.end(); ++i) {
 		session->remove_source (boost::weak_ptr<MidiSource> ((*i).second));
 	}
 
@@ -472,6 +484,7 @@ int main (int argc, char* argv[])
 					if (note_type != 4.0) {
 						all_metrum_divisors_are_quarters = false;
 					}
+
 					divisor_list.push_back (note_type);
 				}
 			}
@@ -492,7 +505,7 @@ int main (int argc, char* argv[])
 
 	if (divisor_list.size() == 1) {
 		cout  << UTILNAME << ": Snapshot " << snapshot_name << " will be converted using one new file per source." << endl;
-		cout  << "To continue with per-source conversion press enter s. q to quit." << endl;
+		cout  << "To continue with per-source conversion enter s. q to quit." << endl;
 
 		while (1) {
 			cout  << "[s/q]" << endl;
