@@ -241,6 +241,7 @@ Push2::open ()
 		error << _("Cannot construct Canvas for display") << endmsg;
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
+		handle = 0;
 		return -1;
 	}
 
