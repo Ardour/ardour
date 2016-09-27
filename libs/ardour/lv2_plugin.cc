@@ -1264,7 +1264,7 @@ LV2Plugin::file_dir() const
 const std::string
 LV2Plugin::state_dir(unsigned num) const
 {
-	return Glib::build_filename(plugin_dir(), string_compose("state%1", num));
+	return Glib::build_filename(plugin_dir(), string("state") + PBD::to_string (num));
 }
 
 /** Implementation of state:makePath for files created at instantiation time.
