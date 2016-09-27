@@ -4090,7 +4090,7 @@ Route::set_name_in_state (XMLNode& node, string const & name, bool rename_playli
 		} else if ((*i)->name() == X_("Diskstream")) {
 
 			if (rename_playlist) {
-				(*i)->set_property (X_("playlist"), string_compose ("%1.1", name).c_str());
+				(*i)->set_property (X_("playlist"), name + ".1");
 			}
 			(*i)->set_property (X_("name"), name);
 
