@@ -84,6 +84,24 @@ Text::set (string const & text)
 	end_change ();
 }
 
+double
+Text::width () const
+{
+	if (_need_redraw) {
+		_redraw  ();
+	}
+	return _width;
+}
+
+double
+Text::height () const
+{
+	if (_need_redraw) {
+		_redraw  ();
+	}
+	return _height;
+}
+
 void
 Text::_redraw () const
 {
