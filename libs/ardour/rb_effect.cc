@@ -372,7 +372,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	if (buffers) {
 		for (uint32_t i = 0; i < channels; ++i) {
-			delete buffers[i];
+			delete [] buffers[i];
 		}
 		delete [] buffers;
 	}
