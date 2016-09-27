@@ -727,18 +727,23 @@ Push2::button_mix_press ()
 void
 Push2::button_master ()
 {
-	boost::shared_ptr<Stripable> master = session->master_out();
+	boost::shared_ptr<Stripable> main_out = session->master_out ();
 
-	if (!master) {
+	if (!main_out) {
 		return;
 	}
 
-	ControlProtocol::SetStripableSelection (master);
-
 	if (_current_layout != track_mix_layout) {
+		ControlProtocol::SetStripableSelection (main_out);
 		set_current_layout (track_mix_layout);
 	} else {
-		set_current_layout (_previous_layout);
+		TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (_current_layout);
+		if (tml->current_stripable() == main_out) {
+			/* back to previous layout */
+			set_current_layout (_previous_layout);
+		} else {
+			ControlProtocol::SetStripableSelection (main_out);
+		}
 	}
 }
 
