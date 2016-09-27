@@ -1712,20 +1712,26 @@ Push2::get_color (ColorName name)
 void
 Push2::set_current_layout (Push2Layout* layout)
 {
-	if (_current_layout) {
-		_current_layout->hide ();
-		_canvas->root()->remove (_current_layout);
-		_previous_layout = _current_layout;
-	}
-
-	_current_layout = layout;
-
-	if (_current_layout) {
-		_canvas->root()->add (_current_layout);
+	if (layout && layout == _current_layout) {
 		_current_layout->show ();
-	}
+	} else {
 
-	_canvas->request_redraw ();
+		if (_current_layout) {
+			_current_layout->hide ();
+			_canvas->root()->remove (_current_layout);
+			_previous_layout = _current_layout;
+		}
+
+		_current_layout = layout;
+
+		if (_current_layout) {
+			_canvas->root()->add (_current_layout);
+			_current_layout->show ();
+		}
+
+
+		_canvas->request_redraw ();
+	}
 }
 
 void
