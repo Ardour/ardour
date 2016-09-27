@@ -66,8 +66,8 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-MixLayout::MixLayout (Push2& p, Session& s)
-	: Push2Layout (p, s)
+MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
+	: Push2Layout (p, s, name)
 	, bank_start (0)
 	, vpot_mode (Volume)
 {

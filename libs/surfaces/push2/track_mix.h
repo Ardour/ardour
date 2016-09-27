@@ -43,7 +43,7 @@ class LevelMeter;
 class TrackMixLayout : public Push2Layout
 {
    public:
-	TrackMixLayout (Push2& p, ARDOUR::Session&);
+	TrackMixLayout (Push2& p, ARDOUR::Session&, std::string const &);
 	~TrackMixLayout ();
 
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
@@ -62,6 +62,8 @@ class TrackMixLayout : public Push2Layout
 
 	void update_meters ();
 	void update_clocks ();
+
+	boost::shared_ptr<ARDOUR::Stripable> current_stripable() const { return stripable; }
 
    private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
@@ -84,6 +86,7 @@ class TrackMixLayout : public Push2Layout
 
 	PBD::ScopedConnection selection_connection;
 	void selection_changed ();
+	void show_state ();
 
 	void drop_stripable ();
 	void name_changed ();

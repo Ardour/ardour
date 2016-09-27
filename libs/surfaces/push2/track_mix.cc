@@ -71,8 +71,8 @@ using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-TrackMixLayout::TrackMixLayout (Push2& p, Session& s)
-	: Push2Layout (p, s)
+TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
+	: Push2Layout (p, s, name)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -169,11 +169,8 @@ TrackMixLayout::~TrackMixLayout ()
 void
 TrackMixLayout::selection_changed ()
 {
-	if (!parent()) {
-		return;
-	}
-
 	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+
 	if (s) {
 		set_stripable (s);
 	}
@@ -192,7 +189,7 @@ TrackMixLayout::show ()
 		p2.write (b->state_msg());
 	}
 
-	selection_changed ();
+	show_state ();
 
 	Container::show ();
 }
@@ -200,7 +197,7 @@ TrackMixLayout::show ()
 void
 TrackMixLayout::hide ()
 {
-	set_stripable (boost::shared_ptr<Stripable>());
+
 }
 
 void
@@ -225,23 +222,31 @@ TrackMixLayout::button_lower (uint32_t n)
 
 	switch (n) {
 	case 0:
-		stripable->mute_control()->set_value (!stripable->mute_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable->mute_control()) {
+			stripable->mute_control()->set_value (!stripable->mute_control()->get_value(), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 1:
-		stripable->solo_control()->set_value (!stripable->solo_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable->solo_control()) {
+			stripable->solo_control()->set_value (!stripable->solo_control()->get_value(), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 2:
-		stripable->rec_enable_control()->set_value (!stripable->rec_enable_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable->rec_enable_control()) {
+			stripable->rec_enable_control()->set_value (!stripable->rec_enable_control()->get_value(), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 3:
-		mc = stripable->monitoring_control()->monitoring_choice();
-		switch (mc) {
-		case MonitorInput:
-			stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
-			break;
-		default:
-			stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::UseGroup);
-			break;
+		if (stripable->monitor_control()) {
+			mc = stripable->monitoring_control()->monitoring_choice();
+			switch (mc) {
+			case MonitorInput:
+				stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
+				break;
+			default:
+				stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::UseGroup);
+				break;
+			}
 		}
 		break;
 	case 4:
@@ -256,10 +261,14 @@ TrackMixLayout::button_lower (uint32_t n)
 		}
 		break;
 	case 5:
-		stripable->solo_isolate_control()->set_value (!stripable->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable->solo_isolate_control()) {
+			stripable->solo_isolate_control()->set_value (!stripable->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 6:
-		stripable->solo_safe_control()->set_value (!stripable->solo_safe_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable->solo_safe_control()) {
+			stripable->solo_safe_control()->set_value (!stripable->solo_safe_control()->get_value(), PBD::Controllable::UseGroup);
+		}
 		break;
 	case 7:
 		/* nothing here */
@@ -435,6 +444,28 @@ TrackMixLayout::monitoring_change ()
 }
 
 void
+TrackMixLayout::show_state ()
+{
+	if (!parent()) {
+		return;
+	}
+
+	if (stripable) {
+		name_changed ();
+		color_changed ();
+		solo_mute_change ();
+		rec_enable_change ();
+		solo_iso_change ();
+		solo_safe_change ();
+		monitoring_change ();
+
+		meter->set_meter (stripable->peak_meter ().get());
+	} else {
+		meter->set_meter (0);
+	}
+}
+
+void
 TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 {
 	stripable_connections.drop_connections ();
@@ -471,19 +502,9 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 		knobs[5]->set_controllable (boost::shared_ptr<AutomationControl>());
 		knobs[6]->set_controllable (boost::shared_ptr<AutomationControl>());
 		knobs[7]->set_controllable (boost::shared_ptr<AutomationControl>());
-
-		name_changed ();
-		color_changed ();
-		solo_mute_change ();
-		rec_enable_change ();
-		solo_iso_change ();
-		solo_safe_change ();
-		monitoring_change ();
-
-		meter->set_meter (stripable->peak_meter ().get());
-	} else {
-		meter->set_meter (0);
 	}
+
+	show_state ();
 }
 
 void
@@ -497,10 +518,16 @@ void
 TrackMixLayout::name_changed ()
 {
 	if (stripable) {
-		/* poor-man's right justification */
-		char buf[92];
-		snprintf (buf, sizeof (buf), "%*s", (int) sizeof (buf) - 1, stripable->name().c_str());
-		name_text->set (buf);
+
+		name_text->set (stripable->name());
+
+		/* right justify */
+
+		Duple pos;
+		pos.y = name_text->position().y;
+		pos.x = display_width() - 10 - name_text->width();
+
+		name_text->set_position (pos);
 	}
 }
 

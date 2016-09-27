@@ -40,7 +40,7 @@ class LevelMeter;
 class MixLayout : public Push2Layout
 {
    public:
-	MixLayout (Push2& p, ARDOUR::Session&);
+	MixLayout (Push2& p, ARDOUR::Session&, std::string const &);
 	~MixLayout ();
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;

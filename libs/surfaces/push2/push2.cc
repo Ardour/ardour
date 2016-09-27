@@ -233,10 +233,10 @@ Push2::open ()
 
 	try {
 		_canvas = new Push2Canvas (*this, 960, 160);
-		mix_layout = new MixLayout (*this, *session);
-		scale_layout = new ScaleLayout (*this, *session);
-		track_mix_layout = new TrackMixLayout (*this, *session);
-		splash_layout = new SplashLayout (*this, *session);
+		mix_layout = new MixLayout (*this, *session, "globalmix");
+		scale_layout = new ScaleLayout (*this, *session, "scale");
+		track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
+		splash_layout = new SplashLayout (*this, *session, "splash");
 	} catch (...) {
 		error << _("Cannot construct Canvas for display") << endmsg;
 		libusb_release_interface (handle, 0x00);

@@ -35,8 +35,8 @@ using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-SplashLayout::SplashLayout (Push2& p, Session& s)
-	: Push2Layout (p, s)
+SplashLayout::SplashLayout (Push2& p, Session& s, std::string const & name)
+	: Push2Layout (p, s, name)
 {
 	std::string splash_file;
 
