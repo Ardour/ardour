@@ -1366,7 +1366,7 @@ LV2Plugin::add_state(XMLNode* root) const
 			saved_state = _state_version;
 		}
 
-		root->set_property("state-dir", string_compose("state%1", saved_state));
+		root->set_property("state-dir", string("state") + PBD::to_string (saved_state));
 	}
 }
 
