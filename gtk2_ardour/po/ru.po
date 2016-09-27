@@ -1831,15 +1831,15 @@ msgstr ""
 
 #: ardour_ui.cc:4875
 msgid "Ignore crash data"
-msgstr "Проигнорировать"
+msgstr "Пропустить сбойные данные"
 
 #: ardour_ui.cc:4876
 msgid "Recover from crash"
-msgstr "Восстановить данные"
+msgstr "Восстановить после сбоя"
 
 #: ardour_ui.cc:4896
 msgid "Sample Rate Mismatch"
-msgstr "Несовпадение частот сэмплирования"
+msgstr "Несовпадение частоты оцифровки"
 
 #: ardour_ui.cc:4897
 msgid ""
@@ -2217,7 +2217,7 @@ msgstr "Обработка отклонений"
 
 #: ardour_ui_ed.cc:152 route_time_axis.cc:1683
 msgid "New..."
-msgstr "Создать..."
+msgstr "Новый..."
 
 #: ardour_ui_ed.cc:154
 msgid "Open..."
@@ -2277,11 +2277,11 @@ msgstr "Сделать снимок и перейти к новой версии
 
 #: ardour_ui_ed.cc:200
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Быстрый снимок (и продолжать работать с текущей сессией)"
 
 #: ardour_ui_ed.cc:203
 msgid "Quick Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Быстрый снимок (и переключиться на новую сессию)"
 
 #: ardour_ui_ed.cc:207
 msgid "Save As..."
@@ -2328,7 +2328,7 @@ msgstr "Очистить неиспользуемые источники..."
 
 #: ardour_ui_ed.cc:239
 msgid "Reset Peak Files"
-msgstr ""
+msgstr "Сбросить файлы пиков"
 
 #: ardour_ui_ed.cc:243
 msgid "Flush Wastebasket"
@@ -2388,11 +2388,11 @@ msgstr "Показать больше предустановок UI"
 
 #: ardour_ui_ed.cc:308
 msgid "Window|Scripting"
-msgstr "Скрипты"
+msgstr "Окно|Скрипты"
 
 #: ardour_ui_ed.cc:309 meterbridge.cc:214 meterbridge.cc:220
 msgid "Window|Meterbridge"
-msgstr "Панель индикаторов"
+msgstr "Окно|Индикаторы"
 
 #: ardour_ui_ed.cc:311 midi_tracer.cc:45
 msgid "MIDI Tracer"
@@ -2404,11 +2404,11 @@ msgstr "Пообщаться"
 
 #: ardour_ui_ed.cc:316
 msgid "Help|Manual"
-msgstr "Справка"
+msgstr "Помощь|Руководство"
 
 #: ardour_ui_ed.cc:317
 msgid "Manual|Reference"
-msgstr "Справка"
+msgstr "Помощь|Указатель"
 
 #: ardour_ui_ed.cc:318
 msgid "Report a Bug"
@@ -2531,7 +2531,7 @@ msgstr "В конец"
 
 #: ardour_ui_ed.cc:424
 msgid "Go to Wall Clock"
-msgstr "К  текущему времени"
+msgstr "К текущему времени"
 
 #: ardour_ui_ed.cc:429 ardour_ui_ed.cc:432
 msgid "Numpad Decimal"
@@ -2725,7 +2725,7 @@ msgid ""
 "It is not possible to use JACK as the the sync source\n"
 "when the pull up/down setting is non-zero."
 msgstr ""
-"Не возможно использовать JACK, как синхронизатор источника,\n"
+"Невозможно использовать JACK, как синхронизатор источника,\n"
 "когда установки растяжки вверх/вниз не равны нулю."
 
 #: ardour_ui_options.cc:309
@@ -2878,7 +2878,7 @@ msgstr "Скрыть дорожку"
 #: automation_time_axis.cc:556 gain_meter.cc:230 generic_pluginui.cc:601
 #: generic_pluginui.cc:949 panner_ui.cc:151
 msgid "Automation|Manual"
-msgstr "Вручную"
+msgstr "Автоматизация|Вручную"
 
 #: automation_time_axis.cc:312 automation_time_axis.cc:373
 #: automation_time_axis.cc:561 editor.cc:2034 editor.cc:2112
@@ -5432,7 +5432,7 @@ msgstr "Скопировать маркер счетчика"
 
 #: editor_drag.cc:3278
 msgid "inactive"
-msgstr ""
+msgstr "неактивно"
 
 #: editor_drag.cc:3323
 msgid "move tempo mark"
@@ -5444,7 +5444,7 @@ msgstr "Скопировать маркер темпа"
 
 #: editor_drag.cc:3461
 msgid "dilate tempo"
-msgstr ""
+msgstr "распространить темп"
 
 #: editor_drag.cc:3735
 msgid "change fade in length"
@@ -5710,7 +5710,7 @@ msgstr ""
 
 #: editor_markers.cc:989
 msgid "Make Constant"
-msgstr ""
+msgstr "Сделать постоянным"
 
 #: editor_markers.cc:993 editor_markers.cc:1013
 msgid "Lock to Music"
@@ -5734,7 +5734,7 @@ msgstr ""
 
 #: editor_markers.cc:1441
 msgid "change tempo type"
-msgstr ""
+msgstr "смена типа темпа"
 
 #: editor_markers.cc:1509 editor_ops.cc:2119
 msgid "New Name:"
@@ -5791,11 +5791,11 @@ msgstr "Правка ноты"
 
 #: editor_mouse.cc:2193
 msgid "start point trim"
-msgstr "Обрезка начальной точки"
+msgstr "начальная точка обрезки"
 
 #: editor_mouse.cc:2218
 msgid "end point trim"
-msgstr ""
+msgstr "конечная точка обрезки"
 
 #: editor_mouse.cc:2270
 msgid "Name for region:"
@@ -8197,11 +8197,11 @@ msgstr "Вернуть"
 
 #: luawindow.cc:166
 msgid "Select Editor Buffer"
-msgstr ""
+msgstr "Выбрать буфер редактора"
 
 #: luawindow.cc:253 luawindow.cc:258
 msgid "Window|Lua"
-msgstr "Lua"
+msgstr "Окно|Lua"
 
 #: luawindow.cc:286 luawindow.cc:304
 msgid "LuaException: %1"
