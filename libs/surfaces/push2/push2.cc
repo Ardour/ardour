@@ -367,7 +367,7 @@ Push2::init_buttons (bool startup)
 	*/
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
-	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session, DoubleLoop,
+	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session,
 	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale
 	};
 
