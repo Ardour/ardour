@@ -886,6 +886,6 @@ VSTPlugin::first_user_preset_index () const
 string
 VSTPlugin::presets_file () const
 {
-	return string_compose ("vst-%1", unique_id ());
+	return string("vst-") + unique_id ();
 }
 
