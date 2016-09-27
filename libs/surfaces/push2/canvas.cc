@@ -71,8 +71,8 @@ Push2Canvas::vblank ()
 		/* something rendered, update device_frame_buffer */
 		blit_to_device_frame_buffer ();
 
-#define RENDER_LAYOUTS
-#ifdef  RENDER_LAYOUTS
+#undef RENDER_LAYOUTS
+#ifdef RENDER_LAYOUTS
 		if (p2.current_layout()) {
 			std::string s = p2.current_layout()->name();
 			s += ".png";
