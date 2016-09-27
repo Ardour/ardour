@@ -70,6 +70,15 @@ Push2Canvas::vblank ()
 		DEBUG_TRACE (DEBUG::Push2, "re-blit to device frame buffer\n");
 		/* something rendered, update device_frame_buffer */
 		blit_to_device_frame_buffer ();
+
+#define RENDER_LAYOUTS
+#ifdef  RENDER_LAYOUTS
+		if (p2.current_layout()) {
+			std::string s = p2.current_layout()->name();
+			s += ".png";
+			frame_buffer->write_to_png (s);
+		}
+#endif
 	}
 
 	int transferred = 0;
