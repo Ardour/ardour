@@ -104,6 +104,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _pressure_mode (AfterTouch)
 	, selection_color (LED::Green)
 	, contrast_color (LED::Green)
+	, in_range_select (false)
 {
 
 	build_maps ();

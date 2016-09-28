@@ -364,6 +364,17 @@ Push2::button_play ()
 		return;
 	}
 
+	if (_modifier_state & ModSelect) {
+		if (in_range_select) {
+			in_range_select = true;
+			access_action ("Editor/start-range-from-playhead");
+		} else {
+			access_action ("Editor/finish-range-from-playhead");
+			in_range_select = false;
+		}
+		return;
+	}
+
 	if (session->transport_rolling ()) {
 		transport_stop ();
 	} else {

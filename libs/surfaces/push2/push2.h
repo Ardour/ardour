@@ -599,6 +599,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	uint8_t selection_color;
 	uint8_t contrast_color;
+
+	bool in_range_select;
 };
 
 } /* namespace */
