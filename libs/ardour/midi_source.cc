@@ -63,7 +63,6 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _length_pulse(0.0)
 	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
@@ -75,7 +74,6 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _writing(false)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _length_pulse(0.0)
 	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
@@ -387,7 +385,6 @@ MidiSource::mark_write_starting_now (framecnt_t position,
 	TempoMap& map (_session.tempo_map());
 	BeatsFramesConverter converter(map, position);
 	_length_beats = converter.from(capture_length);
-	_length_pulse = map.pulse_at_frame (position + capture_length) - map.pulse_at_frame (position);
 }
 
 void
