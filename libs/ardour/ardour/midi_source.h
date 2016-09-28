@@ -171,7 +171,6 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 
 	void     set_length_beats(TimeType l) { _length_beats = l; }
 	TimeType length_beats() const         { return _length_beats; }
-	double length_pulse() const         { return _length_pulse; }
 
 	virtual void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false) = 0;
 	virtual void destroy_model(const Glib::Threads::Mutex::Lock& lock) = 0;
@@ -237,7 +236,6 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	mutable bool                                            _model_iter_valid;
 
 	mutable Evoral::Beats _length_beats;
-	mutable double _length_pulse;
 	mutable framepos_t    _last_read_end;
 
 	/** The total duration of the current capture. */
