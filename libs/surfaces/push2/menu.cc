@@ -21,7 +21,10 @@
 #include <cairomm/region.h>
 #include <pangomm/layout.h>
 
+#include "pbd/i18n.h"
+
 #include "canvas/text.h"
+#include "canvas/types.h"
 #include "canvas/rectangle.h"
 #include "canvas/colors.h"
 
@@ -29,15 +32,18 @@
 #include "gui.h"
 #include "push2.h"
 
+#include "menu.h"
+
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
-
-#include "pbd/i18n.h"
-#include "menu.h"
 
 Push2Menu::Push2Menu (Item* parent, vector<string> s)
 	: Container (parent)

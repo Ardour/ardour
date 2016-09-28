@@ -29,6 +29,10 @@
 #include "push2.h"
 #include "scale.h"
 
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;

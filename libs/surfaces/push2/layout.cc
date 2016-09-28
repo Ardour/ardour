@@ -20,6 +20,10 @@
 #include "layout.h"
 #include "push2.h"
 
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace ARDOUR;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;

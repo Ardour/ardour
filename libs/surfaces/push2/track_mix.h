@@ -33,6 +33,7 @@ namespace ArdourCanvas {
 	class Text;
 	class Line;
 	class VBox;
+	class Rect;
 }
 
 namespace ArdourSurface {

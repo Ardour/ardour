@@ -35,6 +35,7 @@ namespace Cairo {
 namespace ArdourCanvas {
 	class Text;
 	class Rectangle;
+	class Rect;
 }
 
 namespace ArdourSurface {

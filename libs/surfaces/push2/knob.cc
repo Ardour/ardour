@@ -37,6 +37,10 @@
 
 #include "pbd/i18n.h"
 
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;

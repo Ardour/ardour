@@ -29,6 +29,10 @@
 
 #include "splash.h"
 
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;

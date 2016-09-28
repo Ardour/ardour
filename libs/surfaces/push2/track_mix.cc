@@ -55,6 +55,7 @@
 #include "canvas/meter.h"
 #include "canvas/rectangle.h"
 #include "canvas/text.h"
+#include "canvas/types.h"
 
 #include "canvas.h"
 #include "knob.h"
@@ -63,6 +64,10 @@
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
+
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
 
 using namespace ARDOUR;
 using namespace std;
@@ -201,7 +206,7 @@ TrackMixLayout::hide ()
 }
 
 void
-TrackMixLayout::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+TrackMixLayout::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Container::render (area, context);
 }
