@@ -107,9 +107,7 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void fix_negative_start ();
 	Evoral::Beats start_beats () {return _start_beats.val(); }
-	void set_start_beats (const Evoral::Beats start_beats) {_start_beats = start_beats; }
  	Evoral::Beats length_beats () {return _length_beats.val(); }
-	void set_length_beats (const Evoral::Beats length_beats) {_length_beats = length_beats; }
 
 	void clobber_sources (boost::shared_ptr<MidiSource> source);
 
