@@ -764,7 +764,7 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_frame (conv.to ((*i)->time())));
+			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_frame (region->position() + conv.to ((*i)->time())));
 
 			ss.str ("");
 			ss << bbt;
