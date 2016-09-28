@@ -140,9 +140,6 @@ Meter::init (int clr0, int clr1, int clr2, int clr3,
 	_stp[2] = stp2;
 	_stp[3] = stp3;
 
-	pixrect.x = 1;
-	pixrect.y = 1;
-
 	if (!len) {
 		len = 250;
 	}
@@ -159,8 +156,16 @@ Meter::init (int clr0, int clr1, int clr2, int clr3,
 		bgpattern = horizontal_background (pixwidth + 2, pixheight + 2, _bgc, false);
 	}
 
-	pixrect.width = pixwidth;
 	pixrect.height = pixheight;
+	pixrect.x = 1;
+
+	if (orientation == Vertical) {
+		pixrect.width = pixwidth;
+		pixrect.y = pixheight; /* bottom of meter, so essentially "show zero" */
+	} else {
+		pixrect.width = 0; /* right of meter, so essentially "show zero" */
+		pixrect.y = 1;
+	}
 }
 
 void
@@ -519,10 +524,17 @@ Meter::vertical_expose (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Co
 
 	top_of_meter = (gint) floor (pixheight * current_level);
 
-	/* reset the height & origin of the rect that needs to show the pixbuf
+	/* reset the height & origin of the rect that needs to show the meter pattern
 	 */
-
 	pixrect.height = top_of_meter;
+
+	/* X/cairo coordinates; y grows down so y origin of pixrect (pattern
+	   fill area) is the TOP of the pattern area, which we compute like this:
+
+	   - start at 1
+           - go to bottom of meter (pixheight)
+           - back up by current meter height (top_of_meter)
+	*/
 	pixrect.y = 1 + pixheight - top_of_meter;
 
 	background.x = 1;
@@ -728,19 +740,47 @@ Meter::queue_vertical_redraw (float old_level)
 {
 	Cairo::RectangleInt rect;
 
-	gint new_top = (gint) floor (pixheight * current_level);
+	gint new_height = (gint) floor (pixheight * current_level);
+
+	/* this is the nominal area that needs to be filled by the meter
+	 * pattern
+	 */
 
 	rect.x = 1;
 	rect.width = pixwidth;
-	rect.height = new_top;
-	rect.y = 1 + pixheight - new_top;
+
+	/* compute new top of meter (rect.y) by starting at one (border
+	 * offset), go down the full height of the meter (X/Cairo coordinates
+	 * grow down) to get to the bottom coordinate, then back up by the
+	 * height of the patterned area.
+	 */
+	rect.y = 1 + pixheight - new_height;
+	/* remember: height extends DOWN thanks to X/Cairo */
+	rect.height = new_height;
+
+	/* now lets optimize redrawing by figuring out which part needs to be
+	   actually redrawn (i.e. re-use the last drawn state).
+	*/
 
 	if (current_level > old_level) {
-		/* colored/pixbuf got larger, just draw the new section */
-		/* rect.y stays where it is because of X coordinates */
-		/* height of invalidated area is between new.y (smaller) and old.y
-		   (larger).
-		   X coordinates just make my brain hurt.
+		/* filled area got taller, just draw the new section */
+
+		/* rect.y (new y origin) is smaller or equal to pixrect.y (old
+		 * y origin) because the top of the meter is higher (X/Cairo:
+		 * coordinates grow down). 
+		 *
+		 * Leave rect.y alone, and recompute the height to be just the
+		 * difference between the new bottom and the top of the previous
+		 * pattern area.
+		 *
+		 * The old pattern area extended DOWN from pixrect.y to
+		 * pixrect.y + pixrect.height.
+		 *
+		 * The new pattern area extends DOWN from rect.y to 
+		 * rect.y + rect.height
+		 *
+		 * The area needing to be drawn is the difference between the
+		 * old top (pixrect.y) and the new top (rect.y)
 		*/
 		rect.height = pixrect.y - rect.y;
 	} else {
