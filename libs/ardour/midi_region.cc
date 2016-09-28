@@ -206,8 +206,15 @@ MidiRegion::post_set (const PropertyChange& pc)
 	Region::post_set (pc);
 
 	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
-		/* update non-musically */
-		update_length_beats (0);
+		/* we're called by Stateful::set_values() which sends a change
+		   only if the value is different from _current.
+		   session load means we can clobber length_beats here in error (not all properties differ from current),
+		   so disallow (this has been set from XML state anyway).
+		*/
+		if (!_session.loading()) {
+			/* update non-musically */
+			update_length_beats (0);
+		}
 	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
 		set_start_beats_from_start_frames ();
 	}
@@ -307,13 +314,16 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 		update_length_beats (sub_num);
 	}
 
-	if (position_lock_style() == AudioTime) {
-		_length_beats = Evoral::Beats (_session.tempo_map().quarter_note_at_frame (_position + _length) - _session.tempo_map().quarter_note_at_frame (_position));
-	} else {
-		/* leave _length_beats alone, and change _length to reflect the state of things
-		   at the new position (tempo map may dictate a different number of frames).
-		*/
-		Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + (_length_beats.val().to_double() / 4.0)) - _position, sub_num);
+	/* don't clobber _length and _length_beats if session loading.*/
+	if (!_session.loading()) {
+		if (position_lock_style() == AudioTime) {
+			_length_beats = Evoral::Beats (_session.tempo_map().quarter_note_at_frame (_position + _length) - _session.tempo_map().quarter_note_at_frame (_position));
+		} else {
+			/* leave _length_beats alone, and change _length to reflect the state of things
+			   at the new position (tempo map may dictate a different number of frames).
+			*/
+			Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + (_length_beats.val().to_double() / 4.0)) - _position, sub_num);
+		}
 	}
 }
 
