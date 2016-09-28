@@ -59,7 +59,6 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 				 const Glib::Threads::Mutex::Lock& source_lock, const double session_offset)
 {
 	assert (source->empty());
-
 	const bool old_percussive = bbt_source->model()->percussive();
 
 	bbt_source->model()->set_percussive (false);
@@ -77,6 +76,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 
 	bbt_source->model()->set_percussive (old_percussive);
 	source->mark_streaming_write_completed (source_lock);
+	source->set_timeline_position (bbt_source->timeline_position());
 
 	return true;
 }
@@ -187,18 +187,35 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 }
 
 void
-reset_start_and_length (Session* session, boost::shared_ptr<MidiRegion> region)
+reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
+{
+	/* set start_beats to quarter note value from incorrect bbt*/
+	TempoMap& tmap (session->tempo_map());
+	double new_start_qn = (tmap.pulse_at_beat (region->beat()) - tmap.pulse_at_beat (region->beat() - region->start_beats().to_double())) * 4.0;
+
+	/* force a change to start and start_beats */
+	PositionLockStyle old_pls = region->position_lock_style();
+	region->set_position_lock_style (AudioTime);
+	region->set_start (tmap.frame_at_quarter_note (new_start_qn) + 1);
+	region->set_start (tmap.frame_at_quarter_note (new_start_qn));
+	region->set_position_lock_style (old_pls);
+
+}
+
+void
+reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 {
 	/* set start_beats & length_beats to quarter note value */
-	TempoMap& map (session->tempo_map());
+	TempoMap& tmap (session->tempo_map());
+	double new_length_qn = (tmap.pulse_at_beat (region->beat() + region->length_beats().to_double())
+				  - tmap.pulse_at_beat (region->beat())) * 4.0;
 
-	region->set_start_beats (Evoral::Beats ((map.pulse_at_beat (region->beat())
-						 - map.pulse_at_beat (region->beat() - region->start_beats().to_double())) * 4.0));
-
-	region->set_length_beats (Evoral::Beats ((map.pulse_at_beat (region->beat() + region->length_beats().to_double())
-						  - map.pulse_at_beat (region->beat())) * 4.0));
-
-	cout << UTILNAME << ": Reset start and length beats for region : " << region->name() << endl;
+	/* force a change to length and length_beats */
+	PositionLockStyle old_pls = region->position_lock_style();
+	region->set_position_lock_style (AudioTime);
+	region->set_length (tmap.frame_at_quarter_note (new_length_qn) + 1, 0);
+	region->set_length (tmap.frame_at_quarter_note (new_length_qn), 0);
+	region->set_position_lock_style (old_pls);
 }
 
 bool
@@ -222,10 +239,13 @@ apply_one_source_per_region_fix (Session* session)
 				continue;
 			}
 
-			reset_start_and_length (session, mr);
+			reset_start (session, mr);
+			reset_length (session, mr);
+
 			string newsrc_filename = mr->name() +  "-a54-compat.mid";
 			string newsrc_path = Glib::build_filename (session->session_directory().midi_path(), newsrc_filename);
 			boost::shared_ptr<MidiSource> newsrc = ensure_per_region_source (session, mr, newsrc_path);
+
 			mr->clobber_sources (newsrc);
 		}
 	}
@@ -255,7 +275,8 @@ apply_one_source_per_source_fix (Session* session)
 				continue;
 			}
 
-			reset_start_and_length (session, mr);
+			reset_start (session, mr);
+			reset_length (session, mr);
 
 			if ((src_it = old_source_to_new.find (mr->midi_source()->id())) == old_source_to_new.end()) {
 				string newsrc_filename = mr->source()->name() +  "-a54-compat.mid";
@@ -426,6 +447,11 @@ int main (int argc, char* argv[])
 		return -1;
 	}
 
+	if (!PBD::exists_and_writable (Glib::path_get_dirname (session_dir->midi_path()))) {
+		cout << UTILNAME << ": Error : The session midi directory " << session_dir->midi_path() << " must be writable. exiting." << endl;
+		::exit (EXIT_FAILURE);
+	}
+
 	if (!state_tree->read (xmlpath)) {
 		cout << UTILNAME << ": Could not understand session file " << xmlpath << endl;
 		delete state_tree;
@@ -580,11 +606,6 @@ int main (int argc, char* argv[])
 		cout << UTILNAME << ": Loading snapshot." << endl;
 
 		s = SessionUtils::load_session (argv[optind], argv[optind+1]);
-
-		if (!PBD::exists_and_writable (Glib::path_get_dirname (session_dir->midi_path()))) {
-			cout << UTILNAME << ": the directory " << session_dir->midi_path() << " must be writable. exiting." << endl;
-			session_fail (s);
-		}
 
 		/* save new snapshot and prevent alteration of the original by switching to it.
 		   we know these files don't yet exist.
