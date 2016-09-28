@@ -1,4 +1,23 @@
-#include "mode.h"
+/*
+    Copyright (C) 1999-2016 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#include "ardour/mode.h"
 
 MusicalMode::MusicalMode (MusicalMode::Type t)
 {
@@ -36,7 +55,7 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 		m.steps.push_back (4.5);
 		m.steps.push_back (5.5);
 		break;
-	case Minor:
+	case AeolianMinor:
 		m.steps.push_back (1.0);
 		m.steps.push_back (1.5);
 		m.steps.push_back (2.5);
@@ -100,14 +119,6 @@ MusicalMode::fill (MusicalMode& m, MusicalMode::Type t)
 		m.steps.push_back (2.5);
 		m.steps.push_back (3.5);
 		m.steps.push_back (4.5);
-		m.steps.push_back (5.0);
-		break;
-	case Aeolian:
-		m.steps.push_back (1.0);
-		m.steps.push_back (1.5);
-		m.steps.push_back (2.5);
-		m.steps.push_back (3.5);
-		m.steps.push_back (4.0);
 		m.steps.push_back (5.0);
 		break;
 	case Locrian:

@@ -32,6 +32,7 @@
 
 #include "midi++/types.h"
 
+#include "ardour/mode.h"
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
@@ -40,7 +41,6 @@
 #include "canvas/colors.h"
 
 #include "midi_byte_array.h"
-#include "mode.h"
 
 namespace Pango {
 	class Layout;

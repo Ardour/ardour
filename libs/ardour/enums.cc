@@ -31,6 +31,7 @@
 #include "ardour/io.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
+#include "ardour/mode.h"
 #include "ardour/mute_master.h"
 #include "ardour/presentation_info.h"
 #include "ardour/session.h"
@@ -134,6 +135,7 @@ setup_enum_writer ()
         BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
+	MusicalMode::Type mode;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -715,6 +717,45 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (PresentationInfo, Hidden);
 	REGISTER_CLASS_ENUM (PresentationInfo, OrderSet);
 	REGISTER_BITS (_PresentationInfo_Flag);
+
+	REGISTER_CLASS_ENUM (MusicalMode,Dorian);
+	REGISTER_CLASS_ENUM (MusicalMode, IonianMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, AeolianMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, HarmonicMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorAscending);
+	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorDescending);
+	REGISTER_CLASS_ENUM (MusicalMode, Phrygian);
+	REGISTER_CLASS_ENUM (MusicalMode, Lydian);
+	REGISTER_CLASS_ENUM (MusicalMode, Mixolydian);
+	REGISTER_CLASS_ENUM (MusicalMode, Locrian);
+	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, Chromatic);
+	REGISTER_CLASS_ENUM (MusicalMode, BluesScale);
+	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, Oriental);
+	REGISTER_CLASS_ENUM (MusicalMode, DoubleHarmonic);
+	REGISTER_CLASS_ENUM (MusicalMode, Enigmatic);
+	REGISTER_CLASS_ENUM (MusicalMode, Hirajoshi);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianMinor);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianMajor);
+	REGISTER_CLASS_ENUM (MusicalMode, Kumoi);
+	REGISTER_CLASS_ENUM (MusicalMode, Iwato);
+	REGISTER_CLASS_ENUM (MusicalMode, Hindu);
+	REGISTER_CLASS_ENUM (MusicalMode, Spanish8Tone);
+	REGISTER_CLASS_ENUM (MusicalMode, Pelog);
+	REGISTER_CLASS_ENUM (MusicalMode, HungarianGypsy);
+	REGISTER_CLASS_ENUM (MusicalMode, Overtone);
+	REGISTER_CLASS_ENUM (MusicalMode, LeadingWholeTone);
+	REGISTER_CLASS_ENUM (MusicalMode, Arabian);
+	REGISTER_CLASS_ENUM (MusicalMode, Balinese);
+	REGISTER_CLASS_ENUM (MusicalMode, Gypsy);
+	REGISTER_CLASS_ENUM (MusicalMode, Mohammedan);
+	REGISTER_CLASS_ENUM (MusicalMode, Javanese);
+	REGISTER_CLASS_ENUM (MusicalMode, Persian);
+	REGISTER_CLASS_ENUM (MusicalMode, Algerian);
+	REGISTER (mode);
 }
 
 } /* namespace ARDOUR */

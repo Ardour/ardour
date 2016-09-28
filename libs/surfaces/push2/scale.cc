@@ -379,19 +379,18 @@ ScaleLayout::build_scale_menu ()
 
 	v.push_back ("Dorian");
 	v.push_back ("Ionian (Major)");
-	v.push_back ("Minor");
+	v.push_back ("Aeolian (Minor)");
 	v.push_back ("Harmonic Minor");
 	v.push_back ("MelodicMinor Asc.");
 	v.push_back ("MelodicMinor Desc.");
 	v.push_back ("Phrygian");
 	v.push_back ("Lydian");
 	v.push_back ("Mixolydian");
-	v.push_back ("Aeolian");
 	v.push_back ("Locrian");
 	v.push_back ("Pentatonic Major");
 	v.push_back ("Pentatonic Minor");
 	v.push_back ("Chromatic");
-	v.push_back ("BluesScale");
+	v.push_back ("Blues Scale");
 	v.push_back ("Neapolitan Minor");
 	v.push_back ("Neapolitan Major");
 	v.push_back ("Oriental");

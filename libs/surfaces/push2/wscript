@@ -30,7 +30,6 @@ def build(bld):
 	    gui.cc
 	    knob.cc
 	    layout.cc
-	    mode.cc
 	    menu.cc
 	    mix.cc
 	    scale.cc

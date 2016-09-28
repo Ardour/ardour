@@ -75,50 +75,10 @@ register_enums ()
 	vector<int> i;
 	vector<string> s;
 
-	MusicalMode::Type mode;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
-	REGISTER_CLASS_ENUM (MusicalMode,Dorian);
-	REGISTER_CLASS_ENUM (MusicalMode, IonianMajor);
-	REGISTER_CLASS_ENUM (MusicalMode, Minor);
-	REGISTER_CLASS_ENUM (MusicalMode, HarmonicMinor);
-	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorAscending);
-	REGISTER_CLASS_ENUM (MusicalMode, MelodicMinorDescending);
-	REGISTER_CLASS_ENUM (MusicalMode, Phrygian);
-	REGISTER_CLASS_ENUM (MusicalMode, Lydian);
-	REGISTER_CLASS_ENUM (MusicalMode, Mixolydian);
-	REGISTER_CLASS_ENUM (MusicalMode, Aeolian);
-	REGISTER_CLASS_ENUM (MusicalMode, Locrian);
-	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMajor);
-	REGISTER_CLASS_ENUM (MusicalMode, PentatonicMinor);
-	REGISTER_CLASS_ENUM (MusicalMode, Chromatic);
-	REGISTER_CLASS_ENUM (MusicalMode, BluesScale);
-	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMinor);
-	REGISTER_CLASS_ENUM (MusicalMode, NeapolitanMajor);
-	REGISTER_CLASS_ENUM (MusicalMode, Oriental);
-	REGISTER_CLASS_ENUM (MusicalMode, DoubleHarmonic);
-	REGISTER_CLASS_ENUM (MusicalMode, Enigmatic);
-	REGISTER_CLASS_ENUM (MusicalMode, Hirajoshi);
-	REGISTER_CLASS_ENUM (MusicalMode, HungarianMinor);
-	REGISTER_CLASS_ENUM (MusicalMode, HungarianMajor);
-	REGISTER_CLASS_ENUM (MusicalMode, Kumoi);
-	REGISTER_CLASS_ENUM (MusicalMode, Iwato);
-	REGISTER_CLASS_ENUM (MusicalMode, Hindu);
-	REGISTER_CLASS_ENUM (MusicalMode, Spanish8Tone);
-	REGISTER_CLASS_ENUM (MusicalMode, Pelog);
-	REGISTER_CLASS_ENUM (MusicalMode, HungarianGypsy);
-	REGISTER_CLASS_ENUM (MusicalMode, Overtone);
-	REGISTER_CLASS_ENUM (MusicalMode, LeadingWholeTone);
-	REGISTER_CLASS_ENUM (MusicalMode, Arabian);
-	REGISTER_CLASS_ENUM (MusicalMode, Balinese);
-	REGISTER_CLASS_ENUM (MusicalMode, Gypsy);
-	REGISTER_CLASS_ENUM (MusicalMode, Mohammedan);
-	REGISTER_CLASS_ENUM (MusicalMode, Javanese);
-	REGISTER_CLASS_ENUM (MusicalMode, Persian);
-	REGISTER_CLASS_ENUM (MusicalMode, Algerian);
-	REGISTER (mode);
 }
 
 Push2::Push2 (ARDOUR::Session& s)
