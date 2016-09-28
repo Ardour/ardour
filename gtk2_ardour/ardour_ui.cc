@@ -3608,7 +3608,9 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	}
 
 	catch (SessionException e) {
+		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
+		cerr << "---------\n";
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
@@ -3617,7 +3619,9 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		return -1;
 	}
 	catch (...) {
+		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
+		cerr << "---------\n";
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
