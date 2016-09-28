@@ -237,10 +237,12 @@ Session::post_engine_init ()
 	setup_midi_machine_control ();
 
 	if (_butler->start_thread()) {
+		error << _("Butler did not start") << endmsg;
 		return -1;
 	}
 
 	if (start_midi_thread ()) {
+		error << _("MIDI I/O thread did not start") << endmsg;
 		return -1;
 	}
 
@@ -278,6 +280,7 @@ Session::post_engine_init ()
 
 		if (state_tree) {
 			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+				error << _("Could not set session state from XML") << endmsg;
 				return -1;
 			}
 		} else {
@@ -344,7 +347,11 @@ Session::post_engine_init ()
 		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
 		return -1;
+	} catch (std::exception const & e) {
+		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
+		return -1;
 	} catch (...) {
+		error << _("Unknown exception during session setup") << endmsg;
 		return -1;
 	}
 
