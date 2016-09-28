@@ -57,6 +57,10 @@
 
 #include "pbd/i18n.h"
 
+#ifdef PLATFORM_WINDOWS
+#define random() rand()
+#endif
+
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
