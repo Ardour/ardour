@@ -132,11 +132,9 @@ user_config_directory (int version)
 }
 
 std::string
-user_cache_directory ()
+user_cache_directory (std::string cachename)
 {
-	static std::string p;
-
-	if (!p.empty()) return p;
+	std::string p;
 
 #ifdef __APPLE__
 	p = Glib::build_filename (Glib::get_home_dir(), "Library/Caches");
@@ -169,7 +167,11 @@ user_cache_directory ()
 	}
 #endif // end not __APPLE__
 
-	p = Glib::build_filename (p, user_config_directory_name ());
+	if (cachename.empty ()) {
+		p = Glib::build_filename (p, user_config_directory_name ());
+	} else {
+		p = Glib::build_filename (p, cachename);
+	}
 
 #ifdef PLATFORM_WINDOWS
 	 /* On Windows Glib::get_user_data_dir is the folder to use for local
