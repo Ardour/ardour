@@ -72,19 +72,6 @@ using namespace ArdourSurface;
 #define ABLETON 0x2982
 #define PUSH2   0x1967
 
-__attribute__((constructor)) static void
-register_enums ()
-{
-	EnumWriter& enum_writer (EnumWriter::instance());
-	vector<int> i;
-	vector<string> s;
-
-
-#define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
-#define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
-
-}
-
 Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
