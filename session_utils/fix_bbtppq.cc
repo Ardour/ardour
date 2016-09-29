@@ -229,7 +229,7 @@ apply_one_source_per_region_fix (Session* session)
 
 	/* for every midi region, ensure a new source and switch to it. */
 	for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
-		boost::shared_ptr<MidiRegion> mr = 0;
+		boost::shared_ptr<MidiRegion> mr;
 
 		if ((mr = boost::dynamic_pointer_cast<MidiRegion>((*i).second)) != 0) {
 
@@ -265,7 +265,7 @@ apply_one_source_per_source_fix (Session* session)
 	map<PBD::ID, boost::shared_ptr<MidiSource> > old_source_to_new;
 	/* for every midi region, ensure a converted source exists. */
 	for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
-		boost::shared_ptr<MidiRegion> mr = 0;
+		boost::shared_ptr<MidiRegion> mr;
 		map<PBD::ID, boost::shared_ptr<MidiSource> >::iterator src_it;
 
 		if ((mr = boost::dynamic_pointer_cast<MidiRegion>((*i).second)) != 0) {
