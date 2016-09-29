@@ -318,6 +318,12 @@ def enoify (major, minor):
             return "\\n\\\"Music for Films\\\""
         elif minor == 4:
             return "\\n\\\"In a Land of Clear Colours\\\""
+        elif minor == 5:
+            return "\\n\\\"The Plateaux of Mirror\\\""
+        elif minor == 6:
+            return "\\n\\\"Possible Musics\\\""
+        elif minor == 7:
+            return "\\n\\\"My Life in the Bush of Ghosts\\\""
     return "\\\"\\\""
 
 def options(opt):
