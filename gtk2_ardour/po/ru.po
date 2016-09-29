@@ -5025,7 +5025,7 @@ msgstr "Удалить синхронизатор"
 #: editor_actions.cc:1821 mixer_strip.cc:2200 monitor_section.cc:253
 #: monitor_section.cc:321 route_time_axis.cc:264 route_time_axis.cc:550
 msgid "Mute"
-msgstr "Молча"
+msgstr "Заглушить"
 
 #: editor_actions.cc:1824
 msgid "Normalize..."
@@ -5033,7 +5033,7 @@ msgstr "Нормировать сигнал..."
 
 #: editor_actions.cc:1827
 msgid "Reverse"
-msgstr "Развернуть"
+msgstr "Перевернуть"
 
 #: editor_actions.cc:1830
 msgid "Make Mono Regions"
@@ -6060,7 +6060,7 @@ msgstr "Удаление области"
 
 #: editor_ops.cc:4844
 msgid "duplicate range selection"
-msgstr ""
+msgstr "повторить диапазон выделения"
 
 #: editor_ops.cc:4938
 msgid "nudge track"
@@ -6077,11 +6077,11 @@ msgstr ""
 #: editor_ops.cc:4968 editor_ops.cc:7202 editor_regions.cc:503
 #: editor_snapshots.cc:171
 msgid "No, do nothing."
-msgstr "Нет"
+msgstr "Нет, ничего не делать."
 
 #: editor_ops.cc:4969
 msgid "Yes, destroy it."
-msgstr "Да"
+msgstr "Да, уничтожить."
 
 #: editor_ops.cc:4971
 msgid "Destroy last capture"
@@ -6374,11 +6374,11 @@ msgstr "Вставка времени"
 
 #: editor_ops.cc:7436
 msgid "Cannot insert or delete time when in Lock edit."
-msgstr ""
+msgstr "Не могу вставить или удалить время в режиме Блокировки"
 
 #: editor_ops.cc:7456 editor_ops.cc:7468 editor_ops.cc:7541 editor_ops.cc:7554
 msgid "remove time"
-msgstr ""
+msgstr "удалить время"
 
 #: editor_ops.cc:7628
 msgid "There are too many tracks to fit in the current window"
@@ -6567,7 +6567,7 @@ msgstr ""
 
 #: editor_routes.cc:238
 msgid "Record Safe"
-msgstr ""
+msgstr "Безопасная запись"
 
 #: editor_routes.cc:239
 msgid "Muted"
@@ -6749,7 +6749,7 @@ msgstr "Обновить список устройств"
 
 #: engine_dialog.cc:90
 msgid "Use Buffered I/O"
-msgstr ""
+msgstr "Использовать буферизированный ввод-вывод"
 
 #: engine_dialog.cc:91 engine_dialog.cc:3000
 msgid "Measure"
