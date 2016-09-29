@@ -649,6 +649,9 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 		(void) kbm.insert (new_pair).first;
 	}
 
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 and %2, group [%3]\n",
+	                                              kb, action_name, (group ? group->value() : string())));
+
 	if (can_save) {
 		Keyboard::keybindings_changed ();
 	}
@@ -1325,5 +1328,6 @@ ActionMap::get_all_actions (std::vector<std::string>& paths,
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	char const *gdk_name = gdk_keyval_name (k.key());
-	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state " << hex << k.state() << dec;
+	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state "
+	           << hex << k.state() << dec << ' ' << show_gdk_event_state (k.state());
 }
