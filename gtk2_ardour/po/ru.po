@@ -5,7 +5,8 @@
 # Igor Blinov pitstop@nm.ru, 2004.
 # Александр Кольцов <ag1455@mail.ru>, 2014-2016
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006-2016, 2016.
-#
+#Петр Семилетов <tea@list.ru>, 2016
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
@@ -380,11 +381,13 @@ msgid ""
 "Russian:\n"
 "\t Igor Blinov <pitstop@nm.ru>\n"
 "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
+"\tPeter Semiletov <tea@list.ru>\n"
 msgstr ""
 "Русский:\n"
 "\tИгорь Блинов <pitstop@nm.ru>\n"
 "\tАлександр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "\tАлександр Кольцов <ag1455@mail.ru>\n"
+"\tПетр Семилетов <tea@list.ru>\n"
 
 #: about.cc:216
 msgid ""
@@ -781,11 +784,11 @@ msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_http.cc:165 ardour_http.cc:179
 msgid "HTTP request failed: (%1) %2"
-msgstr ""
+msgstr "HTTP-запрос провален: (%1) %2"
 
 #: ardour_http.cc:169 ardour_http.cc:182
 msgid "HTTP request status: %1"
-msgstr ""
+msgstr "Статус HTTP-запроса: %1"
 
 #: ardour_ui.cc:198
 msgid ""
@@ -893,7 +896,7 @@ msgstr "Ваши файлы с настройками скопированы. М
 
 #: ardour_ui.cc:509
 msgid "Pre-Release Warning"
-msgstr ""
+msgstr "Предупреждение предварительного выпуска"
 
 #: ardour_ui.cc:513
 msgid ""
@@ -10901,7 +10904,7 @@ msgstr "По умолчанию"
 
 #: rc_option_editor.cc:1058
 msgid "Adjusting the scale requires an application restart to re-layout."
-msgstr ""
+msgstr "Изменение масштаба требует перезапуска программы для вступления изменений в силу."
 
 #: rc_option_editor.cc:1100
 msgid "∞"
@@ -10936,6 +10939,8 @@ msgid ""
 "Specify the default timeout for plugin instantiation. Plugins that require "
 "more time to load will be blacklisted. A value of 0 disables the timeout."
 msgstr ""
+"Установить минимальное время, за которое создается экземпляр плагина."
+"Плагины, которым нужно больше времени, заносятся в черный список. Значение 0 отключает минимальное время."
 
 #: rc_option_editor.cc:1111
 msgid "Scan Time Out:"
@@ -10959,7 +10964,7 @@ msgstr "Большие сессии (от 64 дорожек и больше)"
 
 #: rc_option_editor.cc:1215
 msgid "Custom (set by sliders below)"
-msgstr ""
+msgstr "Задать (используя ползунки ниже)"
 
 #: rc_option_editor.cc:1219 export_video_dialog.cc:167
 msgid "Preset:"
@@ -11889,7 +11894,7 @@ msgstr "Клавиатура"
 #: rc_option_editor.cc:2848 rc_option_editor.cc:2890 rc_option_editor.cc:2960
 #: startup.cc:352
 msgid "Scan for Plugins"
-msgstr "Просканировать плагины"
+msgstr "Найти установленные плагины"
 
 #: rc_option_editor.cc:2853
 msgid "General"
@@ -11918,6 +11923,8 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>Если включено</b> состояние плагинов будет сброшено при остановке воспроизведения."
+"Большей частью это влияет на эффекты с \"хвостомl\" вроде ревербераторов."
 
 #: rc_option_editor.cc:2879
 msgid "Make new plugins active"
@@ -12069,6 +12076,9 @@ msgid ""
 "using 2D-graphics acceleration.\n"
 "This requires restarting %1 before having an effect"
 msgstr ""
+"Отрисовка больших частей интерфейса программно"
+"вместо 2D-ускорения.\n"
+"Требует перезапуска."
 
 #: rc_option_editor.cc:3046 rc_option_editor.cc:3058 rc_option_editor.cc:3061
 #: rc_option_editor.cc:3069 rc_option_editor.cc:3077 rc_option_editor.cc:3085
@@ -12080,18 +12090,19 @@ msgstr "Интерфейс"
 
 #: rc_option_editor.cc:3052
 msgid "Possibly improve slow graphical performance (requires restart)"
-msgstr ""
+msgstr "Возможное улучшение медленной отрисовки (требует перезапуска)"
 
 #: rc_option_editor.cc:3057
 msgid ""
 "Disables hardware gradient rendering on buggy video drivers (\"buggy "
 "gradients patch\").\n"
 "This requires restarting %1 before having an effect"
-msgstr ""
+msgstr "Отключить аппаратный градиент на глючных видеодрайверах.\n"
+"Необходим перезапуск %1"
 
 #: rc_option_editor.cc:3064
 msgid "Use Window Manager/Desktop visibility information"
-msgstr ""
+msgstr "Использовать настройки видимости оконного менеджера/рабочего стола"
 
 #: rc_option_editor.cc:3072
 msgid "Graphically indicate mouse pointer hovering over various widgets"
@@ -12722,7 +12733,7 @@ msgstr "Новый список воспроизведения"
 
 #: route_time_axis.cc:1441
 msgid "The name \"%1\" is reserved for %2"
-msgstr ""
+msgstr "Название \"%1\" зарезервировано для %2"
 
 #: route_time_axis.cc:1684
 msgid "New Copy..."
@@ -12742,7 +12753,7 @@ msgstr "Очистить текущий"
 
 #: route_time_axis.cc:1697
 msgid "Select from All..."
-msgstr ""
+msgstr "Выделить из всего..."
 
 #: route_time_axis.cc:1785
 msgid "Take: %1.%2"
@@ -12798,7 +12809,7 @@ msgstr "Мониторинг воспроизведения"
 
 #: route_ui.cc:710
 msgid "Not connected to AudioEngine - cannot engage record"
-msgstr "Не подключено к AudioEngine.  Нельзя записывать."
+msgstr "Не подключено к звуковому движку. Нельзя записывать."
 
 #: route_ui.cc:887
 msgid "Rec-Safe"
@@ -12984,11 +12995,11 @@ msgstr ""
 
 #: script_selector.cc:55
 msgid "<b>Description:</b>"
-msgstr ""
+msgstr "<b>Описание:</b>"
 
 #: script_selector.cc:131
 msgid "Select Script to unload"
-msgstr ""
+msgstr "Выберите скрипт для выгрузки"
 
 #: script_selector.cc:165
 msgid "<b>Name:</b>"
@@ -14795,7 +14806,7 @@ msgstr "Временные окна следуют за получающим ф�
 
 #: theme_manager.cc:63
 msgid "Float detached monitor-section window"
-msgstr ""
+msgstr "Отсоединненное окно монитора в плавающем режиме"
 
 #: theme_manager.cc:64
 msgid "Icon Set"
@@ -14850,7 +14861,7 @@ msgstr "Без фильтрации"
 
 #: time_fx_dialog.cc:62
 msgid "Contents"
-msgstr ""
+msgstr "Содержимое"
 
 #: time_fx_dialog.cc:63
 msgid "Minimize time distortion"
@@ -14914,55 +14925,55 @@ msgstr "Ошибка в программе: запрос в несуществу
 
 #: transform_dialog.cc:39
 msgid "this note's"
-msgstr ""
+msgstr "этой ноты"
 
 #: transform_dialog.cc:40
 msgid "the previous note's"
-msgstr ""
+msgstr "предыдущей ноты"
 
 #: transform_dialog.cc:41
 msgid "this note's index"
-msgstr ""
+msgstr "индекс этой ноты"
 
 #: transform_dialog.cc:42
 msgid "the number of notes"
-msgstr ""
+msgstr "количество нот"
 
 #: transform_dialog.cc:43
 msgid "exactly"
-msgstr ""
+msgstr "точно"
 
 #: transform_dialog.cc:44
 msgid "a random number from"
-msgstr ""
+msgstr "случайное число от"
 
 #: transform_dialog.cc:55
 msgid "equal steps from"
-msgstr ""
+msgstr "равные шаги от"
 
 #: transform_dialog.cc:58
 msgid "note number"
-msgstr ""
+msgstr "номер ноты"
 
 #: transform_dialog.cc:59
 msgid "velocity"
-msgstr ""
+msgstr "скорость"
 
 #: transform_dialog.cc:60
 msgid "start time"
-msgstr ""
+msgstr "время начала"
 
 #: transform_dialog.cc:61
 msgid "length"
-msgstr ""
+msgstr "длина"
 
 #: transform_dialog.cc:82 transform_dialog.cc:113
 msgid "Transform"
-msgstr ""
+msgstr "Преобразовать"
 
 #: transform_dialog.cc:91
 msgid "Set "
-msgstr ""
+msgstr "Установить "
 
 #: transpose_dialog.cc:30
 msgid "Transpose MIDI"
