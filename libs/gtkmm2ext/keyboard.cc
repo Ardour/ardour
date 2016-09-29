@@ -60,7 +60,7 @@ guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef __APPLE__
 
-uint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
+uint Keyboard::PrimaryModifier = (GDK_MOD2_MASK|GDK_META_MASK);   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
@@ -369,28 +369,6 @@ Keyboard::reset_relevant_modifier_key_mask ()
 
 	gtk_accelerator_set_default_mod_mask (RelevantModifierKeyMask);
 
-#ifdef __APPLE__
-        /* Remove SUPER,HYPER,META.
-         *
-         * GTK on OS X adds META when Command is pressed for various indefensible reasons, since
-         * it also uses MOD2 to indicate Command. Our code assumes that each
-         * modifier (Primary, Secondary etc.) is represented by a single bit in
-         * the modifier mask, but GTK's (STUPID) design uses two (MOD2 + META)
-         * to represent the Command key. Some discussion about this is here:
-         * https://bugzilla.gnome.org/show_bug.cgi?id=692597
-         *
-         * We cannot do this until AFTER we told GTK what the default modifier
-         * was, because otherwise it will fail to recognize MOD2-META-<key> as
-         * an accelerator.
-         *
-         * Note that in the tabbed branch, we no longer use GTK accelerators
-         * for functional purposes, so this is as critical for that branch.
-         */
-
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_SUPER_MASK);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_HYPER_MASK);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_META_MASK);
-#endif
 	RelevantModifierKeysChanged(); /* EMIT SIGNAL */
 }
 
