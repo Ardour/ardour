@@ -1136,7 +1136,14 @@ Session::state (bool full_state)
 		node->add_child_nocopy (*midi_port_stuff);
 	}
 
-	node->add_child_nocopy (config.get_variables ());
+	XMLNode& cfgxml (config.get_variables ());
+	if (!full_state) {
+		/* exclude search-paths from template */
+		cfgxml.remove_nodes_and_delete ("name", "audio-search-path");
+		cfgxml.remove_nodes_and_delete ("name", "midi-search-path");
+		cfgxml.remove_nodes_and_delete ("name", "raid-path");
+	}
+	node->add_child_nocopy (cfgxml);
 
 	node->add_child_nocopy (ARDOUR::SessionMetadata::Metadata()->get_state());
 
