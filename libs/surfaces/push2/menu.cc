@@ -67,7 +67,7 @@ Push2Menu::Push2Menu (Item* parent, vector<string> s)
 		baseline = h;
 	}
 
-	active_bg = new Rectangle (this);
+	active_bg = new ArdourCanvas::Rectangle (this);
 
 	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
 		Text* t = new Text (this);

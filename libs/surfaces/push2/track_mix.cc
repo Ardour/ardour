@@ -81,7 +81,7 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
 {
 	Pango::FontDescription fd ("Sans 10");
 
-	bg = new Rectangle (this);
+	bg = new ArdourCanvas::Rectangle (this);
 	bg->set (Rect (0, 0, display_width(), display_height()));
 	bg->set_fill_color (p2.get_color (Push2::DarkBackground));
 

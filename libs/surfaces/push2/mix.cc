@@ -77,7 +77,7 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 {
 	/* background */
 
-	bg = new Rectangle (this);
+	bg = new ArdourCanvas::Rectangle (this);
 	bg->set (Rect (0, 0, display_width(), display_height()));
 	bg->set_fill_color (p2.get_color (Push2::DarkBackground));
 
@@ -93,12 +93,12 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 
 		/* background for text labels for knob function */
 
-		Rectangle* r = new Rectangle (this);
+		ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (this);
 		Coord x0 = 10 + (n*Push2Canvas::inter_button_spacing()) - 5;
 		r->set (Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
 		upper_backgrounds.push_back (r);
 
-		r = new Rectangle (this);
+		r = new ArdourCanvas::Rectangle (this);
 		r->set (Rect (x0, 137, x0 + Push2Canvas::inter_button_spacing(), 137 + 21));
 		lower_backgrounds.push_back (r);
 
