@@ -380,7 +380,7 @@ About the Bug\n\
 If a session from affected versions used MIDI regions and a meter note divisor\n\
 was set to anything but quarter notes, the source smf files would contain events\n\
 at a PPQN value derived from BBT beats (using meter note divisor)\n\
-rather than quarter-note beatss.\n\
+rather than quarter-note beats.\n\
 The region start and length offsets would also be stored incorrectly.\n\
 If a MIDI session only contains quarter note meter divisors, it will be unaffected.\n\
 \n");
