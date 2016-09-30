@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\box.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\canvas.cc"
 				>
 			</File>
@@ -288,6 +292,10 @@
 			</File>
 			<File
 				RelativePath="..\lookup_table.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\meter.cc"
 				>
 			</File>
 			<File
@@ -373,6 +381,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\canvas\box.h"
+				>
+			</File>
+			<File
 				RelativePath="..\canvas\canvas.h"
 				>
 			</File>
@@ -438,6 +450,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\lookup_table.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\meter.h"
 				>
 			</File>
 			<File
