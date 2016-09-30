@@ -78,9 +78,6 @@ using Timecode::BBT_Time;
 //
 // - [ ] Update hide_all_automation.
 //
-// - [ ] Make sure the timings are correctly calculated when the region is
-//       temporarily shifted.
-//
 // - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
 //
 // - [ ] Move the hardwired colors in preference global menu.
