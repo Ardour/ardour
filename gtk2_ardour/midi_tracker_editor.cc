@@ -1384,7 +1384,7 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns._note_foreground_color[i]] = "#f0f0f0";
 							row[columns._channel_foreground_color[i]] = "#f0f0f0";
 							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
-							int64_t delay_ticks = mtp->delay_ticks(note->end_time(), irow);
+							int64_t delay_ticks = mtp->region_relative_delay_ticks(note->end_time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
 								row[columns._delay_foreground_color[i]] = "#f0f0f0";
@@ -1402,7 +1402,7 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns._channel_foreground_color[i]] = "#f0f0f0";
 							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
 
-							int64_t delay_ticks = mtp->delay_ticks(note->time(), irow);
+							int64_t delay_ticks = mtp->region_relative_delay_ticks(note->time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
 								row[columns._delay_foreground_color[i]] = "#f0f0f0";

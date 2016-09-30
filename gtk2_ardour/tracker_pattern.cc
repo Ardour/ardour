@@ -39,6 +39,8 @@ TrackerPattern::TrackerPattern(ARDOUR::Session* session,
 	: _session(session), _region(region),
 	  _conv(_session->tempo_map(), _region->position())
 {
+	first_beats = _conv.from (_region->first_frame());
+	last_beats = _conv.from (_region->last_frame());
 }
 
 void TrackerPattern::set_rows_per_beat(uint16_t rpb)
@@ -50,17 +52,24 @@ void TrackerPattern::set_rows_per_beat(uint16_t rpb)
 
 Evoral::Beats TrackerPattern::find_first_row_beats()
 {	
-	return _conv.from (_region->first_frame()).snap_to (beats_per_row);
+	return first_beats.snap_to (beats_per_row);
 }
 
 Evoral::Beats TrackerPattern::find_last_row_beats()
 {
-	return _conv.from (_region->last_frame()).snap_to (beats_per_row);
+	return last_beats.snap_to (beats_per_row);
 }
 
 uint32_t TrackerPattern::find_nrows()
 {
-	return (last_beats - first_beats).to_double() * rows_per_beat;
+	return (last_row_beats - first_row_beats).to_double() * rows_per_beat;
+}
+
+void TrackerPattern::set_row_range()
+{
+	first_row_beats = find_first_row_beats();
+	last_row_beats = find_last_row_beats();
+	nrows = find_nrows();
 }
 
 framepos_t TrackerPattern::frame_at_row(uint32_t irow)
@@ -70,13 +79,13 @@ framepos_t TrackerPattern::frame_at_row(uint32_t irow)
 
 Evoral::Beats TrackerPattern::beats_at_row(uint32_t irow)
 {
-	return first_beats + (irow*1.0) / rows_per_beat;
+	return first_row_beats + (irow*1.0) / rows_per_beat;
 }
 
 uint32_t TrackerPattern::row_at_beats(Evoral::Beats beats)
 {
 	Evoral::Beats half_row(0.5/rows_per_beat);
-	return (beats - first_beats + half_row).to_double() * rows_per_beat;
+	return (beats - first_row_beats + half_row).to_double() * rows_per_beat;
 }
 
 uint32_t TrackerPattern::row_at_frame(framepos_t frame)
@@ -87,7 +96,7 @@ uint32_t TrackerPattern::row_at_frame(framepos_t frame)
 uint32_t TrackerPattern::row_at_beats_min_delay(Evoral::Beats beats)
 {
 	Evoral::Beats tpr_minus_1 = Evoral::Beats::ticks(_ticks_per_row - 1);
-	return (beats - first_beats + tpr_minus_1).to_double() * rows_per_beat;
+	return (beats - first_row_beats + tpr_minus_1).to_double() * rows_per_beat;
 }
 
 uint32_t TrackerPattern::row_at_frame_min_delay(framepos_t frame)
@@ -97,7 +106,7 @@ uint32_t TrackerPattern::row_at_frame_min_delay(framepos_t frame)
 
 uint32_t TrackerPattern::row_at_beats_max_delay(Evoral::Beats beats)
 {
-	return (beats - first_beats).to_double() * rows_per_beat;
+	return (beats - first_row_beats).to_double() * rows_per_beat;
 }
 
 uint32_t TrackerPattern::row_at_frame_max_delay(framepos_t frame)
@@ -113,4 +122,9 @@ int64_t TrackerPattern::delay_ticks(const Evoral::Beats& event_time, uint32_t ir
 int64_t TrackerPattern::delay_ticks(framepos_t frame, uint32_t irow)
 {
 	return delay_ticks(_conv.from (frame), irow);
+}
+
+int64_t TrackerPattern::region_relative_delay_ticks(const Evoral::Beats& event_time, uint32_t irow)
+{
+	return delay_ticks(event_time + first_beats, irow);
 }

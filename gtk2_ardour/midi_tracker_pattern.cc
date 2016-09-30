@@ -48,9 +48,7 @@ MidiTrackerPattern::MidiTrackerPattern(ARDOUR::Session* session,
 
 void MidiTrackerPattern::update_pattern()
 {
-	first_beats = find_first_row_beats();
-	last_beats = find_last_row_beats();
-	nrows = find_nrows();
+	set_row_range();
 
 	// Distribute the notes across N tracks so that no overlapping notes can
 	// exist on the same track. When a note on hits, it is placed on the first
@@ -87,8 +85,8 @@ void MidiTrackerPattern::update_pattern()
 	for (uint16_t itrack = 0; itrack < ntracks; ++itrack) {
 		for (MidiModel::Notes::iterator inote = notes_per_track[itrack].begin();
 		     inote != notes_per_track[itrack].end(); ++inote) {
-			Evoral::Beats on_time = (*inote)->time();
-			Evoral::Beats off_time = (*inote)->end_time();
+			Evoral::Beats on_time = (*inote)->time() + first_beats;
+			Evoral::Beats off_time = (*inote)->end_time() + first_beats;
 			uint32_t row_on_max_delay = row_at_beats_max_delay(on_time);
 			uint32_t row_on = row_at_beats(on_time);
 			uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);

@@ -38,9 +38,7 @@ AutomationTrackerPattern::AutomationTrackerPattern(ARDOUR::Session* session,
 
 void AutomationTrackerPattern::update_pattern()
 {
-	first_beats = find_first_row_beats();
-	last_beats = find_last_row_beats();
-	nrows = find_nrows();
+	set_row_range();
 
 	automations.clear();
 

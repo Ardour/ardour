@@ -59,6 +59,9 @@ public:
 	// Find the number of rows of the region
 	uint32_t find_nrows();
 
+	// Set first_row_beats, last_row_beats and nrows
+	void set_row_range();
+
 	// Return the frame at the corresponding row index
 	framepos_t frame_at_row(uint32_t irow);
 
@@ -90,8 +93,15 @@ public:
 	// Return an event's delay in a certain row in ticks
 	int64_t delay_ticks(const Evoral::Beats& event_time, uint32_t irow);
 
-	// Like above but uses fram instead of beats
+	// Like delay_ticks above but uses frame instead of beats
 	int64_t delay_ticks(framepos_t frame, uint32_t irow);
+
+	// Like delay_ticks but the event_time is relative to the region position
+	int64_t region_relative_delay_ticks(const Evoral::Beats& event_time, uint32_t irow);
+
+	// Beats corresponding to the region's first and last frame
+	Evoral::Beats first_beats;
+	Evoral::Beats last_beats;
 
 	// Number of rows per beat
 	uint8_t rows_per_beat;
@@ -99,11 +109,9 @@ public:
 	// Determined by the number of rows per beat
 	Evoral::Beats beats_per_row;
 
-	// Beats corresponding to the first row
-	Evoral::Beats first_beats;
-
-	// Beats corresponding to the last row
-	Evoral::Beats last_beats;
+	// Beats corresponding to the first and last row
+	Evoral::Beats first_row_beats;
+	Evoral::Beats last_row_beats;
 
 	// Number of rows of that region (given the choosen resolution)
 	uint32_t nrows;
