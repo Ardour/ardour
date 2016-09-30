@@ -585,8 +585,9 @@ About::About ()
 	std::string splash_file;
 
 	Searchpath spath(ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("resources");
 
-	if (find_file (spath, "splash.png", splash_file)) {
+	if (find_file (spath, PROGRAM_NAME "-splash.png", splash_file)) {
 		set_logo (Gdk::Pixbuf::create_from_file (splash_file));
 	} else {
 		error << "Could not find splash file" << endmsg;
