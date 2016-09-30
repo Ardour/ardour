@@ -133,9 +133,14 @@ Push2::Push2 (ARDOUR::Session& s)
 
 Push2::~Push2 ()
 {
-	selection_connection.disconnect ();
+	DEBUG_TRACE (DEBUG::Push2, "push2 control surface object being destroyed\n");
 
-	stop_event_loop (); /* this will call stop_using_device () in Quit request handler */
+	/* do this before stopping the event loop, so that we don't get any notifications */
+	selection_connection.disconnect ();
+	port_reg_connection.disconnect ();
+	port_connection.disconnect ();
+
+	stop_using_device ();
 	device_release ();
 	ports_release ();
 
@@ -150,7 +155,12 @@ Push2::~Push2 ()
 	scale_layout = 0;
 	delete splash_layout;
 	splash_layout = 0;
+	delete track_mix_layout;
+	track_mix_layout = 0;
+
+	stop_event_loop ();
 }
+
 
 void
 Push2::run_event_loop ()
