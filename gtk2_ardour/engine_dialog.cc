@@ -1392,7 +1392,10 @@ EngineControl::set_samplerate_popdown_strings ()
 	set_popdown_strings (sample_rate_combo, s);
 
 	if (!s.empty()) {
-		if (desired.empty ()) {
+		if (ARDOUR::AudioEngine::instance()->running()) {
+			sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
+		}
+		else if (desired.empty ()) {
 			float new_active_sr = backend->default_sample_rate ();
 
 			if (std::find (sr.begin (), sr.end (), new_active_sr) == sr.end ()) {
