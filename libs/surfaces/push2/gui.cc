@@ -145,7 +145,8 @@ P2GUI::P2GUI (Push2& p)
 
 	/* catch future changes to connection state */
 
-	// p2.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&P2GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, invalidator (*this), boost::bind (&P2GUI::connection_handler, this), gui_context());
+	p2.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&P2GUI::connection_handler, this), gui_context());
 }
 
 P2GUI::~P2GUI ()
