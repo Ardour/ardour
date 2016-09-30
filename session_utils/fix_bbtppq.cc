@@ -211,8 +211,8 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_start (tmap.frame_at_quarter_note (new_start_qn) + 1);
-	region->set_start (tmap.frame_at_quarter_note (new_start_qn));
+	region->set_start (tmap.frame_at_quarter_note (region->pulse() * 4.0) - tmap.frame_at_quarter_note ((region->pulse() * 4.0) - new_start_qn)+ 1);
+	region->set_start (tmap.frame_at_quarter_note (region->pulse() * 4.0) - tmap.frame_at_quarter_note ((region->pulse() * 4.0) - new_start_qn));
 	region->set_position_lock_style (old_pls);
 
 }
@@ -228,8 +228,8 @@ reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to length and length_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_length (tmap.frame_at_quarter_note (new_length_qn) + 1, 0);
-	region->set_length (tmap.frame_at_quarter_note (new_length_qn), 0);
+	region->set_length (tmap.frame_at_quarter_note ((region->pulse() * 4.0) + new_length_qn) + 1 - region->position(), 0);
+	region->set_length (tmap.frame_at_quarter_note ((region->pulse() * 4.0) + new_length_qn)- region->position(), 0);
 	region->set_position_lock_style (old_pls);
 }
 
