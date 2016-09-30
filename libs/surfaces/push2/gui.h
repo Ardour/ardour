@@ -91,9 +91,6 @@ private:
 	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 	std::map<std::string,std::string> action_map; // map from action names to paths
 
-	void build_available_action_menu ();
-	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
-
 	struct PressureModeColumns : public Gtk::TreeModel::ColumnRecord {
 		PressureModeColumns() {
 			add (mode);
