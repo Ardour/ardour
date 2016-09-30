@@ -17,6 +17,7 @@
 */
 
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
