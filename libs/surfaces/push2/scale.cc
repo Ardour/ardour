@@ -184,7 +184,7 @@ ScaleLayout::button_upper (uint32_t n)
 		return;
 	}
 
-	int root;
+	int root = 0;
 
 	switch (n) {
 	case 1:
@@ -227,7 +227,7 @@ ScaleLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	int root;
+	int root = 0;
 
 	switch (n) {
 	case 1:
@@ -460,9 +460,9 @@ ScaleLayout::show_root_state ()
 	Pango::FontDescription fd ("Sans 10");
 
 	uint32_t highlight_text = 0;
-	vector<Text*>* none_text_array;
-	vector<Text*>* one_text_array;
-	Push2::ButtonID bid;
+	vector<Text*>* none_text_array = 0;
+	vector<Text*>* one_text_array = 0;
+	Push2::ButtonID bid = Push2::Upper2; /* keep compilers quiet */
 
 	switch (p2.scale_root()) {
 	case 0:
@@ -537,6 +537,8 @@ ScaleLayout::show_root_state ()
 		one_text_array = &upper_text;
 		bid = Push2::Upper7;
 		break;
+	default:
+		return;
 	}
 
 	if (none_text_array) {
