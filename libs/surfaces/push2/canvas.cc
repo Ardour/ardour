@@ -71,7 +71,6 @@ Push2Canvas::vblank ()
 	/* re-render dirty areas, if any */
 
 	if (expose ()) {
-		DEBUG_TRACE (DEBUG::Push2, "re-blit to device frame buffer\n");
 		/* something rendered, update device_frame_buffer */
 		blit_to_device_frame_buffer ();
 

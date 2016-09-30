@@ -370,12 +370,19 @@ class Push2 : public ARDOUR::ControlProtocol
 
   private:
 	libusb_device_handle *handle;
+	bool in_use;
 	ModifierState _modifier_state;
 
 	void do_request (Push2Request*);
-	int stop ();
-	int open ();
-	int close ();
+
+	int begin_using_device ();
+	int stop_using_device ();
+	int device_acquire ();
+	void device_release ();
+	int ports_acquire ();
+	void ports_release ();
+	void run_event_loop ();
+	void stop_event_loop ();
 
 	void relax () {}
 
@@ -430,9 +437,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
-
-	sigc::connection periodic_connection;
-	bool periodic ();
 
 	void thread_init ();
 

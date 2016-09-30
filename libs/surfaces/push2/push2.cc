@@ -76,6 +76,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
 	, handle (0)
+	, in_use (false)
 	, _modifier_state (None)
 	, splash_start (0)
 	, _current_layout (0)
@@ -93,6 +94,9 @@ Push2::Push2 (ARDOUR::Session& s)
 	, contrast_color (LED::Green)
 	, in_range_select (false)
 {
+	/* we're going to need this */
+
+	libusb_init (NULL);
 
 	build_maps ();
 	build_color_map ();
@@ -101,17 +105,21 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
 
-	if (open ()) {
-		throw failed_constructor ();
-	}
-
 	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
 
-	/* catch current selection, if any */
-	{
-		StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
-		stripable_selection_change (sp);
-	}
+	/* allocate graphics layouts, even though we're not using them yet */
+
+	_canvas = new Push2Canvas (*this, 960, 160);
+	mix_layout = new MixLayout (*this, *session, "globalmix");
+	scale_layout = new ScaleLayout (*this, *session, "scale");
+	track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
+	splash_layout = new SplashLayout (*this, *session, "splash");
+
+	run_event_loop ();
+
+	/* Ports exist for the life of this instance */
+
+	ports_acquire ();
 
 	/* catch arrival and departure of Push2 itself */
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
@@ -119,83 +127,103 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
 
-	/* ports might already be there */
+	/* Push 2 ports might already be there */
 	port_registration_handler ();
 }
 
 Push2::~Push2 ()
 {
-	stop ();
+	selection_connection.disconnect ();
 
-	delete track_mix_layout;
+	stop_event_loop (); /* this will call stop_using_device () in Quit request handler */
+	device_release ();
+	ports_release ();
+
+	if (_current_layout) {
+		_canvas->root()->remove (_current_layout);
+		_current_layout = 0;
+	}
+
 	delete mix_layout;
+	mix_layout = 0;
 	delete scale_layout;
+	scale_layout = 0;
+	delete splash_layout;
+	splash_layout = 0;
 }
 
 void
-Push2::port_registration_handler ()
+Push2::run_event_loop ()
 {
-	if (!_async_in && !_async_out) {
-		/* ports not registered yet */
-		return;
-	}
+	DEBUG_TRACE (DEBUG::Push2, "start event loop\n");
+	BaseUI::run ();
+}
 
-	if (_async_in->connected() && _async_out->connected()) {
-		/* don't waste cycles here */
-		return;
-	}
-
-	string input_port_name = X_("Ableton Push 2 MIDI 1 in");
-	string output_port_name = X_("Ableton Push 2 MIDI 1 out");
-	vector<string> in;
-	vector<string> out;
-
-	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
-	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
-
-	if (!in.empty() && !out.empty()) {
-		cerr << "Push2: both ports found\n";
-		cerr << "\tconnecting to " << in.front() <<  " + " << out.front() << endl;
-		if (!_async_in->connected()) {
-			AudioEngine::instance()->connect (_async_in->name(), in.front());
-		}
-		if (!_async_out->connected()) {
-			AudioEngine::instance()->connect (_async_out->name(), out.front());
-		}
-	}
+void
+Push2::stop_event_loop ()
+{
+	DEBUG_TRACE (DEBUG::Push2, "stop event loop\n");
+	BaseUI::quit ();
 }
 
 int
-Push2::open ()
+Push2::begin_using_device ()
 {
-	int err;
+	DEBUG_TRACE (DEBUG::Push2, "begin using device\n");
 
-	if (handle) {
-		/* already open */
+	/* set up periodic task used to push a frame buffer to the
+	 * device (25fps). The device can handle 60fps, but we don't
+	 * need that frame rate.
+	 */
+
+	Glib::RefPtr<Glib::TimeoutSource> vblank_timeout = Glib::TimeoutSource::create (40); // milliseconds
+	vblank_connection = vblank_timeout->connect (sigc::mem_fun (*this, &Push2::vblank));
+	vblank_timeout->attach (main_loop()->get_context());
+
+	connect_session_signals ();
+
+	init_buttons (true);
+	init_touch_strip ();
+	set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+	splash ();
+
+	/* catch current selection, if any so that we can wire up the pads if appropriate */
+	{
+		StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
+		stripable_selection_change (sp);
+	}
+
+	request_pressure_mode ();
+
+	in_use = true;
+
+	return 0;
+}
+
+int
+Push2::stop_using_device ()
+{
+	DEBUG_TRACE (DEBUG::Push2, "stop using device\n");
+
+	if (!in_use) {
+		DEBUG_TRACE (DEBUG::Push2, "nothing to do, device not in use\n");
 		return 0;
 	}
 
-	if ((handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
-		return -1;
-	}
+	init_buttons (false);
+	strip_buttons_off ();
 
-	if ((err = libusb_claim_interface (handle, 0x00))) {
-		return -1;
-	}
+	vblank_connection.disconnect ();
+	session_connections.drop_connections ();
 
-	try {
-		_canvas = new Push2Canvas (*this, 960, 160);
-		mix_layout = new MixLayout (*this, *session, "globalmix");
-		scale_layout = new ScaleLayout (*this, *session, "scale");
-		track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
-		splash_layout = new SplashLayout (*this, *session, "splash");
-	} catch (...) {
-		error << _("Cannot construct Canvas for display") << endmsg;
-		libusb_release_interface (handle, 0x00);
-		libusb_close (handle);
-		handle = 0;
-		return -1;
-	}
+	in_use = false;
+	return 0;
+}
+
+int
+Push2::ports_acquire ()
+{
+	DEBUG_TRACE (DEBUG::Push2, "acquiring ports\n");
 
 	/* setup ports */
 
@@ -203,12 +231,13 @@ Push2::open ()
 	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Push 2 out"), true);
 
 	if (_async_in == 0 || _async_out == 0) {
+		DEBUG_TRACE (DEBUG::Push2, "cannot register ports\n");
 		return -1;
 	}
 
 	/* We do not add our ports to the input/output bundles because we don't
 	 * want users wiring them by hand. They could use JACK tools if they
-	 * really insist on that.
+	 * really insist on that (and use JACK)
 	 */
 
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
@@ -237,26 +266,21 @@ Push2::open ()
 
 	connect_to_parser ();
 
+	/* Connect input port to event loop */
+
+	AsyncMIDIPort* asp;
+
+	asp = dynamic_cast<AsyncMIDIPort*> (_input_port);
+	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port));
+	asp->xthread().attach (main_loop()->get_context());
+
 	return 0;
 }
 
-list<boost::shared_ptr<ARDOUR::Bundle> >
-Push2::bundles ()
+void
+Push2::ports_release ()
 {
-	list<boost::shared_ptr<ARDOUR::Bundle> > b;
-
-	if (_output_bundle) {
-		b.push_back (_output_bundle);
-	}
-
-	return b;
-}
-
-int
-Push2::close ()
-{
-	init_buttons (false);
-	strip_buttons_off ();
+	DEBUG_TRACE (DEBUG::Push2, "releasing ports\n");
 
 	/* wait for button data to be flushed */
 	AsyncMIDIPort* asp;
@@ -270,29 +294,57 @@ Push2::close ()
 	_async_out.reset ((ARDOUR::Port*) 0);
 	_input_port = 0;
 	_output_port = 0;
+}
 
-	periodic_connection.disconnect ();
-	session_connections.drop_connections ();
+int
+Push2::device_acquire ()
+{
+	int err;
 
-	if (_current_layout) {
-		_canvas->root()->remove (_current_layout);
-		_current_layout = 0;
+	DEBUG_TRACE (DEBUG::Push2, "acquiring device\n");
+
+	if (handle) {
+		DEBUG_TRACE (DEBUG::Push2, "open() called with handle already set\n");
+		/* already open */
+		return 0;
 	}
 
-	delete mix_layout;
-	mix_layout = 0;
-	delete scale_layout;
-	scale_layout = 0;
-	delete splash_layout;
-	splash_layout = 0;
+	if ((handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
+		DEBUG_TRACE (DEBUG::Push2, "failed to open USB handle\n");
+		return -1;
+	}
 
+	if ((err = libusb_claim_interface (handle, 0x00))) {
+		DEBUG_TRACE (DEBUG::Push2, "failed to claim USB device\n");
+		libusb_close (handle);
+		handle = 0;
+		return -1;
+	}
+
+	return 0;
+}
+
+void
+Push2::device_release ()
+{
+	DEBUG_TRACE (DEBUG::Push2, "releasing device\n");
 	if (handle) {
 		libusb_release_interface (handle, 0x00);
 		libusb_close (handle);
 		handle = 0;
 	}
+}
 
-	return 0;
+list<boost::shared_ptr<ARDOUR::Bundle> >
+Push2::bundles ()
+{
+	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+
+	if (_output_bundle) {
+		b.push_back (_output_bundle);
+	}
+
+	return b;
 }
 
 void
@@ -366,16 +418,6 @@ Push2::init_buttons (bool startup)
 bool
 Push2::probe ()
 {
-	libusb_device_handle *h;
-	libusb_init (NULL);
-
-	if ((h = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
-		DEBUG_TRACE (DEBUG::Push2, "no Push2 device found\n");
-		return false;
-	}
-
-	libusb_close (h);
-	DEBUG_TRACE (DEBUG::Push2, "Push2 device located\n");
 	return true;
 }
 
@@ -399,18 +441,9 @@ Push2::do_request (Push2Request * req)
 
 	} else if (req->type == Quit) {
 
-		stop ();
+		stop_using_device ();
 	}
 }
-
-int
-Push2::stop ()
-{
-	BaseUI::quit ();
-	close ();
-	return 0;
-}
-
 
 void
 Push2::splash ()
@@ -454,49 +487,20 @@ Push2::set_active (bool yn)
 
 	if (yn) {
 
-		/* start event loop */
-
-		BaseUI::run ();
-
-		if (open ()) {
-			DEBUG_TRACE (DEBUG::Push2, "device open failed\n");
-			close ();
+		if (device_acquire ()) {
 			return -1;
 		}
 
-		/* Connect input port to event loop */
-
-		AsyncMIDIPort* asp;
-
-		asp = dynamic_cast<AsyncMIDIPort*> (_input_port);
-		asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &Push2::midi_input_handler), _input_port));
-		asp->xthread().attach (main_loop()->get_context());
-
-		connect_session_signals ();
-
-		/* set up periodic task used to push a frame buffer to the
-		 * device (25fps). The device can handle 60fps, but we don't
-		 * need that frame rate.
-		 */
-
-		Glib::RefPtr<Glib::TimeoutSource> vblank_timeout = Glib::TimeoutSource::create (40); // milliseconds
-		vblank_connection = vblank_timeout->connect (sigc::mem_fun (*this, &Push2::vblank));
-		vblank_timeout->attach (main_loop()->get_context());
-
-
-		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (1000); // milliseconds
-		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &Push2::periodic));
-		periodic_timeout->attach (main_loop()->get_context());
-
-		init_buttons (true);
-		init_touch_strip ();
-		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
-		splash ();
+		if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+			begin_using_device ();
+		} else {
+			/* begin_using_device () will get called once we're connected */
+		}
 
 	} else {
-
-		stop ();
-
+		/* Control Protocol Manager never calls us with false, but
+		 * insteads destroys us.
+		 */
 	}
 
 	ControlProtocol::set_active (yn);
@@ -537,24 +541,20 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		// DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
 
 		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*>(port);
 		if (asp) {
 			asp->clear ();
 		}
 
-		//DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = AudioEngine::instance()->sample_time();
-		port->parse (now);
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
+		if (in_use) {
+			framepos_t now = AudioEngine::instance()->sample_time();
+			port->parse (now);
+		}
 	}
 
-	return true;
-}
-
-bool
-Push2::periodic ()
-{
 	return true;
 }
 
@@ -1166,10 +1166,51 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 	return matched;
 }
 
+void
+Push2::port_registration_handler ()
+{
+	if (!_async_in && !_async_out) {
+		/* ports not registered yet */
+		return;
+	}
+
+	if (_async_in->connected() && _async_out->connected()) {
+		/* don't waste cycles here */
+		return;
+	}
+
+#ifdef __APPLE__
+	/* the origin of the numeric magic identifiers is known only to Ableton
+	   and may change in time. This is part of how CoreMIDI works.
+	*/
+	string input_port_name = X_("system:midi_capture_1319078870");
+	string output_port_name = X_("system:midi_playback_3409210341");
+#else
+	string input_port_name = X_("Ableton Push 2 MIDI 1 in");
+	string output_port_name = X_("Ableton Push 2 MIDI 1 out");
+#endif
+	vector<string> in;
+	vector<string> out;
+
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
+
+	if (!in.empty() && !out.empty()) {
+		cerr << "Push2: both ports found\n";
+		cerr << "\tconnecting to " << in.front() <<  " + " << out.front() << endl;
+		if (!_async_in->connected()) {
+			AudioEngine::instance()->connect (_async_in->name(), in.front());
+		}
+		if (!_async_out->connected()) {
+			AudioEngine::instance()->connect (_async_out->name(), out.front());
+		}
+	}
+}
+
 bool
 Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
-	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  start\n");
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler start\n");
 	if (!_input_port || !_output_port) {
 		return false;
 	}
@@ -1190,10 +1231,13 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 			connection_state &= ~OutputConnected;
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
 		/* not our ports */
 		return false;
 	}
+
+	DEBUG_TRACE (DEBUG::Push2, string_compose ("our ports changed connection state: %1 -> %2 connected ? %3\n",
+	                                           name1, name2, yn));
 
 	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
@@ -1203,11 +1247,19 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 		*/
 
 		g_usleep (100000);
-                DEBUG_TRACE (DEBUG::FaderPort, "device now connected for both input and output\n");
-                connected ();
+                DEBUG_TRACE (DEBUG::Push2, "device now connected for both input and output\n");
+
+                /* may not have the device open if it was just plugged
+                   in. Really need USB device detection rather than MIDI port
+                   detection for this to work well.
+                */
+
+                device_acquire ();
+                begin_using_device ();
 
 	} else {
 		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both) or not yet fully connected\n");
+		stop_using_device ();
 	}
 
 	ConnectionChange (); /* emit signal for our GUI */
@@ -1215,12 +1267,6 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  end\n");
 
 	return true; /* connection status changed */
-}
-
-void
-Push2::connected ()
-{
-	request_pressure_mode ();
 }
 
 boost::shared_ptr<Port>
