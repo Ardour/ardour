@@ -780,6 +780,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\mode.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\monitor_control.cc"
 				>
 			</File>
@@ -2011,6 +2015,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\mix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\mode.h"
 				>
 			</File>
 			<File
