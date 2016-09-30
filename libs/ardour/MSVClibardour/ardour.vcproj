@@ -1882,6 +1882,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\logmeter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\ltc_file_reader.h"
 				>
 			</File>

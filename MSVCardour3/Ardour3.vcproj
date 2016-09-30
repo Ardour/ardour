@@ -1738,10 +1738,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\logmeter.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\lua_script_manager.h"
 				>
 			</File>
