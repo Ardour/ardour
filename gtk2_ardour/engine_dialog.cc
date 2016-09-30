@@ -852,11 +852,17 @@ EngineControl::update_sensitivity ()
 	}
 
 	if (get_popdown_string_count (sample_rate_combo) > 0) {
+		bool allow_to_set_rate = false;
 		if (!ARDOUR::AudioEngine::instance()->running()) {
-			sample_rate_combo.set_sensitive (true);
-		} else {
-			sample_rate_combo.set_sensitive (false);
+			if (!ARDOUR_UI::instance()->session_loaded) {
+				// engine is not running, no session loaded -> anything goes.
+				allow_to_set_rate = true;
+			} else if (_desired_sample_rate > 0 && get_rate () != _desired_sample_rate) {
+				// only allow to change if the current setting is not the native session rate.
+				allow_to_set_rate = true;
+			}
 		}
+		sample_rate_combo.set_sensitive (allow_to_set_rate);
 	} else {
 		sample_rate_combo.set_sensitive (false);
 		valid = false;
