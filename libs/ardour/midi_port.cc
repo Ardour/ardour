@@ -48,6 +48,10 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 
 MidiPort::~MidiPort()
 {
+	if (_shadow_port) {
+		_shadow_port->disconnect_all ();
+	}
+
 	delete _buffer;
 }
 
