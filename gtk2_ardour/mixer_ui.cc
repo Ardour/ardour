@@ -2817,10 +2817,12 @@ Mixer_UI::step_gain_up_action ()
 	set_axis_targets_for_operation ();
 
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		r->route()->set_mix_group_override(true);
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->step_gain_up ();
 		}
+		r->route()->set_mix_group_override(false);
 	}
 }
 
@@ -2830,10 +2832,12 @@ Mixer_UI::step_gain_down_action ()
 	set_axis_targets_for_operation ();
 
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
+		r->route()->set_mix_group_override(true);
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->step_gain_down ();
 		}
+		r->route()->set_mix_group_override(false);
 	}
 }
 
