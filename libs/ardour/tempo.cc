@@ -3167,7 +3167,7 @@ TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& fr
 		qn = floor (qn) + (floor (((qn - floor (qn)) * (double) sub_num) + 0.5) / sub_num);
 	} else if (sub_num == 1) {
 		/* the gui requested exact musical (BBT) beat */
-		qn = quarter_note_at_beat (floor (beat_at_frame_locked (metrics, frame) + 0.5));
+		qn = quarter_note_at_beat_locked (metrics, floor (beat_at_frame_locked (metrics, frame) + 0.5));
 	} else if (sub_num == -1) {
 		/* snap to  bar */
 		Timecode::BBT_Time bbt = bbt_at_pulse_locked (metrics, qn / 4.0);
