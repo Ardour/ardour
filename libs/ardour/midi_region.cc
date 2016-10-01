@@ -306,6 +306,11 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 {
 	Region::set_position_internal (pos, allow_bbt_recompute, sub_num);
 
+	/* don't clobber _start _length and _length_beats if session loading.*/
+	if (!_session.loading()) {
+		return;
+	}
+
 	/* set _start to new position in tempo map */
 	_start = _position - _session.tempo_map().frame_at_pulse (pulse() - (_start_beats.val().to_double() / 4.0));
 
@@ -314,16 +319,13 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 		update_length_beats (sub_num);
 	}
 
-	/* don't clobber _length and _length_beats if session loading.*/
-	if (!_session.loading()) {
-		if (position_lock_style() == AudioTime) {
-			_length_beats = Evoral::Beats (_session.tempo_map().quarter_note_at_frame (_position + _length) - _session.tempo_map().quarter_note_at_frame (_position));
-		} else {
-			/* leave _length_beats alone, and change _length to reflect the state of things
-			   at the new position (tempo map may dictate a different number of frames).
-			*/
-			Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + (_length_beats.val().to_double() / 4.0)) - _position, sub_num);
-		}
+	if (position_lock_style() == AudioTime) {
+		_length_beats = Evoral::Beats (_session.tempo_map().quarter_note_at_frame (_position + _length) - _session.tempo_map().quarter_note_at_frame (_position));
+	} else {
+		/* leave _length_beats alone, and change _length to reflect the state of things
+		   at the new position (tempo map may dictate a different number of frames).
+		*/
+		Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + (_length_beats.val().to_double() / 4.0)) - _position, sub_num);
 	}
 }
 
@@ -596,10 +598,9 @@ void
 MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	Region::set_start_internal (s, sub_num);
-
 	if (position_lock_style() == AudioTime) {
 		set_start_beats_from_start_frames ();
-		}
+	}
 }
 
 void
