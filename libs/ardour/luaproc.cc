@@ -1020,6 +1020,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	LuaBindings::stddef (LG);
 	LuaBindings::common (LG);
 	LuaBindings::dsp (LG);
+	LuaBindings::osc (LG);
 
 	lua_gui->Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
 	lua_gui->do_command ("function ardour () end");
