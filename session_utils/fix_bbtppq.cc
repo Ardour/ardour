@@ -211,7 +211,7 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_start (tmap.frame_at_quarter_note (region->pulse() * 4.0) - tmap.frame_at_quarter_note ((region->pulse() * 4.0) - new_start_qn)+ 1);
+	region->set_start (tmap.frame_at_quarter_note (region->pulse() * 4.0) - tmap.frame_at_quarter_note ((region->pulse() * 4.0) - new_start_qn) + 1);
 	region->set_start (tmap.frame_at_quarter_note (region->pulse() * 4.0) - tmap.frame_at_quarter_note ((region->pulse() * 4.0) - new_start_qn));
 	region->set_position_lock_style (old_pls);
 
