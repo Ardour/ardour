@@ -72,7 +72,8 @@ using Timecode::BBT_Time;
 //
 // - [ ] Take care of midi automation.
 //
-// - [ ] Update show_all_automation.
+// - [ ] Make sure that it doesn't crash when the number of notes or
+//       automations have been reached.
 //
 // - [ ] Update show_existing_automation.
 //
@@ -283,37 +284,17 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	          << ", column = " << pan->column << std::endl;
 }
 
-// TODO:
+// 1. Does show the midi automations because there are too many of them.
 //
-// 1. This menu needs to be persistent between sessions.
-//
-// 2. Should also be fixed for the track/piano roll view.
+// 2. TODO :This menu needs to be persistent between sessions. Should also be
+//    fixed for the track/piano roll view.
 void
 MidiTrackerEditor::show_all_automation ()
 {
-	// std::cout << "MidiTrackerEditor::show_all_automation" << std::endl;
+	/* Show gain, mute and pan automations */
 
-    // Copy pasted from route_time_axis.cc
-
-	// TODO: past and study MidiTimeAxisView::show_all_automation as well
-
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_all_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
-
-	// 	/* Show our automation */
-
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		i->second->set_marked_for_display (true);
-
-	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-
-	// 		if (menu) {
-	// 			menu->set_active(true);
-	// 		}
-	// 	}
-
+	show_main_automations ();
+	
 	/* Show processor automation */
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
@@ -332,13 +313,6 @@ MidiTrackerEditor::show_all_automation ()
 			(*ii)->menu_item->set_active (true);
 		}
 	}
-
-	// 	no_redraw = false;
-
-	// 	/* Redraw */
-
-	// 	request_redraw ();
-	// }
 
 	redisplay_model ();
 }
@@ -1152,6 +1126,21 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 
 	/* now trigger a redisplay */
 	redisplay_model ();
+}
+
+void MidiTrackerEditor::show_main_automations ()
+{
+	// Gain
+	gain_automation_item->set_active (true);
+	update_gain_column_visibility ();
+
+	// Mute
+	mute_automation_item->set_active (true);
+	update_mute_column_visibility ();
+
+	// Pan
+	pan_automation_item->set_active (true);
+	update_pan_columns_visibility ();
 }
 
 /////////////////////////
