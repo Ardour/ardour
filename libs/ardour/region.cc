@@ -65,7 +65,6 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<framecnt_t> length;
 		PBD::PropertyDescriptor<framepos_t> position;
 		PBD::PropertyDescriptor<double> beat;
-		PBD::PropertyDescriptor<double> pulse;
 		PBD::PropertyDescriptor<framecnt_t> sync_position;
 		PBD::PropertyDescriptor<layer_t> layer;
 		PBD::PropertyDescriptor<framepos_t> ancestral_start;
@@ -118,8 +117,6 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n",	Properties::position.property_id));
 	Properties::beat.property_id = g_quark_from_static_string (X_("beat"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for beat = %1\n",	Properties::beat.property_id));
-	Properties::pulse.property_id = g_quark_from_static_string (X_("pulse"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for pulse = %1\n",	Properties::pulse.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n",	Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
@@ -161,7 +158,6 @@ Region::register_properties ()
 	add_property (_length);
 	add_property (_position);
 	add_property (_beat);
-	add_property (_pulse);
 	add_property (_sync_position);
 	add_property (_ancestral_start);
 	add_property (_ancestral_length);
@@ -180,8 +176,8 @@ Region::register_properties ()
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
 	, _beat (Properties::beat, 0.0) \
-	, _pulse (Properties::pulse, 0.0) \
 	, _sync_position (Properties::sync_position, (s)) \
+	, _pulse (0.0) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
@@ -211,8 +207,8 @@ Region::register_properties ()
 	, _length(Properties::length, other->_length)		\
 	, _position(Properties::position, other->_position)	\
 	, _beat (Properties::beat, other->_beat)                \
-	, _pulse (Properties::pulse, other->_pulse)		\
 	, _sync_position(Properties::sync_position, other->_sync_position) \
+	, _pulse (other->_pulse)                                \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
 	, _transients (other->_transients) \
