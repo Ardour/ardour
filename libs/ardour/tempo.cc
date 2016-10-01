@@ -4075,16 +4075,9 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 	return moved;
 }
 
-/** Add some (fractional) beats to a session frame position, and return the result in frames.
+/** Add some (fractional) Beats to a session frame position, and return the result in frames.
  *  pos can be -ve, if required.
  */
-framepos_t
-TempoMap::framepos_plus_beats (framepos_t frame, Evoral::Beats beats) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, frame) + beats.to_double());
-}
 framepos_t
 TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats quarter_note) const
 {
@@ -4093,16 +4086,6 @@ TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats quarter_note) const
 	return frame_at_quarter_note_locked (_metrics, quarter_note_at_frame_locked (_metrics, frame) + quarter_note.to_double());
 }
 
-/** Subtract some (fractional) beats from a frame position, and return the result in frames */
-framepos_t
-TempoMap::framepos_minus_beats (framepos_t pos, Evoral::Beats beats) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return frame_at_beat_locked (_metrics, beat_at_frame_locked (_metrics, pos) - beats.to_double());
-}
-
-/** Add the BBT interval op to pos and return the result */
 framepos_t
 TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 {
@@ -4131,20 +4114,13 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
     starting at pos.
 */
 Evoral::Beats
-TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return Evoral::Beats (beat_at_frame_locked (_metrics, pos + distance) - beat_at_frame_locked (_metrics, pos));
-}
-
-Evoral::Beats
 TempoMap::framewalk_to_qn (framepos_t pos, framecnt_t distance) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	return Evoral::Beats (quarter_note_at_frame_locked (_metrics, pos + distance) - quarter_note_at_frame_locked (_metrics, pos));
 }
+
 struct bbtcmp {
     bool operator() (const BBT_Time& a, const BBT_Time& b) {
 	    return a < b;

@@ -8,6 +8,7 @@ class FrameposPlusBeatsTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (singleTempoTest);
 	CPPUNIT_TEST (doubleTempoTest);
 	CPPUNIT_TEST (doubleTempoWithMeterTest);
+	CPPUNIT_TEST (doubleTempoWithComplexMeterTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -17,5 +18,6 @@ public:
 	void singleTempoTest ();
 	void doubleTempoTest ();
 	void doubleTempoWithMeterTest ();
+	void doubleTempoWithComplexMeterTest ();
 };
 

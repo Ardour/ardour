@@ -26,11 +26,11 @@ FrameposMinusBeatsTest::singleTempoTest ()
 	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
 
 	/* Subtract 1 beat from beat 3 of the first bar */
-	framepos_t r = map.framepos_minus_beats (frames_per_beat * 2, Beats(1));
+	framepos_t r = map.framepos_minus_qn (frames_per_beat * 2, Beats(1));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 1));
 
 	/* Subtract 4 beats from 3 beats in, to go beyond zero */
-	r = map.framepos_minus_beats (frames_per_beat * 3, Beats(4));
+	r = map.framepos_minus_qn (frames_per_beat * 3, Beats(4));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (- frames_per_beat));
 }
 
@@ -71,15 +71,15 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 	/* Now some tests */
 
 	/* Subtract 1 beat from 1|2 */
-	framepos_t r = map.framepos_minus_beats (24e3, Beats(1));
+	framepos_t r = map.framepos_minus_qn (24e3, Beats(1));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
 
 	/* Subtract 2 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_beats (288e3 + 12e3, Beats(2));
+	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
 
 	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_beats (288e3 + 12e3, Beats(2.5));
+	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2.5));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
 }
 
@@ -126,15 +126,15 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	/* Now some tests */
 
 	/* Subtract 1 beat from 1|2 */
-	framepos_t r = map.framepos_minus_beats (24e3, Beats(1));
+	framepos_t r = map.framepos_minus_qn (24e3, Beats(1));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
 
 	/* Subtract 2 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_beats (288e3 + 12e3, Beats(2));
+	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
 
 	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_beats (288e3 + 12e3, Beats(2.5));
+	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2.5));
 	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
 }
 

@@ -56,8 +56,8 @@ class LIBARDOUR_API Tempo {
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
 		: _beats_per_minute (bpm), _note_type(type) {}
 
-	/* ..or more aptly 'pulse divisions per minute'.
-	   Nothing to do with actual beats, which are defined by the meter and tempo.
+	/*
+	   quarter note beats as distinct from a beat derived from meter and pulse.
 	*/
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
@@ -401,7 +401,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	   that align with the grid formed by tempo and meter sections.
 
 	   They SHOULD NOT be used to determine the position of events
-	   whose location is canonically defined in beats.
+	   whose location is canonically defined in Evoral::Beats.
 	*/
 
 	double beat_at_frame (const framecnt_t& frame) const;
@@ -436,20 +436,18 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/* TEMPO-SENSITIVE FUNCTIONS
 
-	   These next 4 functions will all take tempo in account and should be
+	   These next 2 functions will all take tempo in account and should be
 	   used to determine position (and in the last case, distance in beats)
 	   when tempo matters but meter does not.
 
 	   They SHOULD be used to determine the position of events
-	   whose location is canonically defined in beats.
+	   whose location is canonically defined in Evoral::Beats.
 	*/
 
-	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
 	framepos_t framepos_plus_qn (framepos_t, Evoral::Beats) const;
-	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
-	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 	Evoral::Beats framewalk_to_qn (framepos_t pos, framecnt_t distance) const;
+
+	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
 
 	double quarter_note_at_frame (const framepos_t frame);
 	double quarter_note_at_frame_rt (const framepos_t frame);
