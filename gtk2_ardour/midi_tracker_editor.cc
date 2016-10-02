@@ -75,9 +75,9 @@ using Timecode::BBT_Time;
 // - [ ] Make sure that it doesn't crash when the number of notes or
 //       automations have been reached.
 //
-// - [ ] Update show_existing_automation.
+// - [ ] Enable individual processor automation from menu 
 //
-// - [ ] Update hide_all_automation.
+// - [ ] Update show_existing_automation.
 //
 // - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
 //
