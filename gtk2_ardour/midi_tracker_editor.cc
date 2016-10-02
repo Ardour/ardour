@@ -373,36 +373,24 @@ MidiTrackerEditor::show_existing_automation ()
 void
 MidiTrackerEditor::hide_all_automation ()
 {
-	// Copy pasted from route_time_axis.cc
+	/* Hide gain, mute and pan automations */
 
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::hide_all_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
+	hide_main_automations ();
 
-	// 	/* Hide our automation */
+	/* Hide processor automation */
 
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		i->second->set_marked_for_display (false);
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+			size_t column = (*ii)->column;
+			if (column != 0) {
+				visible_automation_columns.erase (column);
+				(*ii)->menu_item->set_active (false);
+			}
 
-	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+		}
+	}
 
-	// 		if (menu) {
-	// 			menu->set_active (false);
-	// 		}
-	// 	}
-
-	// 	/* Hide processor automation */
-
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-	// 			(*ii)->menu_item->set_active (false);
-	// 		}
-	// 	}
-
-	// 	no_redraw = false;
-	// 	request_redraw ();
-	// }
+	redisplay_model ();
 }
 
 /** Set up the processor menu for the current set of processors, and
@@ -1140,6 +1128,21 @@ void MidiTrackerEditor::show_main_automations ()
 
 	// Pan
 	pan_automation_item->set_active (true);
+	update_pan_columns_visibility ();
+}
+
+void MidiTrackerEditor::hide_main_automations ()
+{
+	// Gain
+	gain_automation_item->set_active (false);
+	update_gain_column_visibility ();
+
+	// Mute
+	mute_automation_item->set_active (false);
+	update_mute_column_visibility ();
+
+	// Pan
+	pan_automation_item->set_active (false);
 	update_pan_columns_visibility ();
 }
 
