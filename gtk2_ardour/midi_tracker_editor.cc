@@ -75,8 +75,6 @@ using Timecode::BBT_Time;
 // - [ ] Make sure that it doesn't crash when the number of notes or
 //       automations have been reached.
 //
-// - [ ] Enable individual processor automation from menu 
-//
 // - [ ] Update show_existing_automation.
 //
 // - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
@@ -514,21 +512,18 @@ MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Proc
 void
 MidiTrackerEditor::processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo* rai, MidiTrackerEditor::ProcessorAutomationNode* pan)
 {
-	// bool showit = pan->menu_item->get_active();
-	// bool redraw = false;
+	const bool showit = pan->menu_item->get_active();
 
-	// if (pan->view == 0 && showit) {
-	// 	add_processor_automation_curve (rai->processor, pan->what);
-	// 	redraw = true;
-	// }
+	if (pan->column == 0)
+		add_processor_automation_column (rai->processor, pan->what);
 
-	// if (pan->view && pan->view->set_marked_for_display (showit)) {
-	// 	redraw = true;
-	// }
+	if (showit)
+		visible_automation_columns.insert (pan->column);
+	else
+		visible_automation_columns.erase (pan->column);
 
-	// if (redraw && !no_redraw) {
-	// 	request_redraw ();
-	// }
+	/* now trigger a redisplay */
+	redisplay_model ();
 }
 
 void
