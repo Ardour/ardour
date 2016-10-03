@@ -307,13 +307,13 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 {
 	XMLNode* child = node->add_child ("Playlists");
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		if (!(*i)->hidden()) {
-                        if (full_state) {
-                                child->add_child_nocopy ((*i)->get_state());
-                        } else {
-                                child->add_child_nocopy ((*i)->get_template());
-                        }
-                }
+		if (!(*i)->hidden ()) {
+			if (full_state) {
+				child->add_child_nocopy ((*i)->get_state ());
+			} else {
+				child->add_child_nocopy ((*i)->get_template ());
+			}
+		}
 	}
 
 	child = node->add_child ("UnusedPlaylists");
