@@ -302,11 +302,37 @@ SessionPlaylists::update_after_tempo_map_change ()
 	}
 }
 
+namespace {
+struct id_compare
+{
+	bool operator()(const boost::shared_ptr<Playlist>& p1, const boost::shared_ptr<Playlist>& p2)
+	{
+		return p1->id () < p2->id ();
+	}
+};
+
+typedef std::set<boost::shared_ptr<Playlist> > List;
+typedef std::set<boost::shared_ptr<Playlist>, id_compare> IDSortedList;
+
+static void
+get_id_sorted_playlists (const List& playlists, IDSortedList& id_sorted_playlists)
+{
+	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		id_sorted_playlists.insert(*i);
+	}
+}
+
+} // anonymous namespace
+
 void
 SessionPlaylists::add_state (XMLNode* node, bool full_state)
 {
 	XMLNode* child = node->add_child ("Playlists");
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+
+	IDSortedList id_sorted_playlists;
+	get_id_sorted_playlists (playlists, id_sorted_playlists);
+
+	for (List::iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
 		if (!(*i)->hidden ()) {
 			if (full_state) {
 				child->add_child_nocopy ((*i)->get_state ());
@@ -317,7 +343,12 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 	}
 
 	child = node->add_child ("UnusedPlaylists");
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+
+	IDSortedList id_sorted_unused_playlists;
+	get_id_sorted_playlists (unused_playlists, id_sorted_unused_playlists);
+
+	for (List::iterator i = id_sorted_unused_playlists.begin ();
+	     i != id_sorted_unused_playlists.end (); ++i) {
 		if (!(*i)->hidden()) {
 			if (!(*i)->empty()) {
 				if (full_state) {
