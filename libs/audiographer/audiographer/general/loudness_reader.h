@@ -20,7 +20,6 @@
 #define AUDIOGRAPHER_LOUDNESS_READER_H
 
 #include <vamp-hostsdk/PluginLoader.h>
-#include <vamp-sdk/Plugin.h>
 
 #include "audiographer/visibility.h"
 #include "audiographer/sink.h"

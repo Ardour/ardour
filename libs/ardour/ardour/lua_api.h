@@ -22,7 +22,7 @@
 #include <string>
 #include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
-#include <vamp-sdk/Plugin.h>
+#include <vamp-hostsdk/Plugin.h>
 
 #include "ardour/libardour_visibility.h"
 
