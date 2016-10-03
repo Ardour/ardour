@@ -22,11 +22,16 @@
 #include <string>
 #include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
+#include <vamp-sdk/Plugin.h>
 
 #include "ardour/libardour_visibility.h"
 
 #include "ardour/processor.h"
 #include "ardour/session.h"
+
+namespace ARDOUR {
+	class Readable;
+}
 
 namespace ARDOUR { namespace LuaAPI {
 
@@ -156,6 +161,66 @@ namespace ARDOUR { namespace LuaAPI {
 	 * If the first element is a relative path, the result will be a relative path.
 	 */
 	int build_filename (lua_State *lua);
+
+	class Vamp {
+	/** Vamp Plugin Interface
+	 *
+	 * Vamp is an audio processing plugin system for plugins that extract descriptive information
+	 * from audio data - typically referred to as audio analysis plugins or audio feature
+	 * extraction plugins.
+	 *
+	 * This interface allows to load a plugins and directly access it using the Vamp Plugin API.
+	 *
+	 * A convenience method is provided to analyze Ardour::Readable objects (Regions).
+	 */
+		public:
+			Vamp (const std::string&, float sample_rate);
+			~Vamp ();
+			::Vamp::Plugin* plugin () { return _plugin; }
+
+			/* high-level abstraction to process a single channel of the given Readable.
+			 *
+			 * If the plugin is not yet initialized, initialize() is called.
+			 *
+			 * if @cb is not nil, it is called with the immediate
+			 * Vamp::Plugin::Features on every process call.
+			 *
+			 * @r readable
+			 * @channel channel to process
+			 * @cb lua callback function
+			 * @return 0 on success
+			 */
+			int analyze (boost::shared_ptr<ARDOUR::Readable>, uint32_t channel, luabridge::LuaRef fn);
+
+			/** call plugin():reset() and clear intialization flag */
+			void reset ();
+
+			/** initialize the plugin for use with analyze().
+			 *
+			 * This is equivalent to plugin():initialise (1, 8192, 8192)
+			 * and prepares a plugin for analyze.
+			 *
+			 * Manual initialization is only required to set plugin-parameters
+			 * which depend on prior initialization of the plugin.
+			 *
+			 * @code
+			 * vamp:reset ()
+			 * vamp:initialize ()
+			 * vamp:plugin():setParameter (0, 1.5)
+			 * vamp:analyze (r, 0)
+			 * @endcode
+			 */
+			bool initialize ();
+
+			bool initialized () const { return _initialized; }
+
+		private:
+			::Vamp::Plugin* _plugin;
+			float           _sample_rate;
+			framecnt_t      _bufsize;
+			bool            _initialized;
+
+	};
 
 } } /* namespace */
 

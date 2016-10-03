@@ -32,6 +32,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/buffer_set.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
@@ -239,6 +240,10 @@ LuaBindings::stddef (lua_State* L)
 		.beginStdVector <std::string> ("StringVector")
 		.endClass ()
 
+	// std::vector<float>
+		.beginStdVector <float> ("FloatVector")
+		.endClass ()
+
 	// register float array (uint8_t*)
 		.registerArray <uint8_t> ("ByteArray")
 
@@ -436,6 +441,103 @@ LuaBindings::common (lua_State* L)
 		.endNamespace ()
 
 		.endNamespace () // Evoral
+
+		.beginNamespace ("Vamp")
+
+		.beginClass<Vamp::RealTime> ("RealTime")
+		.addConstructor <void (*) (int, int)> ()
+		.addFunction ("usec", &Vamp::RealTime::usec)
+		.addFunction ("msec", &Vamp::RealTime::msec)
+		.addFunction ("toString", &Vamp::RealTime::toString)
+		.endClass ()
+
+		.beginClass<Vamp::PluginBase> ("PluginBase")
+		.addFunction ("getIdentifier", &Vamp::PluginBase::getIdentifier)
+		.addFunction ("getName", &Vamp::PluginBase::getName)
+		.addFunction ("getDescription", &Vamp::PluginBase::getDescription)
+		.addFunction ("getMaker", &Vamp::PluginBase::getMaker)
+		.addFunction ("getCopyright", &Vamp::PluginBase::getCopyright)
+		.addFunction ("getPluginVersion", &Vamp::PluginBase::getPluginVersion)
+		.addFunction ("getParameterDescriptors", &Vamp::PluginBase::getParameterDescriptors)
+		.addFunction ("getParameter", &Vamp::PluginBase::getParameter)
+		.addFunction ("setParameter", &Vamp::PluginBase::setParameter)
+		.addFunction ("getPrograms", &Vamp::PluginBase::getPrograms)
+		.addFunction ("getCurrentProgram", &Vamp::PluginBase::getCurrentProgram)
+		.addFunction ("selectProgram", &Vamp::PluginBase::selectProgram)
+		.addFunction ("getType", &Vamp::PluginBase::getType)
+		.endClass ()
+
+		.beginNamespace ("PluginBase")
+		.beginClass<Vamp::PluginBase::ParameterDescriptor> ("ParameterDescriptor")
+		.addData ("identifier", &Vamp::PluginBase::ParameterDescriptor::identifier)
+		.addData ("name", &Vamp::PluginBase::ParameterDescriptor::name)
+		.addData ("description", &Vamp::PluginBase::ParameterDescriptor::description)
+		.addData ("unit", &Vamp::PluginBase::ParameterDescriptor::unit)
+		.addData ("minValue", &Vamp::PluginBase::ParameterDescriptor::minValue)
+		.addData ("maxValue", &Vamp::PluginBase::ParameterDescriptor::maxValue)
+		.addData ("defaultValue", &Vamp::PluginBase::ParameterDescriptor::defaultValue)
+		.addData ("isQuantized", &Vamp::PluginBase::ParameterDescriptor::isQuantized)
+		.addData ("quantizeStep", &Vamp::PluginBase::ParameterDescriptor::quantizeStep)
+		.addData ("valueNames", &Vamp::PluginBase::ParameterDescriptor::valueNames)
+		.endClass ()
+
+		.beginStdVector <Vamp::PluginBase::ParameterDescriptor> ("ParameterList")
+		.endClass ()
+		.endNamespace () // Vamp::PluginBase
+
+		.deriveClass<Vamp::Plugin, Vamp::PluginBase> ("Plugin")
+		// TODO add wrapper std::vector<FloatArray>
+		.addFunction ("process", &Vamp::Plugin::process) // XXX unusable due to  float * const *
+		.addFunction ("getRemainingFeatures", &Vamp::Plugin::getRemainingFeatures)
+		.endClass ()
+
+		.beginNamespace ("Plugin")
+		.beginClass<Vamp::Plugin::OutputDescriptor> ("OutputDescriptor")
+		.addData ("identifier", &Vamp::Plugin::OutputDescriptor::identifier)
+		.addData ("description", &Vamp::Plugin::OutputDescriptor::description)
+		.addData ("unit", &Vamp::Plugin::OutputDescriptor::unit)
+		.addData ("hasFixedBinCount", &Vamp::Plugin::OutputDescriptor::hasFixedBinCount)
+		.addData ("binCount", &Vamp::Plugin::OutputDescriptor::binCount)
+		.addData ("binNames", &Vamp::Plugin::OutputDescriptor::binNames)
+		.addData ("hasKnownExtents", &Vamp::Plugin::OutputDescriptor::hasKnownExtents)
+		.addData ("minValue", &Vamp::Plugin::OutputDescriptor::minValue)
+		.addData ("maxValue", &Vamp::Plugin::OutputDescriptor::maxValue)
+		.addData ("isQuantized", &Vamp::Plugin::OutputDescriptor::isQuantized)
+		.addData ("quantizeStep", &Vamp::Plugin::OutputDescriptor::quantizeStep)
+		.addData ("sampleType", &Vamp::Plugin::OutputDescriptor::sampleType)
+		.addData ("sampleRate", &Vamp::Plugin::OutputDescriptor::sampleRate)
+		.addData ("hasDuration", &Vamp::Plugin::OutputDescriptor::hasDuration)
+		.endClass ()
+
+		.beginNamespace ("OutputDescriptor")
+		/* Vamp::Plugin::OutputDescriptor enum */
+		.beginNamespace ("SampleType")
+		.addConst ("OneSamplePerStep", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::OneSamplePerStep))
+		.addConst ("FixedSampleRate", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::FixedSampleRate))
+		.addConst ("VariableSampleRate", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::VariableSampleRate))
+		.endNamespace ()
+		.endNamespace () /* Vamp::Plugin::OutputDescriptor */
+
+		.beginClass<Vamp::Plugin::Feature> ("Feature")
+		.addData ("hasTimestamp", &Vamp::Plugin::Feature::hasTimestamp, false)
+		.addData ("timestamp", &Vamp::Plugin::Feature::timestamp, false)
+		.addData ("hasDuration", &Vamp::Plugin::Feature::hasDuration, false)
+		.addData ("duration", &Vamp::Plugin::Feature::duration, false)
+		.addData ("values", &Vamp::Plugin::Feature::values, false)
+		.addData ("label", &Vamp::Plugin::Feature::label, false)
+		.endClass ()
+
+		.beginStdVector <Vamp::Plugin::OutputDescriptor> ("OutputList")
+		.endClass ()
+
+		.beginStdVector <Vamp::Plugin::Feature> ("FeatureList")
+		.endClass ()
+
+		.beginStdMap <int, Vamp::Plugin::FeatureList> ("FeatureSet")
+		.endClass ()
+
+		.endNamespace () // Vamp::Plugin
+		.endNamespace () // Vamp
 
 		.beginNamespace ("ARDOUR")
 
@@ -712,6 +814,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
+		.addCast<AudioPlaylist> ("to_audioplaylist")
 		.addFunction ("region_by_id", &Playlist::region_by_id)
 		.addFunction ("data_type", &Playlist::data_type)
 		.addFunction ("n_regions", &Playlist::n_regions)
@@ -746,6 +849,10 @@ LuaBindings::common (lua_State* L)
 #endif
 		.endClass ()
 
+		.deriveWSPtrClass <AudioPlaylist, Playlist> ("AudioPlaylist")
+		.addFunction ("read", &AudioPlaylist::read)
+		.endClass ()
+
 		.deriveWSPtrClass <Track, Route> ("Track")
 		.addCast<AudioTrack> ("to_audio_track")
 		.addCast<MidiTrack> ("to_midi_track")
@@ -763,7 +870,14 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <MidiTrack, Track> ("MidiTrack")
 		.endClass ()
 
+		.beginWSPtrClass <Readable> ("Readable")
+		.addFunction ("read", &Readable::read)
+		.addFunction ("readable_length", &Readable::readable_length)
+		.addFunction ("n_channels", &Readable::n_channels)
+		.endClass ()
+
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
+		.addCast<Readable> ("to_readable")
 		/* properties */
 		.addFunction ("position", &Region::position)
 		.addFunction ("start", &Region::start)
@@ -1472,6 +1586,15 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
 		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
+
+		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
+		.addConstructor <void (*) (const std::string&, float)> ()
+		.addFunction ("plugin", &ARDOUR::LuaAPI::Vamp::plugin)
+		.addFunction ("analyze", &ARDOUR::LuaAPI::Vamp::analyze)
+		.addFunction ("reset", &ARDOUR::LuaAPI::Vamp::reset)
+		.addFunction ("initialize", &ARDOUR::LuaAPI::Vamp::initialize)
+		.endClass ()
+
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
 }

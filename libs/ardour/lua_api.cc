@@ -17,9 +17,11 @@
  *
  */
 #include <cstring>
+#include <vamp-hostsdk/PluginLoader.h>
 
-#include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
 #include "ardour/lua_api.h"
 #include "ardour/luaproc.h"
@@ -27,6 +29,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/readable.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -534,4 +537,97 @@ void LuaTableRef::assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s)
 			assert (0);
 			break;
 	}
+}
+
+
+LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
+	: _plugin (0)
+	, _sample_rate (sample_rate)
+	, _bufsize (8192)
+	, _initialized (false)
+{
+	using namespace ::Vamp::HostExt;
+
+	PluginLoader* loader (PluginLoader::getInstance());
+	_plugin = loader->loadPlugin (key, _sample_rate, PluginLoader::ADAPT_ALL_SAFE);
+
+	if (!_plugin) {
+		PBD::error << string_compose (_("VAMP Plugin \"%1\" could not be loaded"), key) << endmsg;
+		throw failed_constructor ();
+	}
+}
+
+LuaAPI::Vamp::~Vamp ()
+{
+	delete _plugin;
+}
+
+void
+LuaAPI::Vamp::reset ()
+{
+	_initialized = false;
+	if (_plugin) {
+		_plugin->reset ();
+	}
+}
+
+bool
+LuaAPI::Vamp::initialize ()
+{
+	if (!_plugin || _plugin->getMinChannelCount() > 1) {
+		return false;
+	}
+	if (!_plugin->initialise (1, _bufsize, _bufsize)) {
+		return false;
+	}
+	_initialized = true;
+	return true;
+}
+
+int
+LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef cb)
+{
+	if (!_initialized) {
+		if (!initialize ()) {
+			return -1;
+		}
+	}
+	assert (_initialized);
+
+	::Vamp::Plugin::FeatureSet features;
+	float* data = new float[_bufsize];
+	float* bufs[1] = { data };
+
+	framecnt_t len = r->readable_length();
+	framepos_t pos = 0;
+
+	int rv = 0;
+	while (1) {
+		framecnt_t to_read = std::min ((len - pos), _bufsize);
+		if (r->read (data, pos, to_read, channel) != to_read) {
+			rv = -1;
+			break;
+		}
+		if (to_read != _bufsize) {
+			memset (data + to_read, 0, (_bufsize - to_read) * sizeof (float));
+		}
+
+		features = _plugin->process (bufs, ::Vamp::RealTime::fromSeconds ((double) pos / _sample_rate));
+
+		if (cb.type () == LUA_TFUNCTION) {
+			/* TODO existing "features" binding fails here
+			 * std::map<int, std::vector<_VampHost::Vamp::Plugin::Feature> >
+			 */
+			// cb (features, pos); // XXX
+		}
+
+		pos += to_read;
+
+		if (pos >= len) {
+			break;
+		}
+	}
+
+	delete [] data;
+	return rv;
 }
