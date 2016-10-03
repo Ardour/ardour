@@ -615,10 +615,7 @@ LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, 
 		features = _plugin->process (bufs, ::Vamp::RealTime::fromSeconds ((double) pos / _sample_rate));
 
 		if (cb.type () == LUA_TFUNCTION) {
-			/* TODO existing "features" binding fails here
-			 * std::map<int, std::vector<_VampHost::Vamp::Plugin::Feature> >
-			 */
-			// cb (features, pos); // XXX
+			cb (features, pos);
 		}
 
 		pos += to_read;
