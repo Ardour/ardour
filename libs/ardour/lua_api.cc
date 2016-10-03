@@ -543,7 +543,8 @@ void LuaTableRef::assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s)
 LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
 	: _plugin (0)
 	, _sample_rate (sample_rate)
-	, _bufsize (8192)
+	, _bufsize (1024)
+	, _stepsize (512)
 	, _initialized (false)
 {
 	using namespace ::Vamp::HostExt;
@@ -577,7 +578,7 @@ LuaAPI::Vamp::initialize ()
 	if (!_plugin || _plugin->getMinChannelCount() > 1) {
 		return false;
 	}
-	if (!_plugin->initialise (1, _bufsize, _bufsize)) {
+	if (!_plugin->initialise (1, _stepsize, _bufsize)) {
 		return false;
 	}
 	_initialized = true;
@@ -615,10 +616,10 @@ LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, 
 		features = _plugin->process (bufs, ::Vamp::RealTime::fromSeconds ((double) pos / _sample_rate));
 
 		if (cb.type () == LUA_TFUNCTION) {
-			cb (features, pos);
+			cb (&features, pos);
 		}
 
-		pos += to_read;
+		pos += std::min (_stepsize, to_read);
 
 		if (pos >= len) {
 			break;

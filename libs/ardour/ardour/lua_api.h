@@ -197,7 +197,7 @@ namespace ARDOUR { namespace LuaAPI {
 
 			/** initialize the plugin for use with analyze().
 			 *
-			 * This is equivalent to plugin():initialise (1, 8192, 8192)
+			 * This is equivalent to plugin():initialise (1, 512, 1024)
 			 * and prepares a plugin for analyze.
 			 *
 			 * Manual initialization is only required to set plugin-parameters
@@ -206,7 +206,7 @@ namespace ARDOUR { namespace LuaAPI {
 			 * @code
 			 * vamp:reset ()
 			 * vamp:initialize ()
-			 * vamp:plugin():setParameter (0, 1.5)
+			 * vamp:plugin():setParameter (0, 1.5, nil)
 			 * vamp:analyze (r, 0)
 			 * @endcode
 			 */
@@ -218,6 +218,7 @@ namespace ARDOUR { namespace LuaAPI {
 			::Vamp::Plugin* _plugin;
 			float           _sample_rate;
 			framecnt_t      _bufsize;
+			framecnt_t      _stepsize;
 			bool            _initialized;
 
 	};

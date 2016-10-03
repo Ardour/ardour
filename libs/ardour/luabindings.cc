@@ -446,9 +446,13 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass<Vamp::RealTime> ("RealTime")
 		.addConstructor <void (*) (int, int)> ()
+		.addData ("sec", &Vamp::RealTime::sec, false)
+		.addData ("nsec", &Vamp::RealTime::nsec, false)
 		.addFunction ("usec", &Vamp::RealTime::usec)
 		.addFunction ("msec", &Vamp::RealTime::msec)
 		.addFunction ("toString", &Vamp::RealTime::toString)
+		.addStaticFunction ("realTime2Frame", &Vamp::RealTime::realTime2Frame)
+		.addStaticFunction ("frame2RealTime", &Vamp::RealTime::frame2RealTime)
 		.endClass ()
 
 		.beginClass<Vamp::PluginBase> ("PluginBase")
