@@ -206,9 +206,9 @@ CLASSKEYS(Vamp::PluginBase::ParameterDescriptor);
 CLASSKEYS(Vamp::Plugin);
 CLASSKEYS(Vamp::Plugin::OutputDescriptor);
 CLASSKEYS(Vamp::Plugin::Feature);
-CLASSKEYS(std::vector<Vamp::Plugin::OutputDescriptor>);
-CLASSKEYS(std::vector<Vamp::Plugin::Feature>);
-CLASSKEYS(std::map<int, Vamp::Plugin::FeatureList>);
+CLASSKEYS(Vamp::Plugin::OutputList);
+CLASSKEYS(Vamp::Plugin::FeatureList);
+CLASSKEYS(Vamp::Plugin::FeatureSet);
 
 CLASSKEYS(void);
 CLASSKEYS(float);
