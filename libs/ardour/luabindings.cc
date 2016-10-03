@@ -198,6 +198,18 @@ CLASSKEYS(Evoral::Beats);
 CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::AudioEngine);
+
+CLASSKEYS(ARDOUR::LuaAPI::Vamp);
+CLASSKEYS(Vamp::RealTime);
+CLASSKEYS(Vamp::PluginBase);
+CLASSKEYS(Vamp::PluginBase::ParameterDescriptor);
+CLASSKEYS(Vamp::Plugin);
+CLASSKEYS(Vamp::Plugin::OutputDescriptor);
+CLASSKEYS(Vamp::Plugin::Feature);
+CLASSKEYS(std::vector<Vamp::Plugin::OutputDescriptor>);
+CLASSKEYS(std::vector<Vamp::Plugin::Feature>);
+CLASSKEYS(std::map<int, Vamp::Plugin::FeatureList>);
+
 CLASSKEYS(void);
 CLASSKEYS(float);
 CLASSKEYS(unsigned char);
