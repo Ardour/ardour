@@ -38,8 +38,14 @@ foreach (json_decode ($json, true) as $b) {
 	$b ['lua'] = preg_replace ('/:_end/', ':end', $b ['lua']);
 	$b ['lua'] = preg_replace ('/:_type/', ':type', $b ['lua']);
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
+	$b ['ldec'] = preg_replace ('/_VampHost::/', '', $b['ldec']);
+	$b ['decl'] = preg_replace ('/_VampHost::/', '', $b['decl']);
 	if (isset ($b['ret'])) {
 		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
+		$b['ret'] = preg_replace ('/_VampHost::/', '', $b['ret']);
+	}
+	if (isset ($b['parent'])) {
+		$b ['parent'] = preg_replace ('/_VampHost::/', '', $b['parent']);
 	}
 	$doc[] = $b;
 }
@@ -712,6 +718,8 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
 			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			$f['cand'] = str_replace (':', '::', $f['name']);
+			$rv.= format_doxydoc($f);
 		}
 	}
 	return $rv;
