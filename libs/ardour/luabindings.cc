@@ -75,7 +75,7 @@
  *
  * Really!! A static function with a static variable in a library header
  * should never ever be replicated, even if it is a template.
- * But then again this is windows... what else can go wrong.
+ * But then again this is windows... what else can go wrong ?!
  */
 
 template <class T>
@@ -112,16 +112,11 @@ luabridge::getIdentityKey ()
 /* ...and this is the ugly part of it.
  *
  * We need to foward declare classes from gtk2_ardour
- * end explicily list classes which are used by gtk2_ardour's bindings.
+ * AND explicily list classes which are used by gtk2_ardour's bindings.
  *
- * This is needed because some of the GUI classes use objects from libardour
- * as function parameters and the .exe would re-create symbols for libardour
- * objects.
- *
- * Classes which don't use libardour symbols could be moved to
- * gtk2_ardour/luainstance.cc, but keeping this here reduces code
- * duplication and does not give the compiler a chance to even think
- * about replicating the symbols.
+ * This is required because some of the GUI classes use objects from libardour
+ * as function parameters or return values and the .exe would re-create
+ * symbols for libardour objects.
  */
 
 #define CLASSKEYS(CLS) \
@@ -135,71 +130,75 @@ luabridge::getIdentityKey ()
 	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
 	template void const* luabridge::ClassInfo< CLS >::getConstKey();
 
+CLASSINFO(ArdourMarker);
 CLASSINFO(MarkerSelection);
+CLASSINFO(PublicEditor);
+CLASSINFO(RegionSelection);
+CLASSINFO(Selection);
+CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
-CLASSINFO(TimeSelection);
-CLASSINFO(RegionSelection);
-CLASSINFO(PublicEditor);
-CLASSINFO(Selection);
-CLASSINFO(ArdourMarker);
 
-namespace LuaCairo {
-	class ImageSurface;
-	class PangoLayout;
-}
-CLASSKEYS(LuaCairo::ImageSurface);
-CLASSKEYS(LuaCairo::PangoLayout);
-
-namespace Cairo {
-	class Context;
-}
-CLASSKEYS(Cairo::Context);
-CLASSKEYS(std::vector<double>);
-CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
+
+CLASSKEYS(void);
+CLASSKEYS(float);
+CLASSKEYS(unsigned char);
+
 CLASSKEYS(ArdourMarker*);
-CLASSKEYS(ARDOUR::RouteGroup);
-CLASSKEYS(ARDOUR::LuaProc);
-CLASSKEYS(ARDOUR::DataType);
-CLASSKEYS(ARDOUR::ChanCount);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
-CLASSKEYS(ARDOUR::ParameterDescriptor);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
-CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
-CLASSKEYS(ARDOUR::LuaOSC::Address);
-CLASSKEYS(ARDOUR::Session);
-CLASSKEYS(ARDOUR::PeakMeter);
+
+CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BufferSet);
+CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
-CLASSKEYS(ARDOUR::FluidSynth);
 CLASSKEYS(ARDOUR::DSP::DspShm);
-CLASSKEYS(ARDOUR::LuaTableRef);
-CLASSKEYS(PBD::Configuration);
-CLASSKEYS(ARDOUR::PresentationInfo);
-CLASSKEYS(ARDOUR::SessionConfiguration);
-CLASSKEYS(PBD::ID);
+CLASSKEYS(ARDOUR::DataType);
+CLASSKEYS(ARDOUR::FluidSynth);
 CLASSKEYS(ARDOUR::Location);
-CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(ARDOUR::LuaAPI::Vamp);
+CLASSKEYS(ARDOUR::LuaOSC::Address);
+CLASSKEYS(ARDOUR::LuaProc);
+CLASSKEYS(ARDOUR::LuaTableRef);
 CLASSKEYS(ARDOUR::MonitorProcessor);
+CLASSKEYS(ARDOUR::RouteGroup);
+CLASSKEYS(ARDOUR::ParameterDescriptor);
+CLASSKEYS(ARDOUR::PeakMeter);
+CLASSKEYS(ARDOUR::PluginInfo);
 CLASSKEYS(ARDOUR::Plugin::PresetRecord);
-CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
-CLASSKEYS(PBD::PropertyChange);
-CLASSKEYS(std::vector<std::string>);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
-CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
-CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
-CLASSKEYS(std::list<ARDOUR::AudioRange>);
-CLASSKEYS(Evoral::Beats);
 CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
-CLASSKEYS(ARDOUR::AudioEngine);
+CLASSKEYS(ARDOUR::PresentationInfo);
+CLASSKEYS(ARDOUR::Session);
+CLASSKEYS(ARDOUR::SessionConfiguration);
 
-CLASSKEYS(ARDOUR::LuaAPI::Vamp);
+CLASSKEYS(PBD::ID);
+CLASSKEYS(PBD::Configuration);
+CLASSKEYS(PBD::PropertyChange);
+
+CLASSKEYS(Evoral::Beats);
+
+CLASSKEYS(std::vector<std::string>);
+CLASSKEYS(std::vector<float>);
+CLASSKEYS(std::vector<float*>);
+CLASSKEYS(std::vector<double>);
+
+CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
+
+CLASSKEYS(std::list<ArdourMarker*>);
+CLASSKEYS(std::list<ARDOUR::AudioRange>);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
+
+CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
+
 CLASSKEYS(Vamp::RealTime);
 CLASSKEYS(Vamp::PluginBase);
 CLASSKEYS(Vamp::PluginBase::ParameterDescriptor);
@@ -210,9 +209,17 @@ CLASSKEYS(Vamp::Plugin::OutputList);
 CLASSKEYS(Vamp::Plugin::FeatureList);
 CLASSKEYS(Vamp::Plugin::FeatureSet);
 
-CLASSKEYS(void);
-CLASSKEYS(float);
-CLASSKEYS(unsigned char);
+namespace LuaCairo {
+	class ImageSurface;
+	class PangoLayout;
+}
+namespace Cairo {
+	class Context;
+}
+
+CLASSKEYS(Cairo::Context);
+CLASSKEYS(LuaCairo::ImageSurface);
+CLASSKEYS(LuaCairo::PangoLayout);
 
 #endif // end windows special case
 
