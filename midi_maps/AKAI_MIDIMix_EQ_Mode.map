@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.1.0" name="Akai MidiMix EQ Mode">
+
+<!-- Created by The Eighth at 08-17-2016 2:17 p.m -->
+
+<!-- Warning! This map designed to use with Ardour's built-in equalizer plugin ("a-EQ"). So I bound all Midimix's volume knobs to e-EQ actions. Place a-EQ before faders or each track in a bank and you good to go. Since Midimix has only 3 volume knobs per track, I bound all middle knobs to four gains of an equaliser. That means that each middle knob controls a gain of all middle frequencies.  --> 
+<!-- Add "a-EQ" plugin to all tracks you want to operate with before applying this map. Otherwise, it will not work as it should. -->
+<!-- "Send all" button is not used here at all. Keep that in mind -->
+
+<!-- This line should define the number of tracks in a bank -->
+  <DeviceInfo bank-size="8"/>
+
+ 
+<!-- The following binds Midimix's faders and mute/rec buttons to first eight tracks in Ardour. Note: "Solo" button on MidiMix will solo all tracks in current bank. It's useful when you have more than 8 tracks in a session. If you want to keep only one track in solo mode - press solo and then mute other tracks in that bank with "Mute" buttons -->
+
+  <Binding channel="1" ctl="16"  uri="/route/plugin/parameter B1 1 2"/>
+  <Binding channel="1" ctl="17"  uri="/route/plugin/parameter B1 1 4"/>
+  <Binding channel="1" ctl="17"  uri="/route/plugin/parameter B1 1 7"/>
+  <Binding channel="1" ctl="17"  uri="/route/plugin/parameter B1 1 10"/>
+  <Binding channel="1" ctl="17"  uri="/route/plugin/parameter B1 1 13"/>
+  <Binding channel="1" ctl="18"  uri="/route/plugin/parameter B1 1 16"/>
+  <Binding channel="1" note="1"  uri="/route/mute B1"/>
+  <Binding channel="1" note="27" uri="/route/solo B1"/>
+  <Binding channel="1" note="3"  uri="/route/recenable B1"/>
+  <Binding channel="1" ctl="19"  uri="/route/gain B1"/>
+  
+  <Binding channel="1" ctl="20"  uri="/route/plugin/parameter B2 1 2"/>
+  <Binding channel="1" ctl="21"  uri="/route/plugin/parameter B2 1 4"/>
+  <Binding channel="1" ctl="21"  uri="/route/plugin/parameter B2 1 7"/>
+  <Binding channel="1" ctl="21"  uri="/route/plugin/parameter B2 1 10"/>
+  <Binding channel="1" ctl="21"  uri="/route/plugin/parameter B2 1 13"/>
+  <Binding channel="1" ctl="22"  uri="/route/plugin/parameter B2 1 16"/>
+  <Binding channel="1" note="4"  uri="/route/mute B2"/>
+  <Binding channel="1" note="27" uri="/route/solo B2"/>
+  <Binding channel="1" note="6"  uri="/route/recenable B2"/>
+  <Binding channel="1" ctl="23"  uri="/route/gain B2"/>
+  
+  <Binding channel="1" ctl="24"  uri="/route/plugin/parameter B3 1 2"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 4"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 7"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 10"/>
+  <Binding channel="1" ctl="25"  uri="/route/plugin/parameter B3 1 13"/>
+  <Binding channel="1" ctl="26"  uri="/route/plugin/parameter B3 1 16"/>
+  <Binding channel="1" note="7" uri="/route/mute B3"/>
+  <Binding channel="1" note="27" uri="/route/solo B3"/>
+  <Binding channel="1" note="9" uri="/route/recenable B3"/>
+  <Binding channel="1" ctl="27" uri="/route/gain B3"/>
+  
+  <Binding channel="1" ctl="28"  uri="/route/plugin/parameter B4 1 2"/>
+  <Binding channel="1" ctl="29"  uri="/route/plugin/parameter B4 1 4"/>
+  <Binding channel="1" ctl="29"  uri="/route/plugin/parameter B4 1 7"/>
+  <Binding channel="1" ctl="29"  uri="/route/plugin/parameter B4 1 10"/>
+  <Binding channel="1" ctl="29"  uri="/route/plugin/parameter B4 1 13"/>
+  <Binding channel="1" ctl="30"  uri="/route/plugin/parameter B4 1 16"/>
+  <Binding channel="1" note="10" uri="/route/mute B4"/>
+  <Binding channel="1" note="27" uri="/route/solo B4"/>
+  <Binding channel="1" note="12" uri="/route/recenable B4"/>
+  <Binding channel="1" ctl="31" uri="/route/gain B4"/>
+  
+  <Binding channel="1" ctl="46"  uri="/route/plugin/parameter B5 1 2"/>
+  <Binding channel="1" ctl="47"  uri="/route/plugin/parameter B5 1 4"/>
+  <Binding channel="1" ctl="47"  uri="/route/plugin/parameter B5 1 7"/>
+  <Binding channel="1" ctl="47"  uri="/route/plugin/parameter B5 1 10"/>
+  <Binding channel="1" ctl="47"  uri="/route/plugin/parameter B5 1 13"/>
+  <Binding channel="1" ctl="48"  uri="/route/plugin/parameter B5 1 16"/>
+  <Binding channel="1" note="13" uri="/route/mute B5"/>
+  <Binding channel="1" note="27" uri="/route/solo B5"/>
+  <Binding channel="1" note="15" uri="/route/recenable B5"/>
+  <Binding channel="1" ctl="49" uri="/route/gain B5"/>
+  
+  <Binding channel="1" ctl="50"  uri="/route/plugin/parameter B6 1 2"/>
+  <Binding channel="1" ctl="51"  uri="/route/plugin/parameter B6 1 4"/>
+  <Binding channel="1" ctl="51"  uri="/route/plugin/parameter B6 1 7"/>
+  <Binding channel="1" ctl="51"  uri="/route/plugin/parameter B6 1 10"/>
+  <Binding channel="1" ctl="51"  uri="/route/plugin/parameter B6 1 13"/>
+  <Binding channel="1" ctl="52"  uri="/route/plugin/parameter B6 1 16"/>
+  <Binding channel="1" note="16" uri="/route/mute B6"/>
+  <Binding channel="1" note="27" uri="/route/solo B6"/>
+  <Binding channel="1" note="18" uri="/route/recenable B6"/>
+  <Binding channel="1" ctl="53" uri="/route/gain B6"/>
+  
+  <Binding channel="1" ctl="54"  uri="/route/plugin/parameter B7 1 2"/>
+  <Binding channel="1" ctl="55"  uri="/route/plugin/parameter B7 1 4"/>
+  <Binding channel="1" ctl="55"  uri="/route/plugin/parameter B7 1 7"/>
+  <Binding channel="1" ctl="55"  uri="/route/plugin/parameter B7 1 10"/>
+  <Binding channel="1" ctl="55"  uri="/route/plugin/parameter B7 1 13"/>
+  <Binding channel="1" ctl="56"  uri="/route/plugin/parameter B7 1 16"/>
+  <Binding channel="1" note="19" uri="/route/mute B7"/>
+  <Binding channel="1" note="27" uri="/route/solo B7"/>
+  <Binding channel="1" note="21" uri="/route/recenable B7"/>
+  <Binding channel="1" ctl="57" uri="/route/gain B7"/>
+  
+  <Binding channel="1" ctl="58"  uri="/route/plugin/parameter B8 1 2"/>
+  <Binding channel="1" ctl="59"  uri="/route/plugin/parameter B8 1 4"/>
+  <Binding channel="1" ctl="59"  uri="/route/plugin/parameter B8 1 7"/>
+  <Binding channel="1" ctl="59"  uri="/route/plugin/parameter B8 1 10"/>
+  <Binding channel="1" ctl="59"  uri="/route/plugin/parameter B8 1 13"/>
+  <Binding channel="1" ctl="60"  uri="/route/plugin/parameter B8 1 16"/>
+  <Binding channel="1" note="22" uri="/route/mute B8"/>
+  <Binding channel="1" note="27" uri="/route/solo B8"/>
+  <Binding channel="1" note="24" uri="/route/recenable B8"/>
+  <Binding channel="1" ctl="61" uri="/route/gain B8"/>
+
+<!-- Master fader control and bank switches -->  
+
+  <Binding channel="1" note="25" function="prev-bank"/>
+  <Binding channel="1" note="26" function="next-bank"/>
+  <Binding channel="1" ctl="62"   uri="/bus/gain master"/>
+ </ArdourMIDIBindings>
