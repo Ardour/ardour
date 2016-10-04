@@ -354,7 +354,7 @@ const char *luasignalstr[] = {
 namespace LuaMixer {
 
 	ProcessorBox::ProcSelection
-	processor_selection (lua_State* L) {
+	processor_selection () {
 		return ProcessorBox::current_processor_selection ();
 	}
 
