@@ -214,6 +214,18 @@ namespace ARDOUR { namespace LuaAPI {
 
 			bool initialized () const { return _initialized; }
 
+			/** process given array of audio-samples.
+			 *
+			 * This is a lua-binding for vamp:plugin():process ()
+			 *
+			 * @d audio-data, the vector must match the configured channel count
+			 *    and hold a complete buffer for every channel as set during
+			 *    plugin():initialise()
+			 * @rt timestamp matching the provided buffer.
+			 * @returns features extracted from that data (if the plugin is causal)
+			 */
+			::Vamp::Plugin::FeatureSet process (const std::vector<float*>& d, ::Vamp::RealTime rt);
+
 		private:
 			::Vamp::Plugin* _plugin;
 			float           _sample_rate;

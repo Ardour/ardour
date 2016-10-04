@@ -265,6 +265,10 @@ LuaBindings::stddef (lua_State* L)
 	// register float array (int32_t*)
 		.registerArray <int32_t> ("IntArray")
 
+	// std::vector<float*>
+		.beginStdVector <float*> ("FloatArrayVector")
+		.endClass ()
+
 	// TODO std::set
 		.endNamespace ();
 }
@@ -502,8 +506,7 @@ LuaBindings::common (lua_State* L)
 		.endNamespace () // Vamp::PluginBase
 
 		.deriveClass<Vamp::Plugin, Vamp::PluginBase> ("Plugin")
-		// TODO add wrapper std::vector<FloatArray>
-		.addFunction ("process", &Vamp::Plugin::process) // XXX unusable due to  float * const *
+		//.addFunction ("process", &Vamp::Plugin::process) // unusable due to  float*const* -> LuaAPI::Vamp::process
 		.addFunction ("getRemainingFeatures", &Vamp::Plugin::getRemainingFeatures)
 		.endClass ()
 
@@ -1609,6 +1612,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("analyze", &ARDOUR::LuaAPI::Vamp::analyze)
 		.addFunction ("reset", &ARDOUR::LuaAPI::Vamp::reset)
 		.addFunction ("initialize", &ARDOUR::LuaAPI::Vamp::initialize)
+		.addFunction ("process", &ARDOUR::LuaAPI::Vamp::process)
 		.endClass ()
 
 		.endNamespace () // end LuaAPI

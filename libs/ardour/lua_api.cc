@@ -629,3 +629,13 @@ LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, 
 	delete [] data;
 	return rv;
 }
+
+::Vamp::Plugin::FeatureSet
+LuaAPI::Vamp::process (const std::vector<float*>& d, ::Vamp::RealTime rt)
+{
+	if (!_plugin || d.size() == 0) {
+		return ::Vamp::Plugin::FeatureSet ();
+	}
+	const float* const* bufs = &d[0];
+	return _plugin->process (bufs, rt);
+}
