@@ -134,7 +134,7 @@ cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
 cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
 cp build/libs/ardour/ardour-*.dll $DESTDIR/bin/
 cp build/libs/timecode/timecode.dll $DESTDIR/bin/
-cp build/libs/qm-dsp/qmdsp-*.dll $DESTDIR/bin/
+cp build/libs/qm-dsp/qm-dsp-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
