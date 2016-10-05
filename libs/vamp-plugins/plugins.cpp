@@ -41,26 +41,42 @@
 #include <vamp/vamp.h>
 #include <vamp-sdk/PluginAdapter.h>
 
-#include "ZeroCrossing.h"
-#include "SpectralCentroid.h"
-#include "PercussionOnsetDetector.h"
 #include "AmplitudeFollower.h"
-#include "OnsetDetect.h"
+#include "BarBeatTrack.h"
+#include "BeatTrack.h"
+#include "ChromagramPlugin.h"
 #include "EBUr128.h"
+#include "KeyDetect.h"
+#include "OnsetDetect.h"
+#include "PercussionOnsetDetector.h"
+#include "SimilarityPlugin.h"
+#include "SpectralCentroid.h"
+#include "TonalChangeDetect.h"
+#include "Transcription.h"
 #include "TruePeak.h"
+#include "ZeroCrossing.h"
+
 #ifdef HAVE_AUBIO
 #include "Onset.h"
 #endif
 
-static Vamp::PluginAdapter<ZeroCrossing> zeroCrossingAdapter;
-static Vamp::PluginAdapter<SpectralCentroid> spectralCentroidAdapter;
-static Vamp::PluginAdapter<PercussionOnsetDetector> percussionOnsetAdapter;
-static Vamp::PluginAdapter<AmplitudeFollower> amplitudeAdapter;
-static Vamp::PluginAdapter<OnsetDetector> onsetDetectorAdapter;
-static Vamp::PluginAdapter<VampEBUr128> VampEBUr128Adapter;
-static Vamp::PluginAdapter<VampTruePeak> VampTruePeakAdapter;
+static Vamp::PluginAdapter<AmplitudeFollower> AmplitudeFollowerAdapter;
+static Vamp::PluginAdapter<BarBeatTracker> BarBeatTrackerAdapter;
+static Vamp::PluginAdapter<BeatTracker> BeatTrackerAdapter;
+static Vamp::PluginAdapter<ChromagramPlugin> ChromagramPluginAdapter;
+static Vamp::PluginAdapter<VampEBUr128> EBUr128Adapter;
+static Vamp::PluginAdapter<KeyDetector> KeyDetectorAdapter;
+static Vamp::PluginAdapter<OnsetDetector> OnsetDetectorAdapter;
+static Vamp::PluginAdapter<PercussionOnsetDetector> PercussionOnsetDetectorAdapter;
+static Vamp::PluginAdapter<SimilarityPlugin> SimilarityPluginAdapter;
+static Vamp::PluginAdapter<SpectralCentroid> SpectralCentroidAdapter;
+static Vamp::PluginAdapter<TonalChangeDetect> TonalChangeDetectAdapter;
+static Vamp::PluginAdapter<Transcription> TranscriptionAdapter;
+static Vamp::PluginAdapter<VampTruePeak> TruePeakAdapter;
+static Vamp::PluginAdapter<ZeroCrossing> ZeroCrossingAdapter;
+
 #ifdef HAVE_AUBIO
-static Vamp::PluginAdapter<Onset> onsetAdapter;
+static Vamp::PluginAdapter<Onset> OnsetAdapter;
 #endif
 
 const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
@@ -69,15 +85,22 @@ const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
     if (version < 1) return 0;
 
     switch (index) {
-    case  0: return zeroCrossingAdapter.getDescriptor();
-    case  1: return spectralCentroidAdapter.getDescriptor();
-    case  2: return percussionOnsetAdapter.getDescriptor();
-    case  3: return amplitudeAdapter.getDescriptor();
-    case  4: return onsetDetectorAdapter.getDescriptor();
-    case  5: return VampEBUr128Adapter.getDescriptor();
-    case  6: return VampTruePeakAdapter.getDescriptor();
+    case  0: return AmplitudeFollowerAdapter.getDescriptor();
+    case  1: return BarBeatTrackerAdapter.getDescriptor();
+    case  2: return BeatTrackerAdapter.getDescriptor();
+    case  3: return ChromagramPluginAdapter.getDescriptor();
+    case  4: return EBUr128Adapter.getDescriptor();
+    case  5: return KeyDetectorAdapter.getDescriptor();
+    case  6: return OnsetDetectorAdapter.getDescriptor();
+    case  7: return PercussionOnsetDetectorAdapter.getDescriptor();
+    case  8: return SimilarityPluginAdapter.getDescriptor();
+    case  9: return SpectralCentroidAdapter.getDescriptor();
+    case 10: return TonalChangeDetectAdapter.getDescriptor();
+    case 11: return TranscriptionAdapter.getDescriptor();
+    case 12: return TruePeakAdapter.getDescriptor();
+    case 13: return ZeroCrossingAdapter.getDescriptor();
 #ifdef HAVE_AUBIO
-    case  7: return onsetAdapter.getDescriptor();
+    case 14: return OnsetAdapter.getDescriptor();
 #endif
     default: return 0;
     }

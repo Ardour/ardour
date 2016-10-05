@@ -38,11 +38,18 @@ def build(bld):
     obj.source = '''
             plugins.cpp
             AmplitudeFollower.cpp
+            BarBeatTrack.cpp
+            BeatTrack.cpp
+            ChromagramPlugin.cpp
             EBUr128.cpp
             ebu_r128_proc.cc
+            KeyDetect.cpp
             OnsetDetect.cpp
             PercussionOnsetDetector.cpp
+            SimilarityPlugin.cpp
             SpectralCentroid.cpp
+            TonalChangeDetect.cpp
+            Transcription.cpp
             TruePeak.cpp
             ZeroCrossing.cpp
     '''
