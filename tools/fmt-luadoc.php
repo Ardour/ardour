@@ -102,6 +102,10 @@ function arg2lua ($argtype, $flags = 0) {
 		return array ($arg => $flags);
 	}
 
+	if ($arg == 'luabridge::LuaRef') {
+		return array ('Lua-Function' => $flags | 4);
+	}
+
 	# check Class declarations first
 	foreach (array_merge ($classes, $consts) as $b) {
 		if ($b['ldec'] == $arg) {
@@ -200,6 +204,8 @@ function canonical_decl ($b) {
 			$a = preg_replace ('/([^>]) >/', '$1>', $a);
 			$a = preg_replace ('/^Cairo::/', '', $a); // special case cairo enums
 			$a = preg_replace ('/([^ ])&/', '$1 &', $a);
+			$a = preg_replace ('/std::vector<([^>]*)> const/', 'const std::vector<$1>', $a);
+			$a = str_replace ('std::vector', 'vector', $a);
 			$a = str_replace ('vector', 'std::vector', $a);
 			$a = str_replace ('std::string', 'string', $a);
 			$a = str_replace ('string const', 'const string', $a);
@@ -577,7 +583,10 @@ function format_args ($args) {
 	foreach ($args as $a) {
 		if (!$first) { $rv .= ', '; }; $first = false;
 		$flags = $a[varname ($a)];
-		if ($flags & 2) {
+		if ($flags & 4) {
+			$rv .= '<span>'.varname ($a).'</span>';
+		}
+		else if ($flags & 2) {
 			$rv .= '<em>LuaTable</em> {'.typelink (varname ($a), true, 'em').'}';
 		}
 		elseif ($flags & 1) {

@@ -59,6 +59,7 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('const long', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('const unsigned int', 'unsigned int', \$a['decl']);
 	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
+	\$a['decl'] = str_replace (' ::Vamp::', ' Vamp::', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
 }
