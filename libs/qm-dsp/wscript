@@ -49,7 +49,6 @@ def build(bld):
             dsp/phasevocoder/PhaseVocoder.cpp
             dsp/rateconversion/Decimator.cpp
             dsp/rateconversion/DecimatorB.cpp
-            dsp/rateconversion/Resampler.cpp
             dsp/rhythm/BeatSpectrum.cpp
             dsp/segmentation/cluster_melt.c
             dsp/segmentation/ClusterMeltSegmenter.cpp
@@ -73,7 +72,6 @@ def build(bld):
             maths/KLDivergence.cpp
             maths/MathUtilities.cpp
             maths/pca/pca.c
-            thread/Thread.cpp
             ext/kissfft/kiss_fft.c
             ext/kissfft/tools/kiss_fftr.c
     '''

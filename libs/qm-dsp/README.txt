@@ -17,9 +17,6 @@ maths/pca.c -- Fionn Murtagh, from StatLib; with permission
 maths/Polyfit.h -- Allen Miller, David J Taylor and others; also for
 Delphi in the the JEDI Math Library, under the Mozilla Public License
 
-thread/BlockAllocator.h -- derived from FSB Allocator by Juha Nieminen,
-under BSD-style license
-
 See individual files for further authorship details.
 
 
