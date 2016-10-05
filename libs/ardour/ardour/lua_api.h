@@ -178,19 +178,19 @@ namespace ARDOUR { namespace LuaAPI {
 			~Vamp ();
 			::Vamp::Plugin* plugin () { return _plugin; }
 
-			/* high-level abstraction to process a single channel of the given Readable.
+			/** high-level abstraction to process a single channel of the given Readable.
 			 *
 			 * If the plugin is not yet initialized, initialize() is called.
 			 *
 			 * if @cb is not nil, it is called with the immediate
 			 * Vamp::Plugin::Features on every process call.
 			 *
-			 * @r readable
-			 * @channel channel to process
-			 * @cb lua callback function
+			 * @param r readable
+			 * @param channel channel to process
+			 * @param fn lua callback function
 			 * @return 0 on success
 			 */
-			int analyze (boost::shared_ptr<ARDOUR::Readable>, uint32_t channel, luabridge::LuaRef fn);
+			int analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef fn);
 
 			/** call plugin():reset() and clear intialization flag */
 			void reset ();
@@ -218,10 +218,10 @@ namespace ARDOUR { namespace LuaAPI {
 			 *
 			 * This is a lua-binding for vamp:plugin():process ()
 			 *
-			 * @d audio-data, the vector must match the configured channel count
+			 * @param d audio-data, the vector must match the configured channel count
 			 *    and hold a complete buffer for every channel as set during
 			 *    plugin():initialise()
-			 * @rt timestamp matching the provided buffer.
+			 * @param rt timestamp matching the provided buffer.
 			 * @returns features extracted from that data (if the plugin is causal)
 			 */
 			::Vamp::Plugin::FeatureSet process (const std::vector<float*>& d, ::Vamp::RealTime rt);
