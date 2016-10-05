@@ -1615,6 +1615,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
 		.addConstructor <void (*) (const std::string&, float)> ()
+		.addStaticFunction ("list_plugins", &ARDOUR::LuaAPI::Vamp::list_plugins)
 		.addFunction ("plugin", &ARDOUR::LuaAPI::Vamp::plugin)
 		.addFunction ("analyze", &ARDOUR::LuaAPI::Vamp::analyze)
 		.addFunction ("reset", &ARDOUR::LuaAPI::Vamp::reset)

@@ -539,6 +539,13 @@ void LuaTableRef::assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s)
 	}
 }
 
+std::vector<std::string>
+LuaAPI::Vamp::list_plugins ()
+{
+	using namespace ::Vamp::HostExt;
+	PluginLoader* loader (PluginLoader::getInstance());
+	return loader->listPlugins ();
+}
 
 LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
 	: _plugin (0)

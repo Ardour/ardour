@@ -176,6 +176,12 @@ namespace ARDOUR { namespace LuaAPI {
 		public:
 			Vamp (const std::string&, float sample_rate);
 			~Vamp ();
+
+			/** Search for all available available Vamp plugins.
+			 * @returns list of plugin-keys
+			 */
+			static std::vector<std::string> list_plugins ();
+
 			::Vamp::Plugin* plugin () { return _plugin; }
 
 			/** high-level abstraction to process a single channel of the given Readable.
