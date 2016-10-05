@@ -21,6 +21,7 @@
 #define EVORAL_SMF_HPP
 
 #include <glibmm/threads.h>
+#include <set>
 
 #include "evoral/visibility.h"
 #include "evoral/types.hpp"
@@ -49,7 +50,7 @@ public:
 		std::string _file_name;
 	};
 
-	SMF() : _smf(0), _smf_track(0), _empty(true) {};
+	SMF();
 	virtual ~SMF();
 
 	static bool test(const std::string& path);
@@ -75,11 +76,17 @@ public:
 
 	double round_to_file_precision (double val) const;
 
+	bool is_type0 () const { return _type0; }
+	std::set<uint8_t> channels () const { return _type0channels; }
+
 private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
 	mutable Glib::Threads::Mutex _smf_lock;
+
+	bool              _type0;
+	std::set<uint8_t> _type0channels;
 };
 
 }; /* namespace Evoral */
