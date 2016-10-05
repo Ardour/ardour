@@ -344,20 +344,33 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 	uint8_t* buf      = (uint8_t*) malloc (buf_size);
 
 	status.progress = 0.0f;
+	uint16_t num_tracks;
+	bool type0 = source->is_type0 ();
+	const std::set<uint8_t>& chn = source->channels ();
 
-	assert (newfiles.size() == source->num_tracks());
+	if (type0) {
+		num_tracks = source->channels().size();
+	} else {
+		num_tracks = source->num_tracks();
+	}
+	assert (newfiles.size() == num_tracks);
 
 	try {
 		vector<boost::shared_ptr<Source> >::iterator s = newfiles.begin();
+		std::set<uint8_t>::const_iterator cur_chan = chn.begin();
 
-		for (unsigned i = 1; i <= source->num_tracks(); ++i) {
+		for (unsigned i = 1; i <= num_tracks; ++i) {
 
 			boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource> (*s);
 
 			Glib::Threads::Mutex::Lock source_lock(smfs->mutex());
 
 			smfs->drop_model (source_lock);
-			source->seek_to_track (i);
+			if (type0) {
+				source->seek_to_start ();
+			} else {
+				source->seek_to_track (i);
+			}
 
 			uint64_t t       = 0;
 			uint32_t delta_t = 0;
@@ -383,6 +396,17 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				if (ret == 0) { // Meta
 					continue;
+				}
+
+				// type-0 files separate by channel
+				if (type0) {
+					uint8_t type = buf[0] & 0xf0;
+					uint8_t chan = buf[0] & 0x0f;
+					if (type >= 0x80 && type <= 0xE0) {
+						if (chan != *cur_chan) {
+							continue;
+						}
+					}
 				}
 
 				if (first) {
@@ -417,10 +441,13 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					break;
 				}
 			} else {
-				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->num_tracks()) << endmsg;
+				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, num_tracks) << endmsg;
 			}
 
 			++s; // next source
+			if (type0) {
+				++cur_chan;
+			}
 		}
 
 	} catch (exception& e) {
@@ -481,7 +508,12 @@ Session::import_files (ImportStatus& status)
 			try {
 				smf_reader = std::auto_ptr<Evoral::SMF>(new Evoral::SMF());
 				smf_reader->open(*p);
-				channels = smf_reader->num_tracks();
+
+				if (smf_reader->is_type0 ()) {
+					channels = smf_reader->channels().size();
+				} else {
+					channels = smf_reader->num_tracks();
+				}
 			} catch (...) {
 				error << _("Import: error opening MIDI file") << endmsg;
 				status.done = status.cancel = true;
