@@ -135,13 +135,34 @@ load_sf2 (AFluidSynth* self, const char* fn)
 		return false;
 	}
 
+	// Dump Program
+	// TODO consider  lv2_log_note()
+#ifndef NDEBUG
+	printf (" ---- a-fluid synth ----\n");
+	printf ("SoundFont %s\n", fn);
+#endif
 	int chn;
 	fluid_preset_t preset;
 	sfont->iteration_start (sfont);
-	for (chn = 0; sfont->iteration_next (sfont, &preset) && chn < 15; ++chn) {
-		fluid_synth_program_select (self->synth, chn, synth_id,
-				preset.get_banknum (&preset), preset.get_num (&preset));
+	for (chn = 0; sfont->iteration_next (sfont, &preset); ++chn) {
+#ifndef NDEBUG
+			printf ("Bank %3d Prog: %3d '%s'\n",
+					preset.get_banknum (&preset),
+					preset.get_num (&preset),
+					preset.get_name (&preset));
+#endif
+		if (chn < 16) {
+			fluid_synth_program_select (self->synth, chn, synth_id,
+					preset.get_banknum (&preset), preset.get_num (&preset));
+		} else {
+#ifdef NDEBUG
+			break;
+#endif
+		}
 	}
+#ifndef NDEBUG
+	printf (" ---- ------------- ----\n");
+#endif
 
 	if (chn == 0) {
 		return false;
@@ -255,6 +276,9 @@ instantiate (const LV2_Descriptor*     descriptor,
 	fluid_settings_setnum (self->settings, "synth.sample-rate", rate);
 	fluid_settings_setint (self->settings, "synth.parallel-render", 1);
 	fluid_settings_setint (self->settings, "synth.threadsafe-api", 0);
+#ifndef NDEBUG // THIS IS NOT REALTIME SAFE (!)
+	fluid_settings_setint (self->settings, "synth.verbose", 1);
+#endif
 
 	self->synth = new_fluid_synth (self->settings);
 
