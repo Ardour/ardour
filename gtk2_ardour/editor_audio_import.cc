@@ -484,6 +484,7 @@ Editor::import_sndfiles (vector<string>            paths,
 	import_status.freeze = false;
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
+	import_status.split_midi_channels = (disposition == Editing::ImportDistinctChannels);
 
 	import_status.mode = mode;
 	import_status.pos = pos;
