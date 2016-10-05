@@ -338,14 +338,15 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 
 static void
 write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
-                              vector<boost::shared_ptr<Source> >& newfiles)
+                              vector<boost::shared_ptr<Source> >& newfiles,
+                              bool split_type0)
 {
 	uint32_t buf_size = 4;
 	uint8_t* buf      = (uint8_t*) malloc (buf_size);
 
 	status.progress = 0.0f;
 	uint16_t num_tracks;
-	bool type0 = source->is_type0 ();
+	bool type0 = source->is_type0 () && split_type0;
 	const std::set<uint8_t>& chn = source->channels ();
 
 	if (type0) {
@@ -509,7 +510,7 @@ Session::import_files (ImportStatus& status)
 				smf_reader = std::auto_ptr<Evoral::SMF>(new Evoral::SMF());
 				smf_reader->open(*p);
 
-				if (smf_reader->is_type0 ()) {
+				if (smf_reader->is_type0 () && status.split_midi_channels) {
 					channels = smf_reader->channels().size();
 				} else {
 					channels = smf_reader->num_tracks();
@@ -557,7 +558,7 @@ Session::import_files (ImportStatus& status)
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
-			write_midi_data_to_new_files (smf_reader.get(), status, newfiles);
+			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, status.split_midi_channels);
 		}
 
 		++status.current;
