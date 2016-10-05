@@ -38,7 +38,7 @@ public:
 	ChangeDistance process(const TCSGram& rTCSGram);
 private:
 	void setFilterWidth(const int iWidth);
-
+	
 private:
 	valarray<double> m_vaGaussian;
 	double m_dFilterSigma;

@@ -53,13 +53,13 @@ public:
 			    const vector<double> &y,
 			    vector<double> &coef);
 
-
+                   
 private:
     TPolyFit &operator = (const TPolyFit &);   // disable assignment
     TPolyFit();                                // and instantiation
     TPolyFit(const TPolyFit&);                 // and copying
 
-
+  
     static void Square (const Matrix &x,              // Matrix multiplication routine
 			const vector<double> &y,
 			Matrix &a,                    // A = transpose X times X
@@ -105,13 +105,13 @@ double TPolyFit::PolyFit2 (const vector<double> &x,
 // nterms = coefs.size()
 // npoints = x.size()
 {
-    unsigned int i, j;
+    int i, j;
     double xi, yi, yc, srs, sum_y, sum_y2;
     Matrix xmatr;        // Data matrix
     Matrix a;
     vector<double> g;      // Constant vector
-    const unsigned int npoints(x.size());
-    const unsigned int nterms(coefs.size());
+    const int npoints(x.size());
+    const int nterms(coefs.size());
     double correl_coef;
     zeroise(g, nterms);
     zeroise(a, nterms, nterms);
@@ -124,7 +124,7 @@ double TPolyFit::PolyFit2 (const vector<double> &x,
         std::cerr << "ERROR: PolyFit called with less than two points" << std::endl;
         return 0;
     }
-    if(npoints != y.size()) {
+    if(npoints != (int)y.size()) {
         std::cerr << "ERROR: PolyFit called with x and y of unequal size" << std::endl;
         return 0;
     }
@@ -260,8 +260,8 @@ bool TPolyFit::GaussJordan (Matrix &b,
 
     for( int i = 0; i < ncol; ++i)
 	coef[i] = w[i][0];
-
-
+ 
+ 
     return true;
 }   // end;	{ procedure GaussJordan }
 //----------------------------------------------------------------------------------------------
@@ -274,12 +274,11 @@ bool TPolyFit::GaussJordan2(Matrix &b,
 {
     //GaussJordan2;         // first half of GaussJordan
     // actual start of gaussj
-
+ 
     double big, t;
     double pivot;
     double determ;
-    int irow = 0;
-    int icol = 0;
+    int irow, icol;
     int ncol(b.size());
     int nv = 1;                  // single constant vector
     for(int i = 0; i < ncol; ++i)
@@ -405,4 +404,4 @@ void NSUtility::zeroise(vector<vector<int> > &matrix, int m, int n)
 
 
 #endif
-
+ 

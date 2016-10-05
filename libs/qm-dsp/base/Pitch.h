@@ -15,6 +15,10 @@
 #ifndef _PITCH_H_
 #define _PITCH_H_
 
+/**
+ * Convert between musical pitch (i.e. MIDI pitch number) and
+ * fundamental frequency.
+ */
 class Pitch
 {
 public:

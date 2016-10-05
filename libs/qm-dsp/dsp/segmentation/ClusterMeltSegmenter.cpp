@@ -51,7 +51,7 @@ void ClusterMeltSegmenter::initialise(int fs)
 
     if (featureType == FEATURE_TYPE_CONSTQ ||
         featureType == FEATURE_TYPE_CHROMA) {
-
+        
         // run internal processing at 11025 or thereabouts
         int internalRate = 11025;
         int decimationFactor = samplerate / internalRate;
@@ -77,11 +77,11 @@ void ClusterMeltSegmenter::initialise(int fs)
 
         constq = new ConstantQ(config);
         constq->sparsekernel();
-
+        
         ncoeff = constq->getK();
 
         fft = new FFTReal(constq->getfftlength());
-
+        
     } else if (featureType == FEATURE_TYPE_MFCC) {
 
         // run internal processing at 22050 or thereabouts
@@ -110,7 +110,7 @@ void ClusterMeltSegmenter::initialise(int fs)
     }
 }
 
-ClusterMeltSegmenter::~ClusterMeltSegmenter()
+ClusterMeltSegmenter::~ClusterMeltSegmenter() 
 {
     delete window;
     delete constq;
@@ -164,7 +164,7 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
     vector<double> cq(ncoeff);
 
     for (int i = 0; i < ncoeff; ++i) cq[i] = 0.0;
-
+    
     const double *psource = samples;
     int pcount = nsamples;
 
@@ -174,9 +174,9 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
         decimator->process(samples, decout);
         psource = decout;
     }
-
+    
     int origin = 0;
-
+    
 //    std::cerr << "nsamples = " << nsamples << ", pcount = " << pcount << std::endl;
 
     int frames = 0;
@@ -208,11 +208,11 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
         }
 
         window->cut(frame);
-
-        fft->process(false, frame, real, imag);
-
+        
+        fft->forward(frame, real, imag);
+        
         constq->process(real, imag, cqre, cqim);
-
+	
         for (int i = 0; i < ncoeff; ++i) {
             cq[i] += sqrt(cqre[i] * cqre[i] + cqim[i] * cqim[i]);
         }
@@ -255,7 +255,7 @@ void ClusterMeltSegmenter::extractFeaturesMFCC(const double* samples, int nsampl
     vector<double> cc(ncoeff);
 
     for (int i = 0; i < ncoeff; ++i) cc[i] = 0.0;
-
+    
     const double *psource = samples;
     int pcount = nsamples;
 
@@ -287,7 +287,7 @@ void ClusterMeltSegmenter::extractFeaturesMFCC(const double* samples, int nsampl
         }
 
         mfcc->process(frame, ccout);
-
+	
         for (int i = 0; i < ncoeff; ++i) {
             cc[i] += ccout[i];
         }
@@ -330,44 +330,44 @@ void ClusterMeltSegmenter::segment()
     decimator = 0;
 
     if (features.size() < histogramLength) return;
-/*
+/*    
     std::cerr << "ClusterMeltSegmenter::segment: have " << features.size()
               << " features with " << features[0].size() << " coefficients (ncoeff = " << ncoeff << ", ncomponents = " << ncomponents << ")" << std::endl;
 */
     // copy the features to a native array and use the existing C segmenter...
-    double** arrFeatures = new double*[features.size()];
+    double** arrFeatures = new double*[features.size()];	
     for (int i = 0; i < features.size(); i++)
     {
         if (featureType == FEATURE_TYPE_UNKNOWN) {
             arrFeatures[i] = new double[features[0].size()];
             for (int j = 0; j < features[0].size(); j++)
-                arrFeatures[i][j] = features[i][j];
+                arrFeatures[i][j] = features[i][j];	
         } else {
             arrFeatures[i] = new double[ncoeff+1];	// allow space for the normalised envelope
             for (int j = 0; j < ncoeff; j++)
-                arrFeatures[i][j] = features[i][j];
+                arrFeatures[i][j] = features[i][j];	
         }
     }
-
+	
     q = new int[features.size()];
-
+	
     if (featureType == FEATURE_TYPE_UNKNOWN ||
         featureType == FEATURE_TYPE_MFCC)
-        cluster_segment(q, arrFeatures, features.size(), features[0].size(), nHMMStates, histogramLength,
+        cluster_segment(q, arrFeatures, features.size(), features[0].size(), nHMMStates, histogramLength, 
                         nclusters, neighbourhoodLimit);
     else
-        constq_segment(q, arrFeatures, features.size(), nbins, ncoeff, featureType,
+        constq_segment(q, arrFeatures, features.size(), nbins, ncoeff, featureType, 
                        nHMMStates, histogramLength, nclusters, neighbourhoodLimit);
-
+	
     // convert the cluster assignment sequence to a segmentation
-    makeSegmentation(q, features.size());
-
+    makeSegmentation(q, features.size());		
+	
     // de-allocate arrays
     delete [] q;
     for (int i = 0; i < features.size(); i++)
         delete [] arrFeatures[i];
     delete [] arrFeatures;
-
+	
     // clear the features
     clear();
 }
@@ -377,11 +377,11 @@ void ClusterMeltSegmenter::makeSegmentation(int* q, int len)
     segmentation.segments.clear();
     segmentation.nsegtypes = nclusters;
     segmentation.samplerate = samplerate;
-
+	
     Segment segment;
     segment.start = 0;
     segment.type = q[0];
-
+	
     for (int i = 1; i < len; i++)
     {
         if (q[i] != q[i-1])

@@ -39,7 +39,7 @@ Pitch::getPitchForFrequency(float frequency,
 	midiPitch = midiPitch + 1;
 	centsOffset = -(100.0 - centsOffset);
     }
-
+    
     if (centsOffsetReturn) *centsOffsetReturn = centsOffset;
     return midiPitch;
 }

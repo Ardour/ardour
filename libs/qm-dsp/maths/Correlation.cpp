@@ -40,7 +40,7 @@ void Correlation::doAutoUnBiased(double *src, double *dst, unsigned int length)
     {
 	for( j = i; j < length; j++)
 	{
-	    tmp += src[ j-i ] * src[ j ];
+	    tmp += src[ j-i ] * src[ j ]; 
 	}
 
 

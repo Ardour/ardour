@@ -44,14 +44,14 @@ void Framer::configure( unsigned int frameLength, unsigned int hop )
 
     if( m_dataFrame != NULL )
     {
-	delete [] m_dataFrame;
+	delete [] m_dataFrame;	
 	m_dataFrame = NULL;
     }
     m_dataFrame = new double[ m_frameLength ];
 
     if( m_strideFrame != NULL )
     {
-	delete [] m_strideFrame;
+	delete [] m_strideFrame;	
 	m_strideFrame = NULL;
     }
     m_strideFrame = new double[ m_stepSize ];
@@ -64,8 +64,8 @@ void Framer::getFrame(double *dst)
     {
 	for( unsigned int u = 0; u < m_frameLength; u++)
 	{
-	    dst[ u ] = m_srcBuffer[ m_ulSrcIndex++ ];
-	}
+	    dst[ u ] = m_srcBuffer[ m_ulSrcIndex++ ]; 
+	}	
 	m_ulSrcIndex -= ( m_frameLength - m_stepSize );
     }
     else
@@ -77,7 +77,7 @@ void Framer::getFrame(double *dst)
 	{
 	    dst[ u ] = m_srcBuffer[ m_ulSrcIndex++ ];
 	}
-
+		
 	for( unsigned int u = 0; u < zero; u++ )
 	{
 	    dst[ rem + u ] = 0;

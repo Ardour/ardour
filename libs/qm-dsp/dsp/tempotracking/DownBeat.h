@@ -17,6 +17,7 @@
 #define DOWNBEAT_H
 
 #include <vector>
+#include <cstddef>
 
 #include "dsp/rateconversion/Decimator.h"
 
@@ -28,7 +29,7 @@ class FFTReal;
  * This class takes an input audio signal and a sequence of beat
  * locations (calculated e.g. by TempoTrackV2) and estimates which of
  * the beat locations are downbeats (first beat of the bar).
- *
+ * 
  * The input audio signal is expected to have been downsampled to a
  * very low sampling rate (e.g. 2700Hz).  A utility function for
  * downsampling and buffering incoming block-by-block audio is
@@ -56,7 +57,7 @@ public:
 
     /**
      * Estimate which beats are down-beats.
-     *
+     * 
      * audio contains the input audio stream after downsampling, and
      * audioLength contains the number of samples in this downsampled
      * stream.
@@ -83,18 +84,18 @@ public:
      * and the region following it.
      */
     void getBeatSD(vector<double> &beatsd) const;
-
+    
     /**
      * For your downsampling convenience: call this function
      * repeatedly with input audio blocks containing dfIncrement
      * samples at the original sample rate, to decimate them to the
      * downsampled rate and buffer them within the DownBeat class.
-     *
+     *     
      * Call getBufferedAudio() to retrieve the results after all
      * blocks have been processed.
      */
     void pushAudioBlock(const float *audio);
-
+    
     /**
      * Retrieve the accumulated audio produced by pushAudioBlock calls.
      */

@@ -15,12 +15,15 @@
 #ifndef DECIMATOR_H
 #define DECIMATOR_H
 
-class Decimator
+/**
+ * Decimator carries out a fast downsample by a power-of-two
+ * factor. Only a limited number of factors are supported, from two to
+ * whatever getHighestSupportedFactor() returns. This is much faster
+ * than Resampler but has a worse signal-noise ratio.
+ */
+class Decimator  
 {
 public:
-    void process( const double* src, double* dst );
-    void process( const float* src, float* dst );
-
     /**
      * Construct a Decimator to operate on input blocks of length
      * inLength, with decimation factor decFactor.  inLength should be
@@ -34,11 +37,28 @@ public:
     Decimator( unsigned int inLength, unsigned int decFactor );
     virtual ~Decimator();
 
+    /**
+     * Process inLength samples (as supplied to constructor) from src
+     * and write inLength / decFactor samples to dst.  Note that src
+     * and dst may be the same or overlap (an intermediate buffer is
+     * used).
+     */
+    void process( const double* src, double* dst );
+
+    /**
+     * Process inLength samples (as supplied to constructor) from src
+     * and write inLength / decFactor samples to dst.  Note that src
+     * and dst may be the same or overlap (an intermediate buffer is
+     * used).
+     */
+    void process( const float* src, float* dst );
+
     int getFactor() const { return m_decFactor; }
     static int getHighestSupportedFactor() { return 8; }
 
-private:
     void resetFilter();
+
+private:
     void deInitialise();
     void initialise( unsigned int inLength, unsigned int decFactor );
     void doAntiAlias( const double* src, double* dst, unsigned int length );
@@ -55,8 +75,8 @@ private:
 
     double a[ 9 ];
     double b[ 9 ];
-
+	
     double* decBuffer;
 };
 
-#endif //
+#endif // 

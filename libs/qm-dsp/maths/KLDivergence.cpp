@@ -50,7 +50,7 @@ double KLDivergence::distanceDistribution(const vector<double> &d1,
 
     double d = 0;
     double small = 1e-20;
-
+    
     for (int i = 0; i < sz; ++i) {
         d += d1[i] * log10((d1[i] + small) / (d2[i] + small));
     }

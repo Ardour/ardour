@@ -4,7 +4,7 @@
     QM DSP Library
 
     Centre for Digital Music, Queen Mary, University of London.
-    This file 2005-2006 Christian Landone.
+    This file 2005-2006 Christian Landone, copyright 2013 QMUL.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -15,30 +15,47 @@
 
 #include "PhaseVocoder.h"
 #include "dsp/transforms/FFT.h"
+#include "maths/MathUtilities.h"
 #include <math.h>
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include <cassert>
 
-PhaseVocoder::PhaseVocoder(unsigned int n) :
-    m_n(n)
+#include <iostream>
+using std::cerr;
+using std::endl;
+
+PhaseVocoder::PhaseVocoder(int n, int hop) :
+    m_n(n),
+    m_hop(hop)
 {
     m_fft = new FFTReal(m_n);
-    m_realOut = new double[m_n];
-    m_imagOut = new double[m_n];
+    m_time = new double[m_n];
+    m_real = new double[m_n];
+    m_imag = new double[m_n];
+    m_phase = new double[m_n/2 + 1];
+    m_unwrapped = new double[m_n/2 + 1];
+
+    for (int i = 0; i < m_n/2 + 1; ++i) {
+        m_phase[i] = 0.0;
+        m_unwrapped[i] = 0.0;
+    }
+
+    reset();
 }
 
 PhaseVocoder::~PhaseVocoder()
 {
-    delete [] m_realOut;
-    delete [] m_imagOut;
+    delete[] m_unwrapped;
+    delete[] m_phase;
+    delete[] m_real;
+    delete[] m_imag;
+    delete[] m_time;
     delete m_fft;
 }
 
-void PhaseVocoder::FFTShift(unsigned int size, double *src)
+void PhaseVocoder::FFTShift(double *src)
 {
-    const int hs = size/2;
+    const int hs = m_n/2;
     for (int i = 0; i < hs; ++i) {
         double tmp = src[i];
         src[i] = src[i + hs];
@@ -46,34 +63,73 @@ void PhaseVocoder::FFTShift(unsigned int size, double *src)
     }
 }
 
-void PhaseVocoder::process(double *src, double *mag, double *theta)
+void PhaseVocoder::processTimeDomain(const double *src,
+                                     double *mag, double *theta,
+                                     double *unwrapped)
 {
-    FFTShift( m_n, src);
-
-    m_fft->process(0, src, m_realOut, m_imagOut);
-
-    getMagnitude( m_n/2, mag, m_realOut, m_imagOut);
-    getPhase( m_n/2, theta, m_realOut, m_imagOut);
+    for (int i = 0; i < m_n; ++i) {
+        m_time[i] = src[i];
+    }
+    FFTShift(m_time);
+    m_fft->forward(m_time, m_real, m_imag);
+    getMagnitudes(mag);
+    getPhases(theta);
+    unwrapPhases(theta, unwrapped);
 }
 
-void PhaseVocoder::getMagnitude(unsigned int size, double *mag, double *real, double *imag)
+void PhaseVocoder::processFrequencyDomain(const double *reals, 
+                                          const double *imags,
+                                          double *mag, double *theta,
+                                          double *unwrapped)
 {
-    unsigned int j;
+    for (int i = 0; i < m_n/2 + 1; ++i) {
+        m_real[i] = reals[i];
+        m_imag[i] = imags[i];
+    }
+    getMagnitudes(mag);
+    getPhases(theta);
+    unwrapPhases(theta, unwrapped);
+}
 
-    for( j = 0; j < size; j++)
-    {
-	mag[ j ] = sqrt( real[ j ] * real[ j ] + imag[ j ] * imag[ j ]);
+void PhaseVocoder::reset()
+{
+    for (int i = 0; i < m_n/2 + 1; ++i) {
+        // m_phase stores the "previous" phase, so set to one step
+        // behind so that a signal with initial phase at zero matches
+        // the expected values. This is completely unnecessary for any
+        // analytical purpose, it's just tidier.
+        double omega = (2 * M_PI * m_hop * i) / m_n;
+        m_phase[i] = -omega;
+        m_unwrapped[i] = -omega;
     }
 }
 
-void PhaseVocoder::getPhase(unsigned int size, double *theta, double *real, double *imag)
-{
-    unsigned int k;
-
-    // Phase Angle "matlab" style
-    //Watch out for quadrant mapping  !!!
-    for( k = 0; k < size; k++)
-    {
-	theta[ k ] = atan2( -imag[ k ], real[ k ]);
+void PhaseVocoder::getMagnitudes(double *mag)
+{	
+    for (int i = 0; i < m_n/2 + 1; i++) {
+	mag[i] = sqrt(m_real[i] * m_real[i] + m_imag[i] * m_imag[i]);
     }
 }
+
+void PhaseVocoder::getPhases(double *theta)
+{
+    for (int i = 0; i < m_n/2 + 1; i++) {
+	theta[i] = atan2(m_imag[i], m_real[i]);
+    }	
+}
+
+void PhaseVocoder::unwrapPhases(double *theta, double *unwrapped)
+{
+    for (int i = 0; i < m_n/2 + 1; ++i) {
+
+        double omega = (2 * M_PI * m_hop * i) / m_n;
+        double expected = m_phase[i] + omega;
+        double error = MathUtilities::princarg(theta[i] - expected);
+
+        unwrapped[i] = m_unwrapped[i] + omega + error;
+
+        m_phase[i] = theta[i];
+        m_unwrapped[i] = unwrapped[i];
+    }
+}
+

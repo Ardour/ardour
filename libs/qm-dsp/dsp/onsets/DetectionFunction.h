@@ -29,7 +29,7 @@
 
 struct DFConfig{
     unsigned int stepSize; // DF step in samples
-    unsigned int frameLength; // DF analysis window - usually 2*step
+    unsigned int frameLength; // DF analysis window - usually 2*step. Must be even!
     int DFType; // type of detection function ( see defines )
     double dbRise; // only used for broadband df (and required for it)
     bool adaptiveWhitening; // perform adaptive whitening
@@ -37,14 +37,24 @@ struct DFConfig{
     double whiteningFloor; // if < 0, a sensible default will be used
 };
 
-class DetectionFunction
+class DetectionFunction  
 {
 public:
     double* getSpectrumMagnitude();
     DetectionFunction( DFConfig Config );
     virtual ~DetectionFunction();
-    double process( const double* TDomain );
-    double process( const double* magnitudes, const double* phases );
+
+    /**
+     * Process a single time-domain frame of audio, provided as
+     * frameLength samples.
+     */
+    double processTimeDomain(const double* samples);
+
+    /**
+     * Process a single frequency-domain frame, provided as
+     * frameLength/2+1 real and imaginary component values.
+     */
+    double processFrequencyDomain(const double* reals, const double* imags);
 
 private:
     void whiten();
@@ -55,7 +65,7 @@ private:
     double phaseDev(unsigned int length, double *srcPhase);
     double complexSD(unsigned int length, double *srcMagnitude, double *srcPhase);
     double broadband(unsigned int length, double *srcMagnitude);
-
+	
 private:
     void initialise( DFConfig Config );
     void deInitialise();
@@ -74,12 +84,13 @@ private:
     double* m_phaseHistoryOld;
     double* m_magPeaks;
 
-    double* m_DFWindowedFrame; // Array for windowed analysis frame
+    double* m_windowed; // Array for windowed analysis frame
     double* m_magnitude; // Magnitude of analysis frame ( frequency domain )
     double* m_thetaAngle;// Phase of analysis frame ( frequency domain )
+    double* m_unwrapped; // Unwrapped phase of analysis frame
 
     Window<double> *m_window;
     PhaseVocoder* m_phaseVoc;	// Phase Vocoder
 };
 
-#endif
+#endif 

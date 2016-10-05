@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 
-class Framer
+class Framer  
 {
 public:
     void setSource( double* src, unsigned int length );

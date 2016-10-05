@@ -57,31 +57,31 @@ public:
 
 private:
     /* Filter bank parameters */
-    double  lowestFrequency;
-    int     linearFilters;
+    double  lowestFrequency; 
+    int     linearFilters; 
     double  linearSpacing;
     int     logFilters;
     double  logSpacing;
-
+    
     /* FFT length */
     int     fftSize;
-
+    
     int     totalFilters;
     double  logPower;
-
+    
     /* Misc. */
     int     samplingRate;
     int     nceps;
-
+    
     /* MFCC vector */
     double  *ceps;
-
+    
     double  **mfccDCTMatrix;
     double  **mfccFilterWeights;
-
+    
     /* The analysis window */
     Window<double> *window;
-
+    
     /* For the FFT */
     double *realOut;
     double *imagOut;

@@ -13,8 +13,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #else /* !_WIN32 */
+#define USE_PTHREADS
 #ifdef USE_PTHREADS
 #include <pthread.h>
+#else
+#error Must have either _WIN32 or USE_PTHREADS defined
 #endif /* USE_PTHREADS */
 #endif /* !_WIN32 */
 
@@ -127,7 +130,7 @@ public:
     void wait(int us = 0);
 
     void signal();
-
+    
 private:
 
 #ifdef _WIN32

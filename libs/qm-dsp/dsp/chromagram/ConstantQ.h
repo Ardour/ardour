@@ -29,7 +29,7 @@ struct CQConfig{
 };
 
 class ConstantQ {
-
+	
 //public functions incl. sparsekernel so can keep out of loop in main
 public:
     void process( const double* FFTRe, const double* FFTIm,
@@ -46,7 +46,7 @@ public:
 	double out = 0.54 - 0.46*cos(2*PI*n/len);
 	return(out);
     }
-
+	
     int getnumwin() { return m_numWin;}
     double getQ() { return m_dQ;}
     int getK() {return m_uK ;}
@@ -56,7 +56,7 @@ public:
 private:
     void initialise( CQConfig Config );
     void deInitialise();
-
+	
     double* m_CQdata;
     unsigned int m_FS;
     double m_FMin;

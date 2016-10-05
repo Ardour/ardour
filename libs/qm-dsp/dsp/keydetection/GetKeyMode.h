@@ -1,17 +1,12 @@
 /*
- * Author: c.landone 
- * Description:
- *
- * Syntax: C++
- *
- * Copyright (c) 2005 Centre for Digital Music ( C4DM )
- *                    Queen Mary Univesrity of London
- *
- *
- * This program is not free software; you cannot redistribute it 
- * without the explicit authorization from the centre for digital music,
- * queen mary university of london 
- *
+    Copyright (c) 2005 Centre for Digital Music ( C4DM )
+                       Queen Mary Univesrity of London
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License as
+    published by the Free Software Foundation; either version 2 of the
+    License, or (at your option) any later version.  See the file
+    COPYING included with this distribution for more information.
  */
 
 #ifndef GETKEYMODE_H

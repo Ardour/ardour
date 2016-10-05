@@ -35,32 +35,59 @@ def build(bld):
         return
 
     # Host Library
-    obj = bld(features = 'cxx cxxshlib')
+    obj = bld(features = 'c cxx cxxshlib')
     obj.source = '''
+            base/Pitch.cpp
+            base/KaiserWindow.cpp
+            base/SincWindow.cpp
+            dsp/chromagram/Chromagram.cpp
+            dsp/chromagram/ConstantQ.cpp
+            dsp/keydetection/GetKeyMode.cpp
+            dsp/mfcc/MFCC.cpp
             dsp/onsets/DetectionFunction.cpp
             dsp/onsets/PeakPicking.cpp
             dsp/phasevocoder/PhaseVocoder.cpp
             dsp/rateconversion/Decimator.cpp
+            dsp/rateconversion/DecimatorB.cpp
+            dsp/rateconversion/Resampler.cpp
             dsp/rhythm/BeatSpectrum.cpp
+            dsp/segmentation/cluster_melt.c
+            dsp/segmentation/ClusterMeltSegmenter.cpp
+            dsp/segmentation/cluster_segmenter.c
+            dsp/segmentation/Segmenter.cpp
             dsp/signalconditioning/DFProcess.cpp
             dsp/signalconditioning/Filter.cpp
             dsp/signalconditioning/FiltFilt.cpp
             dsp/signalconditioning/Framer.cpp
+            dsp/tempotracking/DownBeat.cpp
+            dsp/tempotracking/TempoTrack.cpp
+            dsp/tempotracking/TempoTrackV2.cpp
+            dsp/tonal/ChangeDetectionFunction.cpp
+            dsp/tonal/TCSgram.cpp
+            dsp/tonal/TonalEstimator.cpp
             dsp/transforms/FFT.cpp
             dsp/wavelet/Wavelet.cpp
+            hmm/hmm.c
             maths/Correlation.cpp
             maths/CosineDistance.cpp
             maths/KLDivergence.cpp
             maths/MathUtilities.cpp
-            base/Pitch.cpp
+            maths/pca/pca.c
+            thread/Thread.cpp
+            ext/kissfft/kiss_fft.c
+            ext/kissfft/tools/kiss_fftr.c
     '''
     autowaf.ensure_visible_symbols (obj, True)
     obj.export_includes = ['.']
-    obj.includes     = ['.']
+    obj.includes     = ['.', 'include/', 'ext/kissfft', 'ext/kissfft/tools/']
+    obj.defines      = ['kiss_fft_scalar=double']
     obj.name         = 'libqm-dsp'
     obj.target       = 'qm-dsp'
     obj.vnum         = QM_DSP_VERSION
     obj.install_path = bld.env['LIBDIR']
+    if bld.env['build_target'] != 'mingw':
+        obj.cxxflags = [ '-fPIC' ]
+        obj.cflags   = [ '-fPIC' ]
 
 def shutdown():
     autowaf.shutdown()

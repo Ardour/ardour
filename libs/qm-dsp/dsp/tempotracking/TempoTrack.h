@@ -31,7 +31,7 @@ using std::vector;
 struct WinThresh
 {
     unsigned int pre;
-    unsigned int  post;
+    unsigned int post;
 };
 
 struct TTParams
