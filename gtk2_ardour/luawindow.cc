@@ -312,6 +312,7 @@ LuaWindow::append_text (std::string s)
 	Glib::RefPtr<Gtk::TextBuffer> tb (outtext.get_buffer());
 	tb->insert (tb->end(), s + "\n");
 	scroll_to_bottom ();
+	Gtkmm2ext::UI::instance()->flush_pending (0.05);
 }
 
 void
