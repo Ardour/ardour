@@ -209,7 +209,6 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::channel_combo_changed ()
 {
-	maybe_update_name_template_entry ();
 	refill_track_modes ();
 }
 
