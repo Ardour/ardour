@@ -24,6 +24,8 @@
 #include <boost/shared_ptr.hpp>
 #include <vamp-hostsdk/Plugin.h>
 
+#include "evoral/Note.hpp"
+
 #include "ardour/libardour_visibility.h"
 
 #include "ardour/processor.h"
@@ -240,6 +242,9 @@ namespace ARDOUR { namespace LuaAPI {
 			bool            _initialized;
 
 	};
+
+	boost::shared_ptr<Evoral::Note<Evoral::Beats> >
+		new_noteptr (uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
 
 } } /* namespace */
 

@@ -255,6 +255,7 @@ public:
 	MidiModel::SysExDiffCommand* new_sysex_diff_command (const std::string name = "midi edit");
 	MidiModel::PatchChangeDiffCommand* new_patch_change_diff_command (const std::string name = "midi edit");
 	void apply_command (Session& session, Command* cmd);
+	void apply_command (Session* session, Command* cmd) { if (session) { apply_command (*session, cmd); } }
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
 	bool sync_to_source (const Glib::Threads::Mutex::Lock& source_lock);

@@ -43,8 +43,12 @@
 #include "ardour/luabindings.h"
 #include "ardour/luaproc.h"
 #include "ardour/meter.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
 #include "ardour/phase_control.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
@@ -159,6 +163,7 @@ CLASSKEYS(ARDOUR::LuaAPI::Vamp);
 CLASSKEYS(ARDOUR::LuaOSC::Address);
 CLASSKEYS(ARDOUR::LuaProc);
 CLASSKEYS(ARDOUR::LuaTableRef);
+CLASSKEYS(ARDOUR::MidiModel::NoteDiffCommand);
 CLASSKEYS(ARDOUR::MonitorProcessor);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
@@ -176,6 +181,8 @@ CLASSKEYS(PBD::Configuration);
 CLASSKEYS(PBD::PropertyChange);
 
 CLASSKEYS(Evoral::Beats);
+CLASSKEYS(Evoral::Event<framepos_t>);
+
 
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::vector<float>);
@@ -191,11 +198,19 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
 
+CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiPlaylist>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(boost::shared_ptr<Evoral::Note<Evoral::Beats> >);
+CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Evoral::Beats> >);
 
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 
@@ -415,6 +430,19 @@ LuaBindings::common (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 
 		.beginNamespace ("Evoral")
+		.beginClass <Evoral::Event<framepos_t> > ("Event")
+		.addFunction ("clear", &Evoral::Event<framepos_t>::clear)
+		.addFunction ("size", &Evoral::Event<framepos_t>::size)
+		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
+		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
+		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::MIDIEvent<framepos_t>::time)
+		.endClass ()
+
+		.beginClass <Evoral::Beats> ("Beats")
+		.addConstructor <void (*) (double)> ()
+		.addFunction ("to_double", &Evoral::Beats::to_double)
+		.endClass ()
+
 		.beginClass <Evoral::Parameter> ("Parameter")
 		.addConstructor <void (*) (uint32_t, uint8_t, uint32_t)> ()
 		.addFunction ("type", &Evoral::Parameter::type)
@@ -454,6 +482,18 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (framepos_t, framepos_t)> ()
 		.addData ("from", &Evoral::Range<framepos_t>::from)
 		.addData ("to", &Evoral::Range<framepos_t>::to)
+		.endClass ()
+
+		.deriveWSPtrClass <Evoral::Sequence<Evoral::Beats>, Evoral::ControlSet> ("Sequence")
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::Note<Evoral::Beats> > ("NotePtr")
+		.addFunction ("time", &Evoral::Note<Evoral::Beats>::time)
+		.addFunction ("note", &Evoral::Note<Evoral::Beats>::note)
+		.addFunction ("velocity", &Evoral::Note<Evoral::Beats>::velocity)
+		.addFunction ("off_velocity", &Evoral::Note<Evoral::Beats>::off_velocity)
+		.addFunction ("length", &Evoral::Note<Evoral::Beats>::length)
+		.addFunction ("channel", &Evoral::Note<Evoral::Beats>::channel)
 		.endClass ()
 
 		/* libevoral enums */
@@ -856,6 +896,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
 		.addCast<AudioPlaylist> ("to_audioplaylist")
+		.addCast<MidiPlaylist> ("to_midiplaylist")
 		.addFunction ("region_by_id", &Playlist::region_by_id)
 		.addFunction ("data_type", &Playlist::data_type)
 		.addFunction ("n_regions", &Playlist::n_regions)
@@ -894,6 +935,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("read", &AudioPlaylist::read)
 		.endClass ()
 
+		.deriveWSPtrClass <MidiPlaylist, Playlist> ("MidiPlaylist")
+		.addFunction ("set_note_mode", &MidiPlaylist::set_note_mode)
+		.endClass ()
+
 		.deriveWSPtrClass <Track, Route> ("Track")
 		.addCast<AudioTrack> ("to_audio_track")
 		.addCast<MidiTrack> ("to_midi_track")
@@ -919,6 +964,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
 		.addCast<Readable> ("to_readable")
+		.addCast<MidiRegion> ("to_midiregion")
 		/* properties */
 		.addFunction ("position", &Region::position)
 		.addFunction ("start", &Region::start)
@@ -972,8 +1018,44 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_position_locked", &Region::set_position_locked)
 		.endClass ()
 
+		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
+		.addFunction ("do_export", &MidiRegion::do_export)
+		.addFunction ("midi_source", &MidiRegion::midi_source)
+		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::midi_source)
+		.endClass ()
+
 		.beginWSPtrClass <Source> ("Source")
 		.endClass ()
+
+		.deriveWSPtrClass <MidiSource, Source> ("MidiSource")
+		.addFunction ("empty", &MidiSource::empty)
+		.addFunction ("length", &MidiSource::length)
+		.addFunction ("model", &MidiSource::model)
+		.endClass ()
+
+		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
+		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
+		.endClass ()
+
+		.deriveWSPtrClass <AutomatableSequence<Evoral::Beats>, Automatable> ("AutomatableSequence")
+		.addCast<Evoral::Sequence<Evoral::Beats> > ("to_sequence")
+		.endClass ()
+
+		.deriveWSPtrClass <MidiModel, AutomatableSequence<Evoral::Beats> > ("MidiModel")
+		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_command)
+		.addFunction ("new_note_diff_command", &ARDOUR::MidiModel::MidiModel::new_note_diff_command)
+		.endClass ()
+
+		.beginNamespace ("MidiModel")
+		.deriveClass<ARDOUR::MidiModel::DiffCommand, Command> ("DiffCommand")
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::NoteDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("add", &ARDOUR::MidiModel::NoteDiffCommand::add)
+		.addFunction ("remove", &ARDOUR::MidiModel::NoteDiffCommand::remove)
+		.endClass ()
+
+		.endNamespace () /* ARDOUR::MidiModel */
 
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
 		.addVoidConstructor ()
@@ -984,10 +1066,6 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginStdVector <Plugin::PresetRecord> ("PresetVector").endClass ()
-
-		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
-		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
-		.endClass ()
 
 		.deriveClass <ParameterDescriptor, Evoral::ParameterDescriptor> ("ParameterDescriptor")
 		.addVoidConstructor ()
@@ -1354,6 +1432,11 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MeterCustom", ARDOUR::MeterPoint(MeterCustom))
 		.endNamespace ()
 
+		.beginNamespace ("NoteMode")
+		.addConst ("Sustained", ARDOUR::NoteMode(Sustained))
+		.addConst ("Percussive", ARDOUR::NoteMode(Percussive))
+		.endNamespace ()
+
 		.beginNamespace ("PortFlags")
 		.addConst ("IsInput", ARDOUR::PortFlags(IsInput))
 		.addConst ("IsOutput", ARDOUR::PortFlags(IsOutput))
@@ -1627,6 +1710,7 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
 		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
+		.addFunction ("new_noteptr", ARDOUR::LuaAPI::new_noteptr)
 
 		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
 		.addConstructor <void (*) (const std::string&, float)> ()
@@ -1680,18 +1764,6 @@ LuaBindings::dsp (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Evoral")
-		.beginClass <Evoral::Event<framepos_t> > ("Event")
-		.addFunction ("clear", &Evoral::Event<framepos_t>::clear)
-		.addFunction ("size", &Evoral::Event<framepos_t>::size)
-		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
-		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
-		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::MIDIEvent<framepos_t>::time)
-		.endClass ()
-
-		.beginClass <Evoral::Beats> ("Beats")
-		.addFunction ("to_double", &Evoral::Beats::to_double)
-		.endClass ()
-
 		.deriveClass <Evoral::MIDIEvent<framepos_t>, Evoral::Event<framepos_t> > ("MidiEvent")
 		// add Ctor?
 		.addFunction ("type", &Evoral::MIDIEvent<framepos_t>::type)
