@@ -514,7 +514,16 @@ LuaBindings::common (lua_State* L)
 
 		.deriveClass<Vamp::Plugin, Vamp::PluginBase> ("Plugin")
 		//.addFunction ("process", &Vamp::Plugin::process) // unusable due to  float*const* -> LuaAPI::Vamp::process
+		.addFunction ("initialise", &Vamp::Plugin::initialise)
+		.addFunction ("reset", &Vamp::Plugin::reset)
+		.addFunction ("getInputDomain", &Vamp::Plugin::getInputDomain)
+		.addFunction ("getPreferredBlockSize", &Vamp::Plugin::getPreferredBlockSize)
+		.addFunction ("getPreferredStepSize", &Vamp::Plugin::getPreferredStepSize)
+		.addFunction ("getMinChannelCount", &Vamp::Plugin::getMinChannelCount)
+		.addFunction ("getMaxChannelCount", &Vamp::Plugin::getMaxChannelCount)
+		.addFunction ("getOutputDescriptors", &Vamp::Plugin::getOutputDescriptors)
 		.addFunction ("getRemainingFeatures", &Vamp::Plugin::getRemainingFeatures)
+		.addFunction ("getType", &Vamp::Plugin::getType)
 		.endClass ()
 
 		.beginNamespace ("Plugin")
@@ -535,8 +544,14 @@ LuaBindings::common (lua_State* L)
 		.addData ("hasDuration", &Vamp::Plugin::OutputDescriptor::hasDuration)
 		.endClass ()
 
-		.beginNamespace ("OutputDescriptor")
+		/* Vamp::Plugin enums */
+		.beginNamespace ("InputDomain")
+		.addConst ("TimeDomain", Vamp::Plugin::InputDomain(Vamp::Plugin::TimeDomain))
+		.addConst ("FrequencyDomain", Vamp::Plugin::InputDomain(Vamp::Plugin::FrequencyDomain))
+		.endNamespace ()
+
 		/* Vamp::Plugin::OutputDescriptor enum */
+		.beginNamespace ("OutputDescriptor")
 		.beginNamespace ("SampleType")
 		.addConst ("OneSamplePerStep", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::OneSamplePerStep))
 		.addConst ("FixedSampleRate", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::FixedSampleRate))
