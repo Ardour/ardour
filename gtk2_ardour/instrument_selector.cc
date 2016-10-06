@@ -16,6 +16,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/convert.h"
 #include "ardour/plugin_manager.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "instrument_selector.h"
@@ -64,6 +65,12 @@ InstrumentSelector::refill()
 	set_button_sensitivity(Gtk::SENSITIVITY_AUTO);
 }
 
+static bool
+pluginsort (const PluginInfoPtr& a, const PluginInfoPtr& b)
+{
+	return PBD::downcase(a->name) < PBD::downcase(b->name);
+}
+
 void
 InstrumentSelector::build_instrument_list()
 {
@@ -84,6 +91,8 @@ InstrumentSelector::build_instrument_list()
 #ifdef LV2_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
+
+	all_plugs.sort (pluginsort);
 
 	_instrument_list = ListStore::create(_instrument_list_columns);
 
