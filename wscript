@@ -165,10 +165,12 @@ def fetch_tarball_revision_date():
     with open('libs/ardour/revision.cc', 'rb') as f:
         content = f.readlines()
         remove_punctuation_map = dict((ord(char), None) for char in '";')
-        raw_line_tokens = content[1].decode('utf-8').strip().split(' ')
 
-        rev = raw_line_tokens[7].translate(remove_punctuation_map)
-        date = raw_line_tokens[12].translate(remove_punctuation_map)
+        raw_line_tokens = content[2].decode('utf-8').strip().split(' ')
+        rev = raw_line_tokens[4].translate(remove_punctuation_map)
+
+        raw_line_tokens = content[3].decode('utf-8').strip().split(' ')
+        date = raw_line_tokens[4].translate(remove_punctuation_map)
 
         return rev, date
 
@@ -308,10 +310,10 @@ def create_stored_revision():
         #
         text =  '#include "ardour/revision.h"\n'
         text += (
-            'namespace ARDOUR { '
-                'const char* revision = \"%s\"; '
-                'const char* date = \"%s\"; }\n'
-        ) % (rev, rev_date)
+            'namespace ARDOUR {\n'
+            '    const char* revision = \"%s\";\n'
+            '    const char* date = \"%s\";\n'
+            '}\n') % (rev, rev_date)
         print('Writing revision info to libs/ardour/revision.cc using ' + rev + ', ' + rev_date)
         o = open('libs/ardour/revision.cc', 'w')
         o.write(text)
