@@ -24,8 +24,8 @@ function factory () return function ()
 		local mm = mr:midi_source(0):model()
 		local midi_command = mm:new_note_diff_command ("Audio2Midi")
 		for f in fl:iter () do
-			local ft = Vamp.RealTime.realTime2Frame (f.timestamp, sr / 2)
-			local fd = Vamp.RealTime.realTime2Frame (f.duration, sr / 2)
+			local ft = Vamp.RealTime.realTime2Frame (f.timestamp, sr)
+			local fd = Vamp.RealTime.realTime2Frame (f.duration, sr)
 			local fn = f.values:at (0)
 
 			local bs = tm:exact_beat_at_frame (ft, 0)
