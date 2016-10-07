@@ -1047,7 +1047,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <MidiModel, AutomatableSequence<Evoral::Beats> > ("MidiModel")
 		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_command)
-		.addFunction ("new_note_diff_command", &ARDOUR::MidiModel::MidiModel::new_note_diff_command)
+		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
 		.endClass ()
 
 		.beginNamespace ("MidiModel")
