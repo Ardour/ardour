@@ -17,6 +17,10 @@
 
 #include <cassert>
 
+#ifdef _MSC_VER
+#pragma warning(disable:4305)
+#endif
+
 std::string
 Wavelet::getWaveletName(Type wavelet)
 {
