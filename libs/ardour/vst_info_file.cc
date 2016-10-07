@@ -300,6 +300,9 @@ vstfx_load_info_block (FILE* fp, VSTInfo *info)
 		info->wantMidi = 1;
 	}
 
+	// TODO read isInstrument -- effFlagsIsSynth
+	info->isInstrument = info->numInputs == 0 && info->numOutputs > 0 && 1 == (info->wantMidi & 1);
+
 	if ((info->numParams) == 0) {
 		info->ParamNames = NULL;
 		info->ParamLabels = NULL;
@@ -381,6 +384,7 @@ vstfx_write_info_block (FILE* fp, VSTInfo *info)
 	fprintf (fp, "%d\n", info->wantMidi);
 	fprintf (fp, "%d\n", info->hasEditor);
 	fprintf (fp, "%d\n", info->canProcessReplacing);
+	// TODO write isInstrument in a backwards compat way
 
 	for (int i = 0; i < info->numParams; i++) {
 		fprintf (fp, "%s\n", info->ParamNames[i]);
@@ -512,7 +516,10 @@ bool vstfx_midi_input (VSTState* vstfx)
 	if (vst_version >= 2) {
 		/* should we send it VST events (i.e. MIDI) */
 
-		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)) {
+		if ((plugin->flags & effFlagsIsSynth)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvents"), 0.0f) > 0)
+				) {
 			return true;
 		}
 	}
@@ -650,6 +657,7 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	info->numParams = plugin->numParams;
 	info->wantMidi = (vstfx_midi_input (vstfx) ? 1 : 0) | (vstfx_midi_output (vstfx) ? 2 : 0);
 	info->hasEditor = plugin->flags & effFlagsHasEditor ? true : false;
+	info->isInstrument = (plugin->flags & effFlagsIsSynth) ? 1 : 0;
 	info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? true : false;
 	info->ParamNames = (char **) malloc (sizeof (char*)*info->numParams);
 	info->ParamLabels = (char **) malloc (sizeof (char*)*info->numParams);

@@ -48,6 +48,7 @@ struct LIBARDOUR_API _VSTInfo
 	int    wantMidi;
 	int    wantEvents;
 	int    hasEditor;
+	int    isInstrument; // still unused
 	int    canProcessReplacing;
 
 	char** ParamNames;
