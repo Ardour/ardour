@@ -45,6 +45,8 @@ SysEx::SysEx (
 
 SysEx::~SysEx()
 {
+	delete _flag;
+	_flag = 0;
 }
 
 bool
