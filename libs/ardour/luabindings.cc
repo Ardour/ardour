@@ -199,7 +199,7 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiPlaylist>);
