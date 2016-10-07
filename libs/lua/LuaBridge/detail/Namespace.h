@@ -1749,7 +1749,8 @@ public:
       .addFunction ("count", (T_SIZE (LT::*)(const K&) const)&LT::count)
       .addExtCFunction ("add", &CFunc::tableToMap<K, V>)
       .addExtCFunction ("iter", &CFunc::mapIter<K, V>)
-      .addExtCFunction ("table", &CFunc::mapToTable<K, V>);
+      .addExtCFunction ("table", &CFunc::mapToTable<K, V>)
+      .addExtCFunction ("at", &CFunc::mapAt<K, V>);
   }
 
   template <class T>

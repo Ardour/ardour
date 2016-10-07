@@ -1293,6 +1293,23 @@ struct CFunc
     return 1;
   }
 
+  // generate table from std::map
+  template <class K, class V>
+  static int mapAt (lua_State *L)
+  {
+    typedef std::map<K, V> C;
+    C const* const t = Userdata::get <C> (L, 1, true);
+    if (!t) { return luaL_error (L, "invalid pointer to std::map"); }
+    K const key = Stack<K>::get (L, 2);
+    typename C::const_iterator iter = t->find(key);
+    if (iter == t->end()) {
+      return 0;
+    }
+    Stack <V>::push (L, (*iter).second);
+    return 1;
+  }
+
+
   //--------------------------------------------------------------------------
   // generate std::set from table keys ( table[member] = true )
   // http://www.lua.org/pil/11.5.html
