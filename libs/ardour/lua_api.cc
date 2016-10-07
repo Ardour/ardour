@@ -551,7 +551,7 @@ LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
 	: _plugin (0)
 	, _sample_rate (sample_rate)
 	, _bufsize (1024)
-	, _stepsize (512)
+	, _stepsize (1024)
 	, _initialized (false)
 {
 	using namespace ::Vamp::HostExt;
@@ -562,6 +562,14 @@ LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
 	if (!_plugin) {
 		PBD::error << string_compose (_("VAMP Plugin \"%1\" could not be loaded"), key) << endmsg;
 		throw failed_constructor ();
+	}
+
+	size_t bs = _plugin->getPreferredBlockSize ();
+	size_t ss = _plugin->getPreferredStepSize ();
+
+	if (bs > 0 && ss > 0 && bs <= 8192 && ss <= 8192) {
+		_bufsize = bs;
+		_stepsize = bs;
 	}
 }
 

@@ -205,8 +205,10 @@ namespace ARDOUR { namespace LuaAPI {
 
 			/** initialize the plugin for use with analyze().
 			 *
-			 * This is equivalent to plugin():initialise (1, 512, 1024)
+			 * This is equivalent to plugin():initialise (1, ssiz, bsiz)
 			 * and prepares a plugin for analyze.
+			 * (by preferred step and block sizes are used. if the plugin
+			 * does not specify them or they're larger than 8K, both are set to 1024)
 			 *
 			 * Manual initialization is only required to set plugin-parameters
 			 * which depend on prior initialization of the plugin.
