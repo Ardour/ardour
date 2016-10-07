@@ -35,7 +35,7 @@ def build(bld):
         return
 
     # Host Library
-    obj = bld(features = 'c cxx cxxshlib')
+    obj = bld(features = 'c cxx cxxstlib')
     obj.source = '''
             base/Pitch.cpp
             base/KaiserWindow.cpp
@@ -70,7 +70,7 @@ def build(bld):
             ext/kissfft/kiss_fft.c
             ext/kissfft/tools/kiss_fftr.c
     '''
-    autowaf.ensure_visible_symbols (obj, True)
+    autowaf.ensure_visible_symbols (obj, False)
     obj.export_includes = ['.']
     obj.includes     = ['.', 'ext/kissfft', 'ext/kissfft/tools/']
     obj.defines      = ['kiss_fft_scalar=double']
@@ -79,8 +79,8 @@ def build(bld):
     obj.vnum         = QM_DSP_VERSION
     obj.install_path = bld.env['LIBDIR']
     if bld.env['build_target'] != 'mingw':
-        obj.cxxflags = [ '-fPIC' ]
-        obj.cflags   = [ '-fPIC' ]
+        obj.cxxflags += [ '-fPIC' ]
+        obj.cflags   += [ '-fPIC' ]
 
 def shutdown():
     autowaf.shutdown()
