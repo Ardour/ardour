@@ -59,7 +59,7 @@ MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
  * formality, until apply_command is called and ownership is taken.
  */
 MidiModel::NoteDiffCommand*
-MidiModel::new_note_diff_command (const string name)
+MidiModel::new_note_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
@@ -69,7 +69,7 @@ MidiModel::new_note_diff_command (const string name)
 
 /** Start a new SysExDiff command */
 MidiModel::SysExDiffCommand*
-MidiModel::new_sysex_diff_command (const string name)
+MidiModel::new_sysex_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
@@ -79,7 +79,7 @@ MidiModel::new_sysex_diff_command (const string name)
 
 /** Start a new PatchChangeDiff command */
 MidiModel::PatchChangeDiffCommand*
-MidiModel::new_patch_change_diff_command (const string name)
+MidiModel::new_patch_change_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
