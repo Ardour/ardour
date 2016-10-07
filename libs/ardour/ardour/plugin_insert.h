@@ -171,7 +171,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	bool has_no_inputs() const;
 	bool has_no_audio_inputs() const;
-	bool needs_midi_input() const;
+	bool is_instrument () const;
 	bool has_output_presets (
 			ChanCount in = ChanCount (DataType::MIDI, 1),
 			ChanCount out = ChanCount (DataType::AUDIO, 2)

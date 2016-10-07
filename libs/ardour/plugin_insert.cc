@@ -394,13 +394,13 @@ PluginInsert::plugin_latency () const {
 }
 
 bool
-PluginInsert::needs_midi_input() const
+PluginInsert::is_instrument() const
 {
 	PluginInfoPtr pip = _plugins[0]->get_info();
-	if (pip->needs_midi_input ()) {
+	if (pip->is_instrument ()) {
 		return true;
 	}
-	return pip->n_inputs.n_midi() != 0 && pip->n_outputs.n_audio() != 0;
+	return pip->n_inputs.n_midi () != 0 && pip->n_outputs.n_audio () > 0 && pip->n_inputs.n_audio () == 0;
 }
 
 bool
@@ -426,7 +426,7 @@ PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 			return false;
 		}
 	}
-	if (!needs_midi_input ()) {
+	if (!is_instrument ()) {
 			return false;
 	}
 	return true;
@@ -1994,7 +1994,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		m.strict_io = true;
 
 		/* special case MIDI instruments */
-		if (needs_midi_input ()) {
+		if (is_instrument ()) {
 			// output = midi-bypass + at most master-out channels.
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));

@@ -82,9 +82,15 @@ static bool seen_set_state_message = false;
 PBD::Signal2<void, std::string, Plugin*> Plugin::PresetsChanged;
 
 bool
+PluginInfo::needs_midi_input () const
+{
+	return (n_inputs.n_midi() != 0);
+}
+
+bool
 PluginInfo::is_instrument () const
 {
-	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0);
+	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
 }
 
 Plugin::Plugin (AudioEngine& e, Session& s)
