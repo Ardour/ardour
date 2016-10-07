@@ -3,13 +3,13 @@ from waflib.extras import autowaf as autowaf
 import os
 
 # Version of this package (even if built as a child)
-QM_DSP_VERSION = '0.0.0'
+QM_DSP_VERSION = '1.7.1'
 
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-QM_DSP_LIB_VERSION = '0.0.0'
+QM_DSP_LIB_VERSION = '1.7.1'
 
 # Variables for 'waf dist'
 APPNAME = 'qm-dsp'

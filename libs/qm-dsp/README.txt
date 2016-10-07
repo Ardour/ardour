@@ -1,3 +1,9 @@
+This is a stripped down version of the Queen Mary DSP library
+Version 1.7.1 from Sept 2015.
+
+https://code.soundsoftware.ac.uk/attachments/download/1582/qm-dsp-1.7.1.tar.gz
+
+---
 
 
 QM-DSP library
@@ -28,5 +34,3 @@ modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation; either version 2 of the
 License, or (at your option) any later version.  See the file
 COPYING included with this distribution for more information.
-
-
