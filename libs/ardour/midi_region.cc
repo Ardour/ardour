@@ -190,11 +190,11 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::start, _start);
 	plist.add (Properties::start_beats, _start_beats);
 	plist.add (Properties::length, _length);
+	plist.add (Properties::beat, _beat);
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true)));
-	ret->set_beat (beat());
 	ret->set_pulse (pulse());
 
 	return ret;
@@ -307,7 +307,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 	Region::set_position_internal (pos, allow_bbt_recompute, sub_num);
 
 	/* don't clobber _start _length and _length_beats if session loading.*/
-	if (!_session.loading()) {
+	if (_session.loading()) {
 		return;
 	}
 
@@ -612,12 +612,6 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 
 	PropertyChange what_changed;
 
-	/* beat has been set exactly by set_position_internal, but the source starts on a frame.
-	   working in beats seems the correct thing to do, but reports of a missing first note
-	   on playback suggest otherwise. for now, we work in exact beats.
-	*/
-	const double pos_pulse = _session.tempo_map().exact_qn_at_frame (position, sub_num) / 4.0;
-	const double pulse_delta = pos_pulse - pulse();
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
@@ -628,18 +622,24 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	 */
 
 	if (_position != position) {
-		/* sets _beat to new position.*/
+
+		const double pos_qn = _session.tempo_map().exact_qn_at_frame (position, sub_num);
+		const double old_pos_qn = pulse() * 4.0;
+
+		/* sets _pulse to new position.*/
 		set_position_internal (position, true, sub_num);
 		what_changed.add (Properties::position);
 
-		const double new_start_pulse = (_start_beats.val().to_double() / 4.0) + pulse_delta;
-		const framepos_t new_start = _position - _session.tempo_map().frame_at_pulse (pulse() - new_start_pulse);
+		double new_start_qn = start_beats().to_double() + (pos_qn - old_pos_qn);
+		const framepos_t new_start = _position - _session.tempo_map().frame_at_quarter_note (pos_qn - new_start_qn);
 
 		if (!verify_start_and_length (new_start, length)) {
 			return;
 		}
 
-		_start_beats = Evoral::Beats (new_start_pulse * 4.0);
+		/* at small deltas, (high zooms) the property will not change without this. tick rounding?*/
+		_start_beats = Evoral::Beats();
+		_start_beats = Evoral::Beats (new_start_qn);
 		what_changed.add (Properties::start_beats);
 
 		set_start_internal (new_start, sub_num);
