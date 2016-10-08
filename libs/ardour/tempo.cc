@@ -204,58 +204,58 @@ TempoSection::set_type (Type type)
 	_type = type;
 }
 
-/** returns the tempo in whole pulses per minute at the zero-based (relative to session) frame.
+/** returns the tempo in beats per minute at the zero-based (relative to session) frame.
 */
 double
 TempoSection::tempo_at_frame (const framepos_t& f, const framecnt_t& frame_rate) const
 {
 
 	if (_type == Constant || _c_func == 0.0) {
-		return pulses_per_minute();
+		return beats_per_minute();
 	}
 
-	return pulse_tempo_at_time (frame_to_minute (f - frame(), frame_rate));
+	return _tempo_at_time (frame_to_minute (f - frame(), frame_rate));
 }
 
 /** returns the zero-based frame (relative to session)
-   where the tempo in whole pulses per minute occurs in this section.
+   where the tempo in beats per minute occurs in this section.
    pulse p is only used for constant tempos.
    note that the tempo map may have multiple such values.
 */
 framepos_t
-TempoSection::frame_at_tempo (const double& ppm, const double& p, const framecnt_t& frame_rate) const
+TempoSection::frame_at_tempo (const double& bpm, const double& p, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant || _c_func == 0.0) {
 		return ((p - pulse()) * frames_per_pulse (frame_rate))  + frame();
 	}
 
-	return minute_to_frame (time_at_pulse_tempo (ppm), frame_rate) + frame();
+	return minute_to_frame (_time_at_tempo (bpm), frame_rate) + frame();
 }
-/** returns the tempo in whole pulses per minute at the zero-based (relative to session) beat.
+/** returns the tempo in beats per minute at the zero-based (relative to session) pulse.
 */
 double
 TempoSection::tempo_at_pulse (const double& p) const
 {
 
 	if (_type == Constant || _c_func == 0.0) {
-		return pulses_per_minute();
+		return beats_per_minute();
 	}
-	double const ppm = pulse_tempo_at_pulse (p - pulse());
-	return ppm;
+
+	return _tempo_at_pulse (p - pulse());
 }
 
-/** returns the zero-based beat (relative to session)
-   where the tempo in whole pulses per minute occurs given frame f. frame f is only used for constant tempos.
+/** returns the zero-based pulse (relative to session)
+   where the tempo in qn beats per minute occurs given frame f. frame f is only used for constant tempi.
    note that the session tempo map may have multiple beats at a given tempo.
 */
 double
-TempoSection::pulse_at_tempo (const double& ppm, const framepos_t& f, const framecnt_t& frame_rate) const
+TempoSection::pulse_at_tempo (const double& bpm, const framepos_t& f, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant || _c_func == 0.0) {
 		double const pulses = ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
 		return  pulses;
 	}
-	return pulse_at_pulse_tempo (ppm) + pulse();
+	return _pulse_at_tempo (bpm) + pulse();
 }
 
 /** returns the zero-based pulse (relative to session origin)
@@ -269,7 +269,7 @@ TempoSection::pulse_at_frame (const framepos_t& f, const framecnt_t& frame_rate)
 		return ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
 	}
 
-	return pulse_at_time (frame_to_minute (f - frame(), frame_rate)) + pulse();
+	return _pulse_at_time (frame_to_minute (f - frame(), frame_rate)) + pulse();
 }
 
 /** returns the zero-based frame (relative to session start frame)
@@ -284,7 +284,7 @@ TempoSection::frame_at_pulse (const double& p, const framecnt_t& frame_rate) con
 		return (framepos_t) floor ((p - pulse()) * frames_per_pulse (frame_rate)) + frame();
 	}
 
-	return minute_to_frame (time_at_pulse (p - pulse()), frame_rate) + frame();
+	return minute_to_frame (_time_at_pulse (p - pulse()), frame_rate) + frame();
 }
 
 /*
@@ -363,17 +363,17 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
 */
 
 /*
-  compute this ramp's function constant using the end tempo (in whole pulses per minute)
+  compute this ramp's function constant using the end tempo (in qn beats per minute)
   and duration (pulses into global start) of some later tempo section.
 */
 double
 TempoSection::compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate)
 {
-	double const log_tempo_ratio = log (end_bpm / pulses_per_minute());
-	return pulses_per_minute() *  (expm1 (log_tempo_ratio)) / (end_pulse - pulse());
+	double const log_tempo_ratio = log (end_bpm / beats_per_minute());
+	return (beats_per_minute() * expm1 (log_tempo_ratio)) / ((end_pulse - pulse()) * _note_type);
 }
 
-/* compute the function constant from some later tempo section, given tempo (whole pulses/min.) and distance (in frames) from session origin */
+/* compute the function constant from some later tempo section, given tempo (quarter notes/min.) and distance (in frames) from session origin */
 double
 TempoSection::compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const
 {
@@ -394,58 +394,58 @@ TempoSection::frame_to_minute (const framepos_t& frame, const framecnt_t& frame_
 
 /* position function */
 double
-TempoSection::a_func (double end_ppm, double c_func) const
+TempoSection::a_func (double end_bpm, double c_func) const
 {
-	return log (end_ppm / pulses_per_minute()) /  c_func;
+	return log (end_bpm / beats_per_minute()) / c_func;
 }
 
 /*function constant*/
 double
-TempoSection::c_func (double end_ppm, double end_time) const
+TempoSection::c_func (double end_bpm, double end_time) const
 {
-	return log (end_ppm / pulses_per_minute()) /  end_time;
+	return log (end_bpm / beats_per_minute()) / end_time;
 }
 
-/* tempo in ppm at time in minutes */
+/* tempo in bpm at time in minutes */
 double
-TempoSection::pulse_tempo_at_time (const double& time) const
+TempoSection::_tempo_at_time (const double& time) const
 {
-	return exp (_c_func * time) * pulses_per_minute();
+	return exp (_c_func * time) * beats_per_minute();
 }
 
-/* time in minutes at tempo in ppm */
+/* time in minutes at tempo in bpm */
 double
-TempoSection::time_at_pulse_tempo (const double& pulse_tempo) const
+TempoSection::_time_at_tempo (const double& tempo) const
 {
-	return log (pulse_tempo / pulses_per_minute()) / _c_func;
+	return log (tempo / beats_per_minute()) / _c_func;
 }
 
-/* pulse at tempo in ppm */
+/* pulse at tempo in bpm */
 double
-TempoSection::pulse_at_pulse_tempo (const double& pulse_tempo) const
+TempoSection::_pulse_at_tempo (const double& tempo) const
 {
-	return (pulse_tempo - pulses_per_minute()) / _c_func;
+	return (tempo - beats_per_minute()) / (_c_func * _note_type);
 }
 
-/* tempo in ppm at pulse */
+/* tempo in bpm at pulse */
 double
-TempoSection::pulse_tempo_at_pulse (const double& pulse) const
+TempoSection::_tempo_at_pulse (const double& pulse) const
 {
-	return (pulse * _c_func) + pulses_per_minute();
+	return (pulse * _note_type * _c_func) + beats_per_minute();
 }
 
 /* pulse at time in minutes */
 double
-TempoSection::pulse_at_time (const double& time) const
+TempoSection::_pulse_at_time (const double& time) const
 {
-	return expm1 (_c_func * time) * (pulses_per_minute() / _c_func);
+	return expm1 (_c_func * time) * (beats_per_minute() / (_c_func * _note_type));
 }
 
 /* time in minutes at pulse */
 double
-TempoSection::time_at_pulse (const double& pulse) const
+TempoSection::_time_at_pulse (const double& pulse) const
 {
-	return log1p ((_c_func * pulse) / pulses_per_minute()) / _c_func;
+	return log1p ((_c_func * pulse * _note_type) / beats_per_minute()) / _c_func;
 }
 
 /***********************************************************************/
@@ -1269,14 +1269,14 @@ TempoMap::recompute_tempi (Metrics& metrics)
 			}
 			if (prev_t) {
 				if (t->position_lock_style() == AudioTime) {
-					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute() / prev_t->note_type(), t->frame(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute(), t->frame(), _frame_rate));
 					if (!t->locked_to_meter()) {
-						t->set_pulse (prev_t->pulse_at_tempo (t->beats_per_minute() / prev_t->note_type(), t->frame(), _frame_rate));
+						t->set_pulse (prev_t->pulse_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 					}
 
 				} else {
-					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute() / prev_t->note_type(), t->pulse(), _frame_rate));
-					t->set_frame (prev_t->frame_at_tempo (t->beats_per_minute() / prev_t->note_type(), t->pulse(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute(), t->pulse(), _frame_rate));
+					t->set_frame (prev_t->frame_at_tempo (t->beats_per_minute(), t->pulse(), _frame_rate));
 
 				}
 			}
@@ -1559,7 +1559,7 @@ TempoMap::tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame
 			}
 			if ((prev_t) && t->frame() > frame) {
 				/* t is the section past frame */
-				const double ret_bpm = prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type();
+				const double ret_bpm = prev_t->tempo_at_frame (frame, _frame_rate);
 				const Tempo ret_tempo (ret_bpm, prev_t->note_type());
 				return ret_tempo;
 			}
@@ -1590,7 +1590,7 @@ framepos_t
 TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const
 {
 	TempoSection* prev_t = 0;
-	const double tempo_ppm = tempo.beats_per_minute() / tempo.note_type();
+	const double tempo_ppm = tempo.beats_per_minute();
 
 	Metrics::const_iterator i;
 
@@ -1603,14 +1603,14 @@ TempoMap::frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 				continue;
 			}
 
-			const double t_ppm = t->beats_per_minute() / t->note_type();
+			const double t_ppm = t->beats_per_minute();
 
 			if (t_ppm == tempo_ppm) {
 				return t->frame();
 			}
 
 			if (prev_t) {
-				const double prev_t_ppm = prev_t->beats_per_minute() / prev_t->note_type();
+				const double prev_t_ppm = prev_t->beats_per_minute();
 
 				if ((t_ppm > tempo_ppm && prev_t_ppm < tempo_ppm) || (t_ppm < tempo_ppm && prev_t_ppm > tempo_ppm)) {
 					return prev_t->frame_at_tempo (tempo_ppm, prev_t->pulse(), _frame_rate);
@@ -1632,9 +1632,8 @@ TempoMap::tempo_at_beat (const double& beat) const
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	const MeterSection* prev_m = &meter_section_at_beat_locked (_metrics, beat);
 	const TempoSection* prev_t = &tempo_section_at_beat_locked (_metrics, beat);
-	const double note_type = prev_t->note_type();
 
-	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()) * note_type, note_type);
+	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()), prev_t->note_type());
 }
 
 double
@@ -2208,7 +2207,7 @@ TempoMap::check_solved (const Metrics& metrics) const
 				}
 
 				/* precision check ensures tempo and frames align.*/
-				if (t->frame() != prev_t->frame_at_tempo (t->beats_per_minute() / prev_t->note_type(), t->pulse(), _frame_rate)) {
+				if (t->frame() != prev_t->frame_at_tempo (t->beats_per_minute(), t->pulse(), _frame_rate)) {
 					if (!t->locked_to_meter()) {
 						return false;
 					}
@@ -2318,10 +2317,10 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
-					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute() / prev_t->note_type(), t->pulse(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute(), t->pulse(), _frame_rate));
 					t->set_frame (prev_t->frame_at_pulse (t->pulse(), _frame_rate));
 				} else {
-					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute() / prev_t->note_type(), t->frame(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute(), t->frame(), _frame_rate));
 					if (!t->locked_to_meter()) {
 						t->set_pulse (prev_t->pulse_at_frame (t->frame(), _frame_rate));
 					}
@@ -2332,7 +2331,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 	}
 
 	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_frame (section->beats_per_minute() / section_prev->note_type(), frame, _frame_rate));
+		section_prev->set_c_func (section_prev->compute_c_func_frame (section->beats_per_minute(), frame, _frame_rate));
 		if (!section->locked_to_meter()) {
 			section->set_pulse (section_prev->pulse_at_frame (frame, _frame_rate));
 		}
@@ -2386,10 +2385,10 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
-					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute() / prev_t->note_type(), t->pulse(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->beats_per_minute(), t->pulse(), _frame_rate));
 					t->set_frame (prev_t->frame_at_pulse (t->pulse(), _frame_rate));
 				} else {
-					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute() / prev_t->note_type(), t->frame(), _frame_rate));
+					prev_t->set_c_func (prev_t->compute_c_func_frame (t->beats_per_minute(), t->frame(), _frame_rate));
 					if (!t->locked_to_meter()) {
 						t->set_pulse (prev_t->pulse_at_frame (t->frame(), _frame_rate));
 					}
@@ -2400,7 +2399,7 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 	}
 
 	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->beats_per_minute() / section_prev->note_type(), pulse, _frame_rate));
+		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->beats_per_minute(), pulse, _frame_rate));
 		section->set_frame (section_prev->frame_at_pulse (pulse, _frame_rate));
 	}
 
@@ -3571,7 +3570,7 @@ TempoMap::frames_per_beat_at (const framepos_t& frame, const framecnt_t& sr) con
 	}
 
 	if (ts_after) {
-		return  (60.0 * _frame_rate) / (ts_at->tempo_at_frame (frame, _frame_rate) * ts_at->note_type());
+		return  (60.0 * _frame_rate) / ts_at->tempo_at_frame (frame, _frame_rate);
 	}
 	/* must be treated as constant tempo */
 	return ts_at->frames_per_beat (_frame_rate);
@@ -3847,7 +3846,7 @@ TempoMap::dump (const Metrics& metrics, std::ostream& o) const
 			o << "current      : " << t->beats_per_minute() << " | " << t->pulse() << " | " << t->frame() << std::endl;
 			if (prev_t) {
 				o << "previous     : " << prev_t->beats_per_minute() << " | " << prev_t->pulse() << " | " << prev_t->frame() << std::endl;
-				o << "calculated   : " << prev_t->tempo_at_pulse (t->pulse()) *  prev_t->note_type() << " | " << prev_t->pulse_at_tempo (t->pulses_per_minute(), t->frame(), _frame_rate) <<  " | " << prev_t->frame_at_tempo (t->pulses_per_minute(), t->pulse(), _frame_rate) << std::endl;
+				o << "calculated   : " << prev_t->tempo_at_pulse (t->pulse()) << " | " << prev_t->pulse_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate) <<  " | " << prev_t->frame_at_tempo (t->beats_per_minute(), t->pulse(), _frame_rate) << std::endl;
 			}
 			prev_t = t;
 		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {

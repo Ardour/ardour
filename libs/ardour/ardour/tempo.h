@@ -62,7 +62,6 @@ class LIBARDOUR_API Tempo {
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
 	double note_type () const { return _note_type; }
-	double pulses_per_minute () const { return _beats_per_minute / _note_type; }
 	/** audio samples per beat
 	 * @param sr samplerate
 	 */
@@ -221,14 +220,14 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double a_func (double end_tpm, double c_func) const;
 	double c_func (double end_tpm, double end_time) const;
 
-	double pulse_tempo_at_time (const double& time) const;
-	double time_at_pulse_tempo (const double& pulse_tempo) const;
+	double _tempo_at_time (const double& time) const;
+	double _time_at_tempo (const double& tempo) const;
 
-	double pulse_tempo_at_pulse (const double& pulse) const;
-	double pulse_at_pulse_tempo (const double& pulse_tempo) const;
+	double _tempo_at_pulse (const double& pulse) const;
+	double _pulse_at_tempo (const double& tempo) const;
 
-	double pulse_at_time (const double& time) const;
-	double time_at_pulse (const double& pulse) const;
+	double _pulse_at_time (const double& time) const;
+	double _time_at_pulse (const double& pulse) const;
 
 	/* this value provides a fractional offset into the bar in which
 	   the tempo section is located in. A value of 0.0 indicates that
