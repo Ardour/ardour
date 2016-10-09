@@ -15,10 +15,9 @@ function factory () return function ()
 		end
 	end
 	assert (ar and mr)
-	assert (mr:position () >= mr:start ())
 
 	local a_off = ar:position ()
-	local m_off = tm:exact_beat_at_frame (mr:position () - mr:start (), 0)
+	local b_off = 4.0 * mr:pulse () - mr:start_beats ():to_double ()
 
 	vamp:analyze (ar:to_readable (), 0, nil)
 	local fl = vamp:plugin ():getRemainingFeatures ():at (0)
@@ -29,10 +28,11 @@ function factory () return function ()
 			local ft = Vamp.RealTime.realTime2Frame (f.timestamp, sr)
 			local fd = Vamp.RealTime.realTime2Frame (f.duration, sr)
 			local fn = f.values:at (0)
-			local bs = tm:exact_beat_at_frame (a_off + ft, 0)
-			local be = tm:exact_beat_at_frame (a_off + ft + fd, 0)
 
-			local pos = Evoral.Beats (bs - m_off)
+			local bs = tm:exact_qn_at_frame (a_off + ft, 0)
+			local be = tm:exact_qn_at_frame (a_off + ft + fd, 0)
+
+			local pos = Evoral.Beats (bs - b_off)
 			local len = Evoral.Beats (be - bs)
 			local note = ARDOUR.LuaAPI.new_noteptr (1, pos, len, fn + 1, 0x7f)
 			midi_command:add (note)
