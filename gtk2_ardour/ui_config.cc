@@ -139,19 +139,21 @@ UIConfiguration::reset_gtk_theme ()
 	LocaleGuard lg;
 	stringstream ss;
 
-	ss << "gtk_color_scheme = \"" << hex;
+	ss << "gtk_color_scheme = \"";
 
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
 
 		if (g->first.find ("gtk_") == 0) {
 			const string gtk_name = g->first.substr (4);
-			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
+			ss << gtk_name << ":" << color_str(g->second) << ';';
 		}
 	}
 
-	ss << '"' << dec << endl;
+	ss << '"' << endl;
 
 	/* reset GTK color scheme */
+
+	std::cout << "UIConfiguration::reset_gtk_theme ss.str() = " << ss.str() << std::endl;
 
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
@@ -779,6 +781,15 @@ UIConfiguration::set_modifier (string const & name, SVAModifier svam)
 	modifiers_modified = true;
 
 	ColorsChanged (); /* EMIT SIGNAL */
+}
+
+std::string
+UIConfiguration::color_str (const std::string& name, bool* failed) const
+{
+	std::stringstream ss;
+	ss << hex;
+	ss << "#" << std::setw (6) << setfill ('0') << (color (name) >> 8);
+	return ss.str();
 }
 
 void
