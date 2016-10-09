@@ -1341,7 +1341,7 @@ MidiTrackerEditor::redisplay_model ()
 				row[columns._channel_foreground_color[i]] = "#404040";
 				row[columns._velocity_foreground_color[i]] = "#404040";
 				row[columns._delay_foreground_color[i]] = "#404040";
-				
+
 				size_t notes_off_count = mtp->notes_off[i].count(irow);
 				size_t notes_on_count = mtp->notes_on[i].count(irow);
 
