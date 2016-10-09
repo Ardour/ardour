@@ -135,7 +135,7 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 
 		Source::Lock newsrc_lock (newsrc->mutex());
 
-		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats().to_double() / 4.0));
+		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats() / 4.0));
 
 		cout << UTILNAME << ":" << endl
 		     << " Created new midi source file" << endl
@@ -189,7 +189,7 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 
 		Source::Lock newsrc_lock (newsrc->mutex());
 
-		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats().to_double() / 4.0));
+		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, region->pulse() - (region->start_beats() / 4.0));
 
 		cout << UTILNAME << ":" << endl
 		     << " Created new midi source file" << endl
@@ -206,7 +206,7 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 {
 	/* set start_beats to quarter note value from incorrect bbt*/
 	TempoMap& tmap (session->tempo_map());
-	double new_start_qn = (tmap.pulse_at_beat (region->beat()) - tmap.pulse_at_beat (region->beat() - region->start_beats().to_double())) * 4.0;
+	double new_start_qn = (tmap.pulse_at_beat (region->beat()) - tmap.pulse_at_beat (region->beat() - region->start_beats())) * 4.0;
 
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
@@ -222,7 +222,7 @@ reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 {
 	/* set length_beats to quarter note value */
 	TempoMap& tmap (session->tempo_map());
-	double new_length_qn = (tmap.pulse_at_beat (region->beat() + region->length_beats().to_double())
+	double new_length_qn = (tmap.pulse_at_beat (region->beat() + region->length_beats())
 				  - tmap.pulse_at_beat (region->beat())) * 4.0;
 
 	/* force a change to length and length_beats */

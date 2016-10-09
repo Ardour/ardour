@@ -17,7 +17,7 @@ function factory () return function ()
 	assert (ar and mr)
 
 	local a_off = ar:position ()
-	local b_off = 4.0 * mr:pulse () - mr:start_beats ():to_double ()
+	local b_off = 4.0 * mr:pulse () - mr:start_beats ()
 
 	vamp:analyze (ar:to_readable (), 0, nil)
 	local fl = vamp:plugin ():getRemainingFeatures ():at (0)

@@ -33,8 +33,8 @@ class XMLNode;
 
 namespace ARDOUR {
 	namespace Properties {
-		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> start_beats;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> length_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<double> start_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<double> length_beats;
 	}
 }
 
@@ -106,8 +106,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	boost::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
-	Evoral::Beats start_beats () {return _start_beats.val(); }
- 	Evoral::Beats length_beats () {return _length_beats.val(); }
+	double start_beats () {return _start_beats; }
+	double length_beats () {return _length_beats; }
 
 	void clobber_sources (boost::shared_ptr<MidiSource> source);
 
@@ -119,8 +119,8 @@ class LIBARDOUR_API MidiRegion : public Region
 
   private:
 	friend class RegionFactory;
-	PBD::Property<Evoral::Beats> _start_beats;
-	PBD::Property<Evoral::Beats> _length_beats;
+	PBD::Property<double> _start_beats;
+	PBD::Property<double> _length_beats;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
