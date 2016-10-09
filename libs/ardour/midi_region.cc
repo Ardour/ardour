@@ -637,8 +637,8 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 			return;
 		}
 
-		/* at small deltas, (high zooms) the property will not change without this. tick rounding?*/
-		_start_beats = Evoral::Beats();
+		/* at small deltas, (high zooms) the property will not change without this (tick resolution of Beats::operator!=)*/
+		_start_beats += Evoral::Beats (new_start_qn) + start_beats().tick() * 2.0;
 		_start_beats = Evoral::Beats (new_start_qn);
 		what_changed.add (Properties::start_beats);
 
