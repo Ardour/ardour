@@ -230,7 +230,7 @@ Push2Menu::set_active (uint32_t index)
 
 	/* set text color for old active item, and the new one */
 
-	if (_active <= displays.size()) {
+	if (_active < displays.size()) {
 		displays[_active]->set_color (text_color);
 	}
 
