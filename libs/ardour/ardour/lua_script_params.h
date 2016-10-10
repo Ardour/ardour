@@ -36,7 +36,7 @@ namespace luabridge {
  */
 namespace ARDOUR { namespace LuaScriptParams {
 
-	LIBARDOUR_API LuaScriptParamList script_params (LuaScriptInfoPtr, const std::string &);
+	LIBARDOUR_API LuaScriptParamList script_params (const LuaScriptInfoPtr&, const std::string &);
 	LIBARDOUR_API LuaScriptParamList script_params (const std::string &, const std::string &, bool file=true);
 	LIBARDOUR_API void params_to_ref (luabridge::LuaRef *tbl_args, const LuaScriptParamList&);
 	LIBARDOUR_API void ref_to_params (LuaScriptParamList&, luabridge::LuaRef *tbl_args);
