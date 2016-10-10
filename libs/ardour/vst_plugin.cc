@@ -318,7 +318,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
-		desc.label = prop.label;
+		desc.label = Glib::locale_to_utf8 (prop.label);
 
 	} else {
 
@@ -330,7 +330,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 
-		desc.label = label;
+		desc.label = Glib::locale_to_utf8 (label);
 		desc.integer_step = false;
 		desc.lower = 0.0f;
 		desc.upper = 1.0f;
