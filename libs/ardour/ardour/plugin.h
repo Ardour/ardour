@@ -51,6 +51,7 @@ class PluginInsert;
 class Plugin;
 class PluginInfo;
 class AutomationControl;
+class SessionObject;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
@@ -262,6 +263,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	PluginInfoPtr get_info() const { return _info; }
 	virtual void set_info (const PluginInfoPtr inf);
 
+	virtual void set_owner (SessionObject* o) { _owner = o; }
+	SessionObject* owner() const { return _owner; }
+
 	ARDOUR::AudioEngine& engine() const { return _engine; }
 	ARDOUR::Session& session() const { return _session; }
 
@@ -334,6 +338,8 @@ protected:
 	PluginInfoPtr            _info;
 	uint32_t                 _cycles;
 	std::map<std::string, PresetRecord> _presets;
+
+	SessionObject*           _owner;
 
 private:
 

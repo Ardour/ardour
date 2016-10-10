@@ -127,7 +127,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	PluginPinWindowProxy * pinmgr_proxy () const { return _pinmgr_proxy; }
 	void set_pingmgr_proxy (PluginPinWindowProxy* wp) { _pinmgr_proxy = wp ; }
 
-	void set_owner (SessionObject*);
+	virtual void set_owner (SessionObject*);
 	SessionObject* owner() const;
 
 protected:

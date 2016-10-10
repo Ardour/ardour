@@ -59,6 +59,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 	void update_id (PBD::ID);
+	void set_owner (SessionObject*);
 	void set_state_dir (const std::string& d = "");
 
 	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);

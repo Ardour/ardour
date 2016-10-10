@@ -2618,6 +2618,15 @@ PluginInsert::update_id (PBD::ID id)
 }
 
 void
+PluginInsert::set_owner (SessionObject* o)
+{
+	Processor::set_owner (o);
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->set_owner (o);
+	}
+}
+
+void
 PluginInsert::set_state_dir (const std::string& d)
 {
 	// state() only saves the state of the first plugin
@@ -2907,6 +2916,7 @@ void
 PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 {
 	plugin->set_insert_id (this->id());
+	plugin->set_owner (_owner);
 
 	if (_plugins.empty()) {
 		/* first (and probably only) plugin instance - connect to relevant signals */
