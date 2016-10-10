@@ -22,6 +22,7 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/convert.h>
 
 #include "pbd/floating.h"
 #include "pbd/locale_guard.h"
