@@ -22,7 +22,6 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:ChanMapping
 
 	local ib = in_map:get (ARDOUR.DataType ("midi"), 0) -- get index of the 1st mapped midi input buffer
-	assert (ib ~= ARDOUR.ChanMapping.Invalid)
 
 	if ib ~= ARDOUR.ChanMapping.Invalid then
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:MidiBuffer
