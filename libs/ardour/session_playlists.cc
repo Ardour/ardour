@@ -332,7 +332,7 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 	IDSortedList id_sorted_playlists;
 	get_id_sorted_playlists (playlists, id_sorted_playlists);
 
-	for (List::iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
+	for (IDSortedList::iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
 		if (!(*i)->hidden ()) {
 			if (full_state) {
 				child->add_child_nocopy ((*i)->get_state ());
@@ -347,7 +347,7 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 	IDSortedList id_sorted_unused_playlists;
 	get_id_sorted_playlists (unused_playlists, id_sorted_unused_playlists);
 
-	for (List::iterator i = id_sorted_unused_playlists.begin ();
+	for (IDSortedList::iterator i = id_sorted_unused_playlists.begin ();
 	     i != id_sorted_unused_playlists.end (); ++i) {
 		if (!(*i)->hidden()) {
 			if (!(*i)->empty()) {
