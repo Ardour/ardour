@@ -144,10 +144,13 @@ LuaProc::init ()
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Ardour")
-		.beginClass <LuaProc> ("LuaProc")
+		.deriveClass <LuaProc, PBD::StatefulDestructible> ("LuaProc")
 		.addFunction ("queue_draw", &LuaProc::queue_draw)
 		.addFunction ("shmem", &LuaProc::instance_shm)
 		.addFunction ("table", &LuaProc::instance_ref)
+		.addFunction ("route", &LuaProc::route)
+		.addFunction ("unique_id", &LuaProc::unique_id)
+		.addFunction ("name", &LuaProc::name)
 		.endClass ()
 		.endNamespace ();
 
@@ -165,6 +168,12 @@ LuaProc::init ()
 	lua.do_command ("for n in pairs(_G) do print(n) end print ('----')"); // print global env
 #endif
 	lua.do_command ("function ardour () end");
+}
+
+boost::weak_ptr<Route>
+LuaProc::route () const
+{
+	return static_cast<Route*>(_owner)->weakroute ();
 }
 
 void
