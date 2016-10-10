@@ -117,6 +117,11 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	processor_max_streams.reset();
 }
 
+boost::weak_ptr<Route>
+Route::weakroute () {
+	return boost::weak_ptr<Route> (shared_from_this ());
+}
+
 int
 Route::init ()
 {
