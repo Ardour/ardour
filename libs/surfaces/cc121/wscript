@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            cc121.cc
+            gui.cc
+            cc121_interface.cc
+            operations.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_cc121"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.includes     = [ '.', './cc121']
+    obj.name         = 'libardour_cc121'
+    obj.target       = 'ardour_cc121'
+    obj.uselib       = 'GTKMM GTK GDK XML'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+def shutdown():
+    autowaf.shutdown()
