@@ -45,7 +45,7 @@ protected:
 
 	SilentFileSource (Session& s, const XMLNode& x, framecnt_t len, float srate)
 		: Source (s, x)
-		, AudioFileSource (s, x, false)
+		, AudioFileSource (s, x, false, true)
 		, _sample_rate(srate)
 	{
 		_length = len;
