@@ -135,7 +135,7 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
  * is an absolute path after ::set_state(), then the file is external to the
  * session.
  */
-AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist, bool optional_origin)
+AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source (s, node)
 	, AudioSource (s, node)
 	, FileSource (s, node, must_exist)
@@ -146,7 +146,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 
 	if (Glib::path_is_absolute (_origin)) {
 		_path = _origin;
-		must_exist = !optional_origin;
+		must_exist = true;
 	}
 
 	if (init (_path, must_exist)) {

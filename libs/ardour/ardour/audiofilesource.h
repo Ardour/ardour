@@ -88,7 +88,7 @@ protected:
 			SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/** Constructor to be called for existing in-session files */
-	AudioFileSource (Session&, const XMLNode&, bool must_exist = true, bool optional_origin = false);
+	AudioFileSource (Session&, const XMLNode&, bool must_exist = true);
 
 	/** Constructor to be called for crash recovery. Final argument is not
 	 * used but exists to differentiate from the external-to-session
