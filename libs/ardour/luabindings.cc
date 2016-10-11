@@ -179,6 +179,7 @@ CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
 CLASSKEYS(PBD::PropertyChange);
+CLASSKEYS(PBD::StatefulDestructible);
 
 CLASSKEYS(Evoral::Beats);
 CLASSKEYS(Evoral::Event<framepos_t>);
