@@ -119,6 +119,7 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
 fi
 
 . ../define_versions.sh
+lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 
 echo "Version is $release_version"
 if [ "x$commit" != "x" ] ; then
@@ -450,6 +451,38 @@ if test -f $BUILD_ROOT/libs/ardouralsautil/ardour-request-device; then
     fi
 fi
 
+# session-utils
+HAVE_SESSION_UTILS=false
+for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
+	BN=$(basename $file)
+	cp -v $file $APPLIB/
+	if test x$STRIP = xall ; then
+		strip -s $APPLIB/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh $APPBIN/${BN}
+	HAVE_SESSION_UTILS=true
+done
+
+if test "$HAVE_SESSION_UTILS" = true ; then
+	cat >> $APPLIB/ardour-util.sh << EOF
+#!/bin/sh
+
+BIN_DIR=\$(dirname \$(readlink -f \$0))
+INSTALL_DIR=\$(dirname \$BIN_DIR)
+
+export LD_LIBRARY_PATH=\$INSTALL_DIR/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}
+
+export ARDOUR_DATA_PATH=\$INSTALL_DIR/share
+export ARDOUR_CONFIG_PATH=\$INSTALL_DIR/etc
+export ARDOUR_DLL_PATH=\$INSTALL_DIR/lib
+export VAMP_PATH=\$INSTALL_DIR/lib\${VAMP_PATH:+:\$VAMP_PATH}
+
+SELF=\$(basename \$0)
+exec "\$INSTALL_DIR/lib/\$SELF" "\$@"
+EOF
+	chmod +x $APPLIB/ardour-util.sh
+fi
+
 OURLIBDIR=$BUILD_ROOT/libs
 OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$BUILD_ROOT/gtk2_ardour
 
@@ -593,7 +626,6 @@ cp ../../gtk2_ardour/ArdourMono.ttf $Shared
 cp ../../gtk2_ardour/resources/${APPNAME}-* ${Shared}/resources/
 
 # Themes: only install those named for this app
-lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
 #
