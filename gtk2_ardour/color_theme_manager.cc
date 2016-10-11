@@ -165,6 +165,16 @@ ColorThemeManager::ColorThemeManager ()
 	show_all ();
 }
 
+
+ColorThemeManager::~ColorThemeManager ()
+{
+	if (palette_group) { 
+		palette_group->clear (true);  
+		delete palette_group;
+	}
+}
+
+
 void
 ColorThemeManager::setup_modifiers ()
 {
@@ -311,7 +321,6 @@ ColorThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCan
 	for (uint32_t y = 0; y < height - box_size && color_num < color_limit; y += box_size) {
 		for (uint32_t x = 0; x < width - box_size && color_num < color_limit; x += box_size) {
 			ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (&group, ArdourCanvas::Rect (x, y, x + box_size, y + box_size));
-
 			string name = nc[color_num++].name;
 
 			UIConfiguration::Colors::iterator c = colors.find (name);
