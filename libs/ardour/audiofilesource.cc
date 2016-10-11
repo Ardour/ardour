@@ -131,9 +131,11 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
 }
 
 
-/** Constructor used for existing files via XML.  File must exist. If _origin
- * is an absolute path after ::set_state(), then the file is external to the
- * session.
+/** Constructor used for sources listed in session-files (XML)
+ * and missing sources (SilentFileSource).
+ *
+ * If _origin is an absolute path after ::set_state(), then the
+ * file is external to the session.
  */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source (s, node)
@@ -146,7 +148,6 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 
 	if (Glib::path_is_absolute (_origin)) {
 		_path = _origin;
-		must_exist = true;
 	}
 
 	if (init (_path, must_exist)) {
