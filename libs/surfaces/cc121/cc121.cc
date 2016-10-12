@@ -1215,12 +1215,13 @@ CC121::map_gain ()
 		val = control->internal_to_interface (control->get_value ());
 	}
 
-	float fval = (val* 16384.0);
-	if (fval <0.0)
-	  fval = 0.0;
-	else if (fval > 16383.0)
-	  fval = 16383.0;
-	int ival = (int)(fval + 0.5);
+	int ival = (int)((val * 16384.0f) + 0.5f);
+	if (ival < 0) {
+	  ival = 0;
+	}
+	else if (ival > 16383) {
+	  ival = 16383;
+	}
 
 	MIDI::byte buf[3];
 
