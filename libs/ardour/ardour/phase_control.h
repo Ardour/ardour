@@ -60,7 +60,7 @@ class LIBARDOUR_API PhaseControl : public AutomationControl
 	XMLNode& get_state ();
 
   protected:
-	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+	bool actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
   private:
 	boost::dynamic_bitset<> _phase_invert;

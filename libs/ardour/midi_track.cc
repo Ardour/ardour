@@ -712,7 +712,7 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 	}
 }
 
-void
+bool
 MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
@@ -732,7 +732,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 	}
 
 	if (!valid) {
-		return;
+		return false;
 	}
 
 	assert(val <= desc.upper);
@@ -776,7 +776,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 		_route->write_immediate_event(size,  ev);
 	}
 
-	AutomationControl::actually_set_value(val, group_override);
+	return AutomationControl::actually_set_value(val, group_override);
 }
 
 void

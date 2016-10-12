@@ -32,12 +32,12 @@ PhaseControl::PhaseControl (Session& session, std::string const & name)
 {
 }
 
-void
+bool
 PhaseControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	_phase_invert = boost::dynamic_bitset<> (std::numeric_limits<double>::digits, (unsigned long) val);
 
-	AutomationControl::actually_set_value (val, gcd);
+	return AutomationControl::actually_set_value (val, gcd);
 }
 
 /** @param c Audio channel index.
@@ -48,7 +48,7 @@ PhaseControl::set_phase_invert (uint32_t c, bool yn)
 {
 	if (_phase_invert[c] != yn) {
 		_phase_invert[c] = yn;
-		AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
+		(void) AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
 		_session.set_dirty ();
 	}
 }
@@ -58,7 +58,7 @@ PhaseControl::set_phase_invert (boost::dynamic_bitset<> p)
 {
 	if (_phase_invert != p) {
 		_phase_invert = p;
-		AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
+		(void) AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
 		Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}

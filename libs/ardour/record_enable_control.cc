@@ -45,15 +45,15 @@ RecordEnableControl::set_value (double val, Controllable::GroupControlDispositio
 	SlavableAutomationControl::set_value (val, gcd);
 }
 
-void
+bool
 RecordEnableControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	if (val && !_recordable.can_be_record_enabled()) {
 		std::cerr << "rec-enable not allowed\n";
-		return;
+		return false;
 	}
 
-	SlavableAutomationControl::actually_set_value (val, gcd);
+	return SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
 void

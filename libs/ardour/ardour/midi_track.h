@@ -95,7 +95,7 @@ public:
 		MidiTrack* _route;
 
 	private:
-		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		bool actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);

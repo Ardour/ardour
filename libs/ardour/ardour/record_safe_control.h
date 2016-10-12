@@ -39,7 +39,7 @@ class LIBARDOUR_API RecordSafeControl : public SlavableAutomationControl
 	~RecordSafeControl() {}
 
   protected:
-	void actually_set_value (double val, Controllable::GroupControlDisposition gcd);
+	bool actually_set_value (double val, Controllable::GroupControlDisposition gcd);
 
   private:
 	Recordable& _recordable;

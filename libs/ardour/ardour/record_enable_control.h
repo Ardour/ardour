@@ -49,7 +49,7 @@ class LIBARDOUR_API RecordEnableControl : public SlavableAutomationControl
 	void set_value (double, PBD::Controllable::GroupControlDisposition);
 
   protected:
-	void actually_set_value (double val, Controllable::GroupControlDisposition gcd);
+	bool  actually_set_value (double val, Controllable::GroupControlDisposition gcd);
 	void do_pre_realtime_queue_stuff (double value);
 
   private:

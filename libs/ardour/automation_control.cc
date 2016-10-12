@@ -116,11 +116,11 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
  *  (e.g. record if necessary, etc.)
  *  @param value `user' value
  */
-void
+bool
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
 	bool to_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_write();
-	//const double old_value = Control::user_double ();
+	const double old_value = get_value ();
 
 	Control::set_double (value, _session.transport_frame(), to_list);
 
@@ -128,7 +128,12 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
 	//<< " (was " << old_value << ") @ " << this << std::endl;
 
-	Changed (true, gcd);
+	if (old_value != value) {
+		Changed (true, gcd);
+		return true;
+	}
+
+	return false;
 }
 
 void

@@ -102,7 +102,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 
 	void   master_going_away (boost::weak_ptr<AutomationControl>);
 	double get_value_locked() const;
-	void   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+	bool   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
