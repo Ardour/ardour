@@ -195,11 +195,11 @@ style "peak_display_peaked_entry" = "mixer_strip_entry"
 	fg[SELECTED] = @texts
 	text[SELECTED] = @texts
 
-	base[NORMAL] = @bright_indicator
-	base[ACTIVE] = @bright_indicator
-	base[PRELIGHT] = @bright_indicator
-	base[INSENSITIVE] = @bright_indicator
-	base[SELECTED] = @bright_indicator
+	base[NORMAL] = @clip_indicator
+	base[ACTIVE] = @clip_indicator
+	base[PRELIGHT] = @clip_indicator
+	base[INSENSITIVE] = @clip_indicator
+	base[SELECTED] = @clip_indicator
 }
 
 style "treeview_parent_node"
