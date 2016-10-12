@@ -55,7 +55,7 @@
     <Color name="color 52" value="0xbba34cff"/>
     <Color name="color 53" value="0xf2c37dff"/>
     <Color name="color 54" value="0xf48352ff"/>
-    <Color name="color 55" value="0xf85813ff"/>
+    <Color name="color 55" value="0xff0009ff"/>
     <Color name="color 56" value="0x8ec794ff"/>
     <Color name="color 57" value="0x7ea854ff"/>
     <Color name="color 58" value="0x3e3e3eff"/>
@@ -181,7 +181,7 @@
     <ColorAlias name="gtk_bg_tooltip" alias="color 52"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
     <ColorAlias name="gtk_bright_indicator" alias="color 9"/>
-    <ColorAlias name="gtk_clip_indicator" alias="color 9"/>
+    <ColorAlias name="gtk_clip_indicator" alias="color 55"/>
     <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
     <ColorAlias name="gtk_control_master" alias="color 64"/>
     <ColorAlias name="gtk_control_text" alias="color 26"/>
