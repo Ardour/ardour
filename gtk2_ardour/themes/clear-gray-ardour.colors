@@ -180,6 +180,7 @@
     <ColorAlias name="gtk_bg_tooltip" alias="color 74"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
     <ColorAlias name="gtk_bright_indicator" alias="meter color8"/>
+    <ColorAlias name="gtk_clip_indicator" alias="meter color8"/>
     <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
     <ColorAlias name="gtk_control_base" alias="color 13"/>
     <ColorAlias name="gtk_control_master" alias="color 64"/>
