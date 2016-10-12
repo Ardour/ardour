@@ -21,9 +21,10 @@ function dsp_run (ins, outs, n_samples)
 	local route = self:route ()
 	local shmem = self:shmem ()
 
+	-- count plugins
 	local i = 0;
 	local l = 0;
-	local s = -1;
+	local s = -1; -- 'self' this plugin instance
 
 	-- iterate overall plugins on this track,
 	-- find all LuaProc instances of this plugin (unique_id),
@@ -33,12 +34,16 @@ function dsp_run (ins, outs, n_samples)
 			and not proc:to_insert():plugin (0):to_luaproc():isnil ()
 			and proc:to_insert():plugin (0):unique_id () == self:unique_id () then
 			if (self:id ():to_s() == proc:to_insert():plugin (0):id ():to_s()) then
-				s = l; -- this plugin instance
+				s = l; -- *this* plugin instance
 			end
 			if l == 0 then
+				-- use shared-memory are of the first plugin instance for all.
+				--
+				-- (the first plugin writes there, all later plugins only read,
+				-- plugins on a track are executed in order, in the same thread)
 				shmem = proc:to_insert():plugin (0):to_luaproc():shmem ()
 			end
-			l = l + 1 -- count total instances of this plugin
+			l = l + 1 -- count total instances of this plugin-type
 		end
 		i = i + 1
 	until proc:isnil ()
@@ -55,6 +60,8 @@ function dsp_run (ins, outs, n_samples)
 		peak = ARDOUR.DSP.compute_peak(outs[c], n_samples, peak)
 	end
 
+
+	-- actual inter-plugin communication
 	local a = shmem:to_float (0):array ()
 	if s == 0 then
 		-- the first plugin saves the peak
