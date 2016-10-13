@@ -107,6 +107,12 @@ Pannable::set_panner (boost::shared_ptr<Panner> p)
 void
 Pannable::value_changed ()
 {
+	if (!has_state ()) {
+		// prevent the GUI from resetting panners
+		// e.g. when switching to aux-sends and back.
+		_has_state = true;
+	}
+
 	_session.set_dirty ();
 }
 
