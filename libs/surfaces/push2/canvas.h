@@ -69,6 +69,8 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	void pick_current_item (ArdourCanvas::Duple const &, int) {}
 	bool get_mouse_position (ArdourCanvas::Duple&) const { return false; }
 
+	Glib::RefPtr<Pango::Context> get_pango_context ();
+
   private:
 	Push2& p2;
 	int _cols;
@@ -83,6 +85,7 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
 	Cairo::RefPtr<Cairo::Context> context;
 	Cairo::RefPtr<Cairo::Region> expose_region;
+	Glib::RefPtr<Pango::Context> pango_context;
 
 	bool expose ();
 	int blit_to_device_frame_buffer ();

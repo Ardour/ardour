@@ -1259,6 +1259,12 @@ GtkCanvas::hide_tooltip ()
 	}
 }
 
+Glib::RefPtr<Pango::Context>
+GtkCanvas::get_pango_context ()
+{
+	return Glib::wrap (gdk_pango_context_get());
+}
+
 /** Create a GtkCanvaSViewport.
  *  @param hadj Adjustment to use for horizontal scrolling.
  *  @param vadj Adjustment to use for vertica scrolling.

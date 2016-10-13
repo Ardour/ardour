@@ -106,7 +106,8 @@ void
 Text::_redraw () const
 {
 	assert (!_text.empty());
-	Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get());
+	assert (_canvas);
+	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
 #ifdef __APPLE__

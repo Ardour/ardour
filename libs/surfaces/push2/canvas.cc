@@ -17,11 +17,15 @@
 
 */
 
+#include <vector>
+
 #include <cairomm/region.h>
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 
 #include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/i18n.h"
 
 #include "ardour/debug.h"
 
@@ -232,4 +236,27 @@ Push2Canvas::visible_area () const
 {
 	/* may need to get more sophisticated once we do scrolling */
 	return Rect (0, 0, 960, 160);
+}
+
+Glib::RefPtr<Pango::Context>
+Push2Canvas::get_pango_context ()
+{
+	if (!pango_context) {
+		PangoFontMap* map = pango_cairo_font_map_get_default ();
+		if (!map) {
+			error << _("Default Cairo font map is null!") << endmsg;
+			return Glib::RefPtr<Pango::Context> ();
+		}
+
+		PangoContext* context = pango_font_map_create_context (map);
+
+		if (!context) {
+			error << _("cannot create new PangoContext from cairo font map") << endmsg;
+			return Glib::RefPtr<Pango::Context> ();
+		}
+
+		pango_context = Glib::wrap (context);
+	}
+
+	return pango_context;
 }

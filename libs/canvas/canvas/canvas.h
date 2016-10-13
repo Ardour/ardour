@@ -43,6 +43,10 @@ namespace Gtk {
 	class Label;
 }
 
+namespace Pango {
+	class Context;
+}
+
 namespace ArdourCanvas
 {
 struct Rect;
@@ -154,7 +158,9 @@ public:
 	 */
 	static void set_tooltip_timeout (uint32_t msecs);
 
-protected:
+	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
+
+  protected:
 	Root  _root;
         Color _bg_color;
 
@@ -195,7 +201,9 @@ public:
 	void start_tooltip_timeout (Item*);
 	void stop_tooltip_timeout ();
 
-protected:
+	Glib::RefPtr<Pango::Context> get_pango_context();
+
+  protected:
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_scroll_event (GdkEventScroll *);
 	bool on_expose_event (GdkEventExpose *);
