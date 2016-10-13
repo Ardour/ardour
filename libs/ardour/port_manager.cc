@@ -47,7 +47,18 @@ using std::vector;
 PortManager::PortManager ()
 	: ports (new Ports)
 	, _port_remove_in_progress (false)
+	, _port_deletions_pending (8192) /* ick, arbitrary sizing */
 {
+}
+
+void
+PortManager::clear_pending_port_deletions ()
+{
+	Port* p;
+
+	while (_port_deletions_pending.read (&p, 1) == 1) {
+		delete p;
+	}
 }
 
 void
@@ -71,6 +82,13 @@ PortManager::remove_all_ports ()
 	/* clear dead wood list in RCU */
 
 	ports.flush ();
+
+	/* clear out pending port deletion list. we know this is safe because
+	 * the auto connect thread in Session is already dead when this is
+	 * done. It doesn't use shared_ptr<Port> anyway.
+	 */
+
+	_port_deletions_pending.reset ();
 
 	_port_remove_in_progress = false;
 }
@@ -300,6 +318,13 @@ PortManager::port_registration_failure (const std::string& portname)
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }
 
+struct PortDeleter
+{
+	void operator() (Port* p) {
+		AudioEngine::instance()->add_pending_port_deletion (p);
+	}
+};
+
 boost::shared_ptr<Port>
 PortManager::register_port (DataType dtype, const string& portname, bool input, bool async, PortFlags flags)
 {
@@ -313,16 +338,19 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 		if (dtype == DataType::AUDIO) {
 			DEBUG_TRACE (DEBUG::Ports, string_compose ("registering AUDIO port %1, input %2\n",
 								   portname, input));
-			newport.reset (new AudioPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
+			newport.reset (new AudioPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+			               PortDeleter());
 		} else if (dtype == DataType::MIDI) {
 			if (async) {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering ASYNC MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new AsyncMIDIPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
+				newport.reset (new AsyncMIDIPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+				               PortDeleter());
 			} else {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new MidiPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)));
+				newport.reset (new MidiPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+				               PortDeleter());
 			}
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");

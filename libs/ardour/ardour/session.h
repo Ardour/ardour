@@ -1149,6 +1149,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	VCAManager& vca_manager() { return *_vca_manager; }
 
+	void auto_connect_thread_wakeup ();
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);

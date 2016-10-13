@@ -1481,3 +1481,19 @@ AudioEngine::set_latency_input_port (const string& name)
 {
 	_latency_input_name = name;
 }
+
+void
+AudioEngine::add_pending_port_deletion (Port* p)
+{
+	if (_session) {
+		std::cerr << "Adding " << p->name() << " to pending port deletion list\n";
+		if (_port_deletions_pending.write (&p, 1) != 1) {
+			error << string_compose (_("programming error: port %1 could not be placed on the pending deletion queue\n"), p->name()) << endmsg;
+		}
+		_session->auto_connect_thread_wakeup ();
+	} else {
+		std::cerr << "Directly delete port\n";
+		delete p;
+	}
+}
+

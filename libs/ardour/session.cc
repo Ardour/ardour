@@ -6896,6 +6896,12 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs
 				input_start, output_start,
 				input_offset, output_offset));
 
+	auto_connect_thread_wakeup ();
+}
+
+void
+Session::auto_connect_thread_wakeup ()
+{
 	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
 		pthread_cond_signal (&_auto_connect_cond);
 		pthread_mutex_unlock (&_auto_connect_mutex);
@@ -6906,10 +6912,7 @@ void
 Session::queue_latency_recompute ()
 {
 	g_atomic_int_inc (&_latency_recompute_pending);
-	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
-		pthread_cond_signal (&_auto_connect_cond);
-		pthread_mutex_unlock (&_auto_connect_mutex);
-	}
+	auto_connect_thread_wakeup ();
 }
 
 void
@@ -7031,10 +7034,7 @@ Session::auto_connect_thread_terminate ()
 		}
 	}
 
-	if (pthread_mutex_lock (&_auto_connect_mutex) == 0) {
-		pthread_cond_signal (&_auto_connect_cond);
-		pthread_mutex_unlock (&_auto_connect_mutex);
-	}
+	auto_connect_thread_wakeup ();
 
 	void *status;
 	pthread_join (_auto_connect_thread, &status);
@@ -7088,6 +7088,16 @@ Session::auto_connect_thread_run ()
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
 				update_latency_compensation ();
 			}
+		}
+
+		std::cerr << "Autoconnect thread checking port deletions ...\n";
+
+		RingBuffer<Port*>& ports (AudioEngine::instance()->port_deletions_pending());
+		Port* p;
+
+		while (ports.read (&p, 1) == 1) {
+			std::cerr << "autoconnect deletes " << p->name() << std::endl;
+			delete p;
 		}
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);

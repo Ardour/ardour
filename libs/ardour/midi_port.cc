@@ -49,7 +49,8 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 MidiPort::~MidiPort()
 {
 	if (_shadow_port) {
-		_shadow_port->disconnect_all ();
+		AudioEngine::instance()->unregister_port (_shadow_port);
+		_shadow_port.reset ();
 	}
 
 	delete _buffer;

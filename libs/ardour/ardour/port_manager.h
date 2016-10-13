@@ -30,6 +30,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/rcu.h"
+#include "pbd/ringbuffer.h"
 
 #include "ardour/chan_count.h"
 #include "ardour/midiport_manager.h"
@@ -96,6 +97,9 @@ class LIBARDOUR_API PortManager
 	int get_ports (DataType, PortList&);
 
 	void remove_all_ports ();
+	void clear_pending_port_deletions ();
+	virtual void add_pending_port_deletion (Port*) = 0;
+	RingBuffer<Port*>& port_deletions_pending () { return _port_deletions_pending; }
 
 	/* per-Port monitoring */
 
@@ -141,6 +145,7 @@ class LIBARDOUR_API PortManager
 	boost::shared_ptr<AudioBackend> _backend;
 	SerializedRCUManager<Ports> ports;
 	bool _port_remove_in_progress;
+	RingBuffer<Port*> _port_deletions_pending;
 
 	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
 	void port_registration_failure (const std::string& portname);
