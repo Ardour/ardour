@@ -126,8 +126,6 @@ TempoTest::tempoAtPulseTest ()
 	map.add_tempo (tempoB, 20.0, 0, TempoSection::Ramp, MusicTime);
 	map.add_tempo (tempoC, 30.0, 0, TempoSection::Ramp, MusicTime);
 
-	map.recompute_map (map._metrics);
-
 	TempoSection* tA = 0;
 	TempoSection* tB = 0;
 	TempoSection* tC = 0;
@@ -166,6 +164,6 @@ TempoTest::tempoAtPulseTest ()
 
 	/* self-check tempo at pulse @ 125 bpm. */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (125.0, tA->tempo_at_pulse (tA->pulse_at_tempo (125.0, 0, sampling_rate)), 0.00000000000000001);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (160.0, tA->tempo_at_pulse (tB->pulse()), 0.00000000000000001);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (123.0, tB->tempo_at_pulse (tC->pulse()), 0.00000000000000001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (160.0, tA->tempo_at_pulse (20.0), 0.00000000000000001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (123.0, tB->tempo_at_pulse (30.0), 0.00000000000000001);
 }
