@@ -410,8 +410,8 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  if (_current_stripable) {
 	    /* Get amount of change (encoder clicks) * (change per click)*/
 	    /*Create an exponential curve*/
-	    float curve = sign * pow(adj, (1.0 + 10.0) / 10.0);
-	    adj = curve * (31 / 1000.0);
+	    float curve = sign * powf (adj, (1.f + 10.f) / 10.f);
+	    adj = curve * (31.f / 1000.f);
 	    ardour_pan_azimuth (adj);
 	  }
 	  break;
