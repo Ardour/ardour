@@ -2112,13 +2112,27 @@ Session::load_sources (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+#ifdef PLATFORM_WINDOWS
+		int old_mode = 0;
+#endif
+
           retry:
 		try {
+#ifdef PLATFORM_WINDOWS
+			// do not show "insert media" popups (files embedded from removable media).
+			old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 			if ((source = XMLSourceFactory (**niter)) == 0) {
 				error << _("Session: cannot create Source from XML description.") << endmsg;
 			}
+#ifdef PLATFORM_WINDOWS
+			SetErrorMode(old_mode);
+#endif
 
 		} catch (MissingSource& err) {
+#ifdef PLATFORM_WINDOWS
+			SetErrorMode(old_mode);
+#endif
 
                         int user_choice;
 
