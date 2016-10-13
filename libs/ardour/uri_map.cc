@@ -70,6 +70,7 @@ URIMap::URIDs::init(URIMap& uri_map)
 	auto_end           = uri_map.uri_to_id(LV2_AUTOMATE_URI__end);
 	auto_parameter     = uri_map.uri_to_id(LV2_AUTOMATE_URI__parameter);
 	auto_value         = uri_map.uri_to_id(LV2_AUTOMATE_URI__value);
+	state_Dirty        = uri_map.uri_to_id("http://ardour.org/lv2/state#Dirty"); // XXX http://lv2plug.in/ns/ext/state/#dirty
 #endif
 }
 

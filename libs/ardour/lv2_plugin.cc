@@ -2692,6 +2692,18 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						}
 					}
 				}
+
+				// Intercept state dirty message
+				if (_has_state_interface /* && (flags & PORT_DIRTYMSG)*/) {
+					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					if (atom->type == _uri_map.urids.atom_Blank ||
+					    atom->type == _uri_map.urids.atom_Object) {
+						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+						if (obj->body.otype == _uri_map.urids.state_Dirty) {
+							_session.set_dirty ();
+						}
+					}
+				}
 #endif
 
 				// Intercept patch change messages to emit PropertyChanged signal

@@ -92,6 +92,7 @@ public:
 		uint32_t auto_end;
 		uint32_t auto_parameter;
 		uint32_t auto_value;
+		uint32_t state_Dirty;
 #endif
 	};
 
