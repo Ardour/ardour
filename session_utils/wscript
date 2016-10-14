@@ -66,8 +66,7 @@ def build_ardour_util(bld, util):
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw':
-        if bld.env['DEBUG'] == False:
-            obj.linkflags = ['-mwindows']
+        obj.install_path = bld.env['BINDIR']
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
@@ -82,12 +81,6 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         return
 
-    # don't build/install windows version just yet.
-    # tools/x-win/package.sh uses 'waf install'. The symlinks
-    # and shell wrapper script won't work on windows.
-    if bld.env['build_target'] == 'mingw':
-        return
-
     pgmprefix = bld.env['PROGRAM_NAME'].lower() + str(bld.env['MAJOR'])
 
     utils = bld.path.ant_glob('*.cc', excl=['example.cc', 'common.cc'])
@@ -95,7 +88,11 @@ def build(bld):
     for util in utils:
         fn = str(util)[:-3]
         build_ardour_util(bld, fn)
-        bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')
+        if bld.env['build_target'] != 'mingw':
+            bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')
+
+    if bld.env['build_target'] == 'mingw':
+        return
 
     obj              = bld(features = 'subst')
     obj.source       = 'ardour-util.sh.in'
