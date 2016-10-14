@@ -113,8 +113,6 @@ SlavableAutomationControl::actually_set_value (double val, Controllable::GroupCo
 	   be retrieved by AutomationControl::get_value ()
 	*/
 	AutomationControl::actually_set_value (val, group_override);
-
-	_session.set_dirty ();
 }
 
 void

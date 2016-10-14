@@ -46,7 +46,6 @@ SoloSafeControl::actually_set_value (double val, PBD::Controllable::GroupControl
 	*/
 
 	AutomationControl::actually_set_value (val, gcd);
-	_session.set_dirty ();
 }
 
 double

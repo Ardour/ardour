@@ -120,15 +120,28 @@ void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
 	bool to_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_write();
-	//const double old_value = Control::user_double ();
+	/* We cannot use ::get_value() here since that is virtual,
+	   and its return value will/may depend on the ordering
+	   of a derived class' own implementation of ::actually_set_value().
+
+	   The derived classes generally need to set their own internal state
+	   before calling this version, which means that ::get_value()
+	   would generally return the *NEW* state, and thus lead to
+	   Changed() not being emitted below.
+	*/
+
+	const double old_value = Control::user_double ();
 
 	Control::set_double (value, _session.transport_frame(), to_list);
 
-	//AutomationType at = (AutomationType) _parameter.type();
-	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
-	//<< " (was " << old_value << ") @ " << this << std::endl;
+	if (old_value != value) {
+		AutomationType at = (AutomationType) _parameter.type();
+		std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
+		          << " (was " << old_value << ") @ " << this << std::endl;
 
-	Changed (true, gcd);
+		Changed (true, gcd);
+		_session.set_dirty ();
+	}
 }
 
 void
