@@ -390,6 +390,14 @@ ProcessorEntry::setup_visuals ()
 		}
 	}
 
+	boost::shared_ptr<InternalSend> aux;
+	if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor))) {
+		if (aux->allow_feedback ()) {
+			_button.set_name ("processor auxfeedback");
+			return;
+		}
+	}
+
 	switch (_position) {
 	case PreFader:
 		if (_plugin_display) { _plugin_display->set_name ("processor prefader"); }
@@ -746,14 +754,22 @@ ProcessorEntry::build_send_options_menu ()
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
-	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
-	if (send) {
+	if (!ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+		if (send) {
+			items.push_back (CheckMenuElem (_("Link panner controls")));
+			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+			c->set_active (send->panner_shell()->is_linked_to_route());
+			c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
+		}
+	}
 
-		items.push_back (CheckMenuElem (_("Link panner controls")));
+	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
+	if (aux) {
+		items.push_back (CheckMenuElem (_("Allow Feedback Loop")));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		c->set_active (send->panner_shell()->is_linked_to_route());
-		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
-
+		c->set_active (aux->allow_feedback());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_allow_feedback));
 	}
 	return menu;
 }
@@ -764,6 +780,15 @@ ProcessorEntry::toggle_panner_link ()
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
 	if (send) {
 		send->panner_shell()->set_linked_to_route(!send->panner_shell()->is_linked_to_route());
+	}
+}
+
+void
+ProcessorEntry::toggle_allow_feedback ()
+{
+	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
+	if (aux) {
+		aux->set_allow_feedback (!aux->allow_feedback ());
 	}
 }
 
@@ -2135,21 +2160,19 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
-		if (send_menu_item) {
-			if (single_selection && !_route->is_monitor()) {
-				Menu* m = single_selection->build_send_options_menu ();
-				if (m && !m->items().empty()) {
-					send_menu_item->set_submenu (*m);
-					send_menu_item->set_sensitive (true);
-				} else {
-					gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
-					send_menu_item->set_sensitive (false);
-				}
+	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+	if (send_menu_item) {
+		if (single_selection && !_route->is_monitor()) {
+			Menu* m = single_selection->build_send_options_menu ();
+			if (m && !m->items().empty()) {
+				send_menu_item->set_submenu (*m);
+				send_menu_item->set_sensitive (true);
 			} else {
+				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
+		} else {
+			send_menu_item->set_sensitive (false);
 		}
 	}
 

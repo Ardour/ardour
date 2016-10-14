@@ -239,6 +239,7 @@ private:
 	void toggle_inline_display_visibility ();
 	void toggle_control_visibility (Control *);
 	void toggle_panner_link ();
+	void toggle_allow_feedback ();
 
 	class PluginDisplay : public Gtk::DrawingArea {
 	public:
