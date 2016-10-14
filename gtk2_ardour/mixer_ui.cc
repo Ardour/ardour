@@ -2044,8 +2044,23 @@ Mixer_UI::scroll_left ()
 {
 	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	/* stupid GTK: can't rely on clamping across versions */
-	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
+	int sc_w = scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = strip_packer.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		lm += i->get_widget()->get_width ();
+		if (lm >= lp) {
+			lm -= i->get_widget()->get_width ();
+			break;
+		}
+	}
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
 }
 
 void
@@ -2053,8 +2068,22 @@ Mixer_UI::scroll_right ()
 {
 	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	/* stupid GTK: can't rely on clamping across versions */
-	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
+	int sc_w = scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = strip_packer.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		lm += i->get_widget()->get_width ();
+		if (lm > lp + 1) {
+			break;
+		}
+	}
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
 }
 
 bool
