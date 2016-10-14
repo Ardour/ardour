@@ -89,6 +89,8 @@ IO::~IO ()
 {
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("IO %1 unregisters %2 ports\n", name(), _ports.num_ports()));
+
 	BLOCK_PROCESS_CALLBACK ();
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {

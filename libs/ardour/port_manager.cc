@@ -56,6 +56,8 @@ PortManager::clear_pending_port_deletions ()
 {
 	Port* p;
 
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("pending port deletions: %1\n", _port_deletions_pending.read_space()));
+
 	while (_port_deletions_pending.read (&p, 1) == 1) {
 		delete p;
 	}
@@ -406,6 +408,7 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 		Ports::iterator x = ps->find (make_port_name_relative (port->name()));
 
 		if (x != ps->end()) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("removing %1 from port map (uc=%2)\n", port->name(), port.use_count()));
 			ps->erase (x);
 		}
 
