@@ -349,6 +349,7 @@ def configure(conf):
                       atleast_version='2.18')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
+    autowaf.check_pkg(conf, 'pangoft2', uselib_store='PANGOFT2', atleast_version='1.36.8', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
 
 
@@ -582,6 +583,7 @@ def build(bld):
 
     if bld.env['build_target'] == 'mingw':
         obj.linkflags += ' -mwindows'
+        obj.use += [ 'PANGOFT2' ]
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
