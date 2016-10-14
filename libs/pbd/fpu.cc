@@ -71,24 +71,18 @@ __cpuid(int regs[4], int cpuid_leaf)
 
 #endif /* !PLATFORM_WINDOWS */
 
-#ifndef COMPILER_MSVC
-
-static uint64_t
-_xgetbv (uint32_t xcr)
-{
-#ifdef __APPLE__
-        /* it would be nice to make this work on OS X but as long we use veclib,
-           we don't really need to know about SSE/AVX on that platform.
-        */
-        return 0;
-#else
-	uint32_t eax, edx;
-	__asm__ volatile ("xgetbv" : "=a" (eax), "=d" (edx) : "c" (xcr));
-	return (static_cast<uint64_t>(edx) << 32) | eax;
+#ifndef HAVE_XGETBV // Allow definition by build system
+	#if defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 5
+		#define HAVE_XGETBV
+	#elif defined(_MSC_VER) && _MSC_VER >= 1600
+		// '_xgetbv()' was only available from VC10 onwards
+		#define HAVE_XGETBV
+	#endif
 #endif
-}
 
-#elif _MSC_VER < 1600
+#ifndef HAVE_XGETBV
+
+#ifdef COMPILER_MSVC
 
 // '_xgetbv()' was only available from VC10 onwards
 __declspec(noinline) static uint64_t
@@ -101,11 +95,29 @@ _xgetbv (uint32_t xcr)
 	// to place this function into its own (unoptimized) source file.
 	__asm {
 			 mov ecx, [xcr]
-			 __asm _emit 0x0f __asm _emit 0x01 __asm _emit 0xd0   /*xgetbv*/
-		  }
+			 __asm _emit 0x0f __asm _emit 0x01 __asm _emit 0xd0 /*xgetbv*/
+	}
+}
+
+#else
+
+static uint64_t
+_xgetbv (uint32_t xcr)
+{
+#ifdef __APPLE__
+	/* it would be nice to make this work on OS X but as long we use veclib,
+	   we don't really need to know about SSE/AVX on that platform.
+	*/
+	return 0;
+#else
+	uint32_t eax, edx;
+	__asm__ volatile ("xgetbv" : "=a" (eax), "=d" (edx) : "c" (xcr));
+	return (static_cast<uint64_t>(edx) << 32) | eax;
+#endif
 }
 
 #endif /* !COMPILER_MSVC */
+#endif /* !HAVE_XGETBV */
 #endif /* ARCH_X86 */
 
 #ifndef _XCR_XFEATURE_ENABLED_MASK
