@@ -1486,13 +1486,13 @@ void
 AudioEngine::add_pending_port_deletion (Port* p)
 {
 	if (_session) {
-		std::cerr << "Adding " << p->name() << " to pending port deletion list\n";
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("adding %1 to pending port deletion list\n", p->name()));
 		if (_port_deletions_pending.write (&p, 1) != 1) {
 			error << string_compose (_("programming error: port %1 could not be placed on the pending deletion queue\n"), p->name()) << endmsg;
 		}
 		_session->auto_connect_thread_wakeup ();
 	} else {
-		std::cerr << "Directly delete port\n";
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("Directly delete port %1\n", p->name()));
 		delete p;
 	}
 }
