@@ -49,6 +49,7 @@ InternalSend::InternalSend (Session& s,
 		bool ignore_bitslot)
 	: Send (s, p, mm, role, ignore_bitslot)
 	, _send_from (sendfrom)
+	, _allow_feedback (false)
 {
 	if (sendto) {
 		if (use_target (sendto)) {
@@ -266,10 +267,20 @@ InternalSend::set_block_size (pframes_t nframes)
         return 0;
 }
 
+void
+InternalSend::set_allow_feedback (bool yn)
+{
+	_allow_feedback = yn;
+	_send_from->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+}
+
 bool
 InternalSend::feeds (boost::shared_ptr<Route> other) const
 {
-	return _send_to == other;
+	if (_role == Listen || !_allow_feedback) {
+		return _send_to == other;
+	}
+	return false;
 }
 
 XMLNode&
@@ -284,6 +295,7 @@ InternalSend::state (bool full)
 	if (_send_to) {
 		node.add_property ("target", _send_to->id().to_s());
 	}
+	node.add_property ("allow-feedback", _allow_feedback);
 
 	return node;
 }
@@ -317,6 +329,10 @@ InternalSend::set_state (const XMLNode& node, int version)
 		} else {
 			connect_when_legal ();
 		}
+	}
+
+	if ((prop = node.property (X_("allow-feedback"))) != 0) {
+		_allow_feedback = string_is_affirmative (prop->value());
 	}
 
 	return 0;
