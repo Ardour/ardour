@@ -157,11 +157,11 @@ SoloControl::mod_solo_by_others_upstream (int32_t delta)
 	Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 }
 
-bool
+void
 SoloControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (_soloable.is_safe() || !_soloable.can_solo()) {
-		return false;
+		return;
 	}
 
 	set_self_solo (val == 1.0);
@@ -170,7 +170,7 @@ SoloControl::actually_set_value (double val, PBD::Controllable::GroupControlDisp
 	   be retrieved by AutomationControl::get_value (), and emits Changed
 	*/
 
-	return SlavableAutomationControl::actually_set_value (val, group_override);
+	SlavableAutomationControl::actually_set_value (val, group_override);
 }
 
 double

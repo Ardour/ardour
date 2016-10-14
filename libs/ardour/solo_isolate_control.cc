@@ -88,11 +88,11 @@ SoloIsolateControl::mod_solo_isolated_by_upstream (int32_t delta)
 	}
 }
 
-bool
+void
 SoloIsolateControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
 {
 	if (!_soloable.can_solo()) {
-		return false;
+		return;
 	}
 
 	set_solo_isolated (val, gcd);
@@ -101,12 +101,8 @@ SoloIsolateControl::actually_set_value (double val, PBD::Controllable::GroupCont
 	   be retrieved by AutomationControl::get_value (), and emits Changed
 	*/
 
-	if (AutomationControl::actually_set_value (val, gcd)) {
-		_session.set_dirty ();
-		return true;
-	}
-
-	return false;
+	AutomationControl::actually_set_value (val, gcd);
+	_session.set_dirty ();
 }
 
 void

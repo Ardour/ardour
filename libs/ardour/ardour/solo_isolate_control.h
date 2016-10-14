@@ -74,7 +74,7 @@ class LIBARDOUR_API SoloIsolateControl : public SlavableAutomationControl
 
   protected:
 	void master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
-	bool actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
   private:
 	Soloable&      _soloable;

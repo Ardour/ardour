@@ -36,14 +36,14 @@ RecordSafeControl::RecordSafeControl (Session& session, std::string const & name
 	set_flags (Controllable::Flag (flags() | Controllable::RealTime));
 }
 
-bool
+void
 RecordSafeControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	if (val && !_recordable.can_be_record_safe()) {
 		std::cerr << "rec-enable not allowed\n";
-		return false;
+		return;
 	}
 
-	return SlavableAutomationControl::actually_set_value (val, gcd);
+	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 

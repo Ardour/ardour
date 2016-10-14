@@ -74,7 +74,7 @@ MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 	}
 }
 
-bool
+void
 MuteControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	if (muted_by_self() != bool (val)) {
@@ -86,7 +86,7 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 		_muteable.act_on_mute ();
 	}
 
-	return SlavableAutomationControl::actually_set_value (val, gcd);
+	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
 void

@@ -36,7 +36,7 @@ SoloSafeControl::SoloSafeControl (Session& session, std::string const & name)
 	_list->set_interpolation(Evoral::ControlList::Discrete);
 }
 
-bool
+void
 SoloSafeControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
 {
 	_solo_safe = (val ? true : false);
@@ -45,12 +45,8 @@ SoloSafeControl::actually_set_value (double val, PBD::Controllable::GroupControl
 	   be retrieved by AutomationControl::get_value (), and emits Changed
 	*/
 
-	if (AutomationControl::actually_set_value (val, gcd)) {
-	    _session.set_dirty ();
-	    return true;
-	}
-
-	return false;
+	AutomationControl::actually_set_value (val, gcd);
+	_session.set_dirty ();
 }
 
 double

@@ -198,7 +198,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	private:
 		PluginInsert* _plugin;
-		bool actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	/** A control that manipulates a plugin property (message). */
@@ -212,7 +212,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 		double get_value (void) const;
 		XMLNode& get_state();
         protected:
-		bool actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
+		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
 	private:
 		PluginInsert* _plugin;

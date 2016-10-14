@@ -34,14 +34,15 @@ PanControllable::lower () const
         }
 }
 
-bool
+void
 PanControllable::actually_set_value (double v, Controllable::GroupControlDisposition group_override)
 {
 	boost::shared_ptr<Panner> p = owner->panner();
 
         if (!p) {
                 /* no panner: just do it */
-	        return AutomationControl::actually_set_value (v, group_override);
+	        AutomationControl::actually_set_value (v, group_override);
+                return;
         }
 
         bool can_set = false;
@@ -61,10 +62,8 @@ PanControllable::actually_set_value (double v, Controllable::GroupControlDisposi
         }
 
         if (can_set) {
-	        return AutomationControl::actually_set_value (v, group_override);
+	        AutomationControl::actually_set_value (v, group_override);
         }
-
-        return false;
 }
 
 std::string

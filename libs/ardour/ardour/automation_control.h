@@ -105,7 +105,7 @@ class LIBARDOUR_API AutomationControl
 	 * this is only used by automation playback.
 	 */
 	void set_value_unchecked (double val) {
-		(void) actually_set_value (val, PBD::Controllable::NoGroup);
+		actually_set_value (val, PBD::Controllable::NoGroup);
 	}
 
 	double lower()   const { return _desc.lower; }
@@ -134,7 +134,7 @@ class LIBARDOUR_API AutomationControl
 	   Controllable::Changed signal is emitted when necessary.
 	*/
 
-	virtual bool actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
+	virtual void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
 	/* Session needs to call this method before it queues up the real
 	   change for execution in a realtime context. C++ access control sucks.

@@ -36,7 +36,7 @@ MonitorControl::MonitorControl (Session& session, std::string const & name, Moni
 	set_flags (Controllable::Flag (flags() | Controllable::RealTime));
 }
 
-bool
+void
 MonitorControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	int v = (int) val;
@@ -48,11 +48,11 @@ MonitorControl::actually_set_value (double val, Controllable::GroupControlDispos
 		break;
 	default:
 		/* illegal value */
-		return false;
+		return;
 	}
 
 	_monitoring = MonitorChoice (v);
-	return AutomationControl::actually_set_value (val, gcd);
+	AutomationControl::actually_set_value (val, gcd);
 }
 
 XMLNode&

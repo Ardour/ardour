@@ -51,7 +51,7 @@ class LIBARDOUR_API PanControllable : public AutomationControl
 
   private:
 	Pannable* owner;
-	bool actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 } // namespace

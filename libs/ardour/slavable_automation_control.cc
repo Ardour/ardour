@@ -96,7 +96,7 @@ SlavableAutomationControl::get_value() const
 	}
 }
 
-bool
+void
 SlavableAutomationControl::actually_set_value (double val, Controllable::GroupControlDisposition group_override)
 {
 	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
@@ -112,12 +112,9 @@ SlavableAutomationControl::actually_set_value (double val, Controllable::GroupCo
 	/* this sets the Evoral::Control::_user_value for us, which will
 	   be retrieved by AutomationControl::get_value ()
 	*/
-	if (AutomationControl::actually_set_value (val, group_override)) {
-		_session.set_dirty ();
-		return true;
-	}
+	AutomationControl::actually_set_value (val, group_override);
 
-	return false;
+	_session.set_dirty ();
 }
 
 void

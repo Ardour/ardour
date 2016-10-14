@@ -2767,7 +2767,7 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 
 /** @param val `user' value */
 
-bool
+void
 PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	/* FIXME: probably should be taking out some lock here.. */
@@ -2781,13 +2781,13 @@ PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controlla
 		iasp->set_parameter (_list->parameter().id(), user_val);
 	}
 
-	return AutomationControl::actually_set_value (user_val, group_override);
+	AutomationControl::actually_set_value (user_val, group_override);
 }
 
 void
 PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 {
-	(void) AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
+	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
 }
 
 XMLNode&
@@ -2834,7 +2834,7 @@ PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*       
 	}
 }
 
-bool
+void
 PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
 {
 	/* Old numeric set_value(), coerce to appropriate datatype if possible.
@@ -2843,7 +2843,7 @@ PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Contro
 	const Variant value(_desc.datatype, user_val);
 	if (value.type() == Variant::NOTHING) {
 		error << "set_value(double) called for non-numeric property" << endmsg;
-		return false;
+		return;
 	}
 
 	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
@@ -2852,7 +2852,7 @@ PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Contro
 
 	_value = value;
 
-	return AutomationControl::actually_set_value (user_val, gcd);
+	AutomationControl::actually_set_value (user_val, gcd);
 }
 
 XMLNode&

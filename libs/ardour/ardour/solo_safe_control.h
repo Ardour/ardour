@@ -44,7 +44,7 @@ class LIBARDOUR_API SoloSafeControl : public SlavableAutomationControl
 	XMLNode& get_state ();
 
   protected:
-	bool actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
   private:
 	bool _solo_safe;
