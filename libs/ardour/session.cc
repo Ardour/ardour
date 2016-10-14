@@ -3719,6 +3719,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 */
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+		cerr << "Drop references to " << (*iter)->name() << endl;
 		(*iter)->drop_references ();
 	}
 
@@ -7090,15 +7091,7 @@ Session::auto_connect_thread_run ()
 			}
 		}
 
-		std::cerr << "Autoconnect thread checking port deletions ...\n";
-
-		RingBuffer<Port*>& ports (AudioEngine::instance()->port_deletions_pending());
-		Port* p;
-
-		while (ports.read (&p, 1) == 1) {
-			std::cerr << "autoconnect deletes " << p->name() << std::endl;
-			delete p;
-		}
+		AudioEngine::instance()->clear_pending_port_deletions ();
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
 	}
