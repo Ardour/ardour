@@ -113,6 +113,8 @@ else
 	fi
 fi
 
+lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
+
 # setup directory structure
 
 APPDIR=${APPNAME}${major_version}.app
@@ -419,6 +421,18 @@ if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
     cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
 
+# session-utils
+HAVE_SESSION_UTILS=false
+for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
+	BN=$(basename $file)
+	cp -v $file $Frameworks/
+	if test x$STRIP = xall ; then
+		strip -s $Frameworks/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	HAVE_SESSION_UTILS=true
+done
+
 # TODO check if this is still needed, even when building on 10.5
 if file $BUILD_ROOT/gtk2_ardour/ardour-$release_version | grep -q ppc; then
 STDCPP='|libstdc\+\+'
@@ -482,13 +496,32 @@ cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 
 
 # Themes: only install those named for this app
-lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
 done
+
+# session utils start script
+if test "$HAVE_SESSION_UTILS" = true ; then
+	cat >> $Frameworks/ardour-util.sh << EOF
+#!/bin/sh
+
+BIN_DIR=\$(dirname "\$0")
+BUNDLE_DIR=\$(dirname "\$BIN_DIR")
+
+export ARDOUR_DATA_PATH="\$BUNDLE_DIR/share"
+export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/etc"
+export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
+export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
+
+SELF=\$(basename "\$0")
+exec "\$BUNDLE_DIR/lib/\$SELF" "\$@"
+EOF
+	chmod +x $Frameworks/ardour-util.sh
+fi
+
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
@@ -507,8 +540,15 @@ executables=$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     executables="$executables"
 fi
+if test "$HAVE_SESSION_UTILS" = true ; then
+	for file in  $Frameworks/${lower_case_appname}${major_version}-*; do
+		BN=$(basename $file)
+		executables="$executables ../lib/${BN}"
+	done
+fi
 
 for exe in $executables; do
+    echo "Processing Executable: $exe"
     EXE=$APPROOT/MacOS/$exe
     changes=""
     for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
