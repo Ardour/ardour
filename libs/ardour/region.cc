@@ -596,9 +596,8 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	if (sub_num == 0) {
 		set_position_internal (pos, true, 0);
 	} else {
-		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
-		_beat = beat;
-		_pulse = _session.tempo_map().exact_qn_at_frame (pos, sub_num) / 4.0;
+		_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+		/* will set pulse accordingly */
 		set_position_internal (pos, false, sub_num);
 	}
 
