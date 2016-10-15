@@ -175,6 +175,7 @@ CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::PresentationInfo);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
+CLASSKEYS(ARDOUR::Source);
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
@@ -192,6 +193,7 @@ CLASSKEYS(std::vector<double>);
 
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
 
 CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<ARDOUR::AudioRange>);
@@ -1004,6 +1006,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("nudge_position", &Region::nudge_position)
 		.addFunction ("move_to_natural_position", &Region::move_to_natural_position)
 		.addFunction ("move_start", &Region::move_start)
+		.addFunction ("master_sources", &Region::master_sources)
+		.addFunction ("master_source_names", &Region::master_source_names)
+		.addFunction ("n_channels", &Region::n_channels)
 		.addFunction ("trim_front", &Region::trim_front)
 		.addFunction ("trim_end", &Region::trim_end)
 		.addFunction ("trim_to", &Region::trim_to)
@@ -1022,6 +1027,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_locked", &Region::set_locked)
 		.addFunction ("set_video_locked", &Region::set_video_locked)
 		.addFunction ("set_position_locked", &Region::set_position_locked)
+		.addFunction ("source", &Region::source)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
@@ -1032,13 +1038,38 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("length_beats", &MidiRegion::length_beats)
 		.endClass ()
 
-		.beginWSPtrClass <Source> ("Source")
+		.deriveWSPtrClass <Source, SessionObject> ("Source")
+		.addCast<AudioSource> ("to_audiosource")
+		.addCast<MidiSource> ("to_midisource")
+		.addFunction ("timestamp", &Source::timestamp)
+		.addFunction ("empty", &Source::empty)
+		.addFunction ("length", &Source::length)
+		.addFunction ("natural_position", &Source::natural_position)
+		.addFunction ("destructive", &Source::destructive)
+		.addFunction ("writable", &Source::writable)
+		.addFunction ("has_been_analysed", &Source::has_been_analysed)
+		.addFunction ("can_be_analysed", &Source::can_be_analysed)
+		.addFunction ("timeline_position", &Source::timeline_position)
+		.addFunction ("use_count", &Source::use_count)
+		.addFunction ("used", &Source::used)
+		.addFunction ("ancestor_name", &Source::ancestor_name)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiSource, Source> ("MidiSource")
 		.addFunction ("empty", &MidiSource::empty)
 		.addFunction ("length", &MidiSource::length)
 		.addFunction ("model", &MidiSource::model)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioSource, Source> ("AudioSource")
+		.addCast<Readable> ("to_readable")
+		.addFunction ("readable_length", &AudioSource::readable_length)
+		.addFunction ("n_channels", &AudioSource::n_channels)
+		.addFunction ("empty", &Source::empty)
+		.addFunction ("length", &Source::length)
+		.addFunction ("read", &AudioSource::read)
+		.addFunction ("sample_rate", &AudioSource::sample_rate)
+		.addFunction ("captured_for", &AudioSource::captured_for)
 		.endClass ()
 
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
@@ -1273,6 +1304,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
 		.beginConstStdList <boost::weak_ptr<Route> > ("WeakRouteList")
+		.endClass ()
+
+		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
+		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
 		.endClass ()
 
 		// std::list< boost::weak_ptr <AudioSource> >
