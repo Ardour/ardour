@@ -4327,7 +4327,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
-	_fixed_grab_x = _point->get_x();
+	_fixed_grab_x = _point->get_x() + _editor->sample_to_pixel_unrounded (_point->line().offset());
 	_fixed_grab_y = _point->get_y();
 
 	framepos_t pos = _editor->pixel_to_sample (_fixed_grab_x);
@@ -4385,13 +4385,12 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	}
 
 	framepos_t cx_frames = _editor->pixel_to_sample (cx) + snap_delta (event->button.state);
-
 	if (!_x_constrained && need_snap) {
 		_editor->snap_to_with_modifier (cx_frames, event);
 	}
 
 	cx_frames -= snap_delta (event->button.state);
-	cx_frames = min (cx_frames, _point->line().maximum_time());
+	cx_frames = min (cx_frames, _point->line().maximum_time() + _point->line().offset());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 

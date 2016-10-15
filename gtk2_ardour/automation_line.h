@@ -154,6 +154,7 @@ public:
 	}
 
 	void set_offset (ARDOUR::framecnt_t);
+	ARDOUR::framecnt_t offset () { return _offset; }
 	void set_width (ARDOUR::framecnt_t);
 
 	framepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
