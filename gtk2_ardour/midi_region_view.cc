@@ -1115,12 +1115,12 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 
 /** This version finds any canvas note matching the supplied note. */
 NoteBase*
-MidiRegionView::find_canvas_note (NoteType note)
+MidiRegionView::find_canvas_note (Evoral::event_id_t id)
 {
 	Events::iterator it;
 
 	for (it = _events.begin(); it != _events.end(); ++it) {
-		if (*((*it)->note()) == note) {
+		if ((*it)->note()->id() == id) {
 			return *it;
 		}
 	}
@@ -1200,9 +1200,9 @@ MidiRegionView::redisplay_model()
 				cne = add_note (note, visible);
 			}
 
-			set<boost::shared_ptr<NoteType> >::iterator it;
+			set<Evoral::event_id_t>::iterator it;
 			for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
-				if (*(*it) == *note) {
+				if ((*it) == note->id()) {
 					add_to_selection (cne);
 				}
 			}
@@ -2229,13 +2229,13 @@ MidiRegionView::invert_selection ()
     The requested notes most likely won't exist in the view until the next model redisplay.
 */
 void
-MidiRegionView::select_notes (list<boost::shared_ptr<NoteType> > notes)
+MidiRegionView::select_notes (list<Evoral::event_id_t> notes)
 {
 	NoteBase* cne;
-	list<boost::shared_ptr<NoteType> >::iterator n;
+	list<Evoral::event_id_t>::iterator n;
 
 	for (n = notes.begin(); n != notes.end(); ++n) {
-		if ((cne = find_canvas_note(*(*n))) != 0) {
+		if ((cne = find_canvas_note(*n)) != 0) {
 			add_to_selection (cne);
 		} else {
 			_pending_note_selection.insert(*n);

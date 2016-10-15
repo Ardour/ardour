@@ -202,7 +202,7 @@ public:
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
 
-	void select_notes (std::list<boost::shared_ptr<NoteType> >);
+	void select_notes (std::list<Evoral::event_id_t>);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
@@ -444,7 +444,7 @@ private:
 	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
 
 	/** Notes that should be selected when the model is redisplayed. */
-	std::set< boost::shared_ptr<NoteType> > _pending_note_selection;
+	std::set<Evoral::event_id_t> _pending_note_selection;
 
 	/** New notes (created in the current command) which should have visible velocity
 	 * when they appear after the command is applied. */
@@ -456,7 +456,7 @@ private:
 	PBD::ScopedConnection content_connection;
 
 	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
-	NoteBase* find_canvas_note (NoteType);
+	NoteBase* find_canvas_note (Evoral::event_id_t id);
 	Events::iterator _optimization_iterator;
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);

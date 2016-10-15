@@ -1283,23 +1283,9 @@ Selection::get_state () const
 
 		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
 			XMLNode* nc = n->add_child(X_("note"));
-			snprintf(buf, sizeof(buf), "%d", (*i)->channel());
-			nc->add_property(X_("channel"), string(buf));
 
-			snprintf(buf, sizeof(buf), "%f", (*i)->time().to_double());
-			nc->add_property(X_("time"), string(buf));
-
-			snprintf(buf, sizeof(buf), "%d", (*i)->note());
-			nc->add_property(X_("note"), string(buf));
-
-			snprintf(buf, sizeof(buf), "%f", (*i)->length().to_double());
-			nc->add_property(X_("length"), string(buf));
-
-			snprintf(buf, sizeof(buf), "%d", (*i)->velocity());
-			nc->add_property(X_("velocity"), string(buf));
-
-			snprintf(buf, sizeof(buf), "%d", (*i)->off_velocity());
-			nc->add_property(X_("off-velocity"), string(buf));
+			snprintf(buf, sizeof(buf), "%d", (*i)->id());
+			nc->add_property(X_("id"), string(buf));
 		}
 	}
 
@@ -1404,35 +1390,14 @@ Selection::set_state (XMLNode const & node, int)
 
 			editor->get_regionviews_by_id (id, rs); // there could be more than one
 
-			std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+			std::list<Evoral::event_id_t> notes;
 			XMLNodeList children = (*i)->children ();
 
 			for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
-				XMLProperty const * prop_channel = (*ci)->property (X_("channel"));
-				XMLProperty const * prop_time = (*ci)->property (X_("time"));
-				XMLProperty const * prop_note = (*ci)->property (X_("note"));
-				XMLProperty const * prop_length = (*ci)->property (X_("length"));
-				XMLProperty const * prop_velocity = (*ci)->property (X_("velocity"));
-				XMLProperty const * prop_off_velocity = (*ci)->property (X_("off-velocity"));
+				XMLProperty const * prop_id = (*ci)->property (X_("id"));
+				Evoral::event_id_t id = atoi(prop_id->value());
 
-				assert (prop_channel);
-				assert (prop_time);
-				assert (prop_note);
-				assert (prop_length);
-				assert (prop_velocity);
-				assert (prop_off_velocity);
-
-				uint8_t channel = atoi(prop_channel->value());
-				Evoral::Beats time (atof(prop_time->value()));
-				Evoral::Beats length (atof(prop_length->value()));
-				uint8_t note = atoi(prop_note->value());
-				uint8_t velocity = atoi(prop_velocity->value());
-				uint8_t off_velocity = atoi(prop_off_velocity->value());
-				boost::shared_ptr<Evoral::Note<Evoral::Beats> > the_note
-					(new Evoral::Note<Evoral::Beats>  (channel, time, length, note, velocity));
-				the_note->set_off_velocity (off_velocity);
-
-				notes.push_back (the_note);
+				notes.push_back (id);
 			}
 
 			for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
