@@ -1704,8 +1704,10 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	TempoMap& map (trackview.session()->tempo_map());
 	const boost::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	boost::shared_ptr<NoteType> note = ev->note();
-	const double qn_note_time = note->time().to_double() + ((_region->pulse() * 4.0) - mr->start_beats());
-	const framepos_t note_start_frames = map.frame_at_quarter_note (qn_note_time) - _region->position();
+
+	const double session_source_start = (_region->pulse() * 4.0) - mr->start_beats();
+	const framepos_t note_start_frames = map.frame_at_quarter_note (note->time().to_double() + session_source_start) - _region->position();
+
 	const double x0 = trackview.editor().sample_to_pixel (note_start_frames);
 	double x1;
 	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
@@ -1715,13 +1717,12 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	if (note->length() > 0) {
 		double note_end_time = note->end_time().to_double();
 
-		if (note->end_time() > mr->start_beats() + mr->length_beats()) {
+		if (note_end_time > mr->start_beats() + mr->length_beats()) {
 			note_end_time = mr->start_beats() + mr->length_beats();
 		}
-		const double session_qn_start = (_region->pulse() * 4.0) - mr->start_beats();
-		const double quarter_note_end_time = session_qn_start  + note_end_time;
 
-		const framepos_t note_end_frames = map.frame_at_quarter_note (quarter_note_end_time) - _region->position();
+		const framepos_t note_end_frames = map.frame_at_quarter_note (session_source_start + note_end_time) - _region->position();
+
 		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_frames)) - 1;
 	} else {
 		x1 = std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1;
@@ -1729,8 +1730,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1);
 
-	ArdourCanvas::Rect rect (x0, y0, x1, y1);
-	ev->set (rect);
+	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
@@ -1791,14 +1791,15 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	ev->set_height (diamond_size);
 
 	// Update color in case velocity has changed
-	ev->set_fill_color(ev->base_color());
-	ev->set_outline_color(ev->calculate_outline(ev->base_color(), ev->selected()));
+	const uint32_t base_col = ev->base_color();
+	ev->set_fill_color(base_col);
+	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
 	if (update_ghost_regions) {
 		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
 			if (gr) {
-				gr->update_note (ev);
+				gr->update_hit (ev);
 			}
 		}
 	}
@@ -2914,9 +2915,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* and then to beats */
-		const double e_baf = tmap.exact_beat_at_frame (current_fr + midi_region()->position(), divisions);
-		const double quarter_note_start_beat = tmap.quarter_note_at_beat (_region->beat() - midi_region()->start_beats());
-		const Evoral::Beats x_beats = Evoral::Beats (tmap.quarter_note_at_beat (e_baf) - quarter_note_start_beat);
+		const double e_qaf = tmap.exact_qn_at_frame (current_fr + midi_region()->position(), divisions);
+		const double quarter_note_start = (_region->pulse() * 4.0) - midi_region()->start_beats();
+		const Evoral::Beats x_beats = Evoral::Beats (e_qaf - quarter_note_start);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));

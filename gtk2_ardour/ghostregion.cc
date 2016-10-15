@@ -375,28 +375,35 @@ MidiGhostRegion::clear_events()
  *  @param parent The CanvasNote from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_note (NoteBase* parent)
+MidiGhostRegion::update_note (Note* note)
 {
-	GhostEvent* ev = find_event (parent);
+	GhostEvent* ev = find_event (note);
 	if (!ev) {
 		return;
 	}
 
-	Note*                    note = NULL;
 	ArdourCanvas::Rectangle* rect = NULL;
-	Hit*                     hit  = NULL;
+	if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
+		rect->set (ArdourCanvas::Rect (note->x0(), rect->y0(), note->x1(), rect->y1()));
+	}
+}
+/** Update the x positions of our representation of a parent's hit.
+ *  @param hit The CanvasHit from the parent MidiRegionView.
+ */
+void
+MidiGhostRegion::update_hit (Hit* hit)
+{
+	GhostEvent* ev = find_event (hit);
+	if (!ev) {
+		return;
+	}
+
 	ArdourCanvas::Polygon*   poly = NULL;
-	if ((note = dynamic_cast<Note*>(parent))) {
-		if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
-			rect->set (ArdourCanvas::Rect (parent->x0(), rect->y0(), parent->x1(), rect->y1()));
-		}
-	} else if ((hit = dynamic_cast<Hit*>(parent))) {
-		if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
-			ArdourCanvas::Duple ppos = hit->position();
-			ArdourCanvas::Duple gpos = poly->position();
-			gpos.x = ppos.x;
-			poly->set_position(gpos);
-		}
+	if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
+		ArdourCanvas::Duple ppos = hit->position();
+		ArdourCanvas::Duple gpos = poly->position();
+		gpos.x = ppos.x;
+		poly->set_position(gpos);
 	}
 }
 
