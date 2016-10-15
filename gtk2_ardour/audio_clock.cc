@@ -1255,55 +1255,35 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 		} else {
 			TempoMap& tmap (_session->tempo_map());
 			const double divisions = tmap.meter_section_at_frame (offset).divisions_per_bar();
+			Timecode::BBT_Time sub_bbt;
 
 			if (negative) {
 				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (offset));
-				Timecode::BBT_Time when_bbt = tmap.bbt_at_frame (offset - when);
-
-				BBT.bars -= when_bbt.bars;
-
-				if (BBT.ticks < when_bbt.ticks) {
-					if (BBT.beats == 1) {
-						BBT.bars--;
-						BBT.beats = divisions;
-					} else {
-						BBT.beats--;
-					}
-					BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (when_bbt.ticks - BBT.ticks);
-				} else {
-					BBT.ticks -= when_bbt.ticks;
-				}
-
-				if (BBT.beats < when_bbt.beats) {
-					BBT.bars--;
-					BBT.beats = divisions - (when_bbt.beats - BBT.beats);
-				} else {
-					BBT.beats -= when_bbt.beats;
-				}
+				sub_bbt = tmap.bbt_at_frame (offset - when);
 			} else {
 				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (when + offset));
-				Timecode::BBT_Time when_bbt = tmap.bbt_at_frame (offset);
+				sub_bbt = tmap.bbt_at_frame (offset);
+			}
 
-				BBT.bars -= when_bbt.bars;
+			BBT.bars -= sub_bbt.bars;
 
-				if (BBT.ticks < when_bbt.ticks) {
-					if (BBT.beats == 1) {
-						BBT.bars--;
-						BBT.beats = divisions;
-					} else {
-						BBT.beats--;
-					}
-					BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (when_bbt.ticks - BBT.ticks);
-				} else {
-					BBT.ticks -= when_bbt.ticks;
-				}
-
-				if (BBT.beats < when_bbt.beats) {
+			if (BBT.ticks < sub_bbt.ticks) {
+				if (BBT.beats == 1) {
 					BBT.bars--;
-					BBT.beats = divisions - (when_bbt.beats - BBT.beats);
+					BBT.beats = divisions;
 				} else {
-					BBT.beats -= when_bbt.beats;
+					BBT.beats--;
 				}
+				BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (sub_bbt.ticks - BBT.ticks);
+			} else {
+				BBT.ticks -= sub_bbt.ticks;
+			}
+
+			if (BBT.beats < sub_bbt.beats) {
+				BBT.bars--;
+				BBT.beats = divisions - (sub_bbt.beats - BBT.beats);
+			} else {
+				BBT.beats -= sub_bbt.beats;
 			}
 		}
 	} else {
