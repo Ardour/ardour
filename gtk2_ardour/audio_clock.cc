@@ -1254,6 +1254,10 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 			BBT.ticks = 0;
 		} else {
 			TempoMap& tmap (_session->tempo_map());
+
+			/* if offset is before beat 0, it is meaningless */
+			offset = max (offset, tmap.frame_at_beat (0.0));
+
 			const double divisions = tmap.meter_section_at_frame (offset).divisions_per_bar();
 			Timecode::BBT_Time sub_bbt;
 
