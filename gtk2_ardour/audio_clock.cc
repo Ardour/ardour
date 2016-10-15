@@ -1003,7 +1003,7 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 			break;
 
 		case BBT:
-			set_bbt (when, force);
+			set_bbt (when, offset, force);
 			break;
 
 		case MinSec:
@@ -1226,7 +1226,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_bbt (framepos_t when, bool /*force*/)
+AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 {
 	char buf[16];
 	Timecode::BBT_Time BBT;
@@ -1253,9 +1253,58 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
-			BBT = _session->tempo_map().bbt_at_frame (when);
-			BBT.bars--;
-			BBT.beats--;
+			TempoMap& tmap (_session->tempo_map());
+			const double divisions = tmap.meter_section_at_frame (offset).divisions_per_bar();
+
+			if (negative) {
+				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (offset));
+				Timecode::BBT_Time when_bbt = tmap.bbt_at_frame (offset - when);
+
+				BBT.bars -= when_bbt.bars;
+
+				if (BBT.ticks < when_bbt.ticks) {
+					if (BBT.beats == 1) {
+						BBT.bars--;
+						BBT.beats = divisions;
+					} else {
+						BBT.beats--;
+					}
+					BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (when_bbt.ticks - BBT.ticks);
+				} else {
+					BBT.ticks -= when_bbt.ticks;
+				}
+
+				if (BBT.beats < when_bbt.beats) {
+					BBT.bars--;
+					BBT.beats = divisions - (when_bbt.beats - BBT.beats);
+				} else {
+					BBT.beats -= when_bbt.beats;
+				}
+			} else {
+				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (when + offset));
+				Timecode::BBT_Time when_bbt = tmap.bbt_at_frame (offset);
+
+				BBT.bars -= when_bbt.bars;
+
+				if (BBT.ticks < when_bbt.ticks) {
+					if (BBT.beats == 1) {
+						BBT.bars--;
+						BBT.beats = divisions;
+					} else {
+						BBT.beats--;
+					}
+					BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (when_bbt.ticks - BBT.ticks);
+				} else {
+					BBT.ticks -= when_bbt.ticks;
+				}
+
+				if (BBT.beats < when_bbt.beats) {
+					BBT.bars--;
+					BBT.beats = divisions - (when_bbt.beats - BBT.beats);
+				} else {
+					BBT.beats -= when_bbt.beats;
+				}
+			}
 		}
 	} else {
 		BBT = _session->tempo_map().bbt_at_frame (when);
@@ -1732,7 +1781,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	switch (ev->direction) {
 
 	case GDK_SCROLL_UP:
-		frames = get_frame_step (f);
+		frames = get_frame_step (f, current_time(), 1);
 		if (frames != 0) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				frames *= 10;
@@ -1743,7 +1792,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 		break;
 
 	case GDK_SCROLL_DOWN:
-		frames = get_frame_step (f);
+		frames = get_frame_step (f, current_time(), -1);
 		if (frames != 0) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				frames *= 10;

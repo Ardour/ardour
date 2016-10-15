@@ -3192,11 +3192,52 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double tick_at_time = max (0.0, beat_at_frame_locked (_metrics, pos)) * BBT_Time::ticks_per_beat;
-	const double bbt_ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
-	const double total_beats = (tick_at_time + bbt_ticks) / BBT_Time::ticks_per_beat;
+	BBT_Time pos_bbt = bbt_at_frame_locked (_metrics, pos);
+	const framecnt_t offset = frame_at_bbt_locked (_metrics, pos_bbt);
+	const double divisions = meter_section_at_frame_locked (_metrics, pos).divisions_per_bar();
 
-	return frame_at_beat_locked (_metrics, total_beats);
+	if (dir > 0) {
+		pos_bbt.bars += bbt.bars;
+
+		pos_bbt.ticks += bbt.ticks;
+		if ((double) pos_bbt.ticks > BBT_Time::ticks_per_beat) {
+			pos_bbt.beats += 1;
+			pos_bbt.ticks -= BBT_Time::ticks_per_beat;
+		}
+
+		pos_bbt.beats += bbt.beats;
+		if ((double) pos_bbt.beats > divisions) {
+			pos_bbt.bars += 1;
+			pos_bbt.beats -= divisions;
+		}
+
+		return frame_at_bbt_locked (_metrics, pos_bbt) - offset;
+	} else {
+		pos_bbt.bars -= bbt.bars;
+
+		if (pos_bbt.ticks < bbt.ticks) {
+			if (pos_bbt.beats == 1) {
+				pos_bbt.bars--;
+				pos_bbt.beats = divisions;
+			} else {
+				pos_bbt.beats--;
+			}
+			pos_bbt.ticks = BBT_Time::ticks_per_beat - (bbt.ticks - pos_bbt.ticks);
+		} else {
+			pos_bbt.ticks -= bbt.ticks;
+		}
+
+		if (pos_bbt.beats <= bbt.beats) {
+			pos_bbt.bars--;
+			pos_bbt.beats = divisions - (bbt.beats - pos_bbt.beats);
+		} else {
+			pos_bbt.beats -= bbt.beats;
+		}
+
+		return offset - frame_at_bbt_locked (_metrics, pos_bbt);
+	}
+
+	return 0;
 }
 
 framepos_t
@@ -3890,129 +3931,24 @@ TempoMap::n_meters() const
 void
 TempoMap::insert_time (framepos_t where, framecnt_t amount)
 {
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-			if ((*i)->frame() >= where && (*i)->movable ()) {
-				(*i)->set_frame ((*i)->frame() + amount);
+	for (Metrics::reverse_iterator i = _metrics.rbegin(); i != _metrics.rend(); ++i) {
+		if ((*i)->frame() >= where && (*i)->movable ()) {
+			MeterSection* ms;
+			TempoSection* ts;
+
+			if ((ms = dynamic_cast <MeterSection*>(*i)) != 0) {
+				gui_move_meter (ms, (*i)->frame() + amount);
+			}
+
+			if ((ts = dynamic_cast <TempoSection*>(*i)) != 0) {
+				gui_move_tempo (ts, (*i)->frame() + amount, 0);
 			}
 		}
-
-		/* now reset the BBT time of all metrics, based on their new
-		 * audio time. This is the only place where we do this reverse
-		 * timestamp.
-		 */
-
-		Metrics::iterator i;
-		const MeterSection* meter;
-		const TempoSection* tempo;
-		MeterSection *m;
-		TempoSection *t;
-
-		meter = &first_meter ();
-		tempo = &first_tempo ();
-
-		BBT_Time start;
-		BBT_Time end;
-
-		// cerr << "\n###################### TIMESTAMP via AUDIO ##############\n" << endl;
-
-		bool first = true;
-		MetricSection* prev = 0;
-
-		for (i = _metrics.begin(); i != _metrics.end(); ++i) {
-
-			BBT_Time bbt;
-			//TempoMetric metric (*meter, *tempo);
-			MeterSection* ms = const_cast<MeterSection*>(meter);
-			TempoSection* ts = const_cast<TempoSection*>(tempo);
-			if (prev) {
-				if (ts){
-					if ((t = dynamic_cast<TempoSection*>(prev)) != 0) {
-						if (!t->active()) {
-							continue;
-						}
-						ts->set_pulse (t->pulse());
-					}
-					if ((m = dynamic_cast<MeterSection*>(prev)) != 0) {
-						ts->set_pulse (m->pulse());
-					}
-					ts->set_frame (prev->frame());
-
-				}
-				if (ms) {
-					if ((m = dynamic_cast<MeterSection*>(prev)) != 0) {
-						pair<double, BBT_Time> start = make_pair (m->beat(), m->bbt());
-						ms->set_beat (start);
-						ms->set_pulse (m->pulse());
-					}
-					if ((t = dynamic_cast<TempoSection*>(prev)) != 0) {
-						if (!t->active()) {
-							continue;
-						}
-						const double beat = beat_at_pulse_locked (_metrics, t->pulse());
-						pair<double, BBT_Time> start = make_pair (beat, bbt_at_beat_locked (_metrics, beat));
-						ms->set_beat (start);
-						ms->set_pulse (t->pulse());
-					}
-					ms->set_frame (prev->frame());
-				}
-
-			} else {
-				// metric will be at frames=0 bbt=1|1|0 by default
-				// which is correct for our purpose
-			}
-
-			// cerr << bbt << endl;
-
-			if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
-				if (!t->active()) {
-					continue;
-				}
-				t->set_pulse (pulse_at_frame_locked (_metrics, m->frame()));
-				tempo = t;
-				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " beat = " << (*i)->pulse() <<endl;
-			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
-				bbt = bbt_at_frame_locked (_metrics, m->frame());
-
-				// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
-
-				if (first) {
-					first = false;
-				} else {
-
-					if (bbt.ticks > BBT_Time::ticks_per_beat/2) {
-						/* round up to next beat */
-						bbt.beats += 1;
-					}
-
-					bbt.ticks = 0;
-
-					if (bbt.beats != 1) {
-						/* round up to next bar */
-						bbt.bars += 1;
-						bbt.beats = 1;
-					}
-				}
-				pair<double, BBT_Time> start = make_pair (max (0.0, beat_at_frame_locked (_metrics, m->frame())), bbt);
-				m->set_beat (start);
-				m->set_pulse (pulse_at_frame_locked (_metrics, m->frame()));
-				meter = m;
-				// cerr << "NEW METER, frame = " << (*i)->frame() << " beat = " << (*i)->pulse() <<endl;
-			} else {
-				fatal << _("programming error: unhandled MetricSection type") << endmsg;
-				abort(); /*NOTREACHED*/
-			}
-
-			prev = (*i);
-		}
-
-		recompute_map (_metrics);
 	}
-
 
 	PropertyChanged (PropertyChange ());
 }
+
 bool
 TempoMap::remove_time (framepos_t where, framecnt_t amount)
 {
