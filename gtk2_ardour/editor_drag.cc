@@ -5584,7 +5584,7 @@ NoteDrag::total_dx (const guint state) const
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
-	double const quarter_note_start = map.quarter_note_at_beat (_region->region()->beat() - _region->midi_region()->start_beats());
+	double const quarter_note_start = (_region->region()->pulse() * 4.0) - _region->midi_region()->start_beats();
 	frameoffset_t const n = map.frame_at_quarter_note (quarter_note_start + _primary->note()->time().to_double());
 
 	/* new time of the primary note in session frames */
