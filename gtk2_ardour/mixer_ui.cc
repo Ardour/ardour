@@ -1480,8 +1480,56 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 		show_track_list_menu ();
 		return true;
 	}
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 1)) {
+		TreeModel::Path path;
+		TreeViewColumn* column;
+		int cellx, celly;
+		if (track_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+			TreeIter iter = track_model->get_iter (path);
+			if ((*iter)[stripable_columns.visible]) {
+				boost::shared_ptr<ARDOUR::Stripable> s = (*iter)[stripable_columns.stripable];
+				move_stripable_into_view (s);
+			}
+		}
+	}
 
 	return false;
+}
+
+void
+Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
+{
+	if (!scroller.get_hscrollbar()) {
+		return;
+	}
+	bool found = false;
+	int x0 = 0;
+	int x1 = 0;
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->route() == s) {
+			int y;
+			found = true;
+			(*i)->translate_coordinates (strip_packer, 0, 0, x0, y);
+			x1 = x0 + (*i)->get_width ();
+			break;
+		}
+	}
+	if (!found) {
+		return;
+	}
+
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	int sl = adj->get_value();
+	int sr = sl + scroller.get_width();
+
+	if (x0 < sl) {
+		scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
+	}
+	else if (x1 > sr) {
+		// TODO: align left side of left most track, if possible
+		double re = x1 - scroller.get_width();
+		scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), re)));
+	}
 }
 
 void
