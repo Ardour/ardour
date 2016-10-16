@@ -7,6 +7,8 @@
     <Color name="color 101" value="0xa06000ff"/>
     <Color name="color 103" value="0x1e7727ff"/>
     <Color name="color 104" value="0x7f7f7fff"/>
+    <Color name="color 105" value="0x101010ff"/>
+    <Color name="color 106" value="0x404040ff"/>
     <Color name="color 11" value="0x9496a3ff"/>
     <Color name="color 12" value="0x18ab27ff"/>
     <Color name="color 13" value="0xffffffff"/>
@@ -463,6 +465,11 @@
     <ColorAlias name="time axis view item base" alias="color 94"/>
     <ColorAlias name="time stretch fill" alias="color 100"/>
     <ColorAlias name="time stretch outline" alias="color 94"/>
+    <ColorAlias name="tracker editor: active foreground" alias="color 10"/>
+    <ColorAlias name="tracker editor: background" alias="color 105"/>
+    <ColorAlias name="tracker editor: beat background" alias="color 29"/>
+    <ColorAlias name="tracker editor: blank foreground" alias="color 106"/>
+    <ColorAlias name="tracker editor: passive foreground" alias="color 106"/>
     <ColorAlias name="tracknumber label: fill" alias="color 34"/>
     <ColorAlias name="tracknumber label: fill active" alias="color 46"/>
     <ColorAlias name="tracknumber label: led active" alias="color 9"/>

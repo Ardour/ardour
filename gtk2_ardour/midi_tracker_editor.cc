@@ -1308,6 +1308,12 @@ MidiTrackerEditor::redisplay_model ()
 		
 		uint32_t nrows = std::max(mtp->nrows, atp->nrows);
 
+		std::string beat_background_color = UIConfiguration::instance().color_str ("tracker editor: beat background");
+		std::string background_color = UIConfiguration::instance().color_str ("tracker editor: background");
+		std::string blank_foreground_color = UIConfiguration::instance().color_str ("tracker editor: blank foreground");
+		std::string active_foreground_color = UIConfiguration::instance().color_str ("tracker editor: active foreground");
+		std::string passive_foreground_color = UIConfiguration::instance().color_str ("tracker editor: passive foreground");
+
 		// Generate each row
 		for (uint32_t irow = 0; irow < nrows; irow++) {
 			row = *(model->append());
@@ -1323,7 +1329,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			// If the row is on a beat the color differs
 			row[columns._background_color] = row_beats == row_beats.round_up_to_beat() ?
-				"#202020" : "#101010";
+				beat_background_color : background_color;
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
@@ -1337,10 +1343,10 @@ MidiTrackerEditor::redisplay_model ()
 				row[columns.delay[i]] = "-----";
 
 				// Grey out infoless cells
-				row[columns._note_foreground_color[i]] = "#404040";
-				row[columns._channel_foreground_color[i]] = "#404040";
-				row[columns._velocity_foreground_color[i]] = "#404040";
-				row[columns._delay_foreground_color[i]] = "#404040";
+				row[columns._note_foreground_color[i]] = blank_foreground_color;
+				row[columns._channel_foreground_color[i]] = blank_foreground_color;
+				row[columns._velocity_foreground_color[i]] = blank_foreground_color;
+				row[columns._delay_foreground_color[i]] = blank_foreground_color;
 
 				size_t notes_off_count = mtp->notes_off[i].count(irow);
 				size_t notes_on_count = mtp->notes_on[i].count(irow);
@@ -1356,7 +1362,7 @@ MidiTrackerEditor::redisplay_model ()
 
 					if (undefined) {
 						row[columns.note_name[i]] = undefined_str;
-						row[columns._note_foreground_color[i]] = "#f0f0f0";
+						row[columns._note_foreground_color[i]] = active_foreground_color;
 					} else {
 						// Notes off
 						MidiTrackerPattern::RowToNotes::const_iterator i_off = mtp->notes_off[i].find(irow);
@@ -1365,13 +1371,13 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.note_name[i]] = note_off_str;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
-							row[columns._note_foreground_color[i]] = "#f0f0f0";
-							row[columns._channel_foreground_color[i]] = "#f0f0f0";
-							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
+							row[columns._note_foreground_color[i]] = active_foreground_color;
+							row[columns._channel_foreground_color[i]] = active_foreground_color;
+							row[columns._velocity_foreground_color[i]] = active_foreground_color;
 							int64_t delay_ticks = mtp->region_relative_delay_ticks(note->end_time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
-								row[columns._delay_foreground_color[i]] = "#f0f0f0";
+								row[columns._delay_foreground_color[i]] = active_foreground_color;
 							}
 						}
 
@@ -1382,14 +1388,14 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = ParameterDescriptor::midi_note_name (note->note());
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
-							row[columns._note_foreground_color[i]] = "#f0f0f0";
-							row[columns._channel_foreground_color[i]] = "#f0f0f0";
-							row[columns._velocity_foreground_color[i]] = "#f0f0f0";
+							row[columns._note_foreground_color[i]] = active_foreground_color;
+							row[columns._channel_foreground_color[i]] = active_foreground_color;
+							row[columns._velocity_foreground_color[i]] = active_foreground_color;
 
 							int64_t delay_ticks = mtp->region_relative_delay_ticks(note->time(), irow);
 							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
-								row[columns._delay_foreground_color[i]] = "#f0f0f0";
+								row[columns._delay_foreground_color[i]] = active_foreground_color;
 							}
 							// Keep the note around for playing it
 							row[columns._note[i]] = note;
@@ -1406,7 +1412,7 @@ MidiTrackerEditor::redisplay_model ()
 				const AutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
-				row[columns._automation_delay_foreground_color[i]] = "#404040";
+				row[columns._automation_delay_foreground_color[i]] = blank_foreground_color;
 
 				// Fill with blank
 				row[columns.automation[i]] = "---";
@@ -1425,20 +1431,20 @@ MidiTrackerEditor::redisplay_model ()
 							int64_t delay_ticks = atp->delay_ticks((framepos_t)auto_when, irow);
 							if (delay_ticks != 0) {
 								row[columns.automation_delay[i]] = to_string (delay_ticks);
-								row[columns._automation_delay_foreground_color[i]] = "#f0f0f0";
+								row[columns._automation_delay_foreground_color[i]] = active_foreground_color;
 							}
 							// Keep the automation iterator around for editing it
 							row[columns._automation[i]] = auto_it->second;
 						}
 					}
-					row[columns._automation_foreground_color[i]] = "#f0f0f0";
+					row[columns._automation_foreground_color[i]] = active_foreground_color;
 				} else {
 					// Interpolation
 					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
 					// if (alist->interpolation() != Evoral::ControlList::Discrete) {
 						double inter_auto_val = alist->eval(row_frame);
 						row[columns.automation[i]] = to_string (inter_auto_val);
-						row[columns._automation_foreground_color[i]] = "#404040";
+						row[columns._automation_foreground_color[i]] = passive_foreground_color;
 					// }
 				}
 			}
