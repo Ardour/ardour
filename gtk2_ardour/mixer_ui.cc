@@ -1504,13 +1504,11 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 	bool found = false;
 	int x0 = 0;
-	int x1 = 0;
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route() == s) {
 			int y;
 			found = true;
 			(*i)->translate_coordinates (strip_packer, 0, 0, x0, y);
-			x1 = x0 + (*i)->get_width ();
 			break;
 		}
 	}
@@ -1521,15 +1519,7 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	int sl = adj->get_value();
 	int sr = sl + scroller.get_width();
-
-	if (x0 < sl) {
-		scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
-	}
-	else if (x1 > sr) {
-		// TODO: align left side of left most track, if possible
-		double re = x1 - scroller.get_width();
-		scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), re)));
-	}
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
 }
 
 void
