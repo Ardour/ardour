@@ -72,14 +72,9 @@ using Timecode::BBT_Time;
 //
 // - [ ] Take care of midi automation.
 //
-// - [ ] Make sure that it doesn't crash when the number of notes or
-//       automations have been reached.
-//
 // - [ ] Update show_existing_automation.
 //
 // - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
-//
-// - [ ] Move the hardwired colors in preference global menu.
 //
 // - [ ] Support audio tracks.
 //
@@ -214,11 +209,7 @@ MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 {
 	// Find the next available column
 	if (available_automation_columns.empty()) {
-		error << _("programming error: ")
-		      << string_compose (X_("no more available automation column for %1/%2/%3"),
-		                         param.type(), (int) param.channel(), param.id() )
-		      << endmsg;
-		abort(); /*NOTREACHED*/
+		std::cout << "Warning: no more available automation column for " << param.type() << "/" << (int)param.channel() << "/" << param.id() << std::endl;
 		return 0;
 	}
 	std::set<size_t>::iterator it = available_automation_columns.begin();
@@ -260,11 +251,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 
 	// Find the next available column
 	if (available_automation_columns.empty()) {
-		error << _("programming error: ")
-		      << string_compose (X_("no more available automation column for %1:%2/%3/%4"),
-		                         processor->name(), what.type(), (int) what.channel(), what.id() )
-		      << endmsg;
-		abort(); /*NOTREACHED*/
+		std::cout << "Warning: no more available automation column for " << processor->name() << ":" << what.type() << "/" << (int)what.channel() << "/" << what.id() << std::endl;
 		return;
 	}
 	std::set<size_t>::iterator it = available_automation_columns.begin();
@@ -306,6 +293,11 @@ MidiTrackerEditor::show_all_automation ()
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
 				column = (*ii)->column;
 			}
+
+			// Still no column available, skip
+			if (column == 0)
+				continue;
+
 			visible_automation_columns.insert (column);
 
 			(*ii)->menu_item->set_active (true);
@@ -1046,6 +1038,10 @@ MidiTrackerEditor::update_gain_column_visibility ()
 	if (gain_column == 0)
 		gain_column = add_automation_column(Evoral::Parameter(GainAutomation));
 
+	// Still no column available, abort
+	if (gain_column == 0)
+		return;
+	
 	if (showit)
 		visible_automation_columns.insert (gain_column);
 	else
@@ -1079,6 +1075,10 @@ MidiTrackerEditor::update_mute_column_visibility ()
 	if (mute_column == 0)
 		mute_column = add_automation_column(Evoral::Parameter(MuteAutomation));
 
+	// Still no column available, abort
+	if (mute_column == 0)
+		return;
+
 	if (showit)
 		visible_automation_columns.insert (mute_column);
 	else
@@ -1099,6 +1099,10 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 			pan_columns.push_back(add_automation_column(*p));
 		}
 	}
+
+	// Still no column available, abort
+	if (pan_columns.empty())
+		return;
 
 	for (std::vector<size_t>::const_iterator it = pan_columns.begin(); it != pan_columns.end(); ++it) {
 		if (showit)
@@ -1334,7 +1338,12 @@ MidiTrackerEditor::redisplay_model ()
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
 			// Render midi notes pattern
-			for (size_t i = 0; i < (size_t)mtp->ntracks; i++) {
+			size_t ntracks = mtp->ntracks;
+			if (ntracks > MAX_NUMBER_OF_NOTE_TRACKS) {
+				std::cout << "Warning: Number of note tracks needed for the tracker interface is too high, some notes might be discarded" << std::endl;
+				ntracks = MAX_NUMBER_OF_NOTE_TRACKS;
+			}
+			for (size_t i = 0; i < ntracks; i++) {
 
 				// Fill with blank
 				row[columns.note_name[i]] = "----";
@@ -1412,6 +1421,11 @@ MidiTrackerEditor::redisplay_model ()
 				const AutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
+				if (i >= MAX_NUMBER_OF_AUTOMATION_TRACKS) {
+					std::cout << "Warning: Number of automation tracks needed for the tracker interface is too high, some automations might be discarded" << std::endl;
+					continue;
+				}
+				
 				row[columns._automation_delay_foreground_color[i]] = blank_foreground_color;
 
 				// Fill with blank
