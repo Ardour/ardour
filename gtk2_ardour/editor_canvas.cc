@@ -51,6 +51,7 @@
 #include "keyboard.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "note_base.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -942,6 +943,8 @@ Editor::color_handler()
 	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	refresh_location_display ();
+
+	NoteBase::set_colors ();
 
 	/* redraw the whole thing */
 	_track_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
