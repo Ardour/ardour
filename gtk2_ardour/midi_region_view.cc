@@ -1540,8 +1540,8 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		ghost->add_note(*i);
 	}
 
-	ghost->set_height ();
 	ghost->set_colors ();
+	ghost->set_height ();
 	ghost->set_duration (_region->length() / samples_per_pixel);
 	ghosts.push_back (ghost);
 
