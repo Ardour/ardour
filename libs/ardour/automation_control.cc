@@ -119,20 +119,41 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	bool to_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_write();
-	/* We cannot use ::get_value() here since that is virtual,
-	   and its return value will/may depend on the ordering
-	   of a derived class' own implementation of ::actually_set_value().
+	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (_list);
+	const framepos_t pos = _session.transport_frame();
+	bool to_list;
+	double old_value;
 
-	   The derived classes generally need to set their own internal state
-	   before calling this version, which means that ::get_value()
-	   would generally return the *NEW* state, and thus lead to
-	   Changed() not being emitted below.
+	/* We cannot use ::get_value() here since that is virtual, and intended
+	   to return a scalar value that in some way reflects the state of the
+	   control (with semantics defined by the control itself, since it's
+	   internal state may be more complex than can be fully represented by
+	   a single scalar).
+
+	   This method's only job is to set the "user_double()" value of the
+	   underlying Evoral::Control object, and so we should compare the new
+	   value we're being given to the current user_double().
+
+	   Unless ... we're doing automation playback, in which case the
+	   current effective value of the control (used to determine if
+	   anything has changed) is the one derived from the automation event
+	   list.
 	*/
 
-	const double old_value = Control::user_double ();
+	if (!al) {
+		to_list = false;
+		old_value = Control::user_double();
+	} else {
+		if (al->automation_write ()) {
+			to_list = true;
+			old_value = Control::user_double ();
+		} else if (al->automation_playback()) {
+			to_list = false;
+			old_value = al->eval (pos);
+		}
+	}
 
-	Control::set_double (value, _session.transport_frame(), to_list);
+	Control::set_double (value, pos, to_list);
 
 	if (old_value != value) {
 		// AutomationType at = (AutomationType) _parameter.type();
