@@ -337,8 +337,10 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
 			uint32_t n = 0;
-
 			for (BufferSet::iterator b = bufs.begin (*t); b != bufs.end (*t); ++b) {
+				if (outs.count ().get (*t) <= n) {
+					continue;
+				}
 				b->read_from (outs.get (*t, n++), nframes, (*t == DataType::AUDIO ? 0 : -Port::port_offset()));
 			}
 		}
