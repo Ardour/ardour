@@ -153,8 +153,6 @@ UIConfiguration::reset_gtk_theme ()
 
 	/* reset GTK color scheme */
 
-	std::cout << "UIConfiguration::reset_gtk_theme ss.str() = " << ss.str() << std::endl;
-
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
 
