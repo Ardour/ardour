@@ -1518,7 +1518,6 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	int sl = adj->get_value();
-	int sr = sl + scroller.get_width();
 	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
 }
 
@@ -2821,7 +2820,7 @@ Mixer_UI::register_actions ()
 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
 
 	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
-	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
+	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
 
 	myactions.register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_midi_input_active), false));
