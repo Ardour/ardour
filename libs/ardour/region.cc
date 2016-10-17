@@ -573,7 +573,8 @@ Region::update_after_tempo_map_change (bool send)
 		return;
 	}
 
-	const framepos_t pos = _session.tempo_map().frame_at_beat (_beat);
+	/* prevent movement before 0 */
+	const framepos_t pos = max ((framepos_t) 0, _session.tempo_map().frame_at_beat (_beat));
 	/* we have _beat. update frame position non-musically */
 	set_position_internal (pos, false, 0);
 
