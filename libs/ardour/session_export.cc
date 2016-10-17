@@ -104,15 +104,19 @@ Session::pre_export ()
 
 /** Called for each range that is being exported */
 int
-Session::start_audio_export (framepos_t position, bool realtime)
+Session::start_audio_export (framepos_t position, bool realtime, bool region_export)
 {
 	if (!_exporting) {
 		pre_export ();
 	}
 
 	_realtime_export = realtime;
+	_region_export = region_export;
 
-	if (realtime) {
+	if (region_export) {
+		_export_preroll = 0;
+	}
+	else if (realtime) {
 		_export_preroll = nominal_frame_rate ();
 	} else {
 		_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
@@ -133,6 +137,10 @@ Session::start_audio_export (framepos_t position, bool realtime)
 	 * includes external latencies and would overcompensate.
 	 */
 	_export_latency = worst_track_latency ();
+
+	if (region_export) {
+		_export_latency = 0;
+	}
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
@@ -197,19 +205,26 @@ Session::process_export (pframes_t nframes)
 		stop_audio_export ();
 	}
 
-	if (_export_rolling) {
-		if (!_realtime_export)  {
-			/* make sure we've caught up with disk i/o, since
-			 * we're running faster than realtime c/o JACK.
-			 */
-			_butler->wait_until_finished ();
+	/* for Region Raw or Fades, we can skip this
+	 * RegionExportChannelFactory::update_buffers() does not care
+	 * about anything done here
+	 */
+	if (!_region_export) {
+		if (_export_rolling) {
+			if (!_realtime_export)  {
+				/* make sure we've caught up with disk i/o, since
+				 * we're running faster than realtime c/o JACK.
+				 */
+				_butler->wait_until_finished ();
+			}
+
+			/* do the usual stuff */
+
+			process_without_events (nframes);
+
+		} else if (_realtime_export) {
+			fail_roll (nframes); // somehow we need to silence _ALL_ output buffers
 		}
-
-		/* do the usual stuff */
-
-		process_without_events (nframes);
-	} else if (_realtime_export) {
-		fail_roll (nframes); // somehow we need to silence _ALL_ output buffers
 	}
 
 	try {

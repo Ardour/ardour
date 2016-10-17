@@ -191,19 +191,32 @@ ExportHandler::start_timespan ()
 	graph_builder->set_current_timespan (current_timespan);
 	handle_duplicate_format_extensions();
 	bool realtime = current_timespan->realtime ();
+	bool region_export = true;
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		// Filenames can be shared across timespans
 		FileSpec & spec = it->second;
 		spec.filename->set_timespan (it->first);
+		switch (spec.channel_config->region_processing_type ()) {
+			case RegionExportChannelFactory::None:
+			case RegionExportChannelFactory::Processed:
+				region_export = false;
+				break;
+			default:
+				break;
+		}
 		graph_builder->add_config (spec, realtime);
 	}
+
+	// ExportDialog::update_realtime_selection does not allow this
+	assert (!region_export || !realtime);
 
 	/* start export */
 
 	post_processing = false;
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
-	session.start_audio_export (process_position, realtime);
+	// TODO check if it's a RegionExport.. set flag to skip  process_without_events()
+	session.start_audio_export (process_position, realtime, region_export);
 }
 
 void
