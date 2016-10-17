@@ -192,7 +192,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_frames) {
 			throw Exception (*this, boost::str (boost::format
-				("No output frames genereated with %1% leftover frames")
+				("No output frames generated with %1% leftover frames")
 				% leftover_frames));
 		}
 

@@ -743,7 +743,7 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 	snd_pcm_hw_params_get_channels_max (hwpar, nchan);
 	if (*nchan > 1024)
 	{
-		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: detected more than 1024 %s channnels, reset to 2.\n",
+		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: detected more than 1024 %s channels, reset to 2.\n",
 				sname);
 		*nchan = 2;
 	}

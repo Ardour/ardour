@@ -433,7 +433,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 		if (cnt > 1) {
 
 			error << string_compose (
-					_("FileSource: \"%1\" is ambigous when searching\n\t"), pathstr) << endmsg;
+					_("FileSource: \"%1\" is ambiguous when searching\n\t"), pathstr) << endmsg;
 			goto out;
 
 		} else if (cnt == 0) {
