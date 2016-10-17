@@ -147,7 +147,6 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 		if (al->automation_write ()) {
 			to_list = true;
 			old_value = Control::user_double ();
-			std::cerr << "OV UD with al AL\n";
 		} else if (al->automation_playback()) {
 			to_list = false;
 			old_value = al->eval (pos);
