@@ -252,7 +252,7 @@ typedef std::list<MetricSection*> Metrics;
 class LIBARDOUR_API TempoMetric {
   public:
 	TempoMetric (const Meter& m, const Tempo& t)
-		: _meter (&m), _tempo (&t), _frame (0) {}
+		: _meter (&m), _tempo (&t), _frame (0), _pulse (0.0) {}
 
 	void set_tempo (const Tempo& t)              { _tempo = &t; }
 	void set_meter (const Meter& m)              { _meter = &m; }
