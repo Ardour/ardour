@@ -520,10 +520,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	void other_vpot (int, int);
 	void other_vpot_touch (int, bool);
 
-	/* special Stripables */
+	/* special Stripable */
 
 	boost::shared_ptr<ARDOUR::Stripable> master;
-	boost::shared_ptr<ARDOUR::Stripable> monitor;
 
 	sigc::connection vblank_connection;
 	bool vblank ();
