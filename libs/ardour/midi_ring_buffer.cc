@@ -105,7 +105,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 #ifndef NDEBUG
 		if (DEBUG_ENABLED (DEBUG::MidiRingBuffer)) {
 			DEBUG_STR_DECL(a);
-			DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3)", ev_time, start, offset));
+			DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3) ", ev_time, start, offset));
 			for (size_t i=0; i < ev_size; ++i) {
 				DEBUG_STR_APPEND(a,hex);
 				DEBUG_STR_APPEND(a,"0x");

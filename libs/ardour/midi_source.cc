@@ -310,7 +310,7 @@ MidiSource::midi_read (const Lock&                        lm,
 #ifndef NDEBUG
 			if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5\n",
+				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5 ",
 				                                    _name, time_frames, i->size(),
 				                                    start + source_start, start + cnt + source_start));
 				for (size_t n=0; n < i->size(); ++n) {
