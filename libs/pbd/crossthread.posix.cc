@@ -29,6 +29,14 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 
 CrossThreadChannel::~CrossThreadChannel ()
 {
+	if (receive_source) {
+		/* this disconnects it from any main context it was attached in
+		   in ::attach(), this prevent its callback from being invoked
+		   after the destructor has finished.
+		*/
+		g_source_destroy (receive_source);
+	}
+
 	if (receive_channel) {
                 g_io_channel_unref (receive_channel);
                 receive_channel = 0;
