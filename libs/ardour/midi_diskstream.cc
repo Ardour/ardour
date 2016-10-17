@@ -1497,7 +1497,10 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
 		}
 	} else {
-		_playback_buf->skip_to (playback_sample);
+		const size_t n_skipped = _playback_buf->skip_to (playback_sample);
+		if (n_skipped > 0) {
+			warning << string_compose(_("MidiDiskstream %1: skipped %2 events, possible underflow"), id(), n_skipped) << endmsg;
+		}
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("playback buffer read, from %1 to %2 (%3)", playback_sample, playback_sample + nframes, nframes));
 		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
 	}
