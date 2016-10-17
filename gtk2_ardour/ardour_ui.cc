@@ -5574,15 +5574,15 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 }
 
 static Gtkmm2ext::Bindings*
-get_bindings_from_widget_heirarchy (GtkWidget* w)
+get_bindings_from_widget_heirarchy (GtkWidget** w)
 {
 	void* p = NULL;
 
-	while (w) {
-		if ((p = g_object_get_data (G_OBJECT(w), "ardour-bindings")) != 0) {
+	while (*w) {
+		if ((p = g_object_get_data (G_OBJECT(*w), "ardour-bindings")) != 0) {
 			break;
 		}
-		w = gtk_widget_get_parent (w);
+		*w = gtk_widget_get_parent (*w);
 	}
 
 	return reinterpret_cast<Gtkmm2ext::Bindings*> (p);
@@ -5593,6 +5593,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 {
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
+	GtkWidget* binding_widget = focus;
 	bool special_handling_of_unmodified_accelerators = false;
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
 
@@ -5611,7 +5612,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		} else {
 
-			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_heirarchy (focus);
+			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_heirarchy (&binding_widget);
 			if (focus_bindings) {
 				bindings = focus_bindings;
 				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Switch bindings based on focus widget, now using %1\n", bindings->name()));
@@ -5673,13 +5674,24 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
 		KeyboardKey k (ev->state, ev->keyval);
 
-		if (bindings) {
+		while (bindings) {
 
 			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing Ardour bindings %1 @ %2 for this event\n", bindings->name(), bindings));
 
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
+			}
+
+			if (binding_widget) {
+				binding_widget = gtk_widget_get_parent (binding_widget);
+				if (binding_widget) {
+					bindings = get_bindings_from_widget_heirarchy (&binding_widget);
+				} else {
+					bindings = 0;
+				}
+			} else {
+				bindings = 0;
 			}
 		}
 
@@ -5711,7 +5723,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
 		KeyboardKey k (ev->state, ev->keyval);
 
-		if (bindings) {
+		while (bindings) {
 
 			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
 
@@ -5721,6 +5733,16 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 				return true;
 			}
 
+			if (binding_widget) {
+				binding_widget = gtk_widget_get_parent (binding_widget);
+				if (binding_widget) {
+					bindings = get_bindings_from_widget_heirarchy (&binding_widget);
+				} else {
+					bindings = 0;
+				}
+			} else {
+				bindings = 0;
+			}
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
