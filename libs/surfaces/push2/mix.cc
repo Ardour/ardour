@@ -547,6 +547,11 @@ MixLayout::switch_bank (uint32_t base)
 
 	if (!s[0]) {
 		/* not even the first stripable exists, do nothing */
+		for (int n = 0; n < 8; ++n) {
+			stripable[n].reset ();
+			gain_meter[n]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
+			gain_meter[n]->meter->set_meter (0);
+		}
 		return;
 	}
 
@@ -563,6 +568,8 @@ MixLayout::switch_bank (uint32_t base)
 		if (!stripable[n]) {
 			lower_text[n]->hide ();
 			hide_selection (n);
+			gain_meter[n]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
+			gain_meter[n]->meter->set_meter (0);
 		} else {
 
 			lower_text[n]->show ();
