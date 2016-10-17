@@ -1517,7 +1517,6 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	int sl = adj->get_value();
 	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
 }
 
