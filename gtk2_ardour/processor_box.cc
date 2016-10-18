@@ -510,7 +510,7 @@ ProcessorEntry::setup_tooltip ()
 			}
 			if (pi->plugin()->has_editor()) {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
-						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::primary_modifier_name (), postfix));
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::secondary_modifier_name (), postfix));
 			} else {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
@@ -1569,11 +1569,20 @@ ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
 {
 	assert (_entry.processor ());
 
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_entry.processor());
+	// duplicated code :(
 	// consider some tweaks to pass this up to the DnDVBox somehow:
 	// select processor, then call (private)
 	//_entry._parent->processor_button_press_event (ev, &_entry);
-	if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+	if (pi && pi->plugin() && pi->plugin()->has_inline_display()
+			&& Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)
+			&& ev->button == 1
+			&& ev->type == GDK_2BUTTON_PRESS) {
+		_entry.toggle_inline_display_visibility ();
+		return true;
+	}
+	else if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			_entry._parent->generic_edit_processor (_entry.processor ());
 		} else {
 			_entry._parent->edit_processor (_entry.processor ());
@@ -2340,6 +2349,15 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 	int ret = false;
 	bool selected = processor_display.selected (child);
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	if (pi && pi->plugin() && pi->plugin()->has_inline_display()
+			&& Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)
+			&& ev->button == 1
+			&& ev->type == GDK_2BUTTON_PRESS) {
+		child->toggle_inline_display_visibility ();
+		return true;
+	}
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 

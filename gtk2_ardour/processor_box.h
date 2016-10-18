@@ -158,6 +158,7 @@ public:
 	/** Hide any widgets that should be hidden */
 	virtual void hide_things ();
 
+	void toggle_inline_display_visibility ();
 	void show_all_controls ();
 	void hide_all_controls ();
 	void add_control_state (XMLNode *) const;
@@ -236,7 +237,6 @@ private:
 
 	std::list<Control*> _controls;
 
-	void toggle_inline_display_visibility ();
 	void toggle_control_visibility (Control *);
 	void toggle_panner_link ();
 	void toggle_allow_feedback ();
