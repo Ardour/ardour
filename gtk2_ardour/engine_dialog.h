@@ -350,6 +350,33 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
     void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
     sigc::connection lm_back_button_signal;
+
+	/* MIDI port management */
+	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+
+		MidiPortColumns () {
+			add (name);
+			add (pretty_name);
+			add (in_use);
+			add (music_data);
+			add (control_data);
+			add (port);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> pretty_name;
+		Gtk::TreeModelColumn<bool> in_use;
+		Gtk::TreeModelColumn<bool> music_data;
+		Gtk::TreeModelColumn<bool> control_data;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Port> > port;
+	};
+
+	MidiPortColumns midi_port_columns;
+	Gtk::TreeView midi_input_view;
+	Gtk::TreeView midi_output_view;
+
+	void refill_midi_ports (bool for_input);
+	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

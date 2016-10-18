@@ -239,6 +239,11 @@ EngineControl::EngineControl ()
 
 	midi_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
 
+	midi_vbox.set_border_width (12);
+	midi_vbox.set_spacing (6);
+	midi_vbox.pack_start (midi_input_view);
+	midi_vbox.pack_start (midi_output_view);
+
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
@@ -246,7 +251,7 @@ EngineControl::EngineControl ()
 	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.set_border_width (12);
 
-	notebook.set_show_tabs (false);
+	//notebook.set_show_tabs (false);
 	notebook.show_all ();
 
 	notebook.set_name ("SettingsNotebook");
@@ -777,20 +782,67 @@ EngineControl::enable_latency_tab ()
 void
 EngineControl::setup_midi_tab_for_backend ()
 {
-	string backend = backend_combo.get_active_text ();
+}
 
-	Gtkmm2ext::container_clear (midi_vbox);
+void
+EngineControl::refill_midi_ports (bool for_input)
+{
+	using namespace ARDOUR;
 
-	midi_vbox.set_border_width (12);
-	midi_device_table.set_border_width (12);
+	std::vector<string> ports;
 
-	if (backend == "JACK") {
-		setup_midi_tab_for_jack ();
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, for_input ? IsInput : IsOutput, ports);
+
+	Glib::RefPtr<ListStore> model = Gtk::ListStore::create (midi_port_columns);
+
+	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
+
+		if (AudioEngine::instance()->port_is_mine (*s)) {
+			continue;
+		}
+
+		TreeModel::Row row = *(model->append());
+
+		string pretty = AudioEngine::instance()->get_pretty_name_by_name (*s);
+		cerr << "pretty for " << *s << " = " << pretty << endl;
+		row[midi_port_columns.name] = *s;
+		row[midi_port_columns.pretty_name] = (pretty.empty() ? *s : pretty);
+		row[midi_port_columns.in_use] = true;
+		row[midi_port_columns.music_data] = true;
+		row[midi_port_columns.control_data] = true;
 	}
 
-	midi_vbox.pack_start (midi_device_table, true, true);
-	midi_vbox.pack_start (midi_back_button, false, false);
-	midi_vbox.show_all ();
+	Gtk::TreeView& view (for_input ? midi_input_view : midi_output_view);
+	int pretty_name_column;
+	view.set_model (model);
+	view.append_column (_("Name"), midi_port_columns.name);
+	pretty_name_column = view.append_column (_("Pretty Name"), midi_port_columns.pretty_name) - 1;
+	view.append_column (_("Use"), midi_port_columns.in_use);
+	view.append_column (_("Music Data"), midi_port_columns.music_data);
+	view.append_column (_("Control Data"), midi_port_columns.control_data);
+
+	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
+	pretty_name_cell->property_editable() = true;
+	pretty_name_cell->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::pretty_name_edit), &view));
+}
+
+void
+EngineControl::pretty_name_edit (std::string const & path, string const & new_text, Gtk::TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend) {
+		ARDOUR::PortEngine::PortHandle ph = backend->get_port_by_name ((*iter)[midi_port_columns.name]);
+		if (ph) {
+			backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", new_text, "");
+			(*iter)[midi_port_columns.pretty_name] = new_text;
+		}
+	}
 }
 
 void
@@ -933,11 +985,6 @@ EngineControl::update_sensitivity ()
 }
 
 void
-EngineControl::setup_midi_tab_for_jack ()
-{
-}
-
-void
 EngineControl::midi_latency_adjustment_changed (Gtk::Adjustment *a, MidiDeviceSettings device, bool for_input) {
 	if (for_input) {
 		device->input_latency = a->get_value();
@@ -1029,6 +1076,7 @@ EngineControl::refresh_midi_display (std::string focus)
 void
 EngineControl::backend_changed ()
 {
+	cerr << "BE\n";
 	SignalBlocker blocker (*this, "backend_changed");
 	string backend_name = backend_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
@@ -1044,6 +1092,7 @@ EngineControl::backend_changed ()
 	_have_control = ARDOUR::AudioEngine::instance()->setup_required ();
 
 	build_notebook ();
+	cerr << "ME\n";
 	setup_midi_tab_for_backend ();
 	_midi_devices.clear();
 
@@ -1520,7 +1569,7 @@ EngineControl::set_nperiods_popdown_strings ()
 	set_popdown_strings (nperiods_combo, s);
 
 	if (!s.empty()) {
-		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size())); // XXX 
+		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size())); // XXX
 	}
 
 	update_sensitivity ();
@@ -3097,6 +3146,9 @@ EngineControl::engine_running ()
 		engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Connected")));
 	}
 	update_sensitivity();
+
+	refill_midi_ports (true);
+	refill_midi_ports (false);
 }
 
 void
