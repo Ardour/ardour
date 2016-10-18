@@ -61,7 +61,6 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "utils.h"
-#include "midi_port_dialog.h"
 #include "sfdb_ui.h"
 #include "keyboard.h"
 #include "theme_manager.h"
