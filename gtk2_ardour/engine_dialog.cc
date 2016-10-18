@@ -239,26 +239,6 @@ EngineControl::EngineControl ()
 
 	midi_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
 
-	pretty_name_column = midi_input_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name) - 1;
-	use_column = midi_input_view.append_column (_("Use"), midi_port_columns.in_use) - 1;
-	music_column = midi_input_view.append_column (_("Use for Music"), midi_port_columns.music_data) - 1;
-	control_column = midi_input_view.append_column (_("Use for Control"), midi_port_columns.control_data) - 1;
-	selection_column = midi_input_view.append_column (_("Follow Selection"), midi_port_columns.control_data) - 1;
-
-	midi_output_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name);
-	midi_output_view.append_column (_("Use"), midi_port_columns.in_use);
-	midi_output_view.append_column (_("Use for Music"), midi_port_columns.music_data);
-	midi_output_view.append_column (_("Use for Control"), midi_port_columns.control_data);
-	midi_output_view.append_column (_("Follow Selection"), midi_port_columns.control_data);
-
-	midi_input_view.get_selection()->set_mode (SELECTION_NONE);
-	midi_output_view.get_selection()->set_mode (SELECTION_NONE);
-
-	midi_vbox.set_border_width (12);
-	midi_vbox.set_spacing (6);
-	midi_vbox.pack_start (midi_input_view);
-	midi_vbox.pack_start (midi_output_view);
-
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
@@ -797,14 +777,31 @@ EngineControl::enable_latency_tab ()
 void
 EngineControl::setup_midi_tab_for_backend ()
 {
-	string backend = backend_combo.get_active_text ();
-
 	Gtkmm2ext::container_clear (midi_vbox);
 
 	midi_vbox.set_border_width (12);
 	midi_device_table.set_border_width (12);
 
 	midi_vbox.pack_start (midi_device_table, true, true);
+
+	pretty_name_column = midi_input_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name) - 1;
+	use_column = midi_input_view.append_column (_("Use"), midi_port_columns.in_use) - 1;
+	music_column = midi_input_view.append_column (_("Use for Music"), midi_port_columns.music_data) - 1;
+	control_column = midi_input_view.append_column (_("Use for Control"), midi_port_columns.control_data) - 1;
+	selection_column = midi_input_view.append_column (_("Follow Selection"), midi_port_columns.control_data) - 1;
+
+	midi_output_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name);
+	midi_output_view.append_column (_("Use"), midi_port_columns.in_use);
+	midi_output_view.append_column (_("Use for Music"), midi_port_columns.music_data);
+	midi_output_view.append_column (_("Use for Control"), midi_port_columns.control_data);
+	midi_output_view.append_column (_("Follow Selection"), midi_port_columns.control_data);
+
+	midi_input_view.get_selection()->set_mode (SELECTION_NONE);
+	midi_output_view.get_selection()->set_mode (SELECTION_NONE);
+
+	midi_vbox.pack_start (midi_input_view);
+	midi_vbox.pack_start (midi_output_view);
+
 	midi_vbox.pack_start (midi_back_button, false, false);
 	midi_vbox.show_all ();
 }
