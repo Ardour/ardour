@@ -239,6 +239,21 @@ EngineControl::EngineControl ()
 
 	midi_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
 
+	pretty_name_column = midi_input_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name) - 1;
+	use_column = midi_input_view.append_column (_("Use"), midi_port_columns.in_use) - 1;
+	music_column = midi_input_view.append_column (_("Use for Music"), midi_port_columns.music_data) - 1;
+	control_column = midi_input_view.append_column (_("Use for Control"), midi_port_columns.control_data) - 1;
+	selection_column = midi_input_view.append_column (_("Follow Selection"), midi_port_columns.control_data) - 1;
+
+	midi_output_view.append_column (_("Pretty Name"), midi_port_columns.pretty_name);
+	midi_output_view.append_column (_("Use"), midi_port_columns.in_use);
+	midi_output_view.append_column (_("Use for Music"), midi_port_columns.music_data);
+	midi_output_view.append_column (_("Use for Control"), midi_port_columns.control_data);
+	midi_output_view.append_column (_("Follow Selection"), midi_port_columns.control_data);
+
+	midi_input_view.get_selection()->set_mode (SELECTION_NONE);
+	midi_output_view.get_selection()->set_mode (SELECTION_NONE);
+
 	midi_vbox.set_border_width (12);
 	midi_vbox.set_spacing (6);
 	midi_vbox.pack_start (midi_input_view);
@@ -782,6 +797,16 @@ EngineControl::enable_latency_tab ()
 void
 EngineControl::setup_midi_tab_for_backend ()
 {
+	string backend = backend_combo.get_active_text ();
+
+	Gtkmm2ext::container_clear (midi_vbox);
+
+	midi_vbox.set_border_width (12);
+	midi_device_table.set_border_width (12);
+
+	midi_vbox.pack_start (midi_device_table, true, true);
+	midi_vbox.pack_start (midi_back_button, false, false);
+	midi_vbox.show_all ();
 }
 
 void
@@ -804,7 +829,6 @@ EngineControl::refill_midi_ports (bool for_input)
 		TreeModel::Row row = *(model->append());
 
 		string pretty = AudioEngine::instance()->get_pretty_name_by_name (*s);
-		cerr << "pretty for " << *s << " = " << pretty << endl;
 		row[midi_port_columns.name] = *s;
 		row[midi_port_columns.pretty_name] = (pretty.empty() ? *s : pretty);
 		row[midi_port_columns.in_use] = true;
@@ -813,17 +837,84 @@ EngineControl::refill_midi_ports (bool for_input)
 	}
 
 	Gtk::TreeView& view (for_input ? midi_input_view : midi_output_view);
-	int pretty_name_column;
+
 	view.set_model (model);
-	view.append_column (_("Name"), midi_port_columns.name);
-	pretty_name_column = view.append_column (_("Pretty Name"), midi_port_columns.pretty_name) - 1;
-	view.append_column (_("Use"), midi_port_columns.in_use);
-	view.append_column (_("Music Data"), midi_port_columns.music_data);
-	view.append_column (_("Control Data"), midi_port_columns.control_data);
 
 	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
 	pretty_name_cell->property_editable() = true;
 	pretty_name_cell->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::pretty_name_edit), &view));
+
+	CellRendererToggle* toggle_cell;
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (use_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_use_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (music_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_music_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (control_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_control_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (selection_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_selection_column_toggled), &view));
+}
+
+void
+EngineControl::midi_use_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.in_use]);
+	(*iter)[midi_port_columns.in_use] = !value;
+
+}
+
+void
+EngineControl::midi_music_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.music_data]);
+	(*iter)[midi_port_columns.music_data] = !value;
+}
+
+void
+EngineControl::midi_control_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.control_data]);
+	(*iter)[midi_port_columns.control_data] = !value;
+
+	if (!value) {
+		// ARDOUR::AudioEngine::instance()->remove_port_purpose (PortFlags (ControlData));
+	} else {
+		// ARDOUR::AudioEngine::instance()->add_port_purpose (PortFlags (ControlData));
+	}
+}
+
+void
+EngineControl::midi_selection_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+	bool value ((*iter)[midi_port_columns.selection]);
+	(*iter)[midi_port_columns.selection] = !value;
 }
 
 void
@@ -1076,7 +1167,6 @@ EngineControl::refresh_midi_display (std::string focus)
 void
 EngineControl::backend_changed ()
 {
-	cerr << "BE\n";
 	SignalBlocker blocker (*this, "backend_changed");
 	string backend_name = backend_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
@@ -1092,7 +1182,6 @@ EngineControl::backend_changed ()
 	_have_control = ARDOUR::AudioEngine::instance()->setup_required ();
 
 	build_notebook ();
-	cerr << "ME\n";
 	setup_midi_tab_for_backend ();
 	_midi_devices.clear();
 
