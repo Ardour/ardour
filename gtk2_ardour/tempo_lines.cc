@@ -103,6 +103,8 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 
 	uint32_t beats = 0;
 	uint32_t bars = 0;
+	const uint32_t bar_color = UIConfiguration::instance().color ("measure line bar");
+	const uint32_t beat_color = UIConfiguration::instance().color_mod ("measure line beat", "measure line beat");
 	uint32_t color;
 
 	bool all_bars = false;
@@ -165,12 +167,12 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 				continue;
 			}
 
-			color = UIConfiguration::instance().color ("measure line bar");
+			color = bar_color;
 		} else {
 			if (beat_density > 0.3) {
 				continue; /* only draw beat lines if the gaps between beats are large. */
 			}
-			color = UIConfiguration::instance().color_mod ("measure line beat", "measure line beat");
+			color = beat_color;
 		}
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
