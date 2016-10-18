@@ -505,9 +505,15 @@ ProcessorEntry::setup_tooltip ()
 		if (pi) {
 			std::string postfix = "";
 			uint32_t replicated;
-			if ((replicated = pi->get_count()) > 1) {
-				postfix = string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+
+			if (pi->plugin()->has_inline_display()) {
+				postfix += string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
 			}
+
+			if ((replicated = pi->get_count()) > 1) {
+				postfix += string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+			}
+
 			if (pi->plugin()->has_editor()) {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::secondary_modifier_name (), postfix));
@@ -1547,7 +1553,8 @@ ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_p
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
 			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
 
-	std::string postfix = "";
+	std::string postfix = string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
+
 	if (_plug->has_editor()) {
 		ARDOUR_UI_UTILS::set_tooltip (*this,
 				string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), e.name (Wide), Keyboard::primary_modifier_name (), postfix));
