@@ -3500,7 +3500,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 
 void
 TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
-		    framepos_t lower, framepos_t upper)
+		    framepos_t lower, framepos_t upper, uint32_t bar_mod)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	int32_t cnt = ceil (beat_at_frame_locked (_metrics, lower));
@@ -3513,14 +3513,32 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 	if (frame_at_beat_locked (_metrics, cnt) >= upper) {
 		return;
 	}
+	if (bar_mod == 0) {
+		while (pos >= 0 && pos < upper) {
+			pos = frame_at_beat_locked (_metrics, cnt);
+			const TempoSection tempo = tempo_section_at_frame_locked (_metrics, pos);
+			const MeterSection meter = meter_section_at_frame_locked (_metrics, pos);
+			const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
+			points.push_back (BBTPoint (meter, tempo_at_frame_locked (_metrics, pos), pos, bbt.bars, bbt.beats, tempo.c_func()));
+			++cnt;
+		}
+	} else {
+		BBT_Time bbt = bbt_at_frame_locked (_metrics, lower);
+		bbt.beats = 1;
+		bbt.ticks = 0;
 
-	while (pos >= 0 && pos < upper) {
-		pos = frame_at_beat_locked (_metrics, cnt);
-		const TempoSection tempo = tempo_section_at_frame_locked (_metrics, pos);
-		const MeterSection meter = meter_section_at_frame_locked (_metrics, pos);
-		const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
-		points.push_back (BBTPoint (meter, tempo_at_frame_locked (_metrics, pos), pos, bbt.bars, bbt.beats, tempo.c_func()));
-		++cnt;
+		if (bar_mod != 1) {
+			bbt.bars -= bbt.bars % bar_mod;
+			++bbt.bars;
+		}
+
+		while (pos >= 0 && pos < upper) {
+			pos = frame_at_bbt_locked (_metrics, bbt);
+			const TempoSection tempo = tempo_section_at_frame_locked (_metrics, pos);
+			const MeterSection meter = meter_section_at_frame_locked (_metrics, pos);
+			points.push_back (BBTPoint (meter, tempo_at_frame_locked (_metrics, pos), pos, bbt.bars, bbt.beats, tempo.c_func()));
+			bbt.bars += bar_mod;
+		}
 	}
 }
 

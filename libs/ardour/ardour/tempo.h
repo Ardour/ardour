@@ -324,7 +324,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	}
 
 	void get_grid (std::vector<BBTPoint>&,
-	               framepos_t start, framepos_t end);
+	               framepos_t start, framepos_t end, uint32_t bar_mod = 0);
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }

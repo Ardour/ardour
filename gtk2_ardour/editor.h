@@ -890,7 +890,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-	void update_tempo_based_rulers (std::vector<ARDOUR::TempoMap::BBTPoint>& grid);
+	void update_tempo_based_rulers ();
 	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
@@ -953,7 +953,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t lower, framepos_t upper);
+	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
 	ArdourCanvas::Ruler* bbt_ruler;

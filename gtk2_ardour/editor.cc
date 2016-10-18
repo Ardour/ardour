@@ -2239,10 +2239,8 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
 	case SnapToBeatDiv2: {
-		std::vector<TempoMap::BBTPoint> grid;
-		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
-		compute_bbt_ruler_scale (grid, leftmost_frame, leftmost_frame + current_page_samples());
-		update_tempo_based_rulers (grid);
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+		update_tempo_based_rulers ();
 		break;
 	}
 
@@ -4614,10 +4612,8 @@ Editor::visual_changer (const VisualChange& vc)
 
 		compute_fixed_ruler_scale ();
 
-		std::vector<TempoMap::BBTPoint> grid;
-		compute_current_bbt_points (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
-		compute_bbt_ruler_scale (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
-		update_tempo_based_rulers (grid);
+		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples());
+		update_tempo_based_rulers ();
 
 		update_video_timeline();
 	}

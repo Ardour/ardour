@@ -166,11 +166,14 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	std::vector<TempoMap::BBTPoint> grid;
-	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	if (bbt_ruler_scale != bbt_show_many) {
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	}
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	draw_measures (grid);
-	update_tempo_based_rulers (grid);
+	update_tempo_based_rulers ();
 }
 
 struct CurveComparator {
@@ -249,10 +252,15 @@ Editor::marker_position_changed ()
 		}
 	}
 
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	std::vector<TempoMap::BBTPoint> grid;
-	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+
+	if (bbt_ruler_scale != bbt_show_many) {
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	}
+
 	draw_measures (grid);
-	update_tempo_based_rulers (grid);
+	update_tempo_based_rulers ();
 }
 
 void
@@ -263,11 +271,15 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	}
 
 	if (immediate_redraw) {
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 		std::vector<TempoMap::BBTPoint> grid;
 
-		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		if (bbt_ruler_scale != bbt_show_many) {
+			compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		}
+
 		draw_measures (grid);
-		update_tempo_based_rulers (grid); // redraw rulers and measure lines
+		update_tempo_based_rulers (); // redraw rulers and measure lines
 
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
@@ -285,7 +297,36 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, frame
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
 	const double lower_beat = floor (max (0.0, _session->tempo_map().beat_at_frame (leftmost))) - 1.0;
-	_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost);
+	switch (bbt_ruler_scale) {
+
+	case bbt_show_beats:
+	case bbt_show_ticks:
+	case bbt_show_ticks_detail:
+	case bbt_show_ticks_super_detail:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost);
+		break;
+
+	case bbt_show_1:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 1);
+		break;
+
+	case bbt_show_4:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 4);
+		break;
+
+	case bbt_show_16:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 16);
+		break;
+
+	case bbt_show_64:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 64);
+		break;
+
+	default:
+		/* bbt_show_many */
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 128);
+		break;
+	}
 }
 
 void

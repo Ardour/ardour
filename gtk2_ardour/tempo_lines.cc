@@ -110,9 +110,22 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 	i = grid.end();
 	i--;
 	bars = (*i).bar - (*grid.begin()).bar;
-	beats = distance (grid.begin(), grid.end()) - bars;
 
-	beat_density = (beats * 10.0f) / lines.canvas()->width();
+	if (bars < distance (grid.begin(), grid.end()) - 1) {
+		/* grid contains beats and bars */
+		beats = distance (grid.begin(), grid.end()) - bars;
+	} else {
+		/* grid contains only bars */
+		beats = distance (grid.begin(), grid.end());
+	}
+
+	double canvas_width_used = 1.0;
+	if (leftmost_frame < grid.front().frame) {
+		const framecnt_t frame_distance = max ((framecnt_t) 1, grid.back().frame - grid.front().frame);
+		canvas_width_used = 1.0 - ((grid.front().frame - leftmost_frame) / (double) (frame_distance + grid.front().frame));
+	}
+
+	beat_density = (beats * 10.0f) / (lines.canvas()->width() * canvas_width_used);
 
 	if (beat_density > 2.0f) {
 		/* if the lines are too close together, they become useless */
