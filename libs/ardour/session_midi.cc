@@ -722,3 +722,55 @@ Session::mtc_input_port () const
 {
 	return _midi_ports->mtc_input_port ();
 }
+
+void
+Session::midi_track_presentation_info_changed (PropertyChange const& what_changed, boost::weak_ptr<MidiTrack> mt)
+{
+	if (!Config->get_midi_input_follows_selection()) {
+		return;
+	}
+
+	if (!what_changed.contains (Properties::selected)) {
+		return;
+	}
+
+	boost::shared_ptr<MidiTrack> new_midi_target (mt.lock ());
+
+	if (new_midi_target->presentation_info().selected()) {
+		rewire_selected_midi (new_midi_target);
+	}
+}
+
+void
+Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
+{
+	if (!new_midi_target) {
+		return;
+	}
+
+	boost::shared_ptr<MidiTrack> old_midi_target = current_midi_target.lock ();
+
+	if (new_midi_target == old_midi_target) {
+		return;
+	}
+
+	PortManager::MidiSelectionPorts msp;
+
+	AudioEngine::instance()->get_midi_selection_ports (msp);
+
+	if (msp.empty()) {
+		return;
+	}
+
+	if (old_midi_target) {
+		for (PortManager::MidiSelectionPorts::const_iterator p = msp.begin(); p != msp.end(); ++p) {
+			old_midi_target->input()->disconnect (old_midi_target->input()->nth (0), (*p), this);
+		}
+	}
+
+	for (PortManager::MidiSelectionPorts::const_iterator p = msp.begin(); p != msp.end(); ++p) {
+		new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
+	}
+
+	current_midi_target = new_midi_target;
+}

@@ -593,7 +593,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 				}
 			}
 		}
-	                                        private:
+            private:
 		Session * _session;
 	};
 
@@ -1150,6 +1150,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	VCAManager& vca_manager() { return *_vca_manager; }
 
 	void auto_connect_thread_wakeup ();
+
 
   protected:
 	friend class AudioEngine;
@@ -2033,6 +2034,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 
 	std::string created_with;
+
+	void midi_track_presentation_info_changed (PBD::PropertyChange const &, boost::weak_ptr<MidiTrack>);
+	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
+	boost::weak_ptr<MidiTrack> current_midi_target;
 };
 
 
