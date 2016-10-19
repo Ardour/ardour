@@ -42,11 +42,13 @@
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
 
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/profile.h"
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/port_manager.h"
 #include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
@@ -1852,6 +1854,214 @@ private:
 };
 
 
+class MidiPortOptions : public OptionEditorBox
+{
+  public:
+	MidiPortOptions() {
+		setup_midi_port_view (midi_output_view, false);
+		setup_midi_port_view (midi_input_view, true);
+
+		_box->pack_start (midi_input_view);
+		_box->pack_start (midi_output_view);
+
+		midi_output_view.show ();
+		midi_input_view.show ();
+	}
+
+	void parameter_changed (string const&) {}
+	void set_state_from_config() {}
+
+  private:
+
+	/* MIDI port management */
+	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+
+		MidiPortColumns () {
+			add (pretty_name);
+			add (in_use);
+			add (music_data);
+			add (control_data);
+			add (selection);
+			add (name);
+		}
+
+		Gtk::TreeModelColumn<std::string> pretty_name;
+		Gtk::TreeModelColumn<bool> in_use;
+		Gtk::TreeModelColumn<bool> music_data;
+		Gtk::TreeModelColumn<bool> control_data;
+		Gtk::TreeModelColumn<bool> selection;
+		Gtk::TreeModelColumn<std::string> name;
+	};
+
+	MidiPortColumns midi_port_columns;
+	Gtk::TreeView midi_input_view;
+	Gtk::TreeView midi_output_view;
+
+	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
+	void refill_midi_ports (bool for_input, Gtk::TreeView&);
+	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
+	void midi_use_column_toggled (std::string const & path, Gtk::TreeView*);
+	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
+	void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
+	void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
+};
+
+void
+MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
+{
+	int pretty_name_column;
+	int use_column;
+	int music_column;
+	int control_column;
+	int selection_column;
+
+	pretty_name_column = view.append_column_editable (_("Name (editable)"), midi_port_columns.pretty_name) - 1;
+	use_column = view.append_column_editable (_("Use"), midi_port_columns.in_use) - 1;
+	music_column = view.append_column_editable (_("Use for Music"), midi_port_columns.music_data) - 1;
+	control_column = view.append_column_editable (_("Use for Control"), midi_port_columns.control_data) - 1;
+
+	if (with_selection) {
+		selection_column = view.append_column_editable (_("Follow Selection"), midi_port_columns.selection) - 1;
+	}
+
+	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
+	pretty_name_cell->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::pretty_name_edit), &view));
+
+	CellRendererToggle* toggle_cell;
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (use_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_use_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (music_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_music_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (control_column));
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_control_column_toggled), &view));
+
+	if (with_selection) {
+		toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (selection_column));
+		toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_selection_column_toggled), &view));
+	}
+
+	view.get_selection()->set_mode (SELECTION_NONE);
+	view.set_tooltip_column (5); /* port "real" name */
+}
+
+void
+MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
+{
+	using namespace ARDOUR;
+
+	std::vector<string> ports;
+
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, for_input ? IsOutput : IsInput, ports);
+
+	Glib::RefPtr<ListStore> model = Gtk::ListStore::create (midi_port_columns);
+
+	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
+
+		if (AudioEngine::instance()->port_is_mine (*s)) {
+			continue;
+		}
+
+		TreeModel::Row row = *(model->append());
+
+		string pretty = AudioEngine::instance()->get_pretty_name_by_name (*s);
+		row[midi_port_columns.pretty_name] = (pretty.empty() ? *s : pretty);
+		row[midi_port_columns.in_use] = true;
+		row[midi_port_columns.music_data] = true;
+		row[midi_port_columns.control_data] = true;
+		row[midi_port_columns.name] = *s;
+	}
+
+	view.set_model (model);
+}
+
+void
+MidiPortOptions::midi_use_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.in_use]);
+	(*iter)[midi_port_columns.in_use] = !value;
+
+}
+
+void
+MidiPortOptions::midi_music_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.music_data]);
+	(*iter)[midi_port_columns.music_data] = !value;
+}
+
+void
+MidiPortOptions::midi_control_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool value ((*iter)[midi_port_columns.control_data]);
+	(*iter)[midi_port_columns.control_data] = !value;
+
+	if (!value) {
+		// ARDOUR::AudioEngine::instance()->remove_port_purpose (PortFlags (ControlData));
+	} else {
+		// ARDOUR::AudioEngine::instance()->add_port_purpose (PortFlags (ControlData));
+	}
+}
+
+void
+MidiPortOptions::midi_selection_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+	bool value ((*iter)[midi_port_columns.selection]);
+	(*iter)[midi_port_columns.selection] = !value;
+
+	if (!value) {
+		ARDOUR::AudioEngine::instance()->add_to_midi_selection_ports ((*iter)[midi_port_columns.name]);
+	} else {
+		ARDOUR::AudioEngine::instance()->remove_from_midi_selection_ports ((*iter)[midi_port_columns.name]);
+	}
+}
+
+void
+MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_text, Gtk::TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend) {
+		ARDOUR::PortEngine::PortHandle ph = backend->get_port_by_name ((*iter)[midi_port_columns.name]);
+		if (ph) {
+			backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", new_text, "");
+			(*iter)[midi_port_columns.pretty_name] = new_text;
+		}
+	}
+}
+
+/*============*/
+
 
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
@@ -2718,6 +2928,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
+
+	add_option (_("MIDI/Ports"),
+		    new BoolOption (
+			    "get-midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI/Ports"), new MidiPortOptions ());
 
 	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
 
