@@ -876,8 +876,7 @@ AudioEngine::start (bool for_latency)
 	int error_code = _backend->start (for_latency);
 
 	if (error_code != 0) {
-		_last_backend_error_string =
-		    AudioBackend::get_error_string((AudioBackend::ErrorCode)error_code);
+		_last_backend_error_string = AudioBackend::get_error_string((AudioBackend::ErrorCode) error_code);
 		return -1;
 	}
 
