@@ -84,6 +84,7 @@ public:
 		uint32_t patch_Set;
 		uint32_t patch_property;
 		uint32_t patch_value;
+		uint32_t state_Changed;
 #ifdef LV2_EXTENDED
 		uint32_t auto_event;
 		uint32_t auto_setup;
@@ -92,7 +93,6 @@ public:
 		uint32_t auto_end;
 		uint32_t auto_parameter;
 		uint32_t auto_value;
-		uint32_t state_Dirty;
 #endif
 	};
 

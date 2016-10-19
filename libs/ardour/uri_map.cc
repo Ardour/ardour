@@ -62,6 +62,7 @@ URIMap::URIDs::init(URIMap& uri_map)
 	patch_Set           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Set");
 	patch_property      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#property");
 	patch_value         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#value");
+	state_Changed       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/state/#StateChanged"); // since LV2 1.15.1
 #ifdef LV2_EXTENDED
 	auto_event         = uri_map.uri_to_id(LV2_AUTOMATE_URI__event);
 	auto_setup         = uri_map.uri_to_id(LV2_AUTOMATE_URI__setup);
@@ -70,7 +71,6 @@ URIMap::URIDs::init(URIMap& uri_map)
 	auto_end           = uri_map.uri_to_id(LV2_AUTOMATE_URI__end);
 	auto_parameter     = uri_map.uri_to_id(LV2_AUTOMATE_URI__parameter);
 	auto_value         = uri_map.uri_to_id(LV2_AUTOMATE_URI__value);
-	state_Dirty        = uri_map.uri_to_id("http://ardour.org/lv2/state#Dirty"); // XXX http://lv2plug.in/ns/ext/state/#dirty
 #endif
 }
 
