@@ -1866,10 +1866,16 @@ class MidiPortOptions : public OptionEditorBox
 
 		midi_output_view.show ();
 		midi_input_view.show ();
+
+		_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
 	}
 
 	void parameter_changed (string const&) {}
 	void set_state_from_config() {}
+	void on_show () {
+		refill_midi_ports (true, midi_input_view);
+		refill_midi_ports (false, midi_output_view);
+	}
 
   private:
 
