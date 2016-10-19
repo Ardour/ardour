@@ -670,7 +670,7 @@ AudioClock::end_edit (bool modify)
 
 			case BBT:
 				if (is_duration) {
-					pos = frame_duration_from_bbt_string (0, edit_string);
+					pos = frame_duration_from_bbt_string (current_time(), edit_string);
 				} else {
 					pos = frames_from_bbt_string (0, edit_string);
 				}
