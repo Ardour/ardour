@@ -128,6 +128,13 @@ class LIBARDOUR_API PortManager
 
 	bool port_remove_in_progress() const { return _port_remove_in_progress; }
 
+	typedef std::vector<std::string> MidiSelectionPorts;
+
+	void get_midi_selection_ports (MidiSelectionPorts&) const;
+	void add_to_midi_selection_ports (std::string const&);
+	void remove_from_midi_selection_ports (std::string const&);
+	void clear_midi_selection_ports ();
+
 	/** Emitted if the backend notifies us of a graph order event */
 	PBD::Signal0<void> GraphReordered;
 
@@ -170,6 +177,9 @@ class LIBARDOUR_API PortManager
 	 * Realtime safe.
 	 */
 	void cycle_end (pframes_t nframes);
+
+	mutable Glib::Threads::Mutex midi_selection_ports_mutex;
+	MidiSelectionPorts _midi_selection_ports;
 };
 
 

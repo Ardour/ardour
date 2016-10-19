@@ -851,3 +851,36 @@ PortManager::port_is_control_only (std::string const& name)
 
 	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
 }
+
+void
+PortManager::get_midi_selection_ports (MidiSelectionPorts& copy) const
+{
+	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+	copy = _midi_selection_ports;
+}
+
+void
+PortManager::add_to_midi_selection_ports (string const & port)
+{
+	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+	if (find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port) == _midi_selection_ports.end()) {
+		_midi_selection_ports.push_back (port);
+	}
+}
+
+void
+PortManager::remove_from_midi_selection_ports (string const & port)
+{
+	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+	MidiSelectionPorts::iterator x = find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port);
+	if (x != _midi_selection_ports.end()) {
+		_midi_selection_ports.erase (x);
+	}
+}
+
+void
+PortManager::clear_midi_selection_ports ()
+{
+	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+	_midi_selection_ports.clear ();
+}
