@@ -134,6 +134,10 @@ class LIBARDOUR_API PortManager
 	void add_to_midi_selection_ports (std::string const&);
 	void remove_from_midi_selection_ports (std::string const&);
 	void clear_midi_selection_ports ();
+	bool port_is_for_midi_selection (std::string const&);
+
+	/** Emitted if the list of ports to be used for MIDI selection tracking changes */
+	PBD::Signal0<void> MidiSelectionPortsChanged;
 
 	/** Emitted if the backend notifies us of a graph order event */
 	PBD::Signal0<void> GraphReordered;

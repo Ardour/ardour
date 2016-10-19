@@ -852,6 +852,13 @@ PortManager::port_is_control_only (std::string const& name)
 	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
 }
 
+bool
+PortManager::port_is_for_midi_selection (std::string const & name)
+{
+	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+	return find (_midi_selection_ports.begin(), _midi_selection_ports.end(), name) != _midi_selection_ports.end();
+}
+
 void
 PortManager::get_midi_selection_ports (MidiSelectionPorts& copy) const
 {
@@ -862,25 +869,47 @@ PortManager::get_midi_selection_ports (MidiSelectionPorts& copy) const
 void
 PortManager::add_to_midi_selection_ports (string const & port)
 {
-	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-	if (find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port) == _midi_selection_ports.end()) {
-		_midi_selection_ports.push_back (port);
+	bool emit = false;
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+		if (find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port) == _midi_selection_ports.end()) {
+			_midi_selection_ports.push_back (port);
+			emit = true;
+		}
+	}
+
+	if (emit) {
+		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
 	}
 }
 
 void
 PortManager::remove_from_midi_selection_ports (string const & port)
 {
-	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-	MidiSelectionPorts::iterator x = find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port);
-	if (x != _midi_selection_ports.end()) {
-		_midi_selection_ports.erase (x);
+	bool emit = false;
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+		MidiSelectionPorts::iterator x = find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port);
+		if (x != _midi_selection_ports.end()) {
+			_midi_selection_ports.erase (x);
+			emit = true;
+		}
+	}
+
+	if (emit) {
+		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
 	}
 }
 
 void
 PortManager::clear_midi_selection_ports ()
 {
-	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-	_midi_selection_ports.clear ();
+	{
+		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
+		_midi_selection_ports.clear ();
+	}
+
+	MidiSelectionPortsChanged (); /* EMIT SIGNAL */
 }

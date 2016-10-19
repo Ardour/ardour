@@ -270,6 +270,7 @@ Session::post_engine_init ()
 
 		SndFileSource::setup_standard_crossfades (*this, frame_rate());
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
 		AudioDiskstream::allocate_working_buffers();
 		refresh_disk_space ();
