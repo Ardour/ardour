@@ -657,7 +657,13 @@ namespace ARDOUR {
 
 		/* non-JACK related flags */
 		Hidden = 0x20,
-		Shadow = 0x40,
+		Shadow = 0x40
+	};
+
+	enum MidiPortFlags {
+		MidiPortMusic = 0x1,
+		MidiPortControl = 0x2,
+		MidiPortSelection = 0x4,
 	};
 
 	struct LatencyRange {

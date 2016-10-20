@@ -891,6 +891,10 @@ AudioEngine::start (bool for_latency)
 
 	}
 
+	/* XXX MIDI ports may not actually be available here yet .. */
+
+	PortManager::fill_midi_port_info ();
+
 	if (!for_latency) {
 		Running(); /* EMIT SIGNAL */
 	}
@@ -917,7 +921,7 @@ AudioEngine::stop (bool for_latency)
 		stop_engine = false;
 	} else {
 		if (_backend->stop ()) {
-			if (pl.locked ()) { 
+			if (pl.locked ()) {
                             pl.release ();
                         }
 			return -1;
@@ -1495,4 +1499,3 @@ AudioEngine::add_pending_port_deletion (Port* p)
 		delete p;
 	}
 }
-

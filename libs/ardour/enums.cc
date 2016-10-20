@@ -136,6 +136,7 @@ setup_enum_writer ()
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
 	MusicalMode::Type mode;
+	MidiPortFlags _MidiPortFlags;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -673,6 +674,11 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Program);
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Bank);
 	REGISTER (_MidiModel_PatchChangeDiffCommand_Property);
+
+	REGISTER_ENUM(MidiPortMusic);
+	REGISTER_ENUM(MidiPortControl);
+	REGISTER_ENUM(MidiPortSelection);
+	REGISTER_BITS(_MidiPortFlags);
 
 	REGISTER_ENUM(Linear);
 	REGISTER_ENUM(Logarithmic);

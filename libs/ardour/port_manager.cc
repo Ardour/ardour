@@ -24,6 +24,9 @@
 #include <regex.h>
 #endif
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
@@ -31,6 +34,7 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audio_port.h"
 #include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/port_manager.h"
@@ -48,7 +52,9 @@ PortManager::PortManager ()
 	: ports (new Ports)
 	, _port_remove_in_progress (false)
 	, _port_deletions_pending (8192) /* ick, arbitrary sizing */
+	, midi_info_dirty (true)
 {
+	load_midi_port_info ();
 }
 
 void
@@ -622,6 +628,12 @@ void
 PortManager::registration_callback ()
 {
 	if (!_port_remove_in_progress) {
+
+		{
+			Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+			midi_info_dirty = true;
+		}
+
 		PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 	}
 }
@@ -862,64 +874,299 @@ PortManager::port_is_control_only (std::string const& name)
 	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
 }
 
-bool
-PortManager::port_is_for_midi_selection (std::string const & name)
+PortManager::MidiPortInformation
+PortManager::midi_port_information (std::string const & name)
 {
-	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-	return find (_midi_selection_ports.begin(), _midi_selection_ports.end(), name) != _midi_selection_ports.end();
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	MidiPortInfo::iterator x = midi_port_info.find (name);
+
+	if (x != midi_port_info.end()) {
+		return x->second;
+	}
+
+	return MidiPortInformation ();
 }
 
 void
-PortManager::get_midi_selection_ports (MidiSelectionPorts& copy) const
+PortManager::get_known_midi_ports (vector<string>& copy)
 {
-	Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-	copy = _midi_selection_ports;
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		copy.push_back (x->first);
+	}
 }
 
 void
-PortManager::add_to_midi_selection_ports (string const & port)
+PortManager::get_midi_selection_ports (vector<string>& copy)
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		if (x->second.properties & MidiPortSelection) {
+			copy.push_back (x->first);
+		}
+	}
+}
+
+void
+PortManager::set_midi_port_pretty_name (string const & port, string const & pretty)
+{
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x == midi_port_info.end()) {
+			return;
+		}
+		x->second.pretty_name = pretty;
+	}
+
+	/* push into back end */
+
+	PortEngine::PortHandle ph = _backend->get_port_by_name (port);
+
+	if (ph) {
+		_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", pretty, string());
+	}
+
+	MidiPortInfoChanged (); /* EMIT SIGNAL*/
+}
+
+void
+PortManager::add_midi_port_flags (string const & port, MidiPortFlags flags)
 {
 	bool emit = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-		if (find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port) == _midi_selection_ports.end()) {
-			_midi_selection_ports.push_back (port);
-			emit = true;
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x != midi_port_info.end()) {
+			if ((x->second.properties & flags) != flags) { // at least one missing
+				x->second.properties = MidiPortFlags (x->second.properties | flags);
+				emit = true;
+			}
 		}
 	}
 
 	if (emit) {
-		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		if (flags & MidiPortSelection) {
+			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		}
+
+		if (flags != MidiPortSelection) {
+			MidiPortInfoChanged (); /* EMIT SIGNAL */
+		}
+
+		save_midi_port_info ();
 	}
 }
 
 void
-PortManager::remove_from_midi_selection_ports (string const & port)
+PortManager::remove_midi_port_flags (string const & port, MidiPortFlags flags)
 {
 	bool emit = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-		MidiSelectionPorts::iterator x = find (_midi_selection_ports.begin(), _midi_selection_ports.end(), port);
-		if (x != _midi_selection_ports.end()) {
-			_midi_selection_ports.erase (x);
-			emit = true;
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x != midi_port_info.end()) {
+			if (x->second.properties & flags) { // at least one is set
+				x->second.properties = MidiPortFlags (x->second.properties & ~flags);
+				emit = true;
+			}
 		}
 	}
 
 	if (emit) {
-		MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		if (flags & MidiPortSelection) {
+			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		}
+
+		if (flags != MidiPortSelection) {
+			MidiPortInfoChanged (); /* EMIT SIGNAL */
+		}
+
+		save_midi_port_info ();
+	}
+}
+
+string
+PortManager::midi_port_info_file ()
+{
+	return Glib::build_filename (user_config_directory(), X_("midi_port_info"));
+}
+
+void
+PortManager::save_midi_port_info ()
+{
+	string path = midi_port_info_file ();
+
+	XMLNode* root = new XMLNode (X_("MidiPortInfo"));
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		if (midi_port_info.empty()) {
+			delete root;
+			return;
+		}
+
+		for (MidiPortInfo::iterator i = midi_port_info.begin(); i != midi_port_info.end(); ++i) {
+			XMLNode* node = new XMLNode (X_("port"));
+			node->add_property (X_("name"), i->first);
+			node->add_property (X_("pretty-name"), i->second.pretty_name);
+			node->add_property (X_("input"), i->second.input ? X_("yes") : X_("no"));
+			node->add_property (X_("properties"), enum_2_string (i->second.properties));
+			root->add_child_nocopy (*node);
+		}
+	}
+
+	XMLTree tree;
+
+	tree.set_root (root);
+
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save MIDI port info to %1"), path) << endmsg;
 	}
 }
 
 void
-PortManager::clear_midi_selection_ports ()
+PortManager::load_midi_port_info ()
 {
-	{
-		Glib::Threads::Mutex::Lock lm (midi_selection_ports_mutex);
-		_midi_selection_ports.clear ();
+	string path = midi_port_info_file ();
+	XMLTree tree;
+
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return;
 	}
 
-	MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+	if (!tree.read (path)) {
+		error << string_compose (_("Cannot load MIDI port info from %1"), path) << endmsg;
+		return;
+	}
+
+	midi_port_info.clear ();
+
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+		XMLProperty const* prop;
+		MidiPortInformation mpi;
+		string name;
+
+		if ((prop = (*i)->property (X_("name"))) == 0) {
+			continue;
+		}
+
+		name = prop->value ();
+
+		if ((prop = (*i)->property (X_("pretty-name"))) == 0) {
+			continue;
+		}
+		mpi.pretty_name = prop->value();
+
+		if ((prop = (*i)->property (X_("input"))) == 0) {
+			continue;
+		}
+		mpi.input = string_is_affirmative (prop->value());
+
+		if ((prop = (*i)->property (X_("properties"))) == 0) {
+			continue;
+		}
+
+		mpi.properties = (MidiPortFlags) string_2_enum (prop->value(), mpi.properties);
+
+		midi_port_info.insert (make_pair (name, mpi));
+	}
+}
+
+void
+PortManager::fill_midi_port_info ()
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+	fill_midi_port_info_locked ();
+}
+
+void
+PortManager::fill_midi_port_info_locked ()
+{
+	/* MIDI info mutex MUST be held */
+
+	if (!midi_info_dirty) {
+		return;
+	}
+
+	std::vector<string> ports;
+
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, IsOutput, ports);
+
+	for (vector<string>::iterator p = ports.begin(); p != ports.end(); ++p) {
+
+		if (port_is_mine (*p)) {
+			continue;
+		}
+
+		if (midi_port_info.find (*p) == midi_port_info.end()) {
+			MidiPortInformation mpi;
+			mpi.pretty_name = *p;
+			mpi.input = true;
+			midi_port_info.insert (make_pair (*p, mpi));
+		}
+	}
+
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, IsInput, ports);
+
+	for (vector<string>::iterator p = ports.begin(); p != ports.end(); ++p) {
+
+		if (port_is_mine (*p)) {
+			continue;
+		}
+
+		if (midi_port_info.find (*p) == midi_port_info.end()) {
+			MidiPortInformation mpi;
+			mpi.pretty_name = *p;
+			mpi.input = false;
+			midi_port_info.insert (make_pair (*p, mpi));
+		}
+	}
+
+	/* now push/pull pretty name information between backend and the
+	 * PortManager
+	 */
+
+	for (MidiPortInfo::iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		PortEngine::PortHandle ph = _backend->get_port_by_name (x->first);
+
+		if (x->second.pretty_name != x->first) {
+			/* name set in port info ... propagate */
+			_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", x->second.pretty_name, string());
+		} else {
+			/* check with backend for pre-existing pretty name */
+			if (ph) {
+				string value;
+				string type;
+				if (0 == _backend->get_port_property (ph,
+				                                      "http://jackaudio.org/metadata/pretty-name",
+				                                      value, type)) {
+					x->second.pretty_name = value;
+				}
+			}
+		}
+	}
+
+	midi_info_dirty = false;
 }

@@ -755,7 +755,7 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 		return;
 	}
 
-	PortManager::MidiSelectionPorts msp;
+	vector<string> msp;
 	AudioEngine::instance()->get_midi_selection_ports (msp);
 
 	if (!msp.empty()) {
@@ -764,7 +764,7 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 			old_midi_target->input()->disconnect (this);
 		}
 
-		for (PortManager::MidiSelectionPorts::const_iterator p = msp.begin(); p != msp.end(); ++p) {
+		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
 			/* disconnect the port from everything */
 			AudioEngine::instance()->disconnect (*p);
 			/* connect it to the new target */
@@ -788,7 +788,7 @@ Session::rewire_midi_selection_ports ()
 		return;
 	}
 
-	PortManager::MidiSelectionPorts msp;
+	vector<string> msp;
 	AudioEngine::instance()->get_midi_selection_ports (msp);
 
 	if (msp.empty()) {
@@ -799,7 +799,7 @@ Session::rewire_midi_selection_ports ()
 
 	target->input()->disconnect (this);
 
-	for (PortManager::MidiSelectionPorts::const_iterator p = msp.begin(); p != msp.end(); ++p) {
+	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
 		cerr << "\tdisconnect " << *p << endl;
 		AudioEngine::instance()->disconnect (*p);
 		cerr << "\tconnect to " << *p << endl;

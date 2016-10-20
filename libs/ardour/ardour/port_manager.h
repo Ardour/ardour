@@ -129,16 +129,27 @@ class LIBARDOUR_API PortManager
 
 	bool port_remove_in_progress() const { return _port_remove_in_progress; }
 
-	typedef std::vector<std::string> MidiSelectionPorts;
+	struct MidiPortInformation {
+		std::string   pretty_name;
+		bool          input;
+		MidiPortFlags properties;
 
-	void get_midi_selection_ports (MidiSelectionPorts&) const;
-	void add_to_midi_selection_ports (std::string const&);
-	void remove_from_midi_selection_ports (std::string const&);
-	void clear_midi_selection_ports ();
-	bool port_is_for_midi_selection (std::string const&);
+		MidiPortInformation () : input (false) , properties (MidiPortFlags (0)) {}
+	};
+
+	void fill_midi_port_info ();
+
+	MidiPortInformation midi_port_information (std::string const&);
+	void get_known_midi_ports (std::vector<std::string>&);
+	void get_midi_selection_ports (std::vector<std::string>&);
+	void add_midi_port_flags (std::string const&, MidiPortFlags);
+	void remove_midi_port_flags (std::string const&, MidiPortFlags);
+	void set_midi_port_pretty_name (std::string const&, std::string const&);
 
 	/** Emitted if the list of ports to be used for MIDI selection tracking changes */
 	PBD::Signal0<void> MidiSelectionPortsChanged;
+	/** Emitted if anything other than the selection property for a MIDI port changes */
+	PBD::Signal0<void> MidiPortInfoChanged;
 
 	/** Emitted if the backend notifies us of a graph order event */
 	PBD::Signal0<void> GraphReordered;
@@ -183,8 +194,16 @@ class LIBARDOUR_API PortManager
 	 */
 	void cycle_end (pframes_t nframes);
 
-	mutable Glib::Threads::Mutex midi_selection_ports_mutex;
-	MidiSelectionPorts _midi_selection_ports;
+	typedef std::map<std::string,MidiPortInformation> MidiPortInfo;
+
+	mutable Glib::Threads::Mutex midi_port_info_mutex;
+	MidiPortInfo midi_port_info;
+
+	static std::string midi_port_info_file ();
+	bool midi_info_dirty;
+	void save_midi_port_info ();
+	void load_midi_port_info ();
+	void fill_midi_port_info_locked ();
 };
 
 
