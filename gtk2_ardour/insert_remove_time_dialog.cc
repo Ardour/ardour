@@ -164,7 +164,7 @@ InsertRemoveTimeDialog::move_locked_markers () const
 framepos_t
 InsertRemoveTimeDialog::distance () const
 {
-	return _clock.current_duration (_editor.get_preferred_edit_position ());
+	return _clock.current_duration (_editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE));
 }
 
 void
