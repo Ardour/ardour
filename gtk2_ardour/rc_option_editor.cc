@@ -1883,13 +1883,23 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 
 	void on_show () {
 		refill ();
-		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connection,
+
+		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
 		                                                               invalidator (*this),
 		                                                               boost::bind (&MidiPortOptions::refill, this),
 		                                                               gui_context());
+		AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
+		                                                      invalidator (*this),
+		                                                      boost::bind (&MidiPortOptions::refill, this),
+		                                                      gui_context());
+		AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
+		                                                            invalidator (*this),
+		                                                            boost::bind (&MidiPortOptions::refill, this),
+		                                                            gui_context());
 	}
 
 	void refill () {
+
 		if (refill_midi_ports (true, midi_input_view)) {
 			input_label.show ();
 		} else {
@@ -1903,14 +1913,13 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 	}
 
   private:
-	PBD::ScopedConnection port_connection;
+	PBD::ScopedConnectionList connections;
 
 	/* MIDI port management */
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
 
 		MidiPortColumns () {
 			add (pretty_name);
-			add (in_use);
 			add (music_data);
 			add (control_data);
 			add (selection);
@@ -1919,7 +1928,6 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 		}
 
 		Gtk::TreeModelColumn<std::string> pretty_name;
-		Gtk::TreeModelColumn<bool> in_use;
 		Gtk::TreeModelColumn<bool> music_data;
 		Gtk::TreeModelColumn<bool> control_data;
 		Gtk::TreeModelColumn<bool> selection;
@@ -1936,7 +1944,6 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
 	bool refill_midi_ports (bool for_input, Gtk::TreeView&);
 	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
-	void midi_use_column_toggled (std::string const & path, Gtk::TreeView*);
 	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
 	void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
 	void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
@@ -1946,7 +1953,6 @@ void
 MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 {
 	int pretty_name_column;
-	int use_column;
 	int music_column;
 	int control_column;
 	int selection_column;
@@ -1954,14 +1960,6 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	Gtk::Label* l;
 
 	pretty_name_column = view.append_column_editable (_("Name (click to edit)"), midi_port_columns.pretty_name) - 1;
-
-	col = manage (new TreeViewColumn ("", midi_port_columns.in_use));
-	col->set_alignment (ALIGN_CENTER);
-	l = manage (new Label (_("Use")));
-	set_tooltip (*l, string_compose (_("If ticked, %1 will use this port.\n\nOtherwise, the port will be ignored."), PROGRAM_NAME));
-	col->set_widget (*l);
-	l->show ();
-	use_column = view.append_column (*col) - 1;
 
 	col = manage (new TreeViewColumn ("", midi_port_columns.music_data));
 	col->set_alignment (ALIGN_CENTER);
@@ -1997,10 +1995,6 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 
 	CellRendererToggle* toggle_cell;
 
-	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (use_column));
-	toggle_cell->property_activatable() = true;
-	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_use_column_toggled), &view));
-
 	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (music_column));
 	toggle_cell->property_activatable() = true;
 	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_music_column_toggled), &view));
@@ -2016,7 +2010,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	}
 
 	view.get_selection()->set_mode (SELECTION_NONE);
-	view.set_tooltip_column (5); /* port "real" name */
+	view.set_tooltip_column (4); /* port "real" name */
 }
 
 bool
@@ -2026,7 +2020,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 
 	std::vector<string> ports;
 
-	AudioEngine::instance()->get_ports (string(), DataType::MIDI, for_input ? IsOutput : IsInput, ports);
+	AudioEngine::instance()->get_known_midi_ports (ports);
 
 	if (ports.empty()) {
 		view.hide ();
@@ -2041,32 +2035,29 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 			continue;
 		}
 
+		PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*s));
+
+		if (mpi.pretty_name.empty()) {
+			/* vanished since get_known_midi_ports() */
+			continue;
+		}
+
+		if (for_input != mpi.input) {
+			continue;
+		}
+
 		TreeModel::Row row = *(model->append());
 
-		string pretty = AudioEngine::instance()->get_pretty_name_by_name (*s);
-		row[midi_port_columns.pretty_name] = (pretty.empty() ? *s : pretty);
-		row[midi_port_columns.in_use] = true;
-		row[midi_port_columns.music_data] = true;
-		row[midi_port_columns.control_data] = true;
+		row[midi_port_columns.pretty_name] = mpi.pretty_name;
+		row[midi_port_columns.music_data] = mpi.properties & MidiPortMusic;
+		row[midi_port_columns.control_data] = mpi.properties & MidiPortControl;
+		row[midi_port_columns.selection] = mpi.properties & MidiPortSelection;
 		row[midi_port_columns.name] = *s;
 	}
 
 	view.set_model (model);
+
 	return true;
-}
-
-void
-MidiPortOptions::midi_use_column_toggled (string const & path, TreeView* view)
-{
-	TreeIter iter = view->get_model()->get_iter (path);
-
-	if (!iter) {
-		return;
-	}
-
-	bool value ((*iter)[midi_port_columns.in_use]);
-	(*iter)[midi_port_columns.in_use] = !value;
-
 }
 
 void
@@ -2078,8 +2069,15 @@ MidiPortOptions::midi_music_column_toggled (string const & path, TreeView* view)
 		return;
 	}
 
-	bool value ((*iter)[midi_port_columns.music_data]);
-	(*iter)[midi_port_columns.music_data] = !value;
+	bool new_value = ! bool ((*iter)[midi_port_columns.music_data]);
+
+	/* don't reset model - wait for MidiPortInfoChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+	} else {
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+	}
 }
 
 void
@@ -2091,13 +2089,14 @@ MidiPortOptions::midi_control_column_toggled (string const & path, TreeView* vie
 		return;
 	}
 
-	bool value ((*iter)[midi_port_columns.control_data]);
-	(*iter)[midi_port_columns.control_data] = !value;
+	bool new_value = ! bool ((*iter)[midi_port_columns.control_data]);
 
-	if (!value) {
-		// ARDOUR::AudioEngine::instance()->remove_port_purpose (PortFlags (ControlData));
+	/* don't reset model - wait for MidiPortInfoChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
 	} else {
-		// ARDOUR::AudioEngine::instance()->add_port_purpose (PortFlags (ControlData));
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
 	}
 }
 
@@ -2109,13 +2108,15 @@ MidiPortOptions::midi_selection_column_toggled (string const & path, TreeView* v
 	if (!iter) {
 		return;
 	}
-	bool value ((*iter)[midi_port_columns.selection]);
-	(*iter)[midi_port_columns.selection] = !value;
 
-	if (!value) {
-		ARDOUR::AudioEngine::instance()->add_to_midi_selection_ports ((*iter)[midi_port_columns.name]);
+	bool new_value = ! bool ((*iter)[midi_port_columns.selection]);
+
+	/* don't reset model - wait for MidiSelectionPortsChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
 	} else {
-		ARDOUR::AudioEngine::instance()->remove_from_midi_selection_ports ((*iter)[midi_port_columns.name]);
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
 	}
 }
 
