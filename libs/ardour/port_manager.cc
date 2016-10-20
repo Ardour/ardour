@@ -540,6 +540,16 @@ PortManager::disconnect (boost::shared_ptr<Port> port)
 }
 
 int
+PortManager::disconnect (std::string const & name)
+{
+	PortEngine::PortHandle ph = _backend->get_port_by_name (name);
+	if (ph) {
+		return _backend->disconnect_all (ph);
+	}
+	return -2;
+}
+
+int
 PortManager::reestablish_ports ()
 {
 	Ports::iterator i;

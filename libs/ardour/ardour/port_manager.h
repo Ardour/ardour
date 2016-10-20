@@ -67,6 +67,7 @@ class LIBARDOUR_API PortManager
 	int  connect (const std::string& source, const std::string& destination);
 	int  disconnect (const std::string& source, const std::string& destination);
 	int  disconnect (boost::shared_ptr<Port>);
+	int  disconnect (std::string const &);
 	int  reestablish_ports ();
 	int  reconnect_ports ();
 
