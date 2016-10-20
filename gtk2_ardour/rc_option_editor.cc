@@ -1858,10 +1858,17 @@ class MidiPortOptions : public OptionEditorBox
 {
   public:
 	MidiPortOptions() {
+
 		setup_midi_port_view (midi_output_view, false);
 		setup_midi_port_view (midi_input_view, true);
 
+
+		input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
+		_box->pack_start (input_label, false, false);
 		_box->pack_start (midi_input_view);
+
+		output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
+		_box->pack_start (output_label, false, false);
 		_box->pack_start (midi_output_view);
 
 		midi_output_view.show ();
@@ -1873,8 +1880,17 @@ class MidiPortOptions : public OptionEditorBox
 	void parameter_changed (string const&) {}
 	void set_state_from_config() {}
 	void on_show () {
-		refill_midi_ports (true, midi_input_view);
-		refill_midi_ports (false, midi_output_view);
+
+		if (refill_midi_ports (true, midi_input_view)) {
+			input_label.show ();
+		} else {
+		       input_label.hide ();
+		}
+		if (refill_midi_ports (false, midi_output_view)) {
+			output_label.show ();
+		} else {
+			output_label.hide ();
+		}
 	}
 
   private:
@@ -1902,9 +1918,11 @@ class MidiPortOptions : public OptionEditorBox
 	MidiPortColumns midi_port_columns;
 	Gtk::TreeView midi_input_view;
 	Gtk::TreeView midi_output_view;
+	Gtk::Label input_label;
+	Gtk::Label output_label;
 
 	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
-	void refill_midi_ports (bool for_input, Gtk::TreeView&);
+	bool refill_midi_ports (bool for_input, Gtk::TreeView&);
 	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
 	void midi_use_column_toggled (std::string const & path, Gtk::TreeView*);
 	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
@@ -1920,32 +1938,56 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	int music_column;
 	int control_column;
 	int selection_column;
+	TreeViewColumn* col;
 
-	pretty_name_column = view.append_column_editable (_("Name (editable)"), midi_port_columns.pretty_name) - 1;
-	use_column = view.append_column_editable (_("Use"), midi_port_columns.in_use) - 1;
-	music_column = view.append_column_editable (_("Use for Music"), midi_port_columns.music_data) - 1;
-	control_column = view.append_column_editable (_("Use for Control"), midi_port_columns.control_data) - 1;
+	pretty_name_column = view.append_column_editable (_("Name (click to edit)"), midi_port_columns.pretty_name) - 1;
+
+	col = manage (new TreeViewColumn (_("Use"), midi_port_columns.in_use));
+	col->set_fixed_width (150);
+	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col->set_alignment (ALIGN_START);
+	use_column = view.append_column (*col) - 1;
+
+	col = manage (new TreeViewColumn (_("Music Data"), midi_port_columns.music_data));
+	col->set_fixed_width (150);
+	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col->set_alignment (ALIGN_START);
+	music_column = view.append_column (*col) - 1;
+
+	col = manage (new TreeViewColumn (_("Control Data"), midi_port_columns.control_data));
+	col->set_fixed_width (150);
+	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col->set_alignment (ALIGN_START);
+	control_column = view.append_column (*col) - 1;
 
 	if (with_selection) {
-		selection_column = view.append_column_editable (_("Follow Selection"), midi_port_columns.selection) - 1;
+		col = manage (new TreeViewColumn (_("Follow Selection"), midi_port_columns.selection));
+		col->set_fixed_width (150);
+		col->set_sizing (TREE_VIEW_COLUMN_FIXED);
+		selection_column = view.append_column (*col) - 1;
 	}
 
 	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
+	pretty_name_cell->property_editable() = true;
 	pretty_name_cell->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::pretty_name_edit), &view));
 
 	CellRendererToggle* toggle_cell;
 
 	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (use_column));
+	toggle_cell->property_activatable() = true;
 	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_use_column_toggled), &view));
 
 	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (music_column));
+	toggle_cell->property_activatable() = true;
 	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_music_column_toggled), &view));
 
 	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (control_column));
+	toggle_cell->property_activatable() = true;
 	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_control_column_toggled), &view));
 
 	if (with_selection) {
 		toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (selection_column));
+		toggle_cell->property_activatable() = true;
 		toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_selection_column_toggled), &view));
 	}
 
@@ -1953,7 +1995,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	view.set_tooltip_column (5); /* port "real" name */
 }
 
-void
+bool
 MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 {
 	using namespace ARDOUR;
@@ -1961,6 +2003,11 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 	std::vector<string> ports;
 
 	AudioEngine::instance()->get_ports (string(), DataType::MIDI, for_input ? IsOutput : IsInput, ports);
+
+	if (ports.empty()) {
+		view.hide ();
+		return false;
+	}
 
 	Glib::RefPtr<ListStore> model = Gtk::ListStore::create (midi_port_columns);
 
@@ -1981,6 +2028,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 	}
 
 	view.set_model (model);
+	return true;
 }
 
 void
