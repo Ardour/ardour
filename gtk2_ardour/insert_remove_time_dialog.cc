@@ -23,49 +23,75 @@
 #include <gtkmm/alignment.h>
 #include "insert_remove_time_dialog.h"
 #include "audio_clock.h"
+#include "ardour_ui.h"
+#include "main_clock.h"
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Editing;
+using namespace ARDOUR;
 
 InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	: ArdourDialog (remove ? _("Remove Time") : _("Insert Time"))
 	, _editor (e)
-	, _clock ("insertTimeClock", true, "",
+	, duration_clock ("insertTimeClock", true, "",
 			true,   // editable
 			false,  // follows_playhead
 			true,   // duration
 			false,  // with_info
 			true    // accept_on_focus_out
 		)
+	, position_clock ("insertPosTimeClock", true, "",
+			true,   // editable
+			false,  // follows_playhead
+			false,   // duration
+			false,  // with_info
+			true    // accept_on_focus_out
+		)
 {
 	set_session (_editor.session ());
-
-	framepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->set_spacing (4);
 
-	Table* table = manage (new Table (2, 2));
+	Table* table = manage (new Table (2, 3));
 	table->set_spacings (4);
 
-	Label* time_label = manage (new Label (remove ? _("Time to remove") : _("Time to insert:")));
+	Label* time_label = manage (new Label (remove ? _("Remove Time starting at:") : _("Insert Time starting at:")));
 	time_label->set_alignment (1, 0.5);
 	table->attach (*time_label, 0, 1, 0, 1, FILL | EXPAND);
-	_clock.set (0);
-	_clock.set_session (_session);
-	_clock.set_bbt_reference (pos);
-	table->attach (_clock, 1, 2, 0, 1);
+	position_clock.set_session (_session);
+	position_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	table->attach (position_clock, 1, 2, 0, 1);
 
+	time_label = manage (new Label (remove ? _("Time to remove:") : _("Time to insert:")));
+	time_label->set_alignment (1, 0.5);
+	table->attach (*time_label, 0, 1, 1, 2, FILL | EXPAND);
+	duration_clock.set_session (_session);
+	duration_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	table->attach (duration_clock, 1, 2, 1, 2);
+
+	//if a Range is selected, assume the user wants to insert/remove the length of the range
+	if ( _editor.get_selection().time.length() != 0 ) {
+		position_clock.set ( _editor.get_selection().time.start(), true );
+		duration_clock.set ( _editor.get_selection().time.end_frame(), true,  _editor.get_selection().time.start() );
+		duration_clock.set_bbt_reference (_editor.get_selection().time.start());
+	} else {
+		framepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
+		position_clock.set ( pos, true );
+		duration_clock.set_bbt_reference (pos);
+		duration_clock.set (0);
+	}
+	
 	if (!remove) {
 		Label* intersected_label = manage (new Label (_("Intersected regions should:")));
 		intersected_label->set_alignment (1, 0.5);
-		table->attach (*intersected_label, 0, 1, 1, 2, FILL | EXPAND);
+		table->attach (*intersected_label, 0, 1, 2, 3, FILL | EXPAND);
 		_intersected_combo.append_text (_("stay in position"));
 		_intersected_combo.append_text (_("move"));
 		_intersected_combo.append_text (_("be split"));
 		_intersected_combo.set_active (0);
-		table->attach (_intersected_combo, 1, 2, 1, 2);
+		table->attach (_intersected_combo, 1, 2, 2, 3);
 	}
 
 	get_vbox()->pack_start (*table);
@@ -162,9 +188,15 @@ InsertRemoveTimeDialog::move_locked_markers () const
 }
 
 framepos_t
+InsertRemoveTimeDialog::position () const
+{
+	return position_clock.current_time();
+}
+
+framepos_t
 InsertRemoveTimeDialog::distance () const
 {
-	return _clock.current_duration (_editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE));
+	return duration_clock.current_duration ( position_clock.current_time() );
 }
 
 void

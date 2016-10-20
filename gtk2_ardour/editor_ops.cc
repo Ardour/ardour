@@ -7393,7 +7393,7 @@ Editor::do_insert_time ()
 	}
 
 	insert_time (
-		get_preferred_edit_position (EDIT_IGNORE_MOUSE),
+		d.position(),
 		d.distance(),
 		d.intersected_region_action (),
 		d.all_playlists(),
@@ -7542,7 +7542,6 @@ Editor::do_remove_time ()
 		return;
 	}
 
-	framepos_t pos = get_preferred_edit_position (EDIT_IGNORE_MOUSE);
 	InsertRemoveTimeDialog d (*this, true);
 
 	int response = d.run ();
@@ -7558,7 +7557,7 @@ Editor::do_remove_time ()
 	}
 
 	remove_time (
-		pos,
+		d.position(),
 		distance,
 		SplitIntersected,
 		d.move_glued(),
