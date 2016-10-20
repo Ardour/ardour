@@ -99,13 +99,13 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	_all_playlists.set_label (_("Apply to all the track's playlists"));
 	get_vbox()->pack_start (_all_playlists);
 
-	_move_glued.set_label (_("Move glued regions"));
+	_move_glued.set_label (_("Move glued-to-musical-time regions (MIDI regions)"));
 	_move_glued.set_active();
 	get_vbox()->pack_start (_move_glued);
 	_move_markers.set_label (_("Move markers"));
 	get_vbox()->pack_start (_move_markers);
 	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertRemoveTimeDialog::move_markers_toggled));
-	_move_glued_markers.set_label (_("Move glued markers"));
+	_move_glued_markers.set_label (_("Move glued-to-musical-time markers"));
 	_move_glued_markers.set_active();
 	Alignment* indent = manage (new Alignment);
 	indent->set_padding (0, 0, 12, 0);
