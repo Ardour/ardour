@@ -1246,10 +1246,6 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 		negative = true;
 	}
 
-	if (offset == 0) {
-		offset = bbt_reference_time;
-	}
-
 	/* handle a common case */
 	if (is_duration) {
 		if (when == 0) {
@@ -1258,6 +1254,10 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 			BBT.ticks = 0;
 		} else {
 			TempoMap& tmap (_session->tempo_map());
+
+			if (offset == 0) {
+				offset = bbt_reference_time;
+			}
 
 			const double divisions = tmap.meter_section_at_frame (offset).divisions_per_bar();
 			Timecode::BBT_Time sub_bbt;
