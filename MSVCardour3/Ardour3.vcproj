@@ -788,10 +788,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\midi_port_dialog.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\midi_region_view.cc"
 				>
 			</File>
@@ -1811,10 +1807,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\midi_list_editor.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\midi_port_dialog.h"
 				>
 			</File>
 			<File
