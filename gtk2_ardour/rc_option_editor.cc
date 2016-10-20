@@ -41,6 +41,7 @@
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
+#include "pbd/i18n.h"
 
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
@@ -54,20 +55,20 @@
 
 #include "canvas/wave_view.h"
 
-#include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "ardour_window.h"
 #include "color_theme_manager.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
-#include "utils.h"
 #include "sfdb_ui.h"
-#include "keyboard.h"
 #include "theme_manager.h"
+#include "tooltips.h"
 #include "ui_config.h"
-#include "pbd/i18n.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -1914,6 +1915,7 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 			add (control_data);
 			add (selection);
 			add (name);
+			add (filler);
 		}
 
 		Gtk::TreeModelColumn<std::string> pretty_name;
@@ -1922,6 +1924,7 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 		Gtk::TreeModelColumn<bool> control_data;
 		Gtk::TreeModelColumn<bool> selection;
 		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> filler;
 	};
 
 	MidiPortColumns midi_port_columns;
@@ -1948,33 +1951,45 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	int control_column;
 	int selection_column;
 	TreeViewColumn* col;
+	Gtk::Label* l;
 
 	pretty_name_column = view.append_column_editable (_("Name (click to edit)"), midi_port_columns.pretty_name) - 1;
 
-	col = manage (new TreeViewColumn (_("Use"), midi_port_columns.in_use));
-	col->set_fixed_width (150);
-	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col->set_alignment (ALIGN_START);
+	col = manage (new TreeViewColumn ("", midi_port_columns.in_use));
+	col->set_alignment (ALIGN_CENTER);
+	l = manage (new Label (_("Use")));
+	set_tooltip (*l, string_compose (_("If ticked, %1 will use this port.\n\nOtherwise, the port will be ignored."), PROGRAM_NAME));
+	col->set_widget (*l);
+	l->show ();
 	use_column = view.append_column (*col) - 1;
 
-	col = manage (new TreeViewColumn (_("Music Data"), midi_port_columns.music_data));
-	col->set_fixed_width (150);
-	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col->set_alignment (ALIGN_START);
+	col = manage (new TreeViewColumn ("", midi_port_columns.music_data));
+	col->set_alignment (ALIGN_CENTER);
+	l = manage (new Label (_("Music Data")));
+	set_tooltip (*l, string_compose (_("If ticked, %1 will consider this port to be a source of music performance data."), PROGRAM_NAME));
+	col->set_widget (*l);
+	l->show ();
 	music_column = view.append_column (*col) - 1;
 
-	col = manage (new TreeViewColumn (_("Control Data"), midi_port_columns.control_data));
-	col->set_fixed_width (150);
-	col->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col->set_alignment (ALIGN_START);
+	col = manage (new TreeViewColumn ("", midi_port_columns.control_data));
+	col->set_alignment (ALIGN_CENTER);
+	l = manage (new Label (_("Control Data")));
+	set_tooltip (*l, string_compose (_("If ticked, %1 will consider this port to be a source of control data."), PROGRAM_NAME));
+	col->set_widget (*l);
+	l->show ();
 	control_column = view.append_column (*col) - 1;
 
 	if (with_selection) {
 		col = manage (new TreeViewColumn (_("Follow Selection"), midi_port_columns.selection));
-		col->set_fixed_width (150);
-		col->set_sizing (TREE_VIEW_COLUMN_FIXED);
 		selection_column = view.append_column (*col) - 1;
+		l = manage (new Label (_("Follow Selection")));
+		set_tooltip (*l, string_compose (_("If ticked, and \"MIDI input follows selection\" is enabled,\n%1 will automatically connect the first selected MIDI track to this port.\n"), PROGRAM_NAME));
+		col->set_widget (*l);
+		l->show ();
 	}
+
+	/* filler column so that the last real column doesn't expand */
+	view.append_column ("", midi_port_columns.filler);
 
 	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
 	pretty_name_cell->property_editable() = true;
