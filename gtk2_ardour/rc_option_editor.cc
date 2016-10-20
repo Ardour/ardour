@@ -1854,7 +1854,7 @@ private:
 };
 
 
-class MidiPortOptions : public OptionEditorBox
+class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 {
   public:
 	MidiPortOptions() {
@@ -1879,8 +1879,16 @@ class MidiPortOptions : public OptionEditorBox
 
 	void parameter_changed (string const&) {}
 	void set_state_from_config() {}
-	void on_show () {
 
+	void on_show () {
+		refill ();
+		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connection,
+		                                                               invalidator (*this),
+		                                                               boost::bind (&MidiPortOptions::refill, this),
+		                                                               gui_context());
+	}
+
+	void refill () {
 		if (refill_midi_ports (true, midi_input_view)) {
 			input_label.show ();
 		} else {
@@ -1894,6 +1902,7 @@ class MidiPortOptions : public OptionEditorBox
 	}
 
   private:
+	PBD::ScopedConnection port_connection;
 
 	/* MIDI port management */
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
