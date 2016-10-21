@@ -737,7 +737,6 @@ Session::midi_track_presentation_info_changed (PropertyChange const& what_change
 	boost::shared_ptr<MidiTrack> new_midi_target (mt.lock ());
 
 	if (new_midi_target->presentation_info().selected()) {
-		cerr << "Rewiring " << new_midi_target->name() << endl;
 		rewire_selected_midi (new_midi_target);
 	}
 }
@@ -795,14 +794,10 @@ Session::rewire_midi_selection_ports ()
 		return;
 	}
 
-	cerr << "2. Rewiring " << target->name() << endl;
-
 	target->input()->disconnect (this);
 
 	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-		cerr << "\tdisconnect " << *p << endl;
 		AudioEngine::instance()->disconnect (*p);
-		cerr << "\tconnect to " << *p << endl;
 		target->input()->connect (target->input()->nth (0), (*p), this);
 	}
 }
