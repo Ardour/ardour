@@ -89,8 +89,12 @@ class LIBARDOUR_API PortManager
 	/* other Port management */
 
 	bool      port_is_physical (const std::string&) const;
-	void      get_physical_outputs (DataType type, std::vector<std::string>&);
-	void      get_physical_inputs (DataType type, std::vector<std::string>&);
+	void      get_physical_outputs (DataType type, std::vector<std::string>&,
+	                                MidiPortFlags include = MidiPortFlags (0),
+	                                MidiPortFlags exclude = MidiPortFlags (0));
+	void      get_physical_inputs (DataType type, std::vector<std::string>&,
+	                               MidiPortFlags include = MidiPortFlags (0),
+	                               MidiPortFlags exclude = MidiPortFlags (0));
 	ChanCount n_physical_outputs () const;
 	ChanCount n_physical_inputs () const;
 
@@ -204,6 +208,8 @@ class LIBARDOUR_API PortManager
 	void save_midi_port_info ();
 	void load_midi_port_info ();
 	void fill_midi_port_info_locked ();
+
+	void filter_midi_ports (std::vector<std::string>&, MidiPortFlags, MidiPortFlags);
 };
 
 

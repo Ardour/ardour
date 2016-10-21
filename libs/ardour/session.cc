@@ -912,38 +912,11 @@ Session::setup_click_state (const XMLNode* node)
 }
 
 void
-Session::get_physical_ports (vector<string>& inputs, vector<string>& outputs, DataType type, bool excluding)
+Session::get_physical_ports (vector<string>& inputs, vector<string>& outputs, DataType type,
+                             MidiPortFlags include, MidiPortFlags exclude)
 {
-	_engine.get_physical_inputs (type, inputs);
-
-	if (excluding) {
-		/* rip out ControlOnly ports, and ALSA MIDI Through ports */
-
-		for (vector<string>::iterator si = inputs.begin(); si != inputs.end(); ) {
-			if (PortManager::port_is_control_only (*si)) {
-				si = inputs.erase (si);
-			} else if ((*si).find (X_("Midi Through")) != string::npos || (*si).find (X_("Midi-Through")) != string::npos) {
-				si = inputs.erase (si);
-			} else {
-				++si;
-			}
-		}
-	}
-	_engine.get_physical_outputs (type, outputs);
-
-	if (excluding) {
-		/* rip out ControlOnly ports, and ALSA MIDI Through ports */
-
-		for (vector<string>::iterator si = outputs.begin(); si != outputs.end(); ) {
-			if (PortManager::port_is_control_only (*si)) {
-				si = outputs.erase (si);
-			} else if ((*si).find (X_("Midi Through")) != string::npos || (*si).find (X_("Midi-Through")) != string::npos) {
-				si = outputs.erase (si);
-			} else {
-				++si;
-			}
-		}
-	}
+	_engine.get_physical_inputs (type, inputs, include, exclude);
+	_engine.get_physical_outputs (type, outputs, include, exclude);
 }
 
 void
@@ -966,7 +939,10 @@ Session::setup_bundles ()
 	vector<string> outputs[DataType::num_types];
 
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
-		get_physical_ports (inputs[i], outputs[i], DataType (DataType::Symbol (i)), true);
+		get_physical_ports (inputs[i], outputs[i], DataType (DataType::Symbol (i)),
+		                    MidiPortFlags (0), /* no specific inclusions */
+		                    MidiPortFlags (MidiPortControl|MidiPortVirtual) /* exclude control & virtual ports */
+			);
 	}
 
 	/* Create a set of Bundle objects that map
@@ -1050,6 +1026,7 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
 		string n = inputs[DataType::MIDI][np];
+
 		std::string pn = _engine.get_pretty_name_by_name (n);
 		if (!pn.empty()) {
 			n = pn;
@@ -6954,7 +6931,12 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		vector<string> physinputs;
 		vector<string> physoutputs;
 
-		get_physical_ports (physinputs, physoutputs, *t, true);
+
+		/* for connecting track inputs we only want MIDI ports marked
+		 * for "music".
+		 */
+
+		get_physical_ports (physinputs, physoutputs, *t, MidiPortMusic);
 
 		if (!physinputs.empty() && ar.connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();

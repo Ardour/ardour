@@ -664,6 +664,7 @@ namespace ARDOUR {
 		MidiPortMusic = 0x1,
 		MidiPortControl = 0x2,
 		MidiPortSelection = 0x4,
+		MidiPortVirtual = 0x8
 	};
 
 	struct LatencyRange {

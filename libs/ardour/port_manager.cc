@@ -189,17 +189,55 @@ PortManager::port_is_physical (const std::string& portname) const
 }
 
 void
-PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
+PortManager::filter_midi_ports (vector<string>& ports, MidiPortFlags include, MidiPortFlags exclude)
+{
+	if (!include && !exclude) {
+		return;
+	}
+
+	for (vector<string>::iterator si = ports.begin(); si != ports.end(); ) {
+
+		PortManager::MidiPortInformation mpi = midi_port_information (*si);
+
+		if (mpi.pretty_name.empty()) {
+			/* no information !!! */
+			++si;
+			continue;
+		}
+
+		if (include) {
+			if ((mpi.properties & include) != include) {
+				/* properties do not include requested ones */
+				si = ports.erase (si);
+				continue;
+			}
+		}
+
+		if (exclude) {
+			if ((mpi.properties & exclude)) {
+				/* properties include ones to avoid */
+				si = ports.erase (si);
+				continue;
+			}
+		}
+
+		++si;
+	}
+}
+
+void
+PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s, MidiPortFlags include, MidiPortFlags exclude)
 {
 	if (!_backend) {
 		s.clear ();
 		return;
 	}
 	_backend->get_physical_outputs (type, s);
+	filter_midi_ports (s, include, exclude);
 }
 
 void
-PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
+PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s, MidiPortFlags include, MidiPortFlags exclude)
 {
 	if (!_backend) {
 		s.clear ();
@@ -207,6 +245,7 @@ PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 	}
 
 	_backend->get_physical_inputs (type, s);
+	filter_midi_ports (s, include, exclude);
 }
 
 ChanCount
@@ -1124,6 +1163,17 @@ PortManager::fill_midi_port_info_locked ()
 			MidiPortInformation mpi;
 			mpi.pretty_name = *p;
 			mpi.input = true;
+
+			if (port_is_control_only (*p)) {
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+			}
+#ifdef LINUX
+			if ((*p.find (X_("Midi Through")) != string::npos ||
+			     (*p).find (X_("Midi-Through")) != string::npos))
+			{
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
+			}
+#endif
 			midi_port_info.insert (make_pair (*p, mpi));
 		}
 	}
@@ -1140,6 +1190,17 @@ PortManager::fill_midi_port_info_locked ()
 			MidiPortInformation mpi;
 			mpi.pretty_name = *p;
 			mpi.input = false;
+
+			if (port_is_control_only (*p)) {
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+			}
+#ifdef LINUX
+			if ((*p.find (X_("Midi Through")) != string::npos ||
+			     (*p).find (X_("Midi-Through")) != string::npos))
+			{
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
+			}
+#endif
 			midi_port_info.insert (make_pair (*p, mpi));
 		}
 	}
