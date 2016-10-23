@@ -1,0 +1,14 @@
+# This is a sample udev file to set "NI Maschine Controller HID" device
+# permissions on GNU/Linux systems.
+#
+# copy this file to /etc/udev/rules.d/
+
+# Maschine2 Mikro
+KERNEL=="hidraw*", ATTRS{idVendor}=="17cc", ATTRS{idProduct}=="1110", GROUP="audio" MODE="0660"
+KERNEL=="hidraw*", ATTRS{idVendor}=="17cc", ATTRS{idProduct}=="1200", GROUP="audio" MODE="0660"
+
+# Maschine2
+KERNEL=="hidraw*", ATTRS{idVendor}=="17cc", ATTRS{idProduct}=="1140", GROUP="audio" MODE="0660"
+
+# Maschine2 Studio
+KERNEL=="hidraw*", ATTRS{idVendor}=="17cc", ATTRS{idProduct}=="1300", GROUP="audio" MODE="0660"
