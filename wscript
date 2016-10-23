@@ -201,12 +201,13 @@ out = 'build'
 
 children = [
         # optionally external libraries
-        'libs/qm-dsp',
-        'libs/vamp-plugins',
-        'libs/libltc',
         'libs/fluidsynth',
+        'libs/hidapi',
+        'libs/libltc',
         'libs/lua',
         'libs/ptformat',
+        'libs/qm-dsp',
+        'libs/vamp-plugins',
         # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
