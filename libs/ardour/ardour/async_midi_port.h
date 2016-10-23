@@ -47,8 +47,10 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 		AsyncMIDIPort (std::string const &, PortFlags);
 		~AsyncMIDIPort ();
 
-		/* called from an RT context */
+		bool flush_at_cycle_start () const { return _flush_at_cycle_start; }
+		void set_flush_at_cycle_start (bool en) { _flush_at_cycle_start = en; }
 
+		/* called from an RT context */
 		void cycle_start (pframes_t nframes);
 		void cycle_end (pframes_t nframes);
 
@@ -79,6 +81,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	private:
 		bool                    _currently_in_cycle;
 		MIDI::timestamp_t       _last_write_timestamp;
+		bool                    _flush_at_cycle_start;
 		bool                    have_timer;
 		boost::function<framecnt_t (void)> timer;
 		RingBuffer< Evoral::Event<double> > output_fifo;
