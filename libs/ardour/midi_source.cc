@@ -199,8 +199,7 @@ MidiSource::midi_read (const Lock&                        lm,
 		       const double                       start_beats) const
 {
 	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
-	const int32_t tpb = Timecode::BBT_Time::ticks_per_beat;
-	const double pulse_tick_res = floor ((pulse * 4.0 * tpb) + 0.5) / tpb;
+
 	const double start_qn = (pulse * 4.0) - start_beats;
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
@@ -257,7 +256,7 @@ MidiSource::midi_read (const Lock&                        lm,
 		 * some way (maybe keep an iterator per playlist).
 		 */
 		for (i = _model->begin(); i != _model->end(); ++i) {
-			if (floor (((i->time().to_double() + start_qn) * tpb) + 0.5) / tpb >= pulse_tick_res) {
+			if (i->time().to_double() >= start_beats) {
 				break;
 			}
 		}
@@ -275,10 +274,9 @@ MidiSource::midi_read (const Lock&                        lm,
 
 		// Offset by source start to convert event time to session time
 
-		framecnt_t time_frames = _session.tempo_map().frame_at_quarter_note (i->time().to_double() + start_qn);
+		framepos_t time_frames = _session.tempo_map().frame_at_quarter_note (i->time().to_double() + start_qn);
 
-		if (time_frames < (start + source_start)) {
-
+		if (time_frames < start + source_start) {
 			/* event too early */
 
 			continue;
