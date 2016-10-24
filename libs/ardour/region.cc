@@ -594,10 +594,12 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 		return;
 	}
 
-	if (sub_num == 0) {
-		set_position_internal (pos, true, 0);
+	if (position_lock_style() == AudioTime) {
+		set_position_internal (pos, true, sub_num);
 	} else {
-		_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+		if (!_session.loading()) {
+			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+		}
 		/* will set pulse accordingly */
 		set_position_internal (pos, false, sub_num);
 	}
@@ -1318,8 +1320,6 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 		}
 	}
 
-	_pulse = _session.tempo_map().pulse_at_beat (_beat);
-
 	/* fix problems with old sessions corrupted by impossible
 	   values for _stretch or _shift
 	*/
@@ -1853,7 +1853,7 @@ void
 Region::post_set (const PropertyChange& pc)
 {
 	if (pc.contains (Properties::position)) {
-		recompute_position_from_lock_style (0);
+		_pulse = _session.tempo_map().pulse_at_beat (_beat);
 	}
 }
 
