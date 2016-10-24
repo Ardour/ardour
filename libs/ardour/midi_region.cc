@@ -265,7 +265,8 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 		  For now, the musical position at the region start is retained, but subsequent events
 		  will maintain their beat distance according to the map.
 		*/
-		_start = _position - _session.tempo_map().frame_at_pulse (pulse() - (_start_beats / 4.0));
+		_start = _session.tempo_map().frame_at_quarter_note (pulse() * 4.0)
+			- _session.tempo_map().frame_at_quarter_note ((pulse() * 4.0) - start_beats());
 
 		/* _length doesn't change for audio-locked regions. update length_beats to match. */
 		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - _session.tempo_map().quarter_note_at_frame (_position);
@@ -312,7 +313,8 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 	}
 
 	/* set _start to new position in tempo map */
-	_start = _position - _session.tempo_map().frame_at_pulse (pulse() - (_start_beats / 4.0));
+	_start = _session.tempo_map().frame_at_quarter_note (pulse() * 4.0)
+		- _session.tempo_map().frame_at_quarter_note ((pulse() * 4.0) - start_beats());
 
 	/* in construction from src */
 	if (_length_beats == 0.0) {
@@ -325,7 +327,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames).
 		*/
-		Region::set_length_internal (_session.tempo_map().frame_at_pulse (pulse() + (_length_beats / 4.0)) - _position, sub_num);
+		Region::set_length_internal (_session.tempo_map().frame_at_quarter_note ((pulse() * 4.0) + length_beats()) - _position, sub_num);
 	}
 }
 
@@ -631,7 +633,8 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 		what_changed.add (Properties::position);
 
 		double new_start_qn = start_beats() + (pos_qn - old_pos_qn);
-		const framepos_t new_start = _position - _session.tempo_map().frame_at_quarter_note (pos_qn - new_start_qn);
+		const framepos_t new_start = _session.tempo_map().frame_at_quarter_note (pos_qn)
+			- _session.tempo_map().frame_at_quarter_note (pos_qn - new_start_qn);
 
 		if (!verify_start_and_length (new_start, length)) {
 			return;
