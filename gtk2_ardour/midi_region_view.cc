@@ -599,7 +599,12 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 	if (!_note_entered) {
 
-		if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
+		if (_mouse_state == AddDragging) {
+			if (_ghost_note) {
+				remove_ghost_note ();
+			}
+
+		} else if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
 		    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
 		    _mouse_state != AddDragging) {
 
@@ -3747,9 +3752,17 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	framepos_t const unsnapped_frame = editor.pixel_to_sample (x);
 
 	const int32_t divisions = editor.get_grid_music_divisions (state);
-	const double snapped_region_qn = snap_frame_to_grid_underneath (unsnapped_frame, divisions, true).to_double();
+	const Evoral::Beats snapped_beats = snap_frame_to_grid_underneath (unsnapped_frame, divisions, true);
 
-	Evoral::Beats snapped_beats = Evoral::Beats (snapped_region_qn);
+	/* ghost note may have been snapped before region */
+	if (_ghost_note && snapped_beats.to_double() < 0.0) {
+		_ghost_note->hide();
+		return;
+
+	} else if (_ghost_note) {
+		_ghost_note->show();
+	}
+
 	/* calculate time in beats relative to start of source */
 	const Evoral::Beats length = get_grid_beats(unsnapped_frame + _region->position());
 
@@ -4132,7 +4145,7 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, 
 		*/
 		const Evoral::Beats grid_beats = get_grid_beats (p + _region->position());
 		const double rem = eqaf - qaf;
-		if (rem >= 0.0 && eqaf - grid_beats.to_double() > _region->pulse() * 4.0) {
+		if (rem >= 0.0) {
 			eqaf -= grid_beats.to_double();
 		}
 	}
