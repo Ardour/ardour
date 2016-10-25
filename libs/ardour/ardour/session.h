@@ -725,7 +725,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int start_audio_export (framepos_t position, bool realtime = false, bool region_export = false);
+	int start_audio_export (framepos_t position, bool realtime = false, bool region_export = false, bool comensate_master_latency = false);
 
 	PBD::Signal1<int, framecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;

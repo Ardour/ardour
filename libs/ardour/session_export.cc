@@ -104,7 +104,7 @@ Session::pre_export ()
 
 /** Called for each range that is being exported */
 int
-Session::start_audio_export (framepos_t position, bool realtime, bool region_export)
+Session::start_audio_export (framepos_t position, bool realtime, bool region_export, bool comensate_master_latency)
 {
 	if (!_exporting) {
 		pre_export ();
@@ -130,13 +130,23 @@ Session::start_audio_export (framepos_t position, bool realtime, bool region_exp
 	/* "worst_track_latency" is the correct value for stem-exports
 	 * see to Route::add_export_point(),
 	 *
-	 * for master-bus export, we'd need to add the master's latency.
-	 * or actually longest-total-session-latency.
+	 * For master-bus export, we also need to add the master's latency.
+	 * (or actually longest-total-session-latency - worst-track-latency)
+	 * to align the export to 00:00:00:00.
 	 *
-	 * We can't use worst_playback_latency because that includes
-	 * includes external latencies and would overcompensate.
+	 * We must not use worst_playback_latency because that
+	 * includes external (hardware) latencies and would overcompensate
+	 * during file-export.
+	 *
+	 * (this is all still very [w]hacky. Individual Bus and Track outputs
+	 * are not aligned but one can select them in the PortExportChannelSelector)
 	 */
 	_export_latency = worst_track_latency ();
+
+	boost::shared_ptr<Route> master = master_out ();
+	if (master && comensate_master_latency) {
+		_export_latency += master->signal_latency ();
+	}
 
 	if (region_export) {
 		_export_latency = 0;
