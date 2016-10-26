@@ -72,7 +72,6 @@ public:
 	                     bool must_exist, bool& is_new, uint16_t& chan,
 	                     std::string& found_path);
 
-	void inc_use_count ();
 	bool removable () const;
         bool is_stub () const;
 
