@@ -24,21 +24,22 @@ def configure(conf):
     else:
         if conf.env['build_target'] == 'mingw':
             conf.check (compiler='cxx', lib='setupapi', mandatory=True, uselib_store='SETUPAPI')
-            if conf.is_defined('HAVE_SETUPAPI'):
-                conf.define ('HAVE_HIDAPI', 1)
+            conf.define ('HAVE_HIDAPI', 1)
+        elif sys.platform == 'darwin':
+            conf.define ('HAVE_HIDAPI', 1)
         elif re.search ("linux", sys.platform) != None:
             autowaf.check_pkg(conf, 'libudev', uselib_store='UDEV', mandatory=False)
             if conf.is_defined('HAVE_UDEV'):
                 conf.define ('HAVE_HIDAPI', 1)
         else:
-            conf.define ('HAVE_HIDAPI', 1)
+            print ("hidapi is not yet available for the given system")
         conf.load('compiler_c')
         autowaf.configure(conf)
 
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         return
-    if not bld.get_define('HAVE_HIDAPI'):
+    if not bld.is_defined('HAVE_HIDAPI'):
         return
 
     # Host Library
