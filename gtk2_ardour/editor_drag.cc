@@ -1529,6 +1529,7 @@ RegionMoveDrag::finished_no_copy (
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
+	std::set<boost::shared_ptr<const Region> > uniq;
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
@@ -1538,6 +1539,13 @@ RegionMoveDrag::finished_no_copy (
 			++i;
 			continue;
 		}
+
+		if (uniq.find (rv->region()) != uniq.end()) {
+			/* prevent duplicate moves when selecting regions from shared playlists */
+			++i;
+			continue;
+		}
+		uniq.insert(rv->region());
 
 		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
 			/* dragged to drop zone */
