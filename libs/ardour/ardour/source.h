@@ -50,6 +50,7 @@ class LIBARDOUR_API Source : public SessionObject
 		Destructive = 0x80,
 		Empty = 0x100, /* used for MIDI only */
 		RF64_RIFF = 0x200,
+		Pattern = 0x400
 	};
 
 	typedef Glib::Threads::Mutex::Lock Lock;
@@ -81,6 +82,7 @@ class LIBARDOUR_API Source : public SessionObject
 	int set_state (const XMLNode&, int version);
 
 	bool         destructive() const       { return (_flags & Destructive); }
+	bool         is_pattern() const { return (_flags & Pattern); }
 	bool         writable () const;
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
