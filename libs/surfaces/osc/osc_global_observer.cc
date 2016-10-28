@@ -203,16 +203,10 @@ OSCGlobalObserver::tick ()
 	}
 	if (feedback[3]) { //heart beat enabled
 		if (_heartbeat == 10) {
-			lo_message msg = lo_message_new ();
-			lo_message_add_float (msg, 1.0);
-			lo_send_message (addr, "/heartbeat", msg);
-			lo_message_free (msg);
+			float_message (X_("/heartbeat"), 1.0);
 		}
 		if (!_heartbeat) {
-			lo_message msg = lo_message_new ();
-			lo_message_add_float (msg, 0.0);
-			lo_send_message (addr, "/heartbeat", msg);
-			lo_message_free (msg);
+			float_message (X_("/heartbeat"), 0.0);
 		}
 		_heartbeat++;
 		if (_heartbeat > 20) _heartbeat = 0;
@@ -223,33 +217,28 @@ OSCGlobalObserver::tick ()
 		if (now_meter < -94) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
-				lo_message msg = lo_message_new ();
 				if (gainmode && feedback[7]) {
 					// change from db to 0-1
-					lo_message_add_float (msg, ((now_meter + 94) / 100));
-					lo_send_message (addr, "/master/meter", msg);
+					float_message (X_("/master/meter"), ((now_meter + 94) / 100));
 				} else if ((!gainmode) && feedback[7]) {
-					lo_message_add_float (msg, now_meter);
-					lo_send_message (addr, "/master/meter", msg);
+					float_message (X_("/master/meter"), now_meter);
 				} else if (feedback[8]) {
 					uint32_t ledlvl = (uint32_t)(((now_meter + 54) / 3.75)-1);
 					uint32_t ledbits = ~(0xfff<<ledlvl);
+					lo_message msg = lo_message_new ();
 					lo_message_add_int32 (msg, ledbits);
 					lo_send_message (addr, "/master/meter", msg);
+					lo_message_free (msg);
 				}
-				lo_message_free (msg);
 			}
 			if (feedback[9]) {
-				lo_message msg = lo_message_new ();
 				float signal;
 				if (now_meter < -40) {
 					signal = 0;
 				} else {
 					signal = 1;
 				}
-				lo_message_add_float (msg, signal);
-				lo_send_message (addr, "/master/signal", msg);
-				lo_message_free (msg);
+				float_message (X_("/master/signal"), signal);
 			}
 		}
 		_last_meter = now_meter;
@@ -260,43 +249,27 @@ OSCGlobalObserver::tick ()
 void
 OSCGlobalObserver::send_change_message (string path, boost::shared_ptr<Controllable> controllable)
 {
-	lo_message msg = lo_message_new ();
-
-	lo_message_add_float (msg, (float) controllable->get_value());
-
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	float_message (path, (float) controllable->get_value());
 }
 
 void
 OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
-	lo_message msg = lo_message_new ();
-
 	if (gainmode) {
-		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+		float_message (path, gain_to_slider_position (controllable->get_value()));
 	} else {
 		if (controllable->get_value() < 1e-15) {
-			lo_message_add_float (msg, -200);
+			float_message (path, -200);
 		} else {
-			lo_message_add_float (msg, accurate_coefficient_to_dB (controllable->get_value()));
+			float_message (path, accurate_coefficient_to_dB (controllable->get_value()));
 		}
 	}
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
 }
 
 void
 OSCGlobalObserver::send_trim_message (string path, boost::shared_ptr<Controllable> controllable)
 {
-	lo_message msg = lo_message_new ();
-
-	lo_message_add_float (msg, (float) accurate_coefficient_to_dB (controllable->get_value()));
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	float_message (X_("/master/trimdB"), (float) accurate_coefficient_to_dB (controllable->get_value()));
 }
 
 
@@ -353,10 +326,7 @@ OSCGlobalObserver::send_record_state_changed ()
 void
 OSCGlobalObserver::solo_active (bool active)
 {
-	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, (float) active);
-	lo_send_message (addr, "/cancel_all_solos", msg);
-	lo_message_free (msg);
+	float_message (X_("/cancel_all_solos"), (float) active);
 }
 
 void
@@ -365,6 +335,17 @@ OSCGlobalObserver::text_message (string path, std::string text)
 	lo_message msg = lo_message_new ();
 
 	lo_message_add_string (msg, text.c_str());
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCGlobalObserver::float_message (string path, float value)
+{
+	lo_message msg = lo_message_new ();
+
+	lo_message_add_float (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);

@@ -66,6 +66,7 @@ class OSCGlobalObserver
 	void send_record_state_changed (void);
 	void solo_active (bool active);
 	void text_message (std::string path, std::string text);
+	void float_message (std::string path, float value);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */
