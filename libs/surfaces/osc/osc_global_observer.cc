@@ -225,10 +225,7 @@ OSCGlobalObserver::tick ()
 				} else if (feedback[8]) {
 					uint32_t ledlvl = (uint32_t)(((now_meter + 54) / 3.75)-1);
 					uint32_t ledbits = ~(0xfff<<ledlvl);
-					lo_message msg = lo_message_new ();
-					lo_message_add_int32 (msg, ledbits);
-					lo_send_message (addr, "/master/meter", msg);
-					lo_message_free (msg);
+					int_message (X_("/master/meter"), ledbits);
 				}
 			}
 			if (feedback[9]) {
@@ -276,51 +273,23 @@ OSCGlobalObserver::send_trim_message (string path, boost::shared_ptr<Controllabl
 void
 OSCGlobalObserver::send_transport_state_changed()
 {
-
-	lo_message msg = lo_message_new ();
-	lo_message_add_int32 (msg, session->get_play_loop());
-	lo_send_message (addr, "/loop_toggle", msg);
-	lo_message_free (msg);
-
-	msg = lo_message_new ();
-	lo_message_add_int32 (msg, session->transport_speed() == 1.0);
-	lo_send_message (addr, "/transport_play", msg);
-	lo_message_free (msg);
-
-	msg = lo_message_new ();
-	lo_message_add_int32 (msg, session->transport_stopped ());
-	lo_send_message (addr, "/transport_stop", msg);
-	lo_message_free (msg);
-
-	msg = lo_message_new ();
-	lo_message_add_int32 (msg, session->transport_speed() < 0.0);
-	lo_send_message (addr, "/rewind", msg);
-	lo_message_free (msg);
-
-	msg = lo_message_new ();
-	lo_message_add_int32 (msg, (session->transport_speed() != 1.0 && session->transport_speed() > 0.0));
-	lo_send_message (addr, "/ffwd", msg);
-	lo_message_free (msg);
-
+	int_message (X_("/loop_toggle"), session->get_play_loop());
+	int_message (X_("/transport_play"), session->transport_speed() == 1.0);
+	int_message (X_("/transport_stop"), session->transport_stopped());
+	int_message (X_("/rewind"), session->transport_speed() < 0.0);
+	int_message (X_("/ffwd"), (session->transport_speed() != 1.0 && session->transport_speed() > 0.0));
 }
 
 void
 OSCGlobalObserver::send_record_state_changed ()
 {
-	lo_message msg = lo_message_new ();
-	lo_message_add_int32 (msg, (int)session->get_record_enabled ());
-	lo_send_message (addr, "/rec_enable_toggle", msg);
-	lo_message_free (msg);
+	int_message (X_("/rec_enable_toggle"), (int)session->get_record_enabled ());
 
-	msg = lo_message_new ();
 	if (session->have_rec_enabled_track ()) {
-		lo_message_add_int32 (msg, 1);
+		int_message (X_("/record_tally"), 1);
 	} else {
-		lo_message_add_int32 (msg, 0);
+		int_message (X_("/record_tally"), 0);
 	}
-	lo_send_message (addr, "/record_tally", msg);
-	lo_message_free (msg);
-
 }
 
 void
@@ -346,6 +315,17 @@ OSCGlobalObserver::float_message (string path, float value)
 	lo_message msg = lo_message_new ();
 
 	lo_message_add_float (msg, value);
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCGlobalObserver::int_message (string path, uint32_t value)
+{
+	lo_message msg = lo_message_new ();
+
+	lo_message_add_int32 (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
