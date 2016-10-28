@@ -115,8 +115,8 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		send_record_state_changed ();
 
 		// session feedback
-		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_session_saved, this, _1), OSC::instance());
-		send_session_saved (session->snap_name());
+		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::text_message, this, X_("/session_name"), _1), OSC::instance());
+		text_message (X_("/session_name"), session->snap_name());
 		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
@@ -154,10 +154,7 @@ OSCGlobalObserver::tick ()
 			os << ':';
 			os << setw(2) << setfill('0') << timecode.frames;
 
-			lo_message msg = lo_message_new ();
-			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/position/smpte", msg);
-			lo_message_free (msg);
+			text_message ("/position/smpte", os.str());
 		}
 		if (feedback[5]) { // Bar beat enabled
 			Timecode::BBT_Time bbt_time;
@@ -173,10 +170,7 @@ OSCGlobalObserver::tick ()
 			os << '|';
 			os << setw(4) << setfill('0') << bbt_time.ticks;
 
-			lo_message msg = lo_message_new ();
-			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/position/bbt", msg);
-			lo_message_free (msg);
+			text_message ("/position/bbt", os.str());
 		}
 		if (feedback[11]) { // minutes/seconds enabled
 			framepos_t left = now_frame;
@@ -198,18 +192,12 @@ OSCGlobalObserver::tick ()
 			os << '.';
 			os << setw(3) << setfill('0') << millisecs;
 
-			lo_message msg = lo_message_new ();
-			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/position/time", msg);
-			lo_message_free (msg);
+			text_message ("/position/time", os.str());
 		}
 		if (feedback[10]) { // samples
 			ostringstream os;
 			os << now_frame;
-			lo_message msg = lo_message_new ();
-			lo_message_add_string (msg, os.str().c_str());
-			lo_send_message (addr, "/position/samples", msg);
-			lo_message_free (msg);
+			text_message ("/position/samples", os.str());
 		}
 		_last_frame = now_frame;
 	}
@@ -363,20 +351,21 @@ OSCGlobalObserver::send_record_state_changed ()
 }
 
 void
-OSCGlobalObserver::send_session_saved (std::string name)
-{
-	lo_message msg = lo_message_new ();
-	lo_message_add_string (msg, name.c_str());
-	lo_send_message (addr, "/session_name", msg);
-	lo_message_free (msg);
-
-}
-
-void
 OSCGlobalObserver::solo_active (bool active)
 {
 	lo_message msg = lo_message_new ();
 	lo_message_add_float (msg, (float) active);
 	lo_send_message (addr, "/cancel_all_solos", msg);
+	lo_message_free (msg);
+}
+
+void
+OSCGlobalObserver::text_message (string path, std::string text)
+{
+	lo_message msg = lo_message_new ();
+
+	lo_message_add_string (msg, text.c_str());
+
+	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 }
