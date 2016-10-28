@@ -86,6 +86,7 @@ def build(bld):
             src/Note.cpp
             src/SMF.cpp
             src/Sequence.cpp
+            src/Sequencer.cpp
             src/TimeConverter.cpp
             src/debug.cpp
             src/types.cpp
