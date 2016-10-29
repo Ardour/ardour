@@ -23,10 +23,12 @@
 #include <iostream>
 #if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <netinet/in.h>
 #include <sys/socket.h>
+#if defined(__FreeBSD__)
 #include <sys/_sockaddr_storage.h>
+#endif
 #include <arpa/inet.h>
 #include <netinet/ip_carp.h>
 #include <sys/types.h>
