@@ -286,13 +286,11 @@ MidiTrackerEditor::show_all_automation ()
 		// std::cout << "[show_all_automation] "
 		//           << "(*i)->valid = " << (*i)->valid << std::endl;
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-			size_t column = (*ii)->column;
+			size_t& column = (*ii)->column;
 			// std::cout << "[show_all_automation] "
 			//           << "column = " << column << std::endl;
-			if (column == 0) {
+			if (column == 0)
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
-				column = (*ii)->column;
-			}
 
 			// Still no column available, skip
 			if (column == 0)
