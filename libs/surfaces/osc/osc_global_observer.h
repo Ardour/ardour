@@ -58,6 +58,8 @@ class OSCGlobalObserver
 	framepos_t _last_frame;
 	uint32_t _heartbeat;
 	float _last_meter;
+	uint32_t master_timeout;
+	uint32_t monitor_timeout;
 
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

@@ -50,6 +50,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		*/
 
 		// Master channel first
+		text_message (X_("/master/name"), "Master");
 		boost::shared_ptr<Stripable> strip = session->master_out();
 
 		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
@@ -67,13 +68,8 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		}
 
 		boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-		if (gainmode) {
-			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/fader"), strip->gain_control()), OSC::instance());
-			send_gain_message ("/master/fader", strip->gain_control());
-		} else {
-			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/gain"), strip->gain_control()), OSC::instance());
-			send_gain_message ("/master/gain", strip->gain_control());
-		}
+		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
+		send_gain_message ("/master/", strip->gain_control());
 
 		// monitor stuff next
 		/*
@@ -86,6 +82,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		*/
 		strip = session->monitor_out();
 		if (strip) {
+			text_message (X_("/monitor/name"), "Monitor");
 
 			// Hmm, it seems the monitor mute is not at route->mute_control()
 			/*boost::shared_ptr<Controllable> mute_controllable2 = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
@@ -94,13 +91,8 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 			send_change_message ("/monitor/mute", strip->mute_control());
 			*/
 			gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-			if (gainmode) {
-				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/fader"), strip->gain_control()), OSC::instance());
-				send_gain_message ("/monitor/fader", strip->gain_control());
-			} else {
-				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/gain"), strip->gain_control()), OSC::instance());
-				send_gain_message ("/monitor/gain", strip->gain_control());
-			}
+				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
+				send_gain_message ("/monitor/", strip->gain_control());
 		}
 
 		/*
@@ -241,6 +233,20 @@ OSCGlobalObserver::tick ()
 		_last_meter = now_meter;
 
 	}
+	if (feedback[4]) {
+		if (master_timeout) {
+			if (master_timeout == 1) {
+				text_message (X_("/master/name"), "Master");
+			}
+			master_timeout--;
+		}
+		if (monitor_timeout) {
+			if (monitor_timeout == 1) {
+				text_message (X_("/monitor/name"), "Monitor");
+			}
+			monitor_timeout--;
+		}
+	}
 }
 
 void
@@ -253,12 +259,19 @@ void
 OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
 	if (gainmode) {
-		float_message (path, gain_to_slider_position (controllable->get_value()));
+		float_message (string_compose ("%1fader", path), gain_to_slider_position (controllable->get_value()));
+		text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
+		if (path.find("master") != std::string::npos) {
+			master_timeout = 8;
+		} else {
+			monitor_timeout = 8;
+		}
+
 	} else {
 		if (controllable->get_value() < 1e-15) {
-			float_message (path, -200);
+			float_message (string_compose ("%1gain",path), -200);
 		} else {
-			float_message (path, accurate_coefficient_to_dB (controllable->get_value()));
+			float_message (string_compose ("%1gain",path), accurate_coefficient_to_dB (controllable->get_value()));
 		}
 	}
 }
