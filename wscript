@@ -576,7 +576,7 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
-    if re.search ("freebsd", sys.platform) != None:
+    if re.search ("freebsd", sys.platform) != None or re.search ("openbsd", sys.platform) != None:
         linker_flags.append('-lexecinfo')
 
     if conf.env['DEBUG_RT_ALLOC']:
@@ -959,7 +959,7 @@ def configure(conf):
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
-        if Options.options.dist_target != 'msvc':
+        if Options.options.dist_target != 'msvc' and re.search ("openbsd", sys.platform) == None:
             if re.search ("freebsd", sys.platform) != None:
                 conf.check_cc(function_name='dlopen', header_name='dlfcn.h', uselib_store='DL')
             else:
@@ -973,6 +973,9 @@ def configure(conf):
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+
+    if re.search ("openbsd", sys.platform) != None:
+        conf.env.append_value('LDFLAGS', '-L/usr/X11R6/lib')
 
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2', mandatory=True)
@@ -1165,7 +1168,7 @@ int main () { return 0; }
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
-    elif Options.options.dist_target != 'mingw':
+    elif Options.options.dist_target != 'mingw' and re.search ("openbsd", sys.platform) == None:
         sub_config_and_use(conf, 'tools/sanity_check')
         sub_config_and_use(conf, 'tools/gccabicheck')
 
@@ -1290,7 +1293,7 @@ def build(bld):
 
     if sys.platform == 'darwin':
         bld.recurse('libs/appleutility')
-    elif bld.env['build_target'] != 'mingw':
+    elif bld.env['build_target'] != 'mingw' and re.search ("openbsd", sys.platform) == None:
         bld.recurse('tools/sanity_check')
         bld.recurse('tools/gccabicheck')
 
