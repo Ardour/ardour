@@ -113,9 +113,14 @@ public:
 protected:
 	void start_step_editing ();
 	void stop_step_editing ();
+	void processors_changed (ARDOUR::RouteProcessorChange);
 
 private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
+
+	void setup_midnam_patches ();
+	void update_patch_selector ();
+	PBD::ScopedConnection midnam_connection;
 
 	void model_changed(const std::string& model);
 	void custom_device_mode_changed(const std::string& mode);
