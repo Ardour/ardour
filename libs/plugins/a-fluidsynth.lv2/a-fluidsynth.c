@@ -138,7 +138,7 @@ load_sf2 (AFluidSynth* self, const char* fn)
 	int chn;
 	fluid_preset_t preset;
 	sfont->iteration_start (sfont);
-	for (chn = 0; sfont->iteration_next (sfont, &preset) && chn < 15; ++chn) {
+	for (chn = 0; sfont->iteration_next (sfont, &preset) && chn < 16; ++chn) {
 		fluid_synth_program_select (self->synth, chn, synth_id,
 				preset.get_banknum (&preset), preset.get_num (&preset));
 	}
