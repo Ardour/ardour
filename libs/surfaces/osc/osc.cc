@@ -1243,6 +1243,8 @@ OSC::clear_devices ()
 		} else {
 			++x;
 		}
+		// slow devices need time to clear buffers
+		usleep ((uint32_t) 10);
 	}
 	// Should maybe do global_observers too
 	for (GlobalObservers::iterator x = global_observers.begin(); x != global_observers.end();) {
@@ -1486,6 +1488,8 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		if (stp) {
 			end_listen (stp, addr);
 		}
+		// slow devices need time to clear buffers
+		usleep ((uint32_t) 10);
 	}
 
 	s->strips = get_sorted_stripables(s->strip_types);
@@ -1520,6 +1524,8 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 					listen_to_route(stp, addr);
 				}
 			}
+			// slow devices need time to clear buffers
+			usleep ((uint32_t) 10);
 		}
 	}
 	// light bankup or bankdown buttons if it is possible to bank in that direction
