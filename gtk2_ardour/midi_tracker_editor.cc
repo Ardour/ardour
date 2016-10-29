@@ -72,11 +72,7 @@ using Timecode::BBT_Time;
 //
 // - [ ] Take care of midi automation.
 //
-// - [ ] Update show_existing_automation.
-//
-// - [ ] Look into this trim thing. UPDATE: need to support audio tracks.
-//
-// - [ ] Support audio tracks.
+// - [ ] Support audio tracks, and trim automation as well
 //
 // - [ ] Support multiple tracks and regions.
 //
@@ -278,7 +274,7 @@ MidiTrackerEditor::show_all_automation ()
 {
 	/* Show gain, mute and pan automations */
 
-	show_main_automations ();
+	show_all_main_automations ();
 	
 	/* Show processor automation */
 
@@ -308,25 +304,9 @@ MidiTrackerEditor::show_all_automation ()
 void
 MidiTrackerEditor::show_existing_automation ()
 {
-	// Copy pasted from route_time_axis.cc
+	/* Show gain, mute and pan automations */
 
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_existing_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
-
-	// 	/* Show our automation */
-
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		if (i->second->has_automation()) {
-	// 			i->second->set_marked_for_display (true);
-
-	// 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-	// 			if (menu) {
-	// 				menu->set_active(true);
-	// 			}
-	// 		}
-	// 	}
+	show_existing_main_automations ();
 
 	// 	/* Show processor automation */
 
@@ -337,7 +317,7 @@ MidiTrackerEditor::show_existing_automation ()
 			size_t& column = (*ii)->column;
 			// std::cout << "[show_existing_automation] "
 			//           << "column = " << column << std::endl;
-			if ((*i)->processor->control((*ii)->what)->list()->size() > 0) {
+			if (param2actrl[(*ii)->what]->list()->size() > 0) {
 				if (column == 0)
 					add_processor_automation_column ((*i)->processor, (*ii)->what);
 
@@ -1110,7 +1090,7 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 	redisplay_model ();
 }
 
-void MidiTrackerEditor::show_main_automations ()
+void MidiTrackerEditor::show_all_main_automations ()
 {
 	// Gain
 	gain_automation_item->set_active (true);
@@ -1123,6 +1103,28 @@ void MidiTrackerEditor::show_main_automations ()
 	// Pan
 	pan_automation_item->set_active (true);
 	update_pan_columns_visibility ();
+}
+
+void MidiTrackerEditor::show_existing_main_automations ()
+{
+	// Gain
+	if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
+		gain_automation_item->set_active (true);
+		update_gain_column_visibility ();
+	}
+
+	// Mute
+	if (param2actrl[Evoral::Parameter(MuteAutomation)]->list()->size() > 0) {
+		mute_automation_item->set_active (true);
+		update_mute_column_visibility ();
+	}
+
+	// TODO: fix pan automation first
+	// // Pan
+	// if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
+	// 	pan_automation_item->set_active (true);
+	// 	update_pan_columns_visibility ();
+	// }
 }
 
 void MidiTrackerEditor::hide_main_automations ()

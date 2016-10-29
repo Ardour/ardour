@@ -207,7 +207,8 @@ class MidiTrackerEditor : public ArdourWindow
 	void update_pan_columns_visibility ();
 
 	// Show/hide gain, mute and pan
-	void show_main_automations ();
+	void show_all_main_automations ();
+	void show_existing_main_automations ();
 	void hide_main_automations ();
 
 	////////////////////////////
