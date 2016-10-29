@@ -120,7 +120,7 @@ XMLTree::read_internal(bool validate)
 }
 
 bool
-XMLTree::read_buffer(const string& buffer)
+XMLTree::read_buffer(const string& buffer, bool to_tree_doc)
 {
 	xmlDocPtr doc;
 
@@ -135,7 +135,14 @@ XMLTree::read_buffer(const string& buffer)
 	}
 
 	_root = readnode(xmlDocGetRootElement(doc));
-	xmlFreeDoc(doc);
+	if (to_tree_doc) {
+		if (_doc) {
+			xmlFreeDoc (_doc);
+		}
+		_doc = doc;
+	} else {
+		xmlFreeDoc (doc);
+	}
 
 	return true;
 }

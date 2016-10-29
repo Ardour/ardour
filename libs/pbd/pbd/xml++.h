@@ -70,7 +70,7 @@ public:
 	bool read(const std::string& fn) { set_filename(fn); return read_internal(false); }
 	bool read_and_validate() { return read_internal(true); }
 	bool read_and_validate(const std::string& fn) { set_filename(fn); return read_internal(true); }
-	bool read_buffer(const std::string&);
+	bool read_buffer(const std::string&, bool to_tree_doc = false);
 
 	bool write() const;
 	bool write(const std::string& fn) { set_filename(fn); return write(); }
