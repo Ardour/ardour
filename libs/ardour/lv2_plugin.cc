@@ -45,6 +45,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
+#include "ardour/midi_patch_manager.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
@@ -223,6 +224,13 @@ queue_draw (LV2_Inline_Display_Handle handle)
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	plugin->QueueDraw(); /* EMIT SIGNAL */
 }
+
+static void
+midnam_update (LV2_Midnam_Handle handle)
+{
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	plugin->UpdateMidnam (); /* EMIT SIGNAL */
+}
 #endif
 
 /* log extension */
@@ -280,6 +288,7 @@ struct LV2Plugin::Impl {
 #endif
 #ifdef LV2_EXTENDED
 	       , queue_draw(0)
+	       , midnam(0)
 #endif
 	{}
 
@@ -307,6 +316,7 @@ struct LV2Plugin::Impl {
 #endif
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display*          queue_draw;
+	LV2_Midnam*                  midnam;
 #endif
 };
 
@@ -399,7 +409,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(12, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(13, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -425,6 +435,15 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_queue_draw_feature.URI  = LV2_INLINEDISPLAY__queue_draw;
 	_queue_draw_feature.data = _impl->queue_draw;
 	_features[n_features++]  = &_queue_draw_feature;
+
+	_impl->midnam = (LV2_Midnam*)
+		malloc (sizeof(LV2_Midnam));
+	_impl->midnam->handle = this;
+	_impl->midnam->update = midnam_update;
+
+	_midnam_feature.URI  = LV2_MIDNAM__update;
+	_midnam_feature.data = _impl->midnam;
+	_features[n_features++]  = &_midnam_feature;
 #endif
 
 #ifdef HAVE_LV2_1_2_0
@@ -521,6 +540,16 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 #ifdef LV2_EXTENDED
 	_display_interface = (const LV2_Inline_Display_Interface*)
 		extension_data (LV2_INLINEDISPLAY__interface);
+
+	_midname_interface = (const LV2_Midnam_Interface*)
+		extension_data (LV2_MIDNAM__interface);
+	if (_midname_interface) {
+		if (read_midnam ()) {
+			printf ("READ MIDNAM FROM PLUGIN\n");
+		} else {
+			printf ("**FAILED TO ** READ MIDNAM FROM PLUGIN\n");
+		}
+	}
 #endif
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
@@ -840,6 +869,15 @@ LV2Plugin::~LV2Plugin ()
 	deactivate();
 	cleanup();
 
+#ifdef LV2_EXTENDED
+	if (has_midnam ()) {
+		std::stringstream ss;
+		ss << (void*)this;
+		ss << unique_id();
+		MIDI::Name::MidiPatchManager::instance().remove_custom_midnam (ss.str());
+	}
+#endif
+
 	lilv_instance_free(_impl->instance);
 	lilv_state_free(_impl->state);
 	lilv_node_free(_impl->name);
@@ -849,6 +887,7 @@ LV2Plugin::~LV2Plugin ()
 #endif
 #ifdef LV2_EXTENDED
 	free(_impl->queue_draw);
+	free(_impl->midnam);
 #endif
 
 	free(_features);
@@ -929,6 +968,43 @@ LV2Plugin::render_inline_display (uint32_t w, uint32_t h) {
 		return (Plugin::Display_Image_Surface*) _display_interface->render ((void*)_impl->instance->lv2_handle, w, h);
 	}
 	return NULL;
+}
+
+bool
+LV2Plugin::has_midnam () {
+	return _midname_interface ? true : false;
+}
+
+bool
+LV2Plugin::read_midnam () {
+	bool rv = false;
+	if (!_midname_interface) {
+		return rv;
+	}
+	char* midnam = _midname_interface->midnam ((void*)_impl->instance->lv2_handle);
+	if (midnam) {
+		std::stringstream ss;
+		ss << (void*)this;
+		ss << unique_id();
+		MIDI::Name::MidiPatchManager::instance().remove_custom_midnam (ss.str());
+		rv = MIDI::Name::MidiPatchManager::instance().add_custom_midnam (ss.str(), midnam);
+	}
+	free (midnam);
+	return rv;
+}
+
+std::string
+LV2Plugin::midnam_model () {
+	std::string rv;
+	if (!_midname_interface) {
+		return rv;
+	}
+	char* model = _midname_interface->model ((void*)_impl->instance->lv2_handle);
+	if (model) {
+		rv = model;
+	}
+	free (model);
+	return rv;
 }
 #endif
 

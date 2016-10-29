@@ -278,6 +278,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 #ifdef LV2_EXTENDED
 	const LV2_Inline_Display_Interface* _display_interface;
+	const LV2_Midnam_Interface* _midname_interface;
 #endif
 
 	typedef struct {
@@ -294,6 +295,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _def_state_feature;
 #ifdef LV2_EXTENDED
 	LV2_Feature    _queue_draw_feature;
+	LV2_Feature    _midnam_feature;
 #endif
 
 	// Options passed to plugin
@@ -321,6 +323,10 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 #ifdef LV2_EXTENDED
 	bool has_inline_display ();
 	Plugin::Display_Image_Surface* render_inline_display (uint32_t, uint32_t);
+
+	bool has_midnam ();
+	bool read_midnam ();
+	std::string midnam_model ();
 #endif
 
 	void latency_compute_run ();

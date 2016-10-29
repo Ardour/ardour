@@ -166,6 +166,11 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual Display_Image_Surface* render_inline_display (uint32_t, uint32_t) { return NULL; }
 	PBD::Signal0<void> QueueDraw;
 
+	virtual bool has_midnam () { return false; }
+	virtual bool read_midnam () { return false; }
+	virtual std::string midnam_model () { return ""; }
+	PBD::Signal0<void> UpdateMidnam;
+
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
 	    PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s), valid (true)  {}
