@@ -330,32 +330,29 @@ MidiTrackerEditor::show_existing_automation ()
 
 	// 	/* Show processor automation */
 
-	// TODO: The solution should look like some clever merge of the 2 following code blocks
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		// std::cout << "[show_existing_automation] "
+		//           << "(*i)->valid = " << (*i)->valid << std::endl;
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
+			size_t& column = (*ii)->column;
+			// std::cout << "[show_existing_automation] "
+			//           << "column = " << column << std::endl;
+			if ((*i)->processor->control((*ii)->what)->list()->size() > 0) {
+				if (column == 0)
+					add_processor_automation_column ((*i)->processor, (*ii)->what);
 
-	// for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 	for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-	// 		if ((*ii)->column == 0 and (*i)->processor->control((*ii)->what)->list()->size() > 0) {
-	// 			add_processor_automation_column ((*i)->processor, (*ii)->what);
-	// 			view.get_column((*ii)->column)->set_visible (true);
-	// 			string name = processor->describe_parameter ((*ii)->what);
-	// 			view.get_column((*ii)->column)->set_title (name);
-	// 			(*ii)->menu_item->set_active (true);
-	// 		}
-	// 	}
-	// }
+				// Still no column available, skip
+				if (column == 0)
+					continue;
 
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-	// 			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
-	// 				(*ii)->menu_item->set_active (true);
-	// 			}
-	// 		}
-	// 	}
+				visible_automation_columns.insert (column);
 
-	// 	no_redraw = false;
+				(*ii)->menu_item->set_active (true);
+			}
+		}
+	}
 
-	// 	request_redraw ();
-	// }
+	redisplay_model ();
 }
 
 void
