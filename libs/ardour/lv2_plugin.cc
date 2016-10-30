@@ -544,11 +544,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
-		if (read_midnam ()) {
-			printf ("READ MIDNAM FROM PLUGIN\n");
-		} else {
-			printf ("**FAILED TO ** READ MIDNAM FROM PLUGIN\n");
-		}
+		read_midnam ();
 	}
 #endif
 

@@ -210,7 +210,7 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path)
 			cout << string_compose(_("Removing MIDI patch file %1"), file_path) << "\n";
 			info << string_compose(_("Removing MIDI patch file %1"), file_path) << endmsg;
 
-			i = _documents.erase(i);
+			_documents.erase(i++);
 
 			for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
 			         document->master_device_names_by_model().begin();
