@@ -3637,6 +3637,11 @@ Session::add_instant_xml (XMLNode& node, bool write_to_config)
 XMLNode*
 Session::instant_xml (const string& node_name)
 {
+#ifdef MIXBUS // "Safe Mode" (shift + click open) -> also ignore instant.xml
+	if (get_disable_all_loaded_plugins ()) {
+		return NULL;
+	}
+#endif
 	return Stateful::instant_xml (node_name, _path);
 }
 
