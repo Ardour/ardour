@@ -190,12 +190,12 @@ MidiSource::midi_read (const Lock&                        lm,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
-                       const double                       pulse,
-                       const double                       start_beats) const
+		       const double                       pos_beats,
+		       const double                       start_beats) const
 {
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
-	const double start_qn = (pulse * 4.0) - start_beats;
+	const double start_qn = pos_beats - start_beats;
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
