@@ -1711,7 +1711,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const boost::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	const double session_source_start = (_region->pulse() * 4.0) - mr->start_beats();
+	const double session_source_start = _region->pos_beats() - mr->start_beats();
 	const framepos_t note_start_frames = map.frame_at_quarter_note (note->time().to_double() + session_source_start) - _region->position();
 
 	const double x0 = trackview.editor().sample_to_pixel (note_start_frames);
@@ -1779,7 +1779,7 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	const double note_time_qn = note->time().to_double() + ((_region->pulse() * 4.0) - midi_region()->start_beats());
+	const double note_time_qn = note->time().to_double() + (_region->pos_beats() - midi_region()->start_beats());
 	const framepos_t note_start_frames = trackview.session()->tempo_map().frame_at_quarter_note (note_time_qn) - _region->position();
 
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
@@ -2595,7 +2595,7 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-		double const start_qn = (_region->pulse() * 4.0) - midi_region()->start_beats();
+		double const start_qn = _region->pos_beats() - midi_region()->start_beats();
 		framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
 		Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
 		if (new_time < 0) {
@@ -2922,7 +2922,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 
 		/* and then to beats */
 		const double e_qaf = tmap.exact_qn_at_frame (current_fr + midi_region()->position(), divisions);
-		const double quarter_note_start = (_region->pulse() * 4.0) - midi_region()->start_beats();
+		const double quarter_note_start = _region->pos_beats() - midi_region()->start_beats();
 		const Evoral::Beats x_beats = Evoral::Beats (e_qaf - quarter_note_start);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
@@ -4149,7 +4149,7 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, 
 			eqaf -= grid_beats.to_double();
 		}
 	}
-	const double session_start_off = (_region->pulse() * 4.0) - midi_region()->start_beats();
+	const double session_start_off = _region->pos_beats() - midi_region()->start_beats();
 
 	return Evoral::Beats (eqaf - session_start_off);
 }

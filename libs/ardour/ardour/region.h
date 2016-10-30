@@ -175,10 +175,12 @@ class LIBARDOUR_API Region
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style (const int32_t sub_num);
 
+	/* meter-based beat at the region position */
 	double beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
-	double pulse () const { return _pulse; }
-	void set_pulse (double pulse) { _pulse = pulse; }
+	/* quarter-note beats at the region position (for use with Evoral::Beats) */
+	double pos_beats () const { return _pos_beats; }
+	void set_pos_beats (double pb) { _pos_beats = pb; }
 
 	void suspend_property_changes ();
 
@@ -380,7 +382,7 @@ class LIBARDOUR_API Region
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
 
-	double                  _pulse;
+	double                  _pos_beats;
 
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
