@@ -2530,12 +2530,15 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output,
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (!plugin) {
+					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
+					continue;
+				}
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
 				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
 				(*r)->add_processor (p, PreFader);
-
 			}
 		}
 	}
@@ -2618,6 +2621,10 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (!plugin) {
+					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
+					continue;
+				}
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
