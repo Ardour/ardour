@@ -213,8 +213,10 @@ MidiRegion::post_set (const PropertyChange& pc)
 		   so disallow (this has been set from XML state anyway).
 		*/
 		if (!_session.loading()) {
-			/* update non-musically */
-			update_length_beats (0);
+			/* ensure this only updates non-musical regions */
+			if (position_lock_style() == AudioTime) {
+				update_length_beats (0);
+			}
 		}
 	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
 		set_start_beats_from_start_frames ();
@@ -224,7 +226,9 @@ MidiRegion::post_set (const PropertyChange& pc)
 void
 MidiRegion::set_start_beats_from_start_frames ()
 {
-	_start_beats = (pulse() * 4.0) - _session.tempo_map().quarter_note_at_frame (_position - _start);
+	if (position_lock_style() == AudioTime) {
+		_start_beats = (pulse() * 4.0) - _session.tempo_map().quarter_note_at_frame (_position - _start);
+	}
 }
 
 void
@@ -451,13 +455,6 @@ MidiRegion::set_state (const XMLNode& node, int version)
 {
 	int ret = Region::set_state (node, version);
 
-	if (ret == 0) {
-		/* set length beats to the frame (non-musical) */
-		if (position_lock_style() == AudioTime) {
-			update_length_beats (0);
-		}
-	}
-
 	return ret;
 }
 
@@ -605,9 +602,7 @@ void
 MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	Region::set_start_internal (s, sub_num);
-	if (position_lock_style() == AudioTime) {
-		set_start_beats_from_start_frames ();
-	}
+	set_start_beats_from_start_frames ();
 }
 
 void

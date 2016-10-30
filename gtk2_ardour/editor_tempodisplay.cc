@@ -362,7 +362,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	TempoMap& map(_session->tempo_map());
 
 	begin_reversible_command (_("add tempo mark"));
-	const double pulse = map.pulse_at_frame (frame);
+	const double pulse = map.exact_qn_at_frame (frame, get_grid_music_divisions (0)) / 4.0;
 
 	if (pulse > 0.0) {
 		XMLNode &before = map.get_state();
