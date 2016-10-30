@@ -90,6 +90,13 @@ MidiPatchManager::remove_custom_midnam (const std::string& id)
 	return remove_midi_name_document ("custom:" + id);
 }
 
+bool
+MidiPatchManager::update_custom_midnam (const std::string& id, const std::string& midnam)
+{
+	remove_midi_name_document ("custom:" + id, false);
+	return add_custom_midnam (id, midnam);
+}
+
 void
 MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_path)
 {
@@ -165,6 +172,7 @@ MidiPatchManager::document_by_model(std::string model_name) const
 bool
 MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> document)
 {
+	bool added = false;
 	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
 	         document->master_device_names_by_model().begin();
 	     device != document->master_device_names_by_model().end();
@@ -189,17 +197,20 @@ MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> do
 		_devices_by_manufacturer[manufacturer].insert(
 		    std::make_pair(device->first, device->second));
 
+		added = true;
 		// TODO: handle this gracefully.
 		assert(_documents.count(device->first) == 1);
 		assert(_master_devices_by_model.count(device->first) == 1);
 	}
 
-	PatchesChanged(); /* EMIT SIGNAL */
-	return true;
+	if (added) {
+		PatchesChanged(); /* EMIT SIGNAL */
+	}
+	return added;
 }
 
 bool
-MidiPatchManager::remove_midi_name_document (const std::string& file_path)
+MidiPatchManager::remove_midi_name_document (const std::string& file_path, bool emit_signal)
 {
 	bool removed = false;
 	for (MidiNameDocuments::iterator i = _documents.begin(); i != _documents.end();) {
@@ -229,7 +240,7 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path)
 			++i;
 		}
 	}
-	if (removed) {
+	if (removed && emit_signal) {
 		PatchesChanged(); /* EMIT SIGNAL */
 	}
 	return removed;

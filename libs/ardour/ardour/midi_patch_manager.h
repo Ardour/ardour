@@ -60,6 +60,7 @@ public:
 	PBD::Signal0<void> PatchesChanged;
 
 	bool add_custom_midnam (const std::string& id, const std::string& midnam);
+	bool update_custom_midnam (const std::string& id, const std::string& midnam);
 	bool remove_custom_midnam (const std::string& id);
 
 	void add_search_path (const PBD::Searchpath& search_path);
@@ -145,7 +146,7 @@ public:
 private:
 	bool load_midi_name_document(const std::string& file_path);
 	bool add_midi_name_document(boost::shared_ptr<MIDINameDocument>);
-	bool remove_midi_name_document(const std::string& file_path);
+	bool remove_midi_name_document(const std::string& file_path, bool emit_signal = true);
 
 	void add_midnam_files_from_directory(const std::string& directory_path);
 	void remove_midnam_files_from_directory(const std::string& directory_path);

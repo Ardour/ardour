@@ -982,9 +982,15 @@ LV2Plugin::read_midnam () {
 		std::stringstream ss;
 		ss << (void*)this;
 		ss << unique_id();
-		MIDI::Name::MidiPatchManager::instance().remove_custom_midnam (ss.str());
-		rv = MIDI::Name::MidiPatchManager::instance().add_custom_midnam (ss.str(), midnam);
+		rv = MIDI::Name::MidiPatchManager::instance().update_custom_midnam (ss.str(), midnam);
 	}
+#ifndef NDEBUG
+	if (rv) {
+		info << string_compose(_("LV2: update midnam for plugin '%1'"), name ()) << endmsg;
+	} else {
+		warning << string_compose(_("LV2: Failed to parse midnam of plugin '%1'"), name ()) << endmsg;
+	}
+#endif
 	_midname_interface->free (midnam);
 	return rv;
 }
