@@ -985,7 +985,7 @@ LV2Plugin::read_midnam () {
 		MIDI::Name::MidiPatchManager::instance().remove_custom_midnam (ss.str());
 		rv = MIDI::Name::MidiPatchManager::instance().add_custom_midnam (ss.str(), midnam);
 	}
-	free (midnam);
+	_midname_interface->free (midnam);
 	return rv;
 }
 
@@ -999,7 +999,7 @@ LV2Plugin::midnam_model () {
 	if (model) {
 		rv = model;
 	}
-	free (model);
+	_midname_interface->free (model);
 	return rv;
 }
 #endif

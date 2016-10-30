@@ -194,16 +194,26 @@ typedef struct {
 } LV2_Midnam;
 
 typedef struct {
-	/** query midnam document. The plugin
-	 * is expected to return an allocated
-	 * null-terminated XML text, which is
-	 * safe for the host to pass to free().
+	/** Query midnam document. The plugin
+	 * is expected to return a null-terminated XML
+	 * text which is a valid midnam desciption
+	 * (or NULL in case of error).
 	 *
 	 * The midnam <Model> must be unique and
 	 * specific for the given plugin-instance.
 	 */
 	char* (*midnam)(LV2_Handle instance);
+
+	/** The unique model id used ith the midnam,
+	 * (or NULL).
+	 */
 	char* (*model)(LV2_Handle instance);
+
+	/** free allocated strings. The host
+	 * calls this for every value returned by
+	 * \ref midnam and \ref model.
+	 */
+	void (*free)(char*);
 } LV2_Midnam_Interface;
 
 /**
