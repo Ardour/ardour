@@ -120,7 +120,8 @@ private:
 
 	void setup_midnam_patches ();
 	void update_patch_selector ();
-	PBD::ScopedConnection midnam_connection;
+	void drop_instrument_ref ();
+	PBD::ScopedConnectionList midnam_connection;
 
 	void model_changed(const std::string& model);
 	void custom_device_mode_changed(const std::string& mode);

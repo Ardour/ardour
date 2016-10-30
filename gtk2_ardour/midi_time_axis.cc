@@ -427,6 +427,12 @@ MidiTimeAxisView::setup_midnam_patches ()
 }
 
 void
+MidiTimeAxisView::drop_instrument_ref ()
+{
+	midnam_connection.drop_connections ();
+}
+
+void
 MidiTimeAxisView::update_patch_selector ()
 {
 	typedef MIDI::Name::MidiPatchManager PatchManager;
@@ -437,7 +443,10 @@ MidiTimeAxisView::update_patch_selector ()
 		boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
 		if (pi && pi->plugin ()->has_midnam ()) {
-			midnam_connection.disconnect ();
+			midnam_connection.drop_connections ();
+			the_instrument->DropReferences.connect (midnam_connection, invalidator (*this),
+					boost::bind (&MidiTimeAxisView::drop_instrument_ref, this),
+					gui_context());
 			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
 					boost::bind (&Plugin::read_midnam, pi->plugin ()),
 					gui_context());
