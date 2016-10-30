@@ -3198,7 +3198,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			}
 			const double beat = map.beat_at_bbt (bbt);
 			_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
-						       , beat, bbt, map.frame_at_bbt (bbt), _real_section->position_lock_style());
+						       , beat, bbt, _real_section->position_lock_style());
 			if (!_real_section) {
 				aborted (true);
 				return;
@@ -3341,7 +3341,8 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->begin_reversible_command (_("copy tempo mark"));
 
 			if (_real_section->position_lock_style() == MusicTime) {
-				_real_section = map.add_tempo (tempo, map.pulse_at_frame (frame), 0, type, MusicTime);
+				const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+				_real_section = map.add_tempo (tempo, map.exact_qn_at_frame (frame, divisions), 0, type, MusicTime);
 			} else {
 				_real_section = map.add_tempo (tempo, 0.0, frame, type, AudioTime);
 			}

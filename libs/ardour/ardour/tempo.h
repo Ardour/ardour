@@ -62,14 +62,13 @@ class LIBARDOUR_API Tempo {
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
 	double note_type () const { return _note_type; }
-	/** audio samples per beat
+	/** audio samples per quarter note beat.
+	 * this is only useful for constant tempo and should not be used.
+	 * if you want an instantaneous value for this, use frames_per_beat_at() instead.
 	 * @param sr samplerate
 	 */
 	double frames_per_beat (framecnt_t sr) const {
 		return (60.0 * sr) / _beats_per_minute;
-	}
-	double frames_per_pulse (framecnt_t sr) const {
-		return (_note_type * 60.0 * sr) / _beats_per_minute;
 	}
 
   protected:
@@ -105,18 +104,20 @@ class LIBARDOUR_API Meter {
 /** A section of timeline with a certain Tempo or Meter. */
 class LIBARDOUR_API MetricSection {
   public:
-	MetricSection (double pulse, framepos_t frame, PositionLockStyle pls, bool is_tempo)
-		: _pulse (pulse), _frame (frame), _movable (true), _position_lock_style (pls), _is_tempo (is_tempo) {}
+	MetricSection (double pulse, double minute, PositionLockStyle pls, bool is_tempo, framecnt_t sample_rate)
+		: _pulse (pulse), _minute (minute), _movable (true), _position_lock_style (pls), _is_tempo (is_tempo), _sample_rate (sample_rate) {}
 
 	virtual ~MetricSection() {}
 
 	const double& pulse () const { return _pulse; }
 	void set_pulse (double pulse) { _pulse = pulse; }
 
-	framepos_t frame() const { return _frame; }
-	virtual void set_frame (framepos_t f) {
-		_frame = f;
+	double minute() const { return _minute; }
+	virtual void set_minute (double m) {
+		_minute = m;
 	}
+
+	framepos_t frame () const { return frame_at_minute (_minute); }
 
 	void set_movable (bool yn) { _movable = yn; }
 	bool movable() const { return _movable; }
@@ -131,21 +132,26 @@ class LIBARDOUR_API MetricSection {
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
 	bool is_tempo () const { return _is_tempo; }
 
+	framepos_t frame_at_minute (const double& time) const;
+	double minute_at_frame (const framepos_t& frame) const;
+
 private:
+
 	double             _pulse;
-	framepos_t         _frame;
+	double             _minute;
 	bool               _movable;
 	PositionLockStyle  _position_lock_style;
 	const bool         _is_tempo;
+	framecnt_t         _sample_rate;
 };
 
 /** A section of timeline with a certain Meter. */
 class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
-	MeterSection (double pulse, framepos_t frame, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type, PositionLockStyle pls)
-		: MetricSection (pulse, frame, pls, false), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
+	MeterSection (double pulse, double minute, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type, PositionLockStyle pls, framecnt_t sr)
+		: MetricSection (pulse, minute, pls, false, sr), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
 
-	MeterSection (const XMLNode&);
+	MeterSection (const XMLNode&, const framecnt_t sample_rate);
 
 	static const std::string xml_state_node_name;
 
@@ -173,10 +179,10 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 		Constant,
 	};
 
-	TempoSection (const double& pulse, const framepos_t& frame, double qpm, double note_type, Type tempo_type, PositionLockStyle pls)
-		: MetricSection (pulse, frame, pls, true), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
+	TempoSection (const double& pulse, const double& minute, double qpm, double note_type, Type tempo_type, PositionLockStyle pls, framecnt_t sr)
+		: MetricSection (pulse, minute, pls, true, sr), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
 
-	TempoSection (const XMLNode&);
+	TempoSection (const XMLNode&, const framecnt_t sample_rate);
 
 	static const std::string xml_state_node_name;
 
@@ -194,24 +200,24 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
 
-	double tempo_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
-	framepos_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
+	double tempo_at_minute (const double& minute) const;
+	double minute_at_tempo (const double& bpm, const double& pulse) const;
 
 	double tempo_at_pulse (const double& pulse) const;
-	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
+	double pulse_at_tempo (const double& bpm, const double& minute) const;
 
-	double pulse_at_frame (const framepos_t& frame, const framepos_t& frame_rate) const;
-	framepos_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
+	double pulse_at_frame (const framepos_t& frame) const;
+	framepos_t frame_at_pulse (const double& pulse) const;
 
-	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate);
-	double compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const;
+	double pulse_at_minute (const double& minute) const;
+	double minute_at_pulse (const double& pulse) const;
+
+	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse) const;
+	double compute_c_func_minute (const double& end_bpm, const double& end_minute) const;
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
   private:
-
-	framepos_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
-	double frame_to_minute (const framepos_t& frame, const framecnt_t& frame_rate) const;
 
 	/*  tempo ramp functions. zero-based with time in minutes,
 	 * 'tick tempo' in ticks per minute and tempo in bpm.
@@ -252,11 +258,11 @@ typedef std::list<MetricSection*> Metrics;
 class LIBARDOUR_API TempoMetric {
   public:
 	TempoMetric (const Meter& m, const Tempo& t)
-		: _meter (&m), _tempo (&t), _frame (0), _pulse (0.0) {}
+		: _meter (&m), _tempo (&t), _minute (0.0), _pulse (0.0) {}
 
 	void set_tempo (const Tempo& t)              { _tempo = &t; }
 	void set_meter (const Meter& m)              { _meter = &m; }
-	void set_frame (framepos_t f)                { _frame = f; }
+	void set_minute (double m)                   { _minute = m; }
 	void set_pulse (const double& p)             { _pulse = p; }
 
 	void set_metric (const MetricSection* section) {
@@ -268,19 +274,19 @@ class LIBARDOUR_API TempoMetric {
 			set_tempo(*tempo);
 		}
 
-		set_frame (section->frame());
+		set_minute (section->minute());
 		set_pulse (section->pulse());
 	}
 
 	const Meter&              meter() const { return *_meter; }
 	const Tempo&              tempo() const { return *_tempo; }
-	framepos_t                frame() const { return _frame; }
+	double                    minute() const { return _minute; }
 	const double&             pulse() const { return _pulse; }
 
   private:
 	const Meter*       _meter;
 	const Tempo*       _tempo;
-	framepos_t         _frame;
+	double             _minute;
 	double             _pulse;
 };
 
@@ -348,7 +354,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	 * @param where bbt position of new section
 	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 */
-	MeterSection* add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where, const framepos_t& frame, PositionLockStyle pls);
+	MeterSection* add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where, PositionLockStyle pls);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -356,8 +362,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
 			    , TempoSection::Type type, PositionLockStyle pls);
 
-	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, const framepos_t& frame
-			    , PositionLockStyle pls);
+	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, PositionLockStyle pls);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -410,6 +415,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t frame_at_tempo (const Tempo& tempo) const;
 
 	Tempo tempo_at_beat (const double& beat) const;
+	double beat_at_tempo (const Tempo& tempo) const;
 
 	const Meter& meter_at_frame (framepos_t) const;
 
@@ -454,6 +460,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
 
+	framecnt_t frames_between_quarter_notes (const double start, const double end);
+
 	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
@@ -470,20 +478,23 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 private:
 
-	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
-	framepos_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
+	double beat_at_minute_locked (const Metrics& metrics, const double& minute) const;
+	double minute_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
 	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	double beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	double pulse_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
-	framepos_t frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_minute_locked (const Metrics& metrics, const double& minute) const;
+	double minute_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	Tempo tempo_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
-	framepos_t frame_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const;
+	Tempo tempo_at_minute_locked (const Metrics& metrics, const double& minute) const;
+	double minute_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const;
 
-	Timecode::BBT_Time bbt_at_frame_locked (const Metrics& metrics, const framepos_t& frame) const;
-	framepos_t frame_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
+	Tempo tempo_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const;
+
+	Timecode::BBT_Time bbt_at_minute_locked (const Metrics& metrics, const double& minute) const;
+	double minute_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
 	double beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
 	Timecode::BBT_Time bbt_at_beat_locked (const Metrics& metrics, const double& beats) const;
@@ -491,27 +502,33 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	framepos_t frame_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const;
-	double quarter_note_at_frame_locked (const Metrics& metrics, const framepos_t frame) const;
+	double minute_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const;
+	double quarter_note_at_minute_locked (const Metrics& metrics, const double minute) const;
+
 	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const;
 	double beat_at_quarter_note_locked (const Metrics& metrics, const double beat) const;
 
-	const TempoSection& tempo_section_at_frame_locked (const Metrics& metrics, framepos_t frame) const;
+	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn);
+
+	const TempoSection& tempo_section_at_minute_locked (const Metrics& metrics, double minute) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
-	const MeterSection& meter_section_at_frame_locked (const Metrics& metrics, framepos_t frame) const;
+	const MeterSection& meter_section_at_minute_locked (const Metrics& metrics, double minute) const;
 	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
 	bool check_solved (const Metrics& metrics) const;
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
 
-	bool solve_map_frame (Metrics& metrics, TempoSection* section, const framepos_t& frame);
+	bool solve_map_minute (Metrics& metrics, TempoSection* section, const double& minute);
 	bool solve_map_pulse (Metrics& metrics, TempoSection* section, const double& pulse);
-	bool solve_map_frame (Metrics& metrics, MeterSection* section, const framepos_t& frame);
+	bool solve_map_minute (Metrics& metrics, MeterSection* section, const double& minute);
 	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
 
 	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
 	double exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
+
+	double minute_at_frame (const framepos_t frame) const;
+	framepos_t frame_at_minute (const double minute) const;
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
@@ -538,11 +555,10 @@ private:
 
 	void do_insert (MetricSection* section);
 
-	TempoSection* add_tempo_locked (const Tempo&, double pulse, framepos_t frame
+	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
 			       , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
-	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, framepos_t frame
-					, PositionLockStyle pls, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, PositionLockStyle pls, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

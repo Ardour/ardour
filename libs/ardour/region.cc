@@ -596,12 +596,24 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 
 	if (position_lock_style() == AudioTime) {
 		set_position_internal (pos, true, sub_num);
+		if (_session.tempo_map().frame_at_beat (_beat) != _position) {
+			std::cout << name ()
+				  << " Region::set_position AudioTime position error!!! FRAME AT BEAT : " <<_session.tempo_map().frame_at_beat (_beat)
+				  << " position : " << _position  << " has playlist : " << (playlist() == 0) << std::endl;
+		}
 	} else {
 		if (!_session.loading()) {
 			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
 		}
+
 		/* will set pulse accordingly */
 		set_position_internal (pos, false, sub_num);
+
+		if (_session.tempo_map().frame_at_beat (_beat) != _position) {
+			std::cout << name ()
+				  << " Region::set_position MusicTime position error!!! FRAME AT BEAT : " <<_session.tempo_map().frame_at_beat (_beat)
+				  << " position : " << _position << " beat : " << _beat << " has playlist : " << (playlist() == 0) << std::endl;
+		}
 	}
 
 	/* do this even if the position is the same. this helps out
