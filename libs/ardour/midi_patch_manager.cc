@@ -207,7 +207,6 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path)
 
 			boost::shared_ptr<MIDINameDocument> document = i->second;
 
-			cout << string_compose(_("Removing MIDI patch file %1"), file_path) << "\n";
 			info << string_compose(_("Removing MIDI patch file %1"), file_path) << endmsg;
 
 			_documents.erase(i++);
