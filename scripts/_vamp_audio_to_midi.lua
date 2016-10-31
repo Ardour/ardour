@@ -32,7 +32,7 @@ function factory () return function ()
 
 	for i,ar in pairs(audio_regions) do
 		local a_off = ar:position ()
-		local b_off = 4.0 * midi_region:pulse () - midi_region:start_beats ()
+		local b_off = midi_region:pos_beats () - midi_region:start_beats ()
 
 		vamp:analyze (ar:to_readable (), 0, nil)
 		local fl = vamp:plugin ():getRemainingFeatures ():at (0)
