@@ -171,8 +171,8 @@ public:
 		return fabs (a.azi - b.azi) < 1.0;
 	}
 
-        virtual void freeze ();
-        virtual void thaw ();
+	virtual void freeze ();
+	virtual void thaw ();
 
 protected:
 	boost::shared_ptr<Pannable> _pannable;
@@ -182,7 +182,7 @@ protected:
 	                                       framepos_t start, framepos_t end, pframes_t nframes,
 	                                       pan_t** buffers, uint32_t which) = 0;
 
-        int32_t _frozen;
+	int32_t _frozen;
 };
 
 } // namespace

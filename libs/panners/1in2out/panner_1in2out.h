@@ -46,17 +46,17 @@ class Panner1in2out : public Panner
     bool clamp_position (double&);
 	std::pair<double, double> position_range () const;
 
-        double position() const;
+	double position() const;
 
-        ChanCount in() const { return ChanCount (DataType::AUDIO, 1); }
-        ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
+	ChanCount in() const { return ChanCount (DataType::AUDIO, 1); }
+	ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
 
-        std::set<Evoral::Parameter> what_can_be_automated() const;
+	std::set<Evoral::Parameter> what_can_be_automated() const;
 
-        static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
+	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
-        std::string describe_parameter (Evoral::Parameter);
-        std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
+	std::string describe_parameter (Evoral::Parameter);
+	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state ();
 
@@ -71,11 +71,11 @@ class Panner1in2out : public Panner
 	float right_interp;
 
 	void distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
-        void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-                                       framepos_t start, framepos_t end, pframes_t nframes,
-                                       pan_t** buffers, uint32_t which);
+	void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
+	                               framepos_t start, framepos_t end, pframes_t nframes,
+	                               pan_t** buffers, uint32_t which);
 
-        void update ();
+	void update ();
 };
 
 } // namespace
