@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2015 Nil Geisweiller
+    Copyright (C) 2015-2016 Nil Geisweiller
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ using Timecode::BBT_Time;
 //       - [ ] what is the difference between pannable and panner?
 //       - [ ] Apparently I need to create pan tracks in order to work.
 //             UPDATE: it seems uncorrelated with that.
+//       - [ ] Look at RouteTimeAxisView
 //
 // - [ ] Take care of midi automation.
 //
