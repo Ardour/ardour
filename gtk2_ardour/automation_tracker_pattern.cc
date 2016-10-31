@@ -52,11 +52,6 @@ void AutomationTrackerPattern::update_pattern()
 			if (automations[param].count(row) == 0)
 				row = row_at_frame_min_delay(frame);
 			automations[param].insert(RowToAutomationIt::value_type(row, it));
-			std::cout << "[update pattern] row = " << row
-			          << ", (*it)->when = " << (*it)->when
-			          << ", frame = " << frame
-			          << ", (*it)->value = " << (*it)->value
-			          << ", (*it)->coeff = " << (*it)->coeff << std::endl;
 		}
 	}
 }
