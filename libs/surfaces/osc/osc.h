@@ -98,6 +98,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types);
+	// cue
+	//Sorted cue_get_sorted_stripables(boost::shared_ptr<Route> aux);
 
 // keep a surface's global setup by remote server url
 	struct OSCSurface {

@@ -212,6 +212,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (audio_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
+	label = manage (new Gtk::Label(_("Audio Auxes:")));
+	label->set_alignment(1, .5);
+	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	sttable->attach (audio_auxes, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++stn;
+
 	label = manage (new Gtk::Label(_("Midi Buses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
@@ -366,6 +372,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	audio_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	midi_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	audio_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	audio_auxes.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	midi_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	control_masters.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	master_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
@@ -671,9 +678,9 @@ OSC_GUI::calculate_strip_types ()
 	if (monitor_type.get_active()) {
 		stvalue += 64;
 	}
-	/*if (Auditioner_type.get_active()) {
-		stvalue += 128; // this one has no user accessable controls
-	}*/
+	if (audio_auxes.get_active()) {
+		stvalue += 128;
+	}
 	if (selected_tracks.get_active()) {
 		stvalue += 256;
 	}

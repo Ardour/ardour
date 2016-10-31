@@ -80,6 +80,7 @@ private:
 	Gtk::CheckButton audio_tracks;
 	Gtk::CheckButton midi_tracks;
 	Gtk::CheckButton audio_buses;
+	Gtk::CheckButton audio_auxes;
 	Gtk::CheckButton midi_buses;
 	Gtk::CheckButton control_masters;
 	Gtk::CheckButton master_type;

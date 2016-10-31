@@ -844,7 +844,14 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
 
-	} else if (strcmp (path, "/strip/listen") == 0) {
+	} else
+	if (!strncmp (path, "/cue/", 5)) {
+
+		//cue_parse (path, types, argv, argc, msg)
+
+		ret = 0;
+	} else
+	if (strcmp (path, "/strip/listen") == 0) {
 
 		cerr << "set up listener\n";
 
@@ -874,7 +881,8 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 
-	} else if (strcmp (path, "/strip/ignore") == 0) {
+	} else
+	if (strcmp (path, "/strip/ignore") == 0) {
 
 		for (int n = 0; n < argc; ++n) {
 
@@ -3366,8 +3374,22 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 			if (types[1] && (s->presentation_info().flags() & PresentationInfo::MidiTrack)) {
 				sorted.push_back (s);
 			} else
-			if (types[2] && (s->presentation_info().flags() & PresentationInfo::AudioBus)) {
-				sorted.push_back (s);
+/*			if (types[2] && (s->presentation_info().flags() & PresentationInfo::AudioBus)) {
+				sorted.push_back (s); */
+			if ((s->presentation_info().flags() & PresentationInfo::AudioBus)) {
+				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+				// r->feeds (session->master_out()) may make more sense
+				if (r->direct_feeds_according_to_reality (session->master_out())) {
+					// this is a bus
+					if (types[2]) {
+						sorted.push_back (s);
+					}
+				} else {
+					// this is an Aux out
+					if (types[7]) {
+						sorted.push_back (s);
+					}
+				}
 			} else
 			if (types[3] && (s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 				sorted.push_back (s);
