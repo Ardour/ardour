@@ -174,6 +174,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
+	bool is_pan_type (const Evoral::Parameter& param) const;
 	// Assign an automation parameter to a column and return the corresponding
 	// column index
 	size_t add_automation_column (const Evoral::Parameter& param);

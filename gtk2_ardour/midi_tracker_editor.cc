@@ -201,6 +201,20 @@ MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
+bool
+MidiTrackerEditor::is_pan_type (const Evoral::Parameter& param) const {
+	switch (param.type()) {
+	case PanAzimuthAutomation:
+	case PanElevationAutomation:
+	case PanWidthAutomation:
+	case PanFrontBackAutomation:
+	case PanLFEAutomation:
+		return true;
+	defaul:
+		return false;
+	}
+}
+
 size_t
 MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 {
