@@ -66,15 +66,9 @@ using Timecode::BBT_Time;
 // TODO //
 //////////
 //
-// - [ ] Take care of pan automation
-//       - [ ] what is the difference between pannable and panner?
-//       - [ ] Apparently I need to create pan tracks in order to work.
-//             UPDATE: it seems uncorrelated with that.
-//       - [ ] Look at RouteTimeAxisView
-//
 // - [ ] Take care of midi automation.
 //
-// - [ ] Support audio tracks, and trim automation as well
+// - [ ] Support audio tracks and trim automation as well
 //
 // - [ ] Support multiple tracks and regions.
 //
@@ -138,6 +132,13 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 	}
 
 	set_session (s);
+
+	// Fill _pan_param_types
+	_pan_param_types.insert(PanAzimuthAutomation);
+	_pan_param_types.insert(PanElevationAutomation);
+	_pan_param_types.insert(PanWidthAutomation);
+	_pan_param_types.insert(PanFrontBackAutomation);
+	_pan_param_types.insert(PanLFEAutomation);
 
 	// Beats per row combo
 	beats_per_row_strings =  I18N (_beats_per_row_strings);
@@ -204,16 +205,7 @@ MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> 
 
 bool
 MidiTrackerEditor::is_pan_type (const Evoral::Parameter& param) const {
-	switch (param.type()) {
-	case PanAzimuthAutomation:
-	case PanElevationAutomation:
-	case PanWidthAutomation:
-	case PanFrontBackAutomation:
-	case PanLFEAutomation:
-		return true;
-	defaul:
-		return false;
-	}
+	return _pan_param_types.find((ARDOUR::AutomationType)param.type()) != _pan_param_types.end();
 }
 
 size_t
@@ -285,7 +277,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 
 // 1. Does show the midi automations because there are too many of them.
 //
-// 2. TODO :This menu needs to be persistent between sessions. Should also be
+// 2. TODO: this menu needs to be persistent between sessions. Should also be
 //    fixed for the track/piano roll view.
 void
 MidiTrackerEditor::show_all_automation ()
@@ -1123,6 +1115,17 @@ void MidiTrackerEditor::show_all_main_automations ()
 	update_pan_columns_visibility ();
 }
 
+bool MidiTrackerEditor::has_pan_automation() const
+{
+	for (std::set<AutomationType>::const_iterator it = _pan_param_types.begin();
+	     it != _pan_param_types.end(); ++it) {
+		Parameter2AutomationControl::const_iterator pac_it = param2actrl.find(Evoral::Parameter(*it));	
+		if (pac_it != param2actrl.end() && pac_it->second->list()->size() > 0)
+			return true;
+	}
+	return false;
+}
+
 void MidiTrackerEditor::show_existing_main_automations ()
 {
 	// Gain
@@ -1137,12 +1140,11 @@ void MidiTrackerEditor::show_existing_main_automations ()
 		update_mute_column_visibility ();
 	}
 
-	// TODO: fix pan automation first
-	// // Pan
-	// if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
-	// 	pan_automation_item->set_active (true);
-	// 	update_pan_columns_visibility ();
-	// }
+	// Pan
+	if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
+		pan_automation_item->set_active (true);
+		update_pan_columns_visibility ();
+	}
 }
 
 void MidiTrackerEditor::hide_main_automations ()
@@ -1511,7 +1513,7 @@ MidiTrackerEditor::build_param2actrl ()
 	param2actrl[Evoral::Parameter(MuteAutomation)] =  route->mute_control();
 
 	// Pan
-	set<Evoral::Parameter> const & pan_params = route->panner()->what_can_be_automated ();
+	set<Evoral::Parameter> const & pan_params = route->pannable()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::const_iterator p = pan_params.begin(); p != pan_params.end(); ++p) {
 		param2actrl[*p] = route->pannable()->automation_control(*p);
 	}

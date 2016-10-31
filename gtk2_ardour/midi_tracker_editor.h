@@ -162,6 +162,9 @@ class MidiTrackerEditor : public ArdourWindow
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
+	/** Set of pan parameter types */
+	std::set<ARDOUR::AutomationType> _pan_param_types;
+
 	size_t gain_column;
 	size_t trim_column; // TODO: support audio tracks
 	size_t mute_column;
@@ -183,6 +186,7 @@ class MidiTrackerEditor : public ArdourWindow
 	void build_param2actrl ();
 
 	virtual void show_all_automation ();
+	bool has_pan_automation() const;
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
 
