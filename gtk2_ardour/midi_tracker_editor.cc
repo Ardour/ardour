@@ -34,6 +34,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/pannable.h"
+#include "ardour/panner.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_patch_manager.h"
 
@@ -231,7 +232,9 @@ MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 	col2param[column] = param;
 
 	// Set the column title
-	string name = route->describe_parameter (param);
+	string name = is_pan_type(param) ?
+		route->panner()->describe_parameter (param)
+		: route->describe_parameter (param);
 	view.get_column(column)->set_title (name);
 
 	std::cout << "add_automation_column: name = " << name
@@ -577,7 +580,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		pan_automation_item->set_active (is_pan_visible());
 
-		set<Evoral::Parameter> const & params = route->pannable()->what_can_be_automated ();
+		set<Evoral::Parameter> const & params = route->panner()->what_can_be_automated ();
 		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
 			_main_automation_menu_map[*p] = pan_automation_item;
 		}
@@ -1084,7 +1087,7 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 	const bool showit = pan_automation_item->get_active();
 
 	if (pan_columns.empty()) {
-		set<Evoral::Parameter> const & params = route->pannable()->what_can_be_automated ();
+		set<Evoral::Parameter> const & params = route->panner()->what_can_be_automated ();
 		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {		
 			pan_columns.push_back(add_automation_column(*p));
 		}
@@ -1508,7 +1511,7 @@ MidiTrackerEditor::build_param2actrl ()
 	param2actrl[Evoral::Parameter(MuteAutomation)] =  route->mute_control();
 
 	// Pan
-	set<Evoral::Parameter> const & pan_params = route->pannable()->what_can_be_automated ();
+	set<Evoral::Parameter> const & pan_params = route->panner()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::const_iterator p = pan_params.begin(); p != pan_params.end(); ++p) {
 		param2actrl[*p] = route->pannable()->automation_control(*p);
 	}
