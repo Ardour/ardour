@@ -1490,9 +1490,10 @@ TempoMap::metric_at (BBT_Time bbt) const
 	return m;
 }
 
-/** Returns the beat duration corresponding to the supplied frame, possibly returning a negative value.
+/** Returns the BBT (meter-based) beat corresponding to the supplied frame, possibly returning a negative value.
  * @param frame The session frame position.
  * @return The beat duration according to the tempo map at the supplied frame.
+ *
  * If the supplied frame lies before the first meter, the returned beat duration will be negative.
  * The returned beat is obtained using the first meter and the continuation of the tempo curve (backwards).
  *
@@ -1534,6 +1535,12 @@ TempoMap::beat_at_minute_locked (const Metrics& metrics, const double& minute) c
 	return beat;
 }
 
+/** Returns the frame corresponding to the supplied BBT (meter-based) beat.
+ * @param beat The BBT (meter-based) beat.
+ * @return The frame duration according to the tempo map at the supplied BBT (meter-based) beat.
+ *
+ * This function uses both tempo and meter.
+ */
 framepos_t
 TempoMap::frame_at_beat (const double& beat) const
 {
@@ -1577,6 +1584,11 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
 	return prev_t->minute_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse());
 }
 
+/** Returns a Tempo corresponding to the supplied frame.
+ * @param frame The audio frame.
+ * @return a Tempo according to the tempo map at the supplied frame.
+ *
+ */
 Tempo
 TempoMap::tempo_at_frame (const framepos_t& frame) const
 {
@@ -1730,8 +1742,8 @@ TempoMap::pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 	return prev_t->minute();
 }
 
-/** more precise than doing tempo_at_frame (frame_at_beat (b)),
- *  as there is no intermediate frame rounding.
+/** Returns a Tempo corresponding to the supplied BBT (meter-based) beat.
+ * @param beat The BBT (meter-based) beat.
  */
 Tempo
 TempoMap::tempo_at_beat (const double& beat) const
@@ -1743,6 +1755,9 @@ TempoMap::tempo_at_beat (const double& beat) const
 	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()), prev_t->note_type());
 }
 
+/** Returns a BBT (meter-based) beat corresponding to the supplied Tempo.
+ * @param tempo The tempo.
+ */
 double
 TempoMap::beat_at_tempo (const Tempo& tempo) const
 {
@@ -1751,7 +1766,13 @@ TempoMap::beat_at_tempo (const Tempo& tempo) const
 
 	return beat_at_pulse_locked (_metrics, pulse);
 }
-
+/** Returns the whole-note pulse corresponding to the supplied  BBT (meter-based) beat.
+ * @param beat The BBT (meter-based) beat.
+ *
+ * a pulse or whole note is the base musical position of a MetricSection.
+ * it is equivalent to four quarter notes.
+ *
+ */
 double
 TempoMap::pulse_at_beat (const double& beat) const
 {
@@ -1767,6 +1788,12 @@ TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) cons
 	return prev_m->pulse() + ((beat - prev_m->beat()) / prev_m->note_divisor());
 }
 
+/** Returns the BBT (meter-based) beat corresponding to the supplied whole-note pulse .
+ * @param pulse the whole-note pulse.
+ *
+ * a pulse or whole note is the base musical position of a MetricSection.
+ * it is equivalent to four quarter notes.
+ */
 double
 TempoMap::beat_at_pulse (const double& pulse) const
 {
@@ -1871,6 +1898,10 @@ TempoMap::minute_at_pulse_locked (const Metrics& metrics, const double& pulse) c
 	return dtime + prev_t->minute();
 }
 
+/** Returns the BBT (meter-based) beat corresponding to the supplied BBT time.
+ * @param bbt The BBT time (meter-based).
+ *
+ */
 double
 TempoMap::beat_at_bbt (const Timecode::BBT_Time& bbt)
 {
@@ -1911,11 +1942,15 @@ TempoMap::beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& 
 	return ret;
 }
 
+/** Returns the BBT time corresponding to the supplied BBT (meter-based) beat.
+ * @param beat The BBT (meter-based) beat.
+ *
+ */
 Timecode::BBT_Time
-TempoMap::bbt_at_beat (const double& beats)
+TempoMap::bbt_at_beat (const double& beat)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return bbt_at_beat_locked (_metrics, beats);
+	return bbt_at_beat_locked (_metrics, beat);
 }
 
 Timecode::BBT_Time
@@ -1970,6 +2005,13 @@ TempoMap::bbt_at_beat_locked (const Metrics& metrics, const double& b) const
 	return ret;
 }
 
+/** Returns the whole-note pulse corresponding to the supplied BBT time (meter-based).
+ * @param bbt The BBT time (meter-based).
+ *
+ * a pulse or whole note is the basic musical position of a MetricSection.
+ * it is equivalent to four quarter notes.
+ * while the input uses meter, the output does not.
+ */
 double
 TempoMap::pulse_at_bbt (const Timecode::BBT_Time& bbt)
 {
@@ -2020,7 +2062,13 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 
 	return ret;
 }
-
+/** Returns the BBT time (meter-based) corresponding to the supplied whole-note pulse.
+ * @param pulse The whole-note pulse.
+ *
+ * a pulse or whole note is the basic musical position of a MetricSection.
+ * it is equivalent to four quarter notes.
+ * while the input uses meter, the output does not.
+ */
 Timecode::BBT_Time
 TempoMap::bbt_at_pulse (const double& pulse)
 {
@@ -2082,6 +2130,10 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
 	return ret;
 }
 
+/** Returns the BBT time corresponding to the supplied frame position.
+ * @param frame the position in audio samples.
+ *
+ */
 BBT_Time
 TempoMap::bbt_at_frame (framepos_t frame)
 {
@@ -2180,6 +2232,10 @@ TempoMap::bbt_at_minute_locked (const Metrics& metrics, const double& minute) co
 	return ret;
 }
 
+/** Returns the frame corresponding to the supplied BBT time.
+ * @param bbt the position in BBT time.
+ *
+ */
 framepos_t
 TempoMap::frame_at_bbt (const BBT_Time& bbt)
 {
@@ -2207,17 +2263,17 @@ TempoMap::minute_at_bbt_locked (const Metrics& metrics, const BBT_Time& bbt) con
 }
 
 /**
- * Returns the distance from 0 in quarter pulses at the supplied frame.
+ * Returns the quarter-note beat position corresponding to the supplied frame.
+ *
+ * @param frame The distance in frames relative to session 0 whose quarter note distance you would like.
+ * @return The quarter-note position of the supplied frame. Ignores meter.
  *
  * Plugin APIs don't count ticks in the same way PROGRAM_NAME does.
  * We use ticks per beat whereas the rest of the world uses ticks per quarter note.
  * This is more or less the VST's ppqPos (a scalar you use to obtain tick position
  * in whatever ppqn you're using).
  *
- * @param frame The distance in frames relative to session 0 whose quarter note distance you would like.
- * @return The quarter note (quarter pulse) distance from session 0 to the supplied frame. Ignores meter.
 */
-
 double
 TempoMap::quarter_note_at_frame (const framepos_t frame)
 {
@@ -2250,6 +2306,14 @@ TempoMap::quarter_note_at_frame_rt (const framepos_t frame)
 	return ret;
 }
 
+/**
+ * Returns the frame corresponding to the supplied quarter-note beat position.
+ *
+ * @param quarter_note The quarter-note relative to session 0 whose frame position you would like.
+ * @return The frame position of the supplied quarter-note. Ignores meter.
+ *
+ *
+*/
 framepos_t
 TempoMap::frame_at_quarter_note (const double quarter_note)
 {
@@ -2268,6 +2332,12 @@ TempoMap::minute_at_quarter_note_locked (const Metrics& metrics, const double qu
 	return ret;
 }
 
+/** Returns the quarter-note beats corresponding to the supplied BBT (meter-based) beat.
+ * @param beat The BBT (meter-based) beat.
+ *
+ * a quarter-note is the musical unit of Evoral::Beats.
+ *
+ */
 double
 TempoMap::quarter_note_at_beat (const double beat)
 {
@@ -2286,6 +2356,12 @@ TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat
 	return ret;
 }
 
+/** Returns the BBT (meter-based) beat position corresponding to the supplied quarter-note beats.
+ * @param quarter_note The position in quarter-note beats.
+ *
+ * a quarter-note is the musical unit of Evoral::Beats.
+ *
+ */
 double
 TempoMap::beat_at_quarter_note (const double quarter_note)
 {
@@ -2303,6 +2379,15 @@ TempoMap::beat_at_quarter_note_locked (const Metrics& metrics, const double quar
 	return beat_at_pulse_locked (metrics, quarter_note / 4.0);
 }
 
+/** Returns the distance in frames between two supplied quarter-note beats.
+ * @param start the first position in quarter-note beats.
+ * @param end the end position in quarter-note beats.
+ *
+ * use this rather than e.g.
+ * frame_at-quarter_note (end_beats) - frame_at_quarter_note (start_beats).
+ * frames_between_quarter_notes() doesn't round to audio frames as an intermediate step,
+ *
+ */
 framecnt_t
 TempoMap::frames_between_quarter_notes (const double start, const double end)
 {
@@ -2887,7 +2972,7 @@ TempoMap::copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSe
 /** answers the question "is this a valid beat position for this tempo section?".
  *  it returns true if the tempo section can be moved to the requested bbt position,
  *  leaving the tempo map in a solved state.
- * @param section the tempo section to be moved
+ * @param ts the tempo section to be moved
  * @param bbt the requested new position for the tempo section
  * @return true if the tempo section can be moved to the position, otherwise false.
  */
@@ -2920,7 +3005,7 @@ TempoMap::can_solve_bbt (TempoSection* ts, const BBT_Time& bbt)
 * This is for a gui that needs to know the pulse or frame of a tempo section if it were to be moved to some bbt time,
 * taking any possible reordering as a consequence of this into account.
 * @param section - the section to be altered
-* @param bbt - the bbt where the altered tempo will fall
+* @param bbt - the BBT time  where the altered tempo will fall
 * @return returns - the position in pulses and frames (as a pair) where the new tempo section will lie.
 */
 pair<double, framepos_t>
@@ -2951,6 +3036,22 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 	return ret;
 }
 
+/** moves a TempoSection to a specified position.
+ * @param ts - the section to be moved
+ * @param frame - the new position in frames for the tempo
+ * @param sub_num - the snap division to use if using musical time.
+ *
+ * if sub_num is non-zero, the frame position is used to calculate an exact
+ * musical position.
+ * sub_num   | effect
+ * -1        | snap to bars (meter-based)
+ *  0        | no snap - use audio frame for musical position
+ *  1        | snap to meter-based (BBT) beat
+ * >1        | snap to quarter-note subdivision (i.e. 4 will snap to sixteenth notes)
+ *
+ * this follows the snap convention in the gui.
+ * if sub_num is zero, the musical position will be taken from the supplied frame.
+ */
 void
 TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& sub_num)
 {
@@ -3020,6 +3121,14 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
 	MetricPositionChanged (); // Emit Signal
 }
 
+/** moves a MeterSection to a specified position.
+ * @param ms - the section to be moved
+ * @param frame - the new position in frames for the meter
+ *
+ * as a meter cannot snap to anything but bars,
+ * the supplied frame is rounded to the nearest bar, possibly
+ * leaving the meter position unchanged.
+ */
 void
 TempoMap::gui_move_meter (MeterSection* ms, const framepos_t& frame)
 {
@@ -3237,14 +3346,15 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 	MetricPositionChanged (); // Emit Signal
 }
 
-/** Returns the exact beat corresponding to the bar, beat or quarter note subdivision nearest to
+/** Returns the exact bbt-based beat corresponding to the bar, beat or quarter note subdivision nearest to
  * the supplied frame, possibly returning a negative value.
  * @param frame  The session frame position.
  * @param sub_num The subdivision to use when rounding the beat.
- * A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
- * Positive integers indicate quarter note (non BBT) divisions.
- * 0 indicates that the returned beat should not be rounded.
+ *                A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
+ *                Positive integers indicate quarter note (non BBT) divisions.
+ *                0 indicates that the returned beat should not be rounded (equivalent to quarter_note_at_frame()).
  * @return The beat position of the supplied frame.
+ *
  * If the supplied frame lies before the first meter, the return will be negative,
  * in which case the returned beat uses the first meter (for BBT subdivisions) and
  * the continuation of the tempo curve (backwards).
@@ -3267,12 +3377,16 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
 
 /** Returns the exact quarter note corresponding to the bar, beat or quarter note subdivision nearest to
  * the supplied frame, possibly returning a negative value.
+ * Supplying a frame position with a non-zero sub_num is equivalent to supplying
+ * a quarter-note musical position without frame rounding (see below)
+ *
  * @param frame  The session frame position.
  * @param sub_num The subdivision to use when rounding the quarter note.
- * A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
- * Positive integers indicate quarter note (non BBT) divisions.
- * 0 indicates that the returned quarter note should not be rounded.
+ *                A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
+ *                Positive integers indicate quarter note (non BBT) divisions.
+ *                0 indicates that the returned quarter note should not be rounded (equivalent to quarter_note_at_frame()).
  * @return The quarter note position of the supplied frame.
+ *
  * If the supplied frame lies before the first meter, the return will be negative,
  * in which case the returned quarter note uses the first meter (for BBT subdivisions) and
  * the continuation of the tempo curve (backwards).
@@ -3317,6 +3431,12 @@ TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& fr
 	return qn;
 }
 
+/** returns the frame duration of the supplied BBT time at a specified frame position in the tempo map.
+ * @param pos the frame position in the tempo map.
+ * @param bbt the distance in BBT time from pos to calculate.
+ * @param dir the rounding direction..
+ * @return the duration in frames between pos and bbt
+*/
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
