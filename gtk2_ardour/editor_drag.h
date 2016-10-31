@@ -745,6 +745,7 @@ private:
 
 	bool _copy;
 	bool _movable;
+	double _grab_bpm;
 	XMLNode* before_state;
 };
 
