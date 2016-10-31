@@ -3271,6 +3271,7 @@ MeterMarkerDrag::aborted (bool moved)
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
+	, _grab_bpm (0.0)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3278,6 +3279,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
 	_movable = _real_section->movable();
+	_grab_bpm = _real_section->beats_per_minute();
 	assert (_marker);
 }
 
@@ -3357,9 +3359,8 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* use vertical movement to alter tempo .. should be log */
-		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
+		double new_bpm = max (1.5, _grab_bpm + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		strs << new_bpm;
 		show_verbose_cursor_text (strs.str());
