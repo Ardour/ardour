@@ -3427,7 +3427,7 @@ TempoMarkerDrag::aborted (bool moved)
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
-	, _pulse (0.0)
+	, _grab_qn (0.0)
 	, _tempo (0)
 	, before_state (0)
 {
@@ -3467,9 +3467,9 @@ BBTRulerDrag::setup_pointer_frame_offset ()
 		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
 	}
 
-	_pulse = map.pulse_at_beat (beat);
+	_grab_qn = map.quarter_note_at_beat (beat);
 
-	_pointer_frame_offset = raw_grab_frame() - map.frame_at_pulse (_pulse);
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_quarter_note (_grab_qn);
 
 }
 
@@ -3494,7 +3494,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer frame */
-		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_pulse (_pulse), pf, _pulse);
+		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
 	}
 	ostringstream sstr;
 	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).beats_per_minute() << "\n";

@@ -225,7 +225,7 @@ intptr_t Session::vst_callback (
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = session->tempo_map().pulse_at_bbt_rt (bbt) * 4.0;
+					double ppqBar = session->tempo_map().quarter_note_at_bbt_rt (bbt);
 					/* quarter note at frame position (not rounded to note subdivision) */
 					double ppqPos = session->tempo_map().quarter_note_at_frame_rt (now);
 					if (value & (kVstPpqPosValid)) {

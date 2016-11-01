@@ -68,7 +68,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 	TempoMap& map (source->session().tempo_map());
 
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = bbt_source->model()->begin(MidiModel::TimeType(), true); i != bbt_source->model()->end(); ++i) {
-		const double new_time = map.quarter_note_at_beat ((*i).time().to_double() + map.beat_at_pulse (session_offset)) - (session_offset * 4.0);
+		const double new_time = map.quarter_note_at_beat ((*i).time().to_double() + map.beat_at_quarter_note (session_offset * 4.0)) - (session_offset * 4.0);
 		Evoral::Event<Evoral::Beats> new_ev (*i, true);
 		new_ev.set_time (Evoral::Beats (new_time));
 		source->append_event_beats (source_lock, new_ev);
@@ -206,7 +206,7 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 {
 	/* set start_beats to quarter note value from incorrect bbt*/
 	TempoMap& tmap (session->tempo_map());
-	double new_start_qn = (tmap.pulse_at_beat (region->beat()) - tmap.pulse_at_beat (region->beat() - region->start_beats())) * 4.0;
+	double new_start_qn = tmap.quarter_note_at_beat (region->beat()) - tmap.quarter_note_at_beat (region->beat() - region->start_beats());
 
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
@@ -222,8 +222,8 @@ reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 {
 	/* set length_beats to quarter note value */
 	TempoMap& tmap (session->tempo_map());
-	double new_length_qn = (tmap.pulse_at_beat (region->beat() + region->length_beats())
-				  - tmap.pulse_at_beat (region->beat())) * 4.0;
+	double new_length_qn = tmap.quarter_note_at_beat (region->beat() + region->length_beats())
+		- tmap.quarter_note_at_beat (region->beat());
 
 	/* force a change to length and length_beats */
 	PositionLockStyle old_pls = region->position_lock_style();

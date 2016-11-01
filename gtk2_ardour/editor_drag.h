@@ -771,7 +771,7 @@ public:
 	void setup_pointer_frame_offset ();
 
 private:
-	double _pulse;
+	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
 	XMLNode* before_state;
 };

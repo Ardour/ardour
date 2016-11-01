@@ -2560,7 +2560,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					} else {
 						tmetric.set_metric(metric);
 						Timecode::BBT_Time bbt;
-						bbt = tmap.bbt_at_pulse (metric->pulse());
+						bbt = tmap.bbt_at_frame (metric->frame());
 						double bpm = tmap.tempo_at_frame (start/*XXX*/).beats_per_minute();
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, speed, bpm,

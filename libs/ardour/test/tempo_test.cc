@@ -69,14 +69,14 @@ TempoTest::recomputeMapTest48 ()
 	/* pulse */
 
 	/* pulse - frame*/
-	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), map.frame_at_pulse (3.0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (144e3), map.frame_at_pulse (1.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (96e3), map.frame_at_pulse (1.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), map.frame_at_quarter_note (12.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (144e3), map.frame_at_quarter_note (6.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (96e3), map.frame_at_quarter_note (4.0));
 
 	/* frame - pulse*/
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, map.pulse_at_frame (288e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, map.pulse_at_frame (144e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, map.pulse_at_frame (96e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_frame (288e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarter_note_at_frame (144e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarter_note_at_frame (96e3), 1e-17);
 
 	/* pulse - internal minute based interface */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_pulse_locked (map._metrics, 3.0), 1e-17);
@@ -170,14 +170,14 @@ TempoTest::recomputeMapTest44 ()
 	/* pulse */
 
 	/* pulse - frame*/
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264600), map.frame_at_pulse (3.0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (132300), map.frame_at_pulse (1.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (88200), map.frame_at_pulse (1.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (264600), map.frame_at_quarter_note (12.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (132300), map.frame_at_quarter_note (6.0));
+	CPPUNIT_ASSERT_EQUAL (framepos_t (88200), map.frame_at_quarter_note (4.0));
 
 	/* frame - pulse*/
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, map.pulse_at_frame (264600), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, map.pulse_at_frame (132300), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, map.pulse_at_frame (88200), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_frame (264600), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarter_note_at_frame (132300), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarter_note_at_frame (88200), 1e-17);
 
 	/* pulse - internal minute based interface */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_pulse_locked (map._metrics, 3.0), 1e-17);

@@ -419,12 +419,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	const Meter& meter_at_frame (framepos_t) const;
 
-	double pulse_at_beat (const double& beat) const;
-	double beat_at_pulse (const double& pulse) const;
-
-	double pulse_at_frame (const framecnt_t& frame) const;
-	framepos_t frame_at_pulse (const double& pulse) const;
-
 	/* bbt - it's nearly always better to use beats.*/
 	Timecode::BBT_Time bbt_at_frame (framepos_t when);
 	Timecode::BBT_Time bbt_at_frame_rt (framepos_t when);
@@ -433,9 +427,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);
 	Timecode::BBT_Time bbt_at_beat (const double& beats);
 
-	double pulse_at_bbt (const Timecode::BBT_Time& bbt);
-	double pulse_at_bbt_rt (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time bbt_at_pulse (const double& pulse);
+	double quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt);
 
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
@@ -457,6 +449,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double quarter_note_at_frame (const framepos_t frame);
 	double quarter_note_at_frame_rt (const framepos_t frame);
 	framepos_t frame_at_quarter_note (const double quarter_note);
+
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
 
@@ -465,7 +458,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
-	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
+	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame);
 
 	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
 	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);

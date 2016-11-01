@@ -1584,7 +1584,7 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
 	return prev_t->minute_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse());
 }
 
-/** Returns a Tempo corresponding to the supplied frame.
+/** Returns a Tempo corresponding to the supplied frame position.
  * @param frame The audio frame.
  * @return a Tempo according to the tempo map at the supplied frame.
  *
@@ -1744,6 +1744,7 @@ TempoMap::pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 
 /** Returns a Tempo corresponding to the supplied BBT (meter-based) beat.
  * @param beat The BBT (meter-based) beat.
+ * @return the Tempo at the supplied BBT (meter-based) beat.
  */
 Tempo
 TempoMap::tempo_at_beat (const double& beat) const
@@ -1757,6 +1758,7 @@ TempoMap::tempo_at_beat (const double& beat) const
 
 /** Returns a BBT (meter-based) beat corresponding to the supplied Tempo.
  * @param tempo The tempo.
+ * @return the BBT (meter-based) beat at the supplied Tempo.
  */
 double
 TempoMap::beat_at_tempo (const Tempo& tempo) const
@@ -1766,20 +1768,16 @@ TempoMap::beat_at_tempo (const Tempo& tempo) const
 
 	return beat_at_pulse_locked (_metrics, pulse);
 }
+
 /** Returns the whole-note pulse corresponding to the supplied  BBT (meter-based) beat.
+ * @param metrics the list of metric sections used to calculate the pulse.
  * @param beat The BBT (meter-based) beat.
+ * @return the whole-note pulse at the supplied BBT (meter-based) beat.
  *
  * a pulse or whole note is the base musical position of a MetricSection.
  * it is equivalent to four quarter notes.
  *
  */
-double
-TempoMap::pulse_at_beat (const double& beat) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return pulse_at_beat_locked (_metrics, beat);
-}
-
 double
 TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
@@ -1789,18 +1787,13 @@ TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) cons
 }
 
 /** Returns the BBT (meter-based) beat corresponding to the supplied whole-note pulse .
+ * @param metrics the list of metric sections used to calculate the beat.
  * @param pulse the whole-note pulse.
+ * @return the meter-based beat at the supplied whole-note pulse.
  *
  * a pulse or whole note is the base musical position of a MetricSection.
  * it is equivalent to four quarter notes.
  */
-double
-TempoMap::beat_at_pulse (const double& pulse) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return beat_at_pulse_locked (_metrics, pulse);
-}
-
 double
 TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const
 {
@@ -1819,13 +1812,6 @@ TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) con
 
 	double const ret = ((pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat();
 	return ret;
-}
-
-double
-TempoMap::pulse_at_frame (const framepos_t& frame) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return pulse_at_minute_locked (_metrics, minute_at_frame (frame));
 }
 
 /* tempo section based */
@@ -1861,14 +1847,6 @@ TempoMap::pulse_at_minute_locked (const Metrics& metrics, const double& minute) 
 	return pulses_in_section + prev_t->pulse();
 }
 
-framepos_t
-TempoMap::frame_at_pulse (const double& pulse) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return frame_at_minute (minute_at_pulse_locked (_metrics, pulse));
-}
-
 /* tempo section based */
 double
 TempoMap::minute_at_pulse_locked (const Metrics& metrics, const double& pulse) const
@@ -1900,6 +1878,7 @@ TempoMap::minute_at_pulse_locked (const Metrics& metrics, const double& pulse) c
 
 /** Returns the BBT (meter-based) beat corresponding to the supplied BBT time.
  * @param bbt The BBT time (meter-based).
+ * @return bbt The BBT beat (meter-based) at the supplied BBT time.
  *
  */
 double
@@ -1944,6 +1923,7 @@ TempoMap::beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& 
 
 /** Returns the BBT time corresponding to the supplied BBT (meter-based) beat.
  * @param beat The BBT (meter-based) beat.
+ * @return The BBT time (meter-based) at the supplied meter-based beat.
  *
  */
 Timecode::BBT_Time
@@ -2005,31 +1985,24 @@ TempoMap::bbt_at_beat_locked (const Metrics& metrics, const double& b) const
 	return ret;
 }
 
-/** Returns the whole-note pulse corresponding to the supplied BBT time (meter-based).
+/** Returns the quarter-note beat corresponding to the supplied BBT time (meter-based).
  * @param bbt The BBT time (meter-based).
+ * @return the quarter note beat at the supplied BBT time
  *
- * a pulse or whole note is the basic musical position of a MetricSection.
- * it is equivalent to four quarter notes.
+ * quarter-notes ignore meter and are based on pulse (the musical unit of MetricSection).
+ *
  * while the input uses meter, the output does not.
  */
 double
-TempoMap::pulse_at_bbt (const Timecode::BBT_Time& bbt)
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return pulse_at_bbt_locked (_metrics, bbt);
-}
-
-double
-TempoMap::pulse_at_bbt_rt (const Timecode::BBT_Time& bbt)
+TempoMap::quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	if (!lm.locked()) {
-		throw std::logic_error ("TempoMap::pulse_at_bbt_rt() could not lock tempo map");
+		throw std::logic_error ("TempoMap::quarter_note_at_bbt_rt() could not lock tempo map");
 	}
 
-	return pulse_at_bbt_locked (_metrics, bbt);
+	return pulse_at_bbt_locked (_metrics, bbt) * 4.0;
 }
 
 double
@@ -2062,21 +2035,16 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 
 	return ret;
 }
-/** Returns the BBT time (meter-based) corresponding to the supplied whole-note pulse.
+
+/** Returns the BBT time (meter-based) corresponding to the supplied whole-note pulse position.
+ * @param metrics The list of metric sections used to determine the result.
  * @param pulse The whole-note pulse.
+ * @return The BBT time at the supplied whole-note pulse.
  *
  * a pulse or whole note is the basic musical position of a MetricSection.
  * it is equivalent to four quarter notes.
- * while the input uses meter, the output does not.
+ * while the output uses meter, the input does not.
  */
-Timecode::BBT_Time
-TempoMap::bbt_at_pulse (const double& pulse)
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	return bbt_at_pulse_locked (_metrics, pulse);
-}
-
 Timecode::BBT_Time
 TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const
 {
@@ -3199,14 +3167,14 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 }
 
 void
-TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const framepos_t& end_frame, const double& pulse)
+TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const framepos_t& end_frame)
 {
 	/*
 	  Ts (future prev_t)   Tnext
 	  |                    |
 	  |     [drag^]        |
 	  |----------|----------
-	        e_f  pulse(frame)
+	        e_f  qn_beats(frame)
 	*/
 
 	Metrics future_map;
@@ -3300,7 +3268,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 
 			double frame_ratio = 1.0;
 			double pulse_ratio = 1.0;
-			const double pulse_pos = prev_t->frame_at_pulse (pulse);
+			const double pulse_pos = frame;
 
 			if (prev_to_prev_t) {
 				if (pulse_pos > prev_to_prev_t->frame() + min_dframe && (pulse_pos - fr_off) > prev_to_prev_t->frame() + min_dframe) {
