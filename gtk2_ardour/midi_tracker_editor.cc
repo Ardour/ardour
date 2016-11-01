@@ -275,26 +275,12 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	          << ", column = " << pan->column << std::endl;
 }
 
-// 1. Does show the midi automations because there are too many of them.
-//
-// 2. TODO: this menu needs to be persistent between sessions. Should also be
-//    fixed for the track/piano roll view.
 void
-MidiTrackerEditor::show_all_automation ()
+MidiTrackerEditor::show_all_processor_automations ()
 {
-	/* Show gain, mute and pan automations */
-
-	show_all_main_automations ();
-	
-	/* Show processor automation */
-
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		// std::cout << "[show_all_automation] "
-		//           << "(*i)->valid = " << (*i)->valid << std::endl;
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 			size_t& column = (*ii)->column;
-			// std::cout << "[show_all_automation] "
-			//           << "column = " << column << std::endl;
 			if (column == 0)
 				add_processor_automation_column ((*i)->processor, (*ii)->what);
 
@@ -307,26 +293,32 @@ MidiTrackerEditor::show_all_automation ()
 			(*ii)->menu_item->set_active (true);
 		}
 	}
+}
+
+// 1. Does not show the midi automations because there are too many of them.
+//
+// 2. TODO: this menu needs to be persistent between sessions. Should also be
+//    fixed for the track/piano roll view.
+void
+MidiTrackerEditor::show_all_automation ()
+{
+	show_all_main_automations ();
+	show_all_processor_automations ();
 
 	redisplay_model ();
 }
 
 void
-MidiTrackerEditor::show_existing_automation ()
+MidiTrackerEditor::show_existing_midi_automations ()
 {
-	/* Show gain, mute and pan automations */
+}
 
-	show_existing_main_automations ();
-
-	// 	/* Show processor automation */
-
+void
+MidiTrackerEditor::show_existing_processor_automations ()
+{
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		// std::cout << "[show_existing_automation] "
-		//           << "(*i)->valid = " << (*i)->valid << std::endl;
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 			size_t& column = (*ii)->column;
-			// std::cout << "[show_existing_automation] "
-			//           << "column = " << column << std::endl;
 			if (param2actrl[(*ii)->what]->list()->size() > 0) {
 				if (column == 0)
 					add_processor_automation_column ((*i)->processor, (*ii)->what);
@@ -341,19 +333,21 @@ MidiTrackerEditor::show_existing_automation ()
 			}
 		}
 	}
+}
+
+void
+MidiTrackerEditor::show_existing_automation ()
+{
+	show_existing_main_automations ();
+	show_existing_midi_automations ();
+	show_existing_processor_automations ();
 
 	redisplay_model ();
 }
 
 void
-MidiTrackerEditor::hide_all_automation ()
+MidiTrackerEditor::hide_processor_automations ()
 {
-	/* Hide gain, mute and pan automations */
-
-	hide_main_automations ();
-
-	/* Hide processor automation */
-
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 			size_t column = (*ii)->column;
@@ -364,6 +358,13 @@ MidiTrackerEditor::hide_all_automation ()
 
 		}
 	}
+}
+
+void
+MidiTrackerEditor::hide_all_automation ()
+{
+	hide_main_automations ();
+	hide_processor_automations ();
 
 	redisplay_model ();
 }

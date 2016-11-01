@@ -216,6 +216,14 @@ class MidiTrackerEditor : public ArdourWindow
 	void show_existing_main_automations ();
 	void hide_main_automations ();
 
+	// Show midi automations
+	void show_existing_midi_automations ();
+
+	// Show processor automations
+	void show_all_processor_automations ();
+	void show_existing_processor_automations ();
+	void hide_processor_automations ();
+
 	////////////////////////////
 	// Other (to sort out)	  //
 	////////////////////////////
