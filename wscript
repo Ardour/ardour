@@ -1165,7 +1165,9 @@ int main () { return 0; }
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
-    elif Options.options.dist_target != 'mingw' and re.search ("openbsd", sys.platform) == None:
+    elif re.search ("openbsd", sys.platform) != None:
+        pass
+    elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
         sub_config_and_use(conf, 'tools/gccabicheck')
 
@@ -1289,7 +1291,9 @@ def build(bld):
 
     if sys.platform == 'darwin':
         bld.recurse('libs/appleutility')
-    elif bld.env['build_target'] != 'mingw' and re.search ("openbsd", sys.platform) == None:
+    elif re.search ("openbsd", sys.platform) != None:
+        pass
+    elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
         bld.recurse('tools/gccabicheck')
 
