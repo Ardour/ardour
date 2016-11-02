@@ -996,11 +996,11 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
                                 mark.position = pos;
                                 marks.push_back (mark);
                                 ++n;
-                        }
-                        /* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
-                           and doing it 1 hour at a time is just stupid (and slow).
-                        */
-                        timecode.hours += timecode_mark_modulo;
+			}
+			/* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
+			 * and doing it 1 hour at a time is just stupid (and slow).
+			 */
+			timecode.hours += timecode_mark_modulo - (timecode.hours % timecode_mark_modulo);
 		}
 		break;
 	}
