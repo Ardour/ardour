@@ -223,6 +223,20 @@ MidiRegion::post_set (const PropertyChange& pc)
 void
 MidiRegion::set_start_beats_from_start_frames ()
 {
+	/* _start gives an offset *in samples* into the source file. we want to
+	   compute (and cache) the offset into the source file using musical
+	   time.
+
+	   _pulse gives the position of the region in musical time, which has
+	   the same relationship to _position that _start_beats does to _start.
+
+	   so, convert pulses into quarter notes, then compute the offset from
+	   the result (region position in quarter notes) from the quarter note
+	   position computed using position and start. The use of quarter notes
+	   here seems optional, but we happen to have API to compute that in
+	   TempoMap.
+	*/
+
 	_start_beats = (pulse() * 4.0) - _session.tempo_map().quarter_note_at_frame (_position - _start);
 }
 
