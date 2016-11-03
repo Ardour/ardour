@@ -235,17 +235,21 @@ TempoTest::qnDistanceTestConstant ()
 
 	Tempo tempoA (120.0);
 	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
-	Tempo tempoB (240.0);
-	map.add_tempo (tempoB, 3.0, 0, TempoSection::Constant, MusicTime);
-
-	Tempo tempoC (130.3);
-	map.add_tempo (tempoC, 6.0, 0, TempoSection::Constant, MusicTime);
+	/* should have no effect on pulse */
+	Tempo tempoB (120.0);
+	map.add_tempo (tempoB, 2.0, 0, TempoSection::Constant, MusicTime);
+	/* equivalent to pulse 3.0 @ 120 bpm*/
+	Tempo tempoC (240.0);
+	map.add_tempo (tempoC, 0.0, 6 * sampling_rate, TempoSection::Constant, AudioTime);
 	Tempo tempoD (90.4);
 	map.add_tempo (tempoD, 9.0, 0, TempoSection::Constant, MusicTime);
 	Tempo tempoE (110.6);
 	map.add_tempo (tempoE, 12.0, 0, TempoSection::Constant, MusicTime);
 	Tempo tempoF (123.7);
 	map.add_tempo (tempoF, 15.0, 0, TempoSection::Constant, MusicTime);
+	Tempo tempoG (111.8);
+	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, TempoSection::Constant, AudioTime);
+
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), MusicTime);
 
@@ -253,13 +257,33 @@ TempoTest::qnDistanceTestConstant ()
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
 	i = map._metrics.end();
 	--i;
-	CPPUNIT_ASSERT_EQUAL ((*i)->frame(), map.frames_between_quarter_notes (0.0, 60.0));
+	CPPUNIT_ASSERT_EQUAL ((*i)->frame(), map.frames_between_quarter_notes (0.0, (*i)->pulse() * 4.0));
+
+	--i;
+	/* tempoF */
+	CPPUNIT_ASSERT_EQUAL ((*i)->frame(), map.frames_between_quarter_notes (0.0, 15.0 * 4.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL ((*i)->minute(), map.minutes_between_quarter_notes_locked (map._metrics, 0.0, 15.0 * 4.0), 1e-17);
+
+	--i;
+	/* tempoE */
+	CPPUNIT_ASSERT_EQUAL ((*i)->frame(), map.frames_between_quarter_notes (0.0, 12.0 * 4.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL ((*i)->minute(), map.minutes_between_quarter_notes_locked (map._metrics, 0.0, 12.0 * 4.0), 1e-17);
+
+	--i;
+	CPPUNIT_ASSERT_EQUAL ((*i)->frame(), map.frames_between_quarter_notes (0.0, 9.0 * 4.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL ((*i)->minute(), map.minutes_between_quarter_notes_locked (map._metrics, 0.0, 9.0 * 4.0), 1e-17);
+
+	--i;
+	/* tempoC */
+	CPPUNIT_ASSERT_EQUAL (framecnt_t (6 * sampling_rate), map.frames_between_quarter_notes (0.0, (*i)->pulse() * 4.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minutes_between_quarter_notes_locked (map._metrics, 0.0, (*i)->pulse() * 4.0), 1e-17);
 
 	/* distance from beat 12.0 to 0.0 should be 6.0 seconds */
-	CPPUNIT_ASSERT_EQUAL (framecnt_t (264600), map.frames_between_quarter_notes (0.0, 12.0));
+	CPPUNIT_ASSERT_EQUAL (framecnt_t (264600), map.frames_between_quarter_notes (0.0, 3.0 * 4.0));
+	CPPUNIT_ASSERT_EQUAL (framecnt_t (-264600), map.frames_between_quarter_notes (3.0 * 4.0, 0.0));
 	CPPUNIT_ASSERT_EQUAL (framecnt_t (396900), map.frames_between_quarter_notes (0.0, 24.0));
-	CPPUNIT_ASSERT_EQUAL (framecnt_t (-264600), map.frames_between_quarter_notes (12.0, 0.0));
 	CPPUNIT_ASSERT_EQUAL (framecnt_t (-396900), map.frames_between_quarter_notes (24.0, 0.0));
+	CPPUNIT_ASSERT_EQUAL (framecnt_t (88200), map.frames_between_quarter_notes (2.0 * 4.0, 3.0 * 4.0));
 }
 void
 TempoTest::qnDistanceTestRamp ()
