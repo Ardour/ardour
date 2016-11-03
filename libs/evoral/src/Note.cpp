@@ -51,6 +51,14 @@ Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	assert(channel() == chan);
 }
 
+template<typename Time>
+Note<Time>::Note (MIDIEvent<Time> const & ev)
+	: _on_event (ev, false) // re-use buffer
+	, _off_event (ev, true) // copy buffer
+{
+	_off_event.set_type (MIDI_CMD_NOTE_OFF);
+	_off_event.set_velocity (0x40);
+}
 
 template<typename Time>
 Note<Time>::Note(const Note<Time>& copy)

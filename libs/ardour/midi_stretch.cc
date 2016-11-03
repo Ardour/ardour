@@ -100,7 +100,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 
 		boost::shared_ptr<Evoral::Event<MidiModel::TimeType> > ev (new Evoral::Event<MidiModel::TimeType> (**i, true));
 		ev->set_time (new_time);
-		new_model->append (ev, Evoral::next_event_id());
+		new_model->insert (ev);
 	}
 
 	new_model->end_write (Evoral::Sequence<Evoral::Beats>::DeleteStuckNotes);

@@ -35,7 +35,9 @@
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
+#include "evoral/Event.hpp"
 #include "evoral/EventSink.hpp"
+#include "evoral/MIDIEvent.hpp"
 #include "evoral/ParameterDescriptor.hpp"
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
@@ -408,66 +410,76 @@ Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
  */
 template<typename Time>
 void
-Sequence<Time>::append(EventPtr const & event, event_id_t evid)
+Sequence<Time>::insert (EventPtr const & event)
 {
 	WriteLock lock(write_lock());
 
-	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
+	boost::shared_ptr<MIDIEvent<Time> > ev = boost::static_pointer_cast<MIDIEvent<Time> > (event);
+
+	if (!ev) {
+		/* Non-MIDI events not handled ... yet */
+		return;
+	}
 
 	assert (_writing);
 
-	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
+	if (!midi_event_is_valid(ev->buffer(), ev->size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
 		return;
 	}
 
+	if (event->id() < 0) {
+		event->set_id (Evoral::next_event_id());
+	}
+
+	/* insert the event into the "master" event map */
+
 	_events.insert (event);
 
-	if (ev.is_note_on() && ev.velocity() > 0) {
-		append_note_on_unlocked (ev, evid);
-	} else if (ev.is_note_off() || (ev.is_note_on() && ev.velocity() == 0)) {
+	if (ev->is_note_on() && ev->velocity() > 0) {
+		append_note_on_unlocked (ev);
+	} else if (ev->is_note_off() || (ev->is_note_on() && ev->velocity() == 0)) {
 		/* XXX note: event ID is discarded because we merge the on+off events into
 		   a single note object
 		*/
 		append_note_off_unlocked (ev);
-	} else if (ev.is_sysex()) {
-		append_sysex_unlocked(ev, evid);
-	} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK || ev.cc_number() == MIDI_CTL_LSB_BANK)) {
+	} else if (ev->is_sysex()) {
+		append_sysex_unlocked(ev);
+	} else if (ev->is_cc() && (ev->cc_number() == MIDI_CTL_MSB_BANK || ev->cc_number() == MIDI_CTL_LSB_BANK)) {
 		/* note bank numbers in our _bank[] array, so that we can write an event when the program change arrives */
-		if (ev.cc_number() == MIDI_CTL_MSB_BANK) {
-			_bank[ev.channel()] &= ~(0x7f << 7);
-			_bank[ev.channel()] |= ev.cc_value() << 7;
+		if (ev->cc_number() == MIDI_CTL_MSB_BANK) {
+			_bank[ev->channel()] &= ~(0x7f << 7);
+			_bank[ev->channel()] |= ev->cc_value() << 7;
 		} else {
-			_bank[ev.channel()] &= ~0x7f;
-			_bank[ev.channel()] |= ev.cc_value();
+			_bank[ev->channel()] &= ~0x7f;
+			_bank[ev->channel()] |= ev->cc_value();
 		}
-	} else if (ev.is_cc()) {
+	} else if (ev->is_cc()) {
 		append_control_unlocked(
-			Parameter(ev.event_type(), ev.channel(), ev.cc_number()),
-			ev.time(), ev.cc_value(), evid);
-	} else if (ev.is_pgm_change()) {
+			Parameter(ev->event_type(), ev->channel(), ev->cc_number()),
+			ev->time(), ev->cc_value());
+	} else if (ev->is_pgm_change()) {
 		/* write a patch change with this program change and any previously set-up bank number */
-		append_patch_change_unlocked (PatchChange<Time> (ev.time(), ev.channel(), ev.pgm_number(), _bank[ev.channel()]), evid);
-	} else if (ev.is_pitch_bender()) {
+		append_patch_change_unlocked (PatchChange<Time> (ev->time(), ev->channel(), ev->pgm_number(), _bank[ev->channel()]));
+	} else if (ev->is_pitch_bender()) {
 		append_control_unlocked(
-			Parameter(ev.event_type(), ev.channel()),
-			ev.time(), double ((0x7F & ev.pitch_bender_msb()) << 7
-			                   | (0x7F & ev.pitch_bender_lsb())),
-			evid);
-	} else if (ev.is_poly_pressure()) {
-		append_control_unlocked (Parameter (ev.event_type(), ev.channel(), ev.poly_note()), ev.time(), ev.poly_pressure(), evid);
-	} else if (ev.is_channel_pressure()) {
+			Parameter(ev->event_type(), ev->channel()),
+			ev->time(), double ((0x7F & ev->pitch_bender_msb()) << 7
+			                   | (0x7F & ev->pitch_bender_lsb())));
+	} else if (ev->is_poly_pressure()) {
+		append_control_unlocked (Parameter (ev->event_type(), ev->channel(), ev->poly_note()), ev->time(), ev->poly_pressure());
+	} else if (ev->is_channel_pressure()) {
 		append_control_unlocked(
-			Parameter(ev.event_type(), ev.channel()),
-			ev.time(), ev.channel_pressure(), evid);
-	} else if (!_type_map.type_is_midi(ev.event_type())) {
-		printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());
-		for (size_t i=0; i < ev.size(); ++i) {
-			printf("%X ", ev.buffer()[i]);
+			Parameter(ev->event_type(), ev->channel()),
+			ev->time(), ev->channel_pressure());
+	} else if (!_type_map.type_is_midi(ev->event_type())) {
+		printf("WARNING: Sequence: Unknown event type %X: ", ev->event_type());
+		for (size_t i=0; i < ev->size(); ++i) {
+			printf("%X ", ev->buffer()[i]);
 		}
 		printf("\n");
 	} else {
-		printf("WARNING: Sequence: Unknown MIDI event type %X\n", ev.type());
+		printf("WARNING: Sequence: Unknown MIDI event type %X\n", ev->type());
 	}
 
 	_edited = true;
@@ -475,27 +487,26 @@ Sequence<Time>::append(EventPtr const & event, event_id_t evid)
 
 template<typename Time>
 void
-Sequence<Time>::append_note_on_unlocked (const MIDIEvent<Time>& ev, event_id_t evid)
+Sequence<Time>::append_note_on_unlocked (boost::shared_ptr<MIDIEvent<Time> > const & ev)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n", this,
-	                                              (int)ev.channel(), (int)ev.note(),
-	                                              ev.time(), (int)ev.velocity()));
+	                                              (int)ev->channel(), (int)ev->note(),
+	                                              ev->time(), (int)ev->velocity()));
 	assert(_writing);
 
-	if (ev.note() > 127) {
-		error << string_compose (_("invalid note on number (%1) ignored"), (int) ev.note()) << endmsg;
+	if (ev->note() > 127) {
+		error << string_compose (_("invalid note on number (%1) ignored"), (int) ev->note()) << endmsg;
 		return;
-	} else if (ev.channel() >= 16) {
-		error << string_compose (_("invalid note on channel (%1) ignored"), (int) ev.channel()) << endmsg;
+	} else if (ev->channel() >= 16) {
+		error << string_compose (_("invalid note on channel (%1) ignored"), (int) ev->channel()) << endmsg;
 		return;
-	} else if (ev.velocity() == 0) {
+	} else if (ev->velocity() == 0) {
 		// Note on with velocity 0 handled as note off by caller
-		error << string_compose (_("invalid note on velocity (%1) ignored"), (int) ev.velocity()) << endmsg;
+		error << string_compose (_("invalid note on velocity (%1) ignored"), (int) ev->velocity()) << endmsg;
 		return;
 	}
 
-	NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
-	note->set_id (evid);
+	NotePtr note (new Note<Time>(*ev.get()));
 
 	add_note_unlocked (note);
 
@@ -507,18 +518,18 @@ Sequence<Time>::append_note_on_unlocked (const MIDIEvent<Time>& ev, event_id_t e
 
 template<typename Time>
 void
-Sequence<Time>::append_note_off_unlocked (const MIDIEvent<Time>& ev)
+Sequence<Time>::append_note_off_unlocked (boost::shared_ptr<MIDIEvent<Time> > const & ev)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 OFF @ %4 v=%5\n",
-	                                              this, (int)ev.channel(),
-	                                              (int)ev.note(), ev.time(), (int)ev.velocity()));
+	                                              this, (int)ev->channel(),
+	                                              (int)ev->note(), ev->time(), (int)ev->velocity()));
 	assert(_writing);
 
-	if (ev.note() > 127) {
-		error << string_compose (_("invalid note off number (%1) ignored"), (int) ev.note()) << endmsg;
+	if (ev->note() > 127) {
+		error << string_compose (_("invalid note off number (%1) ignored"), (int) ev->note()) << endmsg;
 		return;
-	} else if (ev.channel() >= 16) {
-		error << string_compose (_("invalid note off channel (%1) ignored"), (int) ev.channel()) << endmsg;
+	} else if (ev->channel() >= 16) {
+		error << string_compose (_("invalid note off channel (%1) ignored"), (int) ev->channel()) << endmsg;
 		return;
 	}
 
@@ -534,19 +545,19 @@ Sequence<Time>::append_note_off_unlocked (const MIDIEvent<Time>& ev)
 
 	/* XXX use _overlap_pitch_resolution to determine FIFO/LIFO ... */
 
-	for (typename WriteNotes::iterator n = _write_notes[ev.channel()].begin(); n != _write_notes[ev.channel()].end(); ) {
+	for (typename WriteNotes::iterator n = _write_notes[ev->channel()].begin(); n != _write_notes[ev->channel()].end(); ) {
 
 		typename WriteNotes::iterator tmp = n;
 		++tmp;
 
 		NotePtr nn = *n;
-		if (ev.note() == nn->note() && nn->channel() == ev.channel()) {
-			assert(ev.time() >= nn->time());
+		if (ev->note() == nn->note() && nn->channel() == ev->channel()) {
+			assert(ev->time() >= nn->time());
 
-			nn->set_length (ev.time() - nn->time());
-			nn->set_off_velocity (ev.velocity());
+			nn->set_length (ev->time() - nn->time());
+			nn->set_off_velocity (ev->velocity());
 
-			_write_notes[ev.channel()].erase(n);
+			_write_notes[ev->channel()].erase(n);
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note @ %2 length: %1\n", nn->length(), nn->time()));
 			resolved = true;
 			break;
@@ -556,14 +567,14 @@ Sequence<Time>::append_note_off_unlocked (const MIDIEvent<Time>& ev)
 	}
 
 	if (!resolved) {
-		cerr << this << " spurious note off chan " << (int)ev.channel()
-		     << ", note " << (int)ev.note() << " @ " << ev.time() << endl;
+		cerr << this << " spurious note off chan " << (int)ev->channel()
+		     << ", note " << (int)ev->note() << " @ " << ev->time() << endl;
 	}
 }
 
 template<typename Time>
 void
-Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value, event_id_t /* evid */)
+Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
@@ -574,7 +585,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 
 template<typename Time>
 void
-Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* evid */)
+Sequence<Time>::append_sysex_unlocked(boost::shared_ptr<MIDIEvent<Time> > const & ev)
 {
 #ifdef DEBUG_SEQUENCE
 	cerr << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;
@@ -583,19 +594,18 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* e
 	} cerr << "]" << endl;
 #endif
 
-	boost::shared_ptr<MIDIEvent<Time> > event(new MIDIEvent<Time>(ev, true));
 	/* XXX sysex events should use IDs */
-	_sysexes.insert(event);
+	_sysexes.insert (ev);
 }
 
 template<typename Time>
 void
-Sequence<Time>::append_patch_change_unlocked (const PatchChange<Time>& ev, event_id_t id)
+Sequence<Time>::append_patch_change_unlocked (const PatchChange<Time>& ev)
 {
 	PatchChangePtr p (new PatchChange<Time> (ev));
 
 	if (p->id() < 0) {
-		p->set_id (id);
+		p->set_id (Evoral::next_event_id());
 	}
 
 	_patch_changes.insert (p);

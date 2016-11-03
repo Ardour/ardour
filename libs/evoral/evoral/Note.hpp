@@ -40,6 +40,7 @@ class LIBEVORAL_TEMPLATE_API Note {
 #endif
 public:
 	Note(uint8_t chan=0, Time time=Time(), Time len=Time(), uint8_t note=0, uint8_t vel=0x40);
+	Note(MIDIEvent<Time> const & initial_on_event);
 	Note(const Note<Time>& copy);
 	~Note();
 

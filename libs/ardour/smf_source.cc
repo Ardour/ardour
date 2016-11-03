@@ -425,16 +425,8 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		}
 	}
 
-	Evoral::event_id_t event_id;
-
-	if (ev->id() < 0) {
-		event_id  = Evoral::next_event_id();
-	} else {
-		event_id = ev->id();
-	}
-
 	if (_model) {
-		_model->append (ev, event_id);
+		_model->insert (ev);
 	}
 
 	_length_beats = max(_length_beats, time);
@@ -442,7 +434,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 	const Evoral::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev->size(), ev->buffer(), event_id);
+	Evoral::SMF::append_event_delta(delta_time_ticks, ev->size(), ev->buffer(), ev->id());
 	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
 }
@@ -470,18 +462,16 @@ SMFSource::append_event_frames (const Glib::Threads::Mutex::Lock& lock,
 
 	BeatsFramesConverter converter(_session.tempo_map(), position);
 	const Evoral::Beats  ev_time_beats = converter.from(ev->time());
-	Evoral::event_id_t   event_id;
-
-	if (ev->id() < 0) {
-		event_id  = Evoral::next_event_id();
-	} else {
-		event_id = ev->id();
-	}
 
 	if (_model) {
 		boost::shared_ptr<Evoral::Event<Evoral::Beats> > beat_ev
 			(new Evoral::Event<Evoral::Beats> (ev->event_type(), ev_time_beats, ev->size(), const_cast<uint8_t*>(ev->buffer())));
-		_model->append (beat_ev, event_id);
+
+		if (ev->id() >= 0) {
+			beat_ev->set_id (ev->id());
+		}
+
+		_model->insert (beat_ev);
 	}
 
 	_length_beats = max(_length_beats, ev_time_beats);
@@ -490,7 +480,7 @@ SMFSource::append_event_frames (const Glib::Threads::Mutex::Lock& lock,
 	const Evoral::Beats delta_time_beats = ev_time_beats - last_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta (delta_time_ticks, ev->size(), ev->buffer(), event_id);
+	Evoral::SMF::append_event_delta (delta_time_ticks, ev->size(), ev->buffer(), ev->id());
 	_last_ev_time_frames = ev->time();
 	_flags = Source::Flag (_flags & ~Empty);
 }
@@ -685,7 +675,12 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 
 				boost::shared_ptr<Evoral::Event<Evoral::Beats> > ev (
 					new Evoral::Event<Evoral::Beats> (event_type, event_time, size, buf, true));
-				_model->append (ev, event_id);
+
+				if (event_id >= 0) {
+					ev->set_id (event_id);
+				}
+
+				_model->insert (ev);
 
 				// Set size to max capacity to minimize allocs in read_event
 				scratch_size = std::max (size, scratch_size);

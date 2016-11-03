@@ -110,7 +110,7 @@ class LIBEVORAL_API Sequence : virtual public ControlSet {
 
 	void end_write (StuckNoteOption, Time when = Time());
 
-	void append (EventPtr const & ev, Evoral::event_id_t evid);
+	void insert (EventPtr const & ev);
 
 	const TypeMap& type_map() const { return _type_map; }
 
@@ -210,7 +210,6 @@ private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
 	const_iterator begin () const { return _events.begin(); }
-
 	const const_iterator end() const { return _events.end(); }
 
 	/* XXX heap allocation for lower-bound ... fix this */
@@ -267,11 +266,11 @@ private:
 	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
-	void append_note_on_unlocked(const MIDIEvent<Time>& event, Evoral::event_id_t);
-	void append_note_off_unlocked(const MIDIEvent<Time>& event);
-	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
-	void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
-	void append_patch_change_unlocked(const PatchChange<Time>&, Evoral::event_id_t);
+	void append_note_on_unlocked (boost::shared_ptr<MIDIEvent<Time> > const & event);
+	void append_note_off_unlocked (boost::shared_ptr<MIDIEvent<Time> > const & event);
+	void append_control_unlocked (const Parameter& param, Time time, double value);
+	void append_sysex_unlocked (boost::shared_ptr<MIDIEvent<Time> > const & ev);
+	void append_patch_change_unlocked (const PatchChange<Time>&);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
