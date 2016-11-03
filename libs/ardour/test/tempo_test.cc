@@ -50,30 +50,29 @@ TempoTest::recomputeMapTest48 ()
 
 	/* check the tempo section for expected result (no map) */
 	const TempoSection& tsa (map.tempo_section_at_frame (0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), tsa.frame_at_pulse (3.0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (144e3), tsa.frame_at_pulse (1.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (96e3), tsa.frame_at_pulse (1.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_pulse (3.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1 / 2.0, tsa.minute_at_pulse (1.5), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1 / 3.0, tsa.minute_at_pulse (1.0), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_frame (288e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, tsa.pulse_at_frame (144e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.pulse_at_frame (96e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_minute (0.1), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, tsa.pulse_at_minute (0.1 / 2.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.pulse_at_minute (0.1 / 3.0), 1e-17);
+
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.minute_at_frame (60.0 * sampling_rate), 1e-17);
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_tempo (240.0, 3.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_tempo (240.0, 3.0), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_pulse (3.0), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_minute (0.1), 1e-17);
 
 	/* do the same via the map */
 
-	/* pulse */
+	/* quarter note */
 
-	/* pulse - frame*/
+	/* quarter note - frame*/
 	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), map.frame_at_quarter_note (12.0));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (144e3), map.frame_at_quarter_note (6.0));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (96e3), map.frame_at_quarter_note (4.0));
 
-	/* frame - pulse*/
+	/* frame - quarter note*/
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_frame (288e3), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarter_note_at_frame (144e3), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarter_note_at_frame (96e3), 1e-17);
@@ -150,34 +149,34 @@ TempoTest::recomputeMapTest44 ()
 
 	/* check the tempo section for expected result (no map) */
 	const TempoSection& tsa (map.tempo_section_at_frame (0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264600), tsa.frame_at_pulse (3.0));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (132300), tsa.frame_at_pulse (1.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (88200), tsa.frame_at_pulse (1.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_pulse (3.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1 / 2.0, tsa.minute_at_pulse (1.5), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1 / 3.0, tsa.minute_at_pulse (1.0), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_frame (264600), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, tsa.pulse_at_frame (132300), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.pulse_at_frame (88200), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_minute (0.1), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5, tsa.pulse_at_minute (0.1 / 2.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.pulse_at_minute (0.1 / 3.0), 1e-17);
+
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tsa.minute_at_frame (60.0 * sampling_rate), 1e-17);
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_tempo (240.0, 3.0), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_tempo (240.0, 3.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, tsa.minute_at_pulse (3.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, tsa.pulse_at_minute (0.1), 1e-17);
 
 	/* do the same via the map */
 
-	/* pulse */
+	/* quarter note */
 
-	/* pulse - frame*/
+	/* quarter note - frame */
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264600), map.frame_at_quarter_note (12.0));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (132300), map.frame_at_quarter_note (6.0));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (88200), map.frame_at_quarter_note (4.0));
 
-	/* frame - pulse*/
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_frame (264600), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarter_note_at_frame (132300), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarter_note_at_frame (88200), 1e-17);
+	/* frame - quarter note */
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0 * 4.0, map.quarter_note_at_frame (264600), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5 * 4.0, map.quarter_note_at_frame (132300), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0 * 4.0, map.quarter_note_at_frame (88200), 1e-17);
 
 	/* pulse - internal minute based interface */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_pulse_locked (map._metrics, 3.0), 1e-17);
@@ -376,11 +375,10 @@ TempoTest::rampTest48 ()
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.beats_per_minute(), 300.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (217.0, tA.tempo_at_minute (1.0), 1e-17);
-	CPPUNIT_ASSERT_EQUAL ((framepos_t) 60 * sampling_rate, tA.frame_at_pulse (tB.pulse()));
 
 	/* note 1e-14 here. pulse is two derivatives away from time */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_frame ((framepos_t) 60 * sampling_rate), 1e-14);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_minute (1.0), 1e-14);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_pulse (tB.pulse()), 1e-15);
 
 	/* note 1e-17 here. tempo is one derivative away from pulse, so we can get the same stuff with more precision */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_tempo (217.0, 1.0), 1e-17);
@@ -397,9 +395,9 @@ TempoTest::rampTest48 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL ((tB.pulse() - tA.pulse()) / 2.0, tA.pulse_at_tempo (147.0, 0), 1e-17);
 
 	/* self-check frame at pulse 20 seconds in. */
-	const framepos_t target = 20 * sampling_rate;
-	const framepos_t result = tA.frame_at_pulse (tA.pulse_at_frame (target));
-	CPPUNIT_ASSERT_EQUAL (target, result);
+	const double target = 20.0 / 60.0;
+	const double result = tA.minute_at_pulse (tA.pulse_at_minute (target));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (target, result, 1e-14);
 }
 
 void
@@ -439,16 +437,14 @@ TempoTest::rampTest44 ()
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.beats_per_minute(), 300.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (217.0, tA.tempo_at_minute (1.0), 1e-17);
-	CPPUNIT_ASSERT_EQUAL ((framepos_t) 60 * sampling_rate, tA.frame_at_pulse (tB.pulse()));
 
 	/* note 1e-14 here. pulse is two derivatives away from time */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_frame ((framepos_t) 60 * sampling_rate), 1e-14);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_minute (1.0), 1e-14);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_pulse (tB.pulse()), 1e-15);
 
 	/* note 1e-17 here. tempo is one derivative away from pulse, so we can get the same stuff with more precision */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB.pulse(), tA.pulse_at_tempo (217.0, 1.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (217.0, tB.pulse()), 1e-17);
-
 
 	/* self-check tempo at pulse @ 125 bpm. */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (125.0, tA.tempo_at_pulse (tA.pulse_at_tempo (125.0, 0)), 1e-17);
@@ -461,9 +457,9 @@ TempoTest::rampTest44 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL ((tB.pulse() - tA.pulse()) / 2.0, tA.pulse_at_tempo (147.0, 0), 1e-17);
 
 	/* self-check frame at pulse 20 seconds in. */
-	const framepos_t target = 20 * sampling_rate;
-	const framepos_t result = tA.frame_at_pulse (tA.pulse_at_frame (target));
-	CPPUNIT_ASSERT_EQUAL (target, result);
+	const double target = 20.0 / 60.0;
+	const double result = tA.minute_at_pulse (tA.pulse_at_minute (target));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (target, result, 1e-14);
 }
 
 void
@@ -516,8 +512,8 @@ TempoTest::tempoAtPulseTest ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (((160.0 - 123.0)  / 2.0) + 123.0, tB->tempo_at_pulse (25.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (((20.0 - 30.0)  / 2.0) + 30.0, tB->pulse_at_tempo (141.5, 0), 1e-17);
 
-	CPPUNIT_ASSERT_EQUAL (tB->frame(), tA->frame_at_pulse (20.0));
-	CPPUNIT_ASSERT_EQUAL (tC->frame(), tB->frame_at_pulse (30.0));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB->minute(), tA->minute_at_pulse (20.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (tC->minute(), tB->minute_at_pulse (30.0), 1e-17);
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tB->minute(), tA->minute_at_tempo (160.0, 20.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (tC->minute(), tB->minute_at_tempo (123.0, 30.0), 1e-17);
