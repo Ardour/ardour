@@ -282,16 +282,8 @@ TempoSection::pulse_at_tempo (const double& bpm, const double& m) const
 	return _pulse_at_tempo (bpm) + pulse();
 }
 
-/** returns the zero-based pulse (relative to session origin)
-   where the zero-based frame (relative to session)
-   lies.
+/** returns the pulse at the supplied session-relative minute.
 */
-double
-TempoSection::pulse_at_frame (const framepos_t& f) const
-{
-	return pulse_at_minute (minute_at_frame (f));
-}
-
 double
 TempoSection::pulse_at_minute (const double& m) const
 {
@@ -302,17 +294,8 @@ TempoSection::pulse_at_minute (const double& m) const
 	return _pulse_at_time (m - minute()) + pulse();
 }
 
-/** returns the zero-based frame (relative to session start frame)
-   where the zero-based pulse (relative to session start)
-   falls.
+/** returns the minute (relative to session start) at the supplied pulse.
 */
-
-framepos_t
-TempoSection::frame_at_pulse (const double& p) const
-{
-	return frame_at_minute (minute_at_pulse (p));
-}
-
 double
 TempoSection::minute_at_pulse (const double& p) const
 {
@@ -3219,8 +3202,8 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 
 		const frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
 
-		const double start_pulse = prev_t->pulse_at_frame (frame);
-		const double end_pulse = prev_t->pulse_at_frame (end_frame);
+		const double start_pulse = prev_t->pulse_at_minute (minute_at_frame (frame));
+		const double end_pulse = prev_t->pulse_at_minute (minute_at_frame (end_frame));
 
 		double new_bpm;
 
