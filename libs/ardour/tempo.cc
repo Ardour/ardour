@@ -1975,9 +1975,17 @@ TempoMap::bbt_at_beat_locked (const Metrics& metrics, const double& b) const
  * while the input uses meter, the output does not.
  */
 double
-TempoMap::quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt)
+TempoMap::quarter_note_at_bbt (const Timecode::BBT_Time& bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return pulse_at_bbt_locked (_metrics, bbt) * 4.0;
+}
+
+double
+TempoMap::quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		throw std::logic_error ("TempoMap::quarter_note_at_bbt_rt() could not lock tempo map");
@@ -2015,6 +2023,21 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 	const double ret = remaining_pulses + prev_m->pulse() + (((bbt.beats - 1) + (bbt.ticks / BBT_Time::ticks_per_beat)) / prev_m->note_divisor());
 
 	return ret;
+}
+
+/** Returns the BBT time corresponding to the supplied quarter-note beat.
+ * @param qn the quarter-note beat.
+ * @return The BBT time (meter-based) at the supplied meter-based beat.
+ *
+ * quarter-notes ignore meter and are based on pulse (the musical unit of MetricSection).
+ *
+ */
+Timecode::BBT_Time
+TempoMap::bbt_at_quarter_note (const double& qn)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return bbt_at_pulse_locked (_metrics, qn / 4.0);
 }
 
 /** Returns the BBT time (meter-based) corresponding to the supplied whole-note pulse position.
