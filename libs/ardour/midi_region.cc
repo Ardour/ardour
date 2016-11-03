@@ -421,8 +421,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	     << " _start = " << _start
 	     << " intoffset = " << internal_offset
 	     << " pulse = " << pulse()
-	     << " start_pulse = " << start_pulse()
-	     << " start_beat = " << _start_beats
+	     << " beat = " << _start_beats
 	     << endl;
 #endif
 
@@ -438,8 +437,8 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 		    tracker,
 		    filter,
 		    _filtered_parameters,
-		    pulse(),
-		    _start_beats
+		    pulse(), // position of region in musical time
+		    _start_beats // offset into source file in musical time
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}

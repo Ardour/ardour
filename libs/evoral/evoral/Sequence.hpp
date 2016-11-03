@@ -62,11 +62,11 @@ public:
  * Controller data is represented as a list of time-stamped float values. */
 template<typename Time>
 class LIBEVORAL_API Sequence : virtual public ControlSet {
-public:
+  public:
 	Sequence(const TypeMap& type_map);
 	Sequence(const Sequence<Time>& other);
 
-protected:
+  protected:
 	struct WriteLockImpl {
 		WriteLockImpl(Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
 			: sequence_lock(new Glib::Threads::RWLock::WriterLock(s))
@@ -79,7 +79,22 @@ protected:
 		Glib::Threads::Mutex::Lock*        control_lock;
 	};
 
-public:
+  public:
+	struct EventTimeComparator {
+		bool operator() (Event<Time> const & a, Event<Time> const & b) const {
+			return a.time() < b.time();
+		}
+	};
+
+	typedef typename std::multiset<Evoral::Event<Time>,EventTimeComparator> Events;
+	typedef typename Events::const_iterator const_iterator;
+
+  private:
+	Events       _events;      // all events, indexed by time
+
+  public:
+	inline size_t n_events () const { return _events.size(); }
+	inline size_t empty () const { return _events.empty(); }
 
 	typedef typename boost::shared_ptr<Evoral::Note<Time> >       NotePtr;
 	typedef typename boost::weak_ptr<Evoral::Note<Time> >         WeakNotePtr;
@@ -112,7 +127,6 @@ public:
 	const TypeMap& type_map() const { return _type_map; }
 
 	inline size_t n_notes() const { return _notes.size(); }
-	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }
 
 	inline static bool note_time_comparator(const boost::shared_ptr< const Note<Time> >& a,
 	                                        const boost::shared_ptr< const Note<Time> >& b) {
@@ -207,68 +221,10 @@ public:
 private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
+	const_iterator begin () const { return _events.begin(); }
+	const const_iterator end() const { return _events.end(); }
 
-	/** Read iterator */
-	class LIBEVORAL_API const_iterator {
-	public:
-		const_iterator();
-		const_iterator(const Sequence<Time>&              seq,
-		               Time                               t,
-		               bool                               force_discrete,
-		               const std::set<Evoral::Parameter>& filtered,
-		               const std::set<WeakNotePtr>*       active_notes=NULL);
-
-		inline bool valid() const { return !_is_end && _event; }
-
-		void invalidate(std::set<WeakNotePtr>* notes);
-
-		const Event<Time>& operator*()  const { return *_event;  }
-		const boost::shared_ptr< Event<Time> > operator->() const  { return _event; }
-		const boost::shared_ptr< Event<Time> > get_event_pointer() { return _event; }
-
-		const const_iterator& operator++(); // prefix only
-
-		bool operator==(const const_iterator& other) const;
-		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
-
-		const_iterator& operator=(const const_iterator& other);
-
-	private:
-		friend class Sequence<Time>;
-
-		Time choose_next(Time earliest_t);
-		void set_event();
-
-		typedef std::vector<ControlIterator> ControlIterators;
-		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, PATCH_CHANGE };
-
-		const Sequence<Time>*                 _seq;
-		boost::shared_ptr< Event<Time> >      _event;
-		mutable ActiveNotes                   _active_notes;
-		/** If the iterator is pointing at a patch change, this is the index of the
-		 *  sub-message within that change.
-		 */
-		int                                   _active_patch_change_message;
-		MIDIMessageType                       _type;
-		bool                                  _is_end;
-		typename Sequence::ReadLock           _lock;
-		typename Notes::const_iterator        _note_iter;
-		typename SysExes::const_iterator      _sysex_iter;
-		typename PatchChanges::const_iterator _patch_change_iter;
-		ControlIterators                      _control_iters;
-		ControlIterators::iterator            _control_iter;
-		bool                                  _force_discrete;
-	};
-
-	const_iterator begin (
-		Time                               t              = Time(),
-		bool                               force_discrete = false,
-		const std::set<Evoral::Parameter>& f              = std::set<Evoral::Parameter>(),
-		const std::set<WeakNotePtr>*       active_notes   = NULL) const {
-		return const_iterator (*this, t, force_discrete, f, active_notes);
-	}
-
-	const const_iterator& end() const { return _end_iter; }
+	const_iterator lower_bound (Time t) const { Event<Time> ev (0, t, 0, 0, false); return _events.lower_bound (ev); }
 
 	// CONST iterator implementations (x3)
 	typename Notes::const_iterator note_lower_bound (Time t) const;
@@ -321,8 +277,6 @@ protected:
 	virtual void control_list_marked_dirty ();
 
 private:
-	friend class const_iterator;
-
 	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
@@ -338,7 +292,7 @@ private:
 	const TypeMap& _type_map;
 
 	Notes        _notes;       // notes indexed by time
-	Pitches      _pitches[16]; // notes indexed by channel+pitch
+	Pitches      _pitches[16]; // notes indexed by pitch, but also channel via array index
 	SysExes      _sysexes;
 	PatchChanges _patch_changes;
 
@@ -351,7 +305,6 @@ private:
 	 */
 	int _bank[16];
 
-	const   const_iterator _end_iter;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;
@@ -365,4 +318,3 @@ template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream&
 
 
 #endif // EVORAL_SEQUENCE_HPP
-

@@ -1428,7 +1428,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
 	source->drop_model(source_lock);
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin (); i != end(); ++i) {
 		source->append_event_beats(source_lock, *i);
 	}
 
@@ -1466,7 +1466,7 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 
 	ms->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin (); i != end(); ++i) {
 		ms->append_event_beats(source_lock, *i);
 	}
 
@@ -1501,7 +1501,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->drop_model(source_lock);
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin (); i != end(); ++i) {
 		if (i->time() >= begin_time && i->time() < end_time) {
 
 			Evoral::MIDIEvent<TimeType> mev (*i, true); /* copy the event */

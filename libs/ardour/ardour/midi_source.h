@@ -236,7 +236,6 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	mutable bool                                            _model_iter_valid;
 
 	mutable Evoral::Beats _length_beats;
-	mutable framepos_t    _last_read_end;
 
 	/** The total duration of the current capture. */
 	framepos_t _capture_length;
