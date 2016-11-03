@@ -1429,11 +1429,11 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin (); i != end(); ++i) {
-		source->append_event_beats(source_lock, *i);
+		source->append_event_beats (source_lock, *i);
 	}
 
 	set_percussive(old_percussive);
-	source->mark_streaming_write_completed(source_lock);
+	source->mark_streaming_write_completed (source_lock);
 
 	set_edited(false);
 
@@ -1502,17 +1502,17 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin (); i != end(); ++i) {
-		if (i->time() >= begin_time && i->time() < end_time) {
+		if ((*i)->time() >= begin_time && (*i)->time() < end_time) {
 
-			Evoral::MIDIEvent<TimeType> mev (*i, true); /* copy the event */
+			boost::shared_ptr<Evoral::MIDIEvent<TimeType> > mev (new Evoral::MIDIEvent<TimeType> (**i, true)); /* copy the event */
 
 			if (offset_events) {
-				mev.set_time(mev.time() - begin_time);
+				mev->set_time(mev->time() - begin_time);
 			}
 
-			if (mev.is_note_off()) {
+			if (mev->is_note_off()) {
 
-				if (!mst.active (mev.note(), mev.channel())) {
+				if (!mst.active (mev->note(), mev->channel())) {
 					/* the matching note-on was outside the
 					   time range we were given, so just
 					   ignore this note-off.
@@ -1521,10 +1521,10 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 				}
 
 				source->append_event_beats (source_lock, mev);
-				mst.remove (mev.note(), mev.channel());
+				mst.remove (mev->note(), mev->channel());
 
-			} else if (mev.is_note_on()) {
-				mst.add (mev.note(), mev.channel());
+			} else if (mev->is_note_on()) {
+				mst.add (mev->note(), mev->channel());
 				source->append_event_beats(source_lock, mev);
 			} else {
 				source->append_event_beats(source_lock, mev);

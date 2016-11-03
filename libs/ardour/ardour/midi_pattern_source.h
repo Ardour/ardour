@@ -39,9 +39,9 @@ class LIBARDOUR_API MidiPatternSource : public MidiSource, public PatternSource
 	   MidiSource one, so these are no-ops.
 	*/
 	void append_event_beats(const Lock&                         lock,
-	                        const Evoral::Event<Evoral::Beats>& ev) {}
+	                        boost::shared_ptr<Evoral::Event<Evoral::Beats> > const & ev) {}
 	void append_event_frames(const Lock&                      lock,
-	                         const Evoral::Event<framepos_t>& ev,
+	                         boost::shared_ptr<Evoral::Event<framepos_t> > const & ev,
 	                         framepos_t                       source_start) {}
 	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode) {}
 	void mark_streaming_write_started (const Lock& lock) {}

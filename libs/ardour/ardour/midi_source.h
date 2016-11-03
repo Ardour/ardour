@@ -114,16 +114,13 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_beats(const Lock&                         lock,
-	                                const Evoral::Event<Evoral::Beats>& ev) = 0;
+	virtual void append_event_beats(Lock const & lock, boost::shared_ptr<Evoral::Event<Evoral::Beats> > const & ev) = 0;
 
 	/** Append a single event with a timestamp in frames.
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_frames(const Lock&                      lock,
-	                                 const Evoral::Event<framepos_t>& ev,
-	                                 framepos_t                       source_start) = 0;
+	virtual void append_event_frames(Lock const & lock, const boost::shared_ptr <Evoral::Event<framepos_t> > & ev, framepos_t source_start) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;

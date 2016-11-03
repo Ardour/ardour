@@ -181,12 +181,13 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
-				Evoral::MIDIEvent<Evoral::Beats> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
-				ev.set_type (MIDI_CMD_NOTE_OFF);
-				ev.set_channel (channel);
-				ev.set_note (note);
-				ev.set_velocity (0);
-				src.append_event_beats (lock, ev);
+				Evoral::MIDIEvent<Evoral::Beats> * ev = new Evoral::MIDIEvent<Evoral::Beats> ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
+				ev->set_type (MIDI_CMD_NOTE_OFF);
+				ev->set_channel (channel);
+				ev->set_note (note);
+				ev->set_velocity (0);
+				boost::shared_ptr<Evoral::Event<Evoral::Beats> > e (ev);
+				src.append_event_beats (lock, e);
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MS-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
 				_active_notes[note + 128 * channel]--;

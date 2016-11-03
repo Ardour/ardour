@@ -229,13 +229,13 @@ MidiSource::midi_read (const Lock&                        lm,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 (qn = %5) cnt %3 tracker %4\n",
 	                             source_start, start, cnt, tracker, name(), start_qn));
 
-	for (MidiModel::const_iterator i = _model->lower_bound (first_possible_event_time); i != _model->end() && i->time() < last_possible_event_time; ++i) {
+	for (MidiModel::const_iterator i = _model->lower_bound (first_possible_event_time); i != _model->end() && (*i)->time() < last_possible_event_time; ++i) {
 
 #if 0
-		if (filter && filter->filter(i->buffer(), i->size())) {
+		if (filter && filter->filter((*i)->buffer(), (*i)->size())) {
 			DEBUG_TRACE (DEBUG::MidiSourceIO,
 			             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-			                             _name, i->time(), i->event_type(), i->size()));
+			                             _name, (*i)->time(), (*i)->event_type(), (*i)->size()));
 			continue;
 		}
 
@@ -243,18 +243,18 @@ MidiSource::midi_read (const Lock&                        lm,
 			// time_frames = loop_range->squish (time_frames);
 		}
 
-		// dst.write (time_frames, i->event_type(), i->size(), i->buffer());
+		// dst.write (time_frames, (*i)->event_type(), (*i)->size(), (*i)->buffer());
 
 #ifndef NDEBUG
 		if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
 			DEBUG_STR_DECL(a);
 			DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5 ",
-			                                    _name, time_frames, i->size(),
+			                                    _name, time_frames, (*i)->size(),
 			                                    start + source_start, start + cnt + source_start));
 			for (size_t n=0; n < i->size(); ++n) {
 				DEBUG_STR_APPEND(a,hex);
 				DEBUG_STR_APPEND(a,"0x");
-				DEBUG_STR_APPEND(a,(int)i->buffer()[n]);
+				DEBUG_STR_APPEND(a,(int)(*i)->buffer()[n]);
 				DEBUG_STR_APPEND(a,' ');
 			}
 			DEBUG_STR_APPEND(a,'\n');
@@ -264,7 +264,7 @@ MidiSource::midi_read (const Lock&                        lm,
 
 #endif
 		if (tracker) {
-			tracker->track (*i);
+			tracker->track (**i);
 		}
 	}
 

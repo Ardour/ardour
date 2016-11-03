@@ -111,82 +111,6 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence copied: %1\n", this));
 }
 
-/** Write the controller event pointed to by \a iter to \a ev.
- * The buffer of \a ev will be allocated or resized as necessary.
- * The event_type of \a ev should be set to the expected output type.
- * \return true on success
- */
-template<typename Time>
-bool
-Sequence<Time>::control_to_midi_event(
-	boost::shared_ptr< Event<Time> >& ev,
-	const ControlIterator&            iter) const
-{
-	assert(iter.list.get());
-	const uint32_t event_type = iter.list->parameter().type();
-
-	// initialize the event pointer with a new event, if necessary
-	if (!ev) {
-		ev = boost::shared_ptr< Event<Time> >(new Event<Time>(event_type, Time(), 3, NULL, true));
-	}
-
-	uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
-	ev->set_event_type(_type_map.midi_event_type(midi_type));
-	ev->set_id(-1);
-	switch (midi_type) {
-	case MIDI_CMD_CONTROL:
-		assert(iter.list.get());
-		assert(iter.list->parameter().channel() < 16);
-		assert(iter.list->parameter().id() <= INT8_MAX);
-		assert(iter.y <= INT8_MAX);
-
-		ev->set_time(Time(iter.x));
-		ev->realloc(3);
-		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.list->parameter().channel();
-		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
-		ev->buffer()[2] = (uint8_t)iter.y;
-		break;
-
-	case MIDI_CMD_PGM_CHANGE:
-		assert(iter.list.get());
-		assert(iter.list->parameter().channel() < 16);
-		assert(iter.y <= INT8_MAX);
-
-		ev->set_time(Time(iter.x));
-		ev->realloc(2);
-		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.list->parameter().channel();
-		ev->buffer()[1] = (uint8_t)iter.y;
-		break;
-
-	case MIDI_CMD_BENDER:
-		assert(iter.list.get());
-		assert(iter.list->parameter().channel() < 16);
-		assert(iter.y < (1<<14));
-
-		ev->set_time(Time(iter.x));
-		ev->realloc(3);
-		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
-		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
-		ev->buffer()[2] = (uint16_t(iter.y) >> 7) & 0x7F; // MSB
-		break;
-
-	case MIDI_CMD_CHANNEL_PRESSURE:
-		assert(iter.list.get());
-		assert(iter.list->parameter().channel() < 16);
-		assert(iter.y <= INT8_MAX);
-
-		ev->set_time(Time(iter.x));
-		ev->realloc(2);
-		ev->buffer()[0] = MIDI_CMD_CHANNEL_PRESSURE + iter.list->parameter().channel();
-		ev->buffer()[1] = (uint8_t)iter.y;
-		break;
-
-	default:
-		return false;
-	}
-
-	return true;
-}
 
 /** Clear all events from the model.
  */
@@ -480,24 +404,24 @@ Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
 /** Append \a ev to model.  NOT realtime safe.
  *
  * The timestamp of event is expected to be relative to
- * the start of this model (t=0) and MUST be monotonically increasing
- * and MUST be >= the latest event currently in the model.
+ * the start of this model (t=0).
  */
 template<typename Time>
 void
-Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
+Sequence<Time>::append(EventPtr const & event, event_id_t evid)
 {
 	WriteLock lock(write_lock());
 
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
-	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
-	assert(_writing);
+	assert (_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
 		return;
 	}
+
+	_events.insert (event);
 
 	if (ev.is_note_on() && ev.velocity() > 0) {
 		append_note_on_unlocked (ev, evid);

@@ -45,8 +45,8 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
-	void append_event_frames(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, boost::shared_ptr<Evoral::Event<Evoral::Beats> > const & ev);
+	void append_event_frames(const Glib::Threads::Mutex::Lock& lock, boost::shared_ptr<Evoral::Event<framepos_t> > const & ev, framepos_t source_start);
 	void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
 	void destroy_model(const Glib::Threads::Mutex::Lock& lock);
 

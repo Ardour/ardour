@@ -51,8 +51,8 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
-	void append_event_frames (const Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_beats (const Lock& lock, boost::shared_ptr<Evoral::Event<Evoral::Beats> > const & ev);
+	void append_event_frames (const Lock& lock, boost::shared_ptr<Evoral::Event<framepos_t> > const & ev, framepos_t source_start);
 
 	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	void mark_streaming_write_completed (const Lock& lock);

@@ -41,22 +41,6 @@ template<typename Time> class EventSink;
 template<typename Time> class Note;
 template<typename Time> class Event;
 
-/** An iterator over (the x axis of) a 2-d double coordinate space.
- */
-class /*LIBEVORAL_API*/ ControlIterator {
-public:
-	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
-		: list(al)
-		, x(ax)
-		, y(ay)
-	{}
-
-	boost::shared_ptr<const ControlList> list;
-	double x;
-	double y;
-};
-
-
 /** This is a higher level view of events, with separate representations for
  * notes (instead of just unassociated note on/off events) and controller data.
  * Controller data is represented as a list of time-stamped float values. */
@@ -80,13 +64,17 @@ class LIBEVORAL_API Sequence : virtual public ControlSet {
 	};
 
   public:
+	typedef typename boost::shared_ptr<Evoral::Event<Time> >       EventPtr;
+	typedef typename boost::weak_ptr<Evoral::Event<Time> >         WeakEventPtr;
+	typedef typename boost::shared_ptr<const Evoral::Event<Time> > constEventPtr;
+
 	struct EventTimeComparator {
-		bool operator() (Event<Time> const & a, Event<Time> const & b) const {
-			return a.time() < b.time();
+		inline bool operator() (const EventPtr a, const EventPtr b) const {
+			return a->time() < b->time();
 		}
 	};
 
-	typedef typename std::multiset<Evoral::Event<Time>,EventTimeComparator> Events;
+	typedef typename std::multiset<EventPtr,EventTimeComparator> Events;
 	typedef typename Events::const_iterator const_iterator;
 
   private:
@@ -122,7 +110,7 @@ class LIBEVORAL_API Sequence : virtual public ControlSet {
 
 	void end_write (StuckNoteOption, Time when = Time());
 
-	void append(const Event<Time>& ev, Evoral::event_id_t evid);
+	void append (EventPtr const & ev, Evoral::event_id_t evid);
 
 	const TypeMap& type_map() const { return _type_map; }
 
@@ -222,9 +210,11 @@ private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
 	const_iterator begin () const { return _events.begin(); }
+
 	const const_iterator end() const { return _events.end(); }
 
-	const_iterator lower_bound (Time t) const { Event<Time> ev (0, t, 0, 0, false); return _events.lower_bound (ev); }
+	/* XXX heap allocation for lower-bound ... fix this */
+	const_iterator lower_bound (Time t) const { EventPtr e (new Event<Time> (0, t, 0, 0, false)); return _events.lower_bound (e); }
 
 	// CONST iterator implementations (x3)
 	typename Notes::const_iterator note_lower_bound (Time t) const;
@@ -235,9 +225,6 @@ public:
 	typename Notes::iterator note_lower_bound (Time t);
 	typename PatchChanges::iterator patch_change_lower_bound (Time t);
 	typename SysExes::iterator sysex_lower_bound (Time t);
-
-	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
-	                           const ControlIterator&            iter) const;
 
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
