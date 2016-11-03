@@ -410,9 +410,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	const Meter& meter_at_frame (framepos_t) const;
 
-	Tempo tempo_at_beat (const double& beat) const;
-	double beat_at_tempo (const Tempo& tempo) const;
-
 	/* bbt - it's nearly always better to use meter-based beat (above)
 	   unless tick resolution is desirable.
 	*/
@@ -423,7 +420,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);
 	Timecode::BBT_Time bbt_at_beat (const double& beats);
 
+	double quarter_note_at_bbt (const Timecode::BBT_Time& bbt);
 	double quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time bbt_at_quarter_note (const double& quarter_note);
 
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
