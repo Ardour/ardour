@@ -3320,6 +3320,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 
 /** Returns the exact bbt-based beat corresponding to the bar, beat or quarter note subdivision nearest to
  * the supplied frame, possibly returning a negative value.
+ *
  * @param frame  The session frame position.
  * @param sub_num The subdivision to use when rounding the beat.
  *                A value of -1 indicates rounding to BBT bar. 1 indicates rounding to BBT beats.
@@ -3327,11 +3328,17 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
  *                0 indicates that the returned beat should not be rounded (equivalent to quarter_note_at_frame()).
  * @return The beat position of the supplied frame.
  *
+ * when working to a musical grid, the use of sub_nom indicates that
+ * the position should be interpreted musically.
+ *
+ * it effectively snaps to meter bars, meter beats or quarter note divisions
+ * (as per current gui convention) and returns a musical position independent of frame rate.
+ *
  * If the supplied frame lies before the first meter, the return will be negative,
  * in which case the returned beat uses the first meter (for BBT subdivisions) and
  * the continuation of the tempo curve (backwards).
  *
- * This function uses both tempo and meter.
+ * This function is sensitive to tempo and meter.
  */
 double
 TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
@@ -3349,8 +3356,6 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
 
 /** Returns the exact quarter note corresponding to the bar, beat or quarter note subdivision nearest to
  * the supplied frame, possibly returning a negative value.
- * Supplying a frame position with a non-zero sub_num is equivalent to supplying
- * a quarter-note musical position without frame rounding (see below)
  *
  * @param frame  The session frame position.
  * @param sub_num The subdivision to use when rounding the quarter note.
@@ -3359,11 +3364,17 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
  *                0 indicates that the returned quarter note should not be rounded (equivalent to quarter_note_at_frame()).
  * @return The quarter note position of the supplied frame.
  *
+ * When working to a musical grid, the use of sub_nom indicates that
+ * the frame position should be interpreted musically.
+ *
+ * it effectively snaps to meter bars, meter beats or quarter note divisions
+ * (as per current gui convention) and returns a musical position independent of frame rate.
+ *
  * If the supplied frame lies before the first meter, the return will be negative,
  * in which case the returned quarter note uses the first meter (for BBT subdivisions) and
  * the continuation of the tempo curve (backwards).
  *
- * This function uses both tempo and meter.
+ * This function is tempo-sensitive.
  */
 double
 TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num)

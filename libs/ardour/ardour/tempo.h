@@ -441,6 +441,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Evoral::Beats framewalk_to_qn (framepos_t pos, framecnt_t distance) const;
 
 	/* quarter note related functions are also tempo-sensitive and ignore meter.
+	   quarter notes may be compared with and assigned to Evoral::Beats.
 	*/
 	double quarter_note_at_frame (const framepos_t frame);
 	double quarter_note_at_frame_rt (const framepos_t frame);
@@ -451,6 +452,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
 
+	/* obtain a musical subdivision via a frame position and magic note divisor.*/
 	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);
 	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
 
