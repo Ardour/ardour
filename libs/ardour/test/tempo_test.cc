@@ -88,15 +88,14 @@ TempoTest::recomputeMapTest48 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (288e3).beats_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (288e3 - 1).beats_per_minute(), 1e-17);
 
-	/* tempo - bbt (meter based) beat */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_beat (24.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_beat (12.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_beat (6.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_beat (0.0).beats_per_minute(), 1e-17);
-	/*bbt (meter based) beat - tempo */
-	/* this is expected for constant tempi */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.beat_at_tempo (240.0), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.beat_at_tempo (120.0), 1e-17);
+	/* tempo - quarter note */
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).beats_per_minute(), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (240.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (120.0), 1e-17);
 
 	/* tempo - internal minute interface  */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).beats_per_minute(), 1e-17);
@@ -189,15 +188,14 @@ TempoTest::recomputeMapTest44 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (264600).beats_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (264600 - 1).beats_per_minute(), 1e-17);
 
-	/* tempo - meter-based beat (bbt beat)  */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_beat (24.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_beat (12.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_beat (6.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_beat (0.0).beats_per_minute(), 1e-17);
-	/* meter-based beat (bbt beat) - tempo */
-	/* this is expected for constant tempi */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.beat_at_tempo (240.0), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.beat_at_tempo (120.0), 1e-17);
+	/* tempo - quarter note */
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).beats_per_minute(), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (240.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (120.0), 1e-17);
 
 	/* tempo - internal minute interface  */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).beats_per_minute(), 1e-17);

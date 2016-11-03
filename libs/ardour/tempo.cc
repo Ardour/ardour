@@ -1730,13 +1730,11 @@ TempoMap::pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
  * @return the Tempo at the supplied quarter-note.
  */
 Tempo
-TempoMap::tempo_at_beat (const double& beat) const
+TempoMap::tempo_at_quarter_note (const double& qn) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const MeterSection* prev_m = &meter_section_at_beat_locked (_metrics, beat);
-	const TempoSection* prev_t = &tempo_section_at_beat_locked (_metrics, beat);
 
-	return Tempo (prev_t->tempo_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse()), prev_t->note_type());
+	return tempo_at_pulse_locked (_metrics, qn / 4.0);
 }
 
 /** Returns the position in quarter-note beats corresponding to the supplied Tempo.
@@ -1745,12 +1743,11 @@ TempoMap::tempo_at_beat (const double& beat) const
  * is equal to that of the Tempo. currently ignores note_type.
  */
 double
-TempoMap::beat_at_tempo (const Tempo& tempo) const
+TempoMap::quarter_note_at_tempo (const Tempo& tempo) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const double pulse = pulse_at_tempo_locked (_metrics, tempo);
 
-	return beat_at_pulse_locked (_metrics, pulse);
+	return pulse_at_tempo_locked (_metrics, tempo) * 4.0;;
 }
 
 /** Returns the whole-note pulse corresponding to the supplied  BBT (meter-based) beat.
