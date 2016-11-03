@@ -396,7 +396,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
-	   bbt_at_frame(), frame_at_bbt(), beat_at_frame(), frame_at_beat(), tempo_at_beat()
+	   bbt_at_frame(), frame_at_bbt(), beat_at_frame(), frame_at_beat()
 	   and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
@@ -408,15 +408,14 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double beat_at_frame (const framecnt_t& frame) const;
 	framepos_t frame_at_beat (const double& beat) const;
 
-	Tempo tempo_at_frame (const framepos_t& frame) const;
-	framepos_t frame_at_tempo (const Tempo& tempo) const;
+	const Meter& meter_at_frame (framepos_t) const;
 
 	Tempo tempo_at_beat (const double& beat) const;
 	double beat_at_tempo (const Tempo& tempo) const;
 
-	const Meter& meter_at_frame (framepos_t) const;
-
-	/* bbt - it's nearly always better to use beats.*/
+	/* bbt - it's nearly always better to use meter-based beat (above)
+	   unless tick resolution is desirable.
+	*/
 	Timecode::BBT_Time bbt_at_frame (framepos_t when);
 	Timecode::BBT_Time bbt_at_frame_rt (framepos_t when);
 	framepos_t frame_at_bbt (const Timecode::BBT_Time&);
@@ -427,6 +426,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt);
 
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
+	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
 
 	/* TEMPO-SENSITIVE FUNCTIONS
 
@@ -441,24 +441,29 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t framepos_plus_qn (framepos_t, Evoral::Beats) const;
 	Evoral::Beats framewalk_to_qn (framepos_t pos, framecnt_t distance) const;
 
-	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-
+	/* quarter note related functions are also tempo-sensitive and ignore meter.
+	*/
 	double quarter_note_at_frame (const framepos_t frame);
 	double quarter_note_at_frame_rt (const framepos_t frame);
 	framepos_t frame_at_quarter_note (const double quarter_note);
 
+	framecnt_t frames_between_quarter_notes (const double start, const double end);
+
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
 
-	framecnt_t frames_between_quarter_notes (const double start, const double end);
+	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);
+	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
+
+	Tempo tempo_at_frame (const framepos_t& frame) const;
+	framepos_t frame_at_tempo (const Tempo& tempo) const;
+	Tempo tempo_at_quarter_note (const double& beat) const;
+	double quarter_note_at_tempo (const Tempo& tempo) const;
 
 	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame);
-
-	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
-	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
