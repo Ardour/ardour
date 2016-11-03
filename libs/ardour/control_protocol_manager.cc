@@ -127,7 +127,10 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 		cp->set_state (XMLNode(""), Stateful::loading_state_version);
 	}
 
-	cp->set_active (true);
+	if (cp->set_active (true)) {
+		error << string_compose (_("Control protocol support for %1 failed to activate"), cpi.name) << endmsg;
+		teardown (cpi, false);
+	}
 
 	return 0;
 }
@@ -136,7 +139,7 @@ int
 ControlProtocolManager::deactivate (ControlProtocolInfo& cpi)
 {
 	cpi.requested = false;
-	return teardown (cpi);
+	return teardown (cpi, true);
 }
 
 void
@@ -206,7 +209,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 }
 
 int
-ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
+ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 {
 	if (!cpi.protocol) {
 
@@ -240,8 +243,15 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
-	{
+	if (lock_required) {
 		Glib::Threads::Mutex::Lock lm (protocols_lock);
+		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
+		if (p != control_protocols.end()) {
+			control_protocols.erase (p);
+		} else {
+			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
+		}
+	} else {
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
 		if (p != control_protocols.end()) {
 			control_protocols.erase (p);
@@ -462,7 +472,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 					}
 				} else {
 					if (_session) {
-						teardown (*cpi);
+						teardown (*cpi, true);
 					} else {
 						cpi->requested = false;
 					}
