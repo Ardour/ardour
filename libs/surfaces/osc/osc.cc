@@ -94,7 +94,7 @@ OSC::OSC (Session& s, uint32_t port)
 	, address_only (false)
 	, remote_port ("8000")
 	, default_banksize (0)
-	, default_strip (31)
+	, default_strip (159)
 	, default_feedback (0)
 	, default_gainmode (0)
 	, tick (true)
@@ -1370,7 +1370,7 @@ OSC::get_surface (lo_address addr)
 	s.remote_url = r_url;
 	s.bank = 1;
 	s.bank_size = default_banksize; // need to find out how many strips there are
-	s.strip_types = default_strip; // 31 is tracks, busses, and VCAs (no master/monitor)
+	s.strip_types = default_strip; // 159 is tracks, busses, and VCAs (no master/monitor)
 	s.feedback = default_feedback;
 	s.gainmode = default_gainmode;
 	s.sel_obs = 0;
@@ -3374,8 +3374,6 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 			if (types[1] && (s->presentation_info().flags() & PresentationInfo::MidiTrack)) {
 				sorted.push_back (s);
 			} else
-/*			if (types[2] && (s->presentation_info().flags() & PresentationInfo::AudioBus)) {
-				sorted.push_back (s); */
 			if ((s->presentation_info().flags() & PresentationInfo::AudioBus)) {
 				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 				// r->feeds (session->master_out()) may make more sense

@@ -558,7 +558,7 @@ OSC_GUI::factory_reset ()
 {
 	cp.set_banksize (0);
 	bank_entry.set_value (0);
-	cp.set_defaultstrip (31);
+	cp.set_defaultstrip (159);
 	cp.set_defaultfeedback (0);
 	reshow_values ();
 	cp.set_gainmode (0);
@@ -581,6 +581,7 @@ OSC_GUI::reshow_values ()
 	control_masters.set_active(def_strip & 16);
 	master_type.set_active(def_strip & 32);
 	monitor_type.set_active(def_strip & 64);
+	audio_auxes.set_active(def_strip & 128);
 	selected_tracks.set_active(def_strip & 256);
 	hidden_tracks.set_active(def_strip & 512);
 	def_feedback = cp.get_defaultfeedback();
