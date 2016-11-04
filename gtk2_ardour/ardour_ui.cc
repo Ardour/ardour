@@ -4053,8 +4053,7 @@ PresentationInfo::order_t
 ARDOUR_UI::translate_order (RouteDialogs::InsertAt place)
 {
 	if (editor->get_selection().tracks.empty()) {
-		// tracks empty actually means we have master, add 1
-		return PresentationInfo::max_order + 1;
+		return PresentationInfo::max_order;
 	}
 
 	PresentationInfo::order_t order_hint = PresentationInfo::max_order;

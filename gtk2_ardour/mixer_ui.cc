@@ -714,6 +714,11 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	bool change = false;
 	uint32_t order = 0;
 
+	// special case master if it's got PI order 0 lets keep it there
+	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
+		order++;
+	}
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		bool visible = (*ri)[stripable_columns.visible];
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
@@ -735,6 +740,11 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		 */
 
 		stripable->presentation_info().set_hidden (!visible);
+
+		// master may not get set here, but if it is zero keep it there
+		if (stripable->is_master() && (stripable->presentation_info().order() == 0)) {
+			continue;
+		}
 
 		if (order != stripable->presentation_info().order()) {
 			stripable->set_presentation_order (order, false);
