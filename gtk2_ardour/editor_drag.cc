@@ -3279,7 +3279,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
 	_movable = _real_section->movable();
-	_grab_bpm = _real_section->beats_per_minute();
+	_grab_bpm = _real_section->note_types_per_minute();
 	assert (_marker);
 }
 
@@ -3312,7 +3312,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		// mvc drag - create a dummy marker to catch events, hide it.
 
 		char name[64];
-		snprintf (name, sizeof (name), "%.2f", _marker->tempo().beats_per_minute());
+		snprintf (name, sizeof (name), "%.2f", _marker->tempo().note_types_per_minute());
 
 		TempoSection section (_marker->tempo());
 
@@ -3443,8 +3443,8 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 	ostringstream sstr;
 
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).beats_per_minute() << "\n";
-	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute() << "\n";
+	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 	finished (event, false);
 }
@@ -3497,8 +3497,8 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
 	}
 	ostringstream sstr;
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).beats_per_minute() << "\n";
-	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute() << "\n";
+	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 

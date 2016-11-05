@@ -85,23 +85,23 @@ TempoTest::recomputeMapTest48 ()
 
 	/* tempo - frame */
 	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), map.frame_at_tempo (240.0));
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (288e3).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (288e3 - 1).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (288e3).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (288e3 - 1).note_types_per_minute(), 1e-17);
 
 	/* tempo - quarter note */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).note_types_per_minute(), 1e-17);
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (240.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (120.0), 1e-17);
 
 	/* tempo - internal minute interface  */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_tempo_locked (map._metrics, tempoB), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_pulse_locked (map._metrics, 3.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_pulse_locked (map._metrics, 3.0).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, map.pulse_at_tempo_locked (map._metrics, tempoB), 1e-17);
 }
 
@@ -185,23 +185,23 @@ TempoTest::recomputeMapTest44 ()
 
 	/* tempo - frame */
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264600), map.frame_at_tempo (tempoB));
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (264600).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (264600 - 1).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_frame (264600).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_frame (264600 - 1).note_types_per_minute(), 1e-17);
 
 	/* tempo - quarter note */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).beats_per_minute(), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (24.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_quarter_note (12.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).note_types_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).note_types_per_minute(), 1e-17);
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (240.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (120.0), 1e-17);
 
 	/* tempo - internal minute interface  */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_tempo_locked (map._metrics, tempoB), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_pulse_locked (map._metrics, 3.0).beats_per_minute(), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_pulse_locked (map._metrics, 3.0).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0, map.pulse_at_tempo_locked (map._metrics, tempoB), 1e-17);
 }
 
@@ -395,7 +395,7 @@ TempoTest::rampTest48 ()
 	TempoSection& tA = map.first_tempo();
 	const TempoSection& tB = map.tempo_section_at_frame ((framepos_t) 60 * sampling_rate);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.beats_per_minute(), 300.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.note_types_per_minute(), 300.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (217.0, tA.tempo_at_minute (1.0), 1e-17);
 
 	/* note 1e-14 here. pulse is two derivatives away from time */
@@ -457,7 +457,7 @@ TempoTest::rampTest44 ()
 	TempoSection& tA = map.first_tempo();
 	const TempoSection& tB = map.tempo_section_at_frame ((framepos_t) 60 * sampling_rate);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.beats_per_minute(), 300.0), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0, tA.minute_at_tempo (tB.note_types_per_minute(), 300.0), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (217.0, tA.tempo_at_minute (1.0), 1e-17);
 
 	/* note 1e-14 here. pulse is two derivatives away from time */
@@ -553,4 +553,85 @@ TempoTest::tempoAtPulseTest ()
 
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (160.0, tA->tempo_at_minute (tB->minute()), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (123.0, tB->tempo_at_minute (tC->minute()), 1e-17);
+}
+
+void
+TempoTest::tempoFundamentalsTest ()
+{
+	int const sampling_rate = 48000;
+
+	TempoMap map (sampling_rate);
+	Meter meterA (4, 8);
+	Tempo tempoA (120.0, 4.0);
+	Tempo tempoB (120.0, 8.0);
+	Tempo tempoC (120.0, 2.0);
+	Tempo tempoD (160.0, 2.0);
+	Tempo tempoE (123.0, 3.0);
+
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+
+	map.add_tempo (tempoB, 20.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoC, 30.0, 0, TempoSection::Constant, MusicTime);
+
+	map.add_tempo (tempoD, 40.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoE, 50.0, 0, TempoSection::Constant, MusicTime);
+
+	TempoSection* tA = 0;
+	TempoSection* tB = 0;
+	TempoSection* tC = 0;
+	TempoSection* tD = 0;
+	TempoSection* tE = 0;
+	list<MetricSection*>::iterator i;
+
+	for (i = map._metrics.begin(); i != map._metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (!tA) {
+				tA = t;
+				continue;
+			}
+			if (!tB) {
+				tB = t;
+				continue;
+			}
+			if (!tC) {
+				tC = t;
+				continue;
+			}
+			if (!tD) {
+				tD = t;
+				continue;
+			}
+			if (!tE) {
+				tE = t;
+				continue;
+			}
+		}
+	}
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (24000.0, tA->frames_per_quarter_note (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (24000.0, tA->frames_per_note_type (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, tA->quarter_notes_per_minute (), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (30.0, tA->pulses_per_minute (), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (48000.0, tB->frames_per_quarter_note (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (24000.0, tB->frames_per_note_type (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (60.0, tB->quarter_notes_per_minute (), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (15.0, tB->pulses_per_minute (), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12000.0, tC->frames_per_quarter_note (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (24000.0, tC->frames_per_note_type (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, tC->quarter_notes_per_minute (), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (60.0, tC->pulses_per_minute (), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (9000.0, tD->frames_per_quarter_note (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (18000.0, tD->frames_per_note_type (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (320.0, tD->quarter_notes_per_minute (), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (80.0, tD->pulses_per_minute (), 1e-17);
+
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (17560.975609756097, tE->frames_per_quarter_note (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (23414.634146341465, tE->frames_per_note_type (sampling_rate), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (164.0, tE->quarter_notes_per_minute (), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (41.0, tE->pulses_per_minute (), 1e-17);
 }

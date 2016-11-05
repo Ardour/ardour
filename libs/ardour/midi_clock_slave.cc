@@ -82,11 +82,7 @@ MIDIClock_Slave::rebind (MidiPort& port)
 void
 MIDIClock_Slave::calculate_one_ppqn_in_frames_at(framepos_t time)
 {
-	const Tempo& current_tempo = session->tempo_map().tempo_at_frame (time);
-	double const frames_per_beat = session->tempo_map().frames_per_beat_at (time, session->frame_rate());
-
-	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
-	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
+	const double frames_per_quarter_note = session->tempo_map().frames_per_quarter_note_at (time, session->frame_rate());
 
 	one_ppqn_in_frames = frames_per_quarter_note / double (ppqn);
 	// DEBUG_TRACE (DEBUG::MidiClock, string_compose ("at %1, one ppqn = %2\n", time, one_ppqn_in_frames));

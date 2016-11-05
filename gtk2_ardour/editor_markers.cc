@@ -1404,7 +1404,7 @@ Editor::toggle_marker_lock_style ()
 	} else if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->beats_per_minute());
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = tsp->type();
@@ -1431,7 +1431,7 @@ Editor::toggle_tempo_type ()
 	if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->beats_per_minute(), tsp->note_type());
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;

@@ -12,6 +12,7 @@ class TempoTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (rampTest48);
 	CPPUNIT_TEST (rampTest44);
 	CPPUNIT_TEST (tempoAtPulseTest);
+	CPPUNIT_TEST (tempoFundamentalsTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -26,5 +27,6 @@ public:
 	void rampTest48 ();
 	void rampTest44 ();
 	void tempoAtPulseTest();
+	void tempoFundamentalsTest();
 };
 

@@ -77,11 +77,11 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		if (grid.begin()->c != 0.0) {
 			const double beat_divisions = (l / ((double) divisions)) * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
 			const double time_at_division = log (((grid.begin()->c * (beat_divisions)) /
-							   grid.begin()->tempo.beats_per_minute()) + 1) / grid.begin()->c;
+							   grid.begin()->tempo.note_types_per_minute()) + 1) / grid.begin()->c;
 
 			f = grid.begin()->frame + (framecnt_t) floor ((time_at_division * 60.0 * frame_rate) + 0.5);
 		} else {
-			const double fpb  = grid.begin()->tempo.frames_per_beat (frame_rate)
+			const double fpb  = grid.begin()->tempo.frames_per_note_type (frame_rate)
 				* (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
 
 			f = grid.begin()->frame + (l * (fpb / (double) divisions));
