@@ -208,7 +208,7 @@ intptr_t Session::vst_callback (
 
 			if (value & (kVstTempoValid)) {
 				const Tempo& t (session->tempo_map().tempo_at_frame (now));
-				timeinfo->tempo = t.beats_per_minute ();
+				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
@@ -333,7 +333,7 @@ intptr_t Session::vst_callback (
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
 		if (session) {
 			const Tempo& t (session->tempo_map().tempo_at_frame (value));
-			return t.beats_per_minute() * 1000;
+			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;
 		}

@@ -100,13 +100,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			}
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->beats_per_minute(), ts->note_type());
+				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
 			} else {
-				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
+				snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
 			}
 
-			max_tempo = max (max_tempo, ts->beats_per_minute());
-			min_tempo = min (min_tempo, ts->beats_per_minute());
+			max_tempo = max (max_tempo, ts->note_types_per_minute());
+			min_tempo = min (min_tempo, ts->note_types_per_minute());
 
 			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("tempo curve"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
@@ -147,7 +147,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		TempoMarker* tempo_marker;
 
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
+			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
 		}
 	}
 }
@@ -208,11 +208,17 @@ Editor::marker_position_changed ()
 			if ((ts = &tempo_marker->tempo()) != 0) {
 				tempo_marker->set_position (ts->frame ());
 				char buf[64];
-				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
+
+				if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+				} else {
+					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+				}
+
 				tempo_marker->set_name (buf);
 
-				max_tempo = max (max_tempo, ts->beats_per_minute());
-				min_tempo = min (min_tempo, ts->beats_per_minute());
+				max_tempo = max (max_tempo, ts->note_types_per_minute());
+				min_tempo = min (min_tempo, ts->note_types_per_minute());
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -248,7 +254,7 @@ Editor::marker_position_changed ()
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		TempoMarker* tempo_marker;
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
+			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
 		}
 	}
 

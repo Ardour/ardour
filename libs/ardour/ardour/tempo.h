@@ -54,25 +54,32 @@ class LIBARDOUR_API Tempo {
 	 * @param type Note Type (default `4': quarter note)
 	 */
 	Tempo (double npm, double type=4.0) // defaulting to quarter note
-		: _beats_per_minute (npm), _note_type(type) {}
+		: _note_types_per_minute (npm), _note_type(type) {}
 
-	/*
-	   note types per minute.
-	*/
-	double beats_per_minute () const { return _beats_per_minute; }
-	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
+	double note_types_per_minute () const { return _note_types_per_minute; }
+	void set_note_types_per_minute (double npm) { _note_types_per_minute = npm; }
 	double note_type () const { return _note_type; }
-	/** audio samples per quarter note beat.
-	 * this is only useful for constant tempo and should not be used.
-	 * if you want an instantaneous value for this, use frames_per_beat_at() instead.
+
+	double note_divisions_per_minute (double note_type) const { return _note_types_per_minute * (note_type / _note_type); }
+	double quarter_notes_per_minute () const { return note_divisions_per_minute (4.0); }
+	double pulses_per_minute () const { return note_divisions_per_minute (1.0); }
+	/** audio samples per note type.
+	 * if you want an instantaneous value for this, use TempoMap::frames_per_quarter_note_at() instead.
 	 * @param sr samplerate
 	 */
-	double frames_per_beat (framecnt_t sr) const {
-		return (60.0 * sr) / _beats_per_minute;
+	double frames_per_note_type (framecnt_t sr) const {
+		return (60.0 * sr) / _note_types_per_minute;
+	}
+	/** audio samples per quarter note.
+	 * if you want an instantaneous value for this, use TempoMap::frames_per_quarter_note_at() instead.
+	 * @param sr samplerate
+	 */
+	double frames_per_quarter_note (framecnt_t sr) const {
+		return (60.0 * sr) / quarter_notes_per_minute ();
 	}
 
   protected:
-	double _beats_per_minute;
+	double _note_types_per_minute;
 	double _note_type;
 };
 
@@ -313,7 +320,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 		BBTPoint (const MeterSection& m, const Tempo& t, framepos_t f,
 		          uint32_t b, uint32_t e, double func_c)
-		: frame (f), meter (m.divisions_per_bar(), m.note_divisor()), tempo (t.beats_per_minute(), t.note_type()), c (func_c), bar (b), beat (e) {}
+		: frame (f), meter (m.divisions_per_bar(), m.note_divisor()), tempo (t.note_types_per_minute(), t.note_type()), c (func_c), bar (b), beat (e) {}
 
 		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
 		operator Timecode::BBT_Time() const { return bbt(); }
@@ -332,8 +339,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	/* because tempos may be ramped, this is only valid for the instant requested.*/
-	double frames_per_beat_at (const framepos_t&, const framecnt_t& sr) const;
+	/* because tempi may be ramped, this is only valid for the instant requested.*/
+	double frames_per_quarter_note_at (const framepos_t&, const framecnt_t& sr) const;
 
 	const TempoSection& tempo_section_at_frame (framepos_t frame) const;
 	const MeterSection& meter_section_at_frame (framepos_t frame) const;

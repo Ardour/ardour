@@ -2447,7 +2447,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 	if (_bpm_control_port) {
-		*_bpm_control_port = tmap.tempo_at_frame (start).beats_per_minute();
+		*_bpm_control_port = tmap.tempo_at_frame (start).note_types_per_minute();
 	}
 
 #ifdef LV2_EXTENDED
@@ -2519,7 +2519,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
 					Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
-					double bpm = tmap.tempo_at_frame (start).beats_per_minute();
+					double bpm = tmap.tempo_at_frame (start).note_types_per_minute();
 					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
 					               + (bbt.beats - 1)
 					               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);
@@ -2561,7 +2561,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						tmetric.set_metric(metric);
 						Timecode::BBT_Time bbt;
 						bbt = tmap.bbt_at_frame (metric->frame());
-						double bpm = tmap.tempo_at_frame (start/*XXX*/).beats_per_minute();
+						double bpm = tmap.tempo_at_frame (start/*XXX*/).note_types_per_minute();
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, speed, bpm,
 						               metric->frame(),
@@ -2834,7 +2834,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * so it needs to be realative to that.
 		 */
 		TempoMetric t = tmap.metric_at(start);
-		_current_bpm = tmap.tempo_at_frame (start).beats_per_minute();
+		_current_bpm = tmap.tempo_at_frame (start).note_types_per_minute();
 		Timecode::BBT_Time bbt (tmap.bbt_at_frame (start));
 		double beatpos = (bbt.bars - 1) * t.meter().divisions_per_bar()
 		               + (bbt.beats - 1)
