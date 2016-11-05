@@ -1808,7 +1808,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	}
 
 	if (outCurrentTempo) {
-		*outCurrentTempo = tmap.tempo_at_frame (transport_frame + input_offset).beats_per_minute();
+		*outCurrentTempo = tmap.tempo_at_frame (transport_frame + input_offset).quarter_notes_per_minute();
 	}
 
 	return noErr;
