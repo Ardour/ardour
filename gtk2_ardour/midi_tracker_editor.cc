@@ -37,6 +37,7 @@
 #include "ardour/panner.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/midi_playlist.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
@@ -209,7 +210,7 @@ MidiTrackerEditor::is_pan_type (const Evoral::Parameter& param) const {
 }
 
 size_t
-MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
+MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
 {
 	// Find the next available column
 	if (available_automation_columns.empty()) {
@@ -229,10 +230,17 @@ MidiTrackerEditor::add_automation_column (const Evoral::Parameter& param)
 		: route->describe_parameter (param);
 	view.get_column(column)->set_title (name);
 
-	std::cout << "add_automation_column: name = " << name
+	std::cout << "add_main_automation_column: name = " << name
 	          << ", column = " << column << std::endl;
 
 	return column;
+}
+
+size_t
+MidiTrackerEditor::add_midi_automation_column (const Evoral::Parameter& param)
+{
+	// TODO
+	return 0;
 }
 
 /** Add an AutomationTimeAxisView to display automation for a processor's parameter */
@@ -295,14 +303,16 @@ MidiTrackerEditor::show_all_processor_automations ()
 	}
 }
 
-// 1. Does not show the midi automations because there are too many of them.
+// Show all automation, with the exception of midi automations, only show the
+// existing one, because there are too many.
 //
-// 2. TODO: this menu needs to be persistent between sessions. Should also be
-//    fixed for the track/piano roll view.
+// TODO: this menu needs to be persistent between sessions. Should also be
+// fixed for the track/piano roll view.
 void
 MidiTrackerEditor::show_all_automation ()
 {
 	show_all_main_automations ();
+	show_existing_midi_automations ();
 	show_all_processor_automations ();
 
 	redisplay_model ();
@@ -311,6 +321,19 @@ MidiTrackerEditor::show_all_automation ()
 void
 MidiTrackerEditor::show_existing_midi_automations ()
 {
+	const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();	
+	for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
+		// TODO: where is column store
+		size_t column;
+		if (column == 0)
+			column = add_midi_automation_column (*p);
+
+		// Still no column available, skip
+		if (column == 0)
+			continue;
+
+		visible_automation_columns.insert (column);
+	}
 }
 
 void
@@ -1022,7 +1045,7 @@ MidiTrackerEditor::update_gain_column_visibility ()
 	const bool showit = gain_automation_item->get_active();
 
 	if (gain_column == 0)
-		gain_column = add_automation_column(Evoral::Parameter(GainAutomation));
+		gain_column = add_main_automation_column(Evoral::Parameter(GainAutomation));
 
 	// Still no column available, abort
 	if (gain_column == 0)
@@ -1059,7 +1082,7 @@ MidiTrackerEditor::update_mute_column_visibility ()
 	const bool showit = mute_automation_item->get_active();
 
 	if (mute_column == 0)
-		mute_column = add_automation_column(Evoral::Parameter(MuteAutomation));
+		mute_column = add_main_automation_column(Evoral::Parameter(MuteAutomation));
 
 	// Still no column available, abort
 	if (mute_column == 0)
@@ -1081,8 +1104,8 @@ MidiTrackerEditor::update_pan_columns_visibility ()
 
 	if (pan_columns.empty()) {
 		set<Evoral::Parameter> const & params = route->panner()->what_can_be_automated ();
-		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {		
-			pan_columns.push_back(add_automation_column(*p));
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
+			pan_columns.push_back(add_main_automation_column(*p));
 		}
 	}
 
@@ -1519,10 +1542,15 @@ MidiTrackerEditor::build_param2actrl ()
 		param2actrl[*p] = route->pannable()->automation_control(*p);
 	}
 
+	// Midi
+	const set<Evoral::Parameter> midi_params = midi_track()->midi_playlist()->contained_automation();
+	for (set<Evoral::Parameter>::const_iterator i = midi_params.begin(); i != midi_params.end(); ++i) {
+		param2actrl[*i] = route->automation_control(*i, true);
+	}
+
 	// Processors
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
-			// string name = (*i)->processor->describe_parameter ((*ii)->what); // for debugging
 			param2actrl[(*ii)->what] = boost::dynamic_pointer_cast<AutomationControl>((*i)->processor->control((*ii)->what));
 		}
 	}
