@@ -227,7 +227,7 @@ TempoSection::set_type (Type type)
 	_type = type;
 }
 
-/** returns the tempo in beats per minute at the zero-based (relative to session) minute.
+/** returns the tempo on note types per minute at the zero-based (relative to session) minute.
 */
 double
 TempoSection::tempo_at_minute (const double& m) const
@@ -241,7 +241,7 @@ TempoSection::tempo_at_minute (const double& m) const
 }
 
 /** returns the zero-based minute (relative to session)
-   where the tempo in beats per minute occurs in this section.
+   where the tempo in note types per minute occurs in this section.
    pulse p is only used for constant tempi.
    note that the tempo map may have multiple such values.
 */
@@ -254,7 +254,8 @@ TempoSection::minute_at_tempo (const double& bpm, const double& p) const
 
 	return _time_at_tempo (bpm) + minute();
 }
-/** returns the tempo in beats per minute at the supplied pulse.
+
+/** returns the tempo in note types per minute at the supplied pulse.
 */
 double
 TempoSection::tempo_at_pulse (const double& p) const
@@ -267,8 +268,8 @@ TempoSection::tempo_at_pulse (const double& p) const
 	return _tempo_at_pulse (p - pulse());
 }
 
-/** returns the pulse where the tempo in beats per minute occurs given frame f.
-    frame f is only used for constant tempi.
+/** returns the pulse where the tempo in note types per minute occurs given minute m.
+    minute m is only used for constant tempi.
     note that the session tempo map may have multiple locations where a given tempo occurs.
 */
 double
@@ -382,8 +383,9 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
 */
 
 /*
-  compute this ramp's function constant using the end tempo (in qn beats per minute)
-  and duration (pulses into global start) of some later tempo section.
+  compute this ramp's function constant from some tempo-pulse point
+  end tempo (in note types per minute)
+  duration (pulses into global start) of some other position.
 */
 double
 TempoSection::compute_c_func_pulse (const double& end_bpm, const double& end_pulse) const
@@ -392,7 +394,10 @@ TempoSection::compute_c_func_pulse (const double& end_bpm, const double& end_pul
 	return (beats_per_minute() * expm1 (log_tempo_ratio)) / ((end_pulse - pulse()) * _note_type);
 }
 
-/* compute the function constant from some later tempo section, given tempo (quarter notes/min.) and distance (in frames) from session origin */
+/* compute the function constant from some tempo-time point.
+   tempo (note types/min.)
+   distance (in minutes) from session origin
+*/
 double
 TempoSection::compute_c_func_minute (const double& end_bpm, const double& end_minute) const
 {
@@ -413,28 +418,28 @@ TempoSection::c_func (double end_bpm, double end_time) const
 	return log (end_bpm / beats_per_minute()) / end_time;
 }
 
-/* tempo in bpm at time in minutes */
+/* tempo in note types per minute at time in minutes */
 double
 TempoSection::_tempo_at_time (const double& time) const
 {
 	return exp (_c_func * time) * beats_per_minute();
 }
 
-/* time in minutes at tempo in bpm */
+/* time in minutes at tempo in note types per minute */
 double
 TempoSection::_time_at_tempo (const double& tempo) const
 {
 	return log (tempo / beats_per_minute()) / _c_func;
 }
 
-/* pulse at tempo in bpm */
+/* pulse at tempo in note types per minute */
 double
 TempoSection::_pulse_at_tempo (const double& tempo) const
 {
 	return ((tempo - beats_per_minute()) / _c_func) / _note_type;
 }
 
-/* tempo in bpm at pulse */
+/* tempo in note types per minute at pulse */
 double
 TempoSection::_tempo_at_pulse (const double& pulse) const
 {
@@ -603,47 +608,38 @@ MeterSection::get_state() const
 /*
   Tempo Map Overview
 
-  The Shaggs - Things I Wonder
-  https://www.youtube.com/watch?v=9wQK6zMJOoQ
+  Tempo determines the rate of musical pulse determined by its components
+        note types per minute - the rate per minute of the whole note divisor _note_type
+	note type             - the division of whole notes (pulses) which occur at the rate of note types per minute.
+  Meter divides the musical pulse into measures and beats according to its components
+        divisions_per_bar
+	note_divisor
 
-  Tempo is the rate of the musical pulse.
-  Meter divides pulse into measures and beats.
+  TempoSection - translates between time, musical pulse and tempo.
+        has a musical location in whole notes (pulses).
+	has a time location in minutes.
+	Note that 'beats' in Tempo::beats_per_minute() are in fact note types per minute.
+	(In the rest of tempo map,'beat' usually refers to accumulated BBT beats (pulse and meter based).
 
-  TempoSection - provides pulse in the form of beats_per_minute() - the number of quarter notes in one minute.
-  Note that 'beats' in Tempo::beats_per_minute() are quarter notes (pulse based). In the rest of tempo map,
-  'beat' usually refers to accumulated BBT beats (pulse and meter based).
+  MeterSection - translates between BBT, meter-based beat and musical pulse.
+        has a musical location in whole notes (pulses)
+	has a musical location in meter-based beats
+	has a musical location in BBT time
+	has a time location expressed in minutes.
 
-  MeterSecion - divides pulse into measures (via divisions_per_bar) and beats (via note_divisor).
-
-  Both tempo and meter have a pulse position and a frame position.
-  Meters also have a beat position, which is always 0.0 for the first one.
   TempoSection and MeterSection may be locked to either audio or music (position lock style).
-  The lock style determines the 'true' position of the section wich is used to calculate the other postion parameters of the section.
+  The lock style determines the location type to be kept as a reference when location is recalculated.
 
-  The first tempo and first meter are special. they must move together, and must be locked to audio.
-  Audio locked tempos which lie before the first meter are made inactive.
-  They will be re-activated if the first meter is again placed before them.
+  The first tempo and meter are special. they must move together, and are locked to audio.
+  Audio locked tempi which lie before the first meter are made inactive.
 
-  With tempo sections potentially being ramped, meters provide a way of mapping beats to whole pulses without
-  referring to the tempo function(s) involved as the distance in whole pulses between a meter and a subsequent beat is
-  sb->beat() - meter->beat() / meter->note_divisor().
-  Because every meter falls on a known pulse, (derived from its bar), the rest is easy as the duration in pulses between
-  two meters is of course
-  (meater_b->bar - meter_a->bar) * meter_a->divisions_per_bar / meter_a->note_divisor.
+  Recomputing the map is the process where the 'missing' location types are calculated.
+        We construct the tempo map by first using the locked location type of each section
+	to determine non-locked location types (pulse or minute position).
+        We then use this map to find the pulse or minute position of each meter (again depending on lock style).
 
-  Beat calculations are based on meter sections and all pulse and tempo calculations are based on tempo sections.
-  Beat to frame conversion of course requires the use of meter and tempo.
-
-  Remembering that ramped tempo sections interact, it is important to avoid referring to any other tempos when moving tempo sections,
-  Here, beats (meters) are used to determine the new pulse (see predict_tempo_position())
-
-  Recomputing the map is the process where the 'missing' position
-  (tempo pulse or meter pulse & beat in the case of AudioTime, frame for MusicTime) is calculated.
-  We construct the tempo map by first using the frame or pulse position (depending on position lock style) of each tempo.
-  We then use this tempo map (really just the tempos) to find the pulse or frame position of each meter (again depending on lock style).
-
-  Having done this, we can now find any musical duration by selecting the tempo and meter covering the position (or tempo) in question
-  and querying its appropriate meter/tempo.
+  Having done this, we can now traverse the Metrics list by pulse or minute
+  to query its relevant meter/tempo.
 
   It is important to keep the _metrics in an order that makes sense.
   Because ramped MusicTime and AudioTime tempos can interact with each other,
@@ -680,11 +676,14 @@ MeterSection::get_state() const
   beat_at_frame (frame_at_beat (beat)) != beat due to the time quantization of frame_at_beat().
 
   Doing the second one will result in a beat distance error of up to 0.5 audio samples.
-  So instead work in pulses and/or beats and only use beat position to caclulate frame position (e.g. after tempo change).
-  For audio-locked objects, use frame position to calculate beat position.
+  frames_between_quarter_notes () eliminats this effect when determining time duration
+  from Beats distance, or instead work in quarter-notes and/or beats and convert to frames last.
 
-  The above pointless example would then do:
-  beat_at_pulse (pulse_at_beat (beat)) to avoid rounding.
+  The above pointless example could instead do:
+  beat_at_quarter_note (quarter_note_at_beat (beat)) to avoid rounding.
+
+  The Shaggs - Things I Wonder
+  https://www.youtube.com/watch?v=9wQK6zMJOoQ
 
 */
 struct MetricSectionSorter {

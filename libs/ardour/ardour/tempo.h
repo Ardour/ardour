@@ -50,14 +50,14 @@ class TempoMap;
 class LIBARDOUR_API Tempo {
   public:
 	/**
-	 * @param bpm Beats Per Minute
+	 * @param npm Note Types per minute
 	 * @param type Note Type (default `4': quarter note)
 	 */
-	Tempo (double bpm, double type=4.0) // defaulting to quarter note
-		: _beats_per_minute (bpm), _note_type(type) {}
+	Tempo (double npm, double type=4.0) // defaulting to quarter note
+		: _beats_per_minute (npm), _note_type(type) {}
 
 	/*
-	   quarter note beats as distinct from a beat derived from meter and pulse.
+	   note types per minute.
 	*/
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
