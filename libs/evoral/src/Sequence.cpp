@@ -203,7 +203,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		DEBUG_TRACE(DEBUG::Sequence,
 		            string_compose("Starting at type 0x%1 : 0x%2 @ %3\n",
 		                           (int)_event->event_type(),
-		                           (int)((MIDIEvent<Time>*)_event.get())->type(),
+		                           (int)_event->buffer()[0],
 		                           _event->time()));
 	}
 }
@@ -330,7 +330,7 @@ Sequence<Time>::const_iterator::operator++()
 
 	assert(_event && _event->buffer() && _event->size() > 0);
 
-	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
+	const MIDIEvent<Time>& ev = *((const MIDIEvent<Time>*)_event.get());
 
 	if (!(     ev.is_note()
 	           || ev.is_cc()
