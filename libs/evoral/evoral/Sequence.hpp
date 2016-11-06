@@ -232,9 +232,8 @@ public:
 
 		void invalidate(std::set<WeakNotePtr>* notes);
 
-		const Event<Time>& operator*()  const { return *_event;  }
-		const boost::shared_ptr< Event<Time> > operator->() const  { return _event; }
-		const boost::shared_ptr< Event<Time> > get_event_pointer() { return _event; }
+		const Event<Time>& operator*() const { return *_event;  }
+		const boost::shared_ptr< const Event<Time> > operator->() const { return _event; }
 
 		const const_iterator& operator++(); // prefix only
 

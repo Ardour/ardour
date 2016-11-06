@@ -92,7 +92,7 @@ MidiPlaylist::~MidiPlaylist ()
 
 template<typename Time>
 struct EventsSortByTimeAndType {
-    bool operator() (Evoral::Event<Time>* a, Evoral::Event<Time>* b) {
+    bool operator() (const Evoral::Event<Time>* a, const Evoral::Event<Time>* b) {
 	    if (a->time() == b->time()) {
 		    if (parameter_is_midi ((AutomationType)a->event_type()) &&
 		        parameter_is_midi ((AutomationType)b->event_type())) {

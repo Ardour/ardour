@@ -604,8 +604,8 @@ SMFSource::safe_midi_file_extension (const string& file)
 }
 
 static bool compare_eventlist (
-	const std::pair< Evoral::Event<Evoral::Beats>*, gint >& a,
-	const std::pair< Evoral::Event<Evoral::Beats>*, gint >& b) {
+	const std::pair< const Evoral::Event<Evoral::Beats>*, gint >& a,
+	const std::pair< const Evoral::Event<Evoral::Beats>*, gint >& b) {
 	return ( a.first->time() < b.first->time() );
 }
 

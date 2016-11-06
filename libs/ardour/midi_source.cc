@@ -190,8 +190,8 @@ MidiSource::midi_read (const Lock&                        lm,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
-		       const double                       pos_beats,
-		       const double                       start_beats) const
+                       const double                       pos_beats,
+                       const double                       start_beats) const
 {
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
@@ -245,18 +245,28 @@ MidiSource::midi_read (const Lock&                        lm,
 
 			/* in range */
 
-			if (filter && filter->filter(i->buffer(), i->size())) {
-				DEBUG_TRACE (DEBUG::MidiSourceIO,
-				             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-				                             _name, time_frames, i->event_type(), i->size()));
-				continue;
-			}
-
 			if (loop_range) {
 				time_frames = loop_range->squish (time_frames);
 			}
 
-			dst.write (time_frames, i->event_type(), i->size(), i->buffer());
+			const uint8_t status           = i->buffer()[0];
+			const bool    is_channel_event = (0x80 <= (status & 0xF0)) && (status <= 0xE0);
+			if (filter && is_channel_event) {
+				/* Copy event so the filter can modify the channel.  I'm not
+				   sure if this is necessary here (channels are mapped later in
+				   buffers anyway), but it preserves existing behaviour without
+				   destroying events in the model during read. */
+				Evoral::Event<Evoral::Beats> ev(*i, true);
+				if (!filter->filter(ev.buffer(), ev.size())) {
+					dst.write(time_frames, ev.event_type(), ev.size(), ev.buffer());
+				} else {
+					DEBUG_TRACE (DEBUG::MidiSourceIO,
+					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
+					                             _name, time_frames, i->event_type(), i->size()));
+				}
+			} else {
+				dst.write (time_frames, i->event_type(), i->size(), i->buffer());
+			}
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
