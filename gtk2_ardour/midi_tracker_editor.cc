@@ -69,7 +69,7 @@ using Timecode::BBT_Time;
 //
 // - [ ] Take care of midi automation.
 //
-// - [ ] Support audio tracks and trim automation as well
+// - [ ] Support audio tracks and trim automation
 //
 // - [ ] Support multiple tracks and regions.
 //
@@ -222,7 +222,7 @@ MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
 	available_automation_columns.erase(it);
 
 	// Associate that column to the parameter
-	col2param[column] = param;
+	col2param.insert(ColParamBimap::value_type(column, param));
 
 	// Set the column title
 	string name = is_pan_type(param) ?
@@ -273,7 +273,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	available_automation_columns.erase(it);
 
 	// Associate that column to the parameter
-	col2param[pan->column] = what;
+	col2param.insert(ColParamBimap::value_type(pan->column, what));
 
 	// Set the column title
 	string name = processor->describe_parameter (what);
@@ -1455,7 +1455,7 @@ MidiTrackerEditor::redisplay_model ()
 			}
 
 			// Render automation pattern
-			for (std::map<size_t, Evoral::Parameter>::const_iterator cp_it = col2param.begin(); cp_it != col2param.end(); ++cp_it) {
+			for (ColParamBimap::left_const_iterator cp_it = col2param.left.begin(); cp_it != col2param.left.end(); ++cp_it) {
 				size_t col_idx = cp_it->first;
 				size_t i = col2autotrack[col_idx];
 				const Evoral::Parameter& param = cp_it->second;

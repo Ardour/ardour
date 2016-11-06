@@ -19,6 +19,8 @@
 #ifndef __ardour_gtk2_midi_tracker_editor_h_
 #define __ardour_gtk2_midi_tracker_editor_h_
 
+#include <boost/bimap/bimap.hpp>
+
 #include <gtkmm/treeview.h>
 #include <gtkmm/table.h>
 #include <gtkmm/box.h>
@@ -134,8 +136,9 @@ class MidiTrackerEditor : public ArdourWindow
 	// List of column indices currently unassigned to an automation
 	std::set<size_t> available_automation_columns;
 
-	// Map column index to automation parameter
-	std::map<size_t, Evoral::Parameter> col2param;
+	// Map column index to automation parameter and vice versa
+	typedef boost::bimaps::bimap<size_t, Evoral::Parameter> ColParamBimap;
+	ColParamBimap col2param;
 
 	// Keep track of all visible automation columns
 	std::set<size_t> visible_automation_columns;
