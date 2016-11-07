@@ -26,10 +26,6 @@
 #include "evoral/Event.hpp"
 #include "evoral/midi_events.h"
 
-#ifdef EVORAL_MIDI_XML
-class XMLNode;
-#endif
-
 namespace Evoral {
 
 /** MIDI helper functions for an Event.
@@ -48,14 +44,6 @@ public:
 	MIDIEvent(const Event<Time>& copy, bool alloc)
 		: Event<Time>(copy, alloc)
 	{}
-
-#ifdef EVORAL_MIDI_XML
-	/** Event from XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
-	MIDIEvent(const XMLNode& event);
-
-	/** Event to XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
-	boost::shared_ptr<XMLNode> to_xml() const;
-#endif
 
 	inline uint8_t  type()                  const { return (this->_buf[0] & 0xF0); }
 	inline void     set_type(uint8_t type)        { this->_buf[0] =   (0x0F & this->_buf[0])
