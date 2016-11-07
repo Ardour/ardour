@@ -445,7 +445,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			}
 
 			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
-				_capture_buf->write(event_time, ev.type(), ev.size(), ev.buffer());
+				_capture_buf->write(event_time, ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
 		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);

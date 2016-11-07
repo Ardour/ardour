@@ -48,7 +48,7 @@ template<typename Time>
 class LIBEVORAL_API Event {
 public:
 #ifdef EVORAL_EVENT_ALLOC
-	Event(EventType type=0, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
+	Event(EventType type=NO_EVENT, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
 	Event(EventType type, Time time, uint32_t size, const uint8_t* buf);
 
@@ -108,7 +108,7 @@ public:
 	}
 
 	inline void clear() {
-		_type          = 0;
+		_type          = NO_EVENT;
 		_original_time = Time();
 		_nominal_time  = Time();
 		_size          = 0;

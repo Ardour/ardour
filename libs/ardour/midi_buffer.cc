@@ -85,7 +85,7 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 {
 	assert(_capacity >= copy->size ());
 	_size = copy->size ();
-	memcpy(_data, copy->data(), _size);
+	memcpy(_data, copy->_data, _size);
 }
 
 

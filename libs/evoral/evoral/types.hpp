@@ -1,5 +1,5 @@
 /* This file is part of Evoral.
- * Copyright (C) 2008 David Robillard <http://drobilla.net>
+ * Copyright (C) 2008-2016 David Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
  *
  * Evoral is free software; you can redistribute it and/or modify it under the
@@ -37,8 +37,23 @@ namespace Evoral {
 */
 typedef int32_t event_id_t;
 
-/** Type of an event (opaque, mapped by application) */
-typedef uint32_t EventType;
+/** Type of an event (opaque, mapped by application, e.g. MIDI).
+ *
+ * Event types are really an arbitrary integer provided by the type map, and it
+ * is safe to use values not in this enum, but this enum exists so the compiler
+ * can catch mistakes like setting the event type to a MIDI status byte.  Event
+ * types come from the type map and describe a format/protocol like MIDI, and
+ * must not be confused with the payload (such as a note on or CC change).
+ * There is a static value for MIDI as this type is handled specially by
+ * various parts of Evoral.
+ */
+enum EventType {
+	NO_EVENT,
+	MIDI_EVENT
+};
+
+/** Type of a parameter (opaque, mapped by application, e.g. gain) */
+typedef uint32_t ParameterType;
 
 class Beats;
 

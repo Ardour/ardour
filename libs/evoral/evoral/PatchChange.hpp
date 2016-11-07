@@ -39,9 +39,9 @@ public:
 	 *  @param b Bank number (counted from 0, 14-bit).
 	 */
 	PatchChange (Time t, uint8_t c, uint8_t p, int b)
-		: _bank_change_msb (0, t, 3, 0, true)
-		, _bank_change_lsb (0, t, 3, 0, true)
-		, _program_change (0, t, 2, 0, true)
+		: _bank_change_msb (MIDI_EVENT, t, 3, 0, true)
+		, _bank_change_lsb (MIDI_EVENT, t, 3, 0, true)
+		, _program_change (MIDI_EVENT, t, 2, 0, true)
 	{
 		_bank_change_msb.buffer()[0] = MIDI_CMD_CONTROL | c;
 		_bank_change_msb.buffer()[1] = MIDI_CTL_MSB_BANK;

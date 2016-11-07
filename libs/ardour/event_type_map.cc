@@ -62,10 +62,10 @@ EventTypeMap::parameter_midi_type(const Evoral::Parameter& param) const
 	return ARDOUR::parameter_midi_type((AutomationType)param.type());
 }
 
-uint32_t
-EventTypeMap::midi_event_type(uint8_t status) const
+Evoral::ParameterType
+EventTypeMap::midi_parameter_type(const uint8_t* buf, uint32_t len) const
 {
-	return (uint32_t)ARDOUR::midi_parameter_type(status);
+	return (uint32_t)ARDOUR::midi_parameter_type(buf[0]);
 }
 
 Evoral::ControlList::InterpolationStyle

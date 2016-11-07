@@ -418,7 +418,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				smfs->append_event_beats(
 					source_lock,
 					Evoral::Event<Evoral::Beats>(
-						0,
+						Evoral::MIDI_EVENT,
 						Evoral::Beats::ticks_at_rate(t, source->ppqn()),
 						size,
 						buf));

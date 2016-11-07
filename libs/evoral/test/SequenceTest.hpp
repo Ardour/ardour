@@ -31,13 +31,14 @@ public:
 		};
 	}
 
-	uint32_t midi_event_type(uint8_t status) const {
-		status &= 0xf0;
-		switch (status) {
-		case MIDI_CMD_CONTROL:          return CONTROL;
-		case MIDI_CMD_COMMON_SYSEX:     return SYSEX;
-		default:                        return 0;
-		};
+	virtual ParameterType midi_parameter_type(const uint8_t* buf, uint32_t len) const {
+		switch (buf[0] & 0xF0) {
+		case MIDI_CMD_CONTROL:      return CONTROL;
+		case MIDI_CMD_COMMON_SYSEX: return SYSEX;
+		case MIDI_CMD_NOTE_ON:      return NOTE;
+		case MIDI_CMD_NOTE_OFF:     return NOTE;
+		default: return 0;
+		}
 	}
 
 	ParameterDescriptor descriptor(const Parameter& param) const {

@@ -30,9 +30,8 @@ namespace Evoral {
 
 template<typename Time>
 Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
-	// FIXME: types?
-	: _on_event (0xDE, t, 3, NULL, true)
-	, _off_event (0xAD, t + l, 3, NULL, true)
+	: _on_event (MIDI_EVENT, t, 3, NULL, true)
+	, _off_event (MIDI_EVENT, t + l, 3, NULL, true)
 {
 	assert(chan < 16);
 

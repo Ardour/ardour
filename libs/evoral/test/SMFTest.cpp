@@ -59,7 +59,7 @@ SMFTest::takeFiveTest ()
 		if (ret > 0) { // didn't skip (meta) event
 			//cerr << "read smf event type " << hex << int(buf[0]) << endl;
 			ev.set_time(Evoral::Beats::ticks_at_rate(time, smf.ppqn()));
-			ev.set_event_type(type_map->midi_event_type(buf[0]));
+			ev.set_event_type(Evoral::MIDI_EVENT);
 			seq->append(ev, next_event_id ());
 		}
 	}

@@ -143,7 +143,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 			if (!have_timer) {
 				when += (*b).time();
 			}
-			input_fifo.write (when, (Evoral::EventType) 0, (*b).size(), (*b).buffer());
+			input_fifo.write (when, Evoral::NO_EVENT, (*b).size(), (*b).buffer());
 		}
 
 		if (!mb.empty()) {

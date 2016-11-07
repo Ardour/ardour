@@ -25,7 +25,7 @@ SequenceTest::preserveEventOrderingTest ()
 	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
 		uint8_t buffer[3];
 		Event<Time>* event = new Event<Time>(
-				DummyTypeMap::CONTROL, (*i)->on_event().time(), 3, buffer, true
+			(Evoral::EventType)DummyTypeMap::CONTROL, (*i)->on_event().time(), 3, buffer, true
 		);
 
 		event->buffer()[0] = MIDI_CMD_CONTROL;
@@ -77,12 +77,12 @@ SequenceTest::iteratorSeekTest ()
 	bool on = true;
 	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats(600)); i != seq->end(); ++i) {
 		if (on) {
-			CPPUNIT_ASSERT((*i)->is_note_on());
+			CPPUNIT_ASSERT(i->is_note_on());
 			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
 			++num_notes;
 			on = false;
 		} else {
-			CPPUNIT_ASSERT((*i)->is_note_off());
+			CPPUNIT_ASSERT(i->is_note_off());
 			on = true;
 		}
 	}
