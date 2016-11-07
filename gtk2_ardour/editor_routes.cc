@@ -1042,12 +1042,17 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 		 * presentation order 1
 		 */
 		if ((count == 0) && master_is_first && (stripable->presentation_info().order()  == 1)) {
-			master_is_first = false;
+			master_is_first = false; // someone has moved master
 			order = 0;
 		}
 
-		if (stripable->is_master() && (master_is_first == true)) {
-			continue;
+		if (stripable->is_master() && master_is_first) {
+			if (count) {
+				continue;
+			} else {
+				count++;
+				continue;
+			}
 		}
 
 		if (order != stripable->presentation_info().order()) {
