@@ -776,12 +776,14 @@ AudioEngine::backend_discover (const string& path)
 	return info;
 }
 
+#ifdef NDEBUG
 static bool running_from_source_tree ()
 {
 	// dup ARDOUR_UI_UTILS::running_from_source_tree ()
 	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
 	return x && (string (x).find ("gtk2_ardour") != string::npos);
 }
+#endif
 
 vector<const AudioBackendInfo*>
 AudioEngine::available_backends() const

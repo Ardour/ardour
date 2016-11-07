@@ -362,9 +362,9 @@ BufferSet::get_vst_midi (size_t b)
 }
 
 BufferSet::VSTBuffer::VSTBuffer (size_t c)
-  : _capacity (c)
-  , _events (0)
-  , _midi_events (0)
+	: _events (0)
+	, _midi_events (0)
+	, _capacity (c)
 {
 	if (_capacity > 0) {
 		/* from `man malloc`: "If size is 0, then malloc() returns either NULL, or a
