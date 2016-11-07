@@ -1067,6 +1067,7 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 	if (change) {
 		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from editor GUI\n");
 		_session->notify_presentation_info_change ();
+		_session->set_dirty();
 	}
 }
 
