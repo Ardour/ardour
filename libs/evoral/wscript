@@ -82,7 +82,6 @@ def build(bld):
             src/ControlSet.cpp
             src/Curve.cpp
             src/Event.cpp
-            src/MIDIEvent.cpp
             src/Note.cpp
             src/SMF.cpp
             src/Sequence.cpp
@@ -110,7 +109,7 @@ def build(bld):
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = bld.env['LIBDIR']
-    obj.defines       += [ 'PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
+    obj.defines       += [ 'PACKAGE="libevoral"' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)
@@ -129,7 +128,7 @@ def build(bld):
             obj.linkflags      = '-lgcov'
             obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
             obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
-        obj.defines        = ['PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
+        obj.defines        = ['PACKAGE="libevoral"']
 
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')

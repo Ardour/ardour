@@ -409,8 +409,7 @@ def build(bld):
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
-        'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
-        'EVORAL_MIDI_XML=1',
+        'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"'
         ]
 
     #obj.source += ' st_stretch.cc st_pitch.cc '

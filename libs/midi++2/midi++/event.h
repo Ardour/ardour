@@ -37,9 +37,6 @@
  */
 #define EVORAL_EVENT_ALLOC 1
 
-/** Support serialisation of MIDI events to/from XML */
-#define EVORAL_MIDI_XML 1
-
 #include "evoral/Event.hpp"
 #include "evoral/MIDIEvent.hpp"
 
