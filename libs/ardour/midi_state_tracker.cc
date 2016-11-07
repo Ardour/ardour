@@ -122,7 +122,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
 				uint8_t buffer[3] = { ((uint8_t) (MIDI_CMD_NOTE_OFF | channel)), uint8_t (note), 0 };
-				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
+				Evoral::Event<MidiBuffer::TimeType> noteoff
 					(MIDI_CMD_NOTE_OFF, time, 3, buffer, false);
 				/* note that we do not care about failure from
 				   push_back() ... should we warn someone ?
@@ -181,7 +181,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
-				Evoral::MIDIEvent<Evoral::Beats> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
+				Evoral::Event<Evoral::Beats> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
 				ev.set_type (MIDI_CMD_NOTE_OFF);
 				ev.set_channel (channel);
 				ev.set_note (note);

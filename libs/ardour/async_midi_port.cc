@@ -241,14 +241,14 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 			   necessary.
 			*/
 			if (!vec.buf[0]->owns_buffer()) {
-                                vec.buf[0]->set_buffer (0, 0, true);
-                        }
+				vec.buf[0]->set_buffer (0, 0, true);
+			}
 			vec.buf[0]->set (msg, msglen, timestamp);
 		} else {
 			/* see comment in previous branch of if() statement */
 			if (!vec.buf[1]->owns_buffer()) {
-                                vec.buf[1]->set_buffer (0, 0, true);
-                        }
+				vec.buf[1]->set_buffer (0, 0, true);
+			}
 			vec.buf[1]->set (msg, msglen, timestamp);
 		}
 

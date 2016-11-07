@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #include "evoral/visibility.h"
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 
 namespace Evoral {
 
@@ -105,8 +105,8 @@ public:
 
 private:
 	// Event buffers are self-contained
-	MIDIEvent<Time> _on_event;
-	MIDIEvent<Time> _off_event;
+	Event<Time> _on_event;
+	Event<Time> _off_event;
 };
 
 template<typename Time>

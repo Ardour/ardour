@@ -22,7 +22,7 @@
 
 #include "evoral/visibility.h"
 #include "evoral/Event.hpp"
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 
 namespace Evoral {
 
@@ -138,7 +138,7 @@ public:
 	/** The PatchChange is made up of messages() MIDI messages; this method returns them by index.
 	 *  @param i index of message to return.
 	 */
-	MIDIEvent<Time> const & message (int i) const {
+	Event<Time> const & message (int i) const {
 		switch (i) {
 		case 0:
 			return _bank_change_msb;
@@ -158,9 +158,9 @@ public:
 	}
 
 private:
-	MIDIEvent<Time> _bank_change_msb;
-	MIDIEvent<Time> _bank_change_lsb;
-	MIDIEvent<Time> _program_change;
+	Event<Time> _bank_change_msb;
+	Event<Time> _bank_change_lsb;
+	Event<Time> _program_change;
 };
 
 }

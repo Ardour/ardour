@@ -47,7 +47,7 @@ public:
 	void copy(const MidiBuffer& copy);
 	void copy(MidiBuffer const * const);
 
-	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
+	bool     push_back(const Evoral::Event<TimeType>& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);
 
 	uint8_t* reserve(TimeType time, size_t size);
@@ -56,7 +56,7 @@ public:
 	size_t size() const { return _size; }
 	bool empty() const { return _size == 0; }
 
-	bool insert_event(const Evoral::MIDIEvent<TimeType>& event);
+	bool insert_event(const Evoral::Event<TimeType>& event);
 	bool merge_in_place(const MidiBuffer &other);
 
 	/** EventSink interface for non-RT use (export, bounce). */
@@ -122,8 +122,8 @@ public:
 		size_t          offset;
 	};
 
-	typedef iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >             iterator;
-	typedef iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> > const_iterator;
+	typedef iterator_base< MidiBuffer, Evoral::Event<TimeType> >             iterator;
+	typedef iterator_base< const MidiBuffer, const Evoral::Event<TimeType> > const_iterator;
 
 	iterator begin() { return iterator(*this, 0); }
 	iterator end()   { return iterator(*this, _size); }
@@ -176,8 +176,8 @@ public:
 	static bool second_simultaneous_midi_byte_is_first (uint8_t, uint8_t);
 
 private:
-	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
-	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
+	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;
+	friend class iterator_base< const MidiBuffer, const Evoral::Event<TimeType> >;
 
 	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
 	pframes_t _size;

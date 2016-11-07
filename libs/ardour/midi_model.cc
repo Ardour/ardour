@@ -1498,7 +1498,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		if (i->time() >= begin_time && i->time() < end_time) {
 
-			Evoral::MIDIEvent<TimeType> mev (*i, true); /* copy the event */
+			Evoral::Event<TimeType> mev (*i, true); /* copy the event */
 
 			if (offset_events) {
 				mev.set_time(mev.time() - begin_time);

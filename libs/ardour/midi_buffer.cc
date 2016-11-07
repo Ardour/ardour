@@ -110,7 +110,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 	}
 
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
-		const Evoral::MIDIEvent<TimeType> ev(*i, false);
+		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (dst_offset >= 0) {
 			/* Positive offset: shifting events from internal
@@ -168,7 +168,7 @@ MidiBuffer::merge_from (const Buffer& src, framecnt_t /*nframes*/, frameoffset_t
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
+MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
 {
 	return push_back (ev.time(), ev.size(), ev.buffer());
 }
@@ -220,7 +220,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 }
 
 bool
-MidiBuffer::insert_event(const Evoral::MIDIEvent<TimeType>& ev)
+MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 {
 	if (size() == 0) {
 		return push_back(ev);
@@ -273,7 +273,7 @@ MidiBuffer::insert_event(const Evoral::MIDIEvent<TimeType>& ev)
 uint32_t
 MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
 {
-	insert_event(Evoral::MIDIEvent<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
+	insert_event(Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
 	return size;
 }
 

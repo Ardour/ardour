@@ -31,7 +31,7 @@
 #include "ardour/types.h"
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 struct _VstEvents;
 typedef struct _VstEvents VstEvents;
 struct _VstMidiEvent;
@@ -196,7 +196,7 @@ private:
 		~VSTBuffer ();
 
 		void clear ();
-		void push_back (Evoral::MIDIEvent<framepos_t> const &);
+		void push_back (Evoral::Event<framepos_t> const &);
 		VstEvents* events () const {
 			return _events;
 		}

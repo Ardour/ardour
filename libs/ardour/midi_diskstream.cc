@@ -409,7 +409,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		MidiChannelFilter* filter = mt ? &mt->capture_filter() : NULL;
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
+			Evoral::Event<MidiBuffer::TimeType> ev(*i, false);
 			if (ev.time() + rec_offset > rec_nframes) {
 				break;
 			}

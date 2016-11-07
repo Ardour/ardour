@@ -339,7 +339,7 @@ MidiTrack::update_controls(const BufferSet& bufs)
 {
 	const MidiBuffer& buf = bufs.get_midi(0);
 	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-		const Evoral::MIDIEvent<framepos_t>&     ev      = *e;
+		const Evoral::Event<framepos_t>&         ev      = *e;
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
 		const boost::shared_ptr<Evoral::Control> control = this->control(param);
 		if (control) {
@@ -549,7 +549,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 
 		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
 
-			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
+			const Evoral::Event<framepos_t> ev(*e, false);
 
 			/* note on, since for step edit, note length is determined
 			   elsewhere

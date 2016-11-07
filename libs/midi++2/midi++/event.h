@@ -38,6 +38,5 @@
 #define EVORAL_EVENT_ALLOC 1
 
 #include "evoral/Event.hpp"
-#include "evoral/MIDIEvent.hpp"
 
 #endif /* __libmidipp_midi_event_h__ */

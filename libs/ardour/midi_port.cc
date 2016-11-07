@@ -230,7 +230,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 
-			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*i, false);
+			const Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 
 
 			if (sends_output() && _trace_on) {

@@ -19,7 +19,7 @@
 #ifndef EVORAL_MIDI_XML_HPP
 #define EVORAL_MIDI_XML_HPP
 
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 #include "pbd/xml++.h"
 
 namespace Evoral {
@@ -27,7 +27,7 @@ namespace MIDIXML {
 
 template<typename Time>
 bool
-xml_to_midi(const XMLNode& node, Evoral::MIDIEvent<Time>& ev)
+xml_to_midi(const XMLNode& node, Evoral::Event<Time>& ev)
 {
 	if (node.name() == "ControlChange") {
 		ev.set_type(MIDI_CMD_CONTROL);
@@ -45,7 +45,7 @@ xml_to_midi(const XMLNode& node, Evoral::MIDIEvent<Time>& ev)
 
 template<typename Time>
 boost::shared_ptr<XMLNode>
-midi_to_xml(const Evoral::MIDIEvent<Time>& ev)
+midi_to_xml(const Evoral::Event<Time>& ev)
 {
 	XMLNode* result = 0;
 

@@ -1686,7 +1686,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 			/* one MIDI port/buffer only */
 			MidiBuffer& m = bufs.get_midi (i);
 			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
-				Evoral::MIDIEvent<framepos_t> ev (*i);
+				Evoral::Event<framepos_t> ev (*i);
 				if (ev.is_channel_event()) {
 					const uint8_t* b = ev.buffer();
 					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
