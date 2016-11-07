@@ -41,7 +41,7 @@
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 #include "evoral/Control.hpp"
 #include "evoral/midi_util.h"
 
@@ -1293,14 +1293,9 @@ MidiRegionView::display_sysexes()
 	if (!UIConfiguration::instance().get_never_display_periodic_midi()) {
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev =
-				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
-
-			if (mev) {
-				if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
-					have_periodic_system_messages = true;
-					break;
-				}
+			if ((*i)->is_spp() || (*i)->is_mtc_quarter() || (*i)->is_mtc_full()) {
+				have_periodic_system_messages = true;
+				break;
 			}
 		}
 
@@ -1325,17 +1320,11 @@ MidiRegionView::display_sysexes()
 	}
 
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-
-		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev =
-			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
-
 		Evoral::Beats time = (*i)->time();
 
-		if (mev) {
-			if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
-				if (!display_periodic_messages) {
-					continue;
-				}
+		if ((*i)->is_spp() || (*i)->is_mtc_quarter() || (*i)->is_mtc_full()) {
+			if (!display_periodic_messages) {
+				continue;
 			}
 		}
 
@@ -3927,7 +3916,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 	framepos_t back = max_framepos;
 
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
-		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
+		const Evoral::Event<MidiBuffer::TimeType>& ev = *i;
 
 		if (ev.is_channel_event()) {
 			if (get_channel_mode() == FilterChannels) {

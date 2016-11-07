@@ -16,6 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <cassert>
 #include <iostream>
 #include <limits>
 #include <glib.h>

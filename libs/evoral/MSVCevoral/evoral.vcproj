@@ -284,7 +284,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\MIDIEvent.cpp"
+				RelativePath="..\src\MIDIXML.cpp"
 				>
 			</File>
 			<File
@@ -496,7 +496,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\MIDIEvent.hpp"
+				RelativePath="..\evoral\MIDIXML.hpp"
 				>
 			</File>
 			<File

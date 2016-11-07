@@ -401,7 +401,7 @@ BufferSet::VSTBuffer::clear ()
 }
 
 void
-BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<framepos_t> const & ev)
+BufferSet::VSTBuffer::push_back (Evoral::Event<framepos_t> const & ev)
 {
 	if (ev.size() > 3) {
 		/* XXX: this will silently drop MIDI messages longer than 3 bytes, so

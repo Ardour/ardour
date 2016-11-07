@@ -234,7 +234,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			// move events from dly-buffer into current-buffer until nsamples
 			// and remove them from the dly-buffer
 			for (MidiBuffer::iterator m = dly->begin(); m != dly->end();) {
-				const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m, false);
+				const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 				if (ev.time() >= nsamples) {
 					break;
 				}
@@ -250,7 +250,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 				// move events after nsamples from current-buffer into dly-buffer
 				// and trim current-buffer after nsamples
 				for (MidiBuffer::iterator m = mb.begin(); m != mb.end();) {
-					const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m, false);
+					const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 					if (ev.time() < nsamples) {
 						++m;
 						continue;

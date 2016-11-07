@@ -334,7 +334,7 @@ SMFSource::write_unlocked (const Lock&                 lock,
 		_model->start_write();
 	}
 
-	Evoral::MIDIEvent<framepos_t> ev;
+	Evoral::Event<framepos_t> ev;
 	while (true) {
 		/* Get the event time, in frames since session start but ignoring looping. */
 		bool ret;

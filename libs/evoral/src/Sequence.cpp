@@ -330,7 +330,7 @@ Sequence<Time>::const_iterator::operator++()
 
 	assert(_event && _event->buffer() && _event->size() > 0);
 
-	const MIDIEvent<Time>& ev = *((const MIDIEvent<Time>*)_event.get());
+	const Event<Time>& ev = *_event.get();
 
 	if (!(     ev.is_note()
 	           || ev.is_cc()
@@ -902,11 +902,9 @@ Sequence<Time>::remove_sysex_unlocked (const SysExPtr sysex)
  */
 template<typename Time>
 void
-Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
+Sequence<Time>::append(const Event<Time>& ev, event_id_t evid)
 {
 	WriteLock lock(write_lock());
-
-	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
 	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
 	assert(_writing);
@@ -968,7 +966,7 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 
 template<typename Time>
 void
-Sequence<Time>::append_note_on_unlocked (const MIDIEvent<Time>& ev, event_id_t evid)
+Sequence<Time>::append_note_on_unlocked (const Event<Time>& ev, event_id_t evid)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n", this,
 	                                              (int)ev.channel(), (int)ev.note(),
@@ -1000,7 +998,7 @@ Sequence<Time>::append_note_on_unlocked (const MIDIEvent<Time>& ev, event_id_t e
 
 template<typename Time>
 void
-Sequence<Time>::append_note_off_unlocked (const MIDIEvent<Time>& ev)
+Sequence<Time>::append_note_off_unlocked (const Event<Time>& ev)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 OFF @ %4 v=%5\n",
 	                                              this, (int)ev.channel(),
@@ -1067,7 +1065,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 
 template<typename Time>
 void
-Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* evid */)
+Sequence<Time>::append_sysex_unlocked(const Event<Time>& ev, event_id_t /* evid */)
 {
 #ifdef DEBUG_SEQUENCE
 	cerr << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;
@@ -1076,7 +1074,7 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* e
 	} cerr << "]" << endl;
 #endif
 
-	boost::shared_ptr<MIDIEvent<Time> > event(new MIDIEvent<Time>(ev, true));
+	boost::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
 	/* XXX sysex events should use IDs */
 	_sysexes.insert(event);
 }

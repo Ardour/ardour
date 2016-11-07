@@ -106,7 +106,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		const MidiBuffer& buf (bufs.get_midi(i));
 
 		for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
+			const Evoral::Event<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = ev.buffer()[2] / 127.0;
 				if (this_vel > val) {

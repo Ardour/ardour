@@ -17,7 +17,7 @@
 
 */
 
-#include "evoral/MIDIEvent.hpp"
+#include "evoral/Event.hpp"
 #include "midi++/channel.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"

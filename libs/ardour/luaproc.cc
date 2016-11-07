@@ -667,7 +667,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					for (MidiBuffer::iterator m = bufs.get_midi(idx).begin();
 							m != bufs.get_midi(idx).end(); ++m, ++e) {
-						const Evoral::MIDIEvent<framepos_t> ev(*m, false);
+						const Evoral::Event<framepos_t> ev(*m, false);
 						luabridge::LuaRef lua_midi_data (luabridge::newTable (L));
 						const uint8_t* data = ev.buffer();
 						for (uint32_t i = 0; i < ev.size(); ++i) {

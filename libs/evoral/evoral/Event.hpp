@@ -1,5 +1,5 @@
 /* This file is part of Evoral.
- * Copyright (C) 2008 David Robillard <http://drobilla.net>
+ * Copyright (C) 2008-2016 David Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
  *
  * Evoral is free software; you can redistribute it and/or modify it under the
@@ -24,8 +24,9 @@
 #include <sstream>
 #include <stdint.h>
 
-#include "evoral/visibility.h"
+#include "evoral/midi_events.h"
 #include "evoral/types.hpp"
+#include "evoral/visibility.h"
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
@@ -37,7 +38,7 @@ namespace Evoral {
 
 LIBEVORAL_API event_id_t event_id_counter();
 LIBEVORAL_API event_id_t next_event_id();
-LIBEVORAL_API void init_event_id_counter(event_id_t n);
+LIBEVORAL_API void       init_event_id_counter(event_id_t n);
 
 /** An event (much like a type generic jack_midi_event_t)
  *
@@ -47,9 +48,9 @@ template<typename Time>
 class LIBEVORAL_API Event {
 public:
 #ifdef EVORAL_EVENT_ALLOC
-	Event (EventType type=0, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
+	Event(EventType type=0, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
-	Event (EventType type, Time time, uint32_t size, const uint8_t* buf);
+	Event(EventType type, Time time, uint32_t size, const uint8_t* buf);
 
 	/** Copy \a copy.
 	 *
@@ -59,33 +60,20 @@ public:
 	 */
 	Event(const Event& copy, bool alloc);
 
-        ~Event();
+	~Event();
 
-	void assign (const Event& other);
+	void assign(const Event& other);
 
 	void set(const uint8_t* buf, uint32_t size, Time t);
 
 	inline bool operator==(const Event& other) const {
-		if (_type != other._type)
+		if (_type          != other._type ||
+		    _nominal_time  != other._nominal_time ||
+		    _original_time != other._original_time ||
+		    _size          != other._size) {
 			return false;
-
-		if (_nominal_time != other._nominal_time)
-			return false;
-
-		if (_original_time != other._original_time)
-			return false;
-
-		if (_size != other._size)
-			return false;
-
-		if (_buf == other._buf)
-			return true;
-
-		for (uint32_t i=0; i < _size; ++i)
-			if (_buf[i] != other._buf[i])
-				return false;
-
-		return true;
+		}
+		return !memcmp(_buf, other._buf, _size);
 	}
 
 	inline bool operator!=(const Event& other) const { return ! operator==(other); }
@@ -127,10 +115,6 @@ public:
 		_buf           = NULL;
 	}
 
-#else
-
-	inline void set_buffer(uint8_t* buf) { _buf = buf; }
-
 #endif // EVORAL_EVENT_ALLOC
 
 	inline EventType      event_type()    const { return _type; }
@@ -148,15 +132,76 @@ public:
 	inline event_id_t id() const           { return _id; }
 	inline void       set_id(event_id_t n) { _id = n; }
 
+	/* The following methods are type specific and only make sense for the
+	   correct event type.  It is the caller's responsibility to only call
+	   methods which make sense for the given event type.  Currently this means
+	   they all only make sense for MIDI, but built-in support may be added for
+	   other protocols in the future, or the internal representation may change
+	   to be protocol agnostic. */
+
+	uint8_t  type()                const { return _buf[0] & 0xF0; }
+	uint8_t  channel()             const { return _buf[0] & 0x0F; }
+	bool     is_note_on()          const { return type() == MIDI_CMD_NOTE_ON; }
+	bool     is_note_off()         const { return type() == MIDI_CMD_NOTE_OFF; }
+	bool     is_note()             const { return is_note_on() || is_note_off(); }
+	bool     is_poly_pressure()    const { return type() == MIDI_CMD_NOTE_PRESSURE; }
+	bool     is_channel_pressure() const { return type() == MIDI_CMD_CHANNEL_PRESSURE; }
+	bool     is_cc()               const { return type() == MIDI_CMD_CONTROL; }
+	bool     is_pgm_change()       const { return type() == MIDI_CMD_PGM_CHANGE; }
+	bool     is_pitch_bender()     const { return type() == MIDI_CMD_BENDER; }
+	bool     is_channel_event()    const { return (0x80 <= type()) && (type() <= 0xE0); }
+	bool     is_smf_meta_event()   const { return _buf[0] == 0xFF; }
+	bool     is_sysex()            const { return _buf[0] == 0xF0 || _buf[0] == 0xF7; }
+	bool     is_spp()              const { return _buf[0] == 0xF2 && size() == 1; }
+	bool     is_mtc_quarter()      const { return _buf[0] == 0xF1 && size() == 1; }
+	bool     is_mtc_full()         const { return (size() == 10 &&
+	                                               _buf[0] == 0xF0 && _buf[1] == 0x7F &&
+	                                               _buf[3] == 0x01 && _buf[4] == 0x01); }
+
+	uint8_t  note()               const { return _buf[1]; }
+	uint8_t  velocity()           const { return _buf[2]; }
+	uint8_t  poly_note()          const { return _buf[1]; }
+	uint8_t  poly_pressure()      const { return _buf[2]; }
+	uint8_t  channel_pressure()   const { return _buf[1]; }
+	uint8_t  cc_number()          const { return _buf[1]; }
+	uint8_t  cc_value()           const { return _buf[2]; }
+	uint8_t  pgm_number()         const { return _buf[1]; }
+	uint8_t  pitch_bender_lsb()   const { return _buf[1]; }
+	uint8_t  pitch_bender_msb()   const { return _buf[2]; }
+	uint16_t pitch_bender_value() const { return ((0x7F & _buf[2]) << 7 | (0x7F & _buf[1])); }
+
+	void set_channel(uint8_t channel)  { _buf[0] = (0xF0 & _buf[0]) | (0x0F & channel); }
+	void set_type(uint8_t type)        { _buf[0] = (0x0F & _buf[0]) | (0xF0 & type); }
+	void set_note(uint8_t num)         { _buf[1] = num; }
+	void set_velocity(uint8_t val)     { _buf[2] = val; }
+	void set_cc_number(uint8_t num)    { _buf[1] = num; }
+	void set_cc_value(uint8_t val)     { _buf[2] = val; }
+	void set_pgm_number(uint8_t num)   { _buf[1] = num; }
+
+	uint16_t value() const {
+		switch (type()) {
+		case MIDI_CMD_CONTROL:
+			return cc_value();
+		case MIDI_CMD_BENDER:
+			return pitch_bender_value();
+		case MIDI_CMD_NOTE_PRESSURE:
+			return poly_pressure();
+		case MIDI_CMD_CHANNEL_PRESSURE:
+			return channel_pressure();
+		default:
+			return 0;
+		}
+	}
+
 protected:
-	EventType  _type; /**< Type of event (application relative, NOT MIDI 'type') */
-	Time       _original_time; /**< Sample index (or beat time) at which event is valid */
-	Time       _nominal_time; /**< Quantized version of _time, used in preference */
-	uint32_t   _size; /**< Number of uint8_ts of data in \a buffer */
-	uint8_t*   _buf;  /**< Raw MIDI data */
-	event_id_t _id; /** UUID for each event, should probably be 64bit or at least unsigned */
+	EventType  _type;           ///< Type of event (application relative, NOT MIDI 'type')
+	Time       _original_time;  ///< Time stamp of event
+	Time       _nominal_time;   ///< Quantized version of _time, used in preference
+	uint32_t   _size;           ///< Size of buffer in bytes
+	uint8_t*   _buf;            ///< Event contents (e.g. raw MIDI data)
+	event_id_t _id;             ///< Unique event ID
 #ifdef EVORAL_EVENT_ALLOC
-	bool       _owns_buf; /**< Whether buffer is locally allocated */
+	bool       _owns_buf;       ///< Whether buffer is locally allocated
 #endif
 };
 
