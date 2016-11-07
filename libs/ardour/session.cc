@@ -2380,8 +2380,11 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 		}
 	}
 
-	if (!definitely_add_number && route_by_name (base) == 0) {
-		/* juse use the base */
+	/* if we have "base 1" already, it doesn't make sense to add "base"
+	 * if "base 1" has been deleted, adding "base" is no worse than "base 1"
+	 */
+	if (!definitely_add_number && route_by_name (base) == 0 && (route_by_name (string_compose("%1 1", base)) == 0)) {
+		/* just use the base */
 		name = base;
 		return true;
 	}
