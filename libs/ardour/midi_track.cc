@@ -557,7 +557,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 
 			if (ev.is_note_on()) {
 				/* we don't care about the time for this purpose */
-				_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
+				_step_edit_ring_buffer.write (0, ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
 	}
@@ -689,8 +689,7 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 		cerr << "WARNING: Ignoring illegal immediate MIDI event" << endl;
 		return false;
 	}
-	const uint32_t type = midi_parameter_type(buf[0]);
-	return (_immediate_events.write (0, type, size, buf) == size);
+	return (_immediate_events.write (0, Evoral::MIDI_EVENT, size, buf) == size);
 }
 
 void

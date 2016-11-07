@@ -20,8 +20,9 @@
 #ifndef __ardour_midi_buffer_h__
 #define __ardour_midi_buffer_h__
 
-#include "evoral/midi_util.h"
 #include "evoral/EventSink.hpp"
+#include "evoral/midi_util.h"
+#include "evoral/types.hpp"
 
 #include "midi++/event.h"
 
@@ -93,7 +94,7 @@ public:
 			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			return EventType(midi_parameter_type(*ev_start),
+			return EventType(Evoral::MIDI_EVENT,
 					*(reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset))),
 					event_size, ev_start);
 		}
@@ -165,8 +166,6 @@ public:
 
 		return iterator (*this, i.offset);
 	}
-
-	uint8_t* data() const { return _data; }
 
 	/**
 	 * returns true if the message with the second argument as its MIDI

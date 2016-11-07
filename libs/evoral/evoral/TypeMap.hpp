@@ -24,6 +24,7 @@
 #include <string>
 
 #include "evoral/visibility.h"
+#include "evoral/types.hpp"
 
 namespace Evoral {
 
@@ -47,9 +48,8 @@ public:
 	 */
 	virtual uint8_t parameter_midi_type(const Parameter& param) const = 0;
 
-	/** The type ID for a MIDI event with the given status byte
-	 */
-	virtual uint32_t midi_event_type(uint8_t status) const = 0;
+	/** The parameter type for the given MIDI event. */
+	virtual ParameterType midi_parameter_type(const uint8_t* buf, uint32_t len) const = 0;
 
 	/** Return the description of a parameter. */
 	virtual ParameterDescriptor descriptor(const Parameter& param) const = 0;

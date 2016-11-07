@@ -43,7 +43,9 @@ public:
 
 	bool     type_is_midi(uint32_t type) const;
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
-	uint32_t midi_event_type(uint8_t status) const;
+
+	Evoral::ParameterType midi_parameter_type(const uint8_t* buf, uint32_t len) const;
+
 	Evoral::ControlList::InterpolationStyle interpolation_of(const Evoral::Parameter& param);
 
 	Evoral::Parameter from_symbol(const std::string& str) const;

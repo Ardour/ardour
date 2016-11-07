@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "evoral/visibility.h"
+#include "evoral/types.hpp"
 
 namespace Evoral {
 
@@ -40,13 +41,13 @@ namespace Evoral {
 class LIBEVORAL_API Parameter
 {
 public:
-	inline Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)
+	inline Parameter(ParameterType type, uint8_t channel=0, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
 
-	inline uint32_t type()    const { return _type; }
-	inline uint8_t  channel() const { return _channel; }
-	inline uint32_t id()      const { return _id; }
+	inline ParameterType type()    const { return _type; }
+	inline uint8_t       channel() const { return _channel; }
+	inline uint32_t      id()      const { return _id; }
 
 	/** Equivalence operator
 	 * It is obvious from the definition that this operator
@@ -80,9 +81,9 @@ public:
 	inline operator bool() const { return (_type != 0); }
 
 private:
-	uint32_t _type;
-	uint32_t _id;
-	uint8_t  _channel;
+	ParameterType _type;
+	uint32_t      _id;
+	uint8_t       _channel;
 };
 
 } // namespace Evoral
