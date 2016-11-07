@@ -67,10 +67,7 @@ public:
 	void set(const uint8_t* buf, uint32_t size, Time t);
 
 	inline bool operator==(const Event& other) const {
-		if (_type          != other._type ||
-		    _nominal_time  != other._nominal_time ||
-		    _original_time != other._original_time ||
-		    _size          != other._size) {
+		if (_type != other._type || _time != other._time || _size != other._size) {
 			return false;
 		}
 		return !memcmp(_buf, other._buf, _size);
@@ -108,26 +105,23 @@ public:
 	}
 
 	inline void clear() {
-		_type          = NO_EVENT;
-		_original_time = Time();
-		_nominal_time  = Time();
-		_size          = 0;
-		_buf           = NULL;
+		_type = NO_EVENT;
+		_time = Time();
+		_size = 0;
+		_buf  = NULL;
 	}
 
 #endif // EVORAL_EVENT_ALLOC
 
 	inline EventType      event_type()    const { return _type; }
-	inline Time           time()          const { return _nominal_time; }
-	inline Time           original_time() const { return _original_time; }
+	inline Time           time()          const { return _time; }
 	inline uint32_t       size()          const { return _size; }
 	inline const uint8_t* buffer()        const { return _buf; }
 	inline uint8_t*       buffer()              { return _buf; }
 
 	inline void set_event_type(EventType t) { _type = t; }
 
-	void set_time(Time);
-	void set_original_time(Time);
+	inline void set_time(Time t) { _time = t; }
 
 	inline event_id_t id() const           { return _id; }
 	inline void       set_id(event_id_t n) { _id = n; }
@@ -194,14 +188,13 @@ public:
 	}
 
 protected:
-	EventType  _type;           ///< Type of event (application relative, NOT MIDI 'type')
-	Time       _original_time;  ///< Time stamp of event
-	Time       _nominal_time;   ///< Quantized version of _time, used in preference
-	uint32_t   _size;           ///< Size of buffer in bytes
-	uint8_t*   _buf;            ///< Event contents (e.g. raw MIDI data)
-	event_id_t _id;             ///< Unique event ID
+	EventType  _type;      ///< Type of event (application relative, NOT MIDI 'type')
+	Time       _time;      ///< Time stamp of event
+	uint32_t   _size;      ///< Size of buffer in bytes
+	uint8_t*   _buf;       ///< Event contents (e.g. raw MIDI data)
+	event_id_t _id;        ///< Unique event ID
 #ifdef EVORAL_EVENT_ALLOC
-	bool       _owns_buf;       ///< Whether buffer is locally allocated
+	bool       _owns_buf;  ///< Whether buffer is locally allocated
 #endif
 };
 

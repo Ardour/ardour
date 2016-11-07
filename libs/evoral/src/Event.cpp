@@ -57,8 +57,7 @@ next_event_id ()
 template<typename Timestamp>
 Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* buf, bool alloc)
 	: _type(type)
-	, _original_time(time)
-	, _nominal_time(time)
+	, _time(time)
 	, _size(size)
 	, _buf(buf)
 	, _id(-1)
@@ -80,8 +79,7 @@ Event<Timestamp>::Event(EventType      type,
                         uint32_t       size,
                         const uint8_t* buf)
 	: _type(type)
-	, _original_time(time)
-	, _nominal_time(time)
+	, _time(time)
 	, _size(size)
 	, _buf((uint8_t*)malloc(size))
 	, _id(-1)
@@ -93,8 +91,7 @@ Event<Timestamp>::Event(EventType      type,
 template<typename Timestamp>
 Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	: _type(copy._type)
-	, _original_time(copy._original_time)
-	, _nominal_time(copy._nominal_time)
+	, _time(copy._time)
 	, _size(copy._size)
 	, _buf(copy._buf)
 	, _id (next_event_id ())
@@ -123,8 +120,7 @@ Event<Timestamp>::assign(const Event& other)
 {
 	_id = other._id;
 	_type = other._type;
-	_original_time = other._original_time;
-	_nominal_time = other._nominal_time;
+	_time = other._time;
 	_owns_buf = other._owns_buf;
 	if (_owns_buf) {
 		if (other._buf) {
@@ -160,23 +156,8 @@ Event<Timestamp>::set (const uint8_t* buf, uint32_t size, Timestamp t)
 		_buf = const_cast<uint8_t*> (buf);
 	}
 
-	_original_time = t;
-	_nominal_time = t;
+	_time = t;
 	_size = size;
-}
-
-template<typename Timestamp>
-void
-Event<Timestamp>::set_time (Timestamp t)
-{
-	_nominal_time = t;
-}
-
-template<typename Timestamp>
-void
-Event<Timestamp>::set_original_time (Timestamp t)
-{
-	_original_time = t;
 }
 
 #endif // EVORAL_EVENT_ALLOC
