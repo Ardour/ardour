@@ -237,12 +237,11 @@ TempoSection::tempo_at_minute (const double& m) const
  *
 */
 
-/** user feedback dictates that if tempoA (120, 4.0) precedes tempoB (120, 8.0),
- *  there will be no ramp between the two even if set to ramped.
+/** if tempoA (120, 4.0) precedes tempoB (120, 8.0),
+ *  there should be no ramp between the two even if we are ramped.
  *  in other words a ramp should only place a curve on note_types_per_minute.
  *  we should be able to use Tempo note type here, but the above
  *  complicates things a bit.
- *  we would ideally like to use arbitrary Tempo structs here.
 */
 double
 TempoSection::minute_at_ntpm (const double& ntpm, const double& p) const
@@ -311,6 +310,12 @@ TempoSection::minute_at_pulse (const double& p) const
 	return _time_at_pulse (p - pulse()) + minute();
 }
 
+/** returns thw whole-note pulse at session frame position f.
+ *  @param f the frame position.
+ *  @return the position in whole-note pulses corresponding to f
+ *
+ *  for use with musical units whose granularity is coarser than frames (e.g. ticks)
+*/
 double
 TempoSection::pulse_at_frame (const framepos_t& f) const
 {
