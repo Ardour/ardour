@@ -458,6 +458,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t frame_at_quarter_note (const double quarter_note) const;
 
 	framecnt_t frames_between_quarter_notes (const double start, const double end) const;
+	double     quarter_notes_between_frames (const framecnt_t start, const framecnt_t end) const;
 
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
@@ -515,6 +516,7 @@ private:
 	double beat_at_quarter_note_locked (const Metrics& metrics, const double beat) const;
 
 	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn) const;
+	double quarter_notes_between_frames_locked (const Metrics& metrics, const framecnt_t  start, const framecnt_t end) const;
 
 	const TempoSection& tempo_section_at_minute_locked (const Metrics& metrics, double minute) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
