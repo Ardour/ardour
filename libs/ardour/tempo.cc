@@ -4358,11 +4358,12 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
  *  pos can be -ve, if required.
  */
 framepos_t
-TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats quarter_note) const
+TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
+	const double frame_qn = quarter_notes_between_frames_locked (_metrics, 0, frame);
 
-	return frame_at_minute (minute_at_quarter_note_locked (_metrics, quarter_note_at_minute_locked (_metrics, minute_at_frame (frame)) + quarter_note.to_double()));
+	return frame_at_minute (minute_at_quarter_note_locked (_metrics, frame_qn + beats.to_double()));
 }
 
 framepos_t
