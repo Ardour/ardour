@@ -44,7 +44,7 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
           _transport_frame  (0),
           _frame_time       (1000000),
           _tempo_map        (0),
-          tempo             (120),
+          tempo             (120, 4.0),
           meter             (4.0, 4.0)
         {
           _tempo_map = new TempoMap (FRAME_RATE);

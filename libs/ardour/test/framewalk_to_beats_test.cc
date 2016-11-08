@@ -17,7 +17,7 @@ FramewalkToBeatsTest::singleTempoTest ()
 	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
-	Tempo tempo (bpm);
+	Tempo tempo (bpm, 4.0);
 	Meter meter (4, 4);
 
 	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), AudioTime);
@@ -126,11 +126,11 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	*/
 
-	Tempo tempoA (120);
+	Tempo tempoA (120, 4.0);
 	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
-	Tempo tempoB (240);
+	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
-	Tempo tempoC (160);
+	Tempo tempoC (160, 4.0);
 	map.add_tempo (tempoC, 8.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
 
 	/* Walk from 1|3 to 4|1 */
@@ -147,7 +147,7 @@ FramewalkToBeatsTest::singleTempoMeterTest ()
 	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
-	Tempo tempo (bpm);
+	Tempo tempo (bpm, 4.0);
 	Meter meter (7, 8);
 
 	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), AudioTime);
