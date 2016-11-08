@@ -107,7 +107,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	, _start_beats (Properties::start_beats, 0.0)
 	, _length_beats (Properties::length_beats, other->_length_beats)
 {
-	_start_beats = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) - other->pos_beats()) + other->_start_beats;
+	_start_beats = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) - other->_quarter_note) + other->_start_beats;
 
 	update_length_beats (sub_num);
 	register_properties ();
@@ -196,7 +196,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true)));
-	ret->set_pos_beats (pos_beats());
+	ret->set_quarter_note (quarter_note());
 
 	return ret;
 }
@@ -227,7 +227,7 @@ void
 MidiRegion::set_start_beats_from_start_frames ()
 {
 	if (position_lock_style() == AudioTime) {
-		_start_beats = pos_beats() - _session.tempo_map().quarter_note_at_frame (_position - _start);
+		_start_beats = quarter_note() - _session.tempo_map().quarter_note_at_frame (_position - _start);
 	}
 }
 
@@ -270,10 +270,10 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 		  For now, the musical position at the region start is retained, but subsequent events
 		  will maintain their beat distance according to the map.
 		*/
-		_start = _session.tempo_map().frames_between_quarter_notes (pos_beats() - start_beats(), pos_beats());
+		_start = _session.tempo_map().frames_between_quarter_notes (quarter_note() - start_beats(), quarter_note());
 
 		/* _length doesn't change for audio-locked regions. update length_beats to match. */
-		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - pos_beats();
+		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - quarter_note();
 
 		s_and_l.add (Properties::start);
 		s_and_l.add (Properties::length_beats);
@@ -285,7 +285,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
-	_length = max ((framecnt_t) 1, _session.tempo_map().frames_between_quarter_notes (pos_beats(), pos_beats() + _length_beats));
+	_length = max ((framecnt_t) 1, _session.tempo_map().frames_between_quarter_notes (quarter_note(), quarter_note() + _length_beats));
 
 	if (old_start != _start) {
 		s_and_l.add (Properties::start);
@@ -303,7 +303,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 void
 MidiRegion::update_length_beats (const int32_t sub_num)
 {
-	_length_beats = _session.tempo_map().exact_qn_at_frame (_position + _length, sub_num) - pos_beats();
+	_length_beats = _session.tempo_map().exact_qn_at_frame (_position + _length, sub_num) - quarter_note();
 }
 
 void
@@ -317,7 +317,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 	}
 
 	/* set _start to new position in tempo map */
-	_start = _session.tempo_map().frames_between_quarter_notes (pos_beats() - start_beats(), pos_beats());
+	_start = _session.tempo_map().frames_between_quarter_notes (quarter_note() - start_beats(), quarter_note());
 
 	/* in construction from src */
 	if (_length_beats == 0.0) {
@@ -325,12 +325,12 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 	}
 
 	if (position_lock_style() == AudioTime) {
-		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - pos_beats();
+		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - quarter_note();
 	} else {
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames).
 		*/
-		Region::set_length_internal (_session.tempo_map().frames_between_quarter_notes (pos_beats(), pos_beats() + length_beats()), sub_num);
+		Region::set_length_internal (_session.tempo_map().frames_between_quarter_notes (quarter_note(), quarter_note() + length_beats()), sub_num);
 	}
 }
 
@@ -414,7 +414,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	     << " _position = " << _position
 	     << " _start = " << _start
 	     << " intoffset = " << internal_offset
-	     << " pos_beats = " << pos_beats()
+	     << " quarter_note = " << quarter_note()
 	     << " start_beat = " << _start_beats
 	     << endl;
 #endif
@@ -432,7 +432,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 		    tracker,
 		    filter,
 		    _filtered_parameters,
-		    pos_beats(),
+		    quarter_note(),
 		    _start_beats
 		    ) != to_read) {
 		return 0; /* "read nothing" */
@@ -623,7 +623,7 @@ MidiRegion::trim_to_internal (framepos_t position, framecnt_t length, const int3
 	if (_position != position) {
 
 		const double pos_qn = _session.tempo_map().exact_qn_at_frame (position, sub_num);
-		const double old_pos_qn = pos_beats();
+		const double old_pos_qn = quarter_note();
 
 		/* sets _pulse to new position.*/
 		set_position_internal (position, true, sub_num);

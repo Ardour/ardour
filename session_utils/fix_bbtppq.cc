@@ -135,7 +135,7 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 
 		Source::Lock newsrc_lock (newsrc->mutex());
 
-		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, (region->pos_beats() - region->start_beats()) / 4.0);
+		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, (region->quarter_note() - region->start_beats()) / 4.0);
 
 		cout << UTILNAME << ":" << endl
 		     << " Created new midi source file" << endl
@@ -189,7 +189,7 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 
 		Source::Lock newsrc_lock (newsrc->mutex());
 
-		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, (region->pos_beats() - region->start_beats()) / 4.0);
+		write_bbt_source_to_source (region->midi_source(0), newsrc, newsrc_lock, (region->quarter_note() - region->start_beats()) / 4.0);
 
 		cout << UTILNAME << ":" << endl
 		     << " Created new midi source file" << endl
@@ -211,8 +211,8 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_start (tmap.frame_at_quarter_note (region->pos_beats()) - tmap.frame_at_quarter_note (region->pos_beats() - new_start_qn) + 1);
-	region->set_start (tmap.frame_at_quarter_note (region->pos_beats()) - tmap.frame_at_quarter_note (region->pos_beats() - new_start_qn));
+	region->set_start (tmap.frame_at_quarter_note (region->quarter_note()) - tmap.frame_at_quarter_note (region->quarter_note() - new_start_qn) + 1);
+	region->set_start (tmap.frame_at_quarter_note (region->quarter_note()) - tmap.frame_at_quarter_note (region->quarter_note() - new_start_qn));
 	region->set_position_lock_style (old_pls);
 
 }
@@ -228,8 +228,8 @@ reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to length and length_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_length (tmap.frame_at_quarter_note (region->pos_beats() + new_length_qn) + 1 - region->position(), 0);
-	region->set_length (tmap.frame_at_quarter_note (region->pos_beats() + new_length_qn)- region->position(), 0);
+	region->set_length (tmap.frame_at_quarter_note (region->quarter_note() + new_length_qn) + 1 - region->position(), 0);
+	region->set_length (tmap.frame_at_quarter_note (region->quarter_note() + new_length_qn)- region->position(), 0);
 	region->set_position_lock_style (old_pls);
 }
 
