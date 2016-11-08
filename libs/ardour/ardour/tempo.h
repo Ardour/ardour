@@ -57,12 +57,12 @@ class LIBARDOUR_API Tempo {
 		: _note_types_per_minute (npm), _note_type(type) {}
 
 	double note_types_per_minute () const { return _note_types_per_minute; }
+	double note_types_per_minute (double note_type) const { return (_note_types_per_minute / _note_type) * note_type; }
 	void set_note_types_per_minute (double npm) { _note_types_per_minute = npm; }
 	double note_type () const { return _note_type; }
 
-	double note_divisions_per_minute (double note_type) const { return _note_types_per_minute * (note_type / _note_type); }
-	double quarter_notes_per_minute () const { return note_divisions_per_minute (4.0); }
-	double pulses_per_minute () const { return note_divisions_per_minute (1.0); }
+	double quarter_notes_per_minute () const { return note_types_per_minute (4.0); }
+	double pulses_per_minute () const { return note_types_per_minute (1.0); }
 	/** audio samples per note type.
 	 * if you want an instantaneous value for this, use TempoMap::frames_per_quarter_note_at() instead.
 	 * @param sr samplerate
