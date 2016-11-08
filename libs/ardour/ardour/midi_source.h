@@ -162,8 +162,6 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	std::string captured_for() const               { return _captured_for; }
 	void        set_captured_for (std::string str) { _captured_for = str; }
 
-	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
