@@ -96,7 +96,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	BBT_Time bbt;
 	double pulse;
 	uint32_t frame;
-	bool had_beats_per_minute = false;
 
 	_legacy_bbt = BBT_Time (0, 0, 0);
 
@@ -123,29 +122,18 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	if ((prop = node.property ("frame")) != 0) {
 		if (sscanf (prop->value().c_str(), "%" PRIu32, &frame) != 1) {
 			error << _("TempoSection XML node has an illegal \"frame\" value") << endmsg;
+			throw failed_constructor();
 		} else {
 			set_minute (minute_at_frame (frame));
 		}
 	}
 
-	/* replace old beats-per-minute with note-types-per-minute */
+	/* XX replace old beats-per-minute name with note-types-per-minute */
 	if ((prop = node.property ("beats-per-minute")) != 0) {
-		info << _("Renaming legacy \"beats-per-minute\" XML node to note-types-per-minute") << endmsg;
 		if (sscanf (prop->value().c_str(), "%lf", &_note_types_per_minute) != 1 || _note_types_per_minute < 0.0) {
 			error << _("TempoSection XML node has an illegal \"beats-per-minutee\" value") << endmsg;
 			throw failed_constructor();
 		}
-		had_beats_per_minute = true;
-	}
-
-	if ((prop = node.property ("note-types-per-minute")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &_note_types_per_minute) != 1 || _note_types_per_minute < 0.0) {
-			error << _("TempoSection XML node has an illegal \"note-types-per-minute\" value") << endmsg;
-			throw failed_constructor();
-		}
-	} else if (!had_beats_per_minute) {
-		error << _("TempoSection XML node has no \"note-types-per-minute\" or \"beats-per-minute\" property") << endmsg;
-		throw failed_constructor();
 	}
 
 	if ((prop = node.property ("note-type")) == 0) {
@@ -207,7 +195,7 @@ TempoSection::get_state() const
 	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("frame", buf);
 	snprintf (buf, sizeof (buf), "%lf", _note_types_per_minute);
-	root->add_property ("note-types-per-minute", buf);
+	root->add_property ("beats-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%lf", _note_type);
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
@@ -556,6 +544,7 @@ MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 	if ((prop = node.property ("frame")) != 0) {
 		if (sscanf (prop->value().c_str(), "%li", &frame) != 1) {
 			error << _("MeterSection XML node has an illegal \"frame\" value") << endmsg;
+			throw failed_constructor();
 		} else {
 			set_minute (minute_at_frame (frame));
 		}
