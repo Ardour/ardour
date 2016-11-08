@@ -207,17 +207,20 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
 
-	double tempo_at_minute (const double& minute) const;
-	double minute_at_tempo (const double& bpm, const double& pulse) const;
+	Tempo tempo_at_minute (const double& minute) const;
+	double minute_at_ntpm (const double& ntpm, const double& pulse) const;
 
-	double tempo_at_pulse (const double& pulse) const;
-	double pulse_at_tempo (const double& bpm, const double& minute) const;
+	Tempo tempo_at_pulse (const double& pulse) const;
+	double pulse_at_ntpm (const double& ntpm, const double& minute) const;
 
 	double pulse_at_minute (const double& minute) const;
 	double minute_at_pulse (const double& pulse) const;
 
-	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse) const;
-	double compute_c_func_minute (const double& end_bpm, const double& end_minute) const;
+	double compute_c_func_pulse (const double& end_ntpm, const double& end_pulse) const;
+	double compute_c_func_minute (const double& end_ntpm, const double& end_minute) const;
+
+	double pulse_at_frame (const framepos_t& frame) const;
+	framepos_t frame_at_pulse (const double& pulse) const;
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
@@ -450,11 +453,11 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	/* quarter note related functions are also tempo-sensitive and ignore meter.
 	   quarter notes may be compared with and assigned to Evoral::Beats.
 	*/
-	double quarter_note_at_frame (const framepos_t frame);
-	double quarter_note_at_frame_rt (const framepos_t frame);
-	framepos_t frame_at_quarter_note (const double quarter_note);
+	double quarter_note_at_frame (const framepos_t frame) const;
+	double quarter_note_at_frame_rt (const framepos_t frame) const;
+	framepos_t frame_at_quarter_note (const double quarter_note) const;
 
-	framecnt_t frames_between_quarter_notes (const double start, const double end);
+	framecnt_t frames_between_quarter_notes (const double start, const double end) const;
 
 	double quarter_note_at_beat (const double beat);
 	double beat_at_quarter_note (const double beat);
@@ -511,7 +514,7 @@ private:
 	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const;
 	double beat_at_quarter_note_locked (const Metrics& metrics, const double beat) const;
 
-	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn);
+	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn) const;
 
 	const TempoSection& tempo_section_at_minute_locked (const Metrics& metrics, double minute) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
