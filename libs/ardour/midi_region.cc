@@ -285,7 +285,7 @@ MidiRegion::update_after_tempo_map_change (bool /* send */)
 	Region::update_after_tempo_map_change (false);
 
 	/* _start has now been updated. */
-	_length = _session.tempo_map().frames_between_quarter_notes (pos_beats(), pos_beats() + _length_beats);
+	_length = max ((framecnt_t) 1, _session.tempo_map().frames_between_quarter_notes (pos_beats(), pos_beats() + _length_beats));
 
 	if (old_start != _start) {
 		s_and_l.add (Properties::start);
