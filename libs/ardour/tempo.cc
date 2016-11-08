@@ -2152,7 +2152,7 @@ TempoMap::bbt_at_frame (framepos_t frame)
 		bbt.bars = 1;
 		bbt.beats = 1;
 		bbt.ticks = 0;
-		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
+		warning << string_compose (_("tempo map was asked for BBT time at frame %1\n"), frame) << endmsg;
 		return bbt;
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
