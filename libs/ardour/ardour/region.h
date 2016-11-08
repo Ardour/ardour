@@ -178,9 +178,9 @@ class LIBARDOUR_API Region
 	/* meter-based beat at the region position */
 	double beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
-	/* quarter-note beats at the region position (for use with Evoral::Beats) */
-	double pos_beats () const { return _pos_beats; }
-	void set_pos_beats (double pb) { _pos_beats = pb; }
+	/* quarter-note at the region position */
+	double quarter_note () const { return _quarter_note; }
+	void set_quarter_note (double qn) { _quarter_note = qn; }
 
 	void suspend_property_changes ();
 
@@ -382,7 +382,7 @@ class LIBARDOUR_API Region
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
 
-	double                  _pos_beats;
+	double                  _quarter_note;
 
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */

@@ -177,7 +177,7 @@ Region::register_properties ()
 	, _position (Properties::position, 0) \
 	, _beat (Properties::beat, 0.0) \
 	, _sync_position (Properties::sync_position, (s)) \
-	, _pos_beats (0.0) \
+	, _quarter_note (0.0) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
@@ -208,7 +208,7 @@ Region::register_properties ()
 	, _position(Properties::position, other->_position)	\
 	, _beat (Properties::beat, other->_beat)                \
 	, _sync_position(Properties::sync_position, other->_sync_position) \
-	, _pos_beats (other->_pos_beats)                                \
+	, _quarter_note (other->_quarter_note)                                \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
 	, _transients (other->_transients) \
@@ -294,7 +294,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 
 	_start = other->_start;
 	_beat = other->_beat;
-	_pos_beats = other->_pos_beats;
+	_quarter_note = other->_quarter_note;
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
@@ -353,7 +353,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 
 	_start = other->_start + offset;
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_pos_beats = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
+	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -682,7 +682,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 			recompute_position_from_lock_style (sub_num);
 		} else {
 			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
-			_pos_beats = _session.tempo_map().quarter_note_at_beat (_beat);
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
 
 		/* check that the new _position wouldn't make the current
@@ -701,7 +701,7 @@ void
 Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_pos_beats = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
+	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
 }
 
 void
@@ -1872,7 +1872,7 @@ Region::post_set (const PropertyChange& pc)
 				  << " position : " << _position << " beat : " << _beat << std::endl;
 			//_beat = _session.tempo_map().beat_at_frame (_position);
 		}
-		_pos_beats = _session.tempo_map().quarter_note_at_beat (_beat);
+		_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 	}
 }
 
