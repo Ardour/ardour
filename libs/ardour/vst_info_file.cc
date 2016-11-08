@@ -302,6 +302,9 @@ vstfx_load_info_block (FILE* fp, VSTInfo *info)
 
 	// TODO read isInstrument -- effFlagsIsSynth
 	info->isInstrument = info->numInputs == 0 && info->numOutputs > 0 && 1 == (info->wantMidi & 1);
+	if (!strcmp (info->Category, "Synth")) {
+		info->isInstrument = true;
+	}
 
 	if ((info->numParams) == 0) {
 		info->ParamNames = NULL;
