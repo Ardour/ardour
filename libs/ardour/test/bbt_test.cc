@@ -13,7 +13,7 @@ void
 BBTTest::addTest ()
 {
 	TempoMap map(48000);
-	Tempo    tempo(120);
+	Tempo    tempo(120, 4.0);
 	Meter    meter(4.0, 4.0);
 
 	/* no need to supply the frame for a new music-locked meter */

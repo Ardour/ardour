@@ -45,7 +45,7 @@ using Timecode::BBT_Time;
 /* _default tempo is 4/4 qtr=120 */
 
 Meter    TempoMap::_default_meter (4.0, 4.0);
-Tempo    TempoMap::_default_tempo (120.0);
+Tempo    TempoMap::_default_tempo (120.0, 4.0);
 
 framepos_t
 MetricSection::frame_at_minute (const double& time) const
