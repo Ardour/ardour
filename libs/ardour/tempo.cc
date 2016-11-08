@@ -334,6 +334,26 @@ TempoSection::minute_at_pulse (const double& p) const
 	return _time_at_pulse (p - pulse()) + minute();
 }
 
+double
+TempoSection::pulse_at_frame (const framepos_t& f) const
+{
+	if (_type == Constant || _c_func == 0.0) {
+		return (minute_at_frame (f - frame()) * pulses_per_minute()) + pulse();
+	}
+
+	return _pulse_at_time (minute_at_frame (f - frame())) + pulse();
+}
+
+framepos_t
+TempoSection::frame_at_pulse (const double& p) const
+{
+	if (_type == Constant || _c_func == 0.0) {
+		return frame_at_minute (((p - pulse()) / pulses_per_minute()) + minute());
+	}
+
+	return frame_at_minute (_time_at_pulse (p - pulse()) + minute());
+}
+
 /*
 Ramp Overview
 
@@ -2392,6 +2412,54 @@ TempoMap::minutes_between_quarter_notes_locked (const Metrics& metrics, const do
 	return minute_at_pulse_locked (metrics, end / 4.0) - minute_at_pulse_locked (metrics, start / 4.0);
 }
 
+double
+TempoMap::quarter_notes_between_frames (const framecnt_t start, const framecnt_t end) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return quarter_notes_between_frames_locked (_metrics, start, end);
+}
+
+double
+TempoMap::quarter_notes_between_frames_locked (const Metrics& metrics, const framecnt_t start, const framecnt_t end) const
+{
+	const TempoSection* prev_t = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((*i)->is_tempo()) {
+			t = static_cast<TempoSection*> (*i);
+			if (!t->active()) {
+				continue;
+			}
+			if (prev_t && t->frame() > start) {
+				break;
+			}
+			prev_t = t;
+		}
+	}
+	const double start_qn = prev_t->pulse_at_frame (start);
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((*i)->is_tempo()) {
+			t = static_cast<TempoSection*> (*i);
+			if (!t->active()) {
+				continue;
+			}
+			if (prev_t && t->frame() > end) {
+				break;
+			}
+			prev_t = t;
+		}
+	}
+	const double end_qn = prev_t->pulse_at_frame (end);
+
+	return (end_qn - start_qn) * 4.0;
+}
+
 bool
 TempoMap::check_solved (const Metrics& metrics) const
 {
@@ -4329,7 +4397,7 @@ TempoMap::framewalk_to_qn (framepos_t pos, framecnt_t distance) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return Evoral::Beats (quarter_note_at_minute_locked (_metrics, minute_at_frame (pos + distance)) - quarter_note_at_minute_locked (_metrics, minute_at_frame (pos)));
+	return Evoral::Beats (quarter_notes_between_frames_locked (_metrics, pos, pos + distance));
 }
 
 struct bbtcmp {
