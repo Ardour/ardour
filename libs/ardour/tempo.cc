@@ -96,7 +96,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	BBT_Time bbt;
 	double pulse;
 	uint32_t frame;
-	double minute;
 	bool had_beats_per_minute = false;
 
 	_legacy_bbt = BBT_Time (0, 0, 0);
@@ -126,14 +125,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 			error << _("TempoSection XML node has an illegal \"frame\" value") << endmsg;
 		} else {
 			set_minute (minute_at_frame (frame));
-		}
-	}
-
-	if ((prop = node.property ("minute")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &minute) != 1) {
-			error << _("TempoSection XML node has an illegal \"minute\" value") << endmsg;
-		} else {
-			set_minute (minute);
 		}
 	}
 
@@ -215,8 +206,6 @@ TempoSection::get_state() const
 	root->add_property ("pulse", buf);
 	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("frame", buf);
-	snprintf (buf, sizeof (buf), "%lf", minute());
-	root->add_property ("minute", buf);
 	snprintf (buf, sizeof (buf), "%lf", _note_types_per_minute);
 	root->add_property ("note-types-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%lf", _note_type);
@@ -522,7 +511,6 @@ MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 	double beat = 0.0;
 	framepos_t frame = 0;
 	pair<double, BBT_Time> start;
-	double minute = 0.0;
 
 	if ((prop = node.property ("start")) != 0) {
 		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
@@ -570,13 +558,6 @@ MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 			error << _("MeterSection XML node has an illegal \"frame\" value") << endmsg;
 		} else {
 			set_minute (minute_at_frame (frame));
-		}
-	}
-	if ((prop = node.property ("minute")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &minute) != 1) {
-			error << _("MeterSection XML node has an illegal \"frame\" value") << endmsg;
-		} else {
-			set_minute (minute);
 		}
 	}
 
@@ -641,8 +622,6 @@ MeterSection::get_state() const
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("frame", buf);
-	snprintf (buf, sizeof (buf), "%lf", minute());
-	root->add_property ("minute", buf);
 	root->add_property ("lock-style", enum_2_string (position_lock_style()));
 	snprintf (buf, sizeof (buf), "%lf", _divisions_per_bar);
 	root->add_property ("divisions-per-bar", buf);
