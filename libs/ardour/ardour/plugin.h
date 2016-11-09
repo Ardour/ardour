@@ -133,13 +133,20 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		IOPortDescription (const std::string& n)
 			: name (n)
 			, is_sidechain (false)
+			, group_name (n)
+			, group_channel (0)
 		{}
 		IOPortDescription (const IOPortDescription &other)
 			: name (other.name)
 			, is_sidechain (other.is_sidechain)
+			, group_name (other.group_name)
+			, group_channel (other.group_channel)
 		{}
 		std::string name;
 		bool is_sidechain;
+
+		std::string group_name;
+		uint32_t group_channel;
 	};
 
 	virtual IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;

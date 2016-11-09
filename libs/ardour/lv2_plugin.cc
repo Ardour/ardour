@@ -71,6 +71,7 @@
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 #include "lv2/lv2plug.in/ns/extensions/units/units.h"
 #include "lv2/lv2plug.in/ns/ext/patch/patch.h"
+#include "lv2/lv2plug.in/ns/ext/port-groups/port-groups.h"
 #ifdef HAVE_LV2_1_2_0
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/options/options.h"
@@ -134,14 +135,18 @@ public:
 	LilvNode* ext_causesArtifacts;
 	LilvNode* ext_notAutomatic;
 	LilvNode* ext_rangeSteps;
+	LilvNode* groups_group;
+	LilvNode* groups_element;
 	LilvNode* lv2_AudioPort;
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_isSideChain;
+	LilvNode* lv2_index;
 	LilvNode* lv2_integer;
 	LilvNode* lv2_default;
 	LilvNode* lv2_minimum;
@@ -2183,13 +2188,48 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 		return Plugin::IOPortDescription ("?");
 	}
 
-	LilvNode* name = lilv_port_get_name(_impl->plugin,
-			lilv_plugin_get_port_by_index(_impl->plugin, idx));
+	const LilvPort* pport = lilv_plugin_get_port_by_index (_impl->plugin, idx);
+
+	LilvNode* name = lilv_port_get_name(_impl->plugin, pport);
 	Plugin::IOPortDescription iod (lilv_node_as_string (name));
 	lilv_node_free(name);
 
-	if (lilv_port_has_property(_impl->plugin,
-				lilv_plugin_get_port_by_index(_impl->plugin, idx), _world.lv2_isSideChain)) {
+	LilvNodes* groups = lilv_port_get_value (_impl->plugin, pport, _world.groups_group);
+	if (lilv_nodes_size (groups) > 0) {
+		const LilvNode* group = lilv_nodes_get_first (groups);
+		LilvNodes* grouplabel = lilv_world_find_nodes (_world.world, group, _world.rdfs_label, NULL);
+
+		if (lilv_nodes_size (grouplabel) > 0) {
+			const LilvNode* grpname = lilv_nodes_get_first (grouplabel);
+			iod.group_name = lilv_node_as_string (grpname);
+		}
+		lilv_nodes_free (grouplabel);
+
+		LilvNodes* designations = lilv_port_get_value (_impl->plugin, pport, _world.lv2_designation);
+		if (group && lilv_nodes_size (designations) > 0) {
+			LilvNodes* group_childs = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
+			if (lilv_nodes_size (group_childs) > 0) {
+				LILV_FOREACH (nodes, i, designations) {
+					const LilvNode* designation = lilv_nodes_get (designations, i);
+					LILV_FOREACH (nodes, j, group_childs) {
+						const LilvNode* group_element = lilv_nodes_get (group_childs, j);
+						LilvNodes* elem = lilv_world_find_nodes (_world.world, group_element, _world.lv2_designation, designation);
+
+						if (lilv_nodes_size (elem) > 0) {
+							LilvNodes* idx = lilv_world_find_nodes (_world.world, lilv_nodes_get_first (elem), _world.lv2_index, NULL);
+							if (lilv_node_is_int (lilv_nodes_get_first (idx))) {
+								iod.group_channel = lilv_node_as_int(lilv_nodes_get_first (idx));
+							}
+						}
+					}
+				}
+			}
+		}
+		lilv_nodes_free (groups);
+		lilv_nodes_free (designations);
+	}
+
+	if (lilv_port_has_property(_impl->plugin, pport, _world.lv2_isSideChain)) {
 		iod.is_sidechain = true;
 	}
 	return iod;
@@ -3068,12 +3108,15 @@ LV2World::LV2World()
 	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
 	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
 	ext_rangeSteps     = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
+	groups_group       = lilv_new_uri(world, LV2_PORT_GROUPS__group);
+	groups_element     = lilv_new_uri(world, LV2_PORT_GROUPS__element);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_isSideChain    = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
+	lv2_index          = lilv_new_uri(world, LV2_CORE__index);
 	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
 	lv2_default        = lilv_new_uri(world, LV2_CORE__default);
 	lv2_minimum        = lilv_new_uri(world, LV2_CORE__minimum);
@@ -3081,6 +3124,7 @@ LV2World::LV2World()
 	lv2_reportsLatency = lilv_new_uri(world, LV2_CORE__reportsLatency);
 	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
 	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
+	lv2_designation    = lilv_new_uri(world, LV2_CORE__designation);
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
 	lv2_freewheeling   = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
@@ -3149,11 +3193,13 @@ LV2World::~LV2World()
 	lilv_node_free(rdfs_label);
 	lilv_node_free(rdfs_range);
 	lilv_node_free(midi_MidiEvent);
+	lilv_node_free(lv2_designation);
 	lilv_node_free(lv2_enumeration);
 	lilv_node_free(lv2_freewheeling);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
 	lilv_node_free(lv2_reportsLatency);
+	lilv_node_free(lv2_index);
 	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
@@ -3161,6 +3207,8 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
+	lilv_node_free(groups_group);
+	lilv_node_free(groups_element);
 	lilv_node_free(ext_rangeSteps);
 	lilv_node_free(ext_notAutomatic);
 	lilv_node_free(ext_causesArtifacts);
