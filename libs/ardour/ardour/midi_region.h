@@ -45,6 +45,7 @@ template<typename Time> class EventSink;
 namespace ARDOUR {
 
 class MidiChannelFilter;
+class MidiCursor;
 class MidiFilter;
 class MidiModel;
 class MidiSource;
@@ -77,6 +78,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                    framepos_t position,
 	                    framecnt_t dur,
 	                    Evoral::Range<framepos_t>* loop_range,
+	                    MidiCursor& cursor,
 	                    uint32_t  chan_n = 0,
 	                    NoteMode  mode = Sustained,
 	                    MidiStateTracker* tracker = 0,
@@ -86,6 +88,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                           framepos_t position,
 	                           framecnt_t dur,
 	                           Evoral::Range<framepos_t>* loop_range,
+	                           MidiCursor& cursor,
 	                           uint32_t  chan_n = 0,
 	                           NoteMode  mode = Sustained) const;
 
@@ -130,6 +133,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                     framepos_t position,
 	                     framecnt_t dur,
 	                     Evoral::Range<framepos_t>* loop_range,
+	                     MidiCursor& cursor,
 	                     uint32_t chan_n = 0,
 	                     NoteMode mode = Sustained,
 	                     MidiStateTracker* tracker = 0,

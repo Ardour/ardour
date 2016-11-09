@@ -276,6 +276,7 @@ public:
 	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	PBD::ScopedConnectionList region_state_changed_connections;
+	PBD::ScopedConnectionList region_drop_references_connections;
 	DataType        _type;
 	int             _sort_id;
 	mutable gint    block_notifications;
@@ -359,6 +360,7 @@ public:
 
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
+	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
 

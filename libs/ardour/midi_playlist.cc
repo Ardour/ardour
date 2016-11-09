@@ -195,7 +195,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 		                                                    mr->name(), start, dur, 
 		                                                    (loop_range ? loop_range->from : -1),
 		                                                    (loop_range ? loop_range->to : -1)));
-		mr->read_at (tgt, start, dur, loop_range, chan_n, _note_mode, &tracker->tracker, filter);
+		mr->read_at (tgt, start, dur, loop_range, tracker->cursor, chan_n, _note_mode, &tracker->tracker, filter);
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
 
@@ -208,6 +208,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 			                             mr->name(), ((new_tracker) ? "new" : "old")));
 
 			tracker->tracker.resolve_notes (tgt, loop_range ? loop_range->squish ((*i)->last_frame()) : (*i)->last_frame());
+			tracker->cursor.invalidate (false);
 			if (!new_tracker) {
 				_note_trackers.erase (t);
 			}
@@ -261,7 +262,7 @@ MidiPlaylist::region_edited(boost::shared_ptr<Region>         region,
 	/* Queue any necessary edit compensation events. */
 	t->second->fixer.prepare(
 		_session.tempo_map(), cmd, mr->position() - mr->start(),
-		_read_end, mr->midi_source()->model()->active_notes());
+		_read_end, t->second->cursor.active_notes);
 }
 
 void
@@ -290,6 +291,15 @@ MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
 	/* MIDI regions have no dependents (crossfades) but we might be tracking notes */
 	_note_trackers.erase(region.get());
+}
+
+void
+MidiPlaylist::region_going_away (boost::weak_ptr<Region> region)
+{
+	boost::shared_ptr<Region> r = region.lock();
+	if (r) {
+		remove_dependents(r);
+	}
 }
 
 int
@@ -357,8 +367,12 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 
 			i = tmp;
 		}
-	}
 
+		NoteTrackers::iterator t = _note_trackers.find(region.get());
+		if (t != _note_trackers.end()) {
+			_note_trackers.erase(t);
+		}
+	}
 
 	if (changed) {
 		/* overload this, it normally means "removed", not destroyed */

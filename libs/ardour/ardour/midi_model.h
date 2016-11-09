@@ -292,8 +292,6 @@ public:
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
 
-	std::set<WeakNotePtr>& active_notes() { return _active_notes; }
-
 protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
@@ -327,8 +325,6 @@ private:
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	boost::weak_ptr<MidiSource> _midi_source;
 	InsertMergePolicy _insert_merge_policy;
-
-	std::set<WeakNotePtr> _active_notes;
 };
 
 } /* namespace ARDOUR */

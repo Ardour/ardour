@@ -26,6 +26,7 @@
 #include <boost/utility.hpp>
 
 #include "ardour/ardour.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/note_fixer.h"
@@ -112,12 +113,14 @@ public:
 
 protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
+	void region_going_away (boost::weak_ptr<Region> region);
 
 private:
 	typedef Evoral::Note<Evoral::Beats> Note;
 	typedef Evoral::Event<framepos_t>   Event;
 
 	struct RegionTracker : public boost::noncopyable {
+		MidiCursor       cursor;   ///< Cursor (iterator and read state)
 		MidiStateTracker tracker;  ///< Active note tracker
 		NoteFixer        fixer;    ///< Edit compensation
 	};

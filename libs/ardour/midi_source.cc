@@ -40,13 +40,14 @@
 #include "ardour/debug.h"
 #include "ardour/file_source.h"
 #include "ardour/midi_channel_filter.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
-#include "ardour/tempo.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
+#include "ardour/tempo.h"
 
 #include "pbd/i18n.h"
 
@@ -59,9 +60,7 @@ using namespace PBD;
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -70,9 +69,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -177,10 +174,9 @@ MidiSource::update_length (framecnt_t)
 }
 
 void
-MidiSource::invalidate (const Lock& lock, std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes)
+MidiSource::invalidate (const Lock& lock)
 {
-	_model_iter_valid = false;
-	_model_iter.invalidate(notes);
+	Invalidated(_session.transport_rolling());
 }
 
 framecnt_t
@@ -190,13 +186,14 @@ MidiSource::midi_read (const Lock&                        lm,
                        framepos_t                         start,
                        framecnt_t                         cnt,
                        Evoral::Range<framepos_t>*         loop_range,
+                       MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
-		       const double                       pulse,
-		       const double                       start_beats) const
+                       const double                       pulse,
+                       const double                       start_beats) const
 {
-	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
+	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	const double start_qn = (pulse * 4.0) - start_beats;
 
@@ -209,63 +206,21 @@ MidiSource::midi_read (const Lock&                        lm,
 	}
 
 	// Find appropriate model iterator
-	Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
-	const bool linear_read = _last_read_end != 0 && start == _last_read_end;
-	if (!linear_read || !_model_iter_valid) {
-#if 0
-		// Cached iterator is invalid, search for the first event past start
-		i = _model->begin(converter.from(start), false, filtered,
-		                  linear_read ? &_model->active_notes() : NULL);
-		_model_iter_valid = true;
-		if (!linear_read) {
-			_model->active_notes().clear();
-		}
-#else
-		/* hot-fix http://tracker.ardour.org/view.php?id=6541
-		 * "parallel playback of linked midi regions -> no note-offs"
-		 *
-		 * A midi source can be used by multiple tracks simultaneously,
-		 * in which case midi_read() may be called from different tracks for
-		 * overlapping time-ranges.
-		 *
-		 * However there is only a single iterator for a given midi-source.
-		 * This results in every midi_read() performing a seek.
-		 *
-		 * If seeking is performed with
-		 *    _model->begin(converter.from(start),...)
-		 * the model is used for seeking. That method seeks to the first
-		 * *note-on* event after 'start'.
-		 *
-		 * _model->begin(converter.from(  ) ,..) eventually calls
-		 * Sequence<Time>::const_iterator() in libs/evoral/src/Sequence.cpp
-		 * which looks up the note-event via seq.note_lower_bound(t);
-		 * but the sequence 'seq' only contains note-on events(!).
-		 * note-off events are implicit in Sequence<Time>::operator++()
-		 * via _active_notes.pop(); and not part of seq.
-		 *
-		 * see also http://tracker.ardour.org/view.php?id=6287#c16671
-		 *
-		 * The linear search below assures that reading starts at the first
-		 * event for the given time, regardless of its event-type.
-		 *
-		 * The performance of this approach is O(N), while the previous
-		 * implementation is O(log(N)). This needs to be optimized:
-		 * The model-iterator or event-sequence needs to be re-designed in
-		 * some way (maybe keep an iterator per playlist).
-		 */
-		for (i = _model->begin(); i != _model->end(); ++i) {
-			if (i->time().to_double() >= start_beats) {
-				break;
-			}
-		}
-		_model_iter_valid = true;
-		if (!linear_read) {
-			_model->active_notes().clear();
-		}
-#endif
+	Evoral::Sequence<Evoral::Beats>::const_iterator& i = cursor.iter;
+	const bool linear_read = cursor.last_read_end != 0 && start == cursor.last_read_end;
+	if (!linear_read || !i.valid()) {
+		/* Cached iterator is invalid, search for the first event past start.
+		   Note that multiple tracks can use a MidiSource simultaneously, so
+		   all playback state must be in parameters (the cursor) and must not
+		   be cached in the source of model itself.
+		   See http://tracker.ardour.org/view.php?id=6541
+		*/
+		cursor.connect(Invalidated);
+		cursor.iter = _model->begin(converter.from(start), false, filtered, &cursor.active_notes);
+		cursor.active_notes.clear();
 	}
 
-	_last_read_end = start + cnt;
+	cursor.last_read_end = start + cnt;
 
 	// Copy events in [start, start + cnt) into dst
 	for (; i != _model->end(); ++i) {
@@ -338,7 +293,6 @@ MidiSource::midi_write (const Lock&                 lm,
 	const framecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
 	if (cnt == max_framecnt) {
-		_last_read_end = 0;
 		invalidate(lm);
 	} else {
 		_capture_length += cnt;
