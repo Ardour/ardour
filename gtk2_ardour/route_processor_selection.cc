@@ -32,8 +32,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+unsigned int RouteProcessorSelection::_no_route_change_signal = 0;
 RouteProcessorSelection::RouteProcessorSelection()
-	: _no_route_change_signal (false)
 {
 }
 
@@ -76,7 +76,7 @@ RouteProcessorSelection::clear_routes ()
 	}
 	axes.clear ();
 	drop_connections ();
-	if (!_no_route_change_signal) {
+	if (0 == _no_route_change_signal) {
 		RoutesChanged ();
 	}
 }
@@ -110,7 +110,7 @@ RouteProcessorSelection::add (AxisView* r)
 			ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
 		}
 
-		if (!_no_route_change_signal) {
+		if (0 == _no_route_change_signal) {
 			RoutesChanged();
 		}
 	}
@@ -125,7 +125,7 @@ RouteProcessorSelection::remove (AxisView* r)
 	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
 		(*i)->set_selected (false);
 		axes.erase (i);
-		if (!_no_route_change_signal) {
+		if (0 == _no_route_change_signal) {
 			RoutesChanged ();
 		}
 	}
@@ -153,5 +153,10 @@ RouteProcessorSelection::empty ()
 void
 RouteProcessorSelection::block_routes_changed (bool yn)
 {
-	_no_route_change_signal = yn;
+	if (yn) {
+		++_no_route_change_signal;
+	} else {
+		assert (_no_route_change_signal > 0);
+		--_no_route_change_signal;
+	}
 }

@@ -82,6 +82,7 @@
 #include "item_counts.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "mouse_cursors.h"
 #include "normalize_dialog.h"
@@ -7360,6 +7361,9 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
+
+	Mixer_UI::instance()->selection().block_routes_changed (true);
+	selection->block_tracks_changed (true);
 	{
 		DisplaySuspender ds;
 		boost::shared_ptr<RouteList> rl (new RouteList);
@@ -7372,6 +7376,9 @@ edit your ardour.rc file to set the\n\
 	 * destructors are called,
 	 * diskstream drops references, save_state is called (again for every track)
 	 */
+	selection->block_tracks_changed (false);
+	Mixer_UI::instance()->selection().block_routes_changed (false);
+	selection->TracksChanged (); /* EMIT SIGNAL */
 }
 
 void
