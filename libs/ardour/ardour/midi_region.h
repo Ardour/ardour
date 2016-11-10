@@ -161,8 +161,6 @@ class LIBARDOUR_API MidiRegion : public Region
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _source_connection;
 	PBD::ScopedConnection _model_contents_connection;
-
-	double _last_length_beats;
 };
 
 } /* namespace ARDOUR */
