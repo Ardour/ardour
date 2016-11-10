@@ -6265,6 +6265,10 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 {
 	update_route_record_state ();
 	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
+
+	if (!rg->has_control_master () && !rg->has_subgroup () && rg->empty()) {
+		remove_route_group (*rg);
+	}
 }
 
 boost::shared_ptr<RouteList>
