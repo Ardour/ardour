@@ -1696,6 +1696,11 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
+	if (_route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
+		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
+		items.push_back (MenuElem (_("Fan Out Instrument"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false)));
+	}
+
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Adjust Latency..."), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
 

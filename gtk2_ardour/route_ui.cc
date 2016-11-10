@@ -17,6 +17,7 @@
 
 */
 
+#include <map>
 #include <boost/algorithm/string.hpp>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -38,11 +39,13 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 #include "ardour/audio_track.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/midi_track.h"
 #include "ardour/monitor_control.h"
 #include "ardour/internal_send.h"
+#include "ardour/panner_shell.h"
 #include "ardour/profile.h"
 #include "ardour/phase_control.h"
 #include "ardour/send.h"
@@ -2331,6 +2334,54 @@ RouteUI::manage_pins ()
 	if (proxy) {
 		proxy->get (true);
 		proxy->present();
+	}
+}
+
+void
+RouteUI::fan_out (bool to_busses)
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+	assert (pi);
+
+	const uint32_t n_outputs = pi->output_streams ().n_audio ();
+	if (_route->n_outputs ().n_audio () != n_outputs) {
+		MessageDialog msg (string_compose (
+					_("The Plugin's number of audio outputs ports (%1) does not match the Tracks's number of audio outputs (%2). Cannot fan out."),
+					n_outputs, _route->n_outputs ().n_audio ()));
+		msg.run ();
+		return;
+	}
+	boost::shared_ptr<Plugin> plugin = pi->plugin ();
+	std::map<std::string, uint32_t> busnames;
+	for (uint32_t p = 0; p < n_outputs; ++p) {
+		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
+		std::string bn = pi->name () + " " + pd.group_name;
+		busnames[bn]++;
+	}
+
+	if (busnames.size () < 2) {
+		MessageDialog msg (_("Instrument has only 1 output bus. Nothing to fan out."));
+		msg.run ();
+		return;
+	}
+
+	uint32_t outputs = 2;
+	if (_session->master_out ()) {
+		outputs = std::max (outputs, _session->master_out ()->n_inputs ().n_audio ());
+	}
+
+	_route->output ()->disconnect (this);
+	_route->panner_shell ()->set_bypassed (true);
+
+	for (uint32_t p = 0; p < n_outputs; ++p) {
+		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
+		std::string bn = pi->name () + " " + pd.group_name;
+		boost::shared_ptr<Route> r = _session->route_by_name (bn);
+		if (!r) {
+			RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
+			r = rl.front ();
+		}
+		_route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
 	}
 }
 
