@@ -30,13 +30,13 @@
 #include "evoral/Range.hpp"
 #include "ardour/ardour.h"
 #include "ardour/buffer.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/source.h"
 #include "ardour/beats_frames_converter.h"
 
 namespace ARDOUR {
 
 class MidiChannelFilter;
-class MidiCursor;
 class MidiModel;
 class MidiStateTracker;
 

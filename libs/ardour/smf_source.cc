@@ -39,7 +39,6 @@
 
 #include "ardour/debug.h"
 #include "ardour/midi_channel_filter.h"
-#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"

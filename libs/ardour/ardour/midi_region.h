@@ -27,6 +27,7 @@
 #include "evoral/Range.hpp"
 
 #include "ardour/ardour.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/region.h"
 
 class XMLNode;
@@ -45,7 +46,6 @@ template<typename Time> class EventSink;
 namespace ARDOUR {
 
 class MidiChannelFilter;
-class MidiCursor;
 class MidiFilter;
 class MidiModel;
 class MidiSource;
