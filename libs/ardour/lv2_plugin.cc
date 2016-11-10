@@ -2194,27 +2194,34 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	Plugin::IOPortDescription iod (lilv_node_as_string (name));
 	lilv_node_free(name);
 
+	/* get the port's pg:group */
 	LilvNodes* groups = lilv_port_get_value (_impl->plugin, pport, _world.groups_group);
 	if (lilv_nodes_size (groups) > 0) {
 		const LilvNode* group = lilv_nodes_get_first (groups);
 		LilvNodes* grouplabel = lilv_world_find_nodes (_world.world, group, _world.rdfs_label, NULL);
 
+		/* get the name of the port-group */
 		if (lilv_nodes_size (grouplabel) > 0) {
 			const LilvNode* grpname = lilv_nodes_get_first (grouplabel);
 			iod.group_name = lilv_node_as_string (grpname);
 		}
 		lilv_nodes_free (grouplabel);
 
+		/* get all port designations.
+		 * we're interested in e.g. lv2:designation pg:right */
 		LilvNodes* designations = lilv_port_get_value (_impl->plugin, pport, _world.lv2_designation);
-		if (group && lilv_nodes_size (designations) > 0) {
+		if (lilv_nodes_size (designations) > 0) {
+			/* get all pg:elements of the pg:group */
 			LilvNodes* group_childs = lilv_world_find_nodes (_world.world, group, _world.groups_element, NULL);
 			if (lilv_nodes_size (group_childs) > 0) {
+				/* iterate over all port designations .. */
 				LILV_FOREACH (nodes, i, designations) {
 					const LilvNode* designation = lilv_nodes_get (designations, i);
+					/* match the lv2:designation's element against the port-group's element */
 					LILV_FOREACH (nodes, j, group_childs) {
 						const LilvNode* group_element = lilv_nodes_get (group_childs, j);
 						LilvNodes* elem = lilv_world_find_nodes (_world.world, group_element, _world.lv2_designation, designation);
-
+						/* found it. Now look up the index (channel-number) of the pg:Element */
 						if (lilv_nodes_size (elem) > 0) {
 							LilvNodes* idx = lilv_world_find_nodes (_world.world, lilv_nodes_get_first (elem), _world.lv2_index, NULL);
 							if (lilv_node_is_int (lilv_nodes_get_first (idx))) {
