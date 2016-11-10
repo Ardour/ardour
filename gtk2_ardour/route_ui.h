@@ -208,7 +208,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 
 	void manage_pins ();
 	void maybe_add_route_print_mgr ();
-	void fan_out (bool to_busses = true);
+	void fan_out (bool to_busses = true, bool group = true);
 
 	virtual void route_property_changed (const PBD::PropertyChange&) = 0;
 	void route_removed ();

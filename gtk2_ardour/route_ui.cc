@@ -2338,8 +2338,9 @@ RouteUI::manage_pins ()
 }
 
 void
-RouteUI::fan_out (bool to_busses)
+RouteUI::fan_out (bool to_busses, bool group)
 {
+	DisplaySuspender ds;
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 	assert (pi);
 
@@ -2373,15 +2374,39 @@ RouteUI::fan_out (bool to_busses)
 	_route->output ()->disconnect (this);
 	_route->panner_shell ()->set_bypassed (true);
 
+	RouteList to_group;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
 		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
 		std::string bn = pi->name () + " " + pd.group_name;
 		boost::shared_ptr<Route> r = _session->route_by_name (bn);
 		if (!r) {
-			RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
-			r = rl.front ();
+			if (to_busses) {
+				RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
+				r = rl.front ();
+				assert (r);
+			} else {
+				list<boost::shared_ptr<AudioTrack> > tl =
+					_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
+				r = tl.front ();
+				assert (r);
+
+				boost::shared_ptr<ControlList> cl (new ControlList);
+				cl->push_back (r->monitoring_control ());
+				_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+			}
 		}
+		to_group.push_back (r);
 		_route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
+	}
+
+	if (group) {
+		RouteGroup* rg = new RouteGroup (*_session, pi->name ());
+		_session->add_route_group (rg);
+		rg->set_gain (false);
+		GroupTabs::set_group_color (rg, _route->presentation_info().color());
+		for (RouteList::const_iterator i = to_group.begin(); i != to_group.end(); ++i) {
+			rg->add (*i);
+		}
 	}
 }
 
