@@ -10,6 +10,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
@@ -2246,7 +2247,7 @@ msgstr ""
 
 #: ardour_ui_ed.cc:184
 msgid "Open Video..."
-msgstr ""
+msgstr "Ouvrir une vidéo..."
 
 #: ardour_ui_ed.cc:187
 msgid "Remove Video"
