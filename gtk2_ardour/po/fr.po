@@ -14130,7 +14130,7 @@ msgstr "début de la session"
 
 #: sfdb_ui.cc:1695
 msgid "<b>Add files ...</b>"
-msgstr ""
+msgstr "<b>Ajouter des fichiers...</b>"
 
 #: sfdb_ui.cc:1700
 msgid "<b>Insert at</b>"
