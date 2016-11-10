@@ -1958,6 +1958,8 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 			break;
 	}
 
+	std::string busname;
+
 	if (dt == DataType::AUDIO) {
 		if (input) {
 			uint32_t pid = id;
@@ -1966,6 +1968,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					id = pid;
 					ss << _bus_name_in[bus];
 					ss << " / Bus " << (1 + bus);
+					busname = _bus_name_in[bus];
 					break;
 				}
 				pid -= bus_inputs[bus];
@@ -1978,6 +1981,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					id = pid;
 					ss << _bus_name_out[bus];
 					ss << " / Bus " << (1 + bus);
+					busname = _bus_name_out[bus];
 					break;
 				}
 				pid -= bus_outputs[bus];
@@ -1994,6 +1998,10 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	ss << (id + 1);
 
 	Plugin::IOPortDescription iod (ss.str());
+	if (!busname.empty()) {
+		iod.group_name = busname;
+		iod.group_channel = id;
+	}
 	return iod;
 }
 
