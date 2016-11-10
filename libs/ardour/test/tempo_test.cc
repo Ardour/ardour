@@ -524,7 +524,7 @@ TempoTest::tempoAtPulseTest ()
 			}
 		}
 	}
-	std::cout << std::setprecision (18) << "  tA->tempo_at_pulse (20.0).note_types_per_minute(): " << tA->tempo_at_pulse (20.0).note_types_per_minute() << std::endl;
+
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (160.0, tA->tempo_at_pulse (20.0).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (123.0, tB->tempo_at_pulse (30.0).note_types_per_minute(), 1e-17);
 
