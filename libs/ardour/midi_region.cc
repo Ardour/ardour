@@ -34,6 +34,7 @@
 #include "pbd/basename.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"

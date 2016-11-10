@@ -1942,6 +1942,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\midi_cursor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\midi_diskstream.h"
 				>
 			</File>
