@@ -1698,7 +1698,8 @@ MixerStrip::build_route_ops_menu ()
 
 	if (_route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
 		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
-		items.push_back (MenuElem (_("Fan Out Instrument"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
+		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
+		items.push_back (MenuElem (_("Fan out to Tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false, true)));
 	}
 
 	items.push_back (SeparatorElem());

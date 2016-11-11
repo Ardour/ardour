@@ -2352,11 +2352,15 @@ RouteUI::fan_out (bool to_busses, bool group)
 		msg.run ();
 		return;
 	}
+
+#define BUSNAME  pd.group_name + "(" + _route->name () + ")"
+
+	/* count busses and channels/bus */
 	boost::shared_ptr<Plugin> plugin = pi->plugin ();
 	std::map<std::string, uint32_t> busnames;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
 		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
-		std::string bn = pi->name () + " " + pd.group_name;
+		std::string bn = BUSNAME;
 		busnames[bn]++;
 	}
 
@@ -2377,7 +2381,7 @@ RouteUI::fan_out (bool to_busses, bool group)
 	RouteList to_group;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
 		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
-		std::string bn = pi->name () + " " + pd.group_name;
+		std::string bn = BUSNAME;
 		boost::shared_ptr<Route> r = _session->route_by_name (bn);
 		if (!r) {
 			if (to_busses) {
@@ -2394,15 +2398,28 @@ RouteUI::fan_out (bool to_busses, bool group)
 				cl->push_back (r->monitoring_control ());
 				_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
 			}
+			r->input ()->disconnect (this);
 		}
 		to_group.push_back (r);
 		_route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
 	}
+#undef BUSNAME
 
 	if (group) {
-		RouteGroup* rg = new RouteGroup (*_session, pi->name ());
-		_session->add_route_group (rg);
-		rg->set_gain (false);
+		RouteGroup* rg = NULL;
+		const std::list<RouteGroup*>& rgs (_session->route_groups ());
+		for (std::list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
+			if ((*i)->name () == pi->name ()) {
+				rg = *i;
+				break;
+			}
+		}
+		if (!rg) {
+			rg = new RouteGroup (*_session, pi->name ());
+			_session->add_route_group (rg);
+			rg->set_gain (false);
+		}
+
 		GroupTabs::set_group_color (rg, _route->presentation_info().color());
 		for (RouteList::const_iterator i = to_group.begin(); i != to_group.end(); ++i) {
 			rg->add (*i);
