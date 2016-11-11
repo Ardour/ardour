@@ -948,6 +948,10 @@ Mixer_UI::set_session (Session* sess)
 
 	_group_tabs->set_session (sess);
 
+	if (_monitor_section) {
+		_monitor_section->set_session (_session);
+	}
+
 	if (!_session) {
 		return;
 	}

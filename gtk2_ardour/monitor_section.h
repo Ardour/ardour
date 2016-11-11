@@ -106,9 +106,30 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
 	boost::shared_ptr<ARDOUR::Route> _route;
 
+	enum MonitorActions {
+		MonitorMono,
+		MonitorCutAll,
+		MonitorDimAll,
+		ToggleExclusiveSolo,
+		ToggleMuteOverridesSolo,
+		SoloUseInPlace,
+		SoloUseAFL,
+		SoloUsePFL,
+		ToggleMonitorProcessorBox
+	};
+
+	enum ChannelActions {
+		CutChannel,
+		DimChannel,
+		SoloChannel,
+		InvertChannel
+	};
+
 	static Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
-	void register_actions ();
-	void connect_actions ();
+	static void register_actions ();
+
+	static void action_proxy0 (enum MonitorActions);
+	static void action_proxy1 (enum ChannelActions, uint32_t);
 
 	void cut_channel (uint32_t);
 	void dim_channel (uint32_t);
@@ -179,11 +200,10 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 	Glib::RefPtr<Gtk::Action> proctoggle;
 	bool _ui_initialized;
 
-  private:
-	Gtkmm2ext::ActionMap myactions;
-	Gtkmm2ext::Bindings* bindings;
+	static Gtkmm2ext::ActionMap myactions;
+	static Gtkmm2ext::Bindings* bindings;
 
-	void load_bindings ();
+	static void load_bindings ();
 	bool enter_handler (GdkEventCrossing*);
 	bool leave_handler (GdkEventCrossing*);
 };
