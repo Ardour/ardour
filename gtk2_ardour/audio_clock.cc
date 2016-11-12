@@ -1228,7 +1228,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 void
 AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 {
-	char buf[16];
+	char buf[64];
 	Timecode::BBT_Time BBT;
 	bool negative = false;
 
@@ -1316,12 +1316,12 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
-		sprintf (buf, "%-5.3f/%f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
+		snprintf (buf, sizeof(buf), "%-5.3f/%f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
 		/* XXX this doesn't fit inside the container. */
 		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							  INFO_FONT_SIZE, buf, _("Tempo")));
 
-		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
+		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
 		_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							   INFO_FONT_SIZE, buf, _("Meter")));
 	}
