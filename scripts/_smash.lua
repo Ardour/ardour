@@ -1,4 +1,4 @@
-ardour { ["type"] = "dsp", name = "Sound Smasher", category = "Dynamics", license = "MIT", author = "Ardour Lua Task Force", description = [[Another simple DSP example]]
+ardour { ["type"] = "dsp", name = "Sound Smasher", category = "Dynamics", license = "MIT", author = "Ardour Lua Task Force", description = [[Another simple DSP example]] }
 
 function dsp_ioconfig () return
 	-- -1, -1 = any number of channels as long as input and output count matches
