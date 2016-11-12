@@ -57,7 +57,7 @@ static void notifyProc (const MIDINotification *message, void *refCon) {
 static void print_packet (const MIDIPacket *p) {
 	fprintf (stderr, "CoreMIDI: Packet %d bytes [ ", p->length);
 	for (int bb = 0; bb < p->length; ++bb) {
-		fprintf (stderr, "%02x ", ((uint8_t*)p->data)[bb]);
+		fprintf (stderr, "%02x ", ((const uint8_t*)p->data)[bb]);
 	}
 	fprintf (stderr, "]\n");
 }
