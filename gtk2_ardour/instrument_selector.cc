@@ -85,6 +85,9 @@ InstrumentSelector::build_instrument_list()
 #ifdef LXVST_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
 #endif
+#ifdef MACVST_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.mac_vst_plugin_info().begin(), manager.mac_vst_plugin_info().end());
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
 #endif

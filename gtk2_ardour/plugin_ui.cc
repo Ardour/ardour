@@ -52,6 +52,10 @@
 #include "ardour/lxvst_plugin.h"
 #include "lxvst_plugin_ui.h"
 #endif
+#ifdef MACVST_SUPPORT
+#include "ardour/mac_vst_plugin.h"
+#include "vst_plugin_ui.h"
+#endif
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #include "lv2_plugin_ui.h"
@@ -105,6 +109,10 @@ PluginUIWindow::PluginUIWindow (
 
 		case ARDOUR::LXVST:
 			have_gui = create_lxvst_editor (insert);
+			break;
+
+		case ARDOUR::MacVST:
+			have_gui = create_mac_vst_editor (insert);
 			break;
 
 		case ARDOUR::AudioUnit:
@@ -271,6 +279,35 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
 	return true;
 #endif
 }
+
+bool
+#ifdef MACVST_SUPPORT
+PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PluginInsert> insert)
+#else
+PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PluginInsert>)
+#endif
+{
+#ifndef MACVST_SUPPORT
+	return false;
+#else
+	boost::shared_ptr<MacVSTPlugin> mvst;
+	if ((mvst = boost::dynamic_pointer_cast<MacVSTPlugin> (insert->plugin())) == 0) {
+		error << string_compose (_("unknown type of editor-supplying plugin (note: no MacVST support in this version of %1)"), PROGRAM_NAME)
+		      << endmsg;
+		throw failed_constructor ();
+	}
+	VSTPluginUI* vpu = create_mac_vst_gui (insert);
+	_pluginui = vpu;
+	_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
+	add (*vpu);
+	vpu->package (*this);
+
+	Application::instance()->ActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
+
+	return true;
+#endif
+}
+
 
 bool
 #ifdef AUDIOUNIT_SUPPORT

@@ -2484,6 +2484,9 @@ Mixer_UI::refill_favorite_plugins ()
 #ifdef LXVST_SUPPORT
 	refiller (plugs, mgr.lxvst_plugin_info ());
 #endif
+#ifdef MACVST_SUPPORT
+	refiller (plugs, mgr.mac_vst_plugin_info ());
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	refiller (plugs, mgr.au_plugin_info ());
 #endif

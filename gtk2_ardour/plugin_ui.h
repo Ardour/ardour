@@ -79,6 +79,7 @@ namespace Gtkmm2ext {
 class LatencyGUI;
 class ArdourWindow;
 class PluginEqGui;
+class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
 {
@@ -347,9 +348,17 @@ class PluginUIWindow : public ArdourWindow
 
 	bool create_windows_vst_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_lxvst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
+	bool create_mac_vst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
+
+#ifdef MACVST_SUPPORT
+/* this function has to be in a .mm file
+ * because MacVSTPluginUI has Cocoa members
+ */
+extern VSTPluginUI* create_mac_vst_gui (boost::shared_ptr<ARDOUR::PluginInsert>);
+#endif
 
 #ifdef AUDIOUNIT_SUPPORT
 /* this function has to be in a .mm file */

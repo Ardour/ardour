@@ -3147,7 +3147,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
@@ -3156,7 +3156,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
@@ -3188,7 +3188,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Scan for Plugins"),
@@ -3266,11 +3266,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	bo = new BoolOption (
 			"discover-audio-units",
-			_("Scan for AudioUnit Plugins on Application Start"),
+			_("Scan for [new] AudioUnit Plugins on Application Start"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
 			);
-	add_option (_("Plugins"), bo);
+	add_option (_("Plugins/Audio Unit"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
 
@@ -3285,7 +3285,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 				_("AU Blacklist:")));
 #endif
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
 	add_option (_("Plugins"),
 	     new BoolOption (
