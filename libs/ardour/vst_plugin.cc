@@ -344,7 +344,9 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	}
 
 	desc.normal = get_parameter (which);
-	_parameter_defaults[which] = desc.normal;
+	if (_parameter_defaults.find (which) == _parameter_defaults.end ()) {
+		_parameter_defaults[which] = desc.normal;
+	}
 
 	return 0;
 }
