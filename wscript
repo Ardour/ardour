@@ -880,7 +880,9 @@ def configure(conf):
 
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
-        conf.define('MACVST_SUPPORT', 1)
+
+        # NOT READY FOR PRIME TIME
+        #conf.define('MACVST_SUPPORT', 1)
 
         conf.define ('TOP_MENUBAR',1)
 
