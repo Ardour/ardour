@@ -146,6 +146,6 @@ bool
 MacVSTPluginUI::idle ()
 {
 	AEffect* plugin = _vst->state()->plugin;
-	_vst->state()->wantIdle = plugin->dispatcher (plugin, effIdle, 0, 0, NULL, 0);
+	_vst->state()->wantIdle = plugin->dispatcher (plugin, effEditIdle, 0, 0, NULL, 0);
 	return true; // _vst->state()->wantIdle;
 }
