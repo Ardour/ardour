@@ -195,6 +195,12 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		break;
 #endif
 
+#ifdef MACVST_SUPPORT
+	case ARDOUR::MacVST:
+		plugs = mgr.mac_vst_plugin_info();
+		break;
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 	case ARDOUR::AudioUnit:
 		plugs = mgr.au_plugin_info();

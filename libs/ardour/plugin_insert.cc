@@ -50,6 +50,10 @@
 #include "ardour/lxvst_plugin.h"
 #endif
 
+#ifdef MACVST_SUPPORT
+#include "ardour/mac_vst_plugin.h"
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
@@ -1242,6 +1246,9 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LXVST_SUPPORT
 	boost::shared_ptr<LXVSTPlugin> lxvp;
 #endif
+#ifdef MACVST_SUPPORT
+	boost::shared_ptr<MacVSTPlugin> mvp;
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	boost::shared_ptr<AUPlugin> ap;
 #endif
@@ -1261,6 +1268,10 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LXVST_SUPPORT
 	} else if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
+#endif
+#ifdef MACVST_SUPPORT
+	} else if ((mvp = boost::dynamic_pointer_cast<MacVSTPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new MacVSTPlugin (*mvp));
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
@@ -2373,6 +2384,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::Windows_VST;
 	} else if (prop->value() == X_("lxvst")) {
 		type = ARDOUR::LXVST;
+	} else if (prop->value() == X_("mac-vst")) {
+		type = ARDOUR::MacVST;
 	} else if (prop->value() == X_("audiounit")) {
 		type = ARDOUR::AudioUnit;
 	} else if (prop->value() == X_("luaproc")) {
@@ -2403,6 +2416,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			prop = node.property ("id");
 		}
 #endif
+
 		/* recheck  */
 
 		if (prop == 0) {
@@ -2425,6 +2439,13 @@ PluginInsert::set_state(const XMLNode& node, int version)
 #ifdef WINDOWS_VST_SUPPORT
 	if (plugin == 0 && type == ARDOUR::LXVST) {
 		type = ARDOUR::Windows_VST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
+#ifdef MACVST_SUPPORT
+	if (plugin == 0 && type == ARDOUR::MacVST) {
+		type = ARDOUR::MacVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
 #endif
@@ -2937,7 +2958,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 			}
 		}
 	}
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	boost::shared_ptr<VSTPlugin> vst = boost::dynamic_pointer_cast<VSTPlugin> (plugin);
 	if (vst) {
 		vst->set_insert (this, _plugins.size ());

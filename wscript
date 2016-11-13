@@ -880,6 +880,7 @@ def configure(conf):
 
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
+        conf.define('MACVST_SUPPORT', 1)
 
         conf.define ('TOP_MENUBAR',1)
 
@@ -1229,6 +1230,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
+    write_config_text('Mac VST support',       conf.is_defined('MACVST_SUPPORT'))
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)

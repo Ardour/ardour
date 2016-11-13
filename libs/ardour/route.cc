@@ -836,6 +836,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 						prop->value() == "lv2" ||
 						prop->value() == "windows-vst" ||
+						prop->value() == "mac-vst" ||
 						prop->value() == "lxvst" ||
 						prop->value() == "audiounit") {
 
@@ -2759,6 +2760,7 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
 				           prop->value() == "windows-vst" ||
+				           prop->value() == "mac-vst" ||
 				           prop->value() == "lxvst" ||
 				           prop->value() == "luaproc" ||
 				           prop->value() == "audiounit") {

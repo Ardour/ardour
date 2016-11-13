@@ -60,6 +60,10 @@ LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_lx (char *, enum VST
 LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_fst (char *, enum VSTScanMode mode = VST_SCAN_USE_APP);
 #endif
 
+#ifdef MACVST_SUPPORT
+LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_mac (char *, enum VSTScanMode mode = VST_SCAN_USE_APP);
+#endif
+
 #ifndef VST_SCANNER_APP
 } // namespace
 #endif

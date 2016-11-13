@@ -68,6 +68,9 @@ struct LIBARDOUR_API _VSTHandle
 	main_entry_t main_entry;
 
 	int          plugincnt;
+#ifdef MACVST_SUPPORT
+	int32_t      res_file_id;
+#endif
 };
 
 typedef struct _VSTHandle VSTHandle;

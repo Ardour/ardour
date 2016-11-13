@@ -39,7 +39,7 @@
 #include "ardour/lv2_plugin.h"
 #include "lv2_evbuf.h"
 #endif
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 #include "ardour/vestige/aeffectx.h"
 #endif
 
@@ -79,7 +79,7 @@ BufferSet::clear()
 	_count.reset();
 	_available.reset();
 
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
 		delete *i;
 	}
@@ -206,7 +206,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	}
 #endif
 
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	// As above but for VST
 	if (type == DataType::MIDI) {
 		while (_vst_buffers.size() < _buffers[type].size()) {
@@ -343,7 +343,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 
 #endif /* LV2_SUPPORT */
 
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 
 VstEvents*
 BufferSet::get_vst_midi (size_t b)

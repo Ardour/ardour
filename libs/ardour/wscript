@@ -435,8 +435,12 @@ def build(bld):
         obj.source += [ 'lxvst_plugin.cc', 'linux_vst_support.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
 
-    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
+    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined('MACVST_SUPPORT'):
         obj.source += [ 'session_vst.cc', 'vst_plugin.cc', 'vst_info_file.cc' ]
+
+    if bld.is_defined('MACVST_SUPPORT'):
+        obj.source += [ 'mac_vst_plugin.cc', 'mac_vst_support.cc' ]
+        obj.defines += [ 'MACVST_SUPPORT' ]
 
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
