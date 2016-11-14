@@ -20,6 +20,7 @@
 #ifndef __ardour_vst_plugin_h__
 #define __ardour_vst_plugin_h__
 
+#include <pbd/signals.h>
 #include "ardour/plugin.h"
 
 struct _AEffect;
@@ -58,6 +59,8 @@ public:
 	std::string describe_parameter (Evoral::Parameter);
 	framecnt_t signal_latency() const;
 	std::set<Evoral::Parameter> automatable() const;
+
+	PBD::Signal0<void> LoadPresetProgram;
 
 	bool parameter_is_audio (uint32_t) const { return false; }
 	bool parameter_is_control (uint32_t) const { return true; }

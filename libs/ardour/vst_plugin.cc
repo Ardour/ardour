@@ -387,6 +387,7 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 #endif
 	_state->want_program = index;
+	LoadPresetProgram (); /* EMIT SIGNAL */ /* used for macvst */
 	return true;
 }
 
@@ -429,6 +430,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 					_state->wanted_chunk = raw_data;
 					_state->wanted_chunk_size = size;
 					_state->want_chunk = 1;
+					LoadPresetProgram (); /* EMIT SIGNAL */ /* used for macvst */
 					return true;
 				}
 			}
