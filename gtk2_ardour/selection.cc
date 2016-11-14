@@ -1394,10 +1394,11 @@ Selection::set_state (XMLNode const & node, int)
 			XMLNodeList children = (*i)->children ();
 
 			for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
-				XMLProperty const * prop_id = (*ci)->property (X_("id"));
-				Evoral::event_id_t id = atoi(prop_id->value());
-
-				notes.push_back (id);
+				XMLProperty const* prop_id = (*ci)->property (X_("id"));
+				if (prop_id) {
+					Evoral::event_id_t id = atoi (prop_id->value ());
+					notes.push_back (id);
+				}
 			}
 
 			for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
