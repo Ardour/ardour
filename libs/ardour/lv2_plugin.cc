@@ -1318,6 +1318,8 @@ LV2Plugin::add_state(XMLNode* root) const
 	if (_has_state_interface) {
 		// Provisionally increment state version and create directory
 		const std::string new_dir = state_dir(++_state_version);
+		// and keep track of it (for templates & archive)
+		unsigned int saved_state = _state_version;;
 		g_mkdir_with_parents(new_dir.c_str(), 0744);
 
 		LilvState* state = lilv_state_new_from_instance(
@@ -1363,9 +1365,10 @@ LV2Plugin::add_state(XMLNode* root) const
 			lilv_state_free(state);
 			PBD::remove_directory(new_dir);
 			--_state_version;
+			saved_state = _state_version;
 		}
 
-		root->add_property("state-dir", string_compose("state%1", _state_version));
+		root->add_property("state-dir", string_compose("state%1", saved_state));
 	}
 }
 
