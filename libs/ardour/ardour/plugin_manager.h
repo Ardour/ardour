@@ -76,7 +76,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void load_statuses ();
 	void save_statuses ();
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
-	PluginStatusType get_status (const PluginInfoPtr&);
+	PluginStatusType get_status (const PluginInfoPtr&) const;
 
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;

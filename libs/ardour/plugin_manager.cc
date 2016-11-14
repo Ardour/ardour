@@ -1242,7 +1242,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 
 PluginManager::PluginStatusType
-PluginManager::get_status (const PluginInfoPtr& pi)
+PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
 	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
