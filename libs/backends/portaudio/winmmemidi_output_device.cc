@@ -118,13 +118,7 @@ WinMMEMidiOutputDevice::close (std::string& error_msg)
 {
 	// return error message for first error encountered?
 	bool success = true;
-	MMRESULT result = midiOutReset (m_handle);
-	if (result != MMSYSERR_NOERROR) {
-		error_msg = get_error_string (result);
-		DEBUG_MIDI (error_msg);
-		success = false;
-	}
-	result = midiOutClose (m_handle);
+	MMRESULT result = midiOutClose (m_handle);
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
 		DEBUG_MIDI (error_msg);
