@@ -1395,7 +1395,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	statuses.insert (ps);
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()
 {
 #ifdef WINDOWS_VST_SUPPORT
@@ -1408,7 +1408,7 @@ PluginManager::windows_vst_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::mac_vst_plugin_info ()
 {
 #ifdef MACVST_SUPPORT
@@ -1419,7 +1419,7 @@ PluginManager::mac_vst_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::lxvst_plugin_info ()
 {
 #ifdef LXVST_SUPPORT
@@ -1430,14 +1430,14 @@ PluginManager::lxvst_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::ladspa_plugin_info ()
 {
 	assert(_ladspa_plugin_info);
 	return *_ladspa_plugin_info;
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
 #ifdef LV2_SUPPORT
@@ -1448,7 +1448,7 @@ PluginManager::lv2_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
 #ifdef AUDIOUNIT_SUPPORT
@@ -1459,7 +1459,7 @@ PluginManager::au_plugin_info ()
 	return _empty_plugin_info;
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::lua_plugin_info ()
 {
 	assert(_lua_plugin_info);

@@ -41,11 +41,11 @@ PluginsTest::test ()
 		cout << "LADSPA search path includes: " << *i << endl;
 	}
 
-	PluginInfoList& ladspa_list = pm.ladspa_plugin_info ();
+	const PluginInfoList& ladspa_list = pm.ladspa_plugin_info ();
 
 	cout << "Number of Ladspa plugins found: " << ladspa_list.size () << endl;
 
-	for (PluginInfoList::iterator i = ladspa_list.begin (); i != ladspa_list.end(); ++i)
+	for (PluginInfoList::const_iterator i = ladspa_list.begin (); i != ladspa_list.end(); ++i)
 	{
 		print_plugin_info (*i);
 	}

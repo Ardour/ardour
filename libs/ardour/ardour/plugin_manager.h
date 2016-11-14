@@ -45,13 +45,13 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	~PluginManager ();
 
-	ARDOUR::PluginInfoList &windows_vst_plugin_info ();
-	ARDOUR::PluginInfoList &lxvst_plugin_info ();
-	ARDOUR::PluginInfoList &mac_vst_plugin_info ();
-	ARDOUR::PluginInfoList &ladspa_plugin_info ();
-	ARDOUR::PluginInfoList &lv2_plugin_info ();
-	ARDOUR::PluginInfoList &au_plugin_info ();
-	ARDOUR::PluginInfoList &lua_plugin_info ();
+	const ARDOUR::PluginInfoList& windows_vst_plugin_info ();
+	const ARDOUR::PluginInfoList& lxvst_plugin_info ();
+	const ARDOUR::PluginInfoList& mac_vst_plugin_info ();
+	const ARDOUR::PluginInfoList& ladspa_plugin_info ();
+	const ARDOUR::PluginInfoList& lv2_plugin_info ();
+	const ARDOUR::PluginInfoList& au_plugin_info ();
+	const ARDOUR::PluginInfoList& lua_plugin_info ();
 
 	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
