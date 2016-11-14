@@ -1270,14 +1270,12 @@ Selection::get_state () const
 	}
 
 	/* midi region views have thir own internal selection. */
-	XMLNode* n = NULL;
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > rid_notes;
 	editor->get_per_region_note_selection (rid_notes);
 
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
-		assert(n); // hint for clang static analysis
-		n = node->add_child (X_("MIDINotes"));
+		XMLNode* n = node->add_child (X_("MIDINotes"));
 		n->add_property (X_("region-id"), atoi((*rn_it).first.to_s().c_str()));
 
 		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
