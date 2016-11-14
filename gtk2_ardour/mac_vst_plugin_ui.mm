@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkquartz.h>
 
+#include "gui_thread.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/mac_vst_plugin.h"
 #include "ardour/vst_types.h"
