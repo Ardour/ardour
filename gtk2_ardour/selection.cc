@@ -1273,19 +1273,18 @@ Selection::get_state () const
 	XMLNode* n = NULL;
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > rid_notes;
 	editor->get_per_region_note_selection (rid_notes);
-	if (!rid_notes.empty()) {
-		n = node->add_child (X_("MIDINote"));
-	}
+
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
 		assert(n); // hint for clang static analysis
-		n->add_property (X_("region_id"), atoi((*rn_it).first.to_s().c_str()));
+		n = node->add_child (X_("MIDINotes"));
+		n->add_property (X_("region-id"), atoi((*rn_it).first.to_s().c_str()));
 
 		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
 			XMLNode* nc = n->add_child(X_("note"));
 
 			snprintf(buf, sizeof(buf), "%d", (*i)->id());
-			nc->add_property(X_("id"), string(buf));
+			nc->add_property (X_("note-id"), string(buf));
 		}
 	}
 
@@ -1380,7 +1379,7 @@ Selection::set_state (XMLNode const & node, int)
 				regions.pending.push_back (id);
 			}
 
-		} else if ((*i)->name() == X_("MIDINote")) {
+		} else if ((*i)->name() == X_("MIDINotes")) {
 			XMLProperty const * prop_region_id = (*i)->property (X_("region-id"));
 
 			assert (prop_region_id);
@@ -1394,9 +1393,9 @@ Selection::set_state (XMLNode const & node, int)
 			XMLNodeList children = (*i)->children ();
 
 			for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
-				XMLProperty const* prop_id = (*ci)->property (X_("id"));
+				XMLProperty const * prop_id = (*ci)->property (X_("note-id"));
 				if (prop_id) {
-					Evoral::event_id_t id = atoi (prop_id->value ());
+					Evoral::event_id_t id = atoi(prop_id->value());
 					notes.push_back (id);
 				}
 			}
