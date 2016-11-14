@@ -320,8 +320,10 @@ maybe_set_program (VSTState* vstfx)
 	}
 
 	if (vstfx->want_chunk == 1) {
+		pthread_mutex_lock (&vstfx->state_lock);
 		vstfx->plugin->dispatcher (vstfx->plugin, 24 /* effSetChunk */, 1, vstfx->wanted_chunk_size, vstfx->wanted_chunk, 0);
 		vstfx->want_chunk = 0;
+		pthread_mutex_unlock (&vstfx->state_lock);
 	}
 }
 

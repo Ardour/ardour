@@ -129,6 +129,7 @@ struct LIBARDOUR_API _VSTState
 
 	struct _VSTState * next;
 	pthread_mutex_t    lock;
+	pthread_mutex_t    state_lock;
 	pthread_cond_t     window_status_change;
 	pthread_cond_t     plugin_dispatcher_called;
 	pthread_cond_t     window_created;
@@ -136,6 +137,7 @@ struct LIBARDOUR_API _VSTState
 
 	void init () {
 		pthread_mutex_init (&lock, 0);
+		pthread_mutex_init (&state_lock, 0);
 		pthread_cond_init (&window_status_change, 0);
 		pthread_cond_init (&plugin_dispatcher_called, 0);
 		pthread_cond_init (&window_created, 0);

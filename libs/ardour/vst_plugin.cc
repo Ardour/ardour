@@ -172,8 +172,9 @@ VSTPlugin::set_chunk (gchar const * data, bool single)
 	int r = 0;
 	guchar* raw_data = g_base64_decode (data, &size);
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		pthread_mutex_lock (&_state->state_lock);
 		r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+		pthread_mutex_unlock (&_state->state_lock);
 	}
 	g_free (raw_data);
 	return r;
@@ -566,8 +567,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
-	Glib::Threads::Mutex::Lock lm (_state_lock, Glib::Threads::TRY_LOCK);
-	if (!lm.locked()) {
+	if (pthread_mutex_trylock (&_state->state_lock)) {
 		/* by convention 'effSetChunk' should not be called while processing
 		 * http://www.reaper.fm/sdk/vst/vst_ext.php
 		 *
@@ -645,6 +645,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 	_midi_out_buf = 0;
 
+	pthread_mutex_unlock (&_state->state_lock);
 	return 0;
 }
 
