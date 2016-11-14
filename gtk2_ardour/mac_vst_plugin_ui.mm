@@ -56,6 +56,8 @@ MacVSTPluginUI::MacVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::share
 	low_box.signal_realize().connect (mem_fun (this, &MacVSTPluginUI::lower_box_realized));
 	pack_start (low_box, true, true);
 	low_box.show ();
+	vst->LoadPresetProgram.connect (_program_connection, invalidator (*this), boost::bind (&MacVSTPluginUI::set_program, this), gui_context());
+
 }
 
 MacVSTPluginUI::~MacVSTPluginUI ()
@@ -148,4 +150,31 @@ MacVSTPluginUI::idle ()
 	AEffect* plugin = _vst->state()->plugin;
 	_vst->state()->wantIdle = plugin->dispatcher (plugin, effEditIdle, 0, 0, NULL, 0);
 	return true; // _vst->state()->wantIdle;
+}
+
+void
+MacVSTPluginUI::set_program ()
+{
+	VSTState* vstfx = _vst->state();
+
+	if (vstfx->want_program != -1) {
+		if (vstfx->vst_version >= 2) {
+			vstfx->plugin->dispatcher (vstfx->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
+		}
+
+		vstfx->plugin->dispatcher (vstfx->plugin, effSetProgram, 0, vstfx->want_program, NULL, 0);
+
+		if (vstfx->vst_version >= 2) {
+			vstfx->plugin->dispatcher (vstfx->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
+		}
+
+		vstfx->want_program = -1;
+	}
+
+	if (vstfx->want_chunk == 1) {
+		pthread_mutex_lock (&vstfx->state_lock);
+		vstfx->plugin->dispatcher (vstfx->plugin, 24 /* effSetChunk */, 1, vstfx->wanted_chunk_size, vstfx->wanted_chunk, 0);
+		vstfx->want_chunk = 0;
+		pthread_mutex_unlock (&vstfx->state_lock);
+	}
 }

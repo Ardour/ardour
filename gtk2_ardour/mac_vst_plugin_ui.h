@@ -51,9 +51,11 @@ private:
 	int get_XID ();
 	bool idle ();
 	void lower_box_realized ();
+	void set_program ();
 	NSWindow* get_nswindow();
 
 	Gtk::EventBox low_box;
 	NSView*          _ns_view;
 	sigc::connection _idle_connection;
+	PBD::ScopedConnection _program_connection;
 };
