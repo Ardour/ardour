@@ -3260,7 +3260,9 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 		TempoSection* prev_to_prev_t = 0;
 		const frameoffset_t fr_off = end_frame - frame;
 
-		if (prev_t && prev_t->pulse() > 0.0) {
+		assert (prev_t);
+
+		if (prev_t->pulse() > 0.0) {
 			prev_to_prev_t = const_cast<TempoSection*>(&tempo_section_at_minute_locked (future_map, minute_at_frame (prev_t->frame() - 1)));
 		}
 
