@@ -1333,6 +1333,7 @@ TempoMap::recompute_tempi (Metrics& metrics)
 			prev_t = t;
 		}
 	}
+	assert (prev_t);
 	prev_t->set_c_func (0.0);
 }
 
@@ -1570,6 +1571,7 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
 			prev_m = m;
 		}
 	}
+	assert (prev_m);
 
 	TempoSection* t;
 
@@ -1583,6 +1585,7 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
 		}
 
 	}
+	assert (prev_t);
 
 	return prev_t->minute_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse());
 }
@@ -1800,6 +1803,7 @@ TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) con
 			prev_m = m;
 		}
 	}
+	assert (prev_m);
 
 	double const ret = ((pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat();
 	return ret;
@@ -1946,6 +1950,7 @@ TempoMap::bbt_at_beat_locked (const Metrics& metrics, const double& b) const
 			prev_m = m;
 		}
 	}
+	assert (prev_m);
 
 	const double beats_in_ms = beats - prev_m->beat();
 	const uint32_t bars_in_ms = (uint32_t) floor (beats_in_ms / prev_m->divisions_per_bar());
@@ -2082,6 +2087,8 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	const double beats_in_ms = (pulse - prev_m->pulse()) * prev_m->note_divisor();
 	const uint32_t bars_in_ms = (uint32_t) floor (beats_in_ms / prev_m->divisions_per_bar());
@@ -2412,6 +2419,7 @@ TempoMap::quarter_notes_between_frames_locked (const Metrics& metrics, const fra
 			prev_t = t;
 		}
 	}
+	assert (prev_t);
 	const double start_qn = prev_t->pulse_at_frame (start);
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
@@ -3919,6 +3927,7 @@ TempoMap::frames_per_quarter_note_at (const framepos_t& frame, const framecnt_t&
 			ts_at = t;
 		}
 	}
+	assert (ts_at);
 
 	if (ts_after) {
 		return  (60.0 * _frame_rate) / ts_at->tempo_at_minute (minute_at_frame (frame)).quarter_notes_per_minute();
