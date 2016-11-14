@@ -80,25 +80,7 @@ static VSTState *
 mac_vst_new ()
 {
 	VSTState* mac_vst = (VSTState *) calloc (1, sizeof (VSTState));
-
-	/*Mutexes*/
-	pthread_mutex_init (&mac_vst->lock, 0);
-	pthread_cond_init (&mac_vst->window_status_change, 0); // XXX  unused
-	pthread_cond_init (&mac_vst->plugin_dispatcher_called, 0); // XXX unused
-	pthread_cond_init (&mac_vst->window_created, 0); // XXX unused
-
-	/*Safe values*/
-	mac_vst->want_program = -1;
-	mac_vst->want_chunk = 0;
-	mac_vst->n_pending_keys = 0;
-	mac_vst->has_editor = 0;
-	mac_vst->program_set_without_editor = 0;
-	mac_vst->linux_window = 0;
-	mac_vst->linux_plugin_ui_window = 0;
-	mac_vst->eventProc = 0;
-	mac_vst->extra_data = 0;
-	mac_vst->want_resize = 0;
-
+	mac_vst0->init();
 	return mac_vst;
 }
 

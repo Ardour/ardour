@@ -218,13 +218,7 @@ static VSTState*
 fst_new (void)
 {
 	VSTState* fst = (VSTState*) calloc (1, sizeof (VSTState));
-	pthread_mutex_init (&fst->lock, NULL);
-	pthread_cond_init (&fst->window_status_change, NULL); // unused ?? -> TODO check gtk2ardour
-	pthread_cond_init (&fst->plugin_dispatcher_called, NULL); // unused ??
-	fst->want_program = -1;
-	fst->want_chunk = 0;
-	fst->n_pending_keys = 0;
-	fst->has_editor = 0;
+	fst->init();
 #ifdef PLATFORM_WINDOWS
 	fst->voffset = 50;
 	fst->hoffset = 0;
@@ -232,7 +226,6 @@ fst_new (void)
 	fst->voffset = 24;
 	fst->hoffset = 6;
 #endif
-	fst->program_set_without_editor = 0;
 	return fst;
 }
 

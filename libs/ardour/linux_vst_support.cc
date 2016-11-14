@@ -83,27 +83,7 @@ static VSTState *
 vstfx_new ()
 {
 	VSTState* vstfx = (VSTState *) calloc (1, sizeof (VSTState));
-
-	/*Mutexes*/
-
-	pthread_mutex_init (&vstfx->lock, 0);
-	pthread_cond_init (&vstfx->window_status_change, 0);
-	pthread_cond_init (&vstfx->plugin_dispatcher_called, 0);
-	pthread_cond_init (&vstfx->window_created, 0);
-
-	/*Safe values*/
-
-	vstfx->want_program = -1;
-	vstfx->want_chunk = 0;
-	vstfx->n_pending_keys = 0;
-	vstfx->has_editor = 0;
-	vstfx->program_set_without_editor = 0;
-	vstfx->linux_window = 0;
-	vstfx->linux_plugin_ui_window = 0;
-	vstfx->eventProc = 0;
-	vstfx->extra_data = 0;
-	vstfx->want_resize = 0;
-
+	vstfx->init ();
 	return vstfx;
 }
 
