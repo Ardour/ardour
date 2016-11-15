@@ -220,7 +220,16 @@ static VSTState*
 fst_new (void)
 {
 	VSTState* fst = (VSTState*) calloc (1, sizeof (VSTState));
-	vststate_init (fst);
+
+	//vststate_init (fst);
+	pthread_mutex_init (&state->lock, 0);
+	pthread_mutex_init (&state->state_lock, 0);
+	pthread_cond_init (&state->window_status_change, 0);
+	pthread_cond_init (&state->plugin_dispatcher_called, 0);
+	pthread_cond_init (&state->window_created, 0);
+	state->want_program = -1;
+	//
+
 #ifdef PLATFORM_WINDOWS
 	fst->voffset = 50;
 	fst->hoffset = 0;
