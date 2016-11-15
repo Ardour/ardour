@@ -156,26 +156,5 @@ MacVSTPluginUI::idle ()
 void
 MacVSTPluginUI::set_program ()
 {
-	VSTState* vstfx = _vst->state();
-
-	if (vstfx->want_program != -1) {
-		if (vstfx->vst_version >= 2) {
-			vstfx->plugin->dispatcher (vstfx->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
-		}
-
-		vstfx->plugin->dispatcher (vstfx->plugin, effSetProgram, 0, vstfx->want_program, NULL, 0);
-
-		if (vstfx->vst_version >= 2) {
-			vstfx->plugin->dispatcher (vstfx->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
-		}
-
-		vstfx->want_program = -1;
-	}
-
-	if (vstfx->want_chunk == 1) {
-		pthread_mutex_lock (&vstfx->state_lock);
-		vstfx->plugin->dispatcher (vstfx->plugin, 24 /* effSetChunk */, 1, vstfx->wanted_chunk_size, vstfx->wanted_chunk, 0);
-		vstfx->want_chunk = 0;
-		pthread_mutex_unlock (&vstfx->state_lock);
-	}
+	vststate_maybe_set_program (_vst->state());
 }
