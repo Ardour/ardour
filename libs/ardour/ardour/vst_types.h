@@ -138,6 +138,13 @@ struct LIBARDOUR_API _VSTState
 
 typedef struct _VSTState VSTState;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 LIBARDOUR_API extern void vststate_init (VSTState* state);
+LIBARDOUR_API extern void vststate_maybe_set_program (VSTState* state);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

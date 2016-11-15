@@ -72,33 +72,6 @@ vstedit_wndproc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 
-static void
-maybe_set_program (VSTState* fst)
-{
-	if (fst->want_program != -1) {
-		if (fst->vst_version >= 2) {
-			fst->plugin->dispatcher (fst->plugin, effBeginSetProgram, 0, 0, NULL, 0);
-		}
-
-		fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
-
-		if (fst->vst_version >= 2) {
-			fst->plugin->dispatcher (fst->plugin, effEndSetProgram, 0, 0, NULL, 0);
-		}
-		fst->want_program = -1;
-	}
-
-	if (fst->want_chunk == 1) {
-		// XXX check
-		// 24 == audioMasterGetAutomationState,
-		// 48 == audioMasterGetChunkFile
-		pthread_mutex_lock (&fst->state_lock);
-		fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
-		fst->want_chunk = 0;
-		pthread_mutex_unlock (&fst->state_lock);
-	}
-}
-
 static VOID CALLBACK
 idle_hands(
 		HWND hwnd,        // handle to window for timer messages
@@ -148,8 +121,8 @@ idle_hands(
 		fst->n_pending_keys = 0;
 #endif
 
-		/* See comment for maybe_set_program call below */
-		maybe_set_program (fst);
+		/* See comment for call below */
+		vststate_maybe_set_program (fst);
 		fst->want_program = -1;
 		fst->want_chunk = 0;
 		/* If we don't have an editor window yet, we still need to
@@ -161,7 +134,7 @@ idle_hands(
 		 * and so it will be done again if and when the GUI arrives.
 		 */
 		if (fst->program_set_without_editor == 0) {
-			maybe_set_program (fst);
+			vststate_maybe_set_program (fst);
 			fst->program_set_without_editor = 1;
 		}
 
@@ -220,15 +193,7 @@ static VSTState*
 fst_new (void)
 {
 	VSTState* fst = (VSTState*) calloc (1, sizeof (VSTState));
-
-	//vststate_init (fst);
-	pthread_mutex_init (&fst->lock, 0);
-	pthread_mutex_init (&fst->state_lock, 0);
-	pthread_cond_init (&fst->window_status_change, 0);
-	pthread_cond_init (&fst->plugin_dispatcher_called, 0);
-	pthread_cond_init (&fst->window_created, 0);
-	fst->want_program = -1;
-	//
+	vststate_init (fst);
 
 #ifdef PLATFORM_WINDOWS
 	fst->voffset = 50;
