@@ -92,10 +92,10 @@ maybe_set_program (VSTState* fst)
 		// XXX check
 		// 24 == audioMasterGetAutomationState,
 		// 48 == audioMasterGetChunkFile
-		pthread_mutex_lock (&vstfx->state_lock);
+		pthread_mutex_lock (&fst->state_lock);
 		fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
 		fst->want_chunk = 0;
-		pthread_mutex_unlock (&vstfx->state_lock);
+		pthread_mutex_unlock (&fst->state_lock);
 	}
 }
 
