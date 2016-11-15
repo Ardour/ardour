@@ -2259,19 +2259,19 @@ msgstr ""
 
 #: ardour_ui_ed.cc:194
 msgid "Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Prendre un cliché (et continuer à travailler sur la version actuelle) ..."
 
 #: ardour_ui_ed.cc:197
 msgid "Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Prendre un cliché (et basculer sur la nouvelle version) ..."
 
 #: ardour_ui_ed.cc:200
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Prendre rapidement un cliché (et continuer à travailler sur la version actuelle) ..."
 
 #: ardour_ui_ed.cc:203
 msgid "Quick Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Prendre rapidement un cliché (et basculer sur la nouvelle version) ..."
 
 #: ardour_ui_ed.cc:207
 msgid "Save As..."
