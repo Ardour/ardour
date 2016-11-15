@@ -83,7 +83,7 @@ static VSTState *
 vstfx_new ()
 {
 	VSTState* vstfx = (VSTState *) calloc (1, sizeof (VSTState));
-	vstfx->init ();
+	vststate_init (vstfx);
 	return vstfx;
 }
 

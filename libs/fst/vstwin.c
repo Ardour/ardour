@@ -220,7 +220,7 @@ static VSTState*
 fst_new (void)
 {
 	VSTState* fst = (VSTState*) calloc (1, sizeof (VSTState));
-	fst->init();
+	vststate_init (fst);
 #ifdef PLATFORM_WINDOWS
 	fst->voffset = 50;
 	fst->hoffset = 0;

@@ -80,7 +80,7 @@ static VSTState *
 mac_vst_new ()
 {
 	VSTState* mac_vst = (VSTState *) calloc (1, sizeof (VSTState));
-	mac_vst->init();
+	vststate_init (mac_vst);
 	return mac_vst;
 }
 

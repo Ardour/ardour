@@ -36,6 +36,7 @@
 #endif
 #include "../ardour/filesystem_paths.cc"
 #include "../ardour/directory_names.cc"
+#include "../ardour/vst_helper.cc"
 
 
 #ifdef LXVST_SUPPORT

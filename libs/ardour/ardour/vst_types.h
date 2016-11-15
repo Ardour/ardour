@@ -134,26 +134,10 @@ struct LIBARDOUR_API _VSTState
 	pthread_cond_t     plugin_dispatcher_called;
 	pthread_cond_t     window_created;
 	int                been_activated;
-
-	void init () {
-		pthread_mutex_init (&lock, 0);
-		pthread_mutex_init (&state_lock, 0);
-		pthread_cond_init (&window_status_change, 0);
-		pthread_cond_init (&plugin_dispatcher_called, 0);
-		pthread_cond_init (&window_created, 0);
-		want_program = -1;
-		want_chunk = 0;
-		n_pending_keys = 0;
-		has_editor = 0;
-		program_set_without_editor = 0;
-		linux_window = 0;
-		linux_plugin_ui_window = 0;
-		eventProc = 0;
-		extra_data = 0;
-		want_resize = 0;
-	}
 };
 
 typedef struct _VSTState VSTState;
+
+LIBARDOUR_API extern void vststate_init (VSTState* state);
 
 #endif
