@@ -1316,6 +1316,8 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 		}
 	}
 
+	_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
+
 	/* fix problems with old sessions corrupted by impossible
 	   values for _stretch or _shift
 	*/
