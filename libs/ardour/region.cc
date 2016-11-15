@@ -1313,10 +1313,10 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 			} else {
 				_beat = _session.tempo_map().beat_at_bbt (bbt_time);
 			}
+			/* no position property change for legacy Property, so we do this here */
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
 	}
-
-	_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 
 	/* fix problems with old sessions corrupted by impossible
 	   values for _stretch or _shift
