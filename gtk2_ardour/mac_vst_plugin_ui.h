@@ -34,6 +34,14 @@
 
 #include "vst_plugin_ui.h"
 
+class MacVSTPluginUI;
+
+@interface ResizeNotificationObject : NSObject {
+	@private
+		MacVSTPluginUI* plugin_ui;
+}
+@end
+
 class MacVSTPluginUI : public VSTPluginUI
 {
 public:
@@ -46,11 +54,19 @@ public:
 	int package (Gtk::Window &);
 
 	void forward_key_event (GdkEventKey *);
+	void view_resized ();
+
+protected:
+	void lower_box_realized ();
+	bool lower_box_visibility_notify (GdkEventVisibility*);
+	void lower_box_map ();
+	void lower_box_unmap ();
+	void lower_box_size_request (GtkRequisition*);
+	void lower_box_size_allocate (Gtk::Allocation&);
 
 private:
 	int get_XID ();
 	bool idle ();
-	void lower_box_realized ();
 	void set_program ();
 	NSWindow* get_nswindow();
 
@@ -58,4 +74,5 @@ private:
 	NSView*          _ns_view;
 	sigc::connection _idle_connection;
 	PBD::ScopedConnection _program_connection;
+	ResizeNotificationObject* _resize_notifier;
 };
