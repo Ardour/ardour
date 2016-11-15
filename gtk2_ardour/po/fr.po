@@ -13111,7 +13111,7 @@ msgstr "<b>Type :</b>"
 
 #: script_selector.cc:49
 msgid "<b>Author:</b>"
-msgstr "<b>Autheur :</b>"
+msgstr "<b>Auteur :</b>"
 
 #: script_selector.cc:55
 msgid "<b>Description:</b>"
