@@ -1404,7 +1404,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\vst_helper.cc"
+				RelativePath="..\vst_state.cc"
 				>
 			</File>
 			<File
