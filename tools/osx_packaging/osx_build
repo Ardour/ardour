@@ -547,6 +547,10 @@ if test "$HAVE_SESSION_UTILS" = true ; then
 	done
 fi
 
+if test -f "$Frameworks/ardour-vst-scanner"; then
+	executables="$executables ../lib/ardour-vst-scanner"
+fi
+
 for exe in $executables; do
     echo "Processing Executable: $exe"
     EXE=$APPROOT/MacOS/$exe
