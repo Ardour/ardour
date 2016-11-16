@@ -332,7 +332,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	unsigned get_grid_beat_divisions(framepos_t position);
 	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
 
-	unsigned get_grid_music_divisions (uint32_t event_state);
+	int32_t get_grid_music_divisions (uint32_t event_state);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);

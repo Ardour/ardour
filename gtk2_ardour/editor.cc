@@ -4055,7 +4055,7 @@ Editor::get_grid_beat_divisions(framepos_t position)
     if the grid is snapped to bars, returns -1.
     @param event_state the current keyboard modifier mask.
 */
-unsigned
+int32_t
 Editor::get_grid_music_divisions (uint32_t event_state)
 {
 	if (snap_mode() == Editing::SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {

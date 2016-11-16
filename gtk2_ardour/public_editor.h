@@ -298,7 +298,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration) = 0;
 	virtual unsigned get_grid_beat_divisions(framepos_t position) = 0;
 	virtual Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position) = 0;
-	virtual unsigned get_grid_music_divisions (uint32_t event_state) = 0;
+	virtual int32_t get_grid_music_divisions (uint32_t event_state) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
