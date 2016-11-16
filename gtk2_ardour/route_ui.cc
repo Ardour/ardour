@@ -2341,19 +2341,20 @@ void
 RouteUI::fan_out (bool to_busses, bool group)
 {
 	DisplaySuspender ds;
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+	boost::shared_ptr<ARDOUR::Route> route = _route;
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (route->the_instrument ());
 	assert (pi);
 
 	const uint32_t n_outputs = pi->output_streams ().n_audio ();
-	if (_route->n_outputs ().n_audio () != n_outputs) {
+	if (route->n_outputs ().n_audio () != n_outputs) {
 		MessageDialog msg (string_compose (
 					_("The Plugin's number of audio outputs ports (%1) does not match the Tracks's number of audio outputs (%2). Cannot fan out."),
-					n_outputs, _route->n_outputs ().n_audio ()));
+					n_outputs, route->n_outputs ().n_audio ()));
 		msg.run ();
 		return;
 	}
 
-#define BUSNAME  pd.group_name + "(" + _route->name () + ")"
+#define BUSNAME  pd.group_name + "(" + route->name () + ")"
 
 	/* count busses and channels/bus */
 	boost::shared_ptr<Plugin> plugin = pi->plugin ();
@@ -2375,8 +2376,8 @@ RouteUI::fan_out (bool to_busses, bool group)
 		outputs = std::max (outputs, _session->master_out ()->n_inputs ().n_audio ());
 	}
 
-	_route->output ()->disconnect (this);
-	_route->panner_shell ()->set_bypassed (true);
+	route->output ()->disconnect (this);
+	route->panner_shell ()->set_bypassed (true);
 
 	RouteList to_group;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
@@ -2401,7 +2402,7 @@ RouteUI::fan_out (bool to_busses, bool group)
 			r->input ()->disconnect (this);
 		}
 		to_group.push_back (r);
-		_route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
+		route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
 	}
 #undef BUSNAME
 
@@ -2420,7 +2421,7 @@ RouteUI::fan_out (bool to_busses, bool group)
 			rg->set_gain (false);
 		}
 
-		GroupTabs::set_group_color (rg, _route->presentation_info().color());
+		GroupTabs::set_group_color (rg, route->presentation_info().color());
 		for (RouteList::const_iterator i = to_group.begin(); i != to_group.end(); ++i) {
 			rg->add (*i);
 		}
