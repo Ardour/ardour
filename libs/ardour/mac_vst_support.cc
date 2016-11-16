@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <dlfcn.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
