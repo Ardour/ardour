@@ -27,6 +27,8 @@ def build(bld):
 	    m2_map_mk2.cc
 	    m2_dev_mikro.cc
 	    m2_map_mikro.cc
+	    ui_knob.cc
+	    ui_menu.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_maschine2"' ]
