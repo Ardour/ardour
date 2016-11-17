@@ -2401,9 +2401,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (prop == 0) {
 #ifdef WINDOWS_VST_SUPPORT
-		/* older sessions contain VST plugins with only an "id" field.
-		 */
-
+		/* older sessions contain VST plugins with only an "id" field.  */
 		if (type == ARDOUR::Windows_VST) {
 			prop = node.property ("id");
 		}
@@ -2411,7 +2409,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 #ifdef LXVST_SUPPORT
 		/*There shouldn't be any older sessions with linuxVST support.. but anyway..*/
-
 		if (type == ARDOUR::LXVST) {
 			prop = node.property ("id");
 		}
@@ -2427,24 +2424,24 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
-	/* treat linux and windows VST plugins equivalent if they have the same uniqueID
+	/* treat VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
 #ifdef LXVST_SUPPORT
-	if (plugin == 0 && type == ARDOUR::Windows_VST) {
+	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST) {
 		type = ARDOUR::LXVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	if (plugin == 0 && type == ARDOUR::LXVST) {
+	if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::Windows_VST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
 #endif
 
 #ifdef MACVST_SUPPORT
-	if (plugin == 0 && type == ARDOUR::MacVST) {
+	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
 		type = ARDOUR::MacVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
