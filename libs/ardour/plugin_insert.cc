@@ -2606,7 +2606,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			if (!_sidechain) {
 				add_sidechain (0);
 			}
-			_sidechain->set_state (**i, version);
+			if (!regenerate_xml_or_string_ids ()) {
+				_sidechain->set_state (**i, version);
+			}
 		}
 	}
 
