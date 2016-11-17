@@ -393,7 +393,10 @@ PBD::TLSF::TLSF (std::string name, size_t mem_pool_size)
 
 	assert (mem_pool);
 	assert (mem_pool_size >= sizeof(tlsf_t) + BHDR_OVERHEAD * 8);
+
+#ifndef __MINGW64__ // cast fails
 	assert (0 == (((unsigned long)mem_pool) & PTR_MASK));
+#endif
 
 #ifndef PLATFORM_WINDOWS
 	memset (mem_pool, 0, mem_pool_size); // make resident
