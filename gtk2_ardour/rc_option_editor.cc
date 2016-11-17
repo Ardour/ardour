@@ -3194,6 +3194,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
 
+#if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
+	bo = new BoolOption (
+			"",
+			_("Enable Mac VST support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
 	bo = new BoolOption (
 			"discover-vst-on-start",
 			_("Scan for [new] VST Plugins on Application Start"),
