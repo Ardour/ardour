@@ -50,6 +50,9 @@ def configure(conf):
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
     
+    if conf.is_defined('HAVE_HIDAPI'):
+        children += [ 'maschine2' ]
+
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
         children += [ 'osc' ]
 
@@ -88,6 +91,8 @@ def build(bld):
         bld.recurse('tranzport')
     if bld.is_defined('HAVE_USB'):
         bld.recurse('push2')
+    if bld.is_defined('HAVE_HIDAPI'):
+        bld.recurse('maschine2')
 
 def shutdown():
     autowaf.shutdown()
