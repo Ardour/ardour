@@ -213,12 +213,11 @@ MidiRegion::post_set (const PropertyChange& pc)
 		   so disallow (this has been set from XML state anyway).
 		*/
 		if (!_session.loading()) {
-			/* ensure this only updates non-musical regions */
-			if (position_lock_style() == AudioTime) {
-				update_length_beats (0);
-			}
+			update_length_beats (0);
 		}
-	} else if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
+	}
+
+	if (pc.contains (Properties::start) && !pc.contains (Properties::start_beats)) {
 		set_start_beats_from_start_frames ();
 	}
 }
