@@ -48,6 +48,61 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace ArdourSurface;
 
+#if 1 // TEST
+#include "gtkmm2ext/colors.h"
+#include "canvas/line.h"
+#include "canvas/rectangle.h"
+#include "canvas/text.h"
+
+#include "layout.h"
+#include "ui_knob.h"
+#include "ui_menu.h"
+
+class TestLayout : public Maschine2Layout
+{
+	public:
+		TestLayout (Maschine2& m2, Session& s, std::string const & name)
+			: Maschine2Layout (m2, s, name)
+			, knob (0)
+			, menu (0)
+		{
+			using namespace ArdourCanvas;
+			bg = new ArdourCanvas::Rectangle (this);
+			bg->set (ArdourCanvas::Rect (0, 0, display_width(), display_height()));
+			bg->set_fill_color (0x000000ff);
+
+			upper_line = new Line (this);
+			upper_line->set (Duple (0, 16.5), Duple (display_width(), 16.5));
+			upper_line->set_outline_color (0xffffffff);
+
+			knob = new Maschine2Knob(&m2, this);
+			knob->set_position (Duple (64 + 32, 32));
+			if (_session.master_out ()) {
+				knob->set_controllable (_session.master_out ()->gain_control());
+			}
+
+			std::vector<std::string> strs;
+			strs.push_back("T|sg1");
+			strs.push_back("Test2asdjasdlkjasldkjasd");
+			strs.push_back("Test3");
+			strs.push_back("Test4");
+			strs.push_back("Test5");
+			menu = new Maschine2Menu(&m2, this, strs);
+			menu->set_position (Duple (0, 19));
+
+		}
+		Maschine2Knob* get_knob () { return knob; }
+		Maschine2Menu* get_menu () { return menu; }
+	private:
+		ArdourCanvas::Rectangle* bg;
+		ArdourCanvas::Line* upper_line;
+		Maschine2Knob* knob;
+		Maschine2Menu* menu;
+};
+
+static TestLayout* tl = NULL;
+#endif
+
 Maschine2::Maschine2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("NI Maschine2")))
 	, AbstractUI<Maschine2Request> (name())
@@ -198,6 +253,12 @@ Maschine2::start ()
 	read_connection = read_timeout->connect (sigc::mem_fun (*this, &Maschine2::dev_read));
 	read_timeout->attach (main_loop ()->get_context());
 
+#if 1 // TEST
+	tl = new TestLayout (*this, *session, "test");
+	tl->get_menu ()->set_control (_ctrl->encoder (1));
+	tl->get_knob ()->set_control (_ctrl->encoder (2));
+#endif
+
 	return 0;
 }
 
@@ -284,5 +345,9 @@ Maschine2::dev_write ()
 Maschine2Layout*
 Maschine2::current_layout() const
 {
+#if 1 // TEST
+	return tl;
+#else
 	return NULL;
+#endif
 }
