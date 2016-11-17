@@ -477,13 +477,10 @@ fst_load (const char *path)
 			return NULL;
 		}
 
-		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
+		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain");
 
 		if (fhandle->main_entry == 0) {
-			if ((fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain"))) {
-				fprintf(stderr, "VST >= 2.4 plugin '%s'\n", path);
-				//PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
-			}
+			fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
 		}
 
 		if (fhandle->main_entry == 0) {
