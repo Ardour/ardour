@@ -302,6 +302,10 @@ PluginManager::refresh (bool cache_only)
 			BootMessage (_("Discovering Mac VST Plugins"));
 		}
 		mac_vst_refresh (cache_only);
+	} else if (_mac_vst_plugin_info) {
+		_mac_vst_plugin_info->clear ();
+	} else {
+		_mac_vst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 #endif //Native Mac VST SUPPORT
 
