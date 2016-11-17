@@ -2427,7 +2427,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	/* treat VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
 #ifdef LXVST_SUPPORT
-	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST) {
+	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::LXVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
