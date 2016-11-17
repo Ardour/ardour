@@ -327,6 +327,7 @@ protected:
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
 	int apply_track_delta (const int start, const int delta, const int skip, const bool distance_only = false) const;
+	int32_t current_music_divisor (framepos_t pos, int32_t button_state);
 
 	int _visible_y_low;
 	int _visible_y_high;

@@ -598,6 +598,29 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 	return i;
 }
 
+/** determines if @pos is the closest frame to an exact musical division when using SnapMagnetic.
+ *  (SnapMagnetic may snap to an exact division or no division at all).
+ *  this is a hotfix for musical region position/trim. we should really
+ *  deliver musical divisors when snapping magnetically to avoid this.
+*/
+int32_t
+RegionDrag::current_music_divisor (framepos_t pos, int32_t button_state)
+{
+	int32_t divisions = _editor->get_grid_music_divisions (button_state);
+
+	if (_editor->snap_mode() == Editing::SnapMagnetic && !ArdourKeyboard::indicates_snap (button_state)) {
+		TempoMap& tmap (_editor->session()->tempo_map());
+		const framepos_t exact_qn_pos = tmap.frame_at_quarter_note (tmap.exact_qn_at_frame (pos, divisions));
+
+		if (pos != exact_qn_pos) {
+			/* magnetic has not snapped */
+			divisions = 0;
+		}
+	}
+
+	return divisions;
+}
+
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v)
 	, _brushing (b)
@@ -1259,7 +1282,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true
-										       , _editor->get_grid_music_divisions (event->button.state));
+										       , current_music_divisor (original->position(), event->button.state));
 			/* need to set this so that the drop zone code can work. This doesn't
 			   actually put the region into the playlist, but just sets a weak pointer
 			   to it.
@@ -1481,7 +1504,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 
 		if (dest_rtv != 0) {
 			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
-									    modified_playlists, _editor->get_grid_music_divisions (ev_state));
+									    modified_playlists, current_music_divisor (where, ev_state));
 
 			if (new_view != 0) {
 				new_views.push_back (new_view);
@@ -1587,7 +1610,7 @@ RegionMoveDrag::finished_no_copy (
 
 			RegionView* new_view = insert_region_into_playlist (
 				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
-				modified_playlists, _editor->get_grid_music_divisions (ev_state)
+				modified_playlists, current_music_divisor (where, ev_state)
 				);
 
 			if (new_view == 0) {
@@ -1647,7 +1670,7 @@ RegionMoveDrag::finished_no_copy (
 				playlist->freeze ();
 			}
 
-			rv->region()->set_position (where, _editor->get_grid_music_divisions (ev_state));
+			rv->region()->set_position (where, current_music_divisor (where, ev_state));
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
@@ -2922,15 +2945,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
-
-	if (_editor->snap_mode() == Editing::SnapMagnetic) {
-		const framepos_t presnap = adjusted_frame (_drags->current_pointer_frame () + snap_delta (event->button.state), event, false);
-
-		if (presnap == adj_frame) {
-			divisions = 0;
-		}
-	}
+	int32_t divisions = current_music_divisor (adj_frame, event->button.state);
 
 	switch (_operation) {
 	case StartTrim:
