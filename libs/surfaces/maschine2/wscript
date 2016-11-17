@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load ('compiler_cxx')
+    autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
+    autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4', mandatory=True)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            maschine2.cc
+            callbacks.cc
+            canvas.cc
+	    interface.cc
+	    layout.cc
+	    m2_dev_mk2.cc
+	    m2_map_mk2.cc
+	    m2_dev_mikro.cc
+	    m2_map_mikro.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_maschine2"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
+    obj.includes     = [ '.', './maschine2']
+    obj.name         = 'libardour_maschine2'
+    obj.target       = 'ardour_maschine2'
+    obj.uselib       = 'CAIROMM PANGOMM'
+    obj.use          = 'libardour libardour_cp libpbd libcanvas hidapi libgtkmm2ext'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+def shutdown():
+    autowaf.shutdown()
