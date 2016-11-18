@@ -1047,7 +1047,7 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
 
-	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, false);
+	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("MacVST"), *x, !cache_only && !cancelled());
