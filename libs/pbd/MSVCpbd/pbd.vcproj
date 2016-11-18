@@ -613,10 +613,6 @@
 						/>
 					</FileConfiguration>
 				</File>
-				<File
-					RelativePath="..\msvc\msvc_poll.cc"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
