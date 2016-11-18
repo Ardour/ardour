@@ -2143,6 +2143,8 @@ MidiRegionView::delete_selection()
 	_selection.clear();
 
 	apply_diff ();
+
+	_note_entered = false;
 	hide_verbose_cursor ();
 }
 
