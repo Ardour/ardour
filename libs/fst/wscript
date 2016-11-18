@@ -88,7 +88,7 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
-    if re.search ("freebsd", sys.platform) != None:
+    if re.search ("freebsd", sys.platform) != None or re.search ("openbsd", sys.platform) != None:
         obj.defines.append('_POSIX_C_SOURCE=200809')
         obj.defines.append('_XOPEN_SOURCE=700')
 
