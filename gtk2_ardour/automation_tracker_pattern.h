@@ -30,6 +30,8 @@ namespace ARDOUR {
 	class AutomationControl;
 };
 
+// AutomationControl as opposed to AutomationList is used to easily retrieve
+// the associated Parameter of each AutomationList.
 typedef std::set<boost::shared_ptr<ARDOUR::AutomationControl> > AutomationControlSet;
 
 /**

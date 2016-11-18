@@ -210,21 +210,33 @@ MidiTrackerEditor::is_pan_type (const Evoral::Parameter& param) const {
 }
 
 size_t
-MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
+MidiTrackerEditor::select_available_automation_column ()
 {
 	// Find the next available column
 	if (available_automation_columns.empty()) {
-		std::cout << "Warning: no more available automation column for " << param.type() << "/" << (int)param.channel() << "/" << param.id() << std::endl;
+		std::cout << "Warning: no more available automation column" << std::endl;
 		return 0;
 	}
 	std::set<size_t>::iterator it = available_automation_columns.begin();
 	size_t column = *it;
 	available_automation_columns.erase(it);
 
+	return column;
+}
+
+size_t
+MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
+{
+	// Select the next available column
+	size_t column = select_available_automation_column ();
+	if (column == 0)
+		return column;
+
 	// Associate that column to the parameter
 	col2param.insert(ColParamBimap::value_type(column, param));
 
 	// Set the column title
+	// TODO: maybe AutomationControl::desc() could be used instead
 	string name = is_pan_type(param) ?
 		route->panner()->describe_parameter (param)
 		: route->describe_parameter (param);
@@ -239,11 +251,30 @@ MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
 size_t
 MidiTrackerEditor::add_midi_automation_column (const Evoral::Parameter& param)
 {
-	// TODO
-	return 0;
+	// Select the next available column
+	size_t column = select_available_automation_column ();
+	if (column == 0)
+		return column;
+
+	// Associate that column to the parameter
+	col2param.insert(ColParamBimap::value_type(column, param));
+
+	// Set the column title
+	stringstream ss;
+	ss << route->describe_parameter (param)
+	   << "[" << (int)param.channel() << "]";
+	view.get_column(column)->set_title (ss.str());
+
+	std::cout << "add_midi_automation_column: name = " << ss.str()
+	          << ", column = " << column << std::endl;
+
+	return column;
 }
 
-/** Add an AutomationTimeAxisView to display automation for a processor's parameter */
+/**
+ * Add an AutomationTimeAxisView to display automation for a processor's
+ * parameter.
+ */
 void
 MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor> processor, const Evoral::Parameter& what)
 {
@@ -264,13 +295,10 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	}
 
 	// Find the next available column
-	if (available_automation_columns.empty()) {
-		std::cout << "Warning: no more available automation column for " << processor->name() << ":" << what.type() << "/" << (int)what.channel() << "/" << what.id() << std::endl;
+	pan->column = select_available_automation_column ();
+	if (pan->column) {
 		return;
 	}
-	std::set<size_t>::iterator it = available_automation_columns.begin();
-	pan->column = *it;
-	available_automation_columns.erase(it);
 
 	// Associate that column to the parameter
 	col2param.insert(ColParamBimap::value_type(pan->column, what));
@@ -321,12 +349,11 @@ MidiTrackerEditor::show_all_automation ()
 void
 MidiTrackerEditor::show_existing_midi_automations ()
 {
-	const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();	
+	const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
 	for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
-		// TODO: where is column store
-		size_t column;
-		if (column == 0)
-			column = add_midi_automation_column (*p);
+		ColParamBimap::right_const_iterator it = col2param.right.find(*p);
+		size_t column = (it == col2param.right.end()) || (it->second == 0) ?
+			add_midi_automation_column (*p) : it->second;
 
 		// Still no column available, skip
 		if (column == 0)
@@ -1544,9 +1571,8 @@ MidiTrackerEditor::build_param2actrl ()
 
 	// Midi
 	const set<Evoral::Parameter> midi_params = midi_track()->midi_playlist()->contained_automation();
-	for (set<Evoral::Parameter>::const_iterator i = midi_params.begin(); i != midi_params.end(); ++i) {
-		param2actrl[*i] = route->automation_control(*i, true);
-	}
+	for (set<Evoral::Parameter>::const_iterator i = midi_params.begin(); i != midi_params.end(); ++i)
+		param2actrl[*i] = midi_model->automation_control(*i);
 
 	// Processors
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
