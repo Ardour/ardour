@@ -35,9 +35,12 @@
 #include "osc.h"
 #include "osc_select_observer.h"
 
+#include <glibmm.h>
+
 #include "pbd/i18n.h"
 
 using namespace std;
+using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
