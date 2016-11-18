@@ -2597,6 +2597,18 @@ OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
 		}
 
 		if (s->send_level_controllable (sid)) {
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+			if (!r) {
+				return 0;
+			}
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(sid));
+			if (snd) {
+				if (val) {
+					snd->activate();
+				} else {
+					snd->deactivate();
+				}
+			}
 			return 0;
 		}
 
@@ -2624,7 +2636,20 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			return 0;
 		}
 		if (s->send_level_controllable (id)) {
-			return sel_send_fail ("send_enable", id + 1, 1, get_address (msg));
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+			if (!r) {
+				// should never get here
+				return sel_send_fail ("send_enable", id + 1, 0, get_address (msg));
+			}
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(id));
+			if (snd) {
+				if (val) {
+					snd->activate();
+				} else {
+					snd->deactivate();
+				}
+			}
+			return 0;
 		}
 	}
 	return sel_send_fail ("send_enable", id + 1, 0, get_address (msg));

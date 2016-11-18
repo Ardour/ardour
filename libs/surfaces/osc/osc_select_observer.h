@@ -29,6 +29,7 @@
 #include "pbd/controllable.h"
 #include "pbd/stateful.h"
 #include "ardour/types.h"
+#include "ardour/processor.h"
 
 class OSCSelectObserver
 {
@@ -75,6 +76,7 @@ class OSCSelectObserver
 	void send_end (void);
 	void send_restart (int);
 	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_enable (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
 	void eq_init (void);
 	void eq_end (void);
 	void eq_restart (int);

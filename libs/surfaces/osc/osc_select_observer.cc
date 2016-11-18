@@ -29,6 +29,8 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/route.h"
+#include "ardour/send.h"
+#include "ardour/processor.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -251,8 +253,17 @@ OSCSelectObserver::send_init()
 			enable_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
 			sends = true;
 		} else if (sends) {
-			// not used by Ardour, just mixbus so in Ardour always true
-			clear_strip_with_id ("/select/send_enable", nsends + 1, 1);
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
+			if (!r) {
+				// should never get here
+				clear_strip_with_id ("/select/send_enable", nsends + 1, 0);
+			}
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(nsends));
+			if (snd) {
+				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
+				proc->ActiveChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
+				clear_strip_with_id ("/select/send_enable", nsends + 1, proc->enabled());
+			}
 		}
 		// this should get signalled by the route the send goes to, (TODO)
 		if (!gainmode && sends) { // if the gain control is there, this is too
@@ -540,6 +551,15 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	lo_message_add_float (msg, value);
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Processor> proc)
+{
+	// with no delay value is wrong
+	usleep(10);
+
+	clear_strip_with_id ("/select/send_enable", id, proc->enabled());
 }
 
 void
