@@ -661,6 +661,12 @@ OSC::get_unix_server_url()
 }
 
 void
+OSC::gui_changed ()
+{
+	session->set_dirty();
+}
+
+void
 OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 {
 	if (!strip) {

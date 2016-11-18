@@ -153,6 +153,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int get_defaultfeedback() { return default_feedback; }
 	void set_defaultfeedback (int fb) { default_feedback = fb; }
 	void clear_devices ();
+	void gui_changed ();
 	std::string get_remote_port () { return remote_port; }
 	void set_remote_port (std::string pt) { remote_port = pt; }
 

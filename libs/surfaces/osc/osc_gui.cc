@@ -567,7 +567,8 @@ OSC_GUI::factory_reset ()
 	portmode_combo.set_active (0);
 	cp.set_remote_port ("8000");
 	port_entry.set_value (8000);
-	cp.clear_devices();
+	cp.clear_devices ();
+	cp.gui_changed ();
 }
 
 void
@@ -807,6 +808,7 @@ OSC_GUI::save_user ()
 		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
 	}
 	preset_combo.set_active (2);
+	cp.gui_changed();
 
 }
 
@@ -880,6 +882,7 @@ OSC_GUI::load_preset (std::string preset)
 			cp.set_gainmode (atoi (prop->value().c_str()));
 			gainmode_combo.set_active (atoi (prop->value().c_str()));
 		}
+		cp.gui_changed();
 
 	}
 }
