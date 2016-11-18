@@ -537,7 +537,7 @@ int main() { return 0; }''',
     elif conf.env['build_target'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
-                 "-mmacosx-version-min=10.8"))
+                 "-mmacosx-version-min=10.9"))
 
     #
     # save off CPU element in an env
