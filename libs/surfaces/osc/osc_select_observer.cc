@@ -40,7 +40,6 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
@@ -560,7 +559,7 @@ void
 OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Processor> proc)
 {
 	// with no delay value is wrong
-	usleep(10);
+	Glib::usleep(10);
 
 	clear_strip_with_id ("/select/send_enable", id, proc->enabled());
 }
