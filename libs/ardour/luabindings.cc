@@ -27,6 +27,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
+#include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audio_buffer.h"
@@ -202,6 +203,8 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
 
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
@@ -211,6 +214,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::MidiRegion>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Readable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(boost::shared_ptr<Evoral::Note<Evoral::Beats> >);
@@ -511,8 +515,9 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
 		.endNamespace ()
 
-		.endNamespace () // Evoral
+		.endNamespace (); // Evoral
 
+	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Vamp")
 
 		.beginClass<Vamp::RealTime> ("RealTime")
@@ -626,8 +631,9 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.endNamespace () // Vamp::Plugin
-		.endNamespace () // Vamp
+		.endNamespace ();// Vamp
 
+	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 
 		.beginClass <InterThreadInfo> ("InterThreadInfo")
@@ -981,6 +987,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
 		.addCast<Readable> ("to_readable")
 		.addCast<MidiRegion> ("to_midiregion")
+		.addCast<AudioRegion> ("to_audioregion")
 		/* properties */
 		.addFunction ("position", &Region::position)
 		.addFunction ("start", &Region::start)
@@ -1045,6 +1052,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::midi_source)
 		.addFunction ("start_beats", &MidiRegion::start_beats)
 		.addFunction ("length_beats", &MidiRegion::length_beats)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioRegion, Region> ("AudioRegion")
+		.addFunction ("audio_source", &AudioRegion::audio_source)
+		.addFunction ("set_scale_amplitude", &AudioRegion::set_scale_amplitude)
+		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
 		.endClass ()
 
 		.deriveWSPtrClass <Source, SessionObject> ("Source")
@@ -1802,6 +1815,75 @@ LuaBindings::common (lua_State* L)
 
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
+
+	// DSP functions
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginNamespace ("DSP")
+		.addFunction ("compute_peak", ARDOUR::compute_peak)
+		.addFunction ("find_peaks", ARDOUR::find_peaks)
+		.addFunction ("apply_gain_to_buffer", ARDOUR::apply_gain_to_buffer)
+		.addFunction ("mix_buffers_no_gain", ARDOUR::mix_buffers_no_gain)
+		.addFunction ("mix_buffers_with_gain", ARDOUR::mix_buffers_with_gain)
+		.addFunction ("copy_vector", ARDOUR::copy_vector)
+		.addFunction ("dB_to_coefficient", &dB_to_coefficient)
+		.addFunction ("fast_coefficient_to_dB", &fast_coefficient_to_dB)
+		.addFunction ("accurate_coefficient_to_dB", &accurate_coefficient_to_dB)
+		.addFunction ("memset", &DSP::memset)
+		.addFunction ("mmult", &DSP::mmult)
+		.addFunction ("log_meter", &DSP::log_meter)
+		.addFunction ("log_meter_coeff", &DSP::log_meter_coeff)
+		.addFunction ("process_map", &DSP::process_map)
+		.addRefFunction ("peaks", &DSP::peaks)
+
+		.beginClass <DSP::LowPass> ("LowPass")
+		.addConstructor <void (*) (double, float)> ()
+		.addFunction ("proc", &DSP::LowPass::proc)
+		.addFunction ("ctrl", &DSP::LowPass::ctrl)
+		.addFunction ("set_cutoff", &DSP::LowPass::set_cutoff)
+		.addFunction ("reset", &DSP::LowPass::reset)
+		.endClass ()
+		.beginClass <DSP::Biquad> ("Biquad")
+		.addConstructor <void (*) (double)> ()
+		.addFunction ("run", &DSP::Biquad::run)
+		.addFunction ("compute", &DSP::Biquad::compute)
+		.addFunction ("configure", &DSP::Biquad::configure)
+		.addFunction ("reset", &DSP::Biquad::reset)
+		.addFunction ("dB_at_freq", &DSP::Biquad::dB_at_freq)
+		.endClass ()
+		.beginClass <DSP::FFTSpectrum> ("FFTSpectrum")
+		.addConstructor <void (*) (uint32_t, double)> ()
+		.addFunction ("set_data_hann", &DSP::FFTSpectrum::set_data_hann)
+		.addFunction ("execute", &DSP::FFTSpectrum::execute)
+		.addFunction ("power_at_bin", &DSP::FFTSpectrum::power_at_bin)
+		.addFunction ("freq_at_bin", &DSP::FFTSpectrum::freq_at_bin)
+		.endClass ()
+
+		/* DSP enums */
+		.beginNamespace ("BiquadType")
+		.addConst ("LowPass", ARDOUR::DSP::Biquad::LowPass)
+		.addConst ("HighPass", ARDOUR::DSP::Biquad::HighPass)
+		.addConst ("BandPassSkirt", ARDOUR::DSP::Biquad::BandPassSkirt)
+		.addConst ("BandPass0dB", ARDOUR::DSP::Biquad::BandPass0dB)
+		.addConst ("Notch", ARDOUR::DSP::Biquad::Notch)
+		.addConst ("AllPass", ARDOUR::DSP::Biquad::AllPass)
+		.addConst ("Peaking", ARDOUR::DSP::Biquad::Peaking)
+		.addConst ("LowShelf", ARDOUR::DSP::Biquad::LowShelf)
+		.addConst ("HighShelf", ARDOUR::DSP::Biquad::HighShelf)
+		.endNamespace ()
+
+		.beginClass <DSP::DspShm> ("DspShm")
+		.addConstructor<void (*) (size_t)> ()
+		.addFunction ("allocate", &DSP::DspShm::allocate)
+		.addFunction ("clear", &DSP::DspShm::clear)
+		.addFunction ("to_float", &DSP::DspShm::to_float)
+		.addFunction ("to_int", &DSP::DspShm::to_int)
+		.addFunction ("atomic_set_int", &DSP::DspShm::atomic_set_int)
+		.addFunction ("atomic_get_int", &DSP::DspShm::atomic_get_int)
+		.endClass ()
+
+		.endNamespace () // DSP
+		.endNamespace ();// end ARDOUR
 }
 
 void
@@ -1876,70 +1958,6 @@ LuaBindings::dsp (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
-		.beginNamespace ("DSP")
-		.addFunction ("compute_peak", ARDOUR::compute_peak)
-		.addFunction ("find_peaks", ARDOUR::find_peaks)
-		.addFunction ("apply_gain_to_buffer", ARDOUR::apply_gain_to_buffer)
-		.addFunction ("mix_buffers_no_gain", ARDOUR::mix_buffers_no_gain)
-		.addFunction ("mix_buffers_with_gain", ARDOUR::mix_buffers_with_gain)
-		.addFunction ("copy_vector", ARDOUR::copy_vector)
-		.addFunction ("dB_to_coefficient", &dB_to_coefficient)
-		.addFunction ("fast_coefficient_to_dB", &fast_coefficient_to_dB)
-		.addFunction ("accurate_coefficient_to_dB", &accurate_coefficient_to_dB)
-		.addFunction ("memset", &DSP::memset)
-		.addFunction ("mmult", &DSP::mmult)
-		.addFunction ("log_meter", &DSP::log_meter)
-		.addFunction ("log_meter_coeff", &DSP::log_meter_coeff)
-		.addFunction ("process_map", &DSP::process_map)
-		.addRefFunction ("peaks", &DSP::peaks)
-
-		.beginClass <DSP::LowPass> ("LowPass")
-		.addConstructor <void (*) (double, float)> ()
-		.addFunction ("proc", &DSP::LowPass::proc)
-		.addFunction ("ctrl", &DSP::LowPass::ctrl)
-		.addFunction ("set_cutoff", &DSP::LowPass::set_cutoff)
-		.addFunction ("reset", &DSP::LowPass::reset)
-		.endClass ()
-		.beginClass <DSP::Biquad> ("Biquad")
-		.addConstructor <void (*) (double)> ()
-		.addFunction ("run", &DSP::Biquad::run)
-		.addFunction ("compute", &DSP::Biquad::compute)
-		.addFunction ("configure", &DSP::Biquad::configure)
-		.addFunction ("reset", &DSP::Biquad::reset)
-		.addFunction ("dB_at_freq", &DSP::Biquad::dB_at_freq)
-		.endClass ()
-		.beginClass <DSP::FFTSpectrum> ("FFTSpectrum")
-		.addConstructor <void (*) (uint32_t, double)> ()
-		.addFunction ("set_data_hann", &DSP::FFTSpectrum::set_data_hann)
-		.addFunction ("execute", &DSP::FFTSpectrum::execute)
-		.addFunction ("power_at_bin", &DSP::FFTSpectrum::power_at_bin)
-		.addFunction ("freq_at_bin", &DSP::FFTSpectrum::freq_at_bin)
-		.endClass ()
-
-		/* DSP enums */
-		.beginNamespace ("BiquadType")
-		.addConst ("LowPass", ARDOUR::DSP::Biquad::LowPass)
-		.addConst ("HighPass", ARDOUR::DSP::Biquad::HighPass)
-		.addConst ("BandPassSkirt", ARDOUR::DSP::Biquad::BandPassSkirt)
-		.addConst ("BandPass0dB", ARDOUR::DSP::Biquad::BandPass0dB)
-		.addConst ("Notch", ARDOUR::DSP::Biquad::Notch)
-		.addConst ("AllPass", ARDOUR::DSP::Biquad::AllPass)
-		.addConst ("Peaking", ARDOUR::DSP::Biquad::Peaking)
-		.addConst ("LowShelf", ARDOUR::DSP::Biquad::LowShelf)
-		.addConst ("HighShelf", ARDOUR::DSP::Biquad::HighShelf)
-		.endNamespace ()
-
-		.beginClass <DSP::DspShm> ("DspShm")
-		.addConstructor<void (*) (size_t)> ()
-		.addFunction ("allocate", &DSP::DspShm::allocate)
-		.addFunction ("clear", &DSP::DspShm::clear)
-		.addFunction ("to_float", &DSP::DspShm::to_float)
-		.addFunction ("to_int", &DSP::DspShm::to_int)
-		.addFunction ("atomic_set_int", &DSP::DspShm::atomic_set_int)
-		.addFunction ("atomic_get_int", &DSP::DspShm::atomic_get_int)
-		.endClass ()
-
-		.endNamespace () // DSP
 
 		.beginClass <LuaTableRef> ("LuaTableRef")
 		.addCFunction ("get", &LuaTableRef::get)
