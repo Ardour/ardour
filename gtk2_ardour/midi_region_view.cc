@@ -122,7 +122,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_entered (false)
+	, _entered_note (0)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -165,7 +165,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_entered (false)
+	, _entered_note (0)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -213,7 +213,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_entered (false)
+	, _entered_note (0)
 	, _mouse_changed_selection (false)
 {
 	init (false);
@@ -245,7 +245,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_entered (false)
+	, _entered_note (0)
 	, _mouse_changed_selection (false)
 {
 	init (true);
@@ -424,12 +424,12 @@ MidiRegionView::mouse_mode_changed ()
 			remove_ghost_note ();
 
 			/* XXX This is problematic as the function is executed for every region
-			and only for one region _note_entered can be true. Still it's
+			and only for one region _entered_note can be true. Still it's
 			necessary as to hide the verbose cursor when we're changing from
 			draw mode to internal edit mode. These lines are the reason why
 			in some situations no verbose cursor is shown when we enter internal
 			edit mode over a note. */
-			if (!_note_entered) {
+			if (!_entered_note) {
 				hide_verbose_cursor ();
 			}
 		}
@@ -464,7 +464,7 @@ MidiRegionView::leave_internal()
 {
 	hide_verbose_cursor ();
 	remove_ghost_note ();
-	_note_entered = false;
+	_entered_note = 0;
 
 	if (_grabbed_keyboard) {
 		Keyboard::magic_widget_drop_focus();
@@ -597,7 +597,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (!_note_entered) {
+	if (!_entered_note) {
 
 		if (_mouse_state == AddDragging) {
 			if (_ghost_note) {
@@ -1388,7 +1388,7 @@ MidiRegionView::~MidiRegionView ()
 	if (_active_notes) {
 		end_write();
 	}
-
+	_entered_note = 0;
 	_selection.clear();
 	clear_events ();
 
@@ -2114,6 +2114,10 @@ MidiRegionView::step_patch (PatchChange& patch, bool bank, int delta)
 void
 MidiRegionView::note_deleted (NoteBase* cne)
 {
+	if (_entered_note && cne == _entered_note) {
+		_entered_note = 0;
+	}
+
 	if (_selection.empty()) {
 		return;
 	}
@@ -2144,7 +2148,6 @@ MidiRegionView::delete_selection()
 
 	apply_diff ();
 
-	_note_entered = false;
 	hide_verbose_cursor ();
 }
 
@@ -3341,7 +3344,7 @@ MidiRegionView::change_channel(uint8_t channel)
 void
 MidiRegionView::note_entered(NoteBase* ev)
 {
-	_note_entered = true;
+	_entered_note = ev;
 
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
@@ -3364,7 +3367,7 @@ MidiRegionView::note_entered(NoteBase* ev)
 void
 MidiRegionView::note_left (NoteBase*)
 {
-	_note_entered = false;
+	_entered_note = 0;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->hide_velocity ();

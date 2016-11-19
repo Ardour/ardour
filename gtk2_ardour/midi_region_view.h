@@ -501,11 +501,11 @@ private:
 
 	framecnt_t _last_display_zoom;
 
-	double _last_event_x;
-	double _last_event_y;
-	bool   _grabbed_keyboard;
-	bool   _entered;
-	bool   _note_entered;
+	double    _last_event_x;
+	double    _last_event_y;
+	bool      _grabbed_keyboard;
+	bool      _entered;
+	NoteBase* _entered_note;
 
 	bool _mouse_changed_selection;
 
