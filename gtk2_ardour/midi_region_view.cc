@@ -3399,7 +3399,7 @@ MidiRegionView::patch_left (PatchChange *)
 void
 MidiRegionView::sysex_entered (SysEx* p)
 {
-	ostringstream s;
+	// ostringstream s;
 	// CAIROCANVAS
 	// need a way to extract text from p->_flag->_text
 	// s << p->text();
