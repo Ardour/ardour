@@ -6208,8 +6208,11 @@ NoteCreateDrag::grid_frames (framepos_t t) const
 	if (!success) {
 		grid_beats = Evoral::Beats(1);
 	}
+	const Evoral::Beats t_beats = _region_view->region_frames_to_region_beats (t);
 
-	return _region_view->region_beats_to_region_frames (grid_beats);
+	return _region_view->region_beats_to_region_frames (t_beats + grid_beats)
+		- _region_view->region_beats_to_region_frames (t_beats);
+
 }
 
 void
