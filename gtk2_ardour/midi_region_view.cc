@@ -499,6 +499,13 @@ MidiRegionView::button_press (GdkEventButton* ev)
 		_pressed_button = ev->button;
 		_mouse_state = Pressed;
 
+		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
+			editor->drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+			_mouse_state = AddDragging;
+			remove_ghost_note ();
+			hide_verbose_cursor ();
+		}
+
 		return true;
 	}
 
@@ -541,29 +548,13 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseTimeFX:
 			{
 				_mouse_changed_selection = true;
-
-				if (Keyboard::is_insert_note_event(ev)) {
-
-					double event_x, event_y;
-
-					event_x = ev->x;
-					event_y = ev->y;
-					group->canvas_to_item (event_x, event_y);
-
-					Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x) + _region->position());
-					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state, true);
-				} else {
-					clear_editor_note_selection ();
-				}
+				clear_editor_note_selection ();
 
 				break;
 			}
 		case MouseDraw:
-			{
-				Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x) + _region->position());
-				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, ev->state, true);
-				break;
-			}
+			break;
+
 		default:
 			break;
 		}
@@ -644,13 +635,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 			MouseMode m = editor.current_mouse_mode();
 
-			if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
-				_mouse_state = AddDragging;
-				remove_ghost_note ();
-				hide_verbose_cursor ();
-				return true;
-			} else if (m == MouseContent) {
+			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_editor_note_selection ();

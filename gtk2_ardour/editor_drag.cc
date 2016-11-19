@@ -6226,14 +6226,16 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
+	bool success = false;
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
+	if (!success) {
+		grid_beats = Evoral::Beats(1);
+	}
+
 	double eqaf = map.exact_qn_at_frame (pf, divisions);
+	double end_qn = eqaf;
 
 	if (divisions != 0) {
-		bool success = false;
-		Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
-		if (!success) {
-			grid_beats = Evoral::Beats(1);
-		}
 
 		const double qaf = map.quarter_note_at_frame (pf);
 
@@ -6246,15 +6248,18 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			eqaf -= grid_beats.to_double();
 		}
 	}
+	/* minimum initial length is grid beats */
+	end_qn = eqaf + grid_beats.to_double();
 
 	_note[0] = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
-	_note[1] = _note[0];
+	_note[1] = map.frame_at_quarter_note (end_qn) - _region_view->region()->position();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
-	double const x = _editor->sample_to_pixel (_note[0]);
+	double const x0 = _editor->sample_to_pixel (_note[0]);
+	double const x1 = _editor->sample_to_pixel (_note[1]);
 	double const y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
-	_drag_rect->set (ArdourCanvas::Rect (x, y, x, y + floor (_region_view->midi_stream_view()->note_height ())));
+	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_region_view->midi_stream_view()->note_height ())));
 	_drag_rect->set_outline_all ();
 	_drag_rect->set_outline_color (0xffffff99);
 	_drag_rect->set_fill_color (0xffffff66);
@@ -6298,25 +6303,20 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 void
 NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 {
-	if (!had_movement) {
-		return;
-	}
-
+	/* we create a note even if there was no movement */
 	framepos_t const start = min (_note[0], _note[1]);
 	framepos_t const start_sess_rel = start + _region_view->region()->position();
 	framecnt_t length = (framecnt_t) fabs ((double)(_note[0] - _note[1]));
-
 	framecnt_t const g = grid_frames (start);
-	Evoral::Beats const one_tick = Evoral::Beats::ticks(1);
 
 	if (_editor->get_grid_music_divisions (ev->button.state) != 0 && length < g) {
 		length = g;
 	}
 
 	TempoMap& map (_editor->session()->tempo_map());
-	const double qn_length = map.quarter_note_at_frame (start_sess_rel + length) - map.quarter_note_at_frame (start_sess_rel);
+	const double qn_length = map.quarter_notes_between_frames (start_sess_rel, start_sess_rel + length);
+	Evoral::Beats qn_length_beats = max (Evoral::Beats::ticks(1), Evoral::Beats (qn_length));
 
-	Evoral::Beats qn_length_beats = max (one_tick, Evoral::Beats (qn_length));
 	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state, false);
 }
 
