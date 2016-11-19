@@ -3671,6 +3671,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("Theme/Colors"), new ColorThemeManager);
 
+	Widget::show_all ();
+
 	//trigger some parameter-changed messages which affect widget-visibility or -sensitivity
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
