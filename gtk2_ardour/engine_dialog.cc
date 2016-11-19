@@ -466,10 +466,10 @@ EngineControl::on_response (int response_id)
 
 	switch (response_id) {
 	case RESPONSE_OK:
+		hide();
 		if (!start_engine()) {
+			show();
 			return;
-		} else {
-			hide();
 		}
 #ifdef PLATFORM_WINDOWS
 
