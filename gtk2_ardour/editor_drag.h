@@ -591,6 +591,11 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::framecnt_t grid_frames (framepos_t) const;
 
+	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (0, 0);
+	}
+
 	MidiRegionView* _region_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	framepos_t _note[2];
