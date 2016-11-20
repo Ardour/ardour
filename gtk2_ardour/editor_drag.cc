@@ -6306,7 +6306,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	/* we create a note even if there was no movement */
 	framepos_t const start = min (_note[0], _note[1]);
 	framepos_t const start_sess_rel = start + _region_view->region()->position();
-	framecnt_t length = (framecnt_t) fabs ((double)(_note[0] - _note[1]));
+	framecnt_t length = max (_editor->pixel_to_sample (1.0), (framecnt_t) fabs ((double)(_note[0] - _note[1])));
 	framecnt_t const g = grid_frames (start);
 
 	if (_editor->get_grid_music_divisions (ev->button.state) != 0 && length < g) {
