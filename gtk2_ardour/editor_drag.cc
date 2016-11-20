@@ -6336,27 +6336,11 @@ NoteCreateDrag::aborted (bool)
 HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
 	: Drag (e, i)
 	, _region_view (rv)
-	, _y (0.0)
 {
 }
 
 HitCreateDrag::~HitCreateDrag ()
 {
-}
-
-framecnt_t
-HitCreateDrag::grid_frames (framepos_t t) const
-{
-	bool success;
-	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
-	if (!success) {
-		grid_beats = Evoral::Beats(1);
-	}
-	const Evoral::Beats t_beats = _region_view->region_frames_to_region_beats (t);
-
-	return _region_view->region_beats_to_region_frames (t_beats + grid_beats)
-		- _region_view->region_beats_to_region_frames (t_beats);
-
 }
 
 void
@@ -6379,9 +6363,9 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
-	_y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
-	_region_view->create_note_at (start, _y,  grid_beats, event->button.state, false);
+	_region_view->create_note_at (start, y,  grid_beats, event->button.state, false);
 }
 
 void
@@ -6400,7 +6384,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position ();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
-	_y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
 	bool success = false;
 	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
@@ -6408,7 +6392,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 		grid_beats = Evoral::Beats(1);
 	}
 
-	_region_view->create_note_at (start, _y, grid_beats, event->button.state, false);
+	_region_view->create_note_at (start, y, grid_beats, event->button.state, false);
 
 }
 

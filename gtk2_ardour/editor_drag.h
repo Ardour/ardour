@@ -630,7 +630,6 @@ private:
 	}
 
 	MidiRegionView* _region_view;
-	double _y;
 };
 
 /** Drag to move MIDI patch changes */
