@@ -1,5 +1,5 @@
 /*
-    Copyleft (C) 2015 Nil Geisweiller
+    Copyright (C) 2015 Nil Geisweiller
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -48,6 +48,9 @@ public:
 
 	// Build or rebuild the pattern (implement TrackerPattern::update_pattern)
 	void update_pattern();
+
+	// Assign a control event to a row
+	virtual uint32_t control_event2row(const Evoral::Parameter& param, const Evoral::ControlEvent* event) = 0;
 
 	// Map parameters to maps of row to automation range
 	std::map<Evoral::Parameter, RowToAutomationIt> automations;

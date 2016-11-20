@@ -39,7 +39,8 @@
 #include "midi_time_axis.h"
 
 #include "midi_tracker_pattern.h"
-#include "automation_tracker_pattern.h"
+#include "track_automation_tracker_pattern.h"
+#include "region_automation_tracker_pattern.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
@@ -324,7 +325,7 @@ class MidiTrackerEditor : public ArdourWindow
 	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
 
 	MidiTrackerPattern* mtp;
-	AutomationTrackerPattern* atp;
+	TrackAutomationTrackerPattern* atp;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;

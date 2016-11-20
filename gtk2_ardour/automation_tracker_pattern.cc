@@ -47,10 +47,7 @@ void AutomationTrackerPattern::update_pattern()
 		const Evoral::Parameter& param = (*actrl)->parameter();
 		// Build automation pattern
 		for (AutomationList::iterator it = al->begin(); it != al->end(); ++it) {
-			framepos_t frame = (*it)->when;
-			uint32_t row = row_at_frame(frame);
-			if (automations[param].count(row) == 0)
-				row = row_at_frame_min_delay(frame);
+			uint32_t row = control_event2row(param, *it);
 			automations[param].insert(RowToAutomationIt::value_type(row, it));
 		}
 	}

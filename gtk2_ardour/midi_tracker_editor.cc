@@ -1486,7 +1486,7 @@ MidiTrackerEditor::redisplay_model ()
 				size_t col_idx = cp_it->first;
 				size_t i = col2autotrack[col_idx];
 				const Evoral::Parameter& param = cp_it->second;
-				const AutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
+				const TrackAutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
 				if (i >= MAX_NUMBER_OF_AUTOMATION_TRACKS) {
@@ -1505,7 +1505,7 @@ MidiTrackerEditor::redisplay_model ()
 					if (undefined) {
 						row[columns.automation[i]] = undefined_str;
 					} else {
-						AutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
+						TrackAutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
 						if (auto_it != r2at.end()) {
 							double auto_val = (*auto_it->second)->value;
 							row[columns.automation[i]] = to_string (auto_val);
@@ -1591,7 +1591,7 @@ MidiTrackerEditor::setup_pattern ()
 	AutomationControlSet acs;
 	for (Parameter2AutomationControl::const_iterator it = param2actrl.begin(); it != param2actrl.end(); ++it)
 		acs.insert(it->second);
-	atp = new AutomationTrackerPattern(_session, region, acs);
+	atp = new TrackAutomationTrackerPattern(_session, region, acs);
 
 	edit_column = -1;
 	editing_renderer = 0;
