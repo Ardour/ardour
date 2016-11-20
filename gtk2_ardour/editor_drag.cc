@@ -6233,7 +6233,6 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	double eqaf = map.exact_qn_at_frame (pf, divisions);
-	double end_qn = eqaf;
 
 	if (divisions != 0) {
 
@@ -6249,7 +6248,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		}
 	}
 	/* minimum initial length is grid beats */
-	end_qn = eqaf + grid_beats.to_double();
+	const double end_qn = eqaf + grid_beats.to_double();
 
 	_note[0] = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
 	_note[1] = map.frame_at_quarter_note (end_qn) - _region_view->region()->position();
