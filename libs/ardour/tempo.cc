@@ -131,7 +131,7 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	/* XX replace old beats-per-minute name with note-types-per-minute */
 	if ((prop = node.property ("beats-per-minute")) != 0) {
 		if (sscanf (prop->value().c_str(), "%lf", &_note_types_per_minute) != 1 || _note_types_per_minute < 0.0) {
-			error << _("TempoSection XML node has an illegal \"beats-per-minutee\" value") << endmsg;
+			error << _("TempoSection XML node has an illegal \"beats-per-minute\" value") << endmsg;
 			throw failed_constructor();
 		}
 	}
