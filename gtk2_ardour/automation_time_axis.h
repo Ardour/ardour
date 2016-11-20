@@ -35,6 +35,7 @@
 #include "time_axis_view.h"
 #include "automation_controller.h"
 #include "ardour_button.h"
+#include "ardour_dropdown.h"
 
 namespace ARDOUR {
 	class Session;
@@ -153,8 +154,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool    first_call_to_set_height;
 
 	ArdourButton       hide_button;
-	ArdourButton       auto_button;
-	Gtk::Menu*         automation_menu;
+	ArdourDropdown     auto_dropdown;
 	Gtk::Label*        plugname;
 	bool               plugname_packed;
 
@@ -172,7 +172,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void clear_clicked ();
 	void hide_clicked ();
-	void auto_clicked ();
 
 	virtual bool can_edit_name() const {return false;}
 

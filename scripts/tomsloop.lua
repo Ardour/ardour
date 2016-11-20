@@ -4,11 +4,164 @@ ardour { ["type"] = "EditorAction", name = "Tom's Loop",
 	description = [[Bounce the loop-range of all non muted audio tracks, paste N times at playhead]]
 }
 
+-- for minimal configuration in dialogue
 function action_params ()
 	return { ["times"]   = { title = "Number of copies to add", default = "1"}, }
 end
 
+-- main method, every custom (i.e. non-ardour) method must be defined *inside* factory()
 function factory (params) return function ()
+
+-- when this script is called as an action, the output will be printed to the ardour log window
+	function print_help()
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("Manual for \"Tom’s Loop\" Ardour Lua Script")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("Table of Contents")
+		print("")
+		print("1. The first test")
+		print("2. Using mute and solo")
+		print("3. Combining region clouds to a defined length")
+		print("")
+		print("Abstract: This script for Ardour (>=4.7 git) operates on the time")
+		print("line. It allows to copy and combine specific portions within the loop")
+		print("range to a later point on the time line with one single action")
+		print("command. Everything that can be heard within the loop range is")
+		print("considered for this process, namely non-muted regions on non-muted or")
+		print("soloed tracks that are fully or partially inside the loop range. This")
+		print("still sounds a bit abstract and will be more obvious with the")
+		print("following example cases of use.")
+		print("")
+		print("For convenience, it’s recommended to bind the script to a keyboard")
+		print("shortcut in order to quickly and easily access the \"Tom’s Loop\"")
+		print("scripted action.")
+		print("")
+		print("-Open dialog \"Script Manager\" via menu Edit/Scripted Actions/Script")
+		print("Manager")
+		print("")
+		print("-In tab \"Action Scripts\", select a line and press button \"Add/Set\"")
+		print("")
+		print("-In dialog \"Add Lua Action\", select \"Tom’s Loop\" from the drop down")
+		print("menu and hit \"Add\"")
+		print("")
+		print("-In dialog \"Set Script Parameter\" just hit \"Add\" again")
+		print("")
+		print("-Close dialog \"Script Manager\"")
+		print("")
+		print("-Open dialog \"Bindings Editor\" via menu Window/Bindings Editor")
+		print("")
+		print("-In tab \"Editor\", expand \"Editor\", look for entry \"Tom’s loop\",")
+		print("select it")
+		print("")
+		print("-Hit the keyboard shortcut to assign to this scripted action")
+		print("")
+		print("-Close dialog \"Key Bindings\"")
+		print("")
+		print("An alternative way to quickly access a scripted action is to enable")
+		print("\"Action Script Button Visibility\" in \"Preferences/GUI\".")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("1. The first test")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("-Record a short sequence of audio input or import a wave file to a")
+		print("track to get a region")
+		print("")
+		print("-Set a loop range inside that one region")
+		print("")
+		print("-Place the playhead after the loop range, possibly after the region,")
+		print("non-rolling")
+		print("")
+		print("     _L====L_              V")
+		print(" .____|____|____________.  |")
+		print(" |R1__|_x__|____________|  |")
+		print("")
+		print("-Call \"Tom’s Loop\" via the previously created shortcut")
+		print("")
+		print("This results in a new region created at the playhead, with the length")
+		print("of the loop range, containing audio of the original region. The")
+		print("playhead moved to the end of this new region so that subsequent calls")
+		print("to \"Tom’s Loop\" will result in a gap less series of regions.")
+		print("")
+		print("     _L====L_               --> V")
+		print(" .____|____|____________.  .____|")
+		print(" |R1__|_x__|____________|  |_x__|")
+		print("")
+		print("-Repeat calling \"Tom’s Loop\"")
+		print("")
+		print("This creates multiple copies of the loop range to line up one after")
+		print("each other.")
+		print("")
+		print("     _L====L_                         --> V")
+		print(" .____|____|____________.  .______________|")
+		print(" |R1__|_x__|____________|  |_x__|_x__|_x__|")
+		print("")
+		print("-Set a different loop range and call \"Tom’s Loops\" again")
+		print("")
+		print("This will create a new region with the length of the new loop range")
+		print("at the playhead.")
+		print("")
+		print("        _L=======L_                           --> V")
+		print(" ._______|_______|______.  .______________________|")
+		print(" |R1_____|_X_____|______|  |_x__|_x__|_x__|_X_____|")
+		print("")
+		print("By using \"Tom’s Loop\", the loop range - which can be easily set with")
+		print("the handles - and the playhead it’s easy to create any sequence of")
+		print("existing regions on the time line. This can be useful during the")
+		print("arrangement phase where macro parts of the session are already")
+		print("temporally layed out (in the loop) but not part of the final")
+		print("arrangement yet. The process is non-destructive in a sense that the")
+		print("existing regions layout in the current loop range won’t be touched or")
+		print("replaced. The newly created regions are immediately visible on the")
+		print("time line at the playhead position.")
+		print("")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("2. Using mute and solo")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("Creating a sequence of regions like described above respects the")
+		print("current mute and solo state of a track. Variations of the loop are")
+		print("thus easy to create, further supporting the arrangement process.")
+		print("")
+		print("      _L====L_                         --> V")
+		print("  .____|____|____________.  ._________.    |")
+		print("  |R1__|_x__|____________|  |_x__|_x__|    |")
+		print(" .__|R2|_y__|________|_.    |_y__|_________|")
+		print(" |R3___|_z__|__________|         |_z__|_z__|")
+		print("")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("3. Combining region clouds to a defined length")
+		print("")
+		print("---------------------------------------------------------------------")
+		print("")
+		print("Multiple small regions say on a percussive track can be simplified")
+		print("for later arrangement keeping the temporal relations by combining")
+		print("them. Using \"Tom’s Loop\", the resulting regions will not only combine")
+		print("the regions but also automatically extend or shrink the new regions")
+		print("start and end point so that it is exactly of the wished length equal")
+		print("to the loop range.")
+		print("")
+		print("_L======================L_                            --> V")
+		print(" |   .____  .___.  _____|_______.  .______________________|")
+		print(" |   |R1_|  |R2_|  |R3__|_______|  |______________________|")
+		print("")
+		print("See also: Lua Action Bounce+Replace Regions")
+		print("")
+		print("")
+	end -- print_help()
+
 	-- get options
 	local p = params or {}
 	local n_paste  = tonumber (p["times"] or 1)
@@ -22,12 +175,14 @@ function factory (params) return function ()
 
 	-- make sure we have a loop, and the playhead (edit point) is after it
 	if not loop then
-		print ("A Loop range must be set.")
+		print_help();
+		print ("Error: A Loop range must be set.")
 		goto errorout
 	end
 	assert (loop:start () < loop:_end ())
 	if loop:_end () >= playhead then
-		print ("The Playhead (paste point) needs to be after the loop.")
+		print_help();
+		print ("Error: The Playhead (paste point) needs to be after the loop.")
 		goto errorout
 	end
 
@@ -93,7 +248,7 @@ function factory (params) return function ()
 
 		-- do the actual work
 		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false)
-		playlist:add_region (region, playhead, n_paste, false)
+		playlist:add_region (region, playhead, n_paste, false, 0)
 
 		n_regions_created = n_regions_created + 1
 
@@ -104,7 +259,7 @@ function factory (params) return function ()
 		end
 
 		::continue::
-	end
+	end -- for all routes
 
 	--advance playhead so it's just after the newly added regions
 	if n_regions_created > 0 then
@@ -120,6 +275,6 @@ function factory (params) return function ()
 	end
 
 	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " frames) to playhead @ frame # " .. playhead)
-
 	::errorout::
-end end
+end -- end of anonymous action script function
+end -- end of script factory

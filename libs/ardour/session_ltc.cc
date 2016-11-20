@@ -482,8 +482,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame
 				));
 
+	const framecnt_t wrap24h = 86400. * frame_rate();
 	if (ltc_enc_pos < 0
-			|| (ltc_speed != 0 && fabs(ceil(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) > maxdiff)
+			|| (ltc_speed != 0 && fabs(fmod(ceil(ltc_enc_pos + ltc_enc_cnt - poff), wrap24h) - (cycle_start_frame % wrap24h)) > maxdiff)
 			) {
 
 		// (5) re-align
@@ -491,7 +492,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 		/* set frame to encode */
 		SMPTETimecode tc;
-		tc.hours = tc_start.hours;
+		tc.hours = tc_start.hours % 24;
 		tc.mins = tc_start.minutes;
 		tc.secs = tc_start.seconds;
 		tc.frame = tc_start.frames;
@@ -554,7 +555,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			return;
 		}
 
-		ltc_enc_pos = tc_sample_start;
+		ltc_enc_pos = tc_sample_start % wrap24h;
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
 					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
@@ -577,7 +578,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * To do better than this, resampling (or a rewrite of the
 		 * encoder) is required.
 		 */
-		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().sample_rate();
+		ltc_speed -= fmod(((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame), wrap24h) / engine().sample_rate();
 	}
 
 

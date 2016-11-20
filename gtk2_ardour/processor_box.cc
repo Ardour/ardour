@@ -390,6 +390,14 @@ ProcessorEntry::setup_visuals ()
 		}
 	}
 
+	boost::shared_ptr<InternalSend> aux;
+	if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor))) {
+		if (aux->allow_feedback ()) {
+			_button.set_name ("processor auxfeedback");
+			return;
+		}
+	}
+
 	switch (_position) {
 	case PreFader:
 		if (_plugin_display) { _plugin_display->set_name ("processor prefader"); }
@@ -497,12 +505,18 @@ ProcessorEntry::setup_tooltip ()
 		if (pi) {
 			std::string postfix = "";
 			uint32_t replicated;
-			if ((replicated = pi->get_count()) > 1) {
-				postfix = string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+
+			if (pi->plugin()->has_inline_display()) {
+				postfix += string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
 			}
+
+			if ((replicated = pi->get_count()) > 1) {
+				postfix += string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+			}
+
 			if (pi->plugin()->has_editor()) {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
-						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::primary_modifier_name (), postfix));
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::secondary_modifier_name (), postfix));
 			} else {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
@@ -746,14 +760,22 @@ ProcessorEntry::build_send_options_menu ()
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
-	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
-	if (send) {
+	if (!ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+		if (send) {
+			items.push_back (CheckMenuElem (_("Link panner controls")));
+			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+			c->set_active (send->panner_shell()->is_linked_to_route());
+			c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
+		}
+	}
 
-		items.push_back (CheckMenuElem (_("Link panner controls")));
+	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
+	if (aux) {
+		items.push_back (CheckMenuElem (_("Allow Feedback Loop")));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		c->set_active (send->panner_shell()->is_linked_to_route());
-		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
-
+		c->set_active (aux->allow_feedback());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_allow_feedback));
 	}
 	return menu;
 }
@@ -764,6 +786,15 @@ ProcessorEntry::toggle_panner_link ()
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
 	if (send) {
 		send->panner_shell()->set_linked_to_route(!send->panner_shell()->is_linked_to_route());
+	}
+}
+
+void
+ProcessorEntry::toggle_allow_feedback ()
+{
+	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
+	if (aux) {
+		aux->set_allow_feedback (!aux->allow_feedback ());
 	}
 }
 
@@ -1522,7 +1553,8 @@ ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_p
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
 			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
 
-	std::string postfix = "";
+	std::string postfix = string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
+
 	if (_plug->has_editor()) {
 		ARDOUR_UI_UTILS::set_tooltip (*this,
 				string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), e.name (Wide), Keyboard::primary_modifier_name (), postfix));
@@ -1544,10 +1576,19 @@ ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
 {
 	assert (_entry.processor ());
 
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_entry.processor());
+	// duplicated code :(
 	// consider some tweaks to pass this up to the DnDVBox somehow:
 	// select processor, then call (private)
 	//_entry._parent->processor_button_press_event (ev, &_entry);
-	if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
+	if (pi && pi->plugin() && pi->plugin()->has_inline_display()
+			&& Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)
+			&& ev->button == 1
+			&& ev->type == GDK_2BUTTON_PRESS) {
+		_entry.toggle_inline_display_visibility ();
+		return true;
+	}
+	else if (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS)) {
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			_entry._parent->generic_edit_processor (_entry.processor ());
 		} else {
@@ -2135,21 +2176,19 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
-		if (send_menu_item) {
-			if (single_selection && !_route->is_monitor()) {
-				Menu* m = single_selection->build_send_options_menu ();
-				if (m && !m->items().empty()) {
-					send_menu_item->set_submenu (*m);
-					send_menu_item->set_sensitive (true);
-				} else {
-					gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
-					send_menu_item->set_sensitive (false);
-				}
+	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+	if (send_menu_item) {
+		if (single_selection && !_route->is_monitor()) {
+			Menu* m = single_selection->build_send_options_menu ();
+			if (m && !m->items().empty()) {
+				send_menu_item->set_submenu (*m);
+				send_menu_item->set_sensitive (true);
 			} else {
+				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
+		} else {
+			send_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -2317,6 +2356,15 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 	int ret = false;
 	bool selected = processor_display.selected (child);
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	if (pi && pi->plugin() && pi->plugin()->has_inline_display()
+			&& Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)
+			&& ev->button == 1
+			&& ev->type == GDK_2BUTTON_PRESS) {
+		child->toggle_inline_display_visibility ();
+		return true;
+	}
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 

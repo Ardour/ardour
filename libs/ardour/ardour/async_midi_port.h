@@ -43,65 +43,66 @@ namespace ARDOUR {
 
 class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
-  public:
-        AsyncMIDIPort (std::string const &, PortFlags);
-	~AsyncMIDIPort ();
+	public:
+		AsyncMIDIPort (std::string const &, PortFlags);
+		~AsyncMIDIPort ();
 
-        /* called from an RT context */
+		bool flush_at_cycle_start () const { return _flush_at_cycle_start; }
+		void set_flush_at_cycle_start (bool en) { _flush_at_cycle_start = en; }
 
-	void cycle_start (pframes_t nframes);
-	void cycle_end (pframes_t nframes);
+		/* called from an RT context */
+		void cycle_start (pframes_t nframes);
+		void cycle_end (pframes_t nframes);
 
-        /* called from non-RT context */
+		/* called from non-RT context */
+		void parse (framecnt_t timestamp);
+		int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
+		int read (MIDI::byte *buf, size_t bufsize);
+		/* waits for output to be cleared */
+		void drain (int check_interval_usecs, int total_usecs_to_wait);
 
-	void parse (framecnt_t timestamp);
-	int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
-        int read (MIDI::byte *buf, size_t bufsize);
-	/* waits for output to be cleared */
-        void drain (int check_interval_usecs, int total_usecs_to_wait);
+		/* clears async request communication channel */
+		void clear () {
+			_xthread.drain ();
+		}
 
-	/* clears async request communication channel */
-	void clear () {
-		_xthread.drain ();
-	}
+		CrossThreadChannel& xthread() {
+			return _xthread;
+		}
 
-        CrossThreadChannel& xthread() {
-                return _xthread;
-        }
+		/* Not selectable; use ios() */
+		int selectable() const { return -1; }
+		void set_timer (boost::function<framecnt_t (void)>&);
 
-	/* Not selectable; use ios() */
-	int selectable() const { return -1; }
-	void set_timer (boost::function<framecnt_t (void)>&);
+		static void set_process_thread (pthread_t);
+		static pthread_t get_process_thread () { return _process_thread; }
+		static bool is_process_thread();
 
-	static void set_process_thread (pthread_t);
-	static pthread_t get_process_thread () { return _process_thread; }
-	static bool is_process_thread();
+	private:
+		bool                    _currently_in_cycle;
+		MIDI::timestamp_t       _last_write_timestamp;
+		bool                    _flush_at_cycle_start;
+		bool                    have_timer;
+		boost::function<framecnt_t (void)> timer;
+		RingBuffer< Evoral::Event<double> > output_fifo;
+		EventRingBuffer<MIDI::timestamp_t> input_fifo;
+		Glib::Threads::Mutex output_fifo_lock;
+		CrossThreadChannel _xthread;
 
-  private:
-	bool                    _currently_in_cycle;
-        MIDI::timestamp_t       _last_write_timestamp;
-	bool                    have_timer;
-	boost::function<framecnt_t (void)> timer;
-	RingBuffer< Evoral::Event<double> > output_fifo;
-        EventRingBuffer<MIDI::timestamp_t> input_fifo;
-        Glib::Threads::Mutex output_fifo_lock;
-	CrossThreadChannel _xthread;
+		int create_port ();
 
-	int create_port ();
+		/** Channel used to signal to the MidiControlUI that input has arrived */
 
-	/** Channel used to signal to the MidiControlUI that input has arrived */
+		std::string _connections;
+		PBD::ScopedConnection connect_connection;
+		PBD::ScopedConnection halt_connection;
+		void jack_halted ();
+		void make_connections ();
+		void init (std::string const &, Flags);
 
-	std::string _connections;
-	PBD::ScopedConnection connect_connection;
-	PBD::ScopedConnection halt_connection;
-	void flush (void* jack_port_buffer);
-	void jack_halted ();
-	void make_connections ();
-	void init (std::string const &, Flags);
+		void flush_output_fifo (pframes_t);
 
-    void flush_output_fifo (pframes_t);
-
-	static pthread_t _process_thread;
+		static pthread_t _process_thread;
 };
 
 } // namespace ARDOUR

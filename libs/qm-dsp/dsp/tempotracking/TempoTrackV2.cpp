@@ -91,10 +91,17 @@ TempoTrackV2::filter_df(d_vec_t &df)
 }
 
 
+// MEPD 28/11/12
+// This function now allows for a user to specify an inputtempo (in BPM)
+// and a flag "constraintempo" which replaces the general rayleigh weighting for periodicities
+// with a gaussian which is centered around the input tempo
+// Note, if inputtempo = 120 and constraintempo = false, then functionality is
+// as it was before
 void
 TempoTrackV2::calculateBeatPeriod(const vector<double> &df,
                                   vector<double> &beat_period,
-                                  vector<double> &tempi)
+                                  vector<double> &tempi,
+                                  double inputtempo, bool constraintempo)
 {
     // to follow matlab.. split into 512 sample frames with a 128 hop size
     // calculate the acf,
@@ -103,13 +110,42 @@ TempoTrackV2::calculateBeatPeriod(const vector<double> &df,
     // and get best path
 
     unsigned int wv_len = 128;
-    double rayparam = 43.;
+
+    // MEPD 28/11/12
+    // the default value of inputtempo in the beat tracking plugin is 120
+    // so if the user specifies a different inputtempo, the rayparam will be updated
+    // accordingly.
+    // note: 60*44100/512 is a magic number
+    // this might (will?) break if a user specifies a different frame rate for the onset detection function
+    double rayparam = (60*44100/512)/inputtempo;
+
+    // these debug statements can be removed.
+//    std::cerr << "inputtempo" << inputtempo << std::endl;
+//    std::cerr << "rayparam" << rayparam << std::endl;
+//    std::cerr << "constraintempo" << constraintempo << std::endl;
 
     // make rayleigh weighting curve
     d_vec_t wv(wv_len);
-    for (unsigned int i=0; i<wv.size(); i++)
+
+    // check whether or not to use rayleigh weighting (if constraintempo is false)
+    // or use gaussian weighting it (constraintempo is true)
+    if (constraintempo)
     {
-        wv[i] = (static_cast<double> (i) / pow(rayparam,2.)) * exp((-1.*pow(-static_cast<double> (i),2.)) / (2.*pow(rayparam,2.)));
+        for (unsigned int i=0; i<wv.size(); i++)
+        {
+            // MEPD 28/11/12
+            // do a gaussian weighting instead of rayleigh
+            wv[i] = exp( (-1.*pow((static_cast<double> (i)-rayparam),2.)) / (2.*pow(rayparam/4.,2.)) );
+        }
+    }
+    else
+    {
+        for (unsigned int i=0; i<wv.size(); i++)
+        {
+            // MEPD 28/11/12
+            // standard rayleigh weighting over periodicities
+            wv[i] = (static_cast<double> (i) / pow(rayparam,2.)) * exp((-1.*pow(-static_cast<double> (i),2.)) / (2.*pow(rayparam,2.)));
+        }
     }
 
     // beat tracking frame size (roughly 6 seconds) and hop (1.5 seconds)
@@ -397,10 +433,14 @@ TempoTrackV2::normalise_vec(d_vec_t &df)
     }
 }
 
+// MEPD 28/11/12
+// this function has been updated to allow the "alpha" and "tightness" parameters
+// of the dynamic program to be set by the user
+// the default value of alpha = 0.9 and tightness = 4
 void
 TempoTrackV2::calculateBeats(const vector<double> &df,
                              const vector<double> &beat_period,
-                             vector<double> &beats)
+                             vector<double> &beats, double alpha, double tightness)
 {
     if (df.empty() || beat_period.empty()) return;
 
@@ -414,8 +454,12 @@ TempoTrackV2::calculateBeats(const vector<double> &df,
         backlink[i] = -1;
     }
 
-    double tightness = 4.;
-    double alpha = 0.9;
+    //double tightness = 4.;
+    //double alpha = 0.9;
+    // MEPD 28/11/12
+    // debug statements that can be removed.
+//    std::cerr << "alpha" << alpha << std::endl;
+//    std::cerr << "tightness" << tightness << std::endl;
 
     // main loop
     for (unsigned int i=0; i<localscore.size(); i++)
@@ -462,7 +506,7 @@ TempoTrackV2::calculateBeats(const vector<double> &df,
     int startpoint = get_max_ind(tmp_vec) + cumscore.size() - beat_period[beat_period.size()-1] ;
 
     // can happen if no results obtained earlier (e.g. input too short)
-    if (startpoint >= backlink.size()) startpoint = backlink.size()-1;
+    if (startpoint >= (int)backlink.size()) startpoint = backlink.size()-1;
 
     // USE BACKLINK TO GET EACH NEW BEAT (TOWARDS THE BEGINNING OF THE FILE)
     //  BACKTRACKING FROM THE END TO THE BEGINNING.. MAKING SURE NOT TO GO BEFORE SAMPLE 0

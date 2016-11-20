@@ -42,7 +42,7 @@ class LIBPBD_API Receiver : public sigc::trackable
 	virtual void receive (Transmitter::Channel, const char *) = 0;
 
   private:
-	std::vector<sigc::connection *> connections;
+	PBD::ScopedConnectionList connections;
 };
 
 #endif  // __libmisc_receiver_h__

@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "gtkmm2ext/utils.h"
+
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "big_clock_window.h"
@@ -55,7 +57,7 @@ void
 BigClockWindow::on_unmap ()
 {
 	ArdourWindow::on_unmap ();
-	PublicEditor::instance().reset_focus (&clock);
+	ARDOUR_UI::instance()->reset_focus (this);
 }
 
 bool

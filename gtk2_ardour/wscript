@@ -145,7 +145,6 @@ gtk2_ardour_sources = [
         'midi_cut_buffer.cc',
         'midi_export_dialog.cc',
         'midi_list_editor.cc',
-        'midi_port_dialog.cc',
         'midi_region_view.cc',
         'midi_scroomer.cc',
         'midi_selection.cc',
@@ -226,6 +225,7 @@ gtk2_ardour_sources = [
         'selection.cc',
         'selection_memento.cc',
         'send_ui.cc',
+        'session_archive_dialog.cc',
         'session_dialog.cc',
         'session_import_dialog.cc',
         'session_metadata_dialog.cc',
@@ -311,6 +311,18 @@ def enoify (major, minor):
             return "\\n\\\"Before and After Science\\\""
         elif minor == 1:
             return "\\n\\\"After the Heat\\\""
+        elif minor == 2:
+            return "\\n\\\"Music for Airports\\\""
+        elif minor == 3:
+            return "\\n\\\"Music for Films\\\""
+        elif minor == 4:
+            return "\\n\\\"In a Land of Clear Colours\\\""
+        elif minor == 5:
+            return "\\n\\\"The Plateaux of Mirror\\\""
+        elif minor == 6:
+            return "\\n\\\"Possible Musics\\\""
+        elif minor == 7:
+            return "\\n\\\"My Life in the Bush of Ghosts\\\""
     return "\\\"\\\""
 
 def options(opt):
@@ -337,6 +349,7 @@ def configure(conf):
                       atleast_version='2.18')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
+    autowaf.check_pkg(conf, 'pangoft2', uselib_store='PANGOFT2', atleast_version='1.36.8', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
 
 
@@ -570,6 +583,7 @@ def build(bld):
 
     if bld.env['build_target'] == 'mingw':
         obj.linkflags += ' -mwindows'
+        obj.use += [ 'PANGOFT2' ]
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -592,7 +606,11 @@ def build(bld):
         obj.defines += [ 'LXVST_SUPPORT' ]
         obj.use += [ 'X11' ]
 
-    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
+    if bld.is_defined('MACVST_SUPPORT'):
+        obj.source += [ 'mac_vst_plugin_ui.mm' ]
+        obj.defines += [ 'MACVST_SUPPORT' ]
+
+    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined ('MACVST_SUPPORT'):
         obj.source += [ 'vst_plugin_ui.cc' ]
 
     if bld.is_defined('PHONE_HOME'):
@@ -865,7 +883,10 @@ def appdata_i18n_pot(bld):
         adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
                 'ardour.appdata.xml.in.in')
         Logs.info('Updating ' + potfile)
-        subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+        try:
+                subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+        except:
+                print ('Error processing appdata pot file - ignored')
     elif bld.cmd == 'clean' and os.path.exists(potfile):
         Logs.info('Removing Ardour appdata pot file')
         os.remove(potfile)

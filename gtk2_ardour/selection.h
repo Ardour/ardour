@@ -226,7 +226,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	XMLNode& get_state () const;
 	int set_state (XMLNode const &, int);
 
-	std::list<std::pair<PBD::ID const, std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > pending_midi_note_selection;
+	std::list<std::pair<PBD::ID const, std::list<Evoral::event_id_t> > > pending_midi_note_selection;
 
   private:
 	PublicEditor const * editor;

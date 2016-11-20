@@ -115,6 +115,12 @@ ARDOUR_UI::escape ()
 }
 
 void
+ARDOUR_UI::close_current_dialog ()
+{
+	Keyboard::close_current_dialog ();
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = global_actions.create_action_group (X_("Main"));
@@ -122,6 +128,11 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<Action> act;
 
 	global_actions.register_action (main_actions, X_("Escape"), _("Escape"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
+	/* This is hard-wired into the Keyboard code as "Primary-w". Maybe it
+	   doesn't need to be. This action makes it possible to do this from a
+	   control surface.
+	*/
+	global_actions.register_action (main_actions, X_("close-current-dialog"), _("Close Current Dialog"), sigc::mem_fun (*this, &ARDOUR_UI::close_current_dialog));
 
 	/* menus + submenus that need action items */
 
@@ -159,6 +170,7 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."), sigc::mem_fun(*this, &ARDOUR_UI::add_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::rec_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("duplicate-routes"), _("Duplicate Tracks/Busses..."),
 	                                      sigc::mem_fun(*this, &ARDOUR_UI::start_duplicate_routes));
@@ -205,6 +217,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (main_actions, X_("Archive"), _("Archive..."), sigc::mem_fun(*this, &ARDOUR_UI::archive_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
@@ -770,8 +785,7 @@ ARDOUR_UI::resize_text_widgets ()
 void
 ARDOUR_UI::focus_on_clock ()
 {
-	if (editor && primary_clock) {
-		editor->present ();
+	if (primary_clock) {
 		primary_clock->focus ();
 	}
 }

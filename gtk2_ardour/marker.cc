@@ -570,4 +570,3 @@ MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent,
 MeterMarker::~MeterMarker ()
 {
 }
-

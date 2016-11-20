@@ -83,7 +83,8 @@ LuaState::collect_garbage_step () {
 
 void
 LuaState::tweak_rt_gc () {
-	//lua_gc (L, LUA_GCSETPAUSE, 20);
+	/* GC runs same speed as  memory allocation */
+	lua_gc (L, LUA_GCSETPAUSE, 100);
 	lua_gc (L, LUA_GCSETSTEPMUL, 100);
 }
 

@@ -72,7 +72,11 @@ Flag::set_font_description (Pango::FontDescription font_description)
 void
 Flag::set_text (string const & text)
 {
-	_text->set (text);
+	if (text.empty ()) {
+		_text->set (" ");
+	} else {
+		_text->set (text);
+	}
 	boost::optional<Rect> bbox = _text->bounding_box ();
 	assert (bbox);
 

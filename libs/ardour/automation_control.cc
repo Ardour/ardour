@@ -49,8 +49,10 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
                                      const Evoral::Parameter&                  parameter,
                                      const ParameterDescriptor&                desc,
                                      boost::shared_ptr<ARDOUR::AutomationList> list,
-                                     const string&                             name)
-	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name)
+                                     const string&                             name,
+                                     Controllable::Flag                        flags)
+
+	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name, flags)
 	, Evoral::Control(parameter, desc, list)
 	, _session(session)
 	, _desc(desc)
@@ -117,16 +119,54 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	bool to_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_write();
-	//const double old_value = Control::user_double ();
+	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (_list);
+	const framepos_t pos = _session.transport_frame();
+	bool to_list;
+	double old_value;
 
-	Control::set_double (value, _session.transport_frame(), to_list);
+	/* We cannot use ::get_value() here since that is virtual, and intended
+	   to return a scalar value that in some way reflects the state of the
+	   control (with semantics defined by the control itself, since it's
+	   internal state may be more complex than can be fully represented by
+	   a single scalar).
 
-	//AutomationType at = (AutomationType) _parameter.type();
-	//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value 
-	//<< " (was " << old_value << ") @ " << this << std::endl;
+	   This method's only job is to set the "user_double()" value of the
+	   underlying Evoral::Control object, and so we should compare the new
+	   value we're being given to the current user_double().
 
-	Changed (true, gcd);
+	   Unless ... we're doing automation playback, in which case the
+	   current effective value of the control (used to determine if
+	   anything has changed) is the one derived from the automation event
+	   list.
+	*/
+
+	if (!al) {
+		to_list = false;
+		old_value = Control::user_double();
+	} else {
+		if (al->automation_write ()) {
+			to_list = true;
+			old_value = Control::user_double ();
+		} else if (al->automation_playback()) {
+			to_list = false;
+			old_value = al->eval (pos);
+		} else {
+			to_list = false;
+			old_value = Control::user_double ();
+		}
+	}
+
+	Control::set_double (value, pos, to_list);
+
+	if (old_value != value) {
+		// AutomationType at = (AutomationType) _parameter.type();
+		// std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
+		// << " (was " << old_value << ") @ " << this << std::endl;
+
+		Changed (true, gcd);
+		_session.set_dirty ();
+	}
+
 }
 
 void

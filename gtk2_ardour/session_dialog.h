@@ -94,6 +94,7 @@ class SessionDialog : public ArdourDialog {
         Gtk::Button* quit_button;
 
         bool back_button_pressed (GdkEventButton*);
+        bool open_button_pressed (GdkEventButton*);
 
         Gtk::Frame info_frame;
 

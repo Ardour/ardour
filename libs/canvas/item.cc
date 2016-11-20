@@ -817,7 +817,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 }
 
 void
-Item::add_child_bounding_boxes() const
+Item::add_child_bounding_boxes (bool include_hidden) const
 {
 	boost::optional<Rect> self;
 	Rect bbox;
@@ -830,7 +830,7 @@ Item::add_child_bounding_boxes() const
 
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 
-		if (!(*i)->visible()) {
+		if (!(*i)->visible() && !include_hidden) {
 			continue;
 		}
 
@@ -862,6 +862,17 @@ Item::add (Item* i)
 	/* XXX should really notify canvas about this */
 
 	_items.push_back (i);
+	i->reparent (this);
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+}
+
+void
+Item::add_front (Item* i)
+{
+	/* XXX should really notify canvas about this */
+
+	_items.push_front (i);
 	i->reparent (this);
 	invalidate_lut ();
 	_bounding_box_dirty = true;

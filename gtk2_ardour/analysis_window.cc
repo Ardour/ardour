@@ -47,7 +47,7 @@ AnalysisWindow::AnalysisWindow()
 	, source_selection_regions_rb  (_("Selected regions"))
 	, show_minmax_button	 (_("Show frequency power range"))
 	, show_normalized_button (_("Fit dB range"))
-	, show_proportional_button (_("Proportional Spectum, -18dB"))
+	, show_proportional_button (_("Proportional Spectrum, -18dB"))
 	, fft_graph (16384)
 {
 	set_name(_("FFT analysis window"));

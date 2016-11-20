@@ -34,6 +34,7 @@
 #define RDC_BUILD 1
 #endif
 
+#if (defined (_MSC_VER) && (_MSC_VER == 1400))
 #ifndef __midl
 #if defined(_DEBUG) || defined (DEBUG)
 /* Experimental - link to the lowest DebugCRT so we can run on another system */
@@ -56,6 +57,7 @@ __declspec(selectany) int _forceMFCManifestRTM;
 __declspec(selectany) int _forceAtlDllManifestRTM;
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif
 

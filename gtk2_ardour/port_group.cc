@@ -474,9 +474,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI control in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_input_port()->name())
-				);
-			sync->add_channel (
 				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
 				);
 			sync->add_channel (
@@ -485,9 +482,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		} else {
 			sync->add_channel (
 				_("MTC out"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_output_port()->name())
-				);
-			sync->add_channel (
-				_("MIDI control out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_output_port()->name())
 				);
 			sync->add_channel (
 				_("MIDI clock out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_output_port()->name())
@@ -540,7 +534,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                    connections.
                                 */
 
-                                if (p.find ("Midi-Through") != string::npos) {
+				if (p.find ("Midi-Through") != string::npos || p.find ("Midi Through") != string::npos) {
                                         ++s;
                                         continue;
                                 }
@@ -549,8 +543,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                    we excluded them earlier.
                                 */
 
-                                string lp = p, monitor = _("Monitor");
-                                boost::to_lower (lp);
+				string lp = p;
+				string monitor = _("Monitor");
+
+				boost::to_lower (lp);
                                 boost::to_lower (monitor);
 
                                 if ((lp.find (monitor) != string::npos) &&
@@ -566,25 +562,35 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				 */
 
 				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (p);
-				if (ph) {
-					DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
-					if (t != DataType::NIL) {
-						if (port_has_prefix (p, X_("system:")) ||
-						    port_has_prefix (p, X_("alsa_pcm:")) ||
-						    port_has_prefix (p, X_("alsa_midi:"))) {
-							extra_system[t].push_back (p);
-						} else if (port_has_prefix (p, lpnc)) {
-							/* Hide scene ports from non-Tracks Live builds */
-							if (!ARDOUR::Profile->get_trx()) {
-								if (p.find (_("Scene ")) != string::npos) {
-									++s;
-									continue;
-								}
+
+				if (!ph) {
+					continue;
+				}
+
+				DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
+
+				if (t != DataType::NIL) {
+
+					if (port_has_prefix (p, X_("system:")) ||
+					    port_has_prefix (p, X_("alsa_pcm:")) ||
+					    port_has_prefix (p, X_("alsa_midi:"))) {
+						extra_system[t].push_back (p);
+
+					} else if (port_has_prefix (p, lpnc)) {
+
+						/* we own this port (named after the program) */
+
+						/* Hide scene ports from non-Tracks Live builds */
+						if (!ARDOUR::Profile->get_trx()) {
+							if (p.find (_("Scene ")) != string::npos) {
+								++s;
+								continue;
 							}
-							extra_program[t].push_back (p);
-						} else {
-							extra_other[t].push_back (p);
 						}
+
+						extra_program[t].push_back (p);
+					} else {
+						extra_other[t].push_back (p);
 					}
 				}
 			}
@@ -602,9 +608,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (!extra_program[*i].empty()) {
-			/* remove program name prefix from port name and use rest as bundle name */
-			std::string bundle_name = extra_program[*i].front().substr (lpnc.length());
-			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_program[*i], *i, inputs, bundle_name);
+			/* used program name as bundle name */
+			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_program[*i], *i, inputs, lpn);
 			program->add_bundle (b);
 		}
 	}

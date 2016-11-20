@@ -50,6 +50,10 @@
 #include "ardour/lxvst_plugin.h"
 #endif
 
+#ifdef MACVST_SUPPORT
+#include "ardour/mac_vst_plugin.h"
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
@@ -77,6 +81,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _strict_io (false)
 	, _custom_cfg (false)
 	, _maps_from_state (false)
+	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
 {
 	/* the first is the master */
@@ -393,13 +398,13 @@ PluginInsert::plugin_latency () const {
 }
 
 bool
-PluginInsert::needs_midi_input() const
+PluginInsert::is_instrument() const
 {
 	PluginInfoPtr pip = _plugins[0]->get_info();
-	if (pip->needs_midi_input ()) {
+	if (pip->is_instrument ()) {
 		return true;
 	}
-	return pip->n_inputs.n_midi() != 0 && pip->n_outputs.n_audio() != 0;
+	return pip->n_inputs.n_midi () != 0 && pip->n_outputs.n_audio () > 0 && pip->n_inputs.n_audio () == 0;
 }
 
 bool
@@ -425,7 +430,7 @@ PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 			return false;
 		}
 	}
-	if (!needs_midi_input ()) {
+	if (!is_instrument ()) {
 			return false;
 	}
 	return true;
@@ -555,6 +560,13 @@ PluginInsert::activate ()
 	}
 
 	Processor::activate ();
+	/* when setting state e.g ProcessorBox::paste_processor_state ()
+	 * the plugin is not yet owned by a route.
+	 * but no matter.  Route::add_processors() will call activate () again
+	 */
+	if (!owner ()) {
+		return;
+	}
 	if (_plugin_signal_latency != signal_latency ()) {
 		_plugin_signal_latency = signal_latency ();
 		latency_changed ();
@@ -1083,7 +1095,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automation_run (bufs, start_frame, end_frame, speed, nframes);
 		} else {
-			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, false);
+			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
+			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, lm.locked());
 		}
 
 	} else {
@@ -1233,6 +1246,9 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LXVST_SUPPORT
 	boost::shared_ptr<LXVSTPlugin> lxvp;
 #endif
+#ifdef MACVST_SUPPORT
+	boost::shared_ptr<MacVSTPlugin> mvp;
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	boost::shared_ptr<AUPlugin> ap;
 #endif
@@ -1252,6 +1268,10 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef LXVST_SUPPORT
 	} else if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
+#endif
+#ifdef MACVST_SUPPORT
+	} else if ((mvp = boost::dynamic_pointer_cast<MacVSTPlugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new MacVSTPlugin (*mvp));
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
@@ -1985,7 +2005,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		m.strict_io = true;
 
 		/* special case MIDI instruments */
-		if (needs_midi_input ()) {
+		if (is_instrument ()) {
 			// output = midi-bypass + at most master-out channels.
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
@@ -2364,6 +2384,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::Windows_VST;
 	} else if (prop->value() == X_("lxvst")) {
 		type = ARDOUR::LXVST;
+	} else if (prop->value() == X_("mac-vst")) {
+		type = ARDOUR::MacVST;
 	} else if (prop->value() == X_("audiounit")) {
 		type = ARDOUR::AudioUnit;
 	} else if (prop->value() == X_("luaproc")) {
@@ -2379,9 +2401,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (prop == 0) {
 #ifdef WINDOWS_VST_SUPPORT
-		/* older sessions contain VST plugins with only an "id" field.
-		 */
-
+		/* older sessions contain VST plugins with only an "id" field.  */
 		if (type == ARDOUR::Windows_VST) {
 			prop = node.property ("id");
 		}
@@ -2389,11 +2409,11 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 #ifdef LXVST_SUPPORT
 		/*There shouldn't be any older sessions with linuxVST support.. but anyway..*/
-
 		if (type == ARDOUR::LXVST) {
 			prop = node.property ("id");
 		}
 #endif
+
 		/* recheck  */
 
 		if (prop == 0) {
@@ -2404,18 +2424,25 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
-	/* treat linux and windows VST plugins equivalent if they have the same uniqueID
+	/* treat VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
 #ifdef LXVST_SUPPORT
-	if (plugin == 0 && type == ARDOUR::Windows_VST) {
+	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::LXVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	if (plugin == 0 && type == ARDOUR::LXVST) {
+	if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::Windows_VST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
+#ifdef MACVST_SUPPORT
+	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
+		type = ARDOUR::MacVST;
 		plugin = find_plugin (_session, prop->value(), type);
 	}
 #endif
@@ -2579,7 +2606,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			if (!_sidechain) {
 				add_sidechain (0);
 			}
-			_sidechain->set_state (**i, version);
+			if (!regenerate_xml_or_string_ids ()) {
+				_sidechain->set_state (**i, version);
+			}
 		}
 	}
 
@@ -2605,6 +2634,15 @@ PluginInsert::update_id (PBD::ID id)
 	set_id (id.to_s());
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_insert_id (id);
+	}
+}
+
+void
+PluginInsert::set_owner (SessionObject* o)
+{
+	Processor::set_owner (o);
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->set_owner (o);
 	}
 }
 
@@ -2898,6 +2936,7 @@ void
 PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 {
 	plugin->set_insert_id (this->id());
+	plugin->set_owner (_owner);
 
 	if (_plugins.empty()) {
 		/* first (and probably only) plugin instance - connect to relevant signals */
@@ -2918,7 +2957,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 			}
 		}
 	}
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	boost::shared_ptr<VSTPlugin> vst = boost::dynamic_pointer_cast<VSTPlugin> (plugin);
 	if (vst) {
 		vst->set_insert (this, _plugins.size ());

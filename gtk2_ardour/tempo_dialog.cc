@@ -48,7 +48,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	Tempo tempo (map.tempo_at_frame (frame));
 	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 
-	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
+	init (when, tempo.note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
@@ -63,7 +63,7 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
-	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable(), section.position_lock_style());
+	init (when, section.note_types_per_minute(), section.note_type(), section.type(), section.movable(), section.position_lock_style());
 }
 
 void

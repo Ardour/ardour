@@ -714,6 +714,11 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	bool change = false;
 	uint32_t order = 0;
 
+	// special case master if it's got PI order 0 lets keep it there
+	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
+		order++;
+	}
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		bool visible = (*ri)[stripable_columns.visible];
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
@@ -736,6 +741,11 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 
 		stripable->presentation_info().set_hidden (!visible);
 
+		// master may not get set here, but if it is zero keep it there
+		if (stripable->is_master() && (stripable->presentation_info().order() == 0)) {
+			continue;
+		}
+
 		if (order != stripable->presentation_info().order()) {
 			stripable->set_presentation_order (order, false);
 			change = true;
@@ -747,6 +757,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	if (change) {
 		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
 		_session->notify_presentation_info_change ();
+		_session->set_dirty();
 	}
 }
 
@@ -936,6 +947,10 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	_group_tabs->set_session (sess);
+
+	if (_monitor_section) {
+		_monitor_section->set_session (_session);
+	}
 
 	if (!_session) {
 		return;
@@ -1480,8 +1495,44 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 		show_track_list_menu ();
 		return true;
 	}
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 1)) {
+		TreeModel::Path path;
+		TreeViewColumn* column;
+		int cellx, celly;
+		if (track_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+			TreeIter iter = track_model->get_iter (path);
+			if ((*iter)[stripable_columns.visible]) {
+				boost::shared_ptr<ARDOUR::Stripable> s = (*iter)[stripable_columns.stripable];
+				move_stripable_into_view (s);
+			}
+		}
+	}
 
 	return false;
+}
+
+void
+Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
+{
+	if (!scroller.get_hscrollbar()) {
+		return;
+	}
+	bool found = false;
+	int x0 = 0;
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->route() == s) {
+			int y;
+			found = true;
+			(*i)->translate_coordinates (strip_packer, 0, 0, x0, y);
+			break;
+		}
+	}
+	if (!found) {
+		return;
+	}
+
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
 }
 
 void
@@ -2044,8 +2095,23 @@ Mixer_UI::scroll_left ()
 {
 	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	/* stupid GTK: can't rely on clamping across versions */
-	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
+	int sc_w = scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = strip_packer.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		lm += i->get_widget()->get_width ();
+		if (lm >= lp) {
+			lm -= i->get_widget()->get_width ();
+			break;
+		}
+	}
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
 }
 
 void
@@ -2053,8 +2119,22 @@ Mixer_UI::scroll_right ()
 {
 	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	/* stupid GTK: can't rely on clamping across versions */
-	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
+	int sc_w = scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = strip_packer.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		lm += i->get_widget()->get_width ();
+		if (lm > lp + 1) {
+			break;
+		}
+	}
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
 }
 
 bool
@@ -2403,6 +2483,9 @@ Mixer_UI::refill_favorite_plugins ()
 #endif
 #ifdef LXVST_SUPPORT
 	refiller (plugs, mgr.lxvst_plugin_info ());
+#endif
+#ifdef MACVST_SUPPORT
+	refiller (plugs, mgr.mac_vst_plugin_info ());
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	refiller (plugs, mgr.au_plugin_info ());
@@ -2754,7 +2837,7 @@ Mixer_UI::register_actions ()
 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
 
 	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
-	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
+	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
 
 	myactions.register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_midi_input_active), false));

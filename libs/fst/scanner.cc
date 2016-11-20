@@ -31,9 +31,13 @@
 #ifdef LXVST_SUPPORT
 #include "../ardour/linux_vst_support.cc"
 #endif
+#ifdef MACVST_SUPPORT
+#include "../ardour/mac_vst_support.cc"
+#endif
 #include "../ardour/filesystem_paths.cc"
 #include "../ardour/directory_names.cc"
 
+#include "../ardour/vst_state.cc"
 
 #ifdef LXVST_SUPPORT
 void
@@ -115,6 +119,12 @@ int main (int argc, char **argv) {
 #ifdef WINDOWS_VST_SUPPORT
 	else if (slen > 4 && 0 == g_ascii_strcasecmp (&dllpath[slen-4], ".dll")) {
 		infos = vstfx_get_info_fst(dllpath);
+	}
+#endif
+
+#ifdef MACVST_SUPPORT
+	else if (slen > 4 && 0 == g_ascii_strcasecmp (&dllpath[slen-4], ".vst")) {
+		infos = vstfx_get_info_mac(dllpath);
 	}
 #endif
 	else {

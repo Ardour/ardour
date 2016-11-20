@@ -53,10 +53,13 @@ class OSCRouteObserver
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	float _last_meter;
+	uint32_t gain_timeout;
+	uint32_t trim_timeout;
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void text_with_id (std::string path, uint32_t id, std::string name);
 	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

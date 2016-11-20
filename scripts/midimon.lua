@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "MIDI Monitor",
+	name        = "a-MIDI Monitor",
 	category    = "Visualization",
 	license     = "GPLv2",
 	author      = "Ardour Team",
@@ -13,11 +13,8 @@ local evlen = 3
 local hpadding, vpadding = 4, 2
 
 function dsp_ioconfig ()
-	return { { audio_in = -1, audio_out = -1}, }
+	return { { midi_in = 1, midi_out = 1, audio_in = -1, audio_out = -1}, }
 end
-
-function dsp_has_midi_input () return true end
-function dsp_has_midi_output () return true end
 
 function dsp_params ()
 	return

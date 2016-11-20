@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options
+import os
+import re
+import sys
+
+HIDAPI_VERSION = '0.8.0'
+
+# Variables for 'waf dist'
+APPNAME = 'hidapi'
+VERSION = HIDAPI_VERSION
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'hidapi-hidraw', uselib_store='HIDAPI', mandatory=False)
+    else:
+        if conf.env['build_target'] == 'mingw':
+            conf.check (compiler='cxx', lib='setupapi', mandatory=True, uselib_store='SETUPAPI')
+            conf.define ('HAVE_HIDAPI', 1)
+        elif sys.platform == 'darwin':
+            conf.define ('HAVE_HIDAPI', 1)
+        elif re.search ("linux", sys.platform) != None:
+            autowaf.check_pkg(conf, 'libudev', uselib_store='UDEV', mandatory=False)
+            if conf.is_defined('HAVE_UDEV'):
+                conf.define ('HAVE_HIDAPI', 1)
+        else:
+            print ("hidapi is not yet available for the given system")
+        conf.load('compiler_c')
+        autowaf.configure(conf)
+
+def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+    if not bld.is_defined('HAVE_HIDAPI'):
+        return
+
+    # Host Library
+    obj = bld(features = 'c cstlib')
+    autowaf.ensure_visible_symbols (obj, False)
+    obj.export_includes    = ['hidapi']
+    obj.includes           = ['hidapi']
+    obj.name               = 'hidapi'
+    obj.target             = 'hidapi'
+    obj.vnum               = HIDAPI_VERSION
+    obj.install_path       = bld.env['LIBDIR']
+
+    if bld.env['build_target'] == 'mingw':
+        obj.source         = 'windows/hid.c'
+        obj.linkflags      = [ '-lsetupapi', '-mwindows' ]
+        obj.uselib         = 'SETUPAPI'
+    else:
+        obj.cflags        += [ '-fPIC' ]
+        if sys.platform == 'darwin':
+            obj.source     = 'mac/hid.c'
+            obj.framework  = [ 'IOKit', 'CoreFoundation' ]
+        else:
+            obj.source     = 'linux/hid.c'
+            if re.search ("linux", sys.platform) != None:
+                obj.uselib = 'UDEV'
+
+def shutdown():
+    autowaf.shutdown()

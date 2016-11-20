@@ -165,8 +165,8 @@ public:
 	void raise (int);
 	void lower_to_bottom ();
 
-        void hide ();
-	void show ();
+	virtual void hide ();
+        virtual void show ();
 
 	/** @return true if this item is visible (ie it will be rendered),
 	 *  otherwise false
@@ -192,6 +192,7 @@ public:
 
 	/* nested item ("grouping") API */
 	void add (Item *);
+	void add_front (Item *);
 	void remove (Item *);
         void clear (bool with_delete = false);
 	std::list<Item*> const & items () const {
@@ -200,7 +201,7 @@ public:
 	void raise_child_to_top (Item *);
 	void raise_child (Item *, int);
 	void lower_child_to_bottom (Item *);
-	void child_changed ();
+	virtual void child_changed ();
 
 	static int default_items_per_cell;
 
@@ -294,7 +295,7 @@ protected:
 	/* our items, from lowest to highest in the stack */
 	std::list<Item*> _items;
 
-	void add_child_bounding_boxes() const;
+	void add_child_bounding_boxes (bool include_hidden = false) const;
 	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	Duple scroll_offset() const;

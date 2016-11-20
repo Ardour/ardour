@@ -994,6 +994,10 @@ Locations::remove (Location *loc)
 	bool was_current = false;
 	LocationList::iterator i;
 
+	if (!loc) {
+		return;
+	}
+
 	if (loc->is_session_range()) {
 		return;
 	}
@@ -1427,4 +1431,3 @@ Locations::find_all_between (framepos_t start, framepos_t end, LocationList& ll,
 		}
 	}
 }
-

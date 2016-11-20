@@ -24,6 +24,7 @@
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/tempo.h"
+#include "ardour/utils.h"
 
 #include "control_protocol/basic_ui.h"
 
@@ -120,9 +121,9 @@ BasicUI::loop_location (framepos_t start, framepos_t end)
 }
 
 void
-BasicUI::goto_start ()
+BasicUI::goto_start (bool and_roll)
 {
-	session->goto_start ();
+	session->goto_start (and_roll);
 }
 
 void
@@ -493,6 +494,45 @@ void
 BasicUI::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
+}
+
+void
+BasicUI::cancel_all_solo ()
+{
+	if (session) {
+		session->cancel_all_solo ();
+	}
+}
+
+struct SortLocationsByPosition {
+    bool operator() (Location* a, Location* b) {
+	    return a->start() < b->start();
+    }
+};
+
+void
+BasicUI::goto_nth_marker (int n)
+{
+	if (!session) {
+		return;
+	}
+
+	const Locations::LocationList& l (session->locations()->list());
+	Locations::LocationList ordered;
+	ordered = l;
+
+	SortLocationsByPosition cmp;
+	ordered.sort (cmp);
+
+	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
+		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
+			if (n == 0) {
+				session->request_locate ((*i)->start(), session->transport_rolling());
+				break;
+			}
+			--n;
+		}
+	}
 }
 
 #if 0

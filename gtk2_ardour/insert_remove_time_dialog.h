@@ -34,6 +34,7 @@ public:
 	bool move_glued_markers () const;
 	bool move_locked_markers () const;
 	bool move_tempos () const;
+	framepos_t position () const;
 	framepos_t distance () const;
 
 private:
@@ -49,5 +50,6 @@ private:
 	Gtk::CheckButton _move_locked_markers;
 	Gtk::CheckButton _move_tempos;
 	Gtk::Label tempo_label;
-	AudioClock _clock;
+	AudioClock duration_clock;
+	AudioClock position_clock;
 };

@@ -765,6 +765,7 @@ Playlist::flush_notifications (bool from_undo)
 	 notify_region_added (region);
 
 	 region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
+	 region->DropReferences.connect_same_thread (region_drop_references_connections, boost::bind (&Playlist::region_going_away, this, boost::weak_ptr<Region> (region)));
 
 	 return true;
  }
@@ -1745,6 +1746,7 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		 RegionWriteLock rl (this);
 
 		 region_state_changed_connections.drop_connections ();
+		 region_drop_references_connections.drop_connections ();
 
 		 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			 pending_removes.insert (*i);

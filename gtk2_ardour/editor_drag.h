@@ -282,6 +282,7 @@ private:
 	 */
 	ARDOUR::frameoffset_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
+	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
 
 class RegionDrag;
@@ -326,6 +327,7 @@ protected:
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
 	int apply_track_delta (const int start, const int delta, const int skip, const bool distance_only = false) const;
+	int32_t current_music_divisor (framepos_t pos, int32_t button_state);
 
 	int _visible_y_low;
 	int _visible_y_high;
@@ -589,9 +591,45 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::framecnt_t grid_frames (framepos_t) const;
 
+	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (0, 0);
+	}
+
 	MidiRegionView* _region_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	framepos_t _note[2];
+};
+
+class HitCreateDrag : public Drag
+{
+public:
+	HitCreateDrag (Editor *, ArdourCanvas::Item *, MidiRegionView *);
+	~HitCreateDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool active (Editing::MouseMode mode) {
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+private:
+	double y_to_region (double) const;
+	ARDOUR::framecnt_t grid_frames (framepos_t) const;
+
+	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (0, 0);
+	}
+
+	MidiRegionView* _region_view;
 };
 
 /** Drag to move MIDI patch changes */
@@ -744,6 +782,7 @@ private:
 
 	bool _copy;
 	bool _movable;
+	double _grab_bpm;
 	XMLNode* before_state;
 };
 
@@ -769,7 +808,7 @@ public:
 	void setup_pointer_frame_offset ();
 
 private:
-	double _pulse;
+	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
 	XMLNode* before_state;
 };
@@ -1185,6 +1224,22 @@ class CrossfadeEdgeDrag : public Drag
   private:
 	AudioRegionView* arv;
 	bool start;
+};
+
+class RulerZoomDrag : public Drag
+{
+public:
+	RulerZoomDrag (Editor*, ArdourCanvas::Item*);
+
+	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+	virtual bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

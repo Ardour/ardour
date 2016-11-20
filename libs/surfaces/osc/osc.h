@@ -98,6 +98,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types);
+	// cue
+	//Sorted cue_get_sorted_stripables(boost::shared_ptr<Route> aux);
 
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
@@ -129,6 +131,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [10] - Send Playhead position as samples
 		 * [11] - Send Playhead position as minutes seconds
 		 * [12]	- Send Playhead position like primary/secondary GUI clocks
+		 * [13] - Send well known feedback (for /select/command
 		 */
 
 
@@ -139,6 +142,20 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string get_server_url ();
 	void set_debug_mode (OSCDebugMode m) { _debugmode = m; }
 	OSCDebugMode get_debug_mode () { return _debugmode; }
+	int get_portmode() { return address_only; }
+	void set_portmode (int pm) { address_only = pm; }
+	int get_banksize () { return default_banksize; }
+	void set_banksize (int bs) {default_banksize = bs; }
+	int get_gainmode() { return default_gainmode; }
+	void set_gainmode (int gm) { default_gainmode = gm; }
+	int get_defaultstrip() { return default_strip; }
+	void set_defaultstrip (int st) { default_strip = st; }
+	int get_defaultfeedback() { return default_feedback; }
+	void set_defaultfeedback (int fb) { default_feedback = fb; }
+	void clear_devices ();
+	void gui_changed ();
+	std::string get_remote_port () { return remote_port; }
+	void set_remote_port (std::string pt) { remote_port = pt; }
 
   protected:
         void thread_init ();
@@ -159,6 +176,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string _osc_url_file;
 	bool _send_route_changes;
 	OSCDebugMode _debugmode;
+	bool address_only;
+	std::string remote_port;
+	uint32_t default_banksize;
+	uint32_t default_strip;
+	uint32_t default_feedback;
+	uint32_t default_gainmode;
 	bool tick;
 	bool bank_dirty;
 	bool global_init;
@@ -175,6 +198,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// end "Application Hook" handles
 
 	std::string get_unix_server_url ();
+	lo_address get_address (lo_message msg);
 	OSCSurface * get_surface (lo_address addr);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
@@ -213,6 +237,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(transport_frame);
 	PATH_CALLBACK_MSG(transport_speed);
 	PATH_CALLBACK_MSG(record_enabled);
+	PATH_CALLBACK_MSG(refresh_surface);
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);
 
@@ -432,6 +457,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK3(route_set_send_enable,i,i,f);
 	PATH_CALLBACK4(route_plugin_parameter,i,i,i,f);
 	PATH_CALLBACK3(route_plugin_parameter_print,i,i,i);
+	PATH_CALLBACK2_MSG(route_plugin_activate,i,i);
+	PATH_CALLBACK2_MSG(route_plugin_deactivate,i,i);
 
 	int route_mute (int rid, int yn, lo_message msg);
 	int route_solo (int rid, int yn, lo_message msg);
@@ -457,6 +484,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
 	int route_plugin_parameter (int rid, int piid,int par, float val, lo_message msg);
 	int route_plugin_parameter_print (int rid, int piid,int par, lo_message msg);
+	int route_plugin_activate (int rid, int piid, lo_message msg);
+	int route_plugin_deactivate (int rid, int piid, lo_message msg);
 
 	//banking functions
 	int set_bank (uint32_t bank_start, lo_message msg);
@@ -468,6 +497,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
+	int refresh_surface (lo_message msg);
 
 	int master_set_gain (float dB);
 	int master_set_fader (float position);

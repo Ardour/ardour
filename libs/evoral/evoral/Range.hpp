@@ -138,6 +138,18 @@ struct /*LIBEVORAL_API*/ Range {
 	T from; ///< start of the range
 	T to;   ///< end of the range (inclusive: to lies inside the range)
 	bool empty() const { return from == to; }
+	T length() const { return to - from + 1; }
+
+	/** for a T, return a mapping of it into the range (used for
+	 * looping). If the argument is earlier than or equal to the end of
+	 * this range, do nothing.
+	 */
+	T squish (T t) const {
+		if (t > to) {
+			t = (from + ((t - from) % length()));
+		}
+		return t;
+	}
 };
 
 template<typename T>

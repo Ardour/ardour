@@ -301,29 +301,49 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
-				_output->copy_to_outputs (bufs, *t, nframes, ports.port(0)->port_offset());
+				_output->copy_to_outputs (bufs, *t, nframes, Port::port_offset());
 			}
 		}
 
 	} else {
 
-		// Do a 1:1 copy of data to output ports
+		/* Do a 1:1 copy of data to output ports
 
-		// audio is handled separately because we use 0 for the offset
-		// XXX how does this interact with Port::increment_global_port_buffer_offset ?
+		   Audio is handled separately because we use 0 for the offset,
+		   since the port offset is only used for timestamped events
+		   (i.e. MIDI).
+		*/
+
 		if (bufs.count().n_audio() > 0) {
 			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 		}
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
-				_output->copy_to_outputs (bufs, *t, nframes, ports.port(0)->port_offset());
+				_output->copy_to_outputs (bufs, *t, nframes, Port::port_offset());
 			}
 		}
 	}
 
 	if (result_required) {
-		bufs.read_from (output_buffers (), nframes);
+
+		/* "bufs" are internal, meaning they should never reflect
+		   split-cycle offsets. So shift events back in time from where
+		   they were for the external buffers associated with Ports.
+		*/
+
+		BufferSet& outs (output_buffers());
+
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+
+			uint32_t n = 0;
+			for (BufferSet::iterator b = bufs.begin (*t); b != bufs.end (*t); ++b) {
+				if (outs.count ().get (*t) <= n) {
+					continue;
+				}
+				b->read_from (outs.get (*t, n++), nframes, (*t == DataType::AUDIO ? 0 : -Port::port_offset()));
+			}
+		}
 	}
 
 out:
@@ -497,7 +517,7 @@ Delivery::transport_stopped (framepos_t now)
 void
 Delivery::realtime_locate ()
 {
-        if (_output) {
+	if (_output) {
                 PortSet& ports (_output->ports());
 
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {

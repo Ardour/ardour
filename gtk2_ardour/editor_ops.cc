@@ -82,6 +82,7 @@
 #include "item_counts.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "mouse_cursors.h"
 #include "normalize_dialog.h"
@@ -119,6 +120,13 @@ using Gtkmm2ext::Keyboard;
 void
 Editor::undo (uint32_t n)
 {
+	if (_session && _session->actively_recording()) {
+		/* no undo allowed while recording. Session will check also,
+		   but we don't even want to get to that.
+		*/
+		return;
+	}
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
@@ -136,12 +144,19 @@ Editor::undo (uint32_t n)
 void
 Editor::redo (uint32_t n)
 {
+	if (_session && _session->actively_recording()) {
+		/* no redo allowed while recording. Session will check also,
+		   but we don't even want to get to that.
+		*/
+		return;
+	}
+
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
 
 	if (_session) {
-		_session->redo (n);
+	_session->redo (n);
 		if (_session->redo_depth() == 0) {
 			redo_action->set_sensitive(false);
 		}
@@ -1695,25 +1710,43 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 }
 
 void
-Editor::temporal_zoom_step_mouse_focus (bool coarser)
+Editor::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
 	Editing::ZoomFocus temp_focus = zoom_focus;
 	zoom_focus = Editing::ZoomFocusMouse;
-	temporal_zoom_step (coarser);
+	temporal_zoom_step_scale (zoom_out, scale);
 	zoom_focus = temp_focus;
 }
 
 void
-Editor::temporal_zoom_step (bool coarser)
+Editor::temporal_zoom_step_mouse_focus (bool zoom_out)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
+	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
+}
+
+void
+Editor::temporal_zoom_step (bool zoom_out)
+{
+	temporal_zoom_step_scale (zoom_out, 2.0);
+}
+
+void
+Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
+{
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, zoom_out, scale)
 
 	framecnt_t nspp = samples_per_pixel;
 
-	if (coarser) {
-		nspp *= 2;
+	if (zoom_out) {
+		nspp *= scale;
+		if (nspp == samples_per_pixel) {
+			nspp *= 2.0;
+		}
 	} else {
-		nspp /= 2;
+		nspp /= scale;
+		if (nspp == samples_per_pixel) {
+			nspp /= 2.0;
+		}
 	}
 
 	temporal_zoom (nspp);
@@ -1735,6 +1768,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	framepos_t leftmost_after_zoom = 0;
 	framepos_t where;
 	bool in_track_canvas;
+	bool use_mouse_frame = true;
 	framecnt_t nfpp;
 	double l;
 
@@ -1795,18 +1829,13 @@ Editor::temporal_zoom (framecnt_t fpp)
 	case ZoomFocusMouse:
 		/* try to keep the mouse over the same point in the display */
 
-		if (!mouse_frame (where, in_track_canvas)) {
-			/* use playhead instead */
-			where = playhead_cursor->current_frame ();
+		if (_drags->active()) {
+			where = _drags->current_pointer_frame ();
+		} else if (!mouse_frame (where, in_track_canvas)) {
+			use_mouse_frame = false;
+		}
 
-			if (where < half_page_size) {
-				leftmost_after_zoom = 0;
-			} else {
-				leftmost_after_zoom = where - half_page_size;
-			}
-
-		} else {
-
+		if (use_mouse_frame) {
 			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
@@ -1816,8 +1845,16 @@ Editor::temporal_zoom (framecnt_t fpp)
 			} else {
 				leftmost_after_zoom = (framepos_t) l;
 			}
-		}
+		} else {
+			/* use playhead instead */
+			where = playhead_cursor->current_frame ();
 
+			if (where < half_page_size) {
+				leftmost_after_zoom = 0;
+			} else {
+				leftmost_after_zoom = where - half_page_size;
+			}
+		}
 		break;
 
 	case ZoomFocusEdit:
@@ -2243,19 +2280,29 @@ Editor::set_session_end_from_playhead ()
 	_session->set_end_is_free (false);
 }
 
+
+void
+Editor::toggle_location_at_playhead_cursor ()
+{
+	if (!do_remove_location_at_playhead_cursor())
+	{
+		add_location_from_playhead_cursor();
+	}
+}
+
 void
 Editor::add_location_from_playhead_cursor ()
 {
 	add_location_mark (_session->audible_frame());
 }
 
-void
-Editor::remove_location_at_playhead_cursor ()
+bool
+Editor::do_remove_location_at_playhead_cursor ()
 {
+	bool removed = false;
 	if (_session) {
 		//set up for undo
 		XMLNode &before = _session->locations()->get_state();
-		bool removed = false;
 
 		//find location(s) at this time
 		Locations::LocationList locs;
@@ -2275,6 +2322,13 @@ Editor::remove_location_at_playhead_cursor ()
 			commit_reversible_command ();
 		}
 	}
+	return removed;
+}
+
+void
+Editor::remove_location_at_playhead_cursor ()
+{
+	do_remove_location_at_playhead_cursor ();
 }
 
 /** Add a range marker around each selected region */
@@ -4178,6 +4232,7 @@ Editor::cut_copy (CutCopyOp op)
 	}
 }
 
+
 struct AutomationRecord {
 	AutomationRecord () : state (0) , line(NULL) {}
 	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
@@ -4186,7 +4241,11 @@ struct AutomationRecord {
 	const AutomationLine* line; ///< line this came from
 	boost::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
-
+struct PointsSelectionPositionSorter {
+	bool operator() (ControlPoint* a, ControlPoint* b) {
+		return (*(a->model()))->when < (*(b->model()))->when;
+	}
+};
 /** Cut, copy or clear selected automation points.
  *  @param op Operation (Cut, Copy or Clear)
  */
@@ -4204,9 +4263,12 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 	typedef std::map<boost::shared_ptr<AutomationList>, AutomationRecord> Lists;
 	Lists lists;
 
+	/* user could select points in any order */
+	selection->points.sort(PointsSelectionPositionSorter ());
+	
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
-	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-		const AutomationLine&                   line = (*i)->line();
+	for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+		const AutomationLine&                   line = (*sel_point)->line();
 		const boost::shared_ptr<AutomationList> al   = line.the_list();
 		if (lists.find (al) == lists.end ()) {
 			/* We haven't seen this list yet, so make a record for it.  This includes
@@ -4226,17 +4288,17 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 
 		/* Add all selected points to the relevant copy ControlLists */
 		framepos_t start = std::numeric_limits<framepos_t>::max();
-		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
-			AutomationList::const_iterator    j  = (*i)->model();
+		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+			boost::shared_ptr<AutomationList>    al = (*sel_point)->line().the_list();
+			AutomationList::const_iterator ctrl_evt = (*sel_point)->model ();
 
-			lists[al].copy->fast_simple_add ((*j)->when, (*j)->value);
+			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
 			if (midi) {
 				/* Update earliest MIDI start time in beats */
-				earliest = std::min(earliest, Evoral::Beats((*j)->when));
+				earliest = std::min(earliest, Evoral::Beats((*ctrl_evt)->when));
 			} else {
 				/* Update earliest session start time in frames */
-				start = std::min(start, (*i)->line().session_position(j));
+				start = std::min(start, (*sel_point)->line().session_position(ctrl_evt));
 			}
 		}
 
@@ -4259,12 +4321,13 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 			   start time, so relative ordering between points is preserved
 			   when copying from several lists and the paste starts at the
 			   earliest copied piece of data. */
-			for (AutomationList::iterator j = i->second.copy->begin(); j != i->second.copy->end(); ++j) {
-				(*j)->when -= line_offset;
+			boost::shared_ptr<Evoral::ControlList> &al_cpy = i->second.copy;
+			for (AutomationList::iterator ctrl_evt = al_cpy->begin(); ctrl_evt != al_cpy->end(); ++ctrl_evt) {
+				(*ctrl_evt)->when -= line_offset;
 			}
 
 			/* And add it to the cut buffer */
-			cut_buffer->add (i->second.copy);
+			cut_buffer->add (al_cpy);
 		}
 	}
 
@@ -4276,9 +4339,22 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 		}
 
 		/* Remove each selected point from its AutomationList */
-		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
-			al->erase ((*i)->model ());
+		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
+			AutomationLine& line = (*sel_point)->line ();
+			boost::shared_ptr<AutomationList> al = line.the_list();
+
+			bool erase = true;
+			
+			if (dynamic_cast<AudioRegionGainLine*> (&line)) {
+				/* removing of first and last gain point in region gain lines is prohibited*/
+				if (line.is_last_point (*(*sel_point)) || line.is_first_point (*(*sel_point))) {
+					erase = false;
+				}
+			}
+
+			if(erase) {
+				al->erase ((*sel_point)->model ());
+			}
 		}
 
 		/* Thaw the lists and add undo records for them */
@@ -4770,6 +4846,13 @@ Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 }
 
 void
+Editor::duplicate_regions (float times)
+{
+	RegionSelection rs (get_regions_from_selection_and_entered());
+	duplicate_some_regions (rs, times);
+}
+
+void
 Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
 	if (regions.empty ()) {
@@ -4996,7 +5079,7 @@ Editor::normalize_region ()
 
 	NormalizeDialog dialog (rs.size() > 1);
 
-	if (dialog.run () == RESPONSE_CANCEL) {
+	if (dialog.run () != RESPONSE_ACCEPT) {
 		return;
 	}
 
@@ -5010,25 +5093,36 @@ Editor::normalize_region ()
 	   obtain the maximum amplitude of them all.
 	*/
 	list<double> max_amps;
+	list<double> rms_vals;
 	double max_amp = 0;
+	double max_rms = 0;
+	bool use_rms = dialog.constrain_rms ();
+
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView const * arv = dynamic_cast<AudioRegionView const *> (*i);
-		if (arv) {
-			dialog.descend (1.0 / regions);
-			double const a = arv->audio_region()->maximum_amplitude (&dialog);
-
-			if (a == -1) {
-				/* the user cancelled the operation */
-				return;
-			}
-
-			max_amps.push_back (a);
-			max_amp = max (max_amp, a);
-			dialog.ascend ();
+		if (!arv) {
+			continue;
 		}
+		dialog.descend (1.0 / regions);
+		double const a = arv->audio_region()->maximum_amplitude (&dialog);
+		if (use_rms) {
+			double r = arv->audio_region()->rms (&dialog);
+			max_rms = max (max_rms, r);
+			rms_vals.push_back (r);
+		}
+
+		if (a == -1) {
+			/* the user cancelled the operation */
+			return;
+		}
+
+		max_amps.push_back (a);
+		max_amp = max (max_amp, a);
+		dialog.ascend ();
 	}
 
 	list<double>::const_iterator a = max_amps.begin ();
+	list<double>::const_iterator l = rms_vals.begin ();
 	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
@@ -5039,9 +5133,21 @@ Editor::normalize_region ()
 
 		arv->region()->clear_changes ();
 
-		double const amp = dialog.normalize_individually() ? *a : max_amp;
+		double amp = dialog.normalize_individually() ? *a : max_amp;
+		double target = dialog.target_peak (); // dB
 
-		arv->audio_region()->normalize (amp, dialog.target ());
+		if (use_rms) {
+			double const amp_rms = dialog.normalize_individually() ? *l : max_rms;
+			const double t_rms = dialog.target_rms ();
+			const gain_t c_peak = dB_to_coefficient (target);
+			const gain_t c_rms  = dB_to_coefficient (t_rms);
+			if ((amp_rms / c_rms) > (amp / c_peak)) {
+				amp = amp_rms;
+				target = t_rms;
+			}
+		}
+
+		arv->audio_region()->normalize (amp, target);
 
 		if (!in_command) {
 			begin_reversible_command (_("normalize"));
@@ -5050,6 +5156,7 @@ Editor::normalize_region ()
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 
 		++a;
+		++l;
 	}
 
 	if (in_command) {
@@ -5192,8 +5299,7 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	vector<Evoral::Sequence<Evoral::Beats>::Notes> v;
 	v.push_back (selected);
 
-	framepos_t    pos_frames = mrv.midi_region()->position() - mrv.midi_region()->start();
-	Evoral::Beats pos_beats  = _session->tempo_map().framewalk_to_beats(0, pos_frames);
+	Evoral::Beats pos_beats  = Evoral::Beats (mrv.midi_region()->beat()) - mrv.midi_region()->start_beats();
 
 	return op (mrv.midi_region()->model(), pos_beats, v);
 }
@@ -5296,6 +5402,11 @@ Editor::quantize_regions (const RegionSelection& rs)
 
 	if (!quantize_dialog) {
 		quantize_dialog = new QuantizeDialog (*this);
+	}
+
+	if (quantize_dialog->is_mapped()) {
+		/* in progress already */
+		return;
 	}
 
 	quantize_dialog->present ();
@@ -6283,6 +6394,59 @@ Editor::set_punch_from_selection ()
 }
 
 void
+Editor::set_auto_punch_range ()
+{
+	// auto punch in/out button from a single button
+	// If Punch In is unset, set punch range from playhead to end, enable punch in
+	// If Punch In is set, the next punch sets Punch Out, unless the playhead has been
+	//   rewound beyond the Punch In marker, in which case that marker will be moved back
+	//   to the current playhead position.
+	// If punch out is set, it clears the punch range and Punch In/Out buttons
+
+	if (_session == 0) {
+		return;
+	}
+
+	Location* tpl = transport_punch_location();
+	framepos_t now = playhead_cursor->current_frame();
+	framepos_t begin = now;
+	framepos_t end = _session->current_end_frame();
+
+	if (!_session->config.get_punch_in()) {
+		// First Press - set punch in and create range from here to eternity
+		set_punch_range (begin, end, _("Auto Punch In"));
+		_session->config.set_punch_in(true);
+	} else if (tpl && !_session->config.get_punch_out()) {
+		// Second press - update end range marker and set punch_out
+		if (now < tpl->start()) {
+			// playhead has been rewound - move start back  and pretend nothing happened
+			begin = now;
+			set_punch_range (begin, end, _("Auto Punch In/Out"));
+		} else {
+			// normal case for 2nd press - set the punch out
+			end = playhead_cursor->current_frame ();
+			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
+			_session->config.set_punch_out(true);
+		}
+	} else 	{
+		if (_session->config.get_punch_out()) {
+			_session->config.set_punch_out(false);
+		}
+
+		if (_session->config.get_punch_in()) {
+			_session->config.set_punch_in(false);
+		}
+
+		if (tpl)
+		{
+			// third press - unset punch in/out and remove range
+			_session->locations()->remove(tpl);
+		}
+	}
+
+}
+
+void
 Editor::set_session_extents_from_selection ()
 {
 	if (_session == 0) {
@@ -7219,6 +7383,9 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
+
+	Mixer_UI::instance()->selection().block_routes_changed (true);
+	selection->block_tracks_changed (true);
 	{
 		DisplaySuspender ds;
 		boost::shared_ptr<RouteList> rl (new RouteList);
@@ -7231,6 +7398,9 @@ edit your ardour.rc file to set the\n\
 	 * destructors are called,
 	 * diskstream drops references, save_state is called (again for every track)
 	 */
+	selection->block_tracks_changed (false);
+	Mixer_UI::instance()->selection().block_routes_changed (false);
+	selection->TracksChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -7252,7 +7422,7 @@ Editor::do_insert_time ()
 	}
 
 	insert_time (
-		get_preferred_edit_position (EDIT_IGNORE_MOUSE),
+		d.position(),
 		d.distance(),
 		d.intersected_region_action (),
 		d.all_playlists(),
@@ -7401,7 +7571,6 @@ Editor::do_remove_time ()
 		return;
 	}
 
-	framepos_t pos = get_preferred_edit_position (EDIT_IGNORE_MOUSE);
 	InsertRemoveTimeDialog d (*this, true);
 
 	int response = d.run ();
@@ -7417,7 +7586,7 @@ Editor::do_remove_time ()
 	}
 
 	remove_time (
-		pos,
+		d.position(),
 		distance,
 		SplitIntersected,
 		d.move_glued(),
@@ -7860,6 +8029,8 @@ Editor::toggle_midi_input_active (bool flip_others)
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
 
+static bool ok_fine (GdkEventAny*) { return true; }
+
 void
 Editor::lock ()
 {
@@ -7868,6 +8039,7 @@ Editor::lock ()
 
 		Gtk::Image* padlock = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("padlock_closed")));
 		lock_dialog->get_vbox()->pack_start (*padlock);
+		lock_dialog->signal_delete_event ().connect (sigc::ptr_fun (ok_fine));
 
 		ArdourButton* b = manage (new ArdourButton);
 		b->set_name ("lock button");
@@ -7883,6 +8055,8 @@ Editor::lock ()
 	_main_menu_disabler = new MainMenuDisabler;
 
 	lock_dialog->present ();
+
+	lock_dialog->get_window()->set_decorations (Gdk::WMDecoration (0));
 }
 
 void

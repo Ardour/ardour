@@ -14,6 +14,9 @@
       <menuitem action='SnapshotSwitch'/>
 #endif
       <menuitem action='SaveTemplate'/>
+#if 0
+      <menuitem action='Archive'/>
+#endif
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
@@ -130,6 +133,7 @@
       <menu action="MarkerMenu">
         <menuitem action='add-location-from-playhead'/>
         <menuitem action='remove-location-from-playhead'/>
+        <menuitem action='toggle-location-at-playhead'/>
         <separator/>
         <menuitem action='goto-mark-1'/>
         <menuitem action='goto-mark-2'/>

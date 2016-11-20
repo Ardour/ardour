@@ -58,6 +58,8 @@ WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 
 WindowsVSTPluginUI::~WindowsVSTPluginUI ()
 {
+	fst_destroy_editor (_vst->state());
+
 	// plugin destructor destroys the custom GUI, via Windows fun-and-games,
 	// and then our PluginUIWindow does the rest
 }

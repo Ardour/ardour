@@ -59,7 +59,7 @@ class LIBCONTROLCP_API BasicUI {
 	void access_action ( std::string action_path );
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_zero ();
-	void goto_start ();
+	void goto_start (bool and_roll = false);
 	void goto_end ();
 	void rewind ();
 	void ffwd ();
@@ -83,7 +83,7 @@ class LIBCONTROLCP_API BasicUI {
 	void redo ();
 	void toggle_punch_in ();
 	void toggle_punch_out ();
-	
+
 	void mark_in();
 	void mark_out();
 
@@ -93,6 +93,8 @@ class LIBCONTROLCP_API BasicUI {
 	void toggle_monitor_mute();
 	void toggle_monitor_dim();
 	void toggle_monitor_mono();
+
+	void cancel_all_solo ();
 
 	void quick_snapshot_stay ();
 	void quick_snapshot_switch ();
@@ -108,7 +110,7 @@ class LIBCONTROLCP_API BasicUI {
 	void set_record_enable (bool yn);
 	bool get_record_enabled ();
 
-	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args 
+	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args
 	void fit_1_track();
 	void fit_2_tracks();
 	void fit_4_tracks();
@@ -137,6 +139,8 @@ class LIBCONTROLCP_API BasicUI {
 
 	void all_tracks_rec_in ();
 	void all_tracks_rec_out ();
+
+	void goto_nth_marker (int n);
 
 	ARDOUR::framecnt_t timecode_frames_per_hour ();
 

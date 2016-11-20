@@ -100,18 +100,16 @@ class NoteBase : public sigc::trackable
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 
+	static void set_colors ();
+
 	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
 		if (selected) {
-			return UIConfiguration::instance().color_mod ("midi note selected", "midi note");
+			return _selected_mod_col;
 		} else if (vel < 64) {
-			return UINT_INTERPOLATE(
-				UIConfiguration::instance().color_mod ("midi note min", "midi note"),
-				UIConfiguration::instance().color_mod ("midi note mid", "midi note"),
+			return UINT_INTERPOLATE(_min_col, _mid_col,
 				(vel / (double)63.0));
 		} else {
-			return UINT_INTERPOLATE(
-				UIConfiguration::instance().color_mod ("midi note mid", "midi note"),
-				UIConfiguration::instance().color_mod ("midi note max", "midi note"),
+			return UINT_INTERPOLATE(_mid_col, _max_col,
 				((vel-64) / (double)63.0));
 		}
 	}
@@ -119,7 +117,7 @@ class NoteBase : public sigc::trackable
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
 		if (selected) {
-			return UIConfiguration::instance().color ("midi note selected outline");
+			return _selected_outline_col;
 		} else {
 			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 		}
@@ -150,6 +148,14 @@ protected:
 
 private:
 	bool event_handler (GdkEvent *);
+
+	static uint32_t _selected_mod_col;
+	static uint32_t _selected_outline_col;
+	static uint32_t _selected_col;
+	static uint32_t _min_col;
+	static uint32_t _mid_col;
+	static uint32_t _max_col;
+	static bool _color_init;
 };
 
 #endif /* __gtk_ardour_note_h__ */

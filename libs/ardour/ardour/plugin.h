@@ -51,6 +51,7 @@ class PluginInsert;
 class Plugin;
 class PluginInfo;
 class AutomationControl;
+class SessionObject;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
@@ -132,13 +133,20 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		IOPortDescription (const std::string& n)
 			: name (n)
 			, is_sidechain (false)
+			, group_name (n)
+			, group_channel (0)
 		{}
 		IOPortDescription (const IOPortDescription &other)
 			: name (other.name)
 			, is_sidechain (other.is_sidechain)
+			, group_name (other.group_name)
+			, group_channel (other.group_channel)
 		{}
 		std::string name;
 		bool is_sidechain;
+
+		std::string group_name;
+		uint32_t group_channel;
 	};
 
 	virtual IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
@@ -164,6 +172,11 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool has_inline_display () { return false; }
 	virtual Display_Image_Surface* render_inline_display (uint32_t, uint32_t) { return NULL; }
 	PBD::Signal0<void> QueueDraw;
+
+	virtual bool has_midnam () { return false; }
+	virtual bool read_midnam () { return false; }
+	virtual std::string midnam_model () { return ""; }
+	PBD::Signal0<void> UpdateMidnam;
 
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
@@ -262,6 +275,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	PluginInfoPtr get_info() const { return _info; }
 	virtual void set_info (const PluginInfoPtr inf);
 
+	virtual void set_owner (SessionObject* o) { _owner = o; }
+	SessionObject* owner() const { return _owner; }
+
 	ARDOUR::AudioEngine& engine() const { return _engine; }
 	ARDOUR::Session& session() const { return _session; }
 
@@ -335,6 +351,8 @@ protected:
 	uint32_t                 _cycles;
 	std::map<std::string, PresetRecord> _presets;
 
+	SessionObject*           _owner;
+
 private:
 
 	/** Fill _presets with our presets */
@@ -395,7 +413,7 @@ class LIBARDOUR_API PluginInfo {
 
 	virtual PluginPtr load (Session& session) = 0;
 	virtual bool is_instrument() const;
-	virtual bool needs_midi_input() const { return is_instrument (); }
+	virtual bool needs_midi_input() const;
 	virtual bool in_category (const std::string &) const { return false; }
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;

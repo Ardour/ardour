@@ -28,6 +28,7 @@ using namespace std;
 PBD::DebugBits PBD::DEBUG::MidiSourceIO = PBD::new_debug_bit ("midisourceio");
 PBD::DebugBits PBD::DEBUG::MidiPlaylistIO = PBD::new_debug_bit ("midiplaylistio");
 PBD::DebugBits PBD::DEBUG::MidiDiskstreamIO = PBD::new_debug_bit ("mididiskstreamio");
+PBD::DebugBits PBD::DEBUG::MidiRingBuffer = PBD::new_debug_bit ("midiringbuffer");
 PBD::DebugBits PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
 PBD::DebugBits PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
 PBD::DebugBits PBD::DEBUG::LatencyCompensation = PBD::new_debug_bit ("latencycompensation");
@@ -76,4 +77,6 @@ PBD::DebugBits PBD::DEBUG::BackendThreads = PBD::new_debug_bit ("backendthreads"
 PBD::DebugBits PBD::DEBUG::BackendPorts = PBD::new_debug_bit ("backendports");
 PBD::DebugBits PBD::DEBUG::VSTCallbacks = PBD::new_debug_bit ("vstcallbacks");
 PBD::DebugBits PBD::DEBUG::FaderPort = PBD::new_debug_bit ("faderport");
+PBD::DebugBits PBD::DEBUG::CC121 = PBD::new_debug_bit ("cc121");
 PBD::DebugBits PBD::DEBUG::VCA = PBD::new_debug_bit ("vca");
+PBD::DebugBits PBD::DEBUG::Push2 = PBD::new_debug_bit ("push2");

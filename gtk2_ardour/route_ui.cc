@@ -17,6 +17,7 @@
 
 */
 
+#include <map>
 #include <boost/algorithm/string.hpp>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -38,11 +39,13 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 #include "ardour/audio_track.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/midi_track.h"
 #include "ardour/monitor_control.h"
 #include "ardour/internal_send.h"
+#include "ardour/panner_shell.h"
 #include "ardour/profile.h"
 #include "ardour/phase_control.h"
 #include "ardour/send.h"
@@ -204,6 +207,7 @@ RouteUI::init ()
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (this, &RouteUI::parameter_changed));
 
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
@@ -2330,6 +2334,97 @@ RouteUI::manage_pins ()
 	if (proxy) {
 		proxy->get (true);
 		proxy->present();
+	}
+}
+
+void
+RouteUI::fan_out (bool to_busses, bool group)
+{
+	DisplaySuspender ds;
+	boost::shared_ptr<ARDOUR::Route> route = _route;
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (route->the_instrument ());
+	assert (pi);
+
+	const uint32_t n_outputs = pi->output_streams ().n_audio ();
+	if (route->n_outputs ().n_audio () != n_outputs) {
+		MessageDialog msg (string_compose (
+					_("The Plugin's number of audio outputs ports (%1) does not match the Tracks's number of audio outputs (%2). Cannot fan out."),
+					n_outputs, route->n_outputs ().n_audio ()));
+		msg.run ();
+		return;
+	}
+
+#define BUSNAME  pd.group_name + "(" + route->name () + ")"
+
+	/* count busses and channels/bus */
+	boost::shared_ptr<Plugin> plugin = pi->plugin ();
+	std::map<std::string, uint32_t> busnames;
+	for (uint32_t p = 0; p < n_outputs; ++p) {
+		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
+		std::string bn = BUSNAME;
+		busnames[bn]++;
+	}
+
+	if (busnames.size () < 2) {
+		MessageDialog msg (_("Instrument has only 1 output bus. Nothing to fan out."));
+		msg.run ();
+		return;
+	}
+
+	uint32_t outputs = 2;
+	if (_session->master_out ()) {
+		outputs = std::max (outputs, _session->master_out ()->n_inputs ().n_audio ());
+	}
+
+	route->output ()->disconnect (this);
+	route->panner_shell ()->set_bypassed (true);
+
+	RouteList to_group;
+	for (uint32_t p = 0; p < n_outputs; ++p) {
+		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
+		std::string bn = BUSNAME;
+		boost::shared_ptr<Route> r = _session->route_by_name (bn);
+		if (!r) {
+			if (to_busses) {
+				RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
+				r = rl.front ();
+				assert (r);
+			} else {
+				list<boost::shared_ptr<AudioTrack> > tl =
+					_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
+				r = tl.front ();
+				assert (r);
+
+				boost::shared_ptr<ControlList> cl (new ControlList);
+				cl->push_back (r->monitoring_control ());
+				_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+			}
+			r->input ()->disconnect (this);
+		}
+		to_group.push_back (r);
+		route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
+	}
+#undef BUSNAME
+
+	if (group) {
+		RouteGroup* rg = NULL;
+		const std::list<RouteGroup*>& rgs (_session->route_groups ());
+		for (std::list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
+			if ((*i)->name () == pi->name ()) {
+				rg = *i;
+				break;
+			}
+		}
+		if (!rg) {
+			rg = new RouteGroup (*_session, pi->name ());
+			_session->add_route_group (rg);
+			rg->set_gain (false);
+		}
+
+		GroupTabs::set_group_color (rg, route->presentation_info().color());
+		for (RouteList::const_iterator i = to_group.begin(); i != to_group.end(); ++i) {
+			rg->add (*i);
+		}
 	}
 }
 

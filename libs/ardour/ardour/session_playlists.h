@@ -54,7 +54,7 @@ public:
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
 	uint32_t region_use_count (boost::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
-	void foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor);
+	void foreach (boost::function<void(boost::shared_ptr<const Playlist>)> functor, bool incl_unused = true);
 	void get (std::vector<boost::shared_ptr<Playlist> >&) const;
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
 	void destroy_region (boost::shared_ptr<Region>);

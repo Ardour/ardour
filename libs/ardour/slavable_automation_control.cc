@@ -32,8 +32,9 @@ SlavableAutomationControl::SlavableAutomationControl(ARDOUR::Session& s,
                                                      const Evoral::Parameter&                  parameter,
                                                      const ParameterDescriptor&                desc,
                                                      boost::shared_ptr<ARDOUR::AutomationList> l,
-                                                     const std::string&                        name)
-	: AutomationControl (s, parameter, desc, l, name)
+                                                     const std::string&                        name,
+                                                     Controllable::Flag                        flags)
+	: AutomationControl (s, parameter, desc, l, name, flags)
 {
 }
 
@@ -112,8 +113,6 @@ SlavableAutomationControl::actually_set_value (double val, Controllable::GroupCo
 	   be retrieved by AutomationControl::get_value ()
 	*/
 	AutomationControl::actually_set_value (val, group_override);
-
-	_session.set_dirty ();
 }
 
 void

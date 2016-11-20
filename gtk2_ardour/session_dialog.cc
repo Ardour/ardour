@@ -41,6 +41,7 @@
 #include "pbd/openuri.h"
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/keyboard.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
@@ -87,6 +88,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
 
 	back_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::back_button_pressed), false);
+	open_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::open_button_pressed), false);
 
 	open_button->set_sensitive (false);
 	back_button->set_sensitive (false);
@@ -475,6 +477,16 @@ SessionDialog::back_button_pressed (GdkEventButton*)
 	back_button->set_sensitive (false);
 	get_vbox()->pack_start (ic_vbox);
 
+	return true;
+}
+
+bool
+SessionDialog::open_button_pressed (GdkEventButton* ev)
+{
+	if (Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		_disable_plugins.set_active();
+	}
+	response (RESPONSE_ACCEPT);
 	return true;
 }
 

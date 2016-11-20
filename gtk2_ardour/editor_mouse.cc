@@ -47,6 +47,7 @@
 #include "ardour/types.h"
 
 #include "actions.h"
+#include "ardour_ui.h"
 #include "editor.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
@@ -684,7 +685,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			new TempoMarkerDrag (
 				this,
 				item,
-				Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)
+				ArdourKeyboard::indicates_copy (event->button.state)
 				),
 			event
 			);
@@ -697,7 +698,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			new MeterMarkerDrag (
 				this,
 				item,
-				Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)
+				ArdourKeyboard::indicates_copy (event->button.state)
 				),
 			event
 			);
@@ -718,9 +719,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MinsecRulerItem:
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
-			&& !Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+			&& !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+		} else if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new BBTRulerDrag (this, item), event);
 		}
 		return true;
@@ -963,7 +964,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 				/* click on a normal region view */
-				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+				if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_copy_drag (item, event, clicked_regionview);
 				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 					add_region_brush_drag (item, event, clicked_regionview);
@@ -1164,7 +1165,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseObject:
 		switch (item_type) {
 		case RegionItem:
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
+			if (ArdourKeyboard::indicates_copy (event->button.state)) {
 				add_region_copy_drag (item, event, clicked_regionview);
 			} else {
 				add_region_drag (item, event, clicked_regionview);
@@ -1688,6 +1689,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 {
 	ControlPoint* cp;
 	ArdourMarker * marker;
+	MeterMarker* m_marker = 0;
+	TempoMarker* t_marker = 0;
 	double fraction;
         bool ret = true;
 
@@ -1745,9 +1748,30 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		entered_marker = marker;
 		marker->set_color_rgba (UIConfiguration::instance().color ("entered marker"));
-		// fall through
+		break;
+
 	case MeterMarkerItem:
+		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = m_marker;
+		if (m_marker->meter().position_lock_style() == MusicTime) {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+		} else {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+		}
+		break;
+
 	case TempoMarkerItem:
+		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = t_marker;
+		if (t_marker->tempo().position_lock_style() == MusicTime) {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+		} else {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+		}
 		break;
 
 	case FadeInHandleItem:
@@ -1822,6 +1846,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
 	ArdourMarker *marker;
+	TempoMarker *t_marker;
+	MeterMarker *m_marker;
 	Location *loc;
 	bool is_start;
 	bool ret = true;
@@ -1854,9 +1880,30 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
 			location_flags_changed (loc);
 		}
-		// fall through
+		break;
+
 	case MeterMarkerItem:
+		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = 0;
+		if (m_marker->meter().position_lock_style() == MusicTime) {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+		} else {
+			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+		}
+		break;
+
 	case TempoMarkerItem:
+		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
+			break;
+		}
+		entered_marker = 0;
+		if (t_marker->tempo().position_lock_style() == MusicTime) {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+		} else {
+			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+		}
 		break;
 
 	case FadeInTrimHandleItem:
@@ -2464,7 +2511,7 @@ Editor::escape ()
 		selection->clear ();
 	}
 
-	reset_focus (&contents());
+	ARDOUR_UI::instance()->reset_focus (&contents());
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top

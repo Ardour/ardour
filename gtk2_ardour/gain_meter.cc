@@ -20,6 +20,7 @@
 #include <limits.h>
 
 #include "ardour/amp.h"
+#include "ardour/logmeter.h"
 #include "ardour/route_group.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
@@ -35,7 +36,6 @@
 #include "pbd/stacktrace.h"
 
 #include "gain_meter.h"
-#include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -162,6 +162,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
 
 	gain_astate_menu.set_name ("ArdourContextMenu");
+	gain_astate_menu.set_reserve_toggle_size(false);
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
@@ -476,15 +477,9 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
-	{
-		// Switch to user's preferred locale so that
-		// if they use different LC_NUMERIC conventions,
-		// we will honor them.
-
-		PBD::LocaleGuard lg;
-		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
-			return;
-		}
+	// Use the user's preferred locale/LC_NUMERIC setting
+	if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
+		return;
 	}
 
 	/* clamp to displayable values */
@@ -768,7 +763,9 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 	switch (ev->button) {
 		case 1:
 			gain_astate_propagate = Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier));
-			gain_astate_menu.popup (1, ev->time);
+			Gtkmm2ext::anchored_menu_popup(&gain_astate_menu,
+			                               &gain_automation_state_button,
+			                               "", 1, ev->time);
 			break;
 		default:
 			break;

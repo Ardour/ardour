@@ -25,6 +25,7 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
+#include "ardour/logmeter.h"
 #include "ardour_ui.h"
 
 #include "audio_clock.h"
@@ -33,7 +34,6 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "pbd/i18n.h"
-#include "logmeter.h"
 
 using namespace ARDOUR;
 using namespace std;

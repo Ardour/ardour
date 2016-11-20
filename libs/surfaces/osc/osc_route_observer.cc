@@ -104,18 +104,7 @@ OSCRouteObserver::~OSCRouteObserver ()
 	// all strip buttons should be off and faders 0 and etc.
 	clear_strip ("/strip/expand", 0);
 	if (feedback[0]) { // buttons are separate feedback
-		lo_message msg = lo_message_new ();
-		// name is a string do it first
-		string path = "/strip/name";
-		if (feedback[2]) {
-			path = set_path (path);
-		} else {
-			lo_message_add_int32 (msg, ssid);
-		}
-		lo_message_add_string (msg, " ");
-
-		lo_send_message (addr, path.c_str(), msg);
-		lo_message_free (msg);
+		text_with_id ("/strip/name", ssid, " ");
 		clear_strip ("/strip/mute", 0);
 		clear_strip ("/strip/solo", 0);
 		clear_strip ("/strip/recenable", 0);
@@ -207,6 +196,20 @@ OSCRouteObserver::tick ()
 		_last_meter = now_meter;
 
 	}
+	if (feedback[1]) {
+		if (gain_timeout) {
+			if (gain_timeout == 1) {
+				text_with_id ("/strip/name", ssid, _strip->name());
+			}
+			gain_timeout--;
+		}
+		if (trim_timeout) {
+			if (trim_timeout == 1) {
+				text_with_id ("/strip/name", ssid, _strip->name());
+			}
+			trim_timeout--;
+		}
+	}
 
 }
 
@@ -220,21 +223,7 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 	if (!_strip) {
 		return;
 	}
-
-	lo_message msg = lo_message_new ();
-
-	// ssid is the strip on the surface this observer refers to
-	// not part of the internal ordering.
-	string path = "/strip/name";
-	if (feedback[2]) {
-		path = set_path (path);
-	} else {
-		lo_message_add_int32 (msg, ssid);
-	}
-	lo_message_add_string (msg, _strip->name().c_str());
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	text_with_id ("/strip/name", ssid, _strip->name());
 }
 
 void
@@ -249,6 +238,22 @@ OSCRouteObserver::send_change_message (string path, boost::shared_ptr<Controllab
 	}
 	float val = controllable->get_value();
 	lo_message_add_float (msg, (float) controllable->internal_to_interface (val));
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCRouteObserver::text_with_id (string path, uint32_t id, string name)
+{
+	lo_message msg = lo_message_new ();
+	if (feedback[2]) {
+		path = set_path (path);
+	} else {
+		lo_message_add_int32 (msg, id);
+	}
+
+	lo_message_add_string (msg, name.c_str());
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
@@ -300,6 +305,11 @@ OSCRouteObserver::send_monitor_status (boost::shared_ptr<Controllable> controlla
 void
 OSCRouteObserver::send_trim_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	if (gainmode) {
+		text_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
+		trim_timeout = 8;
+	}
+
 	lo_message msg = lo_message_new ();
 
 	if (feedback[2]) {
@@ -327,6 +337,8 @@ OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable
 
 	if (gainmode) {
 		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+		text_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
+		gain_timeout = 8;
 	} else {
 		if (controllable->get_value() < 1e-15) {
 			lo_message_add_float (msg, -200);
@@ -343,9 +355,7 @@ string
 OSCRouteObserver::set_path (string path)
 {
 	if (feedback[2]) {
-  ostringstream os;
-  os << path << "/" << ssid;
-  path = os.str();
+		path = string_compose ("%1/%2", path, ssid);
 	}
 	return path;
 }

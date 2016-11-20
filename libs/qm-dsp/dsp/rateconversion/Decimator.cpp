@@ -199,10 +199,15 @@ void Decimator::doAntiAlias(const float *src, double *dst, unsigned int length)
 
 void Decimator::process(const double *src, double *dst)
 {
-    if( m_decFactor != 1 )
-    {
-	doAntiAlias( src, decBuffer, m_inputLength );
+    if (m_decFactor == 1) {
+        for( unsigned int i = 0; i < m_outputLength; i++ ) {
+            dst[i] = src[i];
+        }
+        return;
     }
+        
+    doAntiAlias( src, decBuffer, m_inputLength );
+
     unsigned idx = 0;
 
     for( unsigned int i = 0; i < m_outputLength; i++ )
@@ -213,10 +218,15 @@ void Decimator::process(const double *src, double *dst)
 
 void Decimator::process(const float *src, float *dst)
 {
-    if( m_decFactor != 1 )
-    {
-	doAntiAlias( src, decBuffer, m_inputLength );
+    if (m_decFactor == 1) {
+        for( unsigned int i = 0; i < m_outputLength; i++ ) {
+            dst[i] = src[i];
+        }
+        return;
     }
+
+    doAntiAlias( src, decBuffer, m_inputLength );
+
     unsigned idx = 0;
 
     for( unsigned int i = 0; i < m_outputLength; i++ )

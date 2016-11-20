@@ -8,6 +8,7 @@ class FramewalkToBeatsTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (singleTempoTest);
 	CPPUNIT_TEST (doubleTempoTest);
 	CPPUNIT_TEST (tripleTempoTest);
+	CPPUNIT_TEST (singleTempoMeterTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -17,5 +18,6 @@ public:
 	void singleTempoTest ();
 	void doubleTempoTest ();
 	void tripleTempoTest ();
+	void singleTempoMeterTest ();
 };
 

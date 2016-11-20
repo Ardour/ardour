@@ -17,6 +17,7 @@
 
 */
 
+#include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/radiobutton.h>
@@ -28,7 +29,9 @@
 using namespace Gtk;
 
 double NormalizeDialog::_last_normalization_value = 0;
+double NormalizeDialog::_last_rms_target_value = -9;
 bool NormalizeDialog::_last_normalize_individually = true;
+bool NormalizeDialog::_last_constrain_rms = false;
 
 NormalizeDialog::NormalizeDialog (bool more_than_one)
 	: ArdourDialog (more_than_one ? _("Normalize regions") : _("Normalize region"))
@@ -36,18 +39,32 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 {
 	get_vbox()->set_spacing (12);
 
-	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (6);
-	hbox->set_border_width (6);
-	hbox->pack_start (*manage (new Label (_("Normalize to:"))), false, false);
-	_spin = manage (new SpinButton (0.2, 2));
-	_spin->set_range (-112, 0);
-	_spin->set_increments (0.1, 1);
-	_spin->set_value (_last_normalization_value);
-	_spin->set_activates_default ();
-	hbox->pack_start (*_spin, false, false);
-	hbox->pack_start (*manage (new Label (_("dBFS"))), false, false);
-	get_vbox()->pack_start (*hbox);
+	Table* tbl = manage (new Table);
+	tbl->set_spacings (6);
+	tbl->set_border_width (6);
+
+	_spin_peak = manage (new SpinButton (0.2, 2));
+	_spin_peak->set_range (-112, 0);
+	_spin_peak->set_increments (0.1, 1);
+	_spin_peak->set_value (_last_normalization_value);
+	_spin_peak->set_activates_default ();
+
+	_constrain_rms = manage (new CheckButton (_("Constrain RMS to:")));
+	_constrain_rms->set_active (_last_constrain_rms);
+	_spin_rms = manage (new SpinButton (0.2, 2));
+	_spin_rms->set_range (-112, 0);
+	_spin_rms->set_increments (0.1, 1);
+	_spin_rms->set_value (_last_rms_target_value);
+
+	tbl->attach (*manage (new Label (_("Normalize to:"), ALIGN_END)), 0, 1, 0, 1, FILL, SHRINK);
+	tbl->attach (*_spin_peak, 1, 2, 0, 1, SHRINK, SHRINK);
+	tbl->attach (*manage (new Label (_("dBFS"))), 2, 3, 0, 1, SHRINK, SHRINK);
+
+	tbl->attach (*_constrain_rms, 0, 1, 1, 2, SHRINK, SHRINK);
+	tbl->attach (*_spin_rms, 1, 2, 1, 2, SHRINK, SHRINK);
+	tbl->attach (*manage (new Label (_("dBFS"))), 2, 3, 1, 2, SHRINK, SHRINK);
+
+	get_vbox()->pack_start (*tbl);
 
 	if (more_than_one) {
 		RadioButtonGroup group;
@@ -67,13 +84,22 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	_progress_bar = manage (new ProgressBar);
 	get_vbox()->pack_start (*_progress_bar);
 
+	update_sensitivity ();
 	show_all ();
+	_progress_bar->hide ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Normalize"), RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);
 
+	_constrain_rms->signal_toggled ().connect (sigc::mem_fun (*this, &NormalizeDialog::update_sensitivity));
 	signal_response().connect (sigc::mem_fun (*this, &NormalizeDialog::button_clicked));
+}
+
+void
+NormalizeDialog::update_sensitivity ()
+{
+	_spin_rms->set_sensitive (constrain_rms ());
 }
 
 bool
@@ -86,10 +112,22 @@ NormalizeDialog::normalize_individually () const
 	return _normalize_individually->get_active ();
 }
 
-double
-NormalizeDialog::target () const
+bool
+NormalizeDialog::constrain_rms () const
 {
-	return _spin->get_value ();
+	return _constrain_rms->get_active ();
+}
+
+double
+NormalizeDialog::target_peak () const
+{
+	return _spin_peak->get_value ();
+}
+
+double
+NormalizeDialog::target_rms () const
+{
+	return _spin_rms->get_value ();
 }
 
 void
@@ -98,7 +136,7 @@ NormalizeDialog::update_progress_gui (float p)
 	/* Normalization is run inside the GUI thread, so we can directly
 	 * update the progress bar when notified about progress.
 	 */
-
+	_progress_bar->show ();
 	_progress_bar->set_fraction (p);
 }
 
@@ -106,7 +144,9 @@ int
 NormalizeDialog::run ()
 {
 	int const r = ArdourDialog::run ();
-	_last_normalization_value = target ();
+	_last_normalization_value = target_peak ();
+	_last_rms_target_value = target_rms ();
+	_last_constrain_rms = constrain_rms ();
 	if (_normalize_individually) {
 		_last_normalize_individually = _normalize_individually->get_active ();
 	}

@@ -51,8 +51,6 @@ using namespace std;
 
 ArdourDisplay::ArdourDisplay (Element e)
 {
-	add_elements(e);
-	add_elements(ArdourButton::Menu);
 	add_elements(ArdourButton::Text);
 }
 
@@ -60,12 +58,6 @@ ArdourDisplay::~ArdourDisplay ()
 {
 }
 
-bool
-ArdourDisplay::on_button_press_event (GdkEventButton*)
-{
-	_menu.popup (1, gtk_get_current_event_time());
-	return true;
-}
 
 bool
 ArdourDisplay::on_scroll_event (GdkEventScroll* ev)
@@ -101,10 +93,7 @@ void
 ArdourDisplay::add_controllable_preset (const char *txt, float val)
 {
 	using namespace Menu_Helpers;
-
-	MenuList& items = _menu.items ();
-
-	items.push_back (MenuElem (txt, sigc::bind (sigc::mem_fun(*this, &ArdourDisplay::handle_controllable_preset), val)));
+	AddMenuElem(MenuElem (txt, sigc::bind (sigc::mem_fun(*this, &ArdourDisplay::handle_controllable_preset), val)));
 }
 
 

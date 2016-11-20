@@ -783,14 +783,14 @@ private:
       return *this;
     }
 
-#if 0 // unused
     //--------------------------------------------------------------------------
     /**
       Add or replace a property member.
     */
     template <class TG, class TS>
-    Class <T>& addProperty (char const* name, TG (T::* get) () const, void (T::* set) (TS))
+    Class <T>& addProperty (char const* name, TG (T::* get) () const, bool (T::* set) (TS))
     {
+      DATADOC ("Property", name, get)
       // Add to __propget in class and const tables.
       {
         rawgetfield (L, -2, "__propget");
@@ -808,7 +808,7 @@ private:
         // Add to __propset in class table.
         rawgetfield (L, -2, "__propset");
         assert (lua_istable (L, -1));
-        typedef void (T::* set_t) (TS);
+        typedef bool (T::* set_t) (TS);
         new (lua_newuserdata (L, sizeof (set_t))) set_t (set);
         lua_pushcclosure (L, &CFunc::CallMember <set_t>::f, 1);
         rawsetfield (L, -2, name);
@@ -818,6 +818,7 @@ private:
       return *this;
     }
 
+#if 0 // unused
     // read-only
     template <class TG>
     Class <T>& addProperty (char const* name, TG (T::* get) () const)
@@ -835,6 +836,7 @@ private:
 
       return *this;
     }
+#endif
 
     //--------------------------------------------------------------------------
     /**
@@ -848,7 +850,7 @@ private:
       argument respectively.
     */
     template <class TG, class TS>
-    Class <T>& addProperty (char const* name, TG (*get) (T const*), void (*set) (T*, TS))
+    Class <T>& addProperty (char const* name, TG (*get) (T const*), bool (*set) (T*, TS))
     {
       // Add to __propget in class and const tables.
       {
@@ -878,6 +880,7 @@ private:
       return *this;
     }
 
+#if 0 // unused
     // read-only
     template <class TG, class TS>
     Class <T>& addProperty (char const* name, TG (*get) (T const*))
@@ -1295,6 +1298,81 @@ private:
       return *this;
     }
 
+    WSPtrClass <T>& addEqualCheck ()
+    {
+      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::WPtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "sameinstance"); // class table
+
+      set_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "sameinstance"); // class table
+
+      return *this;
+    }
+
+    template <class U>
+    WSPtrClass <T>& addData (char const* name, const U T::* mp, bool isWritable = true)
+    {
+      DATADOC ("Data Member", name, mp)
+      typedef const U T::*mp_t;
+
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      // Add to __propget in class and const tables.
+      {
+        rawgetfield (L, -2, "__propget");
+        rawgetfield (L, -4, "__propget");
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::getWPtrProperty <T,U>, 1);
+        lua_pushvalue (L, -1);
+        rawsetfield (L, -4, name);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 2);
+      }
+
+      if (isWritable)
+      {
+        // Add to __propset in class table.
+        rawgetfield (L, -2, "__propset");
+        assert (lua_istable (L, -1));
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::setWPtrProperty <T,U>, 1);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 1);
+      }
+
+      set_shared_class ();
+      assert (lua_istable (L, -1));
+      // Add to __propget in class and const tables.
+      {
+        rawgetfield (L, -2, "__propget");
+        rawgetfield (L, -4, "__propget");
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::getPtrProperty <T,U>, 1);
+        lua_pushvalue (L, -1);
+        rawsetfield (L, -4, name);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 2);
+      }
+
+      if (isWritable)
+      {
+        // Add to __propset in class table.
+        rawgetfield (L, -2, "__propset");
+        assert (lua_istable (L, -1));
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::setPtrProperty <T,U>, 1);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 1);
+      }
+
+      return *this;
+    }
+
 
     Namespace endClass ()
     {
@@ -1545,6 +1623,7 @@ public:
 
       If the set function is omitted or null, the property is read-only.
   */
+#if 0 // unused
   template <class TG, class TS>
   Namespace& addProperty (char const* name, TG (*get) (), void (*set)(TS) = 0)
   {
@@ -1576,6 +1655,7 @@ public:
 
     return *this;
   }
+#endif
 
   //----------------------------------------------------------------------------
   /**
@@ -1647,7 +1727,8 @@ public:
   WSPtrClass <T> beginWSPtrClass (char const* name)
   {
     return WSPtrClass <T> (name, this)
-      .addNullCheck();
+      .addNullCheck()
+      .addEqualCheck();
   }
 
   //----------------------------------------------------------------------------
@@ -1668,7 +1749,8 @@ public:
       .addFunction ("count", (T_SIZE (LT::*)(const K&) const)&LT::count)
       .addExtCFunction ("add", &CFunc::tableToMap<K, V>)
       .addExtCFunction ("iter", &CFunc::mapIter<K, V>)
-      .addExtCFunction ("table", &CFunc::mapToTable<K, V>);
+      .addExtCFunction ("table", &CFunc::mapToTable<K, V>)
+      .addExtCFunction ("at", &CFunc::mapAt<K, V>);
   }
 
   template <class T>
@@ -1805,7 +1887,8 @@ public:
     return WSPtrClass <T> (name, this,
         ClassInfo <boost::shared_ptr<U> >::getStaticKey (),
         ClassInfo <boost::weak_ptr<U> >::getStaticKey ())
-      .addNullCheck();
+      .addNullCheck()
+      .addEqualCheck();
   }
 
 };

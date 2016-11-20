@@ -91,17 +91,22 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
-								 *(const_cast<MeterSection*>(ms))));
+			if (ms->position_lock_style() == MusicTime) {
+				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf,
+									 *(const_cast<MeterSection*>(ms))));
+			} else {
+				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
+									 *(const_cast<MeterSection*>(ms))));
+			}
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->beats_per_minute(), ts->note_type());
+				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
 			} else {
-				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
+				snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
 			}
 
-			max_tempo = max (max_tempo, ts->beats_per_minute());
-			min_tempo = min (min_tempo, ts->beats_per_minute());
+			max_tempo = max (max_tempo, ts->note_types_per_minute());
+			min_tempo = min (min_tempo, ts->note_types_per_minute());
 
 			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("tempo curve"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
@@ -142,7 +147,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		TempoMarker* tempo_marker;
 
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
+			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
 		}
 	}
 }
@@ -161,11 +166,14 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	std::vector<TempoMap::BBTPoint> grid;
-	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	if (bbt_ruler_scale != bbt_show_many) {
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	}
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	draw_measures (grid);
-	update_tempo_based_rulers (grid);
+	update_tempo_based_rulers ();
 }
 
 struct CurveComparator {
@@ -200,11 +208,17 @@ Editor::marker_position_changed ()
 			if ((ts = &tempo_marker->tempo()) != 0) {
 				tempo_marker->set_position (ts->frame ());
 				char buf[64];
-				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
+
+				if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+				} else {
+					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+				}
+
 				tempo_marker->set_name (buf);
 
-				max_tempo = max (max_tempo, ts->beats_per_minute());
-				min_tempo = min (min_tempo, ts->beats_per_minute());
+				max_tempo = max (max_tempo, ts->note_types_per_minute());
+				min_tempo = min (min_tempo, ts->note_types_per_minute());
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -240,14 +254,19 @@ Editor::marker_position_changed ()
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		TempoMarker* tempo_marker;
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
+			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
 		}
 	}
 
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	std::vector<TempoMap::BBTPoint> grid;
-	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+
+	if (bbt_ruler_scale != bbt_show_many) {
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	}
+
 	draw_measures (grid);
-	update_tempo_based_rulers (grid);
+	update_tempo_based_rulers ();
 }
 
 void
@@ -258,11 +277,15 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	}
 
 	if (immediate_redraw) {
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 		std::vector<TempoMap::BBTPoint> grid;
 
-		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		if (bbt_ruler_scale != bbt_show_many) {
+			compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		}
+
 		draw_measures (grid);
-		update_tempo_based_rulers (grid); // redraw rulers and measure lines
+		update_tempo_based_rulers (); // redraw rulers and measure lines
 
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
@@ -279,8 +302,37 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, frame
 
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-	const double lower_beat = floor (_session->tempo_map().beat_at_frame (leftmost)) - 1.0;
-	_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost);
+	const double lower_beat = floor (max (0.0, _session->tempo_map().beat_at_frame (leftmost))) - 1.0;
+	switch (bbt_ruler_scale) {
+
+	case bbt_show_beats:
+	case bbt_show_ticks:
+	case bbt_show_ticks_detail:
+	case bbt_show_ticks_super_detail:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost);
+		break;
+
+	case bbt_show_1:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 1);
+		break;
+
+	case bbt_show_4:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 4);
+		break;
+
+	case bbt_show_16:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 16);
+		break;
+
+	case bbt_show_64:
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 64);
+		break;
+
+	default:
+		/* bbt_show_many */
+		_session->tempo_map().get_grid (grid, max (_session->tempo_map().frame_at_beat (lower_beat), (framepos_t) 0), rightmost, 128);
+		break;
+	}
 }
 
 void
@@ -316,7 +368,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	TempoMap& map(_session->tempo_map());
 
 	begin_reversible_command (_("add tempo mark"));
-	const double pulse = map.pulse_at_frame (frame);
+	const double pulse = map.exact_qn_at_frame (frame, get_grid_music_divisions (0)) / 4.0;
 
 	if (pulse > 0.0) {
 		XMLNode &before = map.get_state();
@@ -363,9 +415,9 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
         XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter (Meter (bpb, note_type), beat, requested,  map.frame_at_beat (beat), MusicTime);
+		map.add_meter (Meter (bpb, note_type), beat, requested, MusicTime);
 	} else {
-		map.add_meter (Meter (bpb, note_type), beat, requested, map.frame_at_beat (beat), AudioTime);
+		map.add_meter (Meter (bpb, note_type), beat, requested, AudioTime);
 	}
 
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
@@ -416,13 +468,12 @@ Editor::edit_meter_section (MeterSection* section)
 	Timecode::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
 
-	framepos_t const frame = _session->tempo_map().frame_at_bbt (when);
 	const PositionLockStyle pls = (meter_dialog.get_lock_style() == AudioTime) ? AudioTime : MusicTime;
 
 	begin_reversible_command (_("replace meter mark"));
         XMLNode &before = _session->tempo_map().get_state();
 
-	_session->tempo_map().replace_meter (*section, meter, when, frame, pls);
+	_session->tempo_map().replace_meter (*section, meter, when, pls);
 
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));

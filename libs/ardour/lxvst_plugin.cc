@@ -58,7 +58,11 @@ LXVSTPlugin::LXVSTPlugin (const LXVSTPlugin &other)
 
 	_plugin = _state->plugin;
 
-	// Plugin::setup_controls ();
+	XMLNode* root = new XMLNode (other.state_node_name ());
+	LocaleGuard lg;
+	other.add_state (root);
+	set_state (*root, Stateful::loading_state_version);
+	delete root;
 }
 
 LXVSTPlugin::~LXVSTPlugin ()

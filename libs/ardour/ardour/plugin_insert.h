@@ -59,6 +59,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 	void update_id (PBD::ID);
+	void set_owner (SessionObject*);
 	void set_state_dir (const std::string& d = "");
 
 	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
@@ -171,7 +172,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	bool has_no_inputs() const;
 	bool has_no_audio_inputs() const;
-	bool needs_midi_input() const;
+	bool is_instrument () const;
 	bool has_output_presets (
 			ChanCount in = ChanCount (DataType::MIDI, 1),
 			ChanCount out = ChanCount (DataType::AUDIO, 2)

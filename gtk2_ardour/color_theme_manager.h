@@ -43,6 +43,7 @@ class ColorThemeManager : public Gtk::VBox, public OptionEditorComponent
 {
   public:
 	ColorThemeManager();
+	~ColorThemeManager();
 
 	void reset_canvas_colors();
 	void on_color_theme_changed ();

@@ -589,9 +589,9 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 	string new_name = format->name();
 	new_name += export_format_suffix;
 
-        /* make sure its legal for the filesystem */
+	/* make sure its legal for the filesystem */
 
-        new_name = legalize_for_path (new_name);
+	new_name = legalize_for_path (new_name);
 
 	std::string new_path = Glib::build_filename (export_config_dir, new_name);
 
@@ -633,7 +633,6 @@ ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 		tree.write();
 	}
 
-	FormatListChanged ();
 	return new_path;
 }
 
@@ -878,10 +877,9 @@ ExportProfileManager::get_warnings ()
 
 void
 ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
-	                            TimespanStatePtr timespan_state,
-	                            ChannelConfigStatePtr channel_config_state,
-	                            FormatStatePtr format_state,
-	                            FilenameStatePtr filename_state)
+                                    TimespanStatePtr timespan_state,
+                                    ChannelConfigStatePtr channel_config_state,
+                                    FormatStatePtr format_state, FilenameStatePtr filename_state)
 {
 	TimespanListPtr timespans = timespan_state->timespans;
 	ExportChannelConfigPtr channel_config = channel_config_state->config;

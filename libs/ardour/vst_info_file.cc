@@ -49,6 +49,7 @@
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/linux_vst_support.h"
+#include "ardour/mac_vst_support.h"
 #include "ardour/plugin_types.h"
 #include "ardour/vst_info_file.h"
 
@@ -72,6 +73,10 @@ vstfx_instantiate_and_get_info_fst (const char* dllpath, vector<VSTInfo*> *infos
 
 #ifdef LXVST_SUPPORT
 static bool vstfx_instantiate_and_get_info_lx (const char* dllpath, vector<VSTInfo*> *infos, int uniqueID);
+#endif
+
+#ifdef MACVST_SUPPORT
+static bool vstfx_instantiate_and_get_info_mac (const char* dllpath, vector<VSTInfo*> *infos, int uniqueID);
 #endif
 
 /* ID for shell plugins */
@@ -300,6 +305,12 @@ vstfx_load_info_block (FILE* fp, VSTInfo *info)
 		info->wantMidi = 1;
 	}
 
+	// TODO read isInstrument -- effFlagsIsSynth
+	info->isInstrument = info->numInputs == 0 && info->numOutputs > 0 && 1 == (info->wantMidi & 1);
+	if (!strcmp (info->Category, "Synth")) {
+		info->isInstrument = true;
+	}
+
 	if ((info->numParams) == 0) {
 		info->ParamNames = NULL;
 		info->ParamLabels = NULL;
@@ -381,6 +392,7 @@ vstfx_write_info_block (FILE* fp, VSTInfo *info)
 	fprintf (fp, "%d\n", info->wantMidi);
 	fprintf (fp, "%d\n", info->hasEditor);
 	fprintf (fp, "%d\n", info->canProcessReplacing);
+	// TODO write isInstrument in a backwards compat way
 
 	for (int i = 0; i < info->numParams; i++) {
 		fprintf (fp, "%s\n", info->ParamNames[i]);
@@ -435,6 +447,8 @@ vstfx_infofile_for_read (const char* dllpath)
 	if (
 			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
 			&&
+			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".vst"))
+			&&
 			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
 	   ) {
 		return 0;
@@ -469,6 +483,8 @@ vstfx_infofile_for_write (const char* dllpath)
 	const size_t slen = strlen (dllpath);
 	if (
 			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
+			&&
+			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".vst"))
 			&&
 			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
 	   ) {
@@ -512,7 +528,10 @@ bool vstfx_midi_input (VSTState* vstfx)
 	if (vst_version >= 2) {
 		/* should we send it VST events (i.e. MIDI) */
 
-		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)) {
+		if ((plugin->flags & effFlagsIsSynth)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvents"), 0.0f) > 0)
+				) {
 			return true;
 		}
 	}
@@ -650,9 +669,17 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	info->numParams = plugin->numParams;
 	info->wantMidi = (vstfx_midi_input (vstfx) ? 1 : 0) | (vstfx_midi_output (vstfx) ? 2 : 0);
 	info->hasEditor = plugin->flags & effFlagsHasEditor ? true : false;
+	info->isInstrument = (plugin->flags & effFlagsIsSynth) ? 1 : 0;
 	info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? true : false;
 	info->ParamNames = (char **) malloc (sizeof (char*)*info->numParams);
 	info->ParamLabels = (char **) malloc (sizeof (char*)*info->numParams);
+
+#ifdef __APPLE__
+	if (info->hasEditor) {
+		/* we only support Cocoa UIs (just like Reaper) */
+		info->hasEditor = (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f) & 0xffff0000) == 0xbeef0000;
+	}
+#endif
 
 	for (int i = 0; i < info->numParams; ++i) {
 		char name[64];
@@ -714,6 +741,11 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 				vstfx_close (vstfx);
 				break;
 #endif
+#ifdef MACVST_SUPPORT
+			case ARDOUR::MacVST:
+				mac_vst_close (vstfx);
+				break;
+#endif
 			default:
 				assert (0);
 				break;
@@ -734,6 +766,11 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 #ifdef LXVST_SUPPORT
 				case ARDOUR::LXVST:
 					ok = vstfx_instantiate_and_get_info_lx (dllpath, infos, id);
+					break;
+#endif
+#ifdef MACVST_SUPPORT
+				case ARDOUR::MacVST:
+					ok = vstfx_instantiate_and_get_info_mac (dllpath, infos, id);
 					break;
 #endif
 				default:
@@ -765,6 +802,11 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 #ifdef LXVST_SUPPORT
 			case ARDOUR::LXVST:
 				vstfx_close (vstfx);
+				break;
+#endif
+#ifdef MACVST_SUPPORT
+			case ARDOUR::MacVST:
+				mac_vst_close (vstfx);
 				break;
 #endif
 			default:
@@ -836,7 +878,35 @@ vstfx_instantiate_and_get_info_fst (
 }
 #endif
 
+#ifdef MACVST_SUPPORT
+static bool
+vstfx_instantiate_and_get_info_mac (
+		const char* dllpath, vector<VSTInfo*> *infos, int uniqueID)
+{
+	printf("vstfx_instantiate_and_get_info_mac %s\n", dllpath);
+	VSTHandle* h;
+	VSTState* vstfx;
+	if (!(h = mac_vst_load (dllpath))) {
+		PBD::warning << string_compose (_("Cannot get MacVST information from '%1': load failed."), dllpath) << endmsg;
+		return false;
+	}
 
+	vstfx_current_loading_id = uniqueID;
+
+	if (!(vstfx = mac_vst_instantiate (h, simple_master_callback, 0))) {
+		mac_vst_unload (h);
+		PBD::warning << string_compose (_("Cannot get MacVST information from '%1': instantiation failed."), dllpath) << endmsg;
+		return false;
+	}
+
+	vstfx_current_loading_id = 0;
+
+	vstfx_info_from_plugin (dllpath, vstfx, infos, ARDOUR::MacVST);
+
+	mac_vst_unload (h);
+	return true;
+}
+#endif
 
 /* *** ERROR LOGGING *** */
 #ifndef VST_SCANNER_APP
@@ -983,6 +1053,11 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 			ok = vstfx_instantiate_and_get_info_lx (dllpath, infos, 0);
 			break;
 #endif
+#ifdef MACVST_SUPPORT
+		case ARDOUR::MacVST:
+			ok = vstfx_instantiate_and_get_info_mac (dllpath, infos, 0);
+			break;
+#endif
 		default:
 			ok = false;
 			break;
@@ -1024,6 +1099,14 @@ vector<VSTInfo *> *
 vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 {
 	return vstfx_get_info (dllpath, ARDOUR::LXVST, mode);
+}
+#endif
+
+#ifdef MACVST_SUPPORT
+vector<VSTInfo *> *
+vstfx_get_info_mac (char* dllpath, enum VSTScanMode mode)
+{
+	return vstfx_get_info (dllpath, ARDOUR::MacVST, mode);
 }
 #endif
 

@@ -26,6 +26,7 @@
 #include <boost/utility.hpp>
 
 #include "ardour/ardour.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/note_fixer.h"
@@ -70,6 +71,7 @@ public:
 	 * @param buf Destination for events.
 	 * @param start First frame of read range.
 	 * @param cnt Number of frames in read range.
+	 * @param loop_range If non-null, all event times will be mapped into this loop range.
 	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
 	 * channel is backed by a separate region, not MIDI channels, which all
 	 * exist in the same region and are not handled here).
@@ -78,6 +80,7 @@ public:
 	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
 	                 framepos_t                     start,
 	                 framecnt_t                     cnt,
+	                 Evoral::Range<framepos_t>*     loop_range,
 	                 uint32_t                       chan_n = 0,
 	                 MidiChannelFilter*             filter = NULL);
 
@@ -110,12 +113,14 @@ public:
 
 protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
+	void region_going_away (boost::weak_ptr<Region> region);
 
 private:
 	typedef Evoral::Note<Evoral::Beats> Note;
 	typedef Evoral::Event<framepos_t>   Event;
 
 	struct RegionTracker : public boost::noncopyable {
+		MidiCursor       cursor;   ///< Cursor (iterator and read state)
 		MidiStateTracker tracker;  ///< Active note tracker
 		NoteFixer        fixer;    ///< Edit compensation
 	};

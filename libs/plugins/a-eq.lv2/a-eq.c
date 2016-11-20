@@ -23,6 +23,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 #ifdef LV2_EXTENDED
@@ -60,6 +67,7 @@ typedef enum {
 	AEQ_FILTOG3,
 	AEQ_FILTOG4,
 	AEQ_FILTOGH,
+	AEQ_ENABLE,
 	AEQ_INPUT,
 	AEQ_OUTPUT,
 } PortIndex;
@@ -91,12 +99,20 @@ static void linear_svf_reset(struct linear_svf *self)
 	self->s[0] = self->s[1] = 0.0;
 }
 
+static void linear_svf_protect(struct linear_svf *self)
+{
+	if (!isfinite_local (self->s[0]) || !isfinite_local (self->s[1])) {
+		linear_svf_reset (self);
+	}
+}
+
 typedef struct {
 	float* f0[BANDS];
 	float* g[BANDS];
 	float* bw[BANDS];
 	float* filtog[BANDS];
 	float* master;
+	float* enable;
 
 	float srate;
 	float tau;
@@ -128,7 +144,7 @@ instantiate(const LV2_Descriptor* descriptor,
 {
 	Aeq* aeq = (Aeq*)calloc(1, sizeof(Aeq));
 	aeq->srate = rate;
-	aeq->tau = (1.0 - exp(-2.0 * M_PI * 64 * 25. / aeq->srate)); // 25Hz time constant @ 64fpp
+	aeq->tau = 1.0 - expf (-2.f * M_PI * 64.f * 25.f / aeq->srate); // 25Hz time constant @ 64fpp
 
 #ifdef LV2_EXTENDED
 	for (int i=0; features[i]; ++i) {
@@ -157,6 +173,9 @@ connect_port(LV2_Handle instance,
 	Aeq* aeq = (Aeq*)instance;
 
 	switch ((PortIndex)port) {
+	case AEQ_ENABLE:
+		aeq->enable = (float*)data;
+		break;
 	case AEQ_FREQL:
 		aeq->f0[0] = (float*)data;
 		break;
@@ -355,16 +374,17 @@ run(LV2_Handle instance, uint32_t n_samples)
 	const float tau = aeq->tau;
 	uint32_t offset = 0;
 
+	const float target_gain = *aeq->enable <= 0 ? 0 : *aeq->master; // dB
+
 	while (n_samples > 0) {
 		uint32_t block = n_samples;
 		bool any_changed = false;
 
-		// TODO global en/disable
-		if (!is_eq(aeq->v_master, *aeq->master, 0.1)) {
-			aeq->v_master += tau * (*aeq->master - aeq->v_master);
+		if (!is_eq(aeq->v_master, target_gain, 0.1)) {
+			aeq->v_master += tau * (target_gain - aeq->v_master);
 			any_changed = true;
 		} else {
-			aeq->v_master = *aeq->master;
+			aeq->v_master = target_gain;
 		}
 
 		for (int i = 0; i < BANDS; ++i) {
@@ -377,7 +397,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 				aeq->v_f0[i] = *aeq->f0[i];
 			}
 
-			if (*aeq->filtog[i] <= 0) {
+			if (*aeq->filtog[i] <= 0 || *aeq->enable <= 0) {
 				if (!is_eq(aeq->v_g[i], 0.f, 0.05)) {
 					aeq->v_g[i] += tau * (0.0 - aeq->v_g[i]);
 					changed = true;
@@ -420,10 +440,14 @@ run(LV2_Handle instance, uint32_t n_samples)
 			for (uint32_t j = 0; j < BANDS; j++) {
 				out = run_linear_svf(&aeq->v_filter[j], out);
 			}
-			output[i + offset] = out * from_dB(*(aeq->master));
+			output[i + offset] = out * from_dB(aeq->v_master);
 		}
 		n_samples -= block;
 		offset += block;
+	}
+
+	for (uint32_t j = 0; j < BANDS; j++) {
+		linear_svf_protect(&aeq->v_filter[j]);
 	}
 
 #ifdef LV2_EXTENDED

@@ -176,6 +176,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void scroll_right ();
         void toggle_midi_input_active (bool flip_others);
 
+	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
+
 	void add_stripables (ARDOUR::StripableList&);
 
 	void add_routes (ARDOUR::RouteList&);

@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+import os
+
+top = '.'
+out = 'build'
+
+def configure(conf):
+    pass
+
+def build(bld):
+    presets = bld.path.ant_glob ('*.preset')
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'osc'), presets)
+
+def options(opt):
+    pass

@@ -35,6 +35,14 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+#if 1
+		/* Push2 needs libcanvas -- which needs pango, which needs a screen
+		 * IA__gdk_pango_context_get_for_screen: assertion 'GDK_IS_SCREEN (screen)' failed
+		 */
+		if ((*i)->name == "Ableton Push 2") {
+			continue;
+		}
+#endif
 		m.activate (**i);
 		m.deactivate (**i);
 	}

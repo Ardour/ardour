@@ -339,10 +339,9 @@ FilesystemTest::testRemoveDirectory ()
 }
 
 void
-FilesystemTest::testCanonicalPath ()
+FilesystemTest::testCanonicalPathASCII ()
 {
-#ifndef PLATFORM_WINDOWS
-	string top_dir = test_output_directory ("testCanonicalPath");
+	string top_dir = test_output_directory ("testCanonicalPathASCII");
 	PwdReset pwd_reset(top_dir);
 
 	string pwd = Glib::get_current_dir ();
@@ -350,17 +349,64 @@ FilesystemTest::testCanonicalPath ()
 	CPPUNIT_ASSERT (!pwd.empty());
 	CPPUNIT_ASSERT (pwd == top_dir);
 
-	CPPUNIT_ASSERT (g_mkdir ("gtk2_ardour", 0755) == 0);
-	CPPUNIT_ASSERT (g_mkdir_with_parents ("libs/pbd/test", 0755) == 0);
-
-	const char* relative_path = "./gtk2_ardour/../libs/pbd/test";
+	string relative_path = ".";
 	string canonical_path = PBD::canonical_path (relative_path);
-	// no expansion expected in this case
-	string expanded_path = PBD::path_expand (relative_path);
-	string expected_path = top_dir + string("/libs/pbd/test");
 
-	CPPUNIT_ASSERT (canonical_path == expected_path);
-	CPPUNIT_ASSERT (expanded_path == expected_path);
+	CPPUNIT_ASSERT (pwd == canonical_path);
+
+	const std::string dir1 = Glib::build_filename (top_dir, "dir1");
+	const std::string dir2 = Glib::build_filename (top_dir, "dir2");
+
+	CPPUNIT_ASSERT (g_mkdir (dir1.c_str(), 0755) == 0);
+	CPPUNIT_ASSERT (g_mkdir (dir2.c_str(), 0755) == 0);
+
+	CPPUNIT_ASSERT (Glib::file_test (dir1, Glib::FILE_TEST_IS_DIR));
+	CPPUNIT_ASSERT (Glib::file_test (dir2, Glib::FILE_TEST_IS_DIR));
+
+	relative_path = Glib::build_filename (".", "dir1", "..", "dir2");
+	canonical_path = PBD::canonical_path (relative_path);
+	string absolute_path = Glib::build_filename (top_dir, "dir2");
+
+	CPPUNIT_ASSERT (canonical_path == absolute_path);
+}
+
+void
+FilesystemTest::testCanonicalPathUTF8 ()
+{
+	string top_dir = test_output_directory ("testCanonicalPathUTF8");
+	PwdReset pwd_reset(top_dir);
+
+	string pwd = Glib::get_current_dir ();
+
+	CPPUNIT_ASSERT (!pwd.empty());
+	CPPUNIT_ASSERT (pwd == top_dir);
+
+// We are using glib for file I/O on windows and the character encoding is
+// guaranteed to be utf-8 as glib does the conversion for us. This is not the
+// case on linux/OS X where the encoding is probably utf-8, but it is not
+// ensured so we can't really enable this part of the test for now, but it is
+// only really important to test on Windows.
+#ifdef PLATFORM_WINDOWS
+
+	std::vector<std::string> utf8_strings;
+
+	get_utf8_test_strings (utf8_strings);
+
+	for (std::vector<std::string>::const_iterator i = utf8_strings.begin (); i != utf8_strings.end ();
+	     ++i) {
+
+		const std::string absolute_path = Glib::build_filename (top_dir, *i);
+		// make a directory in the current test/working directory
+		CPPUNIT_ASSERT (g_mkdir (absolute_path.c_str (), 0755) == 0);
+
+		string relative_path = Glib::build_filename (".", *i);
+
+		string canonical_path = PBD::canonical_path (relative_path);
+
+		// Check that it resolved to the absolute path
+		CPPUNIT_ASSERT (absolute_path == canonical_path);
+	}
+
 #endif
 }
 

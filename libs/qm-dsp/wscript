@@ -3,13 +3,13 @@ from waflib.extras import autowaf as autowaf
 import os
 
 # Version of this package (even if built as a child)
-QM_DSP_VERSION = '0.0.0'
+QM_DSP_VERSION = '1.7.1'
 
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
-QM_DSP_LIB_VERSION = '0.0.0'
+QM_DSP_LIB_VERSION = '1.7.1'
 
 # Variables for 'waf dist'
 APPNAME = 'qm-dsp'
@@ -23,37 +23,64 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        conf.check_cxx(header_name="base/Pitch.h", mandatory=True)
+        conf.check_cxx(lib="qm-dsp", uselib_store="QMDSP", mandatory=True)
+    else:
+        conf.load('compiler_cxx')
+        autowaf.configure(conf)
 
 def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+
     # Host Library
-    obj = bld(features = 'cxx cxxshlib')
+    obj = bld(features = 'c cxx cxxstlib')
     obj.source = '''
+            base/Pitch.cpp
+            base/KaiserWindow.cpp
+            base/SincWindow.cpp
+            dsp/chromagram/Chromagram.cpp
+            dsp/chromagram/ConstantQ.cpp
+            dsp/keydetection/GetKeyMode.cpp
+            dsp/mfcc/MFCC.cpp
             dsp/onsets/DetectionFunction.cpp
             dsp/onsets/PeakPicking.cpp
             dsp/phasevocoder/PhaseVocoder.cpp
             dsp/rateconversion/Decimator.cpp
+            dsp/rateconversion/DecimatorB.cpp
             dsp/rhythm/BeatSpectrum.cpp
             dsp/signalconditioning/DFProcess.cpp
             dsp/signalconditioning/Filter.cpp
             dsp/signalconditioning/FiltFilt.cpp
             dsp/signalconditioning/Framer.cpp
+            dsp/tempotracking/DownBeat.cpp
+            dsp/tempotracking/TempoTrack.cpp
+            dsp/tempotracking/TempoTrackV2.cpp
+            dsp/tonal/ChangeDetectionFunction.cpp
+            dsp/tonal/TCSgram.cpp
+            dsp/tonal/TonalEstimator.cpp
             dsp/transforms/FFT.cpp
             dsp/wavelet/Wavelet.cpp
             maths/Correlation.cpp
             maths/CosineDistance.cpp
             maths/KLDivergence.cpp
             maths/MathUtilities.cpp
-            base/Pitch.cpp
+            maths/pca/pca.c
+            ext/kissfft/kiss_fft.c
+            ext/kissfft/tools/kiss_fftr.c
     '''
-    autowaf.ensure_visible_symbols (obj, True)
+    autowaf.ensure_visible_symbols (obj, False)
     obj.export_includes = ['.']
-    obj.includes     = ['.']
-    obj.name         = 'libqmdsp'
-    obj.target       = 'qmdsp'
+    obj.includes     = ['.', 'ext/kissfft', 'ext/kissfft/tools/']
+    obj.defines      = ['kiss_fft_scalar=double']
+    obj.name         = 'libqm-dsp'
+    obj.target       = 'qm-dsp'
     obj.vnum         = QM_DSP_VERSION
     obj.install_path = bld.env['LIBDIR']
+    if bld.env['build_target'] != 'mingw':
+        obj.cxxflags += [ '-fPIC' ]
+        obj.cflags   += [ '-fPIC' ]
 
 def shutdown():
     autowaf.shutdown()

@@ -1394,10 +1394,9 @@ Editor::toggle_marker_lock_style ()
 
 		const Meter meter (msp->divisions_per_bar(), msp->note_divisor());
 		const Timecode::BBT_Time bbt (msp->bbt());
-		const framepos_t frame = msp->frame();
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_meter (*msp, meter, bbt, frame, pls);
+		_session->tempo_map().replace_meter (*msp, meter, bbt, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1405,7 +1404,7 @@ Editor::toggle_marker_lock_style ()
 	} else if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->beats_per_minute());
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = tsp->type();
@@ -1432,7 +1431,7 @@ Editor::toggle_tempo_type ()
 	if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->beats_per_minute(), tsp->note_type());
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;

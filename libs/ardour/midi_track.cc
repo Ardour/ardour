@@ -701,6 +701,7 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 	case MidiPgmChangeAutomation:
 	case MidiPitchBenderAutomation:
 	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
 	case MidiSystemExclusiveAutomation:
 		/* The track control for MIDI parameters is for immediate events to act
 		   as a control surface, write/touch for them is not currently
@@ -755,6 +756,12 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 			size = 2;
 			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
 			ev[1] = int(val);
+			break;
+
+		case MidiNotePressureAutomation:
+			ev[0] += MIDI_CMD_NOTE_PRESSURE;
+			ev[1] = parameter.id();
+			ev[2] = int(val);
 			break;
 
 		case MidiPitchBenderAutomation:

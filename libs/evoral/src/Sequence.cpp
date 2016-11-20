@@ -933,6 +933,8 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 			ev.time(), double ((0x7F & ev.pitch_bender_msb()) << 7
 			                   | (0x7F & ev.pitch_bender_lsb())),
 			evid);
+	} else if (ev.is_poly_pressure()) {
+		append_control_unlocked (Parameter (ev.event_type(), ev.channel(), ev.poly_note()), ev.time(), ev.poly_pressure(), evid);
 	} else if (ev.is_channel_pressure()) {
 		append_control_unlocked(
 			Parameter(ev.event_type(), ev.channel()),
@@ -1045,7 +1047,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
 	boost::shared_ptr<Control> c = control(param, true);
-	c->list()->add (time.to_double(), value);
+	c->list()->add (time.to_double(), value, true, false);
 	/* XXX control events should use IDs */
 }
 

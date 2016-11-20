@@ -80,7 +80,7 @@ AudioBackend::get_error_string (ErrorCode error_code)
 	case OutputChannelCountNotSupportedError:
 		return _("Output channel count configuration not supported");
 	case AquireRealtimePermissionError:
-		return _("Unable to aquire realtime permissions");
+		return _("Unable to acquire realtime permissions");
 	case SettingAudioThreadPriorityError:
 		return _("Setting audio device thread priorities failed");
 	case SettingMIDIThreadPriorityError:

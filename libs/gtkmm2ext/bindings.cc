@@ -179,13 +179,15 @@ KeyboardKey::display_label () const
 
 #ifdef __APPLE__
 	/* We use both bits (MOD2|META) for Primary on OS X,
-	 * but we don't want MOD2 showing up in listings.
+	 * but we don't want MOD2 showing up in listings. So remove
+	 * it and add back META.
 	 */
 
 	if (mod & GDK_MOD2_MASK) {
-		mod &= ~GDK_MOD2_MASK;
+		mod = (mod & ~GDK_MOD2_MASK) | GDK_META_MASK;
 	}
 #endif
+
 
 	return gtk_accelerator_get_label (key(), (GdkModifierType) mod);
 }
@@ -646,6 +648,9 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 		KeybindingMap::value_type new_pair = make_pair (kb, ActionInfo (action_name));
 		(void) kbm.insert (new_pair).first;
 	}
+
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 and %2, group [%3]\n",
+	                                              kb, action_name, (group ? group->value() : string())));
 
 	if (can_save) {
 		Keyboard::keybindings_changed ();
@@ -1323,5 +1328,6 @@ ActionMap::get_all_actions (std::vector<std::string>& paths,
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	char const *gdk_name = gdk_keyval_name (k.key());
-	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state " << hex << k.state() << dec;
+	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state "
+	           << hex << k.state() << dec << ' ' << show_gdk_event_state (k.state());
 }

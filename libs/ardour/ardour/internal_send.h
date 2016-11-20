@@ -54,6 +54,9 @@ class LIBARDOUR_API InternalSend : public Send
 		return mixbufs;
 	}
 
+	bool allow_feedback () const { return _allow_feedback;}
+	void set_allow_feedback (bool yn);
+
 	void set_can_pan (bool yn);
 	uint32_t pan_outs () const;
 
@@ -63,6 +66,7 @@ class LIBARDOUR_API InternalSend : public Send
 	BufferSet mixbufs;
 	boost::shared_ptr<Route> _send_from;
 	boost::shared_ptr<Route> _send_to;
+	bool _allow_feedback;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
 	PBD::ScopedConnection source_connection;

@@ -401,7 +401,6 @@ struct CFunc
     }
   };
 
-
   template <class T>
   struct PtrNullCheck
   {
@@ -429,6 +428,98 @@ struct CFunc
       return 1;
     }
   };
+
+  template <class T>
+  struct PtrEqualCheck
+  {
+    static int f (lua_State* L)
+    {
+      boost::shared_ptr<T> t0 = luabridge::Stack<boost::shared_ptr<T> >::get (L, 1);
+      boost::shared_ptr<T> t1 = luabridge::Stack<boost::shared_ptr<T> >::get (L, 2);
+      Stack <bool>::push (L, t0 == t1);
+      return 1;
+    }
+  };
+
+  template <class T>
+  struct WPtrEqualCheck
+  {
+    static int f (lua_State* L)
+    {
+      bool rv = false;
+      boost::weak_ptr<T> tw0 = luabridge::Stack<boost::weak_ptr<T> >::get (L, 1);
+      boost::weak_ptr<T> tw1 = luabridge::Stack<boost::weak_ptr<T> >::get (L, 2);
+      boost::shared_ptr<T> const t0 = tw0.lock();
+      boost::shared_ptr<T> const t1 = tw1.lock();
+      if (t0 && t1) {
+        T* const tt0 = t0.get();
+        T* const tt1 = t1.get();
+        rv = (tt0 == tt1);
+      }
+      Stack <bool>::push (L, rv);
+      return 1;
+    }
+  };
+
+  template <class C, typename T>
+  static int getPtrProperty (lua_State* L)
+  {
+    boost::shared_ptr<C> cp = luabridge::Stack<boost::shared_ptr<C> >::get (L, 1);
+    C const* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "shared_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    Stack <T>::push (L, c->**mp);
+    return 1;
+  }
+
+  template <class C, typename T>
+  static int getWPtrProperty (lua_State* L)
+  {
+    boost::weak_ptr<C> cw = luabridge::Stack<boost::weak_ptr<C> >::get (L, 1);
+    boost::shared_ptr<C> const cp = cw.lock();
+    if (!cp) {
+      return luaL_error (L, "cannot lock weak_ptr");
+    }
+    C const* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "weak_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    Stack <T>::push (L, c->**mp);
+    return 1;
+  }
+
+  template <class C, typename T>
+  static int setPtrProperty (lua_State* L)
+  {
+    boost::shared_ptr<C> cp = luabridge::Stack<boost::shared_ptr<C> >::get (L, 1);
+    C* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "shared_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    c->**mp = Stack <T>::get (L, 2);
+    return 0;
+  }
+
+  template <class C, typename T>
+  static int setWPtrProperty (lua_State* L)
+  {
+    boost::weak_ptr<C> cw = luabridge::Stack<boost::weak_ptr<C> >::get (L, 1);
+    boost::shared_ptr<C> cp = cw.lock();
+    if (!cp) {
+      return luaL_error (L, "cannot lock weak_ptr");
+    }
+    C* const c = cp.get();
+    if (!c) {
+      return luaL_error (L, "weak_ptr is nil");
+    }
+    T C::** mp = static_cast <T C::**> (lua_touserdata (L, lua_upvalueindex (1)));
+    c->**mp = Stack <T>::get (L, 2);
+    return 0;
+  }
 
   template <class MemFnPtr, class T,
            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
@@ -1201,6 +1292,23 @@ struct CFunc
     v.push(L);
     return 1;
   }
+
+  // generate table from std::map
+  template <class K, class V>
+  static int mapAt (lua_State *L)
+  {
+    typedef std::map<K, V> C;
+    C const* const t = Userdata::get <C> (L, 1, true);
+    if (!t) { return luaL_error (L, "invalid pointer to std::map"); }
+    K const key = Stack<K>::get (L, 2);
+    typename C::const_iterator iter = t->find(key);
+    if (iter == t->end()) {
+      return 0;
+    }
+    Stack <V>::push (L, (*iter).second);
+    return 1;
+  }
+
 
   //--------------------------------------------------------------------------
   // generate std::set from table keys ( table[member] = true )

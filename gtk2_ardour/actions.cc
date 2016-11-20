@@ -62,6 +62,7 @@ RelatedActions ActionManager::engine_sensitive_actions;
 RelatedActions ActionManager::engine_opposite_sensitive_actions;
 RelatedActions ActionManager::transport_sensitive_actions;
 RelatedActions ActionManager::edit_point_in_region_sensitive_actions;
+RelatedActions ActionManager::rec_sensitive_actions;
 
 void
 ActionManager::init ()

@@ -326,7 +326,7 @@ LuaScriptInfo::str2type (const std::string& str) {
 }
 
 LuaScriptParamList
-LuaScriptParams::script_params (LuaScriptInfoPtr lsi, const std::string &pname)
+LuaScriptParams::script_params (const LuaScriptInfoPtr& lsi, const std::string &pname)
 {
 	assert (lsi);
 	return LuaScriptParams::script_params (lsi->path, pname);

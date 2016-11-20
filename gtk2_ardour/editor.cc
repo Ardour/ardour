@@ -572,7 +572,7 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
-	CairoWidget::set_focus_handler (sigc::mem_fun (*this, &Editor::reset_focus));
+	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
 	_summary = new EditorSummary (this);
 
@@ -1182,7 +1182,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 			/* leaving window, so reset focus, thus ending any and
 			   all text entry operations.
 			*/
-			reset_focus (&contents());
+			ARDOUR_UI::instance()->reset_focus (&contents());
 			break;
 		}
 		break;
@@ -2239,10 +2239,8 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
 	case SnapToBeatDiv2: {
-		std::vector<TempoMap::BBTPoint> grid;
-		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
-		compute_bbt_ruler_scale (grid, leftmost_frame, leftmost_frame + current_page_samples());
-		update_tempo_based_rulers (grid);
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+		update_tempo_based_rulers ();
 		break;
 	}
 
@@ -2853,55 +2851,55 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 		break;
 
 	case SnapToBeatDiv128:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 128, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 128, direction);
 		break;
 	case SnapToBeatDiv64:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 64, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 64, direction);
 		break;
 	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 32, direction);
 		break;
 	case SnapToBeatDiv28:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 28, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 28, direction);
 		break;
 	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 24, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 24, direction);
 		break;
 	case SnapToBeatDiv20:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 20, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 20, direction);
 		break;
 	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 16, direction);
 		break;
 	case SnapToBeatDiv14:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 14, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 14, direction);
 		break;
 	case SnapToBeatDiv12:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 12, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 12, direction);
 		break;
 	case SnapToBeatDiv10:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 10, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 10, direction);
 		break;
 	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 8, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 8, direction);
 		break;
 	case SnapToBeatDiv7:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 7, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 7, direction);
 		break;
 	case SnapToBeatDiv6:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 6, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 6, direction);
 		break;
 	case SnapToBeatDiv5:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 5, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 5, direction);
 		break;
 	case SnapToBeatDiv4:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 4, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 4, direction);
 		break;
 	case SnapToBeatDiv3:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 3, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 3, direction);
 		break;
 	case SnapToBeatDiv2:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 2, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 2, direction);
 		break;
 
 	case SnapToMark:
@@ -4057,7 +4055,7 @@ Editor::get_grid_beat_divisions(framepos_t position)
     if the grid is snapped to bars, returns -1.
     @param event_state the current keyboard modifier mask.
 */
-unsigned
+int32_t
 Editor::get_grid_music_divisions (uint32_t event_state)
 {
 	if (snap_mode() == Editing::SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
@@ -4105,10 +4103,11 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 
 	switch (_snap_type) {
 	case SnapToBeat:
-		return Evoral::Beats(1.0);
+		return Evoral::Beats(4.0 / _session->tempo_map().meter_at_frame (position).note_divisor());
 	case SnapToBar:
 		if (_session) {
-			return Evoral::Beats(_session->tempo_map().meter_at_frame (position).divisions_per_bar());
+			const Meter& m = _session->tempo_map().meter_at_frame (position);
+			return Evoral::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
 		}
 		break;
 	default:
@@ -4613,10 +4612,8 @@ Editor::visual_changer (const VisualChange& vc)
 
 		compute_fixed_ruler_scale ();
 
-		std::vector<TempoMap::BBTPoint> grid;
-		compute_current_bbt_points (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
-		compute_bbt_ruler_scale (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
-		update_tempo_based_rulers (grid);
+		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples());
+		update_tempo_based_rulers ();
 
 		update_video_timeline();
 	}
@@ -5167,7 +5164,7 @@ Editor::region_view_added (RegionView * rv)
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
 	if (mrv) {
-		list<pair<PBD::ID const, list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rnote;
+		list<pair<PBD::ID const, list<Evoral::event_id_t> > >::iterator rnote;
 		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
 			if (rv->region()->id () == (*rnote).first) {
 				mrv->select_notes ((*rnote).second);

@@ -19,7 +19,7 @@ time ./tools/doxy2json/doxy2json -j 4 \
 	-D HAVE_SAMPLERATE=1 -D HAVE_LV2=1 -D HAVE_LV2_1_2_0=1 -D HAVE_LV2_1_10_0=1 -D HAVE_SERD=1 -D HAVE_SORD=1 -D HAVE_SRATOM=1 -D HAVE_LILV=1 -D HAVE_LV2_1_0_0=1 \
 	-D HAVE_LILV_0_16_0=1 -D HAVE_LILV_0_19_2=1 -D HAVE_LILV_0_21_3=1 -D HAVE_SUIL=1 -D LV2_SUPPORT=1 -D LV2_EXTENDED=1 -D HAVE_GTK=1 -D HAVE_LIBS_GTKMM2EXT=1 \
 	-D HAVE_X11=1  -D LXVST_64BIT=1 -D LXVST_SUPPORT=1 -D HAVE_TAGLIB=1 -D HAVE_POSIX_MEMALIGN=1 -D HAVE_VAMPSDK=1 -D HAVE_VAMPHOSTSDK=1 -D HAVE_RUBBERBAND=1 -D ENABLE_NLS=1 \
-	-D HAVE_CURL=1 -D HAVE_LO=1 -D HAVE_LRDF=1 \
+	-D HAVE_CURL=1 -D HAVE_LO=1 -D HAVE_LRDF=1 -D _VAMP_NO_PLUGIN_NAMESPACE=1 \
 	-I libs/ardour -I libs/pbd -I libs/lua -I gtk2_ardour -I libs/timecode -I libs/audiographer -I libs/ptformat -I libs/fst \
 	-I libs/ltc -I libs/evoral -I libs/canvas -I libs/gtkmm2ext -I libs/midi++2 -I libs/surfaces/control_protocol -I libs \
 	-I build/libs/pbd -I build/libs/ardour -I build/gtk2_ardour \
@@ -30,6 +30,7 @@ time ./tools/doxy2json/doxy2json -j 4 \
 	libs/ardour/*.cc libs/pbd/*.cc \
 	gtk2_ardour/*.cc \
 	/usr/include/cairomm-1.0/cairomm/context.h \
+	/usr/include/vamp-sdk/Plugin.h \
 > $TMPFILE
 
 ls -lh $TMPFILE
@@ -58,6 +59,7 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('const long', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('const unsigned int', 'unsigned int', \$a['decl']);
 	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
+	\$a['decl'] = str_replace (' ::Vamp::', ' Vamp::', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
 }

@@ -44,6 +44,11 @@ class OSCGlobalObserver
 	PBD::ScopedConnectionList strip_connections;
 	PBD::ScopedConnectionList session_connections;
 
+	enum STRIP {
+		Master,
+		Monitor,
+	};
+
 
 	lo_address addr;
 	std::string path;
@@ -53,14 +58,18 @@ class OSCGlobalObserver
 	framepos_t _last_frame;
 	uint32_t _heartbeat;
 	float _last_meter;
+	uint32_t master_timeout;
+	uint32_t monitor_timeout;
 
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_transport_state_changed(void);
+	void send_transport_state_changed (void);
 	void send_record_state_changed (void);
-	void send_session_saved (std::string name);
 	void solo_active (bool active);
+	void text_message (std::string path, std::string text);
+	void float_message (std::string path, float value);
+	void int_message (std::string path, uint32_t value);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */

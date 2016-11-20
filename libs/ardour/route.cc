@@ -117,6 +117,11 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	processor_max_streams.reset();
 }
 
+boost::weak_ptr<Route>
+Route::weakroute () {
+	return boost::weak_ptr<Route> (shared_from_this ());
+}
+
 int
 Route::init ()
 {
@@ -831,6 +836,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 						prop->value() == "lv2" ||
 						prop->value() == "windows-vst" ||
+						prop->value() == "mac-vst" ||
 						prop->value() == "lxvst" ||
 						prop->value() == "audiounit") {
 
@@ -1019,7 +1025,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			if ((*i)->active()) {
-				// why?  emit  ActiveChanged() ??
+				// emit ActiveChanged() and latency_changed() if needed
 				(*i)->activate ();
 			}
 
@@ -2460,7 +2466,7 @@ Route::set_state (const XMLNode& node, int version)
 				_solo_safe_control->set_state (*child, version);
 			} else if (prop->value() == _solo_isolate_control->name()) {
 				_solo_isolate_control->set_state (*child, version);
-			} else if (prop->value() == _solo_control->name()) {
+			} else if (prop->value() == _mute_control->name()) {
 				_mute_control->set_state (*child, version);
 			} else if (prop->value() == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
@@ -2754,6 +2760,7 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
 				           prop->value() == "windows-vst" ||
+				           prop->value() == "mac-vst" ||
 				           prop->value() == "lxvst" ||
 				           prop->value() == "luaproc" ||
 				           prop->value() == "audiounit") {
@@ -2815,6 +2822,7 @@ Route::set_processor_state (const XMLNode& node)
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		/* re-assign _processors w/o process-lock.
 		 * if there's an IO-processor present in _processors but
@@ -2822,7 +2830,6 @@ Route::set_processor_state (const XMLNode& node)
 		 * a process lock.
 		 */
 		_processors = new_order;
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
 		if (must_configure) {
 			configure_processors_unlocked (0, &lm);
@@ -2981,8 +2988,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-			listener.reset (new InternalSend (_session, sendpan, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);

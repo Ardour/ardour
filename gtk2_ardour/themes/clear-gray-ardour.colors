@@ -175,11 +175,12 @@
     <ColorAlias name="gtk_audio_track" alias="color 25"/>
     <ColorAlias name="gtk_automation_track_header" alias="color 48"/>
     <ColorAlias name="gtk_background" alias="color 87"/>
-    <ColorAlias name="gtk_bases" alias="color 22"/>
+    <ColorAlias name="gtk_bases" alias="color 88"/>
     <ColorAlias name="gtk_bg_selected" alias="color 81"/>
     <ColorAlias name="gtk_bg_tooltip" alias="color 74"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
     <ColorAlias name="gtk_bright_indicator" alias="meter color8"/>
+    <ColorAlias name="gtk_clip_indicator" alias="meter color8"/>
     <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
     <ColorAlias name="gtk_control_base" alias="color 13"/>
     <ColorAlias name="gtk_control_master" alias="color 64"/>
@@ -240,6 +241,7 @@
     <ColorAlias name="meter bar" alias="color 7"/>
     <ColorAlias name="meter color BBC" alias="color 8"/>
     <ColorAlias name="meter marker" alias="color 19"/>
+    <ColorAlias name="meter marker music" alias="color 5"/>
     <ColorAlias name="meterbridge label: fill" alias="color 81"/>
     <ColorAlias name="meterbridge label: fill active" alias="color 48"/>
     <ColorAlias name="meterbridge label: led" alias="meter color8"/>
@@ -286,6 +288,7 @@
     <ColorAlias name="midi sysex fill" alias="color 10"/>
     <ColorAlias name="midi sysex outline" alias="color 64"/>
     <ColorAlias name="midi track base" alias="color 74"/>
+    <ColorAlias name="plugin automation state button: fill active" alias="color 8"/>
     <ColorAlias name="mixer strip button: fill active" alias="color 8"/>
     <ColorAlias name="mixer strip button: led active" alias="color 8"/>
     <ColorAlias name="mixer strip name button: fill active" alias="color 67"/>

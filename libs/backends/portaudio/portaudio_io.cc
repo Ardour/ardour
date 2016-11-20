@@ -808,7 +808,8 @@ PortAudioIO::open_callback_stream(int device_input,
 	                    data);
 
 	if (err != paNoError) {
-		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
+		DEBUG_AUDIO(string_compose("PortAudio failed to open stream %1\n",
+		                           Pa_GetErrorText(err)));
 		return paInternalError;
 	}
 

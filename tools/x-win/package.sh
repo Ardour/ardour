@@ -16,7 +16,10 @@ test -f gtk2_ardour/wscript || exit 1
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
 : ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
+
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
+: ${HARRISONLV2=harrison_lv2s-n}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
@@ -131,12 +134,12 @@ cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
 cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
 cp build/libs/ardour/ardour-*.dll $DESTDIR/bin/
 cp build/libs/timecode/timecode.dll $DESTDIR/bin/
-cp build/libs/qm-dsp/qmdsp-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
+cp build/session_utils/*-*.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
@@ -265,10 +268,10 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	echo "Including Harrison LV2s"
 
 	curl -s -S --fail -# \
-		-z "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
-		-o "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${WARCH}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/harrison_lv2s.${WARCH}.zip"
+		-z "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
+		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
+		"${HARRISONDSPURL}/${HARRISONLV2}.${WARCH}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
@@ -278,7 +281,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		-o "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
+		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
 
 	cp "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/${HARRISONCHANNELSTRIP}.dll"
@@ -288,11 +291,23 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		-o "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${WARCH}.dll"
+		"${HARRISONDSPURL}/harrison_vamp.${WARCH}.dll"
 
 	cp "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		"$ALIBDIR/vamp/harrison_vamp.dll"
 fi
+
+################################################################################
+
+if test x$DEMO_SESSION_URL != x ; then
+	mkdir -p $Shared/sessions
+	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
+	for demo in $DEMO_SESSIONS; do
+		curl -s -S --fail -# -o $Shared/sessions/$demo $DEMO_SESSION_URL/$demo
+	done
+fi
+
+################################################################################
 
 ( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
 
@@ -342,7 +357,7 @@ if test -n "$MIXBUS"; then
 !define MUI_FINISHPAGE_TITLE "Welcome to Harrison Mixbus"
 !define MUI_FINISHPAGE_TEXT "Thanks for your purchase of Mixbus!\$\\r\$\\nYou will find the Mixbus application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the Mixbus manual, and learn ways to get involved with the Mixbus community."
 !define MUI_FINISHPAGE_LINK "Mixbus Manual"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://www.harrisonconsoles.com/mixbus/mixbus3-live-manual"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://harrisonconsoles.com/site/${PRODUCT_NAME}-info.html"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
 
@@ -351,8 +366,8 @@ else
 	cat >> $NSISFILE << EOF
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
 !define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe Ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
-!define MUI_FINISHPAGE_LINK "Ardour on Windows"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://ardour.org/windows.html"
+!define MUI_FINISHPAGE_LINK "Ardour Manual"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org/"
 #this would run as admin - see http://forums.winamp.com/showthread.php?t=353366
 #!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\${PRODUCT_EXE}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT

@@ -247,6 +247,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	PBD::Signal0<void> BecameSilent;
 	void reset_silence_countdown ();
 
+	void add_pending_port_deletion (Port*);
+
   private:
 	AudioEngine ();
 

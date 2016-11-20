@@ -196,6 +196,12 @@ LIBPBD_API bool touch_file (const std::string& path);
 LIBPBD_API std::string get_absolute_path (const std::string &);
 
 /**
+ * The equivalent of ::realpath on POSIX systems, on Windows hard
+ * links/junctions etc are not resolved.
+ */
+LIBPBD_API std::string canonical_path (const std::string& path);
+
+/**
  * Take a path/filename and return the suffix (characters beyond the last '.'
  * @return A string containing the suffix, which will be empty
  * if there are no '.' characters in the path/filename.

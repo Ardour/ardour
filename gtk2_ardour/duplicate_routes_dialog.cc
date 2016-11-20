@@ -22,6 +22,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "duplicate_routes_dialog.h"
 #include "selection.h"
@@ -48,6 +49,19 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 	playlist_button_box.pack_start (new_playlists_button, false, false);
 	playlist_button_box.pack_start (share_playlists_button, false, false);
 	playlist_button_box.show_all ();
+
+	insert_at_combo.append_text (_("First"));
+	insert_at_combo.append_text (_("Before Selection"));
+	insert_at_combo.append_text (_("After Selection"));
+	insert_at_combo.append_text (_("Last"));
+	insert_at_combo.set_active (3);
+
+	Gtk::Label* l = manage (new Label (_("Insert duplicates at: ")));
+	Gtk::HBox* b = manage (new HBox);
+	b->pack_start (*l, false, false, 10);
+	b->pack_start (insert_at_combo, true, true);
+
+	get_vbox()->pack_end (*b, false, false, 10);
 
 	get_vbox()->show_all ();
 
@@ -157,7 +171,7 @@ DuplicateRouteDialog::on_response (int response)
 		}
 
 		XMLNode& state (rui->route()->get_state());
-		RouteList rl = _session->new_route_from_template (cnt, state, std::string(), playlist_action);
+		RouteList rl = _session->new_route_from_template (cnt, ARDOUR_UI::instance()->translate_order (insert_at()), state, std::string(), playlist_action);
 
 		/* normally the state node would be added to a parent, and
 		 * ownership would transfer. Because we don't do that here,
@@ -178,4 +192,21 @@ DuplicateRouteDialog::on_response (int response)
 		msg.set_position (WIN_POS_MOUSE);
 		msg.run ();
 	}
+}
+
+RouteDialogs::InsertAt
+DuplicateRouteDialog::insert_at ()
+{
+	using namespace RouteDialogs;
+
+	std::string str = insert_at_combo.get_active_text();
+
+	if (str == _("First")) {
+		return First;
+	} else if (str == _("After Selection")) {
+		return AfterSelection;
+	} else if (str == _("Before Selection")){
+		return BeforeSelection;
+	}
+	return Last;
 }

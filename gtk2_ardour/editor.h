@@ -297,8 +297,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
 	void               cycle_zoom_focus ();
-	void temporal_zoom_step (bool coarser);
-	void temporal_zoom_step_mouse_focus (bool coarser);
+	void temporal_zoom_step (bool zoom_out);
+	void temporal_zoom_step_scale (bool zoom_out, double scale);
+	void temporal_zoom_step_mouse_focus (bool zoom_out);
+	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
 	void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
@@ -330,7 +332,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	unsigned get_grid_beat_divisions(framepos_t position);
 	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
 
-	unsigned get_grid_music_divisions (uint32_t event_state);
+	int32_t get_grid_music_divisions (uint32_t event_state);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -890,7 +892,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-	void update_tempo_based_rulers (std::vector<ARDOUR::TempoMap::BBTPoint>& grid);
+	void update_tempo_based_rulers ();
 	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
@@ -953,7 +955,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t lower, framepos_t upper);
+	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
 	ArdourCanvas::Ruler* bbt_ruler;
@@ -1276,8 +1278,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void naturalize_region ();
 
-	void reset_focus (Gtk::Widget*);
-
 	void split_region ();
 
 	void delete_ ();
@@ -1451,6 +1451,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
+	void set_auto_punch_range();
 
 	void set_session_start_from_playhead ();
 	void set_session_end_from_playhead ();
@@ -1461,7 +1462,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_range (framepos_t start, framepos_t end, std::string cmd);
 	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
 
+	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();
+	bool do_remove_location_at_playhead_cursor ();
 	void remove_location_at_playhead_cursor ();
 	bool select_new_marker;
 
@@ -1999,6 +2002,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* duplication */
 
 	void duplicate_range (bool with_dialog);
+	void duplicate_regions (float times);
 
 	/** computes the timeline frame (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
@@ -2268,6 +2272,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class ControlPointDrag;
 	friend class LineDrag;
 	friend class RubberbandSelectDrag;
+	friend class RulerZoomDrag;
 	friend class EditorRubberbandSelectDrag;
 	friend class TimeFXDrag;
 	friend class ScrubDrag;

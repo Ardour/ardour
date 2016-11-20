@@ -6,6 +6,14 @@
     Centre for Digital Music, Queen Mary, University of London.
     This file 2005-2006 Christian Landone.
 
+    Modifications:
+
+    - delta threshold
+    Description: add delta threshold used as offset in the smoothed
+    detection function
+    Author: Mathieu Barthet
+    Date: June 2010
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -25,7 +33,7 @@
 DFProcess::DFProcess( DFProcConfig Config )
 {
     filtSrc = NULL;
-    filtDst = NULL;
+    filtDst = NULL;	
     m_filtScratchIn = NULL;
     m_filtScratchOut = NULL;
 
@@ -51,13 +59,16 @@ void DFProcess::initialise( DFProcConfig Config )
     filtSrc = new double[ m_length ];
     filtDst = new double[ m_length ];
 
-
+	
     //Low Pass Smoothing Filter Config
     m_FilterConfigParams.ord = Config.LPOrd;
     m_FilterConfigParams.ACoeffs = Config.LPACoeffs;
     m_FilterConfigParams.BCoeffs = Config.LPBCoeffs;
-
+	
     m_FiltFilt = new FiltFilt( m_FilterConfigParams );
+	
+    //add delta threshold
+    m_delta = Config.delta;
 }
 
 void DFProcess::deInitialise()
@@ -115,7 +126,7 @@ void DFProcess::medianFilter(double *src, double *dst)
     {
         if (index >= m_length) break;
 
-
+			 
 	l = 0;
 	for(  j  = i; j < ( i + m_winPost + m_winPre + 1); j++)
 	{
@@ -139,15 +150,17 @@ void DFProcess::medianFilter(double *src, double *dst)
 
 	    l++;
 	}
-
-	scratch[ index++ ] = MathUtilities::median( y, l);
+		
+	scratch[ index++ ] = MathUtilities::median( y, l); 
     }
 
 
     for( i = 0; i < m_length; i++ )
     {
-	val = src[ i ] - scratch[ i ];// - 0.033;
-
+	//add a delta threshold used as an offset when computing the smoothed detection function
+	//(helps to discard noise when detecting peaks)	
+	val = src[ i ] - scratch[ i ] - m_delta;
+		
 	if( m_isMedianPositive )
 	{
 	    if( val > 0 )
@@ -164,7 +177,7 @@ void DFProcess::medianFilter(double *src, double *dst)
 	    dst[ i ]  = val;
 	}
     }
-
+	
     delete [] y;
     delete [] scratch;
 }
@@ -180,8 +193,8 @@ void DFProcess::removeDCNormalize( double *src, double*dst )
 
     MathUtilities::getAlphaNorm( src, m_length, m_alphaNormParam, &DFAlphaNorm );
 
-    for(int i = 0; i< m_length; i++)
+    for( unsigned int i = 0; i< m_length; i++)
     {
-	dst[ i ] = ( src[ i ] - DFMin ) / DFAlphaNorm;
+	dst[ i ] = ( src[ i ] - DFMin ) / DFAlphaNorm; 
     }
 }

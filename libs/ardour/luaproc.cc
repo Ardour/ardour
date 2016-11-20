@@ -46,7 +46,7 @@ LuaProc::LuaProc (AudioEngine& engine,
                   Session& session,
                   const std::string &script)
 	: Plugin (engine, session)
-	, _mempool ("LuaProc", 2097152)
+	, _mempool ("LuaProc", 3145728)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
@@ -61,6 +61,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
+	, _configured (false)
 	, _has_midi_input (false)
 	, _has_midi_output (false)
 {
@@ -76,7 +77,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 
 LuaProc::LuaProc (const LuaProc &other)
 	: Plugin (other)
-	, _mempool ("LuaProc", 2097152)
+	, _mempool ("LuaProc", 3145728)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
@@ -91,6 +92,7 @@ LuaProc::LuaProc (const LuaProc &other)
 	, _designated_bypass_port (UINT32_MAX)
 	, _control_data (0)
 	, _shadow_data (0)
+	, _configured (false)
 	, _has_midi_input (false)
 	, _has_midi_output (false)
 {
@@ -142,10 +144,13 @@ LuaProc::init ()
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Ardour")
-		.beginClass <LuaProc> ("LuaProc")
+		.deriveClass <LuaProc, PBD::StatefulDestructible> ("LuaProc")
 		.addFunction ("queue_draw", &LuaProc::queue_draw)
 		.addFunction ("shmem", &LuaProc::instance_shm)
 		.addFunction ("table", &LuaProc::instance_ref)
+		.addFunction ("route", &LuaProc::route)
+		.addFunction ("unique_id", &LuaProc::unique_id)
+		.addFunction ("name", &LuaProc::name)
 		.endClass ()
 		.endNamespace ();
 
@@ -163,6 +168,12 @@ LuaProc::init ()
 	lua.do_command ("for n in pairs(_G) do print(n) end print ('----')"); // print global env
 #endif
 	lua.do_command ("function ardour () end");
+}
+
+boost::weak_ptr<Route>
+LuaProc::route () const
+{
+	return static_cast<Route*>(_owner)->weakroute ();
 }
 
 void
@@ -223,25 +234,6 @@ LuaProc::load_script ()
 	if (lua_dsp_init.type () == LUA_TFUNCTION) {
 		try {
 			lua_dsp_init (_session.nominal_frame_rate ());
-		} catch (luabridge::LuaException const& e) {
-			;
-		}
-	}
-
-	// query midi i/o
-	luabridge::LuaRef lua_dsp_has_midi_in = luabridge::getGlobal (L, "dsp_has_midi_input");
-	if (lua_dsp_has_midi_in.type () == LUA_TFUNCTION) {
-		try {
-			_has_midi_input = lua_dsp_has_midi_in ();
-		} catch (luabridge::LuaException const& e) {
-			;
-		}
-	}
-
-	luabridge::LuaRef lua_dsp_has_midi_out = luabridge::getGlobal (L, "dsp_has_midi_output");
-	if (lua_dsp_has_midi_out.type () == LUA_TFUNCTION) {
-		try {
-			_has_midi_output = lua_dsp_has_midi_out ();
 		} catch (luabridge::LuaException const& e) {
 			;
 		}
@@ -346,28 +338,26 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	// caller must hold process lock (no concurrent calls to interpreter
 	_output_configs.clear ();
 
-	if (in.n_midi() > 0 && !_has_midi_input && !imprecise) {
-		return false;
-	}
-
 	lua_State* L = lua.getState ();
 	luabridge::LuaRef ioconfig = luabridge::getGlobal (L, "dsp_ioconfig");
-	if (!ioconfig.isFunction ()) {
-		return false;
-	}
 
 	luabridge::LuaRef *_iotable = NULL; // can't use reference :(
-	try {
-		luabridge::LuaRef iotable = ioconfig ();
-		if (iotable.isTable ()) {
-			_iotable = new luabridge::LuaRef (iotable);
+
+	if (ioconfig.isFunction ()) {
+		try {
+			luabridge::LuaRef iotable = ioconfig ();
+			if (iotable.isTable ()) {
+				_iotable = new luabridge::LuaRef (iotable);
+			}
+		} catch (luabridge::LuaException const& e) {
+			_iotable = NULL;
 		}
-	} catch (luabridge::LuaException const& e) {
-		return false;
 	}
 
 	if (!_iotable) {
-		return false;
+		/* empty table as default */
+		luabridge::LuaRef iotable = luabridge::newTable(L);
+		_iotable = new luabridge::LuaRef (iotable);
 	}
 
 	// now we can reference it.
@@ -375,231 +365,149 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	delete _iotable;
 
 	if ((iotable).length () < 1) {
-		return false;
+		/* empty table as only config, to get default values */
+		luabridge::LuaRef ioconf = luabridge::newTable(L);
+		iotable[1] = ioconf;
 	}
 
-	bool found = false;
-	bool exact_match = false;
-	const int32_t audio_in = in.n_audio ();
-	int32_t midi_out = _has_midi_output ? 1 : 0;
+	const int audio_in = in.n_audio ();
+	const int midi_in = in.n_midi ();
 
 	// preferred setting (provided by plugin_insert)
-	assert (out.n_audio () > 0 || midi_out > 0);
 	const int preferred_out = out.n_audio ();
+	const int preferred_midiout = out.n_midi ();
 
-	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-		luabridge::LuaRef io (i.value ());
-		if (!io.isTable()) {
-			continue;
-		}
-
-		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
-		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
-
-		// exact match
-		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
-			_output_configs.insert (preferred_out);
-			exact_match = true;
-			found = true;
-			break;
-		}
-	}
-
-	/* now allow potentially "imprecise" matches */
-	int32_t audio_out = -1;
+	int midi_out = -1;
+	int audio_out = -1;
 	float penalty = 9999;
+	bool found = false;
 
-#define FOUNDCFG(nch) {                            \
-  float p = fabsf ((float)(nch) - preferred_out);  \
-  _output_configs.insert (nch);                    \
-  if ((nch) > preferred_out) { p *= 1.1; }         \
-  if (p < penalty) {                               \
-    audio_out = (nch);                             \
-    penalty = p;                                   \
-    found = true;                                  \
-  }                                                \
+#define FOUNDCFG_PENALTY(in, out, p) {                              \
+  _output_configs.insert (out);                                     \
+  if (p < penalty) {                                                \
+    audio_out = (out);                                              \
+    midi_out = possible_midiout;                                    \
+    if (imprecise) {                                                \
+      imprecise->set (DataType::AUDIO, (in));                       \
+      imprecise->set (DataType::MIDI, possible_midiin);             \
+    }                                                               \
+    _has_midi_input = (possible_midiin > 0);                        \
+    _has_midi_output = (possible_midiout > 0);                      \
+    penalty = p;                                                    \
+    found = true;                                                   \
+  }                                                                 \
 }
 
-#define ANYTHINGGOES                               \
+#define FOUNDCFG_IMPRECISE(in, out) {                               \
+  const float p = fabsf ((float)(out) - preferred_out) *            \
+                      (((out) > preferred_out) ? 1.1 : 1)           \
+                + fabsf ((float)possible_midiout - preferred_midiout) *    \
+                      ((possible_midiout - preferred_midiout) ? 0.6 : 0.5) \
+                + fabsf ((float)(in) - audio_in) *                  \
+                      (((in) > audio_in) ? 275 : 250)               \
+                + fabsf ((float)possible_midiin - midi_in) *        \
+                      ((possible_midiin - midi_in) ? 100 : 110);    \
+  FOUNDCFG_PENALTY(in, out, p);                                     \
+}
+
+#define FOUNDCFG(out)                                               \
+  FOUNDCFG_IMPRECISE(audio_in, out)
+
+#define ANYTHINGGOES                                                \
   _output_configs.insert (0);
 
-#define UPTO(nch) {                                \
-  for (int n = 1; n < nch; ++n) {                  \
-    _output_configs.insert (n);                    \
-  }                                                \
+#define UPTO(nch) {                                                 \
+  for (int n = 1; n < nch; ++n) {                                   \
+    _output_configs.insert (n);                                     \
+  }                                                                 \
 }
 
-	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-		luabridge::LuaRef io (i.value ());
-		if (!io.isTable()) {
-			continue;
-		}
-
-		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
-		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
-
-		if (possible_out == 0) {
-			if (possible_in == 0) {
-				if (_has_midi_output && audio_in == 0) {
-					// special case midi filters & generators
-					audio_out = 0;
-					found = true;
-					break;
-				}
-			}
-			continue;
-		}
-
-		if (possible_in == 0) {
-			/* no inputs, generators & instruments */
-			if (possible_out == -1) {
-				/* any configuration possible, stereo output */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid, should be (0, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out);
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in == -1) {
-			/* wildcard for input */
-			if (possible_out == -1) {
-				/* out must match in */
-				FOUNDCFG (audio_in);
-			} else if (possible_out == -2) {
-				/* any configuration possible, pick matching */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG (max (-possible_out, preferred_out));
-				/* and try min, too, in case the penalty is lower */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in == -2) {
-			if (possible_out == -1) {
-				/* any configuration possible, pick matching */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (-1, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* invalid,  interpret as (<-2, <-2)
-				 * variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in < -2) {
-			/* explicit variable number of inputs */
-			if (audio_in > -possible_in && imprecise != NULL) {
-				// hide inputs ports
-				imprecise->set (DataType::AUDIO, -possible_in);
-			}
-
-			if (audio_in > -possible_in && imprecise == NULL) {
-				/* request is too large */
-			} else if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (<-2, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in && (possible_in == audio_in)) {
-			/* exact number of inputs ... must match obviously */
-			if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (>0, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* > 0, < -2 is not specified
-				 * interpret as up to -N */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-	}
-
-	if (found && imprecise) {
+	if (imprecise) {
 		*imprecise = in;
 	}
 
-	if (!found && imprecise) {
-		/* try harder */
-		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
-			luabridge::LuaRef io (i.value ());
-			if (!io.isTable()) {
-				continue;
-			}
+	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
+		luabridge::LuaRef io (i.value ());
+		if (!io.isTable()) {
+			continue;
+		}
 
-			int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
-			int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
+		int possible_in = io["audio_in"].isNumber() ? io["audio_in"] : -1;
+		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
+		int possible_midiin = io["midi_in"].isNumber() ? io["midi_in"] : 0;
+		int possible_midiout = io["midi_out"].isNumber() ? io["midi_out"] : 0;
 
-			if (possible_out == 0 && possible_in == 0 && _has_midi_output) {
-				assert (audio_in > 0); // no input is handled above
-				// TODO hide audio input from plugin
-				imprecise->set (DataType::AUDIO, 0);
-				audio_out = 0;
-				found = true;
-				continue;
-			}
+		if (midi_in != possible_midiin && !imprecise) {
+			continue;
+		}
 
-			assert (possible_in > 0); // all other cases will have been matched above
-			assert (possible_out !=0 || possible_in !=0); // already handled above
+		// exact match
+		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
+			/* Set penalty so low that this output configuration
+			 * will trump any other one */
+			FOUNDCFG_PENALTY(audio_in, preferred_out, -1);
+		}
 
-			imprecise->set (DataType::AUDIO, possible_in);
-			if (possible_out == -1 || possible_out == -2) {
-				FOUNDCFG (2);
+		if (possible_out == 0 && possible_midiout == 0) {
+			/* skip configurations with no output at all */
+			continue;
+		}
+
+		if (possible_in == -1 || possible_in == -2) {
+			/* wildcard for input */
+			if (possible_out == possible_in) {
+				/* either both -1 or both -2 (invalid and
+				 * interpreted as both -1): out must match in */
+				FOUNDCFG (audio_in);
+			} else if (possible_out == -3 - possible_in) {
+				/* one is -1, the other is -2: any output configuration
+				 * possible, pick what the insert prefers */
+				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
+				/* variable number of outputs up to -N,
+				 * invalid if in == -2 but we accept it anyway */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
 			}
-			// ideally we'll also find the closest, best matching
-			// input configuration with minimal output penalty...
 		}
+
+		if (possible_in < -2 || possible_in >= 0) {
+			/* specified number, exact or up to */
+			int desired_in;
+			if (possible_in >= 0) {
+				/* configuration can only match possible_in */
+				desired_in = possible_in;
+			} else {
+				/* configuration can match up to -possible_in */
+				desired_in = min (-possible_in, audio_in);
+			}
+			if (!imprecise && audio_in != desired_in) {
+				/* skip that configuration, it cannot match
+				 * the required audio input count, and we
+				 * cannot ask for change via \imprecise */
+			} else if (possible_out == -1 || possible_out == -2) {
+				/* any output configuration possible
+				 * out == -2 is invalid, interpreted as out == -1.
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, preferred_out);
+				ANYTHINGGOES;
+			} else if (possible_out < -2) {
+				/* variable number of outputs up to -N
+				 * not specified if in > 0, but we accept it anyway.
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, min (-possible_out, preferred_out));
+				UPTO (-possible_out)
+			} else {
+				/* exact number of outputs
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, possible_out);
+			}
+		}
+
 	}
 
 	if (!found) {
@@ -607,19 +515,13 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	}
 
 	if (imprecise) {
-		imprecise->set (DataType::MIDI, _has_midi_input ? 1 : 0);
 		_selected_in = *imprecise;
 	} else {
 		_selected_in = in;
 	}
 
-	if (exact_match) {
-		out.set (DataType::MIDI, midi_out);
-		out.set (DataType::AUDIO, preferred_out);
-	} else {
-		out.set (DataType::MIDI, midi_out);
-		out.set (DataType::AUDIO, audio_out);
-	}
+	out.set (DataType::MIDI, midi_out);
+	out.set (DataType::AUDIO, audio_out);
 	_selected_out = out;
 
 	return true;
@@ -635,7 +537,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 	_info->n_outputs = _selected_out;
 
 	// configure the DSP if needed
-	if (in != _configured_in || out != _configured_out) {
+	if (in != _configured_in || out != _configured_out || !_configured) {
 		lua_State* L = lua.getState ();
 		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
 		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
@@ -672,6 +574,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 					_info->n_inputs = lin;
 					_info->n_outputs = lout;
 				}
+				_configured = true;
 			} catch (luabridge::LuaException const& e) {
 				PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
@@ -773,6 +676,8 @@ LuaProc::connect_and_run (BufferSet& bufs,
 						luabridge::LuaRef lua_midi_event (luabridge::newTable (L));
 						lua_midi_event["time"] = 1 + (*m).time();
 						lua_midi_event["data"] = lua_midi_data;
+						lua_midi_event["bytes"] = data;
+						lua_midi_event["size"] = ev.size();
 						lua_midi_src_tbl[e] = lua_midi_event;
 					}
 				}
@@ -1124,6 +1029,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	LuaBindings::stddef (LG);
 	LuaBindings::common (LG);
 	LuaBindings::dsp (LG);
+	LuaBindings::osc (LG);
 
 	lua_gui->Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
 	lua_gui->do_command ("function ardour () end");
@@ -1142,7 +1048,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	luabridge::push <LuaProc *> (LG, this);
 	lua_setglobal (LG, "self");
 
-	luabridge::push <float *> (LG, _shadow_data);
+	luabridge::push <float *> (LG, _control_data);
 	lua_setglobal (LG, "CtrlPorts");
 }
 ////////////////////////////////////////////////////////////////////////////////

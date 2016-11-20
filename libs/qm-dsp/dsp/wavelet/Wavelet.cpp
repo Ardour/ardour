@@ -13,13 +13,13 @@
     COPYING included with this distribution for more information.
 */
 
-#ifdef COMPILER_MSVC
-#pragma warning(disable:4305)
-#endif
-
 #include "Wavelet.h"
 
 #include <cassert>
+
+#ifdef _MSC_VER
+#pragma warning(disable:4305)
+#endif
 
 std::string
 Wavelet::getWaveletName(Type wavelet)
@@ -81,11 +81,11 @@ Wavelet::createDecompositionFilters(Type wavelet,
     lpd.clear();
     hpd.clear();
 
-    unsigned int flength = 0;
-
+    int flength = 0;
+	
     switch (wavelet) {
 
-    case Haar:
+    case Haar: 
         lpd.push_back(0.70710678118655);
         lpd.push_back(0.70710678118655);
         hpd.push_back(-0.70710678118655);
@@ -103,7 +103,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(-0.22414386804186);
         hpd.push_back(-0.12940952255092);
         flength = 4;
-        break;
+        break;		
 
     case Daubechies_3:
         lpd.push_back(0.03522629188210);
@@ -592,7 +592,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(-0.00000000000000);
         flength = 80;
         break;
-
+			
     case Symlet_2:
         lpd.push_back(-0.12940952255092);
         lpd.push_back(0.22414386804186);
@@ -692,7 +692,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(0.01540410932703);
         flength = 12;
         break;
-
+			
     case Symlet_7:
         lpd.push_back(0.00268181456826);
         lpd.push_back(-0.00104738488868);

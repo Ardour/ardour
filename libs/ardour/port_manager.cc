@@ -17,6 +17,16 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#include <ardourext/misc.h>
+#else
+#include <regex.h>
+#endif
+
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
@@ -24,6 +34,7 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audio_port.h"
 #include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/port_manager.h"
@@ -40,7 +51,22 @@ using std::vector;
 PortManager::PortManager ()
 	: ports (new Ports)
 	, _port_remove_in_progress (false)
+	, _port_deletions_pending (8192) /* ick, arbitrary sizing */
+	, midi_info_dirty (true)
 {
+	load_midi_port_info ();
+}
+
+void
+PortManager::clear_pending_port_deletions ()
+{
+	Port* p;
+
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("pending port deletions: %1\n", _port_deletions_pending.read_space()));
+
+	while (_port_deletions_pending.read (&p, 1) == 1) {
+		delete p;
+	}
 }
 
 void
@@ -64,6 +90,13 @@ PortManager::remove_all_ports ()
 	/* clear dead wood list in RCU */
 
 	ports.flush ();
+
+	/* clear out pending port deletion list. we know this is safe because
+	 * the auto connect thread in Session is already dead when this is
+	 * done. It doesn't use shared_ptr<Port> anyway.
+	 */
+
+	_port_deletions_pending.reset ();
 
 	_port_remove_in_progress = false;
 }
@@ -156,17 +189,55 @@ PortManager::port_is_physical (const std::string& portname) const
 }
 
 void
-PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
+PortManager::filter_midi_ports (vector<string>& ports, MidiPortFlags include, MidiPortFlags exclude)
+{
+	if (!include && !exclude) {
+		return;
+	}
+
+	for (vector<string>::iterator si = ports.begin(); si != ports.end(); ) {
+
+		PortManager::MidiPortInformation mpi = midi_port_information (*si);
+
+		if (mpi.pretty_name.empty()) {
+			/* no information !!! */
+			++si;
+			continue;
+		}
+
+		if (include) {
+			if ((mpi.properties & include) != include) {
+				/* properties do not include requested ones */
+				si = ports.erase (si);
+				continue;
+			}
+		}
+
+		if (exclude) {
+			if ((mpi.properties & exclude)) {
+				/* properties include ones to avoid */
+				si = ports.erase (si);
+				continue;
+			}
+		}
+
+		++si;
+	}
+}
+
+void
+PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s, MidiPortFlags include, MidiPortFlags exclude)
 {
 	if (!_backend) {
 		s.clear ();
 		return;
 	}
 	_backend->get_physical_outputs (type, s);
+	filter_midi_ports (s, include, exclude);
 }
 
 void
-PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
+PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s, MidiPortFlags include, MidiPortFlags exclude)
 {
 	if (!_backend) {
 		s.clear ();
@@ -174,6 +245,7 @@ PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 	}
 
 	_backend->get_physical_inputs (type, s);
+	filter_midi_ports (s, include, exclude);
 }
 
 ChanCount
@@ -293,25 +365,39 @@ PortManager::port_registration_failure (const std::string& portname)
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }
 
+struct PortDeleter
+{
+	void operator() (Port* p) {
+		AudioEngine::instance()->add_pending_port_deletion (p);
+	}
+};
+
 boost::shared_ptr<Port>
-PortManager::register_port (DataType dtype, const string& portname, bool input, bool async)
+PortManager::register_port (DataType dtype, const string& portname, bool input, bool async, PortFlags flags)
 {
 	boost::shared_ptr<Port> newport;
+
+	/* limit the possible flags that can be set */
+
+	flags = PortFlags (flags & (Hidden|Shadow|IsTerminal));
 
 	try {
 		if (dtype == DataType::AUDIO) {
 			DEBUG_TRACE (DEBUG::Ports, string_compose ("registering AUDIO port %1, input %2\n",
 								   portname, input));
-			newport.reset (new AudioPort (portname, (input ? IsInput : IsOutput)));
+			newport.reset (new AudioPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+			               PortDeleter());
 		} else if (dtype == DataType::MIDI) {
 			if (async) {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering ASYNC MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new AsyncMIDIPort (portname, (input ? IsInput : IsOutput)));
+				newport.reset (new AsyncMIDIPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+				               PortDeleter());
 			} else {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering MIDI port %1, input %2\n",
 									   portname, input));
-				newport.reset (new MidiPort (portname, (input ? IsInput : IsOutput)));
+				newport.reset (new MidiPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
+				               PortDeleter());
 			}
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
@@ -339,20 +425,26 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 }
 
 boost::shared_ptr<Port>
-PortManager::register_input_port (DataType type, const string& portname, bool async)
+PortManager::register_input_port (DataType type, const string& portname, bool async, PortFlags extra_flags)
 {
-	return register_port (type, portname, true, async);
+	return register_port (type, portname, true, async, extra_flags);
 }
 
 boost::shared_ptr<Port>
-PortManager::register_output_port (DataType type, const string& portname, bool async)
+PortManager::register_output_port (DataType type, const string& portname, bool async, PortFlags extra_flags)
 {
-	return register_port (type, portname, false, async);
+	return register_port (type, portname, false, async, extra_flags);
 }
 
 int
 PortManager::unregister_port (boost::shared_ptr<Port> port)
 {
+	/* This is a little subtle. We do not call the backend's port
+	 * unregistration code from here. That is left for the Port
+	 * destructor. We are trying to drop references to the Port object
+	 * here, so that its destructor will run and it will unregister itself.
+	 */
+
 	/* caller must hold process lock */
 
 	{
@@ -361,6 +453,7 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 		Ports::iterator x = ps->find (make_port_name_relative (port->name()));
 
 		if (x != ps->end()) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("removing %1 from port map (uc=%2)\n", port->name(), port.use_count()));
 			ps->erase (x);
 		}
 
@@ -492,6 +585,16 @@ PortManager::disconnect (boost::shared_ptr<Port> port)
 }
 
 int
+PortManager::disconnect (std::string const & name)
+{
+	PortEngine::PortHandle ph = _backend->get_port_by_name (name);
+	if (ph) {
+		return _backend->disconnect_all (ph);
+	}
+	return -2;
+}
+
+int
 PortManager::reestablish_ports ()
 {
 	Ports::iterator i;
@@ -564,6 +667,12 @@ void
 PortManager::registration_callback ()
 {
 	if (!_port_remove_in_progress) {
+
+		{
+			Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+			midi_info_dirty = true;
+		}
+
 		PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 	}
 }
@@ -678,6 +787,9 @@ PortManager::silence (pframes_t nframes, Session *s)
 		if (s && i->second == s->ltc_output_port ()) {
 			continue;
 		}
+		if (boost::dynamic_pointer_cast<AsyncMIDIPort>(i->second)) {
+			continue;
+		}
 		if (i->second->sends_output()) {
 			i->second->get_buffer(nframes).silence(nframes);
 		}
@@ -766,4 +878,356 @@ PortManager::port_engine()
 {
 	assert (_backend);
 	return *_backend;
+}
+
+bool
+PortManager::port_is_control_only (std::string const& name)
+{
+	static regex_t compiled_pattern;
+	static string pattern;
+
+	if (pattern.empty()) {
+
+		/* This is a list of regular expressions that match ports
+		 * related to physical MIDI devices that we do not want to
+		 * expose as normal physical ports.
+		 */
+
+		const char * const control_only_ports[] = {
+			X_(".*Ableton Push.*"),
+			X_(".*FaderPort .*"),
+		};
+
+		pattern = "(";
+		for (size_t n = 0; n < sizeof (control_only_ports)/sizeof (control_only_ports[0]); ++n) {
+			if (n > 0) {
+				pattern += '|';
+			}
+			pattern += control_only_ports[n];
+		}
+		pattern += ')';
+
+		regcomp (&compiled_pattern, pattern.c_str(), REG_EXTENDED|REG_NOSUB);
+	}
+
+	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
+}
+
+PortManager::MidiPortInformation
+PortManager::midi_port_information (std::string const & name)
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	MidiPortInfo::iterator x = midi_port_info.find (name);
+
+	if (x != midi_port_info.end()) {
+		return x->second;
+	}
+
+	return MidiPortInformation ();
+}
+
+void
+PortManager::get_known_midi_ports (vector<string>& copy)
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		copy.push_back (x->first);
+	}
+}
+
+void
+PortManager::get_midi_selection_ports (vector<string>& copy)
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+	fill_midi_port_info_locked ();
+
+	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		if (x->second.properties & MidiPortSelection) {
+			copy.push_back (x->first);
+		}
+	}
+}
+
+void
+PortManager::set_midi_port_pretty_name (string const & port, string const & pretty)
+{
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x == midi_port_info.end()) {
+			return;
+		}
+		x->second.pretty_name = pretty;
+	}
+
+	/* push into back end */
+
+	PortEngine::PortHandle ph = _backend->get_port_by_name (port);
+
+	if (ph) {
+		_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", pretty, string());
+	}
+
+	MidiPortInfoChanged (); /* EMIT SIGNAL*/
+}
+
+void
+PortManager::add_midi_port_flags (string const & port, MidiPortFlags flags)
+{
+	bool emit = false;
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x != midi_port_info.end()) {
+			if ((x->second.properties & flags) != flags) { // at least one missing
+				x->second.properties = MidiPortFlags (x->second.properties | flags);
+				emit = true;
+			}
+		}
+	}
+
+	if (emit) {
+		if (flags & MidiPortSelection) {
+			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		}
+
+		if (flags != MidiPortSelection) {
+			MidiPortInfoChanged (); /* EMIT SIGNAL */
+		}
+
+		save_midi_port_info ();
+	}
+}
+
+void
+PortManager::remove_midi_port_flags (string const & port, MidiPortFlags flags)
+{
+	bool emit = false;
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		fill_midi_port_info_locked ();
+
+		MidiPortInfo::iterator x = midi_port_info.find (port);
+		if (x != midi_port_info.end()) {
+			if (x->second.properties & flags) { // at least one is set
+				x->second.properties = MidiPortFlags (x->second.properties & ~flags);
+				emit = true;
+			}
+		}
+	}
+
+	if (emit) {
+		if (flags & MidiPortSelection) {
+			MidiSelectionPortsChanged (); /* EMIT SIGNAL */
+		}
+
+		if (flags != MidiPortSelection) {
+			MidiPortInfoChanged (); /* EMIT SIGNAL */
+		}
+
+		save_midi_port_info ();
+	}
+}
+
+string
+PortManager::midi_port_info_file ()
+{
+	return Glib::build_filename (user_config_directory(), X_("midi_port_info"));
+}
+
+void
+PortManager::save_midi_port_info ()
+{
+	string path = midi_port_info_file ();
+
+	XMLNode* root = new XMLNode (X_("MidiPortInfo"));
+
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+
+		if (midi_port_info.empty()) {
+			delete root;
+			return;
+		}
+
+		for (MidiPortInfo::iterator i = midi_port_info.begin(); i != midi_port_info.end(); ++i) {
+			XMLNode* node = new XMLNode (X_("port"));
+			node->add_property (X_("name"), i->first);
+			node->add_property (X_("pretty-name"), i->second.pretty_name);
+			node->add_property (X_("input"), i->second.input ? X_("yes") : X_("no"));
+			node->add_property (X_("properties"), enum_2_string (i->second.properties));
+			root->add_child_nocopy (*node);
+		}
+	}
+
+	XMLTree tree;
+
+	tree.set_root (root);
+
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save MIDI port info to %1"), path) << endmsg;
+	}
+}
+
+void
+PortManager::load_midi_port_info ()
+{
+	string path = midi_port_info_file ();
+	XMLTree tree;
+
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+
+	if (!tree.read (path)) {
+		error << string_compose (_("Cannot load MIDI port info from %1"), path) << endmsg;
+		return;
+	}
+
+	midi_port_info.clear ();
+
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+		XMLProperty const* prop;
+		MidiPortInformation mpi;
+		string name;
+
+		if ((prop = (*i)->property (X_("name"))) == 0) {
+			continue;
+		}
+
+		name = prop->value ();
+
+		if ((prop = (*i)->property (X_("pretty-name"))) == 0) {
+			continue;
+		}
+		mpi.pretty_name = prop->value();
+
+		if ((prop = (*i)->property (X_("input"))) == 0) {
+			continue;
+		}
+		mpi.input = string_is_affirmative (prop->value());
+
+		if ((prop = (*i)->property (X_("properties"))) == 0) {
+			continue;
+		}
+
+		mpi.properties = (MidiPortFlags) string_2_enum (prop->value(), mpi.properties);
+
+		midi_port_info.insert (make_pair (name, mpi));
+	}
+}
+
+void
+PortManager::fill_midi_port_info ()
+{
+	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+	fill_midi_port_info_locked ();
+}
+
+void
+PortManager::fill_midi_port_info_locked ()
+{
+	/* MIDI info mutex MUST be held */
+
+	if (!midi_info_dirty) {
+		return;
+	}
+
+	std::vector<string> ports;
+
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, IsOutput, ports);
+
+	for (vector<string>::iterator p = ports.begin(); p != ports.end(); ++p) {
+
+		if (port_is_mine (*p)) {
+			continue;
+		}
+
+		if (midi_port_info.find (*p) == midi_port_info.end()) {
+			MidiPortInformation mpi;
+			mpi.pretty_name = *p;
+			mpi.input = true;
+
+			if (port_is_control_only (*p)) {
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+			}
+#ifdef LINUX
+			if ((*p.find (X_("Midi Through")) != string::npos ||
+			     (*p).find (X_("Midi-Through")) != string::npos))
+			{
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
+			}
+#endif
+			midi_port_info.insert (make_pair (*p, mpi));
+		}
+	}
+
+	AudioEngine::instance()->get_ports (string(), DataType::MIDI, IsInput, ports);
+
+	for (vector<string>::iterator p = ports.begin(); p != ports.end(); ++p) {
+
+		if (port_is_mine (*p)) {
+			continue;
+		}
+
+		if (midi_port_info.find (*p) == midi_port_info.end()) {
+			MidiPortInformation mpi;
+			mpi.pretty_name = *p;
+			mpi.input = false;
+
+			if (port_is_control_only (*p)) {
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+			}
+#ifdef LINUX
+			if ((*p.find (X_("Midi Through")) != string::npos ||
+			     (*p).find (X_("Midi-Through")) != string::npos))
+			{
+				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
+			}
+#endif
+			midi_port_info.insert (make_pair (*p, mpi));
+		}
+	}
+
+	/* now push/pull pretty name information between backend and the
+	 * PortManager
+	 */
+
+	for (MidiPortInfo::iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+		PortEngine::PortHandle ph = _backend->get_port_by_name (x->first);
+
+		if (x->second.pretty_name != x->first) {
+			/* name set in port info ... propagate */
+			_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", x->second.pretty_name, string());
+		} else {
+			/* check with backend for pre-existing pretty name */
+			if (ph) {
+				string value;
+				string type;
+				if (0 == _backend->get_port_property (ph,
+				                                      "http://jackaudio.org/metadata/pretty-name",
+				                                      value, type)) {
+					x->second.pretty_name = value;
+				}
+			}
+		}
+	}
+
+	midi_info_dirty = false;
 }

@@ -59,7 +59,7 @@ MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
  * formality, until apply_command is called and ownership is taken.
  */
 MidiModel::NoteDiffCommand*
-MidiModel::new_note_diff_command (const string name)
+MidiModel::new_note_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
@@ -69,7 +69,7 @@ MidiModel::new_note_diff_command (const string name)
 
 /** Start a new SysExDiff command */
 MidiModel::SysExDiffCommand*
-MidiModel::new_sysex_diff_command (const string name)
+MidiModel::new_sysex_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
@@ -79,7 +79,7 @@ MidiModel::new_sysex_diff_command (const string name)
 
 /** Start a new PatchChangeDiff command */
 MidiModel::PatchChangeDiffCommand*
-MidiModel::new_patch_change_diff_command (const string name)
+MidiModel::new_patch_change_diff_command (const string& name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
@@ -1455,8 +1455,7 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
-	ms->invalidate(source_lock,
-	               ms->session().transport_rolling() ? &_active_notes : NULL);
+	ms->invalidate(source_lock);
 
 	ms->mark_streaming_midi_write_started (source_lock, note_mode());
 
@@ -1625,8 +1624,7 @@ MidiModel::edit_lock()
 		   Add currently active notes to _active_notes so we can restore them
 		   if playback resumes at the same point after the edit. */
 		source_lock = new Glib::Threads::Mutex::Lock(ms->mutex());
-		ms->invalidate(*source_lock,
-		               ms->session().transport_rolling() ? &_active_notes : NULL);
+		ms->invalidate(*source_lock);
 	}
 
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));

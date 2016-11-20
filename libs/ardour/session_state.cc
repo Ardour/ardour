@@ -66,6 +66,7 @@
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
@@ -91,6 +92,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
@@ -102,6 +104,7 @@
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/progress.h"
 #include "ardour/profile.h"
 #include "ardour/proxy_controllable.h"
 #include "ardour/recent_sessions.h"
@@ -234,10 +237,12 @@ Session::post_engine_init ()
 	setup_midi_machine_control ();
 
 	if (_butler->start_thread()) {
+		error << _("Butler did not start") << endmsg;
 		return -1;
 	}
 
 	if (start_midi_thread ()) {
+		error << _("MIDI I/O thread did not start") << endmsg;
 		return -1;
 	}
 
@@ -265,6 +270,7 @@ Session::post_engine_init ()
 
 		SndFileSource::setup_standard_crossfades (*this, frame_rate());
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
 		AudioDiskstream::allocate_working_buffers();
 		refresh_disk_space ();
@@ -275,6 +281,7 @@ Session::post_engine_init ()
 
 		if (state_tree) {
 			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+				error << _("Could not set session state from XML") << endmsg;
 				return -1;
 			}
 		} else {
@@ -341,7 +348,11 @@ Session::post_engine_init ()
 		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
 		return -1;
+	} catch (std::exception const & e) {
+		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
+		return -1;
 	} catch (...) {
+		error << _("Unknown exception during session setup") << endmsg;
 		return -1;
 	}
 
@@ -1126,7 +1137,14 @@ Session::state (bool full_state)
 		node->add_child_nocopy (*midi_port_stuff);
 	}
 
-	node->add_child_nocopy (config.get_variables ());
+	XMLNode& cfgxml (config.get_variables ());
+	if (!full_state) {
+		/* exclude search-paths from template */
+		cfgxml.remove_nodes_and_delete ("name", "audio-search-path");
+		cfgxml.remove_nodes_and_delete ("name", "midi-search-path");
+		cfgxml.remove_nodes_and_delete ("name", "raid-path");
+	}
+	node->add_child_nocopy (cfgxml);
 
 	node->add_child_nocopy (ARDOUR::SessionMetadata::Metadata()->get_state());
 
@@ -2095,13 +2113,27 @@ Session::load_sources (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+#ifdef PLATFORM_WINDOWS
+		int old_mode = 0;
+#endif
+
           retry:
 		try {
+#ifdef PLATFORM_WINDOWS
+			// do not show "insert media" popups (files embedded from removable media).
+			old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 			if ((source = XMLSourceFactory (**niter)) == 0) {
 				error << _("Session: cannot create Source from XML description.") << endmsg;
 			}
+#ifdef PLATFORM_WINDOWS
+			SetErrorMode(old_mode);
+#endif
 
 		} catch (MissingSource& err) {
+#ifdef PLATFORM_WINDOWS
+			SetErrorMode(old_mode);
+#endif
 
                         int user_choice;
 
@@ -2268,7 +2300,7 @@ Session::save_template (string template_name, bool replace_existing)
 void
 Session::refresh_disk_space ()
 {
-#if __APPLE__ || __FreeBSD__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
+#if __APPLE__ || __FreeBSD__ || __NetBSD__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
 
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
@@ -2278,10 +2310,15 @@ Session::refresh_disk_space ()
 	_total_free_4k_blocks_uncertain = false;
 
 	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+#if defined(__NetBSD__)
+		struct statvfs statfsbuf;
 
+		statvfs (i->path.c_str(), &statfsbuf);
+#else
 		struct statfs statfsbuf;
-		statfs (i->path.c_str(), &statfsbuf);
 
+		statfs (i->path.c_str(), &statfsbuf);
+#endif
 		double const scale = statfsbuf.f_bsize / 4096.0;
 
 		/* See if this filesystem is read-only */
@@ -3085,7 +3122,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		   capture files.
 		*/
 
-		if (!i->second->used() && (i->second->length(i->second->timeline_position() > 0))) {
+		if (!i->second->used() && (i->second->length(i->second->timeline_position()) > 0)) {
 			dead_sources.push_back (i->second);
 			i->second->drop_references ();
 		}
@@ -3290,30 +3327,28 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
-		g_stat ((*x).c_str(), &statbuf);
-
-		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x), newpath, strerror (errno)) << endmsg;
+		if ((g_stat ((*x).c_str(), &statbuf) != 0) || (::g_rename ((*x).c_str(), newpath.c_str()) != 0)) {
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x),
+			                         newpath, g_strerror (errno)) << endmsg;
 			continue;
 		}
 
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
 
-                string base = Glib::path_get_basename (*x);
-                base += "%A"; /* this is what we add for the channel suffix of all native files,
-                                 or for the first channel of embedded files. it will miss
-                                 some peakfiles for other channels
-                              */
+		string base = Glib::path_get_basename (*x);
+		base += "%A"; /* this is what we add for the channel suffix of all native files,
+		                 or for the first channel of embedded files. it will miss
+		                 some peakfiles for other channels
+		               */
 		string peakpath = construct_peak_filepath (base);
 
-		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			if (::g_unlink (peakpath.c_str()) != 0) {
-				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-                                                         peakpath, _path, strerror (errno))
-				      << endmsg;
+		if (Glib::file_test (peakpath.c_str (), Glib::FILE_TEST_EXISTS)) {
+			if (::g_unlink (peakpath.c_str ()) != 0) {
+				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"), peakpath, _path,
+				                         g_strerror (errno)) << endmsg;
 				/* try to back out */
-				::rename (newpath.c_str(), _path.c_str());
+				::g_rename (newpath.c_str (), _path.c_str ());
 				goto out;
 			}
 		}
@@ -3602,6 +3637,11 @@ Session::add_instant_xml (XMLNode& node, bool write_to_config)
 XMLNode*
 Session::instant_xml (const string& node_name)
 {
+#ifdef MIXBUS // "Safe Mode" (shift + click open) -> also ignore instant.xml
+	if (get_disable_all_loaded_plugins ()) {
+		return NULL;
+	}
+#endif
 	return Stateful::instant_xml (node_name, _path);
 }
 
@@ -3685,7 +3725,7 @@ Session::restore_history (string snapshot_name)
 	// replace history
 	_history.clear();
 
-	for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
+	for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); ++it) {
 
 		XMLNode *t = *it;
 		UndoTransaction* ut = new UndoTransaction ();
@@ -4915,4 +4955,334 @@ Session::save_as (SaveAs& saveas)
 	}
 
 	return 0;
+}
+
+static void set_progress (Progress* p, size_t n, size_t t)
+{
+	p->set_progress (float (n) / float(t));
+}
+
+int
+Session::archive_session (const std::string& dest,
+                          const std::string& name,
+                          ArchiveEncode compress_audio,
+                          bool only_used_sources,
+                          Progress* progress)
+{
+	if (dest.empty () || name.empty ()) {
+		return -1;
+	}
+
+	/* save current values */
+	bool was_dirty = dirty ();
+	string old_path = _path;
+	string old_name = _name;
+	string old_snapshot = _current_snapshot_name;
+	string old_sd = _session_dir->root_path();
+	string old_config_search_path[DataType::num_types];
+	old_config_search_path[DataType::AUDIO] = config.get_audio_search_path ();
+	old_config_search_path[DataType::MIDI]  = config.get_midi_search_path ();
+
+	/* ensure that session-path is included in search-path */
+	bool ok = false;
+	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		if ((*sd).path == old_path) {
+			ok = true;
+		}
+	}
+	if (!ok) {
+		return -1;
+	}
+
+	/* create temporary dir to save session to */
+#ifdef PLATFORM_WINDOWS
+	char tmp[256] = "C:\\TEMP\\";
+	GetTempPath (sizeof (tmp), tmp);
+#else
+	char const* tmp = getenv("TMPDIR");
+	if (!tmp) {
+		tmp = "/tmp/";
+	}
+#endif
+	if ((strlen (tmp) + 21) > 1024) {
+		return -1;
+	}
+
+	char tmptpl[1024];
+	strcpy (tmptpl, tmp);
+	strcat (tmptpl, "ardourarchive-XXXXXX");
+	char*  tmpdir = g_mkdtemp (tmptpl);
+
+	if (!tmpdir) {
+		return -1;
+	}
+
+	std::string to_dir = std::string (tmpdir);
+
+	/* switch session directory temporarily */
+	(*_session_dir) = to_dir;
+
+	if (!_session_dir->create()) {
+		(*_session_dir) = old_sd;
+		remove_directory (to_dir);
+		return -1;
+	}
+
+	/* prepare archive */
+	string archive = Glib::build_filename (dest, name + ".tar.xz");
+
+	PBD::ScopedConnectionList progress_connection;
+	PBD::FileArchive ar (archive);
+	if (progress) {
+		ar.progress.connect_same_thread (progress_connection, boost::bind (&set_progress, progress, _1, _2));
+	}
+
+	/* collect files to archive */
+	std::map<string,string> filemap;
+
+	vector<string> do_not_copy_extensions;
+	do_not_copy_extensions.push_back (statefile_suffix);
+	do_not_copy_extensions.push_back (pending_suffix);
+	do_not_copy_extensions.push_back (backup_suffix);
+	do_not_copy_extensions.push_back (temp_suffix);
+	do_not_copy_extensions.push_back (history_suffix);
+
+	vector<string> blacklist_dirs;
+	blacklist_dirs.push_back (string (peak_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (analysis_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (dead_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (export_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
+	blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
+
+	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
+
+	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
+	if (only_used_sources) {
+		playlists->sync_all_regions_with_regions ();
+		playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+	}
+
+	// collect audio sources for this session, calc total size for encoding
+	// add option to only include *used* sources (see Session::cleanup_sources)
+	size_t total_size = 0;
+	{
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+			if (!afs || afs->readable_length () == 0) {
+				continue;
+			}
+
+			if (only_used_sources) {
+				if (!afs->used()) {
+					continue;
+				}
+				if (sources_used_by_this_snapshot.find (afs) == sources_used_by_this_snapshot.end ()) {
+					continue;
+				}
+			}
+
+			std::string from = afs->path();
+
+			if (compress_audio != NO_ENCODE) {
+				total_size += afs->readable_length ();
+			} else {
+				if (afs->within_session()) {
+					filemap[from] = make_new_media_path (from, name, name);
+				} else {
+					filemap[from] = make_new_media_path (from, name, name);
+					remove_dir_from_search_path (Glib::path_get_dirname (from), DataType::AUDIO);
+				}
+			}
+		}
+	}
+
+	/* encode audio */
+	if (compress_audio != NO_ENCODE) {
+		if (progress) {
+			progress->set_progress (2); // set to "encoding"
+			progress->set_progress (0);
+		}
+
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+			if (!afs || afs->readable_length () == 0) {
+				continue;
+			}
+
+			if (only_used_sources) {
+				if (!afs->used()) {
+					continue;
+				}
+				if (sources_used_by_this_snapshot.find (afs) == sources_used_by_this_snapshot.end ()) {
+					continue;
+				}
+			}
+
+			orig_sources[afs] = afs->path();
+
+			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
+			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
+			g_mkdir_with_parents (Glib::path_get_dirname (new_path).c_str (), 0755);
+
+			if (progress) {
+				progress->descend ((float)afs->readable_length () / total_size);
+			}
+
+			try {
+				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
+				afs->replace_file (new_path);
+				delete ns;
+			} catch (...) {
+				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
+			}
+
+			if (progress) {
+				progress->ascend ();
+			}
+		}
+	}
+
+	if (progress) {
+		progress->set_progress (-1); // set to "archiving"
+		progress->set_progress (0);
+	}
+
+	/* index files relevant for this session */
+	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		vector<string> files;
+
+		size_t prefix_len = (*sd).path.size();
+		if (prefix_len > 0 && (*sd).path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+			++prefix_len;
+		}
+
+		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+
+		static const std::string audiofile_dir_string = string (sound_dir_name) + G_DIR_SEPARATOR;
+		static const std::string videofile_dir_string = string (video_dir_name) + G_DIR_SEPARATOR;
+		static const std::string midifile_dir_string  = string (midi_dir_name)  + G_DIR_SEPARATOR;
+
+		for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
+			std::string from = *i;
+
+#ifdef __APPLE__
+			string filename = Glib::path_get_basename (from);
+			std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);
+			if (filename == ".DS_STORE") {
+				continue;
+			}
+#endif
+
+			if (from.find (audiofile_dir_string) != string::npos) {
+				; // handled above
+			} else if (from.find (midifile_dir_string) != string::npos) {
+				filemap[from] = make_new_media_path (from, name, name);
+			} else if (from.find (videofile_dir_string) != string::npos) {
+				filemap[from] = make_new_media_path (from, name, name);
+			} else {
+				bool do_copy = true;
+				for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
+					if (from.find (*v) != string::npos) {
+						do_copy = false;
+						break;
+					}
+				}
+				for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
+					if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+						do_copy = false;
+						break;
+					}
+				}
+
+				if (do_copy) {
+					filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
+				}
+			}
+		}
+	}
+
+	/* write session file */
+	_path = to_dir;
+	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
+
+	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, true);
+	save_state (name);
+	save_default_options ();
+
+	size_t prefix_len = _path.size();
+	if (prefix_len > 0 && _path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
+		++prefix_len;
+	}
+
+	/* collect session-state files */
+	vector<string> files;
+	do_not_copy_extensions.clear ();
+	do_not_copy_extensions.push_back (history_suffix);
+
+	blacklist_dirs.clear ();
+	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
+
+	find_files_matching_filter (files, to_dir, accept_all_files, 0, false, true, true);
+	for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
+		std::string from = *i;
+		bool do_copy = true;
+		for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
+			if (from.find (*v) != string::npos) {
+				do_copy = false;
+				break;
+			}
+		}
+		for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
+			if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
+				do_copy = false;
+				break;
+			}
+		}
+		if (do_copy) {
+			filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
+		}
+	}
+
+	/* restore original values */
+	_path = old_path;
+	_name = old_name;
+	set_snapshot_name (old_snapshot);
+	(*_session_dir) = old_sd;
+	if (was_dirty) {
+		set_dirty ();
+	}
+	config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
+	config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
+
+	for (std::map<boost::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
+		i->first->replace_file (i->second);
+	}
+
+	int rv = ar.create (filemap);
+	remove_directory (to_dir);
+
+	return rv;
+}
+
+void
+Session::undo (uint32_t n)
+{
+	if (actively_recording()) {
+		return;
+	}
+
+	_history.undo (n);
+}
+
+void
+Session::redo (uint32_t n)
+{
+	if (actively_recording()) {
+		return;
+	}
+
+	_history.redo (n);
 }

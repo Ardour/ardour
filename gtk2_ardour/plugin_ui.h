@@ -79,6 +79,7 @@ namespace Gtkmm2ext {
 class LatencyGUI;
 class ArdourWindow;
 class PluginEqGui;
+class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
 {
@@ -287,10 +288,12 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void update_input_displays (); // workaround for preset load
 	void control_combo_changed (ControlUI* cui, float value);
 
-	void astate_clicked (ControlUI*);
+	bool astate_button_event (GdkEventButton* ev, ControlUI*);
 	void automation_state_changed (ControlUI*);
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void set_all_automation (ARDOUR::AutoState state);
+
+	void knob_size_request(Gtk::Requisition* req, ControlUI* cui);
 
 	/* XXX: remove */
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
@@ -345,9 +348,17 @@ class PluginUIWindow : public ArdourWindow
 
 	bool create_windows_vst_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_lxvst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
+	bool create_mac_vst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
+
+#ifdef MACVST_SUPPORT
+/* this function has to be in a .mm file
+ * because MacVSTPluginUI has Cocoa members
+ */
+extern VSTPluginUI* create_mac_vst_gui (boost::shared_ptr<ARDOUR::PluginInsert>);
+#endif
 
 #ifdef AUDIOUNIT_SUPPORT
 /* this function has to be in a .mm file */

@@ -6,6 +6,14 @@
     Centre for Digital Music, Queen Mary, University of London.
     This file 2005-2006 Christian Landone.
 
+    Modifications:
+
+    - delta threshold
+    Description: add delta threshold used as offset in the smoothed
+    detection function
+    Author: Mathieu Barthet
+    Date: June 2010
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -29,6 +37,12 @@ struct PPWinThresh
 {
     unsigned int pre;
     unsigned int  post;
+
+    PPWinThresh(unsigned int x, unsigned int y) :
+        pre(x),
+        post(y)
+    {
+    }
 };
 
 struct QFitThresh
@@ -36,12 +50,19 @@ struct QFitThresh
     double a;
     double b;
     double c;
+
+    QFitThresh(double x, double y, double z) :
+        a(x),
+        b(y),
+        c(z)
+    {
+    }
 };
 
 struct PPickParams
 {
     unsigned int length; //Detection FunctionLength
-    double tau; // time resolution of the detection function:
+    double tau; // time resolution of the detection function
     unsigned int alpha; //alpha-norm parameter
     double cutoff;//low-pass Filter cutoff freq
     unsigned int LPOrd; // low-pass Filter order
@@ -49,14 +70,29 @@ struct PPickParams
     double* LPBCoeffs; //low pass Filter num coefficients
     PPWinThresh WinT;//window size in frames for adaptive thresholding [pre post]:
     QFitThresh QuadThresh;
+    float delta; //delta threshold used as an offset when computing the smoothed detection function
+
+    PPickParams() :
+        length(0),
+        tau(0),
+        alpha(0),
+        cutoff(0),
+        LPOrd(0),
+        LPACoeffs(NULL),
+        LPBCoeffs(NULL),
+        WinT(0,0),
+        QuadThresh(0,0,0),
+        delta(0)
+    {
+    }
 };
 
-class PeakPicking
+class PeakPicking  
 {
 public:
     PeakPicking( PPickParams Config );
     virtual ~PeakPicking();
-
+	
     void process( double* src, unsigned int len, vector<int> &onsets  );
 
 
@@ -64,7 +100,7 @@ private:
     void initialise( PPickParams Config  );
     void deInitialise();
     int  quadEval( vector<double> &src, vector<int> &idx );
-
+	
     DFProcConfig m_DFProcessingParams;
 
     unsigned int m_DFLength ;
@@ -74,7 +110,7 @@ private:
 
 
     double* m_workBuffer;
-
+	
     DFProcess*	m_DFSmoothing;
 };
 

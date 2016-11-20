@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.1.0" name="Akai MidiMix Normal Mode">
+
+<!-- Created by The Eighth at 08-17-2016 1:12 p.m -->
+
+<!-- Warning! This map has no bindings to Midimix's volume knobs. Why? Because Ardour has no built-in equalizer in its mixer. Maybe it was good to bind Midimix's knobs to "drive" knobs and pans, but you better bind it to whatever action you want with Midi Learning. Or use "EQ Mode" map. --> 
+
+<!-- "Send all" button is not used here at all. Keep that in mind -->
+
+<!-- This line should define the number of tracks in a bank -->
+  <DeviceInfo bank-size="8"/>
+
+ 
+<!-- The following binds Midimix's faders and mute/rec buttons to first eight tracks in Ardour. Note: "Solo" button on MidiMix will solo all tracks in current bank. It's useful when you have more than 8 tracks in a session. If you want to keep only one track in solo mode - press solo and then mute other tracks in that bank with "Mute" buttons. -->
+
+  <Binding channel="1" note="1" uri="/route/mute B1"/>
+  <Binding channel="1" note="27" uri="/route/solo B1"/>
+  <Binding channel="1" note="3" uri="/route/recenable B1"/>
+  <Binding channel="1" ctl="19" uri="/route/gain B1"/>
+  
+  <Binding channel="1" note="4" uri="/route/mute B2"/>
+  <Binding channel="1" note="27" uri="/route/solo B2"/>
+  <Binding channel="1" note="6" uri="/route/recenable B2"/>
+  <Binding channel="1" ctl="23" uri="/route/gain B2"/>
+  
+  <Binding channel="1" note="7" uri="/route/mute B3"/>
+  <Binding channel="1" note="27" uri="/route/solo B3"/>
+  <Binding channel="1" note="9" uri="/route/recenable B3"/>
+  <Binding channel="1" ctl="27" uri="/route/gain B3"/>
+  
+  <Binding channel="1" note="10" uri="/route/mute B4"/>
+  <Binding channel="1" note="27" uri="/route/solo B4"/>
+  <Binding channel="1" note="12" uri="/route/recenable B4"/>
+  <Binding channel="1" ctl="31" uri="/route/gain B4"/>
+  
+  <Binding channel="1" note="13" uri="/route/mute B5"/>
+  <Binding channel="1" note="27" uri="/route/solo B5"/>
+  <Binding channel="1" note="15" uri="/route/recenable B5"/>
+  <Binding channel="1" ctl="49" uri="/route/gain B5"/>
+  
+  <Binding channel="1" note="16" uri="/route/mute B6"/>
+  <Binding channel="1" note="27" uri="/route/solo B6"/>
+  <Binding channel="1" note="18" uri="/route/recenable B6"/>
+  <Binding channel="1" ctl="53" uri="/route/gain B6"/>
+  
+  <Binding channel="1" note="19" uri="/route/mute B7"/>
+  <Binding channel="1" note="27" uri="/route/solo B7"/>
+  <Binding channel="1" note="21" uri="/route/recenable B7"/>
+  <Binding channel="1" ctl="57" uri="/route/gain B7"/>
+  
+  <Binding channel="1" note="22" uri="/route/mute B8"/>
+  <Binding channel="1" note="27" uri="/route/solo B8"/>
+  <Binding channel="1" note="24" uri="/route/recenable B8"/>
+  <Binding channel="1" ctl="61" uri="/route/gain B8"/>
+
+<!-- Master fader control and bank switches -->  
+
+  <Binding channel="1" note="25" function="prev-bank"/>
+  <Binding channel="1" note="26" function="next-bank"/>
+  <Binding channel="1" ctl="62"   uri="/bus/gain master"/>
+ </ArdourMIDIBindings>

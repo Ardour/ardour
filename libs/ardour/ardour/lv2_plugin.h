@@ -63,6 +63,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
+	static bool force_state_save;
+
 	std::string unique_id () const;
 	const char* uri () const;
 	const char* label () const;
@@ -190,6 +192,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _latency_control_port;  ///< Special output set by ardour
 	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
+	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
+	double        _current_bpm;
 	PBD::ID       _insert_id;
 	std::string   _plugin_state_dir;
 	uint32_t      _patch_port_in_index;
@@ -274,6 +278,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 #ifdef LV2_EXTENDED
 	const LV2_Inline_Display_Interface* _display_interface;
+	const LV2_Midnam_Interface* _midname_interface;
 #endif
 
 	typedef struct {
@@ -290,6 +295,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _def_state_feature;
 #ifdef LV2_EXTENDED
 	LV2_Feature    _queue_draw_feature;
+	LV2_Feature    _midnam_feature;
 #endif
 
 	// Options passed to plugin
@@ -310,13 +316,17 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	void init (const void* c_plugin, framecnt_t rate);
 	void allocate_atom_event_buffers ();
-	void run (pframes_t nsamples);
+	void run (pframes_t nsamples, bool sync_work = false);
 
 	void load_supported_properties(PropertyDescriptors& descs);
 
 #ifdef LV2_EXTENDED
 	bool has_inline_display ();
 	Plugin::Display_Image_Surface* render_inline_display (uint32_t, uint32_t);
+
+	bool has_midnam ();
+	bool read_midnam ();
+	std::string midnam_model ();
 #endif
 
 	void latency_compute_run ();

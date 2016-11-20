@@ -27,6 +27,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/session.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -47,6 +48,11 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 
 MidiPort::~MidiPort()
 {
+	if (_shadow_port) {
+		AudioEngine::instance()->unregister_port (_shadow_port);
+		_shadow_port.reset ();
+	}
+
 	delete _buffer;
 }
 
@@ -80,6 +86,19 @@ MidiPort::cycle_start (pframes_t nframes)
 			}
 		}
 	}
+
+	if (inbound_midi_filter) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+		inbound_midi_filter (mb, mb);
+	}
+
+	if (_shadow_port) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+		if (shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
+			_shadow_port->flush_buffers (nframes);
+		}
+	}
+
 }
 
 Buffer&
@@ -232,8 +251,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED (DEBUG::MidiIO)) {
+				const Session* s = AudioEngine::instance()->session();
+				const framepos_t now = (s ? s->transport_frame() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %1 pop event    @ %2 sz %3 ", _buffer, ev.time(), ev.size()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev.time(), ev.size(),
+				                                    now + ev.time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -313,4 +335,32 @@ void
 MidiPort::set_trace_on (bool yn)
 {
 	_trace_on = yn;
+}
+
+int
+MidiPort::add_shadow_port (string const & name, MidiFilter mf)
+{
+	if (!ARDOUR::Port::receives_input()) {
+		return -1;
+	}
+
+	if (_shadow_port) {
+		return -2;
+	}
+
+	shadow_midi_filter = mf;
+
+	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
+		return -3;
+	}
+
+	/* forward on our port latency to the shadow port.
+
+	   XXX: need to capture latency changes and forward them too.
+	*/
+
+	LatencyRange latency = private_latency_range (false);
+	_shadow_port->set_private_latency_range (latency, false);
+
+	return 0;
 }

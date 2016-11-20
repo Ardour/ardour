@@ -58,7 +58,7 @@ class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::t
 
   private:
 	void removed (AxisView*);
-	bool _no_route_change_signal;
+	static unsigned int _no_route_change_signal;
 
 };
 

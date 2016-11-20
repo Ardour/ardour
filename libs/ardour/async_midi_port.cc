@@ -46,6 +46,7 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, MIDI::Port (name, MIDI::Port::Flags (0))
 	, _currently_in_cycle (false)
 	, _last_write_timestamp (0)
+	, _flush_at_cycle_start (false)
 	, have_timer (false)
 	, output_fifo (2048)
 	, input_fifo (1024)
@@ -119,6 +120,9 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 
 	if (ARDOUR::Port::sends_output()) {
 		flush_output_fifo (nframes);
+		if (_flush_at_cycle_start) {
+			flush_buffers (nframes);
+		}
 	}
 
 	/* copy incoming data from the port buffer into the input FIFO
@@ -145,13 +149,14 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 		if (!mb.empty()) {
 			_xthread.wakeup ();
 		}
+
 	}
 }
 
 void
 AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
 {
-	if (ARDOUR::Port::sends_output()) {
+	if (ARDOUR::Port::sends_output() && !_flush_at_cycle_start) {
 		/* move any additional data from output FIFO into the port
 		   buffer.
 		*/

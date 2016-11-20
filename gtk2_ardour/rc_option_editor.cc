@@ -41,32 +41,34 @@
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
+#include "pbd/i18n.h"
 
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/profile.h"
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/port_manager.h"
 #include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
 #include "canvas/wave_view.h"
 
-#include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "ardour_window.h"
 #include "color_theme_manager.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
-#include "utils.h"
-#include "midi_port_dialog.h"
 #include "sfdb_ui.h"
-#include "keyboard.h"
 #include "theme_manager.h"
+#include "tooltips.h"
 #include "ui_config.h"
-#include "pbd/i18n.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -339,6 +341,7 @@ static const struct {
 	{ "Option", GDK_MOD1_MASK },
 	{ "Command-Shift", GDK_MOD2_MASK|GDK_SHIFT_MASK },
 	{ "Command-Option", GDK_MOD2_MASK|GDK_MOD1_MASK },
+	{ "Command-Control", GDK_MOD2_MASK|GDK_CONTROL_MASK },
 	{ "Command-Option-Control", GDK_MOD2_MASK|GDK_MOD1_MASK|GDK_CONTROL_MASK },
 	{ "Option-Control", GDK_MOD1_MASK|GDK_CONTROL_MASK },
 	{ "Option-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
@@ -351,6 +354,7 @@ static const struct {
 	{ "Alt", GDK_MOD1_MASK },
 	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
 	{ "Control-Alt", GDK_CONTROL_MASK|GDK_MOD1_MASK },
+	{ "Control-Windows", GDK_CONTROL_MASK|GDK_MOD4_MASK },
 	{ "Control-Shift-Alt", GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
 	{ "Alt-Windows", GDK_MOD1_MASK|GDK_MOD4_MASK },
 	{ "Alt-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
@@ -541,12 +545,13 @@ public:
 		/* constraint modifier */
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
 #ifdef __APPLE__
 								     Keyboard::primary_modifier_name (),
 #else
-								     Keyboard::secondary_modifier_name (),
+								     Keyboard::tertiary_modifier_name (),
 #endif
 								     restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
@@ -561,6 +566,29 @@ public:
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* push points */
+		set_popdown_strings (_push_points_combo, dumb);
+		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
+
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
+		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Push points using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 
@@ -595,8 +623,10 @@ public:
 		/* anchored trim */
 		set_popdown_strings (_trim_anchored_combo, dumb);
 		_trim_anchored_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_anchored_modifier_chosen));
+
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::tertiary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_trim_anchored_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
 				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
@@ -640,7 +670,7 @@ public:
 		set_popdown_strings (_note_size_relative_combo, dumb);
 		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_note_size_relative_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
 				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
@@ -668,9 +698,9 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef __APPLE__
-		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
-		std::string mod_str = Keyboard::secondary_modifier_name();
+		mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
@@ -754,7 +784,7 @@ public:
 		set_popdown_strings (_fine_adjust_combo, dumb);
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::tertiary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_fine_adjust_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
@@ -769,28 +799,6 @@ public:
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
-
-		++row;
-		col = 1;
-
-		/* push points */
-		set_popdown_strings (_push_points_combo, dumb);
-		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
-
-		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
-				_push_points_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
-
-		l = manage (left_aligned_label (_("Push points using:")));
-		l->set_name ("OptionsLabel");
-
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		_box->pack_start (*t, false, false);
 	}
@@ -1847,6 +1855,292 @@ private:
 };
 
 
+class MidiPortOptions : public OptionEditorBox, public sigc::trackable
+{
+  public:
+	MidiPortOptions() {
+
+		setup_midi_port_view (midi_output_view, false);
+		setup_midi_port_view (midi_input_view, true);
+
+
+		input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
+		_box->pack_start (input_label, false, false);
+		_box->pack_start (midi_input_view);
+
+		output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
+		_box->pack_start (output_label, false, false);
+		_box->pack_start (midi_output_view);
+
+		midi_output_view.show ();
+		midi_input_view.show ();
+
+		_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
+	}
+
+	void parameter_changed (string const&) {}
+	void set_state_from_config() {}
+
+	void on_show () {
+		refill ();
+
+		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
+		                                                               invalidator (*this),
+		                                                               boost::bind (&MidiPortOptions::refill, this),
+		                                                               gui_context());
+		AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
+		                                                      invalidator (*this),
+		                                                      boost::bind (&MidiPortOptions::refill, this),
+		                                                      gui_context());
+		AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
+		                                                            invalidator (*this),
+		                                                            boost::bind (&MidiPortOptions::refill, this),
+		                                                            gui_context());
+	}
+
+	void refill () {
+
+		if (refill_midi_ports (true, midi_input_view)) {
+			input_label.show ();
+		} else {
+		       input_label.hide ();
+		}
+		if (refill_midi_ports (false, midi_output_view)) {
+			output_label.show ();
+		} else {
+			output_label.hide ();
+		}
+	}
+
+  private:
+	PBD::ScopedConnectionList connections;
+
+	/* MIDI port management */
+	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+
+		MidiPortColumns () {
+			add (pretty_name);
+			add (music_data);
+			add (control_data);
+			add (selection);
+			add (name);
+			add (filler);
+		}
+
+		Gtk::TreeModelColumn<std::string> pretty_name;
+		Gtk::TreeModelColumn<bool> music_data;
+		Gtk::TreeModelColumn<bool> control_data;
+		Gtk::TreeModelColumn<bool> selection;
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> filler;
+	};
+
+	MidiPortColumns midi_port_columns;
+	Gtk::TreeView midi_input_view;
+	Gtk::TreeView midi_output_view;
+	Gtk::Label input_label;
+	Gtk::Label output_label;
+
+	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
+	bool refill_midi_ports (bool for_input, Gtk::TreeView&);
+	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
+	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
+	void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
+	void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
+};
+
+void
+MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
+{
+	int pretty_name_column;
+	int music_column;
+	int control_column;
+	int selection_column;
+	TreeViewColumn* col;
+	Gtk::Label* l;
+
+	pretty_name_column = view.append_column_editable (_("Name (click to edit)"), midi_port_columns.pretty_name) - 1;
+
+	col = manage (new TreeViewColumn ("", midi_port_columns.music_data));
+	col->set_alignment (ALIGN_CENTER);
+	l = manage (new Label (_("Music Data")));
+	set_tooltip (*l, string_compose (_("If ticked, %1 will consider this port to be a source of music performance data."), PROGRAM_NAME));
+	col->set_widget (*l);
+	l->show ();
+	music_column = view.append_column (*col) - 1;
+
+	col = manage (new TreeViewColumn ("", midi_port_columns.control_data));
+	col->set_alignment (ALIGN_CENTER);
+	l = manage (new Label (_("Control Data")));
+	set_tooltip (*l, string_compose (_("If ticked, %1 will consider this port to be a source of control data."), PROGRAM_NAME));
+	col->set_widget (*l);
+	l->show ();
+	control_column = view.append_column (*col) - 1;
+
+	if (with_selection) {
+		col = manage (new TreeViewColumn (_("Follow Selection"), midi_port_columns.selection));
+		selection_column = view.append_column (*col) - 1;
+		l = manage (new Label (_("Follow Selection")));
+		set_tooltip (*l, string_compose (_("If ticked, and \"MIDI input follows selection\" is enabled,\n%1 will automatically connect the first selected MIDI track to this port.\n"), PROGRAM_NAME));
+		col->set_widget (*l);
+		l->show ();
+	}
+
+	/* filler column so that the last real column doesn't expand */
+	view.append_column ("", midi_port_columns.filler);
+
+	CellRendererText* pretty_name_cell = dynamic_cast<CellRendererText*> (view.get_column_cell_renderer (pretty_name_column));
+	pretty_name_cell->property_editable() = true;
+	pretty_name_cell->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::pretty_name_edit), &view));
+
+	CellRendererToggle* toggle_cell;
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (music_column));
+	toggle_cell->property_activatable() = true;
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_music_column_toggled), &view));
+
+	toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (control_column));
+	toggle_cell->property_activatable() = true;
+	toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_control_column_toggled), &view));
+
+	if (with_selection) {
+		toggle_cell = dynamic_cast<CellRendererToggle*> (view.get_column_cell_renderer (selection_column));
+		toggle_cell->property_activatable() = true;
+		toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_selection_column_toggled), &view));
+	}
+
+	view.get_selection()->set_mode (SELECTION_NONE);
+	view.set_tooltip_column (4); /* port "real" name */
+}
+
+bool
+MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
+{
+	using namespace ARDOUR;
+
+	std::vector<string> ports;
+
+	AudioEngine::instance()->get_known_midi_ports (ports);
+
+	if (ports.empty()) {
+		view.hide ();
+		return false;
+	}
+
+	Glib::RefPtr<ListStore> model = Gtk::ListStore::create (midi_port_columns);
+
+	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
+
+		if (AudioEngine::instance()->port_is_mine (*s)) {
+			continue;
+		}
+
+		PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*s));
+
+		if (mpi.pretty_name.empty()) {
+			/* vanished since get_known_midi_ports() */
+			continue;
+		}
+
+		if (for_input != mpi.input) {
+			continue;
+		}
+
+		TreeModel::Row row = *(model->append());
+
+		row[midi_port_columns.pretty_name] = mpi.pretty_name;
+		row[midi_port_columns.music_data] = mpi.properties & MidiPortMusic;
+		row[midi_port_columns.control_data] = mpi.properties & MidiPortControl;
+		row[midi_port_columns.selection] = mpi.properties & MidiPortSelection;
+		row[midi_port_columns.name] = *s;
+	}
+
+	view.set_model (model);
+
+	return true;
+}
+
+void
+MidiPortOptions::midi_music_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool new_value = ! bool ((*iter)[midi_port_columns.music_data]);
+
+	/* don't reset model - wait for MidiPortInfoChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+	} else {
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+	}
+}
+
+void
+MidiPortOptions::midi_control_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool new_value = ! bool ((*iter)[midi_port_columns.control_data]);
+
+	/* don't reset model - wait for MidiPortInfoChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
+	} else {
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
+	}
+}
+
+void
+MidiPortOptions::midi_selection_column_toggled (string const & path, TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	bool new_value = ! bool ((*iter)[midi_port_columns.selection]);
+
+	/* don't reset model - wait for MidiSelectionPortsChanged signal */
+
+	if (new_value) {
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
+	} else {
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
+	}
+}
+
+void
+MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_text, Gtk::TreeView* view)
+{
+	TreeIter iter = view->get_model()->get_iter (path);
+
+	if (!iter) {
+		return;
+	}
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend) {
+		ARDOUR::PortEngine::PortHandle ph = backend->get_port_by_name ((*iter)[midi_port_columns.name]);
+		if (ph) {
+			backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", new_text, "");
+			(*iter)[midi_port_columns.pretty_name] = new_text;
+		}
+	}
+}
+
+/*============*/
+
 
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
@@ -1854,14 +2148,6 @@ RCOptionEditor::RCOptionEditor ()
         , _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
-	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
-	if (node) {
-		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
-		   (Gtk::StateType) here !!!
-		*/
-		Tabbable::set_state (*node, Stateful::loading_state_version);
-	}
-
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 
 	/* MISC */
@@ -1884,7 +2170,7 @@ RCOptionEditor::RCOptionEditor ()
                 procs->add (0, _("all available processors"));
 
                 for (uint32_t i = 1; i <= hwcpus; ++i) {
-                        procs->add (i, string_compose (_("%1 processors"), i));
+	                procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
                 }
 
 		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
@@ -2249,6 +2535,14 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
 			    ));
 }  // !mixbus
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "use-time-rulers-to-zoom-with-vertical-drag",
+			    _("Use time rulers area to zoom when clicking and dragging vertically"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
+			    ));
 
 	add_option (_("Editor"),
 		    new BoolOption (
@@ -2722,6 +3016,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
+	add_option (_("MIDI/Ports"),
+		    new BoolOption (
+			    "get-midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI/Ports"), new MidiPortOptions ());
+
 	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
 
 	add_option (_("MIDI/Sync"),
@@ -2843,7 +3147,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
@@ -2852,7 +3156,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
@@ -2884,11 +3188,21 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+
+#if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
+	bo = new BoolOption (
+			"",
+			_("Enable Mac VST support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
 
 	bo = new BoolOption (
 			"discover-vst-on-start",
@@ -2962,11 +3276,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	bo = new BoolOption (
 			"discover-audio-units",
-			_("Scan for AudioUnit Plugins on Application Start"),
+			_("Scan for [new] AudioUnit Plugins on Application Start"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
 			);
-	add_option (_("Plugins"), bo);
+	add_option (_("Plugins/Audio Unit"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
 
@@ -2981,7 +3295,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 				_("AU Blacklist:")));
 #endif
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
 	add_option (_("Plugins"),
 	     new BoolOption (
@@ -3357,11 +3671,21 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("Theme/Colors"), new ColorThemeManager);
 
+	Widget::show_all ();
+
 	//trigger some parameter-changed messages which affect widget-visibility or -sensitivity
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
 	parameter_changed ("use-monitor-bus");
 	parameter_changed ("open-gui-after-adding-plugin");
+
+	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
+	if (node) {
+		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
+		   (Gtk::StateType) here !!!
+		*/
+		Tabbable::set_state (*node, Stateful::loading_state_version);
+	}
 }
 
 void
@@ -3485,7 +3809,7 @@ RCOptionEditor::populate_sync_options ()
 Gtk::Window*
 RCOptionEditor::use_own_window (bool and_fill_it)
 {
-	bool new_window = !own_window();
+	bool new_window = !own_window ();
 
 	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
 

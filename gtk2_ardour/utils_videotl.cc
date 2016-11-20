@@ -260,6 +260,7 @@ VideoUtils::video_query_info (
 		double &video_aspect_ratio
 		)
 {
+	LocaleGuard lg;
 	char url[2048];
 
 	snprintf(url, sizeof(url), "%s%sinfo/?file=%s&format=csv"
@@ -282,6 +283,12 @@ VideoUtils::video_query_info (
 	video_aspect_ratio = atof (lines.at(0).at(3));
 	video_file_fps = atof (lines.at(0).at(4));
 	video_duration = atoll(lines.at(0).at(5));
+
+	if (video_aspect_ratio < 0.01 || video_file_fps < 0.01) {
+		/* catch errors early, aspect == 0 or fps == 0 will
+		 * wreak havoc down the road */
+		return false;
+	}
 	return true;
 }
 

@@ -122,7 +122,7 @@ KeyEditor::KeyEditor ()
 	add (vpacker);
 
 	unbind_button.set_sensitive (false);
-	UpdateBindings.connect (sigc::mem_fun (*this, &KeyEditor::refresh));
+	_refresh_connection = UpdateBindings.connect (sigc::mem_fun (*this, &KeyEditor::refresh));
 }
 
 void

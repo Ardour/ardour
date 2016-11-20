@@ -38,11 +38,18 @@ def build(bld):
     obj.source = '''
             plugins.cpp
             AmplitudeFollower.cpp
+            BarBeatTrack.cpp
+            BeatTrack.cpp
+            ChromagramPlugin.cpp
             EBUr128.cpp
             ebu_r128_proc.cc
+            KeyDetect.cpp
             OnsetDetect.cpp
             PercussionOnsetDetector.cpp
+            SimilarityPlugin.cpp
             SpectralCentroid.cpp
+            TonalChangeDetect.cpp
+            Transcription.cpp
             TruePeak.cpp
             ZeroCrossing.cpp
     '''
@@ -50,8 +57,8 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libardourvampplugins'
     obj.target       = 'ardourvampplugins'
-    obj.uselib       = 'FFTW3F VAMPSDK'
-    obj.use          = 'libvampplugin libqmdsp'
+    obj.uselib       = 'FFTW3F VAMPSDK QMDSP'
+    obj.use          = 'libvampplugin libqm-dsp'
     autowaf.ensure_visible_symbols (obj, True)
     if bld.is_defined('HAVE_AUBIO4'):
         obj.source += ' Onset.cpp '

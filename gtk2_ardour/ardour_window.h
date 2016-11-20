@@ -21,7 +21,6 @@
 #define __ardour_window_h__
 
 #include <gtkmm/window.h>
-#include <gtkmm/window.h>
 
 #include "gtkmm2ext/visibility_tracker.h"
 

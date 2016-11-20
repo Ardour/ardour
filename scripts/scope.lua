@@ -1,12 +1,10 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "Inline Scope",
+	name        = "a-Inline Scope",
 	category    = "Visualization",
-	license     = "GPLv2",
-	author      = "Robin Gareus",
-	email       = "robin@gareus.org",
-	site        = "http://gareus.org",
-	description = [[An Example DSP Plugin to display the waveform on the mixer strip]]
+	license     = "MIT",
+	author      = "Ardour Team",
+	description = [[Mixer strip inline waveform display]]
 }
 
 -- return possible i/o configurations

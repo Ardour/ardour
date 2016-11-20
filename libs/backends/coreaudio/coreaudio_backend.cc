@@ -203,8 +203,8 @@ CoreAudioBackend::available_sample_rates2 (const std::string& input_device, cons
 	std::vector<float> sr_in;
 	std::vector<float> sr_out;
 
-	const uint32_t inp = name_to_id (input_device);
-	const uint32_t out = name_to_id (output_device);
+	const uint32_t inp = name_to_id (input_device, Input);
+	const uint32_t out = name_to_id (output_device, Output);
 
 	if (inp == UINT32_MAX && out == UINT32_MAX) {
 		return sr;
@@ -237,8 +237,8 @@ CoreAudioBackend::available_buffer_sizes2 (const std::string& input_device, cons
 	std::vector<uint32_t> bs;
 	std::vector<uint32_t> bs_in;
 	std::vector<uint32_t> bs_out;
-	const uint32_t inp = name_to_id (input_device);
-	const uint32_t out = name_to_id (output_device);
+	const uint32_t inp = name_to_id (input_device, Input);
+	const uint32_t out = name_to_id (output_device, Output);
 	if (inp == UINT32_MAX && out == UINT32_MAX) {
 		return bs;
 	} else if (inp == UINT32_MAX) {
@@ -292,7 +292,7 @@ int
 CoreAudioBackend::set_input_device_name (const std::string& d)
 {
 	_input_audio_device = d;
-	const float sr = _pcmio->current_sample_rate(name_to_id(_input_audio_device));
+	const float sr = _pcmio->current_sample_rate(name_to_id(_input_audio_device, Input));
 	if (sr > 0) { set_sample_rate(sr); }
 	return 0;
 }
@@ -302,7 +302,7 @@ CoreAudioBackend::set_output_device_name (const std::string& d)
 {
 	_output_audio_device = d;
 	// TODO check SR.
-	const float sr = _pcmio->current_sample_rate(name_to_id(_output_audio_device));
+	const float sr = _pcmio->current_sample_rate(name_to_id(_output_audio_device, Output));
 	if (sr > 0) { set_sample_rate(sr); }
 	return 0;
 }
@@ -459,10 +459,10 @@ void
 CoreAudioBackend::launch_control_app ()
 {
 	if (name_to_id (_input_audio_device) != UINT32_MAX) {
-		_pcmio->launch_control_app(name_to_id(_input_audio_device));
+		_pcmio->launch_control_app(name_to_id(_input_audio_device, Input));
 	}
 	if (name_to_id (_output_audio_device) != UINT32_MAX) {
-		_pcmio->launch_control_app(name_to_id(_output_audio_device));
+		_pcmio->launch_control_app(name_to_id(_output_audio_device, Output));
 	}
 }
 
@@ -507,8 +507,8 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_portmap.clear();
 	}
 
-	uint32_t device1 = name_to_id(_input_audio_device);
-	uint32_t device2 = name_to_id(_output_audio_device);
+	uint32_t device1 = name_to_id(_input_audio_device, Input);
+	uint32_t device2 = name_to_id(_output_audio_device, Output);
 
 	assert(_active_ca == false);
 	assert(_active_fw == false);
@@ -778,10 +778,24 @@ CoreAudioBackend::samples_since_cycle_start ()
 }
 
 uint32_t
-CoreAudioBackend::name_to_id(std::string device_name) const {
+CoreAudioBackend::name_to_id(std::string device_name, DeviceFilter filter) const {
 	uint32_t device_id = UINT32_MAX;
 	std::map<size_t, std::string> devices;
-	_pcmio->device_list(devices);
+	switch (filter) {
+		case Input:
+			_pcmio->input_device_list (devices);
+			break;
+		case Output:
+			_pcmio->output_device_list (devices);
+			break;
+		case Duplex:
+			_pcmio->duplex_device_list (devices);
+			break;
+		case All:
+		default:
+			_pcmio->device_list (devices);
+			break;
+	}
 
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (i->second == device_name) {
@@ -820,6 +834,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 			pthread_attr_destroy (&attr);
 			return -1;
 		}
+		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
 		pthread_attr_destroy (&attr);
 	}
 
@@ -1073,8 +1088,8 @@ CoreAudioBackend::register_system_audio_ports()
 	const uint32_t a_ins = _n_inputs;
 	const uint32_t a_out = _n_outputs;
 
-	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_input_audio_device), true);
-	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_output_audio_device), false);
+	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_input_audio_device, Input), true);
+	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_output_audio_device, Output), false);
 
 #ifndef NDEBUG
 	printf("COREAUDIO LATENCY: i:%d, o:%d\n",

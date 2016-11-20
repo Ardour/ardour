@@ -47,6 +47,9 @@ public:
 
         void clamp_width (double);
 
+        double width() const;
+        double height() const;
+
         void set_size_chars (int nchars);
         void dump (std::ostream&) const;
 

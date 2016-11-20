@@ -33,7 +33,7 @@ class ARDOUR_UI;
 class ArdourKeyboard : public Gtkmm2ext::Keyboard
 {
   public:
-	ArdourKeyboard(ARDOUR_UI& ardour_ui) : ui(ardour_ui) {}
+	ArdourKeyboard(ARDOUR_UI&);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -44,6 +44,8 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 
 	ARDOUR_UI& ui;
 
+	void reset_relevant_modifier_key_mask ();
+
 	/** @param state The button state from a GdkEvent.
 	 *  @return true if the modifier state indicates snap modifier
 	 */
@@ -53,6 +55,16 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	 *  @return true if the modifier state indicates snap delta
 	 */
 	static bool indicates_snap_delta (guint state);
+
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates copy modifier
+	 */
+	static bool indicates_copy (guint state);
+
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates constraint modifier
+	 */
+	static bool indicates_constraint (guint state);
 
 	static void set_constraint_modifier (guint);
 	/** @return Modifier mask to constrain drags in a particular direction;

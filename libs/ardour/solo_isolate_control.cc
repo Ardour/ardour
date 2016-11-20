@@ -102,7 +102,6 @@ SoloIsolateControl::actually_set_value (double val, PBD::Controllable::GroupCont
 	*/
 
 	AutomationControl::actually_set_value (val, gcd);
-	_session.set_dirty ();
 }
 
 void
@@ -154,8 +153,12 @@ SoloIsolateControl::get_value () const
 }
 
 int
-SoloIsolateControl::set_state (XMLNode const & node, int)
+SoloIsolateControl::set_state (XMLNode const & node, int version)
 {
+	if (SlavableAutomationControl::set_state(node, version)) {
+		return -1;
+	}
+
 	XMLProperty const * prop;
 
 	if ((prop = node.property ("solo-isolated")) != 0) {

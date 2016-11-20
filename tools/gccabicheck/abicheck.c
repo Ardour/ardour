@@ -54,7 +54,7 @@ int main (int argc, char **argv) {
 	int error_fail = 0;
 	int verbose = 0;
 
-	char const * glibmm = "libglibmm-2.4.so";
+	char const * glibmm = "libglibmm-2.4.so.1";
 
 	const struct option long_options[] = {
 		{ "fail",       no_argument,       0, 'f' },

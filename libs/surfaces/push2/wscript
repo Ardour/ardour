@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+print "this is push2"
+
+def options(opt):
+    autowaf.set_options(opt)
+    
+def configure(conf):
+    conf.load ('compiler_cxx')
+    autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)
+    autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4', mandatory=True)
+    
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            push2.cc
+            buttons.cc
+            canvas.cc
+	    interface.cc
+            midi_byte_array.cc
+            leds.cc
+            level_meter.cc
+	    gui.cc
+	    knob.cc
+	    layout.cc
+	    menu.cc
+	    mix.cc
+	    scale.cc
+	    splash.cc
+	    track_mix.cc
+	    utils.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_push2"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
+    obj.includes     = [ '.', './push2']
+    obj.name         = 'libardour_push2'
+    obj.target       = 'ardour_push2'
+    obj.uselib       = 'CAIROMM PANGOMM USB GTKMM SIGCPP'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libevoral libcanvas libtimecode'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+def shutdown():
+    autowaf.shutdown()

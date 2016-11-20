@@ -58,6 +58,11 @@ class LIBARDOUR_API MidiPort : public Port {
 	void set_always_parse (bool yn);
 	void set_trace_on (bool yn);
 
+	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
+	void set_inbound_filter (MidiFilter);
+	int add_shadow_port (std::string const &, MidiFilter);
+	boost::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
+
 	MIDI::Parser& self_parser() { return _self_parser; }
 
   protected:
@@ -72,17 +77,20 @@ class LIBARDOUR_API MidiPort : public Port {
 	bool        _input_active;
 	bool        _always_parse;
 	bool        _trace_on;
+	MidiFilter   inbound_midi_filter;
+	boost::shared_ptr<MidiPort> _shadow_port;
+	MidiFilter   shadow_midi_filter;
 
-    /* Naming this is tricky. AsyncMIDIPort inherits (for now, aug 2013) from
-     * both MIDI::Port, which has _parser, and this (ARDOUR::MidiPort). We
-     * need parsing support in this object, independently of what the
-     * MIDI::Port/AsyncMIDIPort stuff does. Rather than risk errors coming
-     * from not explicitly naming which _parser we want, we will call this
-     * _self_parser for now.
-     *
-     * Ultimately, MIDI::Port should probably go away or be fully integrated
-     * into this object, somehow.
-     */
+	/* Naming this is tricky. AsyncMIDIPort inherits (for now, aug 2013) from
+	 * both MIDI::Port, which has _parser, and this (ARDOUR::MidiPort). We
+	 * need parsing support in this object, independently of what the
+	 * MIDI::Port/AsyncMIDIPort stuff does. Rather than risk errors coming
+	 * from not explicitly naming which _parser we want, we will call this
+	 * _self_parser for now.
+	 *
+	 * Ultimately, MIDI::Port should probably go away or be fully integrated
+	 * into this object, somehow.
+	 */
 
 	MIDI::Parser _self_parser;
 

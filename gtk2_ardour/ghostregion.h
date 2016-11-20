@@ -109,7 +109,8 @@ public:
 	void update_range();
 
 	void add_note(NoteBase*);
-	void update_note (NoteBase*);
+	void update_note (Note*);
+	void update_hit (Hit*);
 	void remove_note (NoteBase*);
 
 	void clear_events();

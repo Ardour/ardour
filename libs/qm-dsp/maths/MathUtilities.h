@@ -20,20 +20,57 @@
 
 #include "nan-inf.h"
 
-class MathUtilities
+/**
+ * Static helper functions for simple mathematical calculations.
+ */
+class MathUtilities  
 {
-public:
+public:	
+    /**
+     * Round x to the nearest integer.
+     */
     static double round( double x );
 
+    /**
+     * Return through min and max pointers the highest and lowest
+     * values in the given array of the given length.
+     */
     static void	  getFrameMinMax( const double* data, unsigned int len,  double* min, double* max );
 
+    /**
+     * Return the mean of the given array of the given length.
+     */
     static double mean( const double* src, unsigned int len );
+
+    /**
+     * Return the mean of the subset of the given vector identified by
+     * start and count.
+     */
     static double mean( const std::vector<double> &data,
                         unsigned int start, unsigned int count );
+    
+    /**
+     * Return the sum of the values in the given array of the given
+     * length.
+     */
     static double sum( const double* src, unsigned int len );
+
+    /**
+     * Return the median of the values in the given array of the given
+     * length. If the array is even in length, the returned value will
+     * be half-way between the two values adjacent to median.
+     */
     static double median( const double* src, unsigned int len );
 
+    /**
+     * The principle argument function. Map the phase angle ang into
+     * the range [-pi,pi).
+     */
     static double princarg( double ang );
+
+    /**
+     * Floating-point division modulus: return x % y.
+     */
     static double mod( double x, double y);
 
     static void	  getAlphaNorm(const double *data, unsigned int len, unsigned int alpha, double* ANorm);
@@ -51,19 +88,50 @@ public:
         NormaliseUnitMax
     };
 
-    static void   normalise(double *data, int length,
-                            NormaliseType n = NormaliseUnitMax);
+    static void normalise(double *data, int length,
+                          NormaliseType n = NormaliseUnitMax);
 
-    static void   normalise(std::vector<double> &data,
-                            NormaliseType n = NormaliseUnitMax);
+    static void normalise(std::vector<double> &data,
+                          NormaliseType n = NormaliseUnitMax);
 
-    // moving mean threshholding:
+    /**
+     * Threshold the input/output vector data against a moving-mean
+     * average filter.
+     */
     static void adaptiveThreshold(std::vector<double> &data);
 
+    /** 
+     * Return true if x is 2^n for some integer n >= 0.
+     */
     static bool isPowerOfTwo(int x);
-    static int nextPowerOfTwo(int x); // e.g. 1300 -> 2048, 2048 -> 2048
-    static int previousPowerOfTwo(int x); // e.g. 1300 -> 1024, 2048 -> 2048
-    static int nearestPowerOfTwo(int x); // e.g. 1300 -> 1024, 1700 -> 2048
+
+    /**
+     * Return the next higher integer power of two from x, e.g. 1300
+     * -> 2048, 2048 -> 2048.
+     */
+    static int nextPowerOfTwo(int x);
+
+    /**
+     * Return the next lower integer power of two from x, e.g. 1300 ->
+     * 1024, 2048 -> 2048.
+     */
+    static int previousPowerOfTwo(int x);
+
+    /**
+     * Return the nearest integer power of two to x, e.g. 1300 -> 1024,
+     * 12 -> 16 (not 8; if two are equidistant, the higher is returned).
+     */
+    static int nearestPowerOfTwo(int x);
+
+    /**
+     * Return x!
+     */
+    static double factorial(int x); // returns double in case it is large
+
+    /**
+     * Return the greatest common divisor of natural numbers a and b.
+     */
+    static int gcd(int a, int b);
 };
 
 #endif

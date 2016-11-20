@@ -27,9 +27,9 @@
 #include <gtkmm/menuitem.h>
 
 
-#include "ardour_button.h"
+#include "ardour_dropdown.h"
 
-class ArdourDisplay : public ArdourButton
+class ArdourDisplay : public ArdourDropdown
 {
   public:
 
@@ -39,8 +39,6 @@ class ArdourDisplay : public ArdourButton
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
-	bool on_button_press_event (GdkEventButton*);  //mousedown will pop up our preset menu
-//	bool on_button_press_event (GdkEventButton*);
 //	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll* ev);
 //	bool on_motion_notify_event (GdkEventMotion *ev) ;
@@ -50,9 +48,6 @@ class ArdourDisplay : public ArdourButton
 
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
-
-  private:
-	Gtk::Menu      _menu;
 };
 
 #endif /* __gtk2_ardour_ardour_menu_h__ */

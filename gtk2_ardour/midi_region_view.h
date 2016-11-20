@@ -202,7 +202,7 @@ public:
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
 
-	void select_notes (std::list<boost::shared_ptr<NoteType> >);
+	void select_notes (std::list<Evoral::event_id_t>);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
@@ -324,9 +324,10 @@ public:
 	 * \param t time in frames relative to the position of the region
 	 * \param y vertical position in pixels
 	 * \param length duration of the note in beats
-	 * \param snap_t true to snap t to the grid, otherwise false.
+	 * \param state the keyboard modifier mask for the canvas event (click).
+	 * \param shift_snap true alters snap behavior to round down always (false if the gui has already done that).
 	 */
-	void create_note_at (framepos_t t, double y, Evoral::Beats length, bool snap_t);
+	void create_note_at (framepos_t t, double y, Evoral::Beats length, uint32_t state, bool shift_snap);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.
@@ -443,7 +444,7 @@ private:
 	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
 
 	/** Notes that should be selected when the model is redisplayed. */
-	std::set< boost::shared_ptr<NoteType> > _pending_note_selection;
+	std::set<Evoral::event_id_t> _pending_note_selection;
 
 	/** New notes (created in the current command) which should have visible velocity
 	 * when they appear after the command is applied. */
@@ -455,15 +456,15 @@ private:
 	PBD::ScopedConnection content_connection;
 
 	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
-	NoteBase* find_canvas_note (NoteType);
+	NoteBase* find_canvas_note (Evoral::event_id_t id);
 	Events::iterator _optimization_iterator;
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);
 	void update_hit (Hit *, bool update_ghost_regions = true);
 
-	void create_ghost_note (double, double);
-	void update_ghost_note (double, double);
+	void create_ghost_note (double, double, uint32_t state);
+	void update_ghost_note (double, double, uint32_t state);
 
 	MidiListEditor* _list_editor;
 	bool _no_sound_notes;
@@ -494,21 +495,21 @@ private:
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
-	void enter_internal ();
+	void enter_internal (uint32_t state);
 	void leave_internal ();
 	void hide_verbose_cursor ();
 
 	framecnt_t _last_display_zoom;
 
-	double _last_event_x;
-	double _last_event_y;
-	bool   _grabbed_keyboard;
-	bool   _entered;
-	bool   _note_entered;
+	double    _last_event_x;
+	double    _last_event_y;
+	bool      _grabbed_keyboard;
+	bool      _entered;
+	NoteBase* _entered_note;
 
 	bool _mouse_changed_selection;
 
-	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
+	Evoral::Beats snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, bool shift_snap) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 

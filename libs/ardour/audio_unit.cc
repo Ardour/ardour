@@ -1803,29 +1803,12 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour beat&tempo callback\n");
 
-	/* more than 1 meter or more than 1 tempo means that a simplistic computation
-	   (and interpretation) of a beat position will be incorrect. So refuse to
-	   offer the value.
-	*/
-
-	if (tmap.n_tempos() > 1 || tmap.n_meters() > 1) {
-		return kAudioUnitErr_CannotDoInCurrentContext;
-	}
-
-	TempoMetric metric = tmap.metric_at (transport_frame + input_offset);
-	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (transport_frame + input_offset);
-
 	if (outCurrentBeat) {
-		const double ppq_scaling = metric.meter().note_divisor() / 4.0;
-		float beat;
-		beat = metric.meter().divisions_per_bar() * (bbt.bars - 1);
-		beat += (bbt.beats - 1);
-		beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
-		*outCurrentBeat = beat * ppq_scaling;
+		*outCurrentBeat = tmap.quarter_note_at_frame (transport_frame + input_offset);
 	}
 
 	if (outCurrentTempo) {
-		*outCurrentTempo = floor (metric.tempo().beats_per_minute());
+		*outCurrentTempo = tmap.tempo_at_frame (transport_frame + input_offset).quarter_notes_per_minute();
 	}
 
 	return noErr;
@@ -1842,15 +1825,6 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour music time location callback\n");
 
-	/* more than 1 meter or more than 1 tempo means that a simplistic computation
-	   (and interpretation) of a beat position will be incorrect. So refuse to
-	   offer the value.
-	*/
-
-	if (tmap.n_tempos() > 1 || tmap.n_meters() > 1) {
-		return kAudioUnitErr_CannotDoInCurrentContext;
-	}
-
 	TempoMetric metric = tmap.metric_at (transport_frame + input_offset);
 	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_frame (transport_frame + input_offset);
 
@@ -1859,8 +1833,10 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			double const beat_frac_to_next = (Timecode::BBT_Time::ticks_per_beat - bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-			*outDeltaSampleOffsetToNextBeat = tmap.frame_at_beat (tmap.beat_at_frame (transport_frame + input_offset) + beat_frac_to_next);
+			double const next_beat = ceil (tmap.quarter_note_at_frame (transport_frame + input_offset));
+			framepos_t const next_beat_frame = tmap.frame_at_quarter_note (next_beat);
+
+			*outDeltaSampleOffsetToNextBeat = next_beat_frame - (transport_frame + input_offset);
 		}
 	}
 
@@ -1879,8 +1855,10 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		   3|1|0 -> 1 + (2 * divisions_per_bar)
 		   etc.
 		*/
+		bbt.beats = 1;
+		bbt.ticks = 0;
 
-		*outCurrentMeasureDownBeat = 1 + metric.meter().divisions_per_bar() * (bbt.bars - 1);
+		*outCurrentMeasureDownBeat = tmap.quarter_note_at_bbt (bbt);
 	}
 
 	return noErr;
@@ -1933,38 +1911,14 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 				TempoMap& tmap (_session.tempo_map());
 
-				/* more than 1 meter means that a simplistic computation (and interpretation) of
-				   a beat position will be incorrect. so refuse to offer the value.
-				*/
-
-				if (tmap.n_meters() > 1) {
-					return kAudioUnitErr_CannotDoInCurrentContext;
-				}
-
 				Timecode::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
-					TempoMetric metric = tmap.metric_at (loc->start() + input_offset);
-					bbt = _session.tempo_map().bbt_at_frame (loc->start() + input_offset);
-
-					float beat;
-					beat = metric.meter().divisions_per_bar() * bbt.bars;
-					beat += bbt.beats;
-					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
-
-					*outCycleStartBeat = beat;
+					*outCycleStartBeat = tmap.quarter_note_at_frame (loc->start() + input_offset);
 				}
 
 				if (outCycleEndBeat) {
-					TempoMetric metric = tmap.metric_at (loc->end() + input_offset);
-					bbt = _session.tempo_map().bbt_at_frame (loc->end() + input_offset);
-
-					float beat;
-					beat = metric.meter().divisions_per_bar() * bbt.bars;
-					beat += bbt.beats;
-					beat += bbt.ticks / Timecode::BBT_Time::ticks_per_beat;
-
-					*outCycleEndBeat = beat;
+					*outCycleEndBeat = tmap.quarter_note_at_frame (loc->end() + input_offset);
 				}
 			}
 		}
@@ -2004,6 +1958,8 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 			break;
 	}
 
+	std::string busname;
+
 	if (dt == DataType::AUDIO) {
 		if (input) {
 			uint32_t pid = id;
@@ -2012,6 +1968,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					id = pid;
 					ss << _bus_name_in[bus];
 					ss << " / Bus " << (1 + bus);
+					busname = _bus_name_in[bus];
 					break;
 				}
 				pid -= bus_inputs[bus];
@@ -2024,6 +1981,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					id = pid;
 					ss << _bus_name_out[bus];
 					ss << " / Bus " << (1 + bus);
+					busname = _bus_name_out[bus];
 					break;
 				}
 				pid -= bus_outputs[bus];
@@ -2040,6 +1998,10 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	ss << (id + 1);
 
 	Plugin::IOPortDescription iod (ss.str());
+	if (!busname.empty()) {
+		iod.group_name = busname;
+		iod.group_channel = id;
+	}
 	return iod;
 }
 

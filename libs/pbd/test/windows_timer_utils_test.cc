@@ -143,19 +143,18 @@ WindowsTimerUtilsTest::testMMTimers ()
 
 	test_tgt_granularity ("Minimum Timer Resolution", avg_min_res_tgt_elapsed);
 
-	// test that it the avg granularity is the same as miniumum resolution
-	CPPUNIT_ASSERT (avg_min_res_tgt_elapsed == 1);
+	// In a heavily loaded system and without running this test with raised
+	// scheduling priority we can't assume that the granularity is the same as
+	// the minimum timer resolution so give it a few ms of slack, if it is
+	// greater than that then there likely is a problem that needs investigating.
+	CPPUNIT_ASSERT (avg_min_res_tgt_elapsed <= 5);
 
 	uint32_t avg_min_res_sleep_elapsed = 0;
 
+	// This should have roughly the same granularity as the tgt test above
 	test_sleep_granularity ("Minimum Timer Resolution", avg_min_res_sleep_elapsed);
 
-	// In a heavily loaded system and without running this test with raised
-	// scheduling priority we can't assume that the sleep granularity is the
-	// same as the minimum timer resolution so give it 1ms of slack, if it is
-	// greater than that then there likely is a problem that needs
-	// investigating.
-	CPPUNIT_ASSERT (avg_min_res_sleep_elapsed <= 2);
+	CPPUNIT_ASSERT (avg_min_res_sleep_elapsed <= 5);
 
 	CPPUNIT_ASSERT (PBD::MMTIMERS::reset_resolution());
 

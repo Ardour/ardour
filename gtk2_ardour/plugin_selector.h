@@ -122,6 +122,7 @@ class PluginSelector : public ArdourDialog
 	void lv2_refiller (const std::string&);
 	void vst_refiller (const std::string&);
 	void lxvst_refiller (const std::string&);
+	void mac_vst_refiller (const std::string&);
 	void au_refiller (const std::string&);
 	void lua_refiller (const std::string&);
 

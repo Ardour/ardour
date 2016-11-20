@@ -29,9 +29,13 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/route.h"
+#include "ardour/send.h"
+#include "ardour/processor.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
+
+#include <glibmm.h>
 
 #include "pbd/i18n.h"
 
@@ -251,8 +255,17 @@ OSCSelectObserver::send_init()
 			enable_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
 			sends = true;
 		} else if (sends) {
-			// not used by Ardour, just mixbus so in Ardour always true
-			clear_strip_with_id ("/select/send_enable", nsends + 1, 1);
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
+			if (!r) {
+				// should never get here
+				clear_strip_with_id ("/select/send_enable", nsends + 1, 0);
+			}
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(nsends));
+			if (snd) {
+				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
+				proc->ActiveChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
+				clear_strip_with_id ("/select/send_enable", nsends + 1, proc->enabled());
+			}
 		}
 		// this should get signalled by the route the send goes to, (TODO)
 		if (!gainmode && sends) { // if the gain control is there, this is too
@@ -484,7 +497,7 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 
 	if (gainmode) {
 		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
-		text_message ("/select/name", to_string (accurate_coefficient_to_dB (controllable->get_value())));
+		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		gain_timeout = 8;
 	} else {
 		if (controllable->get_value() < 1e-15) {
@@ -522,7 +535,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 #else
 		value = gain_to_slider_position (controllable->get_value());
 #endif
-	text_with_id ("/select/send_name" , id + 1, to_string (db));
+	text_with_id ("/select/send_name" , id + 1, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db));
 	if (send_timeout.size() > id) {
 		send_timeout[id] = 8;
 	}
@@ -540,6 +553,15 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	lo_message_add_float (msg, value);
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Processor> proc)
+{
+	// with no delay value is wrong
+	Glib::usleep(10);
+
+	clear_strip_with_id ("/select/send_enable", id, proc->enabled());
 }
 
 void
@@ -637,9 +659,7 @@ string
 OSCSelectObserver::set_path (string path, uint32_t id)
 {
 	if (feedback[2]) {
-  ostringstream os;
-  os << path << "/" << id;
-  path = os.str();
+		path = string_compose ("%1/%2", path, id);
 	}
 	return path;
 }

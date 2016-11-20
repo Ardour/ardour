@@ -254,6 +254,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(*this, &Editor::set_session_start_from_playhead));
 	reg_sens (editor_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(*this, &Editor::set_session_end_from_playhead));
 
+	reg_sens (editor_actions, "toggle-location-at-playhead", _("Toggle Mark at Playhead"), sigc::mem_fun(*this, &Editor::toggle_location_at_playhead_cursor));
 	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 
@@ -300,8 +301,8 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
 	act = reg_sens (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down));
-	act = reg_sens (editor_actions, "step-tracks-up", _("Step Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up_line));
-	act = reg_sens (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down_line));
+	act = reg_sens (editor_actions, "step-tracks-up", _("Step Tracks Up"), sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &Editor::scroll_up_one_track), true)));
+	act = reg_sens (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &Editor::scroll_down_one_track), true)));
 
 	reg_sens (editor_actions, "scroll-backward", _("Scroll Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
 	reg_sens (editor_actions, "scroll-forward", _("Scroll Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_forward), 0.8f));
@@ -329,6 +330,7 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "set-playhead", _("Playhead to Mouse"), sigc::mem_fun(*this, &Editor::set_playhead_cursor));
 	reg_sens (editor_actions, "set-edit-point", _("Active Marker to Mouse"), sigc::mem_fun(*this, &Editor::set_edit_point));
+	reg_sens (editor_actions, "set-auto-punch-range", _("Set Auto Punch In/Out from Playhead"), sigc::mem_fun(*this, &Editor::set_auto_punch_range));
 
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
@@ -746,6 +748,11 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
+
+
+	/* MIDI stuff */
+	reg_sens (editor_actions, "quantize", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+
 }
 
 void
@@ -1725,43 +1732,6 @@ Editor::parameter_changed (std::string p)
 }
 
 void
-Editor::reset_focus (Gtk::Widget* w)
-{
-	/* this resets focus to the first focusable parent of the given widget,
-	 * or, if there is no focusable parent, cancels focus in the toplevel
-	 * window that the given widget is packed into (if there is one).
-	 */
-
-	if (!w) {
-		return;
-	}
-
-	Gtk::Widget* top = w->get_toplevel();
-
-	if (!top || !top->is_toplevel()) {
-		return;
-	}
-
-	w = w->get_parent ();
-
-	while (w) {
-		if (w->get_can_focus ()) {
-			Window* win = dynamic_cast<Window*> (top);
-			win->set_focus (*w);
-			return;
-		}
-		w = w->get_parent ();
-	}
-
-	/* no focusable parent found, cancel focus in top level window.
-	   C++ API cannot be used for this. Thanks, references.
-	 */
-
-	gtk_window_set_focus (GTK_WINDOW(top->gobj()), 0);
-
-}
-
-void
 Editor::reset_canvas_action_sensitivity (bool onoff)
 {
 	if (_edit_point != EditAtMouse) {
@@ -1860,7 +1830,7 @@ Editor::register_region_actions ()
 		);
 
 	/* Duplicate selected regions */
-	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), false));
+	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_regions), 1));
 
 	/* Open the dialogue to duplicate selected regions multiple times */
 	reg_sens (

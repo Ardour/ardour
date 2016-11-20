@@ -302,29 +302,6 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 	vstfx->eventProc((void*)event);
 }
 
-static void
-maybe_set_program (VSTState* vstfx)
-{
-	if (vstfx->want_program != -1) {
-		if (vstfx->vst_version >= 2) {
-			vstfx->plugin->dispatcher (vstfx->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
-		}
-
-		vstfx->plugin->dispatcher (vstfx->plugin, effSetProgram, 0, vstfx->want_program, NULL, 0);
-
-		if (vstfx->vst_version >= 2) {
-			vstfx->plugin->dispatcher (vstfx->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
-		}
-
-		vstfx->want_program = -1;
-	}
-
-	if (vstfx->want_chunk == 1) {
-		vstfx->plugin->dispatcher (vstfx->plugin, 24 /* effSetChunk */, 1, vstfx->wanted_chunk_size, vstfx->wanted_chunk, 0);
-		vstfx->want_chunk = 0;
-	}
-}
-
 /** This is the main gui event loop for the plugin, we also need to pass
 any Xevents to all the UI callbacks plugins 'may' have registered on their
 windows, that is if they don't manage their own UIs **/
@@ -437,7 +414,7 @@ again:
 					}
 				}
 
-				maybe_set_program (vstfx);
+				vststate_maybe_set_program (vstfx);
 				vstfx->want_program = -1;
 				vstfx->want_chunk = 0;
 

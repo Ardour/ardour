@@ -45,12 +45,13 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	~PluginManager ();
 
-	ARDOUR::PluginInfoList &windows_vst_plugin_info ();
-	ARDOUR::PluginInfoList &lxvst_plugin_info ();
-	ARDOUR::PluginInfoList &ladspa_plugin_info ();
-	ARDOUR::PluginInfoList &lv2_plugin_info ();
-	ARDOUR::PluginInfoList &au_plugin_info ();
-	ARDOUR::PluginInfoList &lua_plugin_info ();
+	const ARDOUR::PluginInfoList& windows_vst_plugin_info ();
+	const ARDOUR::PluginInfoList& lxvst_plugin_info ();
+	const ARDOUR::PluginInfoList& mac_vst_plugin_info ();
+	const ARDOUR::PluginInfoList& ladspa_plugin_info ();
+	const ARDOUR::PluginInfoList& lv2_plugin_info ();
+	const ARDOUR::PluginInfoList& au_plugin_info ();
+	const ARDOUR::PluginInfoList& lua_plugin_info ();
 
 	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
@@ -75,7 +76,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void load_statuses ();
 	void save_statuses ();
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
-	PluginStatusType get_status (const PluginInfoPtr&);
+	PluginStatusType get_status (const PluginInfoPtr&) const;
 
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;
@@ -110,6 +111,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList  _empty_plugin_info;
 	ARDOUR::PluginInfoList* _windows_vst_plugin_info;
 	ARDOUR::PluginInfoList*	_lxvst_plugin_info;
+	ARDOUR::PluginInfoList*	_mac_vst_plugin_info;
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;
@@ -127,11 +129,13 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void lua_refresh ();
 	void lua_refresh_cb ();
 	void windows_vst_refresh (bool cache_only = false);
+	void mac_vst_refresh (bool cache_only = false);
 	void lxvst_refresh (bool cache_only = false);
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
 	void add_windows_vst_presets ();
+	void add_mac_vst_presets ();
 	void add_lxvst_presets ();
 	void add_presets (std::string domain);
 
@@ -141,6 +145,9 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
 	int windows_vst_discover (std::string path, bool cache_only = false);
+
+	int mac_vst_discover_from_path (std::string path, bool cache_only = false);
+	int mac_vst_discover (std::string path, bool cache_only = false);
 
 	int lxvst_discover_from_path (std::string path, bool cache_only = false);
 	int lxvst_discover (std::string path, bool cache_only = false);

@@ -91,6 +91,7 @@
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "rc_option_editor.h"
+#include "route_dialogs.h"
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
@@ -217,6 +218,8 @@ public:
 	void toggle_mixer_list();
 	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
+
+	void reset_focus (Gtk::Widget*);
 
 	static PublicEditor* _instance;
 
@@ -375,6 +378,8 @@ public:
 	bool key_event_handler (GdkEventKey*, Gtk::Window* window);
 
 	Gtkmm2ext::ActionMap global_actions;
+
+	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
 protected:
 	friend class PublicEditor;
@@ -679,8 +684,8 @@ private:
 
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
+	void archive_session ();
 	void rename_session ();
-	ARDOUR::PresentationInfo::order_t translate_order (AddRouteDialog::InsertAt);
 
 	int         create_mixer ();
 	int         create_editor ();
@@ -887,6 +892,7 @@ private:
 	void step_down_through_tabs ();
 
 	void escape ();
+	void close_current_dialog ();
 	void pre_release_dialog ();
 };
 

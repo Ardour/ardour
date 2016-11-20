@@ -738,7 +738,10 @@ TimeAxisView::popup_display_menu (guint32 when)
 	conditionally_add_to_selection ();
 
 	build_display_menu ();
-	display_menu->popup (1, when);
+
+	if (!display_menu->items().empty()) {
+		display_menu->popup (1, when);
+	}
 }
 
 void
@@ -748,7 +751,7 @@ TimeAxisView::set_selected (bool yn)
 		return;
 	}
 
-	Selectable::set_selected (yn);
+	AxisView::set_selected (yn);
 
 	if (_selected) {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);

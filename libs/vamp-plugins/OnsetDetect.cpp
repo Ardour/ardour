@@ -354,7 +354,7 @@ OnsetDetector::process(const float *const *inputBuffers,
 	return FeatureSet();
     }
 
-    size_t len = m_d->dfConfig.frameLength / 2;
+    size_t len = m_d->dfConfig.frameLength / 2 + 1;
 
 //    float mean = 0.f;
 //    for (size_t i = 0; i < len; ++i) {
@@ -366,25 +366,22 @@ OnsetDetector::process(const float *const *inputBuffers,
 
 //    std::cerr << "OnsetDetector::process(" << timestamp << "): "
 //              << "dftype " << m_dfType << ", sens " << m_sensitivity
-//              << ", len " << len << std::endl;
+//              << ", len " << len << ", mean " << mean << std::endl;
 
-    double *magnitudes = new double[len];
-    double *phases = new double[len];
+    double *reals = new double[len];
+    double *imags = new double[len];
 
     // We only support a single input channel
 
     for (size_t i = 0; i < len; ++i) {
-
-        magnitudes[i] = sqrt(inputBuffers[0][i*2  ] * inputBuffers[0][i*2  ] +
-                             inputBuffers[0][i*2+1] * inputBuffers[0][i*2+1]);
-
-	phases[i] = atan2(-inputBuffers[0][i*2+1], inputBuffers[0][i*2]);
+        reals[i] = inputBuffers[0][i*2];
+        imags[i] = inputBuffers[0][i*2+1];
     }
 
-    double output = m_d->df->process(magnitudes, phases);
+    double output = m_d->df->processFrequencyDomain(reals, imags);
 
-    delete[] magnitudes;
-    delete[] phases;
+    delete[] reals;
+    delete[] imags;
 
     if (m_d->dfOutput.empty()) m_d->origin = timestamp;
 

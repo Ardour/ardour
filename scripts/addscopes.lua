@@ -34,7 +34,7 @@ function factory (params)
 					-- get Nth Ardour::Processor
 					proc = t:nth_plugin (i)
 					-- check if it's a scope
-					if (not proc:isnil() and proc:display_name () == "Inline Scope") then
+					if (not proc:isnil() and proc:display_name () == "a-Inline Scope") then
 						insert = false;
 					end
 					i = i + 1
@@ -43,7 +43,7 @@ function factory (params)
 
 			-- create a new processor and insert it
 			if insert then
-				local a = ARDOUR.LuaAPI.new_luaproc(Session, "Inline Scope");
+				local a = ARDOUR.LuaAPI.new_luaproc(Session, "a-Inline Scope");
 				if (not a:isnil()) then
 					t:add_processor_by_index(a, pos, nil, true)
 					ARDOUR.LuaAPI.set_processor_param (a, 0, 5) -- timescale 5sec

@@ -223,45 +223,6 @@ ssize_t ret;
 	return (ret);
 }
 
-//***************************************************************
-//
-//	round()
-//
-// Emulates round() using floor().
-//
-//	Returns:
-//
-//    On Success: The largest integer that is less than or
-//                equal to 'x'.
-//    On Failure: None
-//
-LIBPBD_API double PBD_APICALLTYPE
-round(double x)
-{
-	return (floor(x));
-}
-
-//***************************************************************
-//
-//	trunc()
-//
-// Emulates trunc() using floor() and ceil().
-//
-//	Returns:
-//
-//    On Success: The largest integer whose magnitude is less
-//                than or equal to 'x' (regardless of sign).
-//    On Failure: None
-//
-LIBPBD_API double PBD_APICALLTYPE
-trunc(double x)
-{
-	if (x < 0)
-		return (ceil(x));
-
-	return (floor(x));
-}
-
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
 //***************************************************************
 //
@@ -300,6 +261,42 @@ log1p(double x)
 {
 	return (log(x + (double)1.0));
 }
+
+//***************************************************************
+//
+//	roundf()
+//
+// Emulates roundf() using floorf().
+//
+//	Returns:
+//
+//    On Success: The largest integer that is less than or
+//                equal to 'x'.
+//    On Failure: None
+//
+LIBPBD_API float PBD_APICALLTYPE
+roundf(float x)
+{
+	return (floorf(x));
+}
+
+//***************************************************************
+//
+//	round()
+//
+// Emulates round() using floor().
+//
+//	Returns:
+//
+//    On Success: The largest integer that is less than or
+//                equal to 'x'.
+//    On Failure: None
+//
+LIBPBD_API double PBD_APICALLTYPE
+round(double x)
+{
+	return (floor(x));
+}
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
@@ -320,6 +317,27 @@ LIBPBD_API double PBD_APICALLTYPE
 log2(double x)
 {
 	return (log(x) / log((double)2.0));
+}
+
+//***************************************************************
+//
+//	trunc()
+//
+// Emulates trunc() using floor() and ceil().
+//
+//	Returns:
+//
+//    On Success: The largest integer whose magnitude is less
+//                than or equal to 'x' (regardless of sign).
+//    On Failure: None
+//
+LIBPBD_API double PBD_APICALLTYPE
+trunc(double x)
+{
+	if (x < 0)
+		return (ceil(x));
+
+	return (floor(x));
 }
 #endif
 

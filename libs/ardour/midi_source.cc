@@ -40,13 +40,14 @@
 #include "ardour/debug.h"
 #include "ardour/file_source.h"
 #include "ardour/midi_channel_filter.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
-#include "ardour/tempo.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
+#include "ardour/tempo.h"
 
 #include "pbd/i18n.h"
 
@@ -56,14 +57,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,MidiSource*> MidiSource::MidiSourceCreated;
-
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -72,9 +69,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -179,10 +174,9 @@ MidiSource::update_length (framecnt_t)
 }
 
 void
-MidiSource::invalidate (const Lock& lock, std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes)
+MidiSource::invalidate (const Lock& lock)
 {
-	_model_iter_valid = false;
-	_model_iter.invalidate(notes);
+	Invalidated(_session.transport_rolling());
 }
 
 framecnt_t
@@ -191,110 +185,103 @@ MidiSource::midi_read (const Lock&                        lm,
                        framepos_t                         source_start,
                        framepos_t                         start,
                        framecnt_t                         cnt,
+                       Evoral::Range<framepos_t>*         loop_range,
+                       MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered,
-		       double                             beat,
-		       double                             start_beat) const
+		       const double                       pos_beats,
+		       const double                       start_beats) const
 {
-	//BeatsFramesConverter converter(_session.tempo_map(), source_start);
+	BeatsFramesConverter converter(_session.tempo_map(), source_start);
+
+	const double start_qn = pos_beats - start_beats;
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
 	                             source_start, start, cnt, tracker, name()));
 
-	if (_model) {
-		// Find appropriate model iterator
-		Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
-		const bool linear_read = _last_read_end != 0 && start == _last_read_end;
-		if (!linear_read || !_model_iter_valid) {
-#if 0
-			// Cached iterator is invalid, search for the first event past start
-			i = _model->begin(converter.from(start), false, filtered,
-			                  linear_read ? &_model->active_notes() : NULL);
-			_model_iter_valid = true;
-			if (!linear_read) {
-				_model->active_notes().clear();
+	if (!_model) {
+		return read_unlocked (lm, dst, source_start, start, cnt, loop_range, tracker, filter);
+	}
+
+	// Find appropriate model iterator
+	Evoral::Sequence<Evoral::Beats>::const_iterator& i = cursor.iter;
+	const bool linear_read = cursor.last_read_end != 0 && start == cursor.last_read_end;
+	if (!linear_read || !i.valid()) {
+		/* Cached iterator is invalid, search for the first event past start.
+		   Note that multiple tracks can use a MidiSource simultaneously, so
+		   all playback state must be in parameters (the cursor) and must not
+		   be cached in the source of model itself.
+		   See http://tracker.ardour.org/view.php?id=6541
+		*/
+		cursor.connect(Invalidated);
+		cursor.iter = _model->begin(converter.from(start), false, filtered, &cursor.active_notes);
+		cursor.active_notes.clear();
+	}
+
+	cursor.last_read_end = start + cnt;
+
+	// Copy events in [start, start + cnt) into dst
+	for (; i != _model->end(); ++i) {
+
+		// Offset by source start to convert event time to session time
+
+		framepos_t time_frames = _session.tempo_map().frame_at_quarter_note (i->time().to_double() + start_qn);
+
+		if (time_frames < start + source_start) {
+			/* event too early */
+
+			continue;
+
+		} else if (time_frames >= start + cnt + source_start) {
+
+			DEBUG_TRACE (DEBUG::MidiSourceIO,
+			             string_compose ("%1: reached end with event @ %2 vs. %3\n",
+			                             _name, time_frames, start+cnt));
+			break;
+
+		} else {
+
+			/* in range */
+
+			if (filter && filter->filter(i->buffer(), i->size())) {
+				DEBUG_TRACE (DEBUG::MidiSourceIO,
+				             string_compose ("%1: filter event @ %2 type %3 size %4\n",
+				                             _name, time_frames, i->event_type(), i->size()));
+				continue;
 			}
-#else
-			/* hot-fix http://tracker.ardour.org/view.php?id=6541
-			 * "parallel playback of linked midi regions -> no note-offs"
-			 *
-			 * A midi source can be used by multiple tracks simultaneously,
-			 * in which case midi_read() may be called from different tracks for
-			 * overlapping time-ranges.
-			 *
-			 * However there is only a single iterator for a given midi-source.
-			 * This results in every midi_read() performing a seek.
-			 *
-			 * If seeking is performed with
-			 *    _model->begin(converter.from(start),...)
-			 * the model is used for seeking. That method seeks to the first
-			 * *note-on* event after 'start'.
-			 *
-			 * _model->begin(converter.from(  ) ,..) eventually calls
-			 * Sequence<Time>::const_iterator() in libs/evoral/src/Sequence.cpp
-			 * which looks up the note-event via seq.note_lower_bound(t);
-			 * but the sequence 'seq' only contains note-on events(!).
-			 * note-off events are implicit in Sequence<Time>::operator++()
-			 * via _active_notes.pop(); and not part of seq.
-			 *
-			 * see also http://tracker.ardour.org/view.php?id=6287#c16671
-			 *
-			 * The linear search below assures that reading starts at the first
-			 * event for the given time, regardless of its event-type.
-			 *
-			 * The performance of this approach is O(N), while the previous
-			 * implementation is O(log(N)). This needs to be optimized:
-			 * The model-iterator or event-sequence needs to be re-designed in
-			 * some way (maybe keep an iterator per playlist).
-			 */
-			for (i = _model->begin(); i != _model->end(); ++i) {
-				if (i->time().to_double() + (beat - start_beat) >= beat) {
-					break;
+
+			if (loop_range) {
+				time_frames = loop_range->squish (time_frames);
+			}
+
+			dst.write (time_frames, i->event_type(), i->size(), i->buffer());
+
+#ifndef NDEBUG
+			if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
+				DEBUG_STR_DECL(a);
+				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5 ",
+				                                    _name, time_frames, i->size(),
+				                                    start + source_start, start + cnt + source_start));
+				for (size_t n=0; n < i->size(); ++n) {
+					DEBUG_STR_APPEND(a,hex);
+					DEBUG_STR_APPEND(a,"0x");
+					DEBUG_STR_APPEND(a,(int)i->buffer()[n]);
+					DEBUG_STR_APPEND(a,' ');
 				}
-			}
-			_model_iter_valid = true;
-			if (!linear_read) {
-				_model->active_notes().clear();
+				DEBUG_STR_APPEND(a,'\n');
+				DEBUG_TRACE (DEBUG::MidiSourceIO, DEBUG_STR(a).str());
 			}
 #endif
-		}
 
-		_last_read_end = start + cnt;
-
-		// Copy events in [start, start + cnt) into dst
-		for (; i != _model->end(); ++i) {
-			const framecnt_t time_frames = _session.tempo_map().frame_at_beat (i->time().to_double() + (beat - start_beat));
-
-			if (time_frames < start + cnt + source_start) {
-				if (filter && filter->filter(i->buffer(), i->size())) {
-					DEBUG_TRACE (DEBUG::MidiSourceIO,
-					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-					                             _name, time_frames, i->event_type(), i->size()));
-					continue;
-				}
-				// Offset by source start to convert event time to session time
-				dst.write (time_frames, i->event_type(), i->size(), i->buffer());
-
-				DEBUG_TRACE (DEBUG::MidiSourceIO,
-				             string_compose ("%1: add event @ %2 type %3 size %4\n",
-				                             _name, time_frames, i->event_type(), i->size()));
-
-				if (tracker) {
-					tracker->track (*i);
-				}
-			} else {
-				DEBUG_TRACE (DEBUG::MidiSourceIO,
-				             string_compose ("%1: reached end with event @ %2 vs. %3\n",
-				                             _name, time_frames, start+cnt));
-				break;
+			if (tracker) {
+				tracker->track (*i);
 			}
 		}
-		return cnt;
-	} else {
-		return read_unlocked (lm, dst, source_start, start, cnt, tracker, filter);
 	}
+
+	return cnt;
 }
 
 framecnt_t
@@ -306,7 +293,6 @@ MidiSource::midi_write (const Lock&                 lm,
 	const framecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
 	if (cnt == max_framecnt) {
-		_last_read_end = 0;
 		invalidate(lm);
 	} else {
 		_capture_length += cnt;
@@ -346,7 +332,8 @@ MidiSource::mark_write_starting_now (framecnt_t position,
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
-	BeatsFramesConverter converter(_session.tempo_map(), position);
+	TempoMap& map (_session.tempo_map());
+	BeatsFramesConverter converter(map, position);
 	_length_beats = converter.from(capture_length);
 }
 

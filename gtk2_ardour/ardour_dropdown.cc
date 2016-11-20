@@ -43,8 +43,6 @@ using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
-using std::max;
-using std::min;
 using namespace std;
 
 
@@ -52,6 +50,9 @@ ArdourDropdown::ArdourDropdown (Element e)
 	: _scrolling_disabled(false)
 {
 //	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
+	_menu.signal_size_request().connect (sigc::mem_fun(*this, &ArdourDropdown::menu_size_request));
+
+	_menu.set_reserve_toggle_size(false);
 
 	add_elements(e);
 	add_elements(ArdourButton::Menu);
@@ -61,11 +62,16 @@ ArdourDropdown::~ArdourDropdown ()
 {
 }
 
+void
+ArdourDropdown::menu_size_request(Requisition *req) {
+	req->width = max(req->width, get_allocation().get_width());
+}
+
 bool
 ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->type == GDK_BUTTON_PRESS) {
-		_menu.popup (1, gtk_get_current_event_time());
+		Gtkmm2ext::anchored_menu_popup(&_menu, this, get_text(), 1, ev->time);
 	}
 	return true;
 }

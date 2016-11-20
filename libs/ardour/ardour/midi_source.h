@@ -27,16 +27,18 @@
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "evoral/Sequence.hpp"
+#include "evoral/Range.hpp"
 #include "ardour/ardour.h"
 #include "ardour/buffer.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/source.h"
 #include "ardour/beats_frames_converter.h"
 
 namespace ARDOUR {
 
 class MidiChannelFilter;
-class MidiStateTracker;
 class MidiModel;
+class MidiStateTracker;
 
 template<typename T> class MidiRingBuffer;
 
@@ -82,6 +84,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * \param source_start Start position of the SOURCE in this read context.
 	 * \param start Start of range to be read.
 	 * \param cnt Length of range to be read (in audio frames).
+	 * \param loop_range If non-null, all event times will be mapped into this loop range.
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
 	 * \param filtered Parameters whose MIDI messages will not be returned.
 	 */
@@ -90,11 +93,13 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                              framepos_t                         source_start,
 	                              framepos_t                         start,
 	                              framecnt_t                         cnt,
+	                              Evoral::Range<framepos_t>*         loop_range,
+	                              MidiCursor&                        cursor,
 	                              MidiStateTracker*                  tracker,
 	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered,
-				      double                             beat,
-				      double                             start_beat) const;
+	                              const double                       pulse,
+	                              const double                       start_beats) const;
 
 	/** Write data from a MidiRingBuffer to this source.
 	 *  @param source Source to read from.
@@ -158,8 +163,6 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	std::string captured_for() const               { return _captured_for; }
 	void        set_captured_for (std::string str) { _captured_for = str; }
 
-	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
@@ -173,10 +176,11 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 
 	/** Reset cached information (like iterators) when things have changed.
 	 * @param lock Source lock, which must be held by caller.
-	 * @param notes If non-NULL, currently active notes are added to this set.
 	 */
-	void invalidate(const Glib::Threads::Mutex::Lock&                       lock,
-	                std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes=NULL);
+	void invalidate(const Glib::Threads::Mutex::Lock& lock);
+
+	/** Thou shalt not emit this directly, use invalidate() instead. */
+	mutable PBD::Signal1<void, bool> Invalidated;
 
 	void set_note_mode(const Glib::Threads::Mutex::Lock& lock, NoteMode mode);
 
@@ -209,6 +213,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                                  framepos_t                     position,
 	                                  framepos_t                     start,
 	                                  framecnt_t                     cnt,
+	                                  Evoral::Range<framepos_t>*     loop_range,
 	                                  MidiStateTracker*              tracker,
 	                                  MidiChannelFilter*             filter) const = 0;
 
@@ -227,11 +232,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 
-	mutable Evoral::Sequence<Evoral::Beats>::const_iterator _model_iter;
-	mutable bool                                            _model_iter_valid;
-
-	mutable Evoral::Beats _length_beats;
-	mutable framepos_t    _last_read_end;
+	Evoral::Beats _length_beats;
 
 	/** The total duration of the current capture. */
 	framepos_t _capture_length;

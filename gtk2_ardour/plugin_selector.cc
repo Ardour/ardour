@@ -341,6 +341,9 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			case LXVST:
 				compstr = X_("LXVST");
 				break;
+			case MacVST:
+				compstr = X_("MacVST");
+				break;
 			case Lua:
 				compstr = X_("Lua");
 				break;
@@ -390,6 +393,7 @@ PluginSelector::refill ()
 	lv2_refiller (filterstr);
 	vst_refiller (filterstr);
 	lxvst_refiller (filterstr);
+	mac_vst_refiller (filterstr);
 	au_refiller (filterstr);
 	lua_refiller (filterstr);
 
@@ -498,6 +502,18 @@ PluginSelector::lxvst_refiller (const std::string&)
 {
 #ifdef LXVST_SUPPORT
 	refiller (manager.lxvst_plugin_info(), filterstr, "LXVST");
+#endif
+}
+
+void
+#ifdef MACVST_SUPPORT
+PluginSelector::mac_vst_refiller (const std::string& filterstr)
+#else
+PluginSelector::mac_vst_refiller (const std::string&)
+#endif
+{
+#ifdef MACVST_SUPPORT
+	refiller (manager.mac_vst_plugin_info(), filterstr, "MacVST");
 #endif
 }
 
@@ -735,6 +751,9 @@ PluginSelector::build_plugin_menu ()
 #endif
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
+#endif
+#ifdef MACVST_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager.mac_vst_plugin_info().begin(), manager.mac_vst_plugin_info().end());
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());

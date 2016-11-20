@@ -55,6 +55,14 @@
 #include <cstring>
 #endif //LXVST_SUPPORT
 
+#ifdef MACVST_SUPPORT
+#include "ardour/vst_info_file.h"
+#include "ardour/mac_vst_support.h"
+#include "ardour/mac_vst_plugin.h"
+#include "pbd/basename.h"
+#include <cstring>
+#endif //MACVST_SUPPORT
+
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 #include <glibmm/fileutils.h>
@@ -118,6 +126,7 @@ PluginManager::instance()
 PluginManager::PluginManager ()
 	: _windows_vst_plugin_info(0)
 	, _lxvst_plugin_info(0)
+	, _mac_vst_plugin_info(0)
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
@@ -128,7 +137,7 @@ PluginManager::PluginManager ()
 	char* s;
 	string lrdf_path;
 
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	// source-tree (ardev, etc)
 	PBD::Searchpath vstsp(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst"));
 
@@ -183,6 +192,12 @@ PluginManager::PluginManager ()
 	}
 #endif /* Native LinuxVST support*/
 
+#ifdef MACVST_SUPPORT
+	if (Config->get_use_macvst ()) {
+		add_mac_vst_presets ();
+	}
+#endif
+
 	if ((s = getenv ("VST_PATH"))) {
 		windows_vst_path = s;
 	} else if ((s = getenv ("VST_PLUGINS"))) {
@@ -229,6 +244,7 @@ PluginManager::~PluginManager()
 		// don't bother, just exit quickly.
 		delete _windows_vst_plugin_info;
 		delete _lxvst_plugin_info;
+		delete _mac_vst_plugin_info;
 		delete _ladspa_plugin_info;
 		delete _lv2_plugin_info;
 		delete _au_plugin_info;
@@ -278,7 +294,22 @@ PluginManager::refresh (bool cache_only)
 	}
 #endif //Native linuxVST SUPPORT
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#ifdef MACVST_SUPPORT
+	if(Config->get_use_macvst ()) {
+		if (cache_only) {
+			BootMessage (_("Scanning Mac VST Plugins"));
+		} else {
+			BootMessage (_("Discovering Mac VST Plugins"));
+		}
+		mac_vst_refresh (cache_only);
+	} else if (_mac_vst_plugin_info) {
+		_mac_vst_plugin_info->clear ();
+	} else {
+		_mac_vst_plugin_info = new ARDOUR::PluginInfoList();
+	}
+#endif //Native Mac VST SUPPORT
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 		if (!cache_only) {
 			string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
 			if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
@@ -383,7 +414,7 @@ PluginManager::clear_vst_cache ()
 #endif
 #endif // old cache cleanup
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	{
 		string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst");
 		vector<string> fsi_files;
@@ -430,7 +461,7 @@ PluginManager::clear_vst_blacklist ()
 
 #endif // old blacklist cleanup
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	{
 		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
@@ -536,6 +567,12 @@ void
 PluginManager::add_windows_vst_presets()
 {
 	add_presets ("windows-vst");
+}
+
+void
+PluginManager::add_mac_vst_presets()
+{
+	add_presets ("mac-vst");
 }
 
 void
@@ -813,7 +850,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 		info << string_compose (_("--- Windows VST plugins Scan: %1"), path) << endmsg;
 	}
 
-	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true, true);
+	find_files_matching_filter (plugin_objects, path, windows_vst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
@@ -979,6 +1016,112 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 #endif // WINDOWS_VST_SUPPORT
 
+#ifdef MACVST_SUPPORT
+void
+PluginManager::mac_vst_refresh (bool cache_only)
+{
+	if (_mac_vst_plugin_info) {
+		_mac_vst_plugin_info->clear ();
+	} else {
+		_mac_vst_plugin_info = new ARDOUR::PluginInfoList();
+	}
+
+	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
+}
+
+static bool mac_vst_filter (const string& str, void *)
+{
+	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
+		return false;
+	}
+	string plist = Glib::build_filename (str, "Contents", "Info.plist");
+	if (!Glib::file_test (plist, Glib::FILE_TEST_IS_REGULAR)) {
+		return false;
+	}
+	return str[0] != '.' && str.length() > 4 && strings_equal_ignore_case (".vst", str.substr(str.length() - 4));
+}
+
+int
+PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
+{
+	vector<string> plugin_objects;
+	vector<string>::iterator x;
+
+	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, true);
+
+	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
+		ARDOUR::PluginScanMessage(_("MacVST"), *x, !cache_only && !cancelled());
+		mac_vst_discover (*x, cache_only || cancelled());
+	}
+	return 0;
+}
+
+int
+PluginManager::mac_vst_discover (string path, bool cache_only)
+{
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent MacVST plugin at %1\n", path));
+
+	_cancel_timeout = false;
+
+	vector<VSTInfo*>* finfos = vstfx_get_info_mac (const_cast<char *> (path.c_str()),
+			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
+
+	if (finfos->empty()) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Mac VST information from '%1'\n", path));
+		return -1;
+	}
+
+	uint32_t discovered = 0;
+	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
+		VSTInfo* finfo = *x;
+		char buf[32];
+
+		if (!finfo->canProcessReplacing) {
+			warning << string_compose (_("Mac VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+							 finfo->name, PROGRAM_NAME)
+				<< endl;
+			continue;
+		}
+
+		PluginInfoPtr info (new MacVSTPluginInfo);
+
+		info->name = finfo->name;
+
+		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
+		info->unique_id = buf;
+		info->category = "MacVST";
+		info->path = path;
+		info->creator = finfo->creator;
+		info->index = 0;
+		info->n_inputs.set_audio (finfo->numInputs);
+		info->n_outputs.set_audio (finfo->numOutputs);
+		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
+		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
+		info->type = ARDOUR::MacVST;
+
+		bool duplicate = false;
+		if (!_mac_vst_plugin_info->empty()) {
+			for (PluginInfoList::iterator i =_mac_vst_plugin_info->begin(); i != _mac_vst_plugin_info->end(); ++i) {
+				if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+					warning << "Ignoring duplicate Mac VST plugin " << info->name << "\n";
+					duplicate = true;
+					break;
+				}
+			}
+		}
+
+		if (!duplicate) {
+			_mac_vst_plugin_info->push_back (info);
+			discovered++;
+		}
+	}
+
+	vstfx_free_info_list (finfos);
+	return discovered > 0 ? 0 : -1;
+}
+
+#endif // MAC_VST_SUPPORT
+
 #ifdef LXVST_SUPPORT
 
 void
@@ -1103,7 +1246,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 
 PluginManager::PluginStatusType
-PluginManager::get_status (const PluginInfoPtr& pi)
+PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
 	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
@@ -1136,6 +1279,9 @@ PluginManager::save_statuses ()
 			break;
 		case LXVST:
 			ofs << "LXVST";
+			break;
+		case MacVST:
+			ofs << "MacVST";
 			break;
 		case Lua:
 			ofs << "Lua";
@@ -1253,7 +1399,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	statuses.insert (ps);
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()
 {
 #ifdef WINDOWS_VST_SUPPORT
@@ -1266,7 +1412,18 @@ PluginManager::windows_vst_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
+PluginManager::mac_vst_plugin_info ()
+{
+#ifdef MACVST_SUPPORT
+	assert(_mac_vst_plugin_info);
+	return *_mac_vst_plugin_info;
+#else
+	return _empty_plugin_info;
+#endif
+}
+
+const ARDOUR::PluginInfoList&
 PluginManager::lxvst_plugin_info ()
 {
 #ifdef LXVST_SUPPORT
@@ -1277,14 +1434,14 @@ PluginManager::lxvst_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::ladspa_plugin_info ()
 {
 	assert(_ladspa_plugin_info);
 	return *_ladspa_plugin_info;
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
 #ifdef LV2_SUPPORT
@@ -1295,7 +1452,7 @@ PluginManager::lv2_plugin_info ()
 #endif
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
 #ifdef AUDIOUNIT_SUPPORT
@@ -1306,7 +1463,7 @@ PluginManager::au_plugin_info ()
 	return _empty_plugin_info;
 }
 
-ARDOUR::PluginInfoList&
+const ARDOUR::PluginInfoList&
 PluginManager::lua_plugin_info ()
 {
 	assert(_lua_plugin_info);

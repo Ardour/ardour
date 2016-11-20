@@ -203,13 +203,13 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	a = new Gtk::Alignment (0, 0.5, 0, 1);
 	a->add (_input_or_output);
 	t->attach (*Gtk::manage (a), 1, 2, 1, 2);
-	_input_or_output.append_text (_("Input"));
-	_input_or_output.append_text (_("Output"));
+	_input_or_output.append_text (_("Destination"));
+	_input_or_output.append_text (_("Source"));
 
 	if (bundle->ports_are_inputs()) {
-		_input_or_output.set_active_text (_("Input"));
+		_input_or_output.set_active_text (_("Source"));
 	} else {
-		_input_or_output.set_active_text (_("Output"));
+		_input_or_output.set_active_text (_("Destination"));
 	}
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
@@ -218,7 +218,6 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
 
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 	show_all ();
 
 	signal_key_press_event().connect (sigc::mem_fun (_matrix, &BundleEditorMatrix::key_press));
@@ -243,7 +242,7 @@ BundleEditor::input_or_output_changed ()
 {
 	_bundle->remove_ports_from_channels ();
 
-	if (_input_or_output.get_active_text() == _("Output")) {
+	if (_input_or_output.get_active_text() == _("Source")) {
 		_bundle->set_ports_are_outputs ();
 	} else {
 		_bundle->set_ports_are_inputs ();
@@ -309,9 +308,6 @@ BundleManager::BundleManager (Session* session)
 	_tree_view.signal_row_activated().connect (
 		sigc::mem_fun (*this, &BundleManager::row_activated)
 		);
-
-	Gtk::Button* close_but = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
-	close_but->signal_clicked ().connect (sigc::mem_fun (*this, &Gtk::Window::hide));
 
 	set_button_sensitivity ();
 

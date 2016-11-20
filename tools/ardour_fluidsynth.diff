@@ -1,0 +1,311 @@
+diff --git b/libs/fluidsynth/src/fluid_defsfont.c a/libs/fluidsynth/src/fluid_defsfont.c
+index 3eea95c..c395218 100644
+--- b/libs/fluidsynth/src/fluid_defsfont.c
++++ a/libs/fluidsynth/src/fluid_defsfont.c
+@@ -109,11 +109,13 @@ char* fluid_defsfont_sfont_get_name(fluid_sfont_t* sfont)
+   return fluid_defsfont_get_name((fluid_defsfont_t*) sfont->data);
+ }
+ 
++#if 0
+ fluid_sample_t* fluid_defsfont_get_sample(fluid_defsfont_t* sfont, char *s)
+ {
+   /* This function is here just to avoid an ABI/SONAME bump, see ticket #98. Should never be used. */
+   return NULL;
+ }
++#endif
+ 
+ fluid_preset_t*
+ fluid_defsfont_sfont_get_preset(fluid_sfont_t* sfont, unsigned int bank, unsigned int prenum)
+diff --git b/libs/fluidsynth/src/fluid_hash.c a/libs/fluidsynth/src/fluid_hash.c
+index a063e29..9d5a920 100644
+--- b/libs/fluidsynth/src/fluid_hash.c
++++ a/libs/fluidsynth/src/fluid_hash.c
+@@ -93,7 +93,7 @@ static const guint primes[] =
+ 
+ static const unsigned int nprimes = sizeof (primes) / sizeof (primes[0]);
+ 
+-unsigned int
++static unsigned int
+ spaced_primes_closest (unsigned int num)
+ {
+   unsigned int i;
+@@ -984,6 +984,7 @@ fluid_hashtable_foreach_remove_or_steal (fluid_hashtable_t *hashtable,
+   return deleted;
+ }
+ 
++#if 0
+ /**
+  * fluid_hashtable_foreach_remove:
+  * @hashtable: a #fluid_hashtable_t.
+@@ -1001,7 +1002,7 @@ fluid_hashtable_foreach_remove_or_steal (fluid_hashtable_t *hashtable,
+  *
+  * Return value: the number of key/value pairs removed.
+  **/
+-unsigned int
++static unsigned int
+ fluid_hashtable_foreach_remove (fluid_hashtable_t *hashtable,
+                                 fluid_hr_func_t func, void *user_data)
+ {
+@@ -1010,6 +1011,7 @@ fluid_hashtable_foreach_remove (fluid_hashtable_t *hashtable,
+ 
+   return fluid_hashtable_foreach_remove_or_steal (hashtable, func, user_data, TRUE);
+ }
++#endif
+ 
+ /**
+  * fluid_hashtable_foreach_steal:
+diff --git b/libs/fluidsynth/src/fluid_midi.c a/libs/fluidsynth/src/fluid_midi.c
+index 5ceab01..171952f 100644
+--- b/libs/fluidsynth/src/fluid_midi.c
++++ a/libs/fluidsynth/src/fluid_midi.c
+@@ -34,7 +34,7 @@ static int fluid_midi_event_length(unsigned char event);
+ static char* fluid_file_read_full(fluid_file fp, size_t* length);
+ #define READ_FULL_INITIAL_BUFLEN 1024
+ 
+-
++#if 0 // disable file I/O with Ardour
+ /***************************************************************
+  *
+  *                      MIDIFILE
+@@ -760,6 +760,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
+ {
+     return midifile->division;
+ }
++#endif
+ 
+ /******************************************************
+  *
+@@ -1030,7 +1031,7 @@ fluid_midi_event_set_sysex(fluid_midi_event_t *evt, void *data, int size, int dy
+  *
+  *     fluid_track_t
+  */
+-
++#if 0 // disable fluid file player in Ardour
+ /*
+  * new_fluid_track
+  */
+@@ -1118,7 +1119,7 @@ fluid_track_get_duration(fluid_track_t *track)
+ /*
+  * fluid_track_count_events
+  */
+-int
++static int
+ fluid_track_count_events(fluid_track_t *track, int *on, int *off)
+ {
+     fluid_midi_event_t *evt = track->first;
+@@ -1533,7 +1534,7 @@ fluid_player_load(fluid_player_t *player, fluid_playlist_item *item)
+     return FLUID_OK;
+ }
+ 
+-void
++static void
+ fluid_player_advancefile(fluid_player_t *player)
+ {
+     if (player->playlist == NULL) {
+@@ -1553,7 +1554,7 @@ fluid_player_advancefile(fluid_player_t *player)
+     }
+ }
+ 
+-void
++static void
+ fluid_player_playlist_load(fluid_player_t *player, unsigned int msec)
+ {
+     fluid_playlist_item* current_playitem;
+@@ -1938,3 +1939,4 @@ fluid_midi_event_length(unsigned char event)
+     }
+     return 1;
+ }
++#endif
+diff --git b/libs/fluidsynth/src/fluid_rev.c a/libs/fluidsynth/src/fluid_rev.c
+index 51b0e79..166007d 100644
+--- b/libs/fluidsynth/src/fluid_rev.c
++++ a/libs/fluidsynth/src/fluid_rev.c
+@@ -75,7 +75,7 @@ void fluid_allpass_init(fluid_allpass* allpass);
+ void fluid_allpass_setfeedback(fluid_allpass* allpass, fluid_real_t val);
+ fluid_real_t fluid_allpass_getfeedback(fluid_allpass* allpass);
+ 
+-void
++static void
+ fluid_allpass_setbuffer(fluid_allpass* allpass, int size)
+ {
+   allpass->bufidx = 0;
+@@ -83,7 +83,7 @@ fluid_allpass_setbuffer(fluid_allpass* allpass, int size)
+   allpass->bufsize = size;
+ }
+ 
+-void
++static void
+ fluid_allpass_release(fluid_allpass* allpass)
+ {
+   FLUID_FREE(allpass->buffer);
+diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.c a/libs/fluidsynth/src/fluid_rvoice_mixer.c
+index 4672cb8..d5369aa 100644
+--- b/libs/fluidsynth/src/fluid_rvoice_mixer.c
++++ a/libs/fluidsynth/src/fluid_rvoice_mixer.c
+@@ -24,12 +24,12 @@
+ #include "fluid_rev.h"
+ #include "fluid_chorus.h"
+ #include "fluidsynth_priv.h"
+-#include "fluid_ladspa.h"
++//#include "fluid_ladspa.h"
+ 
+ #define SYNTH_REVERB_CHANNEL 0
+ #define SYNTH_CHORUS_CHANNEL 1
+ 
+-#define ENABLE_MIXER_THREADS 1
++#undef ENABLE_MIXER_THREADS // Ardour does the multithreading -- synth.cpu-cores defaults to 1
+ 
+ // If less than x voices, the thread overhead is larger than the gain,
+ // so don't activate the thread(s).
+diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.h a/libs/fluidsynth/src/fluid_rvoice_mixer.h
+index eeb49ec..d4e41ca 100644
+--- b/libs/fluidsynth/src/fluid_rvoice_mixer.h
++++ a/libs/fluidsynth/src/fluid_rvoice_mixer.h
+@@ -24,7 +24,7 @@
+ 
+ #include "fluidsynth_priv.h"
+ #include "fluid_rvoice.h"
+-#include "fluid_ladspa.h"
++//#include "fluid_ladspa.h"
+ 
+ typedef struct _fluid_rvoice_mixer_t fluid_rvoice_mixer_t;
+ 
+diff --git b/libs/fluidsynth/src/fluid_settings.c a/libs/fluidsynth/src/fluid_settings.c
+index 78725fb..56de8c7 100644
+--- b/libs/fluidsynth/src/fluid_settings.c
++++ a/libs/fluidsynth/src/fluid_settings.c
+@@ -22,9 +22,9 @@
+ #include "fluid_sys.h"
+ #include "fluid_hash.h"
+ #include "fluid_synth.h"
+-#include "fluid_cmd.h"
+-#include "fluid_adriver.h"
+-#include "fluid_mdriver.h"
++//#include "fluid_cmd.h"
++//#include "fluid_adriver.h"
++//#include "fluid_mdriver.h"
+ #include "fluid_settings.h"
+ #include "fluid_midi.h"
+ 
+@@ -294,11 +294,13 @@ fluid_settings_init(fluid_settings_t* settings)
+   fluid_return_if_fail (settings != NULL);
+ 
+   fluid_synth_settings(settings);
++#if 0
+   fluid_shell_settings(settings);
+   fluid_player_settings(settings);
+   fluid_file_renderer_settings(settings);
+   fluid_audio_driver_settings(settings);
+   fluid_midi_driver_settings(settings);
++#endif
+ }
+ 
+ static int
+diff --git b/libs/fluidsynth/src/fluid_synth.c a/libs/fluidsynth/src/fluid_synth.c
+index 84ee289..a12260c 100644
+--- b/libs/fluidsynth/src/fluid_synth.c
++++ a/libs/fluidsynth/src/fluid_synth.c
+@@ -471,7 +471,7 @@ struct _fluid_sample_timer_t
+ /*
+  * fluid_sample_timer_process - called when synth->ticks is updated
+  */
+-void fluid_sample_timer_process(fluid_synth_t* synth)
++static void fluid_sample_timer_process(fluid_synth_t* synth)
+ {
+ 	fluid_sample_timer_t* st;
+ 	long msec;
+diff --git b/libs/fluidsynth/src/fluid_synth.h a/libs/fluidsynth/src/fluid_synth.h
+index 3af336d..019a8e0 100644
+--- b/libs/fluidsynth/src/fluid_synth.h
++++ a/libs/fluidsynth/src/fluid_synth.h
+@@ -37,8 +37,8 @@
+ #include "fluid_rev.h"
+ #include "fluid_voice.h"
+ #include "fluid_chorus.h"
+-#include "fluid_ladspa.h"
+-#include "fluid_midi_router.h"
++//#include "fluid_ladspa.h"
++//#include "fluid_midi_router.h"
+ #include "fluid_sys.h"
+ #include "fluid_rvoice_event.h"
+ 
+diff --git b/libs/fluidsynth/src/fluid_sys.c a/libs/fluidsynth/src/fluid_sys.c
+index ee7d8d9..328f255 100644
+--- b/libs/fluidsynth/src/fluid_sys.c
++++ a/libs/fluidsynth/src/fluid_sys.c
+@@ -686,7 +686,7 @@ fluid_thread_join(fluid_thread_t* thread)
+ }
+ 
+ 
+-void
++static void
+ fluid_timer_run (void *data)
+ {
+   fluid_timer_t *timer;
+@@ -950,6 +950,7 @@ fluid_ostream_printf (fluid_ostream_t out, char* format, ...)
+ #endif
+ }
+ 
++#if 0 // Ardour says: no, thanks
+ int fluid_server_socket_join(fluid_server_socket_t *server_socket)
+ {
+   return fluid_thread_join (server_socket->thread);
+@@ -1294,3 +1295,4 @@ int delete_fluid_server_socket(fluid_server_socket_t *server_socket)
+ }
+ 
+ #endif
++#endif
+diff --git b/libs/fluidsynth/src/fluid_tuning.c a/libs/fluidsynth/src/fluid_tuning.c
+index cc440aa..8977ed6 100644
+--- b/libs/fluidsynth/src/fluid_tuning.c
++++ a/libs/fluidsynth/src/fluid_tuning.c
+@@ -143,7 +143,7 @@ char* fluid_tuning_get_name(fluid_tuning_t* tuning)
+   return tuning->name;
+ }
+ 
+-void fluid_tuning_set_key(fluid_tuning_t* tuning, int key, double pitch)
++static void fluid_tuning_set_key(fluid_tuning_t* tuning, int key, double pitch)
+ {
+   tuning->pitch[key] = pitch;
+ }
+diff --git b/libs/fluidsynth/src/fluidsynth_priv.h a/libs/fluidsynth/src/fluidsynth_priv.h
+index faf2772..b01618d 100644
+--- b/libs/fluidsynth/src/fluidsynth_priv.h
++++ a/libs/fluidsynth/src/fluidsynth_priv.h
+@@ -28,14 +28,6 @@
+ #include "config.h"
+ #endif
+ 
+-#if defined(__POWERPC__) && !(defined(__APPLE__) && defined(__MACH__))
+-#include "config_maxmsp43.h"
+-#endif
+-
+-#if defined(WIN32) && !defined(MINGW32)
+-#include "config_win32.h"
+-#endif
+-
+ #if HAVE_STRING_H
+ #include <string.h>
+ #endif
+@@ -113,8 +105,6 @@
+ #endif
+ 
+ #if HAVE_WINDOWS_H
+-#include <winsock2.h>
+-#include <ws2tcpip.h>
+ #include <windows.h>
+ #endif
+ 
+@@ -131,6 +121,12 @@
+ #define STDOUT_FILENO 1
+ #define STDERR_FILENO 2
+ 
++#elif defined _MSC_VER
++
++#define STDIN_FILENO  _fileno(stdin)
++#define STDOUT_FILENO _fileno(stdout)
++#define STDERR_FILENO _fileno(stderr)
++
+ #endif
+ 
+ /* Darwin special defines (taken from config_macosx.h) */

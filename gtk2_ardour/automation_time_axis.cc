@@ -92,7 +92,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _parameter (p)
 	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
 	, _view (show_regions ? new AutomationStreamView (*this) : 0)
-	, auto_button (X_("")) /* force addition of a label */
+	, auto_dropdown ()
 	, _show_regions (show_regions)
 {
 	//concatenate plugin name and param name into the tooltip
@@ -128,7 +128,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	                                     ? "midi automation track fill"
 	                                     : "audio automation track fill");
 
-	automation_menu = 0;
 	auto_off_item = 0;
 	auto_touch_item = 0;
 	auto_write_item = 0;
@@ -149,18 +148,35 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
+	using namespace Menu_Helpers;
+
+	auto_dropdown.AddMenuElem (MenuElem (S_("Automation|Manual"), sigc::bind (sigc::mem_fun(*this,
+						&AutomationTimeAxisView::set_automation_state), (AutoState) ARDOUR::Off)));
+	auto_dropdown.AddMenuElem (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
+						&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+	auto_dropdown.AddMenuElem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this,
+						&AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+	auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this,
+						&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+
+	/* XXX translators: use a string here that will be at least as long
+	   as the longest automation label (see ::automation_state_changed()
+	   below). be sure to include a descender.
+	*/
+	auto_dropdown.set_sizing_text(_("Mgnual"));
+
 	hide_button.set_icon (ArdourIcon::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
-	auto_button.set_name ("route button");
+	auto_dropdown.set_name ("route button");
 	hide_button.set_name ("route button");
 
-	auto_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_dropdown.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
 
 	controls_table.set_no_show_all();
 
-	set_tooltip(auto_button, _("automation state"));
+	set_tooltip(auto_dropdown, _("automation state"));
 	set_tooltip(hide_button, _("hide track"));
 
 	const string str = gui_property ("height");
@@ -190,7 +206,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_table.set_border_width (1);
 	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
-	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (auto_dropdown, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
 	Gtk::DrawingArea *blank1 = manage (new Gtk::DrawingArea());
@@ -239,7 +255,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_table.show_all ();
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
-	auto_button.signal_clicked.connect (sigc::mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
 
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
@@ -298,29 +313,6 @@ AutomationTimeAxisView::route_going_away ()
 }
 
 void
-AutomationTimeAxisView::auto_clicked ()
-{
-	using namespace Menu_Helpers;
-
-	if (automation_menu == 0) {
-		automation_menu = manage (new Menu);
-		automation_menu->set_name ("ArdourContextMenu");
-		MenuList& items (automation_menu->items());
-
-		items.push_back (MenuElem (S_("Automation|Manual"), sigc::bind (sigc::mem_fun(*this,
-											      &AutomationTimeAxisView::set_automation_state), (AutoState) ARDOUR::Off)));
-		items.push_back (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
-				&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-		items.push_back (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this,
-				&AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-		items.push_back (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this,
-				&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
-	}
-
-	automation_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
 AutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (ignore_state_request) {
@@ -359,7 +351,7 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
-		auto_button.set_text (S_("Automation|Manual"));
+		auto_dropdown.set_text (S_("Automation|Manual"));
 		if (auto_off_item) {
 			ignore_state_request = true;
 			auto_off_item->set_active (true);
@@ -370,7 +362,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Play:
-		auto_button.set_text (_("Play"));
+		auto_dropdown.set_text (_("Play"));
 		if (auto_play_item) {
 			ignore_state_request = true;
 			auto_play_item->set_active (true);
@@ -381,7 +373,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Write:
-		auto_button.set_text (_("Write"));
+		auto_dropdown.set_text (_("Write"));
 		if (auto_write_item) {
 			ignore_state_request = true;
 			auto_write_item->set_active (true);
@@ -392,7 +384,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Touch:
-		auto_button.set_text (_("Touch"));
+		auto_dropdown.set_text (_("Touch"));
 		if (auto_touch_item) {
 			ignore_state_request = true;
 			auto_touch_item->set_active (true);
@@ -403,7 +395,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	default:
-		auto_button.set_text (_("???"));
+		auto_dropdown.set_text (_("???"));
 		break;
 	}
 }
@@ -483,14 +475,14 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 		if (h >= preset_height (HeightNormal)) {
 			if (!(_parameter.type() >= MidiCCAutomation &&
 			      _parameter.type() <= MidiChannelPressureAutomation)) {
-				auto_button.show();
+				auto_dropdown.show();
 			}
 			name_label.show();
 			hide_button.show();
 
 		} else if (h >= preset_height (HeightSmall)) {
 			controls_table.hide_all ();
-			auto_button.hide();
+			auto_dropdown.hide();
 			name_label.hide();
 		}
 	}

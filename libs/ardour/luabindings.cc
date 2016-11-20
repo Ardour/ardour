@@ -27,22 +27,30 @@
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
+#include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/buffer_set.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/fluid_synth.h"
 #include "ardour/interthread_info.h"
 #include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
 #include "ardour/luaproc.h"
 #include "ardour/meter.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
@@ -73,7 +81,7 @@
  *
  * Really!! A static function with a static variable in a library header
  * should never ever be replicated, even if it is a template.
- * But then again this is windows... what else can go wrong.
+ * But then again this is windows... what else can go wrong ?!
  */
 
 template <class T>
@@ -110,16 +118,11 @@ luabridge::getIdentityKey ()
 /* ...and this is the ugly part of it.
  *
  * We need to foward declare classes from gtk2_ardour
- * end explicily list classes which are used by gtk2_ardour's bindings.
+ * AND explicily list classes which are used by gtk2_ardour's bindings.
  *
- * This is needed because some of the GUI classes use objects from libardour
- * as function parameters and the .exe would re-create symbols for libardour
- * objects.
- *
- * Classes which don't use libardour symbols could be moved to
- * gtk2_ardour/luainstance.cc, but keeping this here reduces code
- * duplication and does not give the compiler a chance to even think
- * about replicating the symbols.
+ * This is required because some of the GUI classes use objects from libardour
+ * as function parameters or return values and the .exe would re-create
+ * symbols for libardour objects.
  */
 
 #define CLASSKEYS(CLS) \
@@ -133,62 +136,113 @@ luabridge::getIdentityKey ()
 	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
 	template void const* luabridge::ClassInfo< CLS >::getConstKey();
 
+CLASSINFO(ArdourMarker);
 CLASSINFO(MarkerSelection);
+CLASSINFO(PublicEditor);
+CLASSINFO(RegionSelection);
+CLASSINFO(Selection);
+CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
-CLASSINFO(TimeSelection);
-CLASSINFO(RegionSelection);
-CLASSINFO(PublicEditor);
-CLASSINFO(Selection);
-CLASSINFO(ArdourMarker);
+
+CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
+
+CLASSKEYS(void);
+CLASSKEYS(float);
+CLASSKEYS(unsigned char);
+
+CLASSKEYS(ArdourMarker*);
+
+CLASSKEYS(ARDOUR::AudioEngine);
+CLASSKEYS(ARDOUR::BufferSet);
+CLASSKEYS(ARDOUR::ChanCount);
+CLASSKEYS(ARDOUR::ChanMapping);
+CLASSKEYS(ARDOUR::DSP::DspShm);
+CLASSKEYS(ARDOUR::DataType);
+CLASSKEYS(ARDOUR::FluidSynth);
+CLASSKEYS(ARDOUR::Location);
+CLASSKEYS(ARDOUR::LuaAPI::Vamp);
+CLASSKEYS(ARDOUR::LuaOSC::Address);
+CLASSKEYS(ARDOUR::LuaProc);
+CLASSKEYS(ARDOUR::LuaTableRef);
+CLASSKEYS(ARDOUR::MidiModel::NoteDiffCommand);
+CLASSKEYS(ARDOUR::MonitorProcessor);
+CLASSKEYS(ARDOUR::RouteGroup);
+CLASSKEYS(ARDOUR::ParameterDescriptor);
+CLASSKEYS(ARDOUR::PeakMeter);
+CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(ARDOUR::Plugin::PresetRecord);
+CLASSKEYS(ARDOUR::PortEngine);
+CLASSKEYS(ARDOUR::PortManager);
+CLASSKEYS(ARDOUR::PresentationInfo);
+CLASSKEYS(ARDOUR::Session);
+CLASSKEYS(ARDOUR::SessionConfiguration);
+CLASSKEYS(ARDOUR::Source);
+
+CLASSKEYS(PBD::ID);
+CLASSKEYS(PBD::Configuration);
+CLASSKEYS(PBD::PropertyChange);
+CLASSKEYS(PBD::StatefulDestructible);
+
+CLASSKEYS(Evoral::Beats);
+CLASSKEYS(Evoral::Event<framepos_t>);
+
+
+CLASSKEYS(std::vector<std::string>);
+CLASSKEYS(std::vector<float>);
+CLASSKEYS(std::vector<float*>);
+CLASSKEYS(std::vector<double>);
+
+CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
+
+CLASSKEYS(std::list<ArdourMarker*>);
+CLASSKEYS(std::list<ARDOUR::AudioRange>);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats> >);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiPlaylist>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::MidiSource>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Readable>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(boost::shared_ptr<Evoral::Note<Evoral::Beats> >);
+CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Evoral::Beats> >);
+
+CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
+
+CLASSKEYS(Vamp::RealTime);
+CLASSKEYS(Vamp::PluginBase);
+CLASSKEYS(Vamp::PluginBase::ParameterDescriptor);
+CLASSKEYS(Vamp::Plugin);
+CLASSKEYS(Vamp::Plugin::OutputDescriptor);
+CLASSKEYS(Vamp::Plugin::Feature);
+CLASSKEYS(Vamp::Plugin::OutputList);
+CLASSKEYS(Vamp::Plugin::FeatureList);
+CLASSKEYS(Vamp::Plugin::FeatureSet);
 
 namespace LuaCairo {
 	class ImageSurface;
 	class PangoLayout;
 }
-CLASSKEYS(LuaCairo::ImageSurface);
-CLASSKEYS(LuaCairo::PangoLayout);
-
 namespace Cairo {
 	class Context;
 }
+
 CLASSKEYS(Cairo::Context);
-CLASSKEYS(std::vector<double>);
-CLASSKEYS(std::list<ArdourMarker*>);
-CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
-CLASSKEYS(ArdourMarker*);
-CLASSKEYS(ARDOUR::RouteGroup);
-CLASSKEYS(ARDOUR::LuaProc);
-CLASSKEYS(ARDOUR::DataType);
-CLASSKEYS(ARDOUR::ChanCount);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
-CLASSKEYS(ARDOUR::ParameterDescriptor);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
-CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
-CLASSKEYS(ARDOUR::LuaOSC::Address);
-CLASSKEYS(ARDOUR::Session);
-CLASSKEYS(ARDOUR::BufferSet);
-CLASSKEYS(ARDOUR::ChanMapping);
-CLASSKEYS(ARDOUR::DSP::DspShm);
-CLASSKEYS(ARDOUR::LuaTableRef);
-CLASSKEYS(PBD::ID);
-CLASSKEYS(ARDOUR::Location);
-CLASSKEYS(ARDOUR::PluginInfo);
-CLASSKEYS(PBD::PropertyChange);
-CLASSKEYS(std::vector<std::string>);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
-CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
-CLASSKEYS(std::list<ARDOUR::AudioRange>);
-CLASSKEYS(Evoral::Beats);
-CLASSKEYS(ARDOUR::PortEngine);
-CLASSKEYS(ARDOUR::PortManager);
-CLASSKEYS(ARDOUR::AudioEngine);
-CLASSKEYS(void);
-CLASSKEYS(float);
+CLASSKEYS(LuaCairo::ImageSurface);
+CLASSKEYS(LuaCairo::PangoLayout);
 
 #endif // end windows special case
 
@@ -228,6 +282,10 @@ LuaBindings::stddef (lua_State* L)
 		.beginStdVector <std::string> ("StringVector")
 		.endClass ()
 
+	// std::vector<float>
+		.beginStdVector <float> ("FloatVector")
+		.endClass ()
+
 	// register float array (uint8_t*)
 		.registerArray <uint8_t> ("ByteArray")
 
@@ -236,6 +294,10 @@ LuaBindings::stddef (lua_State* L)
 
 	// register float array (int32_t*)
 		.registerArray <int32_t> ("IntArray")
+
+	// std::vector<float*>
+		.beginStdVector <float*> ("FloatArrayVector")
+		.endClass ()
 
 	// TODO std::set
 		.endNamespace ();
@@ -275,6 +337,9 @@ LuaBindings::common (lua_State* L)
 
 		.deriveClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructible")
 		.endClass ()
+
+		.deriveClass <PBD::Configuration, PBD::Stateful> ("Configuration")
+		.endClass()
 
 		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
 		.endClass ()
@@ -352,12 +417,44 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("Timecode")
 		.beginClass <Timecode::BBT_Time> ("BBT_TIME")
 		.addConstructor <void (*) (uint32_t, uint32_t, uint32_t)> ()
+		.addData ("bars", &Timecode::BBT_Time::bars)
+		.addData ("beats", &Timecode::BBT_Time::beats)
+		.addData ("ticks", &Timecode::BBT_Time::ticks)
+		//.addStaticData ("ticks_per_beat", &Timecode::BBT_Time::ticks_per_beat, false)
 		.endClass ()
+
+		/* libtimecode enums */
+		.beginNamespace ("TimecodeFormat")
+		.addConst ("TC23976", Timecode::TimecodeFormat(Timecode::timecode_23976))
+		.addConst ("TC24", Timecode::TimecodeFormat(Timecode::timecode_24))
+		.addConst ("TC24976", Timecode::TimecodeFormat(Timecode::timecode_24976))
+		.addConst ("TC25", Timecode::TimecodeFormat(Timecode::timecode_25))
+		.addConst ("TC2997", Timecode::TimecodeFormat(Timecode::timecode_2997))
+		.addConst ("TC2997DF", Timecode::TimecodeFormat(Timecode::timecode_2997drop))
+		.addConst ("TC2997000", Timecode::TimecodeFormat(Timecode::timecode_2997000))
+		.addConst ("TC2997000DF", Timecode::TimecodeFormat(Timecode::timecode_2997000drop))
+		.addConst ("TC30", Timecode::TimecodeFormat(Timecode::timecode_30))
+		.addConst ("TC5994", Timecode::TimecodeFormat(Timecode::timecode_5994))
+		.addConst ("TC60", Timecode::TimecodeFormat(Timecode::timecode_60))
+		.endNamespace ()
 		.endNamespace ();
 
 	luabridge::getGlobalNamespace (L)
 
 		.beginNamespace ("Evoral")
+		.beginClass <Evoral::Event<framepos_t> > ("Event")
+		.addFunction ("clear", &Evoral::Event<framepos_t>::clear)
+		.addFunction ("size", &Evoral::Event<framepos_t>::size)
+		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
+		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
+		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::MIDIEvent<framepos_t>::time)
+		.endClass ()
+
+		.beginClass <Evoral::Beats> ("Beats")
+		.addConstructor <void (*) (double)> ()
+		.addFunction ("to_double", &Evoral::Beats::to_double)
+		.endClass ()
+
 		.beginClass <Evoral::Parameter> ("Parameter")
 		.addConstructor <void (*) (uint32_t, uint8_t, uint32_t)> ()
 		.addFunction ("type", &Evoral::Parameter::type)
@@ -399,6 +496,18 @@ LuaBindings::common (lua_State* L)
 		.addData ("to", &Evoral::Range<framepos_t>::to)
 		.endClass ()
 
+		.deriveWSPtrClass <Evoral::Sequence<Evoral::Beats>, Evoral::ControlSet> ("Sequence")
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::Note<Evoral::Beats> > ("NotePtr")
+		.addFunction ("time", &Evoral::Note<Evoral::Beats>::time)
+		.addFunction ("note", &Evoral::Note<Evoral::Beats>::note)
+		.addFunction ("velocity", &Evoral::Note<Evoral::Beats>::velocity)
+		.addFunction ("off_velocity", &Evoral::Note<Evoral::Beats>::off_velocity)
+		.addFunction ("length", &Evoral::Note<Evoral::Beats>::length)
+		.addFunction ("channel", &Evoral::Note<Evoral::Beats>::channel)
+		.endClass ()
+
 		/* libevoral enums */
 		.beginNamespace ("InterpolationStyle")
 		.addConst ("Discrete", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Discrete))
@@ -406,8 +515,125 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
 		.endNamespace ()
 
-		.endNamespace () // Evoral
+		.endNamespace (); // Evoral
 
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("Vamp")
+
+		.beginClass<Vamp::RealTime> ("RealTime")
+		.addConstructor <void (*) (int, int)> ()
+		.addData ("sec", &Vamp::RealTime::sec, false)
+		.addData ("nsec", &Vamp::RealTime::nsec, false)
+		.addFunction ("usec", &Vamp::RealTime::usec)
+		.addFunction ("msec", &Vamp::RealTime::msec)
+		.addFunction ("toString", &Vamp::RealTime::toString)
+		.addStaticFunction ("realTime2Frame", &Vamp::RealTime::realTime2Frame)
+		.addStaticFunction ("frame2RealTime", &Vamp::RealTime::frame2RealTime)
+		.endClass ()
+
+		.beginClass<Vamp::PluginBase> ("PluginBase")
+		.addFunction ("getIdentifier", &Vamp::PluginBase::getIdentifier)
+		.addFunction ("getName", &Vamp::PluginBase::getName)
+		.addFunction ("getDescription", &Vamp::PluginBase::getDescription)
+		.addFunction ("getMaker", &Vamp::PluginBase::getMaker)
+		.addFunction ("getCopyright", &Vamp::PluginBase::getCopyright)
+		.addFunction ("getPluginVersion", &Vamp::PluginBase::getPluginVersion)
+		.addFunction ("getParameterDescriptors", &Vamp::PluginBase::getParameterDescriptors)
+		.addFunction ("getParameter", &Vamp::PluginBase::getParameter)
+		.addFunction ("setParameter", &Vamp::PluginBase::setParameter)
+		.addFunction ("getPrograms", &Vamp::PluginBase::getPrograms)
+		.addFunction ("getCurrentProgram", &Vamp::PluginBase::getCurrentProgram)
+		.addFunction ("selectProgram", &Vamp::PluginBase::selectProgram)
+		.addFunction ("getType", &Vamp::PluginBase::getType)
+		.endClass ()
+
+		.beginNamespace ("PluginBase")
+		.beginClass<Vamp::PluginBase::ParameterDescriptor> ("ParameterDescriptor")
+		.addData ("identifier", &Vamp::PluginBase::ParameterDescriptor::identifier)
+		.addData ("name", &Vamp::PluginBase::ParameterDescriptor::name)
+		.addData ("description", &Vamp::PluginBase::ParameterDescriptor::description)
+		.addData ("unit", &Vamp::PluginBase::ParameterDescriptor::unit)
+		.addData ("minValue", &Vamp::PluginBase::ParameterDescriptor::minValue)
+		.addData ("maxValue", &Vamp::PluginBase::ParameterDescriptor::maxValue)
+		.addData ("defaultValue", &Vamp::PluginBase::ParameterDescriptor::defaultValue)
+		.addData ("isQuantized", &Vamp::PluginBase::ParameterDescriptor::isQuantized)
+		.addData ("quantizeStep", &Vamp::PluginBase::ParameterDescriptor::quantizeStep)
+		.addData ("valueNames", &Vamp::PluginBase::ParameterDescriptor::valueNames)
+		.endClass ()
+
+		.beginStdVector <Vamp::PluginBase::ParameterDescriptor> ("ParameterList")
+		.endClass ()
+		.endNamespace () // Vamp::PluginBase
+
+		.deriveClass<Vamp::Plugin, Vamp::PluginBase> ("Plugin")
+		//.addFunction ("process", &Vamp::Plugin::process) // unusable due to  float*const* -> LuaAPI::Vamp::process
+		.addFunction ("initialise", &Vamp::Plugin::initialise)
+		.addFunction ("reset", &Vamp::Plugin::reset)
+		.addFunction ("getInputDomain", &Vamp::Plugin::getInputDomain)
+		.addFunction ("getPreferredBlockSize", &Vamp::Plugin::getPreferredBlockSize)
+		.addFunction ("getPreferredStepSize", &Vamp::Plugin::getPreferredStepSize)
+		.addFunction ("getMinChannelCount", &Vamp::Plugin::getMinChannelCount)
+		.addFunction ("getMaxChannelCount", &Vamp::Plugin::getMaxChannelCount)
+		.addFunction ("getOutputDescriptors", &Vamp::Plugin::getOutputDescriptors)
+		.addFunction ("getRemainingFeatures", &Vamp::Plugin::getRemainingFeatures)
+		.addFunction ("getType", &Vamp::Plugin::getType)
+		.endClass ()
+
+		.beginNamespace ("Plugin")
+		.beginClass<Vamp::Plugin::OutputDescriptor> ("OutputDescriptor")
+		.addData ("identifier", &Vamp::Plugin::OutputDescriptor::identifier)
+		.addData ("description", &Vamp::Plugin::OutputDescriptor::description)
+		.addData ("unit", &Vamp::Plugin::OutputDescriptor::unit)
+		.addData ("hasFixedBinCount", &Vamp::Plugin::OutputDescriptor::hasFixedBinCount)
+		.addData ("binCount", &Vamp::Plugin::OutputDescriptor::binCount)
+		.addData ("binNames", &Vamp::Plugin::OutputDescriptor::binNames)
+		.addData ("hasKnownExtents", &Vamp::Plugin::OutputDescriptor::hasKnownExtents)
+		.addData ("minValue", &Vamp::Plugin::OutputDescriptor::minValue)
+		.addData ("maxValue", &Vamp::Plugin::OutputDescriptor::maxValue)
+		.addData ("isQuantized", &Vamp::Plugin::OutputDescriptor::isQuantized)
+		.addData ("quantizeStep", &Vamp::Plugin::OutputDescriptor::quantizeStep)
+		.addData ("sampleType", &Vamp::Plugin::OutputDescriptor::sampleType)
+		.addData ("sampleRate", &Vamp::Plugin::OutputDescriptor::sampleRate)
+		.addData ("hasDuration", &Vamp::Plugin::OutputDescriptor::hasDuration)
+		.endClass ()
+
+		/* Vamp::Plugin enums */
+		.beginNamespace ("InputDomain")
+		.addConst ("TimeDomain", Vamp::Plugin::InputDomain(Vamp::Plugin::TimeDomain))
+		.addConst ("FrequencyDomain", Vamp::Plugin::InputDomain(Vamp::Plugin::FrequencyDomain))
+		.endNamespace ()
+
+		/* Vamp::Plugin::OutputDescriptor enum */
+		.beginNamespace ("OutputDescriptor")
+		.beginNamespace ("SampleType")
+		.addConst ("OneSamplePerStep", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::OneSamplePerStep))
+		.addConst ("FixedSampleRate", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::FixedSampleRate))
+		.addConst ("VariableSampleRate", Vamp::Plugin::OutputDescriptor::SampleType(Vamp::Plugin::OutputDescriptor::VariableSampleRate))
+		.endNamespace ()
+		.endNamespace () /* Vamp::Plugin::OutputDescriptor */
+
+		.beginClass<Vamp::Plugin::Feature> ("Feature")
+		.addData ("hasTimestamp", &Vamp::Plugin::Feature::hasTimestamp, false)
+		.addData ("timestamp", &Vamp::Plugin::Feature::timestamp, false)
+		.addData ("hasDuration", &Vamp::Plugin::Feature::hasDuration, false)
+		.addData ("duration", &Vamp::Plugin::Feature::duration, false)
+		.addData ("values", &Vamp::Plugin::Feature::values, false)
+		.addData ("label", &Vamp::Plugin::Feature::label, false)
+		.endClass ()
+
+		.beginStdVector <Vamp::Plugin::OutputDescriptor> ("OutputList")
+		.endClass ()
+
+		.beginStdVector <Vamp::Plugin::Feature> ("FeatureList")
+		.endClass ()
+
+		.beginStdMap <int, Vamp::Plugin::FeatureList> ("FeatureSet")
+		.endClass ()
+
+		.endNamespace () // Vamp::Plugin
+		.endNamespace ();// Vamp
+
+	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 
 		.beginClass <InterThreadInfo> ("InterThreadInfo")
@@ -430,6 +656,16 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
 		.addVoidConstructor ()
+		.addData ("name", &PluginInfo::name, false)
+		.addData ("category", &PluginInfo::category, false)
+		.addData ("creator", &PluginInfo::creator, false)
+		.addData ("path", &PluginInfo::path, false)
+		.addData ("n_inputs", &PluginInfo::n_inputs, false)
+		.addData ("n_outputs", &PluginInfo::n_outputs, false)
+		.addData ("type", &PluginInfo::type, false)
+		.addData ("unique_id", &PluginInfo::unique_id, false)
+		.addFunction ("is_instrument", &PluginInfo::is_instrument)
+		.addFunction ("get_presets", &PluginInfo::get_presets)
 		.endClass ()
 
 		.beginNamespace ("Route")
@@ -489,8 +725,10 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <Location, PBD::StatefulDestructible> ("Location")
+		.addFunction ("name", &Location::name)
 		.addFunction ("locked", &Location::locked)
 		.addFunction ("lock", &Location::lock)
+		.addFunction ("unlock", &Location::unlock)
 		.addFunction ("start", &Location::start)
 		.addFunction ("_end", &Location::end) // XXX "end" is a lua reserved word
 		.addFunction ("length", &Location::length)
@@ -498,15 +736,26 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_end", &Location::set_end)
 		.addFunction ("set_length", &Location::set)
 		.addFunction ("move_to", &Location::move_to)
+		.addFunction ("matches", &Location::matches)
+		.addFunction ("flags", &Location::flags)
+		.addFunction ("is_auto_punch", &Location::is_auto_punch)
+		.addFunction ("is_auto_loop", &Location::is_auto_loop)
+		.addFunction ("is_mark", &Location::is_mark)
+		.addFunction ("is_hidden", &Location::is_hidden)
+		.addFunction ("is_cd_marker", &Location::is_cd_marker)
+		.addFunction ("is_session_range", &Location::is_session_range)
+		.addFunction ("is_range_marker", &Location::is_range_marker)
 		.endClass ()
 
 		.deriveClass <Locations, PBD::StatefulDestructible> ("Locations")
+		.addFunction ("list", static_cast<Locations::LocationList (Locations::*)()>(&Locations::list))
 		.addFunction ("auto_loop_location", &Locations::auto_loop_location)
 		.addFunction ("auto_punch_location", &Locations::auto_punch_location)
 		.addFunction ("session_range_location", &Locations::session_range_location)
 		.addFunction ("first_mark_after", &Locations::first_mark_after)
 		.addFunction ("first_mark_before", &Locations::first_mark_before)
 		.addFunction ("first_mark_at", &Locations::mark_at)
+		.addFunction ("remove", &Locations::remove)
 		.addRefFunction ("marks_either_side", &Locations::marks_either_side)
 		.addRefFunction ("find_all_between", &Locations::find_all_between)
 		.endClass ()
@@ -529,12 +778,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("sends_output", &Port::sends_output)
 		.addFunction ("connected", &Port::connected)
 		.addFunction ("disconnect_all", &Port::disconnect_all)
-		.addFunction ("connected_to_name", (bool (Port::*)(std::string const &)const)&Port::connected_to)
-		.addFunction ("connect_by_name", (int (Port::*)(std::string const &))&Port::connect)
-		.addFunction ("disconnect_by_name", (int (Port::*)(std::string const &))&Port::disconnect)
-		.addFunction ("connected_to", (bool (Port::*)(Port*)const)&Port::connected_to)
-		.addFunction ("connect", (int (Port::*)(Port*))&Port::connect)
-		.addFunction ("disconnect", (int (Port::*)(Port*))&Port::disconnect)
+		.addFunction ("connected_to", (bool (Port::*)(std::string const &)const)&Port::connected_to)
+		.addFunction ("connect", (int (Port::*)(std::string const &))&Port::connect)
+		.addFunction ("disconnect", (int (Port::*)(std::string const &))&Port::disconnect)
 		//.addStaticFunction ("port_offset", &Port::port_offset) // static
 		.endClass ()
 
@@ -563,6 +809,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("remove_port", &IO::remove_port)
 		.addFunction ("connect", &IO::connect)
 		.addFunction ("disconnect", (int (IO::*)(boost::shared_ptr<Port>, std::string, void *))&IO::disconnect)
+		.addFunction ("disconnect_all", (int (IO::*)(void *))&IO::disconnect)
 		.addFunction ("physically_connected", &IO::physically_connected)
 		.addFunction ("has_port", &IO::has_port)
 		.addFunction ("nth", &IO::nth)
@@ -572,8 +819,20 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_ports", &IO::n_ports)
 		.endClass ()
 
+		.deriveWSPtrClass <PannerShell, SessionObject> ("PannerShell")
+		.addFunction ("bypassed", &PannerShell::bypassed)
+		.addFunction ("set_bypassed", &PannerShell::set_bypassed)
+		.endClass ()
+
 		.beginClass <RouteGroup> ("RouteGroup")
 		// stub RouteGroup* is needed for new_audio_track()
+		.endClass ()
+
+		.deriveClass <PresentationInfo, PBD::Stateful> ("PresentationInfo")
+		.addFunction ("color", &PresentationInfo::color)
+		.addFunction ("set_color", &PresentationInfo::set_color)
+		.addFunction ("order", &PresentationInfo::order)
+		.addConst ("max_order", ARDOUR::PresentationInfo::max_order)
 		.endClass ()
 
 		.deriveWSPtrClass <Stripable, SessionObject> ("Stripable")
@@ -592,6 +851,35 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("trim_control", &Stripable::trim_control)
 		.addFunction ("rec_enable_control", &Stripable::rec_enable_control)
 		.addFunction ("rec_safe_control", &Stripable::rec_safe_control)
+		.addFunction ("pan_azimuth_control", &Stripable::pan_azimuth_control)
+		.addFunction ("pan_elevation_control", &Stripable::pan_elevation_control)
+		.addFunction ("pan_width_control", &Stripable::pan_width_control)
+		.addFunction ("pan_frontback_control", &Stripable::pan_frontback_control)
+		.addFunction ("pan_lfe_control", &Stripable::pan_lfe_control)
+		.addFunction ("send_level_control", &Stripable::send_level_controllable)
+		.addFunction ("send_enable_control", &Stripable::send_level_controllable)
+		.addFunction ("send_name", &Stripable::send_name)
+		.addFunction ("monitor_control", &Stripable::monitor_control)
+		.addFunction ("master_send_enable_control ", &Stripable::master_send_enable_controllable )
+		.addFunction ("comp_enable_control ", &Stripable::comp_enable_controllable )
+		.addFunction ("comp_threshold_control ", &Stripable::comp_threshold_controllable )
+		.addFunction ("comp_speed_control ", &Stripable::comp_speed_controllable )
+		.addFunction ("comp_mode_control ", &Stripable::comp_mode_controllable )
+		.addFunction ("comp_makeup_control ", &Stripable::comp_makeup_controllable )
+		.addFunction ("comp_redux_control ", &Stripable::comp_redux_controllable )
+		.addFunction ("comp_mode_name", &Stripable::comp_mode_name)
+		.addFunction ("comp_speed_name", &Stripable::comp_speed_name)
+		.addFunction ("eq_band_cnt ", &Stripable::eq_band_cnt)
+		.addFunction ("eq_band_name", &Stripable::eq_band_name)
+		.addFunction ("eq_gain_control", &Stripable::eq_gain_controllable)
+		.addFunction ("eq_freq_control ", &Stripable::eq_freq_controllable )
+		.addFunction ("eq_q_control ", &Stripable::eq_q_controllable )
+		.addFunction ("eq_shape_control ", &Stripable::eq_shape_controllable )
+		.addFunction ("eq_enable_control ", &Stripable::eq_enable_controllable )
+		.addFunction ("eq_hpf_control ", &Stripable::eq_hpf_controllable )
+		.addFunction ("set_presentation_order", &Stripable::set_presentation_order)
+		.addFunction ("presentation_info_ptr", &Stripable::presentation_info_ptr)
+
 		.endClass ()
 
 		.deriveWSPtrClass <Route, Stripable> ("Route")
@@ -606,8 +894,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("add_processor_by_index", &Route::add_processor_by_index)
 		.addFunction ("remove_processor", &Route::remove_processor)
 		.addFunction ("replace_processor", &Route::replace_processor)
+		.addFunction ("the_instrument", &Route::the_instrument)
 		.addFunction ("n_inputs", &Route::n_inputs)
 		.addFunction ("n_outputs", &Route::n_outputs)
+		.addFunction ("input", &Route::input)
+		.addFunction ("output", &Route::output)
+		.addFunction ("panner_shell", &Route::panner_shell)
 		.addFunction ("set_comment", &Route::set_comment)
 		.addFunction ("strict_io", &Route::strict_io)
 		.addFunction ("set_strict_io", &Route::set_strict_io)
@@ -620,9 +912,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("soloed", &Route::soloed)
 		.addFunction ("amp", &Route::amp)
 		.addFunction ("trim", &Route::trim)
+		.addFunction ("peak_meter", (boost::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
+		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
+		.addCast<AudioPlaylist> ("to_audioplaylist")
+		.addCast<MidiPlaylist> ("to_midiplaylist")
 		.addFunction ("region_by_id", &Playlist::region_by_id)
 		.addFunction ("data_type", &Playlist::data_type)
 		.addFunction ("n_regions", &Playlist::n_regions)
@@ -657,6 +953,14 @@ LuaBindings::common (lua_State* L)
 #endif
 		.endClass ()
 
+		.deriveWSPtrClass <AudioPlaylist, Playlist> ("AudioPlaylist")
+		.addFunction ("read", &AudioPlaylist::read)
+		.endClass ()
+
+		.deriveWSPtrClass <MidiPlaylist, Playlist> ("MidiPlaylist")
+		.addFunction ("set_note_mode", &MidiPlaylist::set_note_mode)
+		.endClass ()
+
 		.deriveWSPtrClass <Track, Route> ("Track")
 		.addCast<AudioTrack> ("to_audio_track")
 		.addCast<MidiTrack> ("to_midi_track")
@@ -674,7 +978,16 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <MidiTrack, Track> ("MidiTrack")
 		.endClass ()
 
+		.beginWSPtrClass <Readable> ("Readable")
+		.addFunction ("read", &Readable::read)
+		.addFunction ("readable_length", &Readable::readable_length)
+		.addFunction ("n_channels", &Readable::n_channels)
+		.endClass ()
+
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
+		.addCast<Readable> ("to_readable")
+		.addCast<MidiRegion> ("to_midiregion")
+		.addCast<AudioRegion> ("to_audioregion")
 		/* properties */
 		.addFunction ("position", &Region::position)
 		.addFunction ("start", &Region::start)
@@ -709,6 +1022,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("nudge_position", &Region::nudge_position)
 		.addFunction ("move_to_natural_position", &Region::move_to_natural_position)
 		.addFunction ("move_start", &Region::move_start)
+		.addFunction ("master_sources", &Region::master_sources)
+		.addFunction ("master_source_names", &Region::master_source_names)
+		.addFunction ("n_channels", &Region::n_channels)
 		.addFunction ("trim_front", &Region::trim_front)
 		.addFunction ("trim_end", &Region::trim_end)
 		.addFunction ("trim_to", &Region::trim_to)
@@ -720,16 +1036,87 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("lower_to_bottom", &Region::lower_to_bottom)
 		.addFunction ("set_sync_position", &Region::set_sync_position)
 		.addFunction ("clear_sync_position", &Region::clear_sync_position)
+		.addFunction ("quarter_note", &Region::quarter_note)
 		.addFunction ("set_hidden", &Region::set_hidden)
 		.addFunction ("set_muted", &Region::set_muted)
 		.addFunction ("set_opaque", &Region::set_opaque)
 		.addFunction ("set_locked", &Region::set_locked)
 		.addFunction ("set_video_locked", &Region::set_video_locked)
 		.addFunction ("set_position_locked", &Region::set_position_locked)
+		.addFunction ("source", &Region::source)
 		.endClass ()
 
-		.beginWSPtrClass <Source> ("Source")
+		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
+		.addFunction ("do_export", &MidiRegion::do_export)
+		.addFunction ("midi_source", &MidiRegion::midi_source)
+		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::midi_source)
+		.addFunction ("start_beats", &MidiRegion::start_beats)
+		.addFunction ("length_beats", &MidiRegion::length_beats)
 		.endClass ()
+
+		.deriveWSPtrClass <AudioRegion, Region> ("AudioRegion")
+		.addFunction ("audio_source", &AudioRegion::audio_source)
+		.addFunction ("set_scale_amplitude", &AudioRegion::set_scale_amplitude)
+		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
+		.endClass ()
+
+		.deriveWSPtrClass <Source, SessionObject> ("Source")
+		.addCast<AudioSource> ("to_audiosource")
+		.addCast<MidiSource> ("to_midisource")
+		.addFunction ("timestamp", &Source::timestamp)
+		.addFunction ("empty", &Source::empty)
+		.addFunction ("length", &Source::length)
+		.addFunction ("natural_position", &Source::natural_position)
+		.addFunction ("destructive", &Source::destructive)
+		.addFunction ("writable", &Source::writable)
+		.addFunction ("has_been_analysed", &Source::has_been_analysed)
+		.addFunction ("can_be_analysed", &Source::can_be_analysed)
+		.addFunction ("timeline_position", &Source::timeline_position)
+		.addFunction ("use_count", &Source::use_count)
+		.addFunction ("used", &Source::used)
+		.addFunction ("ancestor_name", &Source::ancestor_name)
+		.endClass ()
+
+		.deriveWSPtrClass <MidiSource, Source> ("MidiSource")
+		.addFunction ("empty", &MidiSource::empty)
+		.addFunction ("length", &MidiSource::length)
+		.addFunction ("model", &MidiSource::model)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioSource, Source> ("AudioSource")
+		.addCast<Readable> ("to_readable")
+		.addFunction ("readable_length", &AudioSource::readable_length)
+		.addFunction ("n_channels", &AudioSource::n_channels)
+		.addFunction ("empty", &Source::empty)
+		.addFunction ("length", &Source::length)
+		.addFunction ("read", &AudioSource::read)
+		.addFunction ("sample_rate", &AudioSource::sample_rate)
+		.addFunction ("captured_for", &AudioSource::captured_for)
+		.endClass ()
+
+		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
+		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
+		.endClass ()
+
+		.deriveWSPtrClass <AutomatableSequence<Evoral::Beats>, Automatable> ("AutomatableSequence")
+		.addCast<Evoral::Sequence<Evoral::Beats> > ("to_sequence")
+		.endClass ()
+
+		.deriveWSPtrClass <MidiModel, AutomatableSequence<Evoral::Beats> > ("MidiModel")
+		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_command)
+		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
+		.endClass ()
+
+		.beginNamespace ("MidiModel")
+		.deriveClass<ARDOUR::MidiModel::DiffCommand, Command> ("DiffCommand")
+		.endClass ()
+
+		.deriveClass<ARDOUR::MidiModel::NoteDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")
+		.addFunction ("add", &ARDOUR::MidiModel::NoteDiffCommand::add)
+		.addFunction ("remove", &ARDOUR::MidiModel::NoteDiffCommand::remove)
+		.endClass ()
+
+		.endNamespace () /* ARDOUR::MidiModel */
 
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
 		.addVoidConstructor ()
@@ -739,9 +1126,7 @@ LuaBindings::common (lua_State* L)
 		.addData ("valid", &Plugin::PresetRecord::valid, false)
 		.endClass ()
 
-		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
-		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
-		.endClass ()
+		.beginStdVector <Plugin::PresetRecord> ("PresetVector").endClass ()
 
 		.deriveClass <ParameterDescriptor, Evoral::ParameterDescriptor> ("ParameterDescriptor")
 		.addVoidConstructor ()
@@ -750,6 +1135,8 @@ LuaBindings::common (lua_State* L)
 		.addStaticFunction ("midi_note_name", &ParameterDescriptor::midi_note_name)
 		.endClass ()
 
+		.beginStdVector <boost::shared_ptr<ARDOUR::Processor> > ("ProcessorVector").endClass ()
+
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
 		.addCast<Automatable> ("to_automatable")
 		.addCast<PluginInsert> ("to_insert")
@@ -757,16 +1144,19 @@ LuaBindings::common (lua_State* L)
 		.addCast<IOProcessor> ("to_ioprocessor")
 		.addCast<UnknownProcessor> ("to_unknownprocessor")
 		.addCast<Amp> ("to_amp")
-#if 0 // those objects are not yet bound
+		.addCast<PeakMeter> ("to_peakmeter")
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
+#if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
 		.addCast<DelayLine> ("to_delayline")
-		.addCast<PeakMeter> ("to_meter")
 #endif
+		.addCast<PeakMeter> ("to_meter")
 		.addFunction ("display_name", &Processor::display_name)
 		.addFunction ("active", &Processor::active)
 		.addFunction ("activate", &Processor::activate)
 		.addFunction ("deactivate", &Processor::deactivate)
+		.addFunction ("output_streams", &PluginInsert::output_streams)
+		.addFunction ("input_streams", &PluginInsert::input_streams)
 		.endClass ()
 
 		.deriveWSPtrClass <IOProcessor, Processor> ("IOProcessor")
@@ -780,9 +1170,21 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Delivery, IOProcessor> ("Delivery")
+		.addFunction ("panner_shell", &Route::panner_shell)
 		.endClass ()
 
+		.beginNamespace ("Plugin")
+		.beginClass <Plugin::IOPortDescription> ("IOPortDescription")
+		.addData ("name", &Plugin::IOPortDescription::name)
+		.addData ("is_sidechain", &Plugin::IOPortDescription::is_sidechain)
+		.addData ("group_name", &Plugin::IOPortDescription::group_name)
+		.addData ("group_channel", &Plugin::IOPortDescription::group_channel)
+		.endClass ()
+		.endNamespace ()
+
 		.deriveWSPtrClass <Plugin, PBD::StatefulDestructible> ("Plugin")
+		.addCast<LuaProc> ("to_luaproc")
+		.addFunction ("unique_id", &Plugin::unique_id)
 		.addFunction ("label", &Plugin::label)
 		.addFunction ("name", &Plugin::name)
 		.addFunction ("maker", &Plugin::maker)
@@ -793,8 +1195,15 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("load_preset", &Plugin::load_preset)
 		.addFunction ("parameter_is_input", &Plugin::parameter_is_input)
 		.addFunction ("get_docs", &Plugin::get_docs)
+		.addFunction ("get_info", &Plugin::get_info)
 		.addFunction ("get_parameter_docs", &Plugin::get_parameter_docs)
+		.addFunction ("describe_io_port", &Plugin::describe_io_port)
 		.addRefFunction ("get_parameter_descriptor", &Plugin::get_parameter_descriptor)
+		.endClass ()
+
+		.deriveWSPtrClass <LuaProc, Plugin> ("LuaProc")
+		.addFunction ("shmem", &LuaProc::instance_shm)
+		.addFunction ("table", &LuaProc::instance_ref)
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert, Processor> ("PluginInsert")
@@ -806,7 +1215,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("output_map", (ARDOUR::ChanMapping (PluginInsert::*)(uint32_t) const)&PluginInsert::output_map)
 		.addFunction ("set_input_map", &PluginInsert::set_input_map)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
-		.addFunction ("sidechain_input", &PluginInsert::sidechain_input)
+		.addFunction ("natural_output_streams", &PluginInsert::natural_output_streams)
+		.addFunction ("natural_input_streams", &PluginInsert::natural_input_streams)
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
@@ -866,6 +1276,41 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
 		.endClass ()
 
+		.deriveWSPtrClass <PeakMeter, Processor> ("PeakMeter")
+		.addFunction ("meter_level", &PeakMeter::meter_level)
+		.addFunction ("set_type", &PeakMeter::set_type)
+		.addFunction ("reset_max", &PeakMeter::reset_max)
+		.endClass ()
+
+		.deriveWSPtrClass <MonitorProcessor, Processor> ("MonitorProcessor")
+		.addFunction ("set_cut_all", &MonitorProcessor::set_cut_all)
+		.addFunction ("set_dim_all", &MonitorProcessor::set_dim_all)
+		.addFunction ("set_polarity", &MonitorProcessor::set_polarity)
+		.addFunction ("set_cut", &MonitorProcessor::set_cut)
+		.addFunction ("set_dim", &MonitorProcessor::set_dim)
+		.addFunction ("set_solo", &MonitorProcessor::set_solo)
+		.addFunction ("set_mono", &MonitorProcessor::set_mono)
+		.addFunction ("dim_level", &MonitorProcessor::dim_level)
+		.addFunction ("solo_boost_level", &MonitorProcessor::solo_boost_level)
+		.addFunction ("dimmed", &MonitorProcessor::dimmed)
+		.addFunction ("soloed", &MonitorProcessor::soloed)
+		.addFunction ("inverted", &MonitorProcessor::inverted)
+		.addFunction ("cut", &MonitorProcessor::cut)
+		.addFunction ("cut_all", &MonitorProcessor::cut_all)
+		.addFunction ("dim_all", &MonitorProcessor::dim_all)
+		.addFunction ("mono", &MonitorProcessor::mono)
+		.addFunction ("monitor_active", &MonitorProcessor::monitor_active)
+		.addFunction ("channel_cut_control", &MonitorProcessor::channel_cut_control)
+		.addFunction ("channel_dim_control", &MonitorProcessor::channel_dim_control)
+		.addFunction ("channel_polarity_control", &MonitorProcessor::channel_polarity_control)
+		.addFunction ("channel_solo_control", &MonitorProcessor::channel_solo_control)
+		.addFunction ("dim_control", &MonitorProcessor::dim_control)
+		.addFunction ("cut_control", &MonitorProcessor::cut_control)
+		.addFunction ("mono_control", &MonitorProcessor::mono_control)
+		.addFunction ("dim_level_control", &MonitorProcessor::dim_level_control)
+		.addFunction ("solo_boost_control", &MonitorProcessor::solo_boost_control)
+		.endClass ()
+
 		.deriveWSPtrClass <UnknownProcessor, Processor> ("UnknownProcessor")
 		.endClass ()
 
@@ -895,6 +1340,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
 		.beginConstStdList <boost::weak_ptr<Route> > ("WeakRouteList")
+		.endClass ()
+
+		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
+		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
 		.endClass ()
 
 		// std::list< boost::weak_ptr <AudioSource> >
@@ -934,8 +1383,10 @@ LuaBindings::common (lua_State* L)
 		.beginClass <Tempo> ("Tempo")
 		.addConstructor <void (*) (double, double)> ()
 		.addFunction ("note_type", &Tempo::note_type)
-		.addFunction ("beats_per_minute", &Tempo::beats_per_minute)
-		.addFunction ("frames_per_beat", &Tempo::frames_per_beat)
+		.addFunction ("note_types_per_minute",  (double (Tempo::*)() const)&Tempo::note_types_per_minute)
+		.addFunction ("quarter_notes_per_minute", &Tempo::quarter_notes_per_minute)
+		.addFunction ("frames_per_quarter_note", &Tempo::frames_per_quarter_note)
+		.addFunction ("frames_per_note_type", &Tempo::frames_per_note_type)
 		.endClass ()
 
 		.beginClass <Meter> ("Meter")
@@ -952,6 +1403,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("tempo_section_at_frame", &TempoMap::tempo_section_at_frame)
 		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_frame)
 		.addFunction ("meter_section_at_beat", &TempoMap::meter_section_at_beat)
+		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_frame)
+		.addFunction ("exact_beat_at_frame", &TempoMap::exact_beat_at_frame)
+		.addFunction ("exact_qn_at_frame", &TempoMap::exact_qn_at_frame)
 		.endClass ()
 
 		.beginClass <MetricSection> ("MetricSection")
@@ -1044,6 +1498,36 @@ LuaBindings::common (lua_State* L)
 		.addConst ("SrcBest", ARDOUR::SrcQuality(SrcBest))
 		.endNamespace ()
 
+		.beginNamespace ("MeterType")
+		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
+		.addConst ("MeterMaxPeak", ARDOUR::MeterType(MeterMaxPeak))
+		.addConst ("MeterPeak", ARDOUR::MeterType(MeterPeak))
+		.addConst ("MeterKrms", ARDOUR::MeterType(MeterKrms))
+		.addConst ("MeterK20", ARDOUR::MeterType(MeterK20))
+		.addConst ("MeterK14", ARDOUR::MeterType(MeterK14))
+		.addConst ("MeterIEC1DIN", ARDOUR::MeterType(MeterIEC1DIN))
+		.addConst ("MeterIEC1NOR", ARDOUR::MeterType(MeterIEC1NOR))
+		.addConst ("MeterIEC2BBC", ARDOUR::MeterType(MeterIEC2BBC))
+		.addConst ("MeterIEC2EBU", ARDOUR::MeterType(MeterIEC2EBU))
+		.addConst ("MeterVU", ARDOUR::MeterType(MeterVU))
+		.addConst ("MeterK12", ARDOUR::MeterType(MeterK12))
+		.addConst ("MeterPeak0dB", ARDOUR::MeterType(MeterPeak0dB))
+		.addConst ("MeterMCP", ARDOUR::MeterType(MeterMCP))
+		.endNamespace ()
+
+		.beginNamespace ("MeterPoint")
+		.addConst ("MeterInput", ARDOUR::MeterPoint(MeterInput))
+		.addConst ("MeterPreFader", ARDOUR::MeterPoint(MeterPreFader))
+		.addConst ("MeterPostFader", ARDOUR::MeterPoint(MeterPostFader))
+		.addConst ("MeterOutput", ARDOUR::MeterPoint(MeterOutput))
+		.addConst ("MeterCustom", ARDOUR::MeterPoint(MeterCustom))
+		.endNamespace ()
+
+		.beginNamespace ("NoteMode")
+		.addConst ("Sustained", ARDOUR::NoteMode(Sustained))
+		.addConst ("Percussive", ARDOUR::NoteMode(Percussive))
+		.endNamespace ()
+
 		.beginNamespace ("PortFlags")
 		.addConst ("IsInput", ARDOUR::PortFlags(IsInput))
 		.addConst ("IsOutput", ARDOUR::PortFlags(IsOutput))
@@ -1083,6 +1567,34 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NonLayered", ARDOUR::TrackMode(NonLayered))
 		.addConst ("Destructive", ARDOUR::TrackMode(Destructive))
 		.endNamespace ()
+
+		.beginNamespace ("SampleFormat")
+		.addConst ("Float", ARDOUR::SampleFormat(FormatFloat))
+		.addConst ("Int24", ARDOUR::SampleFormat(FormatInt24))
+		.addConst ("Int16", ARDOUR::SampleFormat(FormatInt16))
+		.endNamespace ()
+
+		.beginNamespace ("HeaderFormat")
+		.addConst ("BWF", ARDOUR::HeaderFormat(BWF))
+		.addConst ("WAVE", ARDOUR::HeaderFormat(WAVE))
+		.addConst ("WAVE64", ARDOUR::HeaderFormat(WAVE64))
+		.addConst ("CAF", ARDOUR::HeaderFormat(CAF))
+		.addConst ("AIFF", ARDOUR::HeaderFormat(AIFF))
+		.addConst ("iXML", ARDOUR::HeaderFormat(iXML))
+		.addConst ("RF64", ARDOUR::HeaderFormat(RF64))
+		.addConst ("RF64_WAV", ARDOUR::HeaderFormat(RF64_WAV))
+		.addConst ("MBWF", ARDOUR::HeaderFormat(MBWF))
+		.endNamespace ()
+
+		.beginNamespace ("InsertMergePolicy")
+		.addConst ("Reject", ARDOUR::InsertMergePolicy(InsertMergeReject))
+		.addConst ("Relax", ARDOUR::InsertMergePolicy(InsertMergeRelax))
+		.addConst ("Replace", ARDOUR::InsertMergePolicy(InsertMergeReplace))
+		.addConst ("TruncateExisting", ARDOUR::InsertMergePolicy(InsertMergeTruncateExisting))
+		.addConst ("TruncateAddition", ARDOUR::InsertMergePolicy(InsertMergeTruncateAddition))
+		.addConst ("Extend", ARDOUR::InsertMergePolicy(InsertMergeExtend))
+		.endNamespace ()
+
 		.endNamespace (); // end ARDOUR
 
 	luabridge::getGlobalNamespace (L)
@@ -1162,6 +1674,25 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_buffer_size", &AudioEngine::set_buffer_size)
 		.addFunction ("get_last_backend_error", &AudioEngine::get_last_backend_error)
 		.endClass()
+
+		.deriveClass <SessionConfiguration, PBD::Configuration> ("SessionConfiguration")
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+#define CONFIG_VARIABLE(Type,var,name,value) \
+		.addFunction ("get_" # var, &SessionConfiguration::get_##var) \
+		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
+		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
+
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
+		.addFunction ("get_" # var, &SessionConfiguration::get_##var) \
+		.addFunction ("set_" # var, &SessionConfiguration::set_##var) \
+		.addProperty (#var, &SessionConfiguration::get_##var, &SessionConfiguration::set_##var)
+
+#include "ardour/session_configuration_vars.h"
+
+#undef CONFIG_VARIABLE
+#undef CONFIG_VARIABLE_SPECIAL
+		.endClass()
 		.endNamespace ();
 
 	// basic representation of Session
@@ -1182,6 +1713,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("timecode_drop_frames", &Session::timecode_drop_frames)
 		.addFunction ("request_locate", &Session::request_locate)
 		.addFunction ("request_stop", &Session::request_stop)
+		.addFunction ("request_play_loop", &Session::request_play_loop)
+		.addFunction ("get_play_loop", &Session::get_play_loop)
 		.addFunction ("last_transport_start", &Session::last_transport_start)
 		.addFunction ("goto_start", &Session::goto_start)
 		.addFunction ("goto_end", &Session::goto_end)
@@ -1197,6 +1730,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
 		.addFunction ("record_status", &Session::record_status)
+		.addFunction ("maybe_enable_record", &Session::maybe_enable_record)
+		.addFunction ("disable_record", &Session::disable_record)
 		.addFunction ("route_by_id", &Session::route_by_id)
 		.addFunction ("route_by_name", &Session::route_by_name)
 		.addFunction ("get_remote_nth_stripable", &Session::get_remote_nth_stripable)
@@ -1222,6 +1757,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("worst_input_latency", &Session::worst_input_latency)
 		.addFunction ("worst_track_latency", &Session::worst_track_latency)
 		.addFunction ("worst_playback_latency", &Session::worst_playback_latency)
+		.addFunction ("cfg", &Session::cfg)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
@@ -1259,81 +1795,28 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addRefFunction ("get_processor_param", ARDOUR::LuaAPI::get_processor_param)
+		.addRefFunction ("get_plugin_insert_param", ARDOUR::LuaAPI::get_plugin_insert_param)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
 		.addCFunction ("hsla_to_rgba", ARDOUR::LuaAPI::hsla_to_rgba)
 		.addFunction ("usleep", Glib::usleep)
+		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
+		.addFunction ("new_noteptr", ARDOUR::LuaAPI::new_noteptr)
+
+		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
+		.addConstructor <void (*) (const std::string&, float)> ()
+		.addStaticFunction ("list_plugins", &ARDOUR::LuaAPI::Vamp::list_plugins)
+		.addFunction ("plugin", &ARDOUR::LuaAPI::Vamp::plugin)
+		.addFunction ("analyze", &ARDOUR::LuaAPI::Vamp::analyze)
+		.addFunction ("reset", &ARDOUR::LuaAPI::Vamp::reset)
+		.addFunction ("initialize", &ARDOUR::LuaAPI::Vamp::initialize)
+		.addFunction ("process", &ARDOUR::LuaAPI::Vamp::process)
+		.endClass ()
+
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
-}
 
-void
-LuaBindings::dsp (lua_State* L)
-{
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
-
-		.beginClass <AudioBuffer> ("AudioBuffer")
-		.addEqualCheck ()
-		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
-		.addFunction ("silence", &AudioBuffer::silence)
-		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
-		.addFunction ("check_silence", &AudioBuffer::check_silence)
-		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, framecnt_t, framecnt_t, framecnt_t))&AudioBuffer::check_silence)
-		.endClass()
-
-		.beginClass <MidiBuffer> ("MidiBuffer")
-		.addEqualCheck ()
-		.addFunction ("silence", &MidiBuffer::silence)
-		.addFunction ("size", &MidiBuffer::size)
-		.addFunction ("empty", &MidiBuffer::empty)
-		.addFunction ("resize", &MidiBuffer::resize)
-		.addFunction ("copy", (void (MidiBuffer::*)(MidiBuffer const * const))&MidiBuffer::copy)
-		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::MIDIEvent<framepos_t>&))&MidiBuffer::push_back)
-		.addFunction ("push_back", (bool (MidiBuffer::*)(framepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
-		// TODO iterators..
-		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::MIDIEvent<framepos_t>, MidiBuffer>)
-		.endClass()
-
-		.beginClass <BufferSet> ("BufferSet")
-		.addEqualCheck ()
-		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
-		.addFunction ("get_midi", static_cast<MidiBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_midi))
-		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
-		.endClass()
-		.endNamespace ();
-
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("Evoral")
-		.beginClass <Evoral::Event<framepos_t> > ("Event")
-		.addFunction ("clear", &Evoral::Event<framepos_t>::clear)
-		.addFunction ("size", &Evoral::Event<framepos_t>::size)
-		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
-		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
-		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::MIDIEvent<framepos_t>::time)
-		.endClass ()
-
-		.beginClass <Evoral::Beats> ("Beats")
-		.addFunction ("to_double", &Evoral::Beats::to_double)
-		.endClass ()
-
-		.deriveClass <Evoral::MIDIEvent<framepos_t>, Evoral::Event<framepos_t> > ("MidiEvent")
-		// add Ctor?
-		.addFunction ("type", &Evoral::MIDIEvent<framepos_t>::type)
-		.addFunction ("channel", &Evoral::MIDIEvent<framepos_t>::channel)
-		.addFunction ("set_type", &Evoral::MIDIEvent<framepos_t>::set_type)
-		.addFunction ("set_channel", &Evoral::MIDIEvent<framepos_t>::set_channel)
-		.endClass ()
-		.endNamespace ();
-
-	// dsp releated session functions
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
-		.beginClass <Session> ("Session")
-		.addFunction ("get_scratch_buffers", &Session::get_scratch_buffers)
-		.addFunction ("get_silent_buffers", &Session::get_silent_buffers)
-		.endClass ()
-		.endNamespace ();
-
+	// DSP functions
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 		.beginNamespace ("DSP")
@@ -1400,6 +1883,81 @@ LuaBindings::dsp (lua_State* L)
 		.endClass ()
 
 		.endNamespace () // DSP
+		.endNamespace ();// end ARDOUR
+}
+
+void
+LuaBindings::dsp (lua_State* L)
+{
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+
+		.beginClass <AudioBuffer> ("AudioBuffer")
+		.addEqualCheck ()
+		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
+		.addFunction ("silence", &AudioBuffer::silence)
+		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
+		.addFunction ("check_silence", &AudioBuffer::check_silence)
+		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, framecnt_t, framecnt_t, framecnt_t))&AudioBuffer::check_silence)
+		.endClass()
+
+		.beginClass <MidiBuffer> ("MidiBuffer")
+		.addEqualCheck ()
+		.addFunction ("silence", &MidiBuffer::silence)
+		.addFunction ("size", &MidiBuffer::size)
+		.addFunction ("empty", &MidiBuffer::empty)
+		.addFunction ("resize", &MidiBuffer::resize)
+		.addFunction ("copy", (void (MidiBuffer::*)(MidiBuffer const * const))&MidiBuffer::copy)
+		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::MIDIEvent<framepos_t>&))&MidiBuffer::push_back)
+		.addFunction ("push_back", (bool (MidiBuffer::*)(framepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
+		// TODO iterators..
+		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::MIDIEvent<framepos_t>, MidiBuffer>)
+		.endClass()
+
+		.beginClass <BufferSet> ("BufferSet")
+		.addEqualCheck ()
+		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
+		.addFunction ("get_midi", static_cast<MidiBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_midi))
+		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
+		.endClass()
+		.endNamespace ();
+
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("Evoral")
+		.deriveClass <Evoral::MIDIEvent<framepos_t>, Evoral::Event<framepos_t> > ("MidiEvent")
+		// add Ctor?
+		.addFunction ("type", &Evoral::MIDIEvent<framepos_t>::type)
+		.addFunction ("channel", &Evoral::MIDIEvent<framepos_t>::channel)
+		.addFunction ("set_type", &Evoral::MIDIEvent<framepos_t>::set_type)
+		.addFunction ("set_channel", &Evoral::MIDIEvent<framepos_t>::set_channel)
+		.endClass ()
+		.endNamespace ();
+
+	// dsp releated session functions
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginClass <Session> ("Session")
+		.addFunction ("get_scratch_buffers", &Session::get_scratch_buffers)
+		.addFunction ("get_silent_buffers", &Session::get_silent_buffers)
+		.endClass ()
+		.endNamespace ();
+
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginClass <FluidSynth> ("FluidSynth")
+		.addConstructor <void (*) (float, int)> ()
+		.addFunction ("load_sf2", &FluidSynth::load_sf2)
+		.addFunction ("synth", &FluidSynth::synth)
+		.addFunction ("midi_event", &FluidSynth::midi_event)
+		.addFunction ("panic", &FluidSynth::panic)
+		.addFunction ("select_program", &FluidSynth::select_program)
+		.addFunction ("program_count", &FluidSynth::program_count)
+		.addFunction ("program_name", &FluidSynth::program_name)
+		.endClass ()
+		.endNamespace ();
+
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
 
 		.beginClass <LuaTableRef> ("LuaTableRef")
 		.addCFunction ("get", &LuaTableRef::get)
@@ -1420,7 +1978,7 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 
-		.addFunction<RouteList (Session::*)(uint32_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
+		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track
 		//.addFunction ("new_midi_track", &Session::new_midi_track)
 		.endClass ()

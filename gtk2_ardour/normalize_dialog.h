@@ -32,17 +32,24 @@ public:
 	NormalizeDialog (bool);
 
 	bool normalize_individually () const;
-	double target () const;
+	bool constrain_rms () const;
+	double target_peak () const;
+	double target_rms () const;
 	int run ();
 
 private:
 	void update_progress_gui (float);
 	void button_clicked (int);
+	void update_sensitivity ();
 
 	Gtk::RadioButton* _normalize_individually;
-	Gtk::SpinButton* _spin;
+	Gtk::CheckButton* _constrain_rms;
+	Gtk::SpinButton*  _spin_peak;
+	Gtk::SpinButton*  _spin_rms;
 	Gtk::ProgressBar* _progress_bar;
 
 	static double _last_normalization_value;
+	static double _last_rms_target_value;
 	static bool _last_normalize_individually;
+	static bool _last_constrain_rms;
 };

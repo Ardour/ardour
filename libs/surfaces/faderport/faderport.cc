@@ -174,7 +174,7 @@ FaderPort::FaderPort (Session& s)
 	/* See comments about Stop above .. */
 	get_button (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
 	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_zero, this), true, ButtonState (RewindDown|StopDown));
-	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_start, this), true, ButtonState (RewindDown|ShiftDown));
+	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_start, this, false), true, ButtonState (RewindDown|ShiftDown));
 
 	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
 	get_button (Ffwd).set_action (boost::bind (&BasicUI::goto_end, this), true, ShiftDown);

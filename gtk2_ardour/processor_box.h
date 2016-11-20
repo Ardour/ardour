@@ -158,6 +158,7 @@ public:
 	/** Hide any widgets that should be hidden */
 	virtual void hide_things ();
 
+	void toggle_inline_display_visibility ();
 	void show_all_controls ();
 	void hide_all_controls ();
 	void add_control_state (XMLNode *) const;
@@ -236,9 +237,9 @@ private:
 
 	std::list<Control*> _controls;
 
-	void toggle_inline_display_visibility ();
 	void toggle_control_visibility (Control *);
 	void toggle_panner_link ();
+	void toggle_allow_feedback ();
 
 	class PluginDisplay : public Gtk::DrawingArea {
 	public:
@@ -454,6 +455,16 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Gtkmm2ext::Bindings* bindings;
 	static void register_actions();
 
+	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
+
+	static ProcSelection current_processor_selection () {
+		ProcSelection ps;
+		if (_current_processor_box) {
+			_current_processor_box->get_selected_processors (ps);
+		}
+		return ps;
+	}
+
 #ifndef NDEBUG
 	static bool show_all_processors;
 #endif
@@ -534,8 +545,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void compute_processor_sort_keys ();
 
 	void ab_plugins ();
-
-	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
 
 	void cut_processors (const ProcSelection&);
 	void copy_processors (const ProcSelection&);

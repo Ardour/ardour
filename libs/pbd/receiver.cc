@@ -37,23 +37,17 @@ Receiver::~Receiver ()
 void
 Receiver::hangup ()
 {
-	vector<sigc::connection *>::iterator i;
-
-	for (i = connections.begin(); i != connections.end (); i++) {
-		(*i)->disconnect ();
-		delete *i;
-	}
-
-	connections.erase (connections.begin(), connections.end());
+	connections.drop_connections ();
 }
 
 void
 Receiver::listen_to (Transmitter &transmitter)
 
 {
-	sigc::connection *c = new sigc::connection;
+	/* odd syntax here because boost's placeholders (_1, _2) are in an
+	   anonymous namespace which causes ambiguity with sigc++ (and will also
+	   do so with std::placeholder in the C++11 future
+	*/
+	transmitter.sender().connect_same_thread (connections, boost::bind (&Receiver::receive, this, boost::arg<1>(), boost::arg<2>()));
 
-	(*c) = transmitter.sender().connect(mem_fun(*this, &Receiver::receive));
-
-	connections.push_back (c);
 }

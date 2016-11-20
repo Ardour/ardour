@@ -853,6 +853,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				frame_handle_end->set_x0 (pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
 				frame_handle_end->set_x1 (pixel_width);
 				frame_handle_end->show();
+
+				frame_handle_start->raise_to_top ();
+				frame_handle_end->raise_to_top ();
 			}
 		}
 	}

@@ -694,7 +694,7 @@ msgid "Fit dB range"
 msgstr ""
 
 #: analysis_window.cc:50
-msgid "Proportional Spectum, -18dB"
+msgid "Proportional Spectrum, -18dB"
 msgstr ""
 
 #: analysis_window.cc:53

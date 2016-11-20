@@ -18,6 +18,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: about.cc:127
 msgid "Fons Adriaensen"
@@ -686,7 +687,7 @@ msgid "Fit dB range"
 msgstr ""
 
 #: analysis_window.cc:50
-msgid "Proportional Spectum, -18dB"
+msgid "Proportional Spectrum, -18dB"
 msgstr ""
 
 #: analysis_window.cc:53

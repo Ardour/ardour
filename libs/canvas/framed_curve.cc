@@ -31,7 +31,7 @@ FramedCurve::FramedCurve (Canvas* c)
 	: PolyItem (c)
 	, n_samples (0)
 	, points_per_segment (16)
-	, curve_fill (None)
+	, curve_fill (Inside)
 {
 }
 
@@ -39,7 +39,7 @@ FramedCurve::FramedCurve (Item* parent)
 	: PolyItem (parent)
 	, n_samples (0)
 	, points_per_segment (16)
-	, curve_fill (None)
+	, curve_fill (Inside)
 {
 }
 
@@ -85,8 +85,15 @@ FramedCurve::interpolate ()
 	}
 	samples.clear ();
 
-	InterpolatedCurve::interpolate (curve_points, points_per_segment, CatmullRomCentripetal, false, samples);
-	n_samples = samples.size();
+	if (_points.size() == 3) {
+		samples.push_back (curve_points.front());
+		samples.push_back (curve_points.back());
+		n_samples = 2;
+	} else {
+
+		InterpolatedCurve::interpolate (curve_points, points_per_segment, CatmullRomCentripetal, false, samples);
+		n_samples = samples.size();
+	}
 }
 
 void

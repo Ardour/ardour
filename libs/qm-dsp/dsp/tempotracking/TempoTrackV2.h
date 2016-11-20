@@ -18,8 +18,7 @@
 #define TEMPOTRACKV2_H
 
 #include <vector>
-
-using std::vector;
+using namespace std;
 
 //!!! Question: how far is this actually sample rate dependent?  I
 // think it does produce plausible results for e.g. 48000 as well as
@@ -40,15 +39,35 @@ public:
     TempoTrackV2(float sampleRate, size_t dfIncrement);
     ~TempoTrackV2();
 
-    // Returned beat periods are given in df increment units; tempi in bpm
+    // Returned beat periods are given in df increment units; inputtempo and tempi in bpm
     void calculateBeatPeriod(const vector<double> &df,
                              vector<double> &beatPeriod,
-                             vector<double> &tempi);
+                             vector<double> &tempi) {
+        calculateBeatPeriod(df, beatPeriod, tempi, 120.0, false);
+    }
+
+    // Returned beat periods are given in df increment units; inputtempo and tempi in bpm
+    // MEPD 28/11/12 Expose inputtempo and constraintempo parameters
+    // Note, if inputtempo = 120 and constraintempo = false, then functionality is as it was before
+    void calculateBeatPeriod(const vector<double> &df,
+                             vector<double> &beatPeriod,
+                             vector<double> &tempi,
+                             double inputtempo, bool constraintempo);
 
     // Returned beat positions are given in df increment units
     void calculateBeats(const vector<double> &df,
                         const vector<double> &beatPeriod,
-                        vector<double> &beats);
+                        vector<double> &beats) {
+        calculateBeats(df, beatPeriod, beats, 0.9, 4.0);
+    }
+
+    // Returned beat positions are given in df increment units
+    // MEPD 28/11/12 Expose alpha and tightness parameters
+    // Note, if alpha = 0.9 and tightness = 4, then functionality is as it was before
+    void calculateBeats(const vector<double> &df,
+                        const vector<double> &beatPeriod,
+                        vector<double> &beats,
+                        double alpha, double tightness);
 
 private:
     typedef vector<int> i_vec_t;

@@ -22,11 +22,18 @@
 #include <string>
 #include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
+#include <vamp-hostsdk/Plugin.h>
+
+#include "evoral/Note.hpp"
 
 #include "ardour/libardour_visibility.h"
 
 #include "ardour/processor.h"
 #include "ardour/session.h"
+
+namespace ARDOUR {
+	class Readable;
+}
 
 namespace ARDOUR { namespace LuaAPI {
 
@@ -82,6 +89,16 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
 	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float val);
+
+	/** get a plugin control parameter value
+	 *
+	 * @param proc Plugin-Processor
+	 * @param which control port to set (starting at 0, including ports of type input and output))
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, bool &ok);
+
 	/** set a plugin control-input parameter value
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
@@ -92,6 +109,15 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
 	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
+
+	/** get a plugin control parameter value
+	 *
+	 * @param proc Plugin-Insert
+	 * @param which control port to query (starting at 0, including ports of type input and output)
+	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
+	 * @returns value
+	 */
+	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
 
 	/**
 	 * A convenience function to get a Automation Lists and ParamaterDescriptor
@@ -130,6 +156,98 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
 	 */
 	int hsla_to_rgba (lua_State *lua);
+
+	/* Creates a filename from a series of elements using the correct separator for filenames.
+	 *
+	 * No attempt is made to force the resulting filename to be an absolute path.
+	 * If the first element is a relative path, the result will be a relative path.
+	 */
+	int build_filename (lua_State *lua);
+
+	class Vamp {
+	/** Vamp Plugin Interface
+	 *
+	 * Vamp is an audio processing plugin system for plugins that extract descriptive information
+	 * from audio data - typically referred to as audio analysis plugins or audio feature
+	 * extraction plugins.
+	 *
+	 * This interface allows to load a plugins and directly access it using the Vamp Plugin API.
+	 *
+	 * A convenience method is provided to analyze Ardour::Readable objects (Regions).
+	 */
+		public:
+			Vamp (const std::string&, float sample_rate);
+			~Vamp ();
+
+			/** Search for all available available Vamp plugins.
+			 * @returns list of plugin-keys
+			 */
+			static std::vector<std::string> list_plugins ();
+
+			::Vamp::Plugin* plugin () { return _plugin; }
+
+			/** high-level abstraction to process a single channel of the given Readable.
+			 *
+			 * If the plugin is not yet initialized, initialize() is called.
+			 *
+			 * if @cb is not nil, it is called with the immediate
+			 * Vamp::Plugin::Features on every process call.
+			 *
+			 * @param r readable
+			 * @param channel channel to process
+			 * @param fn lua callback function
+			 * @return 0 on success
+			 */
+			int analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef fn);
+
+			/** call plugin():reset() and clear intialization flag */
+			void reset ();
+
+			/** initialize the plugin for use with analyze().
+			 *
+			 * This is equivalent to plugin():initialise (1, ssiz, bsiz)
+			 * and prepares a plugin for analyze.
+			 * (by preferred step and block sizes are used. if the plugin
+			 * does not specify them or they're larger than 8K, both are set to 1024)
+			 *
+			 * Manual initialization is only required to set plugin-parameters
+			 * which depend on prior initialization of the plugin.
+			 *
+			 * @code
+			 * vamp:reset ()
+			 * vamp:initialize ()
+			 * vamp:plugin():setParameter (0, 1.5, nil)
+			 * vamp:analyze (r, 0)
+			 * @endcode
+			 */
+			bool initialize ();
+
+			bool initialized () const { return _initialized; }
+
+			/** process given array of audio-samples.
+			 *
+			 * This is a lua-binding for vamp:plugin():process ()
+			 *
+			 * @param d audio-data, the vector must match the configured channel count
+			 *    and hold a complete buffer for every channel as set during
+			 *    plugin():initialise()
+			 * @param rt timestamp matching the provided buffer.
+			 * @returns features extracted from that data (if the plugin is causal)
+			 */
+			::Vamp::Plugin::FeatureSet process (const std::vector<float*>& d, ::Vamp::RealTime rt);
+
+		private:
+			::Vamp::Plugin* _plugin;
+			float           _sample_rate;
+			framecnt_t      _bufsize;
+			framecnt_t      _stepsize;
+			bool            _initialized;
+
+	};
+
+	boost::shared_ptr<Evoral::Note<Evoral::Beats> >
+		new_noteptr (uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
+
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {

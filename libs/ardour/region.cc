@@ -177,6 +177,7 @@ Region::register_properties ()
 	, _position (Properties::position, 0) \
 	, _beat (Properties::beat, 0.0) \
 	, _sync_position (Properties::sync_position, (s)) \
+	, _quarter_note (0.0) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
@@ -207,6 +208,7 @@ Region::register_properties ()
 	, _position(Properties::position, other->_position)	\
 	, _beat (Properties::beat, other->_beat)                \
 	, _sync_position(Properties::sync_position, other->_sync_position) \
+	, _quarter_note (other->_quarter_note)                                \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
 	, _transients (other->_transients) \
@@ -292,6 +294,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 
 	_start = other->_start;
 	_beat = other->_beat;
+	_quarter_note = other->_quarter_note;
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
@@ -350,6 +353,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 
 	_start = other->_start + offset;
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
+	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -545,10 +549,6 @@ Region::set_position_lock_style (PositionLockStyle ps)
 
 		_position_lock_style = ps;
 
-		if (_position_lock_style == MusicTime) {
-			_beat = _session.tempo_map().beat_at_frame (_position);
-		}
-
 		send_change (Properties::position_lock_style);
 	}
 }
@@ -558,11 +558,18 @@ Region::update_after_tempo_map_change (bool send)
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
-	if (!pl || _position_lock_style != MusicTime) {
+	if (!pl) {
 		return;
 	}
 
-	const framepos_t pos = _session.tempo_map().frame_at_beat (_beat);
+	if (_position_lock_style == AudioTime) {
+		/* don't signal as the actual position has not chnged */
+		recompute_position_from_lock_style (0);
+		return;
+	}
+
+	/* prevent movement before 0 */
+	const framepos_t pos = max ((framepos_t) 0, _session.tempo_map().frame_at_beat (_beat));
 	/* we have _beat. update frame position non-musically */
 	set_position_internal (pos, false, 0);
 
@@ -582,11 +589,14 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 		return;
 	}
 
-	if (sub_num == 0) {
-		set_position_internal (pos, true, 0);
+	if (position_lock_style() == AudioTime) {
+		set_position_internal (pos, true, sub_num);
 	} else {
-		double beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
-		_beat = beat;
+		if (!_session.loading()) {
+			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+		}
+
+		/* will set pulse accordingly */
 		set_position_internal (pos, false, sub_num);
 	}
 
@@ -601,9 +611,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	   Notify a length change regardless (its more efficient for MidiRegions),
 	   and when Region has a _length_beats we will need it here anyway).
 	*/
-	if (position_lock_style() == MusicTime) {
-		p_and_l.add (Properties::length);
-	}
+	p_and_l.add (Properties::length);
 
 	send_change (p_and_l);
 
@@ -661,7 +669,11 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 
 		if (allow_bbt_recompute) {
 			recompute_position_from_lock_style (sub_num);
+		} else {
+			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
+
 		/* check that the new _position wouldn't make the current
 		   length impossible - if so, change the length.
 
@@ -678,6 +690,7 @@ void
 Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
 	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
+	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
 }
 
 void
@@ -1296,9 +1309,12 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 				    &bbt_time.beats,
 				    &bbt_time.ticks) != 3) {
 				_position_lock_style = AudioTime;
+				_beat = _session.tempo_map().beat_at_frame (_position);
 			} else {
 				_beat = _session.tempo_map().beat_at_bbt (bbt_time);
 			}
+			/* no position property change for legacy Property, so we do this here */
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
 	}
 
@@ -1835,7 +1851,7 @@ void
 Region::post_set (const PropertyChange& pc)
 {
 	if (pc.contains (Properties::position)) {
-		recompute_position_from_lock_style (0);
+		_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 	}
 }
 

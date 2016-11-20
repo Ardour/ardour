@@ -213,8 +213,12 @@ SoloControl::clear_all_solo_state ()
 }
 
 int
-SoloControl::set_state (XMLNode const & node, int)
+SoloControl::set_state (XMLNode const & node, int version)
 {
+	if (SlavableAutomationControl::set_state(node, version)) {
+		return -1;
+	}
+
 	XMLProperty const * prop;
 
 	if ((prop = node.property ("self-solo")) != 0) {

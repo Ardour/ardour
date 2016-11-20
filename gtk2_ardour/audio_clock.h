@@ -209,7 +209,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void set_slave_info ();
 	void set_timecode (framepos_t, bool);
-	void set_bbt (framepos_t, bool);
+	void set_bbt (framepos_t, ARDOUR::framecnt_t, bool);
 	void set_minsec (framepos_t, bool);
 	void set_frames (framepos_t, bool);
 

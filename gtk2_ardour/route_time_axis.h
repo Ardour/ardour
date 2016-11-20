@@ -183,7 +183,7 @@ protected:
 
 	void update_diskstream_display ();
 
-	gint route_group_click  (GdkEventButton *);
+	bool route_group_click  (GdkEventButton *);
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
@@ -227,13 +227,13 @@ protected:
 
 	void set_align_choice (Gtk::RadioMenuItem*, ARDOUR::AlignChoice, bool apply_to_selection = false);
 
-	void         playlist_click ();
+	bool         playlist_click (GdkEventButton *);
 	void         show_playlist_selector ();
 	void         playlist_changed ();
 
 	void rename_current_playlist ();
 
-	void         automation_click ();
+	bool         automation_click (GdkEventButton *);
 
 	virtual void show_all_automation (bool apply_to_selection = false);
 	virtual void show_existing_automation (bool apply_to_selection = false);

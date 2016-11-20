@@ -206,17 +206,15 @@ intptr_t Session::vst_callback (
 			timeinfo->samplePos = now;
 			timeinfo->sampleRate = session->frame_rate();
 
-			const TempoMetric& tm (session->tempo_map().metric_at (now));
-
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (tm.tempo());
-				timeinfo->tempo = t.beats_per_minute ();
+				const Tempo& t (session->tempo_map().tempo_at_frame (now));
+				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
-				const Meter& m (tm.meter());
-				timeinfo->timeSigNumerator = m.divisions_per_bar ();
-				timeinfo->timeSigDenominator = m.note_divisor ();
+				const MeterSection& ms (session->tempo_map().meter_section_at_frame (now));
+				timeinfo->timeSigNumerator = ms.divisions_per_bar ();
+				timeinfo->timeSigDenominator = ms.note_divisor ();
 				newflags |= (kVstTimeSigValid);
 			}
 			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
@@ -224,10 +222,12 @@ intptr_t Session::vst_callback (
 
 				try {
 					bbt = session->tempo_map().bbt_at_frame_rt (now);
-
-					double ppqBar;
-					double ppqPos = vst_ppq (tm, bbt, ppqBar);
-
+					bbt.beats = 1;
+					bbt.ticks = 0;
+					/* exact quarter note */
+					double ppqBar = session->tempo_map().quarter_note_at_bbt_rt (bbt);
+					/* quarter note at frame position (not rounded to note subdivision) */
+					double ppqPos = session->tempo_map().quarter_note_at_frame_rt (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -288,14 +288,8 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-					double ppqBar;
-					Timecode::BBT_Time bbt;
-
-					bbt = session->tempo_map ().bbt_at_frame_rt (looploc->start ());
-					timeinfo->cycleStartPos = vst_ppq (tm, bbt, ppqBar);
-
-					bbt = session->tempo_map ().bbt_at_frame_rt (looploc->end ());
-					timeinfo->cycleEndPos = vst_ppq (tm, bbt, ppqBar);
+					timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_frame_rt (looploc->start ());
+					timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_frame_rt (looploc->end ());
 
 					newflags |= kVstCyclePosValid;
 				} catch (...) { }
@@ -339,7 +333,7 @@ intptr_t Session::vst_callback (
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
 		if (session) {
 			const Tempo& t (session->tempo_map().tempo_at_frame (value));
-			return t.beats_per_minute() * 1000;
+			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;
 		}

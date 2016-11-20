@@ -113,9 +113,15 @@ public:
 protected:
 	void start_step_editing ();
 	void stop_step_editing ();
+	void processors_changed (ARDOUR::RouteProcessorChange);
 
 private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
+
+	void setup_midnam_patches ();
+	void update_patch_selector ();
+	void drop_instrument_ref ();
+	PBD::ScopedConnectionList midnam_connection;
 
 	void model_changed(const std::string& model);
 	void custom_device_mode_changed(const std::string& mode);
@@ -161,6 +167,7 @@ private:
 	void add_channel_command_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, ARDOUR::AutomationType auto_type, uint8_t cmd);
 
 	Gtk::Menu* controller_menu;
+	Gtk::Menu* poly_pressure_menu;
 
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);

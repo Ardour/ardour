@@ -60,7 +60,7 @@ guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef __APPLE__
 
-uint Keyboard::PrimaryModifier = GDK_META_MASK|GDK_MOD2_MASK;   // Command
+uint Keyboard::PrimaryModifier = (GDK_MOD2_MASK|GDK_META_MASK);   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
@@ -86,7 +86,7 @@ guint Keyboard::snap_delta_mod = Keyboard::Level4Modifier;
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
-guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
+guint Keyboard::Level4Modifier = GDK_MOD4_MASK|GDK_SUPER_MASK; // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
@@ -127,6 +127,7 @@ Gtk::Window* Keyboard::pre_dialog_active_window = 0;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
+sigc::signal0<void> Keyboard::RelevantModifierKeysChanged;
 
 void
 Keyboard::magic_widget_grab_focus ()
@@ -153,39 +154,7 @@ Keyboard::Keyboard ()
                 _current_binding_name = _("Unknown");
 	}
 
-	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
-
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | TertiaryModifier);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | Level4Modifier);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | CopyModifier);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | RangeSelectModifier);
-
-	gtk_accelerator_set_default_mod_mask (RelevantModifierKeyMask);
-
-#ifdef __APPLE__
-        /* Remove SUPER,HYPER,META.
-         *
-         * GTK on OS X adds META when Command is pressed for various indefensible reasons, since
-         * it also uses MOD2 to indicate Command. Our code assumes that each
-         * modifier (Primary, Secondary etc.) is represented by a single bit in
-         * the modifier mask, but GTK's (STUPID) design uses two (MOD2 + META)
-         * to represent the Command key. Some discussion about this is here:
-         * https://bugzilla.gnome.org/show_bug.cgi?id=692597 
-         *
-         * We cannot do this until AFTER we told GTK what the default modifier
-         * was, because otherwise it will fail to recognize MOD2-META-<key> as
-         * an accelerator.
-         *
-         * Note that in the tabbed branch, we no longer use GTK accelerators
-         * for functional purposes, so this is as critical for that branch.
-         */
-
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_SUPER_MASK);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_HYPER_MASK);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_META_MASK);
-#endif
+	reset_relevant_modifier_key_mask();
 
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
 }
@@ -340,23 +309,67 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
-	/* Special keys that we want to handle in
-	   any dialog, no matter whether it uses
-	   the regular set of accelerators or not
-	*/
+	if (event->type == GDK_KEY_RELEASE) {
 
-	if (event->type == GDK_KEY_RELEASE && modifier_state_equals (event->state, PrimaryModifier)) {
-		switch (event->keyval) {
-		case GDK_w:
-			close_current_dialog ();
-			ret = true;
-			break;
+		State::iterator k = find (state.begin(), state.end(), keyval);
+
+		if (k != state.end()) {
+			/* this cannot change the ordering, so need to sort */
+			state.erase (k);
+			if (state.empty()) {
+				DEBUG_TRACE (DEBUG::Keyboard, "no keys down\n");
+			} else {
+#ifndef NDEBUG
+				if (DEBUG_ENABLED(DEBUG::Keyboard)) {
+					DEBUG_STR_DECL(a);
+					DEBUG_STR_APPEND(a, "keyboard, keys still down: ");
+					for (State::iterator i = state.begin(); i != state.end(); ++i) {
+						DEBUG_STR_APPEND(a, gdk_keyval_name (*i));
+						DEBUG_STR_APPEND(a, ',');
+					}
+					DEBUG_STR_APPEND(a, '\n');
+					DEBUG_TRACE (DEBUG::Keyboard, DEBUG_STR(a).str());
+				}
+#endif /* NDEBUG */
+			}
+		}
+
+		if (modifier_state_equals (event->state, PrimaryModifier)) {
+
+			/* Special keys that we want to handle in
+			   any dialog, no matter whether it uses
+			   the regular set of accelerators or not
+			*/
+
+			switch (event->keyval) {
+			case GDK_w:
+				close_current_dialog ();
+				ret = true;
+				break;
+			}
 		}
 	}
 
 	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("snooper returns %1\n", ret));
 
 	return ret;
+}
+
+void
+Keyboard::reset_relevant_modifier_key_mask ()
+{
+	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
+
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | TertiaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | Level4Modifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | CopyModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | RangeSelectModifier);
+
+	gtk_accelerator_set_default_mod_mask (RelevantModifierKeyMask);
+
+	RelevantModifierKeysChanged(); /* EMIT SIGNAL */
 }
 
 void
@@ -471,9 +484,8 @@ Keyboard::set_edit_button (guint but)
 void
 Keyboard::set_edit_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~edit_mod);
 	edit_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | edit_mod);
+	reset_relevant_modifier_key_mask();
 }
 
 void
@@ -485,9 +497,8 @@ Keyboard::set_delete_button (guint but)
 void
 Keyboard::set_delete_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~delete_mod);
 	delete_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | delete_mod);
+	reset_relevant_modifier_key_mask();
 }
 
 void
@@ -499,34 +510,30 @@ Keyboard::set_insert_note_button (guint but)
 void
 Keyboard::set_insert_note_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~insert_note_mod);
 	insert_note_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | insert_note_mod);
+	reset_relevant_modifier_key_mask();
 }
 
 
 void
 Keyboard::set_modifier (uint32_t newval, uint32_t& var)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~var);
 	var = newval;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | var);
+	reset_relevant_modifier_key_mask();
 }
 
 void
 Keyboard::set_snap_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_mod);
 	snap_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_mod);
+	reset_relevant_modifier_key_mask();
 }
 
 void
 Keyboard::set_snap_delta_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_delta_mod);
 	snap_delta_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_delta_mod);
+	reset_relevant_modifier_key_mask();
 }
 
 bool

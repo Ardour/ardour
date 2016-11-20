@@ -96,7 +96,7 @@ void ConstantQ::sparsekernel()
     double* transfHammingWindowRe = new double [ m_FFTLength ];
     double* transfHammingWindowIm = new double [ m_FFTLength ];
 
-    for (unsigned u=0; u < m_FFTLength; u++)
+    for (unsigned u=0; u < m_FFTLength; u++) 
     {
 	hammingWindowRe[u] = 0;
 	hammingWindowIm[u] = 0;
@@ -109,28 +109,28 @@ void ConstantQ::sparsekernel()
     sk->js.reserve( m_FFTLength*2 );
     sk->real.reserve( m_FFTLength*2 );
     sk->imag.reserve( m_FFTLength*2 );
-
+	
     // for each bin value K, calculate temporal kernel, take its fft to
-    //calculate the spectral kernel then threshold it to make it sparse and
+    //calculate the spectral kernel then threshold it to make it sparse and 
     //add it to the sparse kernels matrix
     double squareThreshold = m_CQThresh * m_CQThresh;
 
     FFT m_FFT(m_FFTLength);
-
-    for (unsigned k = m_uK; k--; )
+	
+    for (unsigned k = m_uK; k--; ) 
     {
-        for (unsigned u=0; u < m_FFTLength; u++)
+        for (unsigned u=0; u < m_FFTLength; u++) 
         {
             hammingWindowRe[u] = 0;
             hammingWindowIm[u] = 0;
         }
-
+        
 	// Computing a hamming window
 	const unsigned hammingLength = (int) ceil( m_dQ * m_FS / ( m_FMin * pow(2,((double)(k))/(double)m_BPO)));
 
         unsigned origin = m_FFTLength/2 - hammingLength/2;
 
-	for (unsigned i=0; i<hammingLength; i++)
+	for (unsigned i=0; i<hammingLength; i++) 
 	{
 	    const double angle = 2*PI*m_dQ*i/hammingLength;
 	    const double real = cos(angle);
@@ -148,17 +148,17 @@ void ConstantQ::sparsekernel()
             hammingWindowIm[i] = hammingWindowIm[i + m_FFTLength/2];
             hammingWindowIm[i + m_FFTLength/2] = temp;
         }
-
+    
 	//do fft of hammingWindow
 	m_FFT.process( 0, hammingWindowRe, hammingWindowIm, transfHammingWindowRe, transfHammingWindowIm );
 
-
-	for (unsigned j=0; j<( m_FFTLength ); j++)
+		
+	for (unsigned j=0; j<( m_FFTLength ); j++) 
 	{
 	    // perform thresholding
 	    const double squaredBin = squaredModule( transfHammingWindowRe[ j ], transfHammingWindowIm[ j ]);
 	    if (squaredBin <= squareThreshold) continue;
-
+		
 	    // Insert non-zero position indexes, doubled because they are floats
 	    sk->is.push_back(j);
 	    sk->js.push_back(k);
@@ -241,7 +241,7 @@ void ConstantQ::sparsekernel()
     cout << "}" << endl;
 */
 //    std::cerr << "done\n -> is: " << sk->is.size() << ", js: " << sk->js.size() << ", reals: " << sk->real.size() << ", imags: " << sk->imag.size() << std::endl;
-
+    
     m_sparseKernel = sk;
     return;
 }
@@ -256,7 +256,7 @@ double* ConstantQ::process( const double* fftdata )
 
     SparseKernel *sk = m_sparseKernel;
 
-    for (unsigned row=0; row<2*m_uK; row++)
+    for (unsigned row=0; row<2*m_uK; row++) 
     {
 	m_CQdata[ row ] = 0;
 	m_CQdata[ row+1 ] = 0;
@@ -266,7 +266,7 @@ double* ConstantQ::process( const double* fftdata )
     const double   *real   = &(sk->real[0]);
     const double   *imag   = &(sk->imag[0]);
     const unsigned int sparseCells = sk->real.size();
-
+	
     for (unsigned i = 0; i<sparseCells; i++)
     {
 	const unsigned row = cqbin[i];
@@ -324,7 +324,7 @@ void ConstantQ::process(const double *FFTRe, const double* FFTIm,
 
     SparseKernel *sk = m_sparseKernel;
 
-    for (unsigned row=0; row<m_uK; row++)
+    for (unsigned row=0; row<m_uK; row++) 
     {
 	CQRe[ row ] = 0;
 	CQIm[ row ] = 0;
@@ -335,7 +335,7 @@ void ConstantQ::process(const double *FFTRe, const double* FFTIm,
     const double   *real   = &(sk->real[0]);
     const double   *imag   = &(sk->imag[0]);
     const unsigned int sparseCells = sk->real.size();
-
+	
     for (unsigned i = 0; i<sparseCells; i++)
     {
 	const unsigned row = cqbin[i];

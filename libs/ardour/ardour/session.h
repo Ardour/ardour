@@ -134,6 +134,7 @@ class PluginInfo;
 class Port;
 class PortInsert;
 class ProcessThread;
+class Progress;
 class Processor;
 class Region;
 class Return;
@@ -169,6 +170,16 @@ private:
 /** Ardour Session */
 class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
+  private:
+	enum SubState {
+		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
+		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
+		StopPendingCapture    = 0x4,
+		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
+		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
+		PendingLocate         = 0x20,
+	};
+
   public:
 	enum RecordState {
 		Disabled = 0,
@@ -245,8 +256,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 * @param pd Playlist disposition
 	 * @return list of newly created routes
 	 */
-	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
-	RouteList new_route_from_template (uint32_t how_many, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
+	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
+	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
 
 	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
@@ -414,7 +425,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	framepos_t last_transport_start () const { return _last_roll_location; }
 	void goto_end ();
-	void goto_start ();
+	void goto_start (bool and_roll = false);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed, bool as_default = true);
@@ -426,6 +437,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
+	bool declick_out_pending() const { return static_cast<bool>(transport_sub_state&(PendingDeclickOut)); }
 	bool transport_locked () const;
 
 	int wipe ();
@@ -505,6 +517,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 * @return zero on success
 	 */
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
+
+	enum ArchiveEncode {
+		NO_ENCODE,
+		FLAC_16BIT,
+		FLAC_24BIT
+	};
+
+	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, bool only_used_sources = false, Progress* p = 0);
+
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name, bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
@@ -572,7 +593,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 				}
 			}
 		}
-	                                        private:
+            private:
 		Session * _session;
 	};
 
@@ -704,7 +725,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int start_audio_export (framepos_t position, bool realtime = false);
+	int start_audio_export (framepos_t position, bool realtime = false, bool region_export = false, bool comensate_master_latency = false);
 
 	PBD::Signal1<int, framecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;
@@ -874,13 +895,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
 	 */
-	void undo (uint32_t n) {
-		_history.undo (n);
-	}
-
-	void redo (uint32_t n) {
-		_history.redo (n);
-	}
+	void undo (uint32_t n);
+	/** Redo some transactions.
+	 * @param n Number of transactions to undo.
+	 */
+	void redo (uint32_t n);
 
 	UndoHistory& history() { return _history; }
 
@@ -1007,6 +1026,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	SessionConfiguration config;
 
+	SessionConfiguration* cfg () { return &config; }
+
 	bool exporting () const {
 		return _exporting;
 	}
@@ -1128,6 +1149,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	VCAManager& vca_manager() { return *_vca_manager; }
 
+	void auto_connect_thread_wakeup ();
+
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -1148,15 +1172,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static guint _name_id_counter;
 	static void init_name_id_counter (guint n);
 	static unsigned int name_id_counter ();
-
-	enum SubState {
-		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
-		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
-		StopPendingCapture    = 0x4,
-		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
-		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
-		PendingLocate         = 0x20,
-	};
 
 	/* stuff used in process() should be close together to
 	   maximise cache hits
@@ -1269,6 +1284,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool _exporting;
 	bool _export_rolling;
 	bool _realtime_export;
+	bool _region_export;
 	framepos_t _export_preroll;
 	framepos_t _export_latency;
 
@@ -1515,6 +1531,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	Glib::Threads::Mutex  _auto_connect_queue_lock;
 	AutoConnectQueue _auto_connect_queue;
 	guint _latency_recompute_pending;
+
+	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type,
+	                         MidiPortFlags include = MidiPortFlags (0),
+	                         MidiPortFlags exclude = MidiPortFlags (0));
 
 	void auto_connect (const AutoConnectRequest&);
 	void queue_latency_recompute ();
@@ -2016,6 +2036,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 
 	std::string created_with;
+
+	void midi_track_presentation_info_changed (PBD::PropertyChange const &, boost::weak_ptr<MidiTrack>);
+	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
+	void rewire_midi_selection_ports ();
+	boost::weak_ptr<MidiTrack> current_midi_target;
 };
 
 

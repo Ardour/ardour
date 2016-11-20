@@ -186,6 +186,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return string_compose("Bender [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiChannelPressureAutomation) {
 		return string_compose("Pressure [%1]", int(param.channel()) + 1);
+	} else if (param.type() == MidiNotePressureAutomation) {
+		return string_compose("PolyPressure [%1]", int(param.channel()) + 1);
 #ifdef LV2_SUPPORT
 	} else if (param.type() == PluginPropertyAutomation) {
 		return string_compose("Property %1", URIMap::instance().id_to_uri(param.id()));

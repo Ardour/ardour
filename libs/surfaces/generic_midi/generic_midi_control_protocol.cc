@@ -67,6 +67,23 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_input_port ());
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_output_port ());
 
+	_input_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control In"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control Out"), false));
+
+	_input_bundle->add_channel (
+		boost::static_pointer_cast<MidiPort>(_input_port)->name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (boost::static_pointer_cast<MidiPort>(_input_port)->name())
+		);
+
+	_output_bundle->add_channel (
+		boost::static_pointer_cast<MidiPort>(_output_port)->name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (boost::static_pointer_cast<MidiPort>(_output_port)->name())
+		);
+
+	session->BundleAddedOrRemoved ();
+
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
@@ -109,6 +126,20 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 	drop_all ();
 	tear_down_gui ();
 }
+
+list<boost::shared_ptr<ARDOUR::Bundle> >
+GenericMidiControlProtocol::bundles ()
+{
+	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+
+	if (_input_bundle) {
+		b.push_back (_input_bundle);
+		b.push_back (_output_bundle);
+	}
+
+	return b;
+}
+
 
 static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";

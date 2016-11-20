@@ -235,14 +235,36 @@ esac
 ###################
 
 if test -n "$MULTABI_BUNDLE"; then
-	if ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --fail --gcc4 > /dev/null"; then
+	if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --fail --gcc5; then
 		ABI=-gcc4
 	else
+		ABI=-gcc5
+	fi
+  # allow to manually override
+	if test "$1" = "--gcc4"; then
+		ABI=-gcc4
+	fi
+	if test "$1" = "--gcc5"; then
 		ABI=-gcc5
 	fi
 else
 	ABI=
 fi
+
+####################################
+# Check if bundle is for this system
+####################################
+
+if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
+	echo ""
+	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
+	echo "The installer detected the system as ${ARCH}${ABI}, but this bundle"
+	echo "does not contain the files needed for that configuration."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
 
 ####################
 # Check disk space
@@ -299,7 +321,7 @@ fi
 if test -z "$ABI"; then
 	if %REPLACE_GCC5%; then
 		# Ardour was compiled with gcc5, warn on gcc4 systems
-		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc5; then
 			echo ""
 			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 			echo ""
@@ -314,7 +336,7 @@ if test -z "$ABI"; then
 		fi
 	else
 		# Ardour was compiled with gcc4, warn on gcc5 systems
-		if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc4 ; then
 			echo ""
 			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 			echo ""
@@ -352,14 +374,6 @@ echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH${ABI}"
-
-if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
-	echo ""
-	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
 
 if ! tar -xf ${PGM_NAME}_${ARCH}${ABI}-*.tar; then
 	echo ""
@@ -596,13 +610,13 @@ then
 	
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
-	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
+	chmod ugo+rwx "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
 else
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME} in ${USER_DESKTOP_DIR}"
-	cp ${MENU_FILE_PATH}/${MENU_FILE} ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
-	chmod ugo+rwx ${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
+	chmod ugo+rwx "${USER_DESKTOP_DIR}/${DESKTOP_LINK_FILE}"
 fi
 
 echo ""
@@ -650,7 +664,10 @@ elif which jackdbus > /dev/null; then
 	JACK_INSTALLED="i"
 else
 	echo ""
-	echo "The program Jack is missing from this system. Jack is a required component of $PGM_NAME."
+	echo "The program Jack is missing from this system."
+	echo ""
+	echo "Jack is a very useful utility to allow you to interconnect $PGM_NAME and other audio/MIDI applications."
+	echo "You can use $PGM_NAME without it, but you may find it useful to have around."
 	echo ""
 
 	ANSWER=$(VaildateYesNoQuestion "Install jack using system software repository?")

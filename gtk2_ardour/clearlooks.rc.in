@@ -26,7 +26,6 @@ style "default" = "medium_text"
   GtkDialog           :: content-area-border              = 2                 # [               2 ] ( >= 0 ) Width of border around the main dialog area.
   GtkDialog           :: content-area-spacing             = 0                 # [               0 ] ( >= 0 ) The default spacing used between elements of the content area of the dialog.
 
-
   GtkButton           :: default-border = { 0, 0, 0, 0 }
   GtkButton           :: default-outside_border = { 0, 0, 0, 0 }
   GtkButton           :: button-relief = GTK_RELIEF_NONE
@@ -128,8 +127,8 @@ style "default" = "medium_text"
 
   text[NORMAL]        = @texts
   text[PRELIGHT]      = @texts
-  text[ACTIVE]        = @fg_selected
-  text[INSENSITIVE]   = shade(0.7, @lightest) /* text color for focused selected text */
+  text[INSENSITIVE]   = shade(0.7, @lightest)
+  text[ACTIVE]        = @fg_selected          /* text color for focused selected text */
   text[SELECTED]      = @fg_selected          /* text color for non-focused selected text */
 
   #engine specific tweaks
@@ -152,13 +151,13 @@ style "entry"
 
   base[NORMAL]      = @bases
   base[PRELIGHT]    = @bases
-  base[INSENSITIVE] = @bases
+  base[INSENSITIVE] = shade(1.0, @background)
   base[ACTIVE]      = @bases
   base[SELECTED]    = @bg_selected
 
   text[NORMAL]      = @texts
   text[PRELIGHT]    = @texts
-  text[INSENSITIVE] = shade (0.92, @texts)
+  text[INSENSITIVE] = shade(0.7, @lightest)
   text[ACTIVE]      = @texts
   text[SELECTED]    = @fg_selected
 }
@@ -196,11 +195,11 @@ style "peak_display_peaked_entry" = "mixer_strip_entry"
 	fg[SELECTED] = @texts
 	text[SELECTED] = @texts
 
-	base[NORMAL] = @bright_indicator
-	base[ACTIVE] = @bright_indicator
-	base[PRELIGHT] = @bright_indicator
-	base[INSENSITIVE] = @bright_indicator
-	base[SELECTED] = @bright_indicator
+	base[NORMAL] = @clip_indicator
+	base[ACTIVE] = @clip_indicator
+	base[PRELIGHT] = @clip_indicator
+	base[INSENSITIVE] = @clip_indicator
+	base[SELECTED] = @clip_indicator
 }
 
 style "treeview_parent_node"
@@ -265,7 +264,6 @@ style "automation_track_header"
 	bg[SELECTED] = @automation_track_header
 	bg[PRELIGHT] = @automation_track_header
 }
-
 
 style "inspector_processor_list" = "processor_list"
 {
@@ -385,7 +383,6 @@ style "midi_tracer_textview" = "medium_monospace_text"
 style "time_axis_view_item_name" = "very small text"
 {
 }
-
 
 style "midi_tracer_textview" = "medium_monospace_text"
 {
@@ -611,7 +608,6 @@ style "fatal_message" = "medium_text"
 	bg[ACTIVE]   = @bases
 	bg[NORMAL]   = @bases
 	base[NORMAL] = @bases
-	base[NORMAL] = @bases
 }
 
 style "error_message" = "medium_text"
@@ -620,7 +616,6 @@ style "error_message" = "medium_text"
 	fg[NORMAL] = @bright_indicator
 	bg[ACTIVE]   = @bases
 	bg[NORMAL]   = @bases
-	base[NORMAL] = @bases
 	base[NORMAL] = @bases
 }
 
@@ -631,7 +626,6 @@ style "info_message" = "medium_text"
 	bg[ACTIVE]   = @bases
 	bg[NORMAL]   = @bases
 	base[NORMAL] = @bases
-	base[NORMAL] = @bases
 }
 
 style "warning_message" = "medium_text"
@@ -640,7 +634,6 @@ style "warning_message" = "medium_text"
 	fg[NORMAL] = @bright_color
 	bg[ACTIVE]   = @bases
 	bg[NORMAL]   = @bases
-	base[NORMAL] = @bases
 	base[NORMAL] = @bases
 }
 
@@ -686,7 +679,6 @@ style "medium_bold_entry"  = "medium_bold_text"
 	text[SELECTED] = @fg_selected
 
 	bg[NORMAL] = @bases
-	bg[SELECTED] = @bases
 	bg[SELECTED] = @bases
 
 	base[NORMAL] = @bases
@@ -993,7 +985,6 @@ style "location_row_button" = "default_button"
 	font_name = " 10"
 }
 
-
 style "ardour_button" ="default_button"
 {
 	xthickness = 1
@@ -1136,11 +1127,8 @@ widget "*AudioBusFader" style:highest "audio_bus_fader"
 
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
 widget "*TrackSeparator" style:highest "track_separator"
-widget "*TrackNameEditor" style:highest "track_name_editor"
 widget "*TrackNameEditor*" style:highest "track_name_editor"
-widget "*CrossfadeEditAuditionButton" style:highest "bright_when_active"
 widget "*CrossfadeEditAuditionButton*" style:highest "bright_when_active"
-widget "*CrossfadeEditCurveButton" style:highest "bright_when_active"
 widget "*CrossfadeEditCurveButton*" style:highest "bright_when_active"
 widget "*CrossfadeEditFrame" style:highest "base_frame"
 widget "*AudioTrackControlsBaseInactiveUnselected" style:highest "track_header_inactive"
@@ -1154,7 +1142,6 @@ widget "*AutomationTrackControlsBase" style:highest "automation_track_header"
 widget "*AutomationTrackControlsBaseSelected" style:highest "track_header_selected"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*ParameterValueDisplay" style:highest "medium_bold_entry"
-widget "*PluginUIClickBox" style:highest "medium_bold_entry"
 widget "*PluginUIClickBox*" style:highest "medium_bold_entry"
 widget "*ProcessorControlSlider" style:highest "processor_control_slider"
 widget "*processor control button" style:highest "processor_control_button"
@@ -1169,20 +1156,16 @@ widget "*MixerStripPeakDisplay" style:highest "mixer_strip_entry"
 widget "*MixerStripPeakDisplayPeak" style:highest "peak_display_peaked_entry"
 widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
 widget "*MixerStripFrame" style:highest "base_frame"
-widget "*FadeCurve" style:highest "medium_bold_entry"
 widget "*FadeCurve*" style:highest "medium_bold_entry"
 widget "*RouteParamsListDisplay" style:highest "inspector_track_list_display"
 widget "*TearOffArrow" style:highest "tearoff_arrow"
 widget "*RouteParamsTitleLabel" style:highest "medium_text"
-widget "*PluginAutomateButton" style:highest "small_button"
-widget "*PluginAutomateButton*" style:highest "small_button"
-widget "*PluginSaveButton" style:highest "small_button"
+widget "*plugin automation state button*" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
 widget "*PluginEditorButton*" style:highest "default_toggle_button"
 widget "*PluginEditorButton-active" style:highest "default_toggle_button_active"
 widget "*PluginAnalysisInfoLabel" style:highest "medium_monospace_text"
 
-widget "*BarControlSpinner" style:highest "small_spinner"
 widget "*BarControlSpinner*" style:highest "small_spinner"
 
 widget "*BlackSeparator" style:highest "black_separator"
@@ -1191,7 +1174,6 @@ widget "*MetricLabel" style:highest "medium_text"
 widget "*ChoiceWindow" style:highest "default_generic"
 widget "*TrackParameterName" style:highest "small_italic_text"
 widget "*AddRouteDialog*" style:highest "medium_text"
-widget "*AddRouteDialogSpinner" style:highest "medium_bold_entry"
 widget "*AddRouteDialogSpinner*" style:highest "medium_bold_entry"
 widget "*AddRouteDialogNameTemplateEntry" style:highest "medium_bold_entry"
 widget "*NewSessionSR1Label" style:highest "red_medium_text"
@@ -1199,19 +1181,14 @@ widget "*NewSessionSR2Label" style:highest "medium_text"
 widget "*location edit row clock" style:highest "medium_text"
 widget "*ArdourLuaEntry" style:highest "medium_monospace_text"
 widget "*LocationEditNameLabel" style:highest "medium_text"
-widget "*LocationEditCdButton" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditCdButton*" style:highest "small_red_active_and_selected_button"
-widget "*LocationEditHideButton" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditHideButton*" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditLockButton*" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditGlueButton*" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditNumberLabel" style:highest "small_text"
 widget "*LocationEditNameEntry" style:highest "option_entry"
-widget "*LocationAddLocationButton" style:highest "default_button"
 widget "*LocationAddLocationButton*" style:highest "default_button"
-widget "*LocationAddRangeButton" style:highest "default_button"
 widget "*LocationAddRangeButton*" style:highest "default_button"
-widget "*LocationEditRemoveButton" style:highest "location_row_button"
 widget "*LocationEditRemoveButton*" style:highest "location_row_button"
 widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
@@ -1220,7 +1197,6 @@ widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*midi device" style:highest "midi_device"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*meterbridge label" style:highest "meterbridge_label"
-widget "*ContrastingPopup" style:highest "contrasting_popup"
 widget "*ContrastingPopup*" style:highest "contrasting_popup"
 widget "*MidiChannelSelectorButton" style:highest "midi_channel_selector_button"
 widget "*TimeInfoSelectionTitle" style:highest "small_text"
@@ -1238,6 +1214,5 @@ widget "*MonitorSectionLabel" style:highest "small_text"
 widget "*ooltip*" style:highest "tooltip"
 widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
-widget "*VCALabelBar" style:highest "vca_label_bar"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
 

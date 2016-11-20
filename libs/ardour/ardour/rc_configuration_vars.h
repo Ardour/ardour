@@ -59,6 +59,7 @@ CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
 CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "display-first-midi-bank-as-zero", false)
 CONFIG_VARIABLE (int32_t, inter_scene_gap_frames, "inter-scene-gap-frames", 1)
+CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selection", 1)
 
 /* Timecode and related */
 
@@ -200,6 +201,7 @@ CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 /* miscellany */
 
 CONFIG_VARIABLE (bool, try_autostart_engine, "try-autostart-engine", false)
+CONFIG_VARIABLE (bool, copy_demo_sessions, "copy-demo-sessions", true)
 CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
 CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", false)
@@ -235,6 +237,7 @@ CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
 CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
 CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
+CONFIG_VARIABLE (bool, use_macvst, "use-macvst", true)
 CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", true)
 CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 600) /* deciseconds, per plugin, <= 0 no timeout */

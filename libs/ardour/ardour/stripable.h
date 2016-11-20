@@ -73,6 +73,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	PresentationInfo const & presentation_info () const { return _presentation_info; }
 	PresentationInfo& presentation_info () { return _presentation_info; }
+	PresentationInfo* presentation_info_ptr () { return &_presentation_info; }
 
 	/* set just the order */
 

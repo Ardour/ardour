@@ -49,7 +49,6 @@ PhaseControl::set_phase_invert (uint32_t c, bool yn)
 	if (_phase_invert[c] != yn) {
 		_phase_invert[c] = yn;
 		AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
-		_session.set_dirty ();
 	}
 }
 
@@ -59,8 +58,6 @@ PhaseControl::set_phase_invert (boost::dynamic_bitset<> p)
 	if (_phase_invert != p) {
 		_phase_invert = p;
 		AutomationControl::actually_set_value (_phase_invert.to_ulong(), Controllable::NoGroup);
-		Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
-		_session.set_dirty ();
 	}
 }
 

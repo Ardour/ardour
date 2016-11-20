@@ -95,6 +95,7 @@ libardour_sources = [
         'filter.cc',
         'find_session.cc',
         'fixed_delay.cc',
+        'fluid_synth.cc',
         'gain_control.cc',
         'globals.cc',
         'graph.cc',
@@ -142,6 +143,7 @@ libardour_sources = [
         'mididm.cc',
         'midiport_manager.cc',
         'mix.cc',
+        'mode.cc',
         'monitor_control.cc',
         'monitor_processor.cc',
         'mtc_slave.cc',
@@ -396,9 +398,9 @@ def build(bld):
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        obj.uselib.extend(['VAMPSDK', 'LIBLTC'])
+        obj.uselib.extend(['VAMPSDK', 'LIBLTC', 'LIBFLUIDSYNTH'])
     else:
-        obj.use.extend(['librubberband', 'libltc_includes', 'libltc'])
+        obj.use.extend(['librubberband', 'libltc_includes', 'libltc', 'libfluidsynth_includes', 'libfluidsynth'])
 
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
@@ -433,8 +435,12 @@ def build(bld):
         obj.source += [ 'lxvst_plugin.cc', 'linux_vst_support.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
 
-    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
-        obj.source += [ 'session_vst.cc', 'vst_plugin.cc', 'vst_info_file.cc' ]
+    if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined('MACVST_SUPPORT'):
+        obj.source += [ 'session_vst.cc', 'vst_plugin.cc', 'vst_info_file.cc', 'vst_state.cc' ]
+
+    if bld.is_defined('MACVST_SUPPORT'):
+        obj.source += [ 'mac_vst_plugin.cc', 'mac_vst_support.cc' ]
+        obj.defines += [ 'MACVST_SUPPORT' ]
 
     if bld.is_defined('HAVE_COREAUDIO'):
         obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
@@ -497,9 +503,9 @@ def build(bld):
         testcommon.use          = ['libpbd','libmidipp','libevoral',
                                    'libaudiographer','libardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
-            testcommon.uselib.extend(['LIBLTC',])
+            testcommon.uselib.extend(['LIBLTC', 'LIBFLUIDSYNTH'])
         else:
-            testcommon.use.extend(['libltc', 'librubberband'])
+            testcommon.use.extend(['libltc', 'librubberband', 'libfluidsynth'])
         testcommon.defines      = [
             'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
@@ -514,11 +520,11 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'interpolation', 'test_interpolation', ['test/interpolation_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'framewalk_to_beats', 'test_framewalk_to_beats', ['test/framewalk_to_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'framepos_plus_beats', 'test_framepos_plus_beats', ['test/framepos_plus_beats_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'framepos_minus_beats', 'test_framepos_minus_beats', ['test/framepos_minus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'plugins_test', 'test_plugins', ['test/plugins_test.cc'])
@@ -536,11 +542,11 @@ def build(bld):
             test/dsp_load_calculator_test.cc
             test/tempo_test.cc
             test/interpolation_test.cc
+            test/lua_script_test.cc
             test/midi_clock_slave_test.cc
             test/resampled_source_test.cc
             test/framewalk_to_beats_test.cc
             test/framepos_plus_beats_test.cc
-            test/framepos_minus_beats_test.cc
             test/playlist_equivalent_regions_test.cc
             test/playlist_layering_test.cc
             test/plugins_test.cc
@@ -617,9 +623,9 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.use          = ['libpbd','libmidipp','libevoral',
                             'libaudiographer','libardour','testcommon']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        testobj.uselib.extend(['LIBLTC'])
+        testobj.uselib.extend(['LIBLTC', 'LIBFLUIDSYNTH'])
     else:
-        testobj.use.extend(['libltc'])
+        testobj.use.extend(['libltc', 'libfluidsynth'])
 
     testobj.name         = name
     testobj.target       = target

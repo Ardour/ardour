@@ -55,6 +55,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+
 	boost::shared_ptr<ARDOUR::Port> input_port () const;
 	boost::shared_ptr<ARDOUR::Port> output_port () const;
 
@@ -106,6 +108,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	PBD::Signal0<void> ConnectionChange;
 
   private:
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 

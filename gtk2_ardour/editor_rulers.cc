@@ -710,13 +710,11 @@ Editor::update_fixed_rulers ()
 }
 
 void
-Editor::update_tempo_based_rulers (std::vector<TempoMap::BBTPoint>& grid)
+Editor::update_tempo_based_rulers ()
 {
 	if (_session == 0) {
 		return;
 	}
-
-	compute_bbt_ruler_scale (grid, leftmost_frame, leftmost_frame+current_page_samples());
 
 	_bbt_metric->units_per_pixel = samples_per_pixel;
 
@@ -998,18 +996,18 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
                                 mark.position = pos;
                                 marks.push_back (mark);
                                 ++n;
-                        }
-                        /* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
-                           and doing it 1 hour at a time is just stupid (and slow).
-                        */
-                        timecode.hours += timecode_mark_modulo;
+			}
+			/* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
+			 * and doing it 1 hour at a time is just stupid (and slow).
+			 */
+			timecode.hours += timecode_mark_modulo - (timecode.hours % timecode_mark_modulo);
 		}
 		break;
 	}
 }
 
 void
-Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t lower, framepos_t upper)
+Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 {
 	if (_session == 0) {
 		return;
@@ -1017,14 +1015,14 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 
 	std::vector<TempoMap::BBTPoint>::const_iterator i;
 	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
-	double floor_lower_beat = floor(_session->tempo_map().beat_at_frame (lower));
+	double floor_lower_beat = floor(max (0.0, _session->tempo_map().beat_at_frame (lower)));
 
 	if (floor_lower_beat < 0.0) {
 		floor_lower_beat = 0.0;
 	}
 
 	const framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor_lower_beat);
-	const framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (upper)) + 1.0);
+	const framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (max (0.0, _session->tempo_map().beat_at_frame (upper))) + 1.0);
 
 	_session->bbt_time (beat_before_lower_pos, lower_beat);
 	_session->bbt_time (beat_after_upper_pos, upper_beat);
@@ -1107,22 +1105,17 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
                 bbt_beat_subdivision = 4;
 		break;
 	}
-	if (distance (grid.begin(), grid.end()) == 0) {
+
+	const double ceil_upper_beat = floor (max (0.0, _session->tempo_map().beat_at_frame (upper))) + 1.0;
+	if (ceil_upper_beat == floor_lower_beat) {
 		return;
 	}
 
-	i = grid.end();
-	i--;
+	bbt_bars = _session->tempo_map().bbt_at_beat (ceil_upper_beat).bars - _session->tempo_map().bbt_at_beat (floor_lower_beat).bars;
 
-	/* XX ?? */
-	if ((*i).beat >= (*grid.begin()).beat) {
-		bbt_bars = (*i).bar - (*grid.begin()).bar;
-	} else {
-		bbt_bars = (*i).bar - (*grid.begin()).bar;
-	}
+	beats = (ceil_upper_beat - floor_lower_beat) - bbt_bars;
+	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / 5.0;
 
-	beats = distance (grid.begin(), grid.end()) - bbt_bars;
-	double beat_density = ((distance (grid.begin(), grid.end()) + 1) * ((double) (upper - lower) / (double) (1 + grid.back().frame - grid.front().frame))) / 5.0;
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
 	        bbt_bar_helper_on = true;

@@ -86,7 +86,6 @@ private:
 	sigc::signal<void>  ColorsChanged;
 
 	void reset_dpi ();
-	void set_pango_fontsize ();
 
 	float get_ui_scale ();
 

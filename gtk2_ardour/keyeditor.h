@@ -45,6 +45,10 @@ class KeyEditor : public ArdourWindow
 
 	static sigc::signal<void> UpdateBindings;
 
+	void disconnect () {
+		_refresh_connection.disconnect ();
+	}
+
 	private:
 	class Tab : public Gtk::VBox
 	{
@@ -124,6 +128,8 @@ class KeyEditor : public ArdourWindow
 	void toggle_sort_type ();
 	void search_string_updated (const std::string&);
 	void print () const;
+
+	sigc::connection _refresh_connection;
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */

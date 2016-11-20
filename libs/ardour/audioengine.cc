@@ -775,12 +775,24 @@ AudioEngine::backend_discover (const string& path)
 	return info;
 }
 
+static bool running_from_source_tree ()
+{
+	// dup ARDOUR_UI_UTILS::running_from_source_tree ()
+	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
+	return x && (string (x).find ("gtk2_ardour") != string::npos);
+}
+
 vector<const AudioBackendInfo*>
 AudioEngine::available_backends() const
 {
 	vector<const AudioBackendInfo*> r;
 
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
+#ifdef NDEBUG
+		if (i->first == "None (Dummy)" && !running_from_source_tree ()) {
+			continue;
+		}
+#endif
 		r.push_back (i->second);
 	}
 
@@ -864,8 +876,7 @@ AudioEngine::start (bool for_latency)
 	int error_code = _backend->start (for_latency);
 
 	if (error_code != 0) {
-		_last_backend_error_string =
-		    AudioBackend::get_error_string((AudioBackend::ErrorCode)error_code);
+		_last_backend_error_string = AudioBackend::get_error_string((AudioBackend::ErrorCode) error_code);
 		return -1;
 	}
 
@@ -879,6 +890,10 @@ AudioEngine::start (bool for_latency)
 		}
 
 	}
+
+	/* XXX MIDI ports may not actually be available here yet .. */
+
+	PortManager::fill_midi_port_info ();
 
 	if (!for_latency) {
 		Running(); /* EMIT SIGNAL */
@@ -906,7 +921,9 @@ AudioEngine::stop (bool for_latency)
 		stop_engine = false;
 	} else {
 		if (_backend->stop ()) {
-			pl.release ();
+			if (pl.locked ()) {
+                            pl.release ();
+                        }
 			return -1;
 		}
 	}
@@ -1466,4 +1483,19 @@ void
 AudioEngine::set_latency_input_port (const string& name)
 {
 	_latency_input_name = name;
+}
+
+void
+AudioEngine::add_pending_port_deletion (Port* p)
+{
+	if (_session) {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("adding %1 to pending port deletion list\n", p->name()));
+		if (_port_deletions_pending.write (&p, 1) != 1) {
+			error << string_compose (_("programming error: port %1 could not be placed on the pending deletion queue\n"), p->name()) << endmsg;
+		}
+		_session->auto_connect_thread_wakeup ();
+	} else {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("Directly delete port %1\n", p->name()));
+		delete p;
+	}
 }

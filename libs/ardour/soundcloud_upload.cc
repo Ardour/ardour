@@ -52,6 +52,8 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 }
 
 SoundcloudUploader::SoundcloudUploader()
+: errorBuffer()
+, caller(0)
 {
 	curl_handle = curl_easy_init();
 	multi_handle = curl_multi_init();

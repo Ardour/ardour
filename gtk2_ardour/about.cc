@@ -174,6 +174,7 @@ static const char* authors[] = {
 	N_("André Nusser"),
 	N_("Bent Bisballe Nyeng"),
 	N_("Jack O'Quin"),
+	N_("Len Ovens"),
 	N_("Pavel Potocek"),
 	N_("Nimal Ratnayake"),
 	N_("Julien Rivaud"),
@@ -187,6 +188,7 @@ static const char* authors[] = {
 	N_("Lincoln Spiteri"),
 	N_("Mike Start"),
 	N_("Mark Stewart"),
+	N_("Nathan Stewart"),
 	N_("Roland Stigge"),
 	N_("Petter Sundlöf"),
 	N_("Mike Täht"),
@@ -198,7 +200,7 @@ static const char* authors[] = {
 };
 
 static const char* translators[] = {
-	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n\tRomain Arnaud <roming22@gmail.com>\n"),
+	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n\tRomain Arnaud <roming22@gmail.com>\n\tOlivier Humbert <trebmuh@tuxfamily.org>\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede <schwede@ironshark.com>\
@@ -583,8 +585,9 @@ About::About ()
 	std::string splash_file;
 
 	Searchpath spath(ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("resources");
 
-	if (find_file (spath, "splash.png", splash_file)) {
+	if (find_file (spath, PROGRAM_NAME "-splash.png", splash_file)) {
 		set_logo (Gdk::Pixbuf::create_from_file (splash_file));
 	} else {
 		error << "Could not find splash file" << endmsg;
@@ -622,7 +625,7 @@ About::About ()
 #endif
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2015 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2016 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("http://ardour.org/"));

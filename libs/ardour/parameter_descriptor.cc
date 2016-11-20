@@ -96,6 +96,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
 		lower  = 0.0;
 		normal = 0.0;
 		upper  = 127.0;
@@ -191,7 +192,7 @@ ParameterDescriptor::update_steps()
 std::string
 ParameterDescriptor::midi_note_name (const uint8_t b)
 {
-	char buf[8];
+	char buf[16];
 	if (b > 127) {
 		snprintf(buf, sizeof(buf), "%d", b);
 		return buf;

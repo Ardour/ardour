@@ -135,12 +135,17 @@ JACKAudioBackend::get_port_property (PortHandle port, const std::string& key, st
 	jack_uuid_t uuid = jack_port_uuid((jack_port_t*) port);
 	rv = jack_get_property(uuid, key.c_str(), &cvalue, &ctype);
 
-	if (0 == rv) {
+	if (0 == rv && cvalue) {
 		value = cvalue;
-		type = ctype;
-		jack_free(cvalue);
-		jack_free(ctype);
+		if (ctype) {
+			type = ctype;
+		}
+	} else {
+		rv = -1;
 	}
+
+	jack_free(cvalue);
+	jack_free(ctype);
 	return rv;
 #else
 	return -1;

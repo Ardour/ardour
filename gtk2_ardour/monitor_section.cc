@@ -42,6 +42,7 @@
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "mixer_ui.h"
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "timers.h"
@@ -59,6 +60,8 @@ using namespace PBD;
 using namespace std;
 
 Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
+Gtkmm2ext::ActionMap MonitorSection::myactions (X_("monitor section"));
+Gtkmm2ext::Bindings* MonitorSection::bindings = 0;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
@@ -85,8 +88,6 @@ MonitorSection::MonitorSection (Session* s)
 	, toggle_processorbox_button (ArdourButton::default_elements)
 	, _inhibit_solo_model_update (false)
 	, _ui_initialized (false)
-	, myactions (X_("monitor section"))
-	, bindings (0)
 {
 
 	using namespace Menu_Helpers;
@@ -96,10 +97,9 @@ MonitorSection::MonitorSection (Session* s)
 	if (!monitor_actions) {
 		register_actions ();
 		load_bindings ();
-		if (bindings) {
-			set_data ("ardour-bindings", bindings);
-		}
 	}
+
+	set_data ("ardour-bindings", bindings);
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
 	insert_box = new ProcessorBox (_session, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
@@ -895,22 +895,22 @@ MonitorSection::register_actions ()
 	monitor_actions = myactions.create_action_group (X_("Monitor"));
 
 	myactions.register_toggle_action (monitor_actions, "monitor-mono", _("Switch monitor to mono"),
-			sigc::mem_fun (*this, &MonitorSection::mono));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorMono));
 
 	myactions.register_toggle_action (monitor_actions, "monitor-cut-all", _("Cut monitor"),
-			sigc::mem_fun (*this, &MonitorSection::cut_all));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorCutAll));
 
 	myactions.register_toggle_action (monitor_actions, "monitor-dim-all", _("Dim monitor"),
-			sigc::mem_fun (*this, &MonitorSection::dim_all));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorDimAll));
 
 	act = myactions.register_toggle_action (monitor_actions, "toggle-exclusive-solo", _("Toggle exclusive solo mode"),
-			sigc::mem_fun (*this, &MonitorSection::toggle_exclusive_solo));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), ToggleExclusiveSolo));
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (Config->get_exclusive_solo());
 
 	act = myactions.register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", _("Toggle mute overrides solo mode"),
-			sigc::mem_fun (*this, &MonitorSection::toggle_mute_overrides_solo));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), ToggleMuteOverridesSolo));
 
 	tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (Config->get_solo_mute_override());
@@ -920,22 +920,22 @@ MonitorSection::register_actions ()
 		action_name = string_compose (X_("monitor-cut-%1"), chn);
 		action_descr = string_compose (_("Cut monitor channel %1"), chn);
 		myactions.register_toggle_action (monitor_actions, action_name.c_str(), action_descr.c_str(),
-				sigc::bind (sigc::mem_fun (*this, &MonitorSection::cut_channel), chn));
+				sigc::bind (sigc::ptr_fun (action_proxy1), CutChannel, chn));
 
 		action_name = string_compose (X_("monitor-dim-%1"), chn);
 		action_descr = string_compose (_("Dim monitor channel %1"), chn);
 		myactions.register_toggle_action (monitor_actions, action_name.c_str(), action_descr.c_str(),
-				sigc::bind (sigc::mem_fun (*this, &MonitorSection::dim_channel), chn));
+				sigc::bind (sigc::ptr_fun (action_proxy1), DimChannel, chn));
 
 		action_name = string_compose (X_("monitor-solo-%1"), chn);
 		action_descr = string_compose (_("Solo monitor channel %1"), chn);
 		myactions.register_toggle_action (monitor_actions, action_name.c_str(), action_descr.c_str(),
-				sigc::bind (sigc::mem_fun (*this, &MonitorSection::solo_channel), chn));
+				sigc::bind (sigc::ptr_fun (action_proxy1), SoloChannel, chn));
 
 		action_name = string_compose (X_("monitor-invert-%1"), chn);
 		action_descr = string_compose (_("Invert monitor channel %1"), chn);
 		myactions.register_toggle_action (monitor_actions, action_name.c_str(), action_descr.c_str(),
-				sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
+				sigc::bind (sigc::ptr_fun (action_proxy1), InvertChannel, chn));
 
 	}
 
@@ -944,68 +944,15 @@ MonitorSection::register_actions ()
 	RadioAction::Group solo_group;
 
 	myactions.register_radio_action (solo_actions, solo_group, "solo-use-in-place", _("In-place solo"),
-			sigc::mem_fun (*this, &MonitorSection::solo_use_in_place));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), SoloUseInPlace));
 	myactions.register_radio_action (solo_actions, solo_group, "solo-use-afl", _("After Fade Listen (AFL) solo"),
-			sigc::mem_fun (*this, &MonitorSection::solo_use_afl));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), SoloUseAFL));
 	myactions.register_radio_action (solo_actions, solo_group, "solo-use-pfl", _("Pre Fade Listen (PFL) solo"),
-			sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), SoloUsePFL));
 
 	myactions.register_toggle_action (monitor_actions, "toggle-monitor-processor-box", _("Toggle Monitor Section Processor Box"),
-			sigc::mem_fun(*this, &MonitorSection::update_processor_box));
-}
+			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), ToggleMonitorProcessorBox));
 
-void
-MonitorSection::connect_actions ()
-{
-	Glib::RefPtr<Action> act;
-	Glib::RefPtr<ToggleAction> tact;
-
-#define MON_TOG(NAME, FUNC) \
-	act = ActionManager::get_action (X_("Monitor"), NAME); \
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act); \
-	assert (tact); \
-	tact->signal_toggled().connect (sigc::mem_fun (*this, &MonitorSection::FUNC)); \
-
-	MON_TOG("monitor-mono", mono);
-	MON_TOG("monitor-cut-all", cut_all);
-	MON_TOG("monitor-dim-all", dim_all);
-
-	MON_TOG("toggle-exclusive-solo", toggle_exclusive_solo);
-	tact->set_active (Config->get_exclusive_solo());
-
-	MON_TOG("toggle-mute-overrides-solo", toggle_mute_overrides_solo);
-	tact->set_active (Config->get_solo_mute_override());
-#undef MON_TOG
-
-#define MON_BIND(NAME, FUNC, ARG) \
-	act = ActionManager::get_action (X_("Monitor"), NAME); \
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act); \
-	assert (tact); \
-	tact->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::FUNC), ARG));
-
-	for (uint32_t chn = 0; chn < 16; ++chn) {
-		std::string action_name = string_compose (X_("monitor-cut-%1"), chn);
-		MON_BIND(action_name.c_str(), cut_channel, chn);
-		action_name = string_compose (X_("monitor-dim-%1"), chn);
-		MON_BIND(action_name.c_str(), dim_channel, chn);
-		action_name = string_compose (X_("monitor-solo-%1"), chn);
-		MON_BIND(action_name.c_str(), solo_channel, chn);
-		action_name = string_compose (X_("monitor-invert-%1"), chn);
-		MON_BIND(action_name.c_str(), invert_channel, chn);
-	}
-#undef MON_BIND
-
-#define SOLO_RADIO(NAME, FUNC) \
-	act = ActionManager::get_action (X_("Solo"), NAME); \
-	ract = Glib::RefPtr<RadioAction>::cast_dynamic (act); \
-	assert (ract); \
-	ract->signal_toggled().connect (sigc::mem_fun (*this, &MonitorSection::FUNC)); \
-
-	Glib::RefPtr<RadioAction> ract;
-	SOLO_RADIO ("solo-use-in-place", solo_use_in_place);
-	SOLO_RADIO ("solo-use-afl", solo_use_afl);
-	SOLO_RADIO ("solo-use-pfl", solo_use_pfl);
-#undef SOLO_RADIO
 }
 
 void
@@ -1702,3 +1649,63 @@ MonitorSection::processors_changed (ARDOUR::RouteProcessorChange)
 	update_processor_box ();
 }
 
+void
+MonitorSection::action_proxy0 (enum MonitorActions action)
+{
+	MonitorSection* ms = Mixer_UI::instance()->monitor_section ();
+	if (!ms) {
+		return;
+	}
+	switch (action) {
+		case MonitorMono:
+			ms->mono ();
+			break;
+		case MonitorCutAll:
+			ms->cut_all ();
+			break;
+		case MonitorDimAll:
+			ms->dim_all ();
+			break;
+		case ToggleExclusiveSolo:
+			ms->toggle_exclusive_solo ();
+			break;
+		case ToggleMuteOverridesSolo:
+			ms->toggle_mute_overrides_solo ();
+			break;
+		case SoloUseInPlace:
+			ms->solo_use_in_place ();
+			break;
+		case SoloUseAFL:
+			ms->solo_use_afl ();
+			break;
+		case SoloUsePFL:
+			ms->solo_use_pfl ();
+			break;
+		case ToggleMonitorProcessorBox:
+			ms->update_processor_box ();
+			break;
+	}
+}
+
+void
+MonitorSection::action_proxy1 (enum ChannelActions action, uint32_t chn)
+{
+	MonitorSection* ms = Mixer_UI::instance()->monitor_section ();
+	if (!ms) {
+		return;
+	}
+	switch (action) {
+		case CutChannel:
+			ms->cut_channel (chn);
+			break;
+		case DimChannel:
+			ms->dim_channel (chn);
+			break;
+		case SoloChannel:
+			ms->solo_channel (chn);
+			break;
+		case InvertChannel:
+			ms->invert_channel (chn);
+			break;
+	}
+}

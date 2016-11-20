@@ -41,14 +41,31 @@ using Gtkmm2ext::Keyboard;
 #ifdef __APPLE__
 guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 #else
-guint ArdourKeyboard::constraint_mod = Keyboard::SecondaryModifier;
+guint ArdourKeyboard::constraint_mod = Keyboard::TertiaryModifier;
 #endif
+
+/* TrimDrag::start_grab() */
 guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
+
+/* TrimDrag::motion() */
 guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
-guint ArdourKeyboard::trim_anchored_mod = Keyboard::TertiaryModifier;
-guint ArdourKeyboard::fine_adjust_mod = Keyboard::SecondaryModifier;
-guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier;
-guint ArdourKeyboard::note_size_relative_mod = Keyboard::PrimaryModifier;
+
+/* TrimDrag::start_grab() */
+guint ArdourKeyboard::trim_anchored_mod = Keyboard::PrimaryModifier|Keyboard::TertiaryModifier;
+
+/* ControlPointDrag::motion() && LineDrag::motion()*/
+guint ArdourKeyboard::fine_adjust_mod = Keyboard::PrimaryModifier|Keyboard::SecondaryModifier;
+
+/* ControlPointDrag::start_grab() && MarkerDrag::motion() */
+guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier|Keyboard::Level4Modifier;
+
+/* NoteResizeDrag::start_grab() */
+guint ArdourKeyboard::note_size_relative_mod = Keyboard::TertiaryModifier;
+
+ArdourKeyboard::ArdourKeyboard (ARDOUR_UI& ardour_ui) : ui (ardour_ui)
+{
+	Keyboard::RelevantModifierKeysChanged.connect (sigc::mem_fun (*this, &ArdourKeyboard::reset_relevant_modifier_key_mask));
+}
 
 void
 ArdourKeyboard::find_bindings_files (map<string,string>& files)
@@ -260,6 +277,18 @@ ArdourKeyboard::set_state (const XMLNode& node, int version)
 	return Keyboard::set_state (node, version);
 }
 
+void
+ArdourKeyboard::reset_relevant_modifier_key_mask ()
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | constraint_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_anchored_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | fine_adjust_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | push_points_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | note_size_relative_mod);
+}
+
 /* Snap and snap delta modifiers may contain each other, so we use the
  * following two methods to sort that out:
  */
@@ -283,60 +312,72 @@ ArdourKeyboard::indicates_snap_delta (guint state)
 	return (contains_d && ((contains_s && d_contains_s) || !contains_s));
 }
 
+/* Constraint and copy modifiers are both in effect at the beginning of some drags, and may be set ambiguously */
+bool
+ArdourKeyboard::indicates_copy (guint state)
+{
+	const bool contains_c = Keyboard::modifier_state_contains (state, Keyboard::CopyModifier);
+	const bool equals_cs = Keyboard::modifier_state_equals (state, constraint_modifier ());
+
+	return  contains_c && !equals_cs;
+}
+
+bool
+ArdourKeyboard::indicates_constraint (guint state)
+{
+	const bool contains_cs = Keyboard::modifier_state_contains (state, constraint_modifier ());
+	const bool equals_c = Keyboard::modifier_state_equals (state, Keyboard::CopyModifier);
+
+	return contains_cs && !equals_c;
+}
+
 void
 ArdourKeyboard::set_constraint_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~constraint_mod);
 	constraint_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | constraint_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_trim_contents_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_contents_mod);
 	trim_contents_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_trim_overlap_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_overlap_mod);
 	trim_overlap_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_trim_anchored_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_anchored_mod);
 	trim_anchored_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_anchored_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_fine_adjust_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~fine_adjust_mod);
 	fine_adjust_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | fine_adjust_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_push_points_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~push_points_mod);
 	push_points_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | push_points_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 void
 ArdourKeyboard::set_note_size_relative_modifier (guint mod)
 {
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~note_size_relative_mod);
 	note_size_relative_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | note_size_relative_mod);
+	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
 Selection::Operation

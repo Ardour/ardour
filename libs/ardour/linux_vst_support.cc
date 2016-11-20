@@ -59,7 +59,7 @@ void vstfx_error (const char *fmt, ...)
 
 /*default error handler callback*/
 
-void default_vstfx_error_callback (const char *desc)
+static void default_vstfx_error_callback (const char *desc)
 {
 	PBD::error << desc << endmsg;
 }
@@ -70,7 +70,7 @@ void (*vstfx_error_callback)(const char *desc) = &default_vstfx_error_callback;
 
 /*Create and return a pointer to a new VSTFX handle*/
 
-VSTHandle *
+static VSTHandle *
 vstfx_handle_new ()
 {
 	VSTHandle* vstfx = (VSTHandle *) calloc (1, sizeof (VSTHandle));
@@ -79,37 +79,17 @@ vstfx_handle_new ()
 
 /*Create and return a pointer to a new vstfx instance*/
 
-VSTState *
+static VSTState *
 vstfx_new ()
 {
 	VSTState* vstfx = (VSTState *) calloc (1, sizeof (VSTState));
-
-	/*Mutexes*/
-
-	pthread_mutex_init (&vstfx->lock, 0);
-	pthread_cond_init (&vstfx->window_status_change, 0);
-	pthread_cond_init (&vstfx->plugin_dispatcher_called, 0);
-	pthread_cond_init (&vstfx->window_created, 0);
-
-	/*Safe values*/
-
-	vstfx->want_program = -1;
-	vstfx->want_chunk = 0;
-	vstfx->n_pending_keys = 0;
-	vstfx->has_editor = 0;
-	vstfx->program_set_without_editor = 0;
-	vstfx->linux_window = 0;
-	vstfx->linux_plugin_ui_window = 0;
-	vstfx->eventProc = 0;
-	vstfx->extra_data = 0;
-	vstfx->want_resize = 0;
-
+	vststate_init (vstfx);
 	return vstfx;
 }
 
 /*This loads the plugin shared library*/
 
-void* vstfx_load_vst_library(const char* path)
+static void* vstfx_load_vst_library(const char* path)
 {
 	void* dll;
 	char* full_path = NULL;
@@ -239,12 +219,10 @@ vstfx_load (const char *path)
 
 	/*Find the main entry point into the plugin*/
 
-	fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main");
+	fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "VSTPluginMain");
 
 	if (fhandle->main_entry == 0) {
-		if ((fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "VSTPluginMain")) != 0) {
-			PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
-		}
+		fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main");
 	}
 
 	if (fhandle->main_entry == 0)
@@ -385,134 +363,4 @@ void vstfx_close (VSTState* vstfx)
 		vstfx->handle->dll = 0;
 	}
 	free(vstfx);
-}
-
-
-bool
-vstfx_save_state (VSTState* vstfx, char * filename)
-{
-	FILE* f = g_fopen (filename, "wb");
-	if (f)
-	{
-		int bytelen;
-		int numParams = vstfx->plugin->numParams;
-		int i;
-		char productString[64];
-		char effectName[64];
-		char vendorString[64];
-		int success;
-
-		/* write header */
-
-		fprintf(f, "<plugin_state>\n");
-
-		success = vstfx_call_dispatcher(vstfx, effGetProductString, 0, 0, productString, 0);
-
-		if(success == 1)
-		{
-			fprintf (f, "  <check field=\"productString\" value=\"%s\"/>\n", productString);
-		}
-		else
-		{
-			printf ("No product string\n");
-		}
-
-		success = vstfx_call_dispatcher(vstfx, effGetEffectName, 0, 0, effectName, 0);
-
-		if(success == 1)
-		{
-			fprintf (f, "  <check field=\"effectName\" value=\"%s\"/>\n", effectName);
-			printf ("Effect name: %s\n", effectName);
-		}
-		else
-		{
-			printf ("No effect name\n");
-		}
-
-		success = vstfx_call_dispatcher(vstfx, effGetVendorString, 0, 0, vendorString, 0);
-
-		if( success == 1 )
-		{
-			fprintf (f, "  <check field=\"vendorString\" value=\"%s\"/>\n", vendorString);
-			printf ("Vendor string: %s\n", vendorString);
-		}
-		else
-		{
-			printf ("No vendor string\n");
-		}
-
-
-		if(vstfx->plugin->flags & 32 )
-		{
-			numParams = 0;
-		}
-
-		for(i=0; i < numParams; i++)
-		{
-			float val;
-
-			pthread_mutex_lock( &vstfx->lock );
-			val = vstfx->plugin->getParameter(vstfx->plugin, i );
-			pthread_mutex_unlock( &vstfx->lock );
-			fprintf( f, "  <param index=\"%d\" value=\"%f\"/>\n", i, val );
-		}
-
-		if(vstfx->plugin->flags & 32 )
-		{
-			printf( "getting chunk...\n" );
-			void * chunk;
-			bytelen = vstfx_call_dispatcher(vstfx, 23, 0, 0, &chunk, 0 );
-			printf( "got tha chunk..\n" );
-			if( bytelen )
-			{
-				if( bytelen < 0 )
-				{
-					printf( "Chunke len < 0 !!! Not saving chunk.\n" );
-				}
-				else
-				{
-					//char *encoded = g_base64_encode( chunk, bytelen );
-					//fprintf( f, "  <chunk size=\"%d\">\n    %s\n  </chunk>\n", bytelen, encoded );
-					//g_free( encoded );
-				}
-			}
-		}
-
-		fprintf( f, "</plugin_state>\n" );
-		fclose( f );
-	}
-	else
-	{
-		printf ("Could not open state file\n");
-		return false;
-	}
-	return true;
-}
-
-/*Set up a call to the plugins 'dispatcher' function*/
-
-int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void *ptr, float opt)
-{
-	pthread_mutex_lock (&vstfx->lock);
-
-	/*Set up the opcode and parameters*/
-
-	vstfx->dispatcher_opcode = opcode;
-	vstfx->dispatcher_index = index;
-	vstfx->dispatcher_val = val;
-	vstfx->dispatcher_ptr = ptr;
-	vstfx->dispatcher_opt = opt;
-
-	/*Signal that we want the call to happen*/
-
-	vstfx->dispatcher_wantcall = 1;
-
-	/*Wait for the call to happen*/
-
-	pthread_cond_wait (&vstfx->plugin_dispatcher_called, &vstfx->lock);
-	pthread_mutex_unlock (&vstfx->lock);
-
-	/*Return the result*/
-
-	return vstfx->dispatcher_retval;
 }

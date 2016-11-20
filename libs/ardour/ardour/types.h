@@ -111,12 +111,12 @@ namespace ARDOUR {
 	*/
 
 	enum InsertMergePolicy {
-		InsertMergeReject,  // no overlaps allowed
-		InsertMergeRelax,   // we just don't care about overlaps
-		InsertMergeReplace, // replace old with new
-		InsertMergeTruncateExisting, // shorten existing to avoid overlap
-		InsertMergeTruncateAddition, // shorten new to avoid overlap
-		InsertMergeExtend   // extend new (or old) to the range of old+new
+		InsertMergeReject,  ///< no overlaps allowed
+		InsertMergeRelax,   ///< we just don't care about overlaps
+		InsertMergeReplace, ///< replace old with new
+		InsertMergeTruncateExisting, ///< shorten existing to avoid overlap
+		InsertMergeTruncateAddition, ///< shorten new to avoid overlap
+		InsertMergeExtend   ///< extend new (or old) to the range of old+new
 	};
 
 	/** See evoral/Parameter.hpp
@@ -146,6 +146,7 @@ namespace ARDOUR {
 		MidiPgmChangeAutomation,
 		MidiPitchBenderAutomation,
 		MidiChannelPressureAutomation,
+		MidiNotePressureAutomation,
 		MidiSystemExclusiveAutomation,
 		FadeInAutomation,
 		FadeOutAutomation,
@@ -652,7 +653,18 @@ namespace ARDOUR {
 		IsOutput = 0x2,
 		IsPhysical = 0x4,
 		CanMonitor = 0x8,
-		IsTerminal = 0x10
+		IsTerminal = 0x10,
+
+		/* non-JACK related flags */
+		Hidden = 0x20,
+		Shadow = 0x40
+	};
+
+	enum MidiPortFlags {
+		MidiPortMusic = 0x1,
+		MidiPortControl = 0x2,
+		MidiPortSelection = 0x4,
+		MidiPortVirtual = 0x8
 	};
 
 	struct LatencyRange {

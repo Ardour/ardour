@@ -16,6 +16,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/convert.h"
+#include "pbd/enumwriter.h"
 #include "ardour/plugin_manager.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "instrument_selector.h"
@@ -64,6 +66,21 @@ InstrumentSelector::refill()
 	set_button_sensitivity(Gtk::SENSITIVITY_AUTO);
 }
 
+static bool
+pluginsort (const PluginInfoPtr& a, const PluginInfoPtr& b)
+{
+	return PBD::downcase(a->name) < PBD::downcase(b->name);
+}
+
+static bool
+invalid_instrument (PluginInfoPtr p) {
+	const PluginManager& manager = PluginManager::instance();
+	if (manager.get_status(p) == PluginManager::Hidden) {
+		return true;
+	}
+	return !p->is_instrument();
+}
+
 void
 InstrumentSelector::build_instrument_list()
 {
@@ -78,12 +95,18 @@ InstrumentSelector::build_instrument_list()
 #ifdef LXVST_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
 #endif
+#ifdef MACVST_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.mac_vst_plugin_info().begin(), manager.mac_vst_plugin_info().end());
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
 #endif
 #ifdef LV2_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
+
+	all_plugs.remove_if (invalid_instrument);
+	all_plugs.sort (pluginsort);
 
 	_instrument_list = ListStore::create(_instrument_list_columns);
 
@@ -92,20 +115,40 @@ InstrumentSelector::build_instrument_list()
 	row[_instrument_list_columns.name]     = _("-none-");
 
 	uint32_t n = 1;
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		if (manager.get_status(*i) == PluginManager::Hidden) {
-			continue;
+	std::string prev;
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end();) {
+		PluginInfoPtr p = *i;
+		++i;
+		bool suffix_type = prev == p->name;
+		if (!suffix_type && i != all_plugs.end() && (*i)->name == p->name) {
+			suffix_type = true;
 		}
 
-		if ((*i)->is_instrument()) {
-			row                                    = *(_instrument_list->append());
-			row[_instrument_list_columns.name]     = (*i)->name;
-			row[_instrument_list_columns.info_ptr] = *i;
-			if ((*i)->unique_id == "https://community.ardour.org/node/7596") {
-				_reasonable_synth_id = n;
+		row = *(_instrument_list->append());
+		if (suffix_type) {
+			std::string pt;
+			switch (p->type) {
+				case AudioUnit:
+					pt = "AU";
+					break;
+				case Windows_VST:
+				case LXVST:
+				case MacVST:
+					pt = "VST";
+					break;
+				default:
+					pt = enum_2_string (p->type);
 			}
-			n++;
+			row[_instrument_list_columns.name]   = p->name + " (" + pt + ")";
+		} else {
+			row[_instrument_list_columns.name]   = p->name;
 		}
+		row[_instrument_list_columns.info_ptr] = p;
+		if (p->unique_id == "https://community.ardour.org/node/7596") {
+			_reasonable_synth_id = n;
+		}
+		prev = p->name;
+		n++;
 	}
 }
 

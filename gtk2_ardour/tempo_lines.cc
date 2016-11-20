@@ -77,11 +77,11 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		if (grid.begin()->c != 0.0) {
 			const double beat_divisions = (l / ((double) divisions)) * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
 			const double time_at_division = log (((grid.begin()->c * (beat_divisions)) /
-							   grid.begin()->tempo.beats_per_minute()) + 1) / grid.begin()->c;
+							   grid.begin()->tempo.note_types_per_minute()) + 1) / grid.begin()->c;
 
 			f = grid.begin()->frame + (framecnt_t) floor ((time_at_division * 60.0 * frame_rate) + 0.5);
 		} else {
-			const double fpb  = grid.begin()->tempo.frames_per_beat (frame_rate)
+			const double fpb  = grid.begin()->tempo.frames_per_note_type (frame_rate)
 				* (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
 
 			f = grid.begin()->frame + (l * (fpb / (double) divisions));
@@ -103,16 +103,42 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 
 	uint32_t beats = 0;
 	uint32_t bars = 0;
+	const uint32_t bar_color = UIConfiguration::instance().color ("measure line bar");
+	const uint32_t beat_color = UIConfiguration::instance().color_mod ("measure line beat", "measure line beat");
 	uint32_t color;
 
+	bool all_bars = false;
 	/* get the first bar spacing */
 
 	i = grid.end();
 	i--;
 	bars = (*i).bar - (*grid.begin()).bar;
-	beats = distance (grid.begin(), grid.end()) - bars;
 
-	beat_density = (beats * 10.0f) / lines.canvas()->width();
+	int32_t bar_mod = 4;
+
+	if (bars < distance (grid.begin(), grid.end()) - 1) {
+		/* grid contains beats and bars */
+		beats = distance (grid.begin(), grid.end()) - bars;
+	} else {
+		/* grid contains only bars */
+		beats = distance (grid.begin(), grid.end());
+
+		if (i != grid.begin()) {
+			const int32_t last_bar = (*i).bar;
+			i--;
+			bar_mod = (last_bar - (*i).bar) * 4;
+		}
+
+		all_bars = true;
+	}
+
+	double canvas_width_used = 1.0;
+	if (leftmost_frame < grid.front().frame) {
+		const framecnt_t frame_distance = max ((framecnt_t) 1, grid.back().frame - grid.front().frame);
+		canvas_width_used = 1.0 - ((grid.front().frame - leftmost_frame) / (double) (frame_distance + grid.front().frame));
+	}
+
+	beat_density = (beats * 10.0f) / (lines.canvas()->width() * canvas_width_used);
 
 	if (beat_density > 2.0f) {
 		/* if the lines are too close together, they become useless */
@@ -126,7 +152,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 	}
 
 	lines.clear ();
-	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->frame > 0) {
+	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->frame > 0 && !all_bars) {
 		/* draw subdivisions of the beat before the first visible beat line XX this shouldn't happen now */
 		std::vector<ARDOUR::TempoMap::BBTPoint> vec;
 		vec.push_back (*i);
@@ -136,19 +162,24 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 	for (i = grid.begin(); i != grid.end(); ++i) {
 
 		if ((*i).is_bar()) {
-			color = UIConfiguration::instance().color ("measure line bar");
+			/* keep all_bar beat density down */
+			if (all_bars && beat_density > 0.3 && ((*i).bar % bar_mod) != 1) {
+				continue;
+			}
+
+			color = bar_color;
 		} else {
 			if (beat_density > 0.3) {
 				continue; /* only draw beat lines if the gaps between beats are large. */
 			}
-			color = UIConfiguration::instance().color_mod ("measure line beat", "measure line beat");
+			color = beat_color;
 		}
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
 
 		lines.add (xpos, 1.0, color);
 
-		if (beat_density <= 0.12) {
+		if (beat_density <= 0.12 && !all_bars) {
 			/* draw subdivisions of this beat */
 			std::vector<ARDOUR::TempoMap::BBTPoint> vec;
 			vec.push_back (*i);

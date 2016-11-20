@@ -71,7 +71,7 @@ public:
 	inline bool     is_pitch_bender()       const { return (type() == MIDI_CMD_BENDER); }
 	inline bool     is_pgm_change()         const { return (type() == MIDI_CMD_PGM_CHANGE); }
 	inline bool     is_note()               const { return (is_note_on() || is_note_off()); }
-	inline bool     is_aftertouch()         const { return (type() == MIDI_CMD_NOTE_PRESSURE); }
+	inline bool     is_poly_pressure()      const { return (type() == MIDI_CMD_NOTE_PRESSURE); }
 	inline bool     is_channel_pressure()   const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
 	inline uint8_t  note()                  const { return (this->_buf[1]); }
 	inline void     set_note(uint8_t n)           { this->_buf[1] = n; }
@@ -92,7 +92,8 @@ public:
 	                                                        | (0x7F & this->_buf[1]) ); }
 	inline uint8_t  pgm_number()              const { return (this->_buf[1]); }
 	inline void     set_pgm_number(uint8_t number)  { this->_buf[1] = number; }
-	inline uint8_t  aftertouch()              const { return (this->_buf[1]); }
+	inline uint8_t  poly_note()               const { return (this->_buf[1]); }
+	inline uint8_t  poly_pressure()           const { return (this->_buf[2]); }
 	inline uint8_t  channel_pressure()        const { return (this->_buf[1]); }
 	inline bool     is_channel_event()        const { return (0x80 <= type()) && (type() <= 0xE0); }
 	inline bool     is_smf_meta_event()       const { return this->_buf[0] == 0xFF; }
@@ -112,7 +113,7 @@ public:
 		case MIDI_CMD_BENDER:
 			return pitch_bender_value();
 		case MIDI_CMD_NOTE_PRESSURE:
-			return aftertouch();
+			return poly_pressure();
 		case MIDI_CMD_CHANNEL_PRESSURE:
 			return channel_pressure();
 		default:

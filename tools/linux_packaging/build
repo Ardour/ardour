@@ -24,7 +24,6 @@ fi
 MIXBUS=
 WITH_HARRISON_LV2=
 WITH_X42_LV2=
-WITH_LADSPA=0
 WITH_HARVID=
 STRIP=all
 PRINT_SYSDEPS=
@@ -36,8 +35,10 @@ GCC5ABI=false
 USEWINE=false
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
-: ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
+: ${HARRISONCHANNELSTRIP=harrison_channelstrip}
+: ${HARRISONLV2=harrison_lv2s-n}
+: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
 
 if [ $# -eq 0 ] ; then
 	echo ""
@@ -61,7 +62,6 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
@@ -72,7 +72,6 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all
 		APPNAME=Mixbus32C ;
 		VENDOR=Harrison ;
@@ -82,23 +81,20 @@ while [ $# -gt 0 ] ; do
 	--public)
 		WITH_HARRISON_LV2=1 ;
 		WITH_NLS=1 ;
-		WITH_LADSPA=;
 		STRIP=all ;
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
 		WITH_NLS= ;
-		WITH_LADSPA=1;
 		STRIP=all;
 		shift ;;
-	--test) WITH_LADSPA=; STRIP= ; shift ;;
+	--test) STRIP= ; shift ;;
 
 	#
 	# specific build flags
 	#
 
 	--nojack) INTERNAL_JACK= ; shift ;;
-	--noladspa) WITH_LADSPA= ; shift ;;
 	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
@@ -123,6 +119,7 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
 fi
 
 . ../define_versions.sh
+lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 
 echo "Version is $release_version"
 if [ "x$commit" != "x" ] ; then
@@ -361,20 +358,6 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
 (cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
 
-# LADSPA
-if test x$WITH_LADSPA != x ; then
-	if test x$MIXBUS != x ; then
-		plugdir=mixbus_ladspa
-	else
-		plugdir=ladspa
-	fi
-	echo "Copying `ls $plugdir | wc -l` plugins ..."
-	if [ -d $plugdir ] ; then
-		mkdir -p $Plugins
-		cp -r $plugdir/* $Plugins
-	fi
-fi
-
 # Control Surfaces
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
 cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp.so* $Libraries
@@ -394,6 +377,10 @@ done
 # Lua Scripts Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../scripts/*.lua ; do
+		BN=$(basename $x)
+	  if test "${BN:0:1}" = "_"; then
+			continue;
+		fi
     cp "$x" $LuaScripts
 done
 
@@ -462,6 +449,38 @@ if test -f $BUILD_ROOT/libs/ardouralsautil/ardour-request-device; then
     if test x$STRIP = xall ; then
         strip -s $APPLIB/ardour-request-device
     fi
+fi
+
+# session-utils
+HAVE_SESSION_UTILS=false
+for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
+	BN=$(basename $file)
+	cp -v $file $APPLIB/
+	if test x$STRIP = xall ; then
+		strip -s $APPLIB/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh $APPBIN/${BN}
+	HAVE_SESSION_UTILS=true
+done
+
+if test "$HAVE_SESSION_UTILS" = true ; then
+	cat >> $APPLIB/ardour-util.sh << EOF
+#!/bin/sh
+
+BIN_DIR=\$(dirname \$(readlink -f \$0))
+INSTALL_DIR=\$(dirname \$BIN_DIR)
+
+export LD_LIBRARY_PATH=\$INSTALL_DIR/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}
+
+export ARDOUR_DATA_PATH=\$INSTALL_DIR/share
+export ARDOUR_CONFIG_PATH=\$INSTALL_DIR/etc
+export ARDOUR_DLL_PATH=\$INSTALL_DIR/lib
+export VAMP_PATH=\$INSTALL_DIR/lib\${VAMP_PATH:+:\$VAMP_PATH}
+
+SELF=\$(basename \$0)
+exec "\$INSTALL_DIR/lib/\$SELF" "\$@"
+EOF
+	chmod +x $APPLIB/ardour-util.sh
 fi
 
 OURLIBDIR=$BUILD_ROOT/libs
@@ -535,8 +554,10 @@ while [ true ] ; do
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
 			if echo $dep | grep -qs libstdc++ ; then continue; fi
-                        # don't include libdbus
+			# don't include libdbus (alsa request device)
 			if echo $dep | grep -qs libdbus ; then continue; fi
+			# nor libudev (hidapi)
+			if echo $dep | grep -qs libudev ; then continue; fi
 
 			base=`basename $dep`
 			if ! test -f $Libraries/$base; then
@@ -607,7 +628,6 @@ cp ../../gtk2_ardour/ArdourMono.ttf $Shared
 cp ../../gtk2_ardour/resources/${APPNAME}-* ${Shared}/resources/
 
 # Themes: only install those named for this app
-lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
 cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
 #
@@ -643,10 +663,10 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	mkdir -p $APPLIB/LV2
 
 	curl -s -S --fail -# \
-		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${HARCH}.zip"
-	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
+		-z "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
+		-o "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip" \
+		"${HARRISONDSPURL}/${HARRISONLV2}.${HARCH}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
@@ -656,7 +676,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
 		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${HARCH}.so"
+		"${HARRISONDSPURL}/${HARRISONCHANNELSTRIP}.${HARCH}.so"
 
 	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
 		$APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
@@ -672,7 +692,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		-o "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_vamp.${VAMPARCH}.so"
+		"${HARRISONDSPURL}/harrison_vamp.${VAMPARCH}.so"
 
 	cp "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		$APPLIB/harrison_vamp.so
@@ -692,8 +712,8 @@ if test x$WITH_X42_LV2 != x ; then
 		unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip"
 	done
 fi
-################################################################################
 
+################################################################################
 
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
@@ -718,6 +738,18 @@ if test x$WITH_HARVID != x ; then
 	mv xjadeo xjremote
 	cd -
 fi
+
+################################################################################
+
+if test x$DEMO_SESSION_URL != x ; then
+	mkdir -p $Shared/sessions
+	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
+	for demo in $DEMO_SESSIONS; do
+		curl -s -S --fail -# -o $Shared/sessions/$demo $DEMO_SESSION_URL/$demo
+	done
+fi
+
+################################################################################
 
 #
 # Add the uninstaller

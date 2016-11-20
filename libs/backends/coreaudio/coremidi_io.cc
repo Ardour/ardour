@@ -57,7 +57,7 @@ static void notifyProc (const MIDINotification *message, void *refCon) {
 static void print_packet (const MIDIPacket *p) {
 	fprintf (stderr, "CoreMIDI: Packet %d bytes [ ", p->length);
 	for (int bb = 0; bb < p->length; ++bb) {
-		fprintf (stderr, "%02x ", ((uint8_t*)p->data)[bb]);
+		fprintf (stderr, "%02x ", ((const uint8_t*)p->data)[bb]);
 	}
 	fprintf (stderr, "]\n");
 }
@@ -268,13 +268,21 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		if ((*it)->timeStamp < end) {
 			if ((*it)->timeStamp < start) {
 				uint64_t dt = AudioConvertHostTimeToNanos(start - (*it)->timeStamp);
-				if (dt > 1e7) { // 10ms,
+				if (dt > 1e7 && (*it)->timeStamp != 0) { // 10ms slack and a timestamp is given
 #ifndef NDEBUG
 					printf("Dropped Stale Midi Event. dt:%.2fms\n", dt * 1e-6);
 #endif
 					it = _input_queue[port].erase(it);
 					continue;
 				} else {
+					/* events without a valid timestamp, or events that arrived
+					 * less than 10ms in the past are allowed and
+					 * queued at the beginning of the cycle:
+					 * time (relative to cycle start) = 0
+					 *
+					 * The latter use needed for the "Avid Artist" Control Surface
+					 * the OSX driver sends no timestamps.
+					 */
 #if 0
 					printf("Stale Midi Event. dt:%.2fms\n", dt * 1e-6);
 #endif

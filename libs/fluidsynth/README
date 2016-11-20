@@ -1,0 +1,8 @@
+This is a stripped down version of fluidsynth (library only)
+
+from git://git.code.sf.net/p/fluidsynth/code-git
+revisition f52597be038a5a045fc74b6f96d5f9b0bbbbc044 from May/2015
+imported into Ardour Aug/2016
+
+fluidsynth is licensed in terms of the  LGPL-2+, see individual source
+files for (C) holders.

@@ -125,7 +125,9 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		OrderSet = 0x400,
 
 		/* special mask to delect out "state" bits */
-		StatusMask = (Selected|Hidden)
+		StatusMask = (Selected|Hidden),
+		/* special mask to delect select type bits */
+		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner)
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
@@ -205,10 +207,13 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 			return true;
 		}
 
-		/* compare without status mask - we already checked that above 
+		/* check for any matching type bits.
+		 *
+		 * Do comparisoon without status mask or order set bits - we
+		 * already checked that above.
 		 */
 
-		return (_flags & (f &~ (StatusMask|OrderSet))) != 0; /* some flag matches */
+		return ((f & TypeMask) & _flags);
 	}
 
 	int set_state (XMLNode const&, int);

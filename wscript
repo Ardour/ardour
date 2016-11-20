@@ -144,7 +144,7 @@ compiler_flags_dictionaries['clang'] = clang_dict;
 
 clang_darwin_dict = compiler_flags_dictionaries['clang'].copy();
 clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', ]
-clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math', '-fstrength-reduce' ]
+clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math']
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
 
 def fetch_git_revision ():
@@ -201,11 +201,13 @@ out = 'build'
 
 children = [
         # optionally external libraries
-        'libs/qm-dsp',
-        'libs/vamp-plugins',
+        'libs/fluidsynth',
+        'libs/hidapi',
         'libs/libltc',
         'libs/lua',
         'libs/ptformat',
+        'libs/qm-dsp',
+        'libs/vamp-plugins',
         # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
@@ -223,10 +225,12 @@ children = [
         'libs/plugins/a-delay.lv2',
         'libs/plugins/a-eq.lv2',
         'libs/plugins/a-reverb.lv2',
+        'libs/plugins/a-fluidsynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',
         'mcp',
+        'osc',
         'patchfiles',
         'scripts',
         'headless',
@@ -770,6 +774,10 @@ def options(opt):
                     help='Turn on PT session import option')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option(
+        '--qm-dsp-include', type='string', action='store',
+        dest='qm_dsp_include', default='/usr/include/qm-dsp',
+        help='directory where the header files of qm-dsp can be found')
 
     for i in children:
         opt.recurse(i)
@@ -873,6 +881,9 @@ def configure(conf):
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
 
+        if not Options.options.ppc:
+            conf.define('MACVST_SUPPORT', 1)
+
         conf.define ('TOP_MENUBAR',1)
 
         # It would be nice to be able to use this to force back-compatibility with 10.4
@@ -930,6 +941,8 @@ def configure(conf):
 
     if Options.options.use_external_libs:
         conf.define('USE_EXTERNAL_LIBS', 1)
+        conf.env.append_value(
+            'CXXFLAGS', '-I' + Options.options.qm_dsp_include)
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
@@ -967,6 +980,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18', mandatory=True)
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'libarchive', uselib_store='ARCHIVE', atleast_version='3.0.0', mandatory=True)
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26', mandatory=True)
     autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6', mandatory=True)
     autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.1', mandatory=True)
@@ -995,6 +1009,11 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
+        if conf.options.cxx11:
+            conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CFLAGS', '-DWIN32')
+            conf.env.append_value('CXXFLAGS', '-DWIN32')
         conf.env.append_value('LIB', 'pthread')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
@@ -1213,6 +1232,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
+    write_config_text('Mac VST support',       conf.is_defined('MACVST_SUPPORT'))
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)

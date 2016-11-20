@@ -38,8 +38,14 @@ foreach (json_decode ($json, true) as $b) {
 	$b ['lua'] = preg_replace ('/:_end/', ':end', $b ['lua']);
 	$b ['lua'] = preg_replace ('/:_type/', ':type', $b ['lua']);
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
+	$b ['ldec'] = preg_replace ('/_VampHost::/', '', $b['ldec']);
+	$b ['decl'] = preg_replace ('/_VampHost::/', '', $b['decl']);
 	if (isset ($b['ret'])) {
 		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
+		$b['ret'] = preg_replace ('/_VampHost::/', '', $b['ret']);
+	}
+	if (isset ($b['parent'])) {
+		$b ['parent'] = preg_replace ('/_VampHost::/', '', $b['parent']);
 	}
 	$doc[] = $b;
 }
@@ -91,9 +97,13 @@ function arg2lua ($argtype, $flags = 0) {
 	$arg = preg_replace ('/ $/', '', $arg);
 
 	# filter out basic types
-	$builtin = array ('float', 'double', 'bool', 'std::string', 'int', 'long', 'unsigned long', 'unsigned int', 'unsigned char', 'char', 'void', 'char*', 'unsigned char*', 'void*');
+	$builtin = array ('float', 'double', 'bool', 'std::string', 'int', 'short', 'long', 'unsigned int', 'unsigned short', 'unsigned long', 'unsigned char', 'char', 'void', 'char*', 'unsigned char*', 'void*');
 	if (in_array ($arg, $builtin)) {
 		return array ($arg => $flags);
+	}
+
+	if ($arg == 'luabridge::LuaRef') {
+		return array ('Lua-Function' => $flags | 4);
 	}
 
 	# check Class declarations first
@@ -194,6 +204,8 @@ function canonical_decl ($b) {
 			$a = preg_replace ('/([^>]) >/', '$1>', $a);
 			$a = preg_replace ('/^Cairo::/', '', $a); // special case cairo enums
 			$a = preg_replace ('/([^ ])&/', '$1 &', $a);
+			$a = preg_replace ('/std::vector<([^>]*)> const/', 'const std::vector<$1>', $a);
+			$a = str_replace ('std::vector', 'vector', $a);
 			$a = str_replace ('vector', 'std::vector', $a);
 			$a = str_replace ('std::string', 'string', $a);
 			$a = str_replace ('string const', 'const string', $a);
@@ -259,6 +271,13 @@ foreach ($doc as $b) {
 			'name' => luafn2class ($b['lua']),
 			'args' => decl2args ($b['ldec']),
 			'cand' => canonical_ctor ($b)
+		);
+		break;
+	case "Property":
+		checkclass ($b);
+		$classlist[luafn2class ($b['lua'])]['props'][] = array (
+			'name' => $b['lua'],
+			'ret'  => arg2lua (datatype ($b['ldec']))
 		);
 		break;
 	case "Data Member":
@@ -564,7 +583,10 @@ function format_args ($args) {
 	foreach ($args as $a) {
 		if (!$first) { $rv .= ', '; }; $first = false;
 		$flags = $a[varname ($a)];
-		if ($flags & 2) {
+		if ($flags & 4) {
+			$rv .= '<span>'.varname ($a).'</span>';
+		}
+		else if ($flags & 2) {
 			$rv .= '<em>LuaTable</em> {'.typelink (varname ($a), true, 'em').'}';
 		}
 		elseif ($flags & 1) {
@@ -686,6 +708,17 @@ function format_class_members ($ns, $cl, &$dups) {
 		}
 	}
 
+	# print properties - if any
+	if (isset ($cl['props'])) {
+		usort ($cl['props'], 'name_sort_cb');
+		$rv.= ' <tr><th colspan="3">Properties</th></tr>'.NL;
+		foreach ($cl['props'] as $f) {
+			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
+			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
+			$rv.= '</td><td class="fill"></td></tr>'.NL;
+		}
+	}
+
 	# print data members - if any
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');
@@ -694,6 +727,8 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
 			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			$f['cand'] = str_replace (':', '::', $f['name']);
+			$rv.= format_doxydoc($f);
 		}
 	}
 	return $rv;

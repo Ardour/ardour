@@ -40,6 +40,7 @@
 
 #include "ardour_dialog.h"
 #include "instrument_selector.h"
+#include "route_dialogs.h"
 
 class Editor;
 class RouteGroupDialog;
@@ -70,13 +71,8 @@ class AddRouteDialog : public ArdourDialog
 
 	ARDOUR::TrackMode mode();
 	ARDOUR::RouteGroup* route_group ();
-	enum InsertAt {
-		BeforeSelection,
-		AfterSelection,
-		First,
-		Last
-	};
-	InsertAt insert_at();
+
+	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
 
   private:

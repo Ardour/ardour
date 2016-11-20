@@ -222,7 +222,7 @@ void
 GenericPluginUI::build ()
 {
 	std::vector<ControlUI *> control_uis;
-	bool grid = true;
+	bool grid = plugin->parameter_count() > 0;
 
 	// Build a ControlUI for each control port
 	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
@@ -525,6 +525,8 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	} else {
 		delete output_table;
 	}
+	show_all();
+
 }
 
 void
@@ -555,7 +557,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	, meterinfo (0)
 	, knobtable (0)
 {
-	automate_button.set_name ("PluginAutomateButton");
+	automate_button.set_name ("plugin automation state button");
 	set_tooltip (automate_button, _("Automation control"));
 
 	/* XXX translators: use a string here that will be at least as long
@@ -563,7 +565,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	   below). be sure to include a descender.
 	*/
 
-	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 12, 6);
+	automate_button.set_sizing_text(_("Mgnual"));
 
 	ignore_change = false;
 	update_pending = false;
@@ -588,15 +590,17 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	// don't lock to avoid deadlock because we're triggered by
 	// AutomationControl::Changed() while the automation lock is taken
 
+	AutoState state = insert->get_parameter_automation_state (cui->parameter());
+
+	cui->automate_button.set_active((state != ARDOUR::Off));
+
 	if (cui->knobtable) {
 		cui->automate_button.set_text (
-				GainMeterBase::astate_string (
-					insert->get_parameter_automation_state (cui->parameter()))
-				);
+				GainMeterBase::astate_string (state));
 		return;
 	}
 
-	switch (insert->get_parameter_automation_state (cui->parameter()) & (ARDOUR::Off|Play|Touch|Write)) {
+	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
 		cui->automate_button.set_text (S_("Automation|Manual"));
 		break;
@@ -661,8 +665,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
 	control_ui->set_spacing (5);
-
-	Gtk::Requisition req (control_ui->automate_button.size_request());
 
 	if (is_input) {
 
@@ -758,11 +760,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 				}
 			} else if (desc.toggled) {
-				control_ui->controller->set_size_request (req.height, req.height);
+				ArdourButton* but = dynamic_cast<ArdourButton*> (control_ui->controller->widget());
+				assert(but);
+				but->set_tweaks(ArdourButton::Square);
 			} else if (use_knob) {
-				control_ui->controller->set_size_request (req.height * 1.5, req.height * 1.5);
+				/* Delay size request so that styles are gotten right */
+				control_ui->controller->widget()->signal_size_request().connect(
+						sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::knob_size_request), control_ui));
 			} else {
-				control_ui->controller->set_size_request (200, req.height);
+				control_ui->controller->set_size_request (200, -1);
 				control_ui->controller->set_name (X_("ProcessorControlSlider"));
 			}
 
@@ -775,7 +781,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		if (use_knob) {
-			set_size_request_to_display_given_text (control_ui->automate_button, "M", 2, 2);
+			control_ui->automate_button.set_sizing_text("M");
 
 			control_ui->label.set_alignment (0.5, 0.5);
 			control_ui->knobtable = manage (new Table());
@@ -830,9 +836,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
-			control_ui->automate_button.signal_clicked.connect (sigc::bind (
-						sigc::mem_fun(*this, &GenericPluginUI::astate_clicked),
-						control_ui));
+			control_ui->automate_button.signal_button_press_event().connect (
+					sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_button_event),
+					            control_ui),
+					false);
 			mcontrol->alist()->automation_state_changed.connect (
 					control_connections,
 					invalidator (*this),
@@ -933,13 +940,27 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 }
 
 void
-GenericPluginUI::astate_clicked (ControlUI* cui)
+GenericPluginUI::knob_size_request(Gtk::Requisition* req, ControlUI* cui) {
+	Gtk::Requisition astate_req (cui->automate_button.size_request());
+	const int size = (int) (astate_req.height * 1.5);
+	req->width = max(req->width, size);
+	req->height = max(req->height, size);
+}
+
+
+bool
+GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 {
+	if (ev->button != 1) {
+		return true;
+	}
+
 	using namespace Menu_Helpers;
 
 	if (automation_menu == 0) {
 		automation_menu = manage (new Menu);
 		automation_menu->set_name ("ArdourContextMenu");
+		automation_menu->set_reserve_toggle_size(false);
 	}
 
 	MenuList& items (automation_menu->items());
@@ -954,16 +975,17 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
-	automation_menu->popup (1, gtk_get_current_event_time());
+	anchored_menu_popup(automation_menu, &cui->automate_button, cui->automate_button.get_text(),
+	                    1, ev->time);
+
+	return true;
 }
 
 void
 GenericPluginUI::set_all_automation (AutoState as)
 {
 	for (vector<ControlUI*>::iterator i = input_controls_with_automation.begin(); i != input_controls_with_automation.end(); ++i) {
-		if ((*i)->controller || (*i)->button) {
-			set_automation_state (as, (*i));
-		}
+		set_automation_state (as, (*i));
 	}
 }
 

@@ -282,6 +282,8 @@ ExportFormatSpecification::get_state ()
 	root->add_property ("with-toc", _with_toc ? "true" : "false");
 	root->add_property ("with-mp4chaps", _with_mp4chaps ? "true" : "false");
 	root->add_property ("command", _command);
+	root->add_property ("analyse", _analyse ? "true" : "false");
+	root->add_property ("soundcloud-upload", _soundcloud_upload ? "true" : "false");
 
 	node = root->add_child ("Encoding");
 	node->add_property ("id", enum_2_string (format_id()));
@@ -373,6 +375,18 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		_command = prop->value();
 	} else {
 		_command = "";
+	}
+
+	if ((prop = root.property ("analyse"))) {
+		_analyse = string_is_affirmative (prop->value());
+	} else {
+		_analyse = false;
+	}
+
+	if ((prop = root.property ("soundcloud-upload"))) {
+		_soundcloud_upload = string_is_affirmative (prop->value());
+	} else {
+		_soundcloud_upload = false;
 	}
 
 	/* Encoding and SRC */

@@ -378,6 +378,8 @@ public:
 	XMLNode& get_processor_state ();
 	virtual void set_processor_state (const XMLNode&);
 
+	boost::weak_ptr<Route> weakroute ();
+
 	int save_as_template (const std::string& path, const std::string& name);
 
 	PBD::Signal1<void,void*> SelectedChanged;

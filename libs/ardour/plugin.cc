@@ -82,9 +82,15 @@ static bool seen_set_state_message = false;
 PBD::Signal2<void, std::string, Plugin*> Plugin::PresetsChanged;
 
 bool
+PluginInfo::needs_midi_input () const
+{
+	return (n_inputs.n_midi() != 0);
+}
+
+bool
 PluginInfo::is_instrument () const
 {
-	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0);
+	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
 }
 
 Plugin::Plugin (AudioEngine& e, Session& s)
@@ -186,6 +192,12 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 #ifdef LXVST_SUPPORT
 	case ARDOUR::LXVST:
 		plugs = mgr.lxvst_plugin_info();
+		break;
+#endif
+
+#ifdef MACVST_SUPPORT
+	case ARDOUR::MacVST:
+		plugs = mgr.mac_vst_plugin_info();
 		break;
 #endif
 
@@ -377,7 +389,7 @@ Plugin::resolve_midi ()
 	*/
 
 	_pending_stop_events.get_midi(0).clear ();
-	_tracker.resolve_notes (_pending_stop_events.get_midi (0), /* split cycle offset*/ Port::port_offset());
+	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
 	_have_pending_stop_events = true;
 }
 
@@ -426,6 +438,7 @@ Plugin::load_preset (PresetRecord r)
 	_last_preset = r;
 	_parameter_changed_since_last_preset = false;
 
+	_session.set_dirty ();
 	PresetLoaded (); /* EMIT SIGNAL */
 	return true;
 }
@@ -437,6 +450,7 @@ Plugin::clear_preset ()
 	_last_preset.label = "";
 	_parameter_changed_since_last_preset = false;
 
+	_session.set_dirty ();
 	PresetLoaded (); /* EMIT SIGNAL */
 }
 

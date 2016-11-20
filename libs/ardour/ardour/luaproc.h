@@ -125,6 +125,9 @@ public:
 	bool has_inline_display () { return _lua_has_inline_display; }
 	void setup_lua_inline_gui (LuaState *lua_gui);
 
+	DSP::DspShm* instance_shm () { return &lshm; }
+	LuaTableRef* instance_ref () { return &lref; }
+
 private:
 	void find_presets ();
 
@@ -146,11 +149,11 @@ private:
 	bool _lua_has_inline_display;
 
 	void queue_draw () { QueueDraw(); /* EMIT SIGNAL */ }
-	DSP::DspShm* instance_shm () { return &lshm; }
 	DSP::DspShm lshm;
 
-	LuaTableRef* instance_ref () { return &lref; }
 	LuaTableRef lref;
+
+	boost::weak_ptr<Route> route () const;
 
 	void init ();
 	bool load_script ();
@@ -172,6 +175,8 @@ private:
 
 	ChanCount _configured_in;
 	ChanCount _configured_out;
+
+	bool      _configured;
 
 	ChanCount _selected_in;
 	ChanCount _selected_out;

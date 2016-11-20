@@ -46,7 +46,6 @@ SoloSafeControl::actually_set_value (double val, PBD::Controllable::GroupControl
 	*/
 
 	AutomationControl::actually_set_value (val, gcd);
-	_session.set_dirty ();
 }
 
 double
@@ -66,8 +65,12 @@ SoloSafeControl::get_value () const
 }
 
 int
-SoloSafeControl::set_state (XMLNode const & node, int)
+SoloSafeControl::set_state (XMLNode const & node, int version)
 {
+	if (SlavableAutomationControl::set_state(node, version)) {
+		return -1;
+	}
+
 	XMLProperty const * prop;
 
 	if ((prop = node.property ("solo-safe")) != 0) {

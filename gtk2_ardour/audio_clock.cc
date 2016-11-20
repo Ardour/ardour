@@ -37,11 +37,13 @@
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
+#include "ardour_ui.h"
 #include "audio_clock.h"
-#include "utils.h"
-#include "keyboard.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "ui_config.h"
+#include "utils.h"
+
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -668,7 +670,7 @@ AudioClock::end_edit (bool modify)
 
 			case BBT:
 				if (is_duration) {
-					pos = frame_duration_from_bbt_string (0, edit_string);
+					pos = frame_duration_from_bbt_string (bbt_reference_time, edit_string);
 				} else {
 					pos = frames_from_bbt_string (0, edit_string);
 				}
@@ -709,15 +711,8 @@ AudioClock::drop_focus ()
 	Keyboard::magic_widget_drop_focus ();
 
 	if (has_focus()) {
-
 		/* move focus back to the default widget in the top level window */
-
-		Widget* top = get_toplevel();
-
-		if (top->is_toplevel ()) {
-			Window* win = dynamic_cast<Window*> (top);
-			win->grab_focus ();
-		}
+		ARDOUR_UI::instance()->reset_focus (this);
 	}
 }
 
@@ -1008,7 +1003,7 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 			break;
 
 		case BBT:
-			set_bbt (when, force);
+			set_bbt (when, offset, force);
 			break;
 
 		case MinSec:
@@ -1231,9 +1226,9 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_bbt (framepos_t when, bool /*force*/)
+AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 {
-	char buf[16];
+	char buf[64];
 	Timecode::BBT_Time BBT;
 	bool negative = false;
 
@@ -1258,9 +1253,43 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
-			BBT = _session->tempo_map().bbt_at_frame (when);
-			BBT.bars--;
-			BBT.beats--;
+			TempoMap& tmap (_session->tempo_map());
+
+			if (offset == 0) {
+				offset = bbt_reference_time;
+			}
+
+			const double divisions = tmap.meter_section_at_frame (offset).divisions_per_bar();
+			Timecode::BBT_Time sub_bbt;
+
+			if (negative) {
+				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (offset));
+				sub_bbt = tmap.bbt_at_frame (offset - when);
+			} else {
+				BBT = tmap.bbt_at_beat (tmap.beat_at_frame (when + offset));
+				sub_bbt = tmap.bbt_at_frame (offset);
+			}
+
+			BBT.bars -= sub_bbt.bars;
+
+			if (BBT.ticks < sub_bbt.ticks) {
+				if (BBT.beats == 1) {
+					BBT.bars--;
+					BBT.beats = divisions;
+				} else {
+					BBT.beats--;
+				}
+				BBT.ticks = Timecode::BBT_Time::ticks_per_beat - (sub_bbt.ticks - BBT.ticks);
+			} else {
+				BBT.ticks -= sub_bbt.ticks;
+			}
+
+			if (BBT.beats < sub_bbt.beats) {
+				BBT.bars--;
+				BBT.beats = divisions - (sub_bbt.beats - BBT.beats);
+			} else {
+				BBT.beats -= sub_bbt.beats;
+			}
 		}
 	} else {
 		BBT = _session->tempo_map().bbt_at_frame (when);
@@ -1287,11 +1316,12 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
-		sprintf (buf, "%-5.3f", _session->tempo_map().tempo_at_frame (pos).beats_per_minute());
+		snprintf (buf, sizeof(buf), "%-5.3f/%f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
+		/* XXX this doesn't fit inside the container. */
 		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							  INFO_FONT_SIZE, buf, _("Tempo")));
 
-		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
+		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
 		_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							   INFO_FONT_SIZE, buf, _("Meter")));
 	}
@@ -1737,7 +1767,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	switch (ev->direction) {
 
 	case GDK_SCROLL_UP:
-		frames = get_frame_step (f);
+		frames = get_frame_step (f, current_time(), 1);
 		if (frames != 0) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				frames *= 10;
@@ -1748,7 +1778,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 		break;
 
 	case GDK_SCROLL_DOWN:
-		frames = get_frame_step (f);
+		frames = get_frame_step (f, current_time(), -1);
 		if (frames != 0) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				frames *= 10;

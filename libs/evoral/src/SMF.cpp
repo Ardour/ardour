@@ -39,6 +39,13 @@ using namespace std;
 
 namespace Evoral {
 
+SMF::SMF()
+	: _smf (0)
+	, _smf_track (0)
+	, _empty (true)
+	, _type0 (false)
+	{};
+
 SMF::~SMF()
 {
 	close ();
@@ -107,6 +114,9 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
+	_type0 = false;
+	_type0channels.clear ();
+
 	assert(track >= 1);
 	if (_smf) {
 		smf_delete(_smf);
@@ -133,6 +143,33 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 	}
 
 	fclose(f);
+
+	lm.release ();
+	if (_smf->format == 0 && _smf->number_of_tracks == 1 && !_empty) {
+		// type-0 file: scan file for # of used channels.
+		int ret;
+		uint32_t delta_t = 0;
+		uint32_t size    = 0;
+		uint8_t* buf     = NULL;
+		event_id_t event_id = 0;
+		seek_to_start();
+		while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
+			if (ret == 0) {
+				continue;
+			}
+			if (size == 0) {
+				break;
+			}
+			uint8_t type = buf[0] & 0xf0;
+			uint8_t chan = buf[0] & 0x0f;
+			if (type < 0x80 || type > 0xE0) {
+				continue;
+			}
+			_type0channels.insert(chan);
+		}
+		_type0 = true;
+		seek_to_start();
+	}
 	return 0;
 }
 
@@ -193,6 +230,8 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	}
 
 	_empty = true;
+	_type0 = false;
+	_type0channels.clear ();
 
 	return 0;
 }
@@ -206,6 +245,8 @@ SMF::close() THROW_FILE_ERROR
 		smf_delete(_smf);
 		_smf = 0;
 		_smf_track = 0;
+		_type0 = false;
+		_type0channels.clear ();
 	}
 }
 
@@ -338,6 +379,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 	bool const store_id = (
 		c == MIDI_CMD_NOTE_ON ||
 		c == MIDI_CMD_NOTE_OFF ||
+		c == MIDI_CMD_NOTE_PRESSURE ||
 		c == MIDI_CMD_PGM_CHANGE ||
 		(c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
 	                       );

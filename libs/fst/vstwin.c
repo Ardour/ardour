@@ -72,31 +72,6 @@ vstedit_wndproc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 
-static void
-maybe_set_program (VSTState* fst)
-{
-	if (fst->want_program != -1) {
-		if (fst->vst_version >= 2) {
-			fst->plugin->dispatcher (fst->plugin, effBeginSetProgram, 0, 0, NULL, 0);
-		}
-
-		fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
-
-		if (fst->vst_version >= 2) {
-			fst->plugin->dispatcher (fst->plugin, effEndSetProgram, 0, 0, NULL, 0);
-		}
-		fst->want_program = -1;
-	}
-
-	if (fst->want_chunk == 1) {
-		// XXX check
-		// 24 == audioMasterGetAutomationState,
-		// 48 == audioMasterGetChunkFile
-		fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
-		fst->want_chunk = 0;
-	}
-}
-
 static VOID CALLBACK
 idle_hands(
 		HWND hwnd,        // handle to window for timer messages
@@ -146,8 +121,8 @@ idle_hands(
 		fst->n_pending_keys = 0;
 #endif
 
-		/* See comment for maybe_set_program call below */
-		maybe_set_program (fst);
+		/* See comment for call below */
+		vststate_maybe_set_program (fst);
 		fst->want_program = -1;
 		fst->want_chunk = 0;
 		/* If we don't have an editor window yet, we still need to
@@ -159,7 +134,7 @@ idle_hands(
 		 * and so it will be done again if and when the GUI arrives.
 		 */
 		if (fst->program_set_without_editor == 0) {
-			maybe_set_program (fst);
+			vststate_maybe_set_program (fst);
 			fst->program_set_without_editor = 1;
 		}
 
@@ -218,13 +193,8 @@ static VSTState*
 fst_new (void)
 {
 	VSTState* fst = (VSTState*) calloc (1, sizeof (VSTState));
-	pthread_mutex_init (&fst->lock, NULL);
-	pthread_cond_init (&fst->window_status_change, NULL); // unused ?? -> TODO check gtk2ardour
-	pthread_cond_init (&fst->plugin_dispatcher_called, NULL); // unused ??
-	fst->want_program = -1;
-	fst->want_chunk = 0;
-	fst->n_pending_keys = 0;
-	fst->has_editor = 0;
+	vststate_init (fst);
+
 #ifdef PLATFORM_WINDOWS
 	fst->voffset = 50;
 	fst->hoffset = 0;
@@ -232,7 +202,6 @@ fst_new (void)
 	fst->voffset = 24;
 	fst->hoffset = 6;
 #endif
-	fst->program_set_without_editor = 0;
 	return fst;
 }
 
@@ -374,6 +343,9 @@ fst_exit (void)
 int
 fst_run_editor (VSTState* fst, void* window_parent)
 {
+	/* For safety, remove any pre-existing editor window */ 
+	fst_destroy_editor (fst);
+	
 	if (fst->windows_window == NULL) {
 		HMODULE hInst;
 		HWND window;
@@ -505,13 +477,10 @@ fst_load (const char *path)
 			return NULL;
 		}
 
-		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
+		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain");
 
 		if (fhandle->main_entry == 0) {
-			if ((fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain"))) {
-				fprintf(stderr, "VST >= 2.4 plugin '%s'\n", path);
-				//PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
-			}
+			fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
 		}
 
 		if (fhandle->main_entry == 0) {

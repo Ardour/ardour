@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_mono_panner_editor_h__
+#define __gtk_ardour_mono_panner_editor_h__
+
 #include <gtkmm.h>
 #include "panner_editor.h"
 
@@ -41,3 +44,5 @@ private:
 
 	PBD::ScopedConnectionList _connections;
 };
+
+#endif // __gtk_ardour_mono_panner_editor_h__

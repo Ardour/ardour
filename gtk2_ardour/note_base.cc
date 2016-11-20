@@ -44,6 +44,25 @@ const uint32_t NoteBase::midi_channel_colors[16] = {
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
+bool     NoteBase::_color_init = false;
+uint32_t NoteBase::_selected_mod_col = 0;
+uint32_t NoteBase::_selected_outline_col = 0;
+uint32_t NoteBase::_selected_col = 0;
+uint32_t NoteBase::_min_col = 0;
+uint32_t NoteBase::_mid_col = 0;
+uint32_t NoteBase::_max_col = 0;
+
+void
+NoteBase::set_colors ()
+{
+	_selected_mod_col = UIConfiguration::instance().color_mod ("midi note selected", "midi note");
+	_selected_outline_col = UIConfiguration::instance().color ("midi note selected outline");
+	_selected_col = UIConfiguration::instance().color ("midi note selected");
+	_min_col = UIConfiguration::instance().color_mod ("midi note min", "midi note");
+	_mid_col = UIConfiguration::instance().color_mod ("midi note mid", "midi note");
+	_max_col = UIConfiguration::instance().color_mod ("midi note max", "midi note");
+}
+
 NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)
 	: _region(region)
 	, _item (0)
@@ -56,6 +75,10 @@ NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared
 	, _mouse_x_fraction (-1.0)
 	, _mouse_y_fraction (-1.0)
 {
+	if (!_color_init) {
+		NoteBase::set_colors();
+		_color_init = true;
+	}
 }
 
 NoteBase::~NoteBase()
@@ -169,14 +192,13 @@ NoteBase::base_color()
 	case TrackColor:
 	{
 		const uint32_t region_color = _region.midi_stream_view()->get_region_color();
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity),
-		                         UIConfiguration::instance().color ("midi note selected"),
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
 					 0.5);
 	}
 
 	case ChannelColors:
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity),
-		                         UIConfiguration::instance().color ("midi note selected"), 0.5);
+		                          _selected_col, 0.5);
 
 	default:
 		return meter_style_fill_color(_note->velocity(), selected());

@@ -46,7 +46,7 @@ public:
 
 private:
 	bool event_handler (GdkEvent* ev);
-
+	SysEx(const SysEx& rhs){}
 	ArdourCanvas::Flag* _flag;
 };
 

@@ -37,7 +37,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/convert.h"
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/md5.h"
@@ -214,6 +213,7 @@ Session::Session (AudioEngine &eng,
 	, _exporting (false)
 	, _export_rolling (false)
 	, _realtime_export (false)
+	, _region_export (false)
 	, _export_preroll (0)
 	, _export_latency (0)
 	, _pre_export_mmc_enabled (false)
@@ -912,6 +912,14 @@ Session::setup_click_state (const XMLNode* node)
 }
 
 void
+Session::get_physical_ports (vector<string>& inputs, vector<string>& outputs, DataType type,
+                             MidiPortFlags include, MidiPortFlags exclude)
+{
+	_engine.get_physical_inputs (type, inputs, include, exclude);
+	_engine.get_physical_outputs (type, outputs, include, exclude);
+}
+
+void
 Session::setup_bundles ()
 {
 
@@ -929,9 +937,12 @@ Session::setup_bundles ()
 
 	vector<string> inputs[DataType::num_types];
 	vector<string> outputs[DataType::num_types];
+
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
-		_engine.get_physical_inputs (DataType (DataType::Symbol (i)), inputs[i]);
-		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+		get_physical_ports (inputs[i], outputs[i], DataType (DataType::Symbol (i)),
+		                    MidiPortFlags (0), /* no specific inclusions */
+		                    MidiPortFlags (MidiPortControl|MidiPortVirtual) /* exclude control & virtual ports */
+			);
 	}
 
 	/* Create a set of Bundle objects that map
@@ -1015,6 +1026,7 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
 		string n = inputs[DataType::MIDI][np];
+
 		std::string pn = _engine.get_pretty_name_by_name (n);
 		if (!pn.empty()) {
 			n = pn;
@@ -2368,8 +2380,11 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 		}
 	}
 
-	if (!definitely_add_number && route_by_name (base) == 0) {
-		/* juse use the base */
+	/* if we have "base 1" already, it doesn't make sense to add "base"
+	 * if "base 1" has been deleted, adding "base" is no worse than "base 1"
+	 */
+	if (!definitely_add_number && route_by_name (base) == 0 && (route_by_name (string_compose("%1 1", base)) == 0)) {
+		/* just use the base */
 		name = base;
 		return true;
 	}
@@ -2518,12 +2533,15 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output,
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (!plugin) {
+					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
+					continue;
+				}
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
 				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
 				(*r)->add_processor (p, PreFader);
-
 			}
 		}
 	}
@@ -2606,6 +2624,10 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (!plugin) {
+					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
+					continue;
+				}
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
@@ -3158,7 +3180,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base, PlaylistDisposition pd)
+Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, const std::string& template_path, const std::string& name_base,
+                                  PlaylistDisposition pd)
 {
 	XMLTree tree;
 
@@ -3166,11 +3189,11 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		return RouteList();
 	}
 
-	return new_route_from_template (how_many, *tree.root(), name_base, pd);
+	return new_route_from_template (how_many, insert_at, *tree.root(), name_base, pd);
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
+Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
 {
 	RouteList ret;
 	uint32_t number = 0;
@@ -3340,9 +3363,9 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false, PresentationInfo::max_order);
+			add_routes (ret, false, false, false, insert_at);
 		} else {
-			add_routes (ret, true, true, false, PresentationInfo::max_order);
+			add_routes (ret, true, true, false, insert_at);
 		}
 		IO::enable_connecting ();
 	}
@@ -3438,6 +3461,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			if (mt) {
 				mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
 				mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
+				mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, boost::weak_ptr<MidiTrack>(mt)));
 			}
 		}
 
@@ -3684,6 +3708,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 */
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+		cerr << "Drop references to " << (*iter)->name() << endl;
 		(*iter)->drop_references ();
 	}
 
@@ -6240,6 +6265,10 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 {
 	update_route_record_state ();
 	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
+
+	if (!rg->has_control_master () && !rg->has_subgroup () && rg->empty()) {
+		remove_route_group (*rg);
+	}
 }
 
 boost::shared_ptr<RouteList>
@@ -6294,12 +6323,12 @@ Session::goto_end ()
 }
 
 void
-Session::goto_start ()
+Session::goto_start (bool and_roll)
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->start(), false);
+		request_locate (_session_range_location->start(), and_roll);
 	} else {
-		request_locate (0, false);
+		request_locate (0, and_roll);
 	}
 }
 
@@ -6365,6 +6394,7 @@ Session::start_time_changed (framepos_t old)
 	if (l && l->start() == old) {
 		l->set_start (s->start(), true);
 	}
+	set_dirty ();
 }
 
 void
@@ -6384,6 +6414,7 @@ Session::end_time_changed (framepos_t old)
 	if (l && l->end() == old) {
 		l->set_end (s->end(), true);
 	}
+	set_dirty ();
 }
 
 std::vector<std::string>
@@ -6859,6 +6890,12 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs
 				input_start, output_start,
 				input_offset, output_offset));
 
+	auto_connect_thread_wakeup ();
+}
+
+void
+Session::auto_connect_thread_wakeup ()
+{
 	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
 		pthread_cond_signal (&_auto_connect_cond);
 		pthread_mutex_unlock (&_auto_connect_mutex);
@@ -6869,10 +6906,7 @@ void
 Session::queue_latency_recompute ()
 {
 	g_atomic_int_inc (&_latency_recompute_pending);
-	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
-		pthread_cond_signal (&_auto_connect_cond);
-		pthread_mutex_unlock (&_auto_connect_mutex);
-	}
+	auto_connect_thread_wakeup ();
 }
 
 void
@@ -6911,8 +6945,12 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		vector<string> physinputs;
 		vector<string> physoutputs;
 
-		_engine.get_physical_outputs (*t, physoutputs);
-		_engine.get_physical_inputs (*t, physinputs);
+
+		/* for connecting track inputs we only want MIDI ports marked
+		 * for "music".
+		 */
+
+		get_physical_ports (physinputs, physoutputs, *t, MidiPortMusic);
 
 		if (!physinputs.empty() && ar.connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
@@ -6995,10 +7033,7 @@ Session::auto_connect_thread_terminate ()
 		}
 	}
 
-	if (pthread_mutex_lock (&_auto_connect_mutex) == 0) {
-		pthread_cond_signal (&_auto_connect_cond);
-		pthread_mutex_unlock (&_auto_connect_mutex);
-	}
+	auto_connect_thread_wakeup ();
 
 	void *status;
 	pthread_join (_auto_connect_thread, &status);
@@ -7053,6 +7088,8 @@ Session::auto_connect_thread_run ()
 				update_latency_compensation ();
 			}
 		}
+
+		AudioEngine::instance()->clear_pending_port_deletions ();
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
 	}

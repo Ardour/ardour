@@ -19,12 +19,12 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-FiltFilt::FiltFilt( FiltFiltConfig Config )
+FiltFilt::FiltFilt( FilterConfig Config )
 {
     m_filtScratchIn = NULL;
     m_filtScratchOut = NULL;
     m_ord = 0;
-
+	
     initialise( Config );
 }
 
@@ -33,13 +33,13 @@ FiltFilt::~FiltFilt()
     deInitialise();
 }
 
-void FiltFilt::initialise( FiltFiltConfig Config )
+void FiltFilt::initialise( FilterConfig Config )
 {
     m_ord = Config.ord;
     m_filterConfig.ord = Config.ord;
     m_filterConfig.ACoeffs = Config.ACoeffs;
     m_filterConfig.BCoeffs = Config.BCoeffs;
-
+	
     m_filter = new Filter( m_filterConfig );
 }
 
@@ -50,7 +50,7 @@ void FiltFilt::deInitialise()
 
 
 void FiltFilt::process(double *src, double *dst, unsigned int length)
-{
+{	
     unsigned int i;
 
     if (length == 0) return;
@@ -62,8 +62,8 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
     m_filtScratchIn = new double[ nExt ];
     m_filtScratchOut = new double[ nExt ];
 
-
-    for( i = 0; i< nExt; i++ )
+	
+    for( i = 0; i< nExt; i++ ) 
     {
 	m_filtScratchIn[ i ] = 0.0;
 	m_filtScratchOut[ i ] = 0.0;
@@ -89,21 +89,21 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
     {
 	m_filtScratchIn[ i + nFact ] = src[ i ];
     }
-
+	
     ////////////////////////////////
     // Do  0Ph filtering
     m_filter->process( m_filtScratchIn, m_filtScratchOut, nExt);
-
-    // reverse the series for FILTFILT
+	
+    // reverse the series for FILTFILT 
     for ( i = 0; i < nExt; i++)
-    {
+    { 
 	m_filtScratchIn[ i ] = m_filtScratchOut[ nExt - i - 1];
     }
 
-    // do FILTER again
+    // do FILTER again 
     m_filter->process( m_filtScratchIn, m_filtScratchOut, nExt);
-
-    // reverse the series back
+	
+    // reverse the series back 
     for ( i = 0; i < nExt; i++)
     {
 	m_filtScratchIn[ i ] = m_filtScratchOut[ nExt - i - 1 ];
@@ -117,7 +117,7 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
     for( i = 0; i < length; i++ )
     {
 	dst[ index++ ] = m_filtScratchOut[ i + nFact ];
-    }
+    }	
 
     delete [] m_filtScratchIn;
     delete [] m_filtScratchOut;

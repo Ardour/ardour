@@ -735,8 +735,8 @@ msgid "Fit dB range"
 msgstr "Ajusta rango dB"
 
 #: analysis_window.cc:50
-msgid "Proportional Spectum, -18dB"
-msgstr "Proportional Spectum, -18dB"
+msgid "Proportional Spectrum, -18dB"
+msgstr "Proportional Spectrum, -18dB"
 
 #: analysis_window.cc:53
 msgid "FFT analysis window"

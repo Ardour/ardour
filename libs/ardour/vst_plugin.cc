@@ -22,6 +22,7 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/convert.h>
 
 #include "pbd/floating.h"
 #include "pbd/locale_guard.h"
@@ -48,6 +49,21 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _num (0)
 	, _transport_frame (0)
 	, _transport_speed (0.f)
+{
+	memset (&_timeInfo, 0, sizeof(_timeInfo));
+}
+
+VSTPlugin::VSTPlugin (const VSTPlugin& other)
+	: Plugin (other)
+	, _handle (other._handle)
+	, _state (other._state)
+	, _plugin (other._plugin)
+	, _pi (other._pi)
+	, _num (other._num)
+	, _midi_out_buf (other._midi_out_buf)
+	, _transport_frame (0)
+	, _transport_speed (0.f)
+	, _parameter_defaults (other._parameter_defaults)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -153,8 +169,13 @@ int
 VSTPlugin::set_chunk (gchar const * data, bool single)
 {
 	gsize size = 0;
+	int r = 0;
 	guchar* raw_data = g_base64_decode (data, &size);
-	int const r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+	{
+		pthread_mutex_lock (&_state->state_lock);
+		r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+		pthread_mutex_unlock (&_state->state_lock);
+	}
 	g_free (raw_data);
 	return r;
 }
@@ -299,7 +320,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
-		desc.label = prop.label;
+		desc.label = Glib::locale_to_utf8 (prop.label);
 
 	} else {
 
@@ -311,7 +332,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 
-		desc.label = label;
+		desc.label = Glib::locale_to_utf8 (label);
 		desc.integer_step = false;
 		desc.lower = 0.0f;
 		desc.upper = 1.0f;
@@ -324,7 +345,9 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	}
 
 	desc.normal = get_parameter (which);
-	_parameter_defaults[which] = desc.normal;
+	if (_parameter_defaults.find (which) == _parameter_defaults.end ()) {
+		_parameter_defaults[which] = desc.normal;
+	}
 
 	return 0;
 }
@@ -364,6 +387,7 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 #endif
 	_state->want_program = index;
+	LoadPresetProgram (); /* EMIT SIGNAL */ /* used for macvst */
 	return true;
 }
 
@@ -406,6 +430,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 					_state->wanted_chunk = raw_data;
 					_state->wanted_chunk_size = size;
 					_state->want_chunk = 1;
+					LoadPresetProgram (); /* EMIT SIGNAL */ /* used for macvst */
 					return true;
 				}
 			}
@@ -544,6 +569,16 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
+	if (pthread_mutex_trylock (&_state->state_lock)) {
+		/* by convention 'effSetChunk' should not be called while processing
+		 * http://www.reaper.fm/sdk/vst/vst_ext.php
+		 *
+		 * All VSTs don't use in-place, PluginInsert::connect_and_run()
+		 * does clear output buffers, so we can just return.
+		 */
+		return 0;
+	}
+
 	_transport_frame = start;
 	_transport_speed = speed;
 
@@ -612,6 +647,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 	_midi_out_buf = 0;
 
+	pthread_mutex_unlock (&_state->state_lock);
 	return 0;
 }
 

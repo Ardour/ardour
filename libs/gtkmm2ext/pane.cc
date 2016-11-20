@@ -193,7 +193,6 @@ Pane::on_remove (Widget* w)
 void
 Pane::on_size_allocate (Gtk::Allocation& alloc)
 {
-	std::cerr << "pane @ " << this << " reallocated as " << alloc.get_width() << " x " << alloc.get_height() << std::endl;
 	reallocate (alloc);
 	Container::on_size_allocate (alloc);
 }

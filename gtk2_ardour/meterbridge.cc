@@ -99,6 +99,16 @@ Meterbridge::Meterbridge ()
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
+#ifdef __APPLE__
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+#else
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+#endif
+
 	Gdk::Geometry geom;
 	geom.max_width = 1<<16;
 	geom.max_height = max_height;

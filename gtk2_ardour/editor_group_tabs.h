@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_editor_group_tabs_h__
+#define __gtk_ardour_editor_group_tabs_h__
+
 #include <gtkmm/menu.h>
 #include "group_tabs.h"
 
@@ -38,3 +41,5 @@ private:
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
 	ARDOUR::RouteList selected_routes () const;
 };
+
+#endif // __gtk_ardour_editor_group_tabs_h__

@@ -42,6 +42,7 @@ public:
 	volatile bool              freeze;
 	std::vector<std::string>   paths;
 	bool                       replace_existing_source;
+	bool                       split_midi_channels;
 
 	/** set to true when all files have been imported, as distinct from the done in ARDOUR::InterThreadInfo,
 	 *  which indicates that one run of the import thread has been completed.

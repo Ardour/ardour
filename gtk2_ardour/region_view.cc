@@ -185,7 +185,7 @@ RegionView::init (bool wfd)
 
 	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
 	//set_colors ();
-	//UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }

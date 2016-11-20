@@ -26,7 +26,7 @@ typedef std::vector<std::pair<long, TCSVector> > vectorlist_t;
 
 class TCSGram
 {
-public:
+public:	
 	TCSGram();
 	~TCSGram();
 	void getTCSVector(int, TCSVector&) const;

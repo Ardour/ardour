@@ -15,8 +15,8 @@
    Earn/Bitnet:  fionn@dgaeso51,  fim@dgaipp1s,  murtagh@stsci
    Span:         esomc1::fionn
    Internet:     murtagh@scivax.stsci.edu
-
-   F. Murtagh, Munich, 6 June 1989                                   */
+   
+   F. Murtagh, Munich, 6 June 1989                                   */   
 /*********************************************************************/
 
 #include <stdio.h>
@@ -110,7 +110,7 @@ void tred2(double** a, int n, double* d, double* e)
 {
 	int l, k, j, i;
 	double scale, hh, h, g, f;
-
+	
 	for (i = n-1; i >= 1; i--)
     {
 		l = i - 1;
@@ -188,7 +188,7 @@ void tqli(double* d, double* e, int n, double** z)
 {
 	int m, l, iter, i, k;
 	double s, r, p, g, f, dd, c, b;
-
+	
 	for (i = 1; i < n; i++)
 		e[i-1] = e[i];
 	e[n-1] = 0.0;
@@ -253,23 +253,23 @@ void pca_project(double** data, int n, int m, int ncomponents)
 {
 	int  i, j, k, k2;
 	double  **symmat, **symmat2, *evals, *interm;
-
+	
 	//TODO: assert ncomponents < m
-
+	
 	symmat = (double**) malloc(m*sizeof(double*));
 	for (i = 0; i < m; i++)
 		symmat[i] = (double*) malloc(m*sizeof(double));
-
+		
 	covcol(data, n, m, symmat);
-
+	
 	/*********************************************************************
 		Eigen-reduction
 		**********************************************************************/
-
+	
     /* Allocate storage for dummy and new vectors. */
     evals = (double*) malloc(m*sizeof(double));     /* Storage alloc. for vector of eigenvalues */
     interm = (double*) malloc(m*sizeof(double));    /* Storage alloc. for 'intermediate' vector */
-    //MALLOC_ARRAY(symmat2,m,m,double);
+    //MALLOC_ARRAY(symmat2,m,m,double);    
 	//for (i = 0; i < m; i++) {
 	//	for (j = 0; j < m; j++) {
 	//		symmat2[i][j] = symmat[i][j]; /* Needed below for col. projections */
@@ -278,7 +278,7 @@ void pca_project(double** data, int n, int m, int ncomponents)
     tred2(symmat, m, evals, interm);  /* Triangular decomposition */
 tqli(evals, interm, m, symmat);   /* Reduction of sym. trid. matrix */
 /* evals now contains the eigenvalues,
-columns of symmat now contain the associated eigenvectors. */
+columns of symmat now contain the associated eigenvectors. */	
 
 /*
 	printf("\nEigenvalues:\n");
@@ -289,7 +289,7 @@ columns of symmat now contain the associated eigenvectors. */
 	printf("Eigenvalues are often expressed as cumulative\n");
 	printf("percentages, representing the 'percentage variance\n");
 	printf("explained' by the associated axis or principal component.)\n");
-
+	
 	printf("\nEigenvectors:\n");
 	printf("(First three; their definition in terms of original vbes.)\n");
 	for (j = 0; j < m; j++) {
@@ -310,7 +310,7 @@ for (i = 0; i < n; i++) {
         }
 }
 
-/*
+/*	
 printf("\nProjections of row-points on first 3 prin. comps.:\n");
  for (i = 0; i < n; i++) {
 	 for (j = 0; j < 3; j++)  {

@@ -466,10 +466,10 @@ EngineControl::on_response (int response_id)
 
 	switch (response_id) {
 	case RESPONSE_OK:
+		hide();
 		if (!start_engine()) {
+			show();
 			return;
-		} else {
-			hide();
 		}
 #ifdef PLATFORM_WINDOWS
 
@@ -852,11 +852,17 @@ EngineControl::update_sensitivity ()
 	}
 
 	if (get_popdown_string_count (sample_rate_combo) > 0) {
+		bool allow_to_set_rate = false;
 		if (!ARDOUR::AudioEngine::instance()->running()) {
-			sample_rate_combo.set_sensitive (true);
-		} else {
-			sample_rate_combo.set_sensitive (false);
+			if (!ARDOUR_UI::instance()->session_loaded) {
+				// engine is not running, no session loaded -> anything goes.
+				allow_to_set_rate = true;
+			} else if (_desired_sample_rate > 0 && get_rate () != _desired_sample_rate) {
+				// only allow to change if the current setting is not the native session rate.
+				allow_to_set_rate = true;
+			}
 		}
+		sample_rate_combo.set_sensitive (allow_to_set_rate);
 	} else {
 		sample_rate_combo.set_sensitive (false);
 		valid = false;
@@ -1392,7 +1398,10 @@ EngineControl::set_samplerate_popdown_strings ()
 	set_popdown_strings (sample_rate_combo, s);
 
 	if (!s.empty()) {
-		if (desired.empty ()) {
+		if (ARDOUR::AudioEngine::instance()->running()) {
+			sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
+		}
+		else if (desired.empty ()) {
 			float new_active_sr = backend->default_sample_rate ();
 
 			if (std::find (sr.begin (), sr.end (), new_active_sr) == sr.end ()) {

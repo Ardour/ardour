@@ -90,7 +90,7 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		context->fill ();
 	}
 
-	if (_outline) {
+	if (_outline && _outline_width && _outline_what) {
 
 		setup_outline_context (context);
 

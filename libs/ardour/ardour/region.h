@@ -175,8 +175,12 @@ class LIBARDOUR_API Region
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style (const int32_t sub_num);
 
+	/* meter-based beat at the region position */
 	double beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
+	/* quarter-note at the region position */
+	double quarter_note () const { return _quarter_note; }
+	void set_quarter_note (double qn) { _quarter_note = qn; }
 
 	void suspend_property_changes ();
 
@@ -377,6 +381,8 @@ class LIBARDOUR_API Region
 	PBD::Property<double>      _beat;
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
+
+	double                  _quarter_note;
 
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */

@@ -153,7 +153,7 @@ copy_session_routes (
 				continue;
 			}
 			XMLNode& rs (*(i->second));
-			s->new_route_from_template (1, rs, rs.property (X_("name"))->value (), NewPlaylist);
+			s->new_route_from_template (1, PresentationInfo::max_order, rs, rs.property (X_("name"))->value (), NewPlaylist);
 		}
 	}
 

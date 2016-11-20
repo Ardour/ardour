@@ -42,7 +42,7 @@ def set_winegcc(self):
 
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
-    if not (bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT')):
+    if not (bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined ('MACVST_SUPPORT')):
         return
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
@@ -88,4 +88,8 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
+    if re.search ("freebsd", sys.platform) != None:
+        obj.defines.append('_POSIX_C_SOURCE=200809')
+        obj.defines.append('_XOPEN_SOURCE=700')
+
     obj.install_path = os.path.join(bld.env['LIBDIR'])

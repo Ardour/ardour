@@ -48,6 +48,7 @@ struct LIBARDOUR_API _VSTInfo
 	int    wantMidi;
 	int    wantEvents;
 	int    hasEditor;
+	int    isInstrument; // still unused
 	int    canProcessReplacing;
 
 	char** ParamNames;
@@ -67,6 +68,9 @@ struct LIBARDOUR_API _VSTHandle
 	main_entry_t main_entry;
 
 	int          plugincnt;
+#ifdef MACVST_SUPPORT
+	int32_t      res_file_id;
+#endif
 };
 
 typedef struct _VSTHandle VSTHandle;
@@ -125,6 +129,7 @@ struct LIBARDOUR_API _VSTState
 
 	struct _VSTState * next;
 	pthread_mutex_t    lock;
+	pthread_mutex_t    state_lock;
 	pthread_cond_t     window_status_change;
 	pthread_cond_t     plugin_dispatcher_called;
 	pthread_cond_t     window_created;
@@ -132,5 +137,14 @@ struct LIBARDOUR_API _VSTState
 };
 
 typedef struct _VSTState VSTState;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+LIBARDOUR_API extern void vststate_init (VSTState* state);
+LIBARDOUR_API extern void vststate_maybe_set_program (VSTState* state);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

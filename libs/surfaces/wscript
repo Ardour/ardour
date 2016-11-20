@@ -22,6 +22,7 @@ out = 'build'
 children = [
         'control_protocol',
         'faderport',
+        'cc121',
         'generic_midi',
         'mackie',
 ]
@@ -39,10 +40,15 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
-    #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
+    autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
+    if conf.is_defined('HAVE_USB'):
+        children += [ 'push2' ]
+    else:
+        print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
+    
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
         children += [ 'osc' ]
 
@@ -69,6 +75,7 @@ def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')
     bld.recurse('faderport')
+    bld.recurse('cc121')
     bld.recurse('mackie')
 
     if bld.is_defined ('HAVE_LO'):
@@ -77,6 +84,8 @@ def build(bld):
         bld.recurse('wiimote')
     if bld.is_defined('BUILD_TRANZPORT'):
         bld.recurse('tranzport')
+    if bld.is_defined('HAVE_USB'):
+        bld.recurse('push2')
 
 def shutdown():
     autowaf.shutdown()

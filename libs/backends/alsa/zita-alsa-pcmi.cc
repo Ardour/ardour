@@ -17,8 +17,11 @@
 //
 // ----------------------------------------------------------------------------
 
-
+#if defined(__NetBSD__)
+#include <sys/endian.h>
+#else
 #include <endian.h>
+#endif
 #include <sys/time.h>
 #include "zita-alsa-pcmi.h"
 
@@ -175,7 +178,12 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 		timespec timeout;
 		timeout.tv_sec = 1;
 		timeout.tv_nsec = 0;
+#if defined(__NetBSD__)
+		r = pollts (_poll_fd, n2, &timeout, NULL);
+#else
 		r = ppoll (_poll_fd, n2, &timeout, NULL);
+#endif
+
 
 		if (r < 0)
 		{
@@ -735,7 +743,7 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 	snd_pcm_hw_params_get_channels_max (hwpar, nchan);
 	if (*nchan > 1024)
 	{
-		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: detected more than 1024 %s channnels, reset to 2.\n",
+		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: detected more than 1024 %s channels, reset to 2.\n",
 				sname);
 		*nchan = 2;
 	}

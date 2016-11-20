@@ -69,8 +69,8 @@ public:
 	/** Clear the entire buffer */
 	virtual void clear() { silence(_capacity, 0); }
 
-	virtual void read_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) = 0;
-	virtual void merge_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) = 0;
+	virtual void read_from (const Buffer& src, framecnt_t len, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0) = 0;
+	virtual void merge_from (const Buffer& src, framecnt_t len, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0) = 0;
 
   protected:
 	Buffer(DataType type)

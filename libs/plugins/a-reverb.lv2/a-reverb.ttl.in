@@ -12,16 +12,17 @@
 	foaf:homepage <http://ardour.org/> .
 
 <urn:ardour:a-reverb>
-	a doap:Project, lv2:Plugin, lv2:SpatialPlugin ;
+	a doap:Project, lv2:Plugin, lv2:ReverbPlugin ;
 
-	doap:name "a-Reverb";
-	rdfs:comment "A Schroeder Reverberator"
+	doap:name "a-Reverb" ;
+	rdfs:comment "A Schroeder Reverberator" ;
 
-	doap:maintainer <http://ardour.org/credits.html>
+	doap:maintainer <http://ardour.org/credits.html> ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 
 	lv2:microVersion 0 ; lv2:minorVersion 2 ;
 	lv2:optionalFeature lv2:hardRTCapable ;
+	lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
 
 	lv2:port
 	[
@@ -57,8 +58,8 @@
 			lv2:ControlPort ;
 		lv2:index 4 ;
 		lv2:symbol "blend" ;
-		lv2:name "Blend";
-		lv2:default 0.3;
+		lv2:name "Blend" ;
+		lv2:default 0.3 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	],
@@ -67,8 +68,19 @@
 			lv2:ControlPort ;
 		lv2:index 5 ;
 		lv2:symbol "roomsz" ;
-		lv2:name "Room Size";
-		lv2:default 0.5;
+		lv2:name "Room Size" ;
+		lv2:default 0.5 ;
 		lv2:minimum 0.5 ;
 		lv2:maximum 1.0 ;
-	] .
+	],
+	[
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 6 ;
+		lv2:name "Enable" ;
+		lv2:symbol "enable" ;
+		lv2:default 1 ;
+		lv2:minimum 0 ;
+		lv2:maximum 1 ;
+		lv2:portProperty lv2:integer, lv2:toggled ;
+		lv2:designation lv2:enabled;
+	].

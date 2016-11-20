@@ -27,15 +27,15 @@ TonalEstimator::TonalEstimator()
 	m_Basis.resize(6);
 
 	int i = 0;
-
-
+	
+	
 	// circle of fifths
 	m_Basis[i].resize(12);
 	for (int iP = 0; iP < 12; iP++)
 	{
 		m_Basis[i][iP] = std::sin( (7.0 / 6.0) * iP * PI);
 	}
-
+	
 	i++;
 
 	m_Basis[i].resize(12);
@@ -43,17 +43,17 @@ TonalEstimator::TonalEstimator()
 	{
 		m_Basis[i][iP] = std::cos( (7.0 / 6.0) * iP * PI);
 	}
-
+	
 	i++;
-
-
+	
+	
 	// circle of major thirds
 	m_Basis[i].resize(12);
 	for (int iP = 0; iP < 12; iP++)
 	{
 		m_Basis[i][iP] = 0.6 * std::sin( (2.0 / 3.0) * iP * PI);
 	}
-
+	
 	i++;
 
 	m_Basis[i].resize(12);
@@ -71,7 +71,7 @@ TonalEstimator::TonalEstimator()
 	{
 		m_Basis[i][iP] = 1.1 * std::sin( (3.0 / 2.0) * iP * PI);
 	}
-
+	
 	i++;
 
 	m_Basis[i].resize(12);
@@ -90,7 +90,7 @@ TCSVector TonalEstimator::transform2TCS(const ChromaVector& rVector)
 {
 	TCSVector vaRetVal;
 	vaRetVal.resize(6, 0.0);
-
+		
 	for (int i = 0; i < 6; i++)
 	{
 		for (int iP = 0; iP < 12; iP++)
@@ -98,6 +98,6 @@ TCSVector TonalEstimator::transform2TCS(const ChromaVector& rVector)
 			vaRetVal[i] += m_Basis[i][iP] * rVector[iP];
 		}
 	}
-
+	
 	return vaRetVal;
 }

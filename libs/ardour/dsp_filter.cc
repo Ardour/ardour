@@ -53,7 +53,7 @@ ARDOUR::DSP::mmult (float *data, float *mult, const uint32_t n_samples) {
 
 float
 ARDOUR::DSP::log_meter (float power) {
-	// compare to gtk2_ardour/logmeter.h
+	// compare to libs/ardour/log_meter.h
 	static const float lower_db = -192.f;
 	static const float upper_db = 0.f;
 	static const float non_linearity = 8.0;
@@ -197,9 +197,9 @@ Biquad::configure (double a1, double a2, double b0, double b1, double b2)
 void
 Biquad::compute (Type type, double freq, double Q, double gain)
 {
-	if (Q <= .001)     { Q = 0.001; }
-	if (freq <= 1.)    { freq = 1.; }
-	if (freq >= _rate) { freq = _rate; }
+	if (Q <= .001)  { Q = 0.001; }
+	if (freq <= 1.) { freq = 1.; }
+	if (freq >= 0.4998 * _rate) { freq = 0.4998 * _rate; }
 
 	/* Compute biquad filter settings.
 	 * Based on 'Cookbook formulae for audio EQ biquad filter coefficents'

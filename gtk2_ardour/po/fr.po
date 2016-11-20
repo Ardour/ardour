@@ -10,6 +10,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
@@ -545,7 +546,7 @@ msgstr "Bus MIDI"
 
 #: add_route_dialog.cc:82
 msgid "VCA Masters"
-msgstr ""
+msgstr "Masters VCA"
 
 #: add_route_dialog.cc:85 add_route_dialog.cc:622
 msgid "First"
@@ -753,7 +754,7 @@ msgid "Fit dB range"
 msgstr ""
 
 #: analysis_window.cc:50
-msgid "Proportional Spectum, -18dB"
+msgid "Proportional Spectrum, -18dB"
 msgstr ""
 
 #: analysis_window.cc:53
@@ -2246,7 +2247,7 @@ msgstr ""
 
 #: ardour_ui_ed.cc:184
 msgid "Open Video..."
-msgstr ""
+msgstr "Ouvrir une vidéo..."
 
 #: ardour_ui_ed.cc:187
 msgid "Remove Video"
@@ -2258,19 +2259,19 @@ msgstr ""
 
 #: ardour_ui_ed.cc:194
 msgid "Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Prendre un cliché (et continuer à travailler sur la version actuelle) ..."
 
 #: ardour_ui_ed.cc:197
 msgid "Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Prendre un cliché (et basculer sur la nouvelle version) ..."
 
 #: ardour_ui_ed.cc:200
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Prendre rapidement un cliché (et continuer à travailler sur la version actuelle) ..."
 
 #: ardour_ui_ed.cc:203
 msgid "Quick Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Prendre rapidement un cliché (et basculer sur la nouvelle version) ..."
 
 #: ardour_ui_ed.cc:207
 msgid "Save As..."
@@ -2299,7 +2300,7 @@ msgstr "Importer les méta-données"
 
 #: ardour_ui_ed.cc:226
 msgid "Export to Audio File(s)..."
-msgstr ""
+msgstr "Exporter dans des fichiers audio..."
 
 #: ardour_ui_ed.cc:229
 msgid "Stem export..."
@@ -2336,7 +2337,7 @@ msgstr "Cacher"
 
 #: ardour_ui_ed.cc:263 ardour_ui_ed.cc:264 ardour_ui_ed.cc:265
 msgid "Attach"
-msgstr ""
+msgstr "Attacher"
 
 #: ardour_ui_ed.cc:275 ardour_ui_ed.cc:276 ardour_ui_ed.cc:277
 #: ardour_ui_ed.cc:283 ardour_ui_ed.cc:284 ardour_ui_ed.cc:285
@@ -2345,11 +2346,11 @@ msgstr ""
 
 #: ardour_ui_ed.cc:287
 msgid "Previous Tab"
-msgstr ""
+msgstr "Onglet précédent"
 
 #: ardour_ui_ed.cc:288
 msgid "Next Tab"
-msgstr ""
+msgstr "Onglet suivant"
 
 #: ardour_ui_ed.cc:290
 msgid "Toggle Editor & Mixer"
@@ -2393,15 +2394,15 @@ msgstr "Salon de discussion (anglais)"
 
 #: ardour_ui_ed.cc:316
 msgid "Help|Manual"
-msgstr "Manuel"
+msgstr "Manuel (anglais)"
 
 #: ardour_ui_ed.cc:317
 msgid "Manual|Reference"
-msgstr ""
+msgstr "Référence (anglais)"
 
 #: ardour_ui_ed.cc:318
 msgid "Report a Bug"
-msgstr ""
+msgstr "Rapporter un bogue (anglais)"
 
 #: ardour_ui_ed.cc:319
 msgid "Cheat Sheet"
@@ -2409,7 +2410,7 @@ msgstr "Liste des raccourcis"
 
 #: ardour_ui_ed.cc:320
 msgid "Ardour Website"
-msgstr "Site web d'Ardour"
+msgstr "Site web d'Ardour (anglais)"
 
 #: ardour_ui_ed.cc:321
 msgid "Ardour Development"
@@ -2417,11 +2418,11 @@ msgstr "Développement d'Ardour"
 
 #: ardour_ui_ed.cc:322
 msgid "User Forums"
-msgstr "Forums utilisateurs"
+msgstr "Forums utilisateurs (anglais)"
 
 #: ardour_ui_ed.cc:323
 msgid "How to Report a Bug"
-msgstr ""
+msgstr "Comment rapporter un bogue (anglais)"
 
 # Utilisation de sauvegarder pour éviter la confusion avec enregistrer que l'on réserve au son.
 #: ardour_ui_ed.cc:325 luawindow.cc:100 luawindow.cc:654 plugin_ui.cc:419
@@ -2692,7 +2693,7 @@ msgstr "DSP"
 
 #: ardour_ui_ed.cc:633
 msgid "X-run"
-msgstr ""
+msgstr "Décrochage (xrun)"
 
 #: ardour_ui_ed.cc:634
 msgid "Active Peak-file Work"
@@ -2790,7 +2791,7 @@ msgstr "Se placer ici"
 
 #: audio_clock.cc:2133
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Copier dans le presse-papier"
 
 #: audio_region_editor.cc:60 control_point_dialog.cc:49 rhythm_ferret.cc:137
 #: rhythm_ferret.cc:154
@@ -3445,7 +3446,7 @@ msgstr "Zoomer sur l'intervalle"
 
 #: editor.cc:1952
 msgid "Loudness Analysis"
-msgstr ""
+msgstr "Analyse de la sonie"
 
 #: editor.cc:1959 editor_actions.cc:401
 msgid "Move Range Start to Previous Region Boundary"
@@ -7265,7 +7266,7 @@ msgstr "Parcourir"
 
 #: export_filename_selector.cc:40 export_report.cc:118
 msgid "Open Folder"
-msgstr ""
+msgstr "Ouvrir un répertoire"
 
 #: export_filename_selector.cc:45
 msgid "Build filename(s) from these components:"
@@ -7322,7 +7323,7 @@ msgstr "Crête"
 
 #: export_format_dialog.cc:44
 msgid "Loudness"
-msgstr ""
+msgstr "Sonie"
 
 #: export_format_dialog.cc:50
 msgid "LUFS"
@@ -7523,7 +7524,7 @@ msgstr ""
 
 #: export_report.cc:185
 msgid "Error:"
-msgstr ""
+msgstr "Erreur :"
 
 #: export_report.cc:220 export_report.cc:440
 msgid "(too short integration time)"
@@ -7531,11 +7532,11 @@ msgstr ""
 
 #: export_report.cc:222
 msgid "-888"
-msgstr ""
+msgstr "-888"
 
 #: export_report.cc:227 export_report.cc:353
 msgid "Peak:"
-msgstr ""
+msgstr "Pic :"
 
 #: export_report.cc:228 export_report.cc:360
 msgid "%1 dBFS"
@@ -7555,7 +7556,7 @@ msgstr ""
 
 #: export_report.cc:232
 msgid "+888.88 dB"
-msgstr ""
+msgstr "+888.88 dB"
 
 #: export_report.cc:234 export_report.cc:448
 msgid "Integrated Loudness:"
@@ -7563,7 +7564,7 @@ msgstr ""
 
 #: export_report.cc:235 export_report.cc:454
 msgid "%1 LUFS"
-msgstr ""
+msgstr "%1 LUFS"
 
 #: export_report.cc:236 export_report.cc:460
 msgid "Loudness Range:"
@@ -7571,15 +7572,15 @@ msgstr ""
 
 #: export_report.cc:237 export_report.cc:466
 msgid "%1 LU"
-msgstr ""
+msgstr "%1 LU"
 
 #: export_report.cc:247 export_report.cc:754
 msgid "100"
-msgstr ""
+msgstr "100"
 
 #: export_report.cc:282 export_report.cc:650
 msgid "00:00:00.000"
-msgstr ""
+msgstr "00:00:00.000"
 
 #: export_report.cc:288
 msgid "0|A8"
@@ -7623,23 +7624,23 @@ msgstr ""
 
 #: export_report.cc:738
 msgid "Hz"
-msgstr ""
+msgstr "Hz"
 
 #: export_report.cc:755
 msgid "500"
-msgstr ""
+msgstr "500"
 
 #: export_report.cc:756
 msgid "1K"
-msgstr ""
+msgstr "1K"
 
 #: export_report.cc:757
 msgid "5K"
-msgstr ""
+msgstr "5K"
 
 #: export_report.cc:758
 msgid "10K"
-msgstr ""
+msgstr "10K"
 
 #: export_report.cc:844
 msgid "Writing Export Analysis Image: %1."
@@ -7655,22 +7656,22 @@ msgstr "Impossible d'accéder au fichier audio : "
 
 #: export_report.cc:1203
 msgid "-36"
-msgstr ""
+msgstr "-36"
 
 #: export_report.cc:1204 export_report.cc:1208 export_report.cc:1214
 #: export_report.cc:1217
 msgid "-18"
-msgstr ""
+msgstr "-18"
 
 #: export_report.cc:1205 export_report.cc:1209 export_report.cc:1215
 #: export_report.cc:1218 export_report.cc:1221 export_report.cc:1222
 msgid "-9"
-msgstr ""
+msgstr "-9"
 
 #: export_report.cc:1206 export_report.cc:1210 export_report.cc:1216
 #: export_report.cc:1219 export_report.cc:1223 export_report.cc:1224
 msgid "-3"
-msgstr ""
+msgstr "-3"
 
 #: export_timespan_selector.cc:44
 msgid "Show Times as:"
@@ -7798,7 +7799,7 @@ msgstr "Manuel"
 
 #: generic_pluginui.cc:828
 msgid "This control cannot be automated"
-msgstr ""
+msgstr "Ce contrôle ne peut pas être automatisé"
 
 #: global_port_matrix.cc:158
 msgid "Audio Connection Manager"
@@ -10966,27 +10967,27 @@ msgstr ""
 
 #: rc_option_editor.cc:1101
 msgid "30 sec"
-msgstr ""
+msgstr "30 sec"
 
 #: rc_option_editor.cc:1102
 msgid "1 min"
-msgstr ""
+msgstr "1 min"
 
 #: rc_option_editor.cc:1103
 msgid "2 mins"
-msgstr ""
+msgstr "2 mins"
 
 #: rc_option_editor.cc:1104
 msgid "3 mins"
-msgstr ""
+msgstr "3 mins"
 
 #: rc_option_editor.cc:1105
 msgid "4 mins"
-msgstr ""
+msgstr "4 mins"
 
 #: rc_option_editor.cc:1106
 msgid "5 mins"
-msgstr ""
+msgstr "5 mins"
 
 #: rc_option_editor.cc:1109
 msgid ""
@@ -11069,7 +11070,7 @@ msgstr "Options Avancées (serveur vidéo distant)"
 
 #: rc_option_editor.cc:1556
 msgid "Video Server"
-msgstr ""
+msgstr "Serveur vidéo"
 
 #: rc_option_editor.cc:1565
 #, fuzzy
@@ -11239,7 +11240,7 @@ msgstr "Intervalle de prise d'automation (ms)"
 
 #: rc_option_editor.cc:1975
 msgid "Transport Options"
-msgstr ""
+msgstr "Options de transport"
 
 #: rc_option_editor.cc:1981
 msgid "Keep record-enable engaged on stop"
@@ -11365,23 +11366,23 @@ msgstr ""
 
 #: rc_option_editor.cc:2074
 msgid "0.1 second"
-msgstr ""
+msgstr "0.1 seconde"
 
 #: rc_option_editor.cc:2075
 msgid "0.25 second"
-msgstr ""
+msgstr "0.25 seconde"
 
 #: rc_option_editor.cc:2076
 msgid "0.5 second"
-msgstr ""
+msgstr "0.5 seconde"
 
 #: rc_option_editor.cc:2077
 msgid "1.0 second"
-msgstr ""
+msgstr "1.0 seconde"
 
 #: rc_option_editor.cc:2078
 msgid "2.0 seconds"
-msgstr ""
+msgstr "2.0 secondes"
 
 #: rc_option_editor.cc:2081 rc_option_editor.cc:2090 rc_option_editor.cc:2106
 #: rc_option_editor.cc:2127 rc_option_editor.cc:2145 rc_option_editor.cc:2147
@@ -11607,15 +11608,15 @@ msgstr "seulement si durée, position et origine sont identiques"
 
 #: rc_option_editor.cc:2321
 msgid "Layering model"
-msgstr ""
+msgstr "Modèle d'empilement"
 
 #: rc_option_editor.cc:2326
 msgid "later is higher"
-msgstr ""
+msgstr "le dernier est le plus haut"
 
 #: rc_option_editor.cc:2327
 msgid "manual layering"
-msgstr ""
+msgstr "empilement manuel"
 
 #: rc_option_editor.cc:2332
 msgid "After splitting selected regions, select"
@@ -11636,11 +11637,11 @@ msgstr "la sélection en cours et les régions nouvellement créées"
 #: rc_option_editor.cc:2348 rc_option_editor.cc:2351 rc_option_editor.cc:2360
 #: rc_option_editor.cc:2378 rc_option_editor.cc:2390 rc_option_editor.cc:2392
 msgid "Editor/Waveforms"
-msgstr ""
+msgstr "Éditeur/formes d'onde"
 
 #: rc_option_editor.cc:2348
 msgid "Waveforms"
-msgstr ""
+msgstr "Formes d'onde"
 
 #: rc_option_editor.cc:2354
 msgid "Show waveforms in regions"
@@ -11913,11 +11914,11 @@ msgstr ""
 
 #: rc_option_editor.cc:2725
 msgid "MIDI Clock"
-msgstr ""
+msgstr "Horloge MIDI"
 
 #: rc_option_editor.cc:2735
 msgid "MIDI Time Code (MTC)"
-msgstr ""
+msgstr "Code temporel MIDI (MTC)"
 
 #: rc_option_editor.cc:2740
 msgid "Send MIDI Time Code"
@@ -11932,7 +11933,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2754
 msgid "Midi Machine Control (MMC)"
-msgstr ""
+msgstr "Contrôle Machine MIDI (MMC)"
 
 #: rc_option_editor.cc:2759
 msgid "Obey MIDI Machine Control commands"
@@ -12060,11 +12061,11 @@ msgstr ""
 
 #: rc_option_editor.cc:2918
 msgid "VST Cache:"
-msgstr ""
+msgstr "Cache VST :"
 
 #: rc_option_editor.cc:2923
 msgid "VST Blacklist:"
-msgstr ""
+msgstr "Liste noire VST :"
 
 #: rc_option_editor.cc:2930
 msgid "Linux VST Path:"
@@ -12072,7 +12073,7 @@ msgstr "Dossier Linux VST :"
 
 #: rc_option_editor.cc:2935 rc_option_editor.cc:2948
 msgid "Path:"
-msgstr ""
+msgstr "Chemin :"
 
 #: rc_option_editor.cc:2944
 msgid "Windows VST Path:"
@@ -12080,7 +12081,7 @@ msgstr "Dossier Windows VST :"
 
 #: rc_option_editor.cc:2954 rc_option_editor.cc:2966 rc_option_editor.cc:2971
 msgid "Plugins/Audio Unit"
-msgstr ""
+msgstr "Greffons/Audio Unit"
 
 #: rc_option_editor.cc:2954
 msgid "Audio Unit"
@@ -12106,19 +12107,19 @@ msgstr ""
 
 #: rc_option_editor.cc:2969
 msgid "AU Cache:"
-msgstr ""
+msgstr "Cache AU :"
 
 #: rc_option_editor.cc:2974
 msgid "AU Blacklist:"
-msgstr ""
+msgstr "Liste noire AU :"
 
 #: rc_option_editor.cc:2978
 msgid "Plugin GUI"
-msgstr ""
+msgstr "Interface graphique des greffons"
 
 #: rc_option_editor.cc:2982
 msgid "Automatically open the plugin GUI when adding a new plugin"
-msgstr ""
+msgstr "Ouvrir automatiquement l'interface graphique du greffon lors de l'ajout d'un nouveau greffon"
 
 #: rc_option_editor.cc:2991
 msgid "Show Plugin Inline Display on Mixerstrip by default"
@@ -12132,11 +12133,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3005
 msgid "Instrument"
-msgstr ""
+msgstr "Instrument"
 
 #: rc_option_editor.cc:3009
 msgid "Ask to replace existing instrument plugin"
-msgstr ""
+msgstr "Demander pour remplacer un greffon d'instrument pré-existant"
 
 #: rc_option_editor.cc:3017
 msgid "Interactively configure instrument plugins on insert"
@@ -12150,7 +12151,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3032
 msgid "Disable Graphics Hardware Acceleration (requires restart)"
-msgstr ""
+msgstr "Désactive l'accélération matérielle graphique (nécessite un redémarrage)"
 
 #: rc_option_editor.cc:3038
 msgid ""
@@ -12279,19 +12280,19 @@ msgstr "lent [8.6dB/sec] (BBC PPM, EBU PPM)"
 
 #: rc_option_editor.cc:3195
 msgid "moderate [12.0dB/sec] (DIN)"
-msgstr ""
+msgstr "modéré [12.0dB/sec] (DIN)"
 
 #: rc_option_editor.cc:3196
 msgid "medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
-msgstr ""
+msgstr "médium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
 
 #: rc_option_editor.cc:3197
 msgid "fast [20dB/sec]"
-msgstr ""
+msgstr "rapide [20dB/sec]"
 
 #: rc_option_editor.cc:3198
 msgid "very fast [32dB/sec]"
-msgstr ""
+msgstr "très rapide [32dB/sec]"
 
 #: rc_option_editor.cc:3204
 #, fuzzy
@@ -12398,11 +12399,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3336
 msgid "Post Export Analysis"
-msgstr ""
+msgstr "Analyse post-exportation"
 
 #: rc_option_editor.cc:3341
 msgid "Save loudness analysis as image file"
-msgstr ""
+msgstr "Sauvegarder l'analyse de sonie en tant que fichier image"
 
 #: rc_option_editor.cc:3349
 msgid "Theme"
@@ -13070,7 +13071,7 @@ msgstr ""
 
 #: save_as_dialog.cc:34
 msgid "Switch to newly-saved version"
-msgstr ""
+msgstr "Basculer vers la version nouvellement sauvegardée"
 
 #: save_as_dialog.cc:35
 msgid "Copy media to new session"
@@ -13082,11 +13083,11 @@ msgstr ""
 
 #: save_as_dialog.cc:37
 msgid "Newly-saved session should be empty"
-msgstr ""
+msgstr "La session nouvellement sauvegardée devrait être vide"
 
 #: save_as_dialog.cc:48
 msgid "Save as session name"
-msgstr ""
+msgstr "Sauvegarder sous un nom de session"
 
 #: save_as_dialog.cc:55
 msgid "Parent directory/folder"
@@ -13106,15 +13107,15 @@ msgstr "Le dossier de la session"
 
 #: script_selector.cc:43
 msgid "<b>Type:</b>"
-msgstr ""
+msgstr "<b>Type :</b>"
 
 #: script_selector.cc:49
 msgid "<b>Author:</b>"
-msgstr ""
+msgstr "<b>Auteur :</b>"
 
 #: script_selector.cc:55
 msgid "<b>Description:</b>"
-msgstr ""
+msgstr "<b>Description :</b>"
 
 #: script_selector.cc:131
 msgid "Select Script to unload"
@@ -13122,7 +13123,7 @@ msgstr ""
 
 #: script_selector.cc:165
 msgid "<b>Name:</b>"
-msgstr ""
+msgstr "<b>Nom :</b>"
 
 #: script_selector.cc:172
 msgid "<b>Instance Parameters</b>"
@@ -13151,11 +13152,11 @@ msgstr "Taux d'échantillonage"
 
 #: session_dialog.cc:312
 msgid "File Resolution"
-msgstr ""
+msgstr "Résolution du fichier"
 
 #: session_dialog.cc:313
 msgid "Last Modified"
-msgstr ""
+msgstr "Modifié dernièrement"
 
 #: session_dialog.cc:338
 msgid "New Session"
@@ -13181,7 +13182,7 @@ msgstr "Autres sessions"
 
 #: session_dialog.cc:424
 msgid "Safe Mode: Disable all Plugins"
-msgstr ""
+msgstr "Mode prudent : désactiver tous les greffons"
 
 #: session_dialog.cc:454
 msgid "Open"
@@ -13311,7 +13312,7 @@ msgstr "Utilisateur"
 
 #: session_metadata_dialog.cc:652
 msgid "Email"
-msgstr "Email"
+msgstr "Courriel"
 
 #: session_metadata_dialog.cc:655
 msgid "Web"
@@ -13445,7 +13446,6 @@ msgid "School"
 msgstr "École"
 
 #: session_metadata_dialog.cc:791
-#, fuzzy
 msgid "Instructor"
 msgstr "Instructeur"
 
@@ -13663,7 +13663,7 @@ msgstr "Format de fichier audio"
 
 #: session_option_editor.cc:178
 msgid "Sample format"
-msgstr "Échantillonnage "
+msgstr "Format d'échantillonnage "
 
 #: session_option_editor.cc:183
 msgid "32-bit floating point"
@@ -13815,7 +13815,6 @@ msgid "Name Labels"
 msgstr "Etiquettes de noms"
 
 #: session_option_editor.cc:335
-#, fuzzy
 msgid "Track Name"
 msgstr "Nom de la Piste"
 
@@ -13892,7 +13891,7 @@ msgstr "comme nouvelles pistes de magnéto"
 #: sfdb_ui.cc:100
 #, fuzzy
 msgid "programming error: unknown import mode string %1"
-msgstr "programming error: unknown import mode string %1"
+msgstr "erreur de programmation : unknown import mode string %1"
 
 #: sfdb_ui.cc:127
 msgid "Auto-play"
@@ -13930,7 +13929,7 @@ msgstr "Fichiers audio et MIDI"
 
 #: sfdb_ui.cc:584
 msgid "Audio files"
-msgstr "Audio"
+msgstr "Fichiers audio"
 
 #: sfdb_ui.cc:587
 msgid "MIDI files"
@@ -13989,12 +13988,10 @@ msgid "Lowest rated"
 msgstr "Les moins bien notés"
 
 #: sfdb_ui.cc:684
-#, fuzzy
 msgid "More"
 msgstr "Plus"
 
 #: sfdb_ui.cc:688
-#, fuzzy
 msgid "Similar"
 msgstr "Similaire"
 
@@ -14011,7 +14008,6 @@ msgid "Duration"
 msgstr "Durée"
 
 #: sfdb_ui.cc:704
-#, fuzzy
 msgid "Size"
 msgstr "Taille"
 
@@ -14020,7 +14016,6 @@ msgid "Samplerate"
 msgstr "Taux d'échantillonnage"
 
 #: sfdb_ui.cc:706
-#, fuzzy
 msgid "License"
 msgstr "Licence"
 
@@ -14030,7 +14025,7 @@ msgstr "Rechercher sur Freesound"
 
 #: sfdb_ui.cc:741
 msgid "Press to import selected files"
-msgstr ""
+msgstr "Presser pour importer les fichiers sélectionnés"
 
 #: sfdb_ui.cc:742
 msgid "Press to close this window without importing any files"
@@ -14078,7 +14073,7 @@ msgstr "une piste par canal"
 
 #: sfdb_ui.cc:1442 sfdb_ui.cc:1767 sfdb_ui.cc:1784
 msgid "sequence files"
-msgstr "fichiers séquencés"
+msgstr "fichiers de séquence"
 
 #: sfdb_ui.cc:1445 sfdb_ui.cc:1772
 msgid "all files in one track"
@@ -14130,7 +14125,7 @@ msgstr "début de la session"
 
 #: sfdb_ui.cc:1695
 msgid "<b>Add files ...</b>"
-msgstr ""
+msgstr "<b>Ajouter des fichiers...</b>"
 
 #: sfdb_ui.cc:1700
 msgid "<b>Insert at</b>"
@@ -14192,7 +14187,7 @@ msgstr "Vitesse maximale"
 
 #: shuttle_control.cc:256
 msgid "Reset to 100%"
-msgstr ""
+msgstr "Réinitialiser à 100%"
 
 #: shuttle_control.cc:633
 #, fuzzy
@@ -14211,7 +14206,7 @@ msgstr ">>> %+d demi-tons"
 
 #: soundcloud_export_selector.cc:44
 msgid "User Email"
-msgstr "E-mail utilisateur"
+msgstr "Courriel utilisateur"
 
 #: soundcloud_export_selector.cc:45
 msgid "Password"
