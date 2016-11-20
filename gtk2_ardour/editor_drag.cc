@@ -6391,6 +6391,11 @@ PercussiveCreateDrag::motion (GdkEvent* event, bool)
 
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+
+	if (divisions == 0) {
+		return;
+	}
+
 	const double eqaf = map.exact_qn_at_frame (pf, divisions);
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position ();
 
