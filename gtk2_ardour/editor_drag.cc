@@ -6333,19 +6333,19 @@ NoteCreateDrag::aborted (bool)
 
 }
 
-PercussiveCreateDrag::PercussiveCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
+HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
 	: Drag (e, i)
 	, _region_view (rv)
 	, _y (0.0)
 {
 }
 
-PercussiveCreateDrag::~PercussiveCreateDrag ()
+HitCreateDrag::~HitCreateDrag ()
 {
 }
 
 framecnt_t
-PercussiveCreateDrag::grid_frames (framepos_t t) const
+HitCreateDrag::grid_frames (framepos_t t) const
 {
 	bool success;
 	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
@@ -6360,7 +6360,7 @@ PercussiveCreateDrag::grid_frames (framepos_t t) const
 }
 
 void
-PercussiveCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
@@ -6385,7 +6385,7 @@ PercussiveCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-PercussiveCreateDrag::motion (GdkEvent* event, bool)
+HitCreateDrag::motion (GdkEvent* event, bool)
 {
 	TempoMap& map (_editor->session()->tempo_map());
 
@@ -6413,13 +6413,13 @@ PercussiveCreateDrag::motion (GdkEvent* event, bool)
 }
 
 void
-PercussiveCreateDrag::finished (GdkEvent* /* ev */, bool /* had_movement */)
+HitCreateDrag::finished (GdkEvent* /* ev */, bool /* had_movement */)
 {
 
 }
 
 double
-PercussiveCreateDrag::y_to_region (double y) const
+HitCreateDrag::y_to_region (double y) const
 {
 	double x = 0;
 	_region_view->get_canvas_group()->canvas_to_item (x, y);
@@ -6427,7 +6427,7 @@ PercussiveCreateDrag::y_to_region (double y) const
 }
 
 void
-PercussiveCreateDrag::aborted (bool)
+HitCreateDrag::aborted (bool)
 {
 	// umm..
 }

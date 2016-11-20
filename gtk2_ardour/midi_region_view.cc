@@ -501,7 +501,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
 			if (midi_view()->note_mode() == Percussive) {
-				editor->drags()->set (new PercussiveCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+				editor->drags()->set (new HitCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
 			} else {
 				editor->drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
 			}

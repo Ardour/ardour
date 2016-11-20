@@ -601,6 +601,38 @@ private:
 	framepos_t _note[2];
 };
 
+class HitCreateDrag : public Drag
+{
+public:
+	HitCreateDrag (Editor *, ArdourCanvas::Item *, MidiRegionView *);
+	~HitCreateDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool active (Editing::MouseMode mode) {
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+private:
+	double y_to_region (double) const;
+	ARDOUR::framecnt_t grid_frames (framepos_t) const;
+
+	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (0, 0);
+	}
+
+	MidiRegionView* _region_view;
+	double _y;
+};
+
 /** Drag to move MIDI patch changes */
 class PatchChangeDrag : public Drag
 {
