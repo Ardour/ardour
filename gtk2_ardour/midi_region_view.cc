@@ -715,8 +715,12 @@ MidiRegionView::key_press (GdkEventKey* ev)
 	*/
 	bool unmodified = Keyboard::no_modifier_keys_pressed (ev);
 
-	if (unmodified && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R) && _mouse_state != AddDragging) {
-		_mouse_state = SelectTouchDragging;
+	if (unmodified && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
+
+		if (_mouse_state != AddDragging) {
+			_mouse_state = SelectTouchDragging;
+		}
+
 		return true;
 
 	} else if (ev->keyval == GDK_Escape && unmodified) {
