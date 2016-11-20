@@ -1704,7 +1704,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	double y1;
 
 	/* trim note display to not overlap the end of its region */
-	if (note->length() > 0) {
+	if (note->length().to_double() > 0.0) {
 		double note_end_time = note->end_time().to_double();
 
 		if (note_end_time > mr->start_beats() + mr->length_beats()) {
