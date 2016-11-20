@@ -6333,6 +6333,100 @@ NoteCreateDrag::aborted (bool)
 
 }
 
+PercussiveCreateDrag::PercussiveCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
+	: Drag (e, i)
+	, _region_view (rv)
+	, _y (0.0)
+{
+}
+
+PercussiveCreateDrag::~PercussiveCreateDrag ()
+{
+}
+
+framecnt_t
+PercussiveCreateDrag::grid_frames (framepos_t t) const
+{
+	bool success;
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
+	if (!success) {
+		grid_beats = Evoral::Beats(1);
+	}
+	const Evoral::Beats t_beats = _region_view->region_frames_to_region_beats (t);
+
+	return _region_view->region_beats_to_region_frames (t_beats + grid_beats)
+		- _region_view->region_beats_to_region_frames (t_beats);
+
+}
+
+void
+PercussiveCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+	TempoMap& map (_editor->session()->tempo_map());
+
+	const framepos_t pf = _drags->current_pointer_frame ();
+	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+
+	bool success = false;
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
+	if (!success) {
+		grid_beats = Evoral::Beats(1);
+	}
+
+	const double eqaf = map.exact_qn_at_frame (pf, divisions);
+	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
+
+	MidiStreamView* sv = _region_view->midi_stream_view ();
+	_y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+
+	_region_view->create_note_at (start, _y,  grid_beats, event->button.state, false);
+}
+
+void
+PercussiveCreateDrag::motion (GdkEvent* event, bool)
+{
+	TempoMap& map (_editor->session()->tempo_map());
+
+	const framepos_t pf = _drags->current_pointer_frame ();
+	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+	const double eqaf = map.exact_qn_at_frame (pf, divisions);
+	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position ();
+
+	MidiStreamView* sv = _region_view->midi_stream_view ();
+	_y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+
+	bool success = false;
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
+	if (!success) {
+		grid_beats = Evoral::Beats(1);
+	}
+
+	_region_view->create_note_at (start, _y, grid_beats, event->button.state, false);
+
+}
+
+void
+PercussiveCreateDrag::finished (GdkEvent* /* ev */, bool /* had_movement */)
+{
+
+}
+
+double
+PercussiveCreateDrag::y_to_region (double y) const
+{
+	double x = 0;
+	_region_view->get_canvas_group()->canvas_to_item (x, y);
+	return y;
+}
+
+void
+PercussiveCreateDrag::aborted (bool)
+{
+	// umm..
+}
+
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
 	: Drag (e, i)
 	, arv (rv)

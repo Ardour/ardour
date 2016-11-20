@@ -497,13 +497,20 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	if (_mouse_state != SelectTouchDragging) {
 
 		_pressed_button = ev->button;
-		_mouse_state = Pressed;
 
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-			editor->drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+
+			if (midi_view()->note_mode() == Percussive) {
+				editor->drags()->set (new PercussiveCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+			} else {
+				editor->drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+			}
+
 			_mouse_state = AddDragging;
 			remove_ghost_note ();
 			hide_verbose_cursor ();
+		} else {
+			_mouse_state = Pressed;
 		}
 
 		return true;
@@ -3745,7 +3752,8 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	framepos_t const unsnapped_frame = editor.pixel_to_sample (x);
 
 	const int32_t divisions = editor.get_grid_music_divisions (state);
-	const Evoral::Beats snapped_beats = snap_frame_to_grid_underneath (unsnapped_frame, divisions, true);
+	const bool shift_snap = midi_view()->note_mode() != Percussive;
+	const Evoral::Beats snapped_beats = snap_frame_to_grid_underneath (unsnapped_frame, divisions, shift_snap);
 
 	/* ghost note may have been snapped before region */
 	if (_ghost_note && snapped_beats.to_double() < 0.0) {
