@@ -2256,6 +2256,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtkmm2ext::ActionMap myactions;
 
 	friend class Drag;
+	friend class RegionCutDrag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
 	friend class RegionSpliceDrag;
