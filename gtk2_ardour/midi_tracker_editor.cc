@@ -1532,7 +1532,7 @@ MidiTrackerEditor::redisplay_model ()
 					// Interpolation
 					// TODO: fix for midi automation
 					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
-					double inter_auto_val = alist->eval(row_frame);
+					double inter_auto_val = alist->eval(is_region_automation ? row_beats.to_double() : row_frame);
 					row[columns.automation[i]] = to_string (inter_auto_val);
 					row[columns._automation_foreground_color[i]] = passive_foreground_color;
 				}
