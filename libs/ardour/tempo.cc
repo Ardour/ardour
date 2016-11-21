@@ -3494,7 +3494,6 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	BBT_Time pos_bbt = bbt_at_minute_locked (_metrics, minute_at_frame (pos));
-	const framecnt_t offset = frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
 
 	const double divisions = meter_section_at_minute_locked (_metrics, minute_at_frame (pos)).divisions_per_bar();
 
@@ -3515,13 +3514,8 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 		const framecnt_t music_origin = frame_at_minute (minute_at_bbt_locked (_metrics, BBT_Time (1, 1, 0)));
 		const framecnt_t pos_bbt_frame = frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
 
-		if (pos < music_origin) {
+		return pos_bbt_frame - pos;
 
-			return pos_bbt_frame - pos;
-		} else {
-
-			return pos_bbt_frame - offset;
-		}
 	} else {
 
 		if (pos_bbt.bars <= bbt.bars) {
@@ -3558,7 +3552,7 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 			pos_bbt.beats -= bbt.beats;
 		}
 
-		return offset - frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
+		return pos - frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
 	}
 
 	return 0;
