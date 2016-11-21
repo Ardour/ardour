@@ -631,6 +631,9 @@ private:
 	}
 
 	MidiRegionView* _region_view;
+	framepos_t      _last_pos;
+	double          _last_y;
+
 };
 
 /** Drag to move MIDI patch changes */

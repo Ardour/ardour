@@ -6324,6 +6324,8 @@ NoteCreateDrag::aborted (bool)
 HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
 	: Drag (e, i)
 	, _region_view (rv)
+	, _last_pos (0)
+	, _last_y (0.0)
 {
 }
 
@@ -6341,19 +6343,25 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
-	bool success = false;
-	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
-	if (!success) {
-		grid_beats = Evoral::Beats(1);
+	const double eqaf = map.exact_qn_at_frame (pf, divisions);
+
+	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
+
+	if (eqaf >= mr->quarter_note() + mr->length_beats()) {
+		return;
 	}
 
-	const double eqaf = map.exact_qn_at_frame (pf, divisions);
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
 	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
-	_region_view->create_note_at (start, y,  grid_beats, event->button.state, false);
+	Evoral::Beats length = _region_view->get_grid_beats (pf);
+
+	_region_view->create_note_at (start, y, length, event->button.state, false);
+
+	_last_pos = start;
+	_last_y = y;
 }
 
 void
@@ -6374,14 +6382,21 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 	MidiStreamView* sv = _region_view->midi_stream_view ();
 	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
-	bool success = false;
-	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
-	if (!success) {
-		grid_beats = Evoral::Beats(1);
+	if (_last_pos == start && y == _last_y) {
+		return;
 	}
 
-	_region_view->create_note_at (start, y, grid_beats, event->button.state, false);
+	Evoral::Beats length = _region_view->get_grid_beats (pf);
 
+	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
+	if (eqaf >= mr->quarter_note() + mr->length_beats()) {
+		return;
+	}
+
+	_region_view->create_note_at (start, y, length, event->button.state, false);
+
+	_last_pos = start;
+	_last_y = y;
 }
 
 void
