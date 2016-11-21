@@ -166,7 +166,8 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t sub_num)
+Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t sub_num,
+                          bool snap_frame)
 {
 	bool frozen = false;
 
@@ -192,10 +193,14 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 		case SnapToRegionEnd:
 			break;
 		default:
-			snap_to (where);
+			if (snap_frame) {
+				snap_to (where);
+			}
 		}
 	} else {
-		snap_to (where);
+		if (snap_frame) {
+			snap_to (where);
+		}
 
 		frozen = true;
 		EditorFreeze(); /* Emit Signal */

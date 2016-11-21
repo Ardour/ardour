@@ -6534,12 +6534,12 @@ RegionCutDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 }
 
 void
-RegionCutDrag::motion (GdkEvent*, bool)
+RegionCutDrag::motion (GdkEvent* event, bool)
 {
-	framepos_t where = _drags->current_pointer_frame();
-	_editor->snap_to (where);
+	framepos_t pos = _drags->current_pointer_frame();
+	_editor->snap_to_with_modifier (pos, event);
 
-	line->set_position (where);
+	line->set_position (pos);
 }
 
 void
@@ -6548,6 +6548,7 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 	_editor->get_track_canvas()->canvas()->re_enter();
 
 	framepos_t pos = _drags->current_pointer_frame();
+	_editor->snap_to_with_modifier (pos, event);
 
 	line->hide ();
 
@@ -6557,7 +6558,8 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 		return;
 	}
 
-	_editor->split_regions_at (pos, rs, _editor->get_grid_music_divisions (event->button.state));
+	_editor->split_regions_at (pos, rs, _editor->get_grid_music_divisions (event->button.state),
+	                           false);
 }
 
 void
