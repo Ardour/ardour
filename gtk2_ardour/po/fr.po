@@ -860,7 +860,7 @@ msgstr "Propriétés"
 
 #: ardour_ui.cc:305
 msgid "Add Video"
-msgstr ""
+msgstr "Ajouter une vidéo"
 
 #: ardour_ui.cc:306 bundle_manager.cc:264
 #, fuzzy
@@ -1976,7 +1976,7 @@ msgstr ""
 
 #: ardour_ui2.cc:89
 msgid "Be sensible about input monitoring"
-msgstr "Monitoring d'entrée automatique"
+msgstr "Être sensible à l'écoute de contrôle d'entrée"
 
 #: ardour_ui2.cc:90
 msgid "Enable/Disable audio click"
@@ -5571,7 +5571,7 @@ msgstr "Mon"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Monitoring Choice?"
-msgstr "Partager le choix d'écoute ?"
+msgstr "Partager le choix d'écoute de contrôle ?"
 
 #: editor_route_groups.cc:107
 msgid "Selection|Sel"
@@ -6296,7 +6296,8 @@ msgid ""
 "edit your ardour.rc file to set the\n"
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
-"Supprimer le bus général ou de monitoring n'est pas une très bonne idée.\n"
+"Supprimer le bus général ou celui d'écoute de contrôle n'est pas une très "
+"bonne idée.\n"
 "%1 n'est pas configuré pour autoriser cette opération.\n"
 "\n"
 "Si vous voulez vraiment le faire, éditez le fichier ardour.rc\n"
@@ -7487,19 +7488,19 @@ msgstr "Voulez-vous vraiment enlever le format ?"
 
 #: export_preset_selector.cc:28
 msgid "Preset"
-msgstr "Préréglage"
+msgstr "Pré-réglage"
 
 #: export_preset_selector.cc:99
 msgid ""
 "The selected preset did not load successfully!\n"
 "Perhaps it references a format that has been removed?"
 msgstr ""
-"Le préréglage n'a pas pu être chargé !\n"
+"Le pré-réglage n'a pas pu être chargé !\n"
 "Peut-être qu'il fait référence à un format qui a été supprimé ?"
 
 #: export_preset_selector.cc:151
 msgid "Do you really want to remove this preset?"
-msgstr "Voulez-vous vraiment enlever ce préréglage ?"
+msgstr "Voulez-vous vraiment enlever ce pré-réglage ?"
 
 #: export_report.cc:56
 msgid "Export Report/Analysis"
@@ -7679,7 +7680,7 @@ msgstr "Temps exprimés en :"
 
 #: export_timespan_selector.cc:46
 msgid "Realtime Export"
-msgstr ""
+msgstr "Exportation en temps-réel"
 
 #: export_timespan_selector.cc:54 processor_box.cc:3695
 msgid "Select All"
@@ -7691,7 +7692,7 @@ msgstr " à "
 
 #: export_timespan_selector.cc:399 export_timespan_selector.cc:488
 msgid "RT"
-msgstr ""
+msgstr "TR"
 
 #: export_timespan_selector.cc:400 export_timespan_selector.cc:489
 msgid "Range"
@@ -8952,7 +8953,7 @@ msgstr "Inverseur de phase"
 
 #: mixer_strip.cc:394 rc_option_editor.cc:3137
 msgid "Record & Monitor"
-msgstr "Enregistrement & monitoring"
+msgstr "Enregistrement et écoute de contrôle"
 
 #: mixer_strip.cc:395 rc_option_editor.cc:3138
 #, fuzzy
@@ -8965,7 +8966,7 @@ msgstr ""
 
 #: mixer_strip.cc:531
 msgid "Show/Hide Monitoring Section"
-msgstr "Afficher/Cacher la section d'écoute de contrôle"
+msgstr "Afficher/cacher la section d'écoute de contrôle"
 
 #: mixer_strip.cc:583
 msgid "Enable/Disable MIDI input"
@@ -9219,7 +9220,7 @@ msgstr "Retirer des favoris"
 
 #: mixer_ui.cc:2499
 msgid "Delete Preset"
-msgstr "Supprimer le préréglage"
+msgstr "Supprimer le pré-réglage"
 
 #: mixer_ui.cc:2739
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
@@ -9506,7 +9507,9 @@ msgstr "Réduction SeP"
 
 #: monitor_section.cc:240
 msgid "Gain reduction to use when dimming monitor outputs"
-msgstr "Réduction de gain pour l'atténuation (Dim) des sorties de monitoring"
+msgstr ""
+"Réduction de gain à utiliser pour l'atténuation (Dim) des sorties d'écoute de "
+"contrôle"
 
 #: monitor_section.cc:245 monitor_section.cc:290
 msgid "-3 dB"
@@ -9527,7 +9530,7 @@ msgstr ""
 
 #: monitor_section.cc:399
 msgid "Monitor"
-msgstr "Monitoring"
+msgstr "Écoute de contrôle"
 
 #: monitor_section.cc:897
 msgid "Switch monitor to mono"
@@ -9556,16 +9559,16 @@ msgstr "Canal d'écoute %1 muet"
 #: monitor_section.cc:926
 #, fuzzy
 msgid "Dim monitor channel %1"
-msgstr "Atténuer le canal de monitoring %1"
+msgstr "Atténuer le canal d'écoute de contrôle %1"
 
 #: monitor_section.cc:931
 #, fuzzy
 msgid "Solo monitor channel %1"
-msgstr "Solo sur canal de monitoring %1"
+msgstr "Solo sur canal d'écoute de contrôle %1"
 
 #: monitor_section.cc:936
 msgid "Invert monitor channel %1"
-msgstr "Inverser la phase du canal de monitoring %1"
+msgstr "Inverser la phase du canal d'écoute de contrôle %1"
 
 #: monitor_section.cc:946
 #, fuzzy
@@ -9697,11 +9700,11 @@ msgstr ""
 
 #: new_plugin_preset_dialog.cc:30
 msgid "Replace existing preset with this name"
-msgstr "Écraser le préréglage avec ce nom"
+msgstr "Écraser le pré-réglage avec ce nom"
 
 #: new_plugin_preset_dialog.cc:34
 msgid "Name of new preset"
-msgstr "Nom du nouveau préréglage :"
+msgstr "Nom du nouveau pré-réglage :"
 
 #: new_plugin_preset_dialog.cc:44
 msgid "New Favorite Only"
@@ -10241,20 +10244,20 @@ msgid ""
 "Presets (if any) for this plugin\n"
 "(Both factory and user-created)"
 msgstr ""
-"Préréglages (éventuels) pour ce plugin\n"
+"Pré-réglages (éventuels) pour ce plugin\n"
 "(d'usine et d'utilisateur)"
 
 #: plugin_ui.cc:432
 msgid "Save a new preset"
-msgstr "Sauvegarder nouveau préréglage"
+msgstr "Sauvegarder nouveau pré-réglage"
 
 #: plugin_ui.cc:433
 msgid "Save the current preset"
-msgstr "Sauvegarder le préréglage actuel"
+msgstr "Sauvegarder le pré-réglage actuel"
 
 #: plugin_ui.cc:434
 msgid "Delete the current preset"
-msgstr "Effacer le préréglage actuel"
+msgstr "Effacer le pré-réglage actuel"
 
 #: plugin_ui.cc:435
 msgid ""
@@ -10296,7 +10299,7 @@ msgid ""
 "Plugin presets are not supported in this build of %1. Consider paying for a "
 "full version"
 msgstr ""
-"Les préréglages de greffons ne sont pas pris en charge par cette version de "
+"Les pré-réglages de greffons ne sont pas pris en charge par cette version de "
 "%1. Envisagez d'acheter une version complète."
 
 #: plugin_ui.cc:584
@@ -10304,12 +10307,12 @@ msgid ""
 "Plugin presets are not supported in this build, see the Log window for more "
 "information."
 msgstr ""
-"Les préréglages des greffons ne sont pas pris en charge par cette version, "
+"Les pré-réglages des greffons ne sont pas pris en charge par cette version, "
 "consultez la fenêtre Journal pour plus d'informations."
 
 #: plugin_ui.cc:592
 msgid "New Preset"
-msgstr "Nouveau préréglage"
+msgstr "Nouveau pré-réglage"
 
 #: plugin_ui.cc:688
 msgid "Click to allow normal use of %1 keyboard shortcuts"
@@ -10708,7 +10711,7 @@ msgstr "Nouveau départ externe…"
 
 #: processor_box.cc:3651
 msgid "New Aux Send ..."
-msgstr "Nouveau départ auxilliaire…"
+msgstr "Nouveau départ auxiliaire…"
 
 #: processor_box.cc:3654
 msgid "Send Options"
@@ -10736,12 +10739,12 @@ msgstr "Tout désactiver"
 
 #: processor_box.cc:3694
 msgid "A/B Plugins"
-msgstr "A / B greffons"
+msgstr "Greffons A/B"
 
 # It is for showing the LV2 generic GUI, so translation is correct.
 #: processor_box.cc:3707
 msgid "Edit with generic controls..."
-msgstr "Editer avec l'interface générique..."
+msgstr "Éditer avec l'interface générique..."
 
 #: processor_box.cc:4039
 msgid "%1: %2 (by %3)"
@@ -10809,11 +10812,11 @@ msgstr "Parcourir…"
 
 #: rc_option_editor.cc:89
 msgid "Emphasis on first beat:"
-msgstr ""
+msgstr "Première pulsation plus forte :"
 
 #: rc_option_editor.cc:95
 msgid "Use default Click:"
-msgstr ""
+msgstr "Utiliser le clic par défaut :"
 
 #: rc_option_editor.cc:101
 msgid "Click audio file:"
@@ -10855,11 +10858,11 @@ msgstr ""
 
 #: rc_option_editor.cc:403
 msgid "Select Keyboard layout:"
-msgstr ""
+msgstr "Sélectionner l'agencement du clavier :"
 
 #: rc_option_editor.cc:422
 msgid "When Clicking:"
-msgstr ""
+msgstr "Lors d'un clic :"
 
 #: rc_option_editor.cc:429
 msgid "Edit using:"
@@ -10884,7 +10887,7 @@ msgstr "Insérer une note avec :"
 
 #: rc_option_editor.cc:507
 msgid "When Beginning a Drag:"
-msgstr ""
+msgstr "Lors du commencement d'un cliqué/déplacé :"
 
 #: rc_option_editor.cc:518 rc_option_editor.cc:545 rc_option_editor.cc:578
 #: rc_option_editor.cc:599 rc_option_editor.cc:643 rc_option_editor.cc:676
@@ -10895,63 +10898,63 @@ msgstr ""
 
 #: rc_option_editor.cc:532
 msgid "Copy items using:"
-msgstr ""
+msgstr "Copier les éléments en utilisant :"
 
 #: rc_option_editor.cc:559
 msgid "Constrain drag using:"
-msgstr ""
+msgstr "Contraindre le cliqué/déplacé en utilisant :"
 
 #: rc_option_editor.cc:567
 msgid "When Beginning a Trim:"
-msgstr ""
+msgstr "Lors du commencement d'un rognage :"
 
 #: rc_option_editor.cc:586
 msgid "Trim contents using:"
-msgstr ""
+msgstr "Rogner les contenus en utilisant :"
 
 #: rc_option_editor.cc:607
 msgid "Anchored trim using:"
-msgstr ""
+msgstr "Ancré le rognage en utilisant :"
 
 #: rc_option_editor.cc:651
 msgid "Resize notes relatively using:"
-msgstr ""
+msgstr "Redimensionner les notes en relation en utilisant :"
 
 #: rc_option_editor.cc:660
 msgid "While Dragging:"
-msgstr ""
+msgstr "Lors du cliqué/déplacé :"
 
 #: rc_option_editor.cc:684
 msgid "Ignore snap using:"
-msgstr "Ignorer l'aimantation avec :"
+msgstr "Ignorer l'aimantation en utilisant :"
 
 #: rc_option_editor.cc:710
 msgid "Snap relatively using:"
-msgstr ""
+msgstr "Aimanter en relation en utilisant :"
 
 #: rc_option_editor.cc:718
 msgid "While Trimming:"
-msgstr ""
+msgstr "Lors du rognage :"
 
 #: rc_option_editor.cc:738
 msgid "Resize overlapped regions using:"
-msgstr ""
+msgstr "Redimensionner les régions chevauchées en utilisant :"
 
 #: rc_option_editor.cc:746
 msgid "While Dragging Control Points:"
-msgstr ""
+msgstr "Pendant le déplacement de points de contrôle :"
 
 #: rc_option_editor.cc:767
 msgid "Fine adjust using:"
-msgstr ""
+msgstr "Ajustement fin en utilisant :"
 
 #: rc_option_editor.cc:789
 msgid "Push points using:"
-msgstr ""
+msgstr "Pousser les points en utilisant :"
 
 #: rc_option_editor.cc:1029
 msgid "GUI and Font scaling:"
-msgstr ""
+msgstr "Ajustement de la police d'écriture et de l'interface graphique :"
 
 #: rc_option_editor.cc:1032
 msgid "Default"
@@ -11005,23 +11008,23 @@ msgstr "Niveau d'écrêtage des formes d'ondes (dBFS) :"
 
 #: rc_option_editor.cc:1212
 msgid "Small sessions (4-16 tracks)"
-msgstr ""
+msgstr "Petites sessions (4-16 pistes)"
 
 #: rc_option_editor.cc:1213
 msgid "Medium sessions (16-64 tracks)"
-msgstr ""
+msgstr "Sessions moyennes (16-64 pistes)"
 
 #: rc_option_editor.cc:1214
 msgid "Large sessions (64+ tracks)"
-msgstr ""
+msgstr "Grandes sessions (>64 pistes)"
 
 #: rc_option_editor.cc:1215
 msgid "Custom (set by sliders below)"
-msgstr ""
+msgstr "Personnalisée (paramétrée par les chariots ci-dessous)"
 
 #: rc_option_editor.cc:1219 export_video_dialog.cc:167
 msgid "Preset:"
-msgstr "Préréglage :"
+msgstr "Pré-réglage :"
 
 #: rc_option_editor.cc:1231
 msgid "Playback (seconds of buffering):"
@@ -11038,7 +11041,7 @@ msgstr ""
 #: rc_option_editor.cc:1353
 #, fuzzy
 msgid "Control Surface Protocol"
-msgstr "Protocole de la Surface de Contrôle"
+msgstr "Protocole de surface de contrôle"
 
 #: rc_option_editor.cc:1367
 msgid ""
@@ -11048,11 +11051,11 @@ msgstr ""
 
 #: rc_option_editor.cc:1371
 msgid "Show Protocol Settings"
-msgstr ""
+msgstr "Afficher les paramètres de protocole"
 
 #: rc_option_editor.cc:1494
 msgid "Configuration"
-msgstr ""
+msgstr "configuration"
 
 #: rc_option_editor.cc:1547
 msgid "Show Video Export Info before export"
@@ -11116,7 +11119,7 @@ msgstr ""
 "contenus dans ce répertoire seront accessibles au serveur vidéo. Si le "
 "serveur tourne sur une machine distante, le chemin doit viser un répertoire "
 "réseau inclus dans le répertoire-racine et monté ou laissé vide s'il est "
-"indisponible. Ce chemin est utilisé pour le monitoring vidéo local, et "
+"indisponible. Ce chemin est utilisé pour l'écoute de contrôle vidéo local, et "
 "l'exploration lors de l'ouverture/ajout de fichiers vidéo."
 
 #: rc_option_editor.cc:1584
@@ -11175,7 +11178,7 @@ msgstr "Utilisation processeur par les traitements audio"
 
 #: rc_option_editor.cc:1878
 msgid "Signal processing uses"
-msgstr "Le traitement du signal utilise"
+msgstr "Le traitement du signal utilise "
 
 #: rc_option_editor.cc:1883
 msgid "all but one processor"
@@ -11219,12 +11222,11 @@ msgstr "Répertoire par défaut des nouvelles sessions :"
 
 #: rc_option_editor.cc:1935
 msgid "Maximum number of recent sessions"
-msgstr "Nombre maximum de sessions récentes"
+msgstr "Nombre maximum de sessions récentes "
 
 #: rc_option_editor.cc:1948
-#, fuzzy
 msgid "Click gain level"
-msgstr "Niveau du Clic "
+msgstr "Niveau du clic "
 
 #: rc_option_editor.cc:1953 route_time_axis.cc:277 route_time_axis.cc:831
 msgid "Automation"
@@ -11232,11 +11234,11 @@ msgstr "Automation"
 
 #: rc_option_editor.cc:1958
 msgid "Thinning factor (larger value => less data)"
-msgstr "Facteur d'espacement (plus => moins de données)"
+msgstr "Facteur d'espacement (plus => moins de données) "
 
 #: rc_option_editor.cc:1967
 msgid "Automation sampling interval (milliseconds)"
-msgstr "Intervalle de prise d'automation (ms)"
+msgstr "Intervalle de prise d'automation (ms) "
 
 #: rc_option_editor.cc:1975
 msgid "Transport Options"
@@ -11265,7 +11267,6 @@ msgstr ""
 "annule la lecture en boucle"
 
 #: rc_option_editor.cc:2001
-#, fuzzy
 msgid "Stop recording when an xrun occurs"
 msgstr "Stopper l'enregistrement si un xrun survient"
 
@@ -11325,7 +11326,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2047
 msgid "Disable per-track record disarm while rolling"
-msgstr "Désactiver le désarmement des piste pendant l'enregistrement"
+msgstr "Désactiver le désarmement des pistes pendant l'enregistrement"
 
 #: rc_option_editor.cc:2051
 msgid ""
@@ -11344,12 +11345,12 @@ msgid ""
 "This will reduce the unpleasant increase in perceived volume that occurs "
 "when fast-forwarding or rewinding through some kinds of audio"
 msgstr ""
-"Réduit la l'augmentation désagréable du volume perçu lors du déplacement "
+"Réduit l'augmentation désagréable du volume perçu lors du déplacement "
 "rapide avant/arrière dans certains types d'audio"
 
 #: rc_option_editor.cc:2066
 msgid "Preroll"
-msgstr ""
+msgstr "Pré-roll "
 
 #: rc_option_editor.cc:2071
 msgid ""
@@ -11362,7 +11363,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2073
 msgid "0 (no pre-roll)"
-msgstr ""
+msgstr "0 (pas de pré-rool)"
 
 #: rc_option_editor.cc:2074
 msgid "0.1 second"
@@ -11393,11 +11394,11 @@ msgstr ""
 
 #: rc_option_editor.cc:2081
 msgid "Synchronization and Slave Options"
-msgstr ""
+msgstr "Options de synchronisation et d'esclave"
 
 #: rc_option_editor.cc:2085
 msgid "External timecode source"
-msgstr "Source de « timecode » externe"
+msgstr "Source de « timecode » externe "
 
 #: rc_option_editor.cc:2094
 #, fuzzy
@@ -11432,6 +11433,8 @@ msgstr ""
 #: rc_option_editor.cc:2110
 msgid "Sync-lock timecode to clock (disable drift compensation)"
 msgstr ""
+"Caller la synchronisation timecode à l'horloge (désactive la compensation de "
+"la dérive)"
 
 #: rc_option_editor.cc:2116
 msgid ""
@@ -11543,30 +11546,29 @@ msgstr "Autoriser l'entraînement de la tête de lecture"
 
 #: rc_option_editor.cc:2230
 msgid "Display master-meter in the toolbar"
-msgstr "Vu-mètre master affiché dans la barre d'outils"
+msgstr "Affiche un mesureur maître dans la barre d'outils"
 
 #: rc_option_editor.cc:2239
 msgid "Show zoom toolbar (if torn off)"
-msgstr ""
+msgstr "Affiche la barre d'outils de zoom (si détaché)"
 
 #: rc_option_editor.cc:2247
 msgid ""
 "Always use mouse cursor position as zoom focus when zooming using mouse "
 "scroll wheel"
 msgstr ""
+"Toujours utiliser la position de curseur comme le point de zoom lorsque l'on "
+"zoome en utilisation la molette de la souris"
 
 #: rc_option_editor.cc:2256
 #, fuzzy
 msgid "Update editor window during drags of the summary"
-msgstr ""
-"Mettre à jour l'affichage de la fenêtre de l'Éditeur pendant le cliqué-"
-"glissé du résumé"
+msgstr "Mettre à jour la fenêtre d'édition pendant le cliqué-glissé du résumé"
 
 #: rc_option_editor.cc:2264
 msgid "Auto-scroll editor window when dragging near its edges"
 msgstr ""
-"Défilement automatique de l'éditeur pendant un cliquer-glisser près de ses "
-"bords"
+"Défilement automatique de l'éditeur pendant un cliqué-glissé près de ses bords"
 
 #: rc_option_editor.cc:2272
 msgid "Show gain envelopes in audio regions"
@@ -11578,25 +11580,25 @@ msgstr "dans tous les modes"
 
 #: rc_option_editor.cc:2274
 msgid "only in Draw and Internal Edit modes"
-msgstr ""
+msgstr "uniquement dans les modes Dessin et Édition Interne"
 
 #: rc_option_editor.cc:2279
 msgid "Editor Behavior"
-msgstr ""
+msgstr "Comportement de l'éditeur"
 
 #: rc_option_editor.cc:2284
 msgid "Move relevant automation when audio regions are moved"
 msgstr ""
-"Déplacer les automations appropriées lors du déplacement des regions audio"
+"Déplacer les automations appropriées lors du déplacement des régions audio"
 
 #: rc_option_editor.cc:2291
 #, fuzzy
 msgid "Default fade shape"
-msgstr "définir la forme du fade-out"
+msgstr "Définir la forme du fondu "
 
 #: rc_option_editor.cc:2310
 msgid "Regions in active edit groups are edited together"
-msgstr "Les Régions en groupes d'édition actifs sont modifiées ensemble "
+msgstr "Les régions en groupes d'édition actifs sont modifiées ensemble "
 
 #: rc_option_editor.cc:2311
 msgid "whenever they overlap in time"
@@ -11604,11 +11606,11 @@ msgstr "si elles se chevauchent"
 
 #: rc_option_editor.cc:2312
 msgid "only if they have identical length, position and origin"
-msgstr "seulement si durée, position et origine sont identiques"
+msgstr "seulement si les durées, les positions et les origines sont identiques"
 
 #: rc_option_editor.cc:2321
 msgid "Layering model"
-msgstr "Modèle d'empilement"
+msgstr "Modèle d'empilement "
 
 #: rc_option_editor.cc:2326
 msgid "later is higher"
@@ -11620,7 +11622,7 @@ msgstr "empilement manuel"
 
 #: rc_option_editor.cc:2332
 msgid "After splitting selected regions, select"
-msgstr "Après la découpe de régions sélectionnées, sélectionner"
+msgstr "Après la découpe des régions sélectionnées, sélectionner "
 
 #: rc_option_editor.cc:2337
 msgid "no regions"
@@ -11637,7 +11639,7 @@ msgstr "la sélection en cours et les régions nouvellement créées"
 #: rc_option_editor.cc:2348 rc_option_editor.cc:2351 rc_option_editor.cc:2360
 #: rc_option_editor.cc:2378 rc_option_editor.cc:2390 rc_option_editor.cc:2392
 msgid "Editor/Waveforms"
-msgstr "Éditeur/formes d'onde"
+msgstr "Éditeur/Formes d'onde"
 
 #: rc_option_editor.cc:2348
 msgid "Waveforms"
@@ -11681,7 +11683,7 @@ msgstr "Mise en tampon"
 
 #: rc_option_editor.cc:2405
 msgid "Record monitoring handled by"
-msgstr "Monitoring de l'enregistrement géré par"
+msgstr "Écoute de contrôle de l'enregistrement géré par "
 
 #: rc_option_editor.cc:2411
 #, fuzzy
@@ -11702,11 +11704,11 @@ msgstr "Connexion des pistes et bus"
 
 #: rc_option_editor.cc:2435
 msgid "Auto-connect master/monitor busses"
-msgstr "Connexion automatique du bus général et des bus de monitoring"
+msgstr "Connexion automatique du bus général et des bus d'écoute de contrôle"
 
 #: rc_option_editor.cc:2442
 msgid "Connect track inputs"
-msgstr "Connecter les entrées des pistes"
+msgstr "Connecter les entrées des pistes "
 
 #: rc_option_editor.cc:2447
 msgid "automatically to physical inputs"
@@ -11718,7 +11720,7 @@ msgstr "manuellement"
 
 #: rc_option_editor.cc:2454
 msgid "Connect track and bus outputs"
-msgstr "Connecter les sorties des pistes et des bus"
+msgstr "Connecter les sorties des pistes et des bus "
 
 #: rc_option_editor.cc:2459
 msgid "automatically to physical outputs"
@@ -11730,21 +11732,19 @@ msgstr "automatiquement au bus général"
 
 #: rc_option_editor.cc:2467
 msgid "Use 'Strict-I/O' for new tracks or Busses"
-msgstr "Utiliser les E/S strictes pour les nouveaux bus et pistes"
+msgstr "Utiliser les E/S strictes pour les nouveaux bus et les nouvelles pistes"
 
 #: rc_option_editor.cc:2478
-#, fuzzy
 msgid "Denormals"
 msgstr "Dénormalisations"
 
 #: rc_option_editor.cc:2483
-#, fuzzy
 msgid "Use DC bias to protect against denormals"
-msgstr "Utiliser un courant polarisé pour éviter les dénormalisations"
+msgstr "Utiliser un courant polarisé (DC) pour éviter les dénormalisations"
 
 #: rc_option_editor.cc:2490
 msgid "Processor handling"
-msgstr "Gestion du traitement"
+msgstr "Gestion du traitement "
 
 #: rc_option_editor.cc:2496
 msgid "no processor handling"
@@ -11753,17 +11753,18 @@ msgstr "pas de gestion du traitement"
 #: rc_option_editor.cc:2502
 #, fuzzy
 msgid "use FlushToZero"
-msgstr "mettre à zéro (les valeurs inférieures au plus petit détail)"
+msgstr "utiliser FlushToZero (les valeurs inférieures au plus petit détail)"
 
 #: rc_option_editor.cc:2509
 msgid "use DenormalsAreZero"
-msgstr "Utiliser DenormalsAreZero"
+msgstr "utiliser DenormalsAreZero"
 
 #: rc_option_editor.cc:2516
 #, fuzzy
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr ""
-"mettre à zéro (les valeurs inférieures au plus petit détail ou dénormalisées)"
+"utiliser FlushToZero et DenormalsAreZero (les valeurs inférieures au plus "
+"petit détail ou dénormalisées)"
 
 #: rc_option_editor.cc:2532
 msgid "Enable automatic analysis of audio"
@@ -11821,7 +11822,7 @@ msgstr "pré-fader (PFL)"
 
 #: rc_option_editor.cc:2604
 msgid "PFL signals come from"
-msgstr "Les signaux PFL sont prélevés"
+msgstr "Les signaux PFL sont prélevés "
 
 #: rc_option_editor.cc:2609
 msgid "before pre-fader processors"
@@ -11845,7 +11846,7 @@ msgstr "après les traitements post-fader (avant panoramique)"
 
 #: rc_option_editor.cc:2626
 msgid "Default track / bus muting options"
-msgstr "Options de silencieux par défaut des pistes/bus"
+msgstr "Options par défaut des sourdines des pistes / bus"
 
 #: rc_option_editor.cc:2631
 msgid "Mute affects pre-fader sends"
@@ -11873,15 +11874,15 @@ msgstr "Routine des départs"
 msgid "Link panners of Aux and External Sends with main panner by default"
 msgstr ""
 "Lier par défaut les panoramiques de départs auxiliaires et extérieurs au "
-"panoramique de la Piste (du Bus)"
+"panoramique principal par défaut"
 
 #: rc_option_editor.cc:2672
 msgid "MIDI Preferences"
-msgstr ""
+msgstr "Préférences MIDI"
 
 #: rc_option_editor.cc:2677
 msgid "MIDI read-ahead time (seconds)"
-msgstr "Temps d'avance sur lecture du MIDI (secondes)"
+msgstr "Temps d'avance sur lecture du MIDI (secondes) "
 
 #: rc_option_editor.cc:2687
 #, fuzzy
@@ -11945,16 +11946,16 @@ msgstr "Envoyer les commandes MMC (MIDI Machine Control)"
 
 #: rc_option_editor.cc:2775
 msgid "Inbound MMC device ID"
-msgstr "identifiant de l'appareil MMC en entrée"
+msgstr "Identifiant de l'appareil MMC en entrée "
 
 #: rc_option_editor.cc:2784
 msgid "Outbound MMC device ID"
-msgstr "identifiant de l'appareil MMC en sortie"
+msgstr "Identifiant de l'appareil MMC en sortie "
 
 #: rc_option_editor.cc:2790
 #, fuzzy
 msgid "Midi Audition"
-msgstr "Ecoute MIDI"
+msgstr "Écoute MIDI"
 
 #: rc_option_editor.cc:2794
 #, fuzzy
@@ -13582,7 +13583,7 @@ msgid ""
 "Monitor."
 msgstr ""
 "Utiliser le débit du fichier vidéo au lieu du timecode pour la timeline et "
-"le Monitoring Vidéo."
+"l'écoute de contrôle vidéo."
 
 #: session_option_editor.cc:91
 msgid ""
@@ -13807,7 +13808,7 @@ msgstr "Bouton Solo"
 
 #: session_option_editor.cc:326
 msgid "Monitor Buttons"
-msgstr "Boutons de monitoring"
+msgstr "Boutons d'écoute de contrôle"
 
 #: session_option_editor.cc:331
 #, fuzzy
@@ -14250,7 +14251,7 @@ msgid ""
 "%1 will play NO role in monitoring"
 msgstr ""
 "Utiliser une console de mixage externe ou celle de l'interface audio.\n"
-"(%1 ne jouera AUCUN rôle dans le monitoring)"
+"(%1 ne jouera AUCUN rôle dans l'écoute de contrôle)"
 
 #: startup.cc:73
 msgid "Ask %1 to play back material as it is being recorded"
@@ -14316,7 +14317,7 @@ msgid ""
 msgstr ""
 "Lors de l'enregistrement des instruments ou des voix, vous voudrez\n"
 "certainement entendre le signal simultanément à son enregistrement. Ceci\n"
-"est appelé le \"monitoring\".\n"
+"est appelé l'\"écoute de contrôle\".\n"
 "Il existe différentes manières de le faire, selon le matériel et "
 "saconfiguration. Les deux manières les plus courantes sont présentées ici.\n"
 "Veuillez en choisir une convenant à votre configuration.\n"
@@ -14328,7 +14329,7 @@ msgstr ""
 
 #: startup.cc:266
 msgid "Monitoring Choices"
-msgstr "Choix du monitoring"
+msgstr "Choix de l'écoute de contrôle"
 
 #: startup.cc:289
 msgid "Use a Master bus directly"
@@ -14344,15 +14345,15 @@ msgstr ""
 
 #: startup.cc:300
 msgid "Use an additional Monitor bus"
-msgstr "Utiliser un bus de monitoring supplémentaire"
+msgstr "Utiliser un bus d'écoute de contrôle supplémentaire"
 
 #: startup.cc:303
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
 msgstr ""
-"Insérer un bus de monitoring entre le bus principal (\"master\") et les\n"
-"sorties matérielles pour un plus grand contrôle de l'écoute monitoring\n"
+"Insérer un bus d'écoute de contrôle entre le bus principal (\"master\") et \n"
+"les sorties matérielles pour un plus grand contrôle de l'écoute de contrôle\n"
 "sans affecter le mixage."
 
 #: startup.cc:325
@@ -14363,14 +14364,14 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "<i>Ceci peut être changé à tout moment dans le dialogue de Préférences.\n"
-"Vous pouvez aussi ajouter ou retirer la tranche de monitoring de toute "
+"Vous pouvez aussi ajouter ou retirer la tranche d'écoute de contrôle de toute "
 "session.</i>\n"
 "\n"
 "<i>Si vous ne voyez pas de quoi il s'agit, acceptez le choix par défaut.</i>"
 
 #: startup.cc:336
 msgid "Monitor Section"
-msgstr "Section Monitoring"
+msgstr "Section de l'écoute de contrôle"
 
 #: step_entry.cc:59
 #, fuzzy
@@ -16401,7 +16402,7 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "the monitor bus"
-#~ msgstr "Le Bus de Monitoring"
+#~ msgstr "Le bus d'écoute de contrôle"
 
 #, fuzzy
 #~ msgid ""
