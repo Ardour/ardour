@@ -325,7 +325,8 @@ class MidiTrackerEditor : public ArdourWindow
 	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
 
 	MidiTrackerPattern* mtp;
-	TrackAutomationTrackerPattern* atp;
+	TrackAutomationTrackerPattern* tatp;
+	RegionAutomationTrackerPattern* ratp;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;

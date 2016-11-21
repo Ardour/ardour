@@ -177,7 +177,8 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv,
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
 	delete mtp;
-	delete atp;
+	delete tatp;
+	delete ratp;
 	delete automation_action_menu;
 	delete controller_menu;
 }
@@ -1370,15 +1371,19 @@ MidiTrackerEditor::redisplay_model ()
 		mtp->set_rows_per_beat(rows_per_beat);
 		mtp->update_pattern();
 
-		atp->set_rows_per_beat(rows_per_beat);
-		atp->update_pattern();
+		tatp->set_rows_per_beat(rows_per_beat);
+		tatp->update_pattern();
+
+		ratp->set_rows_per_beat(rows_per_beat);
+		ratp->update_pattern();
 
 		TreeModel::Row row;
 
 		// Make sure that midi and automation regions start at the same frame
-		assert (mtp->frame_at_row(0) == atp->frame_at_row(0));
-		
-		uint32_t nrows = std::max(mtp->nrows, atp->nrows);
+		assert (mtp->frame_at_row(0) == tatp->frame_at_row(0));
+		assert (mtp->frame_at_row(0) == ratp->frame_at_row(0));
+
+		uint32_t nrows = std::max(std::max(mtp->nrows, tatp->nrows), ratp->nrows);
 
 		std::string beat_background_color = UIConfiguration::instance().color_str ("tracker editor: beat background");
 		std::string background_color = UIConfiguration::instance().color_str ("tracker editor: background");
@@ -1486,14 +1491,16 @@ MidiTrackerEditor::redisplay_model ()
 				size_t col_idx = cp_it->first;
 				size_t i = col2autotrack[col_idx];
 				const Evoral::Parameter& param = cp_it->second;
-				const TrackAutomationTrackerPattern::RowToAutomationIt& r2at = atp->automations[param];
+				bool is_region_automation = ARDOUR::parameter_is_midi((AutomationType)param.type());
+				std::cout << "is_region_automation = " << is_region_automation << std::endl;
+				const AutomationTrackerPattern::RowToAutomationIt& r2at = is_region_automation ? ratp->automations[param] : tatp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
 				if (i >= MAX_NUMBER_OF_AUTOMATION_TRACKS) {
 					std::cout << "Warning: Number of automation tracks needed for the tracker interface is too high, some automations might be discarded" << std::endl;
 					continue;
 				}
-				
+
 				row[columns._automation_delay_foreground_color[i]] = blank_foreground_color;
 
 				// Fill with blank
@@ -1505,12 +1512,13 @@ MidiTrackerEditor::redisplay_model ()
 					if (undefined) {
 						row[columns.automation[i]] = undefined_str;
 					} else {
-						TrackAutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
+						AutomationTrackerPattern::RowToAutomationIt::const_iterator auto_it = r2at.find(irow);
 						if (auto_it != r2at.end()) {
-							double auto_val = (*auto_it->second)->value;
-							row[columns.automation[i]] = to_string (auto_val);
-							double auto_when = (*auto_it->second)->when;
-							int64_t delay_ticks = atp->delay_ticks((framepos_t)auto_when, irow);
+							double aval = (*auto_it->second)->value;
+							row[columns.automation[i]] = to_string (aval);
+							double awhen = (*auto_it->second)->when;
+							int64_t delay_ticks = is_region_automation ?
+								ratp->region_relative_delay_ticks(Evoral::Beats(awhen), irow) : tatp->delay_ticks((framepos_t)awhen, irow);
 							if (delay_ticks != 0) {
 								row[columns.automation_delay[i]] = to_string (delay_ticks);
 								row[columns._automation_delay_foreground_color[i]] = active_foreground_color;
@@ -1522,12 +1530,11 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns._automation_foreground_color[i]] = active_foreground_color;
 				} else {
 					// Interpolation
+					// TODO: fix for midi automation
 					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
-					// if (alist->interpolation() != Evoral::ControlList::Discrete) {
-						double inter_auto_val = alist->eval(row_frame);
-						row[columns.automation[i]] = to_string (inter_auto_val);
-						row[columns._automation_foreground_color[i]] = passive_foreground_color;
-					// }
+					double inter_auto_val = alist->eval(row_frame);
+					row[columns.automation[i]] = to_string (inter_auto_val);
+					row[columns._automation_foreground_color[i]] = passive_foreground_color;
 				}
 			}
 		}
@@ -1588,10 +1595,16 @@ MidiTrackerEditor::setup_pattern ()
 	mtp = new MidiTrackerPattern(_session, region, midi_model);
 
 	// Get automation controls
-	AutomationControlSet acs;
-	for (Parameter2AutomationControl::const_iterator it = param2actrl.begin(); it != param2actrl.end(); ++it)
-		acs.insert(it->second);
-	atp = new TrackAutomationTrackerPattern(_session, region, acs);
+	AutomationControlSet tacs, racs;
+	for (Parameter2AutomationControl::const_iterator it = param2actrl.begin(); it != param2actrl.end(); ++it) {
+		// Midi automation are attached to the region, not the track
+		if (ARDOUR::parameter_is_midi((AutomationType)it->first.type()))
+			racs.insert(it->second);
+		else
+			tacs.insert(it->second);
+	}
+	tatp = new TrackAutomationTrackerPattern(_session, region, tacs);
+	ratp = new RegionAutomationTrackerPattern(_session, region, racs);
 
 	edit_column = -1;
 	editing_renderer = 0;

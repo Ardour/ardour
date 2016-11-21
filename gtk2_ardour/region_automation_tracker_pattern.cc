@@ -38,6 +38,9 @@ RegionAutomationTrackerPattern::RegionAutomationTrackerPattern(ARDOUR::Session* 
 uint32_t
 RegionAutomationTrackerPattern::control_event2row(const Evoral::Parameter& param, const Evoral::ControlEvent* event)
 {
-	// TODO
-	return 0;
+	Evoral::Beats beats(event->when);
+	uint32_t row = row_at_beats(beats + first_beats);
+	if (automations[param].count(row) == 0)
+		row = row_at_beats_min_delay(beats + first_beats);
+	return row;
 }
