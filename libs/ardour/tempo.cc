@@ -3495,6 +3495,7 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 
 	BBT_Time pos_bbt = bbt_at_minute_locked (_metrics, minute_at_frame (pos));
 	const framecnt_t offset = frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
+
 	const double divisions = meter_section_at_minute_locked (_metrics, minute_at_frame (pos)).divisions_per_bar();
 
 	if (dir > 0) {
@@ -3511,26 +3512,48 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 			pos_bbt.bars += 1;
 			pos_bbt.beats -= divisions;
 		}
+		const framecnt_t music_origin = frame_at_minute (minute_at_bbt_locked (_metrics, BBT_Time (1, 1, 0)));
+		const framecnt_t pos_bbt_frame = frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
 
-		return frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt)) - offset;
+		if (pos < music_origin) {
+
+			return pos_bbt_frame - pos;
+		} else {
+
+			return pos_bbt_frame - offset;
+		}
 	} else {
-		pos_bbt.bars -= bbt.bars;
+
+		if (pos_bbt.bars <= bbt.bars) {
+			pos_bbt.bars = 1;
+		} else {
+			pos_bbt.bars -= bbt.bars;
+		}
 
 		if (pos_bbt.ticks < bbt.ticks) {
-			if (pos_bbt.beats == 1) {
-				pos_bbt.bars--;
-				pos_bbt.beats = divisions;
+			if (pos_bbt.bars > 1) {
+				if (pos_bbt.beats == 1) {
+					pos_bbt.bars--;
+					pos_bbt.beats = divisions;
+				} else {
+					pos_bbt.beats--;
+				}
+				pos_bbt.ticks = BBT_Time::ticks_per_beat - (bbt.ticks - pos_bbt.ticks);
 			} else {
-				pos_bbt.beats--;
+				pos_bbt.beats = 1;
+				pos_bbt.ticks = 0;
 			}
-			pos_bbt.ticks = BBT_Time::ticks_per_beat - (bbt.ticks - pos_bbt.ticks);
 		} else {
 			pos_bbt.ticks -= bbt.ticks;
 		}
 
 		if (pos_bbt.beats <= bbt.beats) {
-			pos_bbt.bars--;
-			pos_bbt.beats = divisions - (bbt.beats - pos_bbt.beats);
+			if (pos_bbt.bars > 1) {
+				pos_bbt.bars--;
+				pos_bbt.beats = divisions - (bbt.beats - pos_bbt.beats);
+			} else {
+				pos_bbt.beats = 1;
+			}
 		} else {
 			pos_bbt.beats -= bbt.beats;
 		}
