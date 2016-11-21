@@ -1675,7 +1675,7 @@ MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bo
 
 	/* must compare double explicitly as Beats::operator< rounds to ppqn */
 	const bool outside = (note->time().to_double() < midi_reg->start_beats() ||
-			      note->time().to_double() > midi_reg->start_beats() + midi_reg->length_beats());
+			      note->time().to_double() >= midi_reg->start_beats() + midi_reg->length_beats());
 
 	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
 		(note->note() <= midi_stream_view()->highest_note());
