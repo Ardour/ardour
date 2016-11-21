@@ -3755,6 +3755,13 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	const bool shift_snap = midi_view()->note_mode() != Percussive;
 	const Evoral::Beats snapped_beats = snap_frame_to_grid_underneath (unsnapped_frame, divisions, shift_snap);
 
+	/* prevent Percussive mode from displaying a ghost hit at region end */
+	if (!shift_snap && snapped_beats >= midi_region()->length_beats()) {
+		_ghost_note->hide();
+		hide_verbose_cursor ();
+		return;
+	}
+
 	/* ghost note may have been snapped before region */
 	if (_ghost_note && snapped_beats.to_double() < 0.0) {
 		_ghost_note->hide();
