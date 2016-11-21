@@ -355,6 +355,8 @@ private:
 
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
+	friend class NoteCreateDrag;
+	friend class HitCreateDrag;
 
 	friend class EditNoteDialog;
 

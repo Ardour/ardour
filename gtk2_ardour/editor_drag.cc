@@ -6203,16 +6203,12 @@ NoteCreateDrag::~NoteCreateDrag ()
 framecnt_t
 NoteCreateDrag::grid_frames (framepos_t t) const
 {
-	bool success;
-	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
-	if (!success) {
-		grid_beats = Evoral::Beats(1);
-	}
+
+	const Evoral::Beats grid_beats = _region_view->get_grid_beats (t);
 	const Evoral::Beats t_beats = _region_view->region_frames_to_region_beats (t);
 
 	return _region_view->region_beats_to_region_frames (t_beats + grid_beats)
 		- _region_view->region_beats_to_region_frames (t_beats);
-
 }
 
 void
@@ -6226,11 +6222,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
-	bool success = false;
-	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
-	if (!success) {
-		grid_beats = Evoral::Beats(1);
-	}
+	const Evoral::Beats grid_beats = _region_view->get_grid_beats (pf);
 
 	double eqaf = map.exact_qn_at_frame (pf, divisions);
 
@@ -6247,11 +6239,10 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			eqaf -= grid_beats.to_double();
 		}
 	}
-	/* minimum initial length is grid beats */
-	const double end_qn = eqaf + grid_beats.to_double();
 
 	_note[0] = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
-	_note[1] = map.frame_at_quarter_note (end_qn) - _region_view->region()->position();
+	/* minimum initial length is grid beats */
+	_note[1] = map.frame_at_quarter_note (eqaf + grid_beats.to_double()) - _region_view->region()->position();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
 	double const x0 = _editor->sample_to_pixel (_note[0]);
@@ -6273,11 +6264,8 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 	double eqaf = map.exact_qn_at_frame (pf, divisions);
 
 	if (divisions != 0) {
-		bool success = false;
-		Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, pf);
-		if (!success) {
-			grid_beats = Evoral::Beats(1);
-		}
+
+		const Evoral::Beats grid_beats = _region_view->get_grid_beats (pf);
 
 		const double qaf = map.quarter_note_at_frame (pf);
 		/* Hack so that we always snap to the note that we are over, instead of snapping
