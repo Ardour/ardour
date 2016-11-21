@@ -6527,6 +6527,13 @@ RegionCutDrag::~RegionCutDrag ()
 }
 
 void
+RegionCutDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
+{
+	Drag::start_grab (event, c);
+	motion (event, false);
+}
+
+void
 RegionCutDrag::motion (GdkEvent*, bool)
 {
 	framepos_t where = _drags->current_pointer_frame();

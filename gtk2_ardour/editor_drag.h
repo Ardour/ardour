@@ -502,6 +502,7 @@ class RegionCutDrag : public Drag
 	RegionCutDrag (Editor*, ArdourCanvas::Item*, framepos_t);
 	~RegionCutDrag ();
 
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent*, bool);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
