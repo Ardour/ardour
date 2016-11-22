@@ -1480,44 +1480,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 	_current_range_min = min;
 	_current_range_max = max;
 
-	for (Events::const_iterator i = _events.begin(); i != _events.end(); ++i) {
-		NoteBase* event = *i;
-		boost::shared_ptr<NoteType> note (event->note());
-
-		if (note->note() < _current_range_min ||
-		    note->note() > _current_range_max) {
-			event->hide();
-		} else {
-			event->show();
-		}
-
-		if (Note* cnote = dynamic_cast<Note*>(event)) {
-
-			const double y0 = 1. + floor (midi_stream_view()->note_to_y(note->note()));
-			const double y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1.);
-
-			if (y0 < 0 || y1 >= _height) {
-				/* During DnD, the region uses the 'old/current'
-				 * midi_stream_view()'s range and its position/height calculation.
-				 *
-				 * Ideally DnD would decouple the midi_stream_view() for the
-				 * region(s) being dragged and set it to the target's range
-				 * (or in case of the drop-zone, FullRange).
-				 * but I don't see how this can be done without major rework.
-				 *
-				 * For now, just prevent visual bleeding of events in case
-				 * the target-track is smaller.
-				 */
-				event->hide();
-				continue;
-			}
-			cnote->set_y0 (y0);
-			cnote->set_y1 (y1);
-
-		} else if (Hit* chit = dynamic_cast<Hit*>(event)) {
-			update_hit (chit);
-		}
-	}
+	redisplay_model ();
 }
 
 GhostRegion*
@@ -1677,8 +1640,8 @@ MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bo
 	const bool outside = (note->time().to_double() < midi_reg->start_beats() ||
 			      note->time().to_double() >= midi_reg->start_beats() + midi_reg->length_beats());
 
-	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
-		(note->note() <= midi_stream_view()->highest_note());
+	visible = (note->note() >= _current_range_min) &&
+		(note->note() <= _current_range_max);
 
 	return !outside;
 }
@@ -1711,7 +1674,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	const double x0 = trackview.editor().sample_to_pixel (note_start_frames);
 	double x1;
-	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
+	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
 	/* trim note display to not overlap the end of its region */
@@ -1729,7 +1692,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 		x1 = std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1;
 	}
 
-	y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1);
+	y1 = y0 + std::max(1., floor(note_height()) - 1);
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 
@@ -1778,8 +1741,8 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	const framepos_t note_start_frames = trackview.session()->tempo_map().frame_at_quarter_note (note_time_qn) - _region->position();
 
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
-	const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
-	const double y = 1.5 + floor(midi_stream_view()->note_to_y(note->note())) + diamond_size * .5;
+	const double diamond_size = std::max(1., floor(note_height()) - 2.);
+	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 
 	// see DnD note in MidiRegionView::apply_note_range() above
 	if (y <= 0 || y >= _height) {
@@ -1827,7 +1790,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 	} else if (midi_view()->note_mode() == Percussive) {
 
-		const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
+		const double diamond_size = std::max(1., floor(note_height()) - 2.);
 
 		Hit* ev_diamond = new Hit (*this, _note_group, diamond_size, note);
 
@@ -3776,7 +3739,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
-	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
+	_ghost_note->note()->set_note (y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
 	/* the ghost note does not appear in ghost regions, so pass false in here */
@@ -3842,7 +3805,7 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 {
 	/* XXX: This is dead code.  What was it for? */
 
-	double note = midi_stream_view()->y_to_note(y);
+	double note = y_to_note(y);
 	Events e;
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 
@@ -4187,4 +4150,25 @@ MidiRegionView::get_grid_beats(framepos_t pos) const
 		beats = Evoral::Beats(1);
 	}
 	return beats;
+}
+uint8_t
+MidiRegionView::y_to_note (double y) const
+{
+	int const n = ((contents_height() - y) / contents_height() * (double)(_current_range_max - _current_range_min + 1))
+		+ _current_range_min;
+
+	if (n < 0) {
+		return 0;
+	} else if (n > 127) {
+		return 127;
+	}
+
+	/* min due to rounding and/or off-by-one errors */
+	return min ((uint8_t) n, _current_range_max);
+}
+
+double
+MidiRegionView::note_to_y(uint8_t note) const
+{
+	return contents_height() - (note + 1 - _current_range_min) * note_height() + 1;
 }

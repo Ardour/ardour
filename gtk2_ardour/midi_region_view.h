@@ -355,6 +355,7 @@ private:
 
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
+	friend class NoteDrag;
 	friend class NoteCreateDrag;
 	friend class HitCreateDrag;
 
@@ -519,6 +520,13 @@ private:
 
         ARDOUR::ChannelMode get_channel_mode() const;
         uint16_t get_selected_channels () const;
+
+	inline double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	inline double contents_note_range () const { return (double)(_current_range_max - _current_range_min + 1); }
+	inline double note_height() const { return contents_height() / contents_note_range(); }
+
+	double note_to_y (uint8_t note) const;
+	uint8_t y_to_note (double y) const;
 };
 
 

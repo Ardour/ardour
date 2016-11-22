@@ -1122,6 +1122,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				y_delta = yposition - rv->get_canvas_group()->canvas_origin().y;
 			}
 
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
+			if (mrv) {
+				mrv->apply_note_range (60, 71, true);
+			}
 		} else {
 
 			/* The TimeAxisView that this region is now over */
@@ -1182,6 +1186,14 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 				y_delta = track_origin.y - rv->get_canvas_group()->canvas_origin().y;
 
+			}
+
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
+			if (mrv) {
+				MidiStreamView* msv;
+				if ((msv = dynamic_cast <MidiStreamView*> (current_tv->view())) != 0) {
+					mrv->apply_note_range (msv->lowest_note(), msv->highest_note(), true);
+				}
 			}
 		}
 
@@ -5664,15 +5676,15 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-	MidiStreamView* msv = _region->midi_stream_view ();
 	double const y = _region->midi_view()->y_position ();
 	/* new current note */
-	uint8_t n = msv->y_to_note (current_pointer_y () - y);
+	uint8_t n = _region->y_to_note (current_pointer_y () - y);
 	/* clamp */
+	MidiStreamView* msv = _region->midi_stream_view ();
 	n = max (msv->lowest_note(), n);
 	n = min (msv->highest_note(), n);
 	/* and work out delta */
-	return n - msv->y_to_note (grab_y() - y);
+	return n - _region->y_to_note (grab_y() - y);
 }
 
 void
@@ -6244,10 +6256,9 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* minimum initial length is grid beats */
 	_note[1] = map.frame_at_quarter_note (eqaf + grid_beats.to_double()) - _region_view->region()->position();
 
-	MidiStreamView* sv = _region_view->midi_stream_view ();
 	double const x0 = _editor->sample_to_pixel (_note[0]);
 	double const x1 = _editor->sample_to_pixel (_note[1]);
-	double const y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+	double const y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_region_view->midi_stream_view()->note_height ())));
 	_drag_rect->set_outline_all ();
@@ -6352,9 +6363,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
-
-	MidiStreamView* sv = _region_view->midi_stream_view ();
-	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+	const double y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	Evoral::Beats length = _region_view->get_grid_beats (pf);
 
@@ -6378,9 +6387,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 
 	const double eqaf = map.exact_qn_at_frame (pf, divisions);
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position ();
-
-	MidiStreamView* sv = _region_view->midi_stream_view ();
-	const double y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
+	const double y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	if (_last_pos == start && y == _last_y) {
 		return;
