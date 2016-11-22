@@ -3511,7 +3511,6 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 			pos_bbt.bars += 1;
 			pos_bbt.beats -= divisions;
 		}
-		const framecnt_t music_origin = frame_at_minute (minute_at_bbt_locked (_metrics, BBT_Time (1, 1, 0)));
 		const framecnt_t pos_bbt_frame = frame_at_minute (minute_at_bbt_locked (_metrics, pos_bbt));
 
 		return pos_bbt_frame - pos;
