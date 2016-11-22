@@ -2326,7 +2326,7 @@ TempoMap::minute_at_quarter_note_locked (const Metrics& metrics, const double qu
  *
  */
 double
-TempoMap::quarter_note_at_beat (const double beat)
+TempoMap::quarter_note_at_beat (const double beat) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -2351,7 +2351,7 @@ TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat
  *
  */
 double
-TempoMap::beat_at_quarter_note (const double quarter_note)
+TempoMap::beat_at_quarter_note (const double quarter_note) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -3409,7 +3409,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
  * This function is sensitive to tempo and meter.
  */
 double
-TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
+TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -3417,7 +3417,7 @@ TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num)
 }
 
 double
-TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t divisions)
+TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t divisions) const
 {
 	return beat_at_pulse_locked (_metrics, exact_qn_at_frame_locked (metrics, frame, divisions) / 4.0);
 }
@@ -3445,7 +3445,7 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
  * This function is tempo-sensitive.
  */
 double
-TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num)
+TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -3453,7 +3453,7 @@ TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num)
 }
 
 double
-TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num)
+TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num) const
 {
 	double qn = quarter_note_at_minute_locked (metrics, minute_at_frame (frame));
 

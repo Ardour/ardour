@@ -460,12 +460,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framecnt_t frames_between_quarter_notes (const double start, const double end) const;
 	double     quarter_notes_between_frames (const framecnt_t start, const framecnt_t end) const;
 
-	double quarter_note_at_beat (const double beat);
-	double beat_at_quarter_note (const double beat);
+	double quarter_note_at_beat (const double beat) const;
+	double beat_at_quarter_note (const double beat) const;
 
 	/* obtain a musical subdivision via a frame position and magic note divisor.*/
-	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num);
-	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num);
+	double exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num) const;
+	double exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num) const;
 
 	Tempo tempo_at_frame (const framepos_t& frame) const;
 	framepos_t frame_at_tempo (const Tempo& tempo) const;
@@ -532,8 +532,8 @@ private:
 	bool solve_map_minute (Metrics& metrics, MeterSection* section, const double& minute);
 	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
 
-	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
-	double exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num);
+	double exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num) const;
+	double exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num) const;
 
 	double minute_at_frame (const framepos_t frame) const;
 	framepos_t frame_at_minute (const double minute) const;
