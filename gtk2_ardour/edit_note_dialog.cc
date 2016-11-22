@@ -223,7 +223,10 @@ EditNoteDialog::done (int r)
 
 	_region_view->apply_diff ();
 
+	list<Evoral::event_id_t> notes;
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->set_selected ((*i)->selected()); // change color
+		notes.push_back ((*i)->note()->id());
 	}
+
+	_region_view->select_notes (notes);
 }
