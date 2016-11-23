@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-19 14:21+0100\n"
-"PO-Revision-Date: 2016-11-20 21:11+0100\n"
+"POT-Creation-Date: 2016-11-23 13:56+0100\n"
+"PO-Revision-Date: 2016-11-23 14:07+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -389,8 +389,8 @@ msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
 msgstr ""
-"Programmierfehler: Port %1 konnte nicht in die \"zu löschen\"-Warteschlange"
-" eingetragen werden"
+"Programmierfehler: Port %1 konnte nicht in die \"zu löschen\"-Warteschlange "
+"eingetragen werden\n"
 
 #: audioregion.cc:1793
 msgid ""
@@ -1472,8 +1472,8 @@ msgstr "MidiDiskstream: konnte Region für aufgenommenes MIDI nicht erzeugen"
 #: midi_diskstream.cc:1502
 msgid "MidiDiskstream %1: skipped %2 events, possible underflow"
 msgstr ""
-"MidiDiskstream %1: %2 Events übersprungen, möglicherweise wurde der Puffer"
-" nicht rechtzeitig gefüllt"
+"MidiDiskstream %1: %2 Events übersprungen, möglicherweise wurde der Puffer "
+"nicht rechtzeitig gefüllt"
 
 #: midi_model.cc:589
 msgid "Change has no note, using note ID"
@@ -2007,9 +2007,8 @@ msgid ""
 "Mac VST plugin %1 does not support processReplacing, and so cannot be used "
 "in %2 at this time"
 msgstr ""
-"Das Mac VST Plugin %1 unterstützt nicht processReplacing, und kann daher zur"
-" Zeit "
-"nicht in %2 verwendet werden"
+"Das Mac VST Plugin %1 unterstützt nicht processReplacing, und kann daher zur "
+"Zeit nicht in %2 verwendet werden"
 
 #: plugin_manager.cc:1162
 msgid "LXVST"
@@ -3387,8 +3386,8 @@ msgid "TempoSection XML node has an illegal \"frame\" value"
 msgstr "XML-Knoten für TempoSection enthält einen illegalen Wert für \"frame\""
 
 #: tempo.cc:134
-msgid "TempoSection XML node has an illegal \"beats-per-minutee\" value"
-msgstr "TempoSection XML -Knoten hat einen illegalen \"beats-per-minute\" Wert"
+msgid "TempoSection XML node has an illegal \"beats-per-minute\" value"
+msgstr "TempoSection XML-Knoten hat einen illegalen \"beats-per-minute\" Wert"
 
 #: tempo.cc:144
 msgid "TempoSection XML node has an illegal \"note-type\" value"
@@ -3491,16 +3490,16 @@ msgstr "Tempo map wurde nach BBT-Zeit gefragt bei Frame %1\n"
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
 msgstr "Tempo Map fragte nach Frame-Zeit an Takt < 1 %1\n"
 
-#: tempo.cc:4112 tempo.cc:4126
+#: tempo.cc:4128 tempo.cc:4142
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 "Tempo Map: konnte neuen Status nicht setzen, stelle den alten wieder her."
 
-#: tempo.cc:4164 tempo.cc:4165
+#: tempo.cc:4180 tempo.cc:4181
 msgid "Multiple meter definitions found at %1"
 msgstr "Mehrere Metrumdefinitionen an %1 gefunden"
 
-#: tempo.cc:4170 tempo.cc:4171
+#: tempo.cc:4186 tempo.cc:4187
 msgid "Multiple tempo definitions found at %1"
 msgstr "Mehrere Tempodefinitionen an %1 gefunden"
 

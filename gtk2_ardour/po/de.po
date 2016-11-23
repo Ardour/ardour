@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-20 20:46+0100\n"
-"PO-Revision-Date: 2016-11-19 15:18+0100\n"
+"POT-Creation-Date: 2016-11-23 13:56+0100\n"
+"PO-Revision-Date: 2016-11-23 14:07+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -2269,8 +2269,8 @@ msgid "Close"
 msgstr "Schließen"
 
 #: ardour_ui_ed.cc:170
-msgid "Add Track or Bus..."
-msgstr "Spur/Bus hinzufügen..."
+msgid "Add Track, Bus or VCA..."
+msgstr "Füge Spur, Bus oder VCA hinzu..."
 
 #: ardour_ui_ed.cc:175
 msgid "Duplicate Tracks/Busses..."
@@ -2885,7 +2885,7 @@ msgid_plural "Set to %1 beats"
 msgstr[0] "Setze auf %1 Schlag"
 msgstr[1] "Setze auf %1 Schläge"
 
-#: automation_line.cc:292 editor_drag.cc:4433
+#: automation_line.cc:292 editor_drag.cc:4445
 msgid "automation event move"
 msgstr "Automationspunkt bewegen"
 
@@ -2897,7 +2897,7 @@ msgstr "Automationspunkt entfernen"
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "Unzulässige Automationspunkte werden ignoriert: \"%1\""
 
-#: automation_region_view.cc:195 automation_time_axis.cc:641
+#: automation_region_view.cc:196 automation_time_axis.cc:641
 msgid "add automation event"
 msgstr "Automationspunkt einfügen"
 
@@ -3459,7 +3459,7 @@ msgstr "Deaktivieren"
 msgid "Activate"
 msgstr "Aktivieren"
 
-#: editor.cc:1663 editor.cc:1671 editor_ops.cc:3975
+#: editor.cc:1663 editor.cc:1671 editor_ops.cc:3980
 msgid "Freeze"
 msgstr "Einfrieren"
 
@@ -3964,7 +3964,7 @@ msgstr "Wiedergabeliste behalten"
 msgid "Keep Remaining"
 msgstr "Übrige behalten"
 
-#: editor.cc:4150 editor_audio_import.cc:601 editor_ops.cc:6694
+#: editor.cc:4150 editor_audio_import.cc:601 editor_ops.cc:6699
 #: engine_dialog.cc:2995 sfdb_freesound_mootcher.cc:69 processor_box.cc:3491
 #: processor_box.cc:3516
 msgid "Cancel"
@@ -5445,29 +5445,29 @@ msgstr "Erfolg! Import sollte bald abgeschlossen sein."
 msgid "PTImport: UINT_MAX routes? impossible!"
 msgstr "PTImport: UINT_MAX Routen? unmöglich!"
 
-#: editor_canvas_events.cc:1308 editor_drag.cc:1443
+#: editor_canvas_events.cc:1308 editor_drag.cc:1455
 msgid "Could not create new track after region placed in the drop zone"
 msgstr ""
 "Konnte keine neue Spur erzeugen, nachdem die Region in der Drop Zone "
 "platziert wurde"
 
-#: editor_drag.cc:1331
+#: editor_drag.cc:1343
 msgid "fixed time region drag"
 msgstr "Region zeitgleich verschieben"
 
-#: editor_drag.cc:2282
+#: editor_drag.cc:2294
 msgid "Ripple drag"
 msgstr "Wellenmodus-Ziehen"
 
-#: editor_drag.cc:2344
+#: editor_drag.cc:2356
 msgid "create region"
 msgstr "Region erzeugen"
 
-#: editor_drag.cc:2463 midi_region_view.cc:2864
+#: editor_drag.cc:2475 midi_region_view.cc:2826
 msgid "resize notes"
 msgstr "Notenlänge ändern"
 
-#: editor_drag.cc:2646 editor_drag.cc:2681
+#: editor_drag.cc:2658 editor_drag.cc:2693
 msgid ""
 "One or more Audio Regions\n"
 "are both Locked and\n"
@@ -5479,87 +5479,87 @@ msgstr ""
 "an das Video gekoppelt.\n"
 "Das Video kann nicht bewegt werden."
 
-#: editor_drag.cc:2716
+#: editor_drag.cc:2728
 msgid "Video Start:"
 msgstr "Videostart"
 
-#: editor_drag.cc:2718
+#: editor_drag.cc:2730
 msgid "Diff:"
 msgstr "Diff:"
 
-#: editor_drag.cc:2740
+#: editor_drag.cc:2752
 msgid "Move Video"
 msgstr "Bewege Video"
 
-#: editor_drag.cc:3211
+#: editor_drag.cc:3223
 msgid "move meter mark"
 msgstr "Taktwechsel bewegen"
 
-#: editor_drag.cc:3213
+#: editor_drag.cc:3225
 msgid "copy meter mark"
 msgstr "Taktmarker kopieren"
 
-#: editor_drag.cc:3315
+#: editor_drag.cc:3327
 msgid "inactive"
 msgstr "inaktiv"
 
-#: editor_drag.cc:3360
+#: editor_drag.cc:3372
 msgid "move tempo mark"
 msgstr "Tempowechsel bewegen"
 
-#: editor_drag.cc:3367
+#: editor_drag.cc:3379
 msgid "copy tempo mark"
 msgstr "Tempomarker kopieren"
 
-#: editor_drag.cc:3508
+#: editor_drag.cc:3520
 msgid "dilate tempo"
 msgstr "Tempo dehnen"
 
-#: editor_drag.cc:3782
+#: editor_drag.cc:3794
 msgid "change fade in length"
 msgstr "Ändere Fade-In Länge"
 
-#: editor_drag.cc:3907
+#: editor_drag.cc:3919
 msgid "change fade out length"
 msgstr "Fade-Out verändern"
 
-#: editor_drag.cc:4285
+#: editor_drag.cc:4297
 msgid "move marker"
 msgstr "Marker bewegen"
 
-#: editor_drag.cc:4551 editor_drag.cc:5890
+#: editor_drag.cc:4563 editor_drag.cc:5902
 msgid "automation range move"
 msgstr "Automationsbereich bewegen"
 
-#: editor_drag.cc:4935
+#: editor_drag.cc:4947
 msgid "An error occurred while executing time stretch operation"
 msgstr "Beim Ausführen der Timestretch-Operation trat ein Fehler auf"
 
-#: editor_drag.cc:5396
+#: editor_drag.cc:5408
 msgid "programming_error: %1"
 msgstr "Programmierfehler: %1"
 
-#: editor_drag.cc:5465 editor_drag.cc:5475
+#: editor_drag.cc:5477 editor_drag.cc:5487
 msgid "new skip marker"
 msgstr "neuer Sprungmarker"
 
-#: editor_drag.cc:5466
+#: editor_drag.cc:5478
 msgid "skip"
 msgstr "Sprung"
 
-#: editor_drag.cc:5470 location_ui.cc:60
+#: editor_drag.cc:5482 location_ui.cc:60
 msgid "CD"
 msgstr "CD"
 
-#: editor_drag.cc:5471
+#: editor_drag.cc:5483
 msgid "new CD marker"
 msgstr "neuer CD Marker"
 
-#: editor_drag.cc:5476 editor_route_groups.cc:439 mixer_ui.cc:1891
+#: editor_drag.cc:5488 editor_route_groups.cc:439 mixer_ui.cc:1891
 msgid "unnamed"
 msgstr "unbenannt"
 
-#: editor_drag.cc:5797
+#: editor_drag.cc:5809
 msgid "Automation range drag created for invalid region type"
 msgstr "Automationsbereichs-Ziehen für ungültigen Regionstyp erzeugt"
 
@@ -5666,7 +5666,7 @@ msgstr "Einschaltzustand teilen?"
 #: editor_markers.cc:1180 editor_markers.cc:1210 editor_markers.cc:1238
 #: editor_markers.cc:1269 editor_markers.cc:1294 editor_markers.cc:1345
 #: editor_markers.cc:1457 editor_markers.cc:1483 editor_markers.cc:1677
-#: editor_mouse.cc:2302
+#: editor_mouse.cc:2307
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr "Programmierfehler: marker canvas item has no marker object pointer!"
 
@@ -5695,8 +5695,8 @@ msgstr "Ende"
 msgid "mark"
 msgstr "Marker"
 
-#: editor_markers.cc:650 editor_ops.cc:2201 editor_ops.cc:2223
-#: editor_ops.cc:2358 editor_ops.cc:2395 location_ui.cc:1049
+#: editor_markers.cc:650 editor_ops.cc:2206 editor_ops.cc:2228
+#: editor_ops.cc:2363 editor_ops.cc:2400 location_ui.cc:1049
 msgid "add marker"
 msgstr "Marker hinzufügen"
 
@@ -5708,7 +5708,7 @@ msgstr "Loopbereich festlegen"
 msgid "set punch range"
 msgstr "Punchbereich festlegen"
 
-#: editor_markers.cc:715 editor_ops.cc:4213
+#: editor_markers.cc:715 editor_ops.cc:4218
 msgid "range"
 msgstr "Bereich"
 
@@ -5716,7 +5716,7 @@ msgstr "Bereich"
 msgid "new range marker"
 msgstr "Neuer Bereich"
 
-#: editor_markers.cc:751 editor_ops.cc:2319 location_ui.cc:885
+#: editor_markers.cc:751 editor_ops.cc:2324 location_ui.cc:885
 msgid "remove marker"
 msgstr "Marker entfernen"
 
@@ -5804,7 +5804,7 @@ msgstr "ändere Bindungsart des Tempos"
 msgid "change tempo type"
 msgstr "ändere Tempo-Typ"
 
-#: editor_markers.cc:1508 editor_ops.cc:2156
+#: editor_markers.cc:1508 editor_ops.cc:2161
 msgid "New Name:"
 msgstr "Neuer Name: "
 
@@ -5816,7 +5816,7 @@ msgstr "Marker umbenennen"
 msgid "Rename Range"
 msgstr "Bereich umbenennen"
 
-#: editor_markers.cc:1520 editor_mouse.cc:2319 processor_box.cc:3252
+#: editor_markers.cc:1520 editor_mouse.cc:2324 processor_box.cc:3252
 #: processor_box.cc:3741 route_time_axis.cc:1128 route_ui.cc:1645
 #: vca_master_strip.cc:395
 msgid "Rename"
@@ -5831,21 +5831,21 @@ msgid "This screen is not tall enough to display the editor mixer"
 msgstr ""
 "Dieser Bildschirm ist nicht hoch genug, um den Editor-Mixer darzustellen"
 
-#: editor_mouse.cc:1346 editor_mouse.cc:1364 editor_tempodisplay.cc:436
+#: editor_mouse.cc:1351 editor_mouse.cc:1369 editor_tempodisplay.cc:436
 msgid ""
 "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr ""
 "Programmierfehler: tempo marker canvas item has no marker object pointer!"
 
-#: editor_mouse.cc:1351 editor_tempodisplay.cc:441
+#: editor_mouse.cc:1356 editor_tempodisplay.cc:441
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr "Programmierfehler: marker for tempo is not a tempo marker!"
 
-#: editor_mouse.cc:1369 editor_tempodisplay.cc:558
+#: editor_mouse.cc:1374 editor_tempodisplay.cc:558
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr "Programmierfehler: marker for meter is not a meter marker!"
 
-#: editor_mouse.cc:2063 editor_mouse.cc:2088 editor_mouse.cc:2101
+#: editor_mouse.cc:2068 editor_mouse.cc:2093 editor_mouse.cc:2106
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
@@ -5853,183 +5853,183 @@ msgstr ""
 "Programmierfehler: control point canvas item has no control point object "
 "pointer!"
 
-#: editor_mouse.cc:2132
+#: editor_mouse.cc:2137
 msgid "edit note(s)"
 msgstr "Note(n) bearbeiten"
 
-#: editor_mouse.cc:2240
+#: editor_mouse.cc:2245
 msgid "start point trim"
 msgstr "Startpunkt ändern"
 
-#: editor_mouse.cc:2265
+#: editor_mouse.cc:2270
 msgid "end point trim"
 msgstr "Endpunkt ändern"
 
-#: editor_mouse.cc:2317
+#: editor_mouse.cc:2322
 msgid "Name for region:"
 msgstr "Name für Region:"
 
-#: editor_ops.cc:183
+#: editor_ops.cc:184
 msgid "split"
 msgstr "teile"
 
-#: editor_ops.cc:357
+#: editor_ops.cc:362
 msgid "alter selection"
 msgstr "Auswahl ändern"
 
-#: editor_ops.cc:399
+#: editor_ops.cc:404
 msgid "nudge regions forward"
 msgstr "Regionen Schritt vorwärts"
 
-#: editor_ops.cc:456 editor_ops.cc:550
+#: editor_ops.cc:461 editor_ops.cc:555
 msgid "nudge location forward"
 msgstr "Position Schritt vorwärts"
 
-#: editor_ops.cc:487
+#: editor_ops.cc:492
 msgid "nudge regions backward"
 msgstr "Regionen Schritt nach hinten"
 
-#: editor_ops.cc:582
+#: editor_ops.cc:587
 msgid "nudge forward"
 msgstr "Schritt vorwärts"
 
-#: editor_ops.cc:606
+#: editor_ops.cc:611
 msgid "nudge backward"
 msgstr "Schritt nach hinten"
 
-#: editor_ops.cc:671
+#: editor_ops.cc:676
 msgid "sequence regions"
 msgstr "Regionen aneinanderreihen"
 
-#: editor_ops.cc:733
+#: editor_ops.cc:738
 msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr "build_region_boundary_cache wurde mit snap_type = %1 aufgerufen"
 
-#: editor_ops.cc:2158
+#: editor_ops.cc:2163
 msgid "New Location Marker"
 msgstr "Neuer Positionsmarker"
 
-#: editor_ops.cc:2249 editor_ops.cc:2273
+#: editor_ops.cc:2254 editor_ops.cc:2278
 msgid "Set session start"
 msgstr "Projektstart setzen"
 
-#: editor_ops.cc:2358
+#: editor_ops.cc:2363
 msgid "add markers"
 msgstr "Marker hinzufügen"
 
-#: editor_ops.cc:2454
+#: editor_ops.cc:2459
 msgid "clear markers"
 msgstr "Marker zurücksetzen"
 
-#: editor_ops.cc:2469
+#: editor_ops.cc:2474
 msgid "clear ranges"
 msgstr "Bereiche zurücksetzen"
 
-#: editor_ops.cc:2485
+#: editor_ops.cc:2490
 msgid "clear locations"
 msgstr "Positionen zurücksetzen"
 
-#: editor_ops.cc:2548
+#: editor_ops.cc:2553
 msgid "insert region"
 msgstr "Region einfügen"
 
-#: editor_ops.cc:2739
+#: editor_ops.cc:2744
 msgid "raise regions"
 msgstr "Regionen weiter nach oben"
 
-#: editor_ops.cc:2741
+#: editor_ops.cc:2746
 msgid "raise region"
 msgstr "Region weiter nach oben"
 
-#: editor_ops.cc:2747
+#: editor_ops.cc:2752
 msgid "raise regions to top"
 msgstr "Regionen ganz nach oben"
 
-#: editor_ops.cc:2749
+#: editor_ops.cc:2754
 msgid "raise region to top"
 msgstr "Region ganz nach oben"
 
-#: editor_ops.cc:2755
+#: editor_ops.cc:2760
 msgid "lower regions"
 msgstr "Regionen weiter nach unten"
 
-#: editor_ops.cc:2757 editor_ops.cc:2765
+#: editor_ops.cc:2762 editor_ops.cc:2770
 msgid "lower region"
 msgstr "Region weiter nach unten"
 
-#: editor_ops.cc:2763
+#: editor_ops.cc:2768
 msgid "lower regions to bottom"
 msgstr "Regionen ganz nach unten"
 
-#: editor_ops.cc:2848
+#: editor_ops.cc:2853
 msgid "Rename Region"
 msgstr "Region umbenennen"
 
-#: editor_ops.cc:2850 processor_box.cc:3250 route_ui.cc:1643
+#: editor_ops.cc:2855 processor_box.cc:3250 route_ui.cc:1643
 msgid "New name:"
 msgstr "Neuer Name: "
 
-#: editor_ops.cc:3151
+#: editor_ops.cc:3156
 msgid "separate"
 msgstr "Teilen"
 
-#: editor_ops.cc:3261
+#: editor_ops.cc:3266
 msgid "separate region under"
 msgstr "Bereich unter aktueller Region entfernen"
 
-#: editor_ops.cc:3414
+#: editor_ops.cc:3419
 msgid "trim to selection"
 msgstr "Auf Auswahl kürzen"
 
-#: editor_ops.cc:3496
+#: editor_ops.cc:3501
 msgid "set sync point"
 msgstr "Einrastpunkt definieren"
 
-#: editor_ops.cc:3520
+#: editor_ops.cc:3525
 msgid "remove region sync"
 msgstr "Synchronisationspunkt löschen"
 
-#: editor_ops.cc:3542
+#: editor_ops.cc:3547
 msgid "move regions to original position"
 msgstr "Regionen zu ihrer Ursprungsposition verschieben"
 
-#: editor_ops.cc:3544
+#: editor_ops.cc:3549
 msgid "move region to original position"
 msgstr "Region zu ihrer Ursprungsposition verschieben"
 
-#: editor_ops.cc:3565
+#: editor_ops.cc:3570
 msgid "align selection"
 msgstr "Auswahl ausrichten"
 
-#: editor_ops.cc:3639
+#: editor_ops.cc:3644
 msgid "align selection (relative)"
 msgstr "Auswahl relativ ausrichten"
 
-#: editor_ops.cc:3673
+#: editor_ops.cc:3678
 msgid "align region"
 msgstr "Region ausrichten"
 
-#: editor_ops.cc:3724
+#: editor_ops.cc:3729
 msgid "trim front"
 msgstr "vorne abschneiden"
 
-#: editor_ops.cc:3724
+#: editor_ops.cc:3729
 msgid "trim back"
 msgstr "hinten Abschneiden"
 
-#: editor_ops.cc:3754
+#: editor_ops.cc:3759
 msgid "trim to loop"
 msgstr "Auf Schleife kürzen"
 
-#: editor_ops.cc:3764
+#: editor_ops.cc:3769
 msgid "trim to punch"
 msgstr "Auf Punchbereich kürzen"
 
-#: editor_ops.cc:3886
+#: editor_ops.cc:3891
 msgid "trim to region"
 msgstr "Auf Region kürzen"
 
-#: editor_ops.cc:3945
+#: editor_ops.cc:3950
 msgid ""
 "This track/bus cannot be frozen because the signal adds or loses channels "
 "before reaching the outputs.\n"
@@ -6041,11 +6041,11 @@ msgstr ""
 "Typischerweise wird dies durch ein Plugin verursacht, das Stereo aus einer "
 "Monoquelle oder umgekehrt erzeugt."
 
-#: editor_ops.cc:3948
+#: editor_ops.cc:3953
 msgid "Cannot freeze"
 msgstr "Einfrieren nicht möglich"
 
-#: editor_ops.cc:3954
+#: editor_ops.cc:3959
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -6059,23 +6059,23 @@ msgstr ""
 "\n"
 "Einfrieren wird das Signal nur bis zum ersten Send/Insert/Return verarbeiten."
 
-#: editor_ops.cc:3958
+#: editor_ops.cc:3963
 msgid "Freeze anyway"
 msgstr "Trotzdem einfrieren"
 
-#: editor_ops.cc:3959
+#: editor_ops.cc:3964
 msgid "Don't freeze"
 msgstr "Nicht einfrieren"
 
-#: editor_ops.cc:3960
+#: editor_ops.cc:3965
 msgid "Freeze Limits"
 msgstr "Einfrier-Grenzen"
 
-#: editor_ops.cc:3975
+#: editor_ops.cc:3980
 msgid "Cancel Freeze"
 msgstr "Einfrieren abbrechen"
 
-#: editor_ops.cc:4006
+#: editor_ops.cc:4011
 msgid ""
 "You can't perform this operation because the processing of the signal will "
 "cause one or more of the tracks to end up with a region with more channels "
@@ -6090,47 +6090,47 @@ msgstr ""
 "Sie können dies ohne Signalverarbeitung tun, das ist aber eine andere "
 "Operation."
 
-#: editor_ops.cc:4010
+#: editor_ops.cc:4015
 msgid "Cannot bounce"
 msgstr "Kann nicht bouncen"
 
-#: editor_ops.cc:4061
+#: editor_ops.cc:4066
 msgid "bounce range"
 msgstr "Bereich bouncen"
 
-#: editor_ops.cc:4128
+#: editor_ops.cc:4133
 msgid "delete"
 msgstr "Löschen"
 
-#: editor_ops.cc:4131
+#: editor_ops.cc:4136
 msgid "cut"
 msgstr "Ausschneiden"
 
-#: editor_ops.cc:4134
+#: editor_ops.cc:4139
 msgid "copy"
 msgstr "Kopieren"
 
-#: editor_ops.cc:4137
+#: editor_ops.cc:4142
 msgid "clear"
 msgstr "Leeren"
 
-#: editor_ops.cc:4186
+#: editor_ops.cc:4191
 msgid "objects"
 msgstr "Objekte"
 
-#: editor_ops.cc:4418 editor_ops.cc:4503
+#: editor_ops.cc:4423 editor_ops.cc:4508
 msgid "remove region"
 msgstr "Region(en) löschen"
 
-#: editor_ops.cc:4927
+#: editor_ops.cc:4932
 msgid "duplicate range selection"
 msgstr "Bereichsauswahl duplizieren"
 
-#: editor_ops.cc:5021
+#: editor_ops.cc:5026
 msgid "nudge track"
 msgstr "Spur verschieben"
 
-#: editor_ops.cc:5048
+#: editor_ops.cc:5053
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -6138,165 +6138,165 @@ msgstr ""
 "Wollen Sie wirklich die letzte Aufnahme rückgängig machen?\n"
 "(Dies ist destruktiv und kann nicht rückgängig gemacht werden!)"
 
-#: editor_ops.cc:5051 editor_ops.cc:7366 editor_regions.cc:503
+#: editor_ops.cc:5056 editor_ops.cc:7371 editor_regions.cc:503
 #: editor_snapshots.cc:171
 msgid "No, do nothing."
 msgstr "Nein, nichts machen."
 
-#: editor_ops.cc:5052
+#: editor_ops.cc:5057
 msgid "Yes, destroy it."
 msgstr "Ja, entfernen."
 
-#: editor_ops.cc:5054
+#: editor_ops.cc:5059
 msgid "Destroy last capture"
 msgstr "Lösche letzte Aufnahme"
 
-#: editor_ops.cc:5153
+#: editor_ops.cc:5158
 msgid "normalize"
 msgstr "Normalisieren"
 
-#: editor_ops.cc:5252
+#: editor_ops.cc:5257
 msgid "reverse regions"
 msgstr "Regionen umkehren"
 
-#: editor_ops.cc:5289
+#: editor_ops.cc:5294
 msgid "strip silence"
 msgstr "Stille entfernen"
 
-#: editor_ops.cc:5369
+#: editor_ops.cc:5374
 msgid "Fork Region(s)"
 msgstr "Region(en) abzweigen"
 
-#: editor_ops.cc:5376
+#: editor_ops.cc:5381
 msgid "Could not unlink %1"
 msgstr "Konnte die Bindung von %1 nicht lösen"
 
-#: editor_ops.cc:5643
+#: editor_ops.cc:5648
 msgid "reset region gain"
 msgstr "Lautstärkekurve zurücksetzen"
 
-#: editor_ops.cc:5701
+#: editor_ops.cc:5706
 msgid "region gain envelope active"
 msgstr "Lautstärkekurve aktiv"
 
-#: editor_ops.cc:5726
+#: editor_ops.cc:5731
 msgid "toggle region lock"
 msgstr "Regionensperre umschalten"
 
-#: editor_ops.cc:5750
+#: editor_ops.cc:5755
 msgid "Toggle Video Lock"
 msgstr "Videosperre umschalten"
 
-#: editor_ops.cc:5774
+#: editor_ops.cc:5779
 msgid "region lock style"
 msgstr "Art der Regionensperre"
 
-#: editor_ops.cc:5799
+#: editor_ops.cc:5804
 msgid "change region opacity"
 msgstr "Regionen-Deckkraft ändern"
 
-#: editor_ops.cc:5892
+#: editor_ops.cc:5897
 msgid "fade range"
 msgstr "Bereich faden"
 
-#: editor_ops.cc:5930
+#: editor_ops.cc:5935
 msgid "set fade in length"
 msgstr "Ändere Fade-In Länge"
 
-#: editor_ops.cc:5937
+#: editor_ops.cc:5942
 msgid "set fade out length"
 msgstr "Ändere Fade-Out Länge"
 
-#: editor_ops.cc:6002
+#: editor_ops.cc:6007
 msgid "set fade in shape"
 msgstr "Fade-In Kurve bearbeiten"
 
-#: editor_ops.cc:6037
+#: editor_ops.cc:6042
 msgid "set fade out shape"
 msgstr "Fade-Out Kurve ändern"
 
-#: editor_ops.cc:6073
+#: editor_ops.cc:6078
 msgid "set fade in active"
 msgstr "Fade-In aktivieren"
 
-#: editor_ops.cc:6107
+#: editor_ops.cc:6112
 msgid "set fade out active"
 msgstr "Fade-Out aktivieren"
 
-#: editor_ops.cc:6167
+#: editor_ops.cc:6172
 msgid "toggle fade active"
 msgstr "Fade umschalten"
 
-#: editor_ops.cc:6360
+#: editor_ops.cc:6365
 msgid "set loop range from selection"
 msgstr "Schleife aus Auswahl erstellen"
 
-#: editor_ops.cc:6374
+#: editor_ops.cc:6379
 msgid "set loop range from region"
 msgstr "Schleife aus Region erstellen"
 
-#: editor_ops.cc:6393
+#: editor_ops.cc:6398
 msgid "set punch range from selection"
 msgstr "Punchbereich aus Auswahl erstellen"
 
-#: editor_ops.cc:6417
+#: editor_ops.cc:6422
 msgid "Auto Punch In"
 msgstr "Auto-Punch In"
 
-#: editor_ops.cc:6424 editor_ops.cc:6428
+#: editor_ops.cc:6429 editor_ops.cc:6433
 msgid "Auto Punch In/Out"
 msgstr "Auto-Punch In/Out"
 
-#: editor_ops.cc:6470
+#: editor_ops.cc:6475
 msgid "set session start/end from selection"
 msgstr "Projektstart/ende auf Auswahl setzen"
 
-#: editor_ops.cc:6508
+#: editor_ops.cc:6513
 msgid "set punch start from EP"
 msgstr "Punchbeginn von Arbeitspunkt"
 
-#: editor_ops.cc:6536
+#: editor_ops.cc:6541
 msgid "set punch end from EP"
 msgstr "Punchende von Arbeitspunkt"
 
-#: editor_ops.cc:6569
+#: editor_ops.cc:6574
 msgid "set loop start from EP"
 msgstr "Schleifenbeginn von Arbeitspunkt"
 
-#: editor_ops.cc:6597
+#: editor_ops.cc:6602
 msgid "set loop end from EP"
 msgstr "Schleifenende von Arbeitspunkt"
 
-#: editor_ops.cc:6608
+#: editor_ops.cc:6613
 msgid "set punch range from region"
 msgstr "Punchbereich aus Region erstellen"
 
-#: editor_ops.cc:6695
+#: editor_ops.cc:6700
 msgid "Add new marker"
 msgstr "Marker hinzufügen"
 
-#: editor_ops.cc:6696
+#: editor_ops.cc:6701
 msgid "Set global tempo"
 msgstr "Globales tempo setzen"
 
-#: editor_ops.cc:6699
+#: editor_ops.cc:6704
 msgid "Define one bar"
 msgstr "Einen Takt definieren"
 
-#: editor_ops.cc:6700
+#: editor_ops.cc:6705
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr ""
 "Möchten Sie das globale Tempo ändern oder einen neuen Tempo-Marker setzen?"
 
-#: editor_ops.cc:6726
+#: editor_ops.cc:6731
 msgid "set tempo from region"
 msgstr "Tempo anhand von Region setzen"
 
-#: editor_ops.cc:6755
+#: editor_ops.cc:6760
 msgid "split regions"
 msgstr "Region teilen (Split)"
 
-#: editor_ops.cc:6797
+#: editor_ops.cc:6802
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -6306,11 +6306,11 @@ msgstr ""
 "Sie versuchen %1 in %2 Teile zu teilen.\n"
 "Das könnte sehr lange dauern."
 
-#: editor_ops.cc:6804
+#: editor_ops.cc:6809
 msgid "Call for the Ferret!"
 msgstr "Call for the Ferret!"
 
-#: editor_ops.cc:6805
+#: editor_ops.cc:6810
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
@@ -6318,52 +6318,52 @@ msgstr ""
 "Drücken Sie OK um mit der aufteiloperation (Split) fortzufahren\n"
 "oder versuchen sie im Ferret-Fenster die Analyse zu verbessern."
 
-#: editor_ops.cc:6807
+#: editor_ops.cc:6812
 msgid "Press OK to continue with this split operation"
 msgstr "Drücken Sie OK um mit der aufteiloperation (Split) fortzufahren"
 
-#: editor_ops.cc:6810
+#: editor_ops.cc:6815
 msgid "Excessive split?"
 msgstr "Übermäßige Aufteilung?"
 
-#: editor_ops.cc:6964
+#: editor_ops.cc:6969
 msgid "place transient"
 msgstr "Transienten platzieren"
 
-#: editor_ops.cc:6998
+#: editor_ops.cc:7003
 msgid "snap regions to grid"
 msgstr "Regionen an Raster einrasten"
 
-#: editor_ops.cc:7037
+#: editor_ops.cc:7042
 msgid "Close Region Gaps"
 msgstr "Regionenlücken schließen"
 
-#: editor_ops.cc:7042
+#: editor_ops.cc:7047
 msgid "Crossfade length"
 msgstr "Länge des Crossfades"
 
-#: editor_ops.cc:7051 editor_ops.cc:7062 rhythm_ferret.cc:128
+#: editor_ops.cc:7056 editor_ops.cc:7067 rhythm_ferret.cc:128
 #: rhythm_ferret.cc:143 session_option_editor.cc:141
 msgid "ms"
 msgstr "ms"
 
-#: editor_ops.cc:7053
+#: editor_ops.cc:7058
 msgid "Pull-back length"
 msgstr "Öffnungslänge vorne"
 
-#: editor_ops.cc:7066 keyeditor.cc:71
+#: editor_ops.cc:7071 keyeditor.cc:71
 msgid "Ok"
 msgstr "Ok"
 
-#: editor_ops.cc:7081
+#: editor_ops.cc:7086
 msgid "close region gaps"
 msgstr "Schließe Lücken zwischen Regionen"
 
-#: editor_ops.cc:7324
+#: editor_ops.cc:7329
 msgid "That would be bad news ...."
 msgstr "Lieber nicht!"
 
-#: editor_ops.cc:7329
+#: editor_ops.cc:7334
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -6379,19 +6379,19 @@ msgstr ""
 "bearbeitet werden. \"allow-special-bus-removal\" muss\n"
 "dazu auf \"yes\" gesetzt werden."
 
-#: editor_ops.cc:7345
+#: editor_ops.cc:7350
 msgid "track"
 msgid_plural "tracks"
 msgstr[0] "Spur"
 msgstr[1] "Spuren"
 
-#: editor_ops.cc:7346
+#: editor_ops.cc:7351
 msgid "bus"
 msgid_plural "busses"
 msgstr[0] "Bus"
 msgstr[1] "Busse"
 
-#: editor_ops.cc:7350
+#: editor_ops.cc:7355
 msgid ""
 "Do you really want to remove %1 %2 and %3 %4?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -6404,7 +6404,7 @@ msgstr ""
 "Dies kann nicht rückgängig gemacht werden, und die Projektdatei wird "
 "überschrieben werden!"
 
-#: editor_ops.cc:7355
+#: editor_ops.cc:7360
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -6417,7 +6417,7 @@ msgstr ""
 "Dies kann nicht rückgängig gemacht werden, und die Projektdatei wird "
 "überschrieben werden!"
 
-#: editor_ops.cc:7361
+#: editor_ops.cc:7366
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "\n"
@@ -6428,68 +6428,68 @@ msgstr ""
 "Diese Aktion kann nicht rückgängig gemacht werden, und die Projektdatei wird "
 "überschrieben werden"
 
-#: editor_ops.cc:7368
+#: editor_ops.cc:7373
 msgid "Yes, remove them."
 msgstr "Ja, entfernen."
 
-#: editor_ops.cc:7370 editor_snapshots.cc:172
+#: editor_ops.cc:7375 editor_snapshots.cc:172
 msgid "Yes, remove it."
 msgstr "Ja, entfernen."
 
-#: editor_ops.cc:7375 editor_ops.cc:7377
+#: editor_ops.cc:7380 editor_ops.cc:7382
 msgid "Remove %1"
 msgstr "Entferne %1"
 
-#: editor_ops.cc:7489 editor_ops.cc:7503 editor_ops.cc:7543 editor_ops.cc:7553
+#: editor_ops.cc:7494 editor_ops.cc:7508 editor_ops.cc:7548 editor_ops.cc:7558
 msgid "insert time"
 msgstr "Stille einfügen"
 
-#: editor_ops.cc:7605
+#: editor_ops.cc:7610
 msgid "Cannot insert or delete time when in Lock edit."
 msgstr "Kann im Sperr-Bearbeitungsmodus keine Zeit einfügen oder löschen"
 
-#: editor_ops.cc:7625 editor_ops.cc:7637 editor_ops.cc:7710 editor_ops.cc:7723
+#: editor_ops.cc:7630 editor_ops.cc:7642 editor_ops.cc:7715 editor_ops.cc:7728
 msgid "remove time"
 msgstr "Zeit entfernen"
 
-#: editor_ops.cc:7797
+#: editor_ops.cc:7802
 msgid "There are too many tracks to fit in the current window"
 msgstr "Es gibt zu viele Spuren, sie in das aktuelle Fenster zu einzupassen"
 
-#: editor_ops.cc:7858
+#: editor_ops.cc:7863
 msgid "Sel"
 msgstr "Sel"
 
-#: editor_ops.cc:7897
+#: editor_ops.cc:7902
 #, c-format
 msgid "Saved view %u"
 msgstr "Ansicht %u gespeichert"
 
-#: editor_ops.cc:7922
+#: editor_ops.cc:7927
 msgid "mute regions"
 msgstr "Regionen stummschalten"
 
-#: editor_ops.cc:7924
+#: editor_ops.cc:7929
 msgid "mute region"
 msgstr "Region stummschalten"
 
-#: editor_ops.cc:7961
+#: editor_ops.cc:7966
 msgid "combine regions"
 msgstr "Regionen verbinden (combine)"
 
-#: editor_ops.cc:7999
+#: editor_ops.cc:8004
 msgid "uncombine regions"
 msgstr "Regionen trennen (uncombine)"
 
-#: editor_ops.cc:8038
+#: editor_ops.cc:8043
 msgid "%1: Locked"
 msgstr "%1: Gesperrt"
 
-#: editor_ops.cc:8046
+#: editor_ops.cc:8051
 msgid "Click to unlock"
 msgstr "Klicken, um Sperre aufzuheben"
 
-#: editor_ops.cc:8097
+#: editor_ops.cc:8102
 msgid "Moving embedded files into session folder"
 msgstr "Verschiebe eingebettete Dateien in den Projektordner"
 
@@ -8679,67 +8679,67 @@ msgstr "Velocity bearbeiten"
 msgid "add note"
 msgstr "Note hinzufügen"
 
-#: midi_region_view.cc:1899
+#: midi_region_view.cc:1861
 msgid "step add"
 msgstr "Schritt hinzufügen"
 
-#: midi_region_view.cc:1993 midi_region_view.cc:2016
+#: midi_region_view.cc:1955 midi_region_view.cc:1978
 msgid "alter patch change"
 msgstr "Patch Change ändern"
 
-#: midi_region_view.cc:2052
+#: midi_region_view.cc:2014
 msgid "add patch change"
 msgstr "Patch Change hinzufügen"
 
-#: midi_region_view.cc:2074 midi_region_view.cc:2075
+#: midi_region_view.cc:2036 midi_region_view.cc:2037
 msgid "move patch change"
 msgstr "Patch Change verschieben"
 
-#: midi_region_view.cc:2087 midi_region_view.cc:2088
+#: midi_region_view.cc:2049 midi_region_view.cc:2050
 msgid "delete patch change"
 msgstr "Patch Change löschen"
 
-#: midi_region_view.cc:2134
+#: midi_region_view.cc:2096
 msgid "delete selection"
 msgstr "Auswahl löschen"
 
-#: midi_region_view.cc:2152
+#: midi_region_view.cc:2114
 msgid "delete note"
 msgstr "Note löschen"
 
-#: midi_region_view.cc:2594
+#: midi_region_view.cc:2556
 msgid "move notes"
 msgstr "Noten verschieben"
 
-#: midi_region_view.cc:3145
+#: midi_region_view.cc:3107
 msgid "change velocities"
 msgstr "Velocity ändern"
 
-#: midi_region_view.cc:3211
+#: midi_region_view.cc:3173
 msgid "transpose"
 msgstr "Transponieren"
 
-#: midi_region_view.cc:3239
+#: midi_region_view.cc:3201
 msgid "change note lengths"
 msgstr "Notenlänge ändern"
 
-#: midi_region_view.cc:3315
+#: midi_region_view.cc:3277
 msgid "nudge"
 msgstr "Verschieben"
 
-#: midi_region_view.cc:3330
+#: midi_region_view.cc:3292
 msgid "change channel"
 msgstr "Kanal ändern"
 
-#: midi_region_view.cc:3378
+#: midi_region_view.cc:3340
 msgid "Bank "
 msgstr "Bank"
 
-#: midi_region_view.cc:3380
+#: midi_region_view.cc:3342
 msgid "Channel "
 msgstr "Kanal"
 
-#: midi_region_view.cc:3572
+#: midi_region_view.cc:3534
 msgid "paste"
 msgstr "Einfügen"
 
