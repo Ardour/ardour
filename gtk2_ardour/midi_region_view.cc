@@ -1384,7 +1384,6 @@ MidiRegionView::~MidiRegionView ()
 		end_write();
 	}
 	_entered_note = 0;
-	_selection.clear();
 	clear_events ();
 
 	delete _note_group;
