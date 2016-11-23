@@ -297,7 +297,7 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 
 	// Find the next available column
 	pan->column = select_available_automation_column ();
-	if (pan->column) {
+	if (!pan->column) {
 		return;
 	}
 
