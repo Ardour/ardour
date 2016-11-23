@@ -575,8 +575,13 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		if (eff_mouse_mode != MouseRange) {
 			AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 			std::list<Selectable*> selectables;
+			double mx = event->button.x;
+			double my = event->button.y;
+
+			al->grab_item().canvas_to_item (mx, my);
+
 			uint32_t before, after;
-			framecnt_t const  where = (framecnt_t) floor (event->button.x * samples_per_pixel);
+			framecnt_t const  where = (framecnt_t) floor (mx * samples_per_pixel);
 
 			if (!al || !al->control_points_adjacent (where, before, after)) {
 				break;
