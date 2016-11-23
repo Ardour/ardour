@@ -43,6 +43,8 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=ArdourSAE ;
 		APPNAME=Ardour ;
+		BUNDLENAME=Ardour${major_version} ;
+		lower_case_appname=ardour;
 		shift ;;
 	--mixbus) MIXBUS=1;
 		WITH_HARRISON_LV2=1 ;
@@ -52,6 +54,8 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
+		BUNDLENAME=Mixbus${major_version} ;
+		lower_case_appname=mixbus;
 		shift ;;
 	--mixbus32c) MIXBUS=1;
 		MIXBUS32C=1;
@@ -61,8 +65,9 @@ while [ $# -gt 0 ] ; do
 		SAE= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
+		lower_case_appname=mixbus32c;
 		APPNAME=Mixbus32C-${major_version} ;
-		major_version=""
+		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
 	--public)
 		SAE= ;
@@ -70,6 +75,8 @@ while [ $# -gt 0 ] ; do
 		WITH_X42_LV2=1 ;
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
+		BUNDLENAME=Ardour${major_version} ;
+		lower_case_appname=ardour;
 		shift ;;
 	--allinone) SAE= ;
 		STRIP= ;
@@ -113,11 +120,9 @@ else
 	fi
 fi
 
-lower_case_appname=`echo $APPNAME | tr '[:upper:]' '[:lower:]'`
-
 # setup directory structure
 
-APPDIR=${APPNAME}${major_version}.app
+APPDIR=${BUNDLENAME}.app
 APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
@@ -182,36 +187,16 @@ mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $Themes
 
-# maybe set variables
-env=""
-if test x$SAE != x ; then
-    appname="Ardour${major_version}-SAE"
-    EXECUTABLE=${appname}
-    env="$env<key>ARDOUR_SAE</key><string>true</string>"
-    #
-    # current default for SAE version is German keyboard layout without a keypad
-    #
-    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
-    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
-elif test x$MIXBUS != x ; then
-    appname=$APPNAME
-    EXECUTABLE=${appname}${major_version}
-    env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
-    #
-    # current default for MIXBUS version is US keyboard layout without a keypad
-    #
-    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
-    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
-else
-    appname="Ardour${major_version}"
-    EXECUTABLE=${appname}
-fi
+
+
+EXECUTABLE=${BUNDLENAME}
 
 #
 # if we're not going to bundle JACK, make sure we can find
 # jack in the places where it might be
 #
 
+env=""
 env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
 env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
 
@@ -223,7 +208,7 @@ sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" \
     -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
-    -e "s?@BUNDLENAME@?${APPNAME}${major_version}?g" \
+    -e "s?@BUNDLENAME@?$BUNDLENAME?g" \
     -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
