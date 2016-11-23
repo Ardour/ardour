@@ -68,6 +68,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 
 AutomationRegionView::~AutomationRegionView ()
 {
+	in_destructor = true;
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
 
