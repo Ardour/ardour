@@ -511,7 +511,7 @@ msgstr "%1 wird ohne gültige Menüdefinitions-Datei nicht funktionieren"
 
 #: add_route_dialog.cc:58
 msgid "Add Track/Bus/VCA"
-msgstr "Füge Spur/Bus/VCA hinzu"
+msgstr "Spur/Bus/VCA hinzufügen"
 
 #: add_route_dialog.cc:61
 msgid "Configuration:"
