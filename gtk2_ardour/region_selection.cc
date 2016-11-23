@@ -139,7 +139,7 @@ RegionSelection::remove (RegionView* rv)
 
 		// remove from layer sorted list
 		_bylayer.remove (rv);
-
+		pending.remove (rv->region()->id());
 		erase (r);
 		return true;
 	}
