@@ -1124,20 +1124,25 @@ RouteTimeAxisView::rename_current_playlist ()
 
 	prompter.set_title (_("Rename Playlist"));
 	prompter.set_prompt (_("New name for playlist:"));
-	prompter.set_initial_text (pl->name());
 	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	prompter.set_initial_text (pl->name());
 	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 
-	switch (prompter.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
+	while (true) {
+		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+			break;
+		}
 		prompter.get_result (name);
 		if (name.length()) {
-			pl->set_name (name);
+			if (_session->playlists->by_name (name)) {
+				MessageDialog msg (_("Given playlist name is not unique."));
+				msg.run ();
+				prompter.set_initial_text (Playlist::bump_name (name, *_session));
+			} else {
+				pl->set_name (name);
+				break;
+			}
 		}
-		break;
-
-	default:
-		break;
 	}
 }
 
