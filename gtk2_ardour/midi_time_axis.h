@@ -123,6 +123,10 @@ private:
 	void drop_instrument_ref ();
 	PBD::ScopedConnectionList midnam_connection;
 
+	void start_scroomer_update ();
+	void stop_scroomer_update ();
+	sigc::connection _note_range_changed_connection;
+
 	void model_changed(const std::string& model);
 	void custom_device_mode_changed(const std::string& mode);
 

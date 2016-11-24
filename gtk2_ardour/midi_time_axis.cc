@@ -163,8 +163,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		                               true);
 	}
 
-	midi_view()->NoteRangeChanged.connect (
-		sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
 	_view->ContentsHeightChanged.connect (
 		sigc::mem_fun (*this, &MidiTimeAxisView::contents_height_changed));
 
@@ -207,11 +205,12 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_piano_roll_header->ToggleNoteSelection.connect (
 			sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection));
 
-		/* Suspend updates of the StreamView during scroomer drags to speed things up */
+		/* Update StreamView during scroomer drags.*/
+
 		_range_scroomer->DragStarting.connect (
-			sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
+			sigc::mem_fun (*this, &MidiTimeAxisView::start_scroomer_update));
 		_range_scroomer->DragFinishing.connect (
-			sigc::mem_fun (*midi_view(), &MidiStreamView::resume_updates));
+			sigc::mem_fun (*this, &MidiTimeAxisView::stop_scroomer_update));
 
 		/* Put the scroomer and the keyboard in a VBox with a padding
 		   label so that they can be reduced in height for stacked-view
@@ -430,6 +429,17 @@ void
 MidiTimeAxisView::drop_instrument_ref ()
 {
 	midnam_connection.drop_connections ();
+}
+void
+MidiTimeAxisView::start_scroomer_update ()
+{
+	_note_range_changed_connection = midi_view()->NoteRangeChanged.connect (
+		sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
+}
+void
+MidiTimeAxisView::stop_scroomer_update ()
+{
+	_note_range_changed_connection.disconnect();
 }
 
 void
