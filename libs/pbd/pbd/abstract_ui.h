@@ -63,6 +63,7 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
         Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
 	Glib::Threads::Mutex request_buffer_map_lock;
+	Glib::Threads::Mutex request_invalidation_lock;
 
 	static void* request_buffer_factory (uint32_t num_requests);
 

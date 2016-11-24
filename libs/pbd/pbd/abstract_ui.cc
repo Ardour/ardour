@@ -240,6 +240,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					request_buffer_map_lock.lock ();
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
+						Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
 						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
 					} else {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
@@ -301,6 +302,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 */
 
 		if (req->invalidation) {
+			Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", event_loop_name(), pthread_name()));
 
 			/* after this call, if the object referenced by the
@@ -309,6 +311,17 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			 */
 
 			req->invalidation->requests.remove (req);
+
+			/* req->invalidation->requests is identical to
+			 * EventLoop::invalidate_request()'s ir->requests.
+			 *
+			 * However EventLoop::invalidate_request() cannot
+			 * run in parallel to this, because sigc slots are always
+			 * called in the same thread as signal emission (this event-loop).
+			 * So we do not need to expose "request_invalidation_lock",
+			 * and only provide a safeguard for modifications to the
+			 * container itself.
+			 */
 		}
 
 		/* at this point, an object involved in a functor could be
@@ -434,6 +447,19 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	req->invalidation = invalidation;
 
 	if (invalidation) {
+		/* We're about to modify a std::list<> container, this must not
+		 * happen concurrently with other container modifications
+		 * (invalidation->requests.remove in handle_ui_requests).
+		 *
+		 * Let's take a dedicated lock that is less contended than
+		 * request_buffer_map_lock.
+		 *
+		 * This works because object's d'tor disconnect signals
+		 * (member variable) before the sigc::trackable's destroy_notify
+		 * runs. So there is no race between signal-emissions/call_slot()
+		 * and adding new requests after the object has been invalidated.
+		 */
+		Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
 		invalidation->requests.push_back (req);
 		invalidation->event_loop = this;
 	}
