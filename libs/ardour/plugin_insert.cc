@@ -1816,11 +1816,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			&& _in_map.size() == _out_map.size()
 			&& _in_map.size() == get_count ()
 		 ) {
-		assert (_maps_from_state == false);
 		/* If the configuration has not changed, keep the mapping */
 		mapping_changed = sanitize_maps ();
 	} else if (_match.custom_cfg && _configured) {
-		assert (_maps_from_state == false);
 		/* don't touch the map in manual mode */
 		mapping_changed = sanitize_maps ();
 	} else {
