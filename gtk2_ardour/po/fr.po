@@ -10914,7 +10914,7 @@ msgstr "Rogner les contenus en utilisant :"
 
 #: rc_option_editor.cc:607
 msgid "Anchored trim using:"
-msgstr "Ancré le rognage en utilisant :"
+msgstr "Rognage ancré en utilisant :"
 
 #: rc_option_editor.cc:651
 msgid "Resize notes relatively using:"
@@ -11055,7 +11055,7 @@ msgstr "Afficher les paramètres de protocole"
 
 #: rc_option_editor.cc:1494
 msgid "Configuration"
-msgstr "configuration"
+msgstr "Configuration"
 
 #: rc_option_editor.cc:1547
 msgid "Show Video Export Info before export"
