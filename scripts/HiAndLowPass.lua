@@ -177,7 +177,7 @@ end
 
 -- the actual DSP callback
 function dsp_run (ins, outs, n_samples)
-	assert (n_samples < 8192)
+	assert (n_samples <= 8192)
 	assert (#ins == chn)
 	local ctrl = santize_params (CtrlPorts:array ())
 
