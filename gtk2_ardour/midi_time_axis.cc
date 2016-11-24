@@ -433,6 +433,7 @@ MidiTimeAxisView::drop_instrument_ref ()
 void
 MidiTimeAxisView::start_scroomer_update ()
 {
+	_note_range_changed_connection.disconnect();
 	_note_range_changed_connection = midi_view()->NoteRangeChanged.connect (
 		sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
 }
