@@ -181,6 +181,8 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
     : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
     , _optimization_iterator(events.end())
 {
+	set_colors();
+
 	base_rect->lower_to_bottom();
 	update_range ();
 
@@ -203,6 +205,8 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                   initial_unit_pos)
     , _optimization_iterator(events.end())
 {
+	set_colors();
+
 	base_rect->lower_to_bottom();
 	update_range ();
 
@@ -265,11 +269,10 @@ void
 MidiGhostRegion::set_colors()
 {
 	GhostRegion::set_colors();
+	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		_fill = UIConfiguration::instance().color_mod((*it)->event->base_color(), "ghost track midi fill");
-		_outline = UIConfiguration::instance().color ("ghost track midi outline");
-		(*it)->item->set_fill_color (_fill);
+		(*it)->item->set_fill_color (UIConfiguration::instance().color_mod((*it)->event->base_color(), "ghost track midi fill"));
 		(*it)->item->set_outline_color (_outline);
 	}
 }
@@ -333,7 +336,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->item->set_fill_color (_fill);
+	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
 
 	MidiStreamView* mv = midi_view();
