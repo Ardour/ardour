@@ -442,7 +442,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (tempo_marker->tempo().movable()) {
+	if (!tempo_marker->tempo().initial()) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }
@@ -559,7 +559,7 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (meter_marker->meter().movable()) {
+	if (!meter_marker->meter().initial()) {
 	  Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
 	}
 }
