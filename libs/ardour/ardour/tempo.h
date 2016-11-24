@@ -112,7 +112,7 @@ class LIBARDOUR_API Meter {
 class LIBARDOUR_API MetricSection {
   public:
 	MetricSection (double pulse, double minute, PositionLockStyle pls, bool is_tempo, framecnt_t sample_rate)
-		: _pulse (pulse), _minute (minute), _movable (true), _position_lock_style (pls), _is_tempo (is_tempo), _sample_rate (sample_rate) {}
+		: _pulse (pulse), _minute (minute), _initial (false), _position_lock_style (pls), _is_tempo (is_tempo), _sample_rate (sample_rate) {}
 
 	virtual ~MetricSection() {}
 
@@ -126,8 +126,8 @@ class LIBARDOUR_API MetricSection {
 
 	framepos_t frame () const { return frame_at_minute (_minute); }
 
-	void set_movable (bool yn) { _movable = yn; }
-	bool movable() const { return _movable; }
+	void set_initial (bool yn) { _initial = yn; }
+	bool initial() const { return _initial; }
 
 	/* MeterSections are not stateful in the full sense,
 	   but we do want them to control their own
@@ -146,7 +146,7 @@ private:
 
 	double             _pulse;
 	double             _minute;
-	bool               _movable;
+	bool               _initial;
 	PositionLockStyle  _position_lock_style;
 	const bool         _is_tempo;
 	framecnt_t         _sample_rate;

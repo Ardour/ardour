@@ -807,7 +807,7 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 	bool can_remove = false;
 
 	if (mm) {
-		can_remove = mm->meter().movable ();
+		can_remove = !mm->meter().initial ();
 		delete meter_marker_menu;
 		build_meter_marker_menu (mm, can_remove);
 		meter_marker_menu->popup (1, ev->time);
@@ -815,7 +815,7 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		if (!tm->tempo().active()) {
 			return;
 		}
-		can_remove = tm->tempo().movable() && !tm->tempo().locked_to_meter();
+		can_remove = !tm->tempo().initial() && !tm->tempo().locked_to_meter();
 		delete tempo_marker_menu;
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);

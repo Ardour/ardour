@@ -3319,7 +3319,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
-	_movable = _real_section->movable();
+	_movable = !_real_section->initial();
 	_grab_bpm = _real_section->note_types_per_minute();
 	assert (_marker);
 }
