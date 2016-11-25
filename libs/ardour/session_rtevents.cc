@@ -64,8 +64,27 @@ Session::set_control (boost::shared_ptr<AutomationControl> ac, double val, Contr
 void
 Session::rt_set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
+	/* Note that we require that all controls in the ControlList are of the
+	   same type.
+	*/
+	if (cl->empty()) {
+		return;
+	}
+
 	for (ControlList::iterator c = cl->begin(); c != cl->end(); ++c) {
 		(*c)->set_value (val, gcd);
+	}
+
+	/* some controls need global work to take place after they are set. Do
+	 * that here.
+	 */
+
+	switch (cl->front()->parameter().type()) {
+	case SoloAutomation:
+		update_route_solo_state ();
+		break;
+	default:
+		break;
 	}
 }
 

@@ -627,6 +627,9 @@ void
 Route::set_listen (bool yn)
 {
 	if (_monitor_send) {
+		if (_monitor_send->active() == yn) {
+			return;
+		}
 		if (yn) {
 			_monitor_send->activate ();
 		} else {

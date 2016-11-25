@@ -3790,8 +3790,6 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 
 		_listen_cnt--;
 	}
-
-	update_route_solo_state ();
 }
 
 void
@@ -3825,7 +3823,7 @@ Session::route_solo_isolated_changed (boost::weak_ptr<Route> wpr)
 void
 Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
 {
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_changed));
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1, update\n", self_solo_changed));
 
 	boost::shared_ptr<Route> route (wpr.lock());
 
@@ -3877,6 +3875,8 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 	RouteGroup* rg = route->route_group ();
 	const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("propagate to session, group accounted for ? %1\n", group_already_accounted_for));
 
 	if (delta == 1 && Config->get_exclusive_solo()) {
 
@@ -3991,8 +3991,6 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 	DEBUG_TRACE (DEBUG::Solo, "propagation complete\n");
 
-	update_route_solo_state (r);
-
 	/* now notify that the mute state of the routes not involved in the signal
 	   pathway of the just-solo-changed route may have altered.
 	*/
@@ -4000,11 +3998,10 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
 		(*i)->act_on_mute ();
-		(*i)->mute_control()->Changed (false, Controllable::NoGroup);
+		/* Session will emit SoloChanged() after all solo changes are
+		 * complete, which should be used by UIs to update mute status
+		 */
 	}
-
-	SoloChanged (); /* EMIT SIGNAL */
-	set_dirty();
 }
 
 void
@@ -4024,13 +4021,13 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->can_solo()) {
 			if (Config->get_solo_control_is_listen_control()) {
-				if ((*i)->self_soloed() || (*i)->solo_control()->get_masters_value()) {
+				if ((*i)->solo_control()->soloed_by_self_or_masters()) {
 					listeners++;
 					something_listening = true;
 				}
 			} else {
 				(*i)->set_listen (false);
-				if ((*i)->can_solo() && ((*i)->self_soloed() || (*i)->solo_control()->get_masters_value())) {
+				if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
 					something_soloed = true;
 				}
 			}
@@ -4060,6 +4057,10 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("solo state updated by session, soloed? %1 listeners %2 isolated %3\n",
 						  something_soloed, listeners, isolated));
+
+
+	SoloChanged (); /* EMIT SIGNAL */
+	set_dirty();
 }
 
 void
