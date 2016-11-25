@@ -1992,7 +1992,7 @@ Session::xrun_recovery ()
 void
 Session::route_processors_changed (RouteProcessorChange c)
 {
-	if (ignore_route_processor_changes) {
+	if (g_atomic_int_get (&_ignore_route_processor_changes) > 0) {
 		return;
 	}
 

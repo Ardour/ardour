@@ -581,20 +581,40 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
 	class StateProtector {
-	                                        public:
-		StateProtector (Session* s) : _session (s) {
-			g_atomic_int_inc (&s->_suspend_save);
-		}
-		~StateProtector () {
-			if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
-				while (_session->_save_queued) {
-					_session->_save_queued = false;
-					_session->save_state ("");
+		public:
+			StateProtector (Session* s) : _session (s) {
+				g_atomic_int_inc (&s->_suspend_save);
+			}
+			~StateProtector () {
+				if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
+					while (_session->_save_queued) {
+						_session->_save_queued = false;
+						_session->save_state ("");
+					}
 				}
 			}
-		}
-            private:
-		Session * _session;
+		private:
+			Session * _session;
+	};
+
+	class ProcessorChangeBlocker {
+		public:
+			ProcessorChangeBlocker (Session* s, bool rc = true)
+				: _session (s)
+				, _reconfigure_on_delete (rc)
+			{
+				g_atomic_int_inc (&s->_ignore_route_processor_changes);
+			}
+			~ProcessorChangeBlocker () {
+				if (g_atomic_int_dec_and_test (&_session->_ignore_route_processor_changes)) {
+					if (_reconfigure_on_delete) {
+						_session->route_processors_changed (RouteProcessorChange ());
+					}
+				}
+			}
+		private:
+			Session* _session;
+			bool _reconfigure_on_delete;
 	};
 
 	void add_route_group (RouteGroup *);
@@ -2005,7 +2025,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	GraphEdges _current_route_graph;
 
 	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
-	bool ignore_route_processor_changes;
+
+	friend class    ProcessorChangeBlocker;
+	gint            _ignore_route_processor_changes; /* atomic */
 
 	MidiClockTicker* midi_clock;
 

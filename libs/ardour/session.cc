@@ -312,7 +312,7 @@ Session::Session (AudioEngine &eng,
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
-	, ignore_route_processor_changes (false)
+	, _ignore_route_processor_changes (0)
 	, midi_clock (0)
 	, _scene_changer (0)
 	, _midi_ports (0)
@@ -1129,7 +1129,7 @@ Session::remove_monitor_section ()
 
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
-		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+		ProcessorChangeBlocker  pcb (this, false);
 
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
 
@@ -1289,7 +1289,7 @@ Session::add_monitor_section ()
 
 	boost::shared_ptr<RouteList> rls = routes.reader ();
 
-	PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
 
@@ -1413,7 +1413,7 @@ Session::reset_monitor_section ()
 
 	boost::shared_ptr<RouteList> rls = routes.reader ();
 
-	PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+	ProcessorChangeBlocker pcb (this, false);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
 
@@ -3662,7 +3662,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			/* if the monitoring section had a pointer to this route, remove it */
 			if (_monitor_out && !(*iter)->is_master() && !(*iter)->is_monitor()) {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+				ProcessorChangeBlocker pcb (this, false);
 				(*iter)->remove_aux_or_listen (_monitor_out);
 			}
 
@@ -6216,14 +6216,11 @@ Session::update_route_record_state ()
 void
 Session::listen_position_changed ()
 {
-	{
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->listen_position_changed ();
-		}
+	ProcessorChangeBlocker pcb (this);
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->listen_position_changed ();
 	}
-	route_processors_changed (RouteProcessorChange ());
 }
 
 void
