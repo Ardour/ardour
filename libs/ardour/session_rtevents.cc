@@ -106,7 +106,7 @@ Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */
 
 	_vca_manager->clear_all_solo_state ();
 
-	set_dirty();
+	update_route_solo_state ();
 }
 
 void
