@@ -602,6 +602,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK(serv, "/strip/name", "is", route_rename);
 		REGISTER_CALLBACK(serv, "/strip/sends", "i", route_get_sends);
 		REGISTER_CALLBACK(serv, "/strip/receives", "i", route_get_receives);                
+		REGISTER_CALLBACK(serv, "/strip/plugin/list", "i", route_plugin_list);
+		REGISTER_CALLBACK(serv, "/strip/plugin/descriptor", "ii", route_plugin_descriptor);
+		REGISTER_CALLBACK(serv, "/strip/plugin/reset", "ii", route_plugin_reset);
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -2787,6 +2790,170 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 		}
 	}
 	return sel_send_fail ("send_enable", id + 1, 0, get_address (msg));
+}
+
+int
+OSC::route_plugin_list(int ssid, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+	int piid = 0;
+
+	lo_message reply = lo_message_new();
+	lo_message_add_int32(reply, ssid);
+
+
+	for(;;) {
+		boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
+		if( !redi ) {
+			break;
+		}
+
+		boost::shared_ptr<PluginInsert> pi;
+
+		if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+			PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
+			continue;
+		}
+		lo_message_add_int32(reply, piid);
+
+		boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+		lo_message_add_string(reply, pip->name());
+
+		piid++;
+	}
+
+	lo_send_message(get_address (msg), "/strip/plugin/list", reply);
+	lo_message_free(reply);
+	return 0;
+}
+
+int
+OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
+
+	if (!redi) {
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	bool ok = false;
+
+	lo_message reply = lo_message_new();
+	lo_message_add_int32(reply, ssid);
+	lo_message_add_int32(reply, piid);
+	lo_message_add_string(reply, pip->name());
+	for( uint32_t ppi = 0; ppi < pip->parameter_count(); ppi++) {
+
+		uint32_t controlid = pip->nth_parameter(ppi, ok);
+		if (!ok) {
+			continue;
+		}
+		if( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
+			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+
+				lo_message_add_int32(reply, ppi);
+				ParameterDescriptor pd;
+				pi->plugin()->get_parameter_descriptor(controlid, pd);
+				lo_message_add_string(reply, pd.label.c_str());
+
+				// I've combined those binary descriptor parts in a bit-field to reduce lilo message elements
+				int flags = 0;
+				flags |= pd.enumeration ? 1 : 0;
+				flags |= pd.integer_step ? 2 : 0;
+				flags |= pd.logarithmic ? 4 : 0;
+				flags |= pd.max_unbound ? 8 : 0;
+				flags |= pd.min_unbound ? 16 : 0;
+				flags |= pd.sr_dependent ? 32 : 0;
+				flags |= pd.toggled ? 64 : 0;
+				flags |= c != NULL ? 128 : 0; // bit 7 indicates in input control
+				lo_message_add_int32(reply, flags);
+
+				lo_message_add_int32(reply, pd.datatype);
+				lo_message_add_float(reply, pd.lower);
+				lo_message_add_float(reply, pd.upper);
+				lo_message_add_string(reply, pd.print_fmt.c_str());
+				if( pd.scale_points ) {
+					lo_message_add_int32(reply, pd.scale_points->size());
+					for( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
+						lo_message_add_int32(reply, i->second);
+						lo_message_add_string(reply, ((std::string)i->first).c_str());
+					}
+				}
+				else {
+					lo_message_add_int32(reply, 0);
+				}
+				if( c ) {
+					lo_message_add_double(reply, c->get_value());
+				}
+				else {
+					lo_message_add_double (reply, 0);
+			}
+		}
+	}
+
+	lo_send_message (get_address (msg), "/strip/plugin/descriptor", reply);
+	lo_message_free (reply);
+
+	return 0;
+}
+
+int
+OSC::route_plugin_reset(int ssid, int piid, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
+
+	if (!redi) {
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
+		return -1;
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
+		return -1;
+	}
+
+	pi->reset_parameters_to_default();
+
+	return 0;
 }
 
 int

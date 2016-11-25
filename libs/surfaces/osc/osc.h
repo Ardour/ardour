@@ -476,6 +476,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK3(route_plugin_parameter_print,i,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_activate,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_deactivate,i,i);
+	PATH_CALLBACK1_MSG(route_plugin_list,i);
+	PATH_CALLBACK2_MSG(route_plugin_descriptor,i,i);
+	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
 
 	int route_rename (int rid, char *s, lo_message msg);
 	int route_mute (int rid, int yn, lo_message msg);
@@ -504,6 +507,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_plugin_parameter_print (int rid, int piid,int par, lo_message msg);
 	int route_plugin_activate (int rid, int piid, lo_message msg);
 	int route_plugin_deactivate (int rid, int piid, lo_message msg);
+	int route_plugin_list(int ssid, lo_message msg);
+	int route_plugin_descriptor(int ssid, int piid, lo_message msg);
+	int route_plugin_reset(int ssid, int piid, lo_message msg);
 
 	//banking functions
 	int set_bank (uint32_t bank_start, lo_message msg);
