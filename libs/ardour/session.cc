@@ -6230,14 +6230,18 @@ void
 Session::solo_control_mode_changed ()
 {
 	if (soloing() || listening()) {
-		/* We can't use ::clear_all_solo_state() here because during
-		   session loading at program startup, that will queue a call
-		   to rt_clear_all_solo_state() that will not execute until
-		   AFTER solo states have been established (thus throwing away
-		   the session's saved solo state). So just explicitly turn
-		   them all off.
-		*/
-		set_controls (route_list_to_control_list (get_routes(), &Stripable::solo_control), 0.0, Controllable::NoGroup);
+		if (loading()) {
+			/* We can't use ::clear_all_solo_state() here because during
+			   session loading at program startup, that will queue a call
+			   to rt_clear_all_solo_state() that will not execute until
+			   AFTER solo states have been established (thus throwing away
+			   the session's saved solo state). So just explicitly turn
+			   them all off.
+			*/
+			set_controls (route_list_to_control_list (get_routes(), &Stripable::solo_control), 0.0, Controllable::NoGroup);
+		} else {
+			clear_all_solo_state (get_routes());
+		}
 	}
 }
 
