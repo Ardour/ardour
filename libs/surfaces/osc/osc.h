@@ -212,6 +212,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
+	int route_get_sends (lo_message msg);
+	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);
 	void transport_frame (lo_message msg);
 	void transport_speed (lo_message msg);
@@ -233,6 +235,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0;		\
 	}
 
+	PATH_CALLBACK_MSG(route_get_sends);
+	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(transport_frame);
 	PATH_CALLBACK_MSG(transport_speed);
@@ -401,6 +405,18 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0;						\
 	}
 
+#define PATH_CALLBACK2_MSG_s(name,arg1type,arg2type)			\
+        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+        } \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+        OSC_DEBUG;              \
+                if (argc > 1) {						\
+                        name (argv[0]->arg1type, &argv[1]->arg2type, data); \
+                }							\
+                return 0;						\
+        }
+
 #define PATH_CALLBACK3(name,arg1type,arg2type,arg3type)                \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
@@ -436,6 +452,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK4(set_surface,i,i,i,i);
 	PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(loop_location,i,i);
+	PATH_CALLBACK2_MSG_s(route_rename,i,s);
 	PATH_CALLBACK2_MSG(route_mute,i,i);
 	PATH_CALLBACK2_MSG(route_solo,i,i);
 	PATH_CALLBACK2_MSG(route_solo_iso,i,i);
@@ -460,6 +477,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_plugin_activate,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_deactivate,i,i);
 
+	int route_rename (int rid, char *s, lo_message msg);
 	int route_mute (int rid, int yn, lo_message msg);
 	int route_solo (int rid, int yn, lo_message msg);
 	int route_solo_iso (int rid, int yn, lo_message msg);

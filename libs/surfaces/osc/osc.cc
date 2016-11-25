@@ -46,6 +46,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/presentation_info.h"
 #include "ardour/send.h"
+#include "ardour/internal_send.h"
 #include "ardour/phase_control.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
@@ -598,6 +599,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/send/gain", "iif", route_set_send_gain_dB);
 		REGISTER_CALLBACK (serv, "/strip/send/fader", "iif", route_set_send_fader);
 		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
+		REGISTER_CALLBACK(serv, "/strip/name", "is", route_rename);
+		REGISTER_CALLBACK(serv, "/strip/sends", "i", route_get_sends);
+		REGISTER_CALLBACK(serv, "/strip/receives", "i", route_get_receives);                
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -1789,6 +1793,115 @@ OSC::monitor_set_fader (float position)
 	return 0;
 }
 
+int
+OSC::route_get_sends(lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	lo_arg **argv = lo_message_get_argv(msg);
+
+	int rid = argv[0]->i;
+
+	boost::shared_ptr<Stripable> strip = get_strip(rid, get_address(msg));
+	if (!strip) {
+		return -1;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (strip);
+	if (!r) {
+		return -1;
+	}
+
+	lo_message reply = lo_message_new();
+	lo_message_add_int32(reply, rid);
+
+	int i = 0;
+	for (;;) {
+		boost::shared_ptr<Processor> p = r->nth_send(i++);
+
+		if (!p) {
+			break;
+		}
+
+		boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (p);
+		if (isend) {
+			lo_message_add_int32(reply, get_sid(isend->target_route(), get_address(msg)));
+			lo_message_add_string(reply, isend->name().c_str());
+			lo_message_add_int32(reply, i);
+			boost::shared_ptr<Amp> a = isend->amp();
+			lo_message_add_float(reply, gain_to_slider_position(a->gain_control()->get_value()));
+			lo_message_add_int32(reply, p->active() ? 1 : 0);
+		}
+	}
+	// if used dedicated message path to identify this reply in async operation. Naming it #reply wont help the client to identify the content.
+	lo_send_message(get_address (msg), "/strip/sends", reply);
+
+	lo_message_free(reply);
+
+	return 0;
+}
+
+int
+OSC::route_get_receives(lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	lo_arg **argv = lo_message_get_argv(msg);
+
+	uint32_t rid = argv[0]->i;
+
+
+	boost::shared_ptr<Stripable> strip = get_strip(rid, get_address(msg));
+	if (!strip) {
+		return -1;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (strip);
+	if (!r) {
+		return -1;
+	}
+
+	boost::shared_ptr<RouteList> route_list = session->get_routes();
+
+	lo_message reply = lo_message_new();
+
+	for (RouteList::iterator i = route_list->begin(); i != route_list->end(); ++i) {
+		boost::shared_ptr<Route> tr = boost::dynamic_pointer_cast<Route> (*i);
+		if (!tr) {
+			continue;
+		}
+		int j = 0;
+
+		for (;;) {
+			boost::shared_ptr<Processor> p = tr->nth_send(j++);
+
+			if (!p) {
+				break;
+			}
+
+			boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (p);
+			if (isend) {
+				if( isend->target_route()->id() == r->id()){
+					boost::shared_ptr<Amp> a = isend->amp();
+
+					lo_message_add_int32(reply, get_sid(tr, get_address(msg)));
+					lo_message_add_string(reply, tr->name().c_str());
+					lo_message_add_int32(reply, j);
+					lo_message_add_float(reply, gain_to_slider_position(a->gain_control()->get_value()));
+					lo_message_add_int32(reply, p->active() ? 1 : 0);
+				}
+			}
+		}
+	}
+
+	// I have used a dedicated message path to identify this reply in async operation. Naming it #reply wont help the client to identify the content.
+	lo_send_message(get_address (msg), "/strip/receives", reply);
+	lo_message_free(reply);
+	return 0;
+}
+
 // strip calls
 int
 OSC::route_mute (int ssid, int yn, lo_message msg)
@@ -1964,6 +2077,21 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 		}
 	}
 	return route_send_fail ("recenable", ssid, 0, get_address (msg));
+}
+
+int
+OSC::route_rename(int ssid, char *newname, lo_message msg) {
+    if (!session) {
+        return -1;
+    }
+
+    boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
+
+    if (s) {
+        s->set_name(std::string(newname));
+    }
+
+    return 0;
 }
 
 int
