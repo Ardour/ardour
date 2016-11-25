@@ -6223,11 +6223,14 @@ Session::update_route_record_state ()
 void
 Session::listen_position_changed ()
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->listen_position_changed ();
+	{
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->listen_position_changed ();
+		}
 	}
+	route_processors_changed (RouteProcessorChange ());
 }
 
 void
