@@ -2916,7 +2916,7 @@ ProcessorBox::setup_routing_feeds ()
 			(*i)->input_icon.set_ports (p->input_streams());
 			(*i)->output_icon.set_ports (p->output_streams());
 			ChanMapping inmap (p->input_streams ());
-			ChanMapping outmap (p->input_streams ());
+			ChanMapping outmap (p->output_streams ());
 			ChanMapping thrumap;
 			(*i)->routing_icon.set (
 					p->input_streams(),
