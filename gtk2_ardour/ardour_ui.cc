@@ -4166,6 +4166,8 @@ ARDOUR_UI::add_route_dialog_finished (int r)
 
 	/* XXX do something with name template */
 
+	Session::ProcessorChangeBlocker pcb (_session);
+
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
 		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
