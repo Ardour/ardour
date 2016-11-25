@@ -3839,19 +3839,11 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: self %2 masters %3 transition %4\n", route->name(), route->self_soloed(), route->solo_control()->get_masters_value(), route->solo_control()->transitioned_into_solo()));
 
 	if (route->solo_control()->transitioned_into_solo() == 0) {
-		/* route solo changed by upstream/downstream; not interesting
+		/* route solo changed by upstream/downstream or clear all solo state; not interesting
 		   to Session.
 		*/
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 not self-soloed nor soloed by master (%2), ignoring\n", route->name(), route->solo_control()->get_masters_value()));
 		return;
-	}
-
-	if (route->solo_control()->transitioned_into_solo() == 0) {
-		/* reason for being soloed changed (e.g. master went away, we
-		 * took over the master state), but actual status did
-		 * not. nothing to do.
-		 */
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: solo change was change in reason, not status\n", route->name()));
 	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
