@@ -4330,13 +4330,13 @@ Editor::clear_playlists (TimeAxisView* v)
 void
 Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists);
+	atv.use_new_playlist (sz > 1 ? false : true, playlists, false);
 }
 
 void
 Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_copy_playlist (sz > 1 ? false : true, playlists);
+	atv.use_new_playlist (sz > 1 ? false : true, playlists, true);
 }
 
 void

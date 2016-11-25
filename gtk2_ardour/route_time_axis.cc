@@ -1182,62 +1182,7 @@ RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector
 }
 
 void
-RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op)
-{
-	string name;
-
-	boost::shared_ptr<Track> tr = track ();
-	if (!tr || tr->destructive()) {
-		return;
-	}
-
-	boost::shared_ptr<const Playlist> pl = tr->playlist();
-	if (!pl) {
-		return;
-	}
-
-	name = pl->name();
-
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		name = resolve_new_group_playlist_name(name, playlists_before_op);
-	}
-
-	while (_session->playlists->by_name(name)) {
-		name = Playlist::bump_name (name, *_session);
-	}
-
-	// TODO: The prompter "new" button should be de-activated if the user
-	// specifies a playlist name which already exists in the session.
-
-	if (prompt) {
-
-		ArdourPrompter prompter (true);
-
-		prompter.set_title (_("New Copy Playlist"));
-		prompter.set_prompt (_("Name for new playlist:"));
-		prompter.set_initial_text (name);
-		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
-		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
-		prompter.show_all ();
-
-		switch (prompter.run ()) {
-		case Gtk::RESPONSE_ACCEPT:
-			prompter.get_result (name);
-			break;
-
-		default:
-			return;
-		}
-	}
-
-	if (name.length()) {
-		tr->use_copy_playlist ();
-		tr->playlist()->set_name (name);
-	}
-}
-
-void
-RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op)
+RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op, bool copy)
 {
 	string name;
 
@@ -1261,29 +1206,47 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		name = Playlist::bump_name (name, *_session);
 	}
 
-
 	if (prompt) {
+		// TODO: The prompter "new" button should be de-activated if the user
+		// specifies a playlist name which already exists in the session.
 
 		ArdourPrompter prompter (true);
 
-		prompter.set_title (_("New Playlist"));
-		prompter.set_prompt (_("Name for new playlist:"));
+		if (copy) {
+			prompter.set_title (_("New Copy Playlist"));
+			prompter.set_prompt (_("Name for playlist copy:"));
+		} else {
+			prompter.set_title (_("New Playlist"));
+			prompter.set_prompt (_("Name for new playlist:"));
+		}
 		prompter.set_initial_text (name);
 		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+		prompter.show_all ();
 
-		switch (prompter.run ()) {
-		case Gtk::RESPONSE_ACCEPT:
+		while (true) {
+			if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+				return;
+			}
 			prompter.get_result (name);
-			break;
-
-		default:
-			return;
+			if (name.length()) {
+				if (_session->playlists->by_name (name)) {
+					MessageDialog msg (_("Given playlist name is not unique."));
+					msg.run ();
+					prompter.set_initial_text (Playlist::bump_name (name, *_session));
+				} else {
+					break;
+				}
+			}
 		}
 	}
 
 	if (name.length()) {
-		tr->use_new_playlist ();
+		if (copy) {
+			tr->use_new_playlist ();
+		} else {
+			tr->use_copy_playlist ();
+		}
 		tr->playlist()->set_name (name);
 	}
 }

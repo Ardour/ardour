@@ -115,8 +115,7 @@ public:
 	void fade_range (TimeSelection&);
 
 	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void use_copy_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &, bool copy);
 	void clear_playlist ();
 
 	/* group playlist name resolving */
