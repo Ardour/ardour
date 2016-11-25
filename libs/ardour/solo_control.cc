@@ -191,25 +191,33 @@ SoloControl::get_value () const
 void
 SoloControl::clear_all_solo_state ()
 {
-	// ideally this function will never do anything, it only exists to forestall Murphy
+	bool change = false;
 
-#ifndef NDEBUG
-	// these are really debug messages, but of possible interest.
 	if (self_soloed()) {
-		PBD::info << string_compose (_("Cleared Explicit solo: %1\n"), name());
+		PBD::info << string_compose (_("Cleared Explicit solo: %1\n"), name()) << endmsg;
+		actually_set_value (0.0, Controllable::NoGroup);
+		change = true;
 	}
-	if (_soloed_by_others_upstream || _soloed_by_others_downstream) {
-		PBD::info << string_compose (_("Cleared Implicit solo: %1 up:%2 down:%3\n"),
-				name(), _soloed_by_others_upstream, _soloed_by_others_downstream);
+
+	if (_soloed_by_others_upstream) {
+		PBD::info << string_compose (_("Cleared upstream solo: %1 up:%2\n"), name(), _soloed_by_others_upstream)
+		          << endmsg;
+		_soloed_by_others_upstream = 0;
+		change = true;
 	}
-#endif
 
-	_soloed_by_others_upstream = 0;
-	_soloed_by_others_downstream = 0;
+	if (_soloed_by_others_downstream) {
+		PBD::info << string_compose (_("Cleared downstream solo: %1 down:%2\n"), name(), _soloed_by_others_downstream)
+		          << endmsg;
+		_soloed_by_others_downstream = 0;
+		change = true;
+	}
 
-	set_self_solo (false);
 	_transition_into_solo = 0; /* Session does not need to propagate */
-	Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
+
+	if (change) {
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	}
 }
 
 int
