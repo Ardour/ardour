@@ -5269,11 +5269,5 @@ Route::muted_by_others_soloing () const
 void
 Route::clear_all_solo_state ()
 {
-	double v = _solo_safe_control->get_value ();
-
 	_solo_control->clear_all_solo_state ();
-
-	if (v != 0.0) {
-		_solo_safe_control->set_value (v, Controllable::NoGroup);
-	}
 }
