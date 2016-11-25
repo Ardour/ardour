@@ -326,13 +326,13 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 	}
 
 	if (result_required) {
-
 		/* "bufs" are internal, meaning they should never reflect
 		   split-cycle offsets. So shift events back in time from where
 		   they were for the external buffers associated with Ports.
 		*/
 
-		BufferSet& outs (output_buffers());
+		const BufferSet& outs (output_buffers());
+		bufs.set_count (output_buffers().count ());
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
