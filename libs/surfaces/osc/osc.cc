@@ -2793,12 +2793,12 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 }
 
 int
-OSC::route_plugin_list(int ssid, lo_message msg) {
+OSC::route_plugin_list (int ssid, lo_message msg) {
 	if (!session) {
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
 		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
@@ -2806,13 +2806,13 @@ OSC::route_plugin_list(int ssid, lo_message msg) {
 	}
 	int piid = 0;
 
-	lo_message reply = lo_message_new();
-	lo_message_add_int32(reply, ssid);
+	lo_message reply = lo_message_new ();
+	lo_message_add_int32 (reply, ssid);
 
 
-	for(;;) {
+	for (;;) {
 		boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
-		if( !redi ) {
+		if ( !redi ) {
 			break;
 		}
 
@@ -2822,26 +2822,26 @@ OSC::route_plugin_list(int ssid, lo_message msg) {
 			PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
 			continue;
 		}
-		lo_message_add_int32(reply, piid + 1);
+		lo_message_add_int32 (reply, piid + 1);
 
 		boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
-		lo_message_add_string(reply, pip->name());
+		lo_message_add_string (reply, pip->name());
 
 		piid++;
 	}
 
-	lo_send_message(get_address (msg), "/strip/plugin/list", reply);
-	lo_message_free(reply);
+	lo_send_message (get_address (msg), "/strip/plugin/list", reply);
+	lo_message_free (reply);
 	return 0;
 }
 
 int
-OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
+OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 	if (!session) {
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
 		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
@@ -2866,22 +2866,22 @@ OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
 	bool ok = false;
 
 	lo_message reply = lo_message_new();
-	lo_message_add_int32(reply, ssid);
-	lo_message_add_int32(reply, piid);
-	lo_message_add_string(reply, pip->name());
-	for( uint32_t ppi = 0; ppi < pip->parameter_count(); ppi++) {
+	lo_message_add_int32 (reply, ssid);
+	lo_message_add_int32 (reply, piid);
+	lo_message_add_string (reply, pip->name());
+	for ( uint32_t ppi = 0; ppi < pip->parameter_count(); ppi++) {
 
 		uint32_t controlid = pip->nth_parameter(ppi, ok);
 		if (!ok) {
 			continue;
 		}
-		if( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
+		if ( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
 			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 
-				lo_message_add_int32(reply, ppi + 1);
+				lo_message_add_int32 (reply, ppi + 1);
 				ParameterDescriptor pd;
 				pi->plugin()->get_parameter_descriptor(controlid, pd);
-				lo_message_add_string(reply, pd.label.c_str());
+				lo_message_add_string (reply, pd.label.c_str());
 
 				// I've combined those binary descriptor parts in a bit-field to reduce lilo message elements
 				int flags = 0;
@@ -2893,24 +2893,24 @@ OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
 				flags |= pd.sr_dependent ? 32 : 0;
 				flags |= pd.toggled ? 64 : 0;
 				flags |= c != NULL ? 128 : 0; // bit 7 indicates in input control
-				lo_message_add_int32(reply, flags);
+				lo_message_add_int32 (reply, flags);
 
-				lo_message_add_int32(reply, pd.datatype);
-				lo_message_add_float(reply, pd.lower);
-				lo_message_add_float(reply, pd.upper);
-				lo_message_add_string(reply, pd.print_fmt.c_str());
-				if( pd.scale_points ) {
-					lo_message_add_int32(reply, pd.scale_points->size());
-					for( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
-						lo_message_add_int32(reply, i->second);
-						lo_message_add_string(reply, ((std::string)i->first).c_str());
+				lo_message_add_int32 (reply, pd.datatype);
+				lo_message_add_float (reply, pd.lower);
+				lo_message_add_float (reply, pd.upper);
+				lo_message_add_string (reply, pd.print_fmt.c_str());
+				if ( pd.scale_points ) {
+					lo_message_add_int32 (reply, pd.scale_points->size());
+					for ( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
+						lo_message_add_int32 (reply, i->second);
+						lo_message_add_string (reply, ((std::string)i->first).c_str());
 					}
 				}
 				else {
-					lo_message_add_int32(reply, 0);
+					lo_message_add_int32 (reply, 0);
 				}
-				if( c ) {
-					lo_message_add_double(reply, c->get_value());
+				if ( c ) {
+					lo_message_add_double (reply, c->get_value());
 				}
 				else {
 					lo_message_add_double (reply, 0);
@@ -2925,12 +2925,12 @@ OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
 }
 
 int
-OSC::route_plugin_reset(int ssid, int piid, lo_message msg) {
+OSC::route_plugin_reset (int ssid, int piid, lo_message msg) {
 	if (!session) {
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (get_strip(ssid, get_address(msg)));
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
 		PBD::error << "OSC: Invalid Remote Control ID '" << ssid << "'" << endmsg;
@@ -2951,7 +2951,7 @@ OSC::route_plugin_reset(int ssid, int piid, lo_message msg) {
 		return -1;
 	}
 
-	pi->reset_parameters_to_default();
+	pi->reset_parameters_to_default ();
 
 	return 0;
 }

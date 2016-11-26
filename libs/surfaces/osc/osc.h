@@ -224,15 +224,15 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		debugmsg (dgettext(PACKAGE, "OSC"), path, types, argv, argc); \
 	}
 
-#define PATH_CALLBACK_MSG(name)					\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+#define PATH_CALLBACK_MSG(name) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-		OSC_DEBUG;              \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
 		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
-		name (data);		\
-		return 0;		\
+		name (data); \
+		return 0; \
 	}
 
 	PATH_CALLBACK_MSG(route_get_sends);
@@ -246,11 +246,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(bank_down);
 
 #define PATH_CALLBACK(name) \
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, void *) { \
-		OSC_DEBUG;              \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, void *) { \
+		OSC_DEBUG; \
 		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
 		name (); \
 		return 0; \
@@ -312,16 +312,16 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(scroll_up_1_page);
 	PATH_CALLBACK(scroll_dn_1_page);
 
-#define PATH_CALLBACK1(name,type,optional)					\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+#define PATH_CALLBACK1(name,type,optional) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
-		OSC_DEBUG;              \
-                if (argc > 0) {						\
-			name (optional argv[0]->type);		\
-                }							\
-		return 0;						\
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG; \
+		if (argc > 0) { \
+			name (optional argv[0]->type); \
+		} \
+		return 0; \
 	}
 
 	PATH_CALLBACK1(set_transport_speed,f,);
@@ -336,16 +336,16 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1(monitor_set_gain,f,);
 	PATH_CALLBACK1(monitor_set_fader,f,);
 
-#define PATH_CALLBACK1_MSG(name,arg1type)			\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+#define PATH_CALLBACK1_MSG(name,arg1type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-		OSC_DEBUG;              \
-                if (argc > 0) {						\
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 0) { \
 			name (argv[0]->arg1type, data); \
-                }							\
-		return 0;						\
+		} \
+		return 0; \
 	}
 
 	// pan position needs message info to send feedback
@@ -381,65 +381,65 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_eq_hpf,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
 
-#define PATH_CALLBACK2(name,arg1type,arg2type)			\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+#define PATH_CALLBACK2(name,arg1type,arg2type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
-		OSC_DEBUG;              \
-                if (argc > 1) {						\
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG; \
+		if (argc > 1) { \
 			name (argv[0]->arg1type, argv[1]->arg2type); \
-                }							\
-		return 0;						\
+		} \
+		return 0; \
 	}
 
-#define PATH_CALLBACK2_MSG(name,arg1type,arg2type)			\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+#define PATH_CALLBACK2_MSG(name,arg1type,arg2type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-		OSC_DEBUG;              \
-                if (argc > 1) {						\
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 1) {	\
 			name (argv[0]->arg1type, argv[1]->arg2type, data); \
-                }							\
-		return 0;						\
+		} \
+		return 0; \
 	}
 
-#define PATH_CALLBACK2_MSG_s(name,arg1type,arg2type)			\
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
-                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-        OSC_DEBUG;              \
-                if (argc > 1) {						\
-                        name (argv[0]->arg1type, &argv[1]->arg2type, data); \
-                }							\
-                return 0;						\
-        }
+#define PATH_CALLBACK2_MSG_s(name,arg1type,arg2type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 1) {	\
+			name (argv[0]->arg1type, &argv[1]->arg2type, data); \
+		} \
+		return 0; \
+	}
 
-#define PATH_CALLBACK3(name,arg1type,arg2type,arg3type)                \
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
-               return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-		OSC_DEBUG;              \
-                if (argc > 1) {                                                \
-                 name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type, data); \
-                }                                                      \
-               return 0;                                               \
-       }
+#define PATH_CALLBACK3(name,arg1type,arg2type,arg3type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 1) { \
+			name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type, data); \
+		} \
+		return 0; \
+	}
 
-#define PATH_CALLBACK4(name,arg1type,arg2type,arg3type,arg4type)               \
-        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
-               return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
-        } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-		OSC_DEBUG;              \
-                if (argc > 1) {                                                \
-                 name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type, data); \
-                }                                                      \
-               return 0;                                               \
-       }
+#define PATH_CALLBACK4(name,arg1type,arg2type,arg3type,arg4type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 1) { \
+			name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type, data); \
+		} \
+		return 0; \
+	}
 
 	PATH_CALLBACK2_MSG(sel_sendgain,i,f);
 	PATH_CALLBACK2_MSG(sel_sendfader,i,f);
