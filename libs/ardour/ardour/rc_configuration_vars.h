@@ -201,6 +201,7 @@ CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 /* miscellany */
 
 CONFIG_VARIABLE (bool, try_autostart_engine, "try-autostart-engine", false)
+CONFIG_VARIABLE (bool, hide_dummy_backend, "hide-dummy-backend", true)
 CONFIG_VARIABLE (bool, copy_demo_sessions, "copy-demo-sessions", true)
 CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
 CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")

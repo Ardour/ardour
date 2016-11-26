@@ -53,6 +53,7 @@
 #include "ardour/mtdm.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
@@ -789,7 +790,7 @@ AudioEngine::available_backends() const
 
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
 #ifdef NDEBUG
-		if (i->first == "None (Dummy)" && !running_from_source_tree ()) {
+		if (i->first == "None (Dummy)" && !running_from_source_tree () && Config->get_hide_dummy_backend ()) {
 			continue;
 		}
 #endif
