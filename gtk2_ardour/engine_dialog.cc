@@ -1592,6 +1592,24 @@ void
 EngineControl::input_device_changed ()
 {
 	DEBUG_ECONTROL ("input_device_changed");
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend && backend->match_input_output_devices_or_none ()) {
+		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+
+		if (get_output_device_name () != dev_none
+				&& get_input_device_name () != dev_none
+				&& get_input_device_name () != get_output_device_name ()) {
+			block_changed_signals ();
+			if (contains_value (output_device_combo, get_input_device_name ())) {
+				output_device_combo.set_active_text (get_input_device_name ());
+			} else {
+				assert (contains_value (output_device_combo, dev_none));
+				output_device_combo.set_active_text (dev_none);
+			}
+			unblock_changed_signals ();
+		}
+	}
 	device_changed ();
 }
 
@@ -1599,6 +1617,23 @@ void
 EngineControl::output_device_changed ()
 {
 	DEBUG_ECONTROL ("output_device_changed");
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend && backend->match_input_output_devices_or_none ()) {
+		const std::string& dev_none = ARDOUR::AudioBackend::get_standard_device_name (ARDOUR::AudioBackend::DeviceNone);
+
+		if (get_input_device_name () != dev_none
+				&& get_input_device_name () != dev_none
+				&& get_input_device_name () != get_output_device_name ()) {
+			block_changed_signals ();
+			if (contains_value (input_device_combo, get_output_device_name ())) {
+				input_device_combo.set_active_text (get_output_device_name ());
+			} else {
+				assert (contains_value (input_device_combo, dev_none));
+				input_device_combo.set_active_text (dev_none);
+			}
+			unblock_changed_signals ();
+		}
+	}
 	device_changed ();
 }
 
