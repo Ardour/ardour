@@ -2822,7 +2822,7 @@ OSC::route_plugin_list(int ssid, lo_message msg) {
 			PBD::error << "OSC: given processor # " << piid << " on RID '" << ssid << "' is not a Plugin." << endmsg;
 			continue;
 		}
-		lo_message_add_int32(reply, piid);
+		lo_message_add_int32(reply, piid + 1);
 
 		boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 		lo_message_add_string(reply, pip->name());
@@ -2848,7 +2848,7 @@ OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
+	boost::shared_ptr<Processor> redi = r->nth_plugin(piid - 1);
 
 	if (!redi) {
 		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
@@ -2878,7 +2878,7 @@ OSC::route_plugin_descriptor(int ssid, int piid, lo_message msg) {
 		if( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
 			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 
-				lo_message_add_int32(reply, ppi);
+				lo_message_add_int32(reply, ppi + 1);
 				ParameterDescriptor pd;
 				pi->plugin()->get_parameter_descriptor(controlid, pd);
 				lo_message_add_string(reply, pd.label.c_str());
@@ -2937,7 +2937,7 @@ OSC::route_plugin_reset(int ssid, int piid, lo_message msg) {
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi = r->nth_plugin(piid);
+	boost::shared_ptr<Processor> redi = r->nth_plugin(piid - 1);
 
 	if (!redi) {
 		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
@@ -2970,7 +2970,7 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid - 1);
 
 	if (!redi) {
 		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
@@ -2987,7 +2987,7 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	bool ok=false;
 
-	uint32_t controlid = pip->nth_parameter (par,ok);
+	uint32_t controlid = pip->nth_parameter (par - 1,ok);
 
 	if (!ok) {
 		PBD::error << "OSC: Cannot find parameter # " << par <<  " for plugin # " << piid << " on RID '" << ssid << "'" << endmsg;
@@ -3030,7 +3030,7 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi=r->nth_processor (piid);
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid - 1);
 
 	if (!redi) {
 		return -1;
@@ -3045,7 +3045,7 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	bool ok=false;
 
-	uint32_t controlid = pip->nth_parameter (par,ok);
+	uint32_t controlid = pip->nth_parameter (par - 1,ok);
 
 	if (!ok) {
 		return -1;
@@ -3056,8 +3056,12 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 	if (pi->plugin()->get_parameter_descriptor (controlid, pd) == 0) {
 		boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
 
-		cerr << "parameter:     " << redi->describe_parameter(controlid)  << "\n";
-		cerr << "current value: " << c->get_value ();
+		cerr << "parameter:     " << pd.label  << "\n";
+		if (c) {
+			cerr << "current value: " << c->get_value () << "\n";
+		} else {
+			cerr << "current value not available, control does not exist\n";
+		}
 		cerr << "lower value:   " << pd.lower << "\n";
 		cerr << "upper value:   " << pd.upper << "\n";
 	}
@@ -3079,7 +3083,7 @@ OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid - 1);
 
 	if (!redi) {
 		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
@@ -3113,7 +3117,7 @@ OSC::route_plugin_deactivate (int ssid, int piid, lo_message msg)
 		return -1;
 	}
 
-	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
+	boost::shared_ptr<Processor> redi=r->nth_plugin (piid - 1);
 
 	if (!redi) {
 		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << ssid << "'" << endmsg;
