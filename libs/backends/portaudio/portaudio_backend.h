@@ -179,6 +179,7 @@ class PortAudioBackend : public AudioBackend {
 		bool get_use_buffered_io () { return _use_blocking_api; }
 
 		bool use_separate_input_and_output_devices () const;
+		bool match_input_output_devices_or_none () const { return true; }
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<DeviceStatus> enumerate_input_devices () const;
 		std::vector<DeviceStatus> enumerate_output_devices () const;

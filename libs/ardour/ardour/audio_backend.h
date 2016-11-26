@@ -202,6 +202,14 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual bool use_separate_input_and_output_devices () const { return false; }
 
+    /* Return true if the backend uses separate I/O devices only for the case
+     * of allowing one to be "None".
+     *
+     * ie. Input Device must match Output Device, except if either of them
+     * is get_standard_device_name (DeviceNone).
+     */
+    virtual bool match_input_output_devices_or_none () const { return false; }
+
     /** Returns a collection of DeviceStatuses identifying devices discovered
      * by this backend since the start of the process.
      *

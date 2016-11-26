@@ -172,6 +172,7 @@ class AlsaAudioBackend : public AudioBackend {
 		bool is_realtime () const;
 
 		bool use_separate_input_and_output_devices () const { return true; }
+		bool match_input_output_devices_or_none () const { return true; }
 		bool can_set_period_size () const { return true; }
 
 		std::vector<DeviceStatus> enumerate_devices () const;
