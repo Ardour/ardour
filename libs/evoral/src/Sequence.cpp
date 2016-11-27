@@ -337,6 +337,7 @@ Sequence<Time>::const_iterator::operator++()
 	           || ev.is_pgm_change()
 	           || ev.is_pitch_bender()
 	           || ev.is_channel_pressure()
+	           || ev.is_poly_pressure()
 	           || ev.is_sysex()) ) {
 		cerr << "WARNING: Unknown event (type " << _type << "): " << hex
 		     << int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
@@ -571,6 +572,19 @@ Sequence<Time>::control_to_midi_event(
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
 		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
 		ev->buffer()[2] = (uint16_t(iter.y) >> 7) & 0x7F; // MSB
+		break;
+
+	case MIDI_CMD_NOTE_PRESSURE:
+		assert(iter.list.get());
+		assert(iter.list->parameter().channel() < 16);
+		assert(iter.list->parameter().id() <= INT8_MAX);
+		assert(iter.y <= INT8_MAX);
+
+		ev->set_time(Time(iter.x));
+		ev->realloc(3);
+		ev->buffer()[0] = MIDI_CMD_NOTE_PRESSURE + iter.list->parameter().channel();
+		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
+		ev->buffer()[2] = (uint8_t)iter.y;
 		break;
 
 	case MIDI_CMD_CHANNEL_PRESSURE:

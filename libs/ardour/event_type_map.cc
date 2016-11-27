@@ -115,7 +115,7 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 		break;
 	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break;
 	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break;
-	case MidiNotePressureAutomation: return Evoral::ControlList::Linear; break;
+	case MidiNotePressureAutomation:    return Evoral::ControlList::Linear; break;
 	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break;
 	default: assert(false);
 	}
@@ -258,7 +258,7 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return string_compose("midi-pitch-bender-%1", int(param.channel()));
 	} else if (t == MidiChannelPressureAutomation) {
 		return string_compose("midi-channel-pressure-%1", int(param.channel()));
-	} else if (t == MidiChannelPressureAutomation) {
+	} else if (t == MidiNotePressureAutomation) {
 		return string_compose("midi-note-pressure-%1-%2", int(param.channel()), param.id());
 	} else {
 		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
