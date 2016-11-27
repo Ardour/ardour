@@ -399,7 +399,29 @@ MidiTrackerEditor::show_existing_automation ()
 void
 MidiTrackerEditor::hide_midi_automations ()
 {
-	// TODO
+	std::set<size_t> to_remove;
+	for (std::set<size_t>::iterator it = visible_automation_columns.begin();
+	     it != visible_automation_columns.end(); it++) {
+		size_t column = *it;
+		ColParamBimap::left_const_iterator c2p_it = col2param.left.find(column);
+		if (c2p_it == col2param.left.end())
+			continue;
+
+		Evoral::Parameter param = c2p_it->second;
+		ParameterMenuMap::iterator cmm_it = _controller_menu_map.find(param);
+		ParameterMenuMap::iterator ccmm_it = _channel_command_menu_map.find(param);
+		Gtk::CheckMenuItem* mitem = NULL;
+		if (cmm_it != _controller_menu_map.end())
+			mitem = cmm_it->second;
+		else if (ccmm_it != _channel_command_menu_map.end())
+			mitem = ccmm_it->second;
+
+		if (mitem)
+			to_remove.insert(column);
+	}
+	for (std::set<size_t>::iterator it = to_remove.begin();
+	     it != to_remove.end(); it++)
+		visible_automation_columns.erase (*it);
 }
 
 void
