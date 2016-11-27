@@ -934,6 +934,9 @@ MackieControlProtocol::miditracks_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::inputs_press (Mackie::Button&)
 {
+#ifdef MIXBUS
+	set_view_mode (Mixer);  //in Mixbus, this is the same as Global View (avoid dead buttons)
+#endif
 	return none;
 }
 Mackie::LedState
@@ -955,6 +958,9 @@ MackieControlProtocol::audiotracks_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::audioinstruments_press (Mackie::Button& b)
 {
+#ifdef MIXBUS
+	set_view_mode (MidiTracks);  //in Mixbus, we do the same thing as MIDI Tracks ( aviod dead buttons )
+#endif
 	return none;
 }
 

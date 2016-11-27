@@ -320,7 +320,7 @@ MackieControlProtocol::get_sorted_stripables()
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
 #ifdef MIXBUS
-			if (!s->mixbus() && !is_track() && !s->presentation_info().hidden())
+			if (!s->mixbus() && !is_track(s) && !s->presentation_info().hidden())
 #else
 			if (!is_track(s) && !s->presentation_info().hidden())
 #endif

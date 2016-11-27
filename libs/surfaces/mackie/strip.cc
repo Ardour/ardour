@@ -1341,6 +1341,12 @@ Strip::vpot_mode_string ()
 	default:
 		break;
 	}
+#ifdef MIXBUS
+	//"None" mode, by definition (currently) shows the pan control above the fader.
+	//Mixbus controllers are created from a LADSPA so they don't have ac->desc().type
+	//For the forseeable future, we will just return "Pan" here.
+	return "Pan";
+#endif
 
 	return "???";
 }

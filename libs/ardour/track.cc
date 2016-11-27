@@ -27,6 +27,7 @@
 #include "ardour/playlist.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/record_safe_control.h"
 #include "ardour/route_group_specialized.h"
@@ -365,7 +366,8 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	/* no outputs? nothing to do ... what happens if we have sends etc. ? */
 
-	if (n_outputs().n_total() == 0) {
+	if (n_outputs().n_total() == 0 && !ARDOUR::Profile->get_mixbus()) {
+		//Note: Mixbus has its own output mechanism, so we should operate even if no explicit outputs are assigned
 		return 0;
 	}
 

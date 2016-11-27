@@ -2174,6 +2174,22 @@ AudioDiskstream::set_align_style_from_io ()
 		}
 	}
 
+#ifdef MIXBUS
+	// compensate for latency when bouncing from master or mixbus.
+	// we need to use "ExistingMaterial" to pick up the master bus' latency
+	// see also Route::direct_feeds_according_to_reality
+	IOVector ios;
+	ios.push_back (_io);
+	if (_session.master_out() && ios.fed_by (_session.master_out()->output())) {
+		have_physical = true;
+	}
+	for (uint32_t n = 0; n < NUM_MIXBUSES && !have_physical; ++n) {
+		if (_session.get_mixbus (n) && ios.fed_by (_session.get_mixbus(n)->output())) {
+			have_physical = true;
+		}
+	}
+#endif
+
 	if (have_physical) {
 		set_align_style (ExistingMaterial);
 	} else {
