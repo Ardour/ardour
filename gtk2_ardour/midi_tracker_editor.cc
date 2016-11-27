@@ -397,6 +397,12 @@ MidiTrackerEditor::show_existing_automation ()
 }
 
 void
+MidiTrackerEditor::hide_midi_automations ()
+{
+	// TODO
+}
+
+void
 MidiTrackerEditor::hide_processor_automations ()
 {
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
@@ -415,6 +421,7 @@ void
 MidiTrackerEditor::hide_all_automation ()
 {
 	hide_main_automations ();
+	hide_midi_automations ();
 	hide_processor_automations ();
 
 	redisplay_model ();
@@ -723,17 +730,10 @@ MidiTrackerEditor::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 				Evoral::Parameter fully_qualified_param (auto_type, chn, cmd);
 				chn_items.push_back (
 					CheckMenuElem (string_compose (_("Channel %1"), chn+1),
-					               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+					               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::update_automation_column_visibility),
 					                           fully_qualified_param)));
 
-				// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
-				bool visible = false;
-
-				// if (track) {
-				// 	if (track->marked_for_display()) {
-				// 		visible = true;
-				// 	}
-				// }
+				bool visible = is_automation_visible(fully_qualified_param);
 
 				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
@@ -755,17 +755,10 @@ MidiTrackerEditor::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 				Evoral::Parameter fully_qualified_param (auto_type, chn, cmd);
 				items.push_back (
 					CheckMenuElem (label,
-					               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+					               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::update_automation_column_visibility),
 					                           fully_qualified_param)));
 
-				// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
-				bool visible = false;
-
-				// if (track) {
-				// 	if (track->marked_for_display()) {
-				// 		visible = true;
-				// 	}
-				// }
+				bool visible = is_automation_visible(fully_qualified_param);
 
 				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
@@ -796,34 +789,43 @@ MidiTrackerEditor::change_all_channel_tracks_visibility (bool yn, Evoral::Parame
 	// }
 }
 
-/** Toggle an automation track for a fully-specified Parameter (type,channel,id)
- *  Will add track if necessary.
+/** Toggle an automation column for a fully-specified Parameter (type,channel,id)
+ *  Will add column if necessary.
  */
 void
-MidiTrackerEditor::toggle_automation_track (const Evoral::Parameter& param)
+MidiTrackerEditor::update_automation_column_visibility (const Evoral::Parameter& param)
 {
-	// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (param);
-	// Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
+	std::cout << "MidiTrackerEditor::update_automation_column_visibility" << std::endl;
 
-	// if (!track) {
-	// 	/* it doesn't exist yet, so we don't care about the button state: just add it */
-	// 	create_automation_child (param, true);
-	// } else {
-	// 	assert (menu);
-	// 	bool yn = menu->get_active();
-	// 	bool changed = false;
+	// Find menu item associated to this parameter
+	ParameterMenuMap::iterator cmm_it = _controller_menu_map.find(param);
+	ParameterMenuMap::iterator ccmm_it = _channel_command_menu_map.find(param);
+	Gtk::CheckMenuItem* mitem = NULL;
+	if (cmm_it != _controller_menu_map.end())
+		mitem = cmm_it->second;
+	else if (ccmm_it != _channel_command_menu_map.end())
+		mitem = ccmm_it->second;
+	assert(mitem);
+	const bool showit = mitem->get_active();
 
-	// 	if ((changed = track->set_marked_for_display (menu->get_active())) && yn) {
+	// Find the column associated to this parameter, assign one if necessary
+	ColParamBimap::right_const_iterator it = col2param.right.find(param);
+	size_t column = (it == col2param.right.end()) || (it->second == 0) ?
+		add_midi_automation_column (param) : it->second;
 
-	// 		/* we made it visible, now trigger a redisplay. if it was hidden, then automation_track_hidden()
-	// 		   will have done that for us.
-	// 		*/
+	// Still no column available, skip
+	if (column == 0)
+		return;
 
-	// 		if (changed && !no_redraw) {
-	// 			request_redraw ();
-	// 		}
-	// 	}
-	// }
+	if (showit)
+		visible_automation_columns.insert (column);
+	else
+		visible_automation_columns.erase (column);
+
+	std::cout << "MidiTrackerEditor::update_automation_column_visibility before redisplay_model" << std::endl;
+
+	/* now trigger a redisplay */
+	redisplay_model ();
 }
 
 void
@@ -959,19 +961,11 @@ MidiTrackerEditor::add_single_channel_controller_item(Menu_Helpers::MenuList& ct
 				CheckMenuElem (
 					string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn + 1)),
 					sigc::bind (
-						sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+						sigc::mem_fun (*this, &MidiTrackerEditor::update_automation_column_visibility),
 						fully_qualified_param)));
 			dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 
-			// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
-			// 	fully_qualified_param);
-
-			bool visible = false;
-			// if (track) {
-			// 	if (track->marked_for_display()) {
-			// 		visible = true;
-			// 	}
-			// }
+			bool visible = is_automation_visible(fully_qualified_param);
 
 			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
@@ -1016,18 +1010,10 @@ MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl
 			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
 			chn_items.push_back (
 				CheckMenuElem (string_compose (_("Channel %1"), chn+1),
-				               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+				               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::update_automation_column_visibility),
 				                           fully_qualified_param)));
 
-			// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
-			// 	fully_qualified_param);
-			bool visible = false;
-
-			// if (track) {
-			// 	if (track->marked_for_display()) {
-			// 		visible = true;
-			// 	}
-			// }
+			bool visible = is_automation_visible(fully_qualified_param);
 
 			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
@@ -1039,6 +1025,14 @@ MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl
 	ctl_items.push_back (MenuElem (string_compose ("<b>%1</b>: %2", ctl, name),
 	                               *chn_menu));
 	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+}
+
+bool
+MidiTrackerEditor::is_automation_visible(const Evoral::Parameter& param)
+{
+	ColParamBimap::right_const_iterator it = col2param.right.find(param);
+	return it != col2param.right.end() &&
+		visible_automation_columns.find(it->second) != visible_automation_columns.end();
 }
 
 bool
@@ -1171,7 +1165,7 @@ bool MidiTrackerEditor::has_pan_automation() const
 {
 	for (std::set<AutomationType>::const_iterator it = _pan_param_types.begin();
 	     it != _pan_param_types.end(); ++it) {
-		Parameter2AutomationControl::const_iterator pac_it = param2actrl.find(Evoral::Parameter(*it));	
+		Parameter2AutomationControl::const_iterator pac_it = param2actrl.find(Evoral::Parameter(*it));
 		if (pac_it != param2actrl.end() && pac_it->second->list()->size() > 0)
 			return true;
 	}
@@ -1492,7 +1486,6 @@ MidiTrackerEditor::redisplay_model ()
 				size_t i = col2autotrack[col_idx];
 				const Evoral::Parameter& param = cp_it->second;
 				bool is_region_automation = ARDOUR::parameter_is_midi((AutomationType)param.type());
-				std::cout << "is_region_automation = " << is_region_automation << std::endl;
 				const AutomationTrackerPattern::RowToAutomationIt& r2at = is_region_automation ? ratp->automations[param] : tatp->automations[param];
 				size_t auto_count = r2at.count(irow);
 
@@ -1530,9 +1523,11 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns._automation_foreground_color[i]] = active_foreground_color;
 				} else {
 					// Interpolation
-					// TODO: fix for midi automation
-					boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
-					double inter_auto_val = alist->eval(is_region_automation ? row_beats.to_double() : row_frame);
+					double inter_auto_val = 0;
+					if (param2actrl[param]) {
+						boost::shared_ptr<AutomationList> alist = param2actrl[param]->alist();
+						inter_auto_val = alist->eval(is_region_automation ? row_beats.to_double() : row_frame);
+					}
 					row[columns.automation[i]] = to_string (inter_auto_val);
 					row[columns._automation_foreground_color[i]] = passive_foreground_color;
 				}

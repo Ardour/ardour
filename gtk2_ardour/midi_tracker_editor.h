@@ -158,6 +158,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
 	/** parameter -> menu item map for the main automation menu */
+	// TODO: use this instead of gain_automation_item, etc!
 	ParameterMenuMap _main_automation_menu_map;  // TODO: implement!
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
@@ -202,11 +203,15 @@ class MidiTrackerEditor : public ArdourWindow
 	void build_automation_action_menu ();
 	void add_channel_command_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, ARDOUR::AutomationType auto_type, uint8_t cmd);
 	void change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param);
-	void toggle_automation_track (const Evoral::Parameter& param);
+	void update_automation_column_visibility (const Evoral::Parameter& param);
 	void build_controller_menu ();
 	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
+
+	// Return if the automation column associated to this parameter is currently visible
+	// TODO: constify the heck out of it
+	bool is_automation_visible(const Evoral::Parameter& param);
 
 	// Return true if the gain column is visible
 	bool is_gain_visible ();
@@ -224,6 +229,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	// Show midi automations
 	void show_existing_midi_automations ();
+	void hide_midi_automations ();
 
 	// Show processor automations
 	void show_all_processor_automations ();
