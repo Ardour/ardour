@@ -260,8 +260,15 @@ UIConfiguration::color_file_name (bool use_my, bool with_version) const
 		basename += "my-";
 	}
 
-	//this is the overall theme file, e.g. "dark" plus "-downcase(PROGRAM_NAME)"
-	basename += color_file.get();  
+	std::string color_name = color_file.get();
+	size_t sep = color_name.find_first_of("-");
+	if (sep != string::npos) {
+		color_name = color_name.substr (0, sep);
+	}
+
+	basename += color_name;
+	basename += "-";
+	basename += downcase(PROGRAM_NAME);
 
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");
