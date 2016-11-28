@@ -2277,20 +2277,24 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		delete sur->sel_obs;
 		sur->sel_obs = 0;
 	}
-	if (s) {
+	bool feedback_on = sur->feedback.to_ulong();
+	if (s && feedback_on) {
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur->gainmode, sur->feedback);
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
 	} else if (sur->expand_enable) {
 		sur->expand = 0;
 		sur->expand_enable = false;
-		if (_select) {
+		if (_select && feedback_on) {
 			OSCSelectObserver* sel_fb = new OSCSelectObserver (_select, addr, sur->gainmode, sur->feedback);
 			_select->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 			sur->sel_obs = sel_fb;
 		}
-	} else {
+	} else if (feedback_on) {
 		route_send_fail ("select", sur->expand, 0 , addr);
+	}
+	if (!feedback_on) {
+		return 0;
 	}
 	//update buttons on surface
 	int b_s = sur->bank_size;
@@ -2346,7 +2350,6 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	if (!yn) return 0;
 
 	if (!session) {
-		route_send_fail ("select", ssid, 0, get_address (msg));
 		return -1;
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -2355,7 +2358,9 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	if (s) {
 		SetStripableSelection (s);
 	} else {
-		route_send_fail ("select", ssid, 0, get_address (msg));
+		if ((int) (sur->feedback.to_ulong())) {
+			route_send_fail ("select", ssid, 0, get_address (msg));
+		}
 	}
 
 	return 0;

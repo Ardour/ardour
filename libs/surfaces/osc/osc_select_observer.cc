@@ -179,11 +179,10 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 OSCSelectObserver::~OSCSelectObserver ()
 {
-
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
-	clear_strip ("/select/expand", 0);
 	if (feedback[0]) { // buttons are separate feedback
+		clear_strip ("/select/expand", 0);
 		text_message ("/select/name", " ");
 		text_message ("/select/comment", " ");
 		clear_strip ("/select/mute", 0);
@@ -634,8 +633,12 @@ OSCSelectObserver::eq_end ()
 {
 	//need to check feedback for [13]
 	eq_connections.drop_connections ();
-	clear_strip ("/select/eq_hpf", 0);
-	clear_strip ("/select/eq_enable", 0);
+	if (_strip->eq_hpf_controllable ()) {
+		clear_strip ("/select/eq_hpf", 0);
+	}
+	if (_strip->eq_enable_controllable ()) {
+		clear_strip ("/select/eq_enable", 0);
+	}
 
 	for (uint32_t i = 1; i <= _strip->eq_band_cnt (); i++) {
 		text_with_id ("/select/eq_band_name", i, " ");
