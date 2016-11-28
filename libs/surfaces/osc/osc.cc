@@ -1950,7 +1950,7 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 	if (s) {
 		if (s->solo_control()) {
 			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
+			return route_send_fail ("solo", ssid, (float) s->solo_control()->get_value(), get_address (msg));
 		}
 	}
 
@@ -2002,7 +2002,7 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 	if (s) {
 		if (s->solo_control()) {
 			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
+			return sel_fail ("solo", (float) s->solo_control()->get_value(), get_address (msg));
 		}
 	}
 	return sel_fail ("solo", 0, get_address (msg));
@@ -2059,7 +2059,9 @@ OSC::sel_recenable (uint32_t yn, lo_message msg)
 	if (s) {
 		if (s->rec_enable_control()) {
 			s->rec_enable_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
+			if (s->rec_enable_control()->get_value()) {
+				return 0;
+			}
 		}
 	}
 	return sel_fail ("recenable", 0, get_address (msg));
@@ -2110,7 +2112,9 @@ OSC::sel_recsafe (uint32_t yn, lo_message msg)
 	if (s) {
 		if (s->rec_safe_control()) {
 			s->rec_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
+			if (s->rec_safe_control()->get_value()) {
+				return 0;
+			}
 		}
 	}
 	return sel_fail ("record_safe", 0, get_address (msg));
