@@ -2069,7 +2069,7 @@ msgstr "Interface graphique"
 #: ardour_ui2.cc:651 rc_option_editor.cc:1941 rc_option_editor.cc:1943
 #: rc_option_editor.cc:1945
 msgid "Misc/Click"
-msgstr ""
+msgstr "Divers/Métronome"
 
 #: ardour_ui_dependents.cc:118
 msgid "Setup Editor"
@@ -12412,7 +12412,7 @@ msgstr "Thème"
 
 #: rc_option_editor.cc:3351
 msgid "Theme/Colors"
-msgstr "Couleurs"
+msgstr "Thème/Couleurs"
 
 #: rc_option_editor.cc:3429
 msgid "Set Linux VST Search Path"
