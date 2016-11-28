@@ -446,8 +446,14 @@ run (LV2_Handle instance, uint32_t n_samples)
 				fluid_midi_event_set_key (self->fmidi_event, data[1]);
 			}
 			if (ev->body.size > 2) {
-				fluid_midi_event_set_value (self->fmidi_event, data[2]);
+				if (0xe0 /*PITCH_BEND*/ == fluid_midi_event_get_type (self->fmidi_event)) {
+					fluid_midi_event_set_value (self->fmidi_event, 0);
+					fluid_midi_event_set_pitch (self->fmidi_event, ((data[2] & 0x7f) << 7) | (data[1] & 0x7f));
+				} else {
+					fluid_midi_event_set_value (self->fmidi_event, data[2]);
+				}
 			}
+
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
 		}
 	}
