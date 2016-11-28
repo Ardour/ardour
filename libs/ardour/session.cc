@@ -3333,7 +3333,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			if ((track = boost::dynamic_pointer_cast<Track> (route))) {
 				switch (pd) {
 				case NewPlaylist:
-					track->use_new_playlist ();
 					break;
 				case CopyPlaylist:
 					track->use_copy_playlist ();
