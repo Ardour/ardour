@@ -96,10 +96,7 @@ struct EventsSortByTimeAndType {
 	    if (a->time() == b->time()) {
 		    if (parameter_is_midi ((AutomationType)a->event_type()) &&
 		        parameter_is_midi ((AutomationType)b->event_type())) {
-			    /* negate return value since we must return whether
-			     * or not a should sort before b, not b before a
-			     */
-			    return !MidiBuffer::second_simultaneous_midi_byte_is_first (a->buffer()[0], b->buffer()[0]);
+			    return a->time_order_before (*b);
 		    }
 	    }
 	    return a->time() < b->time();
@@ -192,7 +189,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 
 		/* Read from region into target. */
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("read from %1 at %2 for %3 LR %4 .. %5\n",
-		                                                    mr->name(), start, dur, 
+		                                                    mr->name(), start, dur,
 		                                                    (loop_range ? loop_range->from : -1),
 		                                                    (loop_range ? loop_range->to : -1)));
 		mr->read_at (tgt, start, dur, loop_range, chan_n, _note_mode, &tracker->tracker, filter);
@@ -223,14 +220,12 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 
 	if (!direct_read && !evlist.empty()) {
 		/* We've read from multiple regions, sort the event list by time. */
-		EventsSortByTimeAndType<framepos_t> cmp;
-		evlist.sort (cmp);
+		evlist.sort (Evoral::EventTimeComparator<framepos_t>());
 
 		/* Copy ordered events from event list to dst. */
 		for (Evoral::EventList<framepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-			Evoral::Event<framepos_t>* ev (*e);
+			Evoral::EventPointer<framepos_t> ev (*e);
 			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
-			delete ev;
 		}
 	}
 
@@ -258,10 +253,12 @@ MidiPlaylist::region_edited(boost::shared_ptr<Region>         region,
 		return; /* Region is not currently active, nothing to do. */
 	}
 
+#ifdef NOTE_FIXER
 	/* Queue any necessary edit compensation events. */
 	t->second->fixer.prepare(
 		_session.tempo_map(), cmd, mr->position() - mr->start(),
 		_read_end, mr->midi_source()->model()->active_notes());
+#endif
 }
 
 void

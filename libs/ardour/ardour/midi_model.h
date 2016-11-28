@@ -102,9 +102,9 @@ public:
 		int set_state (const XMLNode&, int version);
 		XMLNode & get_state ();
 
-		void add (const NotePtr note);
-		void remove (const NotePtr note);
-		void side_effect_remove (const NotePtr note);
+		void add (NotePtr const & note);
+		void remove (NotePtr const & note);
+		void side_effect_remove (NotePtr const & note);
 
 		void change (const NotePtr note, Property prop, uint8_t new_value) {
 			change(note, prop, Variant(new_value));
@@ -134,8 +134,8 @@ public:
 			Variant new_value;
 		};
 
-		typedef std::list<NoteChange>                                    ChangeList;
-		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
+		typedef std::list<NoteChange> ChangeList;
+		typedef std::list<NotePtr>    NoteList;
 
 		const ChangeList& changes()       const { return _changes; }
 		const NoteList&   added_notes()   const { return _added_notes; }
@@ -167,16 +167,16 @@ public:
 		int set_state (const XMLNode&, int version);
 		XMLNode & get_state ();
 
-		void remove (SysExPtr sysex);
+		void remove (Evoral::EventPointer<TimeType> const & sysex);
 		void operator() ();
 		void undo ();
 
-		void change (boost::shared_ptr<Evoral::Event<TimeType> >, TimeType);
+		void change (Evoral::EventPointer<TimeType> const &, TimeType);
 
 	private:
 		struct Change {
 			Change () : sysex_id (0) {}
-			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
+			Evoral::EventPointer<TimeType> sysex;
 			gint sysex_id;
 			SysExDiffCommand::Property property;
 			TimeType old_time;
@@ -186,7 +186,8 @@ public:
 		typedef std::list<Change> ChangeList;
 		ChangeList _changes;
 
-		std::list<SysExPtr> _removed;
+		typedef std::list<Evoral::EventPointer<TimeType> > Removed;
+		Removed _removed;
 
 		XMLNode & marshal_change (const Change &);
 		Change unmarshal_change (XMLNode *);
@@ -241,13 +242,15 @@ public:
 		typedef std::list<Change> ChangeList;
 		ChangeList _changes;
 
-		std::list<PatchChangePtr> _added;
-		std::list<PatchChangePtr> _removed;
+		typedef std::list<PatchChangePtr> Added;
+		Added _added;
+		typedef std::list<PatchChangePtr> Removed;
+		Removed _removed;
 
 		XMLNode & marshal_change (const Change &);
 		Change unmarshal_change (XMLNode *);
 
-		XMLNode & marshal_patch_change (constPatchChangePtr);
+		XMLNode & marshal_patch_change (PatchChangePtr const &);
 		PatchChangePtr unmarshal_patch_change (XMLNode *);
 	};
 
@@ -279,10 +282,10 @@ public:
 	boost::shared_ptr<const MidiSource> midi_source ();
 	void set_midi_source (boost::shared_ptr<MidiSource>);
 
-	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
+	NotePtr        find_note (NotePtr);
 	PatchChangePtr find_patch_change (Evoral::event_id_t);
-	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
-	boost::shared_ptr<Evoral::Event<TimeType> > find_sysex (gint);
+	NotePtr        find_note (gint note_id);
+	EventPtr       find_sysex (gint);
 
 	InsertMergePolicy insert_merge_policy () const;
 	void set_insert_merge_policy (InsertMergePolicy);
@@ -291,8 +294,6 @@ public:
 
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
-
-	std::set<WeakNotePtr>& active_notes() { return _active_notes; }
 
 protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
@@ -327,8 +328,6 @@ private:
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	boost::weak_ptr<MidiSource> _midi_source;
 	InsertMergePolicy _insert_merge_policy;
-
-	std::set<WeakNotePtr> _active_notes;
 };
 
 } /* namespace ARDOUR */

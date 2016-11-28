@@ -331,7 +331,6 @@ SMFSource::write_unlocked (const Lock&                 lock,
 		_model->start_write();
 	}
 
-	Evoral::Event<framepos_t> ev;
 	while (true) {
 		/* Get the event time, in frames since session start but ignoring looping. */
 		bool ret;
@@ -371,17 +370,19 @@ SMFSource::write_unlocked (const Lock&                 lock,
 			error << _("Event time is before MIDI source position") << endmsg;
 			break;
 		}
+
 		time -= position;
 
-		ev.set(buf, size, time);
-		ev.set_event_type(Evoral::MIDI_EVENT);
-		ev.set_id(Evoral::next_event_id());
-
-		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
+		if (!(Evoral::midi_is_channel_event (buf) ||
+		      Evoral::midi_is_smf_meta_event (buf) ||
+		      Evoral::midi_is_sysex (buf))) {
+			/* throw away most realtime events, active sensing,
+			   etc. etc. etc.
+			*/
 			continue;
 		}
 
-		append_event_frames(lock, ev, position);
+		append_event_frames (lock, time, position, size, buf, Evoral::next_event_id());
 	}
 
 	Evoral::SMF::flush ();
@@ -392,20 +393,19 @@ SMFSource::write_unlocked (const Lock&                 lock,
 
 /** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
-                               const Evoral::Event<Evoral::Beats>& ev)
+SMFSource::append_event_beats (Glib::Threads::Mutex::Lock const & lock,
+                               Evoral::Beats time, uint32_t size, uint8_t const * data, event_id_t id)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || size == 0)  {
 		return;
 	}
 
 #if 0
 	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
-               name().c_str(), ev.id(), ev.time(), ev.size());
-	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+	       name().c_str(), id, time, size);
+	       for (size_t i = 0; i < size; ++i) printf("%X ", data[i]); printf("\n");
 #endif
 
-	Evoral::Beats time = ev.time();
 	if (time < _last_ev_time_beats) {
 		const Evoral::Beats difference = _last_ev_time_beats - time;
 		if (difference.to_double() / (double)ppqn() < 1.0) {
@@ -417,7 +417,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		} else {
 			/* Out of order by more than a tick. */
 			warning << string_compose(_("Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"),
-			                          ev.time(), _last_ev_time_beats, difference, difference.to_double() / (double)ppqn())
+			                          time, _last_ev_time_beats, difference, difference.to_double() / (double)ppqn())
 			        << endmsg;
 			return;
 		}
@@ -425,73 +425,67 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 
 	Evoral::event_id_t event_id;
 
-	if (ev.id() < 0) {
+	if (id < 0) {
 		event_id  = Evoral::next_event_id();
 	} else {
-		event_id = ev.id();
-	}
-
-	if (_model) {
-		_model->append (ev, event_id);
+		event_id = id;
 	}
 
 	_length_beats = max(_length_beats, time);
 
 	const Evoral::Beats delta_time_beats = time - _last_ev_time_beats;
-	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
+	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks (ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
+	append_event_delta_ticks (lock, delta_time_ticks, size, data, event_id);
 	_last_ev_time_beats = time;
-	_flags = Source::Flag (_flags & ~Empty);
 }
 
 /** Append an event with a timestamp in frames (framepos_t) */
 void
-SMFSource::append_event_frames (const Glib::Threads::Mutex::Lock& lock,
-                                const Evoral::Event<framepos_t>&  ev,
-                                framepos_t                        position)
+SMFSource::append_event_frames (Glib::Threads::Mutex::Lock const & lock,
+                                framepos_t time,  framepos_t position, uint32_t size, uint8_t const * data, event_id_t id)
 {
-	if (!_writing || ev.size() == 0)  {
+	if (!_writing || size == 0)  {
 		return;
 	}
 
 	// printf("SMFSource: %s - append_event_frames ID = %d time = %u, size = %u, data = ",
-	// name().c_str(), ev.id(), ev.time(), ev.size());
-	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+	// name().c_str(), ev->id(), ev->time(), ev->size());
+	// for (size_t i=0; i < ev->size(); ++i) printf("%X ", ev->buffer()[i]); printf("\n");
 
-	if (ev.time() < _last_ev_time_frames) {
+	if (time < _last_ev_time_frames) {
 		warning << string_compose(_("Skipping event with unordered frame time %1 < %2"),
-		                          ev.time(), _last_ev_time_frames)
+		                          time, _last_ev_time_frames)
 		        << endmsg;
 		return;
 	}
 
-	BeatsFramesConverter converter(_session.tempo_map(), position);
-	const Evoral::Beats  ev_time_beats = converter.from(ev.time());
+	BeatsFramesConverter converter (_session.tempo_map(), position);
+	const Evoral::Beats  ev_time_beats = converter.from (time);
 	Evoral::event_id_t   event_id;
 
-	if (ev.id() < 0) {
+	if (id < 0) {
 		event_id  = Evoral::next_event_id();
 	} else {
-		event_id = ev.id();
+		event_id = id;
 	}
 
-	if (_model) {
-		const Evoral::Event<Evoral::Beats> beat_ev (ev.event_type(),
-		                                            ev_time_beats,
-		                                            ev.size(),
-		                                            const_cast<uint8_t*>(ev.buffer()));
-		_model->append (beat_ev, event_id);
-	}
-
-	_length_beats = max(_length_beats, ev_time_beats);
+	_length_beats = max (_length_beats, ev_time_beats);
 
 	const Evoral::Beats last_time_beats  = converter.from (_last_ev_time_frames);
 	const Evoral::Beats delta_time_beats = ev_time_beats - last_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_frames = ev.time();
+	append_event_delta_ticks (lock, delta_time_ticks, size, data, event_id);
+	_last_ev_time_frames= time;
+}
+
+/** Append an event with a timestamp in delta ticks */
+void
+SMFSource::append_event_delta_ticks (Glib::Threads::Mutex::Lock const & lock,
+                                     uint32_t delta_time_ticks, uint32_t size, uint8_t const * data, event_id_t id)
+{
+	Evoral::SMF::append_event_delta (delta_time_ticks, size, data, id);
 	_flags = Source::Flag (_flags & ~Empty);
 }
 
@@ -600,12 +594,6 @@ SMFSource::safe_midi_file_extension (const string& file)
 	return true;
 }
 
-static bool compare_eventlist (
-	const std::pair< const Evoral::Event<Evoral::Beats>*, gint >& a,
-	const std::pair< const Evoral::Event<Evoral::Beats>*, gint >& b) {
-	return ( a.first->time() < b.first->time() );
-}
-
 void
 SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload)
 {
@@ -633,7 +621,6 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	Evoral::SMF::seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
-	Evoral::Event<Evoral::Beats> ev;
 
 	uint32_t scratch_size = 0; // keep track of scratch and minimize reallocs
 
@@ -643,9 +630,6 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	int ret;
 	gint event_id;
 	bool have_event_id;
-
-	// TODO simplify event allocation
-	std::list< std::pair< Evoral::Event<Evoral::Beats>*, gint > > eventlist;
 
 	for (unsigned i = 1; i <= num_tracks(); ++i) {
 		if (seek_to_track(i)) continue;
@@ -685,11 +669,7 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 							delta_t, time, size, ss, event_id, name()));
 #endif
 
-				eventlist.push_back(make_pair (
-							new Evoral::Event<Evoral::Beats> (
-								Evoral::MIDI_EVENT, event_time,
-								size, buf, true)
-							, event_id));
+				_model->add_event (Evoral::MIDI_EVENT, event_time, size, buf, event_id);
 
 				// Set size to max capacity to minimize allocs in read_event
 				scratch_size = std::max(size, scratch_size);
@@ -701,14 +681,6 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 			/* event ID's must immediately precede the event they are for */
 			have_event_id = false;
 		}
-	}
-
-	eventlist.sort(compare_eventlist);
-
-	std::list< std::pair< Evoral::Event<Evoral::Beats>*, gint > >::iterator it;
-	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
-		_model->append (*it->first, it->second);
-		delete it->first;
 	}
 
         // cerr << "----SMF-SRC-----\n";

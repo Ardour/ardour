@@ -28,6 +28,7 @@
 #include <glibmm/threads.h>
 
 #include "evoral/visibility.h"
+#include "evoral/EventPool.h"
 #include "evoral/Note.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/ControlList.hpp"
@@ -56,15 +57,30 @@ public:
 	double y;
 };
 
+template<typename T, typename Time>
+struct TimeComparator
+{
+	inline bool operator() (T const & a, T const & b) const {
+		return a->time() < b->time();
+	}
+	inline bool operator() (T const & thing, Time t) const {
+		return thing->time() < t;
+	}
+	inline bool operator() (Time a, Time b) const {
+		return a < b;
+	}
+};
 
 /** This is a higher level view of events, with separate representations for
- * notes (instead of just unassociated note on/off events) and controller data.
- * Controller data is represented as a list of time-stamped float values. */
+ * notes (instead of just unassociated note on/off events), patch changes (a
+ * trio of events) and an additional representation of controller data as a
+ * list of time-stamped float values (inherited from ControlSet).
+ */
 template<typename Time>
 class LIBEVORAL_API Sequence : virtual public ControlSet {
 public:
-	Sequence(const TypeMap& type_map);
-	Sequence(const Sequence<Time>& other);
+	Sequence(const TypeMap& type_map, EventPool* pool = 0);
+	Sequence(const Sequence<Time>& other, EventPool* pool = 0);
 
 protected:
 	struct WriteLockImpl {
@@ -80,16 +96,38 @@ protected:
 	};
 
 public:
+	EventPool& event_pool() const { return *_event_pool; }
 
-	typedef typename boost::shared_ptr<Evoral::Note<Time> >       NotePtr;
-	typedef typename boost::weak_ptr<Evoral::Note<Time> >         WeakNotePtr;
-	typedef typename boost::shared_ptr<const Evoral::Note<Time> > constNotePtr;
+	void add_event (EventType type, Time tm, uint8_t sz, uint8_t* data, event_id_t evid = -1);
+	void add_event (EventPointer<Time> & ev);
+
+	void remove_event (EventPointer<Time> const & ev);
+
+	typedef EventPointer<Time> EventPtr;
+
+	typedef boost::intrusive::list<EventPtr > EventsByTime;
+	typedef typename EventsByTime::iterator iterator;
+	typedef typename EventsByTime::const_iterator const_iterator;
+
+	const_iterator first_event_at_or_after (Time t) const {
+		return std::lower_bound (_events.begin(), _events.end(), t, TimeComparator<EventPtr,Time>());
+	}
+
+	bool empty() const { return _events.empty(); }
+	const_iterator end () const { return _events.end(); }
+	iterator end () { return _events.end(); }
+
+	iterator begin () { return _events.begin(); }
+	const_iterator begin () const { return _events.begin(); }
+	const_iterator begin (Time time) const { return first_event_at_or_after (time); }
 
 	typedef boost::shared_ptr<Glib::Threads::RWLock::ReaderLock> ReadLock;
 	typedef boost::shared_ptr<WriteLockImpl>                     WriteLock;
 
 	virtual ReadLock  read_lock() const { return ReadLock(new Glib::Threads::RWLock::ReaderLock(_lock)); }
 	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
+
+	// typedef typename boost::weak_ptr<Evoral::Note<Time> > WeakNotePtr;
 
 	void clear();
 
@@ -107,28 +145,30 @@ public:
 
 	void end_write (StuckNoteOption, Time when = Time());
 
-	void append(const Event<Time>& ev, Evoral::event_id_t evid);
-
 	const TypeMap& type_map() const { return _type_map; }
 
 	inline size_t n_notes() const { return _notes.size(); }
-	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }
 
-	inline static bool note_time_comparator(const boost::shared_ptr< const Note<Time> >& a,
-	                                        const boost::shared_ptr< const Note<Time> >& b) {
+	typedef NotePointer<Time> NotePtr;
+
+	inline static bool note_time_comparator(NotePtr const & a, NotePtr const & b) {
 		return a->time() < b->time();
 	}
 
 	struct NoteNumberComparator {
-		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
-		                       const boost::shared_ptr< const Note<Time> > b) const {
+		inline bool operator()(NotePtr const & a, NotePtr const & b) const {
 			return a->note() < b->note();
+		}
+		inline bool operator()(NotePtr const & a, uint8_t val) const {
+			return a->note() < val;
+		}
+		inline bool operator()(uint8_t a, uint8_t b) const {
+			return a < b;
 		}
 	};
 
 	struct EarlierNoteComparator {
-		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
-		                       const boost::shared_ptr< const Note<Time> > b) const {
+		inline bool operator()(NotePtr const & a, NotePtr const & b) const {
 			return a->time() < b->time();
 		}
 	};
@@ -151,7 +191,7 @@ public:
 		}
 	};
 
-	typedef std::multiset<NotePtr, EarlierNoteComparator> Notes;
+	typedef boost::intrusive::list<NotePtr > Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
@@ -186,127 +226,44 @@ public:
 
 	void set_notes (const typename Sequence<Time>::Notes& n);
 
-	typedef boost::shared_ptr< Event<Time> > SysExPtr;
-	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
+	inline       EventsByTime& sysexes()       { return _sysexes; }
+	inline const EventsByTime& sysexes() const { return _sysexes; }
 
-	struct EarlierSysExComparator {
-		inline bool operator() (constSysExPtr a, constSysExPtr b) const {
-			return a->time() < b->time();
-		}
-	};
-
-	typedef std::multiset<SysExPtr, EarlierSysExComparator> SysExes;
-	inline       SysExes& sysexes()       { return _sysexes; }
-	inline const SysExes& sysexes() const { return _sysexes; }
-
-	typedef boost::shared_ptr<PatchChange<Time> > PatchChangePtr;
-	typedef boost::shared_ptr<const PatchChange<Time> > constPatchChangePtr;
+	typedef boost::intrusive::list<PatchChangePointer<Time> > PatchChangesByTime;
 
 	struct EarlierPatchChangeComparator {
-		inline bool operator() (constPatchChangePtr a, constPatchChangePtr b) const {
+		inline bool operator() (PatchChangePointer<Time> const & a, PatchChangePointer<Time> const & b) const {
 			return a->time() < b->time();
 		}
 	};
 
-	typedef std::multiset<PatchChangePtr, EarlierPatchChangeComparator> PatchChanges;
+	typedef PatchChangePointer<Time> PatchChangePtr;
+	typedef boost::intrusive::list<PatchChangePtr> PatchChanges;
 	inline       PatchChanges& patch_changes ()       { return _patch_changes; }
 	inline const PatchChanges& patch_changes () const { return _patch_changes; }
 
 	void dump (std::ostream&) const;
 
 private:
-	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
+	typedef std::priority_queue<NotePointer<Time>, std::deque<NotePointer<Time> >, LaterNoteEndComparator> ActiveNotes;
 public:
-
-	/** Read iterator */
-	class LIBEVORAL_API const_iterator {
-	public:
-		const_iterator();
-		const_iterator(const Sequence<Time>&              seq,
-		               Time                               t,
-		               bool                               force_discrete,
-		               const std::set<Evoral::Parameter>& filtered,
-		               const std::set<WeakNotePtr>*       active_notes=NULL);
-
-		inline bool valid() const { return !_is_end && _event; }
-
-		void invalidate(std::set<WeakNotePtr>* notes);
-
-		const Event<Time>& operator*() const { return *_event;  }
-		const boost::shared_ptr< const Event<Time> > operator->() const { return _event; }
-
-		const const_iterator& operator++(); // prefix only
-
-		bool operator==(const const_iterator& other) const;
-		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
-
-		const_iterator& operator=(const const_iterator& other);
-
-	private:
-		friend class Sequence<Time>;
-
-		Time choose_next(Time earliest_t);
-		void set_event();
-
-		typedef std::vector<ControlIterator> ControlIterators;
-		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, PATCH_CHANGE };
-
-		const Sequence<Time>*                 _seq;
-		boost::shared_ptr< Event<Time> >      _event;
-		mutable ActiveNotes                   _active_notes;
-		/** If the iterator is pointing at a patch change, this is the index of the
-		 *  sub-message within that change.
-		 */
-		int                                   _active_patch_change_message;
-		MIDIMessageType                       _type;
-		bool                                  _is_end;
-		typename Sequence::ReadLock           _lock;
-		typename Notes::const_iterator        _note_iter;
-		typename SysExes::const_iterator      _sysex_iter;
-		typename PatchChanges::const_iterator _patch_change_iter;
-		ControlIterators                      _control_iters;
-		ControlIterators::iterator            _control_iter;
-		bool                                  _force_discrete;
-	};
-
-	const_iterator begin (
-		Time                               t              = Time(),
-		bool                               force_discrete = false,
-		const std::set<Evoral::Parameter>& f              = std::set<Evoral::Parameter>(),
-		const std::set<WeakNotePtr>*       active_notes   = NULL) const {
-		return const_iterator (*this, t, force_discrete, f, active_notes);
-	}
-
-	const const_iterator& end() const { return _end_iter; }
-
-	// CONST iterator implementations (x3)
-	typename Notes::const_iterator note_lower_bound (Time t) const;
-	typename PatchChanges::const_iterator patch_change_lower_bound (Time t) const;
-	typename SysExes::const_iterator sysex_lower_bound (Time t) const;
-
-	// NON-CONST iterator implementations (x3)
-	typename Notes::iterator note_lower_bound (Time t);
-	typename PatchChanges::iterator patch_change_lower_bound (Time t);
-	typename SysExes::iterator sysex_lower_bound (Time t);
-
-	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
-	                           const ControlIterator&            iter) const;
-
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-	bool overlaps (const NotePtr& ev,
-	               const NotePtr& ignore_this_note) const;
-	bool contains (const NotePtr& ev) const;
+	bool overlaps (NotePtr const & ev, const NotePtr& ignore_this_note) const;
+	bool contains (NotePtr const & ev) const;
 
-	bool add_note_unlocked (const NotePtr note, void* arg = 0);
-	void remove_note_unlocked(const constNotePtr note);
+	void start_note (EventPtr & note);
+	bool end_note (EventPtr & note);
 
-	void add_patch_change_unlocked (const PatchChangePtr);
-	void remove_patch_change_unlocked (const constPatchChangePtr);
+	bool add_note_unlocked (NotePtr & note, void* arg = 0);
+	void remove_note_unlocked (NotePtr & note);
 
-	void add_sysex_unlocked (const SysExPtr);
-	void remove_sysex_unlocked (const SysExPtr);
+	void add_patch_change_unlocked (PatchChangePtr &);
+	void remove_patch_change_unlocked (PatchChangePtr &);
+
+	void add_sysex_unlocked (EventPtr &);
+	void remove_sysex_unlocked (EventPtr &);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
@@ -319,40 +276,37 @@ protected:
 	mutable Glib::Threads::RWLock   _lock;
 	bool                   _writing;
 
-	virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {
+	virtual int resolve_overlaps_unlocked (const NotePointer<Time>, void* /* arg */ = 0) {
 		return 0;
 	}
 
-	typedef std::multiset<NotePtr, NoteNumberComparator>  Pitches;
-	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
-	inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+	typedef boost::intrusive::list<NotePtr > Pitches; /* sorted by note value */
+	inline Pitches const & pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+	inline Pitches &       pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
 
 	virtual void control_list_marked_dirty ();
 
 private:
-	friend class const_iterator;
-
 	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
-	void append_note_on_unlocked(const Event<Time>& event, Evoral::event_id_t);
-	void append_note_off_unlocked(const Event<Time>& event);
-	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
-	void append_sysex_unlocked(const Event<Time>& ev, Evoral::event_id_t);
-	void append_patch_change_unlocked(const PatchChange<Time>&, Evoral::event_id_t);
+	void append_note_on_unlocked (EventPtr & event);
+	void append_note_off_unlocked (EventPtr & event);
+	void append_control_unlocked (Parameter const & param, Time time, double value);
+	void append_sysex_unlocked (EventPtr & ev);
+	void append_patch_change_unlocked (PatchChangePtr &);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
 	const TypeMap& _type_map;
 
-	Notes        _notes;       // notes indexed by time
-	Pitches      _pitches[16]; // notes indexed by channel+pitch
-	SysExes      _sysexes;
-	PatchChanges _patch_changes;
-
-	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;
-	WriteNotes _write_notes[16];
+	EventsByTime _events;        // all events, ordered by time
+	EventsByTime _sysexes;       // all sysex events, ordered by time
+	Notes        _notes;         // notes indexed by time
+	Pitches      _pitches[16];   // notes indexed by channel ([]) and then pitch
+	PatchChanges _patch_changes; // all patch changes, ordered by time
+	EventsByTime _write_notes[16]; // note-ons without note-offs, indexed by channel and then time
 
 	/** Current bank number on each channel so that we know what
 	 *  to put in PatchChange events when program changes are
@@ -360,11 +314,12 @@ private:
 	 */
 	int _bank[16];
 
-	const   const_iterator _end_iter;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;
 	uint8_t _highest_note;
+
+	EventPool* _event_pool;
 };
 
 
@@ -374,4 +329,3 @@ template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream&
 
 
 #endif // EVORAL_SEQUENCE_HPP
-

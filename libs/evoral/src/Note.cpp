@@ -29,55 +29,40 @@
 namespace Evoral {
 
 template<typename Time>
-Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
-	: _on_event (MIDI_EVENT, t, 3, NULL, true)
-	, _off_event (MIDI_EVENT, t + l, 3, NULL, true)
+Note<Time>::Note (EventPointer<Time> const & on, EventPointer<Time> const & off) 
 {
-	assert(chan < 16);
-
-	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON + chan;
-	_on_event.buffer()[1] = n;
-	_on_event.buffer()[2] = v;
-
-	_off_event.buffer()[0] = MIDI_CMD_NOTE_OFF + chan;
-	_off_event.buffer()[1] = n;
-	_off_event.buffer()[2] = 0x40;
-
-	assert(time() == t);
-	assert(length() == l);
-	assert(note() == n);
-	assert(velocity() == v);
-	assert(_on_event.channel() == _off_event.channel());
-	assert(channel() == chan);
+	set_event (0, on);
+	set_event (1, off);
 }
 
+template<typename Time>
+Note<Time>::Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity)
+{
+	/* this uses the ManagedEvent::default_event_pool to create the Events.
+	 * This is suboptimal if the events/notes are going to end up in a
+	 * Sequence, but isn't actually a problem.
+	 */
+
+	uint8_t data[3];
+
+	data[0] = (MIDI_CMD_NOTE_ON|chan);
+	data[1] = note;
+	data[2] = velocity;
+
+	set_event (0, EventPointer<Time>::create (Evoral::MIDI_EVENT, time, 3, data));
+
+	data[0] = (MIDI_CMD_NOTE_OFF|chan);
+	data[1] = note;
+	data[2] = velocity;
+
+	set_event (1, EventPointer<Time>::create (Evoral::MIDI_EVENT, time + length, 3, data));
+}
 
 template<typename Time>
-Note<Time>::Note(const Note<Time>& copy)
-	: _on_event(copy._on_event, true)
-	, _off_event(copy._off_event, true)
+Note<Time>::Note (Note<Time> const & other)
 {
-	set_id (copy.id());
-
-	assert(_on_event.buffer());
-	assert(_off_event.buffer());
-	/*
-	  assert(copy._on_event.size == 3);
-	  _on_event.buffer = _on_event_buffer;
-	  memcpy(_on_event_buffer, copy._on_event_buffer, 3);
-
-	  assert(copy._off_event.size == 3);
-	  _off_event.buffer = _off_event_buffer;
-	  memcpy(_off_event_buffer, copy._off_event_buffer, 3);
-	*/
-
-	assert(time() == copy.time());
-	assert(end_time() == copy.end_time());
-	assert(length() == copy.length());
-	assert(note() == copy.note());
-	assert(velocity() == copy.velocity());
-	assert(_on_event.channel() == _off_event.channel());
-	assert(channel() == copy.channel());
+	set_event (0, EventPointer<Time> (other.on_event()));
+	set_event (0, EventPointer<Time> (other.off_event()));
 }
 
 template<typename Time>
@@ -85,26 +70,19 @@ Note<Time>::~Note()
 {
 }
 
-template<typename Time> void
-Note<Time>::set_id (event_id_t id)
-{
-	_on_event.set_id (id);
-	_off_event.set_id (id);
-}
-
 template<typename Time>
 const Note<Time>&
 Note<Time>::operator=(const Note<Time>& other)
 {
-	_on_event = other._on_event;
-	_off_event = other._off_event;
+	_events[0] = other._events[0];
+	_events[2] = other._events[1];
 
 	assert(time() == other.time());
 	assert(end_time() == other.end_time());
 	assert(length() == other.length());
 	assert(note() == other.note());
 	assert(velocity() == other.velocity());
-	assert(_on_event.channel() == _off_event.channel());
+	assert(_events[0]->channel() == _events[1]->channel());
 	assert(channel() == other.channel());
 
 	return *this;

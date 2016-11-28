@@ -42,19 +42,19 @@ MidiChannelFilter::filter(BufferSet& bufs)
 	MidiBuffer& buf = bufs.get_midi(0);
 
 	for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ) {
-		Evoral::Event<framepos_t> ev(*e, false);
+		Evoral::Event<framepos_t>* ev (*e);
 
-		if (ev.is_channel_event()) {
+		if (ev->is_channel_event()) {
 			switch (mode) {
 			case FilterChannels:
-				if (0 == ((1 << ev.channel()) & mask)) {
+				if (0 == ((1 << ev->channel()) & mask)) {
 					e = buf.erase (e);
 				} else {
 					++e;
 				}
 				break;
 			case ForceChannel:
-				ev.set_channel(PBD::ffs(mask) - 1);
+				ev->set_channel(PBD::ffs(mask) - 1);
 				++e;
 				break;
 			case AllChannels:

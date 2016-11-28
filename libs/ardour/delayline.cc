@@ -213,33 +213,37 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			// and adjust the time in-place. <= 0 becomes 0.
 			//
 			// iterate over all events in dly-buffer and subtract one cycle
-			// (nsamples) from the timestamp, bringing them closer to de-queue.
+			// (nsamples) from the timestamp, bringing them closer
+			// to de-queue.
+			//
+			// NOTE: THIS DOES NOT REORDER THE EVENTS IN THE BUFFER
 			for (MidiBuffer::iterator m = dly->begin(); m != dly->end(); ++m) {
-				MidiBuffer::TimeType *t = m.timeptr();
-				if (*t > nsamples + delay_diff) {
-					*t -= nsamples + delay_diff;
+				Evoral::Event<MidiBuffer::TimeType>* ev = *m;
+				if (ev->time() > nsamples + delay_diff) {
+					ev->set_time (ev->time() - (nsamples + delay_diff));
 				} else {
-					*t = 0;
+					ev->set_time (0);
 				}
 			}
 
 			if (_delay != 0) {
 				// delay events in current-buffer, in place.
+				// NOTE: THIS DOES NOT REORDER THE EVENTS IN THE BUFFER
 				for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-					MidiBuffer::TimeType *t = m.timeptr();
-					*t += _delay;
+					Evoral::Event<MidiBuffer::TimeType>* ev = *m;
+					ev->set_time (ev->time() + _delay);
 				}
 			}
 
 			// move events from dly-buffer into current-buffer until nsamples
 			// and remove them from the dly-buffer
 			for (MidiBuffer::iterator m = dly->begin(); m != dly->end();) {
-				const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
-				if (ev.time() >= nsamples) {
+				const Evoral::Event<MidiBuffer::TimeType>* ev (*m);
+				if (ev->time() >= nsamples) {
 					break;
 				}
-				mb.insert_event(ev);
-				m = dly->erase(m);
+				mb.insert_event (*ev);
+				m = dly->erase (m);
 			}
 
 			/* For now, this is only relevant if there is there's a positive delay.
@@ -250,13 +254,13 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 				// move events after nsamples from current-buffer into dly-buffer
 				// and trim current-buffer after nsamples
 				for (MidiBuffer::iterator m = mb.begin(); m != mb.end();) {
-					const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
-					if (ev.time() < nsamples) {
+					const Evoral::Event<MidiBuffer::TimeType>* ev (*m);
+					if (ev->time() < nsamples) {
 						++m;
 						continue;
 					}
-					dly->insert_event(ev);
-					m = mb.erase(m);
+					dly->insert_event (*ev);
+					m = mb.erase (m);
 				}
 			}
 		}

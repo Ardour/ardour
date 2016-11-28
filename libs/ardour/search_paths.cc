@@ -247,6 +247,7 @@ vst_search_path ()
 #endif
 	}
 
+
 	if (p == 0) {
 		// If all else failed, assume the plugins are under "My Documents"
 		user_home = (char*) g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS);

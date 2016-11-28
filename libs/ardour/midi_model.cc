@@ -145,21 +145,21 @@ MidiModel::NoteDiffCommand::NoteDiffCommand (boost::shared_ptr<MidiModel> m, con
 }
 
 void
-MidiModel::NoteDiffCommand::add (const NotePtr note)
+MidiModel::NoteDiffCommand::add (NotePtr const & note)
 {
 	_removed_notes.remove(note);
 	_added_notes.push_back(note);
 }
 
 void
-MidiModel::NoteDiffCommand::remove (const NotePtr note)
+MidiModel::NoteDiffCommand::remove (NotePtr const & note)
 {
 	_added_notes.remove(note);
 	_removed_notes.push_back(note);
 }
 
 void
-MidiModel::NoteDiffCommand::side_effect_remove (const NotePtr note)
+MidiModel::NoteDiffCommand::side_effect_remove (NotePtr const & note)
 {
 	side_effect_removals.insert (note);
 }
@@ -310,7 +310,7 @@ MidiModel::NoteDiffCommand::operator() ()
 
 		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
 			NoteDiffCommand side_effects (model(), "side effects");
-			if (_model->add_note_unlocked (*i, &side_effects)) {
+			if (_model->add_note_unlocked (i->copy(), &side_effects)) {
 				/* The note was re-added ok */
 				*this += side_effects;
 			} else {
@@ -423,11 +423,11 @@ MidiModel::NoteDiffCommand::undo ()
 		}
 
 		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-			_model->add_note_unlocked(*i);
+			_model->add_note_unlocked (i->copy());
 		}
 
 		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_note_unlocked (*i);
+			_model->add_note_unlocked (i->copy());
 		}
 
 		/* finally add back notes that were removed by the "do". we don't care
@@ -436,7 +436,7 @@ MidiModel::NoteDiffCommand::undo ()
 		*/
 
 		for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
-			_model->add_note_unlocked (*i);
+			_model->add_note_unlocked (i->copy());
 		}
 	}
 
@@ -765,7 +765,7 @@ MidiModel::SysExDiffCommand::SysExDiffCommand (boost::shared_ptr<MidiModel> m, c
 }
 
 void
-MidiModel::SysExDiffCommand::change (boost::shared_ptr<Evoral::Event<TimeType> > s, TimeType new_time)
+MidiModel::SysExDiffCommand::change (Evoral::EventPointer<TimeType> const & s, TimeType new_time)
 {
 	Change change;
 
@@ -783,7 +783,7 @@ MidiModel::SysExDiffCommand::operator() ()
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
 
-		for (list<SysExPtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+		for (Removed::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->remove_sysex_unlocked (*i);
 		}
 
@@ -813,7 +813,7 @@ MidiModel::SysExDiffCommand::undo ()
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
 
-		for (list<SysExPtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+		for (Removed::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->add_sysex_unlocked (*i);
 		}
 
@@ -840,7 +840,7 @@ MidiModel::SysExDiffCommand::undo ()
 }
 
 void
-MidiModel::SysExDiffCommand::remove (SysExPtr sysex)
+MidiModel::SysExDiffCommand::remove (Evoral::EventPointer<TimeType> const & sysex)
 {
 	_removed.push_back(sysex);
 }
@@ -1038,11 +1038,11 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
 
-		for (list<PatchChangePtr>::iterator i = _added.begin(); i != _added.end(); ++i) {
+		for (Added::iterator i = _added.begin(); i != _added.end(); ++i) {
 			_model->add_patch_change_unlocked (*i);
 		}
 
-		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+		for (Removed::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->remove_patch_change_unlocked (*i);
 		}
 
@@ -1082,7 +1082,7 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 		}
 
 		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_patch_change_unlocked (*i);
+			_model->add_patch_change_unlocked (i->copy());
 		}
 	}
 
@@ -1139,7 +1139,7 @@ MidiModel::PatchChangeDiffCommand::undo ()
 		}
 
 		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-			_model->add_patch_change_unlocked (*i);
+			_model->add_patch_change_unlocked (i->copy());
 		}
 
 	}
@@ -1148,7 +1148,7 @@ MidiModel::PatchChangeDiffCommand::undo ()
 }
 
 XMLNode &
-MidiModel::PatchChangeDiffCommand::marshal_patch_change (constPatchChangePtr p)
+MidiModel::PatchChangeDiffCommand::marshal_patch_change (PatchChangePtr const & p)
 {
 	XMLNode* n = new XMLNode ("patch-change");
 
@@ -1268,7 +1268,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 		s >> bank;
 	}
 
-	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
+	PatchChangePtr p (new Evoral::PatchChange<TimeType> (_model->event_pool(), time, channel, program, bank));
 	assert(prop_id);
 	p->set_id (id);
 	return p;
@@ -1422,8 +1422,8 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
 	source->drop_model(source_lock);
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		source->append_event_beats(source_lock, *i);
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+		source->append_event_beats (source_lock, (*i)->time(), (*i)->size(), (*i)->buffer(), (*i)->id());
 	}
 
 	set_percussive(old_percussive);
@@ -1453,15 +1453,10 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 		return false;
 	}
 
-	/* Invalidate and store active notes, which will be picked up by the iterator
-	   on the next roll if time progresses linearly. */
-	ms->invalidate(source_lock,
-	               ms->session().transport_rolling() ? &_active_notes : NULL);
-
 	ms->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		ms->append_event_beats(source_lock, *i);
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+		ms->append_event_beats (source_lock, (*i)->time(), (*i)->size(), (*i)->buffer(), (*i)->id());
 	}
 
 	set_percussive (old_percussive);
@@ -1495,18 +1490,19 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->drop_model(source_lock);
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		if (i->time() >= begin_time && i->time() < end_time) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
 
-			Evoral::Event<TimeType> mev (*i, true); /* copy the event */
+		Evoral::EventPointer<TimeType> const & mev (*i);
+
+		if (mev->time() >= begin_time && mev->time() < end_time) {
 
 			if (offset_events) {
-				mev.set_time(mev.time() - begin_time);
+				mev->set_time(mev->time() - begin_time);
 			}
 
-			if (mev.is_note_off()) {
+			if (mev->is_note_off()) {
 
-				if (!mst.active (mev.note(), mev.channel())) {
+				if (!mst.active (mev->note(), mev->channel())) {
 					/* the matching note-on was outside the
 					   time range we were given, so just
 					   ignore this note-off.
@@ -1514,15 +1510,13 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 					continue;
 				}
 
-				source->append_event_beats (source_lock, mev);
-				mst.remove (mev.note(), mev.channel());
+				mst.remove (mev->note(), mev->channel());
 
-			} else if (mev.is_note_on()) {
-				mst.add (mev.note(), mev.channel());
-				source->append_event_beats(source_lock, mev);
-			} else {
-				source->append_event_beats(source_lock, mev);
+			} else if (mev->is_note_on()) {
+				mst.add (mev->note(), mev->channel());
 			}
+
+			source->append_event_beats (source_lock, mev->time(), mev->size(), mev->buffer(), mev->id());
 		}
 	}
 
@@ -1549,7 +1543,7 @@ MidiModel::get_state()
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
 MidiModel::find_note (NotePtr other)
 {
-	Notes::iterator l = notes().lower_bound(other);
+	Notes::iterator l = std::lower_bound (notes().begin(), notes().end(), other->time(), Evoral::TimeComparator<NotePtr,Evoral::Beats>());
 
 	if (l != notes().end()) {
 		for (; (*l)->time() == other->time(); ++l) {
@@ -1595,20 +1589,20 @@ MidiModel::find_patch_change (Evoral::event_id_t id)
 	return PatchChangePtr ();
 }
 
-boost::shared_ptr<Evoral::Event<MidiModel::TimeType> >
+Evoral::EventPointer<MidiModel::TimeType>
 MidiModel::find_sysex (gint sysex_id)
 {
 	/* used only for looking up notes when reloading history from disk,
 	   so we don't care about performance *too* much.
 	*/
 
-	for (SysExes::iterator l = sysexes().begin(); l != sysexes().end(); ++l) {
+	for (EventsByTime::iterator l = sysexes().begin(); l != sysexes().end(); ++l) {
 		if ((*l)->id() == sysex_id) {
 			return *l;
 		}
 	}
 
-	return boost::shared_ptr<Evoral::Event<TimeType> > ();
+	return Evoral::EventPointer<MidiModel::TimeType> ();
 }
 
 /** Lock and invalidate the source.
@@ -1617,16 +1611,15 @@ MidiModel::find_sysex (gint sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	boost::shared_ptr<MidiSource> ms          = _midi_source.lock();
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock();
 	Glib::Threads::Mutex::Lock*   source_lock = 0;
 
 	if (ms) {
 		/* Take source lock and invalidate iterator to release its lock on model.
 		   Add currently active notes to _active_notes so we can restore them
-		   if playback resumes at the same point after the edit. */
+		   if playback resumes at the same point after the edit.
+		*/
 		source_lock = new Glib::Threads::Mutex::Lock(ms->mutex());
-		ms->invalidate(*source_lock,
-		               ms->session().transport_rolling() ? &_active_notes : NULL);
 	}
 
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
@@ -1647,8 +1640,8 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 	TimeType ea  = note->end_time();
 
 	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<TimeType>(0, TimeType(), TimeType(), note->note()));
-	set<NotePtr> to_be_deleted;
+	NotePtr search_note (new Note<TimeType>(0, TimeType(), TimeType(), note->note()));
+	Notes to_be_deleted;
 	bool set_note_length = false;
 	bool set_note_time = false;
 	TimeType note_time = note->time();
@@ -1656,8 +1649,10 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 checking overlaps for note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-	for (Pitches::const_iterator i = p.lower_bound (search_note);
+	for (Pitches::const_iterator i = std::lower_bound (p.begin(), p.end(), note->note(), NoteNumberComparator());
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
+
+		NotePtr copy (*i);
 
 		TimeType sb = (*i)->time();
 		TimeType eb = (*i)->end_time();
@@ -1691,7 +1686,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			/* existing note covers start of new note */
 			switch (insert_merge_policy()) {
 			case InsertMergeReplace:
-				to_be_deleted.insert (*i);
+				to_be_deleted.push_back (copy);
 				break;
 			case InsertMergeTruncateExisting:
 				if (cmd) {
@@ -1724,7 +1719,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			/* existing note covers end of new note */
 			switch (insert_merge_policy()) {
 			case InsertMergeReplace:
-				to_be_deleted.insert (*i);
+				to_be_deleted.push_back (copy);
 				break;
 
 			case InsertMergeTruncateExisting:
@@ -1744,7 +1739,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 				   existing note and change the position/length
 				   of the new note (which has not been added yet)
 				*/
-				to_be_deleted.insert (*i);
+				to_be_deleted.push_back (copy);
 				set_note_length = true;
 				note_length = min (note_length, (*i)->end_time() - note->time());
 				break;
@@ -1760,7 +1755,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			/* existing note overlaps all the new note */
 			switch (insert_merge_policy()) {
 			case InsertMergeReplace:
-				to_be_deleted.insert (*i);
+				to_be_deleted.push_back (copy);
 				break;
 			case InsertMergeTruncateExisting:
 			case InsertMergeTruncateAddition:
@@ -1783,7 +1778,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			case InsertMergeTruncateAddition:
 			case InsertMergeExtend:
 				/* delete the existing note, the new one will cover it */
-				to_be_deleted.insert (*i);
+				to_be_deleted.push_back (copy);
 				break;
 			default:
 				abort(); /*NOTREACHED*/
@@ -1799,11 +1794,14 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 		}
 	}
 
-	for (set<NotePtr>::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
-		remove_note_unlocked (*i);
+	for (Notes::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
+
+		NotePtr copy (*i);
+
+		remove_note_unlocked (copy);
 
 		if (cmd) {
-			cmd->side_effect_remove (*i);
+			cmd->side_effect_remove (copy);
 		}
 	}
 
@@ -1975,7 +1973,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 	if (!sysexes().empty()) {
 		SysExDiffCommand* c = new_sysex_diff_command ("insert silence");
 
-		for (SysExes::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
+		for (EventsByTime::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
 			c->change (*i, (*i)->time() + t);
 		}
 

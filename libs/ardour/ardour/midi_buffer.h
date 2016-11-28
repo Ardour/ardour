@@ -51,7 +51,7 @@ public:
 	bool     push_back(const Evoral::Event<TimeType>& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);
 
-	uint8_t* reserve(TimeType time, size_t size);
+	uint8_t* reserve (size_t object_size);
 
 	void resize(size_t);
 	size_t size() const { return _size; }
@@ -81,33 +81,18 @@ public:
 			return *this;
 		}
 
-		inline EventType operator*() const {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
-			int event_size = Evoral::midi_event_size(ev_start);
-			assert(event_size >= 0);
-			return EventType(midi_parameter_type(*ev_start),
-					*((TimeType*)(buffer->_data + offset)),
-					event_size, ev_start);
+		inline EventType* operator*() const {
+			return reinterpret_cast<EventType*> (buffer->_data + offset);
 		}
 
-		inline EventType operator*() {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
-			int event_size = Evoral::midi_event_size(ev_start);
-			assert(event_size >= 0);
-			return EventType(Evoral::MIDI_EVENT,
-					*(reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset))),
-					event_size, ev_start);
-		}
-
-		inline TimeType * timeptr() {
-			return reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset));
+		inline EventType* operator*() {
+			return reinterpret_cast<EventType*> (buffer->_data + offset);
 		}
 
 		inline iterator_base<BufferType, EventType>& operator++() {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
-			int event_size = Evoral::midi_event_size(ev_start);
-			assert(event_size >= 0);
-			offset += sizeof(TimeType) + event_size;
+			EventType const * ev = reinterpret_cast<EventType*> (buffer->_data + offset);
+			assert (ev->size() > 0);
+			offset += sizeof (EventType) + ev->size();
 			return *this;
 		}
 
@@ -134,29 +119,16 @@ public:
 
 	iterator erase(const iterator& i) {
 		assert (i.buffer == this);
-		uint8_t* ev_start = _data + i.offset + sizeof (TimeType);
-		int event_size = Evoral::midi_event_size (ev_start);
 
-		if (event_size < 0) {
-			/* unknown size, sysex: return end() */
-			return end();
-		}
-
-		size_t total_data_deleted = sizeof(TimeType) + event_size;
+		const size_t total_data_deleted = (*i)->object_size();
 
 		if (i.offset + total_data_deleted > _size) {
 			_size = 0;
 			return end();
 		}
 
-		/* we need to avoid the temporary malloc that memmove would do,
-		   so copy by hand. remember: this is small amounts of data ...
-		*/
-		size_t a, b;
-		for (a = i.offset, b = i.offset + total_data_deleted; b < _size; ++b, ++a) {
-			_data[a] = _data[b];
-		}
-
+		/* move data from after the erased event */
+		memmove (_data + i.offset, _data + i.offset + total_data_deleted, total_data_deleted);
 		_size -= total_data_deleted;
 
 		/* all subsequent iterators are now invalid, and the one we
@@ -166,13 +138,6 @@ public:
 
 		return iterator (*this, i.offset);
 	}
-
-	/**
-	 * returns true if the message with the second argument as its MIDI
-	 * status byte should preceed the message with the first argument as
-	 * its MIDI status byte.
-	 */
-	static bool second_simultaneous_midi_byte_is_first (uint8_t, uint8_t);
 
 private:
 	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;

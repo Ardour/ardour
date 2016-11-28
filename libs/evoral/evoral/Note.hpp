@@ -34,13 +34,19 @@ namespace Evoral {
  */
 template<typename Time>
 #ifdef COMPILER_MSVC
-class LIBEVORAL_LOCAL Note {
+class LIBEVORAL_LOCAL Note : public MultiEvent<Time,2>
 #else
-class LIBEVORAL_TEMPLATE_API Note {
+class LIBEVORAL_TEMPLATE_API Note : public MultiEvent<Time,2>
 #endif
+{
 public:
-	Note(uint8_t chan=0, Time time=Time(), Time len=Time(), uint8_t note=0, uint8_t vel=0x40);
-	Note(const Note<Time>& copy);
+	using MultiEvent<Time,2>::_events; /* C++ template arcana */
+	using MultiEvent<Time,2>::set_event;
+
+	Note (EventPointer<Time> const & on_event, EventPointer<Time> const & off_event);
+	Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity = 64);
+	Note (Note<Time> const & other);
+
 	~Note();
 
 	const Note<Time>& operator=(const Note<Time>& copy);
@@ -54,18 +60,21 @@ public:
 			channel()  == other.channel();
 	}
 
-	inline event_id_t id() const { return _on_event.id(); }
-	void set_id (event_id_t);
-
-	inline Time    time()         const { return _on_event.time(); }
-	inline Time    end_time()     const { return _off_event.time(); }
-	inline uint8_t note()         const { return _on_event.note(); }
-	inline uint8_t velocity()     const { return _on_event.velocity(); }
-	inline uint8_t off_velocity() const { return _off_event.velocity(); }
-	inline Time    length()       const { return _off_event.time() - _on_event.time(); }
+	inline Time    time()         const { return _events[0]->time(); }
+	inline Time    end_time()     const { return _events[1]->time(); }
+	inline uint8_t note()         const { return _events[0]->note(); }
+	inline uint8_t velocity()     const { return _events[0]->velocity(); }
+	inline uint8_t off_velocity() const { return _events[1]->velocity(); }
+	inline Time    length()       const { return _events[1]->time() - _events[0]->time(); }
 	inline uint8_t channel()      const {
-		assert(_on_event.channel() == _off_event.channel());
-		return _on_event.channel();
+		assert(_events[0]->channel() == _events[1]->channel());
+		return _events[0]->channel();
+	}
+
+	bool operator== (Note const& other) const {
+		/* Compare contents of both on and off events */
+		return (*_events[0] == *other.on_event()) &&
+			(*_events[1] == *other.off_event());
 	}
 
 private:
@@ -75,38 +84,44 @@ private:
 
 public:
 	inline void set_time(Time t) {
-		_off_event.set_time(t + length());
-		_on_event.set_time(t);
+		_events[1]->set_time(t + length());
+
 	}
 	inline void set_note(uint8_t n) {
 		const uint8_t nn = clamp(n, 0, 127);
-		_on_event.buffer()[1] = nn;
-		_off_event.buffer()[1] = nn;
+		_events[0]->buffer()[1] = nn;
+		_events[1]->buffer()[1] = nn;
 	}
 	inline void set_velocity(uint8_t n) {
-		_on_event.buffer()[2] = clamp(n, 0, 127);
+		_events[0]->buffer()[2] = clamp(n, 0, 127);
 	}
 	inline void set_off_velocity(uint8_t n) {
-		_off_event.buffer()[2] = clamp(n, 0, 127);
+		_events[1]->buffer()[2] = clamp(n, 0, 127);
 	}
 	inline void set_length(Time l) {
-		_off_event.set_time(_on_event.time() + l);
+		_events[1]->set_time(_events[0]->time() + l);
 	}
 	inline void set_channel(uint8_t c) {
 		const uint8_t cc = clamp(c, 0, 16);
-		_on_event.set_channel(cc);
-		_off_event.set_channel(cc);
+		_events[0]->set_channel(cc);
+		_events[1]->set_channel(cc);
 	}
 
-	inline       Event<Time>& on_event()        { return _on_event; }
-	inline const Event<Time>& on_event()  const { return _on_event; }
-	inline       Event<Time>& off_event()       { return _off_event; }
-	inline const Event<Time>& off_event() const { return _off_event; }
+	inline       EventPointer<Time>& on_event()        { return _events[0]; }
+	inline const EventPointer<Time>& on_event()  const { return _events[0]; }
+	inline       EventPointer<Time>& off_event()       { return _events[1]; }
+	inline const EventPointer<Time>& off_event() const { return _events[1]; }
+};
 
-private:
-	// Event buffers are self-contained
-	Event<Time> _on_event;
-	Event<Time> _off_event;
+template<typename T>
+struct LowerNoteValueComparator
+{
+	bool operator() (T const & thing, uint8_t val) const {
+		return thing->note() < val;
+	}
+	bool operator() (T const & a, T const & b) const {
+		return a->note() < b->note();
+	}
 };
 
 template<typename Time>
@@ -118,6 +133,21 @@ template<typename Time>
 	return o;
 }
 
+template<typename Time>
+class NotePointer : public MultiEventPointer<Note<Time> >
+{
+  public:
+	NotePointer () {}
+	NotePointer (Note<Time>* n) : MultiEventPointer<Note<Time> > (n) {}
+
+	~NotePointer () { }
+
+	NotePointer& copy() const {
+		/* XXX need pools for all this */
+		return *new NotePointer<Time> (new Note<Time> (*(this->get())));
+	}
+};
+
 } // namespace Evoral
 
 #ifdef COMPILER_MSVC
@@ -125,4 +155,3 @@ template<typename Time>
 #endif
 
 #endif // EVORAL_NOTE_HPP
-

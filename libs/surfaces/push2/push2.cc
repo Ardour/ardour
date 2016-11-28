@@ -1140,26 +1140,28 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 	bool matched = false;
 
-	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
-		if ((*ev).is_note_on() || (*ev).is_note_off()) {
+	for (MidiBuffer::iterator mi = in.begin(); mi != in.end(); ++mi) {
+		Evoral::Event<MidiBuffer::TimeType>* ev = *mi;
+
+		if (ev->is_note_on() || ev->is_note_off()) {
 
 			/* encoder touch start/touch end use note
 			 * 0-10. touchstrip uses note 12
 			 */
 
-			if ((*ev).note() > 10 && (*ev).note() != 12) {
+			if (ev->note() > 10 && ev->note() != 12) {
 
-				const int n = (*ev).note ();
+				const int n = ev->note ();
 				NNPadMap::const_iterator nni = nn_pad_map.find (n);
 
 				if (nni != nn_pad_map.end()) {
 					Pad const * pad = nni->second;
 					/* shift for output to the shadow port */
 					if (pad->filtered >= 0) {
-						(*ev).set_note (pad->filtered + (octave_shift*12));
+						ev->set_note (pad->filtered + (octave_shift*12));
 						out.push_back (*ev);
 						/* shift back so that the pads light correctly  */
-						(*ev).set_note (n);
+						ev->set_note (n);
 					} else {
 						/* no mapping, don't send event */
 					}
@@ -1169,7 +1171,7 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 
 				matched = true;
 			}
-		} else if ((*ev).is_pitch_bender() || (*ev).is_poly_pressure() || (*ev).is_channel_pressure()) {
+		} else if (ev->is_pitch_bender() || ev->is_poly_pressure() || ev->is_channel_pressure()) {
 			out.push_back (*ev);
 		}
 	}

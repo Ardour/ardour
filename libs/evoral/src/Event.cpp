@@ -20,6 +20,7 @@
 
 #include "evoral/Event.hpp"
 #include "evoral/Beats.hpp"
+#include "evoral/Sequence.hpp"
 
 namespace Evoral {
 
@@ -52,119 +53,18 @@ next_event_id ()
 	return g_atomic_int_add (&_event_id_counter, 1);
 }
 
-#ifdef EVORAL_EVENT_ALLOC
+/* each type of EventPointer<Time> needs it own pool
+ */
 
-template<typename Timestamp>
-Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* buf, bool alloc)
-	: _type(type)
-	, _time(time)
-	, _size(size)
-	, _buf(buf)
-	, _id(-1)
-	, _owns_buf(alloc)
-{
-	if (alloc) {
-		_buf = (uint8_t*)malloc(_size);
-		if (buf) {
-			memcpy(_buf, buf, _size);
-		} else {
-			memset(_buf, 0, _size);
-		}
-	}
-}
-
-template<typename Timestamp>
-Event<Timestamp>::Event(EventType      type,
-                        Timestamp      time,
-                        uint32_t       size,
-                        const uint8_t* buf)
-	: _type(type)
-	, _time(time)
-	, _size(size)
-	, _buf((uint8_t*)malloc(size))
-	, _id(-1)
-	, _owns_buf(true)
-{
-	memcpy(_buf, buf, _size);
-}
-
-template<typename Timestamp>
-Event<Timestamp>::Event(const Event& copy, bool owns_buf)
-	: _type(copy._type)
-	, _time(copy._time)
-	, _size(copy._size)
-	, _buf(copy._buf)
-	, _id (next_event_id ())
-	, _owns_buf(owns_buf)
-{
-	if (owns_buf) {
-		_buf = (uint8_t*)malloc(_size);
-		if (copy._buf) {
-			memcpy(_buf, copy._buf, _size);
-		} else {
-			memset(_buf, 0, _size);
-		}
-	}
-}
-
-template<typename Timestamp>
-Event<Timestamp>::~Event() {
-	if (_owns_buf) {
-		free(_buf);
-	}
-}
-
-template<typename Timestamp>
-void
-Event<Timestamp>::assign(const Event& other)
-{
-	_id = other._id;
-	_type = other._type;
-	_time = other._time;
-	_owns_buf = other._owns_buf;
-	if (_owns_buf) {
-		if (other._buf) {
-			if (other._size > _size) {
-				_buf = (uint8_t*)::realloc(_buf, other._size);
-			}
-			memcpy(_buf, other._buf, other._size);
-		} else {
-			free(_buf);
-			_buf = NULL;
-		}
-	} else {
-		_buf = other._buf;
-	}
-
-	_size = other._size;
-}
-
-template<typename Timestamp>
-void
-Event<Timestamp>::set (const uint8_t* buf, uint32_t size, Timestamp t)
-{
-	if (_owns_buf) {
-		if (_size < size) {
-			_buf = (uint8_t*) ::realloc(_buf, size);
-		}
-		memcpy (_buf, buf, size);
-	} else {
-		/* XXX this is really dangerous given the
-		   const-ness of buf. The API should really
-		   intervene here.
-		*/
-		_buf = const_cast<uint8_t*> (buf);
-	}
-
-	_time = t;
-	_size = size;
-}
-
-#endif // EVORAL_EVENT_ALLOC
+template<typename Time>
+EventPool EventPointer<Time>::pool;
 
 template class Event<Evoral::Beats>;
 template class Event<double>;
-template class Event<int64_t>;
+template class Event<int64_t>; /* framepos_t in Ardour */
+
+template class EventPointer<Evoral::Beats>;
+template class EventPointer<int64_t>; /* framepos_t in Ardour */
+
 
 } // namespace Evoral
-

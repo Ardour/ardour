@@ -2550,11 +2550,11 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				                      (*metric_i)->frame() < tend)) {
 					MetricSection* metric = (metric_i != tmap.metrics_end())
 						? *metric_i : NULL;
-					if (m != m_end && (!metric || metric->frame() > (*m).time())) {
-						const Evoral::Event<framepos_t> ev(*m, false);
-						if (ev.time() < nframes) {
+					if (m != m_end && (!metric || metric->frame() > (*m)->time())) {
+						Evoral::Event<framepos_t> const * ev (*m);
+						if (ev->time() < nframes) {
 							LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
-							lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
+							lv2_evbuf_write(&eend, ev->time(), 0, type, ev->size(), ev->buffer());
 						}
 						++m;
 					} else {

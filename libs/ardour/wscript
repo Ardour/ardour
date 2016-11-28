@@ -151,7 +151,6 @@ libardour_sources = [
         'muteable.cc',
         'mute_control.cc',
         'mute_master.cc',
-        'note_fixer.cc',
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',

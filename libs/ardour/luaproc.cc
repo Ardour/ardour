@@ -667,17 +667,17 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					for (MidiBuffer::iterator m = bufs.get_midi(idx).begin();
 							m != bufs.get_midi(idx).end(); ++m, ++e) {
-						const Evoral::Event<framepos_t> ev(*m, false);
+						const Evoral::Event<framepos_t>* ev (*m);
 						luabridge::LuaRef lua_midi_data (luabridge::newTable (L));
-						const uint8_t* data = ev.buffer();
-						for (uint32_t i = 0; i < ev.size(); ++i) {
+						const uint8_t* data = ev->buffer();
+						for (uint32_t i = 0; i < ev->size(); ++i) {
 							lua_midi_data [i + 1] = data[i];
 						}
 						luabridge::LuaRef lua_midi_event (luabridge::newTable (L));
-						lua_midi_event["time"] = 1 + (*m).time();
+						lua_midi_event["time"] = 1 + ev->time();
 						lua_midi_event["data"] = lua_midi_data;
 						lua_midi_event["bytes"] = data;
-						lua_midi_event["size"] = ev.size();
+						lua_midi_event["size"] = ev->size();
 						lua_midi_src_tbl[e] = lua_midi_event;
 					}
 				}

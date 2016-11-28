@@ -105,25 +105,25 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *  @param source_start This source's start position in session frames.
 	 *  @param cnt The length of time to write.
 	 */
-	virtual framecnt_t midi_write (const Lock&                 lock,
+	virtual framecnt_t midi_write (Lock const &                lock,
 	                               MidiRingBuffer<framepos_t>& src,
 	                               framepos_t                  source_start,
 	                               framecnt_t                  cnt);
 
-	/** Append a single event with a timestamp in beats.
+	/** Append a single event with a timestamp in beats
 	 *
-	 * Caller must ensure that the event is later than the last written event.
+	 * Caller must ensure that the event is later than the last written
+	 * event.
 	 */
-	virtual void append_event_beats(const Lock&                         lock,
-	                                const Evoral::Event<Evoral::Beats>& ev) = 0;
+	virtual void append_event_beats (Lock const & lock,
+	                                 Evoral::Beats beats, uint32_t size, uint8_t const * data, Evoral::event_id_t id = -1) = 0;
 
 	/** Append a single event with a timestamp in frames.
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_frames(const Lock&                      lock,
-	                                 const Evoral::Event<framepos_t>& ev,
-	                                 framepos_t                       source_start) = 0;
+	virtual void append_event_frames (Lock const & lock,
+	                                  framepos_t time, framepos_t source_start, uint32_t size, uint8_t const * data, Evoral::event_id_t id = -1) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;
@@ -179,8 +179,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * @param lock Source lock, which must be held by caller.
 	 * @param notes If non-NULL, currently active notes are added to this set.
 	 */
-	void invalidate(const Glib::Threads::Mutex::Lock&                       lock,
-	                std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes=NULL);
+	void invalidate(const Glib::Threads::Mutex::Lock& lock);
 
 	void set_note_mode(const Glib::Threads::Mutex::Lock& lock, NoteMode mode);
 

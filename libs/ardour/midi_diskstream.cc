@@ -409,16 +409,16 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		MidiChannelFilter* filter = mt ? &mt->capture_filter() : NULL;
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			Evoral::Event<MidiBuffer::TimeType> ev(*i, false);
-			if (ev.time() + rec_offset > rec_nframes) {
+			Evoral::Event<MidiBuffer::TimeType>* ev (*i);
+			if (ev->time() + rec_offset > rec_nframes) {
 				break;
 			}
 #ifndef NDEBUG
 			if (DEBUG_ENABLED(DEBUG::MidiIO)) {
-				const uint8_t* __data = ev.buffer();
+				const uint8_t* __data = ev->buffer();
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), transport_frame, ev.size()));
-				for (size_t i=0; i < ev.size(); ++i) {
+				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev->time(), transport_frame, ev->size()));
+				for (size_t i=0; i < ev->size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
 					DEBUG_STR_APPEND(a,(int)__data[i]);
@@ -438,14 +438,14 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			   probably be implemented in the source instead of here.
 			*/
 			const framecnt_t loop_offset = _num_captured_loops * loop_length;
-			const framepos_t event_time = transport_frame + loop_offset - _accumulated_capture_offset + ev.time();
+			const framepos_t event_time = transport_frame + loop_offset - _accumulated_capture_offset + ev->time();
 			if (event_time < 0 || event_time < first_recordable_frame) {
 				/* Event out of range, skip */
 				continue;
 			}
 
-			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
-				_capture_buf->write(event_time, ev.event_type(), ev.size(), ev.buffer());
+			if (!filter || !filter->filter(ev->buffer(), ev->size())) {
+				_capture_buf->write(event_time, ev->event_type(), ev->size(), ev->buffer());
 			}
 		}
 		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);
@@ -463,7 +463,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 					/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
 					   the end of the world if it does.
 					*/
-					_gui_feed_buffer.push_back ((*i).time() + transport_frame, (*i).size(), (*i).buffer());
+					_gui_feed_buffer.push_back ((*i)->time() + transport_frame, (*i)->size(), (*i)->buffer());
 				}
 			}
 
@@ -518,12 +518,14 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		cnt.set (DataType::AUDIO, bufs.count().n_audio());
 		bufs.set_count (cnt);
 
-		/* vari-speed */
+		/* vari-speed
+
+		   THIS DOES NOT REORDER THE BUFFER, BUT JUST ADJUSTS TIMES.
+		 */
 		if (_target_speed > 0 && _actual_speed != 1.0f) {
 			MidiBuffer& mbuf (bufs.get_midi (0));
 			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
-				MidiBuffer::TimeType *tme = i.timeptr();
-				*tme = (*tme) * nframes / playback_distance;
+				(*i)->set_time ((*i)->time() * nframes / playback_distance);
 			}
 		}
 	}

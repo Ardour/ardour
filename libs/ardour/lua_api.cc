@@ -658,5 +658,6 @@ LuaAPI::Vamp::process (const std::vector<float*>& d, ::Vamp::RealTime rt)
 boost::shared_ptr<Evoral::Note<Evoral::Beats> >
 LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length, uint8_t note, uint8_t velocity)
 {
-	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
+	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (
+		new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
 }

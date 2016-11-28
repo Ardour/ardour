@@ -51,8 +51,9 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
-	void append_event_frames (const Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_beats (Lock const & lock, Evoral::Beats time, uint32_t size, uint8_t const * data, Evoral::event_id_t id = -1);
+	void append_event_frames (Lock const & lock, framepos_t time, framepos_t source_start, uint32_t size, uint8_t const * data, Evoral::event_id_t id = -1);
+	void append_event_delta_ticks (Lock const & lock, uint32_t delta_time_ticks, uint32_t size, uint8_t const * data, Evoral::event_id_t id = -1);
 
 	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	void mark_streaming_write_completed (const Lock& lock);
@@ -102,7 +103,6 @@ public:
 	                           MidiRingBuffer<framepos_t>& src,
 	                           framepos_t                  position,
 	                           framecnt_t                  cnt);
-
 };
 
 }; /* namespace ARDOUR */

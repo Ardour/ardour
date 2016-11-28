@@ -415,13 +415,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					first = false;
 				}
 
-				smfs->append_event_beats(
-					source_lock,
-					Evoral::Event<Evoral::Beats>(
-						Evoral::MIDI_EVENT,
-						Evoral::Beats::ticks_at_rate(t, source->ppqn()),
-						size,
-						buf));
+				/* XXX needs delta ticks, i think */
+
+				smfs->append_event_beats (source_lock,
+				                          Evoral::Beats::ticks_at_rate(t, source->ppqn()),
+				                          size, buf, Evoral::next_event_id());
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
@@ -629,4 +627,3 @@ Session::import_files (ImportStatus& status)
 
 	status.done = true;
 }
-

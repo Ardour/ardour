@@ -354,7 +354,7 @@ BufferSet::get_vst_midi (size_t b)
 	vst->clear ();
 
 	for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
-		vst->push_back (*i);
+		vst->push_back (**i);
 	}
 
 	return vst->events();

@@ -133,6 +133,43 @@ midi_event_is_valid(const uint8_t* buffer, size_t len)
 	return true;
 }
 
+/* Helper inline functions so that we can inspect MIDI data without having to
+ * construct an Event object.
+ */
+
+inline uint8_t midi_type (uint8_t const * data)             { return data[0] & 0xF0; }
+inline uint8_t midi_channel (uint8_t const * data)          { return data[0] & 0x0F; }
+inline bool midi_is_channel_msg (uint8_t const * data)      { return (0x80 <= (data[0] & 0xF0) && (data[0] <= 0xe0)); }
+inline bool midi_is_note_on (uint8_t const * data)          { return midi_type(data) == MIDI_CMD_NOTE_ON; }
+inline bool midi_is_note_off (uint8_t const * data)         { return midi_type(data) == MIDI_CMD_NOTE_OFF; }
+inline bool midi_is_note (uint8_t const * data)             { return midi_is_note_on(data) || midi_is_note_off(data); }
+inline bool midi_is_poly_pressure (uint8_t const * data)    { return midi_type(data) == MIDI_CMD_NOTE_PRESSURE; }
+inline bool midi_is_channel_pressure (uint8_t const * data) { return midi_type(data) == MIDI_CMD_CHANNEL_PRESSURE; }
+inline bool midi_is_cc (uint8_t const * data)               { return midi_type(data) == MIDI_CMD_CONTROL; }
+inline bool midi_is_pgm_change (uint8_t const * data)       { return midi_type(data) == MIDI_CMD_PGM_CHANGE; }
+inline bool midi_is_pitch_bender (uint8_t const * data)     { return midi_type(data) == MIDI_CMD_BENDER; }
+inline bool midi_is_channel_event (uint8_t const * data)    { return (0x80 <= midi_type(data)) && (midi_type(data) <= 0xE0); }
+inline bool midi_is_smf_meta_event (uint8_t const * data)   { return data[0] == 0xFF; }
+inline bool midi_is_sysex (uint8_t const * data)            { return data[0] == 0xF0 || data[0] == 0xF7; }
+inline bool midi_is_spp (uint8_t const * data, uint8_t size)         { return data[0] == 0xF2 && size == 1; }
+inline bool midi_is_mtc_quarter (uint8_t const * data, uint8_t size) { return data[0] == 0xF1 && size == 1; }
+inline bool midi_is_mtc_full (uint8_t const * data, uint8_t size)    { return (size == 10 &&
+                                                                              data[0] == 0xF0 && data[1] == 0x7F &&
+                                                                              data[3] == 0x01 && data[4] == 0x01); }
+
+inline uint8_t  midi_note (uint8_t const * data)               { return data[1]; }
+inline uint8_t  midi_velocity (uint8_t const * data)           { return data[2]; }
+inline uint8_t  midi_poly_note (uint8_t const * data)          { return data[1]; }
+inline uint8_t  midi_poly_pressure (uint8_t const * data)      { return data[2]; }
+inline uint8_t  midi_channel_pressure (uint8_t const * data)   { return data[1]; }
+inline uint8_t  midi_cc_number (uint8_t const * data)          { return data[1]; }
+inline uint8_t  midi_cc_value (uint8_t const * data)           { return data[2]; }
+inline uint8_t  midi_pgm_number (uint8_t const * data)         { return data[1]; }
+inline uint8_t  midi_pitch_bender_lsb (uint8_t const * data)   { return data[1]; }
+inline uint8_t  midi_pitch_bender_msb (uint8_t const * data)   { return data[2]; }
+inline uint16_t midi_pitch_bender_value (uint8_t const * data) { return ((0x7F & data[2]) << 7 | (0x7F & data[1])); }
+
+
 } // namespace Evoral
 
 #endif // EVORAL_MIDI_UTIL_H

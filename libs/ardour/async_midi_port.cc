@@ -68,44 +68,16 @@ AsyncMIDIPort::set_timer (boost::function<MIDI::framecnt_t (void)>& f)
 void
 AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 {
-	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
-	size_t written = 0;
-
-	output_fifo.get_read_vector (&vec);
+	timestamp_t time;
+	Evoral::EventType type;
+	uint32_t size;
+	vector<MIDI::byte> buffer (output_fifo.capacity());
 
 	MidiBuffer& mb (get_midi_buffer (nframes));
 
-	if (vec.len[0]) {
-		Evoral::Event<double>* evp = vec.buf[0];
-
-		assert (evp->size());
-		assert (evp->buffer());
-
-		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
-			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
-				written++;
-			}
-		}
+	while (output_fifo.read (&time, &type, &size, &buffer[0])) {
+		mb.push_back (time, size, buffer.data());
 	}
-
-	if (vec.len[1]) {
-		Evoral::Event<double>* evp = vec.buf[1];
-
-		assert (evp->size());
-		assert (evp->buffer());
-
-		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
-			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
-				written++;
-			}
-		}
-	}
-
-	/* do this "atomically" after we're done pushing events into the
-	 * MidiBuffer
-	 */
-
-	output_fifo.increment_read_idx (written);
 }
 
 void
@@ -140,10 +112,11 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 		}
 
 		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+			Evoral::Event<MidiBuffer::TimeType>* ev (*b);
 			if (!have_timer) {
-				when += (*b).time();
+				when += ev->time();
 			}
-			input_fifo.write (when, Evoral::NO_EVENT, (*b).size(), (*b).buffer());
+			input_fifo.write (when, Evoral::MIDI_EVENT, ev->size(), ev->buffer());
 		}
 
 		if (!mb.empty()) {
@@ -175,8 +148,6 @@ AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
 void
 AsyncMIDIPort::drain (int check_interval_usecs, int total_usecs_to_wait)
 {
-	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
-
 	if (!AudioEngine::instance()->running() || AudioEngine::instance()->session() == 0) {
 		/* no more process calls - it will never drain */
 		return;
@@ -192,8 +163,8 @@ AsyncMIDIPort::drain (int check_interval_usecs, int total_usecs_to_wait)
 	microseconds_t end = now + total_usecs_to_wait;
 
 	while (now < end) {
-		output_fifo.get_write_vector (&vec);
-		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
+		if (output_fifo.write_space() >= output_fifo.bufsize() - 1) {
+			/* ringbuffer is now empty XXX should be a method for this */
 			break;
 		}
 		Glib::usleep (check_interval_usecs);
@@ -222,39 +193,13 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		}
 
 		Glib::Threads::Mutex::Lock lm (output_fifo_lock);
-		RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 
-		output_fifo.get_write_vector (&vec);
-
-		if (vec.len[0] + vec.len[1] < 1) {
+		if (output_fifo.write (timestamp, Evoral::MIDI_EVENT, msglen, msg) != msglen) {
 			error << "no space in FIFO for non-process thread MIDI write" << endmsg;
-			return 0;
-		}
-
-		if (vec.len[0]) {
-			/* force each event inside the ringbuffer to own its
-			   own buffer, but let that be null and of zero size
-			   initially. When ::set() is called, the buffer will
-			   be allocated to hold a *copy* of the data we're
-			   storing, and then that buffer will be used over and
-			   over, occasionally being upwardly resized as
-			   necessary.
-			*/
-			if (!vec.buf[0]->owns_buffer()) {
-				vec.buf[0]->set_buffer (0, 0, true);
-			}
-			vec.buf[0]->set (msg, msglen, timestamp);
+			ret = 0;
 		} else {
-			/* see comment in previous branch of if() statement */
-			if (!vec.buf[1]->owns_buffer()) {
-				vec.buf[1]->set_buffer (0, 0, true);
-			}
-			vec.buf[1]->set (msg, msglen, timestamp);
+			ret = msglen;
 		}
-
-		output_fifo.increment_write_idx (1);
-
-		ret = msglen;
 
 	} else {
 
@@ -345,4 +290,3 @@ AsyncMIDIPort::is_process_thread()
 {
 	return pthread_equal (pthread_self(), _process_thread);
 }
-

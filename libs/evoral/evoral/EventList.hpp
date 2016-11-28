@@ -32,13 +32,12 @@ namespace Evoral {
  * Used when we need an unsorted list of Events that is also an EventSink. Absolutely nothing more.
  */
 template<typename Time>
-class /*LIBEVORAL_API*/ EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
+class /*LIBEVORAL_API*/ EventList : public std::list<Evoral::EventPointer<Time> >, public Evoral::EventSink<Time> {
 public:
 	EventList() {}
 
 	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf) {
-		this->push_back(new Evoral::Event<Time>(
-			          type, time, size, const_cast<uint8_t*>(buf), true)); // Event copies buffer
+		this->push_back (EventPointer<Time>::create (type, time, size, const_cast<uint8_t*>(buf)));
 		return size;
 	}
 };

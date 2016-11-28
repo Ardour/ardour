@@ -339,11 +339,11 @@ MidiTrack::update_controls(const BufferSet& bufs)
 {
 	const MidiBuffer& buf = bufs.get_midi(0);
 	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-		const Evoral::Event<framepos_t>&         ev      = *e;
-		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
+		const Evoral::Event<framepos_t>*         ev (*e);
+		const Evoral::Parameter                  param   = midi_parameter(ev->buffer(), ev->size());
 		const boost::shared_ptr<Evoral::Control> control = this->control(param);
 		if (control) {
-			control->set_double(ev.value(), _session.transport_frame(), false);
+			control->set_double (ev->value(), _session.transport_frame(), false);
 		}
 	}
 }
@@ -549,15 +549,15 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 
 		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
 
-			const Evoral::Event<framepos_t> ev(*e, false);
+			Evoral::Event<framepos_t> const * ev(*e);
 
 			/* note on, since for step edit, note length is determined
 			   elsewhere
 			*/
 
-			if (ev.is_note_on()) {
+			if (ev->is_note_on()) {
 				/* we don't care about the time for this purpose */
-				_step_edit_ring_buffer.write (0, ev.event_type(), ev.size(), ev.buffer());
+				_step_edit_ring_buffer.write (0, ev->event_type(), ev->size(), ev->buffer());
 			}
 		}
 	}
