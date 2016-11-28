@@ -1243,9 +1243,9 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 	if (name.length()) {
 		if (copy) {
-			tr->use_new_playlist ();
-		} else {
 			tr->use_copy_playlist ();
+		} else {
+			tr->use_new_playlist ();
 		}
 		tr->playlist()->set_name (name);
 	}
