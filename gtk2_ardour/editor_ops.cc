@@ -7388,6 +7388,23 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
+	if (current_mixer_strip && routes.size () > 1 && std::find (routes.begin(), routes.end(), current_mixer_strip->route()) != routes.end ()) {
+		/* Route deletion calls Editor::timeaxisview_deleted() iteratively (for each deleted
+		 * route). If the deleted route is currently displayed in the Editor-Mixer (highly
+		 * likely because deletion requires selection) this will call
+		 * Editor::set_selected_mixer_strip () which is expensive ( MixerStrip::set_route() ).
+		 * It's likewise likely that the route that has just been displayed in the
+		 * Editor-Mixer will be next in line for deletion.
+		 *
+		 * So simply switch to the master-bus (if present)
+		 */
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((*i)->stripable ()->is_master ()) {
+				set_selected_mixer_strip (*(*i));
+				break;
+			}
+		}
+	}
 
 	Mixer_UI::instance()->selection().block_routes_changed (true);
 	selection->block_tracks_changed (true);
