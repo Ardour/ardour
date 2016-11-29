@@ -31,6 +31,13 @@
 #  define M_PI 3.14159265358979323846
 #endif
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 typedef enum {
 	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
@@ -357,7 +364,10 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
+	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
+	if (!isfinite_local (acomp->v_lvl)) {
+		acomp->v_lvl = 0.f;
+	}
 	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
 	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
@@ -491,7 +501,10 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl);  // crude LPF TODO use n_samples/rate TC
+	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
+	if (!isfinite_local (acomp->v_lvl)) {
+		acomp->v_lvl = 0.f;
+	}
 	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
 	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
