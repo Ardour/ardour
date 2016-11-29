@@ -1561,7 +1561,7 @@ void
 RouteUI::choose_color ()
 {
 	bool picked;
-	Gdk::Color c (gdk_color_from_rgb (_route->presentation_info().color()));
+	Gdk::Color c (gdk_color_from_rgba (_route->presentation_info().color()));
 	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &c);
 
 	if (picked) {

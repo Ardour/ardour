@@ -276,7 +276,7 @@ Gdk::Color
 ARDOUR_UI_UTILS::gdk_color_from_rgba (uint32_t rgba)
 {
 	Gdk::Color c;
-	set_color_from_rgb (c, rgba);
+	set_color_from_rgb (c, rgba >> 8);
 	return c;
 }
 
