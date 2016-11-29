@@ -205,6 +205,18 @@ MidiTrackerEditor::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
+Gtk::CheckMenuItem* MidiTrackerEditor::automation_child_menu_item(const Evoral::Parameter& param)
+{
+	ParameterMenuMap::iterator cmm_it = _controller_menu_map.find(param);
+	ParameterMenuMap::iterator ccmm_it = _channel_command_menu_map.find(param);
+	Gtk::CheckMenuItem* mitem = NULL;
+	if (cmm_it != _controller_menu_map.end())
+		mitem = cmm_it->second;
+	else if (ccmm_it != _channel_command_menu_map.end())
+		mitem = ccmm_it->second;
+	return mitem;
+}
+
 bool
 MidiTrackerEditor::is_pan_type (const Evoral::Parameter& param) const {
 	return _pan_param_types.find((ARDOUR::AutomationType)param.type()) != _pan_param_types.end();
@@ -408,13 +420,7 @@ MidiTrackerEditor::hide_midi_automations ()
 			continue;
 
 		Evoral::Parameter param = c2p_it->second;
-		ParameterMenuMap::iterator cmm_it = _controller_menu_map.find(param);
-		ParameterMenuMap::iterator ccmm_it = _channel_command_menu_map.find(param);
-		Gtk::CheckMenuItem* mitem = NULL;
-		if (cmm_it != _controller_menu_map.end())
-			mitem = cmm_it->second;
-		else if (ccmm_it != _channel_command_menu_map.end())
-			mitem = ccmm_it->second;
+		Gtk::CheckMenuItem* mitem = automation_child_menu_item(param);
 
 		if (mitem)
 			to_remove.insert(column);
@@ -796,19 +802,19 @@ MidiTrackerEditor::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 void
 MidiTrackerEditor::change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param)
 {
-	// const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
-	// for (uint8_t chn = 0; chn < 16; chn++) {
-	// 	if (selected_channels & (0x0001 << chn)) {
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
 
-	// 		Evoral::Parameter fully_qualified_param (param.type(), chn, param.id());
-	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (fully_qualified_param);
+			Evoral::Parameter fully_qualified_param (param.type(), chn, param.id());
+			Gtk::CheckMenuItem* menu = automation_child_menu_item (fully_qualified_param);
 
-	// 		if (menu) {
-	// 			menu->set_active (yn);
-	// 		}
-	// 	}
-	// }
+			if (menu) {
+				menu->set_active (yn);
+			}
+		}
+	}
 }
 
 /** Toggle an automation column for a fully-specified Parameter (type,channel,id)
@@ -820,13 +826,7 @@ MidiTrackerEditor::update_automation_column_visibility (const Evoral::Parameter&
 	std::cout << "MidiTrackerEditor::update_automation_column_visibility" << std::endl;
 
 	// Find menu item associated to this parameter
-	ParameterMenuMap::iterator cmm_it = _controller_menu_map.find(param);
-	ParameterMenuMap::iterator ccmm_it = _channel_command_menu_map.find(param);
-	Gtk::CheckMenuItem* mitem = NULL;
-	if (cmm_it != _controller_menu_map.end())
-		mitem = cmm_it->second;
-	else if (ccmm_it != _channel_command_menu_map.end())
-		mitem = ccmm_it->second;
+	Gtk::CheckMenuItem* mitem = automation_child_menu_item(param);
 	assert(mitem);
 	const bool showit = mitem->get_active();
 

@@ -182,6 +182,8 @@ class MidiTrackerEditor : public ArdourWindow
 
 	ProcessorAutomationNode* find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> processor, Evoral::Parameter what);
 
+	Gtk::CheckMenuItem* automation_child_menu_item (const Evoral::Parameter& param);
+
 	bool is_pan_type (const Evoral::Parameter& param) const;
 	// Assign an automation parameter to a column and return the corresponding
 	// column index
