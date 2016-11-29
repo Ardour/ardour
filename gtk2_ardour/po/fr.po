@@ -836,7 +836,7 @@ msgstr "À propos"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr "Gammes|Emplacements"
+msgstr "Intervalles|Emplacements"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
@@ -1894,7 +1894,7 @@ msgstr ""
 
 #: ardour_ui.cc:5331
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
-msgstr "Ceci est un copie gratuite/démo de %1. Elle vient juste de basculer en mode silencieux."
+msgstr "Ceci est une démo gratuite de %1. Elle vient juste de basculer en mode silencieux."
 
 #: ardour_ui.cc:5337
 msgid "%1 is now silent"
@@ -2172,7 +2172,7 @@ msgstr "Format de fichiers audio"
 
 #: ardour_ui_ed.cc:141
 msgid "File Type"
-msgstr "Type de fichiers"
+msgstr "Type de fichier"
 
 #: ardour_ui_ed.cc:142 export_format_dialog.cc:75
 msgid "Sample Format"
@@ -2240,7 +2240,7 @@ msgstr "Session|Scripter"
 
 #: ardour_ui_ed.cc:176
 msgid "Add Lua Script..."
-msgstr "Ajouter un script LUQ..."
+msgstr "Ajouter un script LUA..."
 
 #: ardour_ui_ed.cc:180
 msgid "Remove Lua Script"
@@ -2371,7 +2371,7 @@ msgstr "Basculer la liste de la console de mixage"
 
 #: ardour_ui_ed.cc:301
 msgid "Toggle Monitor Section Visibility"
-msgstr "Basculer la visibiliter de la section de moniteur"
+msgstr "Basculer la visibilité de la section de moniteur"
 
 #: ardour_ui_ed.cc:305
 msgid "Show more UI preferences"
@@ -3061,7 +3061,7 @@ msgstr "Dupliquer chaque piste/bus ce nombre de fois :"
 
 #: duplicate_routes_dialog.cc:176
 msgid "1 or more tracks/busses could not be duplicated"
-msgstr "1 o davantage de pistes/bus n'ont pas pu être dupliquées"
+msgstr "1 ou davantage de pistes/bus n'ont pas pu être dupliquées"
 
 #: edit_note_dialog.cc:42
 msgid "Note"
@@ -6582,7 +6582,7 @@ msgstr "Solo"
 
 #: editor_routes.cc:241
 msgid "SoloIso|SI"
-msgstr "SoloIqo|SI"
+msgstr "SoloIso|SI"
 
 #: editor_routes.cc:241
 msgid "Solo Isolated"
@@ -9302,7 +9302,7 @@ msgstr "Réinitialiser crête"
 #: meter_strip.cc:380 route_time_axis.cc:2734 vca_master_strip.cc:206
 #: vca_time_axis.cc:231
 msgid "PreFader|P"
-msgstr "PréFader|P"
+msgstr "Pré-fader|P"
 
 #: meter_strip.cc:894
 #, fuzzy
@@ -13166,7 +13166,6 @@ msgid "Check the website for more..."
 msgstr "Visiter le site web pour plus de détails..."
 
 #: session_dialog.cc:382
-#, fuzzy
 msgid "Click to open the program website in your web browser"
 msgstr "Cliquer pour ouvrir le site du programme dans votre navigateur"
 
