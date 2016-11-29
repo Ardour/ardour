@@ -31,6 +31,13 @@
 # define M_PI 3.1415926
 #endif
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 typedef enum {
 	ADELAY_INPUT = 0,
 	ADELAY_OUTPUT,
@@ -211,9 +218,17 @@ connect_port(LV2_Handle instance,
 }
 
 static inline float
-sanitize_denormal(float value) {
+sanitize_denormal(const float value) {
 	if (!isnormal(value)) {
-		value = 0.f;
+		return 0.f;
+	}
+	return value;
+}
+
+static inline float
+sanitize_input(const float value) {
+	if (!isfinite_local (value)) {
+		return 0.f;
 	}
 	return value;
 }
@@ -296,12 +311,11 @@ static void lpfRbj(LV2_Handle instance, float fc, float srate)
 	adelay->B5 = adelay->B3;
 }
 
-static float runfilter(LV2_Handle instance, float in)
+static float runfilter(LV2_Handle instance, const float in)
 {
 	ADelay* a = (ADelay*)instance;
 
 	float out;
-	in = sanitize_denormal(in);
 
 	out = a->B0/a->A0*in + a->B1/a->A0*a->state[0] + a->B2/a->A0*a->state[1]
 			-a->A1/a->A0*a->state[2] - a->A2/a->A0*a->state[3] + 1e-20;
@@ -309,7 +323,7 @@ static float runfilter(LV2_Handle instance, float in)
 	a->state[1] = a->state[0];
 	a->state[0] = in;
 	a->state[3] = a->state[2];
-	a->state[2] = out;
+	a->state[2] = sanitize_input (out);
 	return out;
 }
 
@@ -417,27 +431,30 @@ run(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	xfade = 0.f;
+
+	float fbstate = adelay->fbstate;
+	const float feedback = *adelay->feedback;
+
 	for (i = 0; i < n_samples; i++) {
-		in = input[i];
-		adelay->z[adelay->posz] = in + *adelay->feedback / 100. * adelay->fbstate;
-		adelay->fbstate = 0.f;
+		in = sanitize_input (input[i]);
+		adelay->z[adelay->posz] = sanitize_denormal (in + feedback / 100.f * fbstate);
 		int p = adelay->posz - adelay->tap[adelay->active]; // active line
 		if (p<0) p += MAX_DELAY;
-		adelay->fbstate += adelay->z[p];
+		fbstate = adelay->z[p];
 		
 		if (recalc) {
 			xfade += 1.0f / (float)n_samples;
-			adelay->fbstate *= (1.-xfade);
+			fbstate *= (1.-xfade);
 			p = adelay->posz - adelay->tap[adelay->next]; // next line
 			if (p<0) p += MAX_DELAY;
-			adelay->fbstate += adelay->z[p] * xfade;
+			fbstate += adelay->z[p] * xfade;
 		}
 
 		wetdry += tau * (wetdry_target - wetdry) + 1e-12;
 		gain += tau * (gain_target - gain) + 1e-12;
 
 		output[i] = (1.f - wetdry) * in;
-		output[i] += wetdry * -inv * runfilter(adelay, adelay->fbstate);
+		output[i] += wetdry * -inv * runfilter(adelay, fbstate);
 		output[i] *= gain;
 
 		if (++(adelay->posz) >= MAX_DELAY) {
@@ -445,6 +462,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 	}
 
+	adelay->fbstate = fbstate;
 	adelay->feedbackold = *(adelay->feedback);
 	adelay->divisorold = *(adelay->divisor);
 	adelay->invertold = *(adelay->inv);
