@@ -25,6 +25,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/playlist.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "canvas/polygon.h"
@@ -524,7 +525,7 @@ RegionView::get_fill_color () const
 	ArdourCanvas::Color f = TimeAxisViewItem::get_fill_color();
 	char const *modname;
 
-	if (_region->opaque()) {
+	if (_region->opaque() && (!ARDOUR::Profile->get_mixbus() || (!_dragging && !_region->muted ()))) {
 		modname = "opaque region base";
 	} else {
 		modname = "transparent region base";

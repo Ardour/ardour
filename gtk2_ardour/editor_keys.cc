@@ -74,7 +74,7 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 	if (_session) {
 
 		framepos_t start;
-		framepos_t end = selection->time.end_frame();  //0 if no current selection
+		framepos_t end = selection->time.end_frame();
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
 			start = _session->audible_frame();
@@ -86,8 +86,14 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 		snap_to(start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
-		if ( start > end ) {
+		if (start > end) {
+#ifdef MIXBUS
+			// 4hours at most.
+			// This works around a visual glitch in red-bordered selection rect.
+			end = start + _session->nominal_frame_rate() * 60 * 60 * 4;
+#else
 			end = max_framepos;
+#endif
 		}
 
 		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
