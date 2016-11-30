@@ -117,6 +117,13 @@ public:
 
 	bool hidden() const { return _hidden; }
 	bool empty() const;
+
+	bool shared () const { return !_shared_with_ids.empty(); }
+	void share_with (const PBD::ID&);
+	void unshare_with (const PBD::ID&);
+	bool shared_with (const PBD::ID&) const;
+	void reset_shares ();
+
 	uint32_t n_regions() const;
 	bool all_regions_empty() const;
 	std::pair<framepos_t, framepos_t> get_extent () const;
@@ -311,6 +318,7 @@ public:
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
 	uint32_t        _combine_ops;
+	std::list<PBD::ID> _shared_with_ids;
 
 	void init (bool hide);
 
