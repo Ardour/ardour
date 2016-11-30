@@ -20,6 +20,7 @@ There are few supplementation translations that can be found here (again,
 showing the case for Russian):
 
 libs/gtkmm2ext/po/ru.po
+gtk2_ardour/appdata/po/fr.po
 
 Every PO file's name is a two-character code, e.g. 'de' for German, 'es' for
 Spanish, and so on. However it's fairly common to have localizations for local
