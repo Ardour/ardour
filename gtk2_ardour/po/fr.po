@@ -836,7 +836,7 @@ msgstr "À propos"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr "Intervalles|Emplacements"
+msgstr "Emplacements"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
@@ -885,15 +885,15 @@ msgstr "Éditeur de raccourcis"
 
 #: ardour_ui.cc:321 editor.cc:1288
 msgid "Window|Editor"
-msgstr "Fenêtres|Éditeur"
+msgstr "Éditeur"
 
 #: ardour_ui.cc:322 mixer_ui.cc:2210 mixer_ui.cc:2216
 msgid "Window|Mixer"
-msgstr "Fenêtres|Console de mixage"
+msgstr "Console de mixage"
 
 #: ardour_ui.cc:323
 msgid "Window|Preferences"
-msgstr "Fenêtres|Préférences"
+msgstr "Préférences"
 
 #: ardour_ui.cc:330
 msgid "Your configuration files were copied. You can now restart %1."
@@ -2236,7 +2236,7 @@ msgstr "Annuler le solo"
 
 #: ardour_ui_ed.cc:173
 msgid "Session|Scripting"
-msgstr "Session|Scripter"
+msgstr "Scripter"
 
 #: ardour_ui_ed.cc:176
 msgid "Add Lua Script..."
@@ -2379,11 +2379,11 @@ msgstr "Afficher davantage de préférences d'interface graphique"
 
 #: ardour_ui_ed.cc:308
 msgid "Window|Scripting"
-msgstr "Fenêtres|Scripter"
+msgstr "Scripter"
 
 #: ardour_ui_ed.cc:309 meterbridge.cc:214 meterbridge.cc:220
 msgid "Window|Meterbridge"
-msgstr "Fenêtres|Bandeau de mesure"
+msgstr "Bandeau de mesure"
 
 #: ardour_ui_ed.cc:311 midi_tracer.cc:45
 msgid "MIDI Tracer"
@@ -2395,11 +2395,11 @@ msgstr "Salon de discussion (anglais)"
 
 #: ardour_ui_ed.cc:316
 msgid "Help|Manual"
-msgstr "Aide|Manuel (anglais)"
+msgstr "Manuel (anglais)"
 
 #: ardour_ui_ed.cc:317
 msgid "Manual|Reference"
-msgstr "Manuel|Référence (anglais)"
+msgstr "Référence (anglais)"
 
 #: ardour_ui_ed.cc:318
 msgid "Report a Bug"
@@ -2870,7 +2870,7 @@ msgstr "cacher la piste"
 #: automation_time_axis.cc:556 gain_meter.cc:230 generic_pluginui.cc:590
 #: generic_pluginui.cc:934 panner_ui.cc:151
 msgid "Automation|Manual"
-msgstr "Automation|Manuel"
+msgstr "Manuel"
 
 #: automation_time_axis.cc:312 automation_time_axis.cc:373
 #: automation_time_axis.cc:561 editor.cc:2033 editor.cc:2111
@@ -3769,11 +3769,11 @@ msgstr ""
 
 #: editor.cc:3571 editor_actions.cc:335
 msgid "Command|Undo"
-msgstr "Commandes|Annuler"
+msgstr "Annuler"
 
 #: editor.cc:3573
 msgid "Command|Undo (%1)"
-msgstr "Commandes|Annuler (%1)"
+msgstr "Annuler (%1)"
 
 #: editor.cc:3580 editor_actions.cc:337 editor_actions.cc:338
 #: editor_actions.cc:339
@@ -4116,7 +4116,7 @@ msgstr "Actions scriptées"
 
 #: editor_actions.cc:159
 msgid "Session|Lock"
-msgstr "Session|Verrouiller"
+msgstr "Verrouiller"
 
 #: editor_actions.cc:161
 msgid "Show Editor Mixer"
@@ -4679,7 +4679,7 @@ msgstr "Changer le point d'édition y compris le repère"
 
 #: editor_actions.cc:544
 msgid "EditMode|Lock"
-msgstr "ModeÉdition|Verrouiller"
+msgstr "Verrouiller"
 
 #: editor_actions.cc:545
 msgid "Cycle Edit Mode"
@@ -5506,7 +5506,7 @@ msgstr "Nom du groupe"
 
 #: editor_route_groups.cc:99 editor_routes.cc:234
 msgid "Visible|V"
-msgstr "Visible|V"
+msgstr "V"
 
 #: editor_route_groups.cc:99
 msgid "Group is visible?"
@@ -5523,7 +5523,7 @@ msgstr "Groupe activé ?"
 
 #: editor_route_groups.cc:101
 msgid "Group|G"
-msgstr "Groupe|G"
+msgstr "G"
 
 #: editor_route_groups.cc:101
 msgid "Sharing Gain?"
@@ -5531,7 +5531,7 @@ msgstr "Partager gain ?"
 
 #: editor_route_groups.cc:102
 msgid "Relative|Rel"
-msgstr "Relatif|Rel"
+msgstr "Rel"
 
 #: editor_route_groups.cc:102
 msgid "Relative Gain Changes?"
@@ -5541,7 +5541,7 @@ msgstr "Changements de gain relatifs ?"
 #: mixer_strip.cc:2221 meter_strip.cc:365 route_time_axis.cc:2742
 #: time_axis_view.cc:1106
 msgid "Mute|M"
-msgstr "Muet|M"
+msgstr "M"
 
 #: editor_route_groups.cc:103
 msgid "Sharing Mute?"
@@ -5551,7 +5551,7 @@ msgstr "Partager muet ?"
 #: meter_strip.cc:373 route_time_axis.cc:2739 vca_master_strip.cc:211
 #: vca_time_axis.cc:236
 msgid "Solo|S"
-msgstr "Solo|S"
+msgstr "S"
 
 #: editor_route_groups.cc:104
 msgid "Sharing Solo?"
@@ -5568,7 +5568,7 @@ msgstr "Partager l'armement ?"
 
 #: editor_route_groups.cc:106
 msgid "Monitoring|Mon"
-msgstr "Moniteur|Mon"
+msgstr "Mon"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Monitoring Choice?"
@@ -5576,7 +5576,7 @@ msgstr "Partager le choix d'écoute de contrôle ?"
 
 #: editor_route_groups.cc:107
 msgid "Selection|Sel"
-msgstr "Sélection|Sél"
+msgstr "Sél"
 
 #: editor_route_groups.cc:107
 msgid "Sharing Selected/Editing Status?"
@@ -5584,7 +5584,7 @@ msgstr "Partager le statut de sélection/édition ?"
 
 #: editor_route_groups.cc:108 editor_routes.cc:235
 msgid "Active|A"
-msgstr "Actif|A"
+msgstr "A"
 
 #: editor_route_groups.cc:108
 msgid "Sharing Active Status?"
@@ -6458,7 +6458,7 @@ msgstr ""
 
 #: editor_regions.cc:166
 msgid "Lock|L"
-msgstr "Verrouillé|L"
+msgstr "L"
 
 #: editor_regions.cc:166
 msgid "Region position locked?"
@@ -6466,11 +6466,11 @@ msgstr "Position de la région verrouillée ?"
 
 #: editor_regions.cc:167
 msgid "Gain|G"
-msgstr "Gain|G"
+msgstr "G"
 
 #: editor_regions.cc:167
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Position de la région collée au temps des Mesures|Temps ?"
+msgstr "Temps ?"
 
 #: editor_regions.cc:168
 msgid "Region muted?"
@@ -6478,7 +6478,7 @@ msgstr "Région muette ?"
 
 #: editor_regions.cc:169
 msgid "Opaque|O"
-msgstr "Opaque|O"
+msgstr "O"
 
 #: editor_regions.cc:169
 msgid "Region opaque (blocks regions below it from being heard)?"
@@ -6550,7 +6550,7 @@ msgstr "Piste/bus actif ?"
 
 #: editor_routes.cc:236
 msgid "MidiInput|I"
-msgstr "EntréeMidi|I"
+msgstr "I"
 
 #: editor_routes.cc:236
 msgid "MIDI input enabled"
@@ -6558,7 +6558,7 @@ msgstr "Entrée MIDI activée"
 
 #: editor_routes.cc:237
 msgid "Rec|R"
-msgstr "Enregistrement|R"
+msgstr "R"
 
 #: editor_routes.cc:237
 msgid "Record enabled"
@@ -6566,7 +6566,7 @@ msgstr "Enregistrement armé"
 
 #: editor_routes.cc:238
 msgid "Rec|RS"
-msgstr "Enregistrement|RS"
+msgstr "RS"
 
 #: editor_routes.cc:238
 msgid "Record Safe"
@@ -6582,7 +6582,7 @@ msgstr "Solo"
 
 #: editor_routes.cc:241
 msgid "SoloIso|SI"
-msgstr "SoloIso|SI"
+msgstr "SI"
 
 #: editor_routes.cc:241
 msgid "Solo Isolated"
@@ -6590,7 +6590,7 @@ msgstr "Solo isolé"
 
 #: editor_routes.cc:242
 msgid "SoloLock|SS"
-msgstr "SoloVerrouillé|SS"
+msgstr "SS"
 
 #: editor_routes.cc:242
 #, fuzzy
@@ -8216,7 +8216,7 @@ msgstr ""
 
 #: luawindow.cc:253 luawindow.cc:258
 msgid "Window|Lua"
-msgstr "Fenêtres|LUA"
+msgstr "LUA"
 
 #: luawindow.cc:286 luawindow.cc:304
 msgid "LuaException: %1"
@@ -8934,7 +8934,7 @@ msgstr "Verrouiller le statut de solo"
 
 #: mixer_strip.cc:208 mixer_strip.cc:2217
 msgid "SoloLock|Lock"
-msgstr "SoloVerr|Verr."
+msgstr "Verr."
 
 #: mixer_strip.cc:209 mixer_strip.cc:2216
 msgid "Iso"
@@ -9132,7 +9132,7 @@ msgstr ""
 
 #: mixer_strip.cc:2225
 msgid "Mon|O"
-msgstr "Mon|O"
+msgstr "O"
 
 #: mixer_strip.cc:2238 meter_strip.cc:377 route_time_axis.cc:2730
 #: vca_master_strip.cc:202 vca_time_axis.cc:227
@@ -9141,15 +9141,15 @@ msgstr ""
 
 #: mixer_strip.cc:2241
 msgid "Prefader|P"
-msgstr "Pré-fader|P"
+msgstr "P"
 
 #: mixer_strip.cc:2246
 msgid "SoloIso|I"
-msgstr "SoloIso|I"
+msgstr "I"
 
 #: mixer_strip.cc:2247
 msgid "SoloLock|L"
-msgstr "SoloVerrouillé|L"
+msgstr "L"
 
 #: mixer_strip.cc:2452
 msgid "Pre Fader"
@@ -9302,7 +9302,7 @@ msgstr "Réinitialiser crête"
 #: meter_strip.cc:380 route_time_axis.cc:2734 vca_master_strip.cc:206
 #: vca_time_axis.cc:231
 msgid "PreFader|P"
-msgstr "Pré-fader|P"
+msgstr "P"
 
 #: meter_strip.cc:894
 #, fuzzy
@@ -9877,19 +9877,19 @@ msgstr "Type d'automation de panoramique"
 
 #: panner_ui.cc:605
 msgid "Manual|M"
-msgstr "Manuel|M"
+msgstr "M"
 
 #: panner_ui.cc:608
 msgid "Play|P"
-msgstr "Jouer|P"
+msgstr "P"
 
 #: panner_ui.cc:611
 msgid "Touch|T"
-msgstr "Toucher|T"
+msgstr "T"
 
 #: panner_ui.cc:614
 msgid "Write|W"
-msgstr "Écrire|W"
+msgstr "W"
 
 #: playlist_selector.cc:43
 msgid "Playlists"
@@ -11197,7 +11197,7 @@ msgstr "Cette option ne sera prise en compte qu'après un redémarrage de %1."
 
 #: rc_option_editor.cc:1895
 msgid "Options|Undo"
-msgstr "Options|Annuler"
+msgstr "Annuler"
 
 #: rc_option_editor.cc:1902
 msgid "Verify removal of last capture"
@@ -12166,7 +12166,7 @@ msgstr ""
 #: rc_option_editor.cc:3129 rc_option_editor.cc:3144 rc_option_editor.cc:3153
 #: rc_option_editor.cc:3161
 msgid "Preferences|GUI"
-msgstr "Préférences|Interface graphique"
+msgstr "Interface graphique"
 
 #: rc_option_editor.cc:3045
 msgid "Possibly improve slow graphical performance (requires restart)"
@@ -12243,7 +12243,7 @@ msgstr ""
 #: rc_option_editor.cc:3320 rc_option_editor.cc:3328 rc_option_editor.cc:3336
 #: rc_option_editor.cc:3338
 msgid "Preferences|Metering"
-msgstr "Préférences|Mesure"
+msgstr "Mesure"
 
 #: rc_option_editor.cc:3173
 #, fuzzy
@@ -13436,7 +13436,7 @@ msgstr "DJ Mixeur"
 
 #: session_metadata_dialog.cc:778
 msgid "Metadata|Mixer"
-msgstr "Méta-données|Mixeur"
+msgstr "Mixeur"
 
 #: session_metadata_dialog.cc:786
 msgid "School"
@@ -13701,7 +13701,7 @@ msgstr "RF64 (compatible WAV)"
 #: session_option_editor.cc:210 session_option_editor.cc:216
 #: session_option_editor.cc:223
 msgid "Files|Locations"
-msgstr "Fichiers|Emplacements"
+msgstr "Emplacements"
 
 #: session_option_editor.cc:210
 msgid "File locations"
@@ -14782,7 +14782,7 @@ msgstr "G : %3d D : %3d Stéréo : %d%%"
 
 #: stereo_panner.cc:272
 msgid "Panner|M"
-msgstr "Balance|M"
+msgstr "M"
 
 #: stereo_panner_editor.cc:37
 msgid "Stereo Panner"
@@ -15071,7 +15071,7 @@ msgstr "Cents :"
 
 #: time_fx_dialog.cc:132
 msgid "Time|Shift"
-msgstr "Temps|Décaler"
+msgstr "Décaler"
 
 #: time_fx_dialog.cc:184 time_fx_dialog.cc:188
 msgid "TimeFXButton"

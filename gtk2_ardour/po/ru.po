@@ -6464,7 +6464,7 @@ msgstr "У"
 
 #: editor_regions.cc:167
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Приклеить позицию региона к времени Бар|Бит?"
+msgstr "Бит?"
 
 #: editor_regions.cc:168
 msgid "Region muted?"
