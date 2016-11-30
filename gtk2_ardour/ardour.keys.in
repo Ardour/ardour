@@ -192,8 +192,8 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/SnapshotStay|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @edit|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
 @mmode|MouseMode/set-mouse-mode-draw|d|note-draw mode
-@rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
-@rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
+@edit|Editor/duplicate|<@SECONDARY@>d|duplicate (once)
+@edit|Editor/multi-duplicate|<@TERTIARY@>d|duplicate (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-selection|f|fit selection vertically
 @edit|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
