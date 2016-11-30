@@ -1,13 +1,14 @@
 # Header entry was created by Lokalize.
 #
 # Romain Arnaud <roming22@gmail.com>, 2011.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-13 18:09-0400\n"
-"PO-Revision-Date: 2015-03-28 20:57+0100\n"
-"Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
+"PO-Revision-Date: 2016-22-30 20:22+0100\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +29,7 @@ msgstr "actionnez maintenant le contrôleur"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "le bouton ne peut pas surveiller l'état d'un Contrôlable inexistant\n"
+msgstr "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
 
 #: cursors.cc:82
 msgid "cursor hotspots info file %1 has an error on line %2"
@@ -66,11 +67,11 @@ msgstr "Commande"
 
 #: keyboard.cc:71 keyboard.cc:93
 msgid "Control"
-msgstr "Ctrl"
+msgstr "Control"
 
 #: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
 msgid "Key|Shift"
-msgstr "Maj."
+msgstr "Key|Maj."
 
 #: keyboard.cc:73
 msgid "Option"
@@ -78,15 +79,15 @@ msgstr "Option"
 
 #: keyboard.cc:75
 msgid "Cmd"
-msgstr ""
+msgstr "Cmd"
 
 #: keyboard.cc:76 keyboard.cc:98
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
 #: keyboard.cc:78
 msgid "Opt"
-msgstr ""
+msgstr "Opt"
 
 #: keyboard.cc:94 keyboard.cc:99
 msgid "Alt"
@@ -94,11 +95,11 @@ msgstr "Alt"
 
 #: keyboard.cc:96
 msgid "Windows"
-msgstr ""
+msgstr "Windows"
 
 #: keyboard.cc:101
 msgid "Win"
-msgstr ""
+msgstr "Win"
 
 #: keyboard.cc:152 keyboard.cc:685
 msgid "Unknown"
@@ -107,20 +108,20 @@ msgstr "Inconnu"
 #: keyboard.cc:696
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
-"fichier de raccourcis claviers contient des erreurs ou introuvable dans "
-"« %2 »."
+"fichier de raccourcis-clavier introuvable dans \"%2\" ou contenant des "
+"erreurs."
 
 #: keyboard.cc:722
 msgid "Keyboard binding found without a name"
-msgstr ""
+msgstr "raccourci-clavier trouvé sans nom"
 
 #: keyboard.cc:752
 msgid "Cannot save key bindings to %1"
-msgstr ""
+msgstr "Impossible de sauvegarder les raccourcis-clavier dans %1"
 
 #: keyboard.cc:768
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr "Impossible de renommer votre propre fichier de raccourcis clavier (%1)"
+msgstr "Impossible de renommer votre propre fichier de raccourcis-clavier (%1)"
 
 #: paths_dialog.cc:32
 msgid "Add"
@@ -140,7 +141,7 @@ msgstr "Ajouter le dossier au chemin de recherche"
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
-msgstr "Cliquez pour afficher dans une fenêtre séparée"
+msgstr "Cliquez pour afficher ceci dans une fenêtre séparée"
 
 #: tearoff.cc:63
 msgid "Click to put this back in the main window"
@@ -150,12 +151,11 @@ msgstr "Cliquez pour remettre dans la fenêtre principale"
 msgid "Close"
 msgstr "Fermer"
 
-#, fuzzy
 #~ msgid "programming error: %1"
 #~ msgstr "erreur de programmation : %1"
 
 #~ msgid "Meta"
-#~ msgstr "Meta"
+#~ msgstr "Méta"
 
 #~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
 #~ msgstr ""
