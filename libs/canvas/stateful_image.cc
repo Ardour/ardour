@@ -108,7 +108,7 @@ StatefulImage::load_states (const XMLNode& node)
 			continue;
 		}
 
-		if ((s.image = find_image (prop->value())) == 0) {
+		if (!(s.image = find_image (prop->value()))) {
 			error << string_compose (_("image %1 not found for state"), prop->value()) << endmsg;
 			continue;
 		}
