@@ -36,7 +36,7 @@ public:
 
 	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
 	                     Evoral::Beats position,
-	                     std::vector<Evoral::Sequence<Evoral::Beats>::Notes>&);
+	                     NoteSequences&);
 	std::string name() const { return std::string ("quantize"); }
 
 private:

@@ -63,7 +63,7 @@ NoteBase::set_colors ()
 	_max_col = UIConfiguration::instance().color_mod ("midi note max", "midi note");
 }
 
-NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)
+NoteBase::NoteBase(MidiRegionView& region, bool with_events, const NotePtr note)
 	: _region(region)
 	, _item (0)
 	, _text(0)

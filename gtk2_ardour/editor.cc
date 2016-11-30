@@ -4972,9 +4972,8 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 }
 
 void
-Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection) const
+Editor::get_per_region_note_selection (PerRegionNoteSelection &selection) const
 {
-
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		MidiTimeAxisView* mtav;
 

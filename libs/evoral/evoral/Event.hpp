@@ -444,6 +444,12 @@ struct LIBEVORAL_API EventPointer : public boost::intrusive_ptr<ManagedEvent<Tim
 		pool.release (ptr);
 	}
 
+	static void init_pool (size_t num_pointers) {
+		EventPool::SizePairs sp;
+		sp.push_back (EventPool::SizePair (sizeof (EventPointer<Time>), num_pointers));
+		pool.add (sp);
+	}
+
   private:
 	static EventPool pool;
 };

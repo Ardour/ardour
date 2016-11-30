@@ -46,7 +46,6 @@ class MidiRegionView;
 class AutomationLine;
 class ControlPoint;
 
-
 namespace ARDOUR {
 	class Region;
 	class AudioRegion;

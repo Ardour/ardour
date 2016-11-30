@@ -37,9 +37,9 @@ NotePlayer::~NotePlayer ()
 }
 
 void
-NotePlayer::add (boost::shared_ptr<NoteType> note)
+NotePlayer::add (NotePtr const & note)
 {
-	notes.push_back (note);
+	notes.push_back (note.copy());
 }
 
 void
@@ -53,7 +53,7 @@ void
 NotePlayer::on ()
 {
 	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-		track->write_immediate_event ((*n)->on_event().size(), (*n)->on_event().buffer());
+		track->write_immediate_event ((*n)->on_event()->size(), (*n)->on_event()->buffer());
 	}
 }
 
@@ -83,6 +83,6 @@ void
 NotePlayer::off ()
 {
 	for (Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-		track->write_immediate_event ((*n)->off_event().size(), (*n)->off_event().buffer());
+		track->write_immediate_event ((*n)->off_event()->size(), (*n)->off_event()->buffer());
 	}
 }

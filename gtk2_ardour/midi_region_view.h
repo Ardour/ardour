@@ -65,8 +65,10 @@ class CursorContext;
 class MidiRegionView : public RegionView
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Sequence<Evoral::Beats>::NotePtr NotePtr;
 	typedef Evoral::Sequence<Evoral::Beats>::Notes Notes;
+
+	typedef Evoral::Sequence<Evoral::Beats>::PatchChangePtr PatchChangePtr;
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
 	                RouteTimeAxisView&                    tv,
@@ -118,7 +120,7 @@ public:
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	NoteBase* add_note(const boost::shared_ptr<NoteType> note, bool visible);
+	NoteBase* add_note(NotePtr const & note, bool visible);
 	void resolve_note(uint8_t note_num, Evoral::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
@@ -143,13 +145,13 @@ public:
 	 * @param old_patch the canvas patch change which is to be altered
 	 * @param new_patch new patch
 	 */
-	void change_patch_change (PatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
-	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::Beats> const &);
+	void change_patch_change (PatchChangePtr const & old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void change_patch_change (PatchChangePtr const &, PatchChangePtr const &);
 
-	void add_patch_change (framecnt_t, Evoral::PatchChange<Evoral::Beats> const &);
-	void move_patch_change (PatchChange &, Evoral::Beats);
-	void delete_patch_change (PatchChange *);
-	void edit_patch_change (PatchChange *);
+	void add_patch_change (framecnt_t, PatchChangePtr const &);
+	void move_patch_change (PatchChangePtr const &, Evoral::Beats);
+	void delete_patch_change (PatchChangePtr const &);
+	void edit_patch_change (PatchChangePtr &);
 
 	void delete_sysex (SysEx*);
 
@@ -157,7 +159,7 @@ public:
 	 * @param bank If true, step bank, otherwise, step program.
 	 * @param delta Amount to adjust number.
 	 */
-	void step_patch (PatchChange& patch, bool bank, int delta);
+	void step_patch (PatchChangePtr const & patch, bool bank, int delta);
 
 	/** Displays all patch change events in the region as flags on the canvas.
 	 */
@@ -176,7 +178,7 @@ public:
 	void start_note_diff_command (std::string name = "midi edit");
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::Beats val);
-	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
+	void note_diff_add_note (NotePtr & note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
 	void apply_diff (bool as_subcommand = false);
@@ -193,7 +195,7 @@ public:
 	void   note_selected(NoteBase* ev, bool add, bool extend=false);
 	void   note_deselected(NoteBase* ev);
 	void   delete_selection();
-	void   delete_note (boost::shared_ptr<NoteType>);
+	void   delete_note (NotePtr const &);
 	size_t selection_size() { return _selection.size(); }
 	void   select_all_notes ();
 	void   select_range(framepos_t start, framepos_t end);
@@ -209,7 +211,7 @@ public:
 	/** Return true iff the note is within the extent of the region.
 	 * @param visible will be set to true if the note is within the visible note range, false otherwise.
 	 */
-	bool note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const;
+	bool note_in_region_range(NotePtr const & note, bool& visible) const;
 
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();
@@ -338,8 +340,7 @@ public:
 
 	void note_deleted (NoteBase*);
 
-	void show_verbose_cursor_for_new_note_value(boost::shared_ptr<NoteType> current_note,
-	                                            uint8_t new_note) const;
+	void show_verbose_cursor_for_new_note_value(NotePtr const & current_note, uint8_t new_note) const;
 
 protected:
 	void region_resized (const PBD::PropertyChange&);
@@ -361,9 +362,9 @@ private:
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
-	void play_midi_note (boost::shared_ptr<NoteType> note);
-	void start_playing_midi_note (boost::shared_ptr<NoteType> note);
-	void start_playing_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
+	void play_midi_note (NotePtr const & note);
+	void start_playing_midi_note (NotePtr const & note);
+	void start_playing_midi_chord (std::vector<NotePtr> const & notes);
 
 	/** Clear the note selection of just this midi region
 	 */
@@ -395,10 +396,10 @@ private:
 	void add_to_selection (NoteBase*);
 	void remove_from_selection (NoteBase*);
 
-	std::string get_note_name (boost::shared_ptr<NoteType> note, uint8_t note_value) const;
+	std::string get_note_name (NotePtr const & note, uint8_t note_value) const;
 
 	void show_verbose_cursor (std::string const &, double, double) const;
-	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
+	void show_verbose_cursor (NotePtr const & note) const;
 
 	uint8_t get_velocity_for_add (ARDOUR::MidiModel::TimeType time) const;
 
@@ -441,21 +442,21 @@ private:
 
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */
-	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
+	std::set<NotePtr> _marked_for_selection;
 
 	/** Notes that should be selected when the model is redisplayed. */
 	std::set<Evoral::event_id_t> _pending_note_selection;
 
 	/** New notes (created in the current command) which should have visible velocity
 	 * when they appear after the command is applied. */
-	std::set< boost::shared_ptr<NoteType> > _marked_for_velocity;
+	std::set<NotePtr> _marked_for_velocity;
 
 	std::vector<NoteResizeData *> _resize_data;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
-	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
+	NoteBase* find_canvas_note (NotePtr const &);
 	NoteBase* find_canvas_note (Evoral::event_id_t id);
 	Events::iterator _optimization_iterator;
 

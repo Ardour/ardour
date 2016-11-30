@@ -277,7 +277,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 			TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 			TreeModel::iterator iter;
-			boost::shared_ptr<NoteType> note;
+			MidiModel::NotePtr note;
 
 			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
@@ -328,7 +328,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 			previous_selection.push_back (path);
 
 			if (iter) {
-				boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+				NotePtr note = (*iter)[columns._note];
 
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::StartTime:
@@ -450,8 +450,8 @@ MidiListEditor::key_release (GdkEventKey* ev)
 	TreeModel::iterator iter;
 	MidiModel::NoteDiffCommand* cmd;
 	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-	boost::shared_ptr<NoteType> note;
-	boost::shared_ptr<NoteType> copy;
+	NotePtr note;
+	NotePtr copy;
 
 	switch (ev->keyval) {
 	case GDK_Insert:
@@ -462,7 +462,7 @@ MidiListEditor::key_release (GdkEventKey* ev)
 		iter = model->get_iter (path);
 		cmd = m->new_note_diff_command (_("insert new note"));
 		note = (*iter)[columns._note];
-		copy.reset (new NoteType (*note.get()));
+		copy = note.copy();
 		cmd->add (copy);
 		m->apply_command (*_session, cmd);
 		/* model has been redisplayed by now */
@@ -511,14 +511,14 @@ MidiListEditor::delete_selected_note ()
 		return;
 	}
 
-	typedef vector<boost::shared_ptr<NoteType> > Notes;
-	Notes to_delete;
+	typedef vector<NotePtr> ToBeDeleted;
+	ToBeDeleted to_delete;
 
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TreeIter iter;
 
 		if ((iter = model->get_iter (*i))) {
-			boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+			NotePtr note = (*iter)[columns._note];
 			to_delete.push_back (note);
 		}
 	}
@@ -526,7 +526,7 @@ MidiListEditor::delete_selected_note ()
 	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 	MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (_("delete notes (from list)"));
 
-	for (Notes::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
+	for (ToBeDeleted::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
 		cmd->remove (*i);
 	}
 
@@ -582,7 +582,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		return;
 	}
 
-	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+	NotePtr note = (*iter)[columns._note];
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
 	double fval;
@@ -753,7 +753,7 @@ MidiListEditor::redisplay_model ()
 	if (_session) {
 
 		BeatsFramesConverter conv (_session->tempo_map(), region->position());
-		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
+		MidiModel::Notes& notes (region->midi_source(0)->model()->notes());
 		TreeModel::Row row;
 		stringstream ss;
 
@@ -802,7 +802,7 @@ MidiListEditor::selection_changed ()
 
 	TreeModel::Path path;
 	TreeModel::iterator iter;
-	boost::shared_ptr<NoteType> note;
+	NotePtr note;
 	TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 
 	NotePlayer* player = new NotePlayer (track);
@@ -810,7 +810,7 @@ MidiListEditor::selection_changed ()
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		if ((iter = model->get_iter (*i))) {
 			note = (*iter)[columns._note];
-			player->add (note);
+			player->add (note.copy());
 		}
 	}
 

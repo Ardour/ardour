@@ -6046,7 +6046,8 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		if (was_double_click()) {
-			_region_view->edit_patch_change (_patch_change);
+			Evoral::PatchChangePointer<Evoral::Beats> pp (_patch_change->patch());
+			_region_view->edit_patch_change (pp);
 		}
 		return;
 	}
@@ -6057,7 +6058,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 	f = min (f, r->last_frame ());
 
 	_region_view->move_patch_change (
-		*_patch_change,
+		_patch_change->patch(),
 		_region_view->region_frames_to_region_beats (f - (r->position() - r->start()))
 		);
 }

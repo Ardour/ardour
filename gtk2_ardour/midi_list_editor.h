@@ -19,6 +19,8 @@
 #ifndef __ardour_gtk2_midi_list_editor_h_
 #define __ardour_gtk2_midi_list_editor_h_
 
+#include "evoral/Note.hpp"
+
 #include <gtkmm/treeview.h>
 #include <gtkmm/table.h>
 #include <gtkmm/box.h>
@@ -28,11 +30,6 @@
 #include "ardour/session_handle.h"
 
 #include "ardour_window.h"
-
-namespace Evoral {
-	template<typename Time> class Note;
-	class                         Beats;
-};
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -44,7 +41,7 @@ namespace ARDOUR {
 class MidiListEditor : public ArdourWindow
 {
   public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::NotePointer<Evoral::Beats> NotePtr;
 
 	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
 		       boost::shared_ptr<ARDOUR::MidiTrack>);
@@ -67,7 +64,7 @@ class MidiListEditor : public ArdourWindow
 		Gtk::TreeModelColumn<uint8_t>     velocity;
 		Gtk::TreeModelColumn<std::string> start;
 		Gtk::TreeModelColumn<std::string> length;
-		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
+		Gtk::TreeModelColumn<NotePtr> _note;
 	};
 
 	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord {

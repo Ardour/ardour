@@ -5273,12 +5273,12 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	Evoral::Sequence<Evoral::Beats>::Notes selected;
 	mrv.selection_as_notelist (selected, true);
 
-	vector<Evoral::Sequence<Evoral::Beats>::Notes> v;
-	v.push_back (selected);
+	MidiOperator::NoteSequences sequences;
+	sequences.push_back (&selected);
 
 	Evoral::Beats pos_beats  = Evoral::Beats (mrv.midi_region()->beat()) - mrv.midi_region()->start_beats();
 
-	return op (mrv.midi_region()->model(), pos_beats, v);
+	return op (mrv.midi_region()->model(), pos_beats, sequences);
 }
 
 void
@@ -5490,8 +5490,8 @@ Editor::insert_patch_change (bool from_context)
 	*/
 	MidiRegionView* first = dynamic_cast<MidiRegionView*> (rs.front ());
 
-	Evoral::PatchChange<Evoral::Beats> empty (Evoral::ManagedEvent<Evoral::Beats>::default_event_pool,
-	                                          Evoral::Beats(), 0, 0, 0);
+	Evoral::PatchChangePointer<Evoral::Beats> empty (Evoral::ManagedEvent<Evoral::Beats>::default_event_pool,
+	                                                 Evoral::Beats(), 0, 0, 0);
 
 	PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
 

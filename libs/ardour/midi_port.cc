@@ -227,11 +227,9 @@ MidiPort::flush_buffers (pframes_t nframes)
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
-
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 
 			const Evoral::Event<MidiBuffer::TimeType>* ev (*i);
-
 
 			if (sends_output() && _trace_on) {
 				uint8_t const * const buf = ev->buffer();
@@ -246,7 +244,6 @@ MidiPort::flush_buffers (pframes_t nframes)
 				}
 			}
 
-
 			// event times are in frames, relative to cycle start
 
 #ifndef NDEBUG
@@ -254,8 +251,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 				const Session* s = AudioEngine::instance()->session();
 				const framepos_t now = (s ? s->transport_frame() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev->time(), ev->size(),
-				                                    now + ev->time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %1 %2 pop event @ %3 (global %4, within %5 gpbo %6 pbo %7 sz %8 ",
+				                                    name(), _buffer, ev->time(),
+				                                    now + ev->time(), nframes,
+				                                    _global_port_buffer_offset,
+				                                    _port_buffer_offset, ev->size()));
 				for (size_t i=0; i < ev->size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");

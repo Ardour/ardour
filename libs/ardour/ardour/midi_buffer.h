@@ -139,7 +139,9 @@ public:
 		return iterator (*this, i.offset);
 	}
 
-private:
+	uint8_t const * data() const { return _data; }
+
+  private:
 	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::Event<TimeType> >;
 

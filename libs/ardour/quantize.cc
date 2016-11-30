@@ -112,7 +112,7 @@ swing_position (double pos, double grid, double swing, double offset)
 Command*
 Quantize::operator () (boost::shared_ptr<MidiModel> model,
                        Evoral::Beats position,
-                       std::vector<Evoral::Sequence<Evoral::Beats>::Notes>& seqs)
+                       NoteSequences& seqs)
 {
 	/* TODO: Rewrite this to be precise with fixed point? */
 
@@ -125,9 +125,9 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
-	for (std::vector<Evoral::Sequence<Evoral::Beats>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+	for (NoteSequences::iterator s = seqs.begin(); s != seqs.end(); ++s) {
 
-		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s)->begin(); i != (*s)->end(); ++i) {
 
 			/* compute new start + end points WITHOUT the offset
 			 * caused by the start of the model (see above).

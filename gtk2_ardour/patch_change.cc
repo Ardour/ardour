@@ -150,7 +150,7 @@ PatchChange::initialize_popup_menus()
 void
 PatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 {
-	_region.change_patch_change (*this, key);
+	_region.change_patch_change (patch(), key);
 }
 
 bool
@@ -169,12 +169,12 @@ PatchChange::event_handler (GdkEvent* ev)
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 
-				_region.delete_patch_change (this);
+				_region.delete_patch_change (_patch);
 				return true;
 
 			} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
 
-				_region.edit_patch_change (this);
+				_region.edit_patch_change (_patch);
 				return true;
 
 			} else if (ev->button.button == 1) {
@@ -199,13 +199,13 @@ PatchChange::event_handler (GdkEvent* ev)
 		case GDK_KP_Up:
 		case GDK_uparrow:
 			_region.step_patch(
-				*this, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), 1);
+				_patch, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), 1);
 			return true;
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
 			_region.step_patch(
-				*this, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), -1);
+				_patch, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), -1);
 			return true;
 		default:
 			break;
@@ -216,7 +216,7 @@ PatchChange::event_handler (GdkEvent* ev)
 		switch (ev->key.keyval) {
 		case GDK_BackSpace:
 		case GDK_Delete:
-			_region.delete_patch_change (this);
+			_region.delete_patch_change (_patch);
 		default:
 			break;
 		}
@@ -225,11 +225,11 @@ PatchChange::event_handler (GdkEvent* ev)
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
 			_region.step_patch(
-				*this, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), 1);
+				_patch, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), 1);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 			_region.step_patch(
-				*this, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), -1);
+				_patch, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), -1);
 			return true;
 		}
 		break;

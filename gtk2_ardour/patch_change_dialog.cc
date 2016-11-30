@@ -23,12 +23,13 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "gtkmm2ext/utils.h"
-
+#include "evoral/Event.hpp"
 #include "midi++/midnam_patch.h"
 
 #include "ardour/beats_frames_converter.h"
 #include "ardour/instrument_info.h"
+
+#include "gtkmm2ext/utils.h"
 
 #include "patch_change_dialog.h"
 #include "gui_thread.h"
@@ -43,7 +44,7 @@ using namespace Gtkmm2ext;
 PatchChangeDialog::PatchChangeDialog (
 	const ARDOUR::BeatsFramesConverter*        tc,
 	ARDOUR::Session*                           session,
-	Evoral::PatchChange<Evoral::Beats> const & patch,
+	Evoral::PatchChangePointer<Evoral::Beats> const & patch,
 	ARDOUR::InstrumentInfo&                    info,
 	const Gtk::BuiltinStockID&                 ok,
 	bool                                       allow_delete)
@@ -70,7 +71,7 @@ PatchChangeDialog::PatchChangeDialog (
 
 		_time.set_session (session);
 		_time.set_mode (AudioClock::BBT);
-		_time.set (_time_converter->to (patch.time ()), true);
+		_time.set (_time_converter->to (patch->time ()), true);
 	}
 
 	l = manage (left_aligned_label (_("Patch Bank")));
@@ -92,7 +93,7 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (_channel, 1, 2, r, r + 1);
 	++r;
 
-	_channel.set_value (patch.channel() + 1);
+	_channel.set_value (patch->channel() + 1);
 	_channel.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::channel_changed));
 
 	l = manage (left_aligned_label (_("Program")));
@@ -100,7 +101,7 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (_program, 1, 2, r, r + 1);
 	++r;
 
-	_program.set_value (patch.program () + 1);
+	_program.set_value (patch->program () + 1);
 	_program.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::program_changed));
 
 	l = manage (left_aligned_label (_("Bank")));
@@ -108,7 +109,7 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (_bank, 1, 2, r, r + 1);
 	++r;
 
-	_bank.set_value (patch.bank() + 1);
+	_bank.set_value (patch->bank() + 1);
 	_bank.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
 
 	get_vbox()->add (*t);
@@ -139,7 +140,7 @@ PatchChangeDialog::instrument_info_changed ()
 	fill_patch_combo ();
 }
 
-Evoral::PatchChange<Evoral::Beats>
+Evoral::PatchChangePointer<Evoral::Beats>
 PatchChangeDialog::patch () const
 {
 	Evoral::Beats t = Evoral::Beats();
@@ -148,7 +149,8 @@ PatchChangeDialog::patch () const
 		t = _time_converter->from (_time.current_time ());
 	}
 
-	return Evoral::PatchChange<Evoral::Beats> (
+	return Evoral::PatchChangePointer<Evoral::Beats> (
+		Evoral::ManagedEvent<Evoral::Beats>::default_event_pool,
 		t,
 		_channel.get_value_as_int() - 1,
 		_program.get_value_as_int() - 1,

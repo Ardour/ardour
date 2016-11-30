@@ -37,9 +37,11 @@ class LIBARDOUR_API MidiOperator {
 	MidiOperator () {}
 	virtual ~MidiOperator() {}
 
+	typedef std::vector<Evoral::Sequence<Evoral::Beats>::Notes*> NoteSequences;
+
 	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
 	                             Evoral::Beats,
-	                             std::vector<Evoral::Sequence<Evoral::Beats>::Notes>&) = 0;
+	                             NoteSequences&) = 0;
 	virtual std::string name() const = 0;
 };
 

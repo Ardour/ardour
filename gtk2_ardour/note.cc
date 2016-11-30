@@ -30,7 +30,7 @@ using namespace ARDOUR;
 using namespace ArdourCanvas;
 
 Note::Note (
-	MidiRegionView& region, Item* parent, const boost::shared_ptr<NoteType> note, bool with_events)
+	MidiRegionView& region, Item* parent, const NotePtr note, bool with_events)
 	: NoteBase (region, with_events, note)
 	, _rectangle (new ArdourCanvas::Rectangle (parent))
 {

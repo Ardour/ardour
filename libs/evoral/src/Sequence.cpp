@@ -169,7 +169,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map, EventPool* p)
 		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 16, 128));
 		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 32, 128));
 
-		_event_pool = new EventPool (sp);
+		_event_pool = new EventPool (string_compose ("sequence@%1", this), sp);
 	}
 
 	for (int i = 0; i < 16; ++i) {
@@ -342,6 +342,14 @@ Sequence<Time>::remove_note_unlocked (NotePtr & note)
 				_highest_note = (*ii)->note();
 		}
 	}
+}
+
+template<typename Time>
+void
+Sequence<Time>::remove_sysex_unlocked (EventPtr & sysex)
+{
+	ordered_erase (_events, sysex, TimeComparator<EventPtr,Time>());
+	ordered_erase (_sysexes, sysex, TimeComparator<EventPtr,Time>());
 }
 
 template<typename Time>
@@ -661,6 +669,7 @@ Sequence<Time>::contains_unlocked (const NotePtr& note) const
 	for (typename Pitches::const_iterator i = std::lower_bound (p.begin(), p.end(), note->note(), NoteNumberComparator());
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
 
+		/* compare note contents */
 		if (**i == *note) {
 			return true;
 		}

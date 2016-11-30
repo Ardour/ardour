@@ -118,6 +118,8 @@ class PatchChangePointer : public MultiEventPointer<PatchChange<Time> >
   public:
 	PatchChangePointer () {}
 	PatchChangePointer (PatchChange<Time>* pc) : MultiEventPointer<PatchChange<Time> > (pc) {}
+	PatchChangePointer (EventPool& pool, Time t, uint8_t c, uint8_t p, int b)
+		: MultiEventPointer<PatchChange<Time> > (new PatchChange<Time> (pool, t, c, p, b)) {}
 
 	~PatchChangePointer () { }
 
@@ -125,7 +127,31 @@ class PatchChangePointer : public MultiEventPointer<PatchChange<Time> >
 		/* XXX need pools for all this */
 		return *new PatchChangePointer<Time> (new PatchChange<Time> (*(this->get())));
 	}
+
+	/* patch change pointers need to be safely created and destroyed in realtime
+	 * contexts
+	 */
+
+	void* operator new (size_t sz) {
+		return pool.alloc (sz);
+	}
+
+	void operator delete (void* ptr) {
+		pool.release (ptr);
+	}
+
+	static void init_pool (size_t num_pointers) {
+		EventPool::SizePairs sp;
+		sp.push_back (EventPool::SizePair (sizeof (PatchChangePointer<Time>), num_pointers));
+		pool.add (sp);
+	}
+
+  private:
+	static EventPool pool;
 };
+
+template<typename Time>
+EventPool PatchChangePointer<Time>::pool ("patch change pointer");
 
 }
 

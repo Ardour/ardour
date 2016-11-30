@@ -24,6 +24,7 @@
 #include <sigc++/trackable.h>
 
 #include "evoral/Note.hpp"
+#include "evoral/Sequence.hpp"
 
 namespace ARDOUR {
 	class MidiTrack;
@@ -31,12 +32,12 @@ namespace ARDOUR {
 
 class NotePlayer : public sigc::trackable {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::NotePointer<Evoral::Beats> NotePtr;
 
 	NotePlayer (boost::shared_ptr<ARDOUR::MidiTrack>);
 	~NotePlayer ();
 
-	void add (boost::shared_ptr<NoteType>);
+	void add (NotePtr const &);
 	void play ();
 	void on ();
 	void off ();
@@ -45,7 +46,7 @@ public:
 	static bool _off (NotePlayer*);
 
 private:
-	typedef std::vector< boost::shared_ptr<NoteType> > Notes;
+	typedef Evoral::Sequence<Evoral::Beats>::Notes Notes;
 
 	boost::shared_ptr<ARDOUR::MidiTrack> track;
 	Notes notes;

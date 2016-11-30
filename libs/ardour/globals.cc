@@ -40,6 +40,10 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
+#include "evoral/Beats.hpp"
+#include "evoral/Event.hpp"
+#include "evoral/PatchChange.hpp"
+
 #ifdef PLATFORM_WINDOWS
 #include <stdio.h> // for _setmaxstdio
 #include <windows.h> // for LARGE_INTEGER
@@ -474,6 +478,21 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (Config->load_state ()) {
 		return false;
 	}
+
+	/* Allocate various Evoral realtime allocation pools */
+
+	Evoral::EventPool::SizePairs size_pairs;
+
+	size_pairs.push_back (make_pair<size_t,size_t> (4, 16848));
+	size_pairs.push_back (make_pair<size_t,size_t> (16, 4096));
+	size_pairs.push_back (make_pair<size_t,size_t> (32, 4096));
+	size_pairs.push_back (make_pair<size_t,size_t> (64, 1024));
+
+	Evoral::ManagedEvent<Evoral::Beats>::default_event_pool.add (size_pairs);
+	Evoral::EventPointer<Evoral::Beats>::init_pool (8000);
+	Evoral::EventPointer<framepos_t>::init_pool (8000);
+	Evoral::PatchChangePointer<Evoral::Beats>::init_pool (2000);
+	Evoral::PatchChangePointer<framepos_t>::init_pool (2000);
 
 	Config->set_use_windows_vst (use_windows_vst);
 #ifdef LXVST_SUPPORT

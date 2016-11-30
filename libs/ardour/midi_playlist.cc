@@ -119,10 +119,12 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
 	             string_compose ("---- MidiPlaylist::read %1 .. %2 (%3 trackers) ----\n",
 	                             start, start + dur, _note_trackers.size()));
 
+#ifdef NOTE_FIXER
 	/* First, emit any queued edit fixup events at start. */
 	for (NoteTrackers::iterator t = _note_trackers.begin(); t != _note_trackers.end(); ++t) {
 		t->second->fixer.emit(dst, _read_end, t->second->tracker);
 	}
+#endif
 
 	/* Find relevant regions that overlap [start..end] */
 	const framepos_t                         end = start + dur - 1;

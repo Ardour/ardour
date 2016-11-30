@@ -32,11 +32,9 @@ namespace ArdourCanvas {
 class Note : public NoteBase
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
-
 	Note (MidiRegionView&                   region,
 	      ArdourCanvas::Item*               parent,
-	      const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
+	      const NotePtr note = NotePtr(),
 	      bool with_events = true);
 
 	~Note ();

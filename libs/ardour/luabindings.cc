@@ -1331,14 +1331,7 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <Location*> ("LocationList")
 		.endClass ()
 
-#if 0  // depends on Evoal:: Note, Beats see note_fixer.h
-	// typedef Evoral::Note<Evoral::Beats> Note;
-	// std::set< boost::weak_ptr<Note> >
-		.beginStdSet <boost::weak_ptr<Note> > ("WeakNoteSet")
-		.endClass ()
-#endif
-
-	// std::list<boost::weak_ptr<Source> >
+		// std::list<boost::weak_ptr<Source> >
 		.beginConstStdList <boost::weak_ptr<Source> > ("WeakSourceList")
 		.endClass ()
 

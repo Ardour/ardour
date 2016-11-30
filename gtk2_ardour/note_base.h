@@ -22,6 +22,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "evoral/Note.hpp"
+
 #include "canvas/types.h"
 
 #include "rgb_macros.h"
@@ -53,9 +55,9 @@ namespace ArdourCanvas {
 class NoteBase : public sigc::trackable
 {
   public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::NotePointer<Evoral::Beats> NotePtr;
 
-	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
+	NoteBase (MidiRegionView& region, bool, const NotePtr note = NotePtr());
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
@@ -97,7 +99,7 @@ class NoteBase : public sigc::trackable
 	float mouse_x_fraction() const { return _mouse_x_fraction; }
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
-	const boost::shared_ptr<NoteType> note() const { return _note; }
+	const NotePtr note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 
 	static void set_colors ();
@@ -136,7 +138,7 @@ protected:
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;
-	const boost::shared_ptr<NoteType> _note;
+	const NotePtr                     _note;
 	bool                              _with_events;
 	bool                              _own_note;
 	bool                              _selected;

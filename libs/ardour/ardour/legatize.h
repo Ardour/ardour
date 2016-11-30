@@ -39,11 +39,9 @@ public:
 	Legatize(bool shrink_only);
 	~Legatize();
 
-	typedef Evoral::Sequence<Evoral::Beats>::Notes Notes;
-
 	Command* operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
 	                    Evoral::Beats                        position,
-	                    std::vector<Notes>&                  seqs);
+	                    NoteSequences&                       seqs);
 
 	std::string name () const { return (_shrink_only ? std::string ("remove overlap") : std::string ("legatize")); }
 

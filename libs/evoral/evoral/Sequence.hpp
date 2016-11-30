@@ -208,6 +208,10 @@ public:
 		VelocityGreaterThanOrEqual,
 	};
 
+	typename Notes::const_iterator first_note_at_or_after (Time t) const {
+		return std::lower_bound (_notes.begin(), _notes.end(), t, TimeComparator<NotePtr,Time>());
+	}
+
 	void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
 	void remove_overlapping_notes ();
@@ -234,6 +238,9 @@ public:
 	struct EarlierPatchChangeComparator {
 		inline bool operator() (PatchChangePointer<Time> const & a, PatchChangePointer<Time> const & b) const {
 			return a->time() < b->time();
+		}
+		inline bool operator() (PatchChangePointer<Time> const & a, Time t) const {
+			return a->time() < t;
 		}
 	};
 

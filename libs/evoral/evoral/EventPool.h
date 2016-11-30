@@ -18,15 +18,18 @@
 #ifndef EVORAL_EVENTPOOL_HPP
 #define EVORAL_EVENTPOOL_HPP
 
-#include <unistd.h>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <unistd.h>
 #include <vector>
 
 #include <boost/atomic.hpp>
 #include <boost/utility.hpp>
 
 #include "evoral/visibility.h"
+
+#define DEBUG_EVENT_POOL 1
 
 namespace Evoral {
 
@@ -76,10 +79,10 @@ class LIBEVORAL_API EventPool
 	typedef std::pair<size_t,size_t> SizePair;
 	typedef std::vector<SizePair> SizePairs;
 
-	EventPool (SizePairs const & sp) {
+	EventPool (std::string const & str, SizePairs const & sp) : _name (str) {
 		add (sp);
 	}
-	EventPool () { /* no pools allocated */ }
+	EventPool (std::string const & str) : _name (str)  { /* no pools allocated */ }
 
 	void add (SizePairs const & sp) {
 		_freelists.reserve (_freelists.size() + sp.size());
@@ -87,6 +90,8 @@ class LIBEVORAL_API EventPool
 			_freelists.push_back (new FreeList (s->first, s->second));
 		}
 	}
+
+	std::string name() const { return _name; }
 
 	static size_t aligned_size (size_t sz) {
 		const int align_size = 8; /* XXX probably a better value for this */
@@ -111,6 +116,13 @@ class LIBEVORAL_API EventPool
 
 				void* ret = (*x)->back();
 				(*x)->pop_back ();
+#ifdef DEBUG_EVENT_POOL
+				std::cerr << name() << ": alloc size[" << (*x)->item_size << "] free = "
+				          << (*x)->size()
+				          << " alloc = " << ((char*)(*x)->end - (char*)(*x)->block) / sizeof ((*x)->item_size)
+				          << std::endl;
+#endif
+
 				return ret;
 			}
 		}
@@ -122,6 +134,12 @@ class LIBEVORAL_API EventPool
 		for (FreeLists::iterator x = _freelists.begin(); x != _freelists.end(); ++x) {
 			if ((*x)->owns (p)) {
 				(*x)->push_back (p);
+#ifdef DEBUG_EVENT_POOL
+				std::cerr << name() << ": release size[" << (*x)->item_size << "] free = "
+				          << (*x)->size()
+				          << " alloc = " << ((char*)(*x)->end - (char*)(*x)->block) / sizeof ((*x)->item_size)
+				          << std::endl;
+#endif
 				return;
 			}
 		}
@@ -129,6 +147,7 @@ class LIBEVORAL_API EventPool
 
   private:
 	FreeLists _freelists;
+	std::string _name;
 };
 
 class LIBEVORAL_API PoolAllocated

@@ -61,8 +61,11 @@ Note<Time>::Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t ve
 template<typename Time>
 Note<Time>::Note (Note<Time> const & other)
 {
-	set_event (0, EventPointer<Time> (other.on_event()));
-	set_event (0, EventPointer<Time> (other.off_event()));
+	EventPointer<Time> on (other.on_event());
+	EventPointer<Time> off (other.off_event());
+
+	set_event (0, EventPointer<Time>::create (Evoral::MIDI_EVENT, on->time(), on->size(), on->buffer()));
+	set_event (1, EventPointer<Time>::create (Evoral::MIDI_EVENT, off->time(), off->size(), off->buffer()));
 }
 
 template<typename Time>

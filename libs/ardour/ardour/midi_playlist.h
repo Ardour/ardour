@@ -119,7 +119,9 @@ private:
 
 	struct RegionTracker : public boost::noncopyable {
 		MidiStateTracker tracker;  ///< Active note tracker
+#ifdef NOTE_FIXER
 		NoteFixer        fixer;    ///< Edit compensation
+#endif
 	};
 
 	typedef std::map< Region*, boost::shared_ptr<RegionTracker> > NoteTrackers;

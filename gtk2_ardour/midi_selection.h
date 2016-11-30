@@ -20,6 +20,14 @@
 #ifndef __ardour_gtk_midi_selection_h__
 #define __ardour_gtk_midi_selection_h__
 
+#include <list>
+#include <set>
+
+#include "pbd/id.h"
+
+#include "evoral/Beats.hpp"
+#include "evoral/Note.hpp"
+
 #include "region_selection.h"
 
 class MidiRegionView;
@@ -48,5 +56,7 @@ public:
 		return end();
 	}
 };
+
+typedef std::list<std::pair<PBD::ID,std::set<Evoral::NotePointer<Evoral::Beats> > > > PerRegionNoteSelection;
 
 #endif /* __ardour_gtk_midi_selection_h__ */

@@ -133,7 +133,7 @@ public:
 
 	Command* operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
 	                    Evoral::Beats                        position,
-	                    std::vector<Notes>&                  seqs);
+	                    NoteSequences&                       seqs);
 
 	std::string name() const { return std::string ("transform"); }
 

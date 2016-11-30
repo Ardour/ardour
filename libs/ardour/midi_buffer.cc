@@ -203,12 +203,28 @@ MidiBuffer::push_back (const Evoral::Event<TimeType>& ev)
 	_size += ev.object_size();
 	_silent = false;
 
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("post-push, size now %1 from %2\n", _size, ev.object_size()));
+
 	return true;
 }
 
 bool
 MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 {
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 current size %4 push data @ %2 sz %3 ", this, time, size, _size));
+		for (size_t i=0; i < size; ++i) {
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)data[i]);
+			DEBUG_STR_APPEND(a,' ');
+		}
+		DEBUG_STR_APPEND(a,'\n');
+		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+	}
+#endif
 	/* Event<T> uses the C zero-sized buffer hack to place data
 	   contiguously "after" itself.
 	*/
@@ -226,11 +242,13 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	/* fake adjust size so that what we copy with memcpy is correct */
 	ev.set_size (size);
 	/* copy C++ object */
-	memcpy (_data + size, &ev, sizeof (ev));
+	memcpy (_data + _size, &ev, sizeof (ev));
 	/* copy data */
-	memcpy (_data + size + sizeof (ev), data, size);
+	memcpy (_data + _size + sizeof (ev), data, size);
 	_size += sizeof (ev) + size;
 	_silent = false;
+
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("post-push, size now %1 from %2\n", _size, size));
 
 	return true;
 }
@@ -238,6 +256,20 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 bool
 MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 {
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 insert event @ %2 sz %3 ", this, ev.time(), ev.size()));
+		for (size_t i=0; i < ev.size(); ++i) {
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)ev.buffer()[i]);
+			DEBUG_STR_APPEND(a,' ');
+		}
+		DEBUG_STR_APPEND(a,'\n');
+		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+	}
+#endif
 	if (size() == 0) {
 		return push_back(ev);
 	}

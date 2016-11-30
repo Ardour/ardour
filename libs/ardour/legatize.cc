@@ -32,14 +32,14 @@ Legatize::~Legatize ()
 Command*
 Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
                      Evoral::Beats                        position,
-                     std::vector<Legatize::Notes>&        seqs)
+                     NoteSequences&                       seqs)
 {
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand(model, name ());
 
-	for (std::vector<Legatize::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
-		for (Legatize::Notes::iterator i = (*s).begin(); i != (*s).end();) {
-			Legatize::Notes::iterator next = i;
-			if (++next == (*s).end()) {
+	for (NoteSequences::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s)->begin(); i != (*s)->end();) {
+			Evoral::Sequence<MidiModel::TimeType>::Notes::iterator next = i;
+			if (++next == (*s)->end()) {
 				break;
 			}
 

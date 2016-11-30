@@ -28,14 +28,14 @@ Transpose::Transpose(int semitones)
 Command*
 Transpose::operator()(boost::shared_ptr<MidiModel> model,
                       Evoral::Beats                position,
-                      std::vector<Notes>&          seqs)
+                      NoteSequences&               seqs)
 {
 	typedef MidiModel::NoteDiffCommand Command;
 
 	Command* cmd = new Command(model, name());
 
-	for (std::vector<Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
-		for (Notes::const_iterator i = (*s).begin(); i != (*s).end(); ++i) {
+	for (NoteSequences::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+		for (Evoral::Sequence<MidiModel::TimeType>::Notes::const_iterator i = (*s)->begin(); i != (*s)->end(); ++i) {
 
 			const NotePtr note = *i;
 

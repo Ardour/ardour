@@ -36,10 +36,11 @@
 
 #include "ardour_dialog.h"
 #include "ardour_dropdown.h"
-#include "route_ui.h"
 #include "enums.h"
-#include "route_time_axis.h"
 #include "midi_streamview.h"
+#include "midi_selection.h"
+#include "route_time_axis.h"
+#include "route_ui.h"
 
 namespace MIDI {
 namespace Name {
@@ -60,10 +61,10 @@ namespace Evoral {
 	template<typename Time> class Note;
 }
 
-class PublicEditor;
 class MidiStreamView;
 class MidiScroomer;
 class PianoRollHeader;
+class Selection;
 class StepEntry;
 class StepEditor;
 class MidiChannelSelectorWindow;
@@ -108,7 +109,7 @@ public:
 
 	uint8_t get_channel_for_add () const;
 
-	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
+	void get_per_region_note_selection (PerRegionNoteSelection&);
 
 protected:
 	void start_step_editing ();
@@ -184,7 +185,7 @@ private:
 	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
-	void get_per_region_note_selection_region_view (RegionView*, std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
+	void get_per_region_note_selection_region_view (RegionView*, PerRegionNoteSelection&);
 
 	void ensure_step_editor ();
 

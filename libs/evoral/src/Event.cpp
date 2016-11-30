@@ -57,7 +57,10 @@ next_event_id ()
  */
 
 template<typename Time>
-EventPool EventPointer<Time>::pool;
+EventPool EventPointer<Time>::pool ("event pointer");
+
+template<typename Time>
+EventPool ManagedEvent<Time>::default_event_pool ("default event");
 
 template class Event<Evoral::Beats>;
 template class Event<double>;
@@ -65,6 +68,5 @@ template class Event<int64_t>; /* framepos_t in Ardour */
 
 template class EventPointer<Evoral::Beats>;
 template class EventPointer<int64_t>; /* framepos_t in Ardour */
-
 
 } // namespace Evoral
