@@ -55,6 +55,7 @@
 #include "ui_config.h"
 #include "utils.h"
 #include "pbd/i18n.h"
+#include "splash.h"
 
 using namespace std;
 using namespace Gtk;
@@ -420,6 +421,9 @@ void
 EngineControl::on_show ()
 {
 	ArdourDialog::on_show ();
+	if (Splash::instance()) {
+		Splash::instance()->pop_back_for (*this);
+	}
 	if (!ARDOUR::AudioEngine::instance()->current_backend() || !ARDOUR::AudioEngine::instance()->running()) {
 		// re-check _have_control (jackd running) see #6041
 		backend_changed ();
