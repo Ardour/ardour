@@ -316,6 +316,7 @@ AudioDiskstream::use_copy_playlist ()
 	newname = Playlist::bump_name (_playlist->name(), _session);
 
 	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist>(PlaylistFactory::create (audio_playlist(), newname))) != 0) {
+		playlist->reset_shares();
 		return use_playlist (playlist);
 	} else {
 		return -1;

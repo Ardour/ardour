@@ -26,6 +26,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/strsplit.h"
 #include "pbd/xml++.h"
 
 #include "ardour/debug.h"
@@ -157,6 +158,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	, regions (*this)
 	, _type(other->_type)
 	, _orig_track_id (other->_orig_track_id)
+	, _shared_with_ids (other->_shared_with_ids)
 {
 	init (hide);
 
@@ -189,6 +191,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 	, regions (*this)
 	, _type(other->_type)
 	, _orig_track_id (other->_orig_track_id)
+	, _shared_with_ids (other->_shared_with_ids)
 {
 	RegionReadLock rlock2 (const_cast<Playlist*> (other.get()));
 
@@ -2234,6 +2237,16 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 			 _frozen = string_is_affirmative (prop->value());
 		 } else if (prop->name() == X_("combine-ops")) {
 			 _combine_ops = atoi (prop->value());
+		 } else if (prop->name() == X_("shared-with-ids")) {
+			 string shared_ids = prop->value ();
+			 if (!shared_ids.empty()) {
+				vector<string> result;
+				::split (shared_ids, result, ',');
+				vector<string>::iterator it = result.begin();
+				for (; it != result.end(); ++it) {
+					_shared_with_ids.push_back (PBD::ID(*it));
+				}
+			 }
 		 }
 	 }
 
@@ -2321,6 +2334,17 @@ Playlist::state (bool full_state)
 
 	_orig_track_id.print (buf, sizeof (buf));
 	node->add_property (X_("orig-track-id"), buf);
+
+	string shared_ids;
+	list<PBD::ID>::const_iterator it = _shared_with_ids.begin();
+	for (; it != _shared_with_ids.end(); ++it) {
+		shared_ids += "," + (*it).to_s();
+	}
+	if (!shared_ids.empty()) {
+		shared_ids.erase(0,1);
+	}
+
+	node->add_property (X_("shared-with-ids"), shared_ids);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
 	if (full_state) {
@@ -3317,7 +3341,54 @@ Playlist::max_source_level () const
 void
 Playlist::set_orig_track_id (const PBD::ID& id)
 {
+	if (shared_with(id)) {
+		// Swap 'shared_id' / origin_track_id
+		unshare_with (id);
+		share_with (_orig_track_id);
+	}
 	_orig_track_id = id;
+}
+
+void
+Playlist::share_with (const PBD::ID& id)
+{
+	if (!shared_with(id)) {
+		_shared_with_ids.push_back (id);
+	}
+}
+
+void
+Playlist::unshare_with (const PBD::ID& id)
+{
+	list<PBD::ID>::iterator it = _shared_with_ids.begin ();
+	while (it != _shared_with_ids.end()) {
+		if (*it == id) {
+			_shared_with_ids.erase (it);
+			break;
+		}
+		++it;
+	}
+}
+
+bool
+Playlist::shared_with (const PBD::ID& id) const
+{
+	bool shared = false;
+	list<PBD::ID>::const_iterator it = _shared_with_ids.begin ();
+	while (it != _shared_with_ids.end() && !shared) {
+		if (*it == id) {
+			shared = true;
+		}
+		++it;
+	}
+
+	return shared;
+}
+
+void
+Playlist::reset_shares ()
+{
+	_shared_with_ids.clear();
 }
 
 /** Take a list of ranges, coalesce any that can be coalesced, then call

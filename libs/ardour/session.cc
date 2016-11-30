@@ -3255,7 +3255,15 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 					boost::shared_ptr<Playlist> playlist = playlists->by_name (playlist_name);
 					// Use same name as Route::set_name_in_state so playlist copy
 					// is picked up when creating the Route in XMLRouteFactory below
-					PlaylistFactory::create (playlist, string_compose ("%1.1", name));
+					playlist = PlaylistFactory::create (playlist, string_compose ("%1.1", name));
+					playlist->reset_shares ();
+				}
+			} else if (pd == SharePlaylist) {
+				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
+				if (ds_node) {
+					const std::string playlist_name = ds_node->property (X_("playlist"))->value ();
+					boost::shared_ptr<Playlist> playlist = playlists->by_name (playlist_name);
+					playlist->share_with ((node_copy.property (X_("id")))->value());
 				}
 			}
 
