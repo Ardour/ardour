@@ -2415,7 +2415,7 @@ msgstr "Site web d'Ardour (anglais)"
 
 #: ardour_ui_ed.cc:321
 msgid "Ardour Development"
-msgstr "Développement d'Ardour"
+msgstr "Développement d'Ardour (anglais)"
 
 #: ardour_ui_ed.cc:322
 msgid "User Forums"
@@ -3319,7 +3319,7 @@ msgstr "Percussion solo atonale"
 
 #: editor.cc:233
 msgid "Resample without preserving pitch"
-msgstr "Rééchantillonage avec modification de la tonalité"
+msgstr "Rééchantillonnage avec modification de la tonalité"
 
 #: editor.cc:319
 msgid "Mins:Secs"
@@ -4112,7 +4112,7 @@ msgstr "Zoom"
 
 #: editor_actions.cc:150
 msgid "Scripted Actions"
-msgstr ""
+msgstr "Actions scriptées"
 
 #: editor_actions.cc:159
 msgid "Session|Lock"
@@ -4625,7 +4625,7 @@ msgstr "Zoomer sur le point d'édition"
 
 #: editor_actions.cc:475
 msgid "Next Zoom Focus"
-msgstr "Option suivante pour Zoomer sur"
+msgstr "Zoomer sur le prochain"
 
 #: editor_actions.cc:488
 msgid "Smart Object Mode"
@@ -5016,7 +5016,7 @@ msgstr "Verrouiller sur la vidéo"
 
 #: editor_actions.cc:1813 editor_markers.cc:917
 msgid "Glue to Bars and Beats"
-msgstr "Coller aux mesures|temps"
+msgstr "Coller aux mesures & temps"
 
 #: editor_actions.cc:1818
 msgid "Remove Sync"
@@ -5049,7 +5049,7 @@ msgstr "Couper le gain"
 
 #: editor_actions.cc:1839
 msgid "Pitch Shift..."
-msgstr "Décalage de hauteur..."
+msgstr "Décalage de tonalité..."
 
 #: editor_actions.cc:1845
 msgid "Opaque"
@@ -5149,7 +5149,7 @@ msgstr "Disjoindre"
 
 #: editor_actions.cc:1944
 msgid "Loudness Analysis..."
-msgstr ""
+msgstr "Analyse de la sonie..."
 
 #: editor_actions.cc:1945
 msgid "Spectral Analysis..."
@@ -6733,7 +6733,7 @@ msgstr "étirer/contracter"
 
 #: editor_timefx.cc:130
 msgid "pitch shift"
-msgstr "modifier la tonalité"
+msgstr "décalage de tonalité"
 
 #: editor_timefx.cc:282
 msgid "timefx cannot be started - thread creation error"
@@ -7368,7 +7368,7 @@ msgstr "Qualité"
 
 #: export_format_dialog.cc:69
 msgid "Sample rate conversion quality:"
-msgstr "Qualité du ré-échantillonage :"
+msgstr "Qualité du ré-échantillonnage :"
 
 #: export_format_dialog.cc:76
 msgid "Dithering"
@@ -7957,11 +7957,11 @@ msgstr ""
 
 #: insert_remove_time_dialog.cc:99
 msgid "Remove time"
-msgstr ""
+msgstr "Supprimer du temps"
 
 #: insert_remove_time_dialog.cc:99
 msgid "Insert time"
-msgstr "Insérer temps"
+msgstr "Insérer du temps"
 
 #: insert_remove_time_dialog.cc:174
 msgid "Invalid or zero duration entered. Please enter a valid duration"
@@ -10017,7 +10017,7 @@ msgstr ""
 
 #: plugin_setup_dialog.cc:30
 msgid "Plugin Setup"
-msgstr ""
+msgstr "Paramètre du greffon"
 
 #: plugin_setup_dialog.cc:33
 msgid "Copy I/O Map"
@@ -10041,7 +10041,7 @@ msgstr ""
 
 #: plugin_setup_dialog.cc:79
 msgid "Configure Plugin '%1'"
-msgstr ""
+msgstr "Configurer le greffon '%1'"
 
 #: plugin_setup_dialog.cc:90
 msgid "Output Configuration"
@@ -10078,7 +10078,7 @@ msgstr "Seulement les cachés"
 
 #: plugin_selector.cc:65
 msgid "Plugin Manager"
-msgstr "Gestionnaire de greffons"
+msgstr "Gestionnaire de greffon"
 
 #: plugin_selector.cc:96
 msgid "Fav"
@@ -11389,7 +11389,7 @@ msgstr "2.0 secondes"
 #: rc_option_editor.cc:2164 rc_option_editor.cc:2167 rc_option_editor.cc:2169
 #: rc_option_editor.cc:2197
 msgid "Transport/Sync"
-msgstr ""
+msgstr "Commandes/Synchronisation"
 
 #: rc_option_editor.cc:2081
 msgid "Synchronization and Slave Options"
@@ -12029,7 +12029,7 @@ msgstr ""
 #: rc_option_editor.cc:2913 rc_option_editor.cc:2915 rc_option_editor.cc:2920
 #: rc_option_editor.cc:2927 rc_option_editor.cc:2932 rc_option_editor.cc:2941
 msgid "Plugins/VST"
-msgstr ""
+msgstr "Greffons/VST"
 
 #: rc_option_editor.cc:2888
 msgid "VST"
@@ -12051,7 +12051,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2904
 msgid "Verbose Plugin Scan"
-msgstr ""
+msgstr "Scan verbeux de greffon"
 
 #: rc_option_editor.cc:2910
 msgid ""
@@ -13147,7 +13147,7 @@ msgstr "Sessions récentes"
 
 #: session_dialog.cc:311
 msgid "Sample Rate"
-msgstr "Taux d'échantillonage"
+msgstr "Taux d'échantillonnage"
 
 #: session_dialog.cc:312
 msgid "File Resolution"
@@ -13436,7 +13436,7 @@ msgstr "DJ Mixeur"
 
 #: session_metadata_dialog.cc:778
 msgid "Metadata|Mixer"
-msgstr "Métadonnées|Mixeur"
+msgstr "Méta-données|Mixeur"
 
 #: session_metadata_dialog.cc:786
 msgid "School"
@@ -13850,11 +13850,11 @@ msgstr "Coller aux mesures et temps"
 
 #: session_option_editor.cc:371
 msgid "Glue new markers to bars and beats"
-msgstr "Coller les nouveaux repères aux mesures|temps"
+msgstr "Coller les nouveaux repères aux mesures & temps"
 
 #: session_option_editor.cc:378
 msgid "Glue new regions to bars and beats"
-msgstr "Coller les nouvelles régions aux mesures|temps"
+msgstr "Coller les nouvelles régions aux mesures & temps"
 
 #: session_option_editor.cc:383
 msgid "Defaults"
@@ -15729,7 +15729,7 @@ msgstr "Écraser FPS (le défaut est d'aligner sur le fichier vidéo d'entrée)�
 
 #: export_video_dialog.cc:97
 msgid "Include Session Metadata"
-msgstr "Inclure les métadonnées de la session"
+msgstr "Inclure les méta-données de la session"
 
 #: export_video_dialog.cc:115
 msgid ""
