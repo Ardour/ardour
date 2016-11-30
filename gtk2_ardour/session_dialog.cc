@@ -324,6 +324,7 @@ SessionDialog::setup_recent_sessions ()
 
 	recent_session_display.show();
 	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &SessionDialog::recent_row_activated));
+	recent_session_display.signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::recent_button_press), false);
 }
 
 void
@@ -1176,6 +1177,65 @@ void
 SessionDialog::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 {
 	response (RESPONSE_ACCEPT);
+}
+
+bool
+SessionDialog::recent_button_press (GdkEventButton* ev)
+{
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
+
+		TreeModel::Path path;
+		TreeViewColumn* column;
+		int cellx, celly;
+		if (recent_session_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+			Glib::RefPtr<Gtk::TreeView::Selection> selection = recent_session_display.get_selection();
+			if (selection) {
+				selection->unselect_all();
+				selection->select(path);
+			}
+		}
+
+		if (recent_session_display.get_selection()->count_selected_rows() > 0) {
+			recent_context_mennu (ev);
+		}
+	}
+	return false;
+}
+
+void
+SessionDialog::recent_context_mennu (GdkEventButton *ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	TreeIter iter = recent_session_display.get_selection()->get_selected();
+	assert (iter);
+	string s = (*iter)[recent_session_columns.fullpath];
+	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		s = Glib::path_get_dirname (s);
+	}
+	if (!Glib::file_test (s, Glib::FILE_TEST_IS_DIR)) {
+		return;
+	}
+
+	Gtk::Menu* m = manage (new Menu);
+	MenuList& items = m->items ();
+	items.push_back (MenuElem (s));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove from recent"), sigc::mem_fun (*this, &SessionDialog::recent_remove_selected)));
+	m->popup (ev->button, ev->time);
+}
+
+void
+SessionDialog::recent_remove_selected ()
+{
+	TreeIter iter = recent_session_display.get_selection()->get_selected();
+	assert (iter);
+	string s = (*iter)[recent_session_columns.fullpath];
+	if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+		s = Glib::path_get_dirname (s);
+	}
+	ARDOUR::remove_recent_sessions (s);
+	redisplay_recent_sessions ();
 }
 
 void
