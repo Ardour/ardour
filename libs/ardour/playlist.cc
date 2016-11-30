@@ -1327,7 +1327,7 @@ Playlist::duplicate_range (AudioRange& range, float times)
 }
 
 void
-Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
+Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 {
 	if (ranges.empty()) {
 		return;
@@ -1345,9 +1345,14 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
 
 	framecnt_t offset = max_pos - min_pos;
 
-	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		boost::shared_ptr<Playlist> pl = copy ((*i).start, (*i).length(), true);
-		paste (pl, (*i).start + offset, 1.0f, 0); // times ??
+	int count = 1;
+	int itimes = (int) floor (times);
+	while (itimes--) {
+		for (list<AudioRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
+			boost::shared_ptr<Playlist> pl = copy ((*i).start, (*i).length (), true);
+			paste (pl, (*i).start + (offset * count), 1.0f, 0);
+		}
+		++count;
 	}
 }
 
