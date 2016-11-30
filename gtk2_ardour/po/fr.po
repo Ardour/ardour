@@ -11081,8 +11081,8 @@ msgid ""
 "- Do not enable this option unless you know what you are doing."
 msgstr ""
 "<b>Si actif</b>, vous pouvez spécifier une URL personnalisée pour le serveur "
-"vidéo et le répertoire racine. N'activez cette option que si vous savez ce '
-'que vous faites !"
+"vidéo et le répertoire racine. N'activez cette option que si vous savez ce "
+"que vous faites !"
 
 #: rc_option_editor.cc:1567
 #, fuzzy
