@@ -276,6 +276,7 @@ EngineControl::EngineControl ()
 	start_stop_button.set_sensitive (false);
 	start_stop_button.set_name ("generic button");
 	start_stop_button.set_can_focus(true);
+	start_stop_button.set_can_default(true);
 
 	update_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::update_devices_button_clicked));
 	update_devices_button.set_sensitive (false);
@@ -286,9 +287,6 @@ EngineControl::EngineControl ()
 	use_buffered_io_button.set_sensitive (false);
 	use_buffered_io_button.set_name ("generic button");
 	use_buffered_io_button.set_can_focus(true);
-
-	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
-	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
@@ -420,7 +418,7 @@ EngineControl::on_show ()
 		backend_changed ();
 	}
 	device_changed ();
-	ok_button->grab_focus();
+	start_stop_button.grab_focus();
 }
 
 bool
@@ -457,49 +455,6 @@ EngineControl::stop_engine (bool for_latency)
 		return false;
 	}
 	return true;
-}
-
-void
-EngineControl::on_response (int response_id)
-{
-	ArdourDialog::on_response (response_id);
-
-	switch (response_id) {
-	case RESPONSE_OK:
-		hide();
-		if (!start_engine()) {
-			show();
-			return;
-		}
-#ifdef PLATFORM_WINDOWS
-
-		// But if there's no session open, this can produce
-		// a long gap when nothing appears to be happening.
-		// Let's show the splash image while we're waiting.
-		if (!ARDOUR_COMMAND_LINE::no_splash) {
-			if (ARDOUR_UI::instance()) {
-				if (!ARDOUR_UI::instance()->session_loaded) {
-					ARDOUR_UI::instance()->show_splash();
-				}
-			}
-		}
-#endif
-		break;
-	case RESPONSE_DELETE_EVENT: {
-		GdkEventButton ev;
-		ev.type = GDK_BUTTON_PRESS;
-		ev.button = 1;
-		on_delete_event((GdkEventAny*)&ev);
-		break;
-	}
-	case RESPONSE_CANCEL:
-		if (ARDOUR_UI::instance() && ARDOUR_UI::instance()->session_loaded) {
-			ARDOUR_UI::instance()->check_audioengine(*this);
-		}
-	// fall through
-	default:
-		hide();
-	}
 }
 
 void
@@ -798,7 +753,6 @@ EngineControl::update_sensitivity ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	if (!backend) {
-		ok_button->set_sensitive (false);
 		start_stop_button.set_sensitive (false);
 		return;
 	}
@@ -923,12 +877,6 @@ EngineControl::update_sensitivity ()
 		} else {
 			driver_combo.set_sensitive (false);
 		}
-	}
-
-	if (valid || !_have_control) {
-		ok_button->set_sensitive (true);
-	} else {
-		ok_button->set_sensitive (false);
 	}
 }
 
@@ -2758,7 +2706,13 @@ EngineControl::start_stop_button_clicked ()
 	if (ARDOUR::AudioEngine::instance()->running()) {
 		ARDOUR::AudioEngine::instance()->stop ();
 	} else {
+		if (!ARDOUR_UI::instance()->session_loaded) {
+			hide ();
+		}
 		start_engine ();
+		if (!ARDOUR_UI::instance()->session_loaded) {
+			ArdourDialog::on_response (RESPONSE_OK);
+		}
 	}
 }
 
@@ -2823,12 +2777,8 @@ void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
 	if (page_num == 0) {
-		cancel_button->set_sensitive (true);
 		_measure_midi.reset();
 		update_sensitivity ();
-	} else {
-		cancel_button->set_sensitive (false);
-		ok_button->set_sensitive (false);
 	}
 
 	if (page_num == midi_tab) {
@@ -3169,7 +3119,13 @@ EngineControl::connect_disconnect_click()
 	if (ARDOUR::AudioEngine::instance()->running()) {
 		stop_engine ();
 	} else {
+		if (!ARDOUR_UI::instance()->session_loaded) {
+			hide ();
+		}
 		start_engine ();
+		if (!ARDOUR_UI::instance()->session_loaded) {
+			ArdourDialog::on_response (RESPONSE_OK);
+		}
 	}
 }
 

@@ -109,9 +109,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     bool              have_lm_results;
     bool              lm_running;
 
-    Gtk::Button* cancel_button;
-    Gtk::Button* ok_button;
-
     /* MIDI Tab */
 
     Gtk::VBox midi_vbox;
@@ -307,7 +304,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	sigc::connection output_channels_connection;
 
     void on_show ();
-    void on_response (int);
     void control_app_button_clicked ();
     void start_stop_button_clicked ();
     void update_devices_button_clicked ();

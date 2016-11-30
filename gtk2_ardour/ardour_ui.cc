@@ -5347,16 +5347,16 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 
 	while (true) {
 		int response = audio_midi_setup->run();
+		printf("RESPONSE %d\n", response);
 		switch (response) {
-		case Gtk::RESPONSE_OK:
+		case Gtk::RESPONSE_DELETE_EVENT:
+			return -1;
+		default:
 			if (!AudioEngine::instance()->running()) {
 				continue;
-			} else {
-				return 0;
 			}
+			audio_midi_setup->hide ();
 			return 0;
-		default:
-			return -1;
 		}
 	}
 }
