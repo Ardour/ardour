@@ -20,6 +20,10 @@ There are few supplementation translations that can be found here (again,
 showing the case for Russian):
 
 libs/gtkmm2ext/po/ru.po
+
+You might want to translate the appdata file as well which is here to help
+distribution's packagers (showing the case for French)
+
 gtk2_ardour/appdata/po/fr.po
 
 Every PO file's name is a two-character code, e.g. 'de' for German, 'es' for
@@ -116,7 +120,18 @@ http://git.gnome.org/browse/gimp/plain/po/ru.po
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
 "%100>=20) ? 1 : 2);\n"
 
-4. PO editors
+4. Special case when translating
+
+4a. slash
+If you find something like : "Preferences/GUI", you will want to translate the whole thing.
+Example for French : "Préférences/Interface graphique" .
+
+4b. pipe
+If you find something like : "Preferences|GUI", you will only want to translate the second part.
+Example for French : "Interface graphique".
+
+
+5. PO editors
 
 It's really up to you which PO editor you choose. These ones are most popular:
 
