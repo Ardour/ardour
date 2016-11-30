@@ -964,7 +964,7 @@ msgstr "ARDOUR_CONFIG_PATH n'est pas défini dans l'environnement\n"
 
 #: filesystem_paths.cc:298
 msgid "ARDOUR_DATA_PATH not set in environment\n"
-msgstr "ARDOUR_DATA_PATH n'est pas défini dans l'environnement"
+msgstr "ARDOUR_DATA_PATH n'est pas défini dans l'environnement\n"
 
 #: filter.cc:67
 msgid "filter: error creating name for new file based on %1"
