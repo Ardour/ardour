@@ -4937,18 +4937,19 @@ Editor::duplicate_selection (float times)
 	}
 
 	if (in_command) {
-		// now "move" range selection to after the current range selection
-		framecnt_t distance = 0;
+		if (times == 1.0f) {
+			// now "move" range selection to after the current range selection
+			framecnt_t distance = 0;
 
-		if (clicked_selection) {
-			distance = selection->time[clicked_selection].end -
-			           selection->time[clicked_selection].start;
-		} else {
-			distance = selection->time.end_frame() - selection->time.start();
+			if (clicked_selection) {
+				distance =
+				    selection->time[clicked_selection].end - selection->time[clicked_selection].start;
+			} else {
+				distance = selection->time.end_frame () - selection->time.start ();
+			}
+
+			selection->move_time (distance);
 		}
-
-		selection->move_time (distance);
-
 		commit_reversible_command ();
 	}
 }
