@@ -3,14 +3,15 @@
 # Fred Rech <f.rech@yahoo.fr>, 2014.
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015
 # Julien Rivaud <frnchfrgg@free.fr>, 2016
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
-"PO-Revision-Date: 2016-07-29 21:22+0200\n"
-"Last-Translator: Julien Rivaud <frnchfrgg@free.fr>\n"
+"PO-Revision-Date: 2016-11-30 19:30+0100\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -272,27 +273,27 @@ msgstr ""
 
 #: audio_playlist_importer.cc:68
 msgid "Audio Playlists"
-msgstr "Listes de lecture Audio"
+msgstr "Listes de lecture audio"
 
 #: audio_playlist_importer.cc:161
 msgid "region"
-msgstr "Région"
+msgstr "région"
 
 #: audio_playlist_importer.cc:163
 msgid "regions"
-msgstr "Régions"
+msgstr "régions"
 
 #: audio_playlist_importer.cc:174 audio_track_importer.cc:244
 msgid "A playlist with this name already exists, please rename it."
-msgstr "Ce nom de liste de lecture existe déjà, merci de la renommer."
+msgstr "Ce nom de liste de lecture existe déjà, veuillez la renommer."
 
 #: audio_playlist_importer.cc:183
 msgid "badly-formed XML in imported playlist"
-msgstr "Liste de lecture importée : syntaxe XML incorrecte"
+msgstr "syntaxe XML incorrecte dans la liste de lecture importée"
 
 #: audio_playlist_importer.cc:267
 msgid "Audio Playlists (unused)"
-msgstr "Listes de lecture Audio (inutilisées)"
+msgstr "Listes de lecture audio (inutilisées)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:1046 midi_playlist_source.cc:147
 #: midi_playlist_source.cc:155 midi_playlist_source.cc:162 midi_source.cc:403
@@ -303,7 +304,7 @@ msgstr "erreur de programmation : %1"
 
 #: audio_region_importer.cc:75
 msgid "Audio Regions"
-msgstr "Régions Audio"
+msgstr "Régions audio"
 
 #: audio_region_importer.cc:145
 msgid "Length: "
@@ -353,7 +354,7 @@ msgstr ""
 
 #: audio_track_importer.cc:68
 msgid "Audio Tracks"
-msgstr "Pistes Audio"
+msgstr "Pistes audio"
 
 #: audio_track_importer.cc:253 audio_track_importer.cc:259
 msgid "badly-formed XML in imported track"
@@ -369,7 +370,7 @@ msgstr "Impossible de charger le Plugin VAMP \"%1\""
 
 #: audioanalyser.cc:70
 msgid "VAMP Plugin \"%1\" could not be loaded"
-msgstr "Le Plugin VAMP \"%1\" ne pouvait pas être chargé"
+msgstr "Le greffon VAMP \"%1\" n'a pas pu être chargé"
 
 #: audioengine.cc:756
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
@@ -377,7 +378,7 @@ msgstr "Moteur Audio : module \"%1\" inchargeable (%2)"
 
 #: audioengine.cc:762
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
-msgstr ""
+msgstr "AudioEngine : le moteur à  \"%1\" n'a pas de descripteur de fonction."
 
 #: audioengine.cc:841
 msgid "Could not create backend for %1: %2"
@@ -397,6 +398,17 @@ msgid ""
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
+"Vous avez demandé une opération qui nécessite une analyse audio.\n"
+"\n"
+"\"auto-analyse-audio\" est actuellement désactivé, ce qui signifie que les "
+"données transitoires doivent être générées à chaque fois que nécessaire.\n"
+"\n"
+"Si vous faites un travail qui nécessitera des données transitoires "
+"régulièrement, vous devriez probablement activer \"auto-analyse-audio\" dans "
+"Préférences > Audio > Régions, puis quitter %1 et le redémarrer.\n"
+"\n"
+"Ce dialogue n'apparaîtra plus. Mais vous pourriez constater un léger délai "
+"les opérations de détection de transitoire actuelles et futures.\n"
 
 #: audioregion.cc:1789
 msgid "Audio Region"
@@ -412,23 +424,27 @@ msgstr ""
 
 #: audiosource.cc:368
 msgid "Cannot open peakfile @ %1 for size check (%2)"
-msgstr ""
+msgstr "Impossible d'ouvrir le fichier de pic @ %1 pour vérifier la taille (%2)"
 
 #: audiosource.cc:389
 msgid "peak file %1 is truncated from %2 to %3"
-msgstr ""
+msgstr "le fichier de pic %1 est tronqué de %2 à %3"
 
 #: audiosource.cc:392
 msgid "Cannot open peakfile @ %1 for size check (%2) after rebuild"
 msgstr ""
+"Impossible d'ouvrir le fichier de pic @ %1 pour vérifier la taille (%2) après "
+"reconstruction"
 
 #: audiosource.cc:404
 msgid "Cannot open peakfile @ %1 for reading (%2)"
-msgstr ""
+msgstr "Impossible d'ouvrir le fichier de pic @ %1 pour lire (%2)"
 
 #: audiosource.cc:438
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
+"impossible de lire les données échantillonnée pour le calcul de pic "
+"non-échelonné"
 
 #: audiosource.cc:473 audiosource.cc:568
 msgid "map failed - could not create file mapping for peakfile %1."
@@ -450,26 +466,29 @@ msgstr ""
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
+"AudioSource[%1] : lecture de pic - impossible de lire les échantillons %2 "
+"à l'offset %3 de %4 (%5)"
 
 #: audiosource.cc:748
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
+"%1 : impossible d'écrire/écrire des données brutes pour le calcul de pic (%2)"
 
 #: audiosource.cc:815
 msgid "AudioSource: cannot open _peakpath (c) \"%1\" (%2)"
-msgstr ""
+msgstr "AudioSource : impossible d'ouvrir _peakpath (c) \"%1\" (%2)"
 
 #: audiosource.cc:894 audiosource.cc:1016
 msgid "%1: could not seek in peak file data (%2)"
-msgstr ""
+msgstr "%1 : impossible de rechercher dans les données du fichier de pic (%2)"
 
 #: audiosource.cc:899 audiosource.cc:1025
 msgid "%1: could not write peak file data (%2)"
-msgstr ""
+msgstr "%1 : impossible d'écrire dans les données du fichier de pic (%2)"
 
 #: audiosource.cc:1058
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
-msgstr ""
+msgstr "impossible de tronquer le fichier de pic %1 de %2 (erreur : %3)"
 
 #: auditioner.cc:105
 msgid "Falling back to Reasonable Synth for Midi Audition"
@@ -481,7 +500,7 @@ msgstr "Pas de synthé trouvé pour l'audition MIDI."
 
 #: auditioner.cc:163
 msgid "no outputs available for auditioner - manual connection required"
-msgstr "Pas de sortie disponible pour l'audition - correction manuelle requise"
+msgstr "pas de sortie disponible pour l'audition - correction manuelle requise"
 
 #: auditioner.cc:408 auditioner.cc:455
 msgid "Cannot setup auditioner processing flow for %1 channels"
@@ -490,7 +509,7 @@ msgstr ""
 
 #: auditioner.cc:443
 msgid "Failed to load synth for MIDI-Audition."
-msgstr "Echec du chargement de synthé pour l'audition MIDI"
+msgstr "Échec du chargement de synthé pour l'audition MIDI"
 
 #: auditioner.cc:462
 msgid "Auditioning of regions other than Audio or Midi is not supported."
@@ -509,13 +528,12 @@ msgid "cannot load automation data from %2"
 msgstr "Impossible de charger les données d'automation de %2"
 
 #: automatable.cc:176 send.cc:95 session.cc:851
-#, fuzzy
 msgid "Fader"
-msgstr "Atténuateur"
+msgstr "Chariot"
 
 #: automatable.cc:178
 msgid "Trim"
-msgstr ""
+msgstr "Rogner"
 
 #: automatable.cc:180
 #, fuzzy
@@ -524,7 +542,7 @@ msgstr "Muet"
 
 #: automation_control.cc:228
 msgid "record %1 automation"
-msgstr ""
+msgstr "enregistrement l'auromation %1"
 
 #: automation_list.cc:410
 msgid "automation list: cannot load coordinates from XML, all points ignored"
@@ -567,51 +585,55 @@ msgstr ""
 
 #: control_protocol_manager.cc:174
 msgid "control protocol name \"%1\" has no descriptor"
-msgstr ""
+msgstr "le nom de protocole \"%1\" n'a pas de descripteur"
 
 #: control_protocol_manager.cc:181
 msgid "control protocol name \"%1\" could not be initialized"
-msgstr ""
+msgstr "le nom de protocole \"%1\" n'a pas pu être initialisé"
 
 #: control_protocol_manager.cc:265
+#, fuzzy
 msgid "Instantiating mandatory control protocol %1"
-msgstr ""
+msgstr "Illustration du protocole de contrôle obligatoire %1"
 
 #: control_protocol_manager.cc:309
 msgid "looking for control protocols in %1\n"
-msgstr ""
+msgstr "recherche des protocoles de contrôle dans %1\n"
 
 #: control_protocol_manager.cc:334
 msgid "Control protocol %1 not usable"
-msgstr ""
+msgstr "Le protocole de contrôle %1 est inutilisable"
 
 #: control_protocol_manager.cc:351
 msgid "Control surface protocol discovered: \"%1\"\n"
-msgstr ""
+msgstr "Protocole de surface de contrôle découvert : \"%1\"\n"
 
 #: control_protocol_manager.cc:367
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
-msgstr "ControlProtocolManager : impossible de charger le module « %1 » (%2)"
+msgstr "ControlProtocolManager : impossible de charger le module \"%1\" (%2)"
 
 #: control_protocol_manager.cc:373
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr ""
+"ControlProtocolManager: le module \"%1\" n'a pas de descripteur de fonction."
 
 #: control_protocol_manager.cc:516
 msgid "Control protocol \"%1\" has no descriptor"
-msgstr ""
+msgstr "Le protocole de contrôle \"%1\" n'a pas de descripteur"
 
 #: cycle_timer.cc:40
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr ""
+msgstr "CycleTimer::get_mhz(): impossible d'ouvrir /proc/cpuinfo"
 
 #: cycle_timer.cc:52
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
 msgstr ""
+"CycleTimer::get_mhz(): impossible de localiser la frésuence de processeur "
+"dans /proc/cpuinfo"
 
 #: cycle_timer.cc:75
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
-msgstr ""
+msgstr "impossible de localiser la frésuence de processeur dans /proc/cpuinfo"
 
 #: data_type.cc:27
 msgid "audio"
@@ -623,15 +645,15 @@ msgstr "MIDI"
 
 #: data_type.cc:29
 msgid "unknown"
-msgstr "Inconnu"
+msgstr "inconnu"
 
 #: delivery.cc:118
 msgid "main outs"
-msgstr "Sorties principales"
+msgstr "sorties principales"
 
 #: delivery.cc:121 send.cc:64
 msgid "listen"
-msgstr "Ecoute"
+msgstr "écoute"
 
 #: diskstream.cc:311
 msgid "Location \"%1\" not valid for track loop (start >= end)"
@@ -643,7 +665,7 @@ msgstr "Pas de port possible pour l'export du canal \"%1\", canal omis"
 
 #: export_failed.cc:32
 msgid "Export failed: %1"
-msgstr "Echec d'export : %1"
+msgstr "Échec d'export : %1"
 
 #: export_filename.cc:128
 msgid "Existing export folder for this session (%1) does not exist - ignored"
@@ -671,20 +693,19 @@ msgstr "CD"
 
 #: export_format_manager.cc:66
 msgid "DVD-A"
-msgstr ""
+msgstr "DVD-A"
 
 #: export_format_manager.cc:80
 msgid "iPod"
-msgstr ""
+msgstr "iPod"
 
 #: export_format_manager.cc:91
 msgid "Something else"
 msgstr "Autre chose"
 
-# any could be anyone or none, have chosen the second
 #: export_format_manager.cc:110
 msgid "Any"
-msgstr "Aucune"
+msgstr "tous"
 
 #: export_format_manager.cc:111
 msgid "Lossless (linear PCM)"
@@ -704,11 +725,11 @@ msgstr "Débit de la session"
 
 #: export_format_specification.cc:609
 msgid "normalize loudness"
-msgstr ""
+msgstr "normaliser la sonie"
 
 #: export_format_specification.cc:611
 msgid "normalize peak"
-msgstr ""
+msgstr "normaliser les pics"
 
 #: export_format_specification.cc:616
 msgid "trim"
@@ -736,19 +757,19 @@ msgstr "Rectangulaire"
 
 #: export_formats.cc:159
 msgid "8-bit"
-msgstr ""
+msgstr "8-bit"
 
 #: export_formats.cc:161
 msgid "16-bit"
-msgstr ""
+msgstr "16-bit"
 
 #: export_formats.cc:163
 msgid "24-bit"
-msgstr ""
+msgstr "24-bit"
 
 #: export_formats.cc:165
 msgid "32-bit"
-msgstr ""
+msgstr "32-bit"
 
 #: export_formats.cc:167
 msgid "float"
@@ -760,7 +781,7 @@ msgstr "Double"
 
 #: export_formats.cc:171
 msgid "8-bit unsigned"
-msgstr ""
+msgstr "8-bit unsigned"
 
 #: export_formats.cc:173
 msgid "Vorbis sample format"
@@ -778,6 +799,8 @@ msgstr "Fichier %1 téléversé vers %2"
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
+"échec du téléversement vers Soundcloud. Peut être que votre adresse courriel "
+"ou votre mot de passe sont incorrects ?\n"
 
 #: export_handler.cc:551 export_handler.cc:554
 msgid "an error occurred while writing a TOC/CUE file: %1"
@@ -817,11 +840,11 @@ msgstr "Format vide"
 
 #: export_profile_manager.cc:752
 msgid "Cannot load export format from %1"
-msgstr ""
+msgstr "Impossible de charger le format d'exportation de %1"
 
 #: export_profile_manager.cc:758
 msgid "Cannot export format read from %1"
-msgstr ""
+msgstr "Impossible de lire le format d'exportation de %1"
 
 #: export_profile_manager.cc:852
 msgid "No timespan has been selected!"
@@ -860,6 +883,7 @@ msgstr ""
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
+"il y a déjà 1000 fichiers avec des noms comme %1; le versionnage est épuisé"
 
 #: file_source.cc:210
 msgid "cannot rename file source from %1 to %2 (%3)"
@@ -867,25 +891,27 @@ msgstr "Impossible de renommer la source du fichier de %1 en %2 (%3)"
 
 #: file_source.cc:251 file_source.cc:374
 msgid "FileSource: search path not set"
-msgstr ""
+msgstr "FileSource : le chemin de recherche n'est pas paramétré"
 
 #: file_source.cc:434
 msgid ""
 "FileSource: \"%1\" is ambigous when searching\n"
 "\t"
 msgstr ""
+"FileSource : \"%1\" est ambigu lors d'une recherche\n"
+"\t"
 
 #: file_source.cc:441
 msgid "Filesource: cannot find required file (%1)"
-msgstr ""
+msgstr "Filesource : impossible de trouver le fichier nécessaire (%1)"
 
 #: file_source.cc:486
 msgid "Filesource: cannot find required file (%1): %2"
-msgstr ""
+msgstr "Filesource : impossible de trouver le fichier nécessaire (%1) : (%2)"
 
 #: file_source.cc:494
 msgid "Filesource: cannot check for existing file (%1): %2"
-msgstr ""
+msgstr "Filesource : impossible de vérifier l'existance du fichier (%1) : (%2)"
 
 #: file_source.cc:589
 msgid ""
@@ -898,7 +924,7 @@ msgstr ""
 
 #: file_source.cc:596
 msgid "cannot rename file %1 to %2 (%3)"
-msgstr "Renommage du fichier %1 en %2 impossible (%3)"
+msgstr "impossible de renommer le fichier %1 en %2 (%3)"
 
 #: filesystem_paths.cc:120
 msgid "Cannot create Configuration directory %1 - cannot run"
@@ -915,12 +941,14 @@ msgstr ""
 
 #: filesystem_paths.cc:186
 msgid "Cannot create cache directory %1 - cannot run"
-msgstr ""
+msgstr "Impossible de créer un répertoire de cache %1 - ne peut pas agir"
 
 #: filesystem_paths.cc:191
 msgid ""
 "Cache directory %1 already exists and is not a directory/folder - cannot run"
 msgstr ""
+"Le répertoire de cache %1 existe déjà et n'est pas un répertoire - ne peut "
+"pas agir"
 
 #: filesystem_paths.cc:209
 msgid "ARDOUR_DLL_PATH not set in environment - exiting\n"
@@ -928,15 +956,15 @@ msgstr "ARDOUR_DLL_PATH non fixé dans l'environnement - sortie\n"
 
 #: filesystem_paths.cc:232
 msgid "Cannot determine %1 package directory"
-msgstr ""
+msgstr "Ne peux pas déterminer le répertoire de paquet %1"
 
 #: filesystem_paths.cc:277
 msgid "ARDOUR_CONFIG_PATH not set in environment\n"
-msgstr ""
+msgstr "ARDOUR_CONFIG_PATH n'est pas défini dans l'environnement\n"
 
 #: filesystem_paths.cc:298
 msgid "ARDOUR_DATA_PATH not set in environment\n"
-msgstr ""
+msgstr "ARDOUR_DATA_PATH n'est pas défini dans l'environnement"
 
 #: filter.cc:67
 msgid "filter: error creating name for new file based on %1"
@@ -969,7 +997,7 @@ msgstr "Type de fichier inconnu pour la session %1"
 #: gain_control.cc:81
 #, c-format
 msgid "%3.1f dB"
-msgstr ""
+msgstr "%3.1f dB"
 
 #: globals.cc:266
 msgid "Could not set system open files limit to \"unlimited\""
@@ -990,6 +1018,8 @@ msgstr "Impossible de modifier le nombre de fichiers ouverts (%1)"
 #: globals.cc:291
 msgid "Could not set system open files limit. Current limit is %1 open files"
 msgstr ""
+"Impossible de paramétrer la limite système du nombre de fichiers ouverts. La "
+"limite actuelle est de %1 fichiers ouverts"
 
 #: globals.cc:474
 msgid "Loading configuration"
@@ -997,7 +1027,7 @@ msgstr "Chargement de la configuration"
 
 #: globals.cc:554 route.cc:182 route.cc:4149 session.cc:1157
 msgid "Monitor"
-msgstr "Monitoring"
+msgstr "Écoute de contrôle"
 
 #: globals.cc:555 session_state.cc:642
 #, fuzzy
@@ -1006,15 +1036,15 @@ msgstr "Bus Master"
 
 #: globals.cc:556
 msgid "Control"
-msgstr ""
+msgstr "Contrôle"
 
 #: globals.cc:557
 msgid "Click"
-msgstr ""
+msgstr "Métronome"
 
 #: globals.cc:558
 msgid "Mackie"
-msgstr ""
+msgstr "Mackie"
 
 #: import.cc:146
 msgid "Cannot find new filename for imported file %1"
@@ -1023,6 +1053,7 @@ msgstr "Impossible de trouver un nouveau nom pour le fichier importé %1"
 #: import.cc:166
 msgid "Could not find a source for %1 even though we are updating this file!"
 msgstr ""
+"N'a pas pu trouver une source pour %1 même si nous mettons à jour ce fichier !"
 
 #: import.cc:195
 msgid "Unable to create file %1 during import"
@@ -1042,7 +1073,7 @@ msgstr "La piste %1 de %2 ne contient aucune donnée MIDI valide"
 
 #: import.cc:427
 msgid "MIDI file could not be written (best guess: %1)"
-msgstr ""
+msgstr "Impossible d'écrire le fichier MIDI (probablement : %1)"
 
 #: import.cc:475
 msgid "Import: cannot open input sound file \"%1\""
@@ -1054,7 +1085,7 @@ msgstr "Import : erreur d'ouverture du fichier MIDI"
 
 #: import.cc:493
 msgid "Import: file contains no channels."
-msgstr ""
+msgstr "Import : le fichier ne contient pas de canaux"
 
 #: import.cc:527
 msgid "Loading MIDI file %1"
@@ -1090,7 +1121,7 @@ msgstr "E/S : impossible d'inscrire le port de sortie %1"
 
 #: io.cc:607 io.cc:668
 msgid "incorrect XML node \"%1\" passed to IO object"
-msgstr ""
+msgstr "noeud \"%1\" XML incorrect passé à l'objet E/S"
 
 #: io.cc:730
 msgid "in"
@@ -1142,16 +1173,16 @@ msgstr ""
 
 #: io.cc:1256 plugin.cc:275
 msgid "Out"
-msgstr ""
+msgstr "Sortie"
 
 #: io.cc:1256 plugin.cc:273
 msgid "In"
-msgstr ""
+msgstr "Entrée"
 
 #: io.cc:1454
 #, c-format
 msgid "%s %u"
-msgstr ""
+msgstr "%s %u"
 
 #: io.cc:1501
 #, c-format
@@ -1177,11 +1208,11 @@ msgstr "D"
 
 #: ladspa_plugin.cc:93
 msgid "LADSPA: Unable to open module: "
-msgstr ""
+msgstr "LADSPA : impossible d'ouvrir le module : "
 
 #: ladspa_plugin.cc:99
 msgid "LADSPA: module has no descriptor function."
-msgstr ""
+msgstr "LADSPA : le module n'a pas de descripteur de fonction."
 
 #: ladspa_plugin.cc:106
 msgid "LADSPA: plugin has gone away since discovery!"
@@ -1190,6 +1221,8 @@ msgstr "LADSPA : le plugin a disparu depuis sa découverte !"
 #: ladspa_plugin.cc:113
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
+msgid "LADSPA : \"%1\" ne peut pas être utilisé, car il ne fait pas de "
+"traitemen sur-place"
 
 #: ladspa_plugin.cc:308
 msgid ""
@@ -1203,15 +1236,15 @@ msgstr ""
 
 #: ladspa_plugin.cc:402 ladspa_plugin.cc:451
 msgid "LADSPA: no ladspa port number"
-msgstr ""
+msgstr "LADSPA : pas de numéro de port ladspa"
 
 #: ladspa_plugin.cc:408 ladspa_plugin.cc:457
 msgid "LADSPA: no ladspa port data"
-msgstr ""
+msgstr "LADSPA : pas de donnée de port ladspa"
 
 #: ladspa_plugin.cc:863
 msgid "Could not locate HOME.  Preset not removed."
-msgstr "HOME introuvable. Préset non enlevé."
+msgstr "HOME introuvable. Pré-réglage non enlevé."
 
 #: ladspa_plugin.cc:902 ladspa_plugin.cc:908
 msgid "Could not create %1.  Preset not saved. (%2)"
@@ -1219,7 +1252,7 @@ msgstr "Création de %1 impossible. Préset non sauvegardé. (%2)"
 
 #: ladspa_plugin.cc:915
 msgid "Error saving presets file %1."
-msgstr ""
+msgstr "Erreur lors de la sauvegarde du fichier de pré-réglage %1."
 
 #: ladspa_plugin.cc:957
 msgid "Could not locate HOME.  Preset not saved."
@@ -1263,21 +1296,19 @@ msgstr ""
 
 #: location.cc:1059 session.cc:1667 session.cc:6305 session_state.cc:1205
 msgid "session"
-msgstr "Session"
+msgstr "session"
 
 #: location.cc:1126
 msgid "could not load location from session file - ignored"
 msgstr ""
 
 #: location_importer.cc:61
-#, fuzzy
 msgid "Locations"
-msgstr "Repères et Intervalles"
+msgstr "Emplacements"
 
 #: location_importer.cc:123
-#, fuzzy
 msgid "Location: "
-msgstr "Emplacement"
+msgstr "Emplacement :"
 
 #: location_importer.cc:125
 msgid ""
@@ -1285,7 +1316,7 @@ msgid ""
 "start: "
 msgstr ""
 "Intervalle\n"
-"Début: "
+"Début : "
 
 #: location_importer.cc:126
 msgid ""
@@ -1351,7 +1382,7 @@ msgstr ""
 
 #: lua_api.cc:87
 msgid "Script with given name was not found\n"
-msgstr ""
+msgstr "Le script de ce nom n'a pas été trouvé\n"
 
 #: lua_api.cc:96
 msgid "Failed to instantiate Lua Processor\n"
@@ -1647,76 +1678,77 @@ msgstr ""
 
 #: parameter_descriptor.cc:201
 msgid "Note|C"
-msgstr "Do"
+msgstr "Note|Do"
 
 #: parameter_descriptor.cc:202
 msgid "Note|C#"
-msgstr "Do ♯"
+msgstr "Note|Do ♯"
 
 #: parameter_descriptor.cc:203
 msgid "Note|D"
-msgstr "Ré"
+msgstr "Note|Ré"
 
 #: parameter_descriptor.cc:204
 msgid "Note|D#"
-msgstr "Ré ♯"
+msgstr "Note|Ré ♯"
 
 #: parameter_descriptor.cc:205
 msgid "Note|E"
-msgstr "Mi"
+msgstr "Note|Mi"
 
 #: parameter_descriptor.cc:206
 msgid "Note|F"
-msgstr "Fa"
+msgstr "Note|Fa"
 
 #: parameter_descriptor.cc:207
 msgid "Note|F#"
-msgstr "Fa ♯"
+msgstr "Note|Fa ♯"
 
 #: parameter_descriptor.cc:208
 msgid "Note|G"
-msgstr "Sol"
+msgstr "Note|Sol"
 
 #: parameter_descriptor.cc:209
 msgid "Note|G#"
-msgstr "Sol ♯"
+msgstr "Note|Sol ♯"
 
 #: parameter_descriptor.cc:210
 msgid "Note|A"
-msgstr "La"
+msgstr "Note|La"
 
 #: parameter_descriptor.cc:211
 msgid "Note|A#"
-msgstr "Si ♭"
+msgstr "Note|Si ♭"
 
 #: parameter_descriptor.cc:212
 msgid "Note|B"
-msgstr "Si"
+msgstr "Note|Si"
 
 #: playlist.cc:2234
 msgid "region state node has no ID, ignored"
-msgstr ""
+msgstr "le noeud d'état de la région n'a pas d'ID, ignoré"
 
 #: playlist.cc:2252
 msgid "Playlist: cannot create region from XML"
-msgstr ""
+msgstr "Liste de lecture : ne peut pas créer une région depuis le XML"
 
 #: playlist_source.cc:99
-#, fuzzy
 msgid "No playlist ID in PlaylistSource XML!"
-msgstr "Liste de lecture importée : syntaxe XML incorrecte"
+msgstr "Pas d'ID de liste de lecture dans le PlaylistSource XML !"
 
 #: playlist_source.cc:118
 msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr ""
+"N'a pas pu construire de liste de lecture pour PlaylistSource depuis les "
+"données de session !"
 
 #: plugin.cc:126
 msgid "Cannot remove plugin factory preset."
-msgstr ""
+msgstr "Ne peut pas supprimer le pré-réglage d'usine du greffon"
 
 #: plugin.cc:144
 msgid "Preset with given name already exists."
-msgstr ""
+msgstr "Un pré-réglage avec ce nom existe déjà."
 
 #: plugin.cc:263
 #, fuzzy
@@ -1725,11 +1757,11 @@ msgstr "Audio"
 
 #: plugin.cc:266
 msgid "Midi"
-msgstr ""
+msgstr "MIDI"
 
 #: plugin.cc:269
 msgid "?"
-msgstr ""
+msgstr "?"
 
 #: plugin.cc:412
 msgid ""
@@ -1753,19 +1785,19 @@ msgstr "erreur de programmation : "
 
 #: plugin_insert.cc:1700
 msgid "SC %1"
-msgstr ""
+msgstr "SC %1"
 
 #: plugin_insert.cc:2352
 msgid "XML node describing plugin is missing the `type' field"
-msgstr ""
+msgstr "Le noeud XML décrivant le greffon n'a pas de champ `type'"
 
 #: plugin_insert.cc:2369
 msgid "unknown plugin type %1 in plugin insert state"
-msgstr ""
+msgstr "greffon inconnu de type %1 dans l'état d'insert de greffon"
 
 #: plugin_insert.cc:2397
 msgid "Plugin has no unique ID field"
-msgstr ""
+msgstr "Le greffon n'a pas de champ d'ID unique"
 
 #: plugin_insert.cc:2435
 msgid ""
@@ -1777,15 +1809,15 @@ msgstr ""
 
 #: plugin_insert.cc:2645
 msgid "PluginInsert: Auto: no ladspa port number"
-msgstr ""
+msgstr "PluginInsert : Auto : pas de numéro de port LADSPA"
 
 #: plugin_insert.cc:2652
 msgid "PluginInsert: Auto: port id out of range"
-msgstr ""
+msgstr "PluginInsert : Auto : ID de port hors d'intervalle"
 
 #: plugin_insert.cc:2688
 msgid "PluginInsert: automatable control %1 not found - ignored"
-msgstr ""
+msgstr "PluginInsert : contrôle automatisable %1 non trouvé - ignoré"
 
 #: plugin_manager.cc:220
 msgid "Discovering Plugins"
@@ -1793,11 +1825,11 @@ msgstr "Découverte de Plugins..."
 
 #: plugin_manager.cc:251
 msgid "Scanning LADSPA Plugins"
-msgstr ""
+msgstr "Scan des greffons LADSPA"
 
 #: plugin_manager.cc:253
 msgid "Scanning Lua DSP Processors"
-msgstr ""
+msgstr "Scan des processeurs DSP LUA"
 
 #: plugin_manager.cc:256
 msgid "Scanning LV2 Plugins"
@@ -1805,47 +1837,47 @@ msgstr "Recherche de greffons LV2"
 
 #: plugin_manager.cc:262
 msgid "Scanning Windows VST Plugins"
-msgstr ""
+msgstr "Scan des greffons VST Windows"
 
 #: plugin_manager.cc:264
 msgid "Discovering Windows VST Plugins"
-msgstr ""
+msgstr "Découverte des greffons VST Windows"
 
 #: plugin_manager.cc:273
 msgid "Scanning Linux VST Plugins"
-msgstr ""
+msgstr "Scan des greffons VST Linux"
 
 #: plugin_manager.cc:275
 msgid "Discovering Linux VST Plugins"
-msgstr ""
+msgstr "Découverte des greffons VST Linux"
 
 #: plugin_manager.cc:288
 msgid "VST Blacklist: "
-msgstr ""
+msgstr "Liste noire de VST : "
 
 #: plugin_manager.cc:290
 msgid "VST Blacklist:"
-msgstr ""
+msgstr "Liste noire de VST :"
 
 #: plugin_manager.cc:300
 msgid "Scanning AU Plugins"
-msgstr ""
+msgstr "Scan des greffons AU"
 
 #: plugin_manager.cc:302
 msgid "Discovering AU Plugins"
-msgstr ""
+msgstr "Découverte des greffons AU"
 
 #: plugin_manager.cc:307
 msgid "Plugin Scan Complete..."
-msgstr ""
+msgstr "Scan des greffons complet"
 
 #: plugin_manager.cc:513
 msgid "LADSPA"
-msgstr ""
+msgstr "LADSPA"
 
 #: plugin_manager.cc:565
 msgid "Could not parse rdf file: %1"
-msgstr ""
+msgstr "Impossible d'analyser le fichier rdf : %1"
 
 #: plugin_manager.cc:602
 msgid "LADSPA: cannot load module \"%1\" (%2)"
