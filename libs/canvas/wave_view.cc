@@ -800,7 +800,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 
 		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request,
 					(current_request ? current_request->should_stop() : false),
-					(current_request ? current_request->image : 0)));
+					(current_request ? (current_request->image ? "yes" : "no") : "n/a")));
 
 		if (current_request && !current_request->should_stop() && current_request->image) {
 
