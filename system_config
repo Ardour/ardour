@@ -18,6 +18,7 @@
     <Option name="initial-program-change" value="-1"/>
     <Option name="display-first-midi-bank-as-zero" value="0"/>
     <Option name="inter-scene-gap-frames" value="1"/>
+    <Option name="midi-input-follows-selection" value="1"/>
     <Option name="mtc-qf-speed-tolerance" value="5"/>
     <Option name="timecode-sync-frame-rate" value="1"/>
     <Option name="timecode-source-is-synced" value="0"/>
@@ -98,6 +99,8 @@
     <Option name="meter-type-track" value="4"/>
     <Option name="meter-type-bus" value="4"/>
     <Option name="try-autostart-engine" value="0"/>
+    <Option name="hide-dummy-backend" value="1"/>
+    <Option name="copy-demo-sessions" value="1"/>
     <Option name="auditioner-output-left" value="default"/>
     <Option name="auditioner-output-right" value="default"/>
     <Option name="replicate-missing-region-channels" value="0"/>
@@ -123,6 +126,7 @@
     <Option name="use-plugin-own-gui" value="1"/>
     <Option name="use-windows-vst" value="1"/>
     <Option name="use-lxvst" value="1"/>
+    <Option name="use-macvst" value="1"/>
     <Option name="discover-vst-on-start" value="0"/>
     <Option name="verbose-plugin-scan" value="1"/>
     <Option name="vst-scan-timeout" value="600"/>
