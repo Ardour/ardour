@@ -52,6 +52,7 @@
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "pbd/i18n.h"
 
@@ -111,6 +112,12 @@ EngineControl::EngineControl ()
 	int row;
 
 	set_name (X_("AudioMIDISetup"));
+
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
 
 	/* the backend combo is the one thing that is ALWAYS visible */
 
