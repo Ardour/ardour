@@ -565,7 +565,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	   below). be sure to include a descender.
 	*/
 
-	automate_button.set_sizing_text(_("Mgnual"));
+	automate_button.set_sizing_text(_("Manual"));
 
 	ignore_change = false;
 	update_pending = false;
