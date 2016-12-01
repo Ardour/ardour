@@ -230,7 +230,7 @@ msgstr "Jack O'Quin"
 
 #: about.cc:177
 msgid "Len Ovens"
-msgstr ""
+msgstr "Len Ovens"
 
 #: about.cc:178
 msgid "Pavel Potocek"
@@ -286,7 +286,7 @@ msgstr "Mark Stewart"
 
 #: about.cc:191
 msgid "Nathan Stewart"
-msgstr ""
+msgstr "Nathan Stewart"
 
 #: about.cc:192
 msgid "Roland Stigge"
@@ -325,6 +325,12 @@ msgid ""
 "\tRomain Arnaud <roming22@gmail.com>\n"
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 msgstr ""
+"Français :\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+"\tMartin Blanchard\n"
+"\tRomain Arnaud <roming22@gmail.com>\n"
+"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 
 #: about.cc:204
 msgid ""
@@ -472,7 +478,7 @@ msgstr " - debug"
 
 #: about.cc:628
 msgid "Copyright (C) 1999-2016 Paul Davis\n"
-msgstr ""
+msgstr "Copyright (C) 1999-2016 Paul Davis\n"
 
 #: about.cc:632
 msgid "http://ardour.org/"
@@ -1018,7 +1024,7 @@ msgstr "NSM : échec d'initialisation"
 
 #: ardour_ui.cc:1107
 msgid "Copied Demo Session %1."
-msgstr ""
+msgstr "Session démo %1 copiée."
 
 #: ardour_ui.cc:1124
 msgid "Free/Demo Version Warning"
@@ -1388,7 +1394,7 @@ msgstr "Échec de la sauvegarde : %1"
 
 #: ardour_ui.cc:2723
 msgid "Session Archiving failed."
-msgstr ""
+msgstr "Échec de l'archivage de session."
 
 #: ardour_ui.cc:2755
 msgid ""
@@ -1592,7 +1598,7 @@ msgstr "kilo"
 
 #: ardour_ui.cc:3871
 msgid "mega"
-msgstr "mega"
+msgstr "méga"
 
 #: ardour_ui.cc:3874
 msgid "giga"
@@ -2302,7 +2308,7 @@ msgstr "Sauvegarder sous..."
 
 #: ardour_ui_ed.cc:222
 msgid "Archive..."
-msgstr ""
+msgstr "Archive..."
 
 #: ardour_ui_ed.cc:225 editor_actions.cc:1758 editor_markers.cc:908
 #: editor_snapshots.cc:136 mixer_strip.cc:1674 route_time_axis.cc:1665
@@ -2968,7 +2974,7 @@ msgstr "Sens :"
 
 #: bundle_manager.cc:206 bundle_manager.cc:212
 msgid "Destination"
-msgstr ""
+msgstr "Destination"
 
 #: bundle_manager.cc:207 bundle_manager.cc:210 bundle_manager.cc:245
 #: export_dialog.cc:514
@@ -3089,7 +3095,7 @@ msgstr "Dupliquer chaque piste/bus ce nombre de fois :"
 
 #: duplicate_routes_dialog.cc:59
 msgid "Insert duplicates at: "
-msgstr ""
+msgstr "Insérer une duplication à : "
 
 #: duplicate_routes_dialog.cc:190
 msgid "1 or more tracks/busses could not be duplicated"
@@ -3560,11 +3566,11 @@ msgstr "Exporter l'intervalle vidéo..."
 
 #: editor.cc:2028 editor.cc:2110 editor_actions.cc:326
 msgid "Play from Edit Point"
-msgstr ""
+msgstr "Jouer depuis le point d'édition"
 
 #: editor.cc:2029 editor.cc:2111
 msgid "Play from Start"
-msgstr ""
+msgstr "Jouer depuis le début"
 
 #: editor.cc:2030
 msgid "Play Region"
@@ -5023,7 +5029,7 @@ msgstr ""
 
 #: editor_actions.cc:754 quantize_dialog.cc:61 quantize_dialog.cc:118
 msgid "Quantize"
-msgstr "Quantiser"
+msgstr "Quantifier"
 
 #: editor_actions.cc:1088 editor_actions.cc:1484 editor_actions.cc:1495
 #: editor_actions.cc:1548 editor_actions.cc:1559 editor_actions.cc:1606
@@ -5263,7 +5269,7 @@ msgstr "Rogner jusqu'au suivant"
 
 #: editor_actions.cc:1970
 msgid "Insert Region from Region List"
-msgstr ""
+msgstr "Insérer une région depuis la liste de région"
 
 #: editor_actions.cc:1976
 msgid "Set Sync Position"
@@ -5471,7 +5477,7 @@ msgstr "copier le repère de signature"
 
 #: editor_drag.cc:3327
 msgid "inactive"
-msgstr ""
+msgstr "inactif"
 
 #: editor_drag.cc:3372
 msgid "move tempo mark"
@@ -5527,7 +5533,7 @@ msgstr "nouveau marqueur de CD"
 
 #: editor_drag.cc:5488 editor_route_groups.cc:439 mixer_ui.cc:1891
 msgid "unnamed"
-msgstr "(sans nom)"
+msgstr "sans nom"
 
 #: editor_drag.cc:5809
 msgid "Automation range drag created for invalid region type"
@@ -5775,7 +5781,7 @@ msgstr ""
 
 #: editor_markers.cc:1440
 msgid "change tempo type"
-msgstr ""
+msgstr "modifier le type de tempo"
 
 #: editor_markers.cc:1508 editor_ops.cc:2161
 msgid "New Name:"
@@ -5882,7 +5888,7 @@ msgstr "Nouveau repère de position"
 
 #: editor_ops.cc:2254 editor_ops.cc:2278
 msgid "Set session start"
-msgstr ""
+msgstr "Définir le départ de la session"
 
 #: editor_ops.cc:2363
 msgid "add markers"
@@ -6095,7 +6101,7 @@ msgstr "supprimer la région"
 
 #: editor_ops.cc:4932
 msgid "duplicate range selection"
-msgstr ""
+msgstr "dupliquer la sélection d'intervalle"
 
 #: editor_ops.cc:5026
 msgid "nudge track"
@@ -6798,7 +6804,7 @@ msgstr "Configuration des appareils MIDI"
 
 #: engine_dialog.cc:91
 msgid "Refresh Devices"
-msgstr ""
+msgstr "Rafraîchir les périphériques"
 
 #: engine_dialog.cc:92
 msgid "Use Buffered I/O"
@@ -7150,23 +7156,23 @@ msgstr "Sortie de piste (canaux : %1)"
 
 #: export_channel_selector.cc:552
 msgid "Apply track/bus processing"
-msgstr ""
+msgstr "Appliquer un traitement de piste/bus"
 
 #: export_channel_selector.cc:553
 msgid "Select all tracks"
-msgstr ""
+msgstr "Sélectionner toutes les pistes"
 
 #: export_channel_selector.cc:554
 msgid "Select all busses"
-msgstr ""
+msgstr "Sélectionner tous les bus"
 
 #: export_channel_selector.cc:555
 msgid "Deselect all"
-msgstr ""
+msgstr "Tout désélectionner"
 
 #: export_channel_selector.cc:589
 msgid "Track name"
-msgstr ""
+msgstr "Nom de la piste"
 
 #: export_dialog.cc:49
 msgid ""
@@ -7286,7 +7292,7 @@ msgstr "Envoyer sur Soundcloud"
 
 #: export_file_notebook.cc:208
 msgid "Analyze Exported Audio"
-msgstr ""
+msgstr "Analyser l'audio exportée"
 
 #: export_file_notebook.cc:295
 msgid "No format!"
@@ -7924,7 +7930,7 @@ msgstr "Ajouter un nouveau bus auxiliaire (post-fader)"
 
 #: group_tabs.cc:401
 msgid "Assign Selection to Control Master..."
-msgstr ""
+msgstr "Assigner la sélection au maître-contrôle"
 
 #: group_tabs.cc:412
 msgid "Assign Record Enabled to Control Master..."
@@ -7944,15 +7950,15 @@ msgstr "Désactiver tous les groupes"
 
 #: insert_remove_time_dialog.cc:60
 msgid "Remove Time starting at:"
-msgstr ""
+msgstr "Supprimer du temps commençant à :"
 
 #: insert_remove_time_dialog.cc:60
 msgid "Insert Time starting at:"
-msgstr ""
+msgstr "Insérer du temps commençant à :"
 
 #: insert_remove_time_dialog.cc:67
 msgid "Time to remove:"
-msgstr ""
+msgstr "Temps à supprimer :"
 
 #: insert_remove_time_dialog.cc:67
 msgid "Time to insert:"
@@ -7976,7 +7982,7 @@ msgstr "être séparées"
 
 #: insert_remove_time_dialog.cc:99
 msgid "Apply to all the track's playlists"
-msgstr ""
+msgstr "Appliquer à toutes les listes de lecture des pistes"
 
 #: insert_remove_time_dialog.cc:102
 msgid "Move glued-to-musical-time regions (MIDI regions)"
@@ -8052,7 +8058,7 @@ msgstr ""
 
 #: keyboard.cc:210
 msgid "Loading keybindings from %1"
-msgstr ""
+msgstr "Chargement des raccourcis-clavier depuis %1"
 
 #: keyeditor.cc:67
 msgid "Colliding keybindings"
@@ -8219,23 +8225,24 @@ msgstr "ajouter un repère d'intervalle"
 
 #: lua_script_manager.cc:31
 msgid "Add/Set"
-msgstr ""
+msgstr "Ajoute/paramètre"
 
 #: lua_script_manager.cc:34
 msgid "Call"
-msgstr ""
+msgstr "Appel"
 
 #: lua_script_manager.cc:35
 msgid "New Hook"
-msgstr ""
+msgstr "Nouveau crochet"
 
 #: lua_script_manager.cc:77
+#, fuzzy
 msgid "Signal(s)"
-msgstr ""
+msgstr "Signal(s)"
 
 #: lua_script_manager.cc:127
 msgid "Action %1"
-msgstr ""
+msgstr "Action %1"
 
 #: lua_script_manager.cc:132 lua_script_manager.cc:227
 msgid "Unset"
@@ -8243,23 +8250,23 @@ msgstr ""
 
 #: luainstance.cc:1108
 msgid "Cannot read script '%1': %2"
-msgstr ""
+msgstr "Ne peut pas lire le script '%1': %2"
 
 #: luawindow.cc:97
 msgid "Run"
-msgstr ""
+msgstr "Lancer"
 
 #: luawindow.cc:98
 msgid "Clear Output"
-msgstr ""
+msgstr "Vider la sortie"
 
 #: luawindow.cc:102
 msgid "Revert"
-msgstr ""
+msgstr "Revenir"
 
 #: luawindow.cc:166
 msgid "Select Editor Buffer"
-msgstr ""
+msgstr "Sélectionner le tampon de l'éditeur"
 
 #: luawindow.cc:253 luawindow.cc:258
 msgid "Window|Lua"
@@ -8267,15 +8274,15 @@ msgstr "LUA"
 
 #: luawindow.cc:286 luawindow.cc:304
 msgid "LuaException: %1"
-msgstr ""
+msgstr "LuaException : %1"
 
 #: luawindow.cc:343
 msgid "Deleted %1"
-msgstr ""
+msgstr "%1 supprimé"
 
 #: luawindow.cc:346
 msgid "Failed to delete %1"
-msgstr ""
+msgstr "Échec de la suppression de %1"
 
 #: luawindow.cc:412
 msgid ""
@@ -8299,11 +8306,11 @@ msgstr ""
 
 #: luawindow.cc:440 luawindow.cc:491
 msgid "Saved as %1"
-msgstr ""
+msgstr "Sauvegardé sous %1"
 
 #: luawindow.cc:443 luawindow.cc:494
 msgid "Error saving file: %1"
-msgstr ""
+msgstr "Erreur lors de la sauvegarde du fichier : %1"
 
 #: luawindow.cc:453
 msgid ""
@@ -8317,7 +8324,7 @@ msgstr ""
 
 #: luawindow.cc:639
 msgid "Action: '%1'"
-msgstr ""
+msgstr "Action: '%1'"
 
 #: luawindow.cc:641
 msgid "Snippet: %1"
@@ -8325,7 +8332,7 @@ msgstr ""
 
 #: luawindow.cc:653
 msgid "Save as"
-msgstr ""
+msgstr "Sauvegarder sous"
 
 #: main.cc:88
 msgid "%1 could not connect to the audio backend."
@@ -8773,7 +8780,7 @@ msgstr "Contrôleurs"
 
 #: midi_time_axis.cc:684
 msgid "Polyphonic Pressure"
-msgstr ""
+msgstr "Pression polyphonique"
 
 #: midi_time_axis.cc:690
 msgid "No MIDI Channels selected"
@@ -9761,7 +9768,7 @@ msgstr "Normaliser la région"
 
 #: normalize_dialog.cc:52
 msgid "Constrain RMS to:"
-msgstr ""
+msgstr "Contraindre le RMS à :"
 
 #: normalize_dialog.cc:59
 msgid "Normalize to:"
@@ -10280,7 +10287,7 @@ msgstr "Ajouter"
 
 #: plugin_ui.cc:461
 msgid "Pinout"
-msgstr ""
+msgstr "Broche de sortie"
 
 #: plugin_ui.cc:462
 msgid "Description"
@@ -10317,7 +10324,7 @@ msgstr ""
 
 #: plugin_ui.cc:475
 msgid "Show Plugin Pin Management Dialog"
-msgstr ""
+msgstr "Afficher le dialogue de gestion des broches du greffon"
 
 #: plugin_ui.cc:476
 msgid "Disable signal processing by the plugin"
@@ -11274,8 +11281,8 @@ msgstr "tous les processeurs disponibles"
 #: rc_option_editor.cc:2173
 msgid "%1 processor"
 msgid_plural "%1 processors"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 processeur"
+msgstr[1] "%1 processeurs"
 
 #: rc_option_editor.cc:2176
 msgid "This setting will only take effect when %1 is restarted."
@@ -12125,7 +12132,7 @@ msgstr "VST"
 
 #: rc_option_editor.cc:3200
 msgid "Enable Mac VST support (requires restart or re-scan)"
-msgstr ""
+msgstr "Active le support VST Mac (nécessite de redémarrer ou de rescanner)"
 
 #: rc_option_editor.cc:3209
 msgid "Scan for [new] VST Plugins on Application Start"
@@ -12182,7 +12189,7 @@ msgstr "Audio Unit"
 
 #: rc_option_editor.cc:3279
 msgid "Scan for [new] AudioUnit Plugins on Application Start"
-msgstr ""
+msgstr "Scan des [nouveaux] greffons AudioUnit au lancement de l'application"
 
 #: rc_option_editor.cc:3285
 msgid ""
@@ -12920,7 +12927,7 @@ msgstr "Nouveau nom de la liste de lecture :"
 
 #: route_time_axis.cc:1138 route_time_axis.cc:1234
 msgid "Given playlist name is not unique."
-msgstr ""
+msgstr "Le nom de liste de lecture donné n'est pas unique."
 
 #: route_time_axis.cc:1216
 msgid "New Copy Playlist"
@@ -12928,7 +12935,7 @@ msgstr "Nouvelle copie de la liste de lecture"
 
 #: route_time_axis.cc:1217
 msgid "Name for playlist copy:"
-msgstr ""
+msgstr "Nom pour la copie de liste de lecture :"
 
 #: route_time_axis.cc:1219
 msgid "New Playlist"
@@ -13375,7 +13382,7 @@ msgstr "<b>Sorties</b>"
 
 #: session_dialog.cc:916
 msgid "Create master bus"
-msgstr "Bus de sortie principal à"
+msgstr "Créer un bus de principal"
 
 #: session_dialog.cc:926
 msgid "Automatically connect to physical inputs"
@@ -13399,7 +13406,7 @@ msgstr "... aux sorties matérielles"
 
 #: session_dialog.cc:1224
 msgid "Remove from recent"
-msgstr ""
+msgstr "Supprimer des récents"
 
 #: session_import_dialog.cc:74
 msgid "Elements"
@@ -14048,7 +14055,7 @@ msgstr "<b>Informations du fichier MIDI</b>"
 
 #: sfdb_ui.cc:310
 msgid "(Tracks)"
-msgstr ""
+msgstr "(Pistes)"
 
 #: sfdb_ui.cc:538
 msgid "SoundFileBox: Could not tokenize string: "
@@ -15410,19 +15417,19 @@ msgstr "Écraser"
 
 #: vca_master_strip.cc:74 vca_time_axis.cc:49
 msgid "Solo slaves"
-msgstr ""
+msgstr "Mettre les esclaves en solo"
 
 #: vca_master_strip.cc:79 vca_time_axis.cc:55
 msgid "Mute slaves"
-msgstr ""
+msgstr "Mettre les esclaves en sourdine"
 
 #: vca_master_strip.cc:83
 msgid "Hide this VCA strip"
-msgstr ""
+msgstr "Cacher cette tranche VCA"
 
 #: vca_master_strip.cc:108 vca_master_strip.cc:418
 msgid "Click to show slaves only"
-msgstr ""
+msgstr "Cliquer pour afficher uniquement les esclaves"
 
 #: vca_master_strip.cc:293
 msgid "A"
@@ -15438,7 +15445,7 @@ msgstr ""
 
 #: vca_master_strip.cc:421
 msgid "Click to show normal mixer"
-msgstr ""
+msgstr "Cliquer pour afficher une console de mixage normale"
 
 #: add_video_dialog.cc:55
 #, fuzzy
