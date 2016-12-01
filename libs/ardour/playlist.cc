@@ -676,7 +676,11 @@ Playlist::flush_notifications (bool from_undo)
 	 framepos_t pos = position;
 
 	 if (times == 1 && auto_partition){
-		 partition(pos - 1, (pos + region->length()), true);
+		RegionList thawlist;
+		partition_internal (pos - 1, (pos + region->length()), true, thawlist);
+		for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
+			(*i)->resume_property_changes ();
+		}
 	 }
 
 	 if (itimes >= 1) {
@@ -873,8 +877,10 @@ Playlist::flush_notifications (bool from_undo)
  Playlist::partition (framepos_t start, framepos_t end, bool cut)
  {
 	 RegionList thawlist;
-
-	 partition_internal (start, end, cut, thawlist);
+	 {
+	  RegionWriteLock lock(this);
+	  partition_internal (start, end, cut, thawlist);
+	 }
 
 	 for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 		 (*i)->resume_property_changes ();
@@ -892,7 +898,6 @@ Playlist::flush_notifications (bool from_undo)
 	 RegionList new_regions;
 
 	 {
-		 RegionWriteLock rlock (this);
 
 		 boost::shared_ptr<Region> region;
 		 boost::shared_ptr<Region> current;
@@ -1119,7 +1124,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	//keep track of any dead space at end (for pasting into Ripple or Splice mode)
 	framepos_t wanted_length = end-start;
-	_end_space = wanted_length - get_extent().second-get_extent().first;
+	_end_space = wanted_length - _get_extent().second - _get_extent().first;
  }
 
  boost::shared_ptr<Playlist>
@@ -1185,7 +1190,10 @@ Playlist::flush_notifications (bool from_undo)
 		 return boost::shared_ptr<Playlist>();
 	 }
 
-	 partition_internal (start, start+cnt-1, true, thawlist);
+	 {
+		RegionWriteLock rlock (this);
+		partition_internal (start, start+cnt-1, true, thawlist);
+	 }
 
 	 for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 		 (*i)->resume_property_changes();
