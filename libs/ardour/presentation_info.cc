@@ -164,6 +164,7 @@ PresentationInfo::set_color (PresentationInfo::color_t c)
 	if (c != _color) {
 		_color = c;
 		send_change (PropertyChange (Properties::color));
+		Change (); /* EMIT SIGNAL */
 	}
 }
 
