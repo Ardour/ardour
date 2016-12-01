@@ -28,7 +28,7 @@ msgid "Digital Audio Workstation"
 msgstr "Station de travail audio-numérique"
 
 #. (itstool) path: description/p
-#: ./ardour/gtk2_ardour/ardour.appdata.xml.in.in:12
+#: ./gtk2_ardour/ardour.appdata.xml.in.in:12
 msgid ""
 "Ardour is a multi-channel digital audio workstation, allowing you to record, "
 "edit, mix and master audio and MIDI projects."
@@ -38,7 +38,7 @@ msgstr ""
 "audio et MIDI."
 
 #. (itstool) path: description/p
-#: ./ardour/gtk2_ardour/ardour.appdata.xml.in.in:16
+#: ./gtk2_ardour/ardour.appdata.xml.in.in:16
 msgid ""
 "It is targeted at audio engineers, musicians, soundtrack editors and "
 "composers."
@@ -47,7 +47,7 @@ msgstr ""
 "pistes audio et les compositeurs."
 
 #. (itstool) path: screenshot/caption
-#: ./ardour/gtk2_ardour/ardour.appdata.xml.in.in:25
+#: ./gtk2_ardour/ardour.appdata.xml.in.in:25
 msgid ""
 "The Editor window where you can arrange audio and MIDI data along a timeline"
 msgstr ""
@@ -55,7 +55,7 @@ msgstr ""
 "long d'une ligne de temps"
 
 #. (itstool) path: screenshot/caption
-#: ./ardour/gtk2_ardour/ardour.appdata.xml.in.in:29
+#: ./gtk2_ardour/ardour.appdata.xml.in.in:29
 msgid "The Mixer window which includes channel strips for each track and bus"
 msgstr ""
 "La fenêtre de mixeur qui inclut les tranches de canaux pour chaque piste et "
