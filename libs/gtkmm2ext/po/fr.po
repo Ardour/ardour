@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:09-0400\n"
-"PO-Revision-Date: 2016-22-30 20:22+0100\n"
+"POT-Creation-Date: 2016-12-01 01:22+0100\n"
+"PO-Revision-Date: 2016-12-01 02:23+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -25,7 +25,7 @@ msgstr "Nom d'action inconnu : %1"
 
 #: binding_proxy.cc:81
 msgid "operate controller now"
-msgstr "actionnez maintenant le contrôleur"
+msgstr "actionnez le contrôleur maintenant"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
@@ -61,65 +61,65 @@ msgstr "Appuyer pour quitter"
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
-#: keyboard.cc:70
+#: keyboard.cc:71
 msgid "Command"
 msgstr "Commande"
 
-#: keyboard.cc:71 keyboard.cc:93
+#: keyboard.cc:72 keyboard.cc:94
 msgid "Control"
 msgstr "Control"
 
-#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
 msgid "Key|Shift"
 msgstr "Key|Maj."
 
-#: keyboard.cc:73
+#: keyboard.cc:74
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:75
+#: keyboard.cc:76
 msgid "Cmd"
 msgstr "Cmd"
 
-#: keyboard.cc:76 keyboard.cc:98
+#: keyboard.cc:77 keyboard.cc:99
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: keyboard.cc:78
+#: keyboard.cc:79
 msgid "Opt"
 msgstr "Opt"
 
-#: keyboard.cc:94 keyboard.cc:99
+#: keyboard.cc:95 keyboard.cc:100
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:96
+#: keyboard.cc:97
 msgid "Windows"
 msgstr "Windows"
 
-#: keyboard.cc:101
+#: keyboard.cc:102
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:152 keyboard.cc:685
+#: keyboard.cc:154 keyboard.cc:635
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:696
+#: keyboard.cc:646
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "fichier de raccourcis-clavier introuvable dans \"%2\" ou contenant des "
 "erreurs."
 
-#: keyboard.cc:722
+#: keyboard.cc:672
 msgid "Keyboard binding found without a name"
 msgstr "raccourci-clavier trouvé sans nom"
 
-#: keyboard.cc:752
+#: keyboard.cc:702
 msgid "Cannot save key bindings to %1"
 msgstr "Impossible de sauvegarder les raccourcis-clavier dans %1"
 
-#: keyboard.cc:768
+#: keyboard.cc:718
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Impossible de renommer votre propre fichier de raccourcis-clavier (%1)"
 
