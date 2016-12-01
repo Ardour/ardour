@@ -721,7 +721,13 @@ GroupTabs::set_activation (RouteGroup* g, bool a)
 void
 GroupTabs::remove_group (RouteGroup* g)
 {
+	RouteList rl (*(g->route_list().get()));
 	_session->remove_route_group (*g);
+
+	for (RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
+		(*i)->presentation_info().PropertyChanged (Properties::color);
+	}
+	PresentationInfo::Change (); // notify summary & port-matrix
 }
 
 /** Set the color of the tab of a route group */
@@ -835,6 +841,7 @@ GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 	}
 
 	r->presentation_info().PropertyChanged (Properties::color);
+	PresentationInfo::Change (); // notify summary & port-matrix
 
 	set_dirty ();
 }
@@ -850,6 +857,7 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 	}
 
 	r->presentation_info().PropertyChanged (Properties::color);
+	PresentationInfo::Change (); // notify summary & port-matrix
 
 	set_dirty ();
 }
@@ -858,6 +866,7 @@ void
 GroupTabs::emit_gui_changed_for_members (RouteGroup* rg)
 {
 	for (RouteList::iterator i = rg->route_list()->begin(); i != rg->route_list()->end(); ++i) {
-		(*i)->gui_changed (X_("color"), 0);
+		(*i)->presentation_info().PropertyChanged (Properties::color);
 	}
+	PresentationInfo::Change (); // notify summary & port-matrix
 }
