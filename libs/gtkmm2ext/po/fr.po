@@ -67,7 +67,7 @@ msgstr "Commande"
 
 #: keyboard.cc:72 keyboard.cc:94
 msgid "Control"
-msgstr "Control"
+msgstr "Contrôle"
 
 #: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
 msgid "Key|Shift"
