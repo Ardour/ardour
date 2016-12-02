@@ -1425,7 +1425,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 	/* Add a new track of the correct type, and return the RouteTimeAxisView that is created to display the
 	   new track.
 	 */
-
+	TimeAxisView* tav = 0;
 	try {
 		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
 			list<boost::shared_ptr<AudioTrack> > audio_tracks;
@@ -1434,27 +1434,24 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
 			}
 			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
-			TimeAxisView* tav =_editor->axis_view_from_stripable (audio_tracks.front());
-			if (tav) {
-				tav->set_height (original->current_height());
-			}
-			return dynamic_cast<RouteTimeAxisView*>(tav);
+			tav =_editor->axis_view_from_stripable (audio_tracks.front());
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
 			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
 			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
-			TimeAxisView* tav = _editor->axis_view_from_stripable (midi_tracks.front());
-			if (tav) {
-				tav->set_height (original->current_height());
-			}
-			return dynamic_cast<RouteTimeAxisView*> (tav);
+			tav = _editor->axis_view_from_stripable (midi_tracks.front());
+		}
+
+		if (tav) {
+			tav->set_height (original->current_height());
 		}
 	} catch (...) {
 		error << _("Could not create new track after region placed in the drop zone") << endmsg;
-		return 0;
 	}
+
+	return dynamic_cast<RouteTimeAxisView*> (tav);
 }
 
 void
@@ -1503,6 +1500,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
 				/* first region from this original playlist: create a new track */
 				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				if(!new_time_axis_view) {
+					Drag::abort();
+					return;
+				}
 				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
 				dest_rtv = new_time_axis_view;
 			} else {
@@ -1590,6 +1591,10 @@ RegionMoveDrag::finished_no_copy (
 			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
 				/* first region from this original playlist: create a new track */
 				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				if(!new_time_axis_view) { // New track creation failed
+					Drag::abort();
+					return;
+				}
 				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
 				dest_rtv = new_time_axis_view;
 			} else {
