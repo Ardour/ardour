@@ -187,7 +187,7 @@ ARDOUR_UI::idle_ask_about_quit ()
 	} else {
 		/* no session or session not dirty, but still ask anyway */
 
-		Gtk::MessageDialog msg (string_compose ("Quit %1?", PROGRAM_NAME),
+		Gtk::MessageDialog msg (string_compose (_("Quit %1?"), PROGRAM_NAME),
 		                        false, /* no markup */
 		                        Gtk::MESSAGE_INFO,
 		                        Gtk::BUTTONS_YES_NO,
