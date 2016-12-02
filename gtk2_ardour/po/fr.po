@@ -8238,7 +8238,7 @@ msgstr "Nouveau crochet"
 #: lua_script_manager.cc:77
 #, fuzzy
 msgid "Signal(s)"
-msgstr "Signal(s)"
+msgstr "Signal(aux)"
 
 #: lua_script_manager.cc:127
 msgid "Action %1"
