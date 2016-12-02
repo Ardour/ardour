@@ -29,7 +29,7 @@ msgstr "%.2f dB"
 
 #: analyser.cc:121 audioregion.cc:1789
 msgid "Transient Analysis failed for %1."
-msgstr "La recherche des transitoires a échouée pour %1."
+msgstr "La recherche des transitoires a échoué pour %1."
 
 #: analyser.cc:121
 msgid "Audio File Source"
