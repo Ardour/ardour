@@ -1222,7 +1222,7 @@ msgstr "LADSPA : le plugin a disparu depuis sa découverte !"
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA : \"%1\" ne peut pas être utilisé, car il ne fait pas de traitement "
-"sur-place"
+"en place"
 
 #: ladspa_plugin.cc:308
 msgid ""
