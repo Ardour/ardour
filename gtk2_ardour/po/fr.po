@@ -7292,7 +7292,7 @@ msgstr "Envoyer sur Soundcloud"
 
 #: export_file_notebook.cc:208
 msgid "Analyze Exported Audio"
-msgstr "Analyser l'audio exportée"
+msgstr "Analyser l'audio exporté"
 
 #: export_file_notebook.cc:295
 msgid "No format!"
