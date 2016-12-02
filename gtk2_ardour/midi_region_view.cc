@@ -1368,6 +1368,8 @@ MidiRegionView::display_sysexes()
 
 MidiRegionView::~MidiRegionView ()
 {
+	cerr << "::~MidiRegionView()\n";
+
 	in_destructor = true;
 
 	hide_verbose_cursor ();
@@ -1386,6 +1388,7 @@ MidiRegionView::~MidiRegionView ()
 	delete _note_group;
 	delete _note_diff_command;
 	delete _step_edit_cursor;
+	delete _ghost_note;
 }
 
 void

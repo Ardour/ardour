@@ -29,7 +29,13 @@
 
 #include "evoral/visibility.h"
 
+#include "pbd/stacktrace.h"
+
 #define DEBUG_EVENT_POOL 1
+
+#ifdef DEBUG_EVENT_POOL
+#include <glib.h>
+#endif
 
 namespace Evoral {
 
@@ -88,6 +94,7 @@ class LIBEVORAL_API EventPool
 		_freelists.reserve (_freelists.size() + sp.size());
 		for (SizePairs::const_iterator s = sp.begin(); s != sp.end(); ++s) {
 			_freelists.push_back (new FreeList (s->first, s->second));
+			std::cerr << name() << " freelist for " << s->first << " count = " << s->second << std::endl;
 		}
 	}
 
@@ -117,10 +124,13 @@ class LIBEVORAL_API EventPool
 				void* ret = (*x)->back();
 				(*x)->pop_back ();
 #ifdef DEBUG_EVENT_POOL
-				std::cerr << name() << ": alloc size[" << (*x)->item_size << "] free = "
+				std::cerr << name() << ": alloc " << ret << " w/size[" << (*x)->item_size << "] for " << sz << " free = "
 				          << (*x)->size()
 				          << " alloc = " << ((char*)(*x)->end - (char*)(*x)->block) / sizeof ((*x)->item_size)
 				          << std::endl;
+				if (g_getenv ("ARDOUR_DEBUG_EVENT_POOLS")) {
+					PBD::stacktrace (std::cerr, 20);
+				}
 #endif
 
 				return ret;
@@ -135,10 +145,13 @@ class LIBEVORAL_API EventPool
 			if ((*x)->owns (p)) {
 				(*x)->push_back (p);
 #ifdef DEBUG_EVENT_POOL
-				std::cerr << name() << ": release size[" << (*x)->item_size << "] free = "
+				std::cerr << name() << ": release " << p << " w/size[" << (*x)->item_size << "] free = "
 				          << (*x)->size()
 				          << " alloc = " << ((char*)(*x)->end - (char*)(*x)->block) / sizeof ((*x)->item_size)
 				          << std::endl;
+				if (g_getenv ("ARDOUR_DEBUG_EVENT_POOLS")) {
+					PBD::stacktrace (std::cerr, 20);
+				}
 #endif
 				return;
 			}
@@ -148,22 +161,6 @@ class LIBEVORAL_API EventPool
   private:
 	FreeLists _freelists;
 	std::string _name;
-};
-
-class LIBEVORAL_API PoolAllocated
-{
-  public:
-	PoolAllocated (EventPool* p) : pool (p) {}
-
-	void operator delete (void *ptr) {
-		PoolAllocated* pa = reinterpret_cast<PoolAllocated*>(ptr);
-		if (pa && pa->pool) {
-			pa->pool->release (ptr);
-		}
-	}
-
-  private:
-	EventPool* pool;
 };
 
 } // namespace Evoral

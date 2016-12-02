@@ -26,6 +26,18 @@ namespace Evoral {
 
 static event_id_t _event_id_counter = 0;
 
+template<typename Time>
+EventPointer<Time>::~EventPointer ()
+{
+	std::cerr << "::~EventPointer\n";
+}
+
+template<typename Time>
+ManagedEvent<Time>::~ManagedEvent ()
+{
+	std::cerr << "::~ManagedEvent\n";
+}
+
 event_id_t
 event_id_counter()
 {
@@ -65,6 +77,10 @@ EventPool ManagedEvent<Time>::default_event_pool ("default event");
 template class Event<Evoral::Beats>;
 template class Event<double>;
 template class Event<int64_t>; /* framepos_t in Ardour */
+
+template class ManagedEvent<Evoral::Beats>;
+template class ManagedEvent<double>;
+template class ManagedEvent<int64_t>; /* framepos_t in Ardour */
 
 template class EventPointer<Evoral::Beats>;
 template class EventPointer<int64_t>; /* framepos_t in Ardour */

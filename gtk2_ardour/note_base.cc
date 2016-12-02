@@ -83,6 +83,8 @@ NoteBase::NoteBase(MidiRegionView& region, bool with_events, const NotePtr note)
 
 NoteBase::~NoteBase()
 {
+	cerr << "::~Notebase()";
+
 	_region.note_deleted (this);
 
 	delete _text;
