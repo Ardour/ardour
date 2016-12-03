@@ -96,7 +96,7 @@ public:
 
 	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
 		if (type == cc_type) {
-			CPPUNIT_ASSERT(size == 3);
+			CPPUNIT_ASSERT_EQUAL((uint32_t)3, size);
 			events.push_back(std::make_pair(time, buf[2]));
 		}
 		return size;
