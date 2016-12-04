@@ -54,6 +54,7 @@ class SMFTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE(SMFTest);
 	CPPUNIT_TEST(createNewFileTest);
 	CPPUNIT_TEST(takeFiveTest);
+	CPPUNIT_TEST(writeTest);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -73,6 +74,7 @@ public:
 
 	void createNewFileTest();
 	void takeFiveTest();
+	void writeTest();
 
 private:
 	DummyTypeMap*     type_map;
