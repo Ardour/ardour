@@ -26,6 +26,10 @@ LuaScriptTest::session_script_test ()
 
 		std::string script = "";
 
+		if (Glib::path_get_basename (spi->path).at(0) == '_') {
+			continue;
+		}
+
 		try {
 			script = Glib::file_get_contents (spi->path);
 		} catch (Glib::FileError e) {
