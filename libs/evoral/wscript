@@ -43,7 +43,8 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0')
-    autowaf.check_pkg(conf, 'libpbd-4', uselib_store='LIBPBD', atleast_version='4.0.0', mandatory=True)
+    if not autowaf.is_child():
+        autowaf.check_pkg(conf, 'libpbd-4', uselib_store='LIBPBD', atleast_version='4.0.0', mandatory=True)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
