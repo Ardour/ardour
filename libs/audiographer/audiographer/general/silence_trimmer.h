@@ -149,10 +149,10 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		if (throw_level (ThrowStrict) && in_end) {
 			throw Exception(*this, "process() after reaching end of input");
 		}
-		in_end = c.has_flag (ProcessContext<T>::EndOfInput);
 
-		// If adding to end, delay end of input propagation
-		if (add_to_end) { c.remove_flag(ProcessContext<T>::EndOfInput); }
+		// delay end of input propagation until after all output is complete
+		in_end = c.has_flag (ProcessContext<T>::EndOfInput);
+		c.remove_flag (ProcessContext<T>::EndOfInput);
 
 		framecnt_t frame_index = 0;
 
@@ -194,12 +194,8 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 						" adding to beginning" << std::endl;
 				}
 
-				ConstProcessContext<T> c_copy (c);
-				if (has_data) { // There will be more output, so remove flag
-					c_copy().remove_flag (ProcessContext<T>::EndOfInput);
-				}
 				add_to_beginning *= c.channels();
-				output_silence_frames (c_copy, add_to_beginning);
+				output_silence_frames (c, add_to_beginning);
 			}
 
 			// If we are not trimming the beginning, output everything
@@ -249,10 +245,6 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 			ListedSource<T>::output (c);
 		}
 
-		if (in_end) {
-			c.set_flag (ProcessContext<T>::EndOfInput);
-		}
-
 		// Finally, if in end, add silence to end
 		if (in_end && add_to_end) {
 			if (debug_level (DebugVerbose)) {
@@ -261,8 +253,19 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 			}
 
 			add_to_end *= c.channels();
-			output_silence_frames (c, add_to_end, true);
+			output_silence_frames (c, add_to_end);
 		}
+
+		if (in_end) {
+			// reset flag removed previous to processing above
+			c.set_flag (ProcessContext<T>::EndOfInput);
+
+			// Finally mark write complete by writing nothing with EndOfInput set
+			ConstProcessContext<T> c_out(c, silence_buffer, 0);
+			c_out().set_flag (ProcessContext<T>::EndOfInput);
+			ListedSource<T>::output (c_out);
+		}
+
 	}
 
 	using Sink<T>::process;
@@ -282,10 +285,9 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		return false;
 	}
 
-	void output_silence_frames (ProcessContext<T> const & c, framecnt_t & total_frames, bool adding_to_end = false)
+	void output_silence_frames (ProcessContext<T> const & c, framecnt_t & total_frames)
 	{
-		bool end_of_input = c.has_flag (ProcessContext<T>::EndOfInput);
-		c.remove_flag (ProcessContext<T>::EndOfInput);
+		assert (!c.has_flag (ProcessContext<T>::EndOfInput));
 
 		while (total_frames > 0) {
 			framecnt_t frames = std::min (silence_buffer_size, total_frames);
@@ -296,18 +298,8 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
 			total_frames -= frames;
 			ConstProcessContext<T> c_out (c, silence_buffer, frames);
-
-			// boolean commentation :)
-			bool const no_more_silence_will_be_added = adding_to_end || (add_to_end == 0);
-			bool const is_last_frame_output_in_this_function = (total_frames == 0);
-			if (end_of_input && no_more_silence_will_be_added && is_last_frame_output_in_this_function) {
-				c_out().set_flag (ProcessContext<T>::EndOfInput);
-			}
 			ListedSource<T>::output (c_out);
 		}
-
-		// Add the flag back if it was removed
-		if (end_of_input) { c.set_flag (ProcessContext<T>::EndOfInput); }
 	}
 
 
