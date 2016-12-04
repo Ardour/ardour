@@ -72,6 +72,22 @@ SMFTest::takeFiveTest ()
 	seq->end_write (Sequence<Time>::Relax,
 	                Evoral::Beats::ticks_at_rate(time, smf.ppqn()));
 	CPPUNIT_ASSERT(!seq->empty());
+
+	// Iterate over all notes
+	bool   on          = true;
+	size_t num_notes   = 0;
+	size_t num_sysexes = 0;
+	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats()); i != seq->end(); ++i) {
+		if (i->is_note_on()) {
+			++num_notes;
+		} else if (i->is_sysex()) {
+			++num_sysexes;
+		}
+	}
+	CPPUNIT_ASSERT_EQUAL(size_t(3833), seq->notes().size());
+	CPPUNIT_ASSERT_EQUAL(size_t(3833), num_notes);
+	CPPUNIT_ASSERT_EQUAL(size_t(232), seq->sysexes().size());
+	CPPUNIT_ASSERT_EQUAL(size_t(232), num_sysexes);
 }
 
 void
