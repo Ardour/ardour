@@ -16,6 +16,7 @@ LIBPBD_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # minor increment <=> compatible changes (additions)
 # micro increment <=> no interface changes
 LIBPBD_LIB_VERSION = '4.1.0'
+LIBPBD_MAJOR_VERSION = '4'
 
 # Variables for 'waf dist'
 APPNAME = 'libpbd'
@@ -87,13 +88,24 @@ libpbd_sources = [
 ]
 
 def options(opt):
+    opt.load('compiler_cxx')
     autowaf.set_options(opt)
+    opt.add_option('--ppc', action='store_true', default=False, dest='ppc',
+                   help='Compile with -arch ppc (OS X ONLY)')
+    opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
+                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw,msvc]')
+    opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
+                   help='Build internal libs as shared libraries')
 
 def configure(conf):
     conf.load('compiler_cxx')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'libarchive', uselib_store='ARCHIVE', atleast_version='3.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
 
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
@@ -101,8 +113,6 @@ def configure(conf):
     if not Options.options.ppc:
         conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
     conf.check(function_name='localtime_r', header_name='time.h', define_name='HAVE_LOCALTIME_R',mandatory=False)
-
-    conf.write_config_header('libpbd-config.h', remove=False)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
@@ -113,7 +123,22 @@ def configure(conf):
                    mandatory=True,
                    uselib_store='OLE')
 
+    if Options.options.internal_shared_libs:
+        conf.define('INTERNAL_SHARED_LIBS', 1)
+
+    conf.write_config_header('libpbd-config.h', remove=False)
+
 def build(bld):
+    if not autowaf.is_child():  # Building standalone, install dev stuff
+        # C++ Headers
+        includedir = '${INCLUDEDIR}/pbd-%s/pbd' % LIBPBD_MAJOR_VERSION
+        bld.install_files(includedir, bld.path.ant_glob('pbd/*.h'))
+        bld.install_files(includedir, 'build/pbd/signals_generated.h')
+
+        # Pkgconfig file
+        autowaf.build_pc(bld, 'libpbd', LIBPBD_VERSION, LIBPBD_MAJOR_VERSION, [],
+                         {'LIBPBD_VERSION' : LIBPBD_VERSION,
+                          'LIBPBD_MAJOR_VERSION' : LIBPBD_MAJOR_VERSION})
 
     # Make signals_generated.h using signals.py
     bld(rule = sys.executable + ' ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
@@ -183,6 +208,3 @@ def build(bld):
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
             testobj.linkflags    = ['-lrt']
-
-def shutdown():
-    autowaf.shutdown()

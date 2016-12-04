@@ -23,13 +23,18 @@ top = '.'
 out = 'build'
 
 def options(opt):
+    opt.load('compiler_c')
+    opt.load('compiler_cxx')
     autowaf.set_options(opt)
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
     opt.add_option('--test-coverage', action='store_true', default=False, dest='test_coverage',
                     help="Use gcov to test for code coverage")
+    opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
+                   help='Build internal libs as shared libraries')
 
 def configure(conf):
+    conf.load('compiler_c')
     conf.load('compiler_cxx')
     autowaf.configure(conf)
     #autowaf.display_header('Evoral Configuration')
@@ -38,6 +43,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0')
+    autowaf.check_pkg(conf, 'libpbd-4', uselib_store='LIBPBD', atleast_version='4.0.0', mandatory=True)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
@@ -46,6 +52,8 @@ def configure(conf):
     conf.env['BUILD_TESTS'] = Options.options.build_tests
     conf.env['TEST_COVERAGE'] = Options.options.test_coverage
 
+    if Options.options.internal_shared_libs:
+        conf.define('INTERNAL_SHARED_LIBS', 1)
     #autowaf.display_msg(conf, "Unit tests", str(conf.env['BUILD_TESTS']))
     #print
 
@@ -105,7 +113,7 @@ def build(bld):
     obj.includes       = ['.', './src']
     obj.name           = 'libevoral'
     obj.target         = 'evoral'
-    obj.uselib         = 'GLIBMM GTHREAD SMF XML'
+    obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD'
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = bld.env['LIBDIR']
@@ -114,20 +122,19 @@ def build(bld):
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)
         obj = bld(features = 'cxx cstlib')
-        obj.source       = lib_source
         obj.source         = lib_source
         obj.export_includes = ['.']
         obj.includes       = ['.', './src']
         obj.name           = 'libevoral_static'
         obj.target         = 'evoral_static'
-        obj.uselib         = 'GLIBMM GTHREAD SMF XML'
+        obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD'
         obj.use            = 'libsmf libpbd'
         obj.vnum           = EVORAL_LIB_VERSION
         obj.install_path   = ''
         if bld.env['TEST_COVERAGE']:
-            obj.linkflags      = '-lgcov'
-            obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
-            obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+            obj.linkflags      = ['--coverage']
+            obj.cflags         = ['--coverage']
+            obj.cxxflags       = ['--coverage']
         obj.defines        = ['PACKAGE="libevoral"']
 
         # Unit tests
@@ -136,20 +143,26 @@ def build(bld):
                 test/SequenceTest.cpp
                 test/SMFTest.cpp
                 test/RangeTest.cpp
+                test/NoteTest.cpp
                 test/CurveTest.cpp
                 test/testrunner.cpp
         '''
         obj.includes     = ['.', './src']
-        obj.use          = 'libevoral_static'
-        obj.uselib       = 'CPPUNIT SNDFILE'
+        obj.use          = 'libevoral_static libboost_system'
+        obj.uselib       = 'CPPUNIT SNDFILE LIBPBD'
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''
         obj.defines      = ['PACKAGE="libevoraltest"']
+        obj.linkflags    = ['-lboost_system'] # FIXME: not sure why this is needed
         if bld.env['TEST_COVERAGE']:
-            obj.linkflags      = '-lgcov'
-            obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
-            obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+            obj.linkflags     += ['--coverage']
+            obj.cflags         = ['--coverage']
+            obj.cxxflags       = ['--coverage']
 
-def shutdown():
-    autowaf.shutdown()
+def test(ctx):
+    autowaf.pre_test(ctx, APPNAME)
+    print(os.getcwd())
+    os.environ['EVORAL_TEST_PATH'] = os.path.abspath('../test/testdata/')
+    autowaf.run_tests(ctx, APPNAME, ['./run-tests'])
+    autowaf.post_test(ctx, APPNAME)
