@@ -92,24 +92,6 @@ Note<Time>::set_id (event_id_t id)
 	_off_event.set_id (id);
 }
 
-template<typename Time>
-const Note<Time>&
-Note<Time>::operator=(const Note<Time>& other)
-{
-	_on_event = other._on_event;
-	_off_event = other._off_event;
-
-	assert(time() == other.time());
-	assert(end_time() == other.end_time());
-	assert(length() == other.length());
-	assert(note() == other.note());
-	assert(velocity() == other.velocity());
-	assert(_on_event.channel() == _off_event.channel());
-	assert(channel() == other.channel());
-
-	return *this;
-}
-
 template class Note<Evoral::Beats>;
 
 } // namespace Evoral

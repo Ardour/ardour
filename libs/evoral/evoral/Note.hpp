@@ -43,8 +43,6 @@ public:
 	Note(const Note<Time>& copy);
 	~Note();
 
-	const Note<Time>& operator=(const Note<Time>& copy);
-
 	inline bool operator==(const Note<Time>& other) {
 		return time() == other.time() &&
 			note() == other.note() &&
@@ -69,6 +67,8 @@ public:
 	}
 
 private:
+	const Note<Time>& operator=(const Note<Time>& copy);  // undefined (unsafe)
+
 	inline int clamp(int val, int low, int high) {
 		return std::min (std::max (val, low), high);
 	}

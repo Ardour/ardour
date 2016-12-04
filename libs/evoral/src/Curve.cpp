@@ -329,18 +329,6 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 double
-Curve::unlocked_eval (double x)
-{
-	// I don't see the point of this...
-
-	if (_dirty) {
-		solve ();
-	}
-
-	return _list.unlocked_eval (x);
-}
-
-double
 Curve::multipoint_eval (double x)
 {
 	pair<ControlList::EventList::const_iterator,ControlList::EventList::const_iterator> range;
@@ -416,13 +404,3 @@ Curve::multipoint_eval (double x)
 }
 
 } // namespace Evoral
-
-extern "C" {
-
-void
-curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, int32_t vecsize)
-{
-	static_cast<Evoral::Curve*>(arg)->get_vector (x0, x1, vec, vecsize);
-}
-
-}

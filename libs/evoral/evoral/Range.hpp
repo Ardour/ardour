@@ -78,13 +78,11 @@ template<typename T>
 
 	if (sa > ea) {
 		// seems we are sometimes called with negative length ranges
-		std::cerr << "a - start after end: " << sa << ", " << ea << std::endl;
 		return OverlapNone;
 	}
 
 	if (sb > eb) {
 		// seems we are sometimes called with negative length ranges
-		std::cerr << "b - start after end: " << sb << ", " << eb << std::endl;
 		return OverlapNone;
 	}
 

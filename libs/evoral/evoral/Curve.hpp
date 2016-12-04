@@ -41,7 +41,6 @@ public:
 	void mark_dirty() const { _dirty = true; }
 
 private:
-	double unlocked_eval (double where);
 	double multipoint_eval (double x);
 
 	void _get_vector (double x0, double x1, float *arg, int32_t veclen);
@@ -51,10 +50,6 @@ private:
 };
 
 } // namespace Evoral
-
-extern "C" {
-	LIBEVORAL_API void curve_get_vector_from_c (void *arg, double, double, float*, int32_t);
-}
 
 #endif // EVORAL_CURVE_HPP
 

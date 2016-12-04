@@ -18,8 +18,6 @@
 
 #include <iostream>
 
-#include "pbd/stacktrace.h"
-
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ParameterDescriptor.hpp"
