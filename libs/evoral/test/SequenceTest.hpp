@@ -52,6 +52,7 @@ template<typename Time>
 class MySequence : public Sequence<Time> {
 public:
 	MySequence(DummyTypeMap&map) : Sequence<Time>(map) {}
+	MySequence(const MySequence& copy) : ControlSet(copy), Sequence<Time>(copy) {}
 
 	virtual bool find_next_event(double start, double end, ControlEvent& ev, bool only_active) const { return false; }
 
@@ -111,6 +112,7 @@ class SequenceTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (SequenceTest);
 	CPPUNIT_TEST (createTest);
+	CPPUNIT_TEST (copyTest);
 	CPPUNIT_TEST (preserveEventOrderingTest);
 	CPPUNIT_TEST (iteratorSeekTest);
 	CPPUNIT_TEST (controlInterpolationTest);
@@ -140,6 +142,7 @@ public:
 	}
 
 	void createTest ();
+	void copyTest ();
 	void preserveEventOrderingTest ();
 	void iteratorSeekTest ();
 	void controlInterpolationTest ();

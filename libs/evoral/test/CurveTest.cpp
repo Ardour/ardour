@@ -39,6 +39,54 @@ using namespace Evoral;
     }
 
 void
+CurveTest::trivial ()
+{
+	float vec[1024];
+
+	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+
+	cl->create_curve ();
+
+	// Empty curve
+	cl->curve().get_vector (1024.0, 2047.0, vec, 1024);
+	for (int i = 0; i < 1024; ++i) {
+		CPPUNIT_ASSERT_EQUAL (0.0f, vec[i]);
+	}
+
+	// Single point curve
+	cl->fast_simple_add(0.0, 42.0);
+	cl->curve().get_vector (1024.0, 2047.0, vec, 1024);
+	for (int i = 0; i < 1024; ++i) {
+		CPPUNIT_ASSERT_EQUAL (42.0f, vec[i]);
+	}
+}
+
+void
+CurveTest::rtGet ()
+{
+	float vec[1024];
+
+	// Create simple control list
+	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	cl->create_curve ();
+	cl->fast_simple_add(0.0, 42.0);
+
+	{
+		// Write-lock list
+		Glib::Threads::RWLock::WriterLock lm(cl->lock());
+
+		// Attempt to get vector in RT (expect failure)
+		CPPUNIT_ASSERT (!cl->curve().rt_safe_get_vector (1024.0, 2047.0, vec, 1024));
+	}
+
+	// Attempt to get vector in RT (expect success)
+	CPPUNIT_ASSERT (cl->curve().rt_safe_get_vector (1024.0, 2047.0, vec, 1024));
+	for (int i = 0; i < 1024; ++i) {
+		CPPUNIT_ASSERT_EQUAL (42.0f, vec[i]);
+	}
+}
+
+void
 CurveTest::twoPointLinear ()
 {
 	float vec[1024];

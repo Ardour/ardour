@@ -14,6 +14,18 @@ SequenceTest::createTest ()
 	CPPUNIT_ASSERT(seq->notes().begin() == seq->notes().end());
 }
 
+void
+SequenceTest::copyTest ()
+{
+	DummyTypeMap map;
+	MySequence<Time> a(map);
+	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
+		a.notes().insert(*i);
+	}
+
+	MySequence<Time> b(a);
+	CPPUNIT_ASSERT_EQUAL(b.notes().size(), a.notes().size());
+}
 
 void
 SequenceTest::preserveEventOrderingTest ()
@@ -74,6 +86,7 @@ SequenceTest::iteratorSeekTest ()
 		seq->notes().insert(*i);
 	}
 
+	// Iterate over all notes
 	bool on = true;
 	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats(600)); i != seq->end(); ++i) {
 		if (on) {
@@ -87,7 +100,38 @@ SequenceTest::iteratorSeekTest ()
 		}
 	}
 
-	CPPUNIT_ASSERT_EQUAL(num_notes, size_t(6));
+	CPPUNIT_ASSERT_EQUAL(size_t(6), num_notes);
+
+	// Test invalidation
+	Sequence<Time>::const_iterator i = seq->begin(Time(600));
+	std::set< boost::weak_ptr< Note<Time> > > active_notes;
+	i.invalidate(&active_notes);
+	CPPUNIT_ASSERT_EQUAL((size_t)1, active_notes.size());
+
+	// Test resuming after invalidation
+	i = seq->begin(Time(601), false, std::set<Evoral::Parameter>(), &active_notes);
+	CPPUNIT_ASSERT(i->is_note_off());
+	on = false;
+	num_notes = 1;
+	for (; i != seq->end(); ++i) {
+		if (on) {
+			CPPUNIT_ASSERT(i->is_note_on());
+			CPPUNIT_ASSERT_EQUAL(Time((num_notes + 6) * 100), i->time());
+			++num_notes;
+			on = false;
+		} else {
+			CPPUNIT_ASSERT(i->is_note_off());
+			on = true;
+		}
+	}
+
+	CPPUNIT_ASSERT_EQUAL(size_t(6), num_notes);
+
+	// Test equality of copied iterators
+	i = seq->begin();
+	++i;
+	Sequence<Time>::const_iterator j = i;
+	CPPUNIT_ASSERT(i == j);
 }
 
 void
@@ -148,10 +192,5 @@ SequenceTest::controlInterpolationTest ()
 		}
 		last_time = i->first;
 		last_value = i->second;
-	}
-
-	// Add some notes
-	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
-		seq->notes().insert(*i);
 	}
 }

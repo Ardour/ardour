@@ -6,6 +6,8 @@
 class CurveTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (CurveTest);
+	CPPUNIT_TEST (trivial);
+	CPPUNIT_TEST (rtGet);
 	CPPUNIT_TEST (twoPointLinear);
 	CPPUNIT_TEST (threePointLinear);
 	CPPUNIT_TEST (threePointDiscete);
@@ -14,6 +16,8 @@ class CurveTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
+	void trivial ();
+	void rtGet ();
 	void twoPointLinear ();
 	void threePointLinear ();
 	void threePointDiscete ();
