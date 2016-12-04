@@ -1138,8 +1138,10 @@ int main () { return 0; }
     if opts.no_threaded_waveviews:
         conf.define('NO_THREADED_WAVEVIEWS', 1)
         conf.env['NO_THREADED_WAVEVIEWS'] = True
-        
+
     backends = opts.with_backends.split(',')
+    if opts.build_tests and 'dummy' not in backends:
+        backends += ['dummy']
 
     if not backends:
         print("Must configure and build at least one backend")
