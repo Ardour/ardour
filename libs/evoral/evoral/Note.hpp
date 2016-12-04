@@ -20,6 +20,7 @@
 #define EVORAL_NOTE_HPP
 
 #include <algorithm>
+#include <assert.h>
 #include <glib.h>
 #include <stdint.h>
 
