@@ -617,7 +617,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 			bool _reconfigure_on_delete;
 	};
 
+	RouteGroup* new_route_group (const std::string&);
 	void add_route_group (RouteGroup *);
+	void remove_route_group (RouteGroup* rg) { if (rg) remove_route_group (*rg); }
 	void remove_route_group (RouteGroup&);
 	void reorder_route_groups (std::list<RouteGroup*>);
 

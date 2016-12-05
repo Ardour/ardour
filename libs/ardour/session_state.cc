@@ -2618,6 +2618,25 @@ Session::possible_states () const
 	return possible_states(_path);
 }
 
+RouteGroup*
+Session::new_route_group (const std::string& name)
+{
+	RouteGroup* rg = NULL;
+
+	for (std::list<RouteGroup*>::const_iterator i = _route_groups.begin (); i != _route_groups.end (); ++i) {
+		if ((*i)->name () == name) {
+			rg = *i;
+			break;
+		}
+	}
+
+	if (!rg) {
+		rg = new RouteGroup (*this, name);
+		add_route_group (rg);
+	}
+	return (rg);
+}
+
 void
 Session::add_route_group (RouteGroup* g)
 {
