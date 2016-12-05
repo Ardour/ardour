@@ -139,9 +139,11 @@ class NotePointer : public MultiEventPointer<Note<Time> >
   public:
 	NotePointer () {}
 	NotePointer (Note<Time>* n) : MultiEventPointer<Note<Time> > (n) {}
+	NotePointer (NotePointer const & other);
 	NotePointer (uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity)
 		: MultiEventPointer<Note<Time> > (new Note<Time> (chan, time, length, note, velocity))
-	{}
+	{
+	}
 
 	~NotePointer () { }
 

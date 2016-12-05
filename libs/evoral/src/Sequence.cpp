@@ -397,8 +397,6 @@ Sequence<Time>::add_event (EventPtr & ev)
 		ev->set_id (next_event_id());
 	}
 
-	ordered_insert (_events, ev, TimeComparator<EventPtr,Time>());
-
 	if (!midi_event_is_valid(ev->buffer(), ev->size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
 		return;
@@ -414,7 +412,7 @@ Sequence<Time>::add_event (EventPtr & ev)
 
 	} else if (ev->is_sysex()) {
 
-		append_sysex_unlocked (ev);
+		add_sysex_unlocked (ev);
 
 	} else if (ev->is_cc() && (ev->cc_number() == MIDI_CTL_MSB_BANK || ev->cc_number() == MIDI_CTL_LSB_BANK)) {
 
@@ -445,7 +443,7 @@ Sequence<Time>::add_event (EventPtr & ev)
 			new PatchChange<Time> (*_event_pool,
 			                       ev->time(), ev->channel(),
 			                       ev->pgm_number(), _bank[ev->channel()]));
-		append_patch_change_unlocked (*pcp);
+		add_patch_change_unlocked (*pcp);
 
 	} else if (ev->is_pitch_bender()) {
 
@@ -619,7 +617,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 
 template<typename Time>
 void
-Sequence<Time>::append_sysex_unlocked(EventPtr & ev)
+Sequence<Time>::add_sysex_unlocked(EventPtr & ev)
 {
 #ifdef DEBUG_SEQUENCE
 	cerr << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;
@@ -628,28 +626,18 @@ Sequence<Time>::append_sysex_unlocked(EventPtr & ev)
 	} cerr << "]" << endl;
 #endif
 
+	ordered_insert (_events, ev, TimeComparator<EventPtr,Time>());
 	ordered_insert (_sysexes, ev, TimeComparator<EventPtr,Time>());
-}
-
-template<typename Time>
-void
-Sequence<Time>::append_patch_change_unlocked (PatchChangePtr & pcp)
-{
-	add_patch_change_unlocked (pcp);
 }
 
 template<typename Time>
 void
 Sequence<Time>::add_patch_change_unlocked (PatchChangePtr & p)
 {
+	ordered_insert (_events, p->bank_msb_message(), TimeComparator<EventPtr,Time>());
+	ordered_insert (_events, p->bank_lsb_message(), TimeComparator<EventPtr,Time>());
+	ordered_insert (_events, p->program_message(), TimeComparator<EventPtr,Time>());
 	ordered_insert (_patch_changes, p, TimeComparator<PatchChangePtr,Time>());
-}
-
-template<typename Time>
-void
-Sequence<Time>::add_sysex_unlocked (EventPtr & ep)
-{
-	ordered_insert (_sysexes, ep, TimeComparator<EventPtr,Time>());
 }
 
 template<typename Time>

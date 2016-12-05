@@ -107,9 +107,9 @@ public:
 		return (this->time() == o.time() && program() == o.program() && bank() == o.bank());
 	}
 
-	EventPointer<Time> const & bank_msb_message () const { return _events[0]; }
-	EventPointer<Time> const & bank_lsb_message () const { return _events[1]; }
-	EventPointer<Time> const & program_message () const { return _events[2]; }
+	EventPointer<Time> & bank_msb_message () { return _events[0]; }
+	EventPointer<Time> & bank_lsb_message () { return _events[1]; }
+	EventPointer<Time> & program_message ()  { return _events[2]; }
 };
 
 template<typename Time>

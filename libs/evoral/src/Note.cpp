@@ -24,12 +24,14 @@
 #include "evoral/Note.hpp"
 #endif
 
+#include "pbd/stacktrace.h"
+
 #include "evoral/Beats.hpp"
 
 namespace Evoral {
 
 template<typename Time>
-Note<Time>::Note (EventPointer<Time> const & on, EventPointer<Time> const & off) 
+Note<Time>::Note (EventPointer<Time> const & on, EventPointer<Time> const & off)
 {
 	set_event (0, on);
 	set_event (1, off);
@@ -49,6 +51,8 @@ Note<Time>::Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t ve
 	data[1] = note;
 	data[2] = velocity;
 
+	std::cerr << "NEW NOTE\n";
+
 	set_event (0, EventPointer<Time>::create (Evoral::MIDI_EVENT, time, 3, data));
 
 	data[0] = (MIDI_CMD_NOTE_OFF|chan);
@@ -56,6 +60,7 @@ Note<Time>::Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t ve
 	data[2] = velocity;
 
 	set_event (1, EventPointer<Time>::create (Evoral::MIDI_EVENT, time + length, 3, data));
+	std::cerr << "NEW NOTE DONE\n";
 }
 
 template<typename Time>
@@ -64,8 +69,11 @@ Note<Time>::Note (Note<Time> const & other)
 	EventPointer<Time> on (other.on_event());
 	EventPointer<Time> off (other.off_event());
 
+	std::cerr << "NOTE COPY\n";
+
 	set_event (0, EventPointer<Time>::create (Evoral::MIDI_EVENT, on->time(), on->size(), on->buffer()));
 	set_event (1, EventPointer<Time>::create (Evoral::MIDI_EVENT, off->time(), off->size(), off->buffer()));
+	std::cerr << "NOTE COPY DONE\n";
 }
 
 template<typename Time>
@@ -91,7 +99,18 @@ Note<Time>::operator=(const Note<Time>& other)
 	return *this;
 }
 
+template<typename Time>
+NotePointer<Time>::NotePointer (NotePointer<Time> const & other)
+	: MultiEventPointer<Note<Time> > (other.get())
+{
+	std::cerr << "copy-constructed note pointer @ " << this << " points to " << this->get()
+	          << " UC now " << this->get()->use_count()
+	          << " linked ? " << this->is_linked ()
+	          << std::endl;
+	PBD::stacktrace (std::cerr, 20);
+}
+
 template class Note<Evoral::Beats>;
+template class NotePointer<Evoral::Beats>;
 
 } // namespace Evoral
-

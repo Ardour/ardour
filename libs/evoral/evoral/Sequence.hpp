@@ -297,11 +297,7 @@ private:
 	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
-	void append_note_on_unlocked (EventPtr & event);
-	void append_note_off_unlocked (EventPtr & event);
 	void append_control_unlocked (Parameter const & param, Time time, double value);
-	void append_sysex_unlocked (EventPtr & ev);
-	void append_patch_change_unlocked (PatchChangePtr &);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;

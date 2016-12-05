@@ -148,6 +148,7 @@ void
 MidiModel::NoteDiffCommand::add (NotePtr const & note)
 {
 	_removed_notes.remove(note);
+	/* copies NotePtr, puts it into an STL (non-invasive) list */
 	_added_notes.push_back(note);
 }
 
@@ -155,6 +156,7 @@ void
 MidiModel::NoteDiffCommand::remove (NotePtr const & note)
 {
 	_added_notes.remove(note);
+	/* copies NotePtr, puts it into an STL (non-invasive) list */
 	_removed_notes.push_back(note);
 }
 
@@ -242,8 +244,15 @@ MidiModel::NoteDiffCommand::operator() ()
 	{
 		MidiModel::WriteLock lock(_model->edit_lock());
 
-		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-			if (!_model->add_note_unlocked(*i)) {
+		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); *i) {
+
+			/* locally scoped pointer to note */
+
+			NotePtr np (*i);
+
+			cerr << "local NP linked? " << np.is_linked() << " iterator version " << (*i).is_linked() << endl;
+
+			if (!_model->add_note_unlocked (np)) {
 				/* failed to add it, so don't leave it in the removed list, to
 				   avoid apparent errors on undo.
 				*/
@@ -252,7 +261,8 @@ MidiModel::NoteDiffCommand::operator() ()
 		}
 
 		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-			_model->remove_note_unlocked(*i);
+			NotePtr np (*i);
+			_model->remove_note_unlocked (np);
 		}
 
 		/* notes we modify in a way that requires remove-then-add to maintain ordering */

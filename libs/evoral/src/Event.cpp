@@ -65,6 +65,16 @@ next_event_id ()
 	return g_atomic_int_add (&_event_id_counter, 1);
 }
 
+template<typename MultiEventObject>
+MultiEventPointer<MultiEventObject>::MultiEventPointer (MultiEventPointer const & mep)
+	: boost::intrusive_ptr<MultiEventObject> (mep.get())
+{
+	std::cerr << "copy-constructed MEV pointer[" << mep->num_events() << "] @ " << this << " points to " << this->get()
+	          << " UC now " << this->get()->use_count()
+	          << " linked ? " << this->is_linked ()
+	          << std::endl;
+}
+
 /* each type of EventPointer<Time> needs it own pool
  */
 
@@ -84,5 +94,8 @@ template class ManagedEvent<int64_t>; /* framepos_t in Ardour */
 
 template class EventPointer<Evoral::Beats>;
 template class EventPointer<int64_t>; /* framepos_t in Ardour */
+
+template class MultiEventPointer<Note<Evoral::Beats> >;
+template class MultiEventPointer<PatchChange<Evoral::Beats> >;
 
 } // namespace Evoral
