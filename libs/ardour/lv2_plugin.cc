@@ -1757,12 +1757,12 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 
 	// Serialize patch:Set message to set property
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, _uri_map.urids.patch_Set);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_property);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_value);
 #else
-	lv2_atom_forge_blank(forge, &frame, 1, _uri_map.urids.patch_Set);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_property, 0);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_value, 0);
@@ -1899,9 +1899,9 @@ LV2Plugin::announce_property_values()
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, _uri_map.urids.patch_Get);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Get);
 #else
-	lv2_atom_forge_blank(forge, &frame, 1, _uri_map.urids.patch_Get);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Get);
 #endif
 
 	// Write message to UI=>Plugin ring
@@ -2436,7 +2436,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
 	LV2_Atom_Forge_Frame frame;
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, urids.time_Position);
+	lv2_atom_forge_object(forge, &frame, 0, urids.time_Position);
 	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_key(forge, urids.time_speed);
