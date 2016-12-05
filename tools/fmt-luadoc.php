@@ -552,6 +552,7 @@ function traverse_parent ($ns, &$inherited) {
 		asort ($parents);
 		foreach ($parents as $p) {
 			if (!empty ($rv)) { $rv .= ', '; }
+			if ($p == $ns) { continue; }
 			$rv .= typelink ($p);
 			$inherited[$p] = $classlist[$p];
 			traverse_parent ($p, $inherited);
