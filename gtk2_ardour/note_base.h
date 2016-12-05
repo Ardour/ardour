@@ -99,7 +99,7 @@ class NoteBase : public sigc::trackable
 	float mouse_x_fraction() const { return _mouse_x_fraction; }
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
-	const NotePtr note() const { return _note; }
+	NotePtr const  & note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 
 	static void set_colors ();
