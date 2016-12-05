@@ -149,15 +149,14 @@ def build(bld):
                 test/testrunner.cpp
         '''
         obj.includes     = ['.', './src']
-        obj.use          = 'libevoral_static libboost_system'
+        obj.use          = 'libevoral_static'
         obj.uselib       = 'CPPUNIT SNDFILE LIBPBD'
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''
         obj.defines      = ['PACKAGE="libevoraltest"']
-        obj.linkflags    = ['-lboost_system'] # FIXME: not sure why this is needed
         if bld.env['TEST_COVERAGE']:
-            obj.linkflags     += ['--coverage']
+            obj.linkflags      = ['--coverage']
             obj.cflags         = ['--coverage']
             obj.cxxflags       = ['--coverage']
 
