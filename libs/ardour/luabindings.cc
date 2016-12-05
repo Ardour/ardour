@@ -1967,7 +1967,7 @@ LuaBindings::dsp (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Evoral")
-		.deriveClass <Evoral::Event<framepos_t>, Evoral::Event<framepos_t> > ("MidiEvent")
+		.deriveClass <Evoral::Event<framepos_t>, Evoral::Event<framepos_t> > ("Event")
 		// add Ctor?
 		.addFunction ("type", &Evoral::Event<framepos_t>::type)
 		.addFunction ("channel", &Evoral::Event<framepos_t>::channel)
