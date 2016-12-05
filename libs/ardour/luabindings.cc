@@ -1248,6 +1248,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
 		.addFunction ("natural_output_streams", &PluginInsert::natural_output_streams)
 		.addFunction ("natural_input_streams", &PluginInsert::natural_input_streams)
+		.addFunction ("reset_parameters_to_default", &PluginInsert::reset_parameters_to_default)
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
