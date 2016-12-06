@@ -753,6 +753,8 @@ mn_file (LV2_Handle instance)
 	pf ("       <Control Type=\"7bit\" Number=\"42\" Name=\"Pan (Fine)\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Damper Pedal (Sustain)\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"91\" Name=\"Reverb\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"93\" Name=\"Chorus\"/>\n");
 	pf ("    </ControlNameList>\n");
 
 	pf (
