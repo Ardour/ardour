@@ -33,6 +33,10 @@
 #define x_forge_object lv2_atom_forge_blank
 #endif
 
+#ifdef LV2_EXTENDED
+#include "../../ardour/ardour/lv2_extensions.h"
+#endif
+
 #include "fluidsynth.h"
 
 #include <lv2/lv2plug.in/ns/lv2core/lv2.h>
@@ -102,6 +106,10 @@ typedef struct {
   LV2_Worker_Schedule* schedule;
 	LV2_Atom_Forge       forge;
 	LV2_Atom_Forge_Frame frame;
+
+#ifdef LV2_EXTENDED
+	LV2_Midnam*          midnam;
+#endif
 
 	/* state */
 	bool panic;
@@ -226,6 +234,10 @@ instantiate (const LV2_Descriptor*     descriptor,
 			self->log = (LV2_Log_Log*)features[i]->data;
 		} else if (!strcmp (features[i]->URI, LV2_WORKER__schedule)) {
 			self->schedule = (LV2_Worker_Schedule*)features[i]->data;
+#ifdef LV2_EXTENDED
+		} else if (!strcmp (features[i]->URI, LV2_MIDNAM__update)) {
+			self->midnam = (LV2_Midnam*)features[i]->data;
+#endif
 		}
 	}
 
@@ -468,6 +480,9 @@ run (LV2_Handle instance, uint32_t n_samples)
 	if (self->inform_ui) {
 		self->inform_ui = false;
 		inform_ui (self);
+#ifdef LV2_EXTENDED
+    self->midnam->update (self->midnam->handle);
+#endif
 	}
 
 	if (n_samples > offset && self->initialized && !self->reinit_in_progress) {
@@ -603,17 +618,146 @@ restore (LV2_Handle                  instance,
 	return LV2_STATE_SUCCESS;
 }
 
+static char* xml_escape (const char* s) {
+	// crude, but hey
+	if (!s) {
+		return strdup ("");
+	}
+	char* tmp;
+	char* rv = strdup (s);
+	while ((tmp = strchr(rv, '"'))) {
+		*tmp = '\'';
+	}
+	while ((tmp = strchr(rv, '&'))) {
+		*tmp = '+';
+	}
+	return rv;
+}
+
+#ifdef LV2_EXTENDED
+static char*
+mn_file (LV2_Handle instance)
+{
+	AFluidSynth* self = (AFluidSynth*)instance;
+	char* rv = NULL;
+	char tmp[1024];
+
+	fluid_sfont_t* sfont = NULL;
+	if (self->initialized && !self->reinit_in_progress) {
+			sfont = fluid_synth_get_sfont (self->synth, 0);
+	}
+	// TODO collect program info during load_sf2();
+
+	rv = calloc (1, sizeof (char));
+
+#define pf(...)                                              \
+	do {                                                       \
+	  snprintf (tmp, sizeof(tmp), __VA_ARGS__);                \
+	  tmp[sizeof(tmp) - 1] = '\0';                             \
+	  rv = (char*)realloc (rv, strlen (rv) + strlen(tmp) + 1); \
+	  strcat (rv, tmp);                                        \
+	} while (0)
+
+	pf ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			"<!DOCTYPE MIDINameDocument PUBLIC \"-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN\" \"http://dev.midi.org/dtds/MIDINameDocument10.dtd\">\n"
+			"<MIDINameDocument>\n"
+			"  <Author/>\n"
+			"  <MasterDeviceNames>\n"
+			"    <Manufacturer>Ardour Foundation</Manufacturer>\n"
+			"    <Model>%s:%p</Model>\n", AFS_URN, (void*) self);
+
+
+	pf ("    <CustomDeviceMode Name=\"Default\">\n");
+	pf ("      <ChannelNameSetAssignments>\n");
+	for (int c = 0; c < 16; ++c) {
+		pf ("        <ChannelNameSetAssign Channel=\"%d\" NameSet=\"Presets\"/>\n", c + 1);
+	}
+	pf ("      </ChannelNameSetAssignments>\n");
+	pf ("    </CustomDeviceMode>\n");
+
+	// TODO collect used banks, std::set<> would be a nice here
+
+	pf ("    <ChannelNameSet Name=\"Presets\">\n");
+	pf ("      <AvailableForChannels>\n");
+	for (int c = 0; c < 16; ++c) {
+		pf ("        <AvailableChannel Channel=\"%d\" Available=\"true\"/>\n", c + 1);
+	}
+	pf ("      </AvailableForChannels>\n");
+	pf ("      <UsesControlNameList Name=\"Controls\"/>\n");
+	pf ("      <PatchBank Name=\"Patch Bank 1\">\n");
+	pf ("        <UsesPatchNameList Name=\"Programmes\"/>\n");
+	pf ("      </PatchBank>\n");
+	pf ("    </ChannelNameSet>\n");
+
+
+	pf ("    <PatchNameList Name=\"Programmes\">\n");
+	if (sfont) {
+		fluid_preset_t preset;
+		sfont->iteration_start (sfont);
+		for (int num = 1; sfont->iteration_next (sfont, &preset); ++num) {
+			if (preset.get_banknum (&preset) != 0) { 
+				continue;
+			}
+			char* pn = xml_escape (preset.get_name (&preset));
+			pf ("      <Patch Number=\"%d\" Name=\"%s\" ProgramChange=\"%d\"/>\n",
+					num, pn, preset.get_num (&preset));
+			free (pn);
+		}
+	}
+	pf ("    </PatchNameList>\n");
+
+	pf ("    <ControlNameList Name=\"Controls\">\n");
+	pf ("       <Control Type=\"7bit\" Number=\"7\" Name=\"Channel Volume\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"10\" Name=\"Pan\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"39\" Name=\"Channel Volume (Fine)\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"42\" Name=\"Pan (Fine)\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Damper Pedal (Sustain)\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto\"/>\n");
+	pf ("    </ControlNameList>\n");
+
+
+	pf (
+			"  </MasterDeviceNames>\n"
+			"</MIDINameDocument>"
+		 );
+
+	return rv;
+}
+
+static char*
+mn_model (LV2_Handle instance)
+{
+	AFluidSynth* self = (AFluidSynth*)instance;
+	char* rv = malloc (64 * sizeof (char));
+	snprintf (rv, 64, "%s:%p", AFS_URN, (void*) self);
+	rv[63] = 0;
+	return rv;
+}
+
+static void
+mn_free (char* v)
+{
+	free (v);
+}
+#endif
+
 static const void*
 extension_data (const char* uri)
 {
-	static const LV2_Worker_Interface worker = { work, work_response, NULL };
-	static const LV2_State_Interface  state  = { save, restore };
 	if (!strcmp (uri, LV2_WORKER__interface)) {
+		static const LV2_Worker_Interface worker = { work, work_response, NULL };
 		return &worker;
 	}
 	else if (!strcmp (uri, LV2_STATE__interface)) {
+		static const LV2_State_Interface  state  = { save, restore };
 		return &state;
 	}
+#ifdef LV2_EXTENDED
+	else if (!strcmp (uri, LV2_MIDNAM__interface)) {
+		static const LV2_Midnam_Interface midnam = { mn_file, mn_model, mn_free };
+		return &midnam;
+	}
+#endif
 	return NULL;
 }
 
