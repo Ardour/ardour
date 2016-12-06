@@ -1133,9 +1133,13 @@ MidiTimeAxisView::build_patch_menu()
 		if (!channel_name_set) {
 			continue;
 		}
+		const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
+		if (patch_banks.size () == 0) {
+			continue;
+		}
+
 		Gtk::Menu& chan_menu = *manage(new Gtk::Menu());
 
-		const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
 		if (patch_banks.size() > 1) {
 
 			for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();

@@ -82,7 +82,7 @@ PatchChange::initialize_popup_menus()
 
 	boost::shared_ptr<ChannelNameSet> channel_name_set = _info.get_patches (_patch->channel());
 
-	if (!channel_name_set) {
+	if (!channel_name_set || channel_name_set->patch_banks().size () == 0) {
 		return;
 	}
 
