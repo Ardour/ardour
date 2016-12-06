@@ -20,9 +20,14 @@
 #define _GNU_SOURCE
 #endif
 
-#include <stdbool.h>
+#include <cstring>
+#include <string>
+#include <algorithm>
+#include <map>
+#include <vector>
+
+#include <pthread.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 
 #define AFS_URN "urn:ardour:a-fluidsynth"
@@ -75,6 +80,27 @@ enum {
   CMD_FREE     = 1,
 };
 
+struct BankProgram {
+	BankProgram (const std::string& n, int b, int p)
+		: name (n)
+		, bank (b)
+		, program (p)
+	{}
+
+	BankProgram (const BankProgram& other)
+		: name (other.name)
+		, bank (other.bank)
+		, program (other.program)
+	{}
+
+	std::string name;
+	int bank;
+	int program;
+};
+
+typedef std::vector<BankProgram> BPList;
+typedef std::map<int, BPList> BPMap;
+
 typedef struct {
 	/* ports */
 	const LV2_Atom_Sequence* control;
@@ -109,7 +135,9 @@ typedef struct {
 
 #ifdef LV2_EXTENDED
 	LV2_Midnam*          midnam;
+	BPMap                presets;
 #endif
+	pthread_mutex_t      bp_lock;
 
 	/* state */
 	bool panic;
@@ -134,6 +162,12 @@ load_sf2 (AFluidSynth* self, const char* fn)
 {
 	const int synth_id = fluid_synth_sfload (self->synth, fn, 1);
 
+#ifdef LV2_EXTENDED
+	pthread_mutex_lock (&self->bp_lock);
+	self->presets.clear ();
+	pthread_mutex_unlock (&self->bp_lock);
+#endif
+
 	if (synth_id == FLUID_FAILED) {
 		return false;
 	}
@@ -146,10 +180,23 @@ load_sf2 (AFluidSynth* self, const char* fn)
 	int chn;
 	fluid_preset_t preset;
 	sfont->iteration_start (sfont);
-	for (chn = 0; sfont->iteration_next (sfont, &preset) && chn < 16; ++chn) {
-		fluid_synth_program_select (self->synth, chn, synth_id,
-				preset.get_banknum (&preset), preset.get_num (&preset));
+	pthread_mutex_lock (&self->bp_lock);
+	for (chn = 0; sfont->iteration_next (sfont, &preset); ++chn) {
+		if (chn < 16) {
+			fluid_synth_program_select (self->synth, chn, synth_id,
+					preset.get_banknum (&preset), preset.get_num (&preset));
+		}
+#ifndef LV2_EXTENDED
+		else { break ; }
+#else
+		self->presets[preset.get_banknum (&preset)].push_back (
+				BankProgram (
+					preset.get_name (&preset),
+					preset.get_banknum (&preset),
+					preset.get_num (&preset)));
+#endif
 	}
+	pthread_mutex_unlock (&self->bp_lock);
 
 	if (chn == 0) {
 		return false;
@@ -293,6 +340,8 @@ instantiate (const LV2_Descriptor*     descriptor,
 
 	/* initialize plugin state */
 
+	pthread_mutex_init (&self->bp_lock, NULL);
+	self->presets = BPMap();
 	self->panic = false;
 	self->inform_ui = false;
 	self->initialized = false;
@@ -500,6 +549,7 @@ static void cleanup (LV2_Handle instance)
 	delete_fluid_synth (self->synth);
 	delete_fluid_settings (self->settings);
 	delete_fluid_midi_event (self->fmidi_event);
+	pthread_mutex_destroy (&self->bp_lock);
 	free (self);
 }
 
@@ -523,6 +573,7 @@ work (LV2_Handle                  instance,
 	if (magic != 0x4711) {
 		return LV2_WORKER_ERR_UNKNOWN;
 	}
+
 
 	self->initialized = load_sf2 (self, self->queue_sf2_file_path);
 
@@ -618,20 +669,16 @@ restore (LV2_Handle                  instance,
 	return LV2_STATE_SUCCESS;
 }
 
-static char* xml_escape (const char* s) {
-	// crude, but hey
-	if (!s) {
-		return strdup ("");
+static std::string xml_escape (const std::string& s)
+{
+	std::string r (s);
+	std::replace (r.begin (), r.end(), '"', '\'');
+	size_t pos = 0;
+	while((pos = r.find ("&", pos)) != std::string::npos) {
+		r.replace (pos, 1, "&amp;");
+		pos += 4;
 	}
-	char* tmp;
-	char* rv = strdup (s);
-	while ((tmp = strchr(rv, '"'))) {
-		*tmp = '\'';
-	}
-	while ((tmp = strchr(rv, '&'))) {
-		*tmp = '+';
-	}
-	return rv;
+	return r;
 }
 
 #ifdef LV2_EXTENDED
@@ -641,12 +688,6 @@ mn_file (LV2_Handle instance)
 	AFluidSynth* self = (AFluidSynth*)instance;
 	char* rv = NULL;
 	char tmp[1024];
-
-	fluid_sfont_t* sfont = NULL;
-	if (self->initialized && !self->reinit_in_progress) {
-			sfont = fluid_synth_get_sfont (self->synth, 0);
-	}
-	// TODO collect program info during load_sf2();
 
 	rv = (char*) calloc (1, sizeof (char));
 
@@ -684,27 +725,26 @@ mn_file (LV2_Handle instance)
 	}
 	pf ("      </AvailableForChannels>\n");
 	pf ("      <UsesControlNameList Name=\"Controls\"/>\n");
-	pf ("      <PatchBank Name=\"Patch Bank 1\">\n");
-	pf ("        <UsesPatchNameList Name=\"Programmes\"/>\n");
-	pf ("      </PatchBank>\n");
-	pf ("    </ChannelNameSet>\n");
 
+	int bn = 1;
+	pthread_mutex_lock (&self->bp_lock);
+	const BPMap& ps (self->presets);
+	pthread_mutex_unlock (&self->bp_lock);
 
-	pf ("    <PatchNameList Name=\"Programmes\">\n");
-	if (sfont) {
-		fluid_preset_t preset;
-		sfont->iteration_start (sfont);
-		for (int num = 1; sfont->iteration_next (sfont, &preset); ++num) {
-			if (preset.get_banknum (&preset) != 0) { 
-				continue;
+	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
+		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
+		if (i->second.size() > 0) {
+			pf ("        <PatchNameList>\n");
+			int n = 0;
+			for (BPList::const_iterator j = i->second.begin(); j != i->second.end(); ++j, ++n) {
+				pf ("      <Patch Number=\"%d\" Name=\"%s\" ProgramChange=\"%d\"/>\n",
+						n, xml_escape (j->name).c_str(), j->program);
 			}
-			char* pn = xml_escape (preset.get_name (&preset));
-			pf ("      <Patch Number=\"%d\" Name=\"%s\" ProgramChange=\"%d\"/>\n",
-					num, pn, preset.get_num (&preset));
-			free (pn);
+			pf ("        </PatchNameList>\n");
 		}
+		pf ("      </PatchBank>\n");
 	}
-	pf ("    </PatchNameList>\n");
+	pf ("    </ChannelNameSet>\n");
 
 	pf ("    <ControlNameList Name=\"Controls\">\n");
 	pf ("       <Control Type=\"7bit\" Number=\"7\" Name=\"Channel Volume\"/>\n");
@@ -715,12 +755,12 @@ mn_file (LV2_Handle instance)
 	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto\"/>\n");
 	pf ("    </ControlNameList>\n");
 
-
 	pf (
 			"  </MasterDeviceNames>\n"
 			"</MIDINameDocument>"
 		 );
 
+	//printf("-----\n%s\n------\n", rv);
 	return rv;
 }
 
