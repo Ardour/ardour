@@ -150,8 +150,13 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	if (!control_names) {
 		return "";
 	}
+	boost::shared_ptr<const Control> c = control_names->control(param.id());
 
-	return control_names->control(param.id())->name();
+	if (c) {
+		return c->name();
+	}
+
+	return "";
 }
 
 boost::shared_ptr<MIDI::Name::ChannelNameSet>
