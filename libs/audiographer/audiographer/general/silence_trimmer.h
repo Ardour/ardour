@@ -275,7 +275,7 @@ private:
 	{
 		framecnt_t last_sample_index = c.frames() - 1;
 
-		for (framecnt_t i = last_sample_index; i != 0; --i) {
+		for (framecnt_t i = last_sample_index; i >= 0; --i) {
 			if (!tester.is_silent (c.data()[i])) {
 				result_frame = i;
 				// Round down to nearest interleaved "frame" beginning
