@@ -183,7 +183,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 			// only check silence if doing either of these
 			// This will set both has_data and frame_index
 			if (add_to_beginning || trim_beginning) {
-				has_data = find_first_non_zero_sample (c, frame_index);
+				has_data = find_first_non_silent_frame (c, frame_index);
 			}
 
 			// Added silence if there is silence to add
@@ -215,7 +215,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
 		} else if (trim_end) { // Only check zero samples if trimming end
 
-			if (find_first_non_zero_sample (c, frame_index)) {
+			if (find_first_non_silent_frame (c, frame_index)) {
 
 				if (debug_level (DebugVerbose)) {
 					debug_stream () << DebugUtils::demangled_name (*this) <<
@@ -272,7 +272,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
   private:
 
-	bool find_first_non_zero_sample (ProcessContext<T> const & c, framecnt_t & result_frame)
+	bool find_first_non_silent_frame (ProcessContext<T> const & c, framecnt_t & result_frame)
 	{
 		for (framecnt_t i = 0; i < c.frames(); ++i) {
 			if (!tester.is_silent (c.data()[i])) {
