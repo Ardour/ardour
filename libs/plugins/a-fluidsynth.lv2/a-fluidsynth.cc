@@ -611,7 +611,7 @@ restore (LV2_Handle                  instance,
 
   const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
 	if (value) {
-		strncpy (self->queue_sf2_file_path, value, 1023);
+		strncpy (self->queue_sf2_file_path, (const char*) value, 1023);
 		self->queue_sf2_file_path[1023] = '\0';
 		self->queue_reinit = true;
 	}
@@ -648,7 +648,7 @@ mn_file (LV2_Handle instance)
 	}
 	// TODO collect program info during load_sf2();
 
-	rv = calloc (1, sizeof (char));
+	rv = (char*) calloc (1, sizeof (char));
 
 #define pf(...)                                              \
 	do {                                                       \
@@ -728,7 +728,7 @@ static char*
 mn_model (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
-	char* rv = malloc (64 * sizeof (char));
+	char* rv = (char*) malloc (64 * sizeof (char));
 	snprintf (rv, 64, "%s:%p", AFS_URN, (void*) self);
 	rv[63] = 0;
 	return rv;

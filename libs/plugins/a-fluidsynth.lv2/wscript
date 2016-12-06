@@ -35,10 +35,10 @@ def build(bld):
                 LIB_EXT      = module_ext)
 
         # Build plugin library
-        obj = bld(features     = 'c cshlib',
-                  source       = 'a-fluidsynth.c',
+        obj = bld(features     = 'cxx cshlib',
+                  source       = 'a-fluidsynth.cc',
                   name         = 'a-fluidsynth',
-                  cflags       = [ '-fPIC',  bld.env['compiler_flags_dict']['c99'] ],
+                  cxxflags     = [ '-fPIC' ],
                   includes     = [ '../../ardour' ],
                   target       = '../../LV2/%s/a-fluidsynth' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,
