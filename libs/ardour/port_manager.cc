@@ -27,7 +27,6 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "pbd/convert.h"
 #include "pbd/error.h"
 
 #include "ardour/async_midi_port.h"
@@ -40,6 +39,7 @@
 #include "ardour/port_manager.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -1069,9 +1069,9 @@ PortManager::save_midi_port_info ()
 
 		for (MidiPortInfo::iterator i = midi_port_info.begin(); i != midi_port_info.end(); ++i) {
 			XMLNode* node = new XMLNode (X_("port"));
-			node->add_property (X_("name"), i->first);
-			node->add_property (X_("input"), i->second.input ? X_("yes") : X_("no"));
-			node->add_property (X_("properties"), enum_2_string (i->second.properties));
+			node->set_property (X_("name"), i->first);
+			node->set_property (X_("input"), i->second.input);
+			node->set_property (X_("properties"), i->second.properties);
 			root->add_child_nocopy (*node);
 		}
 	}
@@ -1103,26 +1103,14 @@ PortManager::load_midi_port_info ()
 	midi_port_info.clear ();
 
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
-		XMLProperty const* prop;
 		MidiPortInformation mpi;
 		string name;
 
-		if ((prop = (*i)->property (X_("name"))) == 0) {
+		if (!(*i)->get_property (X_("name"), name) ||
+		    !(*i)->get_property (X_("input"), mpi.input) ||
+		    !(*i)->get_property (X_("properties"), mpi.properties)) {
 			continue;
 		}
-
-		name = prop->value ();
-
-		if ((prop = (*i)->property (X_("input"))) == 0) {
-			continue;
-		}
-		mpi.input = string_is_affirmative (prop->value());
-
-		if ((prop = (*i)->property (X_("properties"))) == 0) {
-			continue;
-		}
-
-		mpi.properties = (MidiPortFlags) string_2_enum (prop->value(), mpi.properties);
 
 		midi_port_info.insert (make_pair (name, mpi));
 	}
