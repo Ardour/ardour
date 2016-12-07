@@ -88,7 +88,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 
 		/* lets see if we are going to be able to write this event into dst.
 		 */
-		uint8_t* write_loc = dst.reserve (ev_size);
+		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
 		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
 				DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
@@ -105,7 +105,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 #ifndef NDEBUG
 		if (DEBUG_ENABLED (DEBUG::MidiRingBuffer)) {
 			DEBUG_STR_DECL(a);
-			DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3) ", ev_time, start, offset));
+			DEBUG_STR_APPEND(a, string_compose ("wrote %4 bytes of MidiEvent to Buffer (time=%1, start=%2 offset=%3) ", ev_time, start, offset, ev_size));
 			for (size_t i=0; i < ev_size; ++i) {
 				DEBUG_STR_APPEND(a,hex);
 				DEBUG_STR_APPEND(a,"0x");

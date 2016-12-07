@@ -44,7 +44,7 @@ public:
 	using MultiEvent<Time,2>::set_event;
 
 	Note (EventPointer<Time> const & on_event, EventPointer<Time> const & off_event);
-	Note (uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity = 64);
+	Note (EventPool&, uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity = 64);
 	Note (Note<Time> const & other);
 
 	~Note();
@@ -76,6 +76,8 @@ public:
 		return (*_events[0] == *other.on_event()) &&
 			(*_events[1] == *other.off_event());
 	}
+
+	EventPool& pool() const { return _events[0]->pool(); }
 
 private:
 	inline int clamp(int val, int low, int high) {
@@ -129,7 +131,10 @@ template<typename Time>
 	o << "Note #" << n.id() << ": pitch = " << (int) n.note()
 	  << " @ " << n.time() << " .. " << n.end_time()
 	  << " velocity " << (int) n.velocity()
-	  << " chn " << (int) n.channel();
+	  << " chn " << (int) n.channel()
+	  << " on @ " << n.on_event()
+	  << " off @ " << n.off_event()
+		;
 	return o;
 }
 
@@ -140,8 +145,8 @@ class NotePointer : public MultiEventPointer<Note<Time> >
 	NotePointer () {}
 	NotePointer (Note<Time>* n) : MultiEventPointer<Note<Time> > (n) {}
 	NotePointer (NotePointer const & other);
-	NotePointer (uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity)
-		: MultiEventPointer<Note<Time> > (new Note<Time> (chan, time, length, note, velocity))
+	NotePointer (EventPool& pool, uint8_t chan, Time time, Time length, uint8_t note, uint8_t velocity)
+		: MultiEventPointer<Note<Time> > (new Note<Time> (pool, chan, time, length, note, velocity))
 	{
 	}
 

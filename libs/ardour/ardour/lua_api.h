@@ -245,8 +245,7 @@ namespace ARDOUR { namespace LuaAPI {
 
 	};
 
-	boost::shared_ptr<Evoral::Note<Evoral::Beats> >
-		new_noteptr (uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
+	Evoral::NotePointer<Evoral::Beats> new_noteptr (Evoral::EventPool&, uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
 
 } } /* namespace */
 

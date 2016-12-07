@@ -25,6 +25,7 @@
 
 #include "pbd/ringbufferNPT.h"
 
+#include "evoral/Event.hpp"
 #include "evoral/EventSink.hpp"
 #include "evoral/types.hpp"
 
@@ -61,8 +62,10 @@ public:
 	 */
 	inline bool peek (uint8_t*, size_t size);
 
-	inline uint32_t write(Time  time, Evoral::EventType  type, uint32_t  size, const uint8_t* buf);
-	inline bool     read (Time* time, Evoral::EventType* type, uint32_t* size,       uint8_t* buf);
+	inline uint32_t write (Time  time, Evoral::EventType  type, uint32_t  size, const uint8_t* buf);
+	inline uint32_t write (Evoral::Event<Time> const &);
+
+	inline bool     read (Time* time, Evoral::EventType* type, uint32_t* size, uint8_t* buf);
 };
 
 template<typename Time>
@@ -124,6 +127,24 @@ EventRingBuffer<Time>::write(Time time, Evoral::EventType type, uint32_t size, c
 		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&type, sizeof(Evoral::EventType));
 		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&size, sizeof(uint32_t));
 		PBD::RingBufferNPT<uint8_t>::write (buf, size);
+		return size;
+	}
+}
+
+template<typename Time>
+inline uint32_t
+EventRingBuffer<Time>::write(Evoral::Event<Time> const & ev)
+{
+	if (!buf || write_space() < (sizeof(Time) + sizeof(Evoral::EventType) + sizeof(uint32_t) + size)) {
+		return 0;
+	} else {
+		const Time tm = ev->time();
+		const Evoral::EventType ty = ev->event_type ();
+		const uint32_t sz = ev->size();
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&tm, sizeof(Time));
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&ty, sizeof(Evoral::EventType));
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&sz, sizeof(uint32_t));
+		PBD::RingBufferNPT<uint8_t>::write (ev->buffer(), sz);
 		return size;
 	}
 }

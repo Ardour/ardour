@@ -88,7 +88,6 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 	memcpy(_data, copy->_data, _size);
 }
 
-
 /** Read events from @a src starting at time @a offset into the START of this buffer, for
  * time duration @a nframes.  Relative time, where 0 = start of buffer.
  *
@@ -175,7 +174,7 @@ MidiBuffer::push_back (const Evoral::Event<TimeType>& ev)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push event @ %2 sz %3 ", this, ev.time(), ev.size()));
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 cursize %4 push event @ %2 sz %3 ", this, ev.time(), ev.size(), _size));
 		for (size_t i=0; i < ev.size(); ++i) {
 			DEBUG_STR_APPEND(a,hex);
 			DEBUG_STR_APPEND(a,"0x");
@@ -259,7 +258,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 insert event @ %2 sz %3 ", this, ev.time(), ev.size()));
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 cursize %4 insert event @ %2 sz %3 ", this, ev.time(), ev.size(), _size));
 		for (size_t i=0; i < ev.size(); ++i) {
 			DEBUG_STR_APPEND(a,hex);
 			DEBUG_STR_APPEND(a,"0x");
@@ -322,14 +321,28 @@ MidiBuffer::write (TimeType time, Evoral::EventType type, uint32_t size, const u
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
 uint8_t*
-MidiBuffer::reserve (size_t object_size)
+MidiBuffer::reserve(TimeType time, size_t size)
 {
-	uint8_t * const write_loc = _data + _size;
-	_size += object_size;
-	_silent = false;
-	return write_loc;
-}
+	const size_t ev_size = Evoral::Event<TimeType>::memory_size (size);
 
+	if (_size + ev_size >= _capacity) {
+		return 0;
+	}
+
+	/* on-stack temporary Event that we can write into the buffer */
+	uint8_t buf[ev_size];
+	Evoral::Event<TimeType>* ev = ::new (buf) Evoral::Event<TimeType> (Evoral::MIDI_EVENT, time, size, 0);
+
+	/* copy just the Event structure itself (no data, that comes later) */
+	memcpy (_data + _size, ev, sizeof (Evoral::Event<TimeType>));
+
+	// record new size as if data has already been written
+	_size += ev_size;
+	_silent = false;
+
+	/* return address where data can be written */
+	return _data + sizeof (Evoral::Event<TimeType>);
+}
 
 void
 MidiBuffer::silence (framecnt_t /*nframes*/, framecnt_t /*offset*/)

@@ -244,15 +244,9 @@ MidiModel::NoteDiffCommand::operator() ()
 	{
 		MidiModel::WriteLock lock(_model->edit_lock());
 
-		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); *i) {
+		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 
-			/* locally scoped pointer to note */
-
-			NotePtr np (*i);
-
-			cerr << "local NP linked? " << np.is_linked() << " iterator version " << (*i).is_linked() << endl;
-
-			if (!_model->add_note_unlocked (np)) {
+			if (!_model->add_note_unlocked (*i)) {
 				/* failed to add it, so don't leave it in the removed list, to
 				   avoid apparent errors on undo.
 				*/
@@ -261,8 +255,7 @@ MidiModel::NoteDiffCommand::operator() ()
 		}
 
 		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-			NotePtr np (*i);
-			_model->remove_note_unlocked (np);
+			_model->remove_note_unlocked (*i);
 		}
 
 		/* notes we modify in a way that requires remove-then-add to maintain ordering */
@@ -556,7 +549,7 @@ MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 		velocity = 127;
 	}
 
-	NotePtr note_ptr(new Evoral::Note<TimeType>(channel, time, length, note, velocity));
+	NotePtr note_ptr (_model->event_pool(), channel, time, length, note, velocity);
 	note_ptr->set_id (id);
 
 	return note_ptr;
@@ -1650,7 +1643,6 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 	TimeType ea  = note->end_time();
 
 	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note (new Note<TimeType>(0, TimeType(), TimeType(), note->note()));
 	Notes to_be_deleted;
 	bool set_note_length = false;
 	bool set_note_time = false;

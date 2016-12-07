@@ -61,8 +61,8 @@ class LIBEVORAL_API Event /* INHERITANCE ILLEGAL HERE */
 {
 public:
 	Event (EventType ty, Time tm, size_t sz, uint8_t const * data, event_id_t id = -1)
-		: _type (ty)
-		, _time (tm)
+		: _time (tm)
+		, _type (ty)
 		, _size (sz)
 		, _id (id)
 	{
@@ -76,8 +76,8 @@ public:
 	}
 
 	Event (Event const & other)
-		: _type (other.event_type())
-		, _time (other.time())
+		: _time (other.time())
+		, _type (other.event_type())
 		, _size (other.size())
 		, _id (next_event_id())
 	{
@@ -244,12 +244,13 @@ public:
 		return other_first;
 	}
 
+	static uint32_t memory_size (uint32_t size) { return sizeof (Event<Time>) + size; }
 
 	inline EventType      event_type()    const { return _type; }
 	inline Time           time()          const { return _time; }
 	inline uint32_t       size()          const { return _size; }
 	inline void           set_size (uint32_t s) { _size = s; /* CAREFUL !!! */ }
-	inline uint32_t       object_size()   const { return size() + sizeof (*this); }
+	inline uint32_t       object_size()   const { return memory_size (size()); }
 	inline const uint8_t* buffer()        const { return _buf; }
 	inline uint8_t*       buffer()              { return _buf; }
 
@@ -323,8 +324,8 @@ public:
 
 
   public:
-	EventType  _type;   /*< Type of event (application relative, NOT MIDI 'type') */ \
 	Time       _time;   /*< Time stamp of event */ \
+	EventType  _type;   /*< Type of event (application relative, NOT MIDI 'type') */ \
 	uint32_t   _size;   /*< Size of buffer in bytes */ \
 	event_id_t _id;     /*< Unique event ID */ \
 	uint8_t    _buf[0]; /*< Event data. Must be at end, to use C-style variable-sized structure hack */
@@ -400,17 +401,18 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	~ManagedEvent ();
 
 	int refcnt() const { return _refcnt.load(); }
-	EventPool* pool() const { return _pool; }
+	EventPool& pool() const { return _pool; }
 
 	void operator delete (void* ptr) {
-		ManagedEvent* ev = reinterpret_cast<ManagedEvent*> (ptr);
-		if (ev && ev->_pool) {
-			ev->_pool->release (ptr);
+		ManagedEvent* mev = reinterpret_cast<ManagedEvent*> (ptr);
+		if (mev) {
+			mev->_pool.release (ptr);
 		}
 	}
 
 	ManagedEvent& operator= (ManagedEvent<Time> const & other) {
 		if (this != &other) {
+			/* DOES NOT COPY POOL */
 			_event = other._event;
 		}
 		return *this;
@@ -489,7 +491,7 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 		}
 	}
   private:
-	EventPool*  _pool;
+	EventPool&  _pool;
 	Event<Time> _event;
 	/* C++ standard: "Nonstatic data members of a (non-union) class with
 	 * the same access control (Clause 11) are allocated so that later
@@ -499,25 +501,13 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	 */
 
 	ManagedEvent (EventPool& p, EventType ty, Time tm, size_t sz, uint8_t* data, event_id_t id = -1)
-		: _pool (&p)
+		: _pool (p)
 		, _event (ty, tm, sz, data, id)
 	{
 	}
 
 	ManagedEvent (EventPool& p, Event<Time> const & other)
-		: _pool (&p)
-		, _event (other)
-	{
-	}
-
-	ManagedEvent (EventType ty, Time tm, size_t sz, uint8_t* data, event_id_t id = -1)
-		: _pool (0)
-		, _event (ty, tm, sz, data, id)
-	{
-	}
-
-	ManagedEvent (Event<Time> const & other)
-		: _pool (0)
+		: _pool (p)
 		, _event (other)
 	{
 	}

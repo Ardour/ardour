@@ -655,9 +655,12 @@ LuaAPI::Vamp::process (const std::vector<float*>& d, ::Vamp::RealTime rt)
 	return _plugin->process (bufs, rt);
 }
 
-boost::shared_ptr<Evoral::Note<Evoral::Beats> >
-LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length, uint8_t note, uint8_t velocity)
+Evoral::NotePointer<Evoral::Beats>
+LuaAPI::new_noteptr (Evoral::EventPool& pool, uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length, uint8_t note, uint8_t velocity)
 {
-	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (
-		new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
+	/* creates a new Note, then a NotePointer that references the note,
+	   then returns the NotePointer by reference, causing a (stack) copy or
+	   two of the NotePointer flyweight.
+	*/
+	return Evoral::NotePointer<Evoral::Beats> (pool, chan, beat_time, length, note, velocity);
 }

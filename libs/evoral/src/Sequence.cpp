@@ -306,13 +306,22 @@ Sequence<Time>::add_note_unlocked (NotePtr & note, void* arg)
 		note->set_id (Evoral::next_event_id());
 	}
 
-	if (note->note() < _lowest_note)
+	if (note->note() < _lowest_note) {
 		_lowest_note = note->note();
-	if (note->note() > _highest_note)
+	}
+	if (note->note() > _highest_note) {
 		_highest_note = note->note();
+	}
 
+	ordered_insert (_events, note->on_event (), TimeComparator<EventPtr,Time>());
+	ordered_insert (_events, note->off_event (), TimeComparator<EventPtr,Time>());
 	ordered_insert (_notes, note, TimeComparator<NotePtr,Time>());
-	ordered_insert (_pitches[note->channel()], note, LowerNoteValueComparator<NotePtr>());
+
+	/* already inserted @param note into one intrusive list (_notes); need to copy
+	   so that we can do add it to a second list (_pitches).
+	*/
+
+	ordered_insert (_pitches[note->channel()], *(new NotePtr (note)), LowerNoteValueComparator<NotePtr>());
 
 	_edited = true;
 
@@ -733,7 +742,7 @@ Sequence<Time>::set_notes (typename Sequence<Time>::Notes const & n)
 		event_id_t id = next_event_id ();
 
 		EventPtr on (EventPtr::create (*_event_pool, MIDI_EVENT, (*i)->on_event()->time(), (*i)->on_event()->size(), (*i)->on_event()->buffer(), id));
-		EventPtr off (EventPtr::create (*_event_pool, MIDI_EVENT, (*i)->on_event()->time(), (*i)->off_event()->size(), (*i)->off_event()->buffer(), id));
+		EventPtr off (EventPtr::create (*_event_pool, MIDI_EVENT, (*i)->off_event()->time(), (*i)->off_event()->size(), (*i)->off_event()->buffer(), id));
 
 		NotePtr& np (*(new NotePtr (new Note<Time> (on, off))));
 

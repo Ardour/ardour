@@ -51,7 +51,7 @@ public:
 	bool     push_back(const Evoral::Event<TimeType>& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);
 
-	uint8_t* reserve (size_t object_size);
+	uint8_t* reserve (TimeType time, size_t object_size);
 
 	void resize(size_t);
 	size_t size() const { return _size; }
@@ -68,10 +68,10 @@ public:
 	{
 	public:
 		iterator_base<BufferType, EventType>(BufferType& b, framecnt_t o)
-			: buffer(&b), offset(o) {}
+		: buffer(&b), offset(o) { }
 
 		iterator_base<BufferType, EventType>(const iterator_base<BufferType,EventType>& o)
-			: buffer (o.buffer), offset(o.offset) {}
+		: buffer (o.buffer), offset(o.offset) { }
 
 		inline iterator_base<BufferType,EventType> operator= (const iterator_base<BufferType,EventType>& o) {
 			if (&o != this) {
