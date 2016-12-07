@@ -651,7 +651,7 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, std::max (-90.f, est)));
 #else
 	// TODO silence-threshold should be per export-preset, with Config->get_silence_threshold being the default
-	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, Config->get_export_silence_threshold ()));
+	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, est));
 #endif
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
 	silence_trimmer->set_trim_end (config.format->trim_end());
