@@ -36,10 +36,10 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
-#include "pbd/convert.h"
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/string_convert.h"
 #include "pbd/xml++.h"
 
 #include <gtkmm2ext/utils.h>
@@ -327,12 +327,12 @@ SoundFileBox::setup_labels (const string& filename)
 
 		if (ms) {
 			if (ms->is_type0()) {
-				channels_value.set_text (to_string(ms->channels().size(), std::dec));
+				channels_value.set_text (to_string<uint32_t>(ms->channels().size()));
 			} else {
 				if (ms->num_tracks() > 1) {
-					channels_value.set_text (to_string(ms->num_tracks(), std::dec) + _("(Tracks)"));
+					channels_value.set_text (to_string(ms->num_tracks()) + _("(Tracks)"));
 				} else {
-					channels_value.set_text (to_string(ms->num_tracks(), std::dec));
+					channels_value.set_text (to_string(ms->num_tracks()));
 				}
 			}
 			length_clock.set (ms->length(ms->timeline_position()));
@@ -392,7 +392,7 @@ SoundFileBox::setup_labels (const string& filename)
 		n = n.substr (8);
 	}
 	format_text.set_text (n);
-	channels_value.set_text (to_string (sf_info.channels, std::dec));
+	channels_value.set_text (to_string (sf_info.channels));
 
 	if (_session && sf_info.samplerate != _session->frame_rate()) {
 		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample rate:")));
