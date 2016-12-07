@@ -241,7 +241,9 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
 						Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
-						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+						if (!(*i).second->dead) {
+							vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+						}
 					} else {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
 					}
