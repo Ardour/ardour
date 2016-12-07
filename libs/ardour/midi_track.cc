@@ -69,12 +69,13 @@ using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
-	, _immediate_events(1024) // FIXME: size?
+	, _immediate_events(6096) // FIXME: size?
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
 	, _step_editing (false)
 	, _input_active (true)
 {
+	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
 }
 
 MidiTrack::~MidiTrack ()
@@ -266,6 +267,14 @@ MidiTrack::state(bool full_state)
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("input-active", (_input_active ? "yes" : "no"));
 
+	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+		if (boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
+			boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c->second);
+			assert (ac);
+			root.add_child_nocopy (ac->get_state ());
+		}
+	}
+
 	return root;
 }
 
@@ -332,6 +341,18 @@ MidiTrack::set_state_part_two ()
 	}
 
 	return;
+}
+
+void
+MidiTrack::restore_controls ()
+{
+	// TODO order events (CC before PGM to set banks)
+	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+		boost::shared_ptr<MidiTrack::MidiControl> mctrl = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second);
+		if (mctrl) {
+			mctrl->restore_value();
+		}
+	}
 }
 
 void
@@ -709,6 +730,12 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 	default:
 		Automatable::set_parameter_automation_state(param, state);
 	}
+}
+
+void
+MidiTrack::MidiControl::restore_value ()
+{
+	actually_set_value (get_value(), Controllable::NoGroup);
 }
 
 void

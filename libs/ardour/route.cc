@@ -46,6 +46,7 @@
 #include "ardour/capturing_processor.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/event_type_map.h"
 #include "ardour/gain_control.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
@@ -2473,6 +2474,14 @@ Route::set_state (const XMLNode& node, int version)
 				_mute_control->set_state (*child, version);
 			} else if (prop->value() == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
+			} else {
+				Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
+				if (p.type () >= MidiCCAutomation && p.type () < MidiSystemExclusiveAutomation) {
+					boost::shared_ptr<AutomationControl> ac = automation_control (p, true);
+					if (ac) {
+						ac->set_state (*child, version);
+					}
+				}
 			}
 		} else if (child->name() == MuteMaster::xml_node_name) {
 			_mute_master->set_state (*child, version);

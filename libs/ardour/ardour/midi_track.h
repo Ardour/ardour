@@ -91,6 +91,7 @@ public:
 		{}
 
 		bool writable() const { return true; }
+		void restore_value ();
 
 		MidiTrack* _route;
 
@@ -174,6 +175,7 @@ private:
 
 	/** Update automation controls to reflect any changes in buffers. */
 	void update_controls (const BufferSet& bufs);
+	void restore_controls ();
 };
 
 } /* namespace ARDOUR*/
