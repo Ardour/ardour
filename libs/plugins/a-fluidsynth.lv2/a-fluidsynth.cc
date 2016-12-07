@@ -100,6 +100,7 @@ struct BankProgram {
 
 typedef std::vector<BankProgram> BPList;
 typedef std::map<int, BPList> BPMap;
+typedef std::map<int, BankProgram> BPState;
 
 typedef struct {
 	/* ports */
@@ -148,6 +149,10 @@ typedef struct {
 	char queue_sf2_file_path[1024];
 	bool reinit_in_progress; // set in run, cleared in work_response
 	bool queue_reinit; // set in restore, cleared in work_response
+
+	uint8_t last_bank_lsb;
+	uint8_t last_bank_msb;
+	BankProgram program_state[16];
 
 	fluid_midi_event_t* fmidi_event;
 
@@ -200,6 +205,14 @@ load_sf2 (AFluidSynth* self, const char* fn)
 
 	if (chn == 0) {
 		return false;
+	}
+
+	for (chn = 0; chn < 16; ++chn) {
+		if (self->program_state[chn].program < 0) {
+			continue;
+		}
+		fluid_synth_program_select (self->synth, chn, synth_id,
+				self->program_state[chn].bank, self->program_state[chn].program);
 	}
 
 	return true;
@@ -341,12 +354,17 @@ instantiate (const LV2_Descriptor*     descriptor,
 	/* initialize plugin state */
 
 	pthread_mutex_init (&self->bp_lock, NULL);
+#ifdef LV2_EXTENDED
 	self->presets = BPMap();
+#endif
 	self->panic = false;
 	self->inform_ui = false;
 	self->initialized = false;
 	self->reinit_in_progress = false;
 	self->queue_reinit = false;
+	for (int chn = 0; chn < 16; ++chn) {
+		self->program_state[chn].program = -1;
+	}
 
 	lv2_atom_forge_init (&self->forge, map);
 
@@ -485,7 +503,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 				}
 			}
 		}
-		else if (ev->body.type == self->midi_MidiEvent && self->initialized && !self->reinit_in_progress) {
+		else if (ev->body.type == self->midi_MidiEvent) {
 			if (ev->body.size > 3 || ev->time.frames >= n_samples) {
 				continue;
 			}
@@ -513,6 +531,16 @@ run (LV2_Handle instance, uint32_t n_samples)
 				} else {
 					fluid_midi_event_set_value (self->fmidi_event, data[2]);
 				}
+				if (0xb0 /* CC */ == fluid_midi_event_get_type (self->fmidi_event)) {
+					if (data[1] == 0x00) { self->last_bank_msb = data[2]; }
+					if (data[1] == 0x20) { self->last_bank_lsb = data[2]; }
+				}
+			}
+			if (ev->body.size == 2 && 0xc0 /* Pgm */ == fluid_midi_event_get_type (self->fmidi_event)) {
+				int chn = fluid_midi_event_get_channel (self->fmidi_event);
+				assert (chn >= 0 && chn < 16);
+				self->program_state[chn].bank = (self->last_bank_msb << 7) | self->last_bank_lsb;
+				self->program_state[chn].program = data[1];
 			}
 
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
