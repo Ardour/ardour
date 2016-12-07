@@ -3613,7 +3613,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 				continue;
 			}
 
-			(*iter)->solo_control()->set_value (0.0, Controllable::NoGroup);
+			/* speed up session deletion, don't do the solo dance */
+			if (0 == _state_of_the_state & Deletion) {
+				(*iter)->solo_control()->set_value (0.0, Controllable::NoGroup);
+			}
 
 			rs->remove (*iter);
 
