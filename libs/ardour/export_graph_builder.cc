@@ -641,8 +641,14 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	max_frames_in = max_frames;
 	framecnt_t sample_rate = parent.session.nominal_frame_rate();
 
+	/* work around partsing "-inf" config to "0" -- 7b1f97b
+	 * silence trim 0dBFS makes no sense, anyway.
+	 */
+	float est = Config->get_export_silence_threshold ();
+	if (est >= 0.f) est = -INFINITY;
 #ifdef MIXBUS
-	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, -90));
+	// Mixbus channelstrip always dithers the signal, cut above dither level
+	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, std::max (-90.f, est)));
 #else
 	// TODO silence-threshold should be per export-preset, with Config->get_silence_threshold being the default
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, Config->get_export_silence_threshold ()));
