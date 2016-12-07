@@ -53,6 +53,7 @@
 #include "engine_dialog.h"
 #include "gui_thread.h"
 #include "ui_config.h"
+#include "public_editor.h"
 #include "utils.h"
 #include "pbd/i18n.h"
 #include "splash.h"
@@ -113,12 +114,6 @@ EngineControl::EngineControl ()
 	int row;
 
 	set_name (X_("AudioMIDISetup"));
-
-	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
-	} else {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
-	}
 
 	/* the backend combo is the one thing that is ALWAYS visible */
 
@@ -430,6 +425,19 @@ EngineControl::on_show ()
 	}
 	device_changed ();
 	start_stop_button.grab_focus();
+}
+
+void
+EngineControl::on_map ()
+{
+	if (!ARDOUR_UI::instance()->session_loaded && !PublicEditor::_instance) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
+	} else if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+	ArdourDialog::on_map ();
 }
 
 bool

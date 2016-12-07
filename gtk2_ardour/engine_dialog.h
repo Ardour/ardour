@@ -304,6 +304,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	sigc::connection output_channels_connection;
 
     void on_show ();
+    void on_map ();
     void control_app_button_clicked ();
     void start_stop_button_clicked ();
     void update_devices_button_clicked ();
