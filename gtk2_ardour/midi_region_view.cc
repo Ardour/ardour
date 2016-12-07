@@ -943,7 +943,9 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, ui
 	const uint8_t chan     = mtv->get_channel_for_add();
 	const uint8_t velocity = get_velocity_for_add(beat_time);
 
-	NotePtr new_note (chan, beat_time, length, (uint8_t)note, velocity);
+	NotePtr new_note (_model->event_pool(), chan, beat_time, length, (uint8_t)note, velocity);
+
+	cerr << "NEW NOTE\n" << *new_note << endl;
 
 	if (_model->contains (new_note)) {
 		return;
@@ -1877,7 +1879,7 @@ void
 MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
                                Evoral::Beats pos, Evoral::Beats len)
 {
-	NotePtr new_note (channel, pos, len, number, velocity);
+	NotePtr new_note (_model->event_pool(), channel, pos, len, number, velocity);
 
 	/* potentially extend region to hold new note */
 
@@ -3777,7 +3779,8 @@ MidiRegionView::create_ghost_note (double x, double y, uint32_t state)
 {
 	remove_ghost_note ();
 
-	NotePtr g (0, Evoral::Beats(), Evoral::Beats (1), 0, 64); /* arbitrary contents for note; reset in update_ghost_note() below */
+	/* arbitrary contents for note; reset in update_ghost_note() below */
+	NotePtr g (_model->event_pool(), 0, Evoral::Beats(), Evoral::Beats (1), 0, 64); 
 
 	if (midi_view()->note_mode() == Sustained) {
 		_ghost_note = new Note (*this, _note_group, g);
@@ -3968,7 +3971,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			ev->time() - src->timeline_position() + _region->start());
 
 		if (ev->is_note_on()) {
-			NotePtr note (ev->channel(), time_beats, Evoral::Beats(), ev->note(), ev->velocity());
+			NotePtr note (_model->event_pool(), ev->channel(), time_beats, Evoral::Beats(), ev->note(), ev->velocity());
 
 			add_note (note, true);
 
