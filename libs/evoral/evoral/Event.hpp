@@ -182,6 +182,8 @@ public:
 			return poly_pressure();
 		case MIDI_CMD_CHANNEL_PRESSURE:
 			return channel_pressure();
+		case MIDI_CMD_PGM_CHANGE:
+			return pgm_number();
 		default:
 			return 0;
 		}
