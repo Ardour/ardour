@@ -4659,9 +4659,11 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
-	if (Profile->get_mixbus())
-		if (ep == EditAtSelectedMarker)
+	if (Profile->get_mixbus()) {
+		if (ep == EditAtSelectedMarker) {
 			ep = EditAtPlayhead;
+		}
+	}
 
 	if (from_outside_canvas && (ep == EditAtMouse)) {
 		ep = EditAtPlayhead;
