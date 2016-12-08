@@ -5789,7 +5789,7 @@ ARDOUR_UI::reset_focus (Gtk::Widget* w)
 
 	Gtk::Widget* top = w->get_toplevel();
 
-	if (!top || !top->is_toplevel()) {
+	if (!top || !top->get_is_toplevel()) {
 		return;
 	}
 
@@ -5797,7 +5797,7 @@ ARDOUR_UI::reset_focus (Gtk::Widget* w)
 
 	while (w) {
 
-		if (w->is_toplevel()) {
+		if (w->get_is_toplevel()) {
 			/* Setting the focus widget to a Gtk::Window causes all
 			 * subsequent calls to ::has_focus() on the nominal
 			 * focus widget in that window to return
