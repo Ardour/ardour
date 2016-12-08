@@ -798,7 +798,7 @@ SessionDialog::redisplay_recent_sessions ()
 				if (gsb.st_mtime > most_recent) {
 					most_recent = gsb.st_mtime;
 				}
-
+#if 0
 				if (Session::get_info_from_path (s, sr, sf) == 0) {
 					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 					switch (sf) {
@@ -816,6 +816,10 @@ SessionDialog::redisplay_recent_sessions ()
 					child_row[recent_session_columns.sample_rate] = "??";
 					child_row[recent_session_columns.disk_format] = "--";
 				}
+#else
+				child_row[recent_session_columns.sample_rate] = "";
+				child_row[recent_session_columns.disk_format] = "";
+#endif
 
 				++session_snapshot_count;
 			}
