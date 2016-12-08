@@ -93,9 +93,7 @@ Pane::on_size_request (GtkRequisition* req)
 	}
 
 	for (Children::iterator child = children.begin(); child != children.end(); ++child) {
-		GtkRequisition r;
-
-		child->w->size_request (r);
+		GtkRequisition r = child->w->size_request ();
 
 		if (horizontal) {
 			largest.height = max (largest.height, r.height);
@@ -260,9 +258,6 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		        /* child gets the fraction of the remaining space given by the divider that follows it */
 		        fract = (*div)->fract;
 	        }
-
-	        Gtk::Requisition cr;
-	        child->w->size_request (cr);
 
 	        if (horizontal) {
 		        child_alloc.set_width ((gint) floor (remaining * fract));
