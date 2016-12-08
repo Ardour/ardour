@@ -65,7 +65,7 @@ MTC_Slave::MTC_Slave (Session& s, MidiPort& p)
 	busy_guard1 = busy_guard2 = 0;
 
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
-	quarter_frame_duration = (double(session.frames_per_timecode_frame()) / 4.0);
+	quarter_frame_duration = (double(session.samples_per_timecode_frame()) / 4.0);
 
 	mtc_timecode = session.config.get_timecode_format();
 	a3e_timecode = session.config.get_timecode_format();
@@ -448,7 +448,7 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 		long int mtc_off = (long) rint(7.0 * qtr);
 
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("new mtc_frame: %1 | MTC-FpT: %2 A3-FpT:%3\n",
-							 mtc_frame, (4.0*qtr), session.frames_per_timecode_frame()));
+							 mtc_frame, (4.0*qtr), session.samples_per_timecode_frame()));
 
 		switch (port->self_parser().mtc_running()) {
 		case MTC_Backward:

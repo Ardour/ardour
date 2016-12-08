@@ -67,11 +67,11 @@ void
 Session::sync_time_vars ()
 {
 	_current_frame_rate = (framecnt_t) round (_nominal_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
-	_frames_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
+	_samples_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
 	if (timecode_drop_frames()) {
-	  _frames_per_hour = (int32_t)(107892 * _frames_per_timecode_frame);
+	  _frames_per_hour = (int32_t)(107892 * _samples_per_timecode_frame);
 	} else {
-	  _frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second()) * _frames_per_timecode_frame);
+	  _frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second()) * _samples_per_timecode_frame);
 	}
 	_timecode_frames_per_hour = rint(timecode_frames_per_second() * 3600.0);
 

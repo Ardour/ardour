@@ -653,7 +653,7 @@ timecode_to_sample(
 		bool offset_is_negative, int64_t offset_samples
 		)
 {
-	const double frames_per_timecode_frame = (double) sample_frame_rate / (double) timecode.rate;
+	const double samples_per_timecode_frame = (double) sample_frame_rate / (double) timecode.rate;
 
 	if (timecode.drop) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
@@ -711,7 +711,7 @@ timecode_to_sample(
 	} else {
 		/*
 		   Non drop is easy.. just note the use of
-		   rint(timecode.rate) * frames_per_timecode_frame
+		   rint(timecode.rate) * samples_per_timecode_frame
 		   (frames per Timecode second), which is larger than
 		   frame_rate() in the non-integer Timecode rate case.
 		*/
@@ -720,14 +720,14 @@ timecode_to_sample(
 				(
 				 ((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds)
 				 *
-				 (rint(timecode.rate) * frames_per_timecode_frame)
+				 (rint(timecode.rate) * samples_per_timecode_frame)
 				)
-				+ (timecode.frames * frames_per_timecode_frame)
+				+ (timecode.frames * samples_per_timecode_frame)
 			);
 	}
 
 	if (use_subframes) {
-		sample += (int64_t) rint(((double)timecode.subframes * frames_per_timecode_frame) / (double)subframes_per_frame);
+		sample += (int64_t) rint(((double)timecode.subframes * samples_per_timecode_frame) / (double)subframes_per_frame);
 	}
 
 	if (use_offset) {
@@ -812,14 +812,14 @@ sample_to_timecode (
 		double timecode_frames_left_exact;
 		double timecode_frames_fraction;
 		int64_t timecode_frames_left;
-		const double frames_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
-		const int64_t frames_per_hour = (int64_t)(3600. * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+		const double samples_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
+		const int64_t frames_per_hour = (int64_t)(3600. * rint(timecode_frames_per_second) * samples_per_timecode_frame);
 
 		timecode.hours = offset_sample / frames_per_hour;
 
 		// Extract whole hours. Do this to prevent rounding errors with
 		// high sample numbers in the calculations that follow.
-		timecode_frames_left_exact = (double)(offset_sample % frames_per_hour) / frames_per_timecode_frame;
+		timecode_frames_left_exact = (double)(offset_sample % frames_per_hour) / samples_per_timecode_frame;
 		timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
 
 		timecode.subframes = (int32_t) rint(timecode_frames_fraction * subframes_per_frame);

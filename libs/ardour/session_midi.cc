@@ -426,13 +426,13 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	// or a new full timecode will be queued next cycle.
 	while (outbound_mtc_timecode_frame < t) {
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
-		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
+		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
 
-	double const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) / 4.0;
+	double const quarter_frame_duration = ((framecnt_t) _samples_per_timecode_frame) / 4.0;
 	if (ceil((t - mtc_tc) / quarter_frame_duration) > 0) {
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
-		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
+		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("Full MTC TC %1 (off %2)\n", outbound_mtc_timecode_frame, mtc_offset));
@@ -443,7 +443,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
-		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
+		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
 
 	next_quarter_frame_to_send = 0;
@@ -507,7 +507,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
-	double const quarter_frame_duration = _frames_per_timecode_frame / 4.0;
+	double const quarter_frame_duration = _samples_per_timecode_frame / 4.0;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 MT %3 QF %4 QD %5\n",
 				_transport_frame, start_frame, outbound_mtc_timecode_frame,
@@ -592,7 +592,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 			// Increment timing of first quarter frame
-			outbound_mtc_timecode_frame += 2.0 * _frames_per_timecode_frame;
+			outbound_mtc_timecode_frame += 2.0 * _samples_per_timecode_frame;
 		}
 	}
 

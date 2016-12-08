@@ -275,7 +275,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* LTC TV standard offset */
 	if (current_speed != 0) {
 		/* ditto - send "NOW" if not rolling */
-		cycle_start_frame -= ltc_frame_alignment(frames_per_timecode_frame(), TV_STANDARD(cur_timecode));
+		cycle_start_frame -= ltc_frame_alignment(samples_per_timecode_frame(), TV_STANDARD(cur_timecode));
 	}
 
 	/* cycle-start may become negative due to latency compensation */
@@ -448,7 +448,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 
 	// (4) check if alignment matches
-	const double fptcf = frames_per_timecode_frame();
+	const double fptcf = samples_per_timecode_frame();
 
 	/* maximum difference of bit alignment in audio-samples.
 	 *

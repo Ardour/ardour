@@ -257,7 +257,7 @@ Session::Session (AudioEngine &eng,
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
-	, _frames_per_timecode_frame (0)
+	, _samples_per_timecode_frame (0)
 	, _frames_per_hour (0)
 	, _timecode_frames_per_hour (0)
 	, last_timecode_valid (false)

@@ -747,26 +747,26 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 	upper = upper + spacer;
 	framecnt_t const range = upper - lower;
 
-	if (range < (2 * _session->frames_per_timecode_frame())) { /* 0 - 2 frames */
+	if (range < (2 * _session->samples_per_timecode_frame())) { /* 0 - 2 frames */
 		timecode_ruler_scale = timecode_show_bits;
 		timecode_mark_modulo = 20;
 		timecode_nmarks = 2 + (2 * _session->config.get_subframes_per_frame());
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 1;
-		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->samples_per_timecode_frame());
 	} else if (range <= (fr / 2)) { /* 0.25-0.5 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 2;
-		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->samples_per_timecode_frame());
 	} else if (range <= fr) { /* 0.5-1 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 5;
-		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->samples_per_timecode_frame());
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 10;
-		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->samples_per_timecode_frame());
 	} else if (range <= 8 * fr) { /* 2-8 seconds */
 		timecode_ruler_scale = timecode_show_seconds;
 		timecode_mark_modulo = 1;

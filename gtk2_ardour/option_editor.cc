@@ -428,7 +428,7 @@ ClockOption::set_state_from_config ()
 	if (!Timecode::parse_timecode_format(_get(), TC)) {
 		_clock.set (0, true);
 	}
-	TC.rate = _session->frames_per_timecode_frame();
+	TC.rate = _session->samples_per_timecode_frame();
 	TC.drop = _session->timecode_drop_frames();
 	_session->timecode_to_sample(TC, when, false, false);
 	if (TC.negative) { when=-when; }

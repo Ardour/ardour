@@ -450,7 +450,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t nominal_frame_rate () const { return _nominal_frame_rate; }
 	framecnt_t frames_per_hour () const { return _frames_per_hour; }
 
-	double frames_per_timecode_frame() const { return _frames_per_timecode_frame; }
+	double samples_per_timecode_frame() const { return _samples_per_timecode_frame; }
 	framecnt_t timecode_frames_per_hour() const { return _timecode_frames_per_hour; }
 
 	MIDI::byte get_mtc_timecode_bits() const {
@@ -1604,7 +1604,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	Timecode::Time transmitting_timecode_time;
 	int next_quarter_frame_to_send;
 
-	double _frames_per_timecode_frame; /* has to be floating point because of drop frame */
+	double _samples_per_timecode_frame; /* has to be floating point because of drop frame */
 	framecnt_t _frames_per_hour;
 	framecnt_t _timecode_frames_per_hour;
 
