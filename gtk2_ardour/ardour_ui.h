@@ -408,7 +408,6 @@ private:
 	Gtk::Notebook _tabs;
 	PublicEditor*  editor;
 	Mixer_UI*      mixer;
-	Gtk::Tooltips _tooltips;
 	NSM_Client*    nsm;
 	bool          _was_dirty;
 	bool          _mixer_on_top;
