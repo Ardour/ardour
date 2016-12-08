@@ -4354,68 +4354,68 @@ Session::rename (const std::string& new_name)
 }
 
 int
-Session::get_session_info_from_path (XMLTree& tree, const string& xmlpath)
-{
-	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-		return -1;
-        }
-
-	if (!tree.read (xmlpath)) {
-		return -1;
-	}
-
-	return 0;
-}
-
-int
 Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format)
 {
-	XMLTree tree;
 	bool found_sr = false;
 	bool found_data_format = false;
 
-	if (get_session_info_from_path (tree, xmlpath)) {
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		return -1;
+	}
+
+	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+	if (ctxt == NULL) {
+		return -1;
+	}
+	xmlDocPtr doc = xmlCtxtReadFile (ctxt, xmlpath.c_str(), NULL, XML_PARSE_HUGE);
+
+	if (doc == NULL) {
+		xmlFreeParserCtxt(ctxt);
+		return -1;
+	}
+
+	xmlNodePtr node = xmlDocGetRootElement(doc);
+
+	if (node == NULL) {
+		xmlFreeParserCtxt(ctxt);
 		return -1;
 	}
 
 	/* sample rate */
 
-	XMLProperty const * prop;
-	XMLNode const * root (tree.root());
-
-	if ((prop = root->property (X_("sample-rate"))) != 0) {
-		sample_rate = atoi (prop->value());
-		found_sr = true;
-	}
-
-	const XMLNodeList& children (root->children());
-	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-		const XMLNode* child = *c;
-		if (child->name() == "Config") {
-			const XMLNodeList& options (child->children());
-			for (XMLNodeList::const_iterator oc = options.begin(); oc != options.end(); ++oc) {
-				XMLNode const * option = *oc;
-				XMLProperty const * name = option->property("name");
-
-				if (!name) {
-					continue;
-				}
-
-				if (name->value() == "native-file-data-format") {
-					XMLProperty const * value = option->property ("value");
-					if (value) {
-						SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
-						data_format = fmt;
-						found_data_format = true;
-						break;
-					}
-				}
-			}
-		}
-		if (found_data_format) {
-			break;
+	xmlAttrPtr attr;
+	for (attr = node->properties; attr; attr = attr->next) {
+		if (!strcmp ((const char*)attr->name, "sample-rate") && attr->children) {
+			sample_rate = atoi ((char*)attr->children->content);
+			found_sr = true;
 		}
 	}
+
+	node = node->children;
+	while (node != NULL) {
+		 if (strcmp((const char*) node->name, "Config")) {
+			 node = node->next;
+			 continue;
+		 }
+		 for (node = node->children; node; node = node->next) {
+			 xmlChar* pv = xmlGetProp (node, (const xmlChar*)"name");
+			 if (pv && !strcmp ((const char*)pv, "native-file-data-format")) {
+				 xmlFree (pv);
+				 xmlChar* val = xmlGetProp (node, (const xmlChar*)"value");
+				 if (val) {
+					 SampleFormat fmt = (SampleFormat) string_2_enum (string ((const char*)val), fmt);
+					 data_format = fmt;
+					 found_data_format = true;
+				 }
+				 xmlFree (val);
+				 break;
+			 }
+			 xmlFree (pv);
+		 }
+		 break;
+	}
+
+	xmlFreeParserCtxt(ctxt);
 
 	return !(found_sr && found_data_format); // zero if they are both found
 }

@@ -79,7 +79,7 @@ session_template_dir_to_file (string const & dir)
 
 
 void
-find_session_templates (vector<TemplateInfo>& template_names)
+find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 {
 	vector<string> templates;
 
@@ -95,10 +95,11 @@ find_session_templates (vector<TemplateInfo>& template_names)
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
 
-		XMLTree tree;
-
-		if (!tree.read (file.c_str())) {
-			continue;
+		if (read_xml) {
+			XMLTree tree;
+			if (!tree.read (file.c_str())) {
+				continue;
+			}
 		}
 
 		TemplateInfo rti;
