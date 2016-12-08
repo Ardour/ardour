@@ -1598,6 +1598,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("IsTerminal", ARDOUR::PortFlags(IsTerminal))
 		.endNamespace ()
 
+		.beginNamespace ("MidiPortFlags")
+		.addConst ("MidiPortMusic", ARDOUR::MidiPortFlags(MidiPortMusic))
+		.addConst ("MidiPortControl", ARDOUR::MidiPortFlags(MidiPortControl))
+		.addConst ("MidiPortSelection", ARDOUR::MidiPortFlags(MidiPortSelection))
+		.addConst ("MidiPortVirtual", ARDOUR::MidiPortFlags(MidiPortVirtual))
+		.endNamespace ()
+
 		.beginNamespace ("PlaylistDisposition")
 		.addConst ("CopyPlaylist", ARDOUR::PlaylistDisposition(CopyPlaylist))
 		.addConst ("NewPlaylist", ARDOUR::PlaylistDisposition(NewPlaylist))
