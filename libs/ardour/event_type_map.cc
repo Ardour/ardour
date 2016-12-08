@@ -24,7 +24,9 @@
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
+#ifdef LV2_Support
 #include "ardour/uri_map.h"
+#endif
 #include "evoral/Parameter.hpp"
 #include "evoral/ParameterDescriptor.hpp"
 #include "evoral/midi_events.h"

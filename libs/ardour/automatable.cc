@@ -37,7 +37,9 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/session.h"
+#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
+#endif
 #include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"

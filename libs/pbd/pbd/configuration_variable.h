@@ -90,7 +90,7 @@ class /*LIBPBD_API*/ ConfigVariable : public ConfigVariableBase
 };
 
 /** Specialisation of ConfigVariable to deal with float (-inf etc) */
-template<> LIBPBD_API void
+template<> void
 ConfigVariable<float>::set_from_string (std::string const & s);
 
 /** Specialisation of ConfigVariable for std::string to cope with whitespace properly */

@@ -92,7 +92,9 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
+#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
+#endif
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
@@ -5225,8 +5227,9 @@ Session::archive_session (const std::string& dest,
 	/* write session file */
 	_path = to_dir;
 	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
-
+#ifdef LV2_SUPPORT
 	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, true);
+#endif
 	save_state (name);
 	save_default_options ();
 
