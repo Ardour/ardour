@@ -111,8 +111,9 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
-
+#endif
 #include "audiographer/routines.h"
 
 #if defined (__APPLE__)
