@@ -157,12 +157,39 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int hsla_to_rgba (lua_State *lua);
 
-	/* Creates a filename from a series of elements using the correct separator for filenames.
+	/**
+	 * Creates a filename from a series of elements using the correct separator for filenames.
 	 *
 	 * No attempt is made to force the resulting filename to be an absolute path.
 	 * If the first element is a relative path, the result will be a relative path.
 	 */
 	int build_filename (lua_State *lua);
+
+	/**
+	 * Generic conversion from audio sample count to timecode.
+	 * (TimecodeType, sample-rate, sample-pos)
+	 */
+	int sample_to_timecode (lua_State *L);
+
+	/**
+	 * Generic conversion from timecode to audio sample count.
+	 * (TimecodeType, sample-rate, hh, mm, ss, ff)
+	 */
+	int timecode_to_sample (lua_State *L);
+
+	/**
+	 * Use current session settings to convert
+	 * audio-sample count into hh, mm, ss, ff
+	 * timecode (this include session pull up/down).
+	 */
+	int sample_to_timecode_lua (lua_State *L);
+
+	/**
+	 * Use current session settings to convert
+	 * timecode (hh, mm, ss, ff) to audio-sample
+	 * count (this include session pull up/down).
+	 */
+	int timecode_to_sample_lua (lua_State *L);
 
 	class Vamp {
 	/** Vamp Plugin Interface

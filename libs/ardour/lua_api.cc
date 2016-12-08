@@ -253,6 +253,128 @@ ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 }
 
 int
+ARDOUR::LuaAPI::sample_to_timecode (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 3) {
+		return luaL_argerror (L, 1, "invalid number of arguments sample_to_timecode (TimecodeFormat, sample_rate, sample)");
+	}
+	typedef Timecode::TimecodeFormat T;
+	T tf = luabridge::Stack<T>::get (L, 1);
+	double sample_rate = luabridge::Stack<double>::get (L, 2);
+	int64_t sample = luabridge::Stack<int64_t>::get (L, 3);
+
+	Timecode::Time timecode;
+
+	Timecode::sample_to_timecode (
+			sample, timecode, false, false,
+			Timecode::timecode_to_frames_per_second (tf),
+			Timecode::timecode_has_drop_frames (tf),
+			sample_rate,
+			0, false, 0);
+
+	luabridge::Stack<uint32_t>::push (L, timecode.hours);
+	luabridge::Stack<uint32_t>::push (L, timecode.minutes);
+	luabridge::Stack<uint32_t>::push (L, timecode.seconds);
+	luabridge::Stack<uint32_t>::push (L, timecode.frames);
+	return 4;
+}
+
+int
+ARDOUR::LuaAPI::timecode_to_sample (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 6) {
+		return luaL_argerror (L, 1, "invalid number of arguments sample_to_timecode (TimecodeFormat, sample_rate, hh, mm, ss, ff)");
+	}
+	typedef Timecode::TimecodeFormat T;
+	T tf = luabridge::Stack<T>::get (L, 1);
+	double sample_rate = luabridge::Stack<double>::get (L, 2);
+	int hh = luabridge::Stack<int>::get (L, 3);
+	int mm = luabridge::Stack<int>::get (L, 4);
+	int ss = luabridge::Stack<int>::get (L, 5);
+	int ff = luabridge::Stack<int>::get (L, 6);
+
+	Timecode::Time timecode;
+	timecode.negative = false;
+	timecode.hours = hh;
+	timecode.minutes = mm;
+	timecode.seconds = ss;
+	timecode.frames = ff;
+	timecode.subframes = 0;
+	timecode.rate = Timecode::timecode_to_frames_per_second (tf);
+	timecode.drop = Timecode::timecode_has_drop_frames (tf);
+
+	int64_t sample;
+
+	Timecode::timecode_to_sample (
+			timecode, sample, false, false,
+			sample_rate, 0, false, 0);
+
+	luabridge::Stack<int64_t>::push (L, sample);
+	return 1;
+}
+
+int
+ARDOUR::LuaAPI::sample_to_timecode_lua (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 2) {
+		return luaL_argerror (L, 1, "invalid number of arguments sample_to_timecode (sample)");
+	}
+	Session const* const s = luabridge::Userdata::get <Session> (L, 1, true);
+	int64_t sample = luabridge::Stack<int64_t>::get (L, 2);
+
+	Timecode::Time timecode;
+
+	Timecode::sample_to_timecode (
+			sample, timecode, false, false,
+			s->timecode_frames_per_second (),
+			s->timecode_drop_frames (),
+			s->frame_rate (),
+			0, false, 0);
+
+	luabridge::Stack<uint32_t>::push (L, timecode.hours);
+	luabridge::Stack<uint32_t>::push (L, timecode.minutes);
+	luabridge::Stack<uint32_t>::push (L, timecode.seconds);
+	luabridge::Stack<uint32_t>::push (L, timecode.frames);
+	return 4;
+}
+int
+ARDOUR::LuaAPI::timecode_to_sample_lua (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 5) {
+		return luaL_argerror (L, 1, "invalid number of arguments sample_to_timecode (hh, mm, ss, ff)");
+	}
+	Session const* const s = luabridge::Userdata::get <Session> (L, 1, true);
+	int hh = luabridge::Stack<int>::get (L, 2);
+	int mm = luabridge::Stack<int>::get (L, 3);
+	int ss = luabridge::Stack<int>::get (L, 4);
+	int ff = luabridge::Stack<int>::get (L, 5);
+
+	Timecode::Time timecode;
+	timecode.negative = false;
+	timecode.hours = hh;
+	timecode.minutes = mm;
+	timecode.seconds = ss;
+	timecode.frames = ff;
+	timecode.subframes = 0;
+	timecode.rate = s->timecode_frames_per_second ();
+	timecode.drop = s->timecode_drop_frames ();
+
+	int64_t sample;
+
+	Timecode::timecode_to_sample (
+			timecode, sample, false, false,
+			s->frame_rate (),
+			0, false, 0);
+
+	luabridge::Stack<int64_t>::push (L, sample);
+	return 1;
+}
+
+int
 ARDOUR::LuaOSC::Address::send (lua_State *L)
 {
 	Address * const luaosc = luabridge::Userdata::get <Address> (L, 1, false);
