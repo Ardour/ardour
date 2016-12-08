@@ -284,10 +284,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\MIDIXML.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\Sequence.cpp"
 				>
 			</File>
