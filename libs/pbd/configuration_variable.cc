@@ -23,6 +23,11 @@
 #include "pbd/configuration_variable.h"
 #include "pbd/debug.h"
 
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
+// MSVC only introduced std::strtof in VS2013
+#define strtof(s, e) strtod(s, e)
+#endif
+
 using namespace std;
 using namespace PBD;
 
