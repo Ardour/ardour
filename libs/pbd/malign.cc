@@ -35,7 +35,7 @@ static const int CPU_CACHE_ALIGN = 64;
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif
 
-int cache_aligned_malloc (void** memptr, size_t size)
+int PBD::cache_aligned_malloc (void** memptr, size_t size)
 {
 #ifndef HAVE_POSIX_MEMALIGN
 #ifdef PLATFORM_WINDOWS
@@ -65,7 +65,7 @@ int cache_aligned_malloc (void** memptr, size_t size)
 #endif
 }
 
-void cache_aligned_free (void* memptr)
+void PBD::cache_aligned_free (void* memptr)
 {
 #ifdef PLATFORM_WINDOWS
 	_aligned_free (memptr);
@@ -74,7 +74,7 @@ void cache_aligned_free (void* memptr)
 #endif
 }
 
-int  aligned_malloc (void** memptr, size_t size, size_t alignment)
+int  PBD::aligned_malloc (void** memptr, size_t size, size_t alignment)
 {
 #ifndef HAVE_POSIX_MEMALIGN
 #ifdef PLATFORM_WINDOWS
@@ -104,11 +104,18 @@ int  aligned_malloc (void** memptr, size_t size, size_t alignment)
 #endif
 }
 
-void aligned_free (void* memptr)
+void PBD::aligned_free (void* memptr)
 {
 #ifdef PLATFORM_WINDOWS
 	_aligned_free (memptr);
 #else
 	free (memptr);
 #endif
+}
+
+size_t
+PBD::aligned_size (size_t size)
+{
+	const int align_size = 8; /* XXX probably a better value for this */
+	return  (size + align_size - 1) & ~(align_size - 1);
 }
