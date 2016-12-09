@@ -436,10 +436,8 @@ PluginPinWidget::plugin_reconfigured ()
 void
 PluginPinWidget::refill_sidechain_table ()
 {
-	Table_Helpers::TableList& kids = _sidechain_tbl->children ();
-	for (Table_Helpers::TableList::iterator i = kids.begin (); i != kids.end ();) {
-		i = kids.erase (i);
-	}
+	container_clear (*_sidechain_tbl);
+
 	_sidechain_tbl->resize (1, 1);
 	for (list<Control*>::iterator i = _controls.begin (); i != _controls.end (); ++i) {
 		delete *i;
