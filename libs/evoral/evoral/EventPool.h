@@ -29,6 +29,7 @@
 
 #include "evoral/visibility.h"
 
+#include "pbd/malign.h"
 #include "pbd/stacktrace.h"
 
 #define DEBUG_EVENT_POOL 1
@@ -52,7 +53,7 @@ class LIBEVORAL_API EventPool
 			/* ensure that size is correctly set to give alignment
 			   for each item.
 			*/
-			item_size = aligned_size (sz);
+			item_size = PBD::aligned_size (sz);
 
 			/* allocate block and save its end to allow to us to
 			 * quickly identify which if a pointer was allocated
@@ -100,14 +101,9 @@ class LIBEVORAL_API EventPool
 
 	std::string name() const { return _name; }
 
-	static size_t aligned_size (size_t sz) {
-		const int align_size = 8; /* XXX probably a better value for this */
-		return  (sz + align_size - 1) & ~(align_size - 1);
-	}
-
 	void* alloc (size_t sz) {
 
-		sz = aligned_size (sz);
+		sz = PBD::aligned_size (sz);
 
 	  repeat:
 		for (FreeLists::iterator x = _freelists.begin(); x != _freelists.end(); ++x) {

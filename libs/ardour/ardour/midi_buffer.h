@@ -120,7 +120,7 @@ public:
 	iterator erase(const iterator& i) {
 		assert (i.buffer == this);
 
-		const size_t total_data_deleted = (*i)->object_size();
+		const size_t total_data_deleted = (*i)->aligned_size();
 
 		if (i.offset + total_data_deleted > _size) {
 			_size = 0;
@@ -140,6 +140,8 @@ public:
 	}
 
 	uint8_t const * data() const { return _data; }
+
+	void dump (std::ostream&) const;
 
   private:
 	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;

@@ -60,6 +60,8 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
+		cerr << "New event from MRB, time " << ev_time << " size " << ev_size << endl;
+
 		if (this->read_space() < ev_size) {
 			break;;
 		}
@@ -89,6 +91,9 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 		/* lets see if we are going to be able to write this event into dst.
 		 */
 		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
+
+		cerr << "write loc for contents will be " << (int const *) write_loc << endl;
+
 		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
 				DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
@@ -105,17 +110,24 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 #ifndef NDEBUG
 		if (DEBUG_ENABLED (DEBUG::MidiRingBuffer)) {
 			DEBUG_STR_DECL(a);
-			DEBUG_STR_APPEND(a, string_compose ("wrote %4 bytes of MidiEvent to Buffer (time=%1, start=%2 offset=%3) ", ev_time, start, offset, ev_size));
+			DEBUG_STR_APPEND(a, string_compose ("wrote %4 bytes of MidiEvent to Buffer @ %5 (time=%1, start=%2 offset=%3) ",
+			                                    ev_time, start, offset, ev_size, (int*) write_loc));
 			for (size_t i=0; i < ev_size; ++i) {
+				DEBUG_STR_APPEND(a,"@");
+				DEBUG_STR_APPEND(a,(int*) (write_loc+i));
+				DEBUG_STR_APPEND(a,"=");
 				DEBUG_STR_APPEND(a,hex);
 				DEBUG_STR_APPEND(a,"0x");
-				DEBUG_STR_APPEND(a,(int)write_loc[i]);
+				DEBUG_STR_APPEND(a,(int)(write_loc[i]));
+				DEBUG_STR_APPEND(a,dec);
 				DEBUG_STR_APPEND(a,' ');
 			}
 			DEBUG_STR_APPEND(a,'\n');
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, DEBUG_STR(a).str());
 		}
 #endif
+		dst.dump (cerr);
+
 		if (success) {
 			_tracker.track(write_loc);
 			++count;

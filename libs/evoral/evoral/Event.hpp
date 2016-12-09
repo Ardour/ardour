@@ -244,13 +244,17 @@ public:
 		return other_first;
 	}
 
-	static uint32_t memory_size (uint32_t size) { return sizeof (Event<Time>) + size; }
+
+	/* this should really be static, but to do it right requires
+	   instantiating an Event to get the offset, which is silly.
+	*/
+	inline off_t    data_offset() const { return (char const *) _buf - (char const *) this; }
+	inline uint32_t aligned_size()   const { return PBD::aligned_size (data_offset() + _size); }
 
 	inline EventType      event_type()    const { return _type; }
 	inline Time           time()          const { return _time; }
 	inline uint32_t       size()          const { return _size; }
 	inline void           set_size (uint32_t s) { _size = s; /* CAREFUL !!! */ }
-	inline uint32_t       object_size()   const { return memory_size (size()); }
 	inline const uint8_t* buffer()        const { return _buf; }
 	inline uint8_t*       buffer()              { return _buf; }
 
@@ -333,7 +337,7 @@ public:
 	 * the same access control (Clause 11) are allocated so that later
 	 * members have higher addresses within a class object." (9.2.13)
 	 *
-	 * NO MORE DATA MEMBERS AFTER THIS POINT 
+	 * NO MORE DATA MEMBERS AFTER THIS POINT
 	 */
 
   private:
@@ -348,13 +352,18 @@ public:
 };
 
 template<typename Time>
-/*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev) {
-	o << "Event #" << ev.id() << " type = " << ev.event_type() << " @ " << ev.time();
-	o << std::hex;
+/*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev)
+{
+	o << "Event #" << ev.id() << " type = " << ev.event_type() << " @ " << ev.time()
+	  << " size " << ev.size()
+	  << std::hex;
+
 	for (uint32_t n = 0; n < ev.size(); ++n) {
 		o << ' ' << (int) ev.buffer()[n];
 	}
+
 	o << std::dec;
+
 	return o;
 }
 
@@ -370,7 +379,7 @@ template<typename Time>
 class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 {
   public:
-	static uint32_t memory_size (uint32_t size) { return sizeof (ManagedEvent<Time>) + size; }
+	static uint32_t memory_size (uint32_t size) { return PBD::aligned_size (sizeof (ManagedEvent<Time>) + size); }
 	static EventPool default_event_pool;
 
 	/* No public constructors because these objects must:
@@ -497,7 +506,7 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	 * the same access control (Clause 11) are allocated so that later
 	 * members have higher addresses within a class object." (9.2.13)
 	 *
-	 * NO MORE DATA MEMBERS AFTER THIS POINT 
+	 * NO MORE DATA MEMBERS AFTER THIS POINT
 	 */
 
 	ManagedEvent (EventPool& p, EventType ty, Time tm, size_t sz, uint8_t* data, event_id_t id = -1)

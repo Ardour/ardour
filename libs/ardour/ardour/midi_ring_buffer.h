@@ -87,7 +87,8 @@ MidiRingBuffer<T>::read_prefix(T* time, Evoral::EventType* type, uint32_t* size)
 
 
 /** Read the content of an event.  This call MUST be immediately preceded
- * by a call to read_prefix (or the returned even will be garbage).
+ * by either a call to read_prefix() or the use peek() and increment_read_ptr()
+ * to achieve the same thing. If this is not done, the written event will be garbage.
  */
 template<typename T>
 inline bool

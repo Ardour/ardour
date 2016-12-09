@@ -111,6 +111,11 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType>* ev = *i;
 
+		cerr << "MBuf iterator for " << (int const*) i.buffer->data() << " + " << i.offset << " => ev @ "
+		     << ev
+		     << " : " << *ev
+		     << endl;
+
 		if (dst_offset >= 0) {
 			/* Positive offset: shifting events from internal
 			   buffer view of time (always relative to to start of
@@ -122,6 +127,8 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 			*/
 			if (ev->time() >= 0 && ev->time() < nframes) {
 				Evoral::Event<TimeType> new_time (Evoral::MIDI_EVENT, ev->time() + dst_offset, ev->size(), ev->buffer());
+				cerr << "DO > 0\n";
+				cerr << new_time << endl;
 				push_back (new_time);
 			} else {
 				cerr << "\t!!!! MIDI event @ " <<  ev->time() << " skipped, not within range 0 .. " << nframes << ": ";
@@ -139,7 +146,9 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 			const framepos_t evtime = ev->time() + dst_offset;
 
 			if (evtime >= 0 && evtime < nframes) {
+				cerr << "DO < 0\n";
 				Evoral::Event<TimeType> new_time (Evoral::MIDI_EVENT, evtime, ev->size(), ev->buffer());
+				cerr << new_time << endl;
 				push_back (new_time);
 			} else {
 				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev->time() << " + " << dst_offset << ") skipped, not within range 0 .. " << nframes << ": ";
@@ -190,7 +199,9 @@ MidiBuffer::push_back (const Evoral::Event<TimeType>& ev)
 	   contiguously "after" itself.
 	*/
 
-	if (_size + ev.object_size() >= _capacity) {
+	const size_t ev_size = ev.aligned_size();
+
+	if (_size + ev_size >= _capacity) {
 		return false;
 	}
 
@@ -198,11 +209,13 @@ MidiBuffer::push_back (const Evoral::Event<TimeType>& ev)
 		return false;
 	}
 
-	memcpy (_data + _size, &ev, ev.object_size());
-	_size += ev.object_size();
+	/* copy the whole event, including its data */
+	memcpy (_data + _size, &ev, ev_size);
+
+	_size += ev_size;
 	_silent = false;
 
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("post-push, size now %1 from %2\n", _size, ev.object_size()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("post-push, size now %1 from %2\n", _size, ev_size));
 
 	return true;
 }
@@ -273,7 +286,9 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 		return push_back(ev);
 	}
 
-	if (_size + ev.object_size() >= _capacity) {
+	const size_t ev_size = ev.aligned_size();
+
+	if (_size + ev_size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		PBD::stacktrace (cerr, 20);
 		return false;
@@ -295,11 +310,11 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	/* move all data from m.offset later in the buffer to make room for the
 	   new event.
 	*/
-	memmove (_data + m.offset + (*m)->object_size(), _data + m.offset, _size - m.offset);
+	memmove (_data + m.offset + (*m)->aligned_size(), _data + m.offset, _size - m.offset);
 
 	/* merge the new event */
-	memcpy (_data + m.offset, &ev, ev.object_size());
-	_size += ev.object_size();
+	memcpy (_data + m.offset, &ev, ev_size);
+	_size += ev_size;
 
 	return true;
 }
@@ -323,25 +338,31 @@ MidiBuffer::write (TimeType time, Evoral::EventType type, uint32_t size, const u
 uint8_t*
 MidiBuffer::reserve(TimeType time, size_t size)
 {
-	const size_t ev_size = Evoral::Event<TimeType>::memory_size (size);
+	/* stack allocated Event - not legal to use for data, but we can
+	   call ::aligned_size() on it.
+	*/
+	Evoral::Event<TimeType> not_an_event (Evoral::MIDI_EVENT, time, size, 0);
+	const size_t ev_size = not_an_event.aligned_size();
 
 	if (_size + ev_size >= _capacity) {
-		return 0;
+		return 0; /* ENOSPACE */
 	}
 
-	/* on-stack temporary Event that we can write into the buffer */
-	uint8_t buf[ev_size];
-	Evoral::Event<TimeType>* ev = ::new (buf) Evoral::Event<TimeType> (Evoral::MIDI_EVENT, time, size, 0);
-
-	/* copy just the Event structure itself (no data, that comes later) */
-	memcpy (_data + _size, ev, sizeof (Evoral::Event<TimeType>));
+	/* in-place construction of the Event structure */
+	Evoral::Event<TimeType>* ev = ::new (_data + _size) Evoral::Event<TimeType> (Evoral::MIDI_EVENT, time, size, 0);
 
 	// record new size as if data has already been written
 	_size += ev_size;
 	_silent = false;
 
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("midibuffer @ %1 reserved space for %2 @ %3 within %6 (evsize %4)) size now %5\n",
+	                                            this, size,
+	                                            (int const *) (_data + _size - size),
+	                                            ev_size, _size,
+	                                            (int const *) _data));
+
 	/* return address where data can be written */
-	return _data + sizeof (Evoral::Event<TimeType>);
+	return ev->buffer();
 }
 
 void
@@ -395,7 +416,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			if (merge_offset == -1) {
 				merge_offset = them.offset;
 			}
-			bytes_to_merge += (*them)->object_size();
+			bytes_to_merge += (*them)->aligned_size();
 			++them;
 		}
 
@@ -454,7 +475,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 				++us;
 			}
 
-			bytes_to_merge = (*them)->object_size();
+			bytes_to_merge = (*them)->aligned_size();
 
 			/* move our remaining events later in the buffer by
 			 * enough to fit the one message we're going to merge
@@ -515,4 +536,17 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 	}
 
 	return true;
+}
+
+void
+MidiBuffer::dump (std::ostream& o) const
+{
+	o << "MidiBuffer @ " << this << " data @ " << (int const *) _data << endl;
+	for (const_iterator i = begin(); i != end(); ++i) {
+		const Evoral::Event<TimeType>* ev = *i;
+		uint8_t const * data = ev->buffer();
+		o << " event @ " << ev << " (offset=" << i.offset << "): " << " buf[0] @ " << (int const *) data << " delta "
+		  << (char const *) data - (char const *) ev
+		  << '\t' << *ev << endl;
+	}
 }
