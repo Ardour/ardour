@@ -441,6 +441,7 @@ VideoMonitor::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
 	if (!_session) { return; }
+	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoMonitor::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoMonitor::parameter_changed, this, _1), gui_context());
 	XMLNode* node = _session->extra_xml (X_("XJSettings"));
 	if (!node) { return;}
