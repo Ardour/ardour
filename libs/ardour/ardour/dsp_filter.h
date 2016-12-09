@@ -64,7 +64,7 @@ namespace ARDOUR { namespace DSP {
 			}
 
 			~DspShm () {
-				cache_aligned_free (_data);
+				PBD::cache_aligned_free (_data);
 			}
 
 			/** [re] allocate memory in host's memory space
@@ -73,8 +73,8 @@ namespace ARDOUR { namespace DSP {
 			 */
 			void allocate (size_t s) {
 				if (s == _size) { return; }
-				cache_aligned_free (_data);
-				cache_aligned_malloc ((void**) &_data, sizeof (float) * s);
+				PBD::cache_aligned_free (_data);
+				PBD::cache_aligned_malloc ((void**) &_data, sizeof (float) * s);
 				if (_data) { _size = s; }
 			}
 
