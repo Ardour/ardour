@@ -54,8 +54,6 @@ Note<Time>::Note (EventPool& pool, uint8_t chan, Time time, Time length, uint8_t
 	data[1] = note;
 	data[2] = velocity;
 
-	std::cerr << "NEW NOTE\n";
-
 	set_event (0, EventPointer<Time>::create (pool, Evoral::MIDI_EVENT, time, 3, data));
 
 	data[0] = (MIDI_CMD_NOTE_OFF|chan);
@@ -63,7 +61,6 @@ Note<Time>::Note (EventPool& pool, uint8_t chan, Time time, Time length, uint8_t
 	data[2] = velocity;
 
 	set_event (1, EventPointer<Time>::create (pool, Evoral::MIDI_EVENT, time + length, 3, data));
-	std::cerr << "NEW NOTE DONE\n";
 }
 
 template<typename Time>
@@ -72,11 +69,8 @@ Note<Time>::Note (Note<Time> const & other)
 	EventPointer<Time> const & on (other.on_event());
 	EventPointer<Time> const & off (other.off_event());
 
-	std::cerr << "NOTE COPY\n";
-
 	set_event (0, EventPointer<Time>::create (other.pool(), Evoral::MIDI_EVENT, on->time(), on->size(), on->buffer()));
 	set_event (1, EventPointer<Time>::create (other.pool(), Evoral::MIDI_EVENT, off->time(), off->size(), off->buffer()));
-	std::cerr << "NOTE COPY DONE\n";
 }
 
 template<typename Time>

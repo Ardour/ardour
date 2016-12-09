@@ -60,8 +60,6 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
-		cerr << "New event from MRB, time " << ev_time << " size " << ev_size << endl;
-
 		if (this->read_space() < ev_size) {
 			break;;
 		}
@@ -91,8 +89,6 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 		/* lets see if we are going to be able to write this event into dst.
 		 */
 		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
-
-		cerr << "write loc for contents will be " << (int const *) write_loc << endl;
 
 		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
@@ -126,7 +122,6 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, DEBUG_STR(a).str());
 		}
 #endif
-		dst.dump (cerr);
 
 		if (success) {
 			_tracker.track(write_loc);

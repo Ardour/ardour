@@ -244,11 +244,15 @@ public:
 		return other_first;
 	}
 
+	static off_t data_offset() {
+		/* nothing about the contents of this event matters. It
+		   exists solely to allow us to do pointer arithmetic to
+		   get the address of the _buf member as an offset
+		*/
+		static Event<Time> not_an_event (Evoral::MIDI_EVENT, Time(), 3, 0);
+		return (char const *) &not_an_event._buf - (char const *) &not_an_event;
+	}
 
-	/* this should really be static, but to do it right requires
-	   instantiating an Event to get the offset, which is silly.
-	*/
-	inline off_t    data_offset() const { return (char const *) _buf - (char const *) this; }
 	inline uint32_t aligned_size()   const { return PBD::aligned_size (data_offset() + _size); }
 
 	inline EventType      event_type()    const { return _type; }
@@ -378,8 +382,21 @@ template<typename Time>
 template<typename Time>
 class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 {
+  private:
+	static off_t data_offset () {
+		/* nothing about the contents of this event matters. It
+		   exists solely to allow us to do pointer arithmetic to
+		   get the address of the _buf member as an offset
+		*/
+		static ManagedEvent<Time> not_an_event (*((Evoral::EventPool*) 0), Evoral::MIDI_EVENT, Time(), 3, 0);
+		return (char const *) not_an_event._event.buffer() - (char const *) &not_an_event;
+	}
+
+	static size_t aligned_size (size_t size) {
+		return PBD::aligned_size (data_offset() + size);
+	}
+
   public:
-	static uint32_t memory_size (uint32_t size) { return PBD::aligned_size (sizeof (ManagedEvent<Time>) + size); }
 	static EventPool default_event_pool;
 
 	/* No public constructors because these objects must:
@@ -392,19 +409,19 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	 */
 
 	static ManagedEvent<Time>* create (EventPool& p, EventType ty, Time tm, size_t sz, uint8_t* data, event_id_t id = -1) {
-		return ::new (p.alloc (memory_size (sz))) ManagedEvent<Time> (p, ty, tm, sz, data, id);
+		return ::new (p.alloc (aligned_size (sz))) ManagedEvent<Time> (p, ty, tm, sz, data, id);
 	}
 
 	static ManagedEvent<Time>* create (EventPool& p, Event<Time> const & ev) {
-		return ::new (p.alloc (memory_size (ev.size()))) ManagedEvent<Time> (p, ev);
+		return ::new (p.alloc (aligned_size (ev.size()))) ManagedEvent<Time> (p, ev);
 	}
 
 	static ManagedEvent<Time>* create (EventType ty, Time tm, size_t sz, uint8_t* data, event_id_t id = -1) {
-		return ::new (default_event_pool.alloc (memory_size (sz))) ManagedEvent<Time> (default_event_pool, ty, tm, sz, data, id);
+		return ::new (default_event_pool.alloc (aligned_size (sz))) ManagedEvent<Time> (default_event_pool, ty, tm, sz, data, id);
 	}
 
 	static ManagedEvent<Time>* create (Event<Time> const & ev) {
-		return ::new (default_event_pool.alloc (memory_size (ev.size()))) ManagedEvent<Time> (default_event_pool, ev);
+		return ::new (default_event_pool.alloc (aligned_size (ev.size()))) ManagedEvent<Time> (default_event_pool, ev);
 	}
 
 	~ManagedEvent ();
@@ -413,15 +430,14 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	EventPool& pool() const { return _pool; }
 
 	void operator delete (void* ptr) {
-		ManagedEvent* mev = reinterpret_cast<ManagedEvent*> (ptr);
-		if (mev) {
-			mev->_pool.release (ptr);
+		if (ptr) {
+			reinterpret_cast<ManagedEvent*> (ptr)->_pool.release (ptr);
 		}
 	}
 
 	ManagedEvent& operator= (ManagedEvent<Time> const & other) {
 		if (this != &other) {
-			/* DOES NOT COPY POOL */
+			/* DOES NOT COPY POOL (OR ID) */
 			_event = other._event;
 		}
 		return *this;
@@ -438,13 +454,13 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	inline EventType      event_type()    const { return _event.event_type (); }
 	inline Time           time()          const { return _event.time (); }
 	inline uint32_t       size()          const { return _event.size (); }
+	inline event_id_t     id()            const { return _event.id (); }
 	inline void           set_size (uint32_t s) { return _event.set_size  (s); }
 	inline const uint8_t* buffer()        const { return _event.buffer (); }
 	inline uint8_t*       buffer()              { return _event.buffer (); }
-	inline void       set_event_type(EventType t) { return _event.set_event_type (t); }
-	inline void       set_time(Time t) { return _event.set_time (t); }
-	inline event_id_t id() const           { return _event.id (); }
-	inline void       set_id(event_id_t n) { return _event.set_id (n); }
+	inline void set_event_type(EventType t)     { _event.set_event_type (t); }
+	inline void set_time(Time t)                { _event.set_time (t); }
+	inline void set_id(event_id_t n)            { _event.set_id (n); }
 	inline uint8_t  type()                const { return _event.type (); }
 	inline uint8_t  channel()             const { return _event.channel (); }
 	inline bool     is_channel_msg()      const { return _event.is_channel_msg (); }
@@ -462,43 +478,40 @@ class LIBEVORAL_API ManagedEvent /* INHERITANCE ILLEGAL HERE */
 	inline bool     is_spp()              const { return _event.is_spp (); }
 	inline bool     is_mtc_quarter()      const { return _event.is_mtc_quarter (); }
 	inline bool     is_mtc_full()         const { return _event.is_mtc_full (); }
-	inline uint8_t  note()               const { return _event.note (); }
-	inline uint8_t  velocity()           const { return _event.velocity (); }
-	inline uint8_t  poly_note()          const { return _event.poly_note (); }
-	inline uint8_t  poly_pressure()      const { return _event.poly_pressure (); }
-	inline uint8_t  channel_pressure()   const { return _event.channel_pressure (); }
-	inline uint8_t  cc_number()          const { return _event.cc_number (); }
-	inline uint8_t  cc_value()           const { return _event.cc_value (); }
-	inline uint8_t  pgm_number()         const { return _event.pgm_number (); }
-	inline uint8_t  pitch_bender_lsb()   const { return _event.pitch_bender_lsb (); }
-	inline uint8_t  pitch_bender_msb()   const { return _event.pitch_bender_msb (); }
-	inline uint16_t pitch_bender_value() const { return _event.pitch_bender_value (); }
-	inline void set_channel(uint8_t channel)  { return _event.set_channel (channel); }
-	inline void set_type(uint8_t type)        { return _event.set_type (type); }
-	inline void set_note(uint8_t num)         { return _event.set_note (num); }
-	inline void set_velocity(uint8_t val)     { return _event.set_velocity (val); }
-	inline void set_cc_number(uint8_t num)    { return _event.set_cc_number (num); }
-	inline void set_cc_value(uint8_t val)     { return _event.set_cc_value (val); }
-	inline void set_pgm_number(uint8_t num)   { return _event.set_pgm_number (num); }
-	inline uint16_t value() const { return _event.value(); }
+	inline uint8_t  note()                const { return _event.note (); }
+	inline uint8_t  velocity()            const { return _event.velocity (); }
+	inline uint8_t  poly_note()           const { return _event.poly_note (); }
+	inline uint8_t  poly_pressure()       const { return _event.poly_pressure (); }
+	inline uint8_t  channel_pressure()    const { return _event.channel_pressure (); }
+	inline uint8_t  cc_number()           const { return _event.cc_number (); }
+	inline uint8_t  cc_value()            const { return _event.cc_value (); }
+	inline uint8_t  pgm_number()          const { return _event.pgm_number (); }
+	inline uint8_t  pitch_bender_lsb()    const { return _event.pitch_bender_lsb (); }
+	inline uint8_t  pitch_bender_msb()    const { return _event.pitch_bender_msb (); }
+	inline uint16_t pitch_bender_value()  const { return _event.pitch_bender_value (); }
+	inline void set_channel(uint8_t channel)    { return _event.set_channel (channel); }
+	inline void set_type(uint8_t type)          { return _event.set_type (type); }
+	inline void set_note(uint8_t num)           { return _event.set_note (num); }
+	inline void set_velocity(uint8_t val)       { return _event.set_velocity (val); }
+	inline void set_cc_number(uint8_t num)      { return _event.set_cc_number (num); }
+	inline void set_cc_value(uint8_t val)       { return _event.set_cc_value (val); }
+	inline void set_pgm_number(uint8_t num)     { return _event.set_pgm_number (num); }
+	inline uint16_t value()               const { return _event.value(); }
 
   private:
 	mutable boost::atomic<int> _refcnt;
 
 	friend void intrusive_ptr_add_ref (const ManagedEvent<Time>* irc) {
 		irc->_refcnt.fetch_add (1, boost::memory_order_relaxed);
-		std::cerr << "refcnt for " << irc << " += " << irc->refcnt() << std::endl;
 	}
 
 	friend void intrusive_ptr_release (const ManagedEvent<Time>* irc) {
 		if (irc->_refcnt.fetch_sub (1, boost::memory_order_release) == 1) {
 			boost::atomic_thread_fence (boost::memory_order_acquire);
-			std::cerr << "refcnt => 0, delete " << irc << std::endl;
 			delete irc;
-		} else {
-			std::cerr << "refcnt for " << irc << " -= " << irc->refcnt() << std::endl;
 		}
 	}
+
   private:
 	EventPool&  _pool;
 	Event<Time> _event;
@@ -594,7 +607,7 @@ template<typename Time, size_t _num_events>
 struct MultiEvent : public boost::intrusive_ref_counter<MultiEvent<Time,_num_events>,boost::thread_safe_counter>
 {
    public:
-	MultiEvent () { std::cerr << "new MEV[" << _num_events << "] @ " << this << std::endl; }
+	MultiEvent () { }
 	virtual ~MultiEvent() {}
 
 	size_t num_events() const { return _num_events; }

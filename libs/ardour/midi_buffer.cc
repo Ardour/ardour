@@ -111,11 +111,6 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType>* ev = *i;
 
-		cerr << "MBuf iterator for " << (int const*) i.buffer->data() << " + " << i.offset << " => ev @ "
-		     << ev
-		     << " : " << *ev
-		     << endl;
-
 		if (dst_offset >= 0) {
 			/* Positive offset: shifting events from internal
 			   buffer view of time (always relative to to start of
@@ -127,8 +122,6 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 			*/
 			if (ev->time() >= 0 && ev->time() < nframes) {
 				Evoral::Event<TimeType> new_time (Evoral::MIDI_EVENT, ev->time() + dst_offset, ev->size(), ev->buffer());
-				cerr << "DO > 0\n";
-				cerr << new_time << endl;
 				push_back (new_time);
 			} else {
 				cerr << "\t!!!! MIDI event @ " <<  ev->time() << " skipped, not within range 0 .. " << nframes << ": ";
@@ -146,9 +139,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 			const framepos_t evtime = ev->time() + dst_offset;
 
 			if (evtime >= 0 && evtime < nframes) {
-				cerr << "DO < 0\n";
 				Evoral::Event<TimeType> new_time (Evoral::MIDI_EVENT, evtime, ev->size(), ev->buffer());
-				cerr << new_time << endl;
 				push_back (new_time);
 			} else {
 				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev->time() << " + " << dst_offset << ") skipped, not within range 0 .. " << nframes << ": ";

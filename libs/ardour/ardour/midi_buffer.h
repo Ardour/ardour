@@ -92,7 +92,7 @@ public:
 		inline iterator_base<BufferType, EventType>& operator++() {
 			EventType const * ev = reinterpret_cast<EventType*> (buffer->_data + offset);
 			assert (ev->size() > 0);
-			offset += sizeof (EventType) + ev->size();
+			offset += ev->aligned_size ();
 			return *this;
 		}
 

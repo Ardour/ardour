@@ -164,10 +164,14 @@ Sequence<Time>::Sequence(const TypeMap& type_map, EventPool* p)
 
 		/* 2k 4 byte or smaller messages */
 
-		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 4, 2048));
-		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 8, 128));
-		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 16, 128));
-		sp.push_back (std::pair<size_t,size_t> (sizeof (Event<Time>) + 32, 128));
+		vector<size_t> sizes;
+
+#define aligned_managed_event_size(s) PBD::aligned_size (sizeof(ManagedEvent<Time>)+(s))
+
+		sp.push_back (std::pair<size_t,size_t> (aligned_managed_event_size(3), 2048));
+		sp.push_back (std::pair<size_t,size_t> (aligned_managed_event_size (8), 128));
+		sp.push_back (std::pair<size_t,size_t> (aligned_managed_event_size (16), 128));
+		sp.push_back (std::pair<size_t,size_t> (aligned_managed_event_size (32), 128));
 
 		_event_pool = new EventPool (string_compose ("sequence@%1", this), sp);
 	}
