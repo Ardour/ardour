@@ -65,6 +65,13 @@ CairoHPacker::on_expose_event (GdkEventExpose* ev)
 	return HBox::on_expose_event (ev);
 }
 
+void
+CairoHPacker::on_size_allocate (Gtk::Allocation& alloc)
+{
+	get_parent()->queue_draw();
+	HBox::on_size_allocate (alloc);
+}
+
 CairoVPacker::CairoVPacker ()
 {
 }
@@ -81,6 +88,13 @@ CairoVPacker::on_realize ()
 {
 	VBox::on_realize ();
 	CairoWidget::provide_background_for_cairo_widget (*this, get_bg());
+}
+
+void
+CairoVPacker::on_size_allocate (Gtk::Allocation& alloc)
+{
+	get_parent()->queue_draw();
+	VBox::on_size_allocate (alloc);
 }
 
 Gdk::Color
