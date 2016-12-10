@@ -369,7 +369,7 @@
     <ColorAlias name="punch button: fill" alias="color 20"/>
     <ColorAlias name="punch button: fill active" alias="color 9"/>
     <ColorAlias name="punch button: led active" alias="color 4"/>
-    <ColorAlias name="punch clock: background" alias="color 67"/>
+    <ColorAlias name="punch clock: background" alias="color 4"/>
     <ColorAlias name="punch clock: cursor" alias="color 9"/>
     <ColorAlias name="punch clock: edited text" alias="color 9"/>
     <ColorAlias name="punch clock: text" alias="color 12"/>
@@ -413,7 +413,7 @@
     <ColorAlias name="selected waveform fill" alias="color 8"/>
     <ColorAlias name="selected waveform outline" alias="color 67"/>
     <ColorAlias name="selection" alias="color 94"/>
-    <ColorAlias name="selection clock: background" alias="color 67"/>
+    <ColorAlias name="selection clock: background" alias="color 4"/>
     <ColorAlias name="selection clock: cursor" alias="color 9"/>
     <ColorAlias name="selection clock: edited text" alias="color 9"/>
     <ColorAlias name="selection clock: text" alias="color 12"/>
