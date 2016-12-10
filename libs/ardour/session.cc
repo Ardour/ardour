@@ -2366,12 +2366,12 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 	   before anything else.
 	*/
 
-	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
-		if (base == *reserved) {
+	for (map<string,bool>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
+		if (base == reserved->first) {
 			/* Check if this reserved name already exists, and if
 			   so, disallow it without a numeric suffix.
 			*/
-			if (route_by_name (*reserved)) {
+			if (!reserved->second || route_by_name (reserved->first)) {
 				definitely_add_number = true;
 				if (id < 1) {
 					id = 1;
@@ -4075,9 +4075,9 @@ Session::io_name_is_legal (const std::string& name) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
-		if (name == *reserved) {
-			if (!route_by_name (*reserved)) {
+	for (map<string,bool>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
+		if (name == reserved->first) {
+			if (!route_by_name (reserved->first)) {
 				/* first instance of a reserved name is allowed */
 				return true;
 			}

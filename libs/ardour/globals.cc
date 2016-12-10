@@ -144,7 +144,7 @@ PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
 PBD::Signal0<void> ARDOUR::GUIIdle;
 PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 
-std::vector<std::string> ARDOUR::reserved_io_names;
+std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 static bool have_old_configuration_files = false;
 
@@ -544,20 +544,17 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   support may not even be active. Without adding an API to control
 	   surface support that would list their port names, we do have to
 	   list them here.
+
+	   We also need to know if the given I/O is an actual route.
+	   For routes (e.g. "master"), bus creation needs to be allowed the first time,
+	   while for pure I/O (e.g. "Click") track/bus creation must always fail.
 	*/
 
-	char const * const reserved[] = {
-		_("Monitor"),
-		_("Master"),
-		_("Control"),
-		_("Click"),
-		_("Mackie"),
-		0
-	};
-
-	for (int n = 0; reserved[n]; ++n) {
-		reserved_io_names.push_back (reserved[n]);
-	}
+	reserved_io_names[_("Monitor")] = true;
+	reserved_io_names[_("Master")] = true;
+	reserved_io_names[_("Control")] = false;
+	reserved_io_names[_("Click")] = false;
+	reserved_io_names[_("Mackie")] = false;
 
 	libardour_initialized = true;
 
