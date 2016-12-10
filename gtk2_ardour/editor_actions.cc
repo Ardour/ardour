@@ -38,6 +38,7 @@
 #include "editing.h"
 #include "editor.h"
 #include "gui_thread.h"
+#include "main_clock.h"
 #include "time_axis_view.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -201,6 +202,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-loop-range", _("Set Range to Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop));
 	reg_sens (editor_actions, "select-punch-range", _("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch));
 	reg_sens (editor_actions, "select-from-regions", _("Set Range to Selected Regions"), sigc::mem_fun(*this, &Editor::set_selection_from_region));
+
+	reg_sens (editor_actions, "edit-current-tempo", _("Edit Current Tempo"), sigc::mem_fun(*this, &Editor::edit_current_meter));
+	reg_sens (editor_actions, "edit-current-meter", _("Edit Current Meter"), sigc::mem_fun(*this, &Editor::edit_current_tempo));
 
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true, false));
 	reg_sens (editor_actions, "alternate-select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true, false));
@@ -989,6 +993,20 @@ Editor::toggle_measure_visibility ()
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_measures (tact->get_active());
 	}
+}
+
+void
+Editor::edit_current_meter ()
+{
+	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&_session->tempo_map().meter_section_at_frame (ARDOUR_UI::instance()->primary_clock->absolute_time()));
+	edit_meter_section (ms);
+}
+
+void
+Editor::edit_current_tempo ()
+{
+	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&_session->tempo_map().tempo_section_at_frame (ARDOUR_UI::instance()->primary_clock->absolute_time()));
+	edit_tempo_section (ts);
 }
 
 RefPtr<RadioAction>

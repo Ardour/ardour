@@ -1657,6 +1657,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_control_point (ArdourCanvas::Item*);
 	void edit_notes (MidiRegionView*);
 
+	void edit_current_meter ();
+	void edit_current_tempo ();
+
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();

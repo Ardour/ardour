@@ -29,6 +29,7 @@ class MainClock : public AudioClock
 {
 public:
 	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
+	framepos_t absolute_time () const;
 
 private:
 
@@ -40,7 +41,6 @@ private:
 	void edit_current_meter ();
 	void insert_new_tempo ();
 	void insert_new_meter ();
-	framepos_t absolute_time () const;
 	bool _primary;
 
 	bool on_button_press_event (GdkEventButton *ev);
