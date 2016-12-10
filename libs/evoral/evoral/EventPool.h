@@ -112,7 +112,10 @@ class LIBEVORAL_API EventPool
 					/* out of memory - grab a new block */
 					std::cerr << "Out of memory in pool for size " << sz << " allocate a new block\n";
 					SizePairs spp;
-					spp.push_back (std::make_pair<size_t,size_t> (sz, (*x)->num_items()));
+					std::pair<size_t,size_t> p;
+					p.first = sz;
+					p.second = (*x)->num_items();
+					spp.push_back (p);
 					add (spp);
 					goto repeat;
 				}
