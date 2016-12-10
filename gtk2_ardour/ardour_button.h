@@ -78,8 +78,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void set_corner_radius (float);
 
-	void set_text (const std::string&);
-	const std::string& get_text () {return _text;}
+	void set_text (const std::string&, bool markup = false);
+	const std::string& get_text () { return _text; }
+	bool get_markup () const { return _markup; }
 	void set_angle (const double);
 	void set_alignment (const float, const float);
 	void get_alignment (float& xa, float& ya) {xa = _xalign; ya = _yalign;};
@@ -143,11 +144,13 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	std::string                 _sizing_text;
+	bool                        _markup;
 	Element                     _elements;
 	Gtkmm2ext::ArdourIcon::Icon _icon;
 	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
 
+	void set_text_internal ();
 	void recalc_char_pixel_geometry ();
 	unsigned int _char_pixel_width;
 	unsigned int _char_pixel_height;

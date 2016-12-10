@@ -59,6 +59,7 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 
 ArdourButton::ArdourButton (Element e)
 	: _sizing_text("")
+	, _markup (false)
 	, _elements (e)
 	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
 	, _tweaks (Tweaks (0))
@@ -68,7 +69,7 @@ ArdourButton::ArdourButton (Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
-	, _corner_radius (2.5)
+	, _corner_radius (3.5)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -104,7 +105,9 @@ ArdourButton::ArdourButton (Element e)
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
 	: _sizing_text("")
+	, _markup (false)
 	, _elements (e)
+	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -112,7 +115,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
-	, _corner_radius (2.5)
+	, _corner_radius (3.5)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -178,18 +181,29 @@ ArdourButton::set_layout_font (const Pango::FontDescription& fd)
 }
 
 void
-ArdourButton::set_text (const std::string& str)
+ArdourButton::set_text_internal () {
+	assert (_layout);
+	if (_markup) {
+		_layout->set_markup (_text);
+	} else {
+		_layout->set_text (_text);
+	}
+}
+
+void
+ArdourButton::set_text (const std::string& str, bool markup)
 {
-	if (_text == str) {
+	if (_text == str && _markup == markup) {
 		return;
 	}
 	_text = str;
+	_markup = markup;
 	if (!is_realized()) {
 		return;
 	}
 	ensure_layout ();
 	if (_layout && _layout->get_text() != _text) {
-		_layout->set_text (_text);
+		set_text_internal ();
 		/* on_size_request() will fill in _text_width/height
 		 * so queue it even if _sizing_text != "" */
 		queue_resize ();
@@ -549,9 +563,9 @@ ArdourButton::on_realize()
 	ensure_layout ();
 	if (_layout) {
 		if (_layout->get_text() != _text) {
-			_layout->set_text (_text);
+			set_text_internal ();
+			queue_resize ();
 		}
-		queue_resize ();
 	}
 }
 
@@ -572,7 +586,8 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	if (_elements & Text) {
 
 		ensure_layout();
-		_layout->set_text (_text);
+		set_text_internal ();
+
 		/* render() needs the size of the displayed text */
 		_layout->get_pixel_size (_text_width, _text_height);
 
@@ -597,7 +612,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width += sizing_text_width;
 
 			if (!_sizing_text.empty()) {
-				_layout->set_text (_text); /* restore display text */
+				set_text_internal (); /* restore display text */
 			}
 		}
 
@@ -1200,7 +1215,7 @@ ArdourButton::recalc_char_pixel_geometry ()
 	Glib::ustring gx(x);
 	_char_avg_pixel_width = w / (float)gx.size();
 	_char_pixel_width = std::max(4, (int) ceil (_char_avg_pixel_width));
-	_layout->set_text (_text);
+	set_text_internal (); /* restore display text */
 }
 
 void
