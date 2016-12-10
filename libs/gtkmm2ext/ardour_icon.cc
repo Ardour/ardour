@@ -640,8 +640,8 @@ static void icon_transport_play (cairo_t *cr, const int width, const int height)
 /** Midi Panic "!" */
 static void icon_transport_panic (cairo_t *cr, const int width, const int height)
 {
-	const int wh = std::min (width, height) * .1;
-	const double xc = width * .5;
+	const int wh = ceil (std::min (width, height) * .1) - .5;
+	const double xc = rint (width * .5);
 	const double yh = height;
 	cairo_rectangle (cr,
 	                 xc - wh, yh *.19,
@@ -730,8 +730,8 @@ static void icon_transport_metronom (cairo_t *cr, const int width, const int hei
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
-	const double wh = std::min (x, y);
-	const double h  = wh * .85;
+	const double wh = .95 * std::min (x, y);
+	const double h  = wh * .80;
 	const double w  = wh * .55;
 	const double lw = w  * .34;
 
