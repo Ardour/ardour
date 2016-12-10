@@ -172,6 +172,8 @@ ArdourButton::set_layout_font (const Pango::FontDescription& fd)
 	if (_layout) {
 		_layout->set_font_description (fd);
 		queue_resize ();
+		_char_pixel_width = 0;
+		_char_pixel_height = 0;
 	}
 }
 
@@ -406,7 +408,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_save (cr);
 			cairo_rotate(cr, _angle * M_PI / 180.0);
 			cairo_device_to_user(cr, &ww, &wh);
-			xa = (ww - _text_width) * _xalign;
+			xa = text_margin + (ww - _text_width - 2 * text_margin) * _xalign;
 			ya = (wh - _text_height) * _yalign;
 
 			/* quick hack for left/bottom alignment at -90deg
@@ -649,7 +651,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
-	} else if (_sizing_text.empty() && _text_width > 0 && !(_elements & (Menu | Indicator))) {
+	} else if (_sizing_text.empty() && _text_width > 0 && !(_elements & Menu)) {
 		// properly centered text for those elements that are centered
 		// (no sub-pixel offset)
 		if ((req->width - _text_width) & 1) { ++req->width; }
@@ -1189,7 +1191,7 @@ ArdourButton::recalc_char_pixel_geometry ()
 	// NB. this is not static, since the geometry is different
 	// depending on the font used.
 	int w, h;
-	std::string x = _("ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	std::string x = _("@ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	_layout->set_text (x);
 	_layout->get_pixel_size (w, h);
 	_char_pixel_height = std::max(4, h);
