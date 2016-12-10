@@ -148,7 +148,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	backlight_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::toggle_backlight));
 
 	touch_sensitivity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::touch_sensitive_change));
+#ifndef GTKMM_DISABLE_DEPRECATED
 	touch_sensitivity_scale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+#endif
 
 	l = manage (new Gtk::Label (_("Button click")));
 	l->set_alignment (1.0, 0.5);
