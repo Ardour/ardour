@@ -818,8 +818,10 @@ Session::setup_ltc ()
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			// TODO use auto-connect thread somehow (needs a route currently)
+			// see note in Session::auto_connect_thread_run() why process lock is needed.
+			reconnect_ltc_input ();
 		}
-		reconnect_ltc_input ();
 	}
 
 	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
@@ -828,8 +830,9 @@ Session::setup_ltc ()
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+			// TODO use auto-connect thread
+			reconnect_ltc_output ();
 		}
-		reconnect_ltc_output ();
 	}
 
 	/* fix up names of LTC ports because we don't want the normal
