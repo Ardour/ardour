@@ -2502,7 +2502,7 @@ TempoMap::check_solved (const Metrics& metrics) const
 }
 
 bool
-TempoMap::set_active_tempos (const Metrics& metrics, const framepos_t& frame)
+TempoMap::set_active_tempi (const Metrics& metrics, const framepos_t& frame)
 {
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* t;
@@ -2696,7 +2696,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, MeterSection* section, const dou
 
 	if (section->initial()) {
 		/* lock the first tempo to our first meter */
-		if (!set_active_tempos (imaginary, section->frame_at_minute (minute))) {
+		if (!set_active_tempi (imaginary, section->frame_at_minute (minute))) {
 			return false;
 		}
 	}

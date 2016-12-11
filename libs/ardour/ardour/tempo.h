@@ -525,7 +525,7 @@ private:
 	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
 	bool check_solved (const Metrics& metrics) const;
-	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
+	bool set_active_tempi (const Metrics& metrics, const framepos_t& frame);
 
 	bool solve_map_minute (Metrics& metrics, TempoSection* section, const double& minute);
 	bool solve_map_pulse (Metrics& metrics, TempoSection* section, const double& pulse);
