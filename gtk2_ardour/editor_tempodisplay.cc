@@ -75,7 +75,11 @@ Editor::remove_metric_marks ()
 	}
 	tempo_curves.clear ();
 }
-
+struct CurveComparator {
+	bool operator() (TempoCurve const * a, TempoCurve const * b) {
+		return a->tempo().frame() < b->tempo().frame();
+	}
+};
 void
 Editor::draw_metric_marks (const Metrics& metrics)
 {
@@ -121,6 +125,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		}
 
 	}
+	tempo_curves.sort (CurveComparator());
 
 	const double min_tempo_range = 5.0;
 	const double tempo_delta = fabs (max_tempo - min_tempo);
@@ -175,12 +180,6 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	draw_measures (grid);
 	update_tempo_based_rulers ();
 }
-
-struct CurveComparator {
-	bool operator() (TempoCurve const * a, TempoCurve const * b) {
-		return a->tempo().frame() < b->tempo().frame();
-	}
-};
 
 void
 Editor::marker_position_changed ()
