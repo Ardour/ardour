@@ -709,6 +709,8 @@ def options(opt):
                    help='Use external/system versions of some bundled libraries')
     opt.add_option('--luadoc', action='store_true', default=False, dest='luadoc',
                     help='Compile Tool to dump LuaBindings (needs C++11)')
+    opt.add_option('--canvasui', action='store_true', default=False, dest='canvasui',
+                    help='Compile libcanvas test GUI')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -931,6 +933,10 @@ def configure(conf):
         else:
             print ('No Carbon support available for this build\n')
 
+
+    if Options.options.canvasui:
+        conf.env['CANVASTESTUI'] = True
+        conf.define ('CANVASTESTUI', 1)
 
     if Options.options.luadoc:
         conf.env['LUABINDINGDOC'] = True
@@ -1211,6 +1217,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
     write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
     write_config_text('Build target',          conf.env['build_target'])
+    write_config_text('Canvas Test UI',        conf.is_defined('CANVASTESTUI'))
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('CoreAudio 10.5 compat', conf.is_defined('COREAUDIO105'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))

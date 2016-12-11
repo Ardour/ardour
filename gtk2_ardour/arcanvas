@@ -1,0 +1,5 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+exec $TOP/build/gtk2_ardour/canvas_test "$@"

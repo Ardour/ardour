@@ -490,6 +490,36 @@ def build(bld):
             obj.defines += [ 'LXVST_SUPPORT' ]
             obj.use += [ 'X11' ]
 
+    # Tool to test libcanvas
+    if re.search ("linux", sys.platform) != None and bld.env['CANVASTESTUI']:
+        obj = bld (features = 'cxx c cxxprogram')
+        obj.install_path = None
+        obj.source    = list(gtk2_ardour_sources)
+        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
+        obj.target    = 'canvas_test'
+        obj.includes  = ['.', '../libs']
+        obj.ldflags   = ['-no-undefined']
+        obj.use       = [
+                'libpbd',
+                'libardour',
+                'libardour_cp',
+                'libtimecode',
+                'libmidipp',
+                'libgtkmm2ext',
+                'libcanvas',
+                'libptformat',
+                ]
+        obj.defines = [
+                'NOMAIN',
+                'PACKAGE="' + I18N_PACKAGE + '"',
+                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+                'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
+                ]
+        obj.linkflags = ''
+        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+        obj.source += [ 'canvas_test.cc', ]
+
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         # Windows VST support w/wine
