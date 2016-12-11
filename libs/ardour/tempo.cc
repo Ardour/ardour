@@ -1367,9 +1367,11 @@ TempoMap::recompute_meters (Metrics& metrics)
 				}
 
 				if (prev_m) {
-					const double beats = (meter->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
+					double beats = (meter->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
 					if (beats + prev_m->beat() != meter->beat()) {
 						/* reordering caused a bbt change */
+
+						beats = meter->beat() - prev_m->beat();
 						b_bbt = make_pair (beats + prev_m->beat()
 								   , BBT_Time ((beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 						pulse = prev_m->pulse() + (beats / prev_m->note_divisor());
@@ -2852,11 +2854,17 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 		MeterSection* m;
 		if (!(*i)->is_tempo()) {
 			m = static_cast<MeterSection*> (*i);
+
+			if (m == section) {
+				continue;
+			}
+
 			pair<double, BBT_Time> b_bbt;
 			double new_pulse = 0.0;
 
 			if (prev_m && m->bbt().bars > when.bars && !section_prev){
 				section_prev = prev_m;
+
 				const double beats = (when.bars - section_prev->bbt().bars) * section_prev->divisions_per_bar();
 				const double pulse = (beats / section_prev->note_divisor()) + section_prev->pulse();
 				pair<double, BBT_Time> b_bbt = make_pair (beats + section_prev->beat(), when);
@@ -2865,7 +2873,6 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 				section->set_pulse (pulse);
 				section->set_minute (minute_at_pulse_locked (imaginary, pulse));
 				prev_m = section;
-				continue;
 			}
 
 			if (m->position_lock_style() == AudioTime) {
@@ -2887,13 +2894,20 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 				}
 
 				if (prev_m) {
-					const double beats = ((m->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar());
+					double beats = ((m->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar());
 
 					if (beats + prev_m->beat() != m->beat()) {
 						/* tempo/ meter change caused a change in beat (bar). */
+
+						/* the user has requested that the previous section of music overlaps this one.
+						   we have no choice but to change the bar number here, as being locked to audio means
+						   we must stay where we are on the timeline.
+						*/
+						beats = m->beat() - prev_m->beat();
 						b_bbt = make_pair (beats + prev_m->beat()
 								   , BBT_Time ((beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 						new_pulse = prev_m->pulse() + (beats / prev_m->note_divisor());
+
 					} else if (m->movable()) {
 						b_bbt = make_pair (m->beat(), m->bbt());
 						new_pulse = prev_m->pulse() + (beats / prev_m->note_divisor());
