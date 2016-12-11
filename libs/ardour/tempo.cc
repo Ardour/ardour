@@ -4241,7 +4241,7 @@ TempoMap::dump (const Metrics& metrics, std::ostream& o) const
 			  << " minute= " << t->minute() << " frame= " << t->frame() << " (movable? " << t->movable() << ')'
 			  << " pos lock: " << enum_2_string (t->position_lock_style()) << std::endl;
 			if (prev_t) {
-				o << std::setprecision (17) << "  current      : " << t->note_types_per_minute()
+				o <<  "  current      : " << t->note_types_per_minute()
 				  << " | " << t->pulse() << " | " << t->frame() << " | " << t->minute() << std::endl;
 				o << "  previous     : " << prev_t->note_types_per_minute()
 				  << " | " << prev_t->pulse() << " | " << prev_t->frame() << " | " << prev_t->minute() << std::endl;
