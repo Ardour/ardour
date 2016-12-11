@@ -181,7 +181,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
     : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
     , _optimization_iterator(events.end())
 {
-	set_colors();
+	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	base_rect->lower_to_bottom();
 	update_range ();
@@ -205,7 +205,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                   initial_unit_pos)
     , _optimization_iterator(events.end())
 {
-	set_colors();
+	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	base_rect->lower_to_bottom();
 	update_range ();
