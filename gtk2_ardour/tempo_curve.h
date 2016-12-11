@@ -40,7 +40,7 @@ class TempoCurve : public sigc::trackable
 	void hide ();
 	void show ();
 
-	ARDOUR::TempoSection& tempo () { return _tempo; }
+	ARDOUR::TempoSection& tempo () const { return _tempo; }
 
 	void set_max_tempo (const double& max) { _max_tempo = max; }
 	void set_min_tempo (const double& min) { _min_tempo = min; }
