@@ -85,15 +85,8 @@ FramedCurve::interpolate ()
 	}
 	samples.clear ();
 
-	if (_points.size() == 3) {
-		samples.push_back (curve_points.front());
-		samples.push_back (curve_points.back());
-		n_samples = 2;
-	} else {
-
-		InterpolatedCurve::interpolate (curve_points, points_per_segment, CatmullRomCentripetal, false, samples);
-		n_samples = samples.size();
-	}
+	InterpolatedCurve::interpolate (curve_points, points_per_segment, CatmullRomCentripetal, false, samples);
+	n_samples = samples.size();
 }
 
 void
