@@ -1372,6 +1372,8 @@ PluginManager::load_statuses ()
 			type = Windows_VST;
 		} else if (stype == "LXVST") {
 			type = LXVST;
+		} else if (stype == "MacVST") {
+			type = MacVST;
 		} else if (stype == "Lua") {
 			type = Lua;
 		} else {
