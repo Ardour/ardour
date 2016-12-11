@@ -178,7 +178,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 
 struct CurveComparator {
 	bool operator() (TempoCurve const * a, TempoCurve const * b) {
-		return a->position() < b->position();
+		return a->tempo().frame() < b->tempo().frame();
 	}
 };
 
