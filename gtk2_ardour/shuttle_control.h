@@ -75,8 +75,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Gtk::Menu*        shuttle_style_menu;
 	Gtk::Menu*        shuttle_context_menu;
 	BindingProxy      binding_proxy;
-	Glib::RefPtr<Pango::Layout> left_text;
-	Glib::RefPtr<Pango::Layout> right_text;
+	Glib::RefPtr<Pango::Layout> _text;
 	Pango::AttrList text_attributes;
 	Pango::AttrColor* text_color;
 	float bg_r, bg_g, bg_b;
