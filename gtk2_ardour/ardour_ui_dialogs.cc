@@ -223,7 +223,7 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
 			editor_meter->clear_meters();
 			editor_meter->set_type (_session->master_out()->meter_type());
-			editor_meter->setup_meters (30, 12, 6);
+			editor_meter->setup_meters (30, 10, 6);
 			editor_meter->show();
 			meter_box.pack_start(*editor_meter);
 		}

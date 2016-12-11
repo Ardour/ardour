@@ -34,6 +34,7 @@
 #include "ardour/session_handle.h"
 
 #include "gtkmm2ext/cairo_widget.h"
+#include "ardour_button.h"
 
 namespace ARDOUR {
 	class Session;
@@ -80,6 +81,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
 
+	ArdourButton* left_btn () { return &_left_btn; }
+	ArdourButton* right_btn () { return &_right_btn; }
+
 	/** Alter cairo scaling during rendering.
 	 *
 	 * Used by clocks that resize themselves
@@ -106,15 +110,10 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	bool on_button_press_event (GdkEventButton *ev);
 	bool on_button_release_event(GdkEventButton *ev);
-	bool is_lower_layout_click(int y) const {
-		return y > upper_height + separator_height;
-	}
-	bool is_right_layout_click(int x) const {
-		return x > x_leading_padding + get_left_rect_width() + separator_height;
-	}
-	double get_left_rect_width() const {
-	       return round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
-	}
+
+	ArdourButton _left_btn;
+	ArdourButton _right_btn;
+
 	private:
 	Mode             _mode;
 	std::string      _name;
@@ -131,15 +130,14 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             edit_is_negative;
 
 	Glib::RefPtr<Pango::Layout> _layout;
-	Glib::RefPtr<Pango::Layout> _left_layout;
-	Glib::RefPtr<Pango::Layout> _right_layout;
+
+	bool         _with_info;
 
 	Pango::AttrColor*    editing_attr;
 	Pango::AttrColor*    foreground_attr;
 
 	Pango::AttrList normal_attributes;
 	Pango::AttrList editing_attributes;
-	Pango::AttrList info_attributes;
 
 	int first_height;
 	int first_width;

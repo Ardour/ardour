@@ -56,14 +56,9 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
-const double AudioClock::info_font_scale_factor = 0.68;
-const double AudioClock::separator_height = 0.0;
-const double AudioClock::x_leading_padding = 6.0;
 
 #define BBT_BAR_CHAR "|"
 #define BBT_SCANF_FORMAT "%" PRIu32 "%*c%" PRIu32 "%*c%" PRIu32
-#define INFO_FONT_SIZE ((int)lrint(font_size * info_font_scale_factor))
-#define TXTSPAN "<span font-family=\"Sans\" foreground=\"white\">"
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info,
@@ -80,6 +75,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
+	, _with_info (with_info)
 	, editing_attr (0)
 	, foreground_attr (0)
 	, first_height (0)
@@ -107,11 +103,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_layout = Pango::Layout::create (get_pango_context());
 	_layout->set_attributes (normal_attributes);
 
-	if (with_info) {
-		_left_layout = Pango::Layout::create (get_pango_context());
-		_right_layout = Pango::Layout::create (get_pango_context());
-	}
-
 	set_widget_name (widget_name);
 
 	_mode = BBT; /* lie to force mode switch */
@@ -121,6 +112,12 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	if (!is_transient) {
 		clocks.push_back (this);
 	}
+
+	_left_btn.set_sizing_text (_("0000000000000"));
+	// NB right_btn is in a size-group
+
+	_left_btn.set_layout_font (UIConfiguration::instance().get_SmallFont());
+	_right_btn.set_layout_font (UIConfiguration::instance().get_SmallFont());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
@@ -175,18 +172,6 @@ AudioClock::set_font (Pango::FontDescription font)
 
 	normal_attributes.change (*font_attr);
 	editing_attributes.change (*font_attr);
-
-	/* now a smaller version of the same font */
-
-	delete font_attr;
-	font.set_size (INFO_FONT_SIZE);
-	font.set_weight (Pango::WEIGHT_NORMAL);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-
-	info_attributes.change (*font_attr);
-
-	/* and an even smaller one */
-
 	delete font_attr;
 
 	/* get the figure width for the font. This doesn't have to super
@@ -270,7 +255,6 @@ AudioClock::set_colors ()
 	editing_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	normal_attributes.change (*foreground_attr);
-	info_attributes.change (*foreground_attr);
 	editing_attributes.change (*foreground_attr);
 	editing_attributes.change (*editing_attr);
 
@@ -300,11 +284,7 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	if (_need_bg) {
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
-			if (_left_layout) {
-				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
-			} else {
-				Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
-			}
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
 		} else {
 			cairo_rectangle (cr, 0, 0, get_width(), upper_height);
 		}
@@ -325,81 +305,6 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_restore (cr);
-	}
-
-	if (_left_layout) {
-
-		double h = get_height() - upper_height - separator_height;
-
-		if (_need_bg) {
-			cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
-		}
-
-		if (mode_based_info_ratio != 1.0) {
-
-			double left_rect_width = get_left_rect_width();
-
-			if (_need_bg) {
-				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height,
-							left_rect_width + (separator_height == 0 ? corner_radius : 0),
-							h, corner_radius);
-				} else {
-					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
-				}
-				cairo_fill (cr);
-			}
-
-			cairo_move_to (cr, x_leading_padding, upper_height + separator_height + ((h - info_height)/2.0));
-			pango_cairo_show_layout (cr, _left_layout->gobj());
-
-			if (_need_bg) {
-				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height,
-							upper_height + separator_height,
-							get_width() - separator_height - left_rect_width,
-							h, corner_radius);
-				} else {
-					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height,
-							 get_width() - separator_height - left_rect_width, h);
-				}
-				cairo_fill (cr);
-			}
-
-
-			if (_right_layout->get_alignment() == Pango::ALIGN_RIGHT) {
-				/* right-align does not work per se beacuse layout width is unset.
-				 * Using _right_layout->set_width([value >=0]) would also enable
-				 * word-wrapping which is not wanted here.
-				 * The solution is to custom align the layout depending on its size.
-				 * if it is larger than the available space it will be cropped on the
-				 * right edge rather than override text on the left side.
-				 */
-				int x, rw, rh;
-				_right_layout->get_pixel_size(rw, rh);
-				x = get_width() - rw - separator_height - x_leading_padding;
-				if (x < x_leading_padding + left_rect_width + separator_height) {
-					/* rather cut off the right end than overlap with the text on the left */
-					x = x_leading_padding + left_rect_width + separator_height;
-				}
-				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
-			} else {
-				cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
-			}
-			pango_cairo_show_layout (cr, _right_layout->gobj());
-
-		} else {
-			/* no info to display, or just one */
-
-			if (_need_bg) {
-				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height, get_width(), h, corner_radius);
-				} else {
-					cairo_rectangle (cr, 0, upper_height + separator_height, get_width(), h);
-				}
-				cairo_fill (cr);
-			}
-		}
 	}
 
 	if (editing) {
@@ -447,12 +352,7 @@ void
 AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
-
-	if (_left_layout) {
-		upper_height = (get_height()/2.0) - 1.0;
-	} else {
-		upper_height = get_height();
-	}
+	upper_height = get_height();
 }
 
 void
@@ -502,42 +402,6 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 	/* now tackle height, for which we need to know the height of the lower
 	 * layout
 	 */
-
-	if (_left_layout) {
-
-		Glib::RefPtr<Pango::Layout> tmp;
-		Glib::RefPtr<Gtk::Style> style = get_style ();
-		Pango::FontDescription font;
-		int w;
-
-		tmp = Pango::Layout::create (get_pango_context());
-
-		if (!is_realized()) {
-			font = get_font_for_style (get_name());
-		} else {
-			font = style->get_font();
-		}
-
-		tmp->set_font_description (font);
-
-		font.set_size (INFO_FONT_SIZE);
-		font.set_weight (Pango::WEIGHT_NORMAL);
-		tmp->set_font_description (font);
-
-		/* we only care about height, so put as much stuff in here
-		   as possible that might change the height.
-		*/
-		tmp->set_text ("qyhH|"); /* one ascender, one descender */
-
-		tmp->get_pixel_size (w, info_height);
-
-		/* silly extra padding that seems necessary to correct the info
-		 * that pango just gave us. I have no idea why.
-		 */
-
-		req->height += info_height;
-		req->height += separator_height;
-	}
 }
 
 void
@@ -989,33 +853,45 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 #endif
 	}
 
+	bool btn_en = false;
+
 	if (!editing) {
-		if (_right_layout) {
-			_right_layout->set_alignment(Pango::ALIGN_LEFT);
-		}
 
 		switch (_mode) {
 		case Timecode:
-			if (_right_layout) {
-				_right_layout->set_alignment(Pango::ALIGN_RIGHT);
-			}
 			set_timecode (when, force);
 			break;
 
 		case BBT:
 			set_bbt (when, offset, force);
+			btn_en = true;
 			break;
 
 		case MinSec:
-			if (_right_layout) {
-				_right_layout->set_alignment(Pango::ALIGN_RIGHT);
-			}
 			set_minsec (when, force);
 			break;
 
 		case Frames:
 			set_frames (when, force);
 			break;
+		}
+	}
+
+	if (_with_info) {
+		_left_btn.set_sensitive (btn_en);
+		_right_btn.set_sensitive (btn_en);
+		_left_btn.set_visual_state (Gtkmm2ext::NoVisualState);
+		_right_btn.set_visual_state (Gtkmm2ext::NoVisualState);
+		if (btn_en) {
+			_left_btn.set_elements (ArdourButton::Element(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text));
+			_right_btn.set_elements (ArdourButton::Element(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text));
+			_left_btn.set_alignment (.5, .5);
+			_right_btn.set_alignment (.5, .5);
+		} else {
+			_left_btn.set_elements (ArdourButton::Text);
+			_right_btn.set_elements (ArdourButton::Text);
+			_left_btn.set_alignment (0, .5);
+			_right_btn.set_alignment (1, .5);
 		}
 	}
 
@@ -1026,7 +902,7 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 void
 AudioClock::set_slave_info ()
 {
-	if (!_left_layout || !_right_layout) {
+	if (!_with_info) {
 		return;
 	}
 
@@ -1037,20 +913,16 @@ AudioClock::set_slave_info ()
 
 		switch (sync_src) {
 		case Engine:
-			_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-			_right_layout->set_text ("");
+			_left_btn.set_text (sync_source_to_string (sync_src, true));
+			_right_btn.set_text ("");
 			break;
 		case MIDIClock:
 			if (slave) {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-							INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-				_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-							INFO_FONT_SIZE, slave->approximate_current_delta()));
+				_left_btn.set_text (sync_source_to_string (sync_src, true));
+				_right_btn.set_text (slave->approximate_current_delta (), true);
 			} else {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-							INFO_FONT_SIZE, _("--pending--")));
-				_right_layout->set_text ("");
+				_left_btn.set_text (_("--pending--"));
+				_right_btn.set_text ("");
 			}
 			break;
 		case LTC:
@@ -1060,23 +932,23 @@ AudioClock::set_slave_info ()
 				TimecodeSlave* tcslave;
 				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-					_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span><span foreground=\"%3\">%4</span></span>",
-										  INFO_FONT_SIZE, sync_source_to_string(sync_src, true)[0], (matching?"green":"red"),
-										  dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-										   INFO_FONT_SIZE, slave->approximate_current_delta()));
+					_left_btn.set_text (string_compose ("%1 <span face=\"monospace\" foreground=\"%3\">%2</span>",
+								sync_source_to_string(sync_src, true)[0],
+								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position (),
+								matching ? "#66ff66" : "#ff3333"
+								), true);
+					_right_btn.set_text (slave->approximate_current_delta (), true);
 				}
 			} else {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
-							INFO_FONT_SIZE, _("--pending--")));
-				_right_layout->set_text ("");
+				_left_btn.set_text (_("--pending--"));
+				_right_btn.set_text ("");
 			}
 			break;
 		}
 	} else {
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "INT/%2</span></span>",
-					INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-		_right_layout->set_text ("");
+		_left_btn.set_text (string_compose ("%1/%2",
+					_("INT"), sync_source_to_string(sync_src, true)));
+		_right_btn.set_text ("");
 	}
 }
 
@@ -1088,12 +960,8 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ----------");
-
-		if (_left_layout) {
-			_left_layout->set_text ("");
-			_right_layout->set_text ("");
-		}
-
+		_left_btn.set_text ("");
+		_right_btn.set_text ("");
 		return;
 	}
 
@@ -1110,7 +978,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 
 	_layout->set_text (buf);
 
-	if (_left_layout) {
+	if (_with_info) {
 		framecnt_t rate = _session->frame_rate();
 
 		if (fmod (rate, 100.0) == 0.0) {
@@ -1119,18 +987,15 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 			sprintf (buf, "%" PRId64 "Hz", rate);
 		}
 
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">%3</span></span>",
-				INFO_FONT_SIZE, _("SR"), buf));
+		_left_btn.set_text (string_compose ("%1 %2", _("SR"), buf));
 
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">off</span></span>",
-					INFO_FONT_SIZE, _("Pull")));
+			_right_btn.set_text (string_compose ("%1 off", _("Pull")));
 		} else {
 			sprintf (buf, _("%+.4f%%"), vid_pullup);
-			_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">%3</span></span>",
-					INFO_FONT_SIZE, _("Pull"), buf));
+			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf));
 		}
 	}
 }
@@ -1176,11 +1041,8 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--.---");
-
-		if (_left_layout) {
-			_left_layout->set_text ("");
-			_right_layout->set_text ("");
-		}
+		_left_btn.set_text ("");
+		_right_btn.set_text ("");
 
 		return;
 	}
@@ -1199,11 +1061,8 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--:--");
-		if (_left_layout) {
-			_left_layout->set_text ("");
-			_right_layout->set_text ("");
-		}
-
+		_left_btn.set_text ("");
+		_right_btn.set_text ("");
 		return;
 	}
 
@@ -1234,10 +1093,8 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ---|--|----");
-		if (_left_layout) {
-			_left_layout->set_text ("");
-			_right_layout->set_text ("");
-		}
+		_left_btn.set_text ("");
+		_right_btn.set_text ("");
 		return;
 	}
 
@@ -1305,7 +1162,7 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 	_layout->set_text (buf);
 
-	if (_right_layout) {
+	if (_with_info) {
 		framepos_t pos;
 
 		if (bbt_reference_time < 0) {
@@ -1316,14 +1173,17 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
-		snprintf (buf, sizeof(buf), "%-5.3f/%f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
-		/* XXX this doesn't fit inside the container. */
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
-							  INFO_FONT_SIZE, buf, _("Tempo")));
+		if (m.tempo().note_type() == 4) {
+			snprintf (buf, sizeof(buf), "\u2669 = %.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+		} else if (m.tempo().note_type() == 8) {
+			snprintf (buf, sizeof(buf), "\u266a = %.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+		} else {
+			snprintf (buf, sizeof(buf), "%.0f@%.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
+		}
+		_left_btn.set_text (string_compose ("%1: %2", _("Tempo"), buf));
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
-							   INFO_FONT_SIZE, buf, _("Meter")));
+		_right_btn.set_text (string_compose ("%1: %2", _("Meter"), buf));
 	}
 }
 
@@ -1334,6 +1194,7 @@ AudioClock::set_session (Session *s)
 
 	if (_session) {
 
+		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
 		_session->tempo_map().MetricPositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::metric_position_changed, this), gui_context());
@@ -2199,19 +2060,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 
 	Gtk::Requisition req;
 	set_clock_dimensions (req);
-
-	if (_left_layout) {
-
-		_left_layout->set_attributes (info_attributes);
-		_right_layout->set_attributes (info_attributes);
-		/* adjust info_height according to font size */
-		int ignored;
-		_left_layout->set_text (" 1234567890");
-		_left_layout->get_pixel_size (ignored, info_height);
-
-		_left_layout->set_text ("");
-		_right_layout->set_text ("");
-	}
 
 	switch (_mode) {
 	case Timecode:

@@ -3489,7 +3489,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|GUI"),
 			new ColumVisibilityOption (
-				"action-table-columns", _("Action Script Button Visibility"), 3,
+				"action-table-columns", _("Action Script Button Visibility"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)

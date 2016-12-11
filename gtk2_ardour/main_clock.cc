@@ -17,14 +17,14 @@
 
 */
 
+#include "ardour/tempo.h"
+
+#include "actions.h"
 #include "main_clock.h"
+#include "ui_config.h"
 #include "public_editor.h"
 
-#include "ui_config.h"
-
 #include "pbd/i18n.h"
-
-#include "ardour/tempo.h"
 
 using namespace Gtk;
 
@@ -36,7 +36,14 @@ MainClock::MainClock (
 	: AudioClock (clock_name, false, widget_name, true, true, false, true)
 	  , _primary (primary)
 {
+}
 
+void
+MainClock::set_session (ARDOUR::Session *s)
+{
+	AudioClock::set_session (s);
+	_left_btn.set_related_action (ActionManager::get_action (X_("Editor"), X_("edit-current-tempo")));
+	_right_btn.set_related_action (ActionManager::get_action (X_("Editor"), X_("edit-current-meter")));
 }
 
 void
@@ -117,25 +124,3 @@ MainClock::insert_new_meter ()
 {
 	PublicEditor::instance().mouse_add_new_meter_event (absolute_time ());
 }
-
-bool
-MainClock::on_button_press_event (GdkEventButton *ev)
-{
-	if (ev->button == 1) {
-		if (mode() == BBT) {
-			if (is_lower_layout_click(ev->y)) {
-				if (is_right_layout_click(ev->x)) {
-					// meter on the right
-					edit_current_meter();
-				} else {
-					// tempo on the left
-					edit_current_tempo();
-				}
-				return true;
-			}
-		}
-	}
-
-	return AudioClock::on_button_press_event (ev);
-}
-

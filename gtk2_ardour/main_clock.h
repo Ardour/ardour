@@ -30,6 +30,7 @@ class MainClock : public AudioClock
 public:
 	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
 	framepos_t absolute_time () const;
+	void set_session (ARDOUR::Session *s);
 
 private:
 
@@ -42,8 +43,6 @@ private:
 	void insert_new_tempo ();
 	void insert_new_meter ();
 	bool _primary;
-
-	bool on_button_press_event (GdkEventButton *ev);
 };
 
 #endif // __gtk_ardour_main_clock_h__

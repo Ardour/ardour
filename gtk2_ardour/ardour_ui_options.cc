@@ -436,7 +436,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "action-table-columns") {
 		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
 		for (int i = 0; i < 9; ++i) {
-			const int col = i / 3;
+			const int col = i / 2;
 			if (cols & (1<<col)) {
 				action_script_call_btn[i].show();
 			} else {

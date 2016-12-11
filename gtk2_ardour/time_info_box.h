@@ -49,8 +49,7 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     void set_session (ARDOUR::Session*);
 
   private:
-    Gtk::Table left;
-    Gtk::Table right;
+    Gtk::Table table;
 
     AudioClock* selection_start;
     AudioClock* selection_end;
@@ -70,9 +69,6 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     PBD::ScopedConnectionList punch_connections;
     PBD::ScopedConnectionList editor_connections;
     PBD::ScopedConnectionList region_property_connections;
-
-    ArdourButton punch_in_button;
-    ArdourButton punch_out_button;
 
     void selection_changed ();
 

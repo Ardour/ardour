@@ -432,6 +432,8 @@ private:
 	void setup_transport ();
 	void setup_clock ();
 
+	bool transport_expose (GdkEventExpose*);
+
 	static ARDOUR_UI *theArdourUI;
 	SessionDialog *_session_dialog;
 
@@ -473,19 +475,9 @@ private:
 
 	/* Transport Control */
 
+	Gtk::Table               transport_table;
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
-	Gtk::Fixed               transport_base;
-	Gtk::Fixed               transport_button_base;
-	Gtk::Frame               transport_button_frame;
-	Gtk::HBox                transport_button_hbox;
-	Gtk::VBox                transport_button_vbox;
-	Gtk::HBox                transport_option_button_hbox;
-	Gtk::VBox                transport_option_button_vbox;
-	Gtk::HBox                transport_clock_hbox;
-	Gtk::VBox                transport_clock_vbox;
-	Gtk::HBox                primary_clock_hbox;
-	Gtk::HBox                secondary_clock_hbox;
 
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {
@@ -526,6 +518,12 @@ private:
 	ArdourButton auto_loop_button;
 	ArdourButton play_selection_button;
 	ArdourButton rec_button;
+	ArdourButton punch_in_button;
+	ArdourButton punch_out_button;
+	ArdourButton layered_button;
+
+	Gtk::Label   punch_label;
+	Gtk::Label   layered_label;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
@@ -571,8 +569,7 @@ private:
 	void _auditioning_changed (bool);
 
 	bool solo_alert_press (GdkEventButton* ev);
-	bool audition_alert_press (GdkEventButton* ev);
-	bool feedback_alert_press (GdkEventButton *);
+	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
 
 	void big_clock_value_changed ();
