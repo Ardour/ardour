@@ -112,14 +112,15 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 
 	points->push_back (ArdourCanvas::Duple (0.0, curve_height));
 
-	if (end_frame == (framepos_t) UINT32_MAX) {
+	if (frame >= end_frame) {
+		/* shouldn't happen but ..*/
 		const double tempo_at = _tempo.note_types_per_minute();
 		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
 		points->push_back (ArdourCanvas::Duple (0.0, y_pos));
-		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y_pos));
+		points->push_back (ArdourCanvas::Duple (1.0, y_pos));
 
-	} else if (_tempo.type() == ARDOUR::TempoSection::Constant) {
+	} else if (_tempo.type() == ARDOUR::TempoSection::Constant || _tempo.c_func() == 0.0) {
 		const double tempo_at = _tempo.note_types_per_minute();
 		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
@@ -130,7 +131,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		const framepos_t frame_step = max ((end_frame - frame) / 5, (framepos_t) 1);
 		framepos_t current_frame = frame;
 
-		while (current_frame < (end_frame - frame_step)) {
+		while (current_frame < end_frame) {
 			const double tempo_at = _tempo.tempo_at_minute (_tempo.minute_at_frame (current_frame)).note_types_per_minute();
 			const double y_pos = max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
 
@@ -142,7 +143,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		const double tempo_at = _tempo.tempo_at_minute (_tempo.minute_at_frame (end_frame)).note_types_per_minute();
 		const double y_pos = max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
 
-		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel ((end_frame - 1) - frame), min (y_pos, curve_height)));
+		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end_frame - frame), min (y_pos, curve_height)));
 	}
 
 	_curve->set (*points);
