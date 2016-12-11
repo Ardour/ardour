@@ -2511,14 +2511,15 @@ TempoMap::set_active_tempos (const Metrics& metrics, const framepos_t& frame)
 			if (t->initial()) {
 				t->set_active (true);
 				continue;
-			}
-			if (!t->initial() && t->active () && t->position_lock_style() == AudioTime && t->frame() < frame) {
-				t->set_active (false);
-				t->set_pulse (0.0);
-			} else if (!t->initial() && t->position_lock_style() == AudioTime && t->frame() > frame) {
-				t->set_active (true);
-			} else if (!t->initial() && t->position_lock_style() == AudioTime && t->frame() == frame) {
-				return false;
+			} else if (t->position_lock_style() == AudioTime) {
+				if (t->active () && t->frame() < frame) {
+					t->set_active (false);
+					t->set_pulse (0.0);
+				} else if (t->frame() > frame) {
+					t->set_active (true);
+				} else if (t->frame() == frame) {
+					return false;
+				}
 			}
 		}
 	}
