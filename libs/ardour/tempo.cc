@@ -2567,6 +2567,11 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 					}
 					continue;
 				}
+
+				if (t->frame() == frame_at_minute (minute)) {
+					return false;
+				}
+
 				if (t->position_lock_style() == MusicTime) {
 					prev_t->set_c_func (prev_t->compute_c_func_pulse (t->note_types_per_minute(), t->pulse()));
 					t->set_minute (prev_t->minute_at_ntpm (t->note_types_per_minute(), t->pulse()));
