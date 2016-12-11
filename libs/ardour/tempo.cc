@@ -3072,6 +3072,10 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 
 	const double beat = beat_at_bbt_locked (future_map, bbt);
 
+	if (section->position_lock_style() == AudioTime) {
+		tempo_copy->set_position_lock_style (MusicTime);
+	}
+
 	if (solve_map_pulse (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
 		ret.first = tempo_copy->pulse();
 		ret.second = tempo_copy->frame();
