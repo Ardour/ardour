@@ -274,6 +274,8 @@ ARDOUR_UI::setup_transport ()
 	error_alert_button.set_related_action(act);
 	error_alert_button.set_fallthrough_to_parent(true);
 
+	layered_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::layered_button_clicked));
+
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
@@ -333,6 +335,7 @@ ARDOUR_UI::setup_transport ()
 
 	punch_in_button.set_name ("punch button");
 	punch_out_button.set_name ("punch button");
+	layered_button.set_name (("layered button"));
 
 	click_button.set_name ("transport button");
 	sync_button.set_name ("transport active option button");
@@ -549,6 +552,14 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 	}
 	// maybe fall through to to button toggle
 	return !do_toggle;
+}
+
+void
+ARDOUR_UI::layered_button_clicked ()
+{
+	if (_session) {
+		_session->config.set_layered_record_mode (!_session->config.get_layered_record_mode ());
+	}
 }
 
 void

@@ -570,6 +570,8 @@ private:
 	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
 
+	void layered_button_clicked ();
+
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
 	void secondary_clock_value_changed ();

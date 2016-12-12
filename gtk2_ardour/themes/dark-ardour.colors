@@ -219,6 +219,8 @@
     <ColorAlias name="inactive group tab" alias="color 34"/>
     <ColorAlias name="invert button: fill active" alias="color 35"/>
     <ColorAlias name="invert button: led active" alias="color 37"/>
+    <ColorAlias name="layered button: fill" alias="color 25"/>
+    <ColorAlias name="layered button: fill active" alias="color 48"/>
     <ColorAlias name="location cd marker" alias="color 38"/>
     <ColorAlias name="location loop" alias="color 39"/>
     <ColorAlias name="location marker" alias="color 32"/>

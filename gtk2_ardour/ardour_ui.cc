@@ -2509,6 +2509,7 @@ ARDOUR_UI::map_transport_state ()
 		play_selection_button.unset_active_state ();
 		roll_button.unset_active_state ();
 		stop_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		layered_button.set_sensitive (false);
 		return;
 	}
 
@@ -2548,11 +2549,13 @@ ARDOUR_UI::map_transport_state ()
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);
 		}
+		layered_button.set_sensitive (!_session->actively_recording ());
 
 		stop_button.set_active (false);
 
 	} else {
 
+		layered_button.set_sensitive (true);
 		stop_button.set_active (true);
 		roll_button.set_active (false);
 		play_selection_button.set_active (false);

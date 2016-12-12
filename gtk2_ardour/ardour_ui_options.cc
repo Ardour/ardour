@@ -443,6 +443,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 				action_script_call_btn[i].hide();
 			}
 		}
+	} else if (p == "layered-record-mode") {
+		layered_button.set_active (_session->config.get_layered_record_mode ());
 	}
 }
 
