@@ -246,7 +246,20 @@ MidiModel::NoteDiffCommand::operator() ()
 
 		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 
-			if (!_model->add_note_unlocked (*i)) {
+			/* We need to copy the NotePtr. If we add the actual
+			 * NotePtr held in _added_notes, then it is inserted
+			 * into the intrusive containers used by the
+			 * MidiModel/Sequence. But we continue to hold a
+			 * reference to it (since this NoteDiffCommand has a
+			 * long life), and our destructor will attempt to
+			 * destroy it. If the destructor for the NotePtr finds
+			 * that it is linked into an intrusive list, it will
+			 * abort. 
+			 */
+
+			NotePtr* copy = new NotePtr (*i);
+
+			if (!_model->add_note_unlocked (*copy)) {
 				/* failed to add it, so don't leave it in the removed list, to
 				   avoid apparent errors on undo.
 				*/
@@ -255,6 +268,14 @@ MidiModel::NoteDiffCommand::operator() ()
 		}
 
 		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
+
+			/* We are asking the MidiModel/Sequence to remove the
+			 * NotePtr that evaluates operator== (*i) as true
+			 * ... that is, a NotePtr that points to the same Note
+			 * as *i. The actual NotePtr will not be identical (see
+			 * the _added_notes case above.
+			 */
+
 			_model->remove_note_unlocked (*i);
 		}
 
