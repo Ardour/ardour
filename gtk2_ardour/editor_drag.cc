@@ -1293,8 +1293,15 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
 			const boost::shared_ptr<const Region> original = rv->region();
-			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true
-										       , current_music_divisor (original->position(), event->button.state));
+			boost::shared_ptr<Region> region_copy;
+
+			if (rv == _primary) {
+				region_copy = RegionFactory::create (original, true
+								     , current_music_divisor (original->position(), event->button.state));
+			} else {
+				region_copy = RegionFactory::create (original, true, 0);
+			}
+
 			/* need to set this so that the drop zone code can work. This doesn't
 			   actually put the region into the playlist, but just sets a weak pointer
 			   to it.
@@ -1516,8 +1523,14 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		}
 
 		if (dest_rtv != 0) {
-			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
-									    modified_playlists, current_music_divisor (where, ev_state));
+			RegionView* new_view;
+			if (i->view == _primary) {
+				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+									modified_playlists, current_music_divisor (where, ev_state));
+			} else {
+				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+									modified_playlists, 0);
+			}
 
 			if (new_view != 0) {
 				new_views.push_back (new_view);
@@ -1624,11 +1637,18 @@ RegionMoveDrag::finished_no_copy (
 		if (changed_tracks) {
 
 			/* insert into new playlist */
-
-			RegionView* new_view = insert_region_into_playlist (
-				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
-				modified_playlists, current_music_divisor (where, ev_state)
-				);
+			RegionView* new_view;
+			if (rv == _primary) {
+				new_view = insert_region_into_playlist (
+					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
+					modified_playlists, current_music_divisor (where, ev_state)
+					);
+			} else {
+				new_view = insert_region_into_playlist (
+					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
+					modified_playlists, 0
+					);
+			}
 
 			if (new_view == 0) {
 				++i;
@@ -1686,8 +1706,11 @@ RegionMoveDrag::finished_no_copy (
 			if (r.second) {
 				playlist->freeze ();
 			}
-
-			rv->region()->set_position (where, current_music_divisor (where, ev_state));
+			if (rv == _primary) {
+				rv->region()->set_position (where, current_music_divisor (where, ev_state));
+			} else {
+				rv->region()->set_position (where, 0);
+			}
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
