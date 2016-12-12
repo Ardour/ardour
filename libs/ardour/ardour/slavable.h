@@ -52,6 +52,8 @@ class LIBARDOUR_API Slavable
 	void assign (boost::shared_ptr<VCA>);
 	void unassign (boost::shared_ptr<VCA>);
 
+	PBD::Signal2<void,boost::shared_ptr<VCA>,bool> AssignmentChange;
+
 	virtual boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) = 0;
 
 	static std::string xml_node_name;

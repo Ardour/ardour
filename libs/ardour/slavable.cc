@@ -117,19 +117,23 @@ void
 Slavable::assign (boost::shared_ptr<VCA> v)
 {
 	assert (v);
-	Glib::Threads::RWLock::WriterLock lm (master_lock);
-	if (assign_controls (v) == 0) {
-		_masters.insert (v->number());
+	{
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		if (assign_controls (v) == 0) {
+			_masters.insert (v->number());
+		}
+
+		/* Do NOT use ::unassign() because it will store a
+		 * boost::shared_ptr<VCA> in the functor, leaving a dangling ref to the
+		 * VCA.
+		 */
+
+
+		v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
+		v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
 	}
 
-	/* Do NOT use ::unassign() because it will store a
-	 * boost::shared_ptr<VCA> in the functor, leaving a dangling ref to the
-	 * VCA.
-	 */
-
-
-	v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
-	v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
+	AssignmentChange (v, true);
 }
 
 void
@@ -144,13 +148,17 @@ Slavable::weak_unassign (boost::weak_ptr<VCA> v)
 void
 Slavable::unassign (boost::shared_ptr<VCA> v)
 {
-	Glib::Threads::RWLock::WriterLock lm (master_lock);
-	(void) unassign_controls (v);
-	if (v) {
-		_masters.erase (v->number());
-	} else {
-		_masters.clear ();
+	{
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
+
+		(void) unassign_controls (v);
+		if (v) {
+			_masters.erase (v->number());
+		} else {
+			_masters.clear ();
+		}
 	}
+	AssignmentChange (v, false);
 }
 
 /* Gain, solo & mute are currently the only controls that are
