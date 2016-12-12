@@ -109,9 +109,9 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 {
 	if (offset != 0) {
 		_start_beats = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) - other->_quarter_note) + other->_start_beats;
+		update_length_beats (sub_num);
 	}
 
-	update_length_beats (sub_num);
 	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
