@@ -152,7 +152,6 @@ MixerStrip::init ()
 	ignore_toggle = false;
 	comment_area = 0;
 	_width_owner = 0;
-	spacer = 0;
 
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
 	longest_label = "longest label";
@@ -321,6 +320,15 @@ MixerStrip::init ()
 	} else {
 		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	}
+
+	//add a spacer underneath the master bus;
+	//this fills the area that is taken up by the scrollbar on the tracks;
+	//and therefore keeps the faders "even" across the bottom
+	HScrollbar scrollbar;
+	Gtk::Requisition requisition(scrollbar.size_request ());
+	int scrollbar_height = requisition.height;
+	spacer.set_size_request (-1, scrollbar_height+2);  //+2 is a fudge factor to accomodate extra padding in mixer strip
+	global_vpacker.pack_end (spacer, false, false);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -557,15 +565,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (_mixer_owned && route()->is_master() ) {
-
-		HScrollbar scrollbar;
-		Gtk::Requisition requisition(scrollbar.size_request ());
-		int scrollbar_height = requisition.height;
-
-		spacer = manage (new EventBox);
-		spacer->set_size_request (-1, scrollbar_height+2);
-		global_vpacker.pack_start (*spacer, false, false);
-		spacer->show();
+		spacer.show();
+	} else {
+		spacer.hide();
 	}
 
 	if (is_track()) {
