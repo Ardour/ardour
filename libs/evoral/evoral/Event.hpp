@@ -610,7 +610,7 @@ struct MultiEvent : public boost::intrusive_ref_counter<MultiEvent<Time,_num_eve
 	MultiEvent () { }
 	virtual ~MultiEvent() {}
 
-	size_t num_events() const { return _num_events; }
+	static size_t num_events() { return _num_events; }
 
 	EventPointer<Time> event (size_t n) const {
 		assert (n < _num_events);
