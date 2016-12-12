@@ -7080,7 +7080,12 @@ Session::auto_connect_thread_run ()
 			}
 		}
 
-		AudioEngine::instance()->clear_pending_port_deletions ();
+		{
+			// this may call ARDOUR::Port::drop ... jack_port_unregister ()
+			// jack1 cannot cope with removing ports while processing
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			AudioEngine::instance()->clear_pending_port_deletions ();
+		}
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
 	}
