@@ -455,6 +455,7 @@
         <menuitem action='temporal-zoom-out'/>
         <menuitem action='zoom-to-session'/>
         <menuitem action='zoom-to-selection'/>
+        <menuitem action='zoom-to-selection-horiz'/>
         <menuitem action='fit-selection'/>
         <menuitem action='toggle-zoom'/>
         <menuitem action='expand-tracks'/>

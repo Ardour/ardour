@@ -215,6 +215,12 @@ enum EditIgnoreOption {
 	EDIT_IGNORE_MARKER
 };
 
+enum ZoomAxis {
+	Vertical,
+	Horizontal,
+	Both
+};
+
 } // namespace Editing
 
 #endif // __gtk_ardour_editing_h__

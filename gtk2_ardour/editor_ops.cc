@@ -1922,53 +1922,6 @@ Editor::calc_extra_zoom_edges(framepos_t &start, framepos_t &end)
 	}
 }
 
-void
-Editor::temporal_zoom_region (bool both_axes)
-{
-	framepos_t start = max_framepos;
-	framepos_t end = 0;
-	set<TimeAxisView*> tracks;
-
-	if ( !get_selection_extents(start, end) )
-		return;
-
-	calc_extra_zoom_edges (start, end);
-
-	/* if we're zooming on both axes we need to save track heights etc.
-	 */
-
-	undo_visual_stack.push_back (current_visual_state (both_axes));
-
-	PBD::Unwinder<bool> nsv (no_save_visual, true);
-
-	temporal_zoom_by_frame (start, end);
-
-	if (both_axes) {
-		uint32_t per_track_height = (uint32_t) floor ((_visible_canvas_height - 10.0) / tracks.size());
-
-		/* set visible track heights appropriately */
-
-		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-			(*t)->set_height (per_track_height);
-		}
-
-		/* hide irrelevant tracks */
-
-		DisplaySuspender ds;
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-				hide_track_in_display (*i);
-			}
-		}
-
-		vertical_adjustment.set_value (0.0);
-	}
-
-	redo_visual_stack.push_back (current_visual_state (both_axes));
-}
-
-
 bool
 Editor::get_selection_extents (framepos_t &start, framepos_t &end) const
 {
@@ -2010,7 +1963,7 @@ Editor::get_selection_extents (framepos_t &start, framepos_t &end) const
 
 
 void
-Editor::temporal_zoom_selection (bool both_axes)
+Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 {
 	if (!selection) return;
 
@@ -2018,23 +1971,18 @@ Editor::temporal_zoom_selection (bool both_axes)
 
 	//ToDo:  if control points are selected, zoom to that
 
-	//if region(s) are selected, zoom to that
-	if ( !selection->regions.empty() )
-		temporal_zoom_region (both_axes);
+	if (axes == Horizontal || axes == Both) {
 
-	//if a range is selected, zoom to that
-	if (!selection->time.empty()) {
-
-		framepos_t start,  end;
+		framepos_t start, end;
 		if (get_selection_extents (start, end)) {
-			calc_extra_zoom_edges(start, end);
+			calc_extra_zoom_edges (start, end);
 			temporal_zoom_by_frame (start, end);
 		}
-
-		if (both_axes)
-			fit_selection();
 	}
 
+	if (axes == Vertical || axes == Both) {
+		fit_selection ();
+	}
 }
 
 void

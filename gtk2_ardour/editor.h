@@ -1304,8 +1304,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void loop_location (ARDOUR::Location&);
 
 	void calc_extra_zoom_edges(framepos_t &start, framepos_t &end);
-	void temporal_zoom_selection (bool both_axes = false);
-	void temporal_zoom_region (bool both_axes);
+	void temporal_zoom_selection (Editing::ZoomAxis);
 	void temporal_zoom_session ();
 	void temporal_zoom (framecnt_t samples_per_pixel);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
