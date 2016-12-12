@@ -125,7 +125,9 @@ ordered_erase (IntrusiveContainer & things, IntrusivePointer & existing_thing, C
 			break;
 		}
 
+		/* compare ptr-to-ptr .. does not compare referenced objects */
 		if (*i == existing_thing) {
+			std::cerr << "Found object, erase and dispose\n";
 			things.erase_and_dispose (i, delete_disposer<IntrusivePointer>());
 			return;
 		}
@@ -322,7 +324,8 @@ Sequence<Time>::add_note_unlocked (NotePtr & note, void* arg)
 	ordered_insert (_notes, note, TimeComparator<NotePtr,Time>());
 
 	/* already inserted @param note into one intrusive list (_notes); need to copy
-	   so that we can do add it to a second list (_pitches).
+	   so that we can do add it to a second list (_pitches). we are only
+	   copying the NotePtr; the copy still references the same Note.
 	*/
 
 	ordered_insert (_pitches[note->channel()], *(new NotePtr (note)), LowerNoteValueComparator<NotePtr>());
