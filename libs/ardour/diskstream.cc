@@ -148,6 +148,12 @@ Diskstream::~Diskstream ()
         delete deprecated_io_node;
 }
 
+bool
+Diskstream::non_layered () const
+{
+	return _session.config.get_layered_record_mode();
+}
+
 void
 Diskstream::set_track (Track* t)
 {

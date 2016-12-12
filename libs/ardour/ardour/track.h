@@ -56,9 +56,11 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	void resync_track_name ();
 
 	TrackMode mode () const { return _mode; }
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
+#endif
 
 	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
 

@@ -67,7 +67,9 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void mark_capture_end ();
 	void clear_capture_marks();
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	bool set_destructive (bool yn);
+#endif
 
 	bool one_of_several_channels () const;
     uint32_t channel_count () const { return _info.channels; }

@@ -37,8 +37,10 @@ class LIBARDOUR_API AudioTrack : public Track
 	AudioTrack (Session&, std::string name, TrackMode m = Normal);
 	~AudioTrack ();
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	int set_mode (TrackMode m);
 	bool can_use_mode (TrackMode m, bool& bounce_required);
+#endif
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	          int declick, bool& need_butler);

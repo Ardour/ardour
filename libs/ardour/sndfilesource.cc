@@ -799,6 +799,7 @@ SndFileSource::natural_position() const
 	return _timeline_position;
 }
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 bool
 SndFileSource::set_destructive (bool yn)
 {
@@ -817,6 +818,7 @@ SndFileSource::set_destructive (bool yn)
 
 	return true;
 }
+#endif
 
 void
 SndFileSource::clear_capture_marks ()

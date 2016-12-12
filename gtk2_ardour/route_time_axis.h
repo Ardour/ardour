@@ -280,7 +280,9 @@ protected:
 
 	ArdourCanvas::Rectangle* timestretch_rect;
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	void set_track_mode (ARDOUR::TrackMode, bool apply_to_selection = false);
+#endif
 
 	/** Information about all automatable processor parameters that apply to
 	 *  this route.  The Amp processor is not included in this list.

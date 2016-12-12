@@ -82,7 +82,9 @@ class LIBARDOUR_API Source : public SessionObject
 
 	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const;
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	virtual bool set_destructive (bool /*yn*/) { return false; }
+#endif
 	virtual bool length_mutable() const    { return false; }
 
 	static PBD::Signal1<void,Source*>             SourceCreated;

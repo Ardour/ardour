@@ -370,7 +370,9 @@ AddRouteDialog::refill_track_modes ()
 	vector<string> s;
 
 	s.push_back (_("Normal"));
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	s.push_back (_("Non Layered"));
+#endif
 	s.push_back (_("Tape"));
 
 	set_popdown_strings (mode_combo, s);

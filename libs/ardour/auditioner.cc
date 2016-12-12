@@ -332,12 +332,14 @@ Auditioner::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	if (Profile->get_trx()) {
 		_diskstream->set_destructive (false);
 	} else {
 		_diskstream->set_destructive (_mode == Destructive);
 	}
 	_diskstream->set_non_layered (_mode == NonLayered);
+#endif
 	_diskstream->set_record_enabled (false);
 	_diskstream->request_input_monitoring (false);
 

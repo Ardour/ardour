@@ -82,12 +82,14 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	if (Profile->get_trx()) {
 		_diskstream->set_destructive (false);
 	} else {
 		_diskstream->set_destructive (_mode == Destructive);
 	}
 	_diskstream->set_non_layered (_mode == NonLayered);
+#endif
 
 	if (audio_diskstream()->deprecated_io_node) {
 
@@ -110,6 +112,7 @@ AudioTrack::audio_diskstream() const
 	return boost::dynamic_pointer_cast<AudioDiskstream>(_diskstream);
 }
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 int
 AudioTrack::set_mode (TrackMode m)
 {
@@ -149,6 +152,7 @@ AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 		return false;
 	}
 }
+#endif
 
 int
 AudioTrack::deprecated_use_diskstream_connections ()

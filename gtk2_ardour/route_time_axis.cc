@@ -772,6 +772,7 @@ RouteTimeAxisView::build_display_menu ()
 			/* show nothing */
 		}
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 		Menu* mode_menu = manage (new Menu);
 		MenuList& mode_items = mode_menu->items ();
 		mode_menu->set_name ("ArdourContextMenu");
@@ -820,6 +821,7 @@ RouteTimeAxisView::build_display_menu ()
 		i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
 
 		items.push_back (MenuElem (_("Record Mode"), *mode_menu));
+#endif
 
 		items.push_back (SeparatorElem());
 
@@ -888,6 +890,7 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 void
 RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 {
@@ -911,6 +914,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		track()->set_mode (mode);
 	}
 }
+#endif
 
 void
 RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)

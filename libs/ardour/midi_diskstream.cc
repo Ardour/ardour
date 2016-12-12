@@ -288,6 +288,7 @@ MidiDiskstream::use_copy_playlist ()
 	}
 }
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 /** Overloaded from parent to die horribly
  */
 int
@@ -295,6 +296,7 @@ MidiDiskstream::set_destructive (bool yn)
 {
 	return yn ? -1 : 0;
 }
+#endif
 
 void
 MidiDiskstream::set_note_mode (NoteMode m)

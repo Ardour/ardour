@@ -109,13 +109,15 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	virtual void set_record_safe (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	virtual int set_destructive (bool /*yn*/) { return -1; }
 	virtual int set_non_layered (bool /*yn*/) { return -1; }
 	virtual	bool can_become_destructive (bool& /*requires_bounce*/) const { return false; }
+#endif
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
-	bool           non_layered()  const { return _flags & NonLayered; }
+	bool           non_layered() const;  // { return _flags & NonLayered; }
 	bool           reversed()    const { return _actual_speed < 0.0f; }
 	double         speed()       const { return _visible_speed; }
 

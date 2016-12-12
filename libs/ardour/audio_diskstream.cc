@@ -361,6 +361,7 @@ AudioDiskstream::use_destructive_playlist ()
 	{
 		const RegionList& rl (_playlist->region_list_property().rlist());
 		if (rl.size() > 0) {
+			/* this can happen when dragging a region onto a tape track */
 			assert((rl.size() == 1));
 			rp = rl.front();
 		}
@@ -392,7 +393,12 @@ AudioDiskstream::use_destructive_playlist ()
 
 		/* this might be false if we switched modes, so force it */
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 		(*chan)->write_source->set_destructive (true);
+#else
+		// should be set when creating the source or loading the state
+		assert ((*chan)->write_source->destructive());
+#endif
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -2384,6 +2390,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	return 0;
 }
 
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 int
 AudioDiskstream::set_non_layered (bool yn)
 {
@@ -2497,6 +2504,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	requires_bounce = false;
 	return true;
 }
+#endif
 
 void
 AudioDiskstream::adjust_playback_buffering ()
