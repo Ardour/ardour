@@ -387,7 +387,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (statbuf.st_size < expected_file_size) {
 			warning << string_compose (_("peak file %1 is truncated from %2 to %3"), _peakpath, expected_file_size, statbuf.st_size) << endmsg;
+			lm.release(); // build_peaks_from_scratch() takes _lock
 			const_cast<AudioSource*>(this)->build_peaks_from_scratch ();
+			lm.acquire ();
 			if (g_stat (_peakpath.c_str(), &statbuf) != 0) {
 				error << string_compose (_("Cannot open peakfile @ %1 for size check (%2) after rebuild"), _peakpath, strerror (errno)) << endmsg;
 			}
