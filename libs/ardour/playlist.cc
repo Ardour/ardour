@@ -680,6 +680,7 @@ Playlist::flush_notifications (bool from_undo)
 		partition_internal (pos - 1, (pos + region->length()), true, thawlist);
 		for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 			(*i)->resume_property_changes ();
+			_session.add_command (new StatefulDiffCommand (*i));
 		}
 	 }
 
@@ -1006,6 +1007,7 @@ Playlist::flush_notifications (bool from_undo)
 
 				 /* "front" ***** */
 
+				 current->clear_changes ();
 				 current->suspend_property_changes ();
 				 thawlist.push_back (current);
 				 current->cut_end (pos2 - 1);
@@ -1046,6 +1048,7 @@ Playlist::flush_notifications (bool from_undo)
 
 				 /* front ****** */
 
+				 current->clear_changes ();
 				 current->suspend_property_changes ();
 				 thawlist.push_back (current);
 				 current->cut_end (pos2 - 1);
@@ -1090,6 +1093,7 @@ Playlist::flush_notifications (bool from_undo)
 
 				 /* end */
 
+				 current->clear_changes ();
 				 current->suspend_property_changes ();
 				 thawlist.push_back (current);
 				 current->trim_front (pos3);
