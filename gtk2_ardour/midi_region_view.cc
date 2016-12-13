@@ -126,6 +126,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
+
+	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
+	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
+
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
@@ -169,6 +173,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
+
+	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
+	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
+
 	_note_group->raise_to_top();
 
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -1880,14 +1888,16 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 	// so we need to do something more sophisticated to keep its color
 	// appearance (MidiPatchChangeFill/MidiPatchChangeInactiveChannelFill)
 	// up to date.
-
 	boost::shared_ptr<PatchChange> patch_change = boost::shared_ptr<PatchChange>(
 		new PatchChange(*this, group,
 				displaytext,
 				height,
 				x, 1.0,
 				instrument_info(),
-				patch));
+				patch,
+				_patch_change_outline,
+				_patch_change_fill)
+		);
 
 	if (patch_change->item().width() < _pixel_width) {
 		// Show unless patch change is beyond the region bounds
@@ -3829,6 +3839,9 @@ void
 MidiRegionView::color_handler ()
 {
 	RegionView::color_handler ();
+
+	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
+	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->set_selected ((*i)->selected()); // will change color

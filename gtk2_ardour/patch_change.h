@@ -40,7 +40,9 @@ public:
 	            double                            x,
 	            double                            y,
 	            ARDOUR::InstrumentInfo&           info,
-	            ARDOUR::MidiModel::PatchChangePtr patch);
+	            ARDOUR::MidiModel::PatchChangePtr patch,
+		    ArdourCanvas::Color               outline_color,
+		    ArdourCanvas::Color               fill_color);
 
 	~PatchChange();
 
