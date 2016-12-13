@@ -50,6 +50,7 @@ UI_CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", fa
 UI_CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
 UI_CONFIG_VARIABLE (bool, use_mouse_position_as_zoom_focus_on_scroll, "use-mouse-position-as-zoom-focus-on-scroll", true)
 UI_CONFIG_VARIABLE (bool, use_time_rulers_to_zoom_with_vertical_drag, "use-time-rulers-to-zoom-with-vertical-drag", false)
+UI_CONFIG_VARIABLE (bool, use_double_click_to_zoom_to_selection, "use-double-click-to-zoom-to-selection", false)
 UI_CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)
 UI_CONFIG_VARIABLE (bool, use_tooltips, "use-tooltips", true)
 UI_CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-element-visibility", "Input,PhaseInvert,RecMon,SoloIsoLock,Output,Comments")

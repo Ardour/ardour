@@ -2143,6 +2143,16 @@ Editor::note_edit_done (int r, EditNoteDialog* d)
 }
 
 void
+Editor::edit_region (RegionView* rv)
+{
+	if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
+		temporal_zoom_selection (ZoomAxis::Both);
+	} else {
+		rv->show_region_editor ();
+	}
+}
+
+void
 Editor::visible_order_range (int* low, int* high) const
 {
 	*low = TimeAxisView::max_order ();
