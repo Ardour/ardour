@@ -307,8 +307,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		if (req->invalidation) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", event_loop_name(), pthread_name()));
-			assert (req->invalidation->event_loop && req->invalidation->event_loop != this);
-			Glib::Threads::Mutex::Lock lm (req->invalidation->event_loop->request_invalidation_mutex());
+			Glib::Threads::Mutex::Lock lm (req->invalidation->event_loop->request_invalidation_mutex(), Glib::Threads::NOT_LOCK);
+			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
+				lm.acquire ();
+			}
 
 			/* after this call, if the object referenced by the
 			 * invalidation record is deleted, it will no longer
