@@ -76,9 +76,10 @@ class LIBPBD_API EventLoop
 	};
 
 	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
-        virtual Glib::Threads::Mutex& slot_invalidation_mutex() = 0;
+	virtual Glib::Threads::Mutex& slot_invalidation_mutex() = 0;
+	virtual Glib::Threads::Mutex& request_invalidation_mutex() = 0;
 
-        std::string event_loop_name() const { return _name; }
+	std::string event_loop_name() const { return _name; }
 
 	static EventLoop* get_event_loop_for_thread();
 	static void set_event_loop_for_thread (EventLoop* ui);

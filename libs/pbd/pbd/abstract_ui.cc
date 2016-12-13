@@ -240,7 +240,8 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					request_buffer_map_lock.lock ();
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
-						Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
+						assert (vec.buf[0]->invalidation->event_loop);
+						Glib::Threads::Mutex::Lock lm (vec.buf[0]->invalidation->event_loop->request_invalidation_mutex());
 						if (!(*i).second->dead) {
 							vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
 						}
@@ -257,6 +258,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	/* clean up any dead request buffers (their thread has exited) */
 
+	Glib::Threads::Mutex::Lock lr (request_invalidation_lock);
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
 		if ((*i).second->dead) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
@@ -304,8 +306,9 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 */
 
 		if (req->invalidation) {
-			Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", event_loop_name(), pthread_name()));
+			assert (req->invalidation->event_loop && req->invalidation->event_loop != this);
+			Glib::Threads::Mutex::Lock lm (req->invalidation->event_loop->request_invalidation_mutex());
 
 			/* after this call, if the object referenced by the
 			 * invalidation record is deleted, it will no longer

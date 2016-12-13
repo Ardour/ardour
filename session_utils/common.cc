@@ -77,10 +77,12 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 		}
 
 		Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
+		Glib::Threads::Mutex& request_invalidation_mutex() { return request_invalidation_lock; }
 
 	private:
 		Glib::Threads::Thread* run_loop_thread;
 		Glib::Threads::Mutex   request_buffer_map_lock;
+		Glib::Threads::Mutex   request_invalidation_lock;
 };
 
 static MyEventLoop *event_loop;

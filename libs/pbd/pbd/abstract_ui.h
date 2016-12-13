@@ -60,7 +60,8 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
-        Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
+	Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
+	Glib::Threads::Mutex& request_invalidation_mutex() { return request_invalidation_lock; }
 
 	Glib::Threads::Mutex request_buffer_map_lock;
 	Glib::Threads::Mutex request_invalidation_lock;
