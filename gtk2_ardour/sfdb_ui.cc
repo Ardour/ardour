@@ -1436,7 +1436,7 @@ SoundFileOmega::reset_options ()
 	vector<string> channel_strings;
 
 	if (mode == ImportAsTrack || mode == ImportAsTapeTrack || mode == ImportToTrack) {
-		/// XXX needs special casing for MIDI type-1 files
+
 		channel_strings.push_back (_("one track per file"));
 
 		if (selection_includes_multichannel) {
@@ -1578,24 +1578,23 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 		} else if (SMFSource::valid_midi_file (*i)) {
 
 			Evoral::SMF reader;
-			reader.open(*i);
-			if (reader.num_tracks() > 1) {
-				/* NOTE: we cannot merge midi-tracks.
-				 * they will always be on separate tracks
-				 * "one track per file" is not possible.
-				 */
-				//multichannel = true; // "channel" == track here...
-			}
-			if (reader.is_type0 () && reader.channels().size() > 1) {
-				/* for type-0 files, we can split
-				 * "one track per channel"
-				 */
-				multichannel = true;
-			}
 
-			/* XXX we need err = true handling here in case
-			   we can't check the file
-			*/
+			if (reader.open (*i)) {
+				err = true;
+			} else {
+				if (reader.is_type0 ()) {
+					if (reader.channels().size() > 1) {
+						/* for type-0 files, we can split
+						 * "one track per channel"
+						 */
+						multichannel = true;
+					}
+				} else {
+					if (reader.num_tracks() > 1) {
+						multichannel = true;
+					}
+				}
+			}
 
 		} else {
 			err = true;
