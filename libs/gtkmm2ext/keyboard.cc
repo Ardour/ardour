@@ -60,7 +60,7 @@ guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef __APPLE__
 
-uint Keyboard::PrimaryModifier = (GDK_MOD2_MASK|GDK_META_MASK);   // Command
+guint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option

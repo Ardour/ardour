@@ -177,18 +177,6 @@ KeyboardKey::display_label () const
 
 	uint32_t mod = state();
 
-#ifdef __APPLE__
-	/* We use both bits (MOD2|META) for Primary on OS X,
-	 * but we don't want MOD2 showing up in listings. So remove
-	 * it and add back META.
-	 */
-
-	if (mod & GDK_MOD2_MASK) {
-		mod = (mod & ~GDK_MOD2_MASK) | GDK_META_MASK;
-	}
-#endif
-
-
 	return gtk_accelerator_get_label (key(), (GdkModifierType) mod);
 }
 
@@ -601,16 +589,6 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 
 
 		int mod = kb.state();
-#ifdef __APPLE__
-		/* See comments in Keyboard::Keyboard about GTK handling of MOD2, META and the Command key.
-		 *
-		 * If we do not do this, GTK+ won't show the correct text for shortcuts in menus.
-		 */
-
-		if (mod & GDK_MOD2_MASK) {
-			mod =  mod | GDK_META_MASK;
-		}
-#endif
 
 		Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) mod);
 	}

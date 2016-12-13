@@ -878,9 +878,9 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
 					modifiers |= NSControlKeyMask;
 				}
 				
-				/* gdk/quartz maps Command to Meta (XXX check this - it may move to SUPER at some point) */
+				/* our modified gdk/quartz maps Command to Mod2 */
 				
-				if (key->accel_mods & GDK_META_MASK) {
+				if (key->accel_mods & GDK_MOD2_MASK) {
 					modifiers |= NSCommandKeyMask;
 				}
 			}  
