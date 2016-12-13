@@ -5314,7 +5314,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (was_double_click()) {
 			if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
-				_editor->temporal_zoom_selection (ZoomAxis::Both);
+				_editor->temporal_zoom_selection (Both);
 				return;
 			}
 		}

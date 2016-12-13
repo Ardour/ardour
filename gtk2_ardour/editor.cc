@@ -1947,7 +1947,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Loop Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), ZoomAxis::Horizontal)));
+	edit_items.push_back (MenuElem (_("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), Horizontal)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
@@ -3794,7 +3794,7 @@ Editor::build_track_count_menu ()
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 8 hours"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 8 * 60 * 60 * 1000)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 24 hours"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 24 * 60 * 60 * 1000)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session)));
-		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Range/Region Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), ZoomAxis::Horizontal)));
+		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Range/Region Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), Horizontal)));
 	}
 }
 

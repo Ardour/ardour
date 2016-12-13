@@ -2146,7 +2146,7 @@ void
 Editor::edit_region (RegionView* rv)
 {
 	if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
-		temporal_zoom_selection (ZoomAxis::Both);
+		temporal_zoom_selection (Both);
 	} else {
 		rv->show_region_editor ();
 	}
