@@ -1467,6 +1467,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	PlaylistSet modified_playlists;
 	RouteTimeAxisView* new_time_axis_view = 0;
 
+	int32_t divisor = current_music_divisor (_primary->region()->position() - drag_delta, ev_state);
+	TempoMap& tmap (_editor->session()->tempo_map());
+	double qn_delta = _primary->region()->quarter_note() - tmap.exact_qn_at_frame (_primary->region()->position() - drag_delta, divisor);
+
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
 
@@ -1527,8 +1531,14 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
 									modified_playlists, current_music_divisor (where, ev_state));
 			} else {
-				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
-									modified_playlists, 0);
+				if (i->view->region()->position_lock_style() == AudioTime) {
+					new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+										modified_playlists, 0);
+				} else {
+					where = tmap.frame_at_quarter_note (i->view->region()->quarter_note() - qn_delta);
+					new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+										modified_playlists, 0);
+				}
 			}
 
 			if (new_view != 0) {
@@ -1576,6 +1586,10 @@ RegionMoveDrag::finished_no_copy (
 
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
+
+	int32_t divisor = current_music_divisor (_primary->region()->position() - drag_delta, ev_state);
+	TempoMap& tmap (_editor->session()->tempo_map());
+	double qn_delta = _primary->region()->quarter_note() - tmap.exact_qn_at_frame (_primary->region()->position() - drag_delta, divisor);
 
 	std::set<boost::shared_ptr<const Region> > uniq;
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
@@ -1643,10 +1657,19 @@ RegionMoveDrag::finished_no_copy (
 					modified_playlists, current_music_divisor (where, ev_state)
 					);
 			} else {
-				new_view = insert_region_into_playlist (
-					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
-					modified_playlists, 0
-					);
+				if (rv->region()->position_lock_style() == AudioTime) {
+
+					new_view = insert_region_into_playlist (
+						RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
+						modified_playlists, 0
+						);
+				} else {
+					where = tmap.frame_at_quarter_note (rv->region()->quarter_note() - qn_delta);
+					new_view = insert_region_into_playlist (
+						RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where,
+						modified_playlists, 0
+						);
+				}
 			}
 
 			if (new_view == 0) {
@@ -1708,7 +1731,12 @@ RegionMoveDrag::finished_no_copy (
 			if (rv == _primary) {
 				rv->region()->set_position (where, current_music_divisor (where, ev_state));
 			} else {
-				rv->region()->set_position (where, 0);
+				if (rv->region()->position_lock_style() == AudioTime) {
+					rv->region()->set_position (where, 0);
+				} else {
+					rv->region()->set_position (tmap.frame_at_quarter_note (rv->region()->quarter_note() - qn_delta), 0);
+
+				}
 			}
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
