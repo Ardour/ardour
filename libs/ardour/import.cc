@@ -118,7 +118,9 @@ open_importable_source (const string& path, framecnt_t samplerate, ARDOUR::SrcQu
 }
 
 vector<string>
-Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& import_file_path, uint32_t channels)
+Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& import_file_path, uint32_t channels,
+                                    vector<string> const & smf_track_names)
+
 {
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
@@ -129,13 +131,19 @@ Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& impo
 		string filepath;
 
 		switch (type) {
-		  case DataType::MIDI:
-				if (channels > 1) {
-					string mchn_name = string_compose ("%1-t%2", basename, n);
-					filepath = new_midi_source_path (mchn_name);
+		case DataType::MIDI:
+			assert (smf_track_names.empty() || smf_track_names.size() == channels);
+			if (channels > 1) {
+				string mchn_name;
+				if (smf_track_names.empty() || smf_track_names[n].empty()) {
+					mchn_name = string_compose ("%1-t%2", basename, n);
 				} else {
-					filepath = new_midi_source_path (basename);
+					mchn_name = string_compose ("%1-%2", basename, smf_track_names[n]);
 				}
+				filepath = new_midi_source_path (mchn_name);
+			} else {
+				filepath = new_midi_source_path (basename);
+			}
 			break;
 		case DataType::AUDIO:
 			filepath = new_audio_source_path (basename, channels, n, false, false);
@@ -484,6 +492,7 @@ Session::import_files (ImportStatus& status)
 	boost::shared_ptr<AudioFileSource> afs;
 	boost::shared_ptr<SMFSource> smfs;
 	uint32_t channels = 0;
+	vector<string> smf_names;
 
 	status.sources.clear ();
 
@@ -508,12 +517,25 @@ Session::import_files (ImportStatus& status)
 		} else {
 			try {
 				smf_reader = std::auto_ptr<Evoral::SMF>(new Evoral::SMF());
-				smf_reader->open(*p);
+
+				if (smf_reader->open(*p)) {
+					throw Evoral::SMF::FileError (*p);
+				}
 
 				if (smf_reader->is_type0 () && status.split_midi_channels) {
 					channels = smf_reader->channels().size();
 				} else {
 					channels = smf_reader->num_tracks();
+					switch (status.midi_track_name_source) {
+					case SMFTrackNumber:
+						break;
+					case SMFTrackName:
+						smf_reader->track_names (smf_names);
+						break;
+					case SMFInstrumentName:
+						smf_reader->instrument_names (smf_names);
+						break;
+					}
 				}
 			} catch (...) {
 				error << _("Import: error opening MIDI file") << endmsg;
@@ -527,7 +549,7 @@ Session::import_files (ImportStatus& status)
 			continue;
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, channels);
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, channels, smf_names);
 		Sources newfiles;
 		framepos_t natural_position = source ? source->natural_position() : 0;
 
