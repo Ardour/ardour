@@ -278,7 +278,9 @@ struct smf_track_struct {
 
 	int        track_number;
 	size_t     number_of_events;
-
+	/* this will be set from the SMF file if present, during loading */
+	char*      name;
+	char*      instrument;
 	/** These are private fields using only by loading and saving routines. */
 	void      *file_buffer;
 	size_t     file_buffer_length;
