@@ -91,7 +91,7 @@ EventLoop::invalidate_request (void* data)
 		{
 			Glib::Threads::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
 			for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {
-				(*i)->valid = false;
+				(*i)->invalidate ();
 				(*i)->invalidation = 0;
 			}
 		}

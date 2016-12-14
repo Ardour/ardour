@@ -168,7 +168,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3\n", event_loop_name(), rt, pthread_name()));
 
 		vec.buf[0]->type = rt;
-		vec.buf[0]->valid = true;
+		vec.buf[0]->validate ();
 		return vec.buf[0];
 	}
 
@@ -218,7 +218,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			if (vec.len[0] == 0) {
 				break;
 			} else {
-				if (vec.buf[0]->valid) {
+				if (vec.buf[0]->valid ()) {
 					/* We first need to remove the event from the list.
 					 * If the event results in object destruction, PBD::EventLoop::invalidate_request
 					 * will delete the invalidation record (aka buf[0]), so we cannot use it after calling do_request
@@ -327,7 +327,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			}
 		}
 
-		if (!req->valid) {
+		if (!req->valid ()) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", event_loop_name(), pthread_name(), req->type));
 			delete req;
 			continue;

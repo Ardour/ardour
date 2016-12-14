@@ -67,12 +67,16 @@ class LIBPBD_API EventLoop
         static void* invalidate_request (void* data);
 
 	struct BaseRequestObject {
-	    RequestType             type;
-            bool                    valid;
-            InvalidationRecord*     invalidation;
-	    boost::function<void()> the_slot;
+		RequestType             type;
+		gint                    _valid;
+		InvalidationRecord*     invalidation;
+		boost::function<void()> the_slot;
 
-            BaseRequestObject() : valid (true), invalidation (0) {}
+		BaseRequestObject() : _valid (0), invalidation (0) {}
+
+		void validate () { g_atomic_int_set (&_valid, 1); }
+		void invalidate () { g_atomic_int_set (&_valid, 0); }
+		bool valid () { return g_atomic_int_get (&_valid) == 1; }
 	};
 
 	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
