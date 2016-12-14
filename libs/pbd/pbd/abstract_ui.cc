@@ -219,8 +219,27 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 				break;
 			} else {
 				if (vec.buf[0]->valid) {
+					/* We first need to remove the event from the list.
+					 * If the event results in object destruction, PBD::EventLoop::invalidate_request
+					 * will delete the invalidation record (aka buf[0]), so we cannot use it after calling do_request
+					 */
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: remove request from its invalidation list\n", event_loop_name()));
+					if (vec.buf[0]->invalidation) {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
+						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
+							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
+						}
+						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
+							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().unlock ();
+						}
+					} else {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
+					}
+
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, unlocking before calling\n", event_loop_name()));
 					rbml.release ();
+
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
 					do_request (vec.buf[0]);
 
@@ -237,18 +256,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					}
 
 					rbml.acquire ();
-					if (vec.buf[0]->invalidation && !(*i).second->dead) {
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
-						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
-						}
-						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
-						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().unlock ();
-						}
-					} else {
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
-					}
 				} else {
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, "invalid request, ignoring\n");
 				}
@@ -323,7 +330,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		if (!req->valid) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", event_loop_name(), pthread_name(), req->type));
 			delete req;
-			//rbml.release ();
 			continue;
 		}
 
