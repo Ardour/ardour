@@ -266,6 +266,7 @@ Editor::do_import (vector<string>        paths,
                    ImportDisposition     disposition,
                    ImportMode            mode,
                    SrcQuality            quality,
+                   MidiTrackNameSource   midi_track_name_source,
                    framepos_t&           pos,
                    ARDOUR::PluginInfoPtr instrument)
 {
@@ -278,7 +279,7 @@ Editor::do_import (vector<string>        paths,
 	import_status.current = 1;
 	import_status.total = paths.size ();
 	import_status.all_done = false;
-	import_status.midi_track_name_source = SMFTrackName;
+	import_status.midi_track_name_source = midi_track_name_source;
 
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 

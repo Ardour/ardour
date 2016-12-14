@@ -411,10 +411,10 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		frame = 0;
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame, is.selected_instrument());
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, frame, is.selected_instrument());
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
-			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
+			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, SMFTrackName, frame);
 		} else {
 			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
@@ -427,10 +427,10 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 			/* select the track, then embed/import */
 			selection->set (tv);
 
-			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
+			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, SMFTrackName, frame);
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
-				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
+				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, SMFTrackName, frame);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}

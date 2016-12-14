@@ -283,12 +283,14 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText src_combo;
+	Gtk::ComboBoxText midi_track_name_combo;
 	InstrumentSelector instrument_combo;
 
 	Gtk::CheckButton copy_files_btn;
 
 	void set_mode (Editing::ImportMode);
 	Editing::ImportMode get_mode() const;
+	ARDOUR::MidiTrackNameSource get_midi_track_name_source () const;
 	Editing::ImportPosition get_position() const;
 	Editing::ImportDisposition get_channel_disposition() const;
 	ARDOUR::SrcQuality get_src_quality() const;

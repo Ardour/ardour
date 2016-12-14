@@ -84,8 +84,24 @@ using std::string;
 string SoundFileBrowser::persistent_folder;
 typedef TreeView::Selection::ListHandle_Path ListPath;
 
+static MidiTrackNameSource
+string2miditracknamesource (string const & str)
+{
+	if (str == _("by track number")) {
+		return SMFTrackNumber;
+	} else if (str == _("by track name")) {
+		return SMFTrackName;
+	} else if (str == _("by instrument name")) {
+		return SMFInstrumentName;
+	}
+
+	warning << string_compose (_("programming error: unknown midi track name source string %1"), str) << endmsg;
+
+	return SMFTrackNumber;
+}
+
 static ImportMode
-string2importmode (string str)
+string2importmode (string const & str)
 {
 	if (str == _("as new tracks")) {
 		return ImportAsTrack;
@@ -1730,9 +1746,14 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (src_combo, 1, 2, 4, 5, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
-	l->set_markup (_("<b>Instrument</b>"));
+	l->set_markup (_("<b>MIDI Track Names</b>"));
 	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (instrument_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
+	options.attach (midi_track_name_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
+
+	l = manage (new Label);
+	l->set_markup (_("<b>Instrument</b>"));
+	options.attach (*l, 3, 4, 2, 3, FILL, SHRINK, 8, 0);
+	options.attach (instrument_combo, 3, 4, 3, 4, FILL, SHRINK, 8, 0);
 
 	Alignment *hspace = manage (new Alignment ());
 	hspace->set_size_request (2, 2);
@@ -1741,6 +1762,13 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	Alignment *vspace = manage (new Alignment ());
 	vspace->set_size_request (2, 2);
 	options.attach (*vspace, 2, 3, 0, 3, EXPAND, SHRINK, 0, 0);
+
+	str.clear ();
+	str.push_back (_("by track number"));
+	str.push_back (_("by track name"));
+	str.push_back (_("by instrument name"));
+	set_popdown_strings (midi_track_name_combo, str);
+	midi_track_name_combo.set_active_text (str.front());
 
 	str.clear ();
 	str.push_back (_("one track per file"));
@@ -1881,6 +1909,12 @@ SoundFileOmega::where_combo_changed()
 	preview.set_import_position(get_position());
 }
 
+MidiTrackNameSource
+SoundFileOmega::get_midi_track_name_source () const
+{
+	return string2miditracknamesource (midi_track_name_combo.get_active_text());
+}
+
 ImportDisposition
 SoundFileOmega::get_channel_disposition () const
 {
@@ -1953,6 +1987,7 @@ SoundFileOmega::do_something (int action)
 	ImportDisposition chns = get_channel_disposition ();
 	PluginInfoPtr instrument = instrument_combo.selected_instrument();
 	framepos_t where;
+	MidiTrackNameSource mts = get_midi_track_name_source ();
 
 	switch (pos) {
 	case ImportAtEditPoint:
@@ -1974,7 +2009,7 @@ SoundFileOmega::do_something (int action)
 	_import_active = true;
 
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, where, instrument);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, where, instrument);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
@@ -1986,4 +2021,3 @@ SoundFileOmega::do_something (int action)
 		reset_options ();
 	}
 }
-

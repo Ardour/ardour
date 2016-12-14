@@ -428,6 +428,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	                Editing::ImportDisposition            disposition,
 	                Editing::ImportMode                   mode,
 	                ARDOUR::SrcQuality                    quality,
+	                ARDOUR::MidiTrackNameSource           mts,
 	                framepos_t&                           pos,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
