@@ -95,8 +95,9 @@ EventLoop::invalidate_request (void* data)
 				(*i)->invalidation = 0;
 			}
 		}
-		// should this not always be deleted, regardless if there's an event_loop?
-		delete ir;
+		// This invalidation record may still be in-use in per-thread-request-ringbuffer.
+		// it cannot be deleted here,
+		ir->event_loop->trash.push_back(ir);
 	} else {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("EventLoop::invalidate_request no event-loop for invalidation %1\n", ir));
 	}

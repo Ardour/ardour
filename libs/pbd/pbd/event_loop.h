@@ -99,6 +99,8 @@ public:
 	static void pre_register (const std::string& emitting_thread_name, uint32_t num_requests);
 	static void remove_request_buffer_from_map (void* ptr);
 
+	std::list<InvalidationRecord*> trash;
+
 private:
 	static Glib::Threads::Private<EventLoop> thread_event_loop;
 	std::string _name;

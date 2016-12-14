@@ -218,6 +218,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			if (vec.len[0] == 0) {
 				break;
 			} else {
+				bool alive = true;
 				if (vec.buf[0]->valid ()) {
 					/* We first need to remove the event from the list.
 					 * If the event results in object destruction, PBD::EventLoop::invalidate_request
@@ -225,6 +226,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					 */
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: remove request %2 from its invalidation list %3\n", event_loop_name(), vec.buf[0], vec.buf[0]->invalidation));
 					if (vec.buf[0]->invalidation) {
+						alive = std::find (trash.begin(), trash.end(), vec.buf[0]->invalidation) == trash.end();
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
 							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
@@ -240,8 +242,12 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, unlocking before calling\n", event_loop_name()));
 					rbml.release ();
 
-					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
-					do_request (vec.buf[0]);
+					if (alive) {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
+						do_request (vec.buf[0]);
+					} else {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: skipping invalidated request\n", event_loop_name()));
+					}
 
 					/* if the request was CallSlot, then we need to ensure that we reset the functor in the request, in case it
 					 * held a shared_ptr<>. Failure to do so can lead to dangling references to objects passed to PBD::Signals.
@@ -263,8 +269,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			}
 		}
 	}
-
-	/* clean up any dead request buffers (their thread has exited) */
 
 	assert (rbml.locked ());
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
@@ -369,6 +373,15 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		rbml.acquire();
 	}
+
+	/* clean up any dead invalidation records (object was deleted) */
+	trash.sort();
+	trash.unique();
+	for (std::list<InvalidationRecord*>::const_iterator r = trash.begin(); r != trash.end(); ++r) {
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
+		delete *r;
+	}
+	trash.clear ();
 
 	rbml.release ();
 }
