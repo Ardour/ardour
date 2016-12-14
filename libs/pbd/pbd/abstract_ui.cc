@@ -78,7 +78,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	vector<EventLoop::ThreadBufferMapping> tbm = EventLoop::get_request_buffers_for_target_thread (event_loop_name());
 
 	{
-		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
+		Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
 		for (vector<EventLoop::ThreadBufferMapping>::iterator t = tbm.begin(); t != tbm.end(); ++t) {
 			request_buffers[t->emitting_thread] = static_cast<RequestBuffer*> (t->request_buffer);
 		}
@@ -135,7 +135,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 		   only at thread initialization time, not repeatedly,
 		   and so this is of little consequence.
 		*/
-		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
+		Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 
@@ -192,8 +192,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	RequestBufferVector vec;
 
 	/* check all registered per-thread buffers first */
-
-	request_buffer_map_lock.lock ();
+	Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
 
 	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 check %2 request buffers for requests\n", event_loop_name(), request_buffers.size()));
 
@@ -221,7 +220,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			} else {
 				if (vec.buf[0]->valid) {
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, unlocking before calling\n", event_loop_name()));
-					request_buffer_map_lock.unlock ();
+					rbml.release ();
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
 					do_request (vec.buf[0]);
 
@@ -237,13 +236,18 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 						vec.buf[0]->the_slot = 0;
 					}
 
-					request_buffer_map_lock.lock ();
+					rbml.acquire ();
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
-						assert (vec.buf[0]->invalidation->event_loop);
-						Glib::Threads::Mutex::Lock lm (vec.buf[0]->invalidation->event_loop->request_invalidation_mutex());
-						if (!(*i).second->dead) {
+						Glib::Threads::Mutex::Lock li (vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex(), Glib::Threads::NOT_LOCK);
+						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
+							li.acquire ();
+						}
+						//if (!(*i).second->dead) {
 							vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+						//}
+						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
+							li.release ();
 						}
 					} else {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
@@ -258,17 +262,17 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	/* clean up any dead request buffers (their thread has exited) */
 
-	Glib::Threads::Mutex::Lock lr (request_invalidation_lock);
+	assert (rbml.locked ());
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
 		if ((*i).second->dead) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
 			                                                     event_loop_name(), pthread_name(), i->second));
+			RequestBufferMapIterator tmp = i;
+			++tmp;
 			/* remove it from the EventLoop static map of all request buffers */
 			EventLoop::remove_request_buffer_from_map ((*i).second);
 			/* delete it */
 			delete (*i).second;
-			RequestBufferMapIterator tmp = i;
-			++tmp;
 			/* remove it from this thread's list of request buffers */
 			request_buffers.erase (i);
 			i = tmp;
@@ -277,28 +281,12 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		}
 	}
 
-	request_buffer_map_lock.unlock ();
-
 	/* and now, the generic request buffer. same rules as above apply */
 
-	Glib::Threads::Mutex::Lock lm (request_list_lock);
-
 	while (!request_list.empty()) {
+		assert (rbml.locked ());
 		RequestObject* req = request_list.front ();
 		request_list.pop_front ();
-
-		/* We need to use this lock, because its the one
-		 * returned by slot_invalidation_mutex() and protects
-		 * against request invalidation.
-		 */
-
-		request_buffer_map_lock.lock ();
-		if (!req->valid) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", event_loop_name(), pthread_name(), req->type));
-			delete req;
-			request_buffer_map_lock.unlock ();
-			continue;
-		}
 
 		/* we're about to execute this request, so its
 		 * too late for any invalidation. mark
@@ -307,9 +295,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		if (req->invalidation) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", event_loop_name(), pthread_name()));
-			Glib::Threads::Mutex::Lock lm (req->invalidation->event_loop->request_invalidation_mutex(), Glib::Threads::NOT_LOCK);
+
+			Glib::Threads::Mutex::Lock li (req->invalidation->event_loop->slot_invalidation_mutex(), Glib::Threads::NOT_LOCK);
 			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
-				lm.acquire ();
+				li.acquire ();
 			}
 
 			/* after this call, if the object referenced by the
@@ -329,6 +318,16 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			 * and only provide a safeguard for modifications to the
 			 * container itself.
 			 */
+			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
+				li.release ();
+			}
+		}
+
+		if (!req->valid) {
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", event_loop_name(), pthread_name(), req->type));
+			delete req;
+			//rbml.release ();
+			continue;
 		}
 
 		/* at this point, an object involved in a functor could be
@@ -340,14 +339,16 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 * references to objects to enter into the request queue.
 		 */
 
-		request_buffer_map_lock.unlock ();
-
 		/* unlock the request lock while we execute the request, so
 		 * that we don't needlessly block other threads (note: not RT
 		 * threads since they have their own queue) from making requests.
 		 */
 
-		lm.release ();
+		/* also the request may destroy the object itself resulting in a direct
+		 * path to EventLoop::invalidate_request () from here
+		 * which takes the lock */
+
+		rbml.release ();
 
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 execute request type %3\n", event_loop_name(), pthread_name(), req->type));
 
@@ -363,8 +364,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		/* re-acquire the list lock so that we check again */
 
-		lm.acquire();
+		rbml.acquire();
 	}
+
+	rbml.release ();
 }
 
 template <typename RequestObject> void
@@ -410,7 +413,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			   single-reader/single-writer semantics
 			*/
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", event_loop_name(), pthread_name(), req->type));
-			Glib::Threads::Mutex::Lock lm (request_list_lock);
+			Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 			request_list.push_back (req);
 		}
 
@@ -466,7 +469,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 		 * runs. So there is no race between signal-emissions/call_slot()
 		 * and adding new requests after the object has been invalidated.
 		 */
-		Glib::Threads::Mutex::Lock lm (request_invalidation_lock);
+		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 		invalidation->requests.push_back (req);
 		invalidation->event_loop = this;
 	}

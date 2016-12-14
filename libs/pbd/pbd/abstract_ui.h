@@ -54,27 +54,25 @@ class Touchable;
 template<typename RequestObject>
 class ABSTRACT_UI_API AbstractUI : public BaseUI
 {
-  public:
+public:
 	AbstractUI (const std::string& name);
 	virtual ~AbstractUI() {}
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
 	Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
-	Glib::Threads::Mutex& request_invalidation_mutex() { return request_invalidation_lock; }
 
 	Glib::Threads::Mutex request_buffer_map_lock;
-	Glib::Threads::Mutex request_invalidation_lock;
 
 	static void* request_buffer_factory (uint32_t num_requests);
 
-  protected:
+protected:
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
-                bool dead;
-                RequestBuffer (uint32_t size)
-                        : PBD::RingBufferNPT<RequestObject> (size)
-	                , dead (false) {}
-        };
+		bool dead;
+		RequestBuffer (uint32_t size)
+			: PBD::RingBufferNPT<RequestObject> (size)
+			, dead (false) {}
+	};
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
 #if defined(COMPILER_MINGW) && defined(PTW32_VERSION)
@@ -93,9 +91,8 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 #endif
 
 	RequestBufferMap request_buffers;
-        static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;
+	static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;
 
-	Glib::Threads::Mutex               request_list_lock;
 	std::list<RequestObject*> request_list;
 
 	RequestObject* get_request (RequestType);
