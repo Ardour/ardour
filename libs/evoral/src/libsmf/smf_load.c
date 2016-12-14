@@ -812,8 +812,22 @@ parse_mtrk_chunk(smf_track_t *track)
 			break;
 		}
 
-		if (event_is_end_of_track(event))
+		if (event_is_end_of_track(event)) {
 			break;
+		}
+
+		if (smf_event_is_metadata (event)) {
+			switch (event->midi_buffer[1]) {
+			case 0x03:
+				track->name = smf_event_extract_text (event);
+				break;
+			case 0x04:
+				track->instrument = smf_event_extract_text (event);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	track->file_buffer = NULL;
