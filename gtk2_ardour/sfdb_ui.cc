@@ -1437,11 +1437,11 @@ SoundFileOmega::reset_options ()
 
 	if (mode == ImportAsTrack || mode == ImportAsTapeTrack || mode == ImportToTrack) {
 
-		channel_strings.push_back (_("one track per file"));
-
 		if (selection_includes_multichannel) {
 			channel_strings.push_back (_("one track per channel"));
 		}
+
+		channel_strings.push_back (_("one track per file"));
 
 		if (paths.size() > 1) {
 			/* tape tracks are a single region per track, so we cannot
