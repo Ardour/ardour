@@ -150,6 +150,13 @@ smf_track_delete(smf_track_t *track)
 	assert(track->events_array->len == 0);
 	g_ptr_array_free(track->events_array, TRUE);
 
+	if (track->name) {
+		free (track->name);
+	}
+	if (track->instrument) {
+		free (track->instrument);
+	}
+
 	memset(track, 0, sizeof(smf_track_t));
 	free(track);
 }
