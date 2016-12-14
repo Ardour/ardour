@@ -692,6 +692,12 @@ namespace ARDOUR {
 		SharePlaylist
 	};
 
+	enum MidiTrackNameSource {
+		SMFTrackNumber,
+		SMFTrackName,
+		SMFInstrumentName
+	};
+
 } // namespace ARDOUR
 
 
