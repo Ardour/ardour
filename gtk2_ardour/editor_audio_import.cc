@@ -278,6 +278,7 @@ Editor::do_import (vector<string>        paths,
 	import_status.current = 1;
 	import_status.total = paths.size ();
 	import_status.all_done = false;
+	import_status.midi_track_name_source = SMFTrackName;
 
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 
