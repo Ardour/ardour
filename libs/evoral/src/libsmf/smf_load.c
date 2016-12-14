@@ -657,8 +657,9 @@ smf_event_is_textual(const smf_event_t *event)
 		return (0);
 	}
 
-	if (event->midi_buffer_length < 4)
+	if (event->midi_buffer_length < 4) {
 		return (0);
+	}
 
 	if (event->midi_buffer[3] < 1 || event->midi_buffer[3] > 9)
 		return (0);
