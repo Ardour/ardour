@@ -237,14 +237,12 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					}
 
 					rbml.acquire ();
-					if (vec.buf[0]->invalidation) {
+					if (vec.buf[0]->invalidation && !(*i).second->dead) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
 							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
 						}
-						//if (!(*i).second->dead) {
-							vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
-						//}
+						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
 							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().unlock ();
 						}
