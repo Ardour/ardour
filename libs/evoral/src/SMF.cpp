@@ -472,4 +472,55 @@ SMF::round_to_file_precision (double val) const
 	return round (val * div) / div;
 }
 
+void
+SMF::track_names(vector<string>& names) const
+{
+	if (!_smf) {
+		return;
+	}
+
+	names.clear ();
+
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
+	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
+		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
+		if (!trk) {
+			names.push_back (string());
+		} else {
+			if (trk->name) {
+				names.push_back (trk->name);
+			} else {
+				names.push_back (string());
+			}
+		}
+	}
+}
+
+void
+SMF::instrument_names(vector<string>& names) const
+{
+	if (!_smf) {
+		return;
+	}
+
+	names.clear ();
+
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
+	for (uint16_t n = 0; n < _smf->number_of_tracks; ++n) {
+		smf_track_t* trk = smf_get_track_by_number (_smf, n+1);
+		if (!trk) {
+			names.push_back (string());
+		} else {
+			if (trk->instrument) {
+				names.push_back (trk->instrument);
+			} else {
+				names.push_back (string());
+			}
+		}
+	}
+}
+
+
 } // namespace Evoral

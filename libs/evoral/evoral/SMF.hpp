@@ -78,8 +78,10 @@ public:
 
 	bool is_type0 () const { return _type0; }
 	std::set<uint8_t> channels () const { return _type0channels; }
+	void track_names (std::vector<std::string>&) const;
+	void instrument_names (std::vector<std::string>&) const;
 
-private:
+  private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
