@@ -239,15 +239,14 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					rbml.acquire ();
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
-						Glib::Threads::Mutex::Lock li (vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex(), Glib::Threads::NOT_LOCK);
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							li.acquire ();
+							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
 						}
 						//if (!(*i).second->dead) {
 							vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
 						//}
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							li.release ();
+							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().unlock ();
 						}
 					} else {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
