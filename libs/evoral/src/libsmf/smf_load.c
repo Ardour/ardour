@@ -653,8 +653,9 @@ make_string(const unsigned char *buf, const size_t buffer_length, uint32_t len)
 int
 smf_event_is_textual(const smf_event_t *event)
 {
-	if (!smf_event_is_metadata(event))
+	if (!smf_event_is_metadata(event)) {
 		return (0);
+	}
 
 	if (event->midi_buffer_length < 4)
 		return (0);
