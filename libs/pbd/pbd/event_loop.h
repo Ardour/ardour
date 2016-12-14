@@ -45,7 +45,7 @@ namespace PBD
 
 class LIBPBD_API EventLoop
 {
-  public:
+public:
 	EventLoop (std::string const&);
 	virtual ~EventLoop() {}
 
@@ -53,18 +53,18 @@ class LIBPBD_API EventLoop
 		range_guarantee = ~0
 	};
 
-        struct BaseRequestObject;
+	struct BaseRequestObject;
 
-        struct InvalidationRecord {
-	    std::list<BaseRequestObject*> requests;
-	    PBD::EventLoop* event_loop;
-	    const char* file;
-	    int line;
+	struct InvalidationRecord {
+		std::list<BaseRequestObject*> requests;
+		PBD::EventLoop* event_loop;
+		const char* file;
+		int line;
 
-	    InvalidationRecord() : event_loop (0) {}
-        };
+		InvalidationRecord() : event_loop (0) {}
+	};
 
-        static void* invalidate_request (void* data);
+	static void* invalidate_request (void* data);
 
 	struct BaseRequestObject {
 		RequestType             type;
@@ -99,8 +99,8 @@ class LIBPBD_API EventLoop
 	static void pre_register (const std::string& emitting_thread_name, uint32_t num_requests);
 	static void remove_request_buffer_from_map (void* ptr);
 
-  private:
-        static Glib::Threads::Private<EventLoop> thread_event_loop;
+private:
+	static Glib::Threads::Private<EventLoop> thread_event_loop;
 	std::string _name;
 
 	typedef std::map<std::string,ThreadBufferMapping> ThreadRequestBufferList;
@@ -110,14 +110,14 @@ class LIBPBD_API EventLoop
 	struct RequestBufferSupplier {
 
 		/* @param name : name of object/entity that will/may accept
-		   requests from other threads, via a request buffer.
-		*/
+		 * requests from other threads, via a request buffer.
+		 */
 		std::string name;
 
 		/* @param factory : a function that can be called (with an
-		   argument specifying the @param number_of_requests) to create and
-		   return a request buffer for communicating with @param name)
-		*/
+		 * argument specifying the @param number_of_requests) to create and
+		 * return a request buffer for communicating with @param name)
+		 */
 		void* (*factory)(uint32_t nunber_of_requests);
 	};
 	typedef std::vector<RequestBufferSupplier> RequestBufferSuppliers;
