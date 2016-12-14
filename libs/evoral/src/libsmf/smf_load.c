@@ -679,11 +679,8 @@ smf_event_extract_text(const smf_event_t *event)
 	uint32_t string_length = 0;
 	uint32_t length_length = 0;
 
-	if (!smf_event_is_textual(event))
-		return (NULL);
-
-	if (event->midi_buffer_length < 3) {
-		g_critical("smf_event_extract_text: truncated MIDI message.");
+	if (!smf_event_is_textual(event)) {
+		g_warning ("smf_event_extract_text: event is not textual.");
 		return (NULL);
 	}
 
