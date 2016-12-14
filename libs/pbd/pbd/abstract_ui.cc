@@ -223,7 +223,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					 * If the event results in object destruction, PBD::EventLoop::invalidate_request
 					 * will delete the invalidation record (aka buf[0]), so we cannot use it after calling do_request
 					 */
-					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: remove request from its invalidation list\n", event_loop_name()));
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: remove request %2 from its invalidation list %3\n", event_loop_name(), vec.buf[0], vec.buf[0]->invalidation));
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
 						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
@@ -298,7 +298,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 */
 
 		if (req->invalidation) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", event_loop_name(), pthread_name()));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request %3 from its invalidation list %4\n", event_loop_name(), pthread_name(), req, req->invalidation));
 
 			Glib::Threads::Mutex::Lock li (req->invalidation->event_loop->slot_invalidation_mutex(), Glib::Threads::NOT_LOCK);
 			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
