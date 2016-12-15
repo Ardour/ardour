@@ -1145,7 +1145,7 @@ MidiRegionView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<PatchChange>();
 }
 
 void
