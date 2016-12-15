@@ -525,10 +525,9 @@ ArdourMarker::set_right_label_limit (double p)
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: ArdourMarker (editor, parent, rgba, text, Tempo, 0, false),
+	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.frame(), false),
 	  _tempo (temp)
 {
-	set_position (_tempo.frame());
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 }
 
@@ -560,10 +559,9 @@ TempoMarker::update_height_mark (const double& ratio)
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: ArdourMarker (editor, parent, rgba, text, Meter, 0, false),
+	: ArdourMarker (editor, parent, rgba, text, Meter, m.frame(), false),
 	  _meter (m)
 {
-	set_position (_meter.frame());
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), group, this));
 }
 
