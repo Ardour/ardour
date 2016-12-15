@@ -220,8 +220,8 @@ TempoSection::set_type (Type type)
 Tempo
 TempoSection::tempo_at_minute (const double& m) const
 {
-
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && m < minute());
+	if (constant) {
 		return Tempo (note_types_per_minute(), note_type());
 	}
 
@@ -246,7 +246,8 @@ TempoSection::tempo_at_minute (const double& m) const
 double
 TempoSection::minute_at_ntpm (const double& ntpm, const double& p) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && p < pulse());
+	if (constant) {
 		return ((p - pulse()) / pulses_per_minute()) + minute();
 	}
 
@@ -258,8 +259,9 @@ TempoSection::minute_at_ntpm (const double& ntpm, const double& p) const
 Tempo
 TempoSection::tempo_at_pulse (const double& p) const
 {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && p < pulse());
 
-	if (_type == Constant || _c_func == 0.0) {
+	if (constant) {
 		return Tempo (note_types_per_minute(), note_type());
 	}
 
@@ -279,7 +281,8 @@ TempoSection::tempo_at_pulse (const double& p) const
 double
 TempoSection::pulse_at_ntpm (const double& ntpm, const double& m) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && m < minute());
+	if (constant) {
 		return ((m - minute()) * pulses_per_minute()) + pulse();
 	}
 
@@ -291,7 +294,8 @@ TempoSection::pulse_at_ntpm (const double& ntpm, const double& m) const
 double
 TempoSection::pulse_at_minute (const double& m) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && m < minute());
+	if (constant) {
 		return ((m - minute()) * pulses_per_minute()) + pulse();
 	}
 
@@ -303,7 +307,8 @@ TempoSection::pulse_at_minute (const double& m) const
 double
 TempoSection::minute_at_pulse (const double& p) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && p < pulse());
+	if (constant) {
 		return ((p - pulse()) / pulses_per_minute()) + minute();
 	}
 
@@ -319,7 +324,8 @@ TempoSection::minute_at_pulse (const double& p) const
 double
 TempoSection::pulse_at_frame (const framepos_t& f) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && f < frame());
+	if (constant) {
 		return (minute_at_frame (f - frame()) * pulses_per_minute()) + pulse();
 	}
 
@@ -329,7 +335,8 @@ TempoSection::pulse_at_frame (const framepos_t& f) const
 framepos_t
 TempoSection::frame_at_pulse (const double& p) const
 {
-	if (_type == Constant || _c_func == 0.0) {
+	const bool constant = _type == Constant || _c_func == 0.0 || (initial() && p < pulse());
+	if (constant) {
 		return frame_at_minute (((p - pulse()) / pulses_per_minute()) + minute());
 	}
 
