@@ -203,6 +203,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			std::list<InvalidationRecord*>::const_iterator tmp = r;
 			++tmp;
 			delete *r;
+			trash.erase (r);
 			r = tmp;
 		} else {
 			++r;
