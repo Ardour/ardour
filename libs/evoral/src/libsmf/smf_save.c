@@ -382,6 +382,32 @@ write_track(smf_track_t *track)
 	if (ret)
 		return (ret);
 
+	if (track->name) {
+		printf ("save track name [%s]\n", track->name);
+		smf_event_t *ev = smf_event_new_textual (0x03, track->name);
+		ev->delta_time_pulses = 0; /* time zero */
+		ev->track = track;
+		ret = write_event (ev);
+		ev->track = 0;
+		smf_event_delete (ev);
+		if (ret) {
+			return ret;
+		}
+	}
+
+	if (track->instrument) {
+		printf ("save track instrument [%s]\n", track->instrument);
+		smf_event_t *ev = smf_event_new_textual (0x04, track->instrument);
+		ev->delta_time_pulses = 0; /* time zero */
+		ev->track = track;
+		ret = write_event (ev);
+		ev->track = 0;
+		smf_event_delete (ev);
+		if (ret) {
+			return ret;
+		}
+	}
+
 	while ((event = smf_track_get_next_event(track)) != NULL) {
 		ret = write_event(event);
 		if (ret)
