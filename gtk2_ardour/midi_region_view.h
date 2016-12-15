@@ -126,6 +126,7 @@ public:
 	void paste_internal (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
 	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
+	void remove_canvas_patch_change (PatchChange* pc);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the patch change event
@@ -461,6 +462,8 @@ private:
 	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
 	NoteBase* find_canvas_note (Evoral::event_id_t id);
 	Events::iterator _optimization_iterator;
+
+	boost::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);

@@ -1136,6 +1136,18 @@ MidiRegionView::find_canvas_note (Evoral::event_id_t id)
 	return 0;
 }
 
+boost::shared_ptr<PatchChange>
+MidiRegionView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
+{
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		if ((*x)->patch() == p) {
+			return (*x);
+		}
+	}
+
+	return 0;
+}
+
 void
 MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOperator op, uint8_t val, int chan_mask)
 {
@@ -1246,7 +1258,6 @@ MidiRegionView::redisplay_model()
 		}
 	}
 
-	_patch_changes.clear();
 	_sys_exes.clear();
 
 	display_sysexes();
@@ -1282,13 +1293,20 @@ void
 MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_channel)
 {
 	for (MidiModel::PatchChanges::const_iterator i = _model->patch_changes().begin(); i != _model->patch_changes().end(); ++i) {
+		boost::shared_ptr<PatchChange> p;
 
 		if ((*i)->channel() != channel) {
 			continue;
 		}
 
-		const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
-		add_canvas_patch_change (*i, patch_name, active_channel);
+		if ((p = find_canvas_patch_change (*i)) != 0) {
+			framecnt_t region_frames = source_beats_to_region_frames ((*i)->time());
+			const double x = trackview.editor().sample_to_pixel (region_frames);
+			p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
+		} else {
+			const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+			add_canvas_patch_change (*i, patch_name, active_channel);
+		}
 	}
 }
 
@@ -1913,6 +1931,18 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 	_patch_changes.push_back (patch_change);
 }
 
+void
+MidiRegionView::remove_canvas_patch_change (PatchChange* pc)
+{
+	/* remove the canvas item */
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		if ((*x)->patch() == pc->patch()) {
+			_patch_changes.erase (x);
+			break;
+		}
+	}
+}
+
 MIDI::Name::PatchPrimaryKey
 MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 {
@@ -1953,6 +1983,9 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 {
 	string name = _("alter patch change");
 	trackview.editor().begin_reversible_command (name);
+
+	remove_canvas_patch_change (&pc);
+
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (pc.patch()->program() != new_patch.program()) {
@@ -1967,7 +2000,6 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 	_model->apply_command (*trackview.session(), c);
 	trackview.editor().commit_reversible_command ();
 
-	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
@@ -1977,6 +2009,13 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	string name = _("alter patch change");
 	trackview.editor().begin_reversible_command (name);
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
+
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		if ((*x)->patch() == old_change) {
+			_patch_changes.erase (x);
+			break;
+		}
+	}	
 
 	if (old_change->time() != new_change.time()) {
 		c->change_time (old_change, new_change.time());
@@ -1997,7 +2036,6 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	_model->apply_command (*trackview.session(), c);
 	trackview.editor().commit_reversible_command ();
 
-	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
@@ -2025,7 +2063,6 @@ MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beat
 	_model->apply_command (*trackview.session(), c);
 	trackview.editor().commit_reversible_command ();
 
-	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
@@ -2038,7 +2075,6 @@ MidiRegionView::move_patch_change (PatchChange& pc, Evoral::Beats t)
 	_model->apply_command (*trackview.session(), c);
 	trackview.editor().commit_reversible_command ();
 
-	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
@@ -2046,12 +2082,14 @@ void
 MidiRegionView::delete_patch_change (PatchChange* pc)
 {
 	trackview.editor().begin_reversible_command (_("delete patch change"));
+
+	remove_canvas_patch_change (pc);
+
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
 	_model->apply_command (*trackview.session(), c);
 	trackview.editor().commit_reversible_command ();
 
-	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
