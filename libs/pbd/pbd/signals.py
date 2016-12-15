@@ -139,7 +139,7 @@ def signal(f, n, v):
 	*/
 
 	void connect_same_thread (ScopedConnection& c, const slot_function_type& slot) {
-		c = _connect (slot);
+		c = _connect (0, slot);
 	}
 
 	/** Arrange for @a slot to be executed whenever this signal is emitted. 
@@ -150,7 +150,7 @@ def signal(f, n, v):
 	*/
 	
 	void connect_same_thread (ScopedConnectionList& clist, const slot_function_type& slot) {
-		clist.add_connection (_connect (slot));
+		clist.add_connection (_connect (0, slot));
 	}
 
 	/** Arrange for @a slot to be executed in the context of @a event_loop
@@ -196,7 +196,7 @@ def signal(f, n, v):
     else:
         p = ", %s" % comma_separated(u)
 
-    print("\t\tclist.add_connection (_connect (boost::bind (&compositor, slot, event_loop, ir%s)));" % p, file=f)
+    print("\t\tclist.add_connection (_connect (ir, boost::bind (&compositor, slot, event_loop, ir%s)));" % p, file=f)
 
     print("""
 	}
@@ -215,7 +215,7 @@ def signal(f, n, v):
 			ir->event_loop = event_loop;
 		}
 """, file=f)
-    print("\t\tc = _connect (boost::bind (&compositor, slot, event_loop, ir%s));" % p, file=f)
+    print("\t\tc = _connect (ir, boost::bind (&compositor, slot, event_loop, ir%s));" % p, file=f)
     print("\t}", file=f)
 
     print("""
@@ -290,9 +290,9 @@ def signal(f, n, v):
     print("\tfriend class Connection;", file=f)
 
     print("""
-	boost::shared_ptr<Connection> _connect (slot_function_type f)
+	boost::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f)
 	{
-		boost::shared_ptr<Connection> c (new Connection (this));
+		boost::shared_ptr<Connection> c (new Connection (this, ir));
 		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots[c] = f;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
@@ -307,13 +307,16 @@ def signal(f, n, v):
     print("""
 	void disconnect (boost::shared_ptr<Connection> c)
 	{
-		Glib::Threads::Mutex::Lock lm (_mutex);
-		_slots.erase (c);
+		{
+			Glib::Threads::Mutex::Lock lm (_mutex);
+    			_slots.erase (c);
+    		}
+		c->disconnected ();
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-                if (_debug_connection) {
-                        std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+               	if (_debug_connection) {
+    			std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
                         PBD::stacktrace (std::cerr, 10);
-                }
+		}
 #endif
 	}
 };    
