@@ -196,11 +196,11 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	/* clean up any dead invalidation records (object was deleted) */
 	trash.sort();
 	trash.unique();
-	for (std::list<InvalidationRecord*>::const_iterator r = trash.begin(); r != trash.end();) {
+	for (std::list<InvalidationRecord*>::iterator r = trash.begin(); r != trash.end();) {
 		if (!(*r)->in_use ()) {
 			assert (!(*r)->valid ());
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
-			std::list<InvalidationRecord*>::const_iterator tmp = r;
+			std::list<InvalidationRecord*>::iterator tmp = r;
 			++tmp;
 			delete *r;
 			trash.erase (r);
