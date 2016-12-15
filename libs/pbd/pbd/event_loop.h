@@ -58,25 +58,33 @@ public:
 	struct InvalidationRecord {
 		std::list<BaseRequestObject*> requests;
 		PBD::EventLoop* event_loop;
+		gint _valid;
+		gint _ref;
 		const char* file;
 		int line;
 
-		InvalidationRecord() : event_loop (0) {}
+		InvalidationRecord() : event_loop (0), _valid (1), _ref (0) {}
+		void invalidate () { g_atomic_int_set (&_valid, 0); }
+		bool valid () { return g_atomic_int_get (&_valid) == 1; }
+
+		void ref ()    { g_atomic_int_inc (&_ref); }
+		void unref ()  { g_atomic_int_dec_and_test (&_ref); }
+		bool in_use () { return g_atomic_int_get (&_ref) > 0; }
 	};
 
 	static void* invalidate_request (void* data);
 
 	struct BaseRequestObject {
 		RequestType             type;
-		gint                    _valid;
 		InvalidationRecord*     invalidation;
 		boost::function<void()> the_slot;
 
-		BaseRequestObject() : _valid (0), invalidation (0) {}
-
-		void validate () { g_atomic_int_set (&_valid, 1); }
-		void invalidate () { g_atomic_int_set (&_valid, 0); }
-		bool valid () { return g_atomic_int_get (&_valid) == 1; }
+		BaseRequestObject() : invalidation (0) {}
+		~BaseRequestObject() {
+			if (invalidation) {
+				invalidation->unref ();
+			}
+		}
 	};
 
 	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;

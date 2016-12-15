@@ -88,18 +88,9 @@ EventLoop::invalidate_request (void* data)
 
 	if (ir->event_loop) {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: EventLoop::invalidate_request %2\n", ir->event_loop, ir));
-		{
-			Glib::Threads::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
-			for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {
-				(*i)->invalidate ();
-				(*i)->invalidation = 0;
-			}
-		}
-		// This invalidation record may still be in-use in per-thread-request-ringbuffer.
-		// it cannot be deleted here,
+		Glib::Threads::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
+		ir->invalidate ();
 		ir->event_loop->trash.push_back(ir);
-	} else {
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("EventLoop::invalidate_request no event-loop for invalidation %1\n", ir));
 	}
 
 	return 0;

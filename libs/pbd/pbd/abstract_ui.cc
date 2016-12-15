@@ -168,7 +168,6 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3\n", event_loop_name(), rt, pthread_name()));
 
 		vec.buf[0]->type = rt;
-		vec.buf[0]->validate ();
 		return vec.buf[0];
 	}
 
@@ -194,11 +193,30 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	/* check all registered per-thread buffers first */
 	Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
 
+	/* clean up any dead invalidation records (object was deleted) */
+	trash.sort();
+	trash.unique();
+	for (std::list<InvalidationRecord*>::const_iterator r = trash.begin(); r != trash.end();) {
+		if (!(*r)->in_use ()) {
+			assert (!(*r)->valid ());
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
+			delete *r;
+			r = trash.erase (r);
+		} else {
+			++r;
+		}
+	}
+#ifndef NDEBUG
+	if (trash.size() > 0) {
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 items in trash: %2\n", event_loop_name(), trash.size()));
+	}
+#endif
+
 	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 check %2 request buffers for requests\n", event_loop_name(), request_buffers.size()));
 
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
 
-		while (true) {
+		while (!(*i).second->dead) {
 
 			/* we must process requests 1 by 1 because
 			 * the request may run a recursive main
@@ -213,57 +231,38 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			i->second->get_read_vector (&vec);
 
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 reading requests from RB[%2] @ %5, requests = %3 + %4\n",
-			                                                     event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1], i->second));
+						event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1], i->second));
 
 			if (vec.len[0] == 0) {
 				break;
 			} else {
-				bool alive = true;
-				if (vec.buf[0]->valid ()) {
-					/* We first need to remove the event from the list.
-					 * If the event results in object destruction, PBD::EventLoop::invalidate_request
-					 * will delete the invalidation record (aka buf[0]), so we cannot use it after calling do_request
-					 */
-					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: remove request %2 from its invalidation list %3\n", event_loop_name(), vec.buf[0], vec.buf[0]->invalidation));
-					if (vec.buf[0]->invalidation) {
-						alive = std::find (trash.begin(), trash.end(), vec.buf[0]->invalidation) == trash.end();
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
-						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().lock ();
-						}
-						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
-						if (vec.buf[0]->invalidation->event_loop && vec.buf[0]->invalidation->event_loop != this) {
-							vec.buf[0]->invalidation->event_loop->slot_invalidation_mutex().unlock ();
-						}
-					} else {
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
-					}
+				if (vec.buf[0]->invalidation && !vec.buf[0]->invalidation->valid ()) {
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: skipping invalidated request\n", event_loop_name()));
+					rbml.release ();
+				} else {
 
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, unlocking before calling\n", event_loop_name()));
 					rbml.release ();
 
-					if (alive) {
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
-						do_request (vec.buf[0]);
-					} else {
-						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: skipping invalidated request\n", event_loop_name()));
-					}
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
+					do_request (vec.buf[0]);
+				}
 
-					/* if the request was CallSlot, then we need to ensure that we reset the functor in the request, in case it
-					 * held a shared_ptr<>. Failure to do so can lead to dangling references to objects passed to PBD::Signals.
-					 *
-					 * Note that this method (::handle_ui_requests()) is by definition called from the event loop thread, so
-					 * caller_is_self() is true, which means that the execution of the functor has definitely happened after
-					 * do_request() returns and we no longer need the functor for any reason.
-					 */
+				/* if the request was CallSlot, then we need to ensure that we reset the functor in the request, in case it
+				 * held a shared_ptr<>. Failure to do so can lead to dangling references to objects passed to PBD::Signals.
+				 *
+				 * Note that this method (::handle_ui_requests()) is by definition called from the event loop thread, so
+				 * caller_is_self() is true, which means that the execution of the functor has definitely happened after
+				 * do_request() returns and we no longer need the functor for any reason.
+				 */
 
-					if (vec.buf[0]->type == CallSlot) {
-						vec.buf[0]->the_slot = 0;
-					}
+				if (vec.buf[0]->type == CallSlot) {
+					vec.buf[0]->the_slot = 0;
+				}
 
-					rbml.acquire ();
-				} else {
-					DEBUG_TRACE (PBD::DEBUG::AbstractUI, "invalid request, ignoring\n");
+				rbml.acquire ();
+				if (vec.buf[0]->invalidation) {
+					vec.buf[0]->invalidation->unref ();
 				}
 				i->second->increment_read_ptr (1);
 			}
@@ -273,13 +272,17 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	assert (rbml.locked ());
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
 		if ((*i).second->dead) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
-			                                                     event_loop_name(), pthread_name(), i->second));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4 (%5 requests)\n", event_loop_name(), pthread_name(), i->second, (*i).second->read_space()));
 			RequestBufferMapIterator tmp = i;
 			++tmp;
 			/* remove it from the EventLoop static map of all request buffers */
 			EventLoop::remove_request_buffer_from_map ((*i).second);
-			/* delete it */
+			/* delete it
+			 *
+			 * Deleting the ringbuffer destroys all RequestObjects
+			 * and thereby drops any InvalidationRecord references of
+			 * requests that have not been processed.
+			 */
 			delete (*i).second;
 			/* remove it from this thread's list of request buffers */
 			request_buffers.erase (i);
@@ -301,37 +304,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 * the request as "done" before we start.
 		 */
 
-		if (req->invalidation) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request %3 from its invalidation list %4\n", event_loop_name(), pthread_name(), req, req->invalidation));
-
-			Glib::Threads::Mutex::Lock li (req->invalidation->event_loop->slot_invalidation_mutex(), Glib::Threads::NOT_LOCK);
-			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
-				li.acquire ();
-			}
-
-			/* after this call, if the object referenced by the
-			 * invalidation record is deleted, it will no longer
-			 * try to mark the request as invalid.
-			 */
-
-			req->invalidation->requests.remove (req);
-
-			/* req->invalidation->requests is identical to
-			 * EventLoop::invalidate_request()'s ir->requests.
-			 *
-			 * However EventLoop::invalidate_request() cannot
-			 * run in parallel to this, because sigc slots are always
-			 * called in the same thread as signal emission (this event-loop).
-			 * So we do not need to expose "request_invalidation_lock",
-			 * and only provide a safeguard for modifications to the
-			 * container itself.
-			 */
-			if (req->invalidation->event_loop && req->invalidation->event_loop != this) {
-				li.release ();
-			}
-		}
-
-		if (!req->valid ()) {
+		if (req->invalidation && !req->invalidation->valid()) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", event_loop_name(), pthread_name(), req->type));
 			delete req;
 			continue;
@@ -374,15 +347,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		rbml.acquire();
 	}
 
-	/* clean up any dead invalidation records (object was deleted) */
-	trash.sort();
-	trash.unique();
-	for (std::list<InvalidationRecord*>::const_iterator r = trash.begin(); r != trash.end(); ++r) {
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
-		delete *r;
-	}
-	trash.clear ();
-
 	rbml.release ();
 }
 
@@ -395,6 +359,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 	 */
 
 	if (base_instance() == 0) {
+		delete req;
 		return; /* XXX is this the right thing to do ? */
 	}
 
@@ -422,13 +387,13 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		RequestBuffer* rbuf = per_thread_request_buffer.get ();
 
 		if (rbuf != 0) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3 using ringbuffer @ %4\n", event_loop_name(), pthread_name(), req->type, rbuf));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3 using ringbuffer @ %4 IR: %5\n", event_loop_name(), pthread_name(), req->type, rbuf, req->invalidation));
 			rbuf->increment_write_ptr (1);
 		} else {
 			/* no per-thread buffer, so just use a list with a lock so that it remains
-			   single-reader/single-writer semantics
-			*/
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", event_loop_name(), pthread_name(), req->type));
+			 * single-reader/single-writer semantics
+			 */
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3 IR %4\n", event_loop_name(), pthread_name(), req->type, req->invalidation));
 			Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 			request_list.push_back (req);
 		}
@@ -450,9 +415,23 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 		return;
 	}
 
+	if (invalidation) {
+		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock); //  -- remove this once signal connect/disconnect uses ir->un/ref()
+		if (!invalidation->valid()) {
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 ignoring call-slot using functor @ %3, dead invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));
+			return;
+		}
+		invalidation->ref ();
+		assert (invalidation->event_loop == this);
+		invalidation->event_loop = this; // XXX is this needed,  PBD::signal::connect sets it
+	}
+
 	RequestObject *req = get_request (BaseUI::CallSlot);
 
 	if (req == 0) {
+		if (invalidation) {
+			invalidation->unref ();
+		}
 		return;
 	}
 
@@ -471,24 +450,6 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	 */
 
 	req->invalidation = invalidation;
-
-	if (invalidation) {
-		/* We're about to modify a std::list<> container, this must not
-		 * happen concurrently with other container modifications
-		 * (invalidation->requests.remove in handle_ui_requests).
-		 *
-		 * Let's take a dedicated lock that is less contended than
-		 * request_buffer_map_lock.
-		 *
-		 * This works because object's d'tor disconnect signals
-		 * (member variable) before the sigc::trackable's destroy_notify
-		 * runs. So there is no race between signal-emissions/call_slot()
-		 * and adding new requests after the object has been invalidated.
-		 */
-		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
-		invalidation->requests.push_back (req);
-		invalidation->event_loop = this;
-	}
 
 	send_request (req);
 }
