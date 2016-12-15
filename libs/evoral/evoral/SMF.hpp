@@ -37,6 +37,14 @@ namespace Evoral {
 
 /** Standard Midi File.
  * Currently only tempo-based time of a given PPQN is supported.
+ *
+ * For WRITING: this object specifically wraps a type0 file or a type1 file with only a
+ * single track. It has no support at this time for a type1 file with multiple
+ * tracks. 
+ *
+ * For READING: this object can read a single arbitrary track from a type1
+ * file, or the single track of a type0 file. It has no support at this time
+ * for reading more than 1 track.
  */
 class LIBEVORAL_API SMF {
 public:
