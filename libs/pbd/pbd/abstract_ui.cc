@@ -200,8 +200,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		if (!(*r)->in_use ()) {
 			assert (!(*r)->valid ());
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 drop invalidation trash %2\n", event_loop_name(), *r));
+			std::list<InvalidationRecord*>::const_iterator tmp = r;
+			++tmp;
 			delete *r;
-			r = trash.erase (r);
+			r = tmp;
 		} else {
 			++r;
 		}
