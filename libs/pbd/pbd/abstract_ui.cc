@@ -267,6 +267,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 				if (vec.buf[0]->invalidation) {
 					vec.buf[0]->invalidation->unref ();
 				}
+				vec.buf[0]->invalidation = NULL;
 				i->second->increment_read_ptr (1);
 			}
 		}
@@ -418,15 +419,23 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 		return;
 	}
 
+	/* object destruction may race with realtime signal emission.
+	 *
+	 * There may be a concurrent event-loop in progress of deleting
+	 * the slot-object. That's perfectly fine. But we need to mark
+	 * the invalidation record itself as being used by the request.
+	 *
+	 * The IR needs to be kept around until the last signal using
+	 * it is disconnected and then it can be deleted in the event-loop
+	 * (GUI thread).
+	 */
 	if (invalidation) {
-		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock); //  -- remove this once signal connect/disconnect uses ir->un/ref()
 		if (!invalidation->valid()) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 ignoring call-slot using functor @ %3, dead invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));
 			return;
 		}
 		invalidation->ref ();
 		assert (invalidation->event_loop == this);
-		invalidation->event_loop = this; // XXX is this needed,  PBD::signal::connect sets it
 	}
 
 	RequestObject *req = get_request (BaseUI::CallSlot);
