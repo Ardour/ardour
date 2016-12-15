@@ -194,16 +194,15 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 			case Outside:
 				context->stroke_preserve ();
 				window_space = item_to_window (Duple(_points.back().x, 0.0));
-				context->line_to (window_space.x, window_space.y);
+				context->line_to (last_point.x, window_space.y);
 				window_space = item_to_window (Duple(_points.front().x, 0.0));
-				context->line_to (window_space.x, window_space.y);
+				context->line_to (first_point.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
 				context->fill ();
 				break;
 		}
 	} else {
-
 		/* curve of at least 3 points */
 
 		/* find left and right-most sample */
