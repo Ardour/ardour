@@ -157,9 +157,6 @@ class MidiTrackerEditor : public ArdourWindow
 	Gtk::Menu*                   controller_menu;
 
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
-	/** parameter -> menu item map for the main automation menu */
-	// TODO: use this instead of gain_automation_item, etc!
-	ParameterMenuMap _main_automation_menu_map;  // TODO: implement!
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
 	/** parameter -> menu item map for the channel command items */
@@ -212,13 +209,12 @@ class MidiTrackerEditor : public ArdourWindow
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 
 	// Return if the automation column associated to this parameter is currently visible
-	// TODO: constify the heck out of it
-	bool is_automation_visible(const Evoral::Parameter& param);
+	bool is_automation_visible(const Evoral::Parameter& param) const;
 
 	// Return true if the gain column is visible
-	bool is_gain_visible ();
-	bool is_mute_visible ();
-	bool is_pan_visible ();
+	bool is_gain_visible () const;
+	bool is_mute_visible () const;
+	bool is_pan_visible () const;
 	void update_gain_column_visibility ();
 	void update_trim_column_visibility ();
 	void update_mute_column_visibility ();

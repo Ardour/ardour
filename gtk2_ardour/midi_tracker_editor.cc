@@ -67,7 +67,11 @@ using Timecode::BBT_Time;
 // TODO //
 //////////
 //
-// - [ ] Take care of midi automation.
+// - [ ] Fix show existing automation after showing all automations
+//
+// - [ ] Get the width of the Gtk widget minimize automatically
+//
+// - [ ] Update automation when updated on the horizontal track view
 //
 // - [ ] Support audio tracks and trim automation
 //
@@ -76,6 +80,8 @@ using Timecode::BBT_Time;
 // - [ ] Support editing.
 //
 // - [ ] Create a dedicated Gtk widget instead of Gtk::TreeView.
+//
+// - [ ] Remember what notes are on which tracks
 
 ///////////////////////
 // MidiTrackerEditor //
@@ -249,14 +255,10 @@ MidiTrackerEditor::add_main_automation_column (const Evoral::Parameter& param)
 	col2param.insert(ColParamBimap::value_type(column, param));
 
 	// Set the column title
-	// TODO: maybe AutomationControl::desc() could be used instead
 	string name = is_pan_type(param) ?
 		route->panner()->describe_parameter (param)
 		: route->describe_parameter (param);
 	view.get_column(column)->set_title (name);
-
-	std::cout << "add_main_automation_column: name = " << name
-	          << ", column = " << column << std::endl;
 
 	return column;
 }
@@ -273,13 +275,7 @@ MidiTrackerEditor::add_midi_automation_column (const Evoral::Parameter& param)
 	col2param.insert(ColParamBimap::value_type(column, param));
 
 	// Set the column title
-	stringstream ss;
-	ss << route->describe_parameter (param)
-	   << "[" << (int)param.channel() << "]";
-	view.get_column(column)->set_title (ss.str());
-
-	std::cout << "add_midi_automation_column: name = " << ss.str()
-	          << ", column = " << column << std::endl;
+	view.get_column(column)->set_title (route->describe_parameter (param));
 
 	return column;
 }
@@ -319,9 +315,6 @@ MidiTrackerEditor::add_processor_automation_column (boost::shared_ptr<Processor>
 	// Set the column title
 	string name = processor->describe_parameter (what);
 	view.get_column(pan->column)->set_title (name);
-
-	std::cout << "add_processor_automation_column: name = " << name
-	          << ", column = " << pan->column << std::endl;
 }
 
 void
@@ -464,8 +457,6 @@ MidiTrackerEditor::setup_processor_menu_and_curves ()
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
 	route->foreach_processor (sigc::mem_fun (*this, &MidiTrackerEditor::add_processor_to_subplugin_menu));
-	// TODO: look into the following, maybe I need to enable that as well
-	// route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 }
 
 void
@@ -601,7 +592,6 @@ MidiTrackerEditor::build_automation_action_menu ()
 
 	detach_menu (subplugin_menu);
 
-	_main_automation_menu_map.clear ();
 	delete automation_action_menu;
 	automation_action_menu = new Menu;
 
@@ -634,35 +624,24 @@ MidiTrackerEditor::build_automation_action_menu ()
 		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_column_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		gain_automation_item->set_active (is_gain_visible());
-
-		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 	}
 
 	if (false /*trim_track*/ /* TODO: support audio track */) {
 		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_column_visibility)));
 		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		trim_automation_item->set_active (false);
-
-		_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
 	}
 
 	if (true /*mute_track*/) {
 		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_column_visibility)));
 		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		mute_automation_item->set_active (is_mute_visible());
-
-		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 	}
 
 	if (true /*pan_tracks*/) {
 		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_columns_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		pan_automation_item->set_active (is_pan_visible());
-
-		set<Evoral::Parameter> const & params = route->panner()->what_can_be_automated ();
-		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
-			_main_automation_menu_map[*p] = pan_automation_item;
-		}
 	}
 
 	/* Add any midi automation */
@@ -823,8 +802,6 @@ MidiTrackerEditor::change_all_channel_tracks_visibility (bool yn, Evoral::Parame
 void
 MidiTrackerEditor::update_automation_column_visibility (const Evoral::Parameter& param)
 {
-	std::cout << "MidiTrackerEditor::update_automation_column_visibility" << std::endl;
-
 	// Find menu item associated to this parameter
 	Gtk::CheckMenuItem* mitem = automation_child_menu_item(param);
 	assert(mitem);
@@ -843,8 +820,6 @@ MidiTrackerEditor::update_automation_column_visibility (const Evoral::Parameter&
 		visible_automation_columns.insert (column);
 	else
 		visible_automation_columns.erase (column);
-
-	std::cout << "MidiTrackerEditor::update_automation_column_visibility before redisplay_model" << std::endl;
 
 	/* now trigger a redisplay */
 	redisplay_model ();
@@ -1050,7 +1025,7 @@ MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl
 }
 
 bool
-MidiTrackerEditor::is_automation_visible(const Evoral::Parameter& param)
+MidiTrackerEditor::is_automation_visible(const Evoral::Parameter& param) const
 {
 	ColParamBimap::right_const_iterator it = col2param.right.find(param);
 	return it != col2param.right.end() &&
@@ -1058,21 +1033,21 @@ MidiTrackerEditor::is_automation_visible(const Evoral::Parameter& param)
 }
 
 bool
-MidiTrackerEditor::is_gain_visible()
+MidiTrackerEditor::is_gain_visible() const
 {
 	return visible_automation_columns.find(gain_column)
 		!= visible_automation_columns.end();
 };
 
 bool
-MidiTrackerEditor::is_mute_visible()
+MidiTrackerEditor::is_mute_visible() const
 {
 	return visible_automation_columns.find(mute_column)
 		!= visible_automation_columns.end();
 };
 
 bool
-MidiTrackerEditor::is_pan_visible()
+MidiTrackerEditor::is_pan_visible() const
 {
 	bool visible = not pan_columns.empty();
 	for (std::vector<size_t>::const_iterator it = pan_columns.begin(); it != pan_columns.end(); ++it) {
@@ -1197,22 +1172,26 @@ bool MidiTrackerEditor::has_pan_automation() const
 void MidiTrackerEditor::show_existing_main_automations ()
 {
 	// Gain
-	if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
-		gain_automation_item->set_active (true);
-		update_gain_column_visibility ();
-	}
+	bool gain_visible = param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0;
+	gain_automation_item->set_active (gain_visible);
+	update_gain_column_visibility ();
 
 	// Mute
-	if (param2actrl[Evoral::Parameter(MuteAutomation)]->list()->size() > 0) {
-		mute_automation_item->set_active (true);
-		update_mute_column_visibility ();
-	}
+	bool mute_visible = param2actrl[Evoral::Parameter(MuteAutomation)]->list()->size() > 0;
+	mute_automation_item->set_active (mute_visible);
+	update_mute_column_visibility ();
 
 	// Pan
-	if (param2actrl[Evoral::Parameter(GainAutomation)]->list()->size() > 0) {
-		pan_automation_item->set_active (true);
-		update_pan_columns_visibility ();
+	bool pan_visible = false;
+	set<Evoral::Parameter> const & pan_params = route->pannable()->what_can_be_automated ();
+	for (set<Evoral::Parameter>::const_iterator p = pan_params.begin(); p != pan_params.end(); ++p) {
+		if (param2actrl[*p]->list()->size() > 0) {
+			pan_visible = true;
+			break;
+		}
 	}
+	pan_automation_item->set_active (pan_visible);
+	update_pan_columns_visibility ();
 }
 
 void MidiTrackerEditor::hide_main_automations ()
@@ -1352,9 +1331,6 @@ MidiTrackerEditor::redisplay_visible_automation()
 		size_t col = automation_col_offset + 2 * i;
 		bool is_visible = is_in(col, visible_automation_columns);
 		view.get_column(col)->set_visible(is_visible);
-		// std::cout << "[redisplay_visible_automation] "
-		//           << "col = " << col
-		//           << ", is_visible = " << is_visible << std::endl;
 	}
 	redisplay_visible_automation_delay();
 }
@@ -1697,13 +1673,10 @@ MidiTrackerEditor::setup_pattern ()
 		col2autotrack[column] = i;
 		available_automation_columns.insert(column);
 		view.get_column(column)->set_visible (false);
-		// std::cout << "[setup_pattern] name = " << ss_automation.str()
-		//           << ", column = " << column << std::endl;
 
 		column = view.get_columns().size();
 		view.append_column (*viewcolumn_automation_delay);
 		view.get_column(column)->set_visible (false);
-		// std::cout << "Delay" << ", column = " << column << std::endl;
 	}
 
 	view.set_headers_visible (true);
