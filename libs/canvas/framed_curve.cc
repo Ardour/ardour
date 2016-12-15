@@ -136,20 +136,40 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 	}
 
 	setup_outline_context (context);
-
 	if (_points.size() == 3) {
 
 		/* straight line */
 
 		Duple window_space;
 		Points::const_iterator it = _points.begin();
+
+		Duple first_point = Duple (0.0, 0.0);
+		Duple last_point = Duple (0.0, 0.0);
+
 		window_space = item_to_window (*it);
-		context->move_to (window_space.x, window_space.y);
+		if (window_space.x <= draw.x0) {
+			first_point = Duple (draw.x0, window_space.y);
+		} else {
+			first_point = Duple (window_space.x, window_space.y);
+		}
+		context->move_to (first_point.x, first_point.y);
+
 		++it;
 		window_space = item_to_window (*it, false);
-		context->line_to (window_space.x, window_space.y);
+		if (window_space.x <= draw.x0) {
+			context->line_to (draw.x0, window_space.y);
+		} else {
+			context->line_to (window_space.x, window_space.y);
+		}
+
 		window_space = item_to_window (_points.back(), false);
-		context->line_to (window_space.x, window_space.y);
+		if (window_space.x >= draw.x1) {
+			last_point = Duple (draw.x1, window_space.y);
+		} else {
+			last_point = Duple (window_space.x, window_space.y);
+		}
+
+		context->line_to (last_point.x, last_point.y);
 
 		switch (curve_fill) {
 			case None:
@@ -157,10 +177,10 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				break;
 			case Inside:
 				context->stroke_preserve ();
-				window_space = item_to_window (Duple(_points.back().x, draw.height()));
-				context->line_to (window_space.x, window_space.y);
-				window_space = item_to_window (Duple(_points.front().x, draw.height()));
-				context->line_to (window_space.x, window_space.y);
+				window_space = item_to_window (Duple(0.0, draw.height()));
+				context->line_to (last_point.x, window_space.y);
+				window_space = item_to_window (Duple(0.0, draw.height()));
+				context->line_to (first_point.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
 				context->fill ();
