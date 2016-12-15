@@ -74,6 +74,8 @@ Flag::set_text (string const & text)
 {
 	if (text.empty ()) {
 		_text->set (" ");
+	} else if (text == _text->text()) {
+		return;
 	} else {
 		_text->set (text);
 	}
