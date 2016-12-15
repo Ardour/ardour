@@ -4381,7 +4381,7 @@ framepos_t
 TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const double frame_qn = quarter_notes_between_frames_locked (_metrics, 0, frame);
+	const double frame_qn = quarter_note_at_minute_locked (_metrics, minute_at_frame (frame));
 
 	return frame_at_minute (minute_at_quarter_note_locked (_metrics, frame_qn + beats.to_double()));
 }
