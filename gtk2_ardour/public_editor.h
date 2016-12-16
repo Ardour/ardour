@@ -197,6 +197,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	virtual void transition_to_rolling (bool fwd) = 0;
 	virtual framepos_t pixel_to_sample (double pixel) const = 0;
+	virtual framepos_t playhead_cursor_sample () const = 0;
 	virtual double sample_to_pixel (framepos_t frame) const = 0;
 	virtual double sample_to_pixel_unrounded (framepos_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;

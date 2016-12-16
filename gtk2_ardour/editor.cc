@@ -4546,6 +4546,12 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	instant_save ();
 }
 
+framepos_t
+Editor::playhead_cursor_sample () const
+{
+	return playhead_cursor->current_frame();
+}
+
 void
 Editor::queue_visual_videotimeline_update ()
 {

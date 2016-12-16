@@ -1015,7 +1015,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	friend class EditorCursor;
 
-	EditorCursor*        playhead_cursor;
+	EditorCursor* playhead_cursor;
+	framepos_t playhead_cursor_sample () const;
 
 	framepos_t get_region_boundary (framepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
 
