@@ -435,7 +435,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 			return;
 		}
 		invalidation->ref ();
-		assert (invalidation->event_loop == this);
+		invalidation->event_loop = this;
 	}
 
 	RequestObject *req = get_request (BaseUI::CallSlot);
