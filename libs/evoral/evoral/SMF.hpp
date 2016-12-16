@@ -93,7 +93,26 @@ public:
 
 	int num_tempos () const;
 
-	typedef smf_tempo_t Tempo;
+	/* This is exactly modelled on smf_tempo_t */
+	struct Tempo {
+		size_t time_pulses;
+		double time_seconds;
+		int    microseconds_per_quarter_note;
+		int    numerator;
+		int    denominator;
+		int    clocks_per_click;
+		int    notes_per_note;
+
+		Tempo ()
+			: time_pulses (0)
+			, time_seconds (0)
+			, microseconds_per_quarter_note (-1)
+			, numerator (-1)
+			, denominator (-1)
+			, clocks_per_click (-1)
+			, notes_per_note (-1) {}
+		Tempo (smf_tempo_t*);
+	};
 
 	Tempo* tempo_at_smf_pulse (size_t smf_pulse) const;
 	Tempo* tempo_at_seconds (double seconds) const;

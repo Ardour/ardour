@@ -522,6 +522,17 @@ SMF::instrument_names(vector<string>& names) const
 	}
 }
 
+SMF::Tempo::Tempo (smf_tempo_t* smft)
+	: time_pulses (smft->time_pulses)
+	, time_seconds (smft->time_seconds)
+	, microseconds_per_quarter_note (smft->microseconds_per_quarter_note)
+	, numerator (smft->numerator)
+	, denominator (smft->denominator)
+	, clocks_per_click (smft->clocks_per_click)
+	, notes_per_note (smft->notes_per_note)
+{
+}
+
 int
 SMF::num_tempos () const
 {
@@ -532,13 +543,21 @@ SMF::num_tempos () const
 SMF::Tempo*
 SMF::tempo_at_smf_pulse (size_t smf_pulse) const
 {
-	return smf_get_tempo_by_seconds (_smf, smf_pulse);
+	smf_tempo_t* t = smf_get_tempo_by_seconds (_smf, smf_pulse);
+	if (!t) {
+		return 0;
+	}
+	return new Tempo (t);
 }
 
 SMF::Tempo*
 SMF::tempo_at_seconds (double seconds) const
 {
-	return smf_get_tempo_by_seconds (_smf, seconds);
+	smf_tempo_t* t = smf_get_tempo_by_seconds (_smf, seconds);
+	if (!t) {
+		return 0;
+	}
+	return new Tempo (t);
 }
 
 SMF::Tempo*
@@ -546,7 +565,12 @@ SMF::nth_tempo (size_t n) const
 {
 	assert (_smf);
 
-	return smf_get_tempo_by_number (_smf, n);
+	smf_tempo_t* t = smf_get_tempo_by_number (_smf, n);
+	if (!t) {
+		return 0;
+	}
+
+	return new Tempo (t);
 }
 
 } // namespace Evoral
