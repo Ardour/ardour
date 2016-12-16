@@ -221,7 +221,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
-	                        ARDOUR::MidiTrackNameSource, framepos_t&,
+	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, framepos_t&,
 	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,
 	                       framepos_t&,

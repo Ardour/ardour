@@ -267,6 +267,7 @@ Editor::do_import (vector<string>        paths,
                    ImportMode            mode,
                    SrcQuality            quality,
                    MidiTrackNameSource   midi_track_name_source,
+                   MidiTempoMapDisposition smf_tempo_disposition,
                    framepos_t&           pos,
                    ARDOUR::PluginInfoPtr instrument)
 {

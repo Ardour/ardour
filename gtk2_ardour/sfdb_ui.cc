@@ -2026,6 +2026,7 @@ SoundFileOmega::do_something (int action)
 	PluginInfoPtr instrument = instrument_combo.selected_instrument();
 	framepos_t where;
 	MidiTrackNameSource mts = get_midi_track_name_source ();
+	MidiTempoMapDisposition mtd = (get_use_smf_tempo_map () ? SMFTempoUse : SMFTempoIgnore);
 
 	switch (pos) {
 	case ImportAtEditPoint:
@@ -2047,7 +2048,7 @@ SoundFileOmega::do_something (int action)
 	_import_active = true;
 
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, where, instrument);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
