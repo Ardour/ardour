@@ -744,6 +744,55 @@ TempoMap::TempoMap (framecnt_t fr)
 
 }
 
+TempoMap::TempoMap (TempoMap const & other)
+{
+	_frame_rate = other._frame_rate;
+	for (Metrics::const_iterator m = other._metrics.begin(); m != other._metrics.end(); ++m) {
+		TempoSection* ts = dynamic_cast<TempoSection*> (*m);
+		MeterSection* ms = dynamic_cast<MeterSection*> (*m);
+
+		if (ts) {
+			TempoSection* new_section = new TempoSection (*ts);
+			_metrics.push_back (new_section);
+		} else {
+			MeterSection* new_section = new MeterSection (*ms);
+			_metrics.push_back (new_section);
+		}
+	}
+}
+
+TempoMap&
+TempoMap::operator= (TempoMap const & other)
+{
+	if (&other != this) {
+		_frame_rate = other._frame_rate;
+
+		Metrics::const_iterator d = _metrics.begin();
+		while (d != _metrics.end()) {
+			delete (*d);
+			++d;
+		}
+		_metrics.clear();
+
+		for (Metrics::const_iterator m = other._metrics.begin(); m != other._metrics.end(); ++m) {
+			TempoSection* ts = dynamic_cast<TempoSection*> (*m);
+			MeterSection* ms = dynamic_cast<MeterSection*> (*m);
+
+			if (ts) {
+				TempoSection* new_section = new TempoSection (*ts);
+				_metrics.push_back (new_section);
+			} else {
+				MeterSection* new_section = new MeterSection (*ms);
+				_metrics.push_back (new_section);
+			}
+		}
+	}
+
+	PropertyChanged (PropertyChange());
+
+	return *this;
+}
+
 TempoMap::~TempoMap ()
 {
 	Metrics::const_iterator d = _metrics.begin();
@@ -983,7 +1032,7 @@ TempoMap::do_insert (MetricSection* section)
 		}
 
 		_metrics.insert (i, section);
-		//dump (_metrics, std::cout);
+		//dump (std::cout);
 	}
 }
 /* user supplies the exact pulse if pls == MusicTime */
@@ -1067,7 +1116,7 @@ TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
-		dump (_metrics, std::cerr);
+		dump (std::cerr);
 	}
 #endif
 
@@ -3819,7 +3868,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 			++bbt.bars;
 			framepos_t next_ft = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
 
-			if ((raw_ft - prev_ft) > (next_ft - prev_ft) / 2) { 
+			if ((raw_ft - prev_ft) > (next_ft - prev_ft) / 2) {
 				return next_ft;
 			} else {
 				return prev_ft;
@@ -4235,14 +4284,14 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 }
 
 void
-TempoMap::dump (const Metrics& metrics, std::ostream& o) const
+TempoMap::dump (std::ostream& o) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 	const MeterSection* m;
 	const TempoSection* t;
 	const TempoSection* prev_t = 0;
 
-	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 
 		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			o << "Tempo @ " << *i << t->note_types_per_minute() << " BPM (pulse = 1/" << t->note_type()

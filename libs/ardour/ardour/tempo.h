@@ -304,7 +304,10 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 {
   public:
 	TempoMap (framecnt_t frame_rate);
+	TempoMap (TempoMap const &);
 	~TempoMap();
+
+	TempoMap& operator= (TempoMap const &);
 
 	/* measure-based stuff */
 
@@ -381,7 +384,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	void dump (const Metrics& metrics, std::ostream&) const;
+	void dump (std::ostream&) const;
 	void clear ();
 
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
