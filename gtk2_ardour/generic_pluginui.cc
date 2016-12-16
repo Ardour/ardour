@@ -848,7 +848,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			input_controls_with_automation.push_back (control_ui);
 		}
 
-		if (desc.toggled) {
+		if (desc.toggled && !control_ui->combo) {
 			control_ui->button = true;
 			ArdourButton* but = dynamic_cast<ArdourButton*>(control_ui->controller->widget ());
 			assert (but);
