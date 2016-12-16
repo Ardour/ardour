@@ -253,6 +253,16 @@ smf_create_tempo_map_and_compute_seconds(smf_t *smf)
 	/* Not reached. */
 }
 
+int
+smf_get_tempo_count (const smf_t *smf)
+{
+	if (!smf->tempo_array) {
+		return 0;
+	}
+
+	return smf->tempo_array->len;
+}
+
 smf_tempo_t *
 smf_get_tempo_by_number(const smf_t *smf, size_t number)
 {
