@@ -698,6 +698,11 @@ namespace ARDOUR {
 		SMFInstrumentName
 	};
 
+	enum MidiTempoMapDisposition {
+		SMFTempoIgnore,
+		SMFTempoUse,
+	};
+
 } // namespace ARDOUR
 
 
