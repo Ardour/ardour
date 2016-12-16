@@ -1395,6 +1395,12 @@ SoundFileOmega::reset_options ()
 		return false;
 	}
 
+	if (have_a_midi_file) {
+		smf_tempo_btn.show ();
+	} else {
+		smf_tempo_btn.hide ();
+	}
+
 	string existing_choice;
 	vector<string> action_strings;
 
@@ -1726,6 +1732,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 				Editing::ImportMode mode_hint)
 	: SoundFileBrowser (title, s, persistent)
 	, copy_files_btn ( _("Copy files to session"))
+	, smf_tempo_btn (_("Use MIDI Tempo Map (if defined)"))
 	, selected_audio_track_cnt (selected_audio_tracks)
 	, selected_midi_track_cnt (selected_midi_tracks)
 	, _import_active (false)
@@ -1773,7 +1780,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (*l, 2, 3, 0, 1, FILL, SHRINK, 8, 0);
 	options.attach (midi_track_name_combo, 2, 3, 1, 2, FILL, SHRINK, 8, 0);
 
-	smf_tempo_btn.set_label (_("Use MIDI Tempo Map (if defined)"));
 	options.attach (smf_tempo_btn, 2, 3, 3, 4, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
@@ -1939,6 +1945,12 @@ MidiTrackNameSource
 SoundFileOmega::get_midi_track_name_source () const
 {
 	return string2miditracknamesource (midi_track_name_combo.get_active_text());
+}
+
+bool
+SoundFileOmega::get_use_smf_tempo_map () const
+{
+	return smf_tempo_btn.get_active ();
 }
 
 ImportDisposition
