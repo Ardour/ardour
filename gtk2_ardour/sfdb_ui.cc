@@ -136,7 +136,7 @@ importmode2string (ImportMode mode)
 }
 
 SoundFileBox::SoundFileBox (bool /*persistent*/)
-	: table (6, 2),
+	: table (7, 2),
 	  length_clock ("sfboxLengthClock", true, "", false, false, true, false),
 	  timecode_clock ("sfboxTimecodeClock", true, "", false, false, false, false),
 	  main_box (false, 6),
@@ -168,6 +168,8 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	channels.set_alignment (1, 0.5);
 	samplerate.set_text (_("Sample rate:"));
 	samplerate.set_alignment (1, 0.5);
+	tempomap.set_text (_("Tempo Map:"));
+	tempomap.set_alignment (1, 0.5);
 
         preview_label.set_max_width_chars (50);
 	preview_label.set_ellipsize (Pango::ELLIPSIZE_END);
@@ -185,12 +187,14 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	table.attach (format, 0, 1, 2, 4, FILL, FILL);
 	table.attach (length, 0, 1, 4, 5, FILL, FILL);
 	table.attach (timecode, 0, 1, 5, 6, FILL, FILL);
+	table.attach (tempomap, 0, 1, 6, 7, FILL, FILL);
 
 	table.attach (channels_value, 1, 2, 0, 1, FILL, FILL);
 	table.attach (samplerate_value, 1, 2, 1, 2, FILL, FILL);
 	table.attach (format_text, 1, 2, 2, 4, FILL, FILL);
 	table.attach (length_clock, 1, 2, 4, 5, FILL, FILL);
 	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
+	table.attach (tempomap_value, 1, 2, 6, 7, FILL, FILL);
 
 	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
 	timecode_clock.set_mode (AudioClock::Timecode);
@@ -329,9 +333,28 @@ SoundFileBox::setup_labels (const string& filename)
 				}
 			}
 			length_clock.set (ms->length(ms->timeline_position()));
+			switch (ms->num_tempos()) {
+			case 0:
+				tempomap_value.set_text (_("No tempo data"));
+				break;
+			case 1: {
+				Evoral::SMF::Tempo* t = ms->nth_tempo (0);
+				assert (t);
+				tempomap_value.set_text (string_compose (_("%1/%2 \u2669 = %3"),
+				                                         t->numerator,
+				                                         t->denominator,
+				                                         (1000000 / t->microseconds_per_quarter_note) * 60));
+				break;
+			}
+			default:
+				tempomap_value.set_text (string_compose (_("map with %1 sections"),
+				                                         ms->num_tempos()));
+				break;
+			}
 		} else {
 			channels_value.set_text ("");
 			length_clock.set (0);
+			tempomap_value.set_text (_("No tempo data"));
 		}
 
 		if (_session && ms) {
@@ -1747,13 +1770,16 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 
 	l = manage (new Label);
 	l->set_markup (_("<b>MIDI Track Names</b>"));
-	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (midi_track_name_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
+	options.attach (*l, 2, 3, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (midi_track_name_combo, 2, 3, 1, 2, FILL, SHRINK, 8, 0);
+
+	smf_tempo_btn.set_label (_("Use MIDI Tempo Map (if defined)"));
+	options.attach (smf_tempo_btn, 2, 3, 3, 4, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Instrument</b>"));
-	options.attach (*l, 3, 4, 2, 3, FILL, SHRINK, 8, 0);
-	options.attach (instrument_combo, 3, 4, 3, 4, FILL, SHRINK, 8, 0);
+	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (instrument_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
 
 	Alignment *hspace = manage (new Alignment ());
 	hspace->set_size_request (2, 2);
