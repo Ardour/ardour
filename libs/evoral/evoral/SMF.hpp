@@ -28,8 +28,10 @@
 
 struct smf_struct;
 struct smf_track_struct;
+struct smf_tempo_struct;
 typedef smf_struct smf_t;
 typedef smf_track_struct smf_track_t;
+typedef smf_tempo_struct smf_tempo_t;
 
 namespace Evoral {
 
@@ -40,7 +42,7 @@ namespace Evoral {
  *
  * For WRITING: this object specifically wraps a type0 file or a type1 file with only a
  * single track. It has no support at this time for a type1 file with multiple
- * tracks. 
+ * tracks.
  *
  * For READING: this object can read a single arbitrary track from a type1
  * file, or the single track of a type0 file. It has no support at this time
@@ -89,6 +91,14 @@ public:
 	void track_names (std::vector<std::string>&) const;
 	void instrument_names (std::vector<std::string>&) const;
 
+	int num_tempos () const;
+
+	typedef smf_tempo_t Tempo;
+
+	Tempo* tempo_at_smf_pulse (size_t smf_pulse) const;
+	Tempo* tempo_at_seconds (double seconds) const;
+	Tempo* nth_tempo (size_t n) const;
+
   private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
@@ -102,4 +112,3 @@ public:
 }; /* namespace Evoral */
 
 #endif /* EVORAL_SMF_HPP */
-

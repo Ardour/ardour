@@ -522,5 +522,31 @@ SMF::instrument_names(vector<string>& names) const
 	}
 }
 
+int
+SMF::num_tempos () const
+{
+	assert (_smf);
+	return smf_get_tempo_count (_smf);
+}
+
+SMF::Tempo*
+SMF::tempo_at_smf_pulse (size_t smf_pulse) const
+{
+	return smf_get_tempo_by_seconds (_smf, smf_pulse);
+}
+
+SMF::Tempo*
+SMF::tempo_at_seconds (double seconds) const
+{
+	return smf_get_tempo_by_seconds (_smf, seconds);
+}
+
+SMF::Tempo*
+SMF::nth_tempo (size_t n) const
+{
+	assert (_smf);
+
+	return smf_get_tempo_by_number (_smf, n);
+}
 
 } // namespace Evoral
