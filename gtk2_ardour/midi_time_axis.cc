@@ -241,26 +241,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_view->RegionViewAdded.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 
-		midi_track()->playback_filter().ChannelModeChanged.connect (
-			*this, invalidator (*this),
-			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-			gui_context());
-		midi_track()->playback_filter().ChannelMaskChanged.connect (
-			*this, invalidator (*this),
-			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-			gui_context());
-		midi_track()->capture_filter().ChannelModeChanged.connect (
-			*this, invalidator (*this),
-			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-			gui_context());
-		midi_track()->capture_filter().ChannelMaskChanged.connect (
-			*this, invalidator (*this),
-			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-			gui_context());
-
-		playback_channel_mode_changed ();
-		capture_channel_mode_changed ();
-
 		if (!_editor.have_idled()) {
 			/* first idle will do what we need */
 		} else {
@@ -288,25 +268,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
-
-	_channel_status_box.set_homogeneous (false);
-	_channel_status_box.set_spacing (4);
-
-	ArdourButton *channel_selector_button = manage (new ArdourButton(_("Chns")));
-	channel_selector_button->set_name ("route button");
-	set_tooltip (channel_selector_button, _("Click to edit channel settings"));
-
-	// Insert expanding space labels to get full width justification
-	_channel_status_box.pack_start (_playback_channel_status, false, false, 2);
-	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
-	_channel_status_box.pack_start (_capture_channel_status, false, false, 2);
-	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
-	_channel_status_box.pack_end (*channel_selector_button, false, false);
-	_channel_status_box.show_all ();
-
-	channel_selector_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
-
-	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
 
 	MIDI::Name::MidiPatchManager::instance().PatchesChanged.connect (*this, invalidator (*this),
 			boost::bind (&MidiTimeAxisView::setup_midnam_patches, this),
@@ -1784,42 +1745,6 @@ void
 MidiTimeAxisView::contents_height_changed ()
 {
 	_range_scroomer->queue_resize ();
-}
-
-void
-MidiTimeAxisView::playback_channel_mode_changed ()
-{
-	/* Invalidate the controller automation menu */
-	delete controller_menu;
-	controller_menu = 0;
-	/* Update the button text */
-	switch (midi_track()->get_playback_channel_mode()) {
-	case AllChannels:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("all")));
-		break;
-	case FilterChannels:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("some")));
-		break;
-	case ForceChannel:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), PBD::ffs (midi_track()->get_playback_channel_mask())));
-		break;
-	}
-}
-
-void
-MidiTimeAxisView::capture_channel_mode_changed ()
-{
-	switch (midi_track()->get_capture_channel_mode()) {
-	case AllChannels:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("all")));
-		break;
-	case FilterChannels:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("some")));
-		break;
-	case ForceChannel:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), PBD::ffs (midi_track()->get_capture_channel_mask())));
-		break;
-	}
 }
 
 bool

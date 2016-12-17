@@ -526,13 +526,13 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	automation_action_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Show All Automation"),
-				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_all_automation), for_selection)));
+	                           sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_all_automation), for_selection)));
 
 	items.push_back (MenuElem (_("Show Existing Automation"),
-				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_existing_automation), for_selection)));
+	                           sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_existing_automation), for_selection)));
 
 	items.push_back (MenuElem (_("Hide All Automation"),
-				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
+	                           sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
 
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
 	   so it was detached above
@@ -577,7 +577,7 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &RouteTimeAxisView::update_pan_track_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
+		                                 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
 		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
@@ -851,6 +851,17 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 
 	items.push_back (SeparatorElem());
+
+	if (is_midi_track()) {
+		Menu* midi_menu = manage (new Menu);
+		MenuList& midi_items = midi_menu->items();
+		midi_menu->set_name (X_("ArdourContextMenu"));
+
+		midi_items.push_back (MenuElem (_("Channel Management"), sigc::mem_fun (*this, &RouteTimeAxisView::toggle_channel_selector)));
+
+		items.push_back (MenuElem (_("MIDI"), *midi_menu));
+		items.push_back (SeparatorElem());
+	}
 
 	int active = 0;
 	int inactive = 0;
@@ -1420,7 +1431,7 @@ RouteTimeAxisView::name_entry_changed (string const& str)
 	}
 
 	string x = str;
-	
+
 	strip_whitespace_edges (x);
 
 	if (x.empty()) {
@@ -2928,4 +2939,3 @@ RouteTimeAxisView::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
 }
-

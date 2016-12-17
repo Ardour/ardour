@@ -158,9 +158,6 @@ private:
 	Gtk::RadioMenuItem*          _meter_color_mode_item;
 	Gtk::RadioMenuItem*          _channel_color_mode_item;
 	Gtk::RadioMenuItem*          _track_color_mode_item;
-	Gtk::Label                   _playback_channel_status;
-	Gtk::Label                   _capture_channel_status;
-	Gtk::HBox                    _channel_status_box;
 	Gtk::VBox                    _midi_controls_box;
 	MidiChannelSelectorWindow*   _channel_selector;
 	ArdourDropdown               _midnam_model_selector;
@@ -201,9 +198,6 @@ private:
 	ParameterMenuMap _controller_menu_map;
 
 	StepEditor* _step_editor;
-
-	void capture_channel_mode_changed();
-	void playback_channel_mode_changed();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

@@ -214,6 +214,8 @@ protected:
 	void route_property_changed (const PBD::PropertyChange&);
 	bool name_entry_changed (std::string const&);
 
+	virtual void toggle_channel_selector () {}
+
 	void blink_rec_display (bool onoff);
 
 	virtual void label_view ();
