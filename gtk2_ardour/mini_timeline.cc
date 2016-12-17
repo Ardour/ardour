@@ -288,6 +288,19 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, int h, const std::string& 
 	return rw;
 }
 
+struct LocationMarker {
+	LocationMarker (const std::string& l, framepos_t w)
+		: label (l), when (w) {}
+	std::string label;
+	framepos_t  when;
+};
+
+struct LocationMarkerSort {
+	bool operator() (const LocationMarker& a, const LocationMarker& b) {
+		return (a.when < b.when);
+	}
+};
+
 void
 MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 {
@@ -357,19 +370,6 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	lmin -= mw / px_per_sample;
 	lmax += mw / px_per_sample;
 
-	struct LocationMarker {
-		LocationMarker (const std::string& l, framepos_t w)
-			: label (l), when (w) {}
-		std::string label;
-		framepos_t  when;
-	};
-
-	struct LocationMarkerSort {
-		bool operator() (const LocationMarker& a, const LocationMarker& b) {
-			return (a.when < b.when);
-		}
-	} location_marker_sort;
-
 	std::vector<LocationMarker> lm;
 
 	const Locations::LocationList& ll (_session->locations ()->list ());
@@ -398,6 +398,8 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	_jumplist.clear ();
+
+	LocationMarkerSort location_marker_sort;
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end();) {
