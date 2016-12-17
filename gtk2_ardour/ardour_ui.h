@@ -128,7 +128,7 @@ class SessionDialog;
 class SessionOptionEditorWindow;
 class ShuttleControl;
 class Splash;
-class TimeInfoBox;
+class MiniTimeline;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
@@ -253,6 +253,7 @@ public:
 	MainClock* secondary_clock;
 	void focus_on_clock ();
 	AudioClock*   big_clock;
+	MiniTimeline* mini_timeline;
 
 	VideoTimeLine *video_timeline;
 

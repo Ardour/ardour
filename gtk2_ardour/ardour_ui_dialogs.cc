@@ -56,6 +56,7 @@
 #include "meter_patterns.h"
 #include "monitor_section.h"
 #include "midi_tracer.h"
+#include "mini_timeline.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
 #include "processor_box.h"
@@ -114,6 +115,7 @@ ARDOUR_UI::set_session (Session *s)
 	primary_clock->set_session (s);
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
+	mini_timeline->set_session (s);
 	video_timeline->set_session (s);
 
 	/* sensitize menu bar options that are now valid */

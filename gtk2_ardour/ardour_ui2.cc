@@ -54,6 +54,7 @@
 #include "utils.h"
 #include "theme_manager.h"
 #include "midi_tracer.h"
+#include "mini_timeline.h"
 #include "shuttle_control.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
@@ -396,6 +397,7 @@ ARDOUR_UI::setup_transport ()
 	punch_button_size_group->add_widget (punch_out_button);
 
 	shuttle_box = manage (new ShuttleControl);
+	mini_timeline = manage (new MiniTimeline);
 
 	/* and now the layout... */
 
@@ -488,6 +490,8 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (editor_visibility_button, 14, 15, 0, 1 , FILL, SHRINK, 1, 0);
 	transport_table.attach (mixer_visibility_button, 14, 15, 1, 2 , FILL, SHRINK, 1, 0);
+
+	transport_table.attach (*mini_timeline, 15, 16, 0, 2, EXPAND|FILL, EXPAND|FILL, 2, 0);
 
 	/* desensitize */
 
