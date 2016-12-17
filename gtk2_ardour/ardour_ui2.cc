@@ -58,7 +58,6 @@
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "rc_option_editor.h"
-#include "time_info_box.h"
 
 #include "pbd/i18n.h"
 
@@ -393,8 +392,6 @@ ARDOUR_UI::setup_transport ()
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
 
-	// external widgets
-	time_info_box = manage (new TimeInfoBox);
 	shuttle_box = manage (new ShuttleControl);
 
 	/* and now the layout... */
@@ -488,8 +485,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (editor_visibility_button, 14, 15, 0, 1 , FILL, SHRINK, 1, 0);
 	transport_table.attach (mixer_visibility_button, 14, 15, 1, 2 , FILL, SHRINK, 1, 0);
-
-	transport_table.attach (*time_info_box, 15, 16, 0, 2, SHRINK, EXPAND|FILL, 1, 0); // XXX
 
 	/* desensitize */
 

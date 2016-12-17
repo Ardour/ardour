@@ -134,6 +134,7 @@ class SoundFileOmega;
 class StreamView;
 class TempoLines;
 class TimeAxisView;
+class TimeInfoBox;
 class TimeFXDialog;
 class TimeSelection;
 class RegionLayeringOrderEditor;
@@ -570,6 +571,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	boost::optional<framepos_t> _control_scroll_target;
 
 	PlaylistSelector* _playlist_selector;
+
+	TimeInfoBox*      _time_info_box;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 

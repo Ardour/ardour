@@ -254,8 +254,6 @@ public:
 	void focus_on_clock ();
 	AudioClock*   big_clock;
 
-	TimeInfoBox* time_info_box;
-
 	VideoTimeLine *video_timeline;
 
 	void store_clock_modes ();

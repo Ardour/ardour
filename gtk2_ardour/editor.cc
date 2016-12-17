@@ -132,6 +132,7 @@
 #include "sfdb_ui.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
+#include "time_info_box.h"
 #include "timers.h"
 #include "tooltips.h"
 #include "ui_config.h"
@@ -242,6 +243,7 @@ Editor::Editor ()
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
 	, _playlist_selector (0)
+	, _time_info_box (0)
 	, no_save_visual (false)
 	, leftmost_frame (0)
 	, samples_per_pixel (2048)
@@ -643,6 +645,7 @@ Editor::Editor ()
 	_regions = new EditorRegions (this);
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
+	_time_info_box = new TimeInfoBox ();
 
 	/* these are static location signals */
 
@@ -722,11 +725,14 @@ Editor::Editor ()
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
-		edit_pane.add (_the_notebook);
+		VBox* editor_list_vbox = manage (new VBox);
+		editor_list_vbox->pack_start (*_time_info_box, false, false, 0);
+		editor_list_vbox->pack_start (_the_notebook);
+		edit_pane.add (*editor_list_vbox);
+		edit_pane.set_child_minsize (*editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 	}
 
 	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
-	edit_pane.set_child_minsize (_the_notebook, 30); /* rough guess at width of notebook tabs */
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
 	float fract;
@@ -875,6 +881,7 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _locations;
 	delete _playlist_selector;
+	delete _time_info_box;
 
 	for (list<XMLNode *>::iterator i = selection_op_history.begin(); i != selection_op_history.end(); ++i) {
 		delete *i;
@@ -1312,6 +1319,7 @@ Editor::set_session (Session *t)
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
+	_time_info_box->set_session (_session);
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);
