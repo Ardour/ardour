@@ -225,13 +225,7 @@ ARDOUR_UI::transport_expose (GdkEventExpose* ev)
 
 	cr->move_to (x0 + xx, 1.5 + y0 + ymargin + round (punch_in_button.get_height () * .5));
 	cr->rel_line_to (dx, 0);
-	cr->stroke ();
-
-	/* alert box */
-	gint ax;
-	solo_alert_button.translate_coordinates (transport_table, -xmargin, 0, ax, uu); // left
-	ww = solo_alert_button.get_width () + 2 * xmargin;
-	Gtkmm2ext::rounded_rectangle (cr->cobj(), x0 + ax - 0.5, y0 + 0.5, ww + 1, hh, 6);
+	cr->set_line_width (2.0);
 	cr->stroke ();
 
 	return false;
@@ -429,7 +423,7 @@ ARDOUR_UI::setup_transport ()
 	VBox* alert_box = manage (new VBox);
 	alert_box->set_homogeneous (true);
 	alert_box->set_spacing (1);
-	alert_box->set_border_width (2);
+	alert_box->set_border_width (0);
 	alert_box->pack_start (solo_alert_button, true, false, 0);
 	alert_box->pack_start (auditioning_alert_button, true, false, 0);
 	alert_box->pack_start (feedback_alert_button, true, false, 0);
@@ -469,29 +463,29 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (follow_edits_button, 6, 7, 0, 1 , FILL, SHRINK, 2, 0);
 	transport_table.attach (auto_return_button, 6, 7, 1, 2 , FILL, SHRINK, 2, 0);
 
-	transport_table.attach (*primary_clock, 7, 9, 0, 1 , FILL, SHRINK, 1, 0);
-	transport_table.attach (*primary_clock->left_btn(), 7, 8, 1, 2 , FILL, SHRINK, 1, 0);
-	transport_table.attach (*primary_clock->right_btn(), 8, 9, 1, 2 , FILL, SHRINK, 1, 0);
+	transport_table.attach (*primary_clock, 7, 9, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->left_btn(), 7, 8, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->right_btn(), 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		transport_table.attach (*secondary_clock, 9, 11, 0, 1 , FILL, SHRINK, 1, 0);
-		transport_table.attach (*secondary_clock->left_btn(), 9, 10, 1, 2 , FILL, SHRINK, 1, 0);
-		transport_table.attach (*secondary_clock->right_btn(), 10, 11, 1, 2 , FILL, SHRINK, 1, 0);
+		transport_table.attach (*secondary_clock, 9, 11, 0, 1 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->left_btn(), 9, 10, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->right_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
 	}
 
-	transport_table.attach (*alert_box, 11, 12, 0, 2, SHRINK, SHRINK, 2, 0);
+	transport_table.attach (*alert_box, 11, 12, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 
 	/* editor-meter is in transport_hbox */
 	transport_hbox.set_spacing (PX_SCALE(1));
-	transport_table.attach (transport_hbox, 12, 13, 0, 2, SHRINK, EXPAND|FILL, 3, 0);
+	transport_table.attach (transport_hbox, 12, 13, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+
+	transport_table.attach (*mini_timeline, 13, 14, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
 
 	/* lua script action buttons */
-	transport_table.attach (action_script_table, 13, 14, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
+	transport_table.attach (action_script_table, 14, 15, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
 
-	transport_table.attach (editor_visibility_button, 14, 15, 0, 1 , FILL, SHRINK, 1, 0);
-	transport_table.attach (mixer_visibility_button, 14, 15, 1, 2 , FILL, SHRINK, 1, 0);
-
-	transport_table.attach (*mini_timeline, 15, 16, 0, 2, EXPAND|FILL, EXPAND|FILL, 2, 0);
+	transport_table.attach (editor_visibility_button, 15, 16, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (mixer_visibility_button, 15, 16, 1, 2 , FILL, SHRINK, 2, 0);
 
 	/* desensitize */
 
