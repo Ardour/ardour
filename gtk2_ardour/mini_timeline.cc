@@ -67,6 +67,7 @@ void
 MiniTimeline::session_going_away ()
 {
 	super_rapid_connection.disconnect ();
+	session_connection.disconnect ();
 	SessionHandlePtr::session_going_away ();
 	_jumplist.clear ();
 }
@@ -83,6 +84,11 @@ MiniTimeline::set_session (Session* s)
 	super_rapid_connection = Timers::super_rapid_connect (
 			sigc::mem_fun (*this, &MiniTimeline::super_rapid_update)
 			);
+	_session->config.ParameterChanged.connect (session_connection,
+			invalidator (*this),
+			boost::bind (&MiniTimeline::parameter_changed, this, _1), gui_context()
+			);
+
 	_jumplist.clear ();
 }
 
@@ -109,6 +115,14 @@ void
 MiniTimeline::set_colors ()
 {
 	// TODO  UIConfiguration::instance().color & font
+}
+
+void
+MiniTimeline::parameter_changed (std::string const& p)
+{
+	if (p == "minitimeline-span") {
+		update_minitimeline ();
+	}
 }
 
 void
@@ -321,7 +335,7 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 
 
 	/* time */
-	const framepos_t time_span = 60; /* left+right: 2 minutes */
+	const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
 	const framepos_t time_span_samples = time_span * _session->nominal_frame_rate ();
 	const framepos_t time_granularity = _session->nominal_frame_rate () * ceil (2. * time_span / n_labels);
 	const framepos_t p = _last_update_frame;
@@ -446,7 +460,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 		}
 	} else if (ev->button == 1) {
 		// copy from ::render() // TODO consolidate
-		const framepos_t time_span = 60; /* left+right: 2 minutes */
+		const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
 		const framepos_t time_span_samples = time_span * _session->nominal_frame_rate ();
 		const framepos_t p = _last_update_frame;
 		const double px_per_sample = get_width () / (2. * time_span_samples);

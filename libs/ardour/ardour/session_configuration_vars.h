@@ -39,6 +39,7 @@ CONFIG_VARIABLE (bool, punch_out, "punch-out", false)
 CONFIG_VARIABLE (bool, layered_record_mode, "layered-record-mode", false)
 CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
 CONFIG_VARIABLE (Timecode::TimecodeFormat, timecode_format, "timecode-format", Timecode::timecode_30)
+CONFIG_VARIABLE (framecnt_t, minitimeline_span, "minitimeline-span", 120) // seconds
 CONFIG_VARIABLE_SPECIAL(std::string, raid_path, "raid-path", "", PBD::path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, audio_search_path, "audio-search-path", "", PBD::search_path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, midi_search_path, "midi-search-path", "", PBD::search_path_expand)

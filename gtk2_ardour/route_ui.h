@@ -300,7 +300,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	bool mark_hidden (bool yn);
 
   private:
-	void parameter_changed (std::string const &);
+	void parameter_changed (std::string const&);
 	void relabel_solo_button ();
 	void track_mode_changed ();
 

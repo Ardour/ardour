@@ -53,6 +53,7 @@ private:
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 	void set_colors ();
+	void parameter_changed (std::string const &);
 
 	void calculate_time_width ();
 	void update_minitimeline ();
@@ -68,6 +69,7 @@ private:
 	Glib::RefPtr<Pango::Layout> _layout;
 	sigc::connection super_rapid_connection;
 	PBD::ScopedConnectionList marker_connection;
+	PBD::ScopedConnection session_connection;
 
 	framepos_t _last_update_frame;
 	AudioClock::Mode _clock_mode;
