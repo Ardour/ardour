@@ -383,7 +383,7 @@ private:
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed ();
-        PBD::ScopedConnection _channel_mode_changed_connection;
+	PBD::ScopedConnection _channel_mode_changed_connection;
 	void instrument_settings_changed ();
 	PBD::ScopedConnection _instrument_changed_connection;
 
@@ -527,8 +527,8 @@ private:
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;
 
-        ARDOUR::ChannelMode get_channel_mode() const;
-        uint16_t get_selected_channels () const;
+	ARDOUR::ChannelMode get_channel_mode() const;
+	uint16_t get_selected_channels () const;
 
 	inline double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 	inline double contents_note_range () const { return (double)(_current_range_max - _current_range_min + 1); }

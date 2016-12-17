@@ -89,7 +89,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
 	    gint16                width;
-            int			  length;
+		int                   length;
 	    bool                  packed;
 	    float                 max_peak;
 
