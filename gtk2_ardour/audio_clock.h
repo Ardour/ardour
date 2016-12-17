@@ -144,9 +144,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool style_resets_first;
 	int layout_height;
 	int layout_width;
-	int info_height;
-	int upper_height;
-	double mode_based_info_ratio;
 	double corner_radius;
 	uint32_t font_size;
 
@@ -202,7 +199,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);
-	void on_size_allocate (Gtk::Allocation&);
 	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_slave_info ();

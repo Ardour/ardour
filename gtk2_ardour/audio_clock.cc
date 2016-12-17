@@ -83,9 +83,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, style_resets_first (true)
 	, layout_height (0)
 	, layout_width (0)
-	, info_height (0)
-	, upper_height (0)
-	, mode_based_info_ratio (1.0)
 	, corner_radius (4)
 	, font_size (10240)
 	, editing (false)
@@ -284,9 +281,9 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	if (_need_bg) {
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), corner_radius);
 		} else {
-			cairo_rectangle (cr, 0, 0, get_width(), upper_height);
+			cairo_rectangle (cr, 0, 0, get_width(), get_height());
 		}
 		cairo_fill (cr);
 	}
@@ -294,7 +291,7 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	double lw = layout_width * xscale;
 	double lh = layout_height * yscale;
 
-	cairo_move_to (cr, (get_width() - lw) / 2.0, (upper_height - lh) / 2.0);
+	cairo_move_to (cr, (get_width() - lw) / 2.0, (get_height() - lh) / 2.0);
 
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_save (cr);
@@ -328,7 +325,7 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 				cairo_rectangle (cr,
 						 min (get_width() - 2.0,
 						      (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-						 (upper_height - layout_height)/2.0,
+						 (get_height() - layout_height)/2.0,
 						 2.0, cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
 			} else {
@@ -340,19 +337,12 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
 						 (get_width()/2.0),
-						 (upper_height - layout_height)/2.0,
-						 2.0, upper_height);
+						 (get_height() - layout_height)/2.0,
+						 2.0, get_height());
 				cairo_fill (cr);
 			}
 		}
 	}
-}
-
-void
-AudioClock::on_size_allocate (Gtk::Allocation& alloc)
-{
-	CairoWidget::on_size_allocate (alloc);
-	upper_height = get_height();
 }
 
 void
@@ -1499,7 +1489,7 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			 */
 			int xcenter = (get_width() - layout_width) /2;
 
-			y = ev->y - ((upper_height - layout_height)/2);
+			y = ev->y - ((get_height() - layout_height)/2);
 			x = ev->x - xcenter;
 
 			if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
@@ -1545,7 +1535,7 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 						int xcenter = (get_width() - layout_width) /2;
 						int index = 0;
 						int trailing;
-						int y = ev->y - ((upper_height - layout_height)/2);
+						int y = ev->y - ((get_height() - layout_height)/2);
 						int x = ev->x - xcenter;
 						Field f;
 
@@ -1614,7 +1604,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 */
 
 	int xcenter = (get_width() - layout_width) /2;
-	y = ev->y - ((upper_height - layout_height)/2);
+	y = ev->y - ((get_height() - layout_height)/2);
 	x = ev->x - xcenter;
 
 	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
@@ -2063,7 +2053,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 
 	switch (_mode) {
 	case Timecode:
-		mode_based_info_ratio = 0.6;
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (8);
@@ -2075,7 +2064,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 		break;
 
 	case BBT:
-		mode_based_info_ratio = 0.5;
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (9);
@@ -2088,7 +2076,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 		break;
 
 	case MinSec:
-		mode_based_info_ratio = 0.6;
 		insert_map.push_back (12);
 		insert_map.push_back (11);
 		insert_map.push_back (10);
@@ -2101,7 +2088,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 		break;
 
 	case Frames:
-		mode_based_info_ratio = 0.45;
 		break;
 	}
 
