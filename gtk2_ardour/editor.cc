@@ -386,7 +386,6 @@ Editor::Editor ()
 	, _visible_track_count (-1)
 	,  toolbar_selection_clock_table (2,3)
 	,  automation_mode_button (_("mode"))
-	,  _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
 	, selection (new Selection (this))
 	, cut_buffer (new Selection (this))
 	, _selection_memento (new SelectionMemento())
@@ -756,13 +755,10 @@ Editor::Editor ()
 		}
 	}
 
-	top_hbox.pack_start (toolbar_frame);
-
-	HBox *hbox = manage (new HBox);
-	hbox->pack_start (edit_pane, true, true);
-
-	global_vpacker.pack_start (top_hbox, false, false);
-	global_vpacker.pack_start (*hbox, true, true);
+	global_vpacker.set_spacing (2);
+	global_vpacker.set_border_width (0);
+	global_vpacker.pack_start (toolbar_hbox, false, false);
+	global_vpacker.pack_start (edit_pane, true, true);
 	global_hpacker.pack_start (global_vpacker, true, true);
 
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
@@ -3176,7 +3172,7 @@ Editor::setup_toolbar ()
 	hbox->set_spacing(2);
 
 	toolbar_hbox.set_spacing (2);
-	toolbar_hbox.set_border_width (1);
+	toolbar_hbox.set_border_width (2);
 
 	toolbar_hbox.pack_start (*mode_box, false, false);
 	if (!ARDOUR::Profile->get_trx()) {
@@ -3190,17 +3186,6 @@ Editor::setup_toolbar ()
 	}
 
 	hbox->show_all ();
-
-	toolbar_base.set_name ("ToolBarBase");
-	toolbar_base.add (toolbar_hbox);
-
-	_toolbar_viewport.add (toolbar_base);
-	/* stick to the required height but allow width to vary if there's not enough room */
-	_toolbar_viewport.set_size_request (1, -1);
-
-	toolbar_frame.set_shadow_type (SHADOW_OUT);
-	toolbar_frame.set_name ("BaseFrame");
-	toolbar_frame.add (_toolbar_viewport);
 }
 
 void

@@ -1054,7 +1054,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::HBox           toplevel_hpacker;
 
-	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
 
 	Gtk::Table          edit_packer;
@@ -1823,9 +1822,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void setup_tooltips ();
 
 	Gtk::HBox                toolbar_hbox;
-	Gtk::EventBox            toolbar_base;
-	Gtk::Frame               toolbar_frame;
-	Gtk::Viewport           _toolbar_viewport;
 
 	void setup_midi_toolbar ();
 

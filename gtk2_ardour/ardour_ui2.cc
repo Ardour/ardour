@@ -397,9 +397,11 @@ ARDOUR_UI::setup_transport ()
 
 	/* top level packing */
 	transport_table.set_spacings (0);
+	transport_table.set_row_spacings (4);
 	transport_table.set_border_width (2);
 	transport_frame.add (transport_table);
 	transport_frame.set_name ("BaseFrame");
+	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
 
 	transport_table.signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::transport_expose), false);
 
@@ -407,7 +409,7 @@ ARDOUR_UI::setup_transport ()
 	click_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
 
 	HBox* tbox = manage (new HBox);
-	tbox->set_spacing (PX_SCALE(1));
+	tbox->set_spacing (PX_SCALE(2));
 
 	tbox->pack_start (midi_panic_button, true, true, 0);
 	tbox->pack_start (click_button, true, true, 0);
@@ -438,12 +440,11 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
 	button_height_size_group->add_widget (stop_button);
-	button_height_size_group->add_widget (sync_button);
-	button_height_size_group->add_widget (layered_button);
+//	button_height_size_group->add_widget (sync_button);
+//	button_height_size_group->add_widget (layered_button);
 	button_height_size_group->add_widget (auto_return_button);
 	button_height_size_group->add_widget (editor_visibility_button);
 	button_height_size_group->add_widget (mixer_visibility_button);
-
 
 	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
 	clock1_size_group->add_widget (*primary_clock->left_btn());
@@ -463,9 +464,6 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, 2, 3, 1, 2 , FILL, SHRINK, 3, 0);
 
 	transport_table.attach (punch_in_button, 3, 4, 0, 1 , FILL, SHRINK, 0, 2);
-//	EventBox* spacer = manage (new EventBox);//  spacer->set_size_request(1,-1);
-//	transport_table.attach (*spacer, 4, 5, 0, 1 , SHRINK, SHRINK, 1, 0);
-	transport_table.attach (*(manage (new Label (""))), 4, 5, 0, 1 , FILL, SHRINK, 1, 0);
 	transport_table.attach (punch_out_button, 5, 6, 0, 1 , FILL, SHRINK, 0, 2);
 	transport_table.attach (layered_button, 3, 6, 1, 2 , FILL, SHRINK, 0, 2);
 
