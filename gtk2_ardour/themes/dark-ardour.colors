@@ -156,7 +156,7 @@
     <ColorAlias name="entered automation line" alias="color 19"/>
     <ColorAlias name="entered gain line" alias="color 19"/>
     <ColorAlias name="entered marker" alias="color 19"/>
-    <ColorAlias name="feedback alert: fill" alias="color 20"/>
+    <ColorAlias name="feedback alert: fill" alias="color 25"/>
     <ColorAlias name="feedback alert: fill active" alias="color 9"/>
     <ColorAlias name="feedback alert: led active" alias="color 4"/>
     <ColorAlias name="frame handle" alias="color 23"/>
@@ -390,13 +390,13 @@
     <ColorAlias name="route button: fill active" alias="color 67"/>
     <ColorAlias name="route button: led active" alias="color 8"/>
     <ColorAlias name="rubber band rect" alias="color 88"/>
-    <ColorAlias name="rude audition: fill" alias="color 20"/>
+    <ColorAlias name="rude audition: fill" alias="color 25"/>
     <ColorAlias name="rude audition: fill active" alias="color 86"/>
     <ColorAlias name="rude audition: led active" alias="color 4"/>
     <ColorAlias name="rude isolate: fill" alias="color 42"/>
     <ColorAlias name="rude isolate: fill active" alias="color 89"/>
     <ColorAlias name="rude isolate: led active" alias="color 4"/>
-    <ColorAlias name="rude solo: fill" alias="color 20"/>
+    <ColorAlias name="rude solo: fill" alias="color 25"/>
     <ColorAlias name="rude solo: fill active" alias="color 86"/>
     <ColorAlias name="rude solo: led active" alias="color 4"/>
     <ColorAlias name="ruler base" alias="color 67"/>
