@@ -21,7 +21,7 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	Tempo tempo (bpm, 4.0);
 	Meter meter (4, 4);
 
-	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), AudioTime);
+	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), 0, AudioTime);
 	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
 
 	/* Add 1 beat to beat 3 of the first bar */
@@ -41,7 +41,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), AudioTime);
+	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -94,7 +94,7 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), AudioTime);
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -120,7 +120,7 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, TempoSection::Constant, MusicTime);
 	Meter meterB (3, 8);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), MusicTime);
+	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
 
 	/* Now some tests */
 
@@ -149,7 +149,7 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (3, 4);
-	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), AudioTime);
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -177,7 +177,7 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 12.0 / 4.0, 0, TempoSection::Constant, MusicTime);
 	Meter meterB (5, 8);
-	map.add_meter (meterB, 9.0, BBT_Time (4, 1, 0), MusicTime);
+	map.add_meter (meterB, 9.0, BBT_Time (4, 1, 0), 0, MusicTime);
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */

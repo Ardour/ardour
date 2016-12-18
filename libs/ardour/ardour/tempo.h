@@ -359,12 +359,20 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	 */
 	TempoSection* add_tempo (const Tempo&, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls);
 
-	/** add an meter section locked to pls.. ignored values will be set in recompute_meters()
+	/** add a meter section locked to pls.. ignored values will be set in recompute_meters()
+	 * @param meter the Meter to be added
 	 * @param beat beat position of new section
 	 * @param where bbt position of new section
 	 * @param frame frame position of new section. ignored if pls == MusicTime
+	 * note that @frame may also be ignored if it would create an un-solvable map
+	 * (previous audio-locked tempi may place the requested beat at an earlier time than frame)
+	 * in which case the new meter will be placed at the specified BBT.
+	 * @param  pls the position lock style
+	 *
+	 * adding an audio-locked meter will add a meter-locked tempo section at the meter position.
+	 * the meter-locked tempo tempo will be the Tempo at @beat
 	 */
-	MeterSection* add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where, PositionLockStyle pls);
+	MeterSection* add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -372,7 +380,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
 			    , TempoSection::Type type, PositionLockStyle pls);
 
-	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, PositionLockStyle pls);
+	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -569,7 +577,7 @@ private:
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
 			       , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
-	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, PositionLockStyle pls, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

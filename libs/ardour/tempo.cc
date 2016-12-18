@@ -1015,15 +1015,24 @@ TempoMap::do_insert (MetricSection* section)
 		MeterSection* const insert_meter = dynamic_cast<MeterSection*> (section);
 		TempoSection* const insert_tempo = dynamic_cast<TempoSection*> (section);
 		Metrics::iterator i;
+
 		if (insert_meter) {
+			TempoSection* prev_t = 0;
+
 			for (i = _metrics.begin(); i != _metrics.end(); ++i) {
 				MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
+				bool const ipm = insert_meter->position_lock_style() == MusicTime;
 
 				if (meter) {
-					bool const ipm = insert_meter->position_lock_style() == MusicTime;
 					if ((ipm && meter->beat() > insert_meter->beat()) || (!ipm && meter->frame() > insert_meter->frame())) {
 						break;
 					}
+				} else {
+					if (prev_t && prev_t->locked_to_meter() && (!ipm && prev_t->frame() == insert_meter->frame())) {
+						break;
+					}
+
+					prev_t = dynamic_cast<TempoSection*> (*i);
 				}
 			}
 		} else if (insert_tempo) {
@@ -1032,7 +1041,10 @@ TempoMap::do_insert (MetricSection* section)
 
 				if (tempo) {
 					bool const ipm = insert_tempo->position_lock_style() == MusicTime;
-					if ((ipm && tempo->pulse() > insert_tempo->pulse()) || (!ipm && tempo->frame() > insert_tempo->frame())) {
+					const bool tpm = tempo->position_lock_style() == MusicTime;
+					const bool lm = insert_tempo->locked_to_meter();
+					if ((ipm && tempo->pulse() > insert_tempo->pulse()) || (!ipm && tempo->frame() > insert_tempo->frame())
+					    || (lm && tempo->pulse() > insert_tempo->pulse())) {
 						break;
 					}
 				}
@@ -1113,12 +1125,12 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, double minute
 }
 
 MeterSection*
-TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, PositionLockStyle pls)
+TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls)
 {
 	MeterSection* m = 0;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		m = add_meter_locked (meter, beat, where, pls, true);
+		m = add_meter_locked (meter, beat, where, frame, pls, true);
 	}
 
 
@@ -1133,7 +1145,7 @@ TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT
 }
 
 void
-TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_Time& where, PositionLockStyle pls)
+TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_Time& where, framepos_t frame, PositionLockStyle pls)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
@@ -1141,7 +1153,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 
 		if (!ms.initial()) {
 			remove_meter_locked (ms);
-			add_meter_locked (meter, beat, where, pls, true);
+			add_meter_locked (meter, beat, where, frame, pls, true);
 		} else {
 			MeterSection& first (first_meter());
 			TempoSection& first_t (first_tempo());
@@ -1163,7 +1175,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 }
 
 MeterSection*
-TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& where, PositionLockStyle pls, bool recompute)
+TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute)
 {
 	const MeterSection& prev_m = meter_section_at_minute_locked  (_metrics, minute_at_beat_locked (_metrics, beat) - minute_at_frame (1));
 	const double pulse = ((where.bars - prev_m.bbt().bars) * (prev_m.divisions_per_bar() / prev_m.note_divisor())) + prev_m.pulse();
@@ -1172,7 +1184,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 
 	if (pls == AudioTime) {
 		/* add meter-locked tempo */
-		mlt = add_tempo_locked (tempo_at_minute_locked (_metrics, time_minutes), pulse,  time_minutes, TempoSection::Ramp, AudioTime, true, true);
+		mlt = add_tempo_locked (tempo_at_minute_locked (_metrics, time_minutes), pulse, minute_at_frame (frame), TempoSection::Ramp, AudioTime, true, true);
 
 		if (!mlt) {
 			return 0;
@@ -1180,7 +1192,8 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 
 	}
 
-	MeterSection* new_meter = new MeterSection (pulse, time_minutes, beat, where, meter.divisions_per_bar(), meter.note_divisor(), pls, _frame_rate);
+	MeterSection* new_meter = new MeterSection (pulse, minute_at_frame (frame), beat, where, meter.divisions_per_bar(), meter.note_divisor(), pls, _frame_rate);
+
 	bool solved = false;
 
 	do_insert (new_meter);
@@ -1188,7 +1201,13 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 	if (recompute) {
 
 		if (pls == AudioTime) {
-			solved = solve_map_minute (_metrics, new_meter, time_minutes);
+			solved = solve_map_minute (_metrics, new_meter, minute_at_frame (frame));
+			/* we failed, most likely due to some impossible frame requirement wrt audio-locked tempi.
+			   fudge frame so that the meter ends up at its BBT position instead.
+			*/
+			if (!solved) {
+				solved = solve_map_minute (_metrics, new_meter, minute_at_frame (prev_m.frame() + 1));
+			}
 		} else {
 			solved = solve_map_bbt (_metrics, new_meter, where);
 			/* required due to resetting the pulse of meter-locked tempi above.
@@ -2596,6 +2615,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 	TempoSection* prev_t = 0;
 	TempoSection* section_prev = 0;
 	double first_m_minute = 0.0;
+	const bool sml = section->locked_to_meter();
 
 	/* can't move a tempo before the first meter */
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
@@ -2623,17 +2643,29 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 			if (!t->active()) {
 				continue;
 			}
+
 			if (prev_t) {
+
 				if (t == section) {
-					section_prev = prev_t;
-					if (t->locked_to_meter()) {
-						prev_t = t;
-					}
 					continue;
 				}
 
 				if (t->frame() == frame_at_minute (minute)) {
 					return false;
+				}
+
+				const bool tlm = t->position_lock_style() == MusicTime;
+
+				if (prev_t && !section_prev && ((sml && tlm && t->pulse() > section->pulse()) || (!tlm && t->minute() > minute))) {
+					section_prev = prev_t;
+
+					if (t->locked_to_meter()) {
+						section_prev->set_c_func (section_prev->compute_c_func_minute (section->note_types_per_minute(), minute));
+						if (!section->locked_to_meter()) {
+							section->set_pulse (section_prev->pulse_at_ntpm (section->note_types_per_minute(), minute));
+						}
+						prev_t = section;
+					}
 				}
 
 				if (t->position_lock_style() == MusicTime) {
@@ -2776,7 +2808,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, MeterSection* section, const dou
 		TempoSection* t;
 		if ((*ii)->is_tempo()) {
 			t = static_cast<TempoSection*> (*ii);
-			if ((t->locked_to_meter() || t->initial()) && t->minute() == section->minute()) {
+			if ((t->locked_to_meter() || t->initial()) && t->frame() == section->frame()) {
 				meter_locked_tempo = t;
 				break;
 			}
@@ -2831,7 +2863,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, MeterSection* section, const dou
 						}
 					} else {
 						/* all is ok. set section's locked tempo if allowed.
-						   possibly disallowed if there is an adjacent audio-locked tempo.
+						   possibly disallow if there is an adjacent audio-locked tempo.
 						   XX this check could possibly go. its never actually happened here.
 						*/
 						MeterSection* meter_copy = const_cast<MeterSection*>

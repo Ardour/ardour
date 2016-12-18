@@ -1396,7 +1396,7 @@ Editor::toggle_marker_lock_style ()
 		const Timecode::BBT_Time bbt (msp->bbt());
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_meter (*msp, meter, bbt, pls);
+		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->frame(), pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
