@@ -481,9 +481,10 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	transport_table.attach (punch_in_button,  col,     col + 1, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (punch_out_button, col + 1, col + 2, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (layered_button,   col,     col + 2, 1, 2 , FILL, SHRINK, 0, 2);
-	col += 2;
+	transport_table.attach (*(manage (new Label (""))), col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (punch_out_button, col + 2, col + 3, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (layered_button,   col,     col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	col += 3;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
