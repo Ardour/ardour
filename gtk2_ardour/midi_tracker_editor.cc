@@ -67,8 +67,6 @@ using Timecode::BBT_Time;
 // TODO //
 //////////
 //
-// - [ ] Fix show existing automation after showing all automations
-//
 // - [ ] Get the width of the Gtk widget minimize automatically
 //
 // - [ ] Update automation when updated on the horizontal track view
@@ -375,18 +373,24 @@ MidiTrackerEditor::show_existing_processor_automations ()
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->columns.begin(); ii != (*i)->columns.end(); ++ii) {
 			size_t& column = (*ii)->column;
-			if (param2actrl[(*ii)->what]->list()->size() > 0) {
+			bool exist = param2actrl[(*ii)->what]->list()->size() > 0;
+
+			// Create automation column if necessary
+			if (exist) {
 				if (column == 0)
 					add_processor_automation_column ((*i)->processor, (*ii)->what);
-
-				// Still no column available, skip
-				if (column == 0)
-					continue;
-
-				visible_automation_columns.insert (column);
-
-				(*ii)->menu_item->set_active (true);
 			}
+
+			// Still no column available, skip
+			if (column == 0)
+				continue;
+
+			if (exist)
+				visible_automation_columns.insert (column);
+			else
+				visible_automation_columns.erase (column);
+
+			(*ii)->menu_item->set_active (exist);
 		}
 	}
 }
