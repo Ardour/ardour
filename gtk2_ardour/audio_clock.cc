@@ -1164,16 +1164,16 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		if (m.tempo().note_type() == 4) {
-			snprintf (buf, sizeof(buf), "\u2669 = %.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
 		} else if (m.tempo().note_type() == 8) {
-			snprintf (buf, sizeof(buf), "\u266a = %.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
 		} else {
-			snprintf (buf, sizeof(buf), "%.0f@%.0f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
+			snprintf (buf, sizeof(buf), "%.1f@%.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
 		}
-		_left_btn.set_text (string_compose ("%1: %2", _("Tempo"), buf));
+		_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf));
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_btn.set_text (string_compose ("%1: %2", _("Meter"), buf));
+		_right_btn.set_text (string_compose ("%1: %2", S_("Meter|M"), buf));
 	}
 }
 
