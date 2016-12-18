@@ -607,9 +607,6 @@ Session::destroy ()
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
-	/* stop autoconnecting */
-	auto_connect_thread_terminate ();
-
 	/* disconnect from any and all signals that we are connected to */
 
 	Port::PortSignalDrop (); /* EMIT SIGNAL */
@@ -620,6 +617,9 @@ Session::destroy ()
 	*/
 
 	ControlProtocolManager::instance().drop_protocols ();
+
+	/* stop autoconnecting */
+	auto_connect_thread_terminate ();
 
 	MIDI::Name::MidiPatchManager::instance().remove_search_path(session_directory().midi_patch_path());
 
