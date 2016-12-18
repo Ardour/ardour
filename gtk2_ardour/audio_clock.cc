@@ -41,6 +41,7 @@
 #include "audio_clock.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -877,11 +878,15 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 			_right_btn.set_elements (ArdourButton::Element(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text));
 			_left_btn.set_alignment (.5, .5);
 			_right_btn.set_alignment (.5, .5);
+			set_tooltip (_left_btn, _("Change current tempo"));
+			set_tooltip (_right_btn, _("Change current time signature"));
 		} else {
 			_left_btn.set_elements (ArdourButton::Text);
 			_right_btn.set_elements (ArdourButton::Text);
 			_left_btn.set_alignment (0, .5);
 			_right_btn.set_alignment (1, .5);
+			set_tooltip (_left_btn, _(""));
+			set_tooltip (_right_btn, _(""));
 		}
 	}
 
