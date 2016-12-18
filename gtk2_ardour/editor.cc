@@ -757,6 +757,12 @@ Editor::Editor ()
 
 	global_vpacker.set_spacing (2);
 	global_vpacker.set_border_width (0);
+
+	//spacer
+	EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(-1, 1);
+	spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	global_vpacker.pack_start (*spacer, false, false, 0);
+
 	global_vpacker.pack_start (toolbar_hbox, false, false);
 	global_vpacker.pack_start (edit_pane, true, true);
 	global_hpacker.pack_start (global_vpacker, true, true);
@@ -3110,6 +3116,9 @@ Editor::setup_toolbar ()
 	}
 
 	/* Track zoom buttons */
+	_track_box.set_spacing (2);
+	_track_box.set_border_width (2);
+
 	visible_tracks_selector.set_name ("zoom button");
 	if (Profile->get_mixbus()) {
 		visible_tracks_selector.set_image(::get_icon ("tav_exp"));
@@ -3129,14 +3138,14 @@ Editor::setup_toolbar ()
 	tav_shrink_button.set_related_action (act);
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		_zoom_box.pack_start (visible_tracks_selector);
+		_track_box.pack_start (visible_tracks_selector);
 	} else if (ARDOUR::Profile->get_trx()) {
-		_zoom_box.pack_start (tav_shrink_button);
-		_zoom_box.pack_start (tav_expand_button);
+		_track_box.pack_start (tav_shrink_button);
+		_track_box.pack_start (tav_expand_button);
 	} else {
-		_zoom_box.pack_start (visible_tracks_selector);
-		_zoom_box.pack_start (tav_shrink_button);
-		_zoom_box.pack_start (tav_expand_button);
+		_track_box.pack_start (visible_tracks_selector);
+		_track_box.pack_start (tav_shrink_button);
+		_track_box.pack_start (tav_expand_button);
 	}
 
 	snap_box.set_spacing (2);
@@ -3150,7 +3159,13 @@ Editor::setup_toolbar ()
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
-	snap_box.pack_start (edit_point_selector, false, false);
+
+	/* Edit Point*/
+	HBox *ep_box = manage (new HBox);
+	ep_box->set_spacing (2);
+	ep_box->set_border_width (2);
+
+	ep_box->pack_start (edit_point_selector, false, false);
 
 	/* Nudge */
 
@@ -3168,24 +3183,50 @@ Editor::setup_toolbar ()
 
 	/* Pack everything in... */
 
-	HBox* hbox = manage (new HBox);
-	hbox->set_spacing(2);
-
 	toolbar_hbox.set_spacing (2);
 	toolbar_hbox.set_border_width (2);
 
 	toolbar_hbox.pack_start (*mode_box, false, false);
+
 	if (!ARDOUR::Profile->get_trx()) {
+
+		//spacer
+		EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
+		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+		toolbar_hbox.pack_start (*spacer, false, false, 3);
+
 		toolbar_hbox.pack_start (_zoom_box, false, false);
-		toolbar_hbox.pack_start (*hbox, false, false);
+
+		//spacer
+		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
+		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+		toolbar_hbox.pack_start (*spacer, false, false, 3);
+
+		toolbar_hbox.pack_start (_track_box, false, false);
+
+		//spacer
+		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
+		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+		toolbar_hbox.pack_start (*spacer, false, false, 3);
+
+		toolbar_hbox.pack_start (snap_box, false, false);
+
+		//spacer
+		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
+		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+		toolbar_hbox.pack_start (*spacer, false, false, 3);
+
+		toolbar_hbox.pack_start (*ep_box, false, false);
+
+		//spacer
+		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
+		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
+		toolbar_hbox.pack_start (*spacer, false, false, 3);
+
+		toolbar_hbox.pack_start (*nudge_box, false, false);
 	}
 
-	if (!ARDOUR::Profile->get_trx()) {
-		hbox->pack_start (snap_box, false, false);
-		hbox->pack_start (*nudge_box, false, false);
-	}
-
-	hbox->show_all ();
+	toolbar_hbox.show_all ();
 }
 
 void

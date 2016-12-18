@@ -180,8 +180,21 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 }
 
 bool
+ARDOUR_UI::spacer_expose (GdkEventExpose* ev)
+{
+	cairo_t *cr = gdk_cairo_create (ev->window);
+    
+	cairo_rectangle (cr, 1, 0, ev->area.width-2, ev->area.height);
+	cairo_set_source_rgb (cr, 0,0,0);
+	cairo_fill (cr);
+	
+	return true;
+}
+
+bool
 ARDOUR_UI::transport_expose (GdkEventExpose* ev)
 {
+return false;
 	int x0, y0;
 	Gtk::Widget* window_parent;
 	Glib::RefPtr<Gdk::Window> win = Gtkmm2ext::window_to_draw_on (transport_table, &window_parent);
@@ -345,8 +358,8 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_text (_("Out"));
 	layered_button.set_text (_("Non-Layered"));
 
-	punch_label.set_text (_(" Punch:"));
-	layered_label.set_text (_(" Mode:"));
+	punch_label.set_text (_("Punch:"));
+	layered_label.set_text (_("Rec:"));
 
 	/* and tooltips */
 
@@ -462,42 +475,70 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (sync_button, 0, 1, 1, 2 , FILL, SHRINK, 0, 0);
 	transport_table.attach (*shuttle_box, 1, 2, 1, 2 , FILL, SHRINK, 3, 0);
 
-	transport_table.attach (punch_label, 2, 3, 0, 1 , FILL, SHRINK, 3, 0);
-	transport_table.attach (layered_label, 2, 3, 1, 2 , FILL, SHRINK, 3, 0);
+	//spacer
+	EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 2, 3, 0, 2 , FILL, SHRINK, 3, 0);
+	
+	transport_table.attach (punch_label, 3, 4, 0, 1 , FILL, SHRINK, 3, 0);
+	transport_table.attach (layered_label, 3, 4, 1, 2 , FILL, SHRINK, 3, 0);
 
-	transport_table.attach (punch_in_button, 3, 4, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (punch_out_button, 5, 6, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (layered_button, 3, 6, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_in_button, 4, 5, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_out_button, 6, 7, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (layered_button, 4, 7, 1, 2 , FILL, SHRINK, 0, 2);
 
-	// some extra space here (accomodate for the record-option box)
-	transport_table.attach (*(manage (new Label (""))), 6, 7, 0, 2 , FILL, SHRINK, 2, 0);
+	//spacer
+	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 7, 8, 0, 2 , FILL, SHRINK, 3, 0);
 
-	transport_table.attach (follow_edits_button, 7, 8, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (auto_return_button, 7, 8, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (follow_edits_button, 8, 9, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (auto_return_button, 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
 
-	transport_table.attach (*primary_clock, 8, 10, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->left_btn(), 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->right_btn(), 9, 10, 1, 2 , FILL, SHRINK, 2, 0);
+	//spacer
+	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 9, 10, 0, 2 , FILL, SHRINK, 3, 0);
+
+	transport_table.attach (*primary_clock, 10, 12, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->left_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->right_btn(), 11, 12, 1, 2 , FILL, SHRINK, 2, 0);
+
+	//spacer
+	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 12, 13, 0, 2 , FILL, SHRINK, 3, 0);
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		transport_table.attach (*secondary_clock, 10, 12, 0, 1 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->left_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->right_btn(), 11, 12, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock, 13, 15, 0, 1 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->left_btn(), 13, 14, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->right_btn(), 14, 15, 1, 2 , FILL, SHRINK, 2, 0);
 	}
 
-	transport_table.attach (*alert_box, 12, 13, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+	//spacer
+	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 15, 16, 0, 2 , FILL, SHRINK, 3, 0);
+
+	transport_table.attach (*alert_box, 16, 17, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+
+	//spacer
+	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
+	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
+	transport_table.attach (*spacer, 17, 18, 0, 2 , FILL, SHRINK, 3, 0);
+
 
 	/* editor-meter is in transport_hbox */
 	transport_hbox.set_spacing (PX_SCALE(1));
-	transport_table.attach (transport_hbox, 13, 14, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+	transport_table.attach (transport_hbox, 18, 19, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 
-	transport_table.attach (*mini_timeline, 14, 15, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
+	transport_table.attach (*mini_timeline, 19, 20, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
 
 	/* lua script action buttons */
-	transport_table.attach (action_script_table, 15, 16, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
+	transport_table.attach (action_script_table, 20, 21, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
 
-	transport_table.attach (editor_visibility_button, 16, 17, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (mixer_visibility_button, 16, 17, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (editor_visibility_button, 21, 22, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (mixer_visibility_button, 21, 22, 1, 2 , FILL, SHRINK, 2, 0);
 
 	/* desensitize */
 

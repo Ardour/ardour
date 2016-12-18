@@ -1814,6 +1814,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
+	Gtk::HBox           _track_box;
+
 	Gtk::HBox           _zoom_box;
 	void                zoom_adjustment_changed();
 

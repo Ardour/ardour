@@ -380,6 +380,8 @@ public:
 
 	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
+	bool spacer_expose (GdkEventExpose*);
+
 protected:
 	friend class PublicEditor;
 
