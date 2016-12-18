@@ -260,6 +260,8 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 
+	sync_button.set_sizing_text (_("Internal")); // longest of sync_source_to_string()
+
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
 	solo_alert_button.set_related_action (act);
