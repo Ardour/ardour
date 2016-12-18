@@ -68,7 +68,7 @@ void
 MiniTimeline::session_going_away ()
 {
 	super_rapid_connection.disconnect ();
-	session_connection.disconnect ();
+	session_connection.drop_connections ();
 	SessionHandlePtr::session_going_away ();
 	_jumplist.clear ();
 }
@@ -85,9 +85,22 @@ MiniTimeline::set_session (Session* s)
 	super_rapid_connection = Timers::super_rapid_connect (
 			sigc::mem_fun (*this, &MiniTimeline::super_rapid_update)
 			);
+
 	_session->config.ParameterChanged.connect (session_connection,
 			invalidator (*this),
 			boost::bind (&MiniTimeline::parameter_changed, this, _1), gui_context()
+			);
+	_session->locations()->added.connect (session_connection,
+			invalidator (*this),
+			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
+			);
+	_session->locations()->removed.connect (session_connection,
+			invalidator (*this),
+			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
+			);
+	_session->locations()->changed.connect (session_connection,
+			invalidator (*this),
+			boost::bind (&MiniTimeline::update_minitimeline, this), gui_context()
 			);
 
 	_jumplist.clear ();

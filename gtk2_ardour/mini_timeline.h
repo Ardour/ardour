@@ -69,7 +69,7 @@ private:
 	Glib::RefPtr<Pango::Layout> _layout;
 	sigc::connection super_rapid_connection;
 	PBD::ScopedConnectionList marker_connection;
-	PBD::ScopedConnection session_connection;
+	PBD::ScopedConnectionList session_connection;
 
 	framepos_t _last_update_frame;
 	AudioClock::Mode _clock_mode;
