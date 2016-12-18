@@ -289,11 +289,8 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, int h, const std::string& 
 	} else {
 		cairo_save (cr);
 		cairo_rectangle (cr, x0, y, rw - x0, h);
-		cairo_set_source_rgba (cr, r, g, b, 0.5);
+		cairo_set_source_rgba (cr, r, g, b, 0.5); // this should use a shaded color
 		cairo_fill_preserve (cr);
-		cairo_set_source_rgba (cr, r, g, b, 1.0);
-		cairo_set_line_width (cr, 1.0);
-		cairo_stroke_preserve (cr);
 		cairo_clip (cr);
 
 		// marker label
@@ -311,7 +308,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, int h, const std::string& 
 	cairo_rel_line_to (cr, w2, -h1);
 	cairo_rel_line_to (cr, 0, -h0);
 	cairo_close_path (cr);
-	cairo_set_source_rgba (cr, r, g, b, a);
+	cairo_set_source_rgba (cr, r, g, b, 1.0);
 	cairo_set_line_width (cr, 1.0);
 	cairo_stroke_preserve (cr);
 	cairo_fill (cr);
