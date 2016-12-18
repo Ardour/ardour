@@ -4840,7 +4840,7 @@ msgid "List Editor..."
 msgstr ""
 
 #: editor_actions.cc:1935
-msgid "Tracker Editor..."
+msgid "Tracker Editor (read-only)..."
 msgstr ""
 
 #: editor_actions.cc:1918

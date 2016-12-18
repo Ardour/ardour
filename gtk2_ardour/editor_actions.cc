@@ -1924,7 +1924,7 @@ Editor::register_region_actions ()
 	/* Open the list editor dialogue for the selected regions */
 	reg_sens (_region_actions, "show-region-list-editor", _("List Editor..."), sigc::mem_fun (*this, &Editor::show_midi_list_editor));
 
-	reg_sens (_region_actions, "show-region-tracker-editor", _("Tracker Editor..."), sigc::mem_fun (*this, &Editor::show_midi_tracker_editor));
+	reg_sens (_region_actions, "show-region-tracker-editor", _("Tracker Editor (read-only)..."), sigc::mem_fun (*this, &Editor::show_midi_tracker_editor));
 
 	/* Open the region properties dialogue for the selected regions */
 	reg_sens (_region_actions, "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
