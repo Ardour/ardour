@@ -496,7 +496,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 	}
 
 	for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
-		if ((marv = tv.view()->find_view (*ir)) != 0) {
+		if ((marv = tv.view()->find_view (*ir)) != 0 && basis->region()->layer() == marv->region()->layer()) {
 			all_equivs->push_back (marv);
 		}
 	}
