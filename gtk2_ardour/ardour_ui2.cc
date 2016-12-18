@@ -44,6 +44,7 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#include "ardour_spacer.h"
 #include "ardour_ui.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -69,7 +70,6 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
 using namespace ARDOUR_UI_UTILS;
-
 
 void
 ARDOUR_UI::setup_tooltips ()
@@ -177,18 +177,6 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 		return true;
 	}
 	return false;
-}
-
-bool
-ARDOUR_UI::spacer_expose (GdkEventExpose* ev)
-{
-	cairo_t *cr = gdk_cairo_create (ev->window);
-    
-	cairo_rectangle (cr, 1, 0, ev->area.width-2, ev->area.height);
-	cairo_set_source_rgb (cr, 0,0,0);
-	cairo_fill (cr);
-	
-	return true;
 }
 
 bool
@@ -476,9 +464,7 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (*shuttle_box, 1, 2, 1, 2 , FILL, SHRINK, 3, 0);
 
 	//spacer
-	EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 2, 3, 0, 2 , FILL, SHRINK, 3, 0);
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 2, 3, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	
 	transport_table.attach (punch_label, 3, 4, 0, 1 , FILL, SHRINK, 3, 0);
 	transport_table.attach (layered_label, 3, 4, 1, 2 , FILL, SHRINK, 3, 0);
@@ -488,26 +474,20 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_button, 4, 7, 1, 2 , FILL, SHRINK, 0, 2);
 
 	//spacer
-	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 7, 8, 0, 2 , FILL, SHRINK, 3, 0);
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 7, 8, 3, 0 , SHRINK, EXPAND|FILL, 3, 0);
 
 	transport_table.attach (follow_edits_button, 8, 9, 0, 1 , FILL, SHRINK, 2, 0);
 	transport_table.attach (auto_return_button, 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
 
 	//spacer
-	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 9, 10, 0, 2 , FILL, SHRINK, 3, 0);
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 9, 10, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 
 	transport_table.attach (*primary_clock, 10, 12, 0, 1 , FILL, SHRINK, 2, 0);
 	transport_table.attach (*primary_clock->left_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
 	transport_table.attach (*primary_clock->right_btn(), 11, 12, 1, 2 , FILL, SHRINK, 2, 0);
 
 	//spacer
-	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 12, 13, 0, 2 , FILL, SHRINK, 3, 0);
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 12, 13, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 
 	if (!ARDOUR::Profile->get_small_screen()) {
 		transport_table.attach (*secondary_clock, 13, 15, 0, 1 , FILL, SHRINK, 2, 0);
@@ -516,17 +496,12 @@ ARDOUR_UI::setup_transport ()
 	}
 
 	//spacer
-	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 15, 16, 0, 2 , FILL, SHRINK, 3, 0);
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 15, 16, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 
 	transport_table.attach (*alert_box, 16, 17, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 
 	//spacer
-	spacer = manage (new EventBox ()); spacer->set_size_request(3, 42);
-	spacer->signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	transport_table.attach (*spacer, 17, 18, 0, 2 , FILL, SHRINK, 3, 0);
-
+	transport_table.attach (*(manage (new ArdourVSpacer ())), 17, 18, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 
 	/* editor-meter is in transport_hbox */
 	transport_hbox.set_spacing (PX_SCALE(1));

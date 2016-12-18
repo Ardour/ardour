@@ -87,6 +87,7 @@
 
 #include "actions.h"
 #include "analysis_window.h"
+#include "ardour_spacer.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -757,11 +758,6 @@ Editor::Editor ()
 
 	global_vpacker.set_spacing (2);
 	global_vpacker.set_border_width (0);
-
-	//spacer
-	EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(-1, 1);
-	spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-//	global_vpacker.pack_start (*spacer, false, false, 0);
 
 	global_vpacker.pack_start (toolbar_hbox, false, false);
 	global_vpacker.pack_start (edit_pane, true, true);
@@ -3190,38 +3186,23 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_trx()) {
 
-		//spacer
-		EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
-		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-		toolbar_hbox.pack_start (*spacer, false, false, 3);
+		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 		toolbar_hbox.pack_start (_zoom_box, false, false);
 
-		//spacer
-		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
-		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-		toolbar_hbox.pack_start (*spacer, false, false, 3);
+		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 		toolbar_hbox.pack_start (_track_box, false, false);
 
-		//spacer
-		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
-		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-		toolbar_hbox.pack_start (*spacer, false, false, 3);
+		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 		toolbar_hbox.pack_start (snap_box, false, false);
 
-		//spacer
-		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
-		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-		toolbar_hbox.pack_start (*spacer, false, false, 3);
+		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 		toolbar_hbox.pack_start (*ep_box, false, false);
 
-		//spacer
-		spacer = manage (new EventBox ()); spacer->set_size_request(3, 12);
-		spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-		toolbar_hbox.pack_start (*spacer, false, false, 3);
+		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 		toolbar_hbox.pack_start (*nudge_box, false, false);
 	}
