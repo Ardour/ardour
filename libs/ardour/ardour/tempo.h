@@ -483,10 +483,10 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Tempo tempo_at_quarter_note (const double& beat) const;
 	double quarter_note_at_tempo (const Tempo& tempo) const;
 
-	void gui_move_tempo (TempoSection*, const framepos_t& frame, const int& sub_num);
-	void gui_move_meter (MeterSection*, const framepos_t& frame);
+	void gui_set_tempo_position (TempoSection*, const framepos_t& frame, const int& sub_num);
+	void gui_set_meter_position (MeterSection*, const framepos_t& frame);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
-	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame);
+	void gui_stretch_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame);
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);

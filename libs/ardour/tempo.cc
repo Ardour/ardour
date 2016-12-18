@@ -1041,7 +1041,6 @@ TempoMap::do_insert (MetricSection* section)
 
 				if (tempo) {
 					bool const ipm = insert_tempo->position_lock_style() == MusicTime;
-					const bool tpm = tempo->position_lock_style() == MusicTime;
 					const bool lm = insert_tempo->locked_to_meter();
 					if ((ipm && tempo->pulse() > insert_tempo->pulse()) || (!ipm && tempo->frame() > insert_tempo->frame())
 					    || (lm && tempo->pulse() > insert_tempo->pulse())) {
@@ -3211,7 +3210,7 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
  * if sub_num is zero, the musical position will be taken from the supplied frame.
  */
 void
-TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& sub_num)
+TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, const int& sub_num)
 {
 	Metrics future_map;
 
@@ -3284,7 +3283,7 @@ TempoMap::gui_move_tempo (TempoSection* ts, const framepos_t& frame, const int& 
  * leaving the meter position unchanged.
  */
 void
-TempoMap::gui_move_meter (MeterSection* ms, const framepos_t& frame)
+TempoMap::gui_set_meter_position (MeterSection* ms, const framepos_t& frame)
 {
 	Metrics future_map;
 
@@ -3353,7 +3352,7 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 }
 
 void
-TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const framepos_t& end_frame)
+TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t& frame, const framepos_t& end_frame)
 {
 	/*
 	  Ts (future prev_t)   Tnext
@@ -4397,11 +4396,11 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 			TempoSection* ts;
 
 			if ((ms = dynamic_cast <MeterSection*>(*i)) != 0) {
-				gui_move_meter (ms, (*i)->frame() + amount);
+				gui_set_meter_position (ms, (*i)->frame() + amount);
 			}
 
 			if ((ts = dynamic_cast <TempoSection*>(*i)) != 0) {
-				gui_move_tempo (ts, (*i)->frame() + amount, 0);
+				gui_set_tempo_position (ts, (*i)->frame() + amount, 0);
 			}
 		}
 	}

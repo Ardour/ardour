@@ -3310,7 +3310,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		pf = adjusted_current_frame (event, false);
 	}
 
-	_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
+	_editor->session()->tempo_map().gui_set_meter_position (_real_section, pf);
 
 	/* fake marker meeds to stay under the mouse, unlike the real one. */
 	_marker->set_position (adjusted_current_frame (event, false));
@@ -3473,7 +3473,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* snap to beat is 1, snap to bar is -1 (sorry) */
 		const int sub_num = _editor->get_grid_music_divisions (event->button.state);
 
-		map.gui_move_tempo (_real_section, pf, sub_num);
+		map.gui_set_tempo_position (_real_section, pf, sub_num);
 
 		show_verbose_cursor_time (_real_section->frame());
 	}
@@ -3572,7 +3572,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/* get current state */
 		before_state = &map.get_state();
-		_editor->begin_reversible_command (_("dilate tempo"));
+		_editor->begin_reversible_command (_("stretch tempo"));
 	}
 
 	framepos_t pf;
@@ -3585,7 +3585,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer frame */
-		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
+		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
 	}
 	ostringstream sstr;
 	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute() << "\n";
