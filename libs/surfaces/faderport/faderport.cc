@@ -197,6 +197,8 @@ FaderPort::FaderPort (Session& s)
 
 FaderPort::~FaderPort ()
 {
+	cerr << "~FP\n";
+
 	all_lights_out ();
 
 	if (_input_port) {
@@ -247,7 +249,7 @@ FaderPort::start_midi_handling ()
 	 * method, which will read the data, and invoke the parser.
 	 */
 
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort::midi_input_handler), _input_port));
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort::midi_input_handler), boost::weak_ptr<AsyncMIDIPort> (_input_port)));
 	_input_port->xthread().attach (main_loop()->get_context());
 }
 
@@ -749,8 +751,14 @@ FaderPort::connect_session_signals()
 }
 
 bool
-FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port)
+FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> wport)
 {
+	boost::shared_ptr<AsyncMIDIPort> port (wport.lock());
+
+	if (!port) {
+		return false;
+	}
+
 	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("something happend on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 
 	if (ioc & ~IO_IN) {

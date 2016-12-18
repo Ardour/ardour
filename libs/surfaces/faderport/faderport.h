@@ -178,7 +178,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	PBD::ScopedConnectionList midi_connections;
 
-	bool midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port);
+	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
 
 	mutable void *gui;
 	void build_gui ();
