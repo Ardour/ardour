@@ -306,7 +306,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
-			sync_button.set_text (_("Internal"));
+			sync_button.set_text (S_("SyncSource|Int."));
 			auto_loop_button.set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);

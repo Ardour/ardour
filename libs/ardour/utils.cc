@@ -475,27 +475,27 @@ ARDOUR::sync_source_to_string (SyncSource src, bool sh)
 		/* no other backends offer sync for now ... deal with this if we
 		 * ever have to.
 		 */
-		return _("JACK");
+		return S_("SyncSource|JACK");
 
 	case MTC:
 		if (sh) {
-			return _("MTC");
+			return S_("SyncSource|MTC");
 		} else {
 			return _("MIDI Timecode");
 		}
 
 	case MIDIClock:
 		if (sh) {
-			return _("M-Clock");
+			return S_("SyncSource|M-Clk");
 		} else {
 			return _("MIDI Clock");
 		}
 
 	case LTC:
-		return _("LTC");
+		return S_("SyncSource|LTC");
 	}
 	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
-	return _("JACK");
+	return S_("SyncSource|JACK");
 }
 
 float
