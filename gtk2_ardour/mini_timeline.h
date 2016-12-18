@@ -50,12 +50,14 @@ private:
 	void super_rapid_update ();
 
 	void on_size_request (Gtk::Requisition*);
+	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 	void set_colors ();
 	void parameter_changed (std::string const &);
 
 	void calculate_time_width ();
+	void calculate_time_spacing ();
 	void update_minitimeline ();
 	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, int h, const std::string&);
@@ -75,6 +77,11 @@ private:
 	AudioClock::Mode _clock_mode;
 	int _time_width;
 	int _time_height;
+
+	int _n_labels;
+	double _px_per_sample;
+	framepos_t _time_granularity;
+	framepos_t _time_span_samples;
 
 	struct JumpRange {
 		JumpRange (int l, int r, framepos_t t)

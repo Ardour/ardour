@@ -44,6 +44,10 @@ MiniTimeline::MiniTimeline ()
 	, _clock_mode (AudioClock::Timecode)
 	, _time_width (0)
 	, _time_height (0)
+	, _n_labels (0)
+	, _px_per_sample (0)
+	, _time_granularity (0)
+	, _time_span_samples (0)
 {
 	_layout = Pango::Layout::create (get_pango_context());
 
@@ -135,6 +139,7 @@ void
 MiniTimeline::parameter_changed (std::string const& p)
 {
 	if (p == "minitimeline-span") {
+		calculate_time_spacing ();
 		update_minitimeline ();
 	}
 }
@@ -145,8 +150,15 @@ MiniTimeline::on_size_request (Gtk::Requisition* req)
 	req->width = req->height = 0;
 	CairoWidget::on_size_request (req);
 
-	req->width = std::max( req->width, 1);
+	req->width = std::max (req->width, 1);
 	req->height = std::max (req->height, 20);
+}
+
+void
+MiniTimeline::on_size_allocate (Gtk::Allocation& alloc)
+{
+	CairoWidget::on_size_allocate (alloc);
+	calculate_time_spacing ();
 }
 
 void
@@ -158,7 +170,10 @@ MiniTimeline::super_rapid_update ()
 	framepos_t const frame = PublicEditor::instance().playhead_cursor_sample ();
 	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode();
 
-	bool change = _last_update_frame != frame;
+	bool change = false;
+	if (fabs ((_last_update_frame - frame) * _px_per_sample) >= 1.0) {
+		change = true;
+	}
 
 	if (m != _clock_mode) {
 		_clock_mode = m;
@@ -196,6 +211,22 @@ MiniTimeline::calculate_time_width ()
 			break;
 	}
 	_layout->get_pixel_size (_time_width, _time_height);
+}
+
+void
+MiniTimeline::calculate_time_spacing ()
+{
+	_n_labels = floor (get_width () / (_time_width * 1.15));
+
+	if (_n_labels == 0 || !_session) {
+		return;
+	}
+
+	const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
+	_time_span_samples = time_span * _session->nominal_frame_rate ();
+	_time_granularity = _session->nominal_frame_rate () * ceil (2. * time_span / _n_labels);
+	_px_per_sample = get_width () / (2. * _time_span_samples);
+	//_px_per_sample = 1.0 / round (1.0 / _px_per_sample);
 }
 
 void
@@ -336,9 +367,7 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
 	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");
 
-	int n_labels = floor (get_width () / (_time_width * 1.15));
-
-	if (n_labels == 0) {
+	if (_n_labels == 0) {
 		return;
 	}
 
@@ -355,17 +384,13 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 
 
 	/* time */
-	const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
-	const framepos_t time_span_samples = time_span * _session->nominal_frame_rate ();
-	const framepos_t time_granularity = _session->nominal_frame_rate () * ceil (2. * time_span / n_labels);
 	const framepos_t p = _last_update_frame;
-	const framepos_t lower = (std::max ((framepos_t)0, (p - time_span_samples)) / time_granularity) * time_granularity;
-	const double px_per_sample = get_width () / (2. * time_span_samples);
+	const framepos_t lower = (std::max ((framepos_t)0, (p - _time_span_samples)) / _time_granularity) * _time_granularity;
 
-	int dot_left = get_width() * .5 + (lower - p) * px_per_sample;
-	for (int i = 0; i < 2 + n_labels; ++i) {
-		framepos_t when = lower + i * time_granularity;
-		double xpos = get_width() * .5 + (when - p) * px_per_sample;
+	int dot_left = get_width() * .5 + (lower - p) * _px_per_sample;
+	for (int i = 0; i < 2 + _n_labels; ++i) {
+		framepos_t when = lower + i * _time_granularity;
+		double xpos = get_width() * .5 + (when - p) * _px_per_sample;
 
 		// TODO round to nearest display TC in +/- 1px
 		// prefer to display BBT |0  or .0
@@ -379,13 +404,6 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 
 		draw_dots (cr, dot_left, x0, y0 + _time_height * .5, text);
 
-#if 0 // border around TC
-		Gtkmm2ext::rounded_rectangle (cr, x0, y0, lw, _time_height, 4);
-		ArdourCanvas::set_source_rgba(cr, text);
-		cairo_set_line_width (cr, 1.0);
-		cairo_stroke (cr);
-#endif
-
 		cairo_move_to (cr, x0, y0);
 		ArdourCanvas::set_source_rgba(cr, text);
 		pango_cairo_show_layout (cr, _layout->gobj());
@@ -394,19 +412,19 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	draw_dots (cr, dot_left, get_width(), get_height() - 3 - _time_height * .5, text);
 
 	/* locations */
-	framepos_t lmin = std::max ((framepos_t)0, (p - time_span_samples));
-	framepos_t lmax = p + time_span_samples;
+	framepos_t lmin = std::max ((framepos_t)0, (p - _time_span_samples));
+	framepos_t lmax = p + _time_span_samples;
 
 	int tw, th;
-	_layout->set_text( X_("Marker@") );
+	_layout->set_text (X_("Marker@"));
 	_layout->get_pixel_size (tw, th);
 
 	const int mh = th + 2;
 	assert (mh > 4);
 	const int mw = (mh - 1) / 4;
 
-	lmin -= mw / px_per_sample;
-	lmax += mw / px_per_sample;
+	lmin -= mw / _px_per_sample;
+	lmax += mw / _px_per_sample;
 
 	std::vector<LocationMarker> lm;
 
@@ -442,11 +460,11 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end();) {
 		framepos_t when = (*l).when;
-		int x0 = floor (get_width() * .5 + (when - p) * px_per_sample);
+		int x0 = floor (get_width() * .5 + (when - p) * _px_per_sample);
 		int x1 = get_width();
 		const std::string& label = (*l).label;
 		if (++l != lm.end()) {
-			x1 = floor (get_width() * .5 + ((*l).when - p) * px_per_sample) - 1 - mw;
+			x1 = floor (get_width() * .5 + ((*l).when - p) * _px_per_sample) - 1 - mw;
 		}
 		x1 = draw_mark (cr, x0, x1, mh, label);
 		_jumplist.push_back (JumpRange (x0 - mw, x1, when));
@@ -472,7 +490,6 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 {
 	if (!_session) { return true; }
 
-	bool handled = false;
 	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
 		if (i->left < ev->x && ev->x < i->right) {
 			if (ev->button == 3) {
@@ -480,22 +497,15 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 			} else if (ev->button == 1) {
 				_session->request_locate (i->to, _session->transport_rolling ());
 			}
-			handled = true;
-			break;
+			return true;
 		}
 	}
-	
-	if ( !handled && ev->button == 1 ) {
-		// copy from ::render() // TODO consolidate
-		const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
-		const framepos_t time_span_samples = time_span * _session->nominal_frame_rate ();
-		const framepos_t p = _last_update_frame;
-		const double px_per_sample = get_width () / (2. * time_span_samples);
 
-		framepos_t when = p + (ev->x - get_width() * .5) / px_per_sample;
+	if (ev->button == 1) {
+		framepos_t when = _last_update_frame + (ev->x - get_width() * .5) / _px_per_sample;
 		_session->request_locate (std::max ((framepos_t)0, when), _session->transport_rolling ());
 	}
-	
+
 	return true;
 }
 
