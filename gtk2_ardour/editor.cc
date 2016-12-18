@@ -761,7 +761,7 @@ Editor::Editor ()
 	//spacer
 	EventBox *spacer = manage (new EventBox ()); spacer->set_size_request(-1, 1);
 	spacer->signal_expose_event().connect (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::spacer_expose), false);  spacer->show();
-	global_vpacker.pack_start (*spacer, false, false, 0);
+//	global_vpacker.pack_start (*spacer, false, false, 0);
 
 	global_vpacker.pack_start (toolbar_hbox, false, false);
 	global_vpacker.pack_start (edit_pane, true, true);
