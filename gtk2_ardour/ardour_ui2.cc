@@ -343,8 +343,8 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_text (_("Out"));
 	layered_button.set_text (_("Non-Layered"));
 
-	punch_label.set_text (_("Punch:"));
-	layered_label.set_text (_("Mode:"));
+	punch_label.set_text (_(" Punch:"));
+	layered_label.set_text (_(" Mode:"));
 
 	/* and tooltips */
 
@@ -397,6 +397,7 @@ ARDOUR_UI::setup_transport ()
 
 	/* top level packing */
 	transport_table.set_spacings (0);
+	transport_table.set_border_width (2);
 	transport_frame.add (transport_table);
 	transport_frame.set_name ("BaseFrame");
 
@@ -436,6 +437,14 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (*secondary_clock->left_btn());
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
+	button_height_size_group->add_widget (stop_button);
+	button_height_size_group->add_widget (sync_button);
+	button_height_size_group->add_widget (layered_button);
+	button_height_size_group->add_widget (auto_return_button);
+	button_height_size_group->add_widget (editor_visibility_button);
+	button_height_size_group->add_widget (mixer_visibility_button);
+
+
 	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
 	clock1_size_group->add_widget (*primary_clock->left_btn());
 	clock1_size_group->add_widget (*primary_clock->right_btn());
@@ -446,46 +455,49 @@ ARDOUR_UI::setup_transport ()
 
 	/* and the main table layout */
 
-	transport_table.attach (*tbox, 0, 2, 0, 1 , SHRINK, SHRINK, 3, 0);
+	transport_table.attach (*tbox, 0, 2, 0, 1 , SHRINK, SHRINK, 0, 0);
 	transport_table.attach (sync_button, 0, 1, 1, 2 , FILL, SHRINK, 0, 0);
 	transport_table.attach (*shuttle_box, 1, 2, 1, 2 , FILL, SHRINK, 3, 0);
 
 	transport_table.attach (punch_label, 2, 3, 0, 1 , FILL, SHRINK, 3, 0);
 	transport_table.attach (layered_label, 2, 3, 1, 2 , FILL, SHRINK, 3, 0);
 
-	transport_table.attach (punch_in_button, 3, 4, 0, 1 , FILL, SHRINK, 1, 2);
-	transport_table.attach (punch_out_button, 4, 5, 0, 1 , FILL, SHRINK, 1, 2);
-	transport_table.attach (layered_button, 3, 5, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_in_button, 3, 4, 0, 1 , FILL, SHRINK, 0, 2);
+//	EventBox* spacer = manage (new EventBox);//  spacer->set_size_request(1,-1);
+//	transport_table.attach (*spacer, 4, 5, 0, 1 , SHRINK, SHRINK, 1, 0);
+	transport_table.attach (*(manage (new Label (""))), 4, 5, 0, 1 , FILL, SHRINK, 1, 0);
+	transport_table.attach (punch_out_button, 5, 6, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (layered_button, 3, 6, 1, 2 , FILL, SHRINK, 0, 2);
 
 	// some extra space here (accomodate for the record-option box)
-	transport_table.attach (*(manage (new Label (""))), 5, 6, 0, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*(manage (new Label (""))), 6, 7, 0, 2 , FILL, SHRINK, 2, 0);
 
-	transport_table.attach (follow_edits_button, 6, 7, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (auto_return_button, 6, 7, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (follow_edits_button, 7, 8, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (auto_return_button, 7, 8, 1, 2 , FILL, SHRINK, 2, 0);
 
-	transport_table.attach (*primary_clock, 7, 9, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->left_btn(), 7, 8, 1, 2 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->right_btn(), 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock, 8, 10, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->left_btn(), 8, 9, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock->right_btn(), 9, 10, 1, 2 , FILL, SHRINK, 2, 0);
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		transport_table.attach (*secondary_clock, 9, 11, 0, 1 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->left_btn(), 9, 10, 1, 2 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->right_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock, 10, 12, 0, 1 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->left_btn(), 10, 11, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock->right_btn(), 11, 12, 1, 2 , FILL, SHRINK, 2, 0);
 	}
 
-	transport_table.attach (*alert_box, 11, 12, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+	transport_table.attach (*alert_box, 12, 13, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 
 	/* editor-meter is in transport_hbox */
 	transport_hbox.set_spacing (PX_SCALE(1));
-	transport_table.attach (transport_hbox, 12, 13, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+	transport_table.attach (transport_hbox, 13, 14, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 
-	transport_table.attach (*mini_timeline, 13, 14, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
+	transport_table.attach (*mini_timeline, 14, 15, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
 
 	/* lua script action buttons */
-	transport_table.attach (action_script_table, 14, 15, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
+	transport_table.attach (action_script_table, 15, 16, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
 
-	transport_table.attach (editor_visibility_button, 15, 16, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (mixer_visibility_button, 15, 16, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (editor_visibility_button, 16, 17, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (mixer_visibility_button, 16, 17, 1, 2 , FILL, SHRINK, 2, 0);
 
 	/* desensitize */
 
