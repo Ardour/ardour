@@ -108,6 +108,8 @@ MiniTimeline::set_session (Session* s)
 			);
 
 	_jumplist.clear ();
+	calculate_time_spacing ();
+	update_minitimeline ();
 }
 
 void
