@@ -1249,6 +1249,9 @@ MidiTrackerEditor::redisplay_visible_note()
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 1)->set_visible(i < mtp->ntracks ? visible_note : false);
 	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 bool
@@ -1270,6 +1273,9 @@ MidiTrackerEditor::redisplay_visible_channel()
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 2)->set_visible(i < mtp->ntracks ? visible_channel : false);
 	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 bool
@@ -1291,6 +1297,9 @@ MidiTrackerEditor::redisplay_visible_velocity()
 	for (size_t i = 0; i < MAX_NUMBER_OF_NOTE_TRACKS; i++)
 		view.get_column(i*4 + 3)->set_visible(i < mtp->ntracks ? visible_velocity : false);
 	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 bool
@@ -1313,6 +1322,9 @@ MidiTrackerEditor::redisplay_visible_delay()
 		view.get_column(i*4 + 4)->set_visible(i < mtp->ntracks ? visible_delay : false);
 	redisplay_visible_automation_delay ();
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 bool
@@ -1337,6 +1349,9 @@ MidiTrackerEditor::redisplay_visible_automation()
 		view.get_column(col)->set_visible(is_visible);
 	}
 	redisplay_visible_automation_delay();
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 void
@@ -1347,6 +1362,9 @@ MidiTrackerEditor::redisplay_visible_automation_delay()
 		bool is_visible = visible_delay && is_in(col, visible_automation_columns);
 		view.get_column(col + 1)->set_visible(is_visible);
 	}
+
+	// Garanty that the window size is always kept to its minimum
+	resize(1, 1);
 }
 
 void
