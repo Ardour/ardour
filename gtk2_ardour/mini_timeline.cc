@@ -454,18 +454,21 @@ bool
 MiniTimeline::on_button_release_event (GdkEventButton *ev)
 {
 	if (!_session) { return true; }
-	if (ev->y < get_height () * .5) {
-		for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
-			if (i->left < ev->x && ev->x < i->right) {
-				if (ev->button == 3) {
-					PublicEditor::instance().center_screen (i->to);
-				} else if (ev->button == 1) {
-					_session->request_locate (i->to, _session->transport_rolling ());
-				}
-				break;
+
+	bool handled = false;
+	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
+		if (i->left < ev->x && ev->x < i->right) {
+			if (ev->button == 3) {
+				PublicEditor::instance().center_screen (i->to);
+			} else if (ev->button == 1) {
+				_session->request_locate (i->to, _session->transport_rolling ());
 			}
+			handled = true;
+			break;
 		}
-	} else if (ev->button == 1) {
+	}
+	
+	if ( !handled && ev->button == 1 ) {
 		// copy from ::render() // TODO consolidate
 		const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
 		const framepos_t time_span_samples = time_span * _session->nominal_frame_rate ();
@@ -475,6 +478,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 		framepos_t when = p + (ev->x - get_width() * .5) / px_per_sample;
 		_session->request_locate (std::max ((framepos_t)0, when), _session->transport_rolling ());
 	}
+	
 	return true;
 }
 
