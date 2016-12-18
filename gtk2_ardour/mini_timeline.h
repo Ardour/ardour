@@ -57,7 +57,7 @@ private:
 
 	void calculate_time_width ();
 	void update_minitimeline ();
-	void draw_dots (cairo_t*, int left, int right, int y);
+	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, int h, const std::string&);
 
 	void render (cairo_t*, cairo_rectangle_t*);

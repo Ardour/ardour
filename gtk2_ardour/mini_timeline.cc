@@ -24,6 +24,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "canvas/colors.h"
+#include "canvas/utils.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -223,14 +224,14 @@ MiniTimeline::format_time (framepos_t when)
 }
 
 void
-MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y)
+MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y, ArdourCanvas::Color color)
 {
 	if (left + 1 >= right) {
 		return;
 	}
 	cairo_move_to (cr, left + .5, y + .5);
 	cairo_line_to (cr, right - .5, y + .5);
-	cairo_set_source_rgb (cr, 0, .5, 0); // tc color
+	ArdourCanvas::set_source_rgb_a(cr, color, 0.3);
 	const double dashes[] = { 0, 1 };
 	cairo_set_dash (cr, dashes, 2, 1);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
@@ -318,6 +319,10 @@ struct LocationMarkerSort {
 void
 MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 {
+	// TODO cache, set_colors()
+	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
+	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");
+
 	int n_labels = floor (get_width () / (_time_width * 1.15));
 
 	if (n_labels == 0) {
@@ -325,8 +330,10 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 4);
-	cairo_set_source_rgba (cr, 0, 0, 0, 1);
-	cairo_fill_preserve (cr);
+	ArdourCanvas::set_source_rgba(cr, base);
+	cairo_fill (cr);
+
+	Gtkmm2ext::rounded_rectangle (cr, 3, 3, get_width()-6, get_height()-6, 4);
 	cairo_clip (cr);
 
 	if (_session == 0) {
@@ -357,21 +364,21 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 		int x0 = xpos - lw / 2.0;
 		int y0 = get_height() - 3 - _time_height;
 
-		draw_dots (cr, dot_left, x0, y0 + _time_height * .5);
+		draw_dots (cr, dot_left, x0, y0 + _time_height * .5, text);
 
-#if 1 // border around TC
+#if 0 // border around TC
 		Gtkmm2ext::rounded_rectangle (cr, x0, y0, lw, _time_height, 4);
-		cairo_set_source_rgba (cr, 0, 1, 0, .5); // tc color, shaded
+		ArdourCanvas::set_source_rgba(cr, text);
 		cairo_set_line_width (cr, 1.0);
 		cairo_stroke (cr);
 #endif
 
 		cairo_move_to (cr, x0, y0);
-		cairo_set_source_rgb (cr, 0, 1, 0); // tc color
+		ArdourCanvas::set_source_rgba(cr, text);
 		pango_cairo_show_layout (cr, _layout->gobj());
 		dot_left = x0 + lw;
 	}
-	draw_dots (cr, dot_left, get_width(), get_height() - 3 - _time_height * .5);
+	draw_dots (cr, dot_left, get_width(), get_height() - 3 - _time_height * .5, text);
 
 	/* locations */
 	framepos_t lmin = std::max ((framepos_t)0, (p - time_span_samples));
