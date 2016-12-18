@@ -460,7 +460,7 @@ ARDOUR_UI::setup_transport ()
 	/* and the main table layout */
 
 	transport_table.attach (*tbox, 0, 2, 0, 1 , SHRINK, SHRINK, 0, 0);
-	transport_table.attach (sync_button, 0, 1, 1, 2 , FILL, SHRINK, 0, 0);
+	transport_table.attach (sync_button, 0, 1, 1, 2 , SHRINK, SHRINK, 0, 0);
 	transport_table.attach (*shuttle_box, 1, 2, 1, 2 , FILL, SHRINK, 3, 0);
 
 	//spacer
