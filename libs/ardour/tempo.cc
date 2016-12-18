@@ -426,6 +426,10 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
 double
 TempoSection::compute_c_func_pulse (const double& end_npm, const double& end_pulse) const
 {
+	if (note_types_per_minute() == end_npm) {
+		return 0.0;
+	}
+
 	double const log_tempo_ratio = log (end_npm / note_types_per_minute());
 	return (note_types_per_minute() * expm1 (log_tempo_ratio)) / ((end_pulse - pulse()) * _note_type);
 }
@@ -438,6 +442,10 @@ TempoSection::compute_c_func_pulse (const double& end_npm, const double& end_pul
 double
 TempoSection::compute_c_func_minute (const double& end_npm, const double& end_minute) const
 {
+	if (note_types_per_minute() == end_npm) {
+		return 0.0;
+	}
+
 	return c_func (end_npm, end_minute - minute());
 }
 
