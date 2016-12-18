@@ -422,7 +422,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 	Meter meter (map.meter_at_frame (frame));
 
-	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, MusicTime);
+	init (when, meter.divisions_per_bar(), meter.note_divisor(), false, MusicTime);
 }
 
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
