@@ -1170,15 +1170,17 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+			_left_btn.set_text (string_compose ("%1", buf));
 		} else if (m.tempo().note_type() == 8) {
 			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+			_left_btn.set_text (string_compose ("%1", buf));
 		} else {
-			snprintf (buf, sizeof(buf), "%.1f@%.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute(), m.tempo().note_type());
+			snprintf (buf, sizeof(buf), "%.1f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
+			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf));
 		}
-		_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf));
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_btn.set_text (string_compose ("%1: %2", S_("Meter|M"), buf));
+		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf));
 	}
 }
 
