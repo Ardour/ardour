@@ -3808,9 +3808,14 @@ TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMo
 			ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-		if (ticks >= BBT_Time::ticks_per_beat) {
-			ticks -= BBT_Time::ticks_per_beat;
-		}
+//NOTE:  this code intentionally limits the rounding so we don't advance to the next beat.
+//  For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
+//	And since the "prev" direction DOES move beats, I assume this code is unintended.
+//  But I'm keeping it around, until we determine there are no terrible consequences.
+//		if (ticks >= BBT_Time::ticks_per_beat) {
+//			ticks -= BBT_Time::ticks_per_beat;
+//		}
+
 	} else if (dir < 0) {
 
 		/* round to previous (or same iff dir == RoundDownMaybe) */
