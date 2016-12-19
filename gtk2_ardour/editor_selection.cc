@@ -1387,10 +1387,6 @@ Editor::region_selection_changed ()
 		}
 	}
 
-	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
-		maybe_locate_with_edit_preroll (selection->regions.start());
-	}
-
 	/* propagate into backend */
 
 	if (_session) {
