@@ -189,7 +189,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			if (_divide_height >= 0) {
 				cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
 			} else {
-				cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
+				cr->move_to (pos.x + 2.0, self.y0 + logical.get_y() + .5 * (height - logical.get_height()));
 			}
 			layout->show_in_cairo_context (cr);
 		}
