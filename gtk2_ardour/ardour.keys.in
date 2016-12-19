@@ -242,21 +242,21 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-next-route|<@SECONDARY@>Down|select next track/bus
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>Down|move selected tracks down
 
-@movp|Editor/playhead-to-previous-region-boundary|Left|to previous region edge
+@movp|Editor/playhead-backward-to-grid|Left|to previous grid point
+@movp|Editor/playhead-to-previous-region-boundary|<@SECONDARY@><@TERTIARY@>Left|to previous region edge
 ;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>Left|to previous edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>Left|to previous region sync
 @movp|Editor/tab-to-transient-backwards|<@PRIMARY@>Left|to previous transient
 @movp|Editor/nudge-playhead-backward|<@SECONDARY@>Left|nudge backward
-@movp|Editor/playhead-backward-to-grid|<@SECONDARY@><@TERTIARY@>Left|to previous grid point
 @trans|Transport/Rewind|<@TERTIARY@>Left|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>Left|move to prev region edge
 
-@movp|Editor/playhead-to-next-region-boundary|Right|to next region edge
+@movp|Editor/playhead-forward-to-grid|Right|to next grid point
+@movp|Editor/playhead-to-next-region-boundary|<@SECONDARY@><@TERTIARY@>Right|to next region edge
 ;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>Right|to next region edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>Right|to next region sync
 @movp|Editor/tab-to-transient-forwards|<@PRIMARY@>Right|to next transient
 @movp|Editor/nudge-playhead-forward|<@SECONDARY@>Right|nudge forwards
-@movp|Editor/playhead-forward-to-grid|<@SECONDARY@><@TERTIARY@>Right|to next grid point
 @trans|Transport/Forward|<@TERTIARY@>Right|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>Right|move to next region edge
 
