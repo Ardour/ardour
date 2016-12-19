@@ -2920,11 +2920,16 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 		} else if (after == max_framepos) {
 			start = before;
 		} else if (before != max_framepos && after != max_framepos) {
-			/* have before and after */
-			if ((start - before) < (after - start)) {
-				start = before;
-			} else {
+			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
 				start = after;
+			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+				start = before;
+			else if (direction ==  0 ) {
+				if ((start - before) < (after - start)) {
+					start = before;
+				} else {
+					start = after;
+				}
 			}
 		}
 
