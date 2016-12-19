@@ -44,6 +44,8 @@ public:
 private:
 	CairoWidget& _widget;
 	bool event_proxy (GdkEvent*);
+	bool queue_draw ();
+	bool queue_resize ();
 };
 
 }

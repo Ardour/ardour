@@ -34,6 +34,9 @@ Widget::Widget (Canvas* c, CairoWidget& w)
 	, _widget (w)
 {
 	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));
+	w.set_canvas_widget ();
+	w.QueueDraw.connect (sigc::mem_fun(*this, &Widget::queue_draw));
+	w.QueueResize.connect (sigc::mem_fun(*this, &Widget::queue_resize));
 }
 
 Widget::Widget (Item* parent, CairoWidget& w)
@@ -41,6 +44,9 @@ Widget::Widget (Item* parent, CairoWidget& w)
 	, _widget (w)
 {
 	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));
+	w.set_canvas_widget ();
+	w.QueueDraw.connect (sigc::mem_fun(*this, &Widget::queue_draw));
+	w.QueueResize.connect (sigc::mem_fun(*this, &Widget::queue_resize));
 }
 
 bool
@@ -48,6 +54,22 @@ Widget::event_proxy (GdkEvent* ev)
 {
 	/* XXX need to translate coordinate into widget's own coordinate space */
 	return _widget.event (ev);
+}
+
+bool
+Widget::queue_draw ()
+{
+	begin_visual_change ();
+	end_visual_change ();
+	return true;
+}
+
+bool
+Widget::queue_resize ()
+{
+	begin_change ();
+	end_change ();
+	return true;
 }
 
 void

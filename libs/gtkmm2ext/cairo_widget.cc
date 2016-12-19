@@ -48,14 +48,56 @@ CairoWidget::CairoWidget ()
 	, _grabbed (false)
 	, _name_proxy (this, X_("name"))
 	, _current_parent (0)
+	, _canvas_widget (false)
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
 
 CairoWidget::~CairoWidget ()
 {
+	if (_canvas_widget) {
+		gtk_widget_set_realized (GTK_WIDGET(gobj()), false);
+	}
 	if (_parent_style_change) _parent_style_change.disconnect();
 }
+
+void
+CairoWidget::set_canvas_widget ()
+{
+	assert (!_canvas_widget);
+	ensure_style ();
+	gtk_widget_set_realized (GTK_WIDGET(gobj()), true);
+	_canvas_widget = true;
+}
+
+int
+CairoWidget::get_width () const
+{
+	if (_canvas_widget) {
+		return _allocation.get_width ();
+	}
+	return Gtk::EventBox::get_width ();
+}
+
+int
+CairoWidget::get_height () const
+{
+	if (_canvas_widget) {
+		return _allocation.get_height ();
+	}
+	return Gtk::EventBox::get_height ();
+}
+
+void
+CairoWidget::size_allocate (Gtk::Allocation& alloc)
+{
+	if (_canvas_widget) {
+		memcpy (&_allocation, &alloc, sizeof(Gtk::Allocation));
+		return;
+	}
+	Gtk::EventBox::size_allocate (alloc);
+}
+
 
 bool
 CairoWidget::on_button_press_event (GdkEventButton*)
@@ -241,8 +283,30 @@ CairoWidget::set_dirty (cairo_rectangle_t *area)
 	if (!area) {
 		queue_draw ();
 	} else {
+		// TODO emit QueueDrawArea -> ArdourCanvas::Widget
+		if (QueueDraw ()) {
+			return;
+		}
 		queue_draw_area (area->x, area->y, area->width, area->height);
 	}
+}
+
+void
+CairoWidget::queue_draw ()
+{
+	if (QueueDraw ()) {
+		return;
+	}
+	Gtk::EventBox::queue_draw ();
+}
+
+void
+CairoWidget::queue_resize ()
+{
+	if (QueueResize ()) {
+		return;
+	}
+	Gtk::EventBox::queue_resize ();
 }
 
 /** Handle a size allocation.
@@ -251,7 +315,11 @@ CairoWidget::set_dirty (cairo_rectangle_t *area)
 void
 CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
-	Gtk::EventBox::on_size_allocate (alloc);
+	if (!_canvas_widget) {
+		Gtk::EventBox::on_size_allocate (alloc);
+	} else {
+		memcpy (&_allocation, &alloc, sizeof(Gtk::Allocation));
+	}
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {
@@ -263,6 +331,9 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 	}
 #endif
 
+	if (_canvas_widget) {
+		return;
+	}
 	set_dirty ();
 }
 
@@ -340,7 +411,7 @@ CairoWidget::set_active (bool yn)
 void
 CairoWidget::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 {
-	queue_draw();
+	set_dirty ();
 }
 
 void
@@ -356,7 +427,7 @@ CairoWidget::on_state_changed (Gtk::StateType)
 		set_visual_state (Gtkmm2ext::VisualState (visual_state() & ~Gtkmm2ext::Insensitive));
 	}
 
-	queue_draw ();
+	set_dirty ();
 }
 
 void

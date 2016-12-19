@@ -35,6 +35,15 @@ public:
 	CairoWidget ();
 	virtual ~CairoWidget ();
 
+	void set_canvas_widget ();
+
+	/* swizzle Gtk::Widget methods for Canvas::Widget */
+	void queue_draw ();
+	void queue_resize ();
+	int get_width () const;
+	int get_height () const;
+	void size_allocate (Gtk::Allocation&);
+
 	void set_dirty (cairo_rectangle_t *area = 0);
 
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
@@ -65,6 +74,8 @@ public:
 	void set_draw_background (bool yn);
 
 	sigc::signal<void> StateChanged;
+	sigc::signal<bool> QueueDraw;
+	sigc::signal<bool> QueueResize;
 
 	static void provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg);
 
@@ -125,6 +136,8 @@ protected:
 	Glib::SignalProxyProperty _name_proxy;
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
+	bool _canvas_widget;
+	Gdk::Rectangle _allocation;
 
 };
 
