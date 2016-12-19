@@ -463,7 +463,8 @@ ARDOUR_UI::setup_transport ()
 	HBox* ssbox = manage (new HBox);
 	ssbox->set_spacing (PX_SCALE(2));
 	ssbox->pack_start (sync_button, false, false, 0);
-	ssbox->pack_start (*shuttle_box, true, true, 3);
+	ssbox->pack_start (*shuttle_box, true, true, 0);
+	ssbox->pack_start (*shuttle_box->info_button(), false, false, 0);
 
 
 	/* and the main table layout */

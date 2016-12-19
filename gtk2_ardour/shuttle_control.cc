@@ -55,16 +55,13 @@ gboolean qt (gboolean, gint, gint, gboolean, Gtk::Tooltip*, gpointer)
 ShuttleControl::ShuttleControl ()
 	: _controllable (new ShuttleControllable (*this))
 	, binding_proxy (_controllable)
-	, text_color (0)
 {
-
-	Pango::AttrFontDesc* font_attr;
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (UIConfiguration::instance().get_NormalFont()));
-	text_attributes.change (*font_attr);
-	delete font_attr;
-
-	_text = Pango::Layout::create (get_pango_context());
-	_text->set_attributes (text_attributes);
+	_info_button.set_layout_font (UIConfiguration::instance().get_NormalFont());
+	_info_button.set_sizing_text (S_("LogestShuttle|< +00 st"));
+	_info_button.set_name ("shuttle text");
+	_info_button.set_sensitive (false);
+	_info_button.set_visual_state (Gtkmm2ext::NoVisualState);
+	_info_button.set_elements (ArdourButton::Text);
 
 	set_tooltip (*this, _("Shuttle speed control (Context-click for options)"));
 
@@ -85,13 +82,7 @@ ShuttleControl::ShuttleControl ()
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	set_name (X_("ShuttleControl"));
 
-	int tw, th, h;
 	ensure_style ();
-	_text->set_text ("@Sp");
-	_text->get_pixel_size (tw, th);
-	h = (int) ceil(th * BASELINESTRETCH + 1.0);
-	if ((h - th) & 1) { ++h; }
-	set_size_request (85, h);
 
 	shuttle_max_speed = Config->get_shuttle_max_speed();
 
@@ -116,7 +107,6 @@ ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
 	cairo_pattern_destroy (shine_pattern);
-	delete text_color;
 }
 
 void
@@ -576,24 +566,11 @@ ShuttleControl::set_colors ()
 	int r, g, b, a;
 
 	uint32_t bg_color = UIConfiguration::instance().color (X_("shuttle bg"));
-	uint32_t text = UIConfiguration::instance().color (X_("shuttle text"));
 
 	UINT_TO_RGBA (bg_color, &r, &g, &b, &a);
 	bg_r = r/255.0;
 	bg_g = g/255.0;
 	bg_b = b/255.0;
-
-	UINT_TO_RGBA (text, &r, &g, &b, &a);
-
-	/* rescale for Pango colors ... sigh */
-
-	r = lrint (r * 65535.0);
-	g = lrint (g * 65535.0);
-	b = lrint (b * 65535.0);
-
-	delete text_color;
-	text_color = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
-	text_attributes.change (*text_color);
 }
 
 void
@@ -607,6 +584,10 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_move_to (cr, lw, yc);
 	cairo_line_to (cr, get_width () - lw, yc);
 	cairo_set_source_rgb (cr, bg_r, bg_g, bg_b);
+	if (UIConfiguration::instance().get_widget_prelight() && _hovering) {
+		cairo_stroke_preserve (cr);
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
+	}
 	cairo_stroke (cr);
 
 	float speed = 0.0;
@@ -632,13 +613,17 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_fill(cr);
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
 	cairo_set_source (cr, pattern);
+	if (UIConfiguration::instance().get_widget_prelight() && _hovering) {
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
+	}
 	cairo_fill(cr);
 
 	/* text */
 	if (acutal_speed != 0) {
 		if (Config->get_shuttle_units() == Percentage) {
 			if (acutal_speed == 1.0) {
-				snprintf (buf, sizeof (buf), "%s", _("Playing"));
+				snprintf (buf, sizeof (buf), "%s", _("Play"));
 			} else {
 				if (acutal_speed < 0.0) {
 					snprintf (buf, sizeof (buf), "< %.1f%%", -acutal_speed * 100.f);
@@ -650,23 +635,20 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 			bool reversed;
 			int semi = speed_as_semitones (acutal_speed, reversed);
 			if (reversed) {
-				snprintf (buf, sizeof (buf), _("< %+2d semi"), semi);
+				snprintf (buf, sizeof (buf), _("< %+2d st"), semi);
 			} else {
-				snprintf (buf, sizeof (buf), _("> %+2d semi"), semi);
+				snprintf (buf, sizeof (buf), _("> %+2d st"), semi);
 			}
 		}
 	} else {
-		snprintf (buf, sizeof (buf), "%s", _("Stopped"));
+		snprintf (buf, sizeof (buf), "%s", _("Stop"));
 	}
 
 	last_speed_displayed = acutal_speed;
 
-	int tw, th;
-	_text->set_text (buf);
-	_text->get_pixel_size (tw, th);
-	cairo_move_to (cr, 0.5 * (get_width() - tw), 0.5 * (get_height() - th));
-	pango_cairo_show_layout (cr, _text->gobj());
+	_info_button.set_text (buf);
 
+#if 0
 	if (UIConfiguration::instance().get_widget_prelight()) {
 		if (_hovering) {
 			rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3.5);
@@ -674,6 +656,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 			cairo_fill (cr);
 		}
 	}
+#endif
 }
 
 void
