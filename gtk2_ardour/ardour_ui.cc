@@ -167,7 +167,6 @@ typedef uint64_t microseconds_t;
 #include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
-#include "shuttle_control.h"
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "startup.h"
@@ -828,7 +827,7 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 		rec_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("shuttle")) != 0) {
-		shuttle_box->controllable()->set_id (prop->value());
+		shuttle_box.controllable()->set_id (prop->value());
 	}
 }
 
@@ -852,7 +851,7 @@ ARDOUR_UI::get_transport_controllable_state ()
 	node->add_property (X_("play_selection"), buf);
 	rec_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("rec"), buf);
-	shuttle_box->controllable()->id().print (buf, sizeof (buf));
+	shuttle_box.controllable()->id().print (buf, sizeof (buf));
 	node->add_property (X_("shuttle"), buf);
 
 	return *node;
@@ -2513,7 +2512,7 @@ ARDOUR_UI::map_transport_state ()
 		return;
 	}
 
-	shuttle_box->map_transport_state ();
+	shuttle_box.map_transport_state ();
 
 	float sp = _session->transport_speed();
 

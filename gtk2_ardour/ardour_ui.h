@@ -76,6 +76,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
+#include "shuttle_control.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
@@ -126,7 +127,6 @@ class PublicEditor;
 class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditorWindow;
-class ShuttleControl;
 class Splash;
 class MiniTimeline;
 class Meterbridge;
@@ -528,7 +528,7 @@ private:
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	ShuttleControl* shuttle_box;
+	ShuttleControl shuttle_box;
 
 	ArdourButton auto_return_button;
 	ArdourButton follow_edits_button;

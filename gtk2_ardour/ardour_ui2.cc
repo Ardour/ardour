@@ -56,7 +56,6 @@
 #include "theme_manager.h"
 #include "midi_tracer.h"
 #include "mini_timeline.h"
-#include "shuttle_control.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "rc_option_editor.h"
@@ -395,7 +394,6 @@ ARDOUR_UI::setup_transport ()
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
 
-	shuttle_box = manage (new ShuttleControl);
 	mini_timeline = manage (new MiniTimeline);
 
 	/* and now the layout... */
@@ -463,8 +461,8 @@ ARDOUR_UI::setup_transport ()
 	HBox* ssbox = manage (new HBox);
 	ssbox->set_spacing (PX_SCALE(2));
 	ssbox->pack_start (sync_button, false, false, 0);
-	ssbox->pack_start (*shuttle_box, true, true, 0);
-	ssbox->pack_start (*shuttle_box->info_button(), false, false, 0);
+	ssbox->pack_start (shuttle_box, true, true, 0);
+	ssbox->pack_start (*shuttle_box.info_button(), false, false, 0);
 
 
 	/* and the main table layout */
@@ -716,7 +714,7 @@ void
 ARDOUR_UI::set_transport_sensitivity (bool yn)
 {
 	ActionManager::set_sensitive (ActionManager::transport_sensitive_actions, yn);
-	shuttle_box->set_sensitive (yn);
+	shuttle_box.set_sensitive (yn);
 }
 
 void
