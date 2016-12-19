@@ -206,6 +206,11 @@ MiniTimeline::super_rapid_update ()
 		change = true;
 	}
 
+	if (_clock_mode == AudioClock::BBT) {
+		// TODO check if tempo-map changed
+		change = true;
+	}
+
 	if (change) {
 		_last_update_frame = frame;
 		update_minitimeline ();
