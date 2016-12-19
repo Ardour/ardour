@@ -1824,14 +1824,26 @@ load_parameter_descriptor(LV2World&            world,
 	if (label) {
 		desc.label = lilv_node_as_string(label);
 	}
-	if (def && lilv_node_is_float(def)) {
-		desc.normal = lilv_node_as_float(def);
+	if (def) {
+		if (lilv_node_is_float(def)) {
+			desc.normal = lilv_node_as_float(def);
+		} else if (lilv_node_is_int(def)) {
+			desc.normal = lilv_node_as_int(def);
+		}
 	}
-	if (minimum && lilv_node_is_float(minimum)) {
-		desc.lower = lilv_node_as_float(minimum);
+	if (minimum) {
+		if (lilv_node_is_float(minimum)) {
+			desc.lower = lilv_node_as_float(minimum);
+		} else if (lilv_node_is_int(minimum)) {
+			desc.lower = lilv_node_as_int(minimum);
+		}
 	}
-	if (maximum && lilv_node_is_float(maximum)) {
-		desc.upper = lilv_node_as_float(maximum);
+	if (maximum) {
+		if (lilv_node_is_float(maximum)) {
+			desc.upper = lilv_node_as_float(maximum);
+		} else if (lilv_node_is_int(maximum)) {
+			desc.upper = lilv_node_as_int(maximum);
+		}
 	}
 	load_parameter_descriptor_units(lworld, desc, units);
 	desc.datatype      = datatype;
