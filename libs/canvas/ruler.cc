@@ -162,19 +162,19 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		}
 
 		switch (m->style) {
-		case Mark::Major:
-                        if (_divide_height >= 0) {
-                                cr->rel_line_to (0, -_divide_height);
-                        } else {
-                                cr->rel_line_to (0, -height);
-                        }
-			break;
-		case Mark::Minor:
-			cr->rel_line_to (0, -height/3.0);
-			break;
-		case Mark::Micro:
-			cr->rel_line_to (0, -height/5.0);
-			break;
+			case Mark::Major:
+				if (_divide_height >= 0) {
+					cr->rel_line_to (0, -_divide_height);
+				} else {
+					cr->rel_line_to (0, -height);
+				}
+				break;
+			case Mark::Minor:
+				cr->rel_line_to (0, -height/3.0);
+				break;
+			case Mark::Micro:
+				cr->rel_line_to (0, -height/5.0);
+				break;
 		}
 		cr->stroke ();
 
@@ -186,31 +186,31 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			layout->set_text (m->label);
 			logical = layout->get_pixel_logical_extents ();
 
-                        if (_divide_height >= 0) {
-                                cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
-                        } else {
-                                cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
-                        }
+			if (_divide_height >= 0) {
+				cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
+			} else {
+				cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
+			}
 			layout->show_in_cairo_context (cr);
 		}
 	}
 
-        if (_divide_height >= 0.0) {
+	if (_divide_height >= 0.0) {
 
-                cr->set_line_width (1.0);
+		cr->set_line_width (1.0);
 
-                set_source_rgba (cr, _divider_color_top);
-                cr->move_to (self.x0, self.y0 + _divide_height-1.0+0.5);
-                cr->line_to (self.x1, self.y0 + _divide_height-1.0+0.5);
-                cr->stroke ();
+		set_source_rgba (cr, _divider_color_top);
+		cr->move_to (self.x0, self.y0 + _divide_height-1.0+0.5);
+		cr->line_to (self.x1, self.y0 + _divide_height-1.0+0.5);
+		cr->stroke ();
 
-                set_source_rgba (cr, _divider_color_bottom);
-                cr->move_to (self.x0, self.y0 + _divide_height+0.5);
-                cr->line_to (self.x1, self.y0 + _divide_height+0.5);
-                cr->stroke ();
+		set_source_rgba (cr, _divider_color_bottom);
+		cr->move_to (self.x0, self.y0 + _divide_height+0.5);
+		cr->line_to (self.x1, self.y0 + _divide_height+0.5);
+		cr->stroke ();
 
 
-        }
+	}
 
 	/* done! */
 }
