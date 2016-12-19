@@ -393,7 +393,6 @@ Editor::Editor ()
 	, _all_region_actions_sensitized (false)
 	, _ignore_region_action (false)
 	, _last_region_menu_was_main (false)
-	, _ignore_follow_edits (false)
 	, cd_marker_bar_drag_rect (0)
 	, range_bar_drag_rect (0)
 	, transport_bar_drag_rect (0)
@@ -833,8 +832,6 @@ Editor::Editor ()
 	_ignore_region_action = false;
 	_last_region_menu_was_main = false;
 	_popup_region_menu_item = 0;
-
-	_ignore_follow_edits = false;
 
 	_show_marker_lines = false;
 

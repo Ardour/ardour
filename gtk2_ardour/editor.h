@@ -1850,8 +1850,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
-	bool _ignore_follow_edits;
-
 	void cancel_selection ();
 	void cancel_time_selection ();
 

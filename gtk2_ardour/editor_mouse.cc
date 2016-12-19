@@ -2551,6 +2551,10 @@ Editor::update_join_object_range_location (double y)
 
 	if (entered_regionview) {
 
+		//ToDo:  there is currently a bug here(?)
+		//when we are inside a region fade handle, it acts as though we are in range mode because it is in the top half of the region
+		//can it be fixed here?
+
 		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
 		double const c = item_space.y / entered_regionview->height();
 

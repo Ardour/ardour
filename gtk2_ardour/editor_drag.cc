@@ -1421,8 +1421,6 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 			);
 
 	}
-
-	_editor->maybe_locate_with_edit_preroll (_editor->get_selection().regions.start());
 }
 
 RouteTimeAxisView*
@@ -3118,18 +3116,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				if (_jump_position_when_done) {
 					i->view->region()->set_position (i->initial_end - i->view->region()->length());
 				}
-			}
-		}
-
-		if (!_views.empty()) {
-			if (_operation == StartTrim) {
-				_editor->maybe_locate_with_edit_preroll(
-					_views.begin()->view->region()->position());
-			}
-			if (_operation == EndTrim) {
-				_editor->maybe_locate_with_edit_preroll(
-					_views.begin()->view->region()->position() +
-					_views.begin()->view->region()->length());
 			}
 		}
 
@@ -5323,10 +5309,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 				s->request_play_range (&_editor->selection->time, true);
 			} else if (!s->config.get_external_sync()) {
 				if (UIConfiguration::instance().get_follow_edits() && !s->transport_rolling()) {
-					if (_operation == SelectionEndTrim)
-						_editor->maybe_locate_with_edit_preroll( _editor->get_selection().time.end_frame());
-					else
-						s->request_locate (_editor->get_selection().time.start());
+					s->request_locate (_editor->get_selection().time.start());
 				}
 			}
 

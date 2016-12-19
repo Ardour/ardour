@@ -85,7 +85,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (follow_edits_button, _("Playhead follows range selections and edits"));
+	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -342,7 +342,7 @@ ARDOUR_UI::setup_transport ()
 
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
-	follow_edits_button.set_text(_("Follow Edits"));
+	follow_edits_button.set_text(_("Follow Range"));
 	//auto_input_button.set_text (_("Auto Input"));
 	punch_in_button.set_text (_("In"));
 	punch_out_button.set_text (_("Out"));

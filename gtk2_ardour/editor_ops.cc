@@ -278,7 +278,6 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 	if (working_on_selection) {
 		// IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
 
-		_ignore_follow_edits = true;  // a split will change the region selection in mysterious ways;  it's not practical or wanted to follow this edit
 		RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
 		/* There are three classes of regions that we might want selected after
 		   splitting selected regions:
@@ -305,13 +304,10 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 				}
 			}
 		}
-		_ignore_follow_edits = false;
 	} else {
-		_ignore_follow_edits = true;
 		if( working_on_selection ) {
 			selection->add (latest_regionviews);  //these are the new regions created after the split
 		}
-		_ignore_follow_edits = false;
 	}
 
 	commit_reversible_command ();
@@ -2610,7 +2606,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _ignore_follow_edits || _session->config.get_external_sync() )
+	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _session->config.get_external_sync() )
 		return;
 
 	location -= get_preroll();
@@ -3683,10 +3679,8 @@ Editor::trim_region (bool front)
 
 			if (front) {
 				(*i)->region()->trim_front (where);
-				maybe_locate_with_edit_preroll ( where );
 			} else {
 				(*i)->region()->trim_end (where);
-				maybe_locate_with_edit_preroll ( where );
 			}
 
 			_session->add_command (new StatefulDiffCommand ((*i)->region()));
@@ -6195,9 +6189,11 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if (UIConfiguration::instance().get_follow_edits() && (!_session || !_session->config.get_external_sync())) {
-		cancel_time_selection();
-	}
+//not sure what this was for;  remove it for now.
+//	if (UIConfiguration::instance().get_follow_edits() && (!_session || !_session->config.get_external_sync())) {
+//		cancel_time_selection();
+//	}
+
 }
 
 void
