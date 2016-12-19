@@ -48,7 +48,13 @@ MiniTimeline::MiniTimeline ()
 	, _px_per_sample (0)
 	, _time_granularity (0)
 	, _time_span_samples (0)
+	, _marker_height (0)
+	, _pointer_x (-1)
+	, _pointer_y (-1)
+	, _minitl_context_menu (0)
 {
+	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+
 	_layout = Pango::Layout::create (get_pango_context());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MiniTimeline::set_colors));
@@ -66,6 +72,8 @@ MiniTimeline::MiniTimeline ()
 
 MiniTimeline::~MiniTimeline ()
 {
+	delete _minitl_context_menu;
+	_minitl_context_menu = 0;
 }
 
 void
@@ -75,6 +83,8 @@ MiniTimeline::session_going_away ()
 	session_connection.drop_connections ();
 	SessionHandlePtr::session_going_away ();
 	_jumplist.clear ();
+	delete _minitl_context_menu;
+	_minitl_context_menu = 0;
 }
 
 void
@@ -164,6 +174,19 @@ MiniTimeline::on_size_allocate (Gtk::Allocation& alloc)
 }
 
 void
+MiniTimeline::set_span (framecnt_t ts)
+{
+	assert (_session);
+	if (_session->config.get_minitimeline_span () == ts) {
+		return;
+	}
+
+	_session->config.set_minitimeline_span (ts);
+	calculate_time_spacing ();
+	update_minitimeline ();
+}
+
+void
 MiniTimeline::super_rapid_update ()
 {
 	if (!_session || !_session->engine().running()) {
@@ -224,7 +247,7 @@ MiniTimeline::calculate_time_spacing ()
 		return;
 	}
 
-	const framepos_t time_span = _session->config.get_minitimeline_span () / 2;
+	const framecnt_t time_span = _session->config.get_minitimeline_span () / 2;
 	_time_span_samples = time_span * _session->nominal_frame_rate ();
 	_time_granularity = _session->nominal_frame_rate () * ceil (2. * time_span / _n_labels);
 	_px_per_sample = get_width () / (2. * _time_span_samples);
@@ -287,8 +310,9 @@ MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y, ArdourCanvas::
 }
 
 int
-MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, int h, const std::string& label)
+MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, bool& prelight)
 {
+	int h = _marker_height;
 	/* ArdourMarker shape
 	 * MH = 13
 	 *
@@ -310,13 +334,19 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, int h, const std::string& 
 	int lw, lh;
 	_layout->set_text (label);
 	_layout->get_pixel_size (lw, lh);
+	int rw = std::min (x1, x0 + w2 + lw + 2);
 
-	// TODO cache, set_colors()
-	uint32_t color = UIConfiguration::instance().color ("location marker");
+	if (_pointer_y >= 0 && _pointer_y < h && _pointer_x >= x0 && _pointer_x <= rw) {
+		prelight = true;
+	}
+
+	// TODO cache in set_colors()
+	uint32_t color = UIConfiguration::instance().color (
+			prelight ? "entered marker" : "location marker");
+
 	double r, g, b, a;
 	ArdourCanvas::color_to_rgba (color, r, g, b, a);
 
-	int rw = std::min (x1, x0 + w2 + lw + 2);
 	if (rw < x0) {
 		rw = x1;
 	} else {
@@ -421,9 +451,9 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	_layout->set_text (X_("Marker@"));
 	_layout->get_pixel_size (tw, th);
 
-	const int mh = th + 2;
-	assert (mh > 4);
-	const int mw = (mh - 1) / 4;
+	_marker_height = th + 2;
+	assert (_marker_height > 4);
+	const int mw = (_marker_height - 1) / 4;
 
 	lmin -= mw / _px_per_sample;
 	lmax += mw / _px_per_sample;
@@ -460,7 +490,8 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	LocationMarkerSort location_marker_sort;
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 
-	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end();) {
+	int id = 0;
+	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); ++id) {
 		framepos_t when = (*l).when;
 		int x0 = floor (get_width() * .5 + (when - p) * _px_per_sample);
 		int x1 = get_width();
@@ -468,8 +499,9 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 		if (++l != lm.end()) {
 			x1 = floor (get_width() * .5 + ((*l).when - p) * _px_per_sample) - 1 - mw;
 		}
-		x1 = draw_mark (cr, x0, x1, mh, label);
-		_jumplist.push_back (JumpRange (x0 - mw, x1, when));
+		bool prelight = false;
+		x1 = draw_mark (cr, x0, x1, label, prelight);
+		_jumplist.push_back (JumpRange (x0 - mw, x1, when, prelight));
 	}
 
 	/* playhead on top */
@@ -487,19 +519,72 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_fill (cr);
 }
 
+void
+MiniTimeline::build_minitl_context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+
+	assert (_session);
+
+	const framecnt_t time_span = _session->config.get_minitimeline_span ();
+
+	_minitl_context_menu = new Gtk::Menu();
+	MenuList& items = _minitl_context_menu->items();
+
+	// ideally this would have a heading (or rather be a sub-menu to "Visible Time")
+	std::map<framecnt_t, std::string> spans;
+	spans[30]   = _("30 sec");
+	spans[60]   = _("1 min");
+	spans[120]  = _("2 mins");
+	spans[300]  = _("5 mins");
+	spans[600]  = _("10 mins");
+	spans[1200] = _("20 mins");
+
+	RadioMenuItem::Group span_group;
+	for (std::map<framecnt_t, std::string>::const_iterator i = spans.begin (); i != spans.end (); ++i) {
+		items.push_back (RadioMenuElem (span_group, i->second, sigc::bind (sigc::mem_fun (*this, &MiniTimeline::set_span), i->first)));
+		if (time_span == i->first) {
+			static_cast<RadioMenuItem*>(&items.back())->set_active ();
+		}
+	}
+}
+
+void
+MiniTimeline::show_minitl_context_menu ()
+{
+	if (_minitl_context_menu == 0) {
+		build_minitl_context_menu ();
+	}
+	_minitl_context_menu->popup (1, gtk_get_current_event_time());
+}
+
+bool
+MiniTimeline::on_button_press_event (GdkEventButton *ev)
+{
+	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
+		if (_session) {
+			show_minitl_context_menu ();
+		}
+		return true;
+	}
+	return true;
+}
+
 bool
 MiniTimeline::on_button_release_event (GdkEventButton *ev)
 {
 	if (!_session) { return true; }
+	if (ev->y < 0 || ev->y > get_height () || ev->x < 0 || ev->x > get_width ()) {
+		return true;
+	}
 
-	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
-		if (i->left < ev->x && ev->x < i->right) {
-			if (ev->button == 3) {
-				PublicEditor::instance().center_screen (i->to);
-			} else if (ev->button == 1) {
+	if (ev->y <= _marker_height) {
+		for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
+			if (i->left < ev->x && ev->x < i->right) {
 				_session->request_locate (i->to, _session->transport_rolling ());
+				return true;
 			}
-			return true;
 		}
 	}
 
@@ -512,11 +597,57 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 }
 
 bool
+MiniTimeline::on_motion_notify_event (GdkEventMotion *ev)
+{
+	if (!_session) { return true; }
+
+	_pointer_x = ev->x;
+	_pointer_y = ev->y;
+
+	bool need_expose = false;
+
+	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
+		if (i->left < ev->x && ev->x < i->right && ev->y <= _marker_height) {
+			if (!(*i).prelight) {
+				need_expose = true;
+				break;
+			}
+		} else {
+			if ((*i).prelight) {
+				need_expose = true;
+				break;
+			}
+		}
+	}
+	if (need_expose) {
+		update_minitimeline ();
+	}
+
+	return true;
+}
+
+bool
+MiniTimeline::on_leave_notify_event (GdkEventCrossing *ev)
+{
+	CairoWidget::on_leave_notify_event (ev);
+	_pointer_x = _pointer_y = -1;
+	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
+		if ((*i).prelight) {
+			update_minitimeline ();
+			break;
+		}
+	}
+	return true;
+}
+
+bool
 MiniTimeline::on_scroll_event (GdkEventScroll *ev)
 {
 	if (!_session) { return true; }
+	const framecnt_t time_span = _session->config.get_minitimeline_span ();
 	framepos_t when = _session->audible_frame ();
-	double scale = 2.0;
+
+	double scale = time_span / 60.0;
 
 	if (ev->state & Gtkmm2ext::Keyboard::GainFineScaleModifier) {
 		if (ev->state & Gtkmm2ext::Keyboard::GainExtraFineScaleModifier) {
