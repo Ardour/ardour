@@ -252,7 +252,7 @@ Session::Session (AudioEngine &eng,
 	, _ignore_skips_updates (false)
 	, _rt_thread_active (false)
 	, _rt_emit_pending (false)
-	, _ac_thread_active (false)
+	, _ac_thread_active (0)
 	, _latency_recompute_pending (0)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
@@ -6995,7 +6995,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 void
 Session::auto_connect_thread_start ()
 {
-	if (_ac_thread_active) {
+	if (g_atomic_int_get (&_ac_thread_active)) {
 		return;
 	}
 
@@ -7003,19 +7003,18 @@ Session::auto_connect_thread_start ()
 		_auto_connect_queue.pop ();
 	}
 
-	_ac_thread_active = true;
+	g_atomic_int_set (&_ac_thread_active, 1);
 	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
-		_ac_thread_active = false;
+		g_atomic_int_set (&_ac_thread_active, 0);
 	}
 }
 
 void
 Session::auto_connect_thread_terminate ()
 {
-	if (!_ac_thread_active) {
+	if (!g_atomic_int_get (&_ac_thread_active)) {
 		return;
 	}
-	_ac_thread_active = false;
 
 	{
 		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
@@ -7029,6 +7028,7 @@ Session::auto_connect_thread_terminate ()
 	 */
 
 	pthread_mutex_lock (&_auto_connect_mutex);
+	g_atomic_int_set (&_ac_thread_active, 0);
 	pthread_cond_signal (&_auto_connect_cond);
 	pthread_mutex_unlock (&_auto_connect_mutex);
 
@@ -7052,7 +7052,7 @@ Session::auto_connect_thread_run ()
 	SessionEvent::create_per_thread_pool (X_("autoconnect"), 1024);
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);
-	while (_ac_thread_active) {
+	while (g_atomic_int_get (&_ac_thread_active)) {
 
 		if (!_auto_connect_queue.empty ()) {
 			// Why would we need the process lock ??

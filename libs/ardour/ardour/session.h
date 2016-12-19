@@ -1523,7 +1523,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void auto_connect_thread_terminate ();
 
 	pthread_t       _auto_connect_thread;
-	bool            _ac_thread_active;
+	gint            _ac_thread_active;
 	pthread_mutex_t _auto_connect_mutex;
 	pthread_cond_t  _auto_connect_cond;
 
