@@ -7024,7 +7024,13 @@ Session::auto_connect_thread_terminate ()
 		}
 	}
 
-	auto_connect_thread_wakeup ();
+	/* cannot use auto_connect_thread_wakeup() because that is allowed to
+	 * fail to wakeup the thread.
+	 */
+
+	pthread_mutex_lock (&_auto_connect_mutex);
+	pthread_cond_signal (&_auto_connect_cond);
+	pthread_mutex_unlock (&_auto_connect_mutex);
 
 	void *status;
 	pthread_join (_auto_connect_thread, &status);
