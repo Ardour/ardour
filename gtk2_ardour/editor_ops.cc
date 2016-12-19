@@ -2626,13 +2626,12 @@ Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 void
 Editor::play_with_preroll ()
 {
-	{
-		framepos_t preroll = get_preroll();
+	framepos_t preroll = get_preroll();
+	framepos_t start, end;
+	if ( UIConfiguration::instance().get_follow_edits() && get_selection_extents ( start, end) ) {
 
-		framepos_t start, end;
-		if (!get_selection_extents ( start, end))
-			return;
-
+		framepos_t ret = start;
+		
 		if (start > preroll)
 			start = start - preroll;
 
@@ -2643,6 +2642,16 @@ Editor::play_with_preroll ()
 		lar.push_back (ar);
 
 		_session->request_play_range (&lar, true);
+		_session->set_requested_return_frame( ret );  //force auto-return to return to range start, without the preroll
+	} else {
+		framepos_t ph = playhead_cursor->current_frame ();
+		framepos_t start;
+		if (ph > preroll)
+			start = ph - preroll; 
+		else
+			start = 0;
+		_session->request_locate ( start, true);
+		_session->set_requested_return_frame( ph );  //force auto-return to return to playhead location, without the preroll
 	}
 }
 
