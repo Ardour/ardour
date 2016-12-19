@@ -495,7 +495,7 @@ style "processor" = "small_text"
 {
 }
 
-style "ruler_label" = "small_bold_text"
+style "ruler_label" = "small_text"
 {
 	fg[NORMAL] = @light_text_on_dark
 }
