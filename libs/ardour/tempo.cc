@@ -3888,6 +3888,8 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 	case Bar:
 		if (dir < 0) {
 			/* find bar previous to 'frame' */
+			if (bbt.bars > 0)
+				--bbt.bars;
 			bbt.beats = 1;
 			bbt.ticks = 0;
 			return frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
