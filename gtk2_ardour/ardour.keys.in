@@ -187,7 +187,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Region/align-regions-sync|<@TERTIARY@>a|align sync points
 @aep|Region/align-regions-start|<@PRIMARY@><@SECONDARY@>a|align start(s)
 @aep|Region/align-regions-start-relative|<@PRIMARY@><@TERTIARY@>a|align start(s) relative
-@rop|Region/split-region|s|split
+@rop|Editor/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/SnapshotStay|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @edit|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status

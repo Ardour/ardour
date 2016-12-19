@@ -318,7 +318,6 @@
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
         <menuitem action='pitch-shift-region'/>
-        <menuitem action='split-region'/>
         <menuitem action='split-region-at-transients'/>
         <menuitem action='split-multichannel-region'/>
         <menuitem action='close-region-gaps'/>
