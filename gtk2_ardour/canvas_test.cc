@@ -25,6 +25,7 @@
 #include "canvas/colors.h"
 #include "canvas/scroll_group.h"
 #include "canvas/text.h"
+#include "canvas/widget.h"
 
 #include "ardour_button.h"
 #include "ui_config.h"
@@ -140,7 +141,6 @@ CANVAS_UI::CANVAS_UI (int *argcp, char **argvp[], const char* localedir)
 	test_button.set_text ("Don't click me");
 
 	b->pack_start (*l, false, 0);
-	b->pack_start (test_button, false, 0);
 	b->pack_start (*canvas, true, 0);
 
 	_main_window.add (*b);
@@ -168,8 +168,7 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	ScrollGroup* scroll_group = new ScrollGroup (canvas.root(),
 			ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 
-	Text* text = new Text (scroll_group);
-	text->set ("Canvas Text");
+	ArdourCanvas::Widget* w = new ArdourCanvas::Widget (scroll_group, test_button);
 
 	return new ArdourCanvas::Container (scroll_group);
 }
