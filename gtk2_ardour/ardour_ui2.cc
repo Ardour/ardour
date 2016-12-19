@@ -259,7 +259,9 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+
 	sync_button.set_related_action (act);
+	sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::sync_button_clicked), false);
 
 	sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
 
@@ -760,6 +762,19 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 
 	show_tabbable (rc_option_editor);
 	rc_option_editor->set_current_page (_("Misc/Click"));
+	return true;
+}
+
+bool
+ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
+{
+	if (ev->button != 3) {
+		/* this handler is just for button-3 clicks */
+		return false;
+	}
+
+	show_tabbable (rc_option_editor);
+	rc_option_editor->set_current_page (_("Transport/Sync"));
 	return true;
 }
 
