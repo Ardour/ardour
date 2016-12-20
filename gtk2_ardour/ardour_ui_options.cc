@@ -403,22 +403,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+	} else if (p == "show-mini-timeline") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-selclock") {
+		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
-		bool show = UIConfiguration::instance().get_show_editor_meter();
-
-		if (editor_meter) {
-			if (meter_box.get_parent()) {
-				transport_hbox.remove (meter_box);
-				transport_hbox.remove (editor_meter_peak_display);
-			}
-
-			if (show) {
-				transport_hbox.pack_start (meter_box, false, false);
-				transport_hbox.pack_start (editor_meter_peak_display, false, false);
-				meter_box.show();
-				editor_meter_peak_display.show();
-			}
-		}
+		repack_transport_hbox ();
 	} else if (p == "waveform-scale") {
 		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {

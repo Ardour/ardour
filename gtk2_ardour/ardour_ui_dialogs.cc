@@ -68,6 +68,7 @@
 #include "splash.h"
 #include "sfdb_ui.h"
 #include "theme_manager.h"
+#include "time_info_box.h"
 #include "timers.h"
 
 #include "pbd/i18n.h"
@@ -109,11 +110,12 @@ ARDOUR_UI::set_session (Session *s)
 	AutomationWatch::instance().set_session (s);
 
 	shuttle_box.set_session (s);
+	mini_timeline.set_session (s);
+	time_info_box->set_session (s);
 
 	primary_clock->set_session (s);
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
-	mini_timeline->set_session (s);
 	video_timeline->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
@@ -238,12 +240,7 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
-		if (UIConfiguration::instance().get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
-			transport_hbox.pack_start (meter_box, false, false);
-			transport_hbox.pack_start (editor_meter_peak_display, false, false);
-			meter_box.show();
-			editor_meter_peak_display.show();
-		}
+		repack_transport_hbox ();
 	}
 
 	update_title ();

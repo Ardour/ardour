@@ -2510,14 +2510,6 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "show-editor-meter",
-		     _("Display master-meter in the toolbar"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
-		     ));
-
 if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
@@ -3487,13 +3479,40 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (S_("Preferences|GUI"),
+	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Items")));
+
+	add_option (_("GUI/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-selclock",
+		     _("Display Selection Clock in the Toolbar"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
+		     ));
+
+	add_option (_("GUI/Toolbar"),
+	     new BoolOption (
+		     "show-mini-timeline",
+		     _("Display Navigation Timeline in the Toolbar"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
+		     ));
+
+	add_option (_("GUI/Toolbar"),
+	     new BoolOption (
+		     "show-editor-meter",
+		     _("Display Master Level Meter in the Toolbar"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
+		     ));
+
+	add_option (_("GUI/Toolbar"),
 			new ColumVisibilityOption (
 				"action-table-columns", _("Action Script Button Visibility"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
+
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 

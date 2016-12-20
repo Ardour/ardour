@@ -76,6 +76,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
+#include "mini_timeline.h"
 #include "shuttle_control.h"
 #include "visibility_group.h"
 #include "window_manager.h"
@@ -128,7 +129,7 @@ class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditorWindow;
 class Splash;
-class MiniTimeline;
+class TimeInfoBox;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
@@ -253,7 +254,6 @@ public:
 	MainClock* secondary_clock;
 	void focus_on_clock ();
 	AudioClock*   big_clock;
-	MiniTimeline* mini_timeline;
 
 	VideoTimeLine *video_timeline;
 
@@ -478,6 +478,8 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
+	void repack_transport_hbox ();
+
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {
 		    Roll = 0,
@@ -529,6 +531,8 @@ private:
 	void toggle_video_sync ();
 
 	ShuttleControl shuttle_box;
+	MiniTimeline   mini_timeline;
+	TimeInfoBox   *time_info_box;
 
 	ArdourButton auto_return_button;
 	ArdourButton follow_edits_button;

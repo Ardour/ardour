@@ -172,6 +172,7 @@ typedef uint64_t microseconds_t;
 #include "startup.h"
 #include "theme_manager.h"
 #include "time_axis_view_item.h"
+#include "time_info_box.h"
 #include "timers.h"
 #include "utils.h"
 #include "video_server_dialog.h"
@@ -278,6 +279,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
+	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
@@ -738,6 +740,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete primary_clock; primary_clock = 0;
 		delete secondary_clock; secondary_clock = 0;
 		delete _process_thread; _process_thread = 0;
+		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
 		delete luawindow; luawindow = 0;
 		delete editor; editor = 0;

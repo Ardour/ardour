@@ -72,6 +72,8 @@ UI_CONFIG_VARIABLE (ARDOUR::MeterLineUp, meter_line_up_din, "meter-line-up-din",
 UI_CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 UI_CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", false)
 UI_CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
+UI_CONFIG_VARIABLE (bool, show_toolbar_selclock, "show-toolbar-selclock", false)
+UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
 UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
 UI_CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 UI_CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)

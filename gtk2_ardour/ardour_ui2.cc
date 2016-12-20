@@ -54,8 +54,8 @@
 #include "mixer_ui.h"
 #include "utils.h"
 #include "theme_manager.h"
+#include "time_info_box.h"
 #include "midi_tracer.h"
-#include "mini_timeline.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "rc_option_editor.h"
@@ -176,6 +176,42 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 		return true;
 	}
 	return false;
+}
+
+void
+ARDOUR_UI::repack_transport_hbox ()
+{
+	if (time_info_box) {
+		if (time_info_box->get_parent()) {
+			transport_hbox.remove (*time_info_box);
+		}
+		if (UIConfiguration::instance().get_show_toolbar_selclock ()) {
+			transport_hbox.pack_start (*time_info_box, false, false);
+			time_info_box->show();
+		}
+	}
+
+	if (mini_timeline.get_parent()) {
+		transport_hbox.remove (mini_timeline);
+	}
+	if (UIConfiguration::instance().get_show_mini_timeline ()) {
+		transport_hbox.pack_start (mini_timeline, true, true);
+		mini_timeline.show();
+	}
+
+	if (editor_meter) {
+		if (meter_box.get_parent()) {
+			transport_hbox.remove (meter_box);
+			transport_hbox.remove (editor_meter_peak_display);
+		}
+
+		if (UIConfiguration::instance().get_show_editor_meter()) {
+			transport_hbox.pack_end (editor_meter_peak_display, false, false);
+			transport_hbox.pack_end (meter_box, false, false);
+			meter_box.show();
+			editor_meter_peak_display.show();
+		}
+	}
 }
 
 bool
@@ -394,8 +430,6 @@ ARDOUR_UI::setup_transport ()
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
 
-	mini_timeline = manage (new MiniTimeline);
-
 	/* and now the layout... */
 
 	/* top level packing */
@@ -521,12 +555,9 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	/* editor-meter is in transport_hbox */
-	transport_hbox.set_spacing (PX_SCALE(1));
-	transport_table.attach (transport_hbox, TCOL, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
-	++col;
-
-	transport_table.attach (*mini_timeline, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, 1, 0);
+	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */
+	transport_hbox.set_spacing (3);
+	transport_table.attach (transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, 2, 0);
 	++col;
 
 	/* lua script action buttons */
@@ -537,6 +568,7 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, 2, 0);
 	++col;
 
+	repack_transport_hbox ();
 	/* desensitize */
 
 	feedback_alert_button.set_sensitive (false);
