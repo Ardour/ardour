@@ -1970,10 +1970,18 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::Route> r)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), r->name ()))
 	, _route (r)
+	, _height_mapped (false)
 {
 	vbox = manage (new VBox ());
-	add (*vbox);
+	vbox->signal_size_allocate().connect (sigc::mem_fun (*this, &PluginPinDialog::map_height));
+	scroller = manage (new ScrolledWindow);
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->set_shadow_type (Gtk::SHADOW_NONE);
+	scroller->show ();
 	vbox->show ();
+	scroller->add (*vbox);
+	add (*scroller);
+
 
 	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
 
@@ -1995,14 +2003,25 @@ PluginPinDialog::set_session (ARDOUR::Session *s)
 }
 
 void
+PluginPinDialog::map_height (Gtk::Allocation&)
+{
+	if (!_height_mapped) {
+		scroller->set_size_request (-1, std::min (600, 2 + vbox->get_height()));
+		_height_mapped = true;
+	}
+}
+
+void
 PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange)
 {
 	ppw.clear ();
-	remove ();
+	_height_mapped = false;
+	scroller->remove ();
 	vbox = manage (new VBox ());
-	add (*vbox);
-	vbox->show ();
+	vbox->signal_size_allocate().connect (sigc::mem_fun (*this, &PluginPinDialog::map_height));
+	scroller->add (*vbox);
 	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
+	vbox->show ();
 }
 
 void
@@ -2034,7 +2053,7 @@ PluginPinDialog::add_processor (boost::weak_ptr<Processor> p)
 		hbox->pack_start (*manage (new HSeparator ()));
 		hbox->pack_start (*manage (new Label (proc->display_name ())));
 		hbox->pack_start (*manage (new HSeparator ()));
-		vbox->pack_start (*hbox);
+		vbox->pack_start (*hbox, false, false);
 		hbox->show_all ();
 	}
 }
