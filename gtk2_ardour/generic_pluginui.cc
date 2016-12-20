@@ -702,13 +702,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			return control_ui;
 		}
 
-		if (desc.datatype != Variant::INT && desc.datatype != Variant::LONG &&
-				desc.datatype != Variant::FLOAT && desc.datatype != Variant::DOUBLE &&
-				desc.datatype != Variant::BOOL) {
-			/* unsupported variant type */
-			return control_ui;
-		}
-
 		assert(mcontrol);
 
 		/* See if there any named values for our input value */
@@ -870,13 +863,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		input_controls.push_back (control_ui);
 
 	} else {
-
-		if (desc.datatype != Variant::INT && desc.datatype != Variant::LONG &&
-				desc.datatype != Variant::FLOAT && desc.datatype != Variant::DOUBLE &&
-				desc.datatype != Variant::BOOL) {
-			/* unsupported variant type */
-			return control_ui;
-		}
 
 		control_ui->display = manage (new EventBox);
 		control_ui->display->set_name ("ParameterValueDisplay");
