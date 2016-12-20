@@ -1452,7 +1452,7 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 {
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
-	if (editor_meter && UIConfiguration::instance().get_show_editor_meter()) {
+	if (editor_meter && UIConfiguration::instance().get_show_editor_meter() && editor_meter_peak_display.is_mapped ()) {
 		float mpeak = editor_meter->update_meters();
 		if (mpeak > editor_meter_max_peak) {
 			if (mpeak >= UIConfiguration::instance().get_meter_peak()) {

@@ -196,7 +196,7 @@ MiniTimeline::set_span (framecnt_t ts)
 void
 MiniTimeline::super_rapid_update ()
 {
-	if (!_session || !_session->engine().running()) {
+	if (!_session || !_session->engine().running() || !is_mapped ()) {
 		return;
 	}
 	framepos_t const frame = PublicEditor::instance().playhead_cursor_sample ();
