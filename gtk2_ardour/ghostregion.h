@@ -119,8 +119,9 @@ private:
 	ArdourCanvas::Color _outline;
 
 	MidiGhostRegion::GhostEvent* find_event (NoteBase*);
+	typedef Evoral::Note<Evoral::Beats> NoteType;
 
-	typedef std::list<MidiGhostRegion::GhostEvent*> EventList;
+	typedef std::map<boost::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
 	EventList events;
 	EventList::iterator _optimization_iterator;
 };

@@ -272,8 +272,8 @@ MidiGhostRegion::set_colors()
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->item->set_fill_color (UIConfiguration::instance().color_mod((*it)->event->base_color(), "ghost track midi fill"));
-		(*it)->item->set_outline_color (_outline);
+		(*it).second->item->set_fill_color (UIConfiguration::instance().color_mod((*it).second->event->base_color(), "ghost track midi fill"));
+		(*it).second->item->set_outline_color (_outline);
 	}
 }
 
@@ -308,19 +308,18 @@ MidiGhostRegion::update_range ()
 	double const h = note_height(trackview, mv);
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		uint8_t const note_num = (*it)->event->note()->note();
+		uint8_t const note_num = (*it).second->event->note()->note();
 
 		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			(*it)->item->hide();
+			(*it).second->item->hide();
 		} else {
-			(*it)->item->show();
+			(*it).second->item->show();
 			double const y = note_y(trackview, mv, note_num);
 			ArdourCanvas::Rectangle* rect = NULL;
 			ArdourCanvas::Polygon*   poly = NULL;
-			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it)->item))) {
-				rect->set_y0 (y);
-				rect->set_y1 (y + h);
-			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>((*it)->item))) {
+			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
+				rect->set (Rect (rect->x0(), y, rect->x1(), y + h));
+			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
 				Duple position = poly->position();
 				position.y = y;
 				poly->set_position(position);
@@ -334,7 +333,7 @@ void
 MidiGhostRegion::add_note (NoteBase* n)
 {
 	GhostEvent* event = new GhostEvent (n, group);
-	events.push_back (event);
+	events.insert (make_pair (n->note(), event));
 
 	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
@@ -367,7 +366,7 @@ void
 MidiGhostRegion::clear_events()
 {
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		delete *it;
+		delete (*it).second;
 	}
 
 	events.clear();
@@ -380,7 +379,13 @@ MidiGhostRegion::clear_events()
 void
 MidiGhostRegion::update_note (Note* note)
 {
-	GhostEvent* ev = find_event (note);
+	EventList::iterator f = events.find (note->note());
+	if (f == events.end()) {
+		return;
+	}
+
+	GhostEvent* ev = (*f).second;
+
 	if (!ev) {
 		return;
 	}
@@ -390,13 +395,20 @@ MidiGhostRegion::update_note (Note* note)
 		rect->set (ArdourCanvas::Rect (note->x0(), rect->y0(), note->x1(), rect->y1()));
 	}
 }
+
 /** Update the x positions of our representation of a parent's hit.
  *  @param hit The CanvasHit from the parent MidiRegionView.
  */
 void
 MidiGhostRegion::update_hit (Hit* hit)
 {
-	GhostEvent* ev = find_event (hit);
+	EventList::iterator f = events.find (hit->note());
+	if (f == events.end()) {
+		return;
+	}
+
+	GhostEvent* ev = (*f).second;
+
 	if (!ev) {
 		return;
 	}
@@ -413,13 +425,14 @@ MidiGhostRegion::update_hit (Hit* hit)
 void
 MidiGhostRegion::remove_note (NoteBase* note)
 {
-	GhostEvent* ev = find_event (note);
-	if (!ev) {
+	EventList::iterator f = events.find (note->note());
+	if (f == events.end()) {
 		return;
 	}
 
-	events.remove (ev);
-	delete ev;
+	delete (*f).second;
+	events.erase (f);
+
 	_optimization_iterator = events.end ();
 }
 
@@ -439,13 +452,13 @@ MidiGhostRegion::find_event (NoteBase* parent)
 		++_optimization_iterator;
 	}
 
-	if (_optimization_iterator != events.end() && (*_optimization_iterator)->event == parent) {
-		return *_optimization_iterator;
+	if (_optimization_iterator != events.end() && (*_optimization_iterator).second->event == parent) {
+		return (*_optimization_iterator).second;
 	}
 
 	for (_optimization_iterator = events.begin(); _optimization_iterator != events.end(); ++_optimization_iterator) {
-		if ((*_optimization_iterator)->event == parent) {
-			return *_optimization_iterator;
+		if ((*_optimization_iterator).second->event == parent) {
+			return (*_optimization_iterator).second;
 		}
 	}
 
