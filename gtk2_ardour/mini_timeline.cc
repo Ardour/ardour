@@ -35,6 +35,7 @@
 
 #include "pbd/i18n.h"
 
+#define PADDING 3
 #define BBT_BAR_CHAR "|"
 
 using namespace ARDOUR;
@@ -331,7 +332,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	 *        (3,MH)
 	 */
 
-	int y = 3;
+	const int y = PADDING;
 	int w2 = (h - 1) / 4;
 	double h0 = h * .4;
 	double h1 = h - h0;
@@ -341,7 +342,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	_layout->get_pixel_size (lw, lh);
 	int rw = std::min (x1, x0 + w2 + lw + 2);
 
-	if (_pointer_y >= 0 && _pointer_y < h && _pointer_x >= x0 && _pointer_x <= rw) {
+	if (_pointer_y >= 0 && _pointer_y <= y + h && _pointer_x >= x0 && _pointer_x <= rw) {
 		prelight = true;
 	}
 
@@ -412,7 +413,7 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 	ArdourCanvas::set_source_rgba(cr, base);
 	cairo_fill (cr);
 
-	Gtkmm2ext::rounded_rectangle (cr, 3, 3, get_width()-6, get_height()-6, 4);
+	Gtkmm2ext::rounded_rectangle (cr, PADDING, PADDING, get_width() - PADDING - PADDING, get_height() - PADDING - PADDING, 4);
 	cairo_clip (cr);
 
 	if (_session == 0) {
@@ -437,7 +438,7 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 		_layout->get_pixel_size (lw, lh);
 
 		int x0 = xpos - lw / 2.0;
-		int y0 = get_height() - 3 - _time_height;
+		int y0 = get_height() - PADDING - _time_height;
 
 		draw_dots (cr, dot_left, x0, y0 + _time_height * .5, text);
 
@@ -446,7 +447,7 @@ MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
 		pango_cairo_show_layout (cr, _layout->gobj());
 		dot_left = x0 + lw;
 	}
-	draw_dots (cr, dot_left, get_width(), get_height() - 3 - _time_height * .5, text);
+	draw_dots (cr, dot_left, get_width(), get_height() - PADDING - _time_height * .5, text);
 
 	/* locations */
 	framepos_t lmin = std::max ((framepos_t)0, (p - _time_span_samples));
@@ -584,7 +585,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 		return true;
 	}
 
-	if (ev->y <= _marker_height) {
+	if (ev->y <= PADDING + _marker_height) {
 		for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
 			if (i->left < ev->x && ev->x < i->right) {
 				_session->request_locate (i->to, _session->transport_rolling ());
@@ -612,7 +613,7 @@ MiniTimeline::on_motion_notify_event (GdkEventMotion *ev)
 	bool need_expose = false;
 
 	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
-		if (i->left < ev->x && ev->x < i->right && ev->y <= _marker_height) {
+		if (i->left < ev->x && ev->x < i->right && ev->y <= PADDING + _marker_height) {
 			if (!(*i).prelight) {
 				need_expose = true;
 				break;
