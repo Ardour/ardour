@@ -193,9 +193,13 @@ ArdourButton::set_text_internal () {
 void
 ArdourButton::set_text (const std::string& str, bool markup)
 {
+	if (!(_elements & Text)) {
+		return;
+	}
 	if (_text == str && _markup == markup) {
 		return;
 	}
+
 	_text = str;
 	_markup = markup;
 	if (!is_realized()) {
@@ -366,7 +370,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 	else /* VectorIcons are exclusive to Pixbuf Icons */
 	if (_elements & VectorIcon) {
-		Gtkmm2ext::ArdourIcon::render (cr, _icon, get_width(), get_height(), active_state(), text_color);
+		int vw = get_width();
+		int vh = get_height();
+		if (_elements & Menu) {
+			vw -= _diameter + 4;
+		}
+		Gtkmm2ext::ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
 	}
 
 	const int text_margin = char_pixel_width();
@@ -1033,6 +1042,7 @@ ArdourButton::setup_led_rect ()
 void
 ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 {
+	 _elements = (ArdourButton::Element) (_elements & ~ArdourButton::Text);
 	_pixbuf = img;
 	if (is_realized()) {
 		queue_resize ();
