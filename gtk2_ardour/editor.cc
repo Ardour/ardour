@@ -3018,14 +3018,16 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (mouse_content_button);
 
-	mouse_mode_size_group->add_widget (zoom_in_button);
-	mouse_mode_size_group->add_widget (zoom_out_button);
-	mouse_mode_size_group->add_widget (zoom_preset_selector);
-	mouse_mode_size_group->add_widget (zoom_out_full_button);
-	mouse_mode_size_group->add_widget (zoom_focus_selector);
+	if (!Profile->get_mixbus()) {
+		mouse_mode_size_group->add_widget (zoom_in_button);
+		mouse_mode_size_group->add_widget (zoom_out_button);
+		mouse_mode_size_group->add_widget (zoom_out_full_button);
+		mouse_mode_size_group->add_widget (zoom_focus_selector);
+		mouse_mode_size_group->add_widget (tav_shrink_button);
+		mouse_mode_size_group->add_widget (tav_expand_button);
+	}
 
-	mouse_mode_size_group->add_widget (tav_shrink_button);
-	mouse_mode_size_group->add_widget (tav_expand_button);
+	mouse_mode_size_group->add_widget (zoom_preset_selector);
 	mouse_mode_size_group->add_widget (visible_tracks_selector);
 
 	mouse_mode_size_group->add_widget (snap_type_selector);
@@ -3081,8 +3083,7 @@ Editor::setup_toolbar ()
 	RefPtr<Action> act;
 
 	zoom_preset_selector.set_name ("zoom button");
-	zoom_preset_selector.set_image(::get_icon ("time_exp"));
-	zoom_preset_selector.set_size_request (42, -1);
+	zoom_preset_selector.set_icon (ArdourIcon::ZoomExpand);
 
 	zoom_in_button.set_name ("zoom button");
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
@@ -3119,8 +3120,7 @@ Editor::setup_toolbar ()
 
 	visible_tracks_selector.set_name ("zoom button");
 	if (Profile->get_mixbus()) {
-		visible_tracks_selector.set_image(::get_icon ("tav_exp"));
-		visible_tracks_selector.set_size_request (42, -1);
+		visible_tracks_selector.set_icon (ArdourIcon::TimeAxisExpand);
 	} else {
 		set_size_request_to_display_given_text (visible_tracks_selector, _("All"), 30, 2);
 	}
