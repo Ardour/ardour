@@ -1186,61 +1186,15 @@ MidiRegionView::redisplay_model()
 		return;
 	}
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->invalidate ();
-	}
-
-	MidiModel::ReadLock lock(_model->read_lock());
-
-	MidiModel::Notes& notes (_model->notes());
-	_optimization_iterator = _events.begin();
-
 	bool empty_when_starting = _events.empty();
-	NoteBase* cne;
-
-	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-
-		boost::shared_ptr<NoteType> note (*n);
-		bool visible;
-
-		if (note_in_region_range (note, visible)) {
-
-			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
-
-				if (visible) {
-					cne->validate ();
-					update_note (cne);
-					cne->show ();
-				} else {
-					cne->hide ();
-				}
-
-			} else {
-
-				cne = add_note (note, visible);
-			}
-
-			set<Evoral::event_id_t>::iterator it;
-			for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
-				if ((*it) == note->id()) {
-					add_to_selection (cne);
-				}
-			}
-
-		} else {
-
-			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
-				cne->validate ();
-				cne->hide ();
-			}
-		}
-	}
-
-	/* remove note items that are no longer valid */
+	MidiModel::ReadLock lock(_model->read_lock());
+	MidiModel::Notes missing_notes = _model->notes(); // copy
 
 	if (!empty_when_starting) {
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
-			if (!(*i)->valid ()) {
+			boost::shared_ptr<NoteType> note ((*i)->note());
+			/* remove note items that are no longer valid */
+			if (!(*i)->valid () || !_model->find_note (note)) {
 
 				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
 					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
@@ -1253,7 +1207,47 @@ MidiRegionView::redisplay_model()
 				i = _events.erase (i);
 
 			} else {
+				MidiModel::Notes::iterator f;
+				NoteBase* cne = (*i);
+				bool visible;
+
+				if (note_in_region_range (note, visible)) {
+					if (visible) {
+						update_note (cne);
+						cne->show ();
+					} else {
+						cne->hide ();
+					}
+				} else {
+					cne->hide ();
+				}
+
+				if ((f = missing_notes.find (note)) != missing_notes.end()) {
+					missing_notes.erase (f);
+				}
+
 				++i;
+			}
+
+		}
+	}
+
+	NoteBase* cne;
+
+	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
+		boost::shared_ptr<NoteType> note (*n);
+		bool visible;
+
+		if (note_in_region_range (note, visible)) {
+			if (visible) {
+				cne = add_note (note, true);
+				set<Evoral::event_id_t>::iterator it;
+
+				for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
+					if ((*it) == note->id()) {
+						add_to_selection (cne);
+					}
+				}
 			}
 		}
 	}
