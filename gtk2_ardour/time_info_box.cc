@@ -43,10 +43,13 @@ using namespace ARDOUR;
 using std::min;
 using std::max;
 
-TimeInfoBox::TimeInfoBox ()
-	: table (3, 4)
+TimeInfoBox::TimeInfoBox (bool with_punch)
+	: table (3, 3)
+	, punch_start (0)
+	, punch_end (0)
 	, syncing_selection (false)
 	, syncing_punch (false)
+	, with_punch_clock (with_punch)
 {
 	set_name (X_("TimeInfoBox"));
 
@@ -54,11 +57,7 @@ TimeInfoBox::TimeInfoBox ()
 	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
 	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
 
-	punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
-	punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
-
 	selection_title.set_text (_("Selection"));
-	punch_title.set_text (_("Punch"));
 
 	set_homogeneous (false);
 	set_spacing (0);
@@ -74,7 +73,9 @@ TimeInfoBox::TimeInfoBox ()
 	Gtk::Label* l;
 
 	selection_title.set_name ("TimeInfoSelectionTitle");
-	table.attach (selection_title, 1, 2, 0, 1);
+	if (with_punch_clock) {
+		table.attach (selection_title, 1, 2, 0, 1);
+	}
 	l = manage (new Label);
 	l->set_text (_("Start"));
 	l->set_alignment (1.0, 0.5);
@@ -96,10 +97,16 @@ TimeInfoBox::TimeInfoBox ()
 	table.attach (*l, 0, 1, 3, 4, FILL);
 	table.attach (*selection_length, 1, 2, 3, 4);
 
-	punch_title.set_name ("TimeInfoSelectionTitle");
-	table.attach (punch_title, 2, 3, 0, 1);
-	table.attach (*punch_start, 2, 3, 1, 2);
-	table.attach (*punch_end, 2, 3, 2, 3);
+	if (with_punch_clock) {
+		punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
+		punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
+		punch_title.set_text (_("Punch"));
+
+		punch_title.set_name ("TimeInfoSelectionTitle");
+		table.attach (punch_title, 2, 3, 0, 1);
+		table.attach (*punch_start, 2, 3, 1, 2);
+		table.attach (*punch_end, 2, 3, 2, 3);
+	}
 
 	show_all ();
 
@@ -107,14 +114,16 @@ TimeInfoBox::TimeInfoBox ()
 	selection_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_end));
 	selection_length->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_length));
 
-	punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
-	punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
-
 	selection_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_start), true);
 	selection_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_end), true);
 
-	punch_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_start), true);
-	punch_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_end), true);
+	if (with_punch_clock) {
+		punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
+		punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
+
+		punch_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_start), true);
+		punch_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_end), true);
+	}
 
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
@@ -198,6 +207,9 @@ TimeInfoBox::sync_selection_mode (AudioClock* src)
 void
 TimeInfoBox::sync_punch_mode (AudioClock* src)
 {
+	if (!with_punch_clock) {
+		return;
+	}
 	if (!syncing_punch) {
 		syncing_punch = true;
 		punch_start->set_mode (src->mode());
@@ -216,6 +228,10 @@ TimeInfoBox::set_session (Session* s)
 	selection_end->set_session (s);
 	selection_length->set_session (s);
 
+	if (!with_punch_clock) {
+		return;
+	}
+
 	punch_start->set_session (s);
 	punch_end->set_session (s);
 
@@ -229,7 +245,7 @@ TimeInfoBox::set_session (Session* s)
 		punch_changed (punch);
 
 		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR,
-							       boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
+				boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
 	}
 }
 
@@ -335,7 +351,7 @@ TimeInfoBox::selection_changed ()
 void
 TimeInfoBox::punch_location_changed (Location* loc)
 {
-	if (loc) {
+	if (loc && with_punch_clock) {
 		watch_punch (loc);
 	}
 }
@@ -343,6 +359,7 @@ TimeInfoBox::punch_location_changed (Location* loc)
 void
 TimeInfoBox::watch_punch (Location* punch)
 {
+	assert (with_punch_clock);
 	punch_connections.drop_connections ();
 
 	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
@@ -354,6 +371,7 @@ TimeInfoBox::watch_punch (Location* punch)
 void
 TimeInfoBox::punch_changed (Location* loc)
 {
+	assert (with_punch_clock);
 	if (!loc) {
 		punch_start->set_off (true);
 		punch_end->set_off (true);
@@ -366,4 +384,3 @@ TimeInfoBox::punch_changed (Location* loc)
 	punch_start->set (loc->start());
 	punch_end->set (loc->end());
 }
-

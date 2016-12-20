@@ -644,7 +644,7 @@ Editor::Editor ()
 	_regions = new EditorRegions (this);
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
-	_time_info_box = new TimeInfoBox ();
+	_time_info_box = new TimeInfoBox (true);
 
 	/* these are static location signals */
 
