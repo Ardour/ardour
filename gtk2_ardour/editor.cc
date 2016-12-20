@@ -3025,10 +3025,10 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (zoom_focus_selector);
 		mouse_mode_size_group->add_widget (tav_shrink_button);
 		mouse_mode_size_group->add_widget (tav_expand_button);
+	} else {
+		mouse_mode_size_group->add_widget (zoom_preset_selector);
+		mouse_mode_size_group->add_widget (visible_tracks_selector);
 	}
-
-	mouse_mode_size_group->add_widget (zoom_preset_selector);
-	mouse_mode_size_group->add_widget (visible_tracks_selector);
 
 	mouse_mode_size_group->add_widget (snap_type_selector);
 	mouse_mode_size_group->add_widget (snap_mode_selector);
