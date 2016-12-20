@@ -26,6 +26,7 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		ZoomIn,
 		ZoomOut,
 		ZoomFull,
+		ZoomExpand,
 		TimeAxisShrink,
 		TimeAxisExpand,
 		ToolGrab,
