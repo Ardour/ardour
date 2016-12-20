@@ -530,7 +530,6 @@ OptionEditor::treeview_row_selected ()
 		Gtk::Widget* w = row[option_columns.widget];
 		if (w) {
 			_notebook.set_current_page (_notebook.page_num (*w));
-			cerr << "OE: set current page to " << _notebook.page_num (*w) << endl;
 		}
 	}
 }
