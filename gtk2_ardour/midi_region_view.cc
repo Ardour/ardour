@@ -1191,10 +1191,26 @@ MidiRegionView::redisplay_model()
 	MidiModel::Notes missing_notes = _model->notes(); // copy
 
 	if (!empty_when_starting) {
+		MidiModel::Notes::iterator f;
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
-			boost::shared_ptr<NoteType> note ((*i)->note());
+			boost::shared_ptr<NoteType> note = (*i)->note();
+
+			/* if event item's note exists in the model, we can just update it.
+			 * don't mark it as missing.
+			*/
+			if ((f = missing_notes.find (note)) != missing_notes.end()) {
+				if ((*f) == note) {
+					(*i)->validate();
+					missing_notes.erase (f);
+				} else {
+					(*i)->invalidate();
+				}
+
+			} else {
+				(*i)->invalidate();
+			}
 			/* remove note items that are no longer valid */
-			if (!(*i)->valid () || !_model->find_note (note)) {
+			if (!(*i)->valid()) {
 
 				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
 					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
@@ -1207,7 +1223,6 @@ MidiRegionView::redisplay_model()
 				i = _events.erase (i);
 
 			} else {
-				MidiModel::Notes::iterator f;
 				NoteBase* cne = (*i);
 				bool visible;
 
@@ -1222,33 +1237,33 @@ MidiRegionView::redisplay_model()
 					cne->hide ();
 				}
 
-				if ((f = missing_notes.find (note)) != missing_notes.end()) {
-					missing_notes.erase (f);
-				}
-
 				++i;
 			}
-
 		}
 	}
 
-	NoteBase* cne;
 
 	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
 		boost::shared_ptr<NoteType> note (*n);
+		NoteBase* cne = add_note (note, true);
 		bool visible;
 
 		if (note_in_region_range (note, visible)) {
 			if (visible) {
-				cne = add_note (note, true);
 				set<Evoral::event_id_t>::iterator it;
+
+				cne->show ();
 
 				for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 					if ((*it) == note->id()) {
 						add_to_selection (cne);
 					}
 				}
+			} else {
+				cne->hide ();
 			}
+		} else {
+			cne->hide ();
 		}
 	}
 
