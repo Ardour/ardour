@@ -2658,13 +2658,11 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 				if (prev_t && !section_prev && ((sml && tlm && t->pulse() > section->pulse()) || (!tlm && t->minute() > minute))) {
 					section_prev = prev_t;
 
-					if (t->locked_to_meter()) {
-						section_prev->set_c_func (section_prev->compute_c_func_minute (section->note_types_per_minute(), minute));
-						if (!section->locked_to_meter()) {
-							section->set_pulse (section_prev->pulse_at_ntpm (section->note_types_per_minute(), minute));
-						}
-						prev_t = section;
+					section_prev->set_c_func (section_prev->compute_c_func_minute (section->note_types_per_minute(), minute));
+					if (!section->locked_to_meter()) {
+						section->set_pulse (section_prev->pulse_at_ntpm (section->note_types_per_minute(), minute));
 					}
+					prev_t = section;
 				}
 
 				if (t->position_lock_style() == MusicTime) {
@@ -2678,13 +2676,6 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 				}
 			}
 			prev_t = t;
-		}
-	}
-
-	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_minute (section->note_types_per_minute(), minute));
-		if (!section->locked_to_meter()) {
-			section->set_pulse (section_prev->pulse_at_ntpm (section->note_types_per_minute(), minute));
 		}
 	}
 
