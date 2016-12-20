@@ -2469,7 +2469,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
-	add_option (_("Transport"), _ltc_send_continuously);
+	add_option (_("Transport/Sync"), _ltc_send_continuously);
 
 	_ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
 	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
