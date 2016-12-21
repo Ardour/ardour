@@ -224,12 +224,16 @@ ARDOUR_UI::update_clock_visibility ()
 		secondary_clock->show();
 		secondary_clock->left_btn()->show();
 		secondary_clock->right_btn()->show();
-		secondary_clock_spacer->show();
+		if (secondary_clock_spacer) {
+			secondary_clock_spacer->show();
+		}
 	} else {
 		secondary_clock->hide();
 		secondary_clock->left_btn()->hide();
 		secondary_clock->right_btn()->hide();
-		secondary_clock_spacer->hide();
+		if (secondary_clock_spacer) {
+			secondary_clock_spacer->hide();
+		}
 	}
 }
 
