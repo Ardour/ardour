@@ -318,7 +318,7 @@ MidiGhostRegion::update_range ()
 			ArdourCanvas::Rectangle* rect = NULL;
 			ArdourCanvas::Polygon*   poly = NULL;
 			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
-				rect->set (Rect (rect->x0(), y, rect->x1(), y + h));
+				rect->set (ArdourCanvas::Rect (rect->x0(), y, rect->x1(), y + h));
 			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
 				Duple position = poly->position();
 				position.y = y;
