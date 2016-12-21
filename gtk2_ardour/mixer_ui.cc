@@ -1516,6 +1516,10 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	if (!scroller.get_hscrollbar()) {
 		return;
 	}
+	if (s->presentation_info().special () || s->presentation_info().flag_match (PresentationInfo::VCA)) {
+		return;
+	}
+
 	bool found = false;
 	int x0 = 0;
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
