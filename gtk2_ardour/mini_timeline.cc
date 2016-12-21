@@ -671,9 +671,11 @@ MiniTimeline::on_scroll_event (GdkEventScroll *ev)
 
 	switch (ev->direction) {
 		case GDK_SCROLL_UP:
+		case GDK_SCROLL_RIGHT:
 			when += scale * _session->nominal_frame_rate ();
 			break;
 		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_LEFT:
 			when -= scale * _session->nominal_frame_rate ();
 			break;
 		default:
