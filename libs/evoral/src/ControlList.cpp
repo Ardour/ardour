@@ -1205,7 +1205,7 @@ ControlList::unlocked_eval (double x) const
 			return lval;
 		}
 
-		/* linear interpolation betweeen the two points */
+		/* linear interpolation between the two points */
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
 		return lval + (fraction * (uval - lval));
 
