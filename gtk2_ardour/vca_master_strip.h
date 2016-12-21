@@ -101,6 +101,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 
 	void parameter_changed (std::string const& p);
 	void set_button_names ();
+	void update_bottom_padding ();
 
 	void start_color_edit ();
 	void finish_color_edit (int, Gtk::ColorSelectionDialog*);

@@ -95,7 +95,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	bottom_padding.set_size_request (-1, 55); /* this one is a hack. there's no trivial way to compute it */
+	update_bottom_padding ();
 
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
@@ -108,13 +108,14 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
 	global_vpacker.set_border_width (1);
-	global_vpacker.set_spacing (0);
+	global_vpacker.set_spacing (2);
+	gain_meter.set_spacing(4);
 
 	global_vpacker.pack_start (number_label, false, false);
 	global_vpacker.pack_start (hide_button, false, false);
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
-	global_vpacker.pack_start (gain_meter, false, false, 2);
+	global_vpacker.pack_start (gain_meter, false, false);
 	global_vpacker.pack_start (control_slave_ui, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
 
@@ -190,6 +191,8 @@ VCAMasterStrip::parameter_changed (std::string const & p)
 {
 	if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
+	} else if (p == "mixer-element-visibility") {
+		update_bottom_padding ();
 	}
 }
 
@@ -211,6 +214,42 @@ VCAMasterStrip::set_button_names ()
 		solo_button.set_text (S_("Solo|S"));
 		set_tooltip (solo_button, _("Solo"));
 	}
+}
+
+void
+VCAMasterStrip::update_bottom_padding ()
+{
+	std::string viz = UIConfiguration::instance().get_mixer_strip_visibility ();
+
+	ArdourButton meter_point_button (_("pre"));
+	ArdourButton output_button (_("Output"));
+	ArdourButton comment_button (_("Comments"));
+
+	meter_point_button.set_name ("mixer strip button");
+	output_button.set_name ("mixer strip button");
+	comment_button.set_name ("generic button");
+
+
+	int h = 0;
+	if (1) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (meter_point_button);
+		Gtk::Requisition requisition(meter_point_button.size_request ());
+		h += requisition.height;
+	}
+	if (viz.find ("Output") != std::string::npos) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (output_button);
+		Gtk::Requisition requisition(output_button.size_request ());
+		h += requisition.height + 2;
+	}
+	if (viz.find ("Comments") != std::string::npos) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (comment_button);
+		Gtk::Requisition requisition(comment_button.size_request ());
+		h += requisition.height + 2;
+	}
+	bottom_padding.set_size_request (-1, h);
 }
 
 string
