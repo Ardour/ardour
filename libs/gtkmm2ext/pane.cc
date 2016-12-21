@@ -48,6 +48,8 @@ Pane::Pane (bool h)
 Pane::~Pane ()
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
+		c->show_con.disconnect ();
+		c->hide_con.disconnect ();
 		c->w->remove_destroy_notify_callback (&(*c));
 		c->w->unparent ();
 	}
@@ -142,6 +144,7 @@ void
 Pane::on_add (Widget* w)
 {
 	children.push_back (Child (this, w, 0));
+	Child& kid = children.back ();
 
 	w->set_parent (*this);
 	/* Gtkmm 2.4 does not correctly arrange for ::on_remove() to be called
@@ -150,8 +153,8 @@ Pane::on_add (Widget* w)
 	*/
 	w->add_destroy_notify_callback (&children.back(), &Pane::notify_child_destroyed);
 
-	w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
-	w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
+	kid.show_con = w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
+	kid.hide_con = w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
 
 	while (dividers.size() < (children.size() - 1)) {
 		add_divider ();
@@ -170,6 +173,8 @@ Pane::child_destroyed (Gtk::Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		if (c->w == w) {
+			c->show_con.disconnect ();
+			c->hide_con.disconnect ();
 			children.erase (c);
 			break;
 		}
@@ -182,6 +187,8 @@ Pane::on_remove (Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		if (c->w == w) {
+			c->show_con.disconnect ();
+			c->hide_con.disconnect ();
 			w->remove_destroy_notify_callback (&(*c));
 			w->unparent ();
 			children.erase (c);

@@ -49,6 +49,8 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 		Pane* pane;
 		Gtk::Widget* w;
 		int32_t minsize;
+		sigc::connection show_con;
+		sigc::connection hide_con;
 
 		Child (Pane* p, Gtk::Widget* widget, uint32_t ms) : pane (p), w (widget), minsize (ms) {}
 	};
