@@ -1519,7 +1519,11 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	if (s->presentation_info().special () || s->presentation_info().flag_match (PresentationInfo::VCA)) {
 		return;
 	}
-
+#ifdef MIXBUS
+	if (s->mixbus ()) {
+		return;
+	}
+#endif
 	bool found = false;
 	int x0 = 0;
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {

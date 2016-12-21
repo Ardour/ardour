@@ -1647,8 +1647,8 @@ EditorRoutes::move_selected_tracks (bool up)
 			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("move %1 to %2\n", leading->old_order, neworder.size() - 1));
 		}
 #endif
-
 	}
+
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::OrderKeys, "New order after moving tracks:\n");
 	for (vector<int>::iterator i = neworder.begin(); i != neworder.end(); ++i) {

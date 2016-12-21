@@ -51,7 +51,7 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 
 	initial_button.set_no_show_all (true);
 	initial_button.set_name (X_("vca assign"));
-	initial_button.set_text (_("-vca-"));
+	initial_button.set_text (_("-VCAs-"));
 	initial_button.show ();
 	initial_button.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	initial_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::vca_button_release), 0), false);
