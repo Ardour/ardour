@@ -186,6 +186,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
 	base_rect->lower_to_bottom();
 	update_range ();
 
+	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
 /**
@@ -209,6 +210,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
 	base_rect->lower_to_bottom();
 	update_range ();
 
+	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
 MidiGhostRegion::~MidiGhostRegion()
