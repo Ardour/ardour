@@ -214,6 +214,25 @@ ARDOUR_UI::repack_transport_hbox ()
 	}
 }
 
+void
+ARDOUR_UI::update_clock_visibility ()
+{
+	if (ARDOUR::Profile->get_small_screen()) {
+		return;
+	}
+	if (UIConfiguration::instance().get_show_secondary_clock ()) {
+		secondary_clock->show();
+		secondary_clock->left_btn()->show();
+		secondary_clock->right_btn()->show();
+		secondary_clock_spacer->show();
+	} else {
+		secondary_clock->hide();
+		secondary_clock->left_btn()->hide();
+		secondary_clock->right_btn()->hide();
+		secondary_clock_spacer->hide();
+	}
+}
+
 bool
 ARDOUR_UI::transport_expose (GdkEventExpose* ev)
 {
@@ -543,11 +562,15 @@ ARDOUR_UI::setup_transport ()
 		transport_table.attach (*secondary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, 2, 0);
 		transport_table.attach (*secondary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, 2, 0);
 		transport_table.attach (*secondary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 0);
+		secondary_clock->set_no_show_all (true);
+		secondary_clock->left_btn()->set_no_show_all (true);
+		secondary_clock->right_btn()->set_no_show_all (true);
 		col += 2;
-	}
 
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
+		secondary_clock_spacer = manage (new ArdourVSpacer ());
+		transport_table.attach (*secondary_clock_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+		++col;
+	}
 
 	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
 	++col;
@@ -569,6 +592,7 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	repack_transport_hbox ();
+	update_clock_visibility ();
 	/* desensitize */
 
 	feedback_alert_button.set_sensitive (false);

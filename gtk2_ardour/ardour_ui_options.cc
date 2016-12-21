@@ -409,6 +409,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
 		repack_transport_hbox ();
+	} else if (p == "show-secondary-clock") {
+		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
 		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {

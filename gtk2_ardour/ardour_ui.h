@@ -101,6 +101,7 @@
 class About;
 class AddRouteDialog;
 class AddVideoDialog;
+class ArdourVSpacer;
 class BigClockWindow;
 class BundleManager;
 class EngineControl;
@@ -478,7 +479,9 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
+	ArdourVSpacer *secondary_clock_spacer;
 	void repack_transport_hbox ();
+	void update_clock_visibility ();
 
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {

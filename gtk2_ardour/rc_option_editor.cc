@@ -3489,6 +3489,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
 		     ));
 
+	if (!ARDOUR::Profile->get_small_screen()) {
+		add_option (_("GUI/Toolbar"),
+				new BoolOption (
+					"show-secondary-clock",
+					_("Display Secondary Clock in the Toolbar"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_secondary_clock),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
+					));
+	}
+
 	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-mini-timeline",
