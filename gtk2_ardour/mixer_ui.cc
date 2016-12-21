@@ -137,6 +137,8 @@ Mixer_UI::Mixer_UI ()
 
 	_group_tabs = new MixerGroupTabs (this);
 	VBox* b = manage (new VBox);
+	b->set_spacing (0);
+	b->set_border_width (0);
 	b->pack_start (*_group_tabs, PACK_SHRINK);
 	b->pack_start (strip_packer);
 	b->show_all ();
@@ -252,15 +254,13 @@ Mixer_UI::Mixer_UI ()
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
 	string vca_text = _("Control Masters");
-	Gtk::HBox* vca_top_padding = manage (new Gtk::HBox);
-	vca_top_padding->set_size_request (-1, 2);
-	vca_vpacker.pack_start (*vca_top_padding, false, false);
-
 	vca_label.set_text (vca_text);
-	vca_label_bar.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
+	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 
+#ifndef MIXBUS
 	vca_label_bar.set_name (X_("VCALabelBar"));
 	vca_label_bar.add (vca_label);
+#endif
 
 	vca_vpacker.pack_start (vca_label_bar, false, false);
 
@@ -348,7 +348,6 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.show();
 	strip_packer.show();
 	inner_pane.show();
-	vca_top_padding->show ();
 	vca_scroller.show();
 	vca_vpacker.show();
 	vca_hpacker.show();
@@ -621,7 +620,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 			(*s)->presentation_info().PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
 			(*s)->PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
-						}
+		}
 
 	} catch (const std::exception& e) {
 		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;

@@ -133,6 +133,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
+	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
@@ -321,14 +322,23 @@ MixerStrip::init ()
 		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	}
 
+#ifndef MIXBUS
 	//add a spacer underneath the master bus;
 	//this fills the area that is taken up by the scrollbar on the tracks;
 	//and therefore keeps the faders "even" across the bottom
-	HScrollbar scrollbar;
-	Gtk::Requisition requisition(scrollbar.size_request ());
-	int scrollbar_height = requisition.height;
-	spacer.set_size_request (-1, scrollbar_height+2);  //+2 is a fudge factor to accomodate extra padding in mixer strip
+	int scrollbar_height = 0;
+	{
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		HScrollbar scrollbar;
+		window.add (scrollbar);
+		scrollbar.set_name ("MixerWindow");
+		scrollbar.ensure_style();
+		Gtk::Requisition requisition(scrollbar.size_request ());
+		scrollbar_height = requisition.height;
+	}
+	spacer.set_size_request (-1, scrollbar_height);
 	global_vpacker.pack_end (spacer, false, false);
+#endif
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
