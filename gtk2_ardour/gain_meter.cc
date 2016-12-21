@@ -417,6 +417,10 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 void
 GainMeterBase::reset_peak_display ()
 {
+	if (!_route) {
+		// catch "reset all" for VCAs
+		return;
+	}
 	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = minus_infinity ();
