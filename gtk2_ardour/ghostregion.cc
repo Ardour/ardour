@@ -179,7 +179,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
     : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
-    , _optimization_iterator(events.end())
+    , _tmp_rect (NULL), _tmp_poly (NULL), _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -203,7 +203,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                   msv.trackview(),
                   source_tv,
                   initial_unit_pos)
-    , _optimization_iterator(events.end())
+    , _tmp_rect (NULL), _tmp_poly (NULL), _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -262,7 +262,7 @@ void
 MidiGhostRegion::set_height ()
 {
 	GhostRegion::set_height();
-	update_range();
+	set_contents_height ();
 }
 
 void
@@ -305,8 +305,6 @@ MidiGhostRegion::update_range ()
 		return;
 	}
 
-	double const h = note_height(trackview, mv);
-
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = (*it).second->event->note()->note();
 
@@ -314,17 +312,33 @@ MidiGhostRegion::update_range ()
 			(*it).second->item->hide();
 		} else {
 			(*it).second->item->show();
-			double const y = note_y(trackview, mv, note_num);
-			ArdourCanvas::Rectangle* rect = NULL;
-			ArdourCanvas::Polygon*   poly = NULL;
-			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
-				rect->set (ArdourCanvas::Rect (rect->x0(), y, rect->x1(), y + h));
-			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
-				Duple position = poly->position();
-				position.y = y;
-				poly->set_position(position);
-				poly->set(Hit::points(h));
-			}
+		}
+	}
+}
+
+void
+MidiGhostRegion::set_contents_height ()
+{
+	MidiStreamView* mv = midi_view();
+
+	if (!mv) {
+		return;
+	}
+
+	double const h = note_height(trackview, mv);
+
+	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+		uint8_t const note_num = (*it).second->event->note()->note();
+
+		double const y = note_y(trackview, mv, note_num);
+
+		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
+			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
+		} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
+			Duple position = _tmp_poly->position();
+			position.y = y;
+			_tmp_poly->set_position(position);
+			_tmp_poly->set(Hit::points(h));
 		}
 	}
 }
@@ -348,15 +362,13 @@ MidiGhostRegion::add_note (NoteBase* n)
 		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 			event->item->hide();
 		} else {
-			ArdourCanvas::Rectangle* rect = NULL;
-			ArdourCanvas::Polygon*   poly = NULL;
-			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
-				rect->set (ArdourCanvas::Rect (rect->x0(), y, rect->x1(), y + h));
-			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(event->item))) {
-				Duple position = poly->position();
+			if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
+				_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
+			} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(event->item))) {
+				Duple position = _tmp_poly->position();
 				position.y = y;
-				poly->set_position(position);
-				poly->set(Hit::points(h));
+				_tmp_poly->set_position(position);
+				_tmp_poly->set(Hit::points(h));
 			}
 		}
 	}
@@ -379,21 +391,27 @@ MidiGhostRegion::clear_events()
 void
 MidiGhostRegion::update_note (Note* note)
 {
-	EventList::iterator f = events.find (note->note());
-	if (f == events.end()) {
+	MidiStreamView* mv = midi_view();
+
+	if (!mv) {
 		return;
 	}
 
-	GhostEvent* ev = (*f).second;
+	GhostEvent* ev = find_event (note);
 
 	if (!ev) {
 		return;
 	}
 
-	ArdourCanvas::Rectangle* rect = NULL;
-	if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
-		rect->set (ArdourCanvas::Rect (note->x0(), rect->y0(), note->x1(), rect->y1()));
+	uint8_t const note_num = note->note()->note();
+
+	double const y = note_y(trackview, mv, note_num);
+	double const h = note_height(trackview, mv);
+
+	if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
+		_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
 	}
+
 }
 
 /** Update the x positions of our representation of a parent's hit.
@@ -402,23 +420,30 @@ MidiGhostRegion::update_note (Note* note)
 void
 MidiGhostRegion::update_hit (Hit* hit)
 {
-	EventList::iterator f = events.find (hit->note());
-	if (f == events.end()) {
+	MidiStreamView* mv = midi_view();
+
+	if (!mv) {
 		return;
 	}
 
-	GhostEvent* ev = (*f).second;
+	GhostEvent* ev = find_event (hit);
 
 	if (!ev) {
 		return;
 	}
 
-	ArdourCanvas::Polygon*   poly = NULL;
-	if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
+	uint8_t const note_num = ev->event->note()->note();
+
+	double const h = note_height(trackview, mv);
+	double const y = note_y(trackview, mv, note_num);
+
+	if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
 		ArdourCanvas::Duple ppos = hit->position();
-		ArdourCanvas::Duple gpos = poly->position();
+		ArdourCanvas::Duple gpos = _tmp_poly->position();
 		gpos.x = ppos.x;
-		poly->set_position(gpos);
+		gpos.y = y;
+		_tmp_poly->set_position(gpos);
+		_tmp_poly->set(Hit::points(h));
 	}
 }
 

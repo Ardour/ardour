@@ -107,6 +107,7 @@ public:
 	void set_colors();
 
 	void update_range();
+	void set_contents_height();
 
 	void add_note(NoteBase*);
 	void update_note (Note*);
@@ -117,6 +118,8 @@ public:
 
 private:
 	ArdourCanvas::Color _outline;
+	ArdourCanvas::Rectangle* _tmp_rect;
+	ArdourCanvas::Polygon* _tmp_poly;
 
 	MidiGhostRegion::GhostEvent* find_event (NoteBase*);
 	typedef Evoral::Note<Evoral::Beats> NoteType;
