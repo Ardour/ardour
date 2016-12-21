@@ -78,7 +78,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
 
-        void add_automation_event (GdkEvent *, framepos_t, double, bool with_guard_points);
+	void add_automation_event (GdkEvent *, framepos_t, double, bool with_guard_points);
 
 	void clear_lines ();
 
