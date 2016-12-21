@@ -412,6 +412,18 @@ MonitorSection::MonitorSection (Session* s)
 	lower_packer->pack_start (*mono_dim_box,        false, false, PX_SCALE(2));
 	lower_packer->pack_start (cut_all_button,       false, false, PX_SCALE(2));
 
+	// calc height of mixer scrollbar
+	int scrollbar_height = 0;
+	{
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		HScrollbar scrollbar;
+		window.add (scrollbar);
+		scrollbar.set_name ("MixerWindow");
+		scrollbar.ensure_style();
+		Gtk::Requisition requisition(scrollbar.size_request ());
+		scrollbar_height = requisition.height;
+	}
+
 	// output port select
 	VBox* out_packer = manage (new VBox);
 	out_packer->set_spacing (PX_SCALE(2));
@@ -429,7 +441,13 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker.pack_start (*level_tbl,           false, false, PX_SCALE(8));
 	vpacker.pack_start (*lower_packer,        false, false, PX_SCALE(8));
 	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
-	vpacker.pack_end   (*out_packer,          false, false, PX_SCALE(3));
+	vpacker.pack_end   (*out_packer,          false, false,
+#ifdef MIXBUS
+			scrollbar_height - 2 /* no outer frame */
+#else
+			scrollbar_height + 2 /* frame borders */
+#endif
+			);
 
 	hpacker.set_spacing (0);
 	hpacker.pack_start (vpacker, true, true);
