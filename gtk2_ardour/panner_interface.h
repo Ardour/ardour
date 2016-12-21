@@ -66,8 +66,8 @@ protected:
 
 	void value_change ();
 
-        bool on_enter_notify_event (GdkEventCrossing *);
-        bool on_leave_notify_event (GdkEventCrossing *);
+	bool on_enter_notify_event (GdkEventCrossing *);
+	bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_key_release_event  (GdkEventKey *);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);

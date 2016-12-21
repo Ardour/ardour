@@ -1199,28 +1199,28 @@ RouteUI::update_solo_display ()
 		solo_isolated_check->set_active (yn);
 	}
 
-        set_button_names ();
+	set_button_names ();
 
-        if (solo_isolated_led) {
-	        if (_route->solo_isolate_control()->solo_isolated()) {
+	if (solo_isolated_led) {
+		if (_route->solo_isolate_control()->solo_isolated()) {
 			solo_isolated_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_isolated_led->unset_active_state ();
 		}
-        }
+	}
 
-        if (solo_safe_led) {
-	        if (_route->solo_safe_control()->solo_safe()) {
+	if (solo_safe_led) {
+		if (_route->solo_safe_control()->solo_safe()) {
 			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_safe_led->unset_active_state ();
 		}
-        }
+	}
 
 	solo_button->set_active_state (solo_active_state (_route));
 
-        /* some changes to solo status can affect mute display, so catch up
-         */
+	/* some changes to solo status can affect mute display, so catch up
+	 */
 
 	update_mute_display ();
 }

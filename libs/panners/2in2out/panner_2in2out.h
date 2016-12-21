@@ -43,34 +43,34 @@ class Panner2in2out : public Panner
 	Panner2in2out (boost::shared_ptr<Pannable>);
 	~Panner2in2out ();
 
-        ChanCount in() const { return ChanCount (DataType::AUDIO, 2); }
-        ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
+	ChanCount in() const { return ChanCount (DataType::AUDIO, 2); }
+	ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
 
-        bool clamp_position (double&);
-        bool clamp_width (double&);
+	bool clamp_position (double&);
+	bool clamp_width (double&);
 
 	std::pair<double, double> position_range () const;
 	std::pair<double, double> width_range () const;
 
-        void set_position (double);
-        void set_width (double);
+	void set_position (double);
+	void set_width (double);
 
-        double position () const;
-        double width () const;
+	double position () const;
+	double width () const;
 
 	std::set<Evoral::Parameter> what_can_be_automated() const;
 
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
-        std::string describe_parameter (Evoral::Parameter);
-        std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
+	std::string describe_parameter (Evoral::Parameter);
+	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state ();
 
-        void update ();
+	void update ();
 
 	void reset ();
-        void thaw ();
+	void thaw ();
 
   protected:
 	float left[2];
@@ -81,12 +81,12 @@ class Panner2in2out : public Panner
 	float right_interp[2];
 
   private:
-        bool clamp_stereo_pan (double& direction_as_lr_fract, double& width);
+	bool clamp_stereo_pan (double& direction_as_lr_fract, double& width);
 
-        void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
-        void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-                                       framepos_t start, framepos_t end, pframes_t nframes,
-                                       pan_t** buffers, uint32_t which);
+	void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
+	void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
+	                               framepos_t start, framepos_t end, pframes_t nframes,
+	                               pan_t** buffers, uint32_t which);
 };
 
 } // namespace

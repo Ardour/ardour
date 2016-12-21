@@ -106,7 +106,7 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 
 	void start_touch (double when);
 	void stop_touch (bool mark, double when);
-        bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
+	bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
 	bool writing() const { return _state == Write; }
 	bool touch_enabled() const { return _state == Touch; }
 
