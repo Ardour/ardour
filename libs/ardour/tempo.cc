@@ -2567,10 +2567,10 @@ TempoMap::check_solved (const Metrics& metrics) const
 			m = static_cast<MeterSection*> (*i);
 			if (prev_m && m->position_lock_style() == AudioTime) {
 				const TempoSection* t = &tempo_section_at_minute_locked (metrics, minute_at_frame (m->frame() - 1));
-				const double nascent_m_minute = t->minute_at_pulse (m->pulse());
+				const framepos_t nascent_m_frame = frame_at_minute (t->minute_at_pulse (m->pulse()));
 				/* Here we check that a preceding section of music doesn't overlap a subsequent one.
 				*/
-				if (t && (nascent_m_minute > m->minute() || nascent_m_minute < 0.0)) {
+				if (t && (nascent_m_frame > m->frame() || nascent_m_frame < 0)) {
 					return false;
 				}
 			}
