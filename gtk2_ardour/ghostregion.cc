@@ -179,7 +179,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
     : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
-    , _tmp_rect (NULL), _tmp_poly (NULL), _optimization_iterator(events.end())
+    , _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -203,7 +203,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                   msv.trackview(),
                   source_tv,
                   initial_unit_pos)
-    , _tmp_rect (NULL), _tmp_poly (NULL), _optimization_iterator(events.end())
+    , _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
