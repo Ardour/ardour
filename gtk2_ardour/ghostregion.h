@@ -106,8 +106,7 @@ public:
 	void set_samples_per_pixel (double spu);
 	void set_colors();
 
-	void update_range();
-	void set_contents_height();
+	void update_contents_height();
 
 	void add_note(NoteBase*);
 	void update_note (Note*);

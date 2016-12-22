@@ -1239,13 +1239,6 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 void
 MidiTimeAxisView::update_range()
 {
-	MidiGhostRegion* mgr;
-
-	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if ((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
-			mgr->update_range();
-		}
-	}
 }
 
 void

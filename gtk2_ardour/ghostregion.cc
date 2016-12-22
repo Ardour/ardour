@@ -184,9 +184,6 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	base_rect->lower_to_bottom();
-	update_range ();
-
-	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
 /**
@@ -208,9 +205,6 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	base_rect->lower_to_bottom();
-	update_range ();
-
-	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
 MidiGhostRegion::~MidiGhostRegion()
@@ -262,7 +256,7 @@ void
 MidiGhostRegion::set_height ()
 {
 	GhostRegion::set_height();
-	set_contents_height ();
+	update_contents_height ();
 }
 
 void
@@ -297,27 +291,7 @@ note_y(TimeAxisView& trackview, MidiStreamView* mv, uint8_t note_num)
 }
 
 void
-MidiGhostRegion::update_range ()
-{
-	MidiStreamView* mv = midi_view();
-
-	if (!mv) {
-		return;
-	}
-
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		uint8_t const note_num = (*it).second->event->note()->note();
-
-		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			(*it).second->item->hide();
-		} else {
-			(*it).second->item->show();
-		}
-	}
-}
-
-void
-MidiGhostRegion::set_contents_height ()
+MidiGhostRegion::update_contents_height ()
 {
 	MidiStreamView* mv = midi_view();
 
@@ -408,10 +382,14 @@ MidiGhostRegion::update_note (Note* note)
 	double const y = note_y(trackview, mv, note_num);
 	double const h = note_height(trackview, mv);
 
-	if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
-		_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
+	if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+		ev->item->hide();
+	} else {
+		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
+			_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
+		}
+		ev->item->show();
 	}
-
 }
 
 /** Update the x positions of our representation of a parent's hit.
@@ -436,14 +414,18 @@ MidiGhostRegion::update_hit (Hit* hit)
 
 	double const h = note_height(trackview, mv);
 	double const y = note_y(trackview, mv, note_num);
-
-	if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
-		ArdourCanvas::Duple ppos = hit->position();
-		ArdourCanvas::Duple gpos = _tmp_poly->position();
-		gpos.x = ppos.x;
-		gpos.y = y;
-		_tmp_poly->set_position(gpos);
-		_tmp_poly->set(Hit::points(h));
+	if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+		ev->item->hide();
+	} else {
+		if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
+			ArdourCanvas::Duple ppos = hit->position();
+			ArdourCanvas::Duple gpos = _tmp_poly->position();
+			gpos.x = ppos.x;
+			gpos.y = y;
+			_tmp_poly->set_position(gpos);
+			_tmp_poly->set(Hit::points(h));
+		}
+		ev->item->show();
 	}
 }
 

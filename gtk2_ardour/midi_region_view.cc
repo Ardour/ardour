@@ -1189,6 +1189,8 @@ MidiRegionView::redisplay_model()
 	bool empty_when_starting = _events.empty();
 	MidiModel::ReadLock lock(_model->read_lock());
 	MidiModel::Notes missing_notes = _model->notes(); // copy
+	Note* sus = NULL;
+	Hit*  hit = NULL;
 
 	if (!empty_when_starting) {
 		MidiModel::Notes::iterator f;
@@ -1225,10 +1227,11 @@ MidiRegionView::redisplay_model()
 			} else {
 				NoteBase* cne = (*i);
 				bool visible;
+				bool update = false;
 
 				if (note_in_region_range (note, visible)) {
 					if (visible) {
-						update_note (cne);
+						update = true;
 						cne->show ();
 					} else {
 						cne->hide ();
@@ -1236,7 +1239,31 @@ MidiRegionView::redisplay_model()
 				} else {
 					cne->hide ();
 				}
+				if ((sus = dynamic_cast<Note*>(cne))) {
 
+					if (update) {
+						update_sustained (sus);
+					}
+
+					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+						if (gr) {
+							gr->update_note (sus);
+						}
+					}
+				} else if ((hit = dynamic_cast<Hit*>(cne))) {
+
+					if (update) {
+						update_hit (hit);
+					}
+
+					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+						if (gr) {
+							gr->update_hit (hit);
+						}
+					}
+				}
 				++i;
 			}
 		}
@@ -1248,18 +1275,14 @@ MidiRegionView::redisplay_model()
 		NoteBase* cne = add_note (note, true);
 		bool visible;
 
+		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
+			if ((*it) == note->id()) {
+				add_to_selection (cne);
+			}
+		}
+
 		if (note_in_region_range (note, visible)) {
-			if (visible) {
-				set<Evoral::event_id_t>::iterator it;
-
-				cne->show ();
-
-				for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
-					if ((*it) == note->id()) {
-						add_to_selection (cne);
-					}
-				}
-			} else {
+			if (!visible) {
 				cne->hide ();
 			}
 		} else {
@@ -1747,14 +1770,6 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	ev->set_fill_color(base_col);
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
-	if (update_ghost_regions) {
-		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-			if (gr) {
-				gr->update_note (ev);
-			}
-		}
-	}
 }
 
 void
@@ -1784,14 +1799,6 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	ev->set_fill_color(base_col);
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
 
-	if (update_ghost_regions) {
-		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-			if (gr) {
-				gr->update_hit (ev);
-			}
-		}
-	}
 }
 
 /** Add a MIDI note to the view (with length).
