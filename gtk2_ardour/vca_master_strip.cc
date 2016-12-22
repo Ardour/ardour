@@ -94,6 +94,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_name ("generic button");
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
+	number_label.set_inactive_color (_vca->presentation_info().color ());
 
 	update_bottom_padding ();
 
@@ -411,6 +412,7 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::color)) {
 		vertical_button.set_active_color (_vca->presentation_info().color ());
+		number_label.set_inactive_color (_vca->presentation_info().color ());
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
