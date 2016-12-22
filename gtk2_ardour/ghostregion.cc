@@ -336,8 +336,9 @@ MidiGhostRegion::add_note (NoteBase* n)
 		uint8_t const note_num = n->note()->note();
 		double const  h        = note_height(trackview, mv);
 		double const  y        = note_y(trackview, mv, note_num);
-
-		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+		if (n->x0() < base_rect->x0() || n->x1() > base_rect->x1()) {
+			event->item->hide();
+		} else if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 			event->item->hide();
 		} else {
 			if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
@@ -367,7 +368,7 @@ MidiGhostRegion::clear_events()
  *  @param parent The CanvasNote from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_note (Note* note)
+MidiGhostRegion::update_note (Note* note, bool hide)
 {
 	MidiStreamView* mv = midi_view();
 
@@ -386,7 +387,7 @@ MidiGhostRegion::update_note (Note* note)
 	double const y = note_y(trackview, mv, note_num);
 	double const h = note_height(trackview, mv);
 
-	if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+	if (hide || note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 		ev->item->hide();
 	} else {
 		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
@@ -400,7 +401,7 @@ MidiGhostRegion::update_note (Note* note)
  *  @param hit The CanvasHit from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_hit (Hit* hit)
+MidiGhostRegion::update_hit (Hit* hit, bool hide)
 {
 	MidiStreamView* mv = midi_view();
 
@@ -418,7 +419,7 @@ MidiGhostRegion::update_hit (Hit* hit)
 
 	double const h = note_height(trackview, mv);
 	double const y = note_y(trackview, mv, note_num);
-	if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+	if (hide || note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 		ev->item->hide();
 	} else {
 		if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {

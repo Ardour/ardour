@@ -1248,7 +1248,7 @@ MidiRegionView::redisplay_model()
 					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
 						if (gr && gr->trackview.y_position() != -1) {
-							gr->update_note (sus);
+							gr->update_note (sus, !update);
 						}
 					}
 				} else if ((hit = dynamic_cast<Hit*>(cne))) {
@@ -1260,7 +1260,7 @@ MidiRegionView::redisplay_model()
 					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
 						if (gr && gr->trackview.y_position() != -1) {
-							gr->update_hit (hit);
+							gr->update_hit (hit, !update);
 						}
 					}
 				}
@@ -1272,21 +1272,23 @@ MidiRegionView::redisplay_model()
 
 	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
 		boost::shared_ptr<NoteType> note (*n);
-		NoteBase* cne = add_note (note, true);
+		NoteBase* cne;
 		bool visible;
+
+		if (note_in_region_range (note, visible)) {
+			if (visible) {
+				cne = add_note (note, true);
+			} else {
+				cne = add_note (note, false);
+			}
+		} else {
+			cne = add_note (note, false);
+		}
 
 		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 			if ((*it) == note->id()) {
 				add_to_selection (cne);
 			}
-		}
-
-		if (note_in_region_range (note, visible)) {
-			if (!visible) {
-				cne->hide ();
-			}
-		} else {
-			cne->hide ();
 		}
 	}
 
@@ -1547,13 +1549,14 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
 	}
 
+	ghost->set_colors ();
+	ghost->set_height ();
+	ghost->set_duration (_region->length() / samples_per_pixel);
+
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		ghost->add_note(*i);
 	}
 
-	ghost->set_colors ();
-	ghost->set_height ();
-	ghost->set_duration (_region->length() / samples_per_pixel);
 	ghosts.push_back (ghost);
 
 	return ghost;

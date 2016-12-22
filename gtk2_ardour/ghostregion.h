@@ -109,8 +109,8 @@ public:
 	void update_contents_height();
 
 	void add_note(NoteBase*);
-	void update_note (Note*);
-	void update_hit (Hit*);
+	void update_note (Note* note,  bool hide);
+	void update_hit (Hit* hit, bool hide);
 	void remove_note (NoteBase*);
 
 	void clear_events();
