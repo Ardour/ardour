@@ -1279,8 +1279,18 @@ void
 Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 {
 	TreeModel::Children rows = track_model->children();
+	std::list<boost::shared_ptr<VCA> > vcas;
+	vcas.push_back (vca);
 
-	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+		AxisView* av = (*i)[stripable_columns.strip];
+		VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+		if (vms && vms->vca()->slaved_to (vca)) {
+			vcas.push_back (vms->vca());
+		}
+	}
+
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
 
 		AxisView* av = (*i)[stripable_columns.strip];
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
@@ -1299,7 +1309,15 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 			continue;
 		}
 
-		if (strip->route()->slaved_to (vca)) {
+		bool slaved = false;
+		for (std::list<boost::shared_ptr<VCA> >::const_iterator m = vcas.begin(); m != vcas.end(); ++m) {
+			if (strip->route()->slaved_to (*m)) {
+				slaved = true;
+				break;
+			}
+		}
+
+		if (slaved) {
 
 			if (strip->packed()) {
 				strip_packer.reorder_child (*strip, -1); /* put at end */
