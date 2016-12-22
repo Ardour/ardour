@@ -1094,11 +1094,12 @@ EditorRoutes::sync_treeview_from_presentation_info ()
 	}
 
 	OrderingKeys sorted;
+	const size_t cmp_max = rows.size ();
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 		/* use global order */
-		sorted.push_back (OrderKeys (old_order, stripable->presentation_info().order()));
+		sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
 	}
 
 	SortByNewDisplayOrder cmp;

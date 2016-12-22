@@ -29,17 +29,33 @@
 struct OrderKeys {
     uint32_t old_display_order;
     uint32_t new_display_order;
+    uint32_t compare_order;
 
-	OrderKeys (uint32_t ok, uint32_t nk)
+	OrderKeys (uint32_t ok, boost::shared_ptr<ARDOUR::Stripable> s, uint32_t cmp_max)
 		: old_display_order (ok)
-		, new_display_order (nk) {}
+	{
+		new_display_order = s->presentation_info().order();
+		compare_order = new_display_order;
+
+		if (s->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+			compare_order += 2 * cmp_max;
+		}
+#ifdef MIXBUS
+		if (s->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus || s->mixbus()) {
+			compare_order += cmp_max;
+		}
+		if (s->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+			compare_order += 3 * cmp_max;
+		}
+#endif
+	}
 };
 
 typedef std::vector<OrderKeys> OrderingKeys;
 
 struct SortByNewDisplayOrder {
     bool operator() (const OrderKeys& a, const OrderKeys& b) {
-	    return a.new_display_order < b.new_display_order;
+	    return a.compare_order < b.compare_order;
     }
 };
 
