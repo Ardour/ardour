@@ -305,18 +305,14 @@ MidiGhostRegion::update_contents_height ()
 		uint8_t const note_num = (*it).second->event->note()->note();
 
 		double const y = note_y(trackview, mv, note_num);
-		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			(*it).second->item->hide();
-		} else {
-			if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
-				_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
-			} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
-				Duple position = _tmp_poly->position();
-				position.y = y;
-				_tmp_poly->set_position(position);
-				_tmp_poly->set(Hit::points(h));
-			}
-			(*it).second->item->show();
+
+		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
+			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
+		} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
+			Duple position = _tmp_poly->position();
+			position.y = y;
+			_tmp_poly->set_position(position);
+			_tmp_poly->set(Hit::points(h));
 		}
 	}
 }
