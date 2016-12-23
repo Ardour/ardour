@@ -356,11 +356,14 @@ MidiGhostRegion::add_note (NoteBase* n)
 void
 MidiGhostRegion::clear_events()
 {
-	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+	EventList::iterator it = events.begin();
+
+	while (it != events.end()) {
 		delete (*it).second;
+		events.erase (it);
+		++it;
 	}
 
-	events.clear();
 	_optimization_iterator = events.end ();
 }
 
