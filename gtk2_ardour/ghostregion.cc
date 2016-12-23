@@ -360,8 +360,7 @@ MidiGhostRegion::clear_events()
 
 	while (it != events.end()) {
 		delete (*it).second;
-		events.erase (it);
-		++it;
+		it = events.erase (it);
 	}
 
 	_optimization_iterator = events.end ();
