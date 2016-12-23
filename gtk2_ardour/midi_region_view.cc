@@ -978,10 +978,8 @@ MidiRegionView::clear_events ()
 		}
 	}
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		delete *i;
-	}
 
+	_note_group->clear (true);
 	_events.clear();
 	_patch_changes.clear();
 	_sys_exes.clear();

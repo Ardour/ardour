@@ -116,6 +116,7 @@ public:
 	void clear_events();
 
 private:
+	ArdourCanvas::Container* _note_group;
 	ArdourCanvas::Color _outline;
 	ArdourCanvas::Rectangle* _tmp_rect;
 	ArdourCanvas::Polygon* _tmp_poly;
