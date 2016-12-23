@@ -724,11 +724,10 @@ Editor::Editor ()
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
 	if (!ARDOUR::Profile->get_trx()) {
-		VBox* editor_list_vbox = manage (new VBox);
-		editor_list_vbox->pack_start (*_time_info_box, false, false, 0);
-		editor_list_vbox->pack_start (_the_notebook);
-		edit_pane.add (*editor_list_vbox);
-		edit_pane.set_child_minsize (*editor_list_vbox, 30); /* rough guess at width of notebook tabs */
+		_editor_list_vbox.pack_start (*_time_info_box, false, false, 0);
+		_editor_list_vbox.pack_start (_the_notebook);
+		edit_pane.add (_editor_list_vbox);
+		edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 	}
 
 	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
@@ -5846,9 +5845,9 @@ void
 Editor::show_editor_list (bool yn)
 {
 	if (yn) {
-		_the_notebook.show ();
+		_editor_list_vbox.show ();
 	} else {
-		_the_notebook.hide ();
+		_editor_list_vbox.hide ();
 	}
 }
 
