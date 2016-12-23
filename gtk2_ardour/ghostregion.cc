@@ -356,14 +356,12 @@ MidiGhostRegion::add_note (NoteBase* n)
 void
 MidiGhostRegion::clear_events()
 {
-	EventList::iterator it = events.begin();
+	_optimization_iterator = events.begin();
 
-	while (it != events.end()) {
-		delete (*it).second;
-		it = events.erase (it);
+	while (_optimization_iterator != events.end()) {
+		delete (*_optimization_iterator).second;
+		_optimization_iterator = events.erase (_optimization_iterator);
 	}
-
-	_optimization_iterator = events.end ();
 }
 
 /** Update the x positions of our representation of a parent's note.
