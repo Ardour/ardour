@@ -383,7 +383,7 @@ MidiGhostRegion::update_note (Note* note, bool hide)
 	double const y = note_y(trackview, mv, note_num);
 	double const h = note_height(trackview, mv);
 
-	if (hide || note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+	if (hide) {
 		ev->item->hide();
 	} else {
 		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
@@ -415,7 +415,7 @@ MidiGhostRegion::update_hit (Hit* hit, bool hide)
 
 	double const h = note_height(trackview, mv);
 	double const y = note_y(trackview, mv, note_num);
-	if (hide || note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+	if (hide) {
 		ev->item->hide();
 	} else {
 		if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
