@@ -215,11 +215,15 @@ MidiGhostRegion::~MidiGhostRegion()
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
 	: event (e)
 {
-	Hit* hit = NULL;
+
 	if (dynamic_cast<Note*>(e)) {
 		item = new ArdourCanvas::Rectangle(
 			g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
-	} else if ((hit = dynamic_cast<Hit*>(e))) {
+	} else {
+		Hit* hit = dynamic_cast<Hit*>(e);
+		if (!hit) {
+			return;
+		}
 		ArdourCanvas::Polygon* poly = new ArdourCanvas::Polygon(g);
 		poly->set(Hit::points(e->y1() - e->y0()));
 		poly->set_position(hit->position());
