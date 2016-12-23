@@ -212,6 +212,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
 MidiGhostRegion::~MidiGhostRegion()
 {
 	clear_events ();
+	delete _note_group;
 }
 
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
