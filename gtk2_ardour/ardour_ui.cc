@@ -1878,6 +1878,13 @@ ARDOUR_UI::open_session ()
 	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	open_session_selector.add_filter (session_filter);
+
+	FileFilter archive_filter;
+	archive_filter.add_pattern (X_("*.tar.xz"));
+	archive_filter.set_name (_("Session Archives"));
+
+	open_session_selector.add_filter (archive_filter);
+
 	open_session_selector.set_filter (session_filter);
 
 	int response = open_session_selector.run();
@@ -1892,7 +1899,18 @@ ARDOUR_UI::open_session ()
 	bool isnew;
 
 	if (session_path.length() > 0) {
-		if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
+		int rv = ARDOUR::inflate_session (session_path,
+				Config->get_default_session_parent_dir(), path, name);
+		if (rv == 0) {
+			_session_is_new = false;
+			load_session (path, name);
+		}
+		else if (rv < 0) {
+			MessageDialog msg (_main_window,
+					string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+			msg.run ();
+		}
+		else if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
 			_session_is_new = isnew;
 			load_session (path, name);
 		}
@@ -3305,6 +3323,21 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		        likely_new = true;
 		}
 
+		if (!likely_new) {
+			int rv = ARDOUR::inflate_session (session_name,
+					Config->get_default_session_parent_dir(), session_path, session_name);
+			if (rv < 0) {
+				MessageDialog msg (session_dialog,
+					string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+				msg.run ();
+				continue;
+			}
+			else if (rv == 0) {
+				session_dialog.set_provided_session (session_name, session_path);
+			}
+		}
+
+		// XXX check archive, inflate
 		string::size_type suffix = session_name.find (statefile_suffix);
 
 		if (suffix != string::npos) {
