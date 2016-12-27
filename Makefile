@@ -13,4 +13,4 @@ cscope.files:
 install uninstall:
 	./waf $@
 
-.PHONY: all cscope.files sconsi cscope waf install
+.PHONY: all cscope.files sconsi cscope waf install uninstall
