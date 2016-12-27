@@ -61,6 +61,7 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
 	, _file_is_new (!origin.empty()) // if origin is left unspecified (empty string) then file must exist
 	, _channel (0)
 	, _origin (origin)
+	, _gain (1.f)
 {
 	set_within_session_from_path (path);
 }
@@ -69,6 +70,7 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
 	: Source (session, node)
 	, _file_is_new (false)
 	, _channel (0)
+	, _gain (1.f)
 {
 	/* this setting of _path is temporary - we expect derived classes
 	   to call ::init() which will actually locate the file
@@ -142,6 +144,7 @@ FileSource::init (const string& pathstr, bool must_exist)
 int
 FileSource::set_state (const XMLNode& node, int /*version*/)
 {
+	LocaleGuard lg;
 	XMLProperty const * prop;
 
 	if ((prop = node.property (X_("channel"))) != 0) {
@@ -152,6 +155,12 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property (X_("origin"))) != 0) {
 		_origin = prop->value();
+	}
+
+	if ((prop = node.property (X_("gain"))) != 0) {
+		_gain = atof (prop->value());
+	} else {
+		_gain = 1.f;
 	}
 
 	return 0;

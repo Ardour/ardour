@@ -207,11 +207,14 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 XMLNode&
 AudioFileSource::get_state ()
 {
+	LocaleGuard lg;
 	XMLNode& root (AudioSource::get_state());
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", _channel);
 	root.add_property (X_("channel"), buf);
-        root.add_property (X_("origin"), _origin);
+	root.add_property (X_("origin"), _origin);
+	snprintf (buf, sizeof (buf), "%f", _gain);
+	root.add_property (X_("gain"), buf);
 	return root;
 }
 
@@ -281,6 +284,20 @@ AudioFileSource::setup_peakfile ()
 	} else {
 		return 0;
 	}
+}
+
+void
+AudioFileSource::set_gain (float g, bool temporarily)
+{
+	if (_gain == g) {
+		return;
+	}
+	_gain = g;
+	if (temporarily) {
+		return;
+	}
+	close_peakfile();
+	setup_peakfile ();
 }
 
 bool
