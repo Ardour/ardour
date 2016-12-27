@@ -31,7 +31,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 SessionArchiveDialog::SessionArchiveDialog ()
-	: ArdourDialog (_("Zip/Archive Session"))
+	: ArdourDialog (_("Zip/Archive Current Session"))
 	, ProgressReporter ()
 	, only_used_checkbox (_("Exclude unused audio sources"))
 {
@@ -73,6 +73,10 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	vbox->pack_start (*hbox, false, false);
 
 	vbox->pack_start (only_used_checkbox, false, false);
+
+	label = manage (new Label (_("Note: This archives only the current session state, snapshots are not included."), ALIGN_START));
+	label->set_line_wrap (true);
+	vbox->pack_start (*label, false, false);
 
 	vbox->pack_start (progress_bar, true, true, 12);
 
