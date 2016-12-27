@@ -10,7 +10,7 @@ cscope.out: cscope.files
 cscope.files:
 	find . -name '*.[ch]' -o -name '*.cc' > $@
 
-install:
-	./waf install
+install uninstall:
+	./waf $@
 
 .PHONY: all cscope.files sconsi cscope waf install
