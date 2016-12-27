@@ -333,7 +333,7 @@ Session::Session (AudioEngine &eng,
 	init_name_id_counter (1); // reset for new sessions, start at 1
 	VCA::set_next_vca_number (1); // reset for new sessions, start at 1
 
-	pre_engine_init (fullpath);
+	pre_engine_init (fullpath); // sets _is_new
 
 	setup_lua ();
 
@@ -478,6 +478,8 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 #endif
+
+	ensure_subdirs (); // archived or zipped sessions may lack peaks/ analysis/ etc
 
 	_is_new = false;
 	session_loaded ();

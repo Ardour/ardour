@@ -28,6 +28,8 @@
 namespace ARDOUR {
 
 	LIBARDOUR_API extern int find_session (std::string str, std::string& path, std::string& snapshot, bool& isnew);
+	LIBARDOUR_API extern int inflate_session (const std::string& zipfile, const std::string& target_dir, std::string& path, std::string& snapshot);
+	LIBARDOUR_API extern std::string inflate_error (int);
 
 };
 
