@@ -36,6 +36,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "ardour/runtime_functions.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/sndfile_helpers.h"
 #include "ardour/utils.h"
@@ -275,16 +276,41 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		throw failed_constructor();
 	}
 
-	/* copy file */
 	Sample buf[8192];
 	framecnt_t off = 0;
+	float peak = 0;
+	float norm = 1.f;
+
+	/* normalize before converting to fixed point, calc gain factor */
 	framecnt_t len = other.read (buf, off, 8192, /*channel*/0);
 	while (len > 0) {
+		peak = compute_peak (buf, len, peak);
+		off += len;
+		len = other.read (buf, off, 8192, /*channel*/0);
+		if (progress) {
+			progress->set_progress (0.5f * (float) off / other.readable_length ());
+		}
+	}
+
+	if (peak > 0) {
+		_gain *= peak;
+		norm = 1.f / peak;
+	}
+
+	/* copy file */
+	off = 0;
+	len = other.read (buf, off, 8192, /*channel*/0);
+	while (len > 0) {
+		if (norm != 1.f) {
+			for (framecnt_t i = 0; i < len; ++i) {
+				buf[i] *= norm;
+			}
+		}
 		write (buf, len);
 		off += len;
 		len = other.read (buf, off, 8192, /*channel*/0);
 		if (progress) {
-			progress->set_progress ((float) off / other.readable_length ());
+			progress->set_progress (0.5f + 0.5f * (float) off / other.readable_length ());
 		}
 	}
 }

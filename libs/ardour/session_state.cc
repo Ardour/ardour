@@ -5075,6 +5075,7 @@ Session::archive_session (const std::string& dest,
 	blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
 
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
+	std::map<boost::shared_ptr<AudioFileSource>, float> orig_gain;
 
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 	if (only_used_sources) {
@@ -5141,6 +5142,7 @@ Session::archive_session (const std::string& dest,
 			}
 
 			orig_sources[afs] = afs->path();
+			orig_gain[afs]    = afs->gain();
 
 			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
 			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
@@ -5153,6 +5155,7 @@ Session::archive_session (const std::string& dest,
 			try {
 				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
 				afs->replace_file (new_path);
+				afs->set_gain (ns->gain(), true);
 				delete ns;
 			} catch (...) {
 				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
@@ -5278,6 +5281,9 @@ Session::archive_session (const std::string& dest,
 
 	for (std::map<boost::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
 		i->first->replace_file (i->second);
+	}
+	for (std::map<boost::shared_ptr<AudioFileSource>, float>::iterator i = orig_gain.begin (); i != orig_gain.end (); ++i) {
+		i->first->set_gain (i->second, true);
 	}
 
 	int rv = ar.create (filemap);
