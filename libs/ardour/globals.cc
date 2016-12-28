@@ -721,6 +721,7 @@ ARDOUR::set_translations_enabled (bool yn)
 	(void) ::write (fd, &c, 1);
 	(void) ::close (fd);
 
+	Config->ParameterChanged ("enable-translation");
 	return true;
 }
 
