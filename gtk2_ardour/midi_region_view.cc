@@ -994,7 +994,6 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
 	/* Don't signal as nobody else needs to know until selection has been altered. */
-	clear_events ();
 
 	if (_enable_display) {
 		redisplay_model();
