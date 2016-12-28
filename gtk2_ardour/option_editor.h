@@ -79,7 +79,7 @@ public:
 
         virtual Gtk::Widget& tip_widget() = 0;
 
-private:
+protected:
 	void maybe_add_note (OptionEditorPage *, int);
 
 	std::string _note;

@@ -3116,30 +3116,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("MIDI"), audition_synth);
 
-	/* USER INTERACTION */
-
-	if (
-#ifdef PLATFORM_WINDOWS
-			true
-#else
-			getenv ("ARDOUR_BUNDLED")
-#endif
-	   )
-	{
-		add_option (_("User interaction"),
-			    new BoolOption (
-				    "enable-translation",
-				    string_compose (_("Use translations of %1 messages\n"
-						      "   <i>(requires a restart of %1 to take effect)</i>\n"
-						      "   <i>(if available for your language preferences)</i>"), PROGRAM_NAME),
-				    sigc::ptr_fun (ARDOUR::translations_are_enabled),
-				    sigc::ptr_fun (ARDOUR::set_translations_enabled)));
-	}
-
-	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
-
-	add_option (_("User interaction"), new KeyboardOptions);
-
 	/* Control Surfaces */
 
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions);
@@ -3479,6 +3455,40 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
+#ifdef ENABLE_NLS
+	OptionEditorHeading* i18n_head = new OptionEditorHeading (_("Internationalization"));
+	i18n_head->set_note (string_compose (_("These settings will only take effect after %1 is restarted (if available for your language preferences)."), PROGRAM_NAME));
+
+	add_option (_("GUI/Translation"), i18n_head);
+
+	bo = new BoolOption (
+			"enable-translation",
+			_("Use translations"),
+			sigc::ptr_fun (ARDOUR::translations_are_enabled),
+			sigc::ptr_fun (ARDOUR::set_translations_enabled)
+			);
+
+	add_option (_("GUI/Translation"), bo);
+
+	_l10n = new ComboOption<ARDOUR::LocaleMode> (
+		"locale-mode",
+		_("Localization"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_locale_mode),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_locale_mode)
+		);
+
+	_l10n->add (ARDOUR::SET_LC_ALL, _("Set complete locale"));
+	_l10n->add (ARDOUR::SET_LC_MESSAGES, _("Enable only message translation"));
+	_l10n->add (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC, _("Translate messages and format numeric format"));
+	_l10n->set_note (_("This setting is provided for plugin compatibility. e.g. some plugins on some systems expect the decimal point to be a dot."));
+
+	add_option (_("GUI/Translation"), _l10n);
+	parameter_changed ("enable-translation");
+#endif // ENABLE_NLS
+
+	add_option (_("GUI/Keyboard"), new OptionEditorHeading (_("Keyboard")));
+	add_option (_("GUI/Keyboard"), new KeyboardOptions);
+
 	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Items")));
 
 	add_option (_("GUI/Toolbar"),
@@ -3763,6 +3773,10 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "open-gui-after-adding-plugin" || p == "show-inline-display-by-default") {
 #if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
+#endif
+#ifdef ENABLE_NLS
+	} else if (p == "enable-translation") {
+		_l10n->set_sensitive (ARDOUR::translations_are_enabled ());
 #endif
 	}
 }

@@ -103,9 +103,15 @@ OptionEditorHeading::add_to_page (OptionEditorPage* p)
 {
 	int const n = p->table.property_n_rows();
 	p->table.resize (n + 2, 3);
+	if (!_note.empty ()) {
+		p->table.resize (n + 3, 3);
+	} else {
+		p->table.resize (n + 2, 3);
+	}
 
 	p->table.attach (*manage (new Label ("")), 0, 3, n, n + 1, FILL | EXPAND);
 	p->table.attach (*_label, 0, 3, n + 1, n + 2, FILL | EXPAND);
+	maybe_add_note (p, n + 2);
 }
 
 void
