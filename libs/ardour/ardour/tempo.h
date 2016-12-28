@@ -588,8 +588,8 @@ private:
 
 }; /* namespace ARDOUR */
 
-std::ostream& operator<< (std::ostream&, const ARDOUR::Meter&);
-std::ostream& operator<< (std::ostream&, const ARDOUR::Tempo&);
-std::ostream& operator<< (std::ostream&, const ARDOUR::MetricSection&);
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Meter&);
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Tempo&);
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::MetricSection&);
 
 #endif /* __ardour_tempo_h__ */
