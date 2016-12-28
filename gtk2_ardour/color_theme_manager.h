@@ -39,7 +39,7 @@ namespace ArdourCanvas {
 
 class ArdourDialog;
 
-class ColorThemeManager : public Gtk::VBox, public OptionEditorComponent
+class ColorThemeManager : public OptionEditorBox
 {
   public:
 	ColorThemeManager();
@@ -55,9 +55,6 @@ class ColorThemeManager : public Gtk::VBox, public OptionEditorComponent
 
 	/** Called to instruct the object to set its UI state from the configuration */
 	void set_state_from_config ();
-
-	/** Called to instruct the object to add itself to an OptionEditorPage */
-	void add_to_page (OptionEditorPage *);
 
 	void set_note (std::string const &);
 
