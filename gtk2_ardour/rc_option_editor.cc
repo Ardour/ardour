@@ -1370,8 +1370,7 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 			_view.append_column (_("Control Surface Protocol"), _model.name);
 			_view.get_column(0)->set_resizable (true);
 			_view.get_column(0)->set_expand (true);
-			_view.append_column_editable (_("Enabled"), _model.enabled);
-			_view.append_column_editable (_("Feedback"), _model.feedback);
+			_view.append_column_editable (_("Enable"), _model.enabled);
 
 			Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Control Surfaces"))));
 			l->set_alignment (0, 0.5);
@@ -1420,7 +1419,6 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 					TreeModel::Row r = *_store->append ();
 					r[_model.name] = (*i)->name;
 					r[_model.enabled] = ((*i)->protocol || (*i)->requested);
-					r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
 					r[_model.protocol_info] = *i;
 				}
 			}
@@ -1480,12 +1478,6 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 				}
 			}
 
-			bool const was_feedback = (cpi->protocol && cpi->protocol->get_feedback ());
-			bool const is_feedback = r[_model.feedback];
-
-			if (was_feedback != is_feedback && cpi->protocol) {
-				cpi->protocol->set_feedback (is_feedback);
-			}
 			selection_changed ();
 		}
 
@@ -1543,13 +1535,11 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 			{
 				add (name);
 				add (enabled);
-				add (feedback);
 				add (protocol_info);
 			}
 
 			TreeModelColumn<string> name;
 			TreeModelColumn<bool> enabled;
-			TreeModelColumn<bool> feedback;
 			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
