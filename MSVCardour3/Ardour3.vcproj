@@ -816,6 +816,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\mini_timeline.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\missing_file_dialog.cc"
 				>
 			</File>
@@ -1374,6 +1378,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_spacer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_spinner.h"
 				>
 			</File>
@@ -1839,6 +1847,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\midi_velocity_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\mini_timeline.h"
 				>
 			</File>
 			<File
