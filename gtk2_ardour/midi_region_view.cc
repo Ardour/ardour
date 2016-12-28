@@ -1136,10 +1136,10 @@ MidiRegionView::find_canvas_note (Evoral::event_id_t id)
 boost::shared_ptr<PatchChange>
 MidiRegionView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 {
-	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x)->patch() == p) {
-			return (*x);
-		}
+	PatchChanges::const_iterator f = _patch_changes.find (p);
+
+	if (f != _patch_changes.end()) {
+		return (*f).second;
 	}
 
 	return boost::shared_ptr<PatchChange>();
@@ -1331,11 +1331,20 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 		}
 
 		if ((p = find_canvas_patch_change (*i)) != 0) {
-			framecnt_t region_frames = source_beats_to_region_frames ((*i)->time());
-			const double x = trackview.editor().sample_to_pixel (region_frames);
-			const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
-			p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
-			p->flag()->set_text (patch_name);
+
+			const framecnt_t region_frames = source_beats_to_region_frames ((*i)->time());
+
+			if (region_frames < 0 || region_frames >= _region->length()) {
+				p->hide();
+			} else {
+				const double x = trackview.editor().sample_to_pixel (region_frames);
+				const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+				p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
+				p->flag()->set_text (patch_name);
+
+				p->show();
+			}
+
 		} else {
 			const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
 			add_canvas_patch_change (*i, patch_name, active_channel);
@@ -1474,11 +1483,15 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 		redisplay_model();
 	}
 
-	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x)->canvas_item()->width() >= _pixel_width) {
-			(*x)->hide();
-		} else {
-			(*x)->show();
+	bool hide_all = false;
+	PatchChanges::iterator x = _patch_changes.begin();
+	if (x != _patch_changes.end()) {
+		hide_all = (*x).second->flag()->width() >= _pixel_width;
+	}
+
+	if (hide_all) {
+		for (; x != _patch_changes.end(); ++x) {
+			(*x).second->hide();
 		}
 	}
 
@@ -1501,7 +1514,7 @@ MidiRegionView::set_height (double height)
 	}
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		(*x)->set_height (midi_stream_view()->contents_height());
+		(*x).second->set_height (midi_stream_view()->contents_height());
 	}
 
 	if (_step_edit_cursor) {
@@ -1946,7 +1959,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		patch_change->hide ();
 	}
 
-	_patch_changes.push_back (patch_change);
+	_patch_changes.insert (make_pair (patch, patch_change));
 }
 
 void
@@ -1954,7 +1967,7 @@ MidiRegionView::remove_canvas_patch_change (PatchChange* pc)
 {
 	/* remove the canvas item */
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x)->patch() == pc->patch()) {
+		if ((*x).second->patch() == pc->patch()) {
 			_patch_changes.erase (x);
 			break;
 		}
@@ -2047,7 +2060,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	trackview.editor().commit_reversible_command ();
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x)->patch() == old_change) {
+		if ((*x).second->patch() == old_change) {
 			_patch_changes.erase (x);
 			break;
 		}

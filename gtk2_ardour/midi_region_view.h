@@ -410,7 +410,7 @@ private:
 	uint8_t  _current_range_max;
 
 	typedef std::list<NoteBase*>                          Events;
-	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
+	typedef std::map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
 	typedef std::vector< boost::shared_ptr<SysEx> >       SysExes;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
