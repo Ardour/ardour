@@ -42,7 +42,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, bpm_spinner (bpm_adjustment)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Tempo tempo (map.tempo_at_frame (frame));
@@ -59,7 +59,7 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, bpm_spinner (bpm_adjustment)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
@@ -158,17 +158,20 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	table->set_homogeneous (false);
 
 	int row;
-	Label* bpm_label = manage (new Label(_("Beats per minute:"), ALIGN_LEFT, ALIGN_CENTER));
-	table->attach (*bpm_label, 0, 1, 0, 1);
-	table->attach (bpm_spinner, 1, 5, 0, 1);
 
 	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-		table->attach (pulse_selector_label, 0, 1, 1, 2);
-		table->attach (pulse_selector, 1, 5, 1, 2);
-		row = 2;
-	} else {
+		table->attach (pulse_selector_label, 0, 1, 0, 1);
+		table->attach (pulse_selector, 1, 5, 0, 1);
+
 		row = 1;
+	} else {
+		row = 0;
 	}
+
+	Label* bpm_label = manage (new Label(_("Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER));
+	table->attach (*bpm_label, 0, 1, row, row + 1);
+	table->attach (bpm_spinner, 1, 5, row, row + 1);
+	++row;
 
 	char buf[64];
 
