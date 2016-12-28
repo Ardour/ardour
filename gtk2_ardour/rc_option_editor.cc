@@ -2256,11 +2256,25 @@ RCOptionEditor::RCOptionEditor ()
 		     1, 1000, 1, 20
 		     ));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Tempo")));
+
+	BoolOption* tsf;
+
+	tsf = new BoolOption (
+		"allow-non-quarter-pulse",
+		_("Allow non quarter-note pulse"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
+							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
+							    PROGRAM_NAME));
+	add_option (_("Misc"), tsf);
+
 	/* TRANSPORT */
 
 	add_option (_("Transport"), new OptionEditorHeading (S_("Transport Options")));
-
-	BoolOption* tsf;
 
 	tsf = new BoolOption (
 		     "latched-record-enable",
