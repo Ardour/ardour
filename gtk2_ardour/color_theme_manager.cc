@@ -149,8 +149,8 @@ ColorThemeManager::ColorThemeManager ()
 
 	notebook.set_size_request (400, 400);
 
-	_box->pack_start (notebook, true, true, 12);
-	_box->pack_start (reset_button, false, false, 12);
+	_box->pack_start (notebook, true, true, 6);
+	_box->pack_start (reset_button, false, false);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);

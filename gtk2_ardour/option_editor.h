@@ -682,10 +682,14 @@ class OptionEditorPage
 {
 public:
 	OptionEditorPage (Gtk::Notebook&, std::string const &);
+	OptionEditorPage ();
 
 	Gtk::VBox box;
 	Gtk::Table table;
 	std::list<OptionEditorComponent*> components;
+
+private:
+	void init ();
 };
 
 /** The OptionEditor dialog base class */

@@ -77,7 +77,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-class ClickOptions : public OptionEditorBox
+class ClickOptions : public OptionEditorPageBox, public OptionEditorPage
 {
 public:
 	ClickOptions (RCConfiguration* c)
@@ -85,36 +85,45 @@ public:
 		, _click_browse_button (_("Browse..."))
 		, _click_emphasis_browse_button (_("Browse..."))
 	{
-		Table* t = manage (new Table (4, 3));
-		t->set_spacings (4);
+		Table* t = &table;
 
 		Label* l = manage (left_aligned_label (_("Emphasis on first beat:")));
-		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_use_emphasis_on_click_check_button, 1, 2, 1, 2, FILL);
+		_use_emphasis_on_click_check_button.add (*l);
+		t->attach (_use_emphasis_on_click_check_button, 1, 3, 0, 1, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
 
 		l = manage (left_aligned_label (_("Use default Click:")));
-		t->attach (*l, 0, 1, 0, 1, FILL);
-		t->attach (_use_default_click_check_button, 1, 2, 0, 1, FILL);
+		_use_default_click_check_button.add (*l);
+		t->attach (_use_default_click_check_button, 1, 3, 1, 2, FILL);
 		_use_default_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
 
 		l = manage (left_aligned_label (_("Click audio file:")));
-		t->attach (*l, 0, 1, 2, 3, FILL);
-		t->attach (_click_path_entry, 1, 2, 2, 3, FILL);
+		t->attach (*l, 1, 2, 2, 3, FILL);
+		t->attach (_click_path_entry, 2, 3, 2, 3, FILL);
 		_click_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (_click_browse_button, 2, 3, 2, 3, FILL);
+		t->attach (_click_browse_button, 3, 4, 2, 3, FILL);
 
 		l = manage (left_aligned_label (_("Click emphasis audio file:")));
-		t->attach (*l, 0, 1, 3, 4, FILL);
-		t->attach (_click_emphasis_path_entry, 1, 2, 3, 4, FILL);
+		t->attach (*l, 1, 2, 3, 4, FILL);
+		t->attach (_click_emphasis_path_entry, 2, 3, 3, 4, FILL);
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (_click_emphasis_browse_button, 2, 3, 3, 4, FILL);
+		t->attach (_click_emphasis_browse_button, 3, 4, 3, 4, FILL);
 
-		_box->pack_start (*t, true, false);
+		FaderOption* fo = new FaderOption (
+				"click-gain",
+				_("Click gain level"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
+				);
+
+		fo->add_to_page (this);
+		fo->set_state_from_config ();
+
+		_box->pack_start (table, true, true);
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
@@ -1552,7 +1561,7 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 		Gtk::Button* edit_button;
 };
 
-class VideoTimelineOptions : public OptionEditorPageBox
+class VideoTimelineOptions : public OptionEditorPageBox, public OptionEditorPage
 {
 	public:
 		VideoTimelineOptions (RCConfiguration* c)
@@ -1561,79 +1570,78 @@ class VideoTimelineOptions : public OptionEditorPageBox
 			, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
 			, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
 			, _xjadeo_browse_button (_("Browse..."))
-	{
-		Table* t = manage (new Table (8, 4));
-		t->set_spacings (4);
+		{
+			Table* t = &table;
 
-		Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Video Server"))));
-		l->set_use_markup (true);
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 0);
+			Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Video Server"))));
+			l->set_use_markup (true);
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 0);
 
-		t->attach (_video_advanced_setup_button, 1, 4, 1, 2);
-		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
-				_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+			t->attach (_show_video_export_info_button, 1, 4, 1, 2);
+			_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
+					_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
 
-		l = manage (new Label (_("Video Server URL:")));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 2, 2, 3, FILL);
-		t->attach (_video_server_url_entry, 2, 4, 2, 3, FILL);
-		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
-				_("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
+			t->attach (_show_video_server_dialog_button, 1, 4, 2, 3);
+			_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
+					_("<b>When enabled</b> the video server is never launched automatically without confirmation"));
 
-		l = manage (new Label (_("Video Folder:")));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 2, 3, 4, FILL);
-		t->attach (_video_server_docroot_entry, 2, 4, 3, 4);
-		Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-				_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+			t->attach (_video_advanced_setup_button, 1, 4, 3, 4, FILL);
+			_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
+					_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
 
-		t->attach (_show_video_export_info_button, 1, 4, 4, 5);
-		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
-				_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
+			l = manage (new Label (_("Video Server URL:")));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 2, 4, 5, FILL);
+			t->attach (_video_server_url_entry, 2, 4, 4, 5, FILL);
+			Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
+					_("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
 
-		t->attach (_show_video_server_dialog_button, 1, 4, 5, 6);
-		_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
-				_("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+			l = manage (new Label (_("Video Folder:")));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 2, 5, 6, FILL);
+			t->attach (_video_server_docroot_entry, 2, 4, 5, 6);
+			Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
+					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 
-		l = manage (new Label (""));
-		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL);
+			l = manage (new Label (""));
+			t->attach (*l, 0, 4, 6, 7, EXPAND | FILL);
 
-		l = manage (new Label (string_compose ("<b>%1</b>", _("Video Monitor"))));
-		l->set_use_markup (true);
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 7, 8, EXPAND | FILL);
+			l = manage (new Label (string_compose ("<b>%1</b>", _("Video Monitor"))));
+			l->set_use_markup (true);
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 0, 4, 7, 8, EXPAND | FILL);
 
-		l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
+			l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
 #ifdef __APPLE__
-						"Jadeo.app"
+							"Jadeo.app"
 #elif defined PLATFORM_WINDOWS
-						"xjadeo.exe"
+							"xjadeo.exe"
 #else
-						"xjadeo"
+							"xjadeo"
 #endif
-						)));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 4, 8, 9, FILL);
-		t->attach (_custom_xjadeo_path, 2, 3, 9, 10);
-		Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
-		t->attach (_xjadeo_browse_button, 3, 4, 9, 10, FILL);
+							)));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 4, 8, 9, FILL);
+			t->attach (_custom_xjadeo_path, 2, 3, 9, 10, EXPAND|FILL);
+			Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
+			t->attach (_xjadeo_browse_button, 3, 4, 9, 10, FILL);
 
-		_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
-		_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
-		_video_server_docroot_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
-		_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
-		_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
-		_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
+			_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
+			_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
+			_video_server_docroot_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
+			_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
+			_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
+			_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
 
-		// xjadeo-path is a UIConfig parameter
-		UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
+			// xjadeo-path is a UIConfig parameter
+			UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
 
-		_box->pack_start (*t,true,true);
-	}
+			_box->pack_start (*t, true, true);
+		}
 
 		void server_url_changed ()
 		{
@@ -1859,7 +1867,7 @@ private:
 };
 
 
-class MidiPortOptions : public OptionEditorBox, public sigc::trackable
+class MidiPortOptions : public OptionEditorPageBox, public sigc::trackable
 {
 	public:
 		MidiPortOptions() {
@@ -2245,14 +2253,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc/Click"), new OptionEditorHeading (_("Click")));
 
 	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
-
-	add_option (_("Misc/Click"),
-	     new FaderOption (
-		     "click-gain",
-		     _("Click gain level"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
-		     ));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Automation")));
 
@@ -3536,7 +3536,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("GUI/Keyboard"), new OptionEditorHeading (_("Keyboard")));
 	add_option (_("GUI/Keyboard"), new KeyboardOptions);
 
-	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Items")));
+	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
 
 	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
@@ -3574,12 +3574,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("GUI/Toolbar"),
 			new ColumVisibilityOption (
-				"action-table-columns", _("Action Script Button Visibility"), 4,
+				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
-
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 

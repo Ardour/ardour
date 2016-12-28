@@ -478,14 +478,26 @@ ClockOption::set_session (Session* s)
 	_clock.set_session (s);
 }
 
+OptionEditorPage::OptionEditorPage ()
+	: table (1, 3)
+{
+	init ();
+}
+
 OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 	: table (1, 3)
 {
-	table.set_spacings (4);
-	table.set_col_spacing (0, 32);
+	init ();
 	box.pack_start (table, false, false);
 	box.set_border_width (4);
 	n.append_page (box, t);
+}
+
+void
+OptionEditorPage::init ()
+{
+	table.set_spacings (4);
+	table.set_col_spacing (0, 32);
 }
 
 /** Construct an OptionEditor.
