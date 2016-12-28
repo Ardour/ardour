@@ -1871,12 +1871,22 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 			_box->pack_start (*manage (new Label("")), false, false);
 			input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
 			_box->pack_start (input_label, false, false);
-			_box->pack_start (midi_input_view);
+
+			Gtk::ScrolledWindow* scroller = manage (new Gtk::ScrolledWindow);
+			scroller->add (midi_input_view);
+			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			scroller->set_size_request (-1, 180);
+			_box->pack_start (*scroller, false, false);
 
 			_box->pack_start (*manage (new Label("")), false, false);
 			output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
 			_box->pack_start (output_label, false, false);
-			_box->pack_start (midi_output_view);
+
+			scroller = manage (new Gtk::ScrolledWindow);
+			scroller->add (midi_output_view);
+			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			scroller->set_size_request (-1, 180);
+			_box->pack_start (*scroller, false, false);
 
 			midi_output_view.show ();
 			midi_input_view.show ();
