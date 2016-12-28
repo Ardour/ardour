@@ -1350,7 +1350,7 @@ private:
 	ComboBoxText _buffering_presets_combo;
 };
 
-class ControlSurfacesOptions : public OptionEditorBox
+class ControlSurfacesOptions : public OptionEditorPageBox
 {
 public:
 	ControlSurfacesOptions ()
@@ -1364,6 +1364,10 @@ public:
 		_view.append_column_editable (_("Enabled"), _model.enabled);
 		_view.append_column_editable (_("Feedback"), _model.feedback);
 
+		Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Control Surfaces"))));
+		l->set_alignment (0, 0.5);
+		l->set_use_markup (true);
+		_box->pack_start (*l, false, false);
 		_box->pack_start (_view, false, false);
 
 		Gtk::HBox* edit_box = manage (new Gtk::HBox);
@@ -1372,7 +1376,7 @@ public:
 		edit_box->show ();
 
 		Label* label = manage (new Label);
-		label->set_text (_("Click to edit the settings for selected protocol ( it must be ENABLED first ):"));
+		label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
 		edit_box->pack_start (*label, false, false);
 		label->show ();
 
@@ -1473,6 +1477,7 @@ private:
 		if (was_feedback != is_feedback && cpi->protocol) {
 			cpi->protocol->set_feedback (is_feedback);
 		}
+		selection_changed ();
 	}
 
 	void edit_btn_clicked ()
@@ -1547,7 +1552,7 @@ private:
 	Gtk::Button* edit_button;
 };
 
-class VideoTimelineOptions : public OptionEditorBox
+class VideoTimelineOptions : public OptionEditorPageBox
 {
 public:
 	VideoTimelineOptions (RCConfiguration* c)
@@ -1560,12 +1565,10 @@ public:
 		Table* t = manage (new Table (8, 4));
 		t->set_spacings (4);
 
-		std::stringstream s;
-		s << "<b>" << _("Video Server") << "</b>";
-		Label* l = manage (new Label (s.str()));
+		Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Video Server"))));
 		l->set_use_markup (true);
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 8);
+		t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 0);
 
 		t->attach (_video_advanced_setup_button, 1, 4, 1, 2);
 		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
@@ -1596,12 +1599,13 @@ public:
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
 					    _("<b>When enabled</b> the video server is never launched automatically without confirmation"));
 
-		s.str (std::string ());
-		s << "<b>" << _("Video Monitor") << "</b>";
-		l = manage (new Label (s.str()));
+		l = manage (new Label (""));
+		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL);
+
+		l = manage (new Label (string_compose ("<b>%1</b>", _("Video Monitor"))));
 		l->set_use_markup (true);
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL, FILL | EXPAND, 0, 8);
+		t->attach (*l, 0, 4, 7, 8, EXPAND | FILL);
 
 		l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
 #ifdef __APPLE__
@@ -1613,10 +1617,10 @@ public:
 #endif
 						)));
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 4, 7, 8, FILL);
-		t->attach (_custom_xjadeo_path, 2, 3, 8, 9);
+		t->attach (*l, 1, 4, 8, 9, FILL);
+		t->attach (_custom_xjadeo_path, 2, 3, 9, 10);
 		Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
-		t->attach (_xjadeo_browse_button, 3, 4, 8, 9, FILL);
+		t->attach (_xjadeo_browse_button, 3, 4, 9, 10, FILL);
 
 		_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
 		_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
@@ -1864,10 +1868,12 @@ class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 		setup_midi_port_view (midi_input_view, true);
 
 
+		_box->pack_start (*manage (new Label("")), false, false);
 		input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
 		_box->pack_start (input_label, false, false);
 		_box->pack_start (midi_input_view);
 
+		_box->pack_start (*manage (new Label("")), false, false);
 		output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
 		_box->pack_start (output_label, false, false);
 		_box->pack_start (midi_output_view);
@@ -2011,6 +2017,8 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 
 	view.get_selection()->set_mode (SELECTION_NONE);
 	view.set_tooltip_column (4); /* port "real" name */
+	view.get_column(0)->set_resizable (true);
+	view.get_column(0)->set_expand (true);
 }
 
 bool
@@ -2498,6 +2506,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* EDITOR */
 
+	add_option (_("Editor"), new OptionEditorHeading (_("Editor Settings")));
+
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
@@ -2612,18 +2622,20 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), fadeshape);
 
+#if 1
 
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
-		     _("Regions in active edit groups are edited together"),
+		     _("Regions in edit groups are edited together"),
 		     _("whenever they overlap in time"),
-		     _("only if they have identical length, position and origin"),
+		     _("only if they have identical length and position"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     );
 
 	add_option (_("Editor"), bco);
 
+#endif
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
 		_("Layering model"),
@@ -3030,6 +3042,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
+	add_option (_("MIDI/Ports"), new OptionEditorHeading (_("MIDI Port Options")));
+
 	add_option (_("MIDI/Ports"),
 		    new BoolOption (
 			    "get-midi-input-follows-selection",
@@ -3124,7 +3138,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 		if (!(*i)->is_instrument()) continue;
 		if ((*i)->type != ARDOUR::LV2) continue;
-		audition_synth->add((*i)->unique_id, (*i)->name);
+		if ((*i)->name.length() > 46) {
+			audition_synth->add((*i)->unique_id, (*i)->name.substr (0, 44) + "...");
+		} else {
+			audition_synth->add((*i)->unique_id, (*i)->name);
+		}
 	}
 #endif
 
@@ -3132,12 +3150,13 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	/* Control Surfaces */
 
-	add_option (_("Control Surfaces"), new ControlSurfacesOptions);
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
@@ -3336,6 +3355,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 #endif
 
 	/* INTERFACE */
+#if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
+	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphics Acceleration")));
+#endif
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	BoolOption* bgc = new BoolOption (
@@ -3362,6 +3384,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (S_("Preferences|GUI"), bgo);
 #endif
 
+	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphical User Interface")));
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-wm-visibility",
@@ -3728,6 +3751,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	/* and now the theme manager */
 
 	ThemeManager* tm = manage (new ThemeManager);
+	add_option (_("Theme"), new OptionEditorHeading (_("Theme")));
 	add_page (_("Theme"), *tm);
 
 	add_option (_("Theme/Colors"), new ColorThemeManager);

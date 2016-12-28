@@ -61,7 +61,10 @@ ColorThemeManager::ColorThemeManager ()
 	, palette_window (0)
 	, color_theme_label (_("Color Theme"))
 {
-	_box->set_spacing (12);
+	Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Colors"))));
+	l->set_alignment (0, 0.5);
+	l->set_use_markup (true);
+	_box->pack_start (*l, false, false);
 
 	std::map<string,string> color_themes;
 
@@ -146,8 +149,8 @@ ColorThemeManager::ColorThemeManager ()
 
 	notebook.set_size_request (400, 400);
 
-	_box->pack_start (notebook, true, true);
-	_box->pack_start (reset_button, false, false);
+	_box->pack_start (notebook, true, true, 12);
+	_box->pack_start (reset_button, false, false, 12);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);

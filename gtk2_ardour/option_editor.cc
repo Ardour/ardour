@@ -80,6 +80,7 @@ OptionEditorComponent::maybe_add_note (OptionEditorPage* p, int n)
 	if (!_note.empty ()) {
 		Gtk::Label* l = manage (new Gtk::Label (string_compose (X_("<i>%1</i>"), _note)));
 		l->set_use_markup (true);
+		l->set_line_wrap (true);
 		p->table.attach (*l, 1, 3, n, n + 1, FILL | EXPAND);
 	}
 }
@@ -102,7 +103,6 @@ void
 OptionEditorHeading::add_to_page (OptionEditorPage* p)
 {
 	int const n = p->table.property_n_rows();
-	p->table.resize (n + 2, 3);
 	if (!_note.empty ()) {
 		p->table.resize (n + 3, 3);
 	} else {
@@ -118,6 +118,21 @@ void
 OptionEditorBox::add_to_page (OptionEditorPage* p)
 {
 	add_widget_to_page (p, _box);
+}
+
+void
+OptionEditorPageBox::add_to_page (OptionEditorPage* p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 2;
+	if (!_note.empty ()) {
+		++m;
+	}
+	_box->set_border_width (0);
+	p->table.resize (m, 3);
+	p->table.attach (*manage (new Label ("")), 0, 3, n, n + 1, FILL | EXPAND);
+	p->table.attach (*_box, 0, 3, n + 1, n + 2, FILL | EXPAND);
+	maybe_add_note (p, n + 2);
 }
 
 RcActionButton::RcActionButton (std::string const & t, const Glib::SignalProxy0< void >::SlotType & slot, std::string const & l)
@@ -344,7 +359,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	, _get (g)
 	, _set (s)
 {
-	_db_slider = manage (new HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable>(), 115, 18));
+	_db_slider = manage (new HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable>(), 220, 18));
 
 	_label.set_text (n + ":");
 	_label.set_alignment (0, 0.5);
@@ -356,9 +371,10 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	_box.set_homogeneous (false);
 	_box.pack_start (_fader_centering_box, false, false);
 	_box.pack_start (_db_display, false, false);
+	_box.pack_start (*manage (new Label ("dB")), false, false);
 	_box.show_all ();
 
-	set_size_request_to_display_given_text (_db_display, "-99.00", 12, 12);
+	set_size_request_to_display_given_text (_db_display, "-99.00", 12, 0);
 
 	_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FaderOption::db_changed));
 	_db_display.signal_activate().connect (sigc::mem_fun (*this, &FaderOption::on_activate));
@@ -690,7 +706,7 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 {
 	set_border_width (4);
 	hpacker.pack_start (treeview(), false, false);
-	hpacker.pack_start (notebook(), true, true);
+	hpacker.pack_start (notebook(), false, false);
 	pack_start (hpacker, true, true);
 
 	show_all ();

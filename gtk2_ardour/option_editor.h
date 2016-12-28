@@ -115,13 +115,19 @@ public:
 
 	void parameter_changed (std::string const &) = 0;
 	void set_state_from_config () = 0;
-	void add_to_page (OptionEditorPage *);
+	virtual void add_to_page (OptionEditorPage *);
 
-        Gtk::Widget& tip_widget() { return *_box->children().front().get_widget(); }
+	Gtk::Widget& tip_widget() { return *_box->children().front().get_widget(); }
 
 protected:
 
 	Gtk::VBox* _box; ///< constituent box for subclasses to add widgets to
+};
+
+class OptionEditorPageBox : public OptionEditorBox
+{
+public:
+	virtual void add_to_page (OptionEditorPage *);
 };
 
 class RcConfigDisplay : public OptionEditorComponent
