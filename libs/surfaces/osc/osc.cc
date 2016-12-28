@@ -110,6 +110,7 @@ OSC::OSC (Session& s, uint32_t port)
 OSC::~OSC()
 {
 	stop ();
+	tear_down_gui ();
 	_instance = 0;
 }
 
