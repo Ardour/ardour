@@ -462,10 +462,9 @@ MidiGhostRegion::find_event (NoteBase* parent)
 
 	if (_optimization_iterator != events.end()) {
 		++_optimization_iterator;
-	}
-
-	if (_optimization_iterator != events.end() && (*_optimization_iterator).second->event == parent) {
-		return (*_optimization_iterator).second;
+		if (_optimization_iterator != events.end() && (*_optimization_iterator).second->event == parent) {
+			return (*_optimization_iterator).second;
+		}
 	}
 
 	_optimization_iterator = events.find (parent->note());
