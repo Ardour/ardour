@@ -119,3 +119,12 @@ Flag::covers (Duple const & point) const
 
 	return false;
 }
+
+double
+Flag::width () const
+{
+	boost::optional<Rect> bbox = _text->bounding_box ();
+	assert (bbox);
+
+	return bbox.get().width() + 10;
+}
