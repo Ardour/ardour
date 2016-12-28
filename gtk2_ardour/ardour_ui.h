@@ -101,7 +101,6 @@
 class About;
 class AddRouteDialog;
 class AddVideoDialog;
-class ArdourVSpacer;
 class BigClockWindow;
 class BundleManager;
 class EngineControl;
@@ -118,6 +117,7 @@ class GlobalPortMatrixWindow;
 
 class VideoTimeLine;
 class ArdourKeyboard;
+class ArdourVSpacer;
 class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
