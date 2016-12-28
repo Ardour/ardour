@@ -324,8 +324,8 @@ private:
 
 
 static const struct {
-    const char *name;
-    guint modifier;
+	const char *name;
+	guint modifier;
 } modifiers[] = {
 
 	{ "Unmodified", 0 },
@@ -1205,13 +1205,13 @@ private:
 
 class BufferingOptions : public OptionEditorBox
 {
-public:
-	BufferingOptions (RCConfiguration* c)
-                : _rc_config (c)
-		, _playback_adjustment (5, 1, 60, 1, 4)
-                , _capture_adjustment (5, 1, 60, 1, 4)
-                , _playback_slider (_playback_adjustment)
-		, _capture_slider (_capture_adjustment)
+	public:
+		BufferingOptions (RCConfiguration* c)
+			: _rc_config (c)
+			, _playback_adjustment (5, 1, 60, 1, 4)
+			, _capture_adjustment (5, 1, 60, 1, 4)
+			, _playback_slider (_playback_adjustment)
+			, _capture_slider (_capture_adjustment)
 	{
 		vector<string> presets;
 
@@ -1264,303 +1264,303 @@ public:
 		_playback_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::playback_changed));
 	}
 
-	void parameter_changed (string const & p)
-	{
-		if (p == "buffering-preset") {
-			switch (_rc_config->get_buffering_preset()) {
-			case Small:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (0);
-				break;
-			case Medium:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (1);
-				break;
-			case Large:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (2);
-				break;
-			case Custom:
-				_playback_slider.set_sensitive (true);
-				_capture_slider.set_sensitive (true);
-				_buffering_presets_combo.set_active (3);
-				break;
+		void parameter_changed (string const & p)
+		{
+			if (p == "buffering-preset") {
+				switch (_rc_config->get_buffering_preset()) {
+					case Small:
+						_playback_slider.set_sensitive (false);
+						_capture_slider.set_sensitive (false);
+						_buffering_presets_combo.set_active (0);
+						break;
+					case Medium:
+						_playback_slider.set_sensitive (false);
+						_capture_slider.set_sensitive (false);
+						_buffering_presets_combo.set_active (1);
+						break;
+					case Large:
+						_playback_slider.set_sensitive (false);
+						_capture_slider.set_sensitive (false);
+						_buffering_presets_combo.set_active (2);
+						break;
+					case Custom:
+						_playback_slider.set_sensitive (true);
+						_capture_slider.set_sensitive (true);
+						_buffering_presets_combo.set_active (3);
+						break;
+				}
+			}
+
+			if (p == "playback-buffer-seconds") {
+				_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
+			} else if (p == "capture-buffer-seconds") {
+				_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
 			}
 		}
 
-		if (p == "playback-buffer-seconds") {
-			_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
-		} else if (p == "capture-buffer-seconds") {
-			_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
-                }
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("buffering-preset");
-		parameter_changed ("playback-buffer-seconds");
-		parameter_changed ("capture-buffer-seconds");
-	}
-
-private:
-
-	void preset_changed ()
-	{
-		int index = _buffering_presets_combo.get_active_row_number ();
-		if (index < 0) {
-			return;
+		void set_state_from_config ()
+		{
+			parameter_changed ("buffering-preset");
+			parameter_changed ("playback-buffer-seconds");
+			parameter_changed ("capture-buffer-seconds");
 		}
-		switch (index) {
-		case 0:
-			_rc_config->set_buffering_preset (Small);
-			break;
-		case 1:
-			_rc_config->set_buffering_preset (Medium);
-			break;
-		case 2:
-			_rc_config->set_buffering_preset (Large);
-			break;
-		case 3:
-			_rc_config->set_buffering_preset (Custom);
-			break;
-		default:
-			error << string_compose (_("programming error: unknown buffering preset string, index = %1"), index) << endmsg;
-			break;
+
+	private:
+
+		void preset_changed ()
+		{
+			int index = _buffering_presets_combo.get_active_row_number ();
+			if (index < 0) {
+				return;
+			}
+			switch (index) {
+				case 0:
+					_rc_config->set_buffering_preset (Small);
+					break;
+				case 1:
+					_rc_config->set_buffering_preset (Medium);
+					break;
+				case 2:
+					_rc_config->set_buffering_preset (Large);
+					break;
+				case 3:
+					_rc_config->set_buffering_preset (Custom);
+					break;
+				default:
+					error << string_compose (_("programming error: unknown buffering preset string, index = %1"), index) << endmsg;
+					break;
+			}
 		}
-	}
 
-	void playback_changed ()
-	{
-		_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
-	}
+		void playback_changed ()
+		{
+			_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
+		}
 
-	void capture_changed ()
-	{
-		_rc_config->set_audio_capture_buffer_seconds ((long) _capture_adjustment.get_value());
-	}
+		void capture_changed ()
+		{
+			_rc_config->set_audio_capture_buffer_seconds ((long) _capture_adjustment.get_value());
+		}
 
-	RCConfiguration* _rc_config;
-	Adjustment _playback_adjustment;
-	Adjustment _capture_adjustment;
-	HScale _playback_slider;
-	HScale _capture_slider;
-	ComboBoxText _buffering_presets_combo;
+		RCConfiguration* _rc_config;
+		Adjustment _playback_adjustment;
+		Adjustment _capture_adjustment;
+		HScale _playback_slider;
+		HScale _capture_slider;
+		ComboBoxText _buffering_presets_combo;
 };
 
 class ControlSurfacesOptions : public OptionEditorPageBox
 {
-public:
-	ControlSurfacesOptions ()
-		: _ignore_view_change (0)
-	{
-		_store = ListStore::create (_model);
-		_view.set_model (_store);
-		_view.append_column (_("Control Surface Protocol"), _model.name);
-		_view.get_column(0)->set_resizable (true);
-		_view.get_column(0)->set_expand (true);
-		_view.append_column_editable (_("Enabled"), _model.enabled);
-		_view.append_column_editable (_("Feedback"), _model.feedback);
-
-		Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Control Surfaces"))));
-		l->set_alignment (0, 0.5);
-		l->set_use_markup (true);
-		_box->pack_start (*l, false, false);
-		_box->pack_start (_view, false, false);
-
-		Gtk::HBox* edit_box = manage (new Gtk::HBox);
-		edit_box->set_spacing(3);
-		_box->pack_start (*edit_box, false, false);
-		edit_box->show ();
-
-		Label* label = manage (new Label);
-		label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
-		edit_box->pack_start (*label, false, false);
-		label->show ();
-
-		edit_button = manage (new Button(_("Show Protocol Settings")));
-		edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
-		edit_box->pack_start (*edit_button, true, true);
-		edit_button->set_sensitive (false);
-		edit_button->show ();
-
-		ControlProtocolManager& m = ControlProtocolManager::instance ();
-		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-						boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
-
-		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
-		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
-		_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
-	}
-
-	void parameter_changed (std::string const &)
-	{
-
-	}
-
-	void set_state_from_config ()
-	{
-		_store->clear ();
-
-		ControlProtocolManager& m = ControlProtocolManager::instance ();
-		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-
-			if (!(*i)->mandatory) {
-				TreeModel::Row r = *_store->append ();
-				r[_model.name] = (*i)->name;
-				r[_model.enabled] = ((*i)->protocol || (*i)->requested);
-				r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
-				r[_model.protocol_info] = *i;
-			}
-		}
-	}
-
-private:
-
-        void protocol_status_changed (ControlProtocolInfo* cpi) {
-		/* find the row */
-		TreeModel::Children rows = _store->children();
-
-		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
-			string n = ((*x)[_model.name]);
-
-			if ((*x)[_model.protocol_info] == cpi) {
-				_ignore_view_change++;
-				(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
-				_ignore_view_change--;
-				break;
-			}
-		}
-	}
-
-	void selection_changed ()
-	{
-		//enable the Edit button when a row is selected for editing
-		TreeModel::Row row = *(_view.get_selection()->get_selected());
-		if (row && row[_model.enabled])
-			edit_button->set_sensitive (true);
-		else
-			edit_button->set_sensitive (false);
-	}
-
-	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
-	{
-		TreeModel::Row r = *i;
-
-		if (_ignore_view_change) {
-			return;
-		}
-
-		ControlProtocolInfo* cpi = r[_model.protocol_info];
-		if (!cpi) {
-			return;
-		}
-
-		bool const was_enabled = (cpi->protocol != 0);
-		bool const is_enabled = r[_model.enabled];
-
-
-		if (was_enabled != is_enabled) {
-
-			if (!was_enabled) {
-				ControlProtocolManager::instance().activate (*cpi);
-			} else {
-				ControlProtocolManager::instance().deactivate (*cpi);
-			}
-		}
-
-		bool const was_feedback = (cpi->protocol && cpi->protocol->get_feedback ());
-		bool const is_feedback = r[_model.feedback];
-
-		if (was_feedback != is_feedback && cpi->protocol) {
-			cpi->protocol->set_feedback (is_feedback);
-		}
-		selection_changed ();
-	}
-
-	void edit_btn_clicked ()
-	{
-		std::string name;
-		ControlProtocolInfo* cpi;
-		TreeModel::Row row;
-
-		row = *(_view.get_selection()->get_selected());
-		if (!row[_model.enabled]) {
-			return;
-		}
-		cpi = row[_model.protocol_info];
-		if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
-			return;
-		}
-		Box* box = (Box*) cpi->protocol->get_gui ();
-		if (!box) {
-			return;
-		}
-		if (box->get_parent()) {
-			static_cast<ArdourWindow*>(box->get_parent())->present();
-			return;
-		}
-		WindowTitle title (Glib::get_application_name());
-		title += row[_model.name];
-		title += _("Configuration");
-		/* once created, the window is managed by the surface itself (as ->get_parent())
-		 * Surface's tear_down_gui() is called on session close, when de-activating
-		 * or re-initializing a surface.
-		 * tear_down_gui() hides an deletes the Window if it exists.
-		 */
-		ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
-		win->set_title ("Control Protocol Options");
-		win->add (*box);
-		box->show ();
-		win->present ();
-	}
-
-	void edit_clicked (GdkEventButton* ev)
-	{
-		if (ev->type != GDK_2BUTTON_PRESS) {
-			return;
-		}
-
-		edit_btn_clicked();
-	}
-
-        class ControlSurfacesModelColumns : public TreeModelColumnRecord
-	{
 	public:
-
-		ControlSurfacesModelColumns ()
+		ControlSurfacesOptions ()
+			: _ignore_view_change (0)
 		{
-			add (name);
-			add (enabled);
-			add (feedback);
-			add (protocol_info);
+			_store = ListStore::create (_model);
+			_view.set_model (_store);
+			_view.append_column (_("Control Surface Protocol"), _model.name);
+			_view.get_column(0)->set_resizable (true);
+			_view.get_column(0)->set_expand (true);
+			_view.append_column_editable (_("Enabled"), _model.enabled);
+			_view.append_column_editable (_("Feedback"), _model.feedback);
+
+			Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Control Surfaces"))));
+			l->set_alignment (0, 0.5);
+			l->set_use_markup (true);
+			_box->pack_start (*l, false, false);
+			_box->pack_start (_view, false, false);
+
+			Gtk::HBox* edit_box = manage (new Gtk::HBox);
+			edit_box->set_spacing(3);
+			_box->pack_start (*edit_box, false, false);
+			edit_box->show ();
+
+			Label* label = manage (new Label);
+			label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
+			edit_box->pack_start (*label, false, false);
+			label->show ();
+
+			edit_button = manage (new Button(_("Show Protocol Settings")));
+			edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
+			edit_box->pack_start (*edit_button, true, true);
+			edit_button->set_sensitive (false);
+			edit_button->show ();
+
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
+					boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+
+			_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
+			_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
+			_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
 		}
 
-		TreeModelColumn<string> name;
-		TreeModelColumn<bool> enabled;
-		TreeModelColumn<bool> feedback;
-		TreeModelColumn<ControlProtocolInfo*> protocol_info;
+		void parameter_changed (std::string const &)
+		{
+
+		}
+
+		void set_state_from_config ()
+		{
+			_store->clear ();
+
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+
+				if (!(*i)->mandatory) {
+					TreeModel::Row r = *_store->append ();
+					r[_model.name] = (*i)->name;
+					r[_model.enabled] = ((*i)->protocol || (*i)->requested);
+					r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
+					r[_model.protocol_info] = *i;
+				}
+			}
+		}
+
+	private:
+
+		void protocol_status_changed (ControlProtocolInfo* cpi) {
+			/* find the row */
+			TreeModel::Children rows = _store->children();
+
+			for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+				string n = ((*x)[_model.name]);
+
+				if ((*x)[_model.protocol_info] == cpi) {
+					_ignore_view_change++;
+					(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+					_ignore_view_change--;
+					break;
+				}
+			}
+		}
+
+		void selection_changed ()
+		{
+			//enable the Edit button when a row is selected for editing
+			TreeModel::Row row = *(_view.get_selection()->get_selected());
+			if (row && row[_model.enabled])
+				edit_button->set_sensitive (true);
+			else
+				edit_button->set_sensitive (false);
+		}
+
+		void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+		{
+			TreeModel::Row r = *i;
+
+			if (_ignore_view_change) {
+				return;
+			}
+
+			ControlProtocolInfo* cpi = r[_model.protocol_info];
+			if (!cpi) {
+				return;
+			}
+
+			bool const was_enabled = (cpi->protocol != 0);
+			bool const is_enabled = r[_model.enabled];
+
+
+			if (was_enabled != is_enabled) {
+
+				if (!was_enabled) {
+					ControlProtocolManager::instance().activate (*cpi);
+				} else {
+					ControlProtocolManager::instance().deactivate (*cpi);
+				}
+			}
+
+			bool const was_feedback = (cpi->protocol && cpi->protocol->get_feedback ());
+			bool const is_feedback = r[_model.feedback];
+
+			if (was_feedback != is_feedback && cpi->protocol) {
+				cpi->protocol->set_feedback (is_feedback);
+			}
+			selection_changed ();
+		}
+
+		void edit_btn_clicked ()
+		{
+			std::string name;
+			ControlProtocolInfo* cpi;
+			TreeModel::Row row;
+
+			row = *(_view.get_selection()->get_selected());
+			if (!row[_model.enabled]) {
+				return;
+			}
+			cpi = row[_model.protocol_info];
+			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+				return;
+			}
+			Box* box = (Box*) cpi->protocol->get_gui ();
+			if (!box) {
+				return;
+			}
+			if (box->get_parent()) {
+				static_cast<ArdourWindow*>(box->get_parent())->present();
+				return;
+			}
+			WindowTitle title (Glib::get_application_name());
+			title += row[_model.name];
+			title += _("Configuration");
+			/* once created, the window is managed by the surface itself (as ->get_parent())
+			 * Surface's tear_down_gui() is called on session close, when de-activating
+			 * or re-initializing a surface.
+			 * tear_down_gui() hides an deletes the Window if it exists.
+			 */
+			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
+			win->set_title ("Control Protocol Options");
+			win->add (*box);
+			box->show ();
+			win->present ();
+		}
+
+		void edit_clicked (GdkEventButton* ev)
+		{
+			if (ev->type != GDK_2BUTTON_PRESS) {
+				return;
+			}
+
+			edit_btn_clicked();
+		}
+
+		class ControlSurfacesModelColumns : public TreeModelColumnRecord
+	{
+		public:
+
+			ControlSurfacesModelColumns ()
+			{
+				add (name);
+				add (enabled);
+				add (feedback);
+				add (protocol_info);
+			}
+
+			TreeModelColumn<string> name;
+			TreeModelColumn<bool> enabled;
+			TreeModelColumn<bool> feedback;
+			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
-	Glib::RefPtr<ListStore> _store;
-	ControlSurfacesModelColumns _model;
-	TreeView _view;
-        PBD::ScopedConnection protocol_status_connection;
-        uint32_t _ignore_view_change;
-	Gtk::Button* edit_button;
+		Glib::RefPtr<ListStore> _store;
+		ControlSurfacesModelColumns _model;
+		TreeView _view;
+		PBD::ScopedConnection protocol_status_connection;
+		uint32_t _ignore_view_change;
+		Gtk::Button* edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorPageBox
 {
-public:
-	VideoTimelineOptions (RCConfiguration* c)
-		: _rc_config (c)
-		, _show_video_export_info_button (_("Show Video Export Info before export"))
-		, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
-		, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
-		, _xjadeo_browse_button (_("Browse..."))
+	public:
+		VideoTimelineOptions (RCConfiguration* c)
+			: _rc_config (c)
+			, _show_video_export_info_button (_("Show Video Export Info before export"))
+			, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
+			, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
+			, _xjadeo_browse_button (_("Browse..."))
 	{
 		Table* t = manage (new Table (8, 4));
 		t->set_spacings (4);
@@ -1573,31 +1573,31 @@ public:
 		t->attach (_video_advanced_setup_button, 1, 4, 1, 2);
 		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
-					    _("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+				_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
 
 		l = manage (new Label (_("Video Server URL:")));
 		l->set_alignment (0, 0.5);
 		t->attach (*l, 1, 2, 2, 3, FILL);
 		t->attach (_video_server_url_entry, 2, 4, 2, 3, FILL);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
-					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
+				_("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
 
 		l = manage (new Label (_("Video Folder:")));
 		l->set_alignment (0, 0.5);
 		t->attach (*l, 1, 2, 3, 4, FILL);
 		t->attach (_video_server_docroot_entry, 2, 4, 3, 4);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-					    _("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+				_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 
 		t->attach (_show_video_export_info_button, 1, 4, 4, 5);
 		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
-					    _("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
+				_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
 
 		t->attach (_show_video_server_dialog_button, 1, 4, 5, 6);
 		_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
-					    _("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+				_("<b>When enabled</b> the video server is never launched automatically without confirmation"));
 
 		l = manage (new Label (""));
 		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL);
@@ -1635,100 +1635,100 @@ public:
 		_box->pack_start (*t,true,true);
 	}
 
-	void server_url_changed ()
-	{
-		_rc_config->set_video_server_url (_video_server_url_entry.get_text());
-	}
+		void server_url_changed ()
+		{
+			_rc_config->set_video_server_url (_video_server_url_entry.get_text());
+		}
 
-	void server_docroot_changed ()
-	{
-		_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
-	}
+		void server_docroot_changed ()
+		{
+			_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
+		}
 
-	void show_video_export_info_toggled ()
-	{
-		bool const x = _show_video_export_info_button.get_active ();
-		_rc_config->set_show_video_export_info (x);
-	}
+		void show_video_export_info_toggled ()
+		{
+			bool const x = _show_video_export_info_button.get_active ();
+			_rc_config->set_show_video_export_info (x);
+		}
 
-	void show_video_server_dialog_toggled ()
-	{
-		bool const x = _show_video_server_dialog_button.get_active ();
-		_rc_config->set_show_video_server_dialog (x);
-	}
+		void show_video_server_dialog_toggled ()
+		{
+			bool const x = _show_video_server_dialog_button.get_active ();
+			_rc_config->set_show_video_server_dialog (x);
+		}
 
-	void video_advanced_setup_toggled ()
-	{
-		bool const x = _video_advanced_setup_button.get_active ();
-		_rc_config->set_video_advanced_setup(x);
-	}
+		void video_advanced_setup_toggled ()
+		{
+			bool const x = _video_advanced_setup_button.get_active ();
+			_rc_config->set_video_advanced_setup(x);
+		}
 
-	void custom_xjadeo_path_changed ()
-	{
-		UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
-	}
+		void custom_xjadeo_path_changed ()
+		{
+			UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
+		}
 
-	void xjadeo_browse_clicked ()
-	{
-		Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-		dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
-		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-		if (dialog.run () == Gtk::RESPONSE_OK) {
-			const std::string& filename = dialog.get_filename();
-			if (!filename.empty() && (
+		void xjadeo_browse_clicked ()
+		{
+			Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+			dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
+			dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+			if (dialog.run () == Gtk::RESPONSE_OK) {
+				const std::string& filename = dialog.get_filename();
+				if (!filename.empty() && (
 #ifdef __APPLE__
-					Glib::file_test (filename + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE) ||
+							Glib::file_test (filename + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE) ||
 #endif
-					Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
-					)) {
-				UIConfiguration::instance().set_xjadeo_binary (filename);
+							Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
+							)) {
+					UIConfiguration::instance().set_xjadeo_binary (filename);
+				}
 			}
 		}
-	}
 
-	void parameter_changed (string const & p)
-	{
-		if (p == "video-server-url") {
-			_video_server_url_entry.set_text (_rc_config->get_video_server_url());
-		} else if (p == "video-server-docroot") {
-			_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
-		} else if (p == "show-video-export-info") {
-			bool const x = _rc_config->get_show_video_export_info();
-			_show_video_export_info_button.set_active (x);
-		} else if (p == "show-video-server-dialog") {
-			bool const x = _rc_config->get_show_video_server_dialog();
-			_show_video_server_dialog_button.set_active (x);
-		} else if (p == "video-advanced-setup") {
-			bool const x = _rc_config->get_video_advanced_setup();
-			_video_advanced_setup_button.set_active(x);
-			_video_server_docroot_entry.set_sensitive(x);
-			_video_server_url_entry.set_sensitive(x);
-		} else if (p == "xjadeo-binary") {
-			_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
+		void parameter_changed (string const & p)
+		{
+			if (p == "video-server-url") {
+				_video_server_url_entry.set_text (_rc_config->get_video_server_url());
+			} else if (p == "video-server-docroot") {
+				_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
+			} else if (p == "show-video-export-info") {
+				bool const x = _rc_config->get_show_video_export_info();
+				_show_video_export_info_button.set_active (x);
+			} else if (p == "show-video-server-dialog") {
+				bool const x = _rc_config->get_show_video_server_dialog();
+				_show_video_server_dialog_button.set_active (x);
+			} else if (p == "video-advanced-setup") {
+				bool const x = _rc_config->get_video_advanced_setup();
+				_video_advanced_setup_button.set_active(x);
+				_video_server_docroot_entry.set_sensitive(x);
+				_video_server_url_entry.set_sensitive(x);
+			} else if (p == "xjadeo-binary") {
+				_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
+			}
 		}
-	}
 
-	void set_state_from_config ()
-	{
-		parameter_changed ("video-server-url");
-		parameter_changed ("video-server-docroot");
-		parameter_changed ("video-monitor-setup-dialog");
-		parameter_changed ("show-video-export-info");
-		parameter_changed ("show-video-server-dialog");
-		parameter_changed ("video-advanced-setup");
-		parameter_changed ("xjadeo-binary");
-	}
+		void set_state_from_config ()
+		{
+			parameter_changed ("video-server-url");
+			parameter_changed ("video-server-docroot");
+			parameter_changed ("video-monitor-setup-dialog");
+			parameter_changed ("show-video-export-info");
+			parameter_changed ("show-video-server-dialog");
+			parameter_changed ("video-advanced-setup");
+			parameter_changed ("xjadeo-binary");
+		}
 
-private:
-	RCConfiguration* _rc_config;
-	Entry _video_server_url_entry;
-	Entry _video_server_docroot_entry;
-	Entry _custom_xjadeo_path;
-	CheckButton _show_video_export_info_button;
-	CheckButton _show_video_server_dialog_button;
-	CheckButton _video_advanced_setup_button;
-	Button _xjadeo_browse_button;
+	private:
+		RCConfiguration* _rc_config;
+		Entry _video_server_url_entry;
+		Entry _video_server_docroot_entry;
+		Entry _custom_xjadeo_path;
+		CheckButton _show_video_export_info_button;
+		CheckButton _show_video_server_dialog_button;
+		CheckButton _video_advanced_setup_button;
+		Button _xjadeo_browse_button;
 };
 
 class ColumVisibilityOption : public Option
@@ -1840,7 +1840,7 @@ public:
 		add_widget_to_page (p, _visibility_group->list_view ());
 	}
 
-        Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
+	Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
 
 private:
 	void changed ()
@@ -1861,98 +1861,98 @@ private:
 
 class MidiPortOptions : public OptionEditorBox, public sigc::trackable
 {
-  public:
-	MidiPortOptions() {
+	public:
+		MidiPortOptions() {
 
-		setup_midi_port_view (midi_output_view, false);
-		setup_midi_port_view (midi_input_view, true);
+			setup_midi_port_view (midi_output_view, false);
+			setup_midi_port_view (midi_input_view, true);
 
 
-		_box->pack_start (*manage (new Label("")), false, false);
-		input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
-		_box->pack_start (input_label, false, false);
-		_box->pack_start (midi_input_view);
+			_box->pack_start (*manage (new Label("")), false, false);
+			input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
+			_box->pack_start (input_label, false, false);
+			_box->pack_start (midi_input_view);
 
-		_box->pack_start (*manage (new Label("")), false, false);
-		output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
-		_box->pack_start (output_label, false, false);
-		_box->pack_start (midi_output_view);
+			_box->pack_start (*manage (new Label("")), false, false);
+			output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
+			_box->pack_start (output_label, false, false);
+			_box->pack_start (midi_output_view);
 
-		midi_output_view.show ();
-		midi_input_view.show ();
+			midi_output_view.show ();
+			midi_input_view.show ();
 
-		_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
-	}
-
-	void parameter_changed (string const&) {}
-	void set_state_from_config() {}
-
-	void on_show () {
-		refill ();
-
-		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
-		                                                               invalidator (*this),
-		                                                               boost::bind (&MidiPortOptions::refill, this),
-		                                                               gui_context());
-		AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
-		                                                      invalidator (*this),
-		                                                      boost::bind (&MidiPortOptions::refill, this),
-		                                                      gui_context());
-		AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
-		                                                            invalidator (*this),
-		                                                            boost::bind (&MidiPortOptions::refill, this),
-		                                                            gui_context());
-	}
-
-	void refill () {
-
-		if (refill_midi_ports (true, midi_input_view)) {
-			input_label.show ();
-		} else {
-		       input_label.hide ();
-		}
-		if (refill_midi_ports (false, midi_output_view)) {
-			output_label.show ();
-		} else {
-			output_label.hide ();
-		}
-	}
-
-  private:
-	PBD::ScopedConnectionList connections;
-
-	/* MIDI port management */
-	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
-
-		MidiPortColumns () {
-			add (pretty_name);
-			add (music_data);
-			add (control_data);
-			add (selection);
-			add (name);
-			add (filler);
+			_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
 		}
 
-		Gtk::TreeModelColumn<std::string> pretty_name;
-		Gtk::TreeModelColumn<bool> music_data;
-		Gtk::TreeModelColumn<bool> control_data;
-		Gtk::TreeModelColumn<bool> selection;
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> filler;
-	};
+		void parameter_changed (string const&) {}
+		void set_state_from_config() {}
 
-	MidiPortColumns midi_port_columns;
-	Gtk::TreeView midi_input_view;
-	Gtk::TreeView midi_output_view;
-	Gtk::Label input_label;
-	Gtk::Label output_label;
+		void on_show () {
+			refill ();
 
-	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
-	bool refill_midi_ports (bool for_input, Gtk::TreeView&);
-	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
-	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
-	void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
-	void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
+			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+			AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+			AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+		}
+
+		void refill () {
+
+			if (refill_midi_ports (true, midi_input_view)) {
+				input_label.show ();
+			} else {
+				input_label.hide ();
+			}
+			if (refill_midi_ports (false, midi_output_view)) {
+				output_label.show ();
+			} else {
+				output_label.hide ();
+			}
+		}
+
+	private:
+		PBD::ScopedConnectionList connections;
+
+		/* MIDI port management */
+		struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+
+			MidiPortColumns () {
+				add (pretty_name);
+				add (music_data);
+				add (control_data);
+				add (selection);
+				add (name);
+				add (filler);
+			}
+
+			Gtk::TreeModelColumn<std::string> pretty_name;
+			Gtk::TreeModelColumn<bool> music_data;
+			Gtk::TreeModelColumn<bool> control_data;
+			Gtk::TreeModelColumn<bool> selection;
+			Gtk::TreeModelColumn<std::string> name;
+			Gtk::TreeModelColumn<std::string> filler;
+		};
+
+		MidiPortColumns midi_port_columns;
+		Gtk::TreeView midi_input_view;
+		Gtk::TreeView midi_output_view;
+		Gtk::Label input_label;
+		Gtk::Label output_label;
+
+		void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
+		bool refill_midi_ports (bool for_input, Gtk::TreeView&);
+		void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
+		void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
+		void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
+		void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
 };
 
 void
@@ -2153,38 +2153,38 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
 	, Tabbable (*this, _("Preferences")) /* pack self-as-vbox into tabbable */
-        , _rc_config (Config)
+	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 
 	/* MISC */
 
-        uint32_t hwcpus = hardware_concurrency ();
+	uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
 	BoolComboOption* bco;
 
-        if (hwcpus > 1) {
-                add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
+	if (hwcpus > 1) {
+		add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
 
-                ComboOption<int32_t>* procs = new ComboOption<int32_t> (
-                        "processor-usage",
-                        _("Signal processing uses"),
-                        sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
-                        sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
-                        );
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"processor-usage",
+				_("Signal processing uses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
+				);
 
-                procs->add (-1, _("all but one processor"));
-                procs->add (0, _("all available processors"));
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
 
-                for (uint32_t i = 1; i <= hwcpus; ++i) {
-	                procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
-                }
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
+		}
 
 		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
 
-                add_option (_("Misc"), procs);
-        }
+		add_option (_("Misc"), procs);
+	}
 
 	add_option (_("Misc"), new OptionEditorHeading (S_("Options|Undo")));
 
@@ -2727,9 +2727,9 @@ if (!Profile->get_mixbus()) {
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-        if (AudioEngine::instance()->port_engine().can_monitor_input()) {
-                mm->add (HardwareMonitoring, _("via Audio Driver"));
-        }
+	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
+		mm->add (HardwareMonitoring, _("via Audio Driver"));
+	}
 
 	string prog (PROGRAM_NAME);
 	boost::algorithm::to_lower (prog);
