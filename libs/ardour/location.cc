@@ -54,7 +54,9 @@ PBD::Signal1<void,Location*> Location::changed;
 Location::Location (Session& s)
 	: SessionHandleRef (s)
 	, _start (0)
+	, _start_beat (0.0)
 	, _end (0)
+	, _end_beat (0.0)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _position_lock_style (AudioTime)
@@ -64,7 +66,7 @@ Location::Location (Session& s)
 }
 
 /** Construct a new Location, giving it the position lock style determined by glue-new-markers-to-bars-and-beats */
-Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits)
+Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits, const uint32_t sub_num)
 	: SessionHandleRef (s)
 	, _name (name)
 	, _start (sample_start)
@@ -74,7 +76,7 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
 
 {
-	recompute_bbt_from_frames ();
+	recompute_beat_from_frames (sub_num);
 
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -85,9 +87,9 @@ Location::Location (const Location& other)
 	, StatefulDestructible()
 	, _name (other._name)
 	, _start (other._start)
-	, _bbt_start (other._bbt_start)
+	, _start_beat (other._start_beat)
 	, _end (other._end)
-	, _bbt_end (other._bbt_end)
+	, _end_beat (other._end_beat)
 	, _flags (other._flags)
 	, _position_lock_style (other._position_lock_style)
 
@@ -125,8 +127,8 @@ Location::operator== (const Location& other)
 	if (_name != other._name ||
 	    _start != other._start ||
 	    _end != other._end ||
-	    _bbt_start != other._bbt_start ||
-	    _bbt_end != other._bbt_end ||
+	    _start_beat != other._start_beat ||
+	    _end_beat != other._end_beat ||
 	    _flags != other._flags ||
 	    _position_lock_style != other._position_lock_style) {
 		return false;
@@ -143,9 +145,9 @@ Location::operator= (const Location& other)
 
 	_name = other._name;
 	_start = other._start;
-	_bbt_start = other._bbt_start;
+	_start_beat = other._start_beat;
 	_end = other._end;
-	_bbt_end = other._bbt_end;
+	_end_beat = other._end_beat;
 	_flags = other._flags;
 	_position_lock_style = other._position_lock_style;
 
@@ -178,10 +180,10 @@ Location::set_name (const std::string& str)
 /** Set start position.
  *  @param s New start.
  *  @param force true to force setting, even if the given new start is after the current end.
- *  @param allow_bbt_recompute True to recompute BBT start time from the new given start time.
+ *  @param allow_beat_recompute True to recompute BEAT start time from the new given start time.
  */
 int
-Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
+Location::set_start (framepos_t s, bool force, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (s < 0) {
 		return -1;
@@ -201,8 +203,8 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		if (_start != s) {
 			_start = s;
 			_end = s;
-			if (allow_bbt_recompute) {
-				recompute_bbt_from_frames ();
+			if (allow_beat_recompute) {
+				recompute_beat_from_frames (sub_num);
 			}
 
 			start_changed (this); /* EMIT SIGNAL */
@@ -235,8 +237,8 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		framepos_t const old = _start;
 
 		_start = s;
-		if (allow_bbt_recompute) {
-			recompute_bbt_from_frames ();
+		if (allow_beat_recompute) {
+			recompute_beat_from_frames (sub_num);
 		}
 		start_changed (this); /* EMIT SIGNAL */
 		StartChanged (); /* EMIT SIGNAL */
@@ -255,10 +257,10 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 /** Set end position.
  *  @param s New end.
  *  @param force true to force setting, even if the given new end is before the current start.
- *  @param allow_bbt_recompute True to recompute BBT end time from the new given end time.
+ *  @param allow_beat_recompute True to recompute BEAT end time from the new given end time.
  */
 int
-Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
+Location::set_end (framepos_t e, bool force, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (e < 0) {
 		return -1;
@@ -278,8 +280,8 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		if (_start != e) {
 			_start = e;
 			_end = e;
-			if (allow_bbt_recompute) {
-				recompute_bbt_from_frames ();
+			if (allow_beat_recompute) {
+				recompute_beat_from_frames (sub_num);
 			}
 			//start_changed (this); /* EMIT SIGNAL */
 			//StartChanged (); /* EMIT SIGNAL */
@@ -303,8 +305,8 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		framepos_t const old = _end;
 
 		_end = e;
-		if (allow_bbt_recompute) {
-			recompute_bbt_from_frames ();
+		if (allow_beat_recompute) {
+			recompute_beat_from_frames (sub_num);
 		}
 
 		end_changed(this); /* EMIT SIGNAL */
@@ -321,7 +323,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 }
 
 int
-Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
+Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (s < 0 || e < 0) {
 		return -1;
@@ -341,8 +343,8 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 			_start = s;
 			_end = s;
 
-			if (allow_bbt_recompute) {
-				recompute_bbt_from_frames ();
+			if (allow_beat_recompute) {
+				recompute_beat_from_frames (sub_num);
 			}
 
 			start_change = true;
@@ -364,8 +366,8 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 			framepos_t const old = _start;
 			_start = s;
 
-			if (allow_bbt_recompute) {
-				recompute_bbt_from_frames ();
+			if (allow_beat_recompute) {
+				recompute_beat_from_frames (sub_num);
 			}
 
 			start_change = true;
@@ -382,8 +384,8 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 			framepos_t const old = _end;
 			_end = e;
 
-			if (allow_bbt_recompute) {
-				recompute_bbt_from_frames ();
+			if (allow_beat_recompute) {
+				recompute_beat_from_frames (sub_num);
 			}
 
 			end_change = true;
@@ -411,7 +413,7 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 }
 
 int
-Location::move_to (framepos_t pos)
+Location::move_to (framepos_t pos, const uint32_t sub_num)
 {
 	if (pos < 0) {
 		return -1;
@@ -424,7 +426,7 @@ Location::move_to (framepos_t pos)
 	if (_start != pos) {
 		_start = pos;
 		_end = _start + length();
-		recompute_bbt_from_frames ();
+		recompute_beat_from_frames (sub_num);
 
 		changed (this); /* EMIT SIGNAL */
 		Changed (); /* EMIT SIGNAL */
@@ -580,6 +582,14 @@ Location::get_state ()
 	node->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%" PRId64, end());
 	node->add_property ("end", buf);
+
+	if (position_lock_style() == MusicTime) {
+		snprintf (buf, sizeof (buf), "%lf", _start_beat);
+		node->add_property ("start-beat", buf);
+		snprintf (buf, sizeof (buf), "%lf", _end_beat);
+		node->add_property ("end-beat", buf);
+	}
+
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("locked", (_locked ? "yes" : "no"));
 	node->add_property ("position-lock-style", enum_2_string (_position_lock_style));
@@ -689,7 +699,27 @@ Location::set_state (const XMLNode& node, int version)
 		_scene_change = SceneChange::factory (*scene_child, version);
 	}
 
-	recompute_bbt_from_frames ();
+	if (position_lock_style() == AudioTime) {
+		recompute_beat_from_frames (0);
+	} else{
+		/* music */
+		bool has_beat = false;
+
+		if ((prop = node.property ("start-beat")) != 0) {
+			sscanf (prop->value().c_str(), "%lf", &_start_beat);
+			has_beat = true;
+		}
+
+		if ((prop = node.property ("end-beat")) != 0) {
+			sscanf (prop->value().c_str(), "%lf", &_end_beat);
+			has_beat = true;
+		}
+
+		if (!has_beat) {
+			recompute_beat_from_frames (0);
+		}
+	}
+
 
 	changed (this); /* EMIT SIGNAL */
 	Changed (); /* EMIT SIGNAL */
@@ -709,32 +739,30 @@ Location::set_position_lock_style (PositionLockStyle ps)
 
 	_position_lock_style = ps;
 
-	recompute_bbt_from_frames ();
+	if (ps == MusicTime) {
+		recompute_beat_from_frames (0);
+	}
 
 	position_lock_style_changed (this); /* EMIT SIGNAL */
 	PositionLockStyleChanged (); /* EMIT SIGNAL */
 }
 
 void
-Location::recompute_bbt_from_frames ()
+Location::recompute_beat_from_frames (const uint32_t sub_num)
 {
-	if (_position_lock_style != MusicTime) {
-		return;
-	}
-
-	_bbt_start = _session.tempo_map().beat_at_frame (_start);
-	_bbt_end = _session.tempo_map().beat_at_frame (_end);
+	_start_beat = _session.tempo_map().exact_beat_at_frame (_start, sub_num);
+	_end_beat = _session.tempo_map().exact_beat_at_frame (_end, sub_num);
 }
 
 void
-Location::recompute_frames_from_bbt ()
+Location::recompute_frames_from_beat ()
 {
 	if (_position_lock_style != MusicTime) {
 		return;
 	}
 
 	TempoMap& map (_session.tempo_map());
-	set (map.frame_at_beat (_bbt_start), map.frame_at_beat (_bbt_end), false);
+	set (map.frame_at_beat (_start_beat), map.frame_at_beat (_end_beat), false);
 }
 
 void
@@ -1060,7 +1088,7 @@ Locations::set_state (const XMLNode& node, int version)
 
 	Location* session_range_location = 0;
 	if (version < 3000) {
-		session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange);
+		session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange, 0);
 		new_locations.push_back (session_range_location);
 	}
 

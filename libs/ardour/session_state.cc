@@ -634,7 +634,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 		/* Initial loop location, from absolute zero, length 10 seconds  */
 
-		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop);
+		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop, 0);
 		_locations->add (loc, true);
 		set_auto_loop_location (loc);
 	}
@@ -1220,7 +1220,7 @@ Session::state (bool full_state)
 		Locations loc (*this);
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
+		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
 		range->set (max_framepos, 0);
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();

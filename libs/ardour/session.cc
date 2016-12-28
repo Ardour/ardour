@@ -1682,7 +1682,7 @@ Session::set_session_extents (framepos_t start, framepos_t end)
 	Location* existing;
 	if ((existing = _locations->session_range_location()) == 0) {
 		//if there is no existing session, we need to make a new session location  (should never happen)
-		existing = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
+		existing = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
 	}
 
 	if (end <= start) {
@@ -5582,7 +5582,7 @@ void
 Session::update_locations_after_tempo_map_change (const Locations::LocationList& loc)
 {
 	for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
-		(*i)->recompute_frames_from_bbt ();
+		(*i)->recompute_frames_from_beat ();
 	}
 }
 
@@ -6340,7 +6340,7 @@ Session::current_end_frame () const
 void
 Session::set_session_range_location (framepos_t start, framepos_t end)
 {
-	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
+	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange, 0);
 	_locations->add (_session_range_location);
 }
 

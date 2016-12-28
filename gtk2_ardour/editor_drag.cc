@@ -4196,6 +4196,8 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
+	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+
 	/* now move them all */
 
 	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
@@ -4213,8 +4215,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		if (copy_location->is_mark()) {
 
 			/* now move it */
-
-			copy_location->set_start (copy_location->start() + f_delta);
+			copy_location->set_start (copy_location->start() + f_delta, false, true, divisions);
 
 		} else {
 
@@ -4224,27 +4225,27 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			if (is_start) { // start-of-range marker
 
 				if (move_both || (*x).move_both) {
-					copy_location->set_start (new_start);
-					copy_location->set_end (new_end);
+					copy_location->set_start (new_start, false, true, divisions);
+					copy_location->set_end (new_end, false, true, divisions);
 				} else	if (new_start < copy_location->end()) {
-					copy_location->set_start (new_start);
+					copy_location->set_start (new_start, false, true, divisions);
 				} else if (newframe > 0) {
 					//_editor->snap_to (next, RoundUpAlways, true);
-					copy_location->set_end (next);
-					copy_location->set_start (newframe);
+					copy_location->set_end (next, false, true, divisions);
+					copy_location->set_start (newframe, false, true, divisions);
 				}
 
 			} else { // end marker
 
 				if (move_both || (*x).move_both) {
-					copy_location->set_end (new_end);
-					copy_location->set_start (new_start);
+					copy_location->set_end (new_end, divisions);
+					copy_location->set_start (new_start, false, true, divisions);
 				} else if (new_end > copy_location->start()) {
-					copy_location->set_end (new_end);
+					copy_location->set_end (new_end, false, true, divisions);
 				} else if (newframe > 0) {
 					//_editor->snap_to (next, RoundDownAlways, true);
-					copy_location->set_start (next);
-					copy_location->set_end (newframe);
+					copy_location->set_start (next, false, true, divisions);
+					copy_location->set_end (newframe, false, true, divisions);
 				}
 			}
 		}
@@ -4321,6 +4322,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	MarkerSelection::iterator i;
 	CopiedLocationInfo::iterator x;
+	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 	bool is_start;
 
 	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
@@ -4339,9 +4341,9 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 				in_command = true;
 			}
 			if (location->is_mark()) {
-				location->set_start (((*x).location)->start());
+				location->set_start (((*x).location)->start(), false, true, divisions);
 			} else {
-				location->set (((*x).location)->start(), ((*x).location)->end());
+				location->set (((*x).location)->start(), ((*x).location)->end(), true, divisions);
 			}
 
 			if (location->is_session_range()) {
@@ -5536,7 +5538,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 			newloc = new Location (
 				*_editor->session(), _editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags
-				);
+				, _editor->get_grid_music_divisions (event->button.state));
 
 			_editor->session()->locations()->add (newloc, true);
 			XMLNode &after = _editor->session()->locations()->get_state();
