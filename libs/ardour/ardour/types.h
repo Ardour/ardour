@@ -249,6 +249,12 @@ namespace ARDOUR {
 		TrackColor
 	};
 
+	enum LocaleMode {
+		SET_LC_ALL,
+		SET_LC_MESSAGES,
+		SET_LC_MESSAGES_AND_LC_NUMERIC
+	};
+
 	enum RoundMode {
 		RoundDownMaybe  = -2,  ///< Round down only if necessary
 		RoundDownAlways = -1,  ///< Always round down, even if on a division
@@ -762,11 +768,13 @@ LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& s
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::LocaleMode& sf);
 
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::LocaleMode& sf);
 
 
 static inline ARDOUR::framepos_t
