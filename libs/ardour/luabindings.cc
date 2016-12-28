@@ -659,6 +659,9 @@ LuaBindings::common (lua_State* L)
 		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
 		.endClass ()
 
+		.beginClass <Progress> ("Progress")
+		.endClass ()
+
 		.beginClass <AudioRange> ("AudioRange")
 		.addConstructor <void (*) (framepos_t, framepos_t, uint32_t)> ()
 		.addFunction ("length", &AudioRange::length)
@@ -1104,6 +1107,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("audio_source", &AudioRegion::audio_source)
 		.addFunction ("set_scale_amplitude", &AudioRegion::set_scale_amplitude)
 		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
+		.addFunction ("maximum_amplitude", &AudioRegion::maximum_amplitude)
+		.addFunction ("rms", &AudioRegion::rms)
 		.endClass ()
 
 		.deriveWSPtrClass <Source, SessionObject> ("Source")
