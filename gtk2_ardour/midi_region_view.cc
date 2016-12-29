@@ -191,6 +191,8 @@ MidiRegionView::parameter_changed (std::string const & p)
 		if (_enable_display) {
 			redisplay_model();
 		}
+	} else if (p == "color-regions-using-track-color") {
+		set_colors ();
 	}
 }
 
@@ -311,6 +313,7 @@ MidiRegionView::init (bool wfd)
 	                                            gui_context ());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
 	connect_to_diskstream ();
 }
 
