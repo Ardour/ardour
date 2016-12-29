@@ -3339,20 +3339,21 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     ));
 
 	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "show-name-highlight",
-		     _("Use name highlight bars in region displays (requires a restart)"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
 			    _("Update transport clock display at FPS instead of every 100ms"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
 			    ));
+
+	add_option (S_("Preferences|GUI"),
+			new BoolOption (
+				"blink-rec-arm",
+				_("Blink Rec-Arm buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_rec_arm),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
+				));
+
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
@@ -3389,6 +3390,33 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (S_("Preferences|GUI"), slts);
 } // !mixbus
 
+	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Editor UI Options")));
+	add_option (_("GUI/Editor"),
+	     new BoolOption (
+		     "show-name-highlight",
+		     _("Use name highlight bars in region displays (requires a restart)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
+		     ));
+
+	add_option (_("GUI/Editor"),
+			new BoolOption (
+			"color-regions-using-track-color",
+			_("Color regions using their track's color"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
+			));
+
+	add_option (_("GUI/Editor"),
+			new BoolOption (
+			"show-waveform-clipping",
+			_("Show waveform clipping"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
+			));
+
+	add_option (_("GUI/Editor"), new OptionEditorBlank ());
+
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
 	*/
@@ -3400,8 +3428,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
 
-	add_option (
-		S_("Preferences|GUI"),
+	add_option (_("GUI/Mixer"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -3410,13 +3437,15 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			)
 		);
 
-	add_option (S_("Preferences|GUI"),
+	add_option (_("GUI/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
+
+	add_option (_("GUI/Mixer"), new OptionEditorBlank ());
 
 #ifdef ENABLE_NLS
 	OptionEditorHeading* i18n_head = new OptionEditorHeading (_("Internationalization"));

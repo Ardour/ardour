@@ -51,7 +51,6 @@ using namespace ARDOUR_UI_UTILS;
 
 ThemeManager::ThemeManager()
 {
-	Gtk::HBox* hbox;
 	BoolOption* bo;
 
 #ifndef __APPLE__
@@ -94,33 +93,6 @@ ThemeManager::ThemeManager()
 					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
 						"This requires a restart of %1 to take effect"), PROGRAM_NAME));
 	}
-
-	bo = new BoolOption (
-			"blink-rec-arm",
-			_("Blink Rec-Arm buttons"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_rec_arm),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
-			);
-	bo->add_to_page (this);
-	bo->set_state_from_config ();
-
-	bo = new BoolOption (
-			"color-regions-using-track-color",
-			_("Color regions using their track's color"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
-			);
-	bo->add_to_page (this);
-	bo->set_state_from_config ();
-
-	bo = new BoolOption (
-			"show-waveform-clipping",
-			_("Show waveform clipping"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
-			);
-	bo->add_to_page (this);
-	bo->set_state_from_config ();
 
 	bo = new BoolOption (
 			"flat-buttons",
