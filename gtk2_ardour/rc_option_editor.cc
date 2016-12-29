@@ -318,7 +318,7 @@ public:
 		HBox* box = manage (new HBox());
 		box->set_spacing (4);
 		box->pack_start (_limit_undo_spin, false, false);
-		box->pack_start (*l, false, false);
+		box->pack_start (*l, true, true);
 		t->attach (_limit_undo_button, 1, 2, n, n +1, FILL);
 		t->attach (*box, 2, 3, n, n + 1, FILL | EXPAND);
 
@@ -326,7 +326,7 @@ public:
 		box = manage (new HBox());
 		box->set_spacing (4);
 		box->pack_start (_save_undo_spin, false, false);
-		box->pack_start (*l, false, false);
+		box->pack_start (*l, true, true);
 		t->attach (_save_undo_button, 1, 2, n + 1, n + 2, FILL);
 		t->attach (*box, 2, 3, n + 1, n + 2, FILL | EXPAND);
 	}
@@ -2310,7 +2310,7 @@ RCOptionEditor::RCOptionEditor ()
 	psc->add (2.0, _("2.0 seconds"));
 	add_option (_("Transport"), psc);
 
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("Synchronization and Slave Options")));
+	add_option (_("Sync"), new OptionEditorHeading (S_("Synchronization and Slave Options")));
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
@@ -2319,7 +2319,7 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
 		);
 
-	add_option (_("Transport/Sync"), _sync_source);
+	add_option (_("Sync"), _sync_source);
 
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
@@ -2335,7 +2335,7 @@ RCOptionEditor::RCOptionEditor ()
 				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 
-	add_option (_("Transport/Sync"), _sync_framerate);
+	add_option (_("Sync"), _sync_framerate);
 
 	_sync_genlock = new BoolOption (
 		"timecode-source-is-synced",
@@ -2356,7 +2356,7 @@ RCOptionEditor::RCOptionEditor ()
 				  ), PROGRAM_NAME));
 
 
-	add_option (_("Transport/Sync"), _sync_genlock);
+	add_option (_("Sync"), _sync_genlock);
 
 	_sync_source_2997 = new BoolOption (
 		"timecode-source-2997",
@@ -2374,9 +2374,9 @@ RCOptionEditor::RCOptionEditor ()
 			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 			 ));
 
-	add_option (_("Transport/Sync"), _sync_source_2997);
+	add_option (_("Sync"), _sync_source_2997);
 
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Reader")));
+	add_option (_("Sync/LTC"), new OptionEditorHeading (S_("LTC Reader")));
 
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
@@ -2393,12 +2393,11 @@ RCOptionEditor::RCOptionEditor ()
 	populate_sync_options ();
 	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
 
-	add_option (_("Transport/Sync"), _ltc_port);
+	add_option (_("Sync/LTC"), _ltc_port);
 
-	// TODO; rather disable this button than not compile it..
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Generator")));
+	add_option (_("Sync/LTC"), new OptionEditorHeading (S_("LTC Generator")));
 
-	add_option (_("Transport/Sync"),
+	add_option (_("Sync/LTC"),
 		    new BoolOption (
 			    "send-ltc",
 			    _("Enable LTC generator"),
@@ -2415,7 +2414,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
-	add_option (_("Transport/Sync"), _ltc_send_continuously);
+	add_option (_("Sync/LTC"), _ltc_send_continuously);
 
 	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
@@ -2427,13 +2426,80 @@ RCOptionEditor::RCOptionEditor ()
 		(_ltc_volume_slider->tip_widget(),
 		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
-	add_option (_("Transport/Sync"), _ltc_volume_slider);
+	add_option (_("Sync/LTC"), _ltc_volume_slider);
+
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Clock")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-midi-clock",
+			    _("Send MIDI Clock"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
+			    ));
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-mtc",
+			    _("Send MIDI Time Code"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+		    new SpinOption<int> (
+			    "mtc-qf-speed-tolerance",
+			    _("Percentage either side of normal transport speed to transmit MTC"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
+			    0, 20, 1, 5
+			    ));
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "mmc-control",
+			    _("Obey MIDI Machine Control commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-mmc",
+			    _("Send MIDI Machine Control commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-receive-device-id",
+		     _("Inbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
+		     0, 128, 1, 10
+		     ));
+
+	add_option (_("Sync/MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-send-device-id",
+		     _("Outbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
+		     0, 128, 1, 10
+		     ));
+
 
 	/* EDITOR */
 
-	add_option (_("Editor"), new OptionEditorHeading (_("Editor Settings")));
+	add_option (_("Editing"), new OptionEditorHeading (_("Editor Settings")));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
 		     _("Make rubberband selection rectangle snap to the grid"),
@@ -2447,11 +2513,11 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
 		);
-	add_option (_("Editor"), bo);
+	add_option (_("Editing"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them"));
 
-	add_option (S_("Editor"),
+	add_option (S_("Editing"),
 	     new BoolOption (
 		     "draggable-playhead",
 		     _("Allow dragging of playhead"),
@@ -2460,7 +2526,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 if (!Profile->get_mixbus()) {
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 		    new BoolOption (
 			    "show-zoom-tools",
 			    _("Show zoom toolbar (if torn off)"),
@@ -2468,7 +2534,7 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
 			    ));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 		    new BoolOption (
 			    "use-mouse-position-as-zoom-focus-on-scroll",
 			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
@@ -2477,7 +2543,7 @@ if (!Profile->get_mixbus()) {
 			    ));
 }  // !mixbus
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 		    new BoolOption (
 			    "use-time-rulers-to-zoom-with-vertical-drag",
 			    _("Use time rulers area to zoom when clicking and dragging vertically"),
@@ -2485,7 +2551,7 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
 			    ));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 		    new BoolOption (
 			    "use-double-click-to-zoom-to-selection",
 			    _("Use double mouse click to zoom to selection"),
@@ -2493,7 +2559,7 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
 			    ));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 		    new BoolOption (
 			    "update-editor-during-summary-drag",
 			    _("Update editor window during drags of the summary"),
@@ -2501,7 +2567,7 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_update_editor_during_summary_drag)
 			    ));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 	    new BoolOption (
 		    "autoscroll-editor",
 		    _("Auto-scroll editor window when dragging near its edges"),
@@ -2509,7 +2575,7 @@ if (!Profile->get_mixbus()) {
 		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
 		    ));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
@@ -2519,9 +2585,9 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
 		     ));
 
-	add_option (_("Editor"), new OptionEditorHeading (_("Editor Behavior")));
+	add_option (_("Editing"), new OptionEditorHeading (_("Editor Behavior")));
 
-	add_option (_("Editor"),
+	add_option (_("Editing"),
 	     new BoolOption (
 		     "automation-follows-regions",
 		     _("Move relevant automation when audio regions are moved"),
@@ -2545,7 +2611,7 @@ if (!Profile->get_mixbus()) {
 	fadeshape->add (FadeSlow, _("Slow"));
 	fadeshape->add (FadeFast, _("Fast"));
 
-	add_option (_("Editor"), fadeshape);
+	add_option (_("Editing"), fadeshape);
 
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
@@ -2556,7 +2622,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     );
 
-	add_option (_("Editor"), bco);
+	add_option (_("Editing"), bco);
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
@@ -2567,7 +2633,7 @@ if (!Profile->get_mixbus()) {
 
 	lm->add (LaterHigher, _("later is higher"));
 	lm->add (Manual, _("manual layering"));
-	add_option (_("Editor"), lm);
+	add_option (_("Editing"), lm);
 
 	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
 		    "region-selection-after-split",
@@ -2585,54 +2651,7 @@ if (!Profile->get_mixbus()) {
 	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
 	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
 
-	add_option (_("Editor"), rsas);
-
-	add_option (_("Editor/Waveforms"), new OptionEditorHeading (_("Waveforms")));
-
-if (!Profile->get_mixbus()) {
-	add_option (_("Editor/Waveforms"),
-	     new BoolOption (
-		     "show-waveforms",
-		     _("Show waveforms in regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
-		     ));
-}  // !mixbus
-
-	add_option (_("Editor/Waveforms"),
-	     new BoolOption (
-		     "show-waveforms-while-recording",
-		     _("Show waveforms for audio while it is being recorded"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
-		     ));
-
-	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
-		"waveform-scale",
-		_("Waveform scale"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
-		);
-
-	wfs->add (Linear, _("linear"));
-	wfs->add (Logarithmic, _("logarithmic"));
-
-	add_option (_("Editor/Waveforms"), wfs);
-
-	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
-		"waveform-shape",
-		_("Waveform shape"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
-		);
-
-	wfsh->add (Traditional, _("traditional"));
-	wfsh->add (Rectified, _("rectified"));
-
-	add_option (_("Editor/Waveforms"), wfsh);
-
-	add_option (_("Editor/Waveforms"), new ClipLevelOptions ());
-
+	add_option (_("Editing"), rsas);
 
 	/* AUDIO */
 
@@ -2976,72 +2995,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("MIDI/Ports"), new MidiPortOptions ());
 	add_option (_("MIDI/Ports"), new OptionEditorBlank ());
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-midi-clock",
-			    _("Send MIDI Clock"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
-			    ));
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-mtc",
-			    _("Send MIDI Time Code"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-		    new SpinOption<int> (
-			    "mtc-qf-speed-tolerance",
-			    _("Percentage either side of normal transport speed to transmit MTC"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
-			    0, 20, 1, 5
-			    ));
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "mmc-control",
-			    _("Obey MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-mmc",
-			    _("Send MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-	     new SpinOption<uint8_t> (
-		     "mmc-receive-device-id",
-		     _("Inbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 128, 1, 10
-		     ));
-
-	add_option (_("MIDI/Sync"),
-	     new SpinOption<uint8_t> (
-		     "mmc-send-device-id",
-		     _("Outbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
-		     0, 128, 1, 10
-		     ));
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
 
 	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
@@ -3407,6 +3360,54 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
 			));
+
+
+	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Waveforms")));
+
+if (!Profile->get_mixbus()) {
+	add_option (_("GUI/Editor"),
+	     new BoolOption (
+		     "show-waveforms",
+		     _("Show waveforms in regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
+		     ));
+}  // !mixbus
+
+	add_option (_("GUI/Editor"),
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms for audio while it is being recorded"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
+		     ));
+
+	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
+		"waveform-scale",
+		_("Waveform scale"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
+		);
+
+	wfs->add (Linear, _("linear"));
+	wfs->add (Logarithmic, _("logarithmic"));
+
+	add_option (_("GUI/Editor"), wfs);
+
+	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
+		"waveform-shape",
+		_("Waveform shape"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
+		);
+
+	wfsh->add (Traditional, _("traditional"));
+	wfsh->add (Rectified, _("rectified"));
+
+	add_option (_("GUI/Editor"), wfsh);
+
+	add_option (_("GUI/Editor"), new ClipLevelOptions ());
+
 
 	add_option (_("GUI/Editor"), new OptionEditorBlank ());
 
