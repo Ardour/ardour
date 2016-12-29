@@ -317,7 +317,7 @@ public:
 		Label* l = manage (left_aligned_label (_("commands")));
 		HBox* box = manage (new HBox());
 		box->set_spacing (4);
-		box->pack_start (_limit_undo_spin, true, true);
+		box->pack_start (_limit_undo_spin, false, false);
 		box->pack_start (*l, false, false);
 		t->attach (_limit_undo_button, 1, 2, n, n +1, FILL);
 		t->attach (*box, 2, 3, n, n + 1, FILL | EXPAND);
@@ -325,7 +325,7 @@ public:
 		l = manage (left_aligned_label (_("commands")));
 		box = manage (new HBox());
 		box->set_spacing (4);
-		box->pack_start (_save_undo_spin, true, true);
+		box->pack_start (_save_undo_spin, false, false);
 		box->pack_start (*l, false, false);
 		t->attach (_save_undo_button, 1, 2, n + 1, n + 2, FILL);
 		t->attach (*box, 2, 3, n + 1, n + 2, FILL | EXPAND);
@@ -2919,8 +2919,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    _("MIDI read-ahead time (seconds)"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
-			    0.1, 10, 0.1, 1,
-			    "", 1.0, 1
+			    0.1, 10, 0.05, 1,
+			    "", 1.0, 2
 			    ));
 
 	add_option (_("MIDI"),
