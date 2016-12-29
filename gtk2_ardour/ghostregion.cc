@@ -343,9 +343,8 @@ MidiGhostRegion::add_note (NoteBase* n)
 		uint8_t const note_num = n->note()->note();
 		double const  h        = note_height(trackview, mv);
 		double const  y        = note_y(trackview, mv, note_num);
-		if (n->x0() < base_rect->x0() || n->x1() > base_rect->x1()) {
-			event->item->hide();
-		} else if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+
+		if (!n->item()->visible()) {
 			event->item->hide();
 		} else {
 			if (!event->is_hit) {
