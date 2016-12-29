@@ -1193,8 +1193,8 @@ MidiRegionView::redisplay_model()
 	if (!empty_when_starting) {
 		MidiModel::Notes::iterator f;
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
-			boost::shared_ptr<NoteType> note = (*i)->note();
 			NoteBase* cne = (*i);
+			boost::shared_ptr<NoteType> note = cne->note();
 
 			/* if event item's note exists in the model, we can just update it.
 			 * don't mark it as missing.
