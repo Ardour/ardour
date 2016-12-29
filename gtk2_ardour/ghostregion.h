@@ -86,6 +86,7 @@ public:
 
 	    NoteBase* event;
 	    ArdourCanvas::Item* item;
+	    bool is_hit;
 	};
 
 	MidiGhostRegion(RegionView& rv,

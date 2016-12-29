@@ -222,6 +222,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	if (dynamic_cast<Note*>(e)) {
 		item = new ArdourCanvas::Rectangle(
 			g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
+		is_hit = false;
 	} else {
 		Hit* hit = dynamic_cast<Hit*>(e);
 		if (!hit) {
@@ -231,6 +232,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 		poly->set(Hit::points(e->y1() - e->y0()));
 		poly->set_position(hit->position());
 		item = poly;
+		is_hit = true;
 	}
 
 	CANVAS_DEBUG_NAME (item, "ghost note item");
@@ -313,9 +315,11 @@ MidiGhostRegion::update_contents_height ()
 
 		double const y = note_y(trackview, mv, note_num);
 
-		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(it->second->item))) {
+		if (!it->second->is_hit) {
+			_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(it->second->item);
 			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
-		} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(it->second->item))) {
+		} else {
+			_tmp_poly = static_cast<ArdourCanvas::Polygon*>(it->second->item);
 			Duple position = _tmp_poly->position();
 			position.y = y;
 			_tmp_poly->set_position(position);
@@ -344,9 +348,11 @@ MidiGhostRegion::add_note (NoteBase* n)
 		} else if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 			event->item->hide();
 		} else {
-			if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
+			if (!event->is_hit) {
+				_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(event->item);
 				_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
-			} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(event->item))) {
+			} else {
+				_tmp_poly = static_cast<ArdourCanvas::Polygon*>(event->item);
 				Duple position = _tmp_poly->position();
 				position.y = y;
 				_tmp_poly->set_position(position);
@@ -389,10 +395,10 @@ MidiGhostRegion::update_note (Note* note, bool hide)
 
 	if (hide) {
 		ev->item->hide();
-	} else {
-		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
-			_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
-		}
+	} else if (!ev->is_hit) {
+		_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(ev->item);
+		_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
+
 		ev->item->show();
 	}
 }
@@ -419,17 +425,18 @@ MidiGhostRegion::update_hit (Hit* hit, bool hide)
 
 	double const h = note_height(trackview, mv);
 	double const y = note_y(trackview, mv, note_num);
+
 	if (hide) {
 		ev->item->hide();
-	} else {
-		if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
-			ArdourCanvas::Duple ppos = hit->position();
-			ArdourCanvas::Duple gpos = _tmp_poly->position();
-			gpos.x = ppos.x;
-			gpos.y = y;
-			_tmp_poly->set_position(gpos);
-			_tmp_poly->set(Hit::points(h));
-		}
+	} else if (ev->is_hit) {
+		_tmp_poly = static_cast<ArdourCanvas::Polygon*>(ev->item);
+		ArdourCanvas::Duple ppos = hit->position();
+		ArdourCanvas::Duple gpos = _tmp_poly->position();
+		gpos.x = ppos.x;
+		gpos.y = y;
+		_tmp_poly->set_position(gpos);
+		_tmp_poly->set(Hit::points(h));
+
 		ev->item->show();
 	}
 }
