@@ -3674,9 +3674,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	/* and now the theme manager */
 
-	ThemeManager* tm = manage (new ThemeManager);
 	add_option (_("Theme"), new OptionEditorHeading (_("Theme")));
-	add_page (_("Theme"), *tm);
+	add_option (_("Theme"), new ThemeManager);
 
 	add_option (_("Theme/Colors"), new OptionEditorHeading (_("Colors")));
 	add_option (_("Theme/Colors"), new ColorThemeManager);

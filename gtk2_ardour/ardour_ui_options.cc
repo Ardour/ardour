@@ -437,6 +437,17 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());
+	} else if (p == "show-waveform-clipping") {
+		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
+	} else if (p == "waveform-gradient-depth") {
+		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+	} else if (p == "flat-buttons") {
+		bool flat = UIConfiguration::instance().get_flat_buttons();
+		if (ArdourButton::flat_buttons () != flat) {
+			ArdourButton::set_flat_buttons (flat);
+			/* force a redraw */
+			gtk_rc_reset_styles (gtk_settings_get_default());
+		}
 	}
 }
 
