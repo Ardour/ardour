@@ -59,7 +59,7 @@ OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
 }
 
 void
-OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb)
+OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb, bool expand)
 {
 	int const n = p->table.property_n_rows();
 	int m = n + 1;
@@ -69,8 +69,13 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 
 	p->table.resize (m, 3);
 	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
-	p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
-
+	if (expand) {
+		p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
+	} else {
+		Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+		a->add (*wb);
+		p->table.attach (*a, 2, 3, n, n + 1, FILL | EXPAND);
+	}
 	maybe_add_note (p, n + 1);
 }
 

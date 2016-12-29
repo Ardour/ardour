@@ -72,7 +72,7 @@ public:
 	virtual void add_to_page (OptionEditorPage *) = 0;
 
 	void add_widget_to_page (OptionEditorPage*, Gtk::Widget*);
-	void add_widgets_to_page (OptionEditorPage*, Gtk::Widget*, Gtk::Widget*);
+	void add_widgets_to_page (OptionEditorPage*, Gtk::Widget*, Gtk::Widget*, bool expand = true);
 
 	void set_note (std::string const &);
 
@@ -509,7 +509,7 @@ public:
 
 	void add_to_page (OptionEditorPage* p)
 	{
-		add_widgets_to_page (p, _label, _box);
+		add_widgets_to_page (p, _label, _box, false);
 	}
 
 	void changed ()
