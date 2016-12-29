@@ -1204,6 +1204,10 @@ MidiRegionView::redisplay_model()
 					cne->validate();
 					missing_notes.erase (f);
 				} else {
+					if (cne->selected()) {
+						_marked_for_selection.insert (note);
+					}
+
 					cne->invalidate();
 				}
 
