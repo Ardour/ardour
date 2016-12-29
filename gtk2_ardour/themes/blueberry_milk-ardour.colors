@@ -97,7 +97,7 @@
     <Color name="color 90" value="0x222020ff"/>
     <Color name="color 91" value="0x8ef823ff"/>
     <Color name="color 92" value="0xcfdee4ff"/>
-    <Color name="color 93" value="0x51578aff"/>
+    <Color name="color 93" value="0x2F3880ff"/>
     <Color name="color 94" value="0x636363ff"/>
     <Color name="color 95" value="0xe4f4d3ff"/>
     <Color name="color 96" value="0x85e524ff"/>
@@ -172,7 +172,7 @@
     <ColorAlias name="ghost track wave fill" alias="color 29"/>
     <ColorAlias name="ghost track zero line" alias="color 30"/>
     <ColorAlias name="gtk_arm" alias="color 9"/>
-    <ColorAlias name="gtk_audio_bus" alias="color 2"/>
+    <ColorAlias name="gtk_audio_bus" alias="color 4"/>
     <ColorAlias name="gtk_audio_track" alias="color 16"/>
     <ColorAlias name="gtk_automation_track_header" alias="color 13"/>
     <ColorAlias name="gtk_background" alias="color 22"/>
@@ -180,7 +180,7 @@
     <ColorAlias name="gtk_bg_selected" alias="color 99"/>
     <ColorAlias name="gtk_bg_tooltip" alias="color 52"/>
     <ColorAlias name="gtk_bright_color" alias="color 74"/>
-    <ColorAlias name="gtk_bright_indicator" alias="color 9"/>
+    <ColorAlias name="gtk_bright_indicator" alias="color 23"/>
     <ColorAlias name="gtk_clip_indicator" alias="color 9"/>
     <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
     <ColorAlias name="gtk_control_master" alias="color 64"/>
@@ -210,9 +210,9 @@
     <ColorAlias name="gtk_send_fg" alias="color 24"/>
     <ColorAlias name="gtk_solo" alias="color 91"/>
     <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
-    <ColorAlias name="gtk_texts" alias="color 7"/>
+    <ColorAlias name="gtk_texts" alias="color 27"/>
     <ColorAlias name="gtk_track_header_inactive" alias="color 34"/>
-    <ColorAlias name="gtk_track_header_selected" alias="color 59"/>
+    <ColorAlias name="gtk_track_header_selected" alias="color 23"/>
     <ColorAlias name="image track" alias="color 31"/>
     <ColorAlias name="inactive crossfade" alias="color 32"/>
     <ColorAlias name="inactive fade handle" alias="color 33"/>
@@ -397,7 +397,7 @@
     <ColorAlias name="secondary delta clock: text" alias="color 92"/>
     <ColorAlias name="selected midi note frame" alias="color 63"/>
     <ColorAlias name="selected region base" alias="color 22"/>
-    <ColorAlias name="selected time axis frame" alias="color 86"/>
+    <ColorAlias name="selected time axis frame" alias="color 85"/>
     <ColorAlias name="selected waveform fill" alias="color 21"/>
     <ColorAlias name="selected waveform outline" alias="color 67"/>
     <ColorAlias name="selection" alias="color 94"/>
@@ -493,7 +493,7 @@
     <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
     <Modifier name="dragging region" modifier="= alpha:0.9"/>
-    <Modifier name="editable region" modifier="= alpha:0.0752019"/>
+    <Modifier name="editable region" modifier="= alpha:0.14"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
     <Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
