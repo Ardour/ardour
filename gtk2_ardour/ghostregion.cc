@@ -273,8 +273,8 @@ MidiGhostRegion::set_colors()
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it).second->item->set_fill_color (UIConfiguration::instance().color_mod((*it).second->event->base_color(), "ghost track midi fill"));
-		(*it).second->item->set_outline_color (_outline);
+		it->second->item->set_fill_color (UIConfiguration::instance().color_mod((*it).second->event->base_color(), "ghost track midi fill"));
+		it->second->item->set_outline_color (_outline);
 	}
 }
 
@@ -309,13 +309,13 @@ MidiGhostRegion::update_contents_height ()
 	double const h = note_height(trackview, mv);
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		uint8_t const note_num = (*it).second->event->note()->note();
+		uint8_t const note_num = it->second->event->note()->note();
 
 		double const y = note_y(trackview, mv, note_num);
 
-		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it).second->item))) {
+		if ((_tmp_rect = dynamic_cast<ArdourCanvas::Rectangle*>(it->second->item))) {
 			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
-		} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>((*it).second->item))) {
+		} else if ((_tmp_poly = dynamic_cast<ArdourCanvas::Polygon*>(it->second->item))) {
 			Duple position = _tmp_poly->position();
 			position.y = y;
 			_tmp_poly->set_position(position);
@@ -442,7 +442,7 @@ MidiGhostRegion::remove_note (NoteBase* note)
 		return;
 	}
 
-	delete (*f).second;
+	delete f->second;
 	events.erase (f);
 
 	_optimization_iterator = events.end ();
@@ -462,14 +462,14 @@ MidiGhostRegion::find_event (NoteBase* parent)
 
 	if (_optimization_iterator != events.end()) {
 		++_optimization_iterator;
-		if (_optimization_iterator != events.end() && (*_optimization_iterator).second->event == parent) {
-			return (*_optimization_iterator).second;
+		if (_optimization_iterator != events.end() && _optimization_iterator->second->event == parent) {
+			return _optimization_iterator->second;
 		}
 	}
 
 	_optimization_iterator = events.find (parent->note());
 	if (_optimization_iterator != events.end()) {
-		return (*_optimization_iterator).second;
+		return _optimization_iterator->second;
 	}
 
 	return 0;

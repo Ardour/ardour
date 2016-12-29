@@ -1140,7 +1140,7 @@ MidiRegionView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 	PatchChanges::const_iterator f = _patch_changes.find (p);
 
 	if (f != _patch_changes.end()) {
-		return (*f).second;
+		return f->second;
 	}
 
 	return boost::shared_ptr<PatchChange>();
@@ -1194,36 +1194,36 @@ MidiRegionView::redisplay_model()
 		MidiModel::Notes::iterator f;
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 			boost::shared_ptr<NoteType> note = (*i)->note();
+			NoteBase* cne = (*i);
 
 			/* if event item's note exists in the model, we can just update it.
 			 * don't mark it as missing.
 			*/
 			if ((f = missing_notes.find (note)) != missing_notes.end()) {
 				if ((*f) == note) {
-					(*i)->validate();
+					cne->validate();
 					missing_notes.erase (f);
 				} else {
-					(*i)->invalidate();
+					cne->invalidate();
 				}
 
 			} else {
-				(*i)->invalidate();
+				cne->invalidate();
 			}
 			/* remove note items that are no longer valid */
-			if (!(*i)->valid()) {
+			if (!cne->valid()) {
 
 				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
 					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
 					if (gr) {
-						gr->remove_note (*i);
+						gr->remove_note (cne);
 					}
 				}
 
-				delete *i;
+				delete cne;
 				i = _events.erase (i);
 
 			} else {
-				NoteBase* cne = (*i);
 				bool visible;
 				bool update = false;
 
@@ -1968,7 +1968,7 @@ MidiRegionView::remove_canvas_patch_change (PatchChange* pc)
 {
 	/* remove the canvas item */
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x).second->patch() == pc->patch()) {
+		if (x->second->patch() == pc->patch()) {
 			_patch_changes.erase (x);
 			break;
 		}
@@ -2061,7 +2061,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	trackview.editor().commit_reversible_command ();
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x).second->patch() == old_change) {
+		if (x->second->patch() == old_change) {
 			_patch_changes.erase (x);
 			break;
 		}
