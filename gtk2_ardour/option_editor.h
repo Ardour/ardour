@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __gtk_ardour_option_editor_h__
@@ -77,7 +76,7 @@ public:
 
 	void set_note (std::string const &);
 
-        virtual Gtk::Widget& tip_widget() = 0;
+	virtual Gtk::Widget& tip_widget() = 0;
 
 protected:
 	void maybe_add_note (OptionEditorPage *, int);
@@ -95,39 +94,26 @@ public:
 	void set_state_from_config () {}
 	void add_to_page (OptionEditorPage *);
 
-        Gtk::Widget& tip_widget() { return *_label; }
+	Gtk::Widget& tip_widget() { return *_label; }
 
 private:
 	Gtk::Label* _label; ///< the label used for the heading
 };
 
-/** A component which provides a box into which a subclass can put arbitrary widgets */
-class OptionEditorBox : public OptionEditorComponent
+/** Expanding layout helper to push elements to the left on a single column page  */
+class OptionEditorBlank : public OptionEditorComponent
 {
 public:
+	OptionEditorBlank () {}
 
-	/** Construct an OpenEditorBox */
-	OptionEditorBox ()
-	{
-		_box = Gtk::manage (new Gtk::VBox);
-		_box->set_spacing (4);
-	}
+	void parameter_changed (std::string const &) {}
+	void set_state_from_config () {}
+	void add_to_page (OptionEditorPage *);
 
-	void parameter_changed (std::string const &) = 0;
-	void set_state_from_config () = 0;
-	virtual void add_to_page (OptionEditorPage *);
+	Gtk::Widget& tip_widget() { return _dummy; }
 
-	Gtk::Widget& tip_widget() { return *_box->children().front().get_widget(); }
-
-protected:
-
-	Gtk::VBox* _box; ///< constituent box for subclasses to add widgets to
-};
-
-class OptionEditorPageBox : public OptionEditorBox
-{
-public:
-	virtual void add_to_page (OptionEditorPage *);
+private:
+	Gtk::EventBox _dummy;
 };
 
 class RcConfigDisplay : public OptionEditorComponent
@@ -192,7 +178,6 @@ public:
 	}
 
 protected:
-
 	std::string _id;
 	std::string _name;
 };
@@ -201,7 +186,6 @@ protected:
 class BoolOption : public Option
 {
 public:
-
 	BoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
@@ -213,7 +197,6 @@ public:
 	Gtk::Widget& tip_widget() { return *_button; }
 
 protected:
-
 	virtual void toggled ();
 
 	sigc::slot<bool>       _get; ///< slot to get the configuration variable's value
@@ -226,6 +209,7 @@ class RouteDisplayBoolOption : public BoolOption
 {
 public:
 	RouteDisplayBoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
+
 protected:
 	virtual void toggled ();
 };
@@ -251,7 +235,6 @@ private:
 class EntryOption : public Option
 {
 public:
-
 	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
@@ -261,7 +244,6 @@ public:
 	Gtk::Widget& tip_widget() { return *_entry; }
 
 private:
-
 	void activated ();
 	bool focus_out (GdkEventFocus*);
 	void filter_text (const Glib::ustring&, int*);
@@ -281,7 +263,6 @@ template <class T>
 class ComboOption : public Option
 {
 public:
-
 	/** Construct an ComboOption.
 	 *  @param i id
 	 *  @param n User-visible name.
@@ -294,9 +275,9 @@ public:
 		sigc::slot<T> g,
 		sigc::slot<bool, T> s
 		)
-		: Option (i, n),
-		  _get (g),
-		  _set (s)
+		: Option (i, n)
+		, _get (g)
+		, _set (s)
 	{
 		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
@@ -304,7 +285,8 @@ public:
 		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboOption::changed));
 	}
 
-	void set_state_from_config () {
+	void set_state_from_config ()
+	{
 		uint32_t r = 0;
 		while (r < _options.size() && _get () != _options[r]) {
 			++r;
@@ -324,31 +306,33 @@ public:
 	 *  @param e Enumeration.
 	 *  @param o User-visible name for this value.
 	 */
-	void add (T e, std::string const & o) {
+	void add (T e, std::string const & o)
+	{
 		_options.push_back (e);
 		_combo->append_text (o);
 	}
 
-	void clear () {
+	void clear ()
+	{
 		_combo->clear_items();
 		_options.clear ();
 	}
 
-	void changed () {
+	void changed ()
+	{
 		uint32_t const r = _combo->get_active_row_number ();
 		if (r < _options.size()) {
 			_set (_options[r]);
 		}
 	}
-
-	void set_sensitive (bool yn) {
+	void set_sensitive (bool yn)
+	{
 		_combo->set_sensitive (yn);
 	}
 
-        Gtk::Widget& tip_widget() { return *_combo; }
+	Gtk::Widget& tip_widget() { return *_combo; }
 
 private:
-
 	sigc::slot<T> _get;
 	sigc::slot<bool, T> _set;
 	Gtk::Label* _label;
@@ -362,71 +346,36 @@ private:
 class HSliderOption : public Option
 {
 public:
-
-	/** Construct an ComboOption.
-	 *  @param i id
-	 *  @param n User-visible name.
-	 *  @param g Slot to get the variable's value.
-	 *  @param s Slot to set the variable's value.
-	 */
 	HSliderOption (
-		std::string const & i,
-		std::string const & n,
-		Gtk::Adjustment &adj
-		)
-		: Option (i, n)
-	{
-		_label = Gtk::manage (new Gtk::Label (n + ":"));
-		_label->set_alignment (0, 0.5);
-		_hscale = Gtk::manage (new Gtk::HScale(adj));
-		_adj = NULL;
-	}
+			std::string const& i,
+			std::string const& n,
+			sigc::slot<float> g,
+			sigc::slot<bool, float> s,
+			double lower, double upper,
+			double step_increment = 1,
+			double page_increment = 10,
+			double mult = 1.0,
+			bool logarithmic = false
+		);
 
-	HSliderOption (
-		std::string const & i,
-		std::string const & n,
-		Gtk::Adjustment *adj,
-		sigc::slot<float> g,
-		sigc::slot<bool, float> s
-		)
-		: Option (i, n)
-		, _get (g)
-		, _set (s)
-		, _adj (adj)
-	{
-		_label = Gtk::manage (new Gtk::Label (n + ":"));
-		_label->set_alignment (0, 0.5);
-		_hscale = Gtk::manage (new Gtk::HScale(*_adj));
-		_adj->signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
-	}
+	void set_state_from_config ();
+	virtual void changed ();
+	void add_to_page (OptionEditorPage* p);
+	void set_sensitive (bool yn);
 
-	void set_state_from_config () {
-		if (_adj) _adj->set_value (_get());
-	}
+	Gtk::Widget& tip_widget() { return _hscale; }
+	Gtk::HScale& scale() { return _hscale; }
 
-	void changed () {
-		if (_adj) _set (_adj->get_value ());
-	}
-
-	void add_to_page (OptionEditorPage* p)
-	{
-		add_widgets_to_page (p, _label, _hscale);
-	}
-
-	void set_sensitive (bool yn) {
-		_hscale->set_sensitive (yn);
-	}
-
-	Gtk::Widget& tip_widget() { return *_hscale; }
-	Gtk::HScale& scale() { return *_hscale; }
-
-private:
+protected:
 	sigc::slot<float> _get;
 	sigc::slot<bool, float> _set;
-	Gtk::Label* _label;
-	Gtk::HScale* _hscale;
-	Gtk::Adjustment* _adj;
+	Gtk::Adjustment _adj;
+	Gtk::HScale _hscale;
+	Gtk::Label _label;
+	double _mult;
+	bool _log;
 };
+
 
 /** Component which provides the UI to handle an enumerated option using a GTK ComboBox.
  *  The template parameter is the enumeration.
@@ -434,7 +383,6 @@ private:
 class ComboStringOption : public Option
 {
 public:
-
 	/** Construct an ComboOption.
 	 *  @param i id
 	 *  @param n User-visible name.
@@ -446,53 +394,25 @@ public:
 		std::string const & n,
 		sigc::slot<std::string> g,
 		sigc::slot<bool, std::string> s
-		)
-		: Option (i, n),
-		  _get (g),
-		  _set (s)
-	{
-		_label = Gtk::manage (new Gtk::Label (n + ":"));
-		_label->set_alignment (0, 0.5);
-		_combo = Gtk::manage (new Gtk::ComboBoxText);
-		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboStringOption::changed));
-	}
+		);
 
-	void set_state_from_config () {
-		_combo->set_active_text (_get());
-	}
-
-	void add_to_page (OptionEditorPage* p)
-	{
-		add_widgets_to_page (p, _label, _combo);
-	}
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage* p);
 
 	/** Set the allowed strings for this option
 	 *  @param strings a vector of allowed strings
 	 */
-        void set_popdown_strings (const std::vector<std::string>& strings) {
-		_combo->clear_items ();
-		for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
-			_combo->append_text (*i);
-		}
-	}
+	void set_popdown_strings (const std::vector<std::string>& strings);
 
-	void clear () {
-		_combo->clear_items();
-	}
+	void clear ();
+	void changed ();
+	void set_sensitive (bool yn);
 
-	void changed () {
-		_set (_combo->get_active_text ());
-	}
-
-	void set_sensitive (bool yn) {
-		_combo->set_sensitive (yn);
-	}
-
-        Gtk::Widget& tip_widget() { return *_combo; }
+	Gtk::Widget& tip_widget() { return *_combo; }
 
 private:
-        sigc::slot<std::string> _get;
-        sigc::slot<bool, std::string> _set;
+	sigc::slot<std::string> _get;
+	sigc::slot<bool, std::string> _set;
 	Gtk::Label* _label;
 	Gtk::ComboBoxText* _combo;
 };
@@ -504,7 +424,6 @@ private:
 class BoolComboOption : public Option
 {
 public:
-
 	BoolComboOption (
 		std::string const &,
 		std::string const &,
@@ -519,16 +438,14 @@ public:
 	void changed ();
 	void set_sensitive (bool);
 
-        Gtk::Widget& tip_widget() { return *_combo; }
+	Gtk::Widget& tip_widget() { return *_combo; }
 
 private:
-
 	sigc::slot<bool> _get;
 	sigc::slot<bool, bool> _set;
 	Gtk::Label* _label;
 	Gtk::ComboBoxText* _combo;
 };
-
 
 
 /** Component which provides the UI to handle an numeric option using a GTK SpinButton */
@@ -562,10 +479,10 @@ public:
 		float scale = 1,
 		unsigned digits = 0
 		)
-		: Option (i, n),
-		  _get (g),
-		  _set (s),
-		  _scale (scale)
+		: Option (i, n)
+		, _get (g)
+		, _set (s)
+		, _scale (scale)
 	{
 		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
@@ -600,7 +517,7 @@ public:
 		_set (static_cast<T> (_spin->get_value ()) * _scale);
 	}
 
-        Gtk::Widget& tip_widget() { return *_spin; }
+	Gtk::Widget& tip_widget() { return *_spin; }
 
 private:
 	sigc::slot<T> _get;
@@ -619,7 +536,7 @@ public:
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
 
-        Gtk::Widget& tip_widget() { return *_db_slider; }
+	Gtk::Widget& tip_widget() { return *_db_slider; }
 
 private:
 	void db_changed ();
@@ -644,8 +561,8 @@ public:
 	void add_to_page (OptionEditorPage *);
 	void set_session (ARDOUR::Session *);
 
-        Gtk::Widget& tip_widget() { return _clock; }
-        AudioClock& clock() { return _clock; }
+	Gtk::Widget& tip_widget() { return _clock; }
+	AudioClock& clock() { return _clock; }
 
 private:
 	void save_clock_time ();
@@ -664,7 +581,7 @@ public:
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
 
-        Gtk::Widget& tip_widget() { return _file_chooser; }
+	Gtk::Widget& tip_widget() { return _file_chooser; }
 
 private:
 	void selection_changed ();
@@ -692,6 +609,22 @@ private:
 	void init ();
 };
 
+class OptionEditorMiniPage : public OptionEditorComponent, public OptionEditorPage
+{
+public:
+	OptionEditorMiniPage ()
+	{
+		box.pack_start (table, false, false);
+		box.set_border_width (0);
+	}
+
+	void parameter_changed (std::string const &) = 0;
+	void set_state_from_config () = 0;
+	virtual void add_to_page (OptionEditorPage*);
+
+	Gtk::Widget& tip_widget() { return *table.children().front().get_widget(); }
+};
+
 /** The OptionEditor dialog base class */
 class OptionEditor : virtual public sigc::trackable
 {
@@ -713,14 +646,14 @@ protected:
 
 	class OptionColumns : public Gtk::TreeModel::ColumnRecord
 	{
-          public:
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<Gtk::Widget*> widget;
+		public:
+			Gtk::TreeModelColumn<std::string> name;
+			Gtk::TreeModelColumn<Gtk::Widget*> widget;
 
-		OptionColumns() {
-			add (name);
-			add (widget);
-		}
+			OptionColumns() {
+				add (name);
+				add (widget);
+			}
 	};
 
 	OptionColumns option_columns;

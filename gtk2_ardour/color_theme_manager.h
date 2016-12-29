@@ -39,7 +39,7 @@ namespace ArdourCanvas {
 
 class ArdourDialog;
 
-class ColorThemeManager : public OptionEditorPageBox
+class ColorThemeManager : public OptionEditorMiniPage
 {
   public:
 	ColorThemeManager();

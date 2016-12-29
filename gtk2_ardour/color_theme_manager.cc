@@ -61,14 +61,10 @@ ColorThemeManager::ColorThemeManager ()
 	, palette_window (0)
 	, color_theme_label (_("Color Theme"))
 {
-	Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Colors"))));
-	l->set_alignment (0, 0.5);
-	l->set_use_markup (true);
-	_box->pack_start (*l, false, false);
-
 	std::map<string,string> color_themes;
 
 	get_color_themes (color_themes);
+	int n = 0;
 
 	if (color_themes.size() > 1) {
 		theme_list = TreeStore::create (color_theme_columns);
@@ -108,8 +104,9 @@ ColorThemeManager::ColorThemeManager ()
 		hbox->set_spacing (6);
 		hbox->pack_start (color_theme_label, false, false);
 		hbox->pack_start (*align, true, true);
-		_box->pack_start (*hbox, PACK_SHRINK);
 		hbox->show_all ();
+		table.attach (*hbox, 0, 3, n, n + 1);
+		++n;
 	}
 
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ColorThemeManager::reset_canvas_colors));
@@ -149,8 +146,9 @@ ColorThemeManager::ColorThemeManager ()
 
 	notebook.set_size_request (400, 400);
 
-	_box->pack_start (notebook, true, true, 6);
-	_box->pack_start (reset_button, false, false);
+	table.attach (notebook, 0, 3, n, n + 1);
+	++n;
+	table.attach (reset_button, 0, 3, n, n + 1);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
@@ -164,8 +162,6 @@ ColorThemeManager::ColorThemeManager ()
 	setup_modifiers ();
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ColorThemeManager::colors_changed));
-
-	_box->show_all ();
 }
 
 

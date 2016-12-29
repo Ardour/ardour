@@ -77,7 +77,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-class ClickOptions : public OptionEditorPageBox, public OptionEditorPage
+class ClickOptions : public OptionEditorMiniPage
 {
 public:
 	ClickOptions (RCConfiguration* c)
@@ -122,8 +122,6 @@ public:
 
 		fo->add_to_page (this);
 		fo->set_state_from_config ();
-
-		_box->pack_start (table, true, true);
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
@@ -241,7 +239,7 @@ private:
 	Button _click_emphasis_browse_button;
 };
 
-class UndoOptions : public OptionEditorBox
+class UndoOptions : public OptionEditorComponent
 {
 public:
 	UndoOptions (RCConfiguration* c) :
@@ -249,24 +247,11 @@ public:
 		_limit_undo_button (_("Limit undo history to")),
 		_save_undo_button (_("Save undo history of"))
 	{
-		Table* t = new Table (2, 3);
-		t->set_spacings (4);
-
-		t->attach (_limit_undo_button, 0, 1, 0, 1, FILL);
 		_limit_undo_spin.set_range (0, 512);
 		_limit_undo_spin.set_increments (1, 10);
-		t->attach (_limit_undo_spin, 1, 2, 0, 1, FILL | EXPAND);
-		Label* l = manage (left_aligned_label (_("commands")));
-		t->attach (*l, 2, 3, 0, 1);
 
-		t->attach (_save_undo_button, 0, 1, 1, 2, FILL);
 		_save_undo_spin.set_range (0, 512);
 		_save_undo_spin.set_increments (1, 10);
-		t->attach (_save_undo_spin, 1, 2, 1, 2, FILL | EXPAND);
-		l = manage (left_aligned_label (_("commands")));
-		t->attach (*l, 2, 3, 1, 2);
-
-		_box->pack_start (*t);
 
 		_limit_undo_button.signal_toggled().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_toggled));
 		_limit_undo_spin.signal_value_changed().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_changed));
@@ -322,6 +307,34 @@ public:
 		_rc_config->set_saved_history_depth (_save_undo_spin.get_value_as_int ());
 	}
 
+	void add_to_page (OptionEditorPage* p)
+	{
+		int const n = p->table.property_n_rows();
+		Table* t = & p->table;
+
+		t->resize (n + 2, 3);
+
+		Label* l = manage (left_aligned_label (_("commands")));
+		HBox* box = manage (new HBox());
+		box->set_spacing (4);
+		box->pack_start (_limit_undo_spin, true, true);
+		box->pack_start (*l, false, false);
+		t->attach (_limit_undo_button, 1, 2, n, n +1, FILL);
+		t->attach (*box, 2, 3, n, n + 1, FILL | EXPAND);
+
+		l = manage (left_aligned_label (_("commands")));
+		box = manage (new HBox());
+		box->set_spacing (4);
+		box->pack_start (_save_undo_spin, true, true);
+		box->pack_start (*l, false, false);
+		t->attach (_save_undo_button, 1, 2, n + 1, n + 2, FILL);
+		t->attach (*box, 2, 3, n + 1, n + 2, FILL | EXPAND);
+	}
+
+	Gtk::Widget& tip_widget() {
+		return _limit_undo_button; // unused
+	}
+
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _limit_undo_button;
@@ -329,7 +342,6 @@ private:
 	CheckButton _save_undo_button;
 	SpinButton _save_undo_spin;
 };
-
 
 
 static const struct {
@@ -377,7 +389,7 @@ static const struct {
 };
 
 
-class KeyboardOptions : public OptionEditorBox
+class KeyboardOptions : public OptionEditorMiniPage
 {
 public:
 	KeyboardOptions () :
@@ -407,8 +419,7 @@ public:
 			}
 		}
 
-		Table* t = manage (new Table (5, 11));
-		t->set_spacings (4);
+		Table* t = &table;
 
 		int row = 0;
 		int col = 0;
@@ -426,14 +437,15 @@ public:
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_keyboard_layout_selector, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 2, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_keyboard_layout_selector, col + 2, col + 3, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 		col = 0;
 
-		l = manage (left_aligned_label (_("When Clicking:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Clicking:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, col, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -517,8 +529,9 @@ public:
 
 		++row;
 
-		l = manage (left_aligned_label (_("When Beginning a Drag:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Beginning a Drag:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -601,8 +614,9 @@ public:
 
 		++row;
 
-		l = manage (left_aligned_label (_("When Beginning a Trim:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Beginning a Trim:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -696,8 +710,9 @@ public:
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Dragging:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Dragging:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -754,8 +769,9 @@ public:
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Trimming:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Trimming:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -782,8 +798,9 @@ public:
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Dragging Control Points:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Dragging Control Points:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -808,8 +825,6 @@ public:
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
-
-		_box->pack_start (*t, false, false);
 	}
 
 	void parameter_changed (string const &)
@@ -820,6 +835,13 @@ public:
 	void set_state_from_config ()
 	{
 		/* XXX: these aren't really config options... */
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		int const n = p->table.property_n_rows();
+		p->table.resize (n + 1, 3);
+		p->table.attach (box, 1, 3, n, n + 1, FILL | EXPAND, SHRINK, 0, 0);
 	}
 
 private:
@@ -1034,155 +1056,82 @@ private:
 
 };
 
-class FontScalingOptions : public OptionEditorBox
+class FontScalingOptions : public HSliderOption
 {
-public:
-	FontScalingOptions () :
-		_dpi_adjustment (100, 50, 250, 1, 5),
-		_dpi_slider (_dpi_adjustment)
+	public:
+		FontScalingOptions ()
+			: HSliderOption ("font-scale", _("GUI and Font scaling"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_font_scale),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_font_scale),
+					50, 250, 1, 5,
+					1024, false)
 	{
-		_dpi_adjustment.set_value (UIConfiguration::instance().get_font_scale() / 1024.);
-
-		Label* l = manage (new Label (_("GUI and Font scaling:")));
-		l->set_name ("OptionsLabel");
-
-		const std::string dflt = _("Default");
+		const std::string dflt = _("100%");
 		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
-		_dpi_slider.set_name("FontScaleSlider");
-		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		_dpi_slider.set_draw_value(false);
-		_dpi_slider.add_mark(50,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(60,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(70,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(80,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(90,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(100, Gtk::POS_TOP, dflt);
-		_dpi_slider.add_mark(125, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(150, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(175, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(200, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(225, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(250, Gtk::POS_TOP, empty);
-
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_dpi_slider, true, true);
-
-		_box->pack_start (*h, false, false);
+		_hscale.set_name("FontScaleSlider");
+		_hscale.set_draw_value(false);
+		_hscale.add_mark(50,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(60,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(70,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(80,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(90,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(100, Gtk::POS_TOP, dflt);
+		_hscale.add_mark(125, Gtk::POS_TOP, empty);
+		_hscale.add_mark(150, Gtk::POS_TOP, empty);
+		_hscale.add_mark(175, Gtk::POS_TOP, empty);
+		_hscale.add_mark(200, Gtk::POS_TOP, empty);
+		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
 		set_note (_("Adjusting the scale requires an application restart to re-layout."));
-
-		_dpi_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FontScalingOptions::dpi_changed));
 	}
 
-	void parameter_changed (string const & p)
+	void changed ()
 	{
-		if (p == "font-scale") {
-			_dpi_adjustment.set_value (UIConfiguration::instance().get_font_scale() / 1024.);
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("font-scale");
-	}
-
-private:
-
-	void dpi_changed ()
-	{
-		UIConfiguration::instance().set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024.));
+		HSliderOption::changed ();
 		/* XXX: should be triggered from the parameter changed signal */
 		UIConfiguration::instance().reset_dpi ();
 	}
-
-	Adjustment _dpi_adjustment;
-	HScale _dpi_slider;
 };
 
-class VstTimeOutSliderOption : public OptionEditorBox
+class VstTimeOutSliderOption : public HSliderOption
 {
 public:
 	VstTimeOutSliderOption (RCConfiguration* c)
-		: _rc_config (c)
-		, _timeout_adjustment (0, 0, 3000, 50, 50)
-		, _timeout_slider (_timeout_adjustment)
+		: HSliderOption ("vst-scan-timeout", _("Scan Time Out"),
+				sigc::mem_fun (*c, &RCConfiguration::get_vst_scan_timeout),
+				sigc::mem_fun (*c, &RCConfiguration::set_vst_scan_timeout),
+				0, 3000, 50, 50)
 	{
-		_timeout_slider.set_digits (0);
-		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &VstTimeOutSliderOption::timeout_changed));
+		_label.set_alignment (1.0, 0.5); // match buttons below
+		_hscale.set_digits (0);
+		_hscale.set_draw_value(false);
+		_hscale.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
+		_hscale.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
+		_hscale.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
+		_hscale.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
+		_hscale.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
+		_hscale.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
+		_hscale.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
 
-		_timeout_slider.set_draw_value(false);
-		_timeout_slider.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
-		_timeout_slider.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
-		_timeout_slider.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
-		_timeout_slider.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
-		_timeout_slider.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
-		_timeout_slider.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
-		_timeout_slider.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
-
-		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
+		Gtkmm2ext::UI::instance()->set_tip(_hscale,
 			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
-
-		Label* l = manage (left_aligned_label (_("Scan Time Out:")));
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_timeout_slider, true, true);
-
-		_box->pack_start (*h, false, false);
 	}
-
-	void parameter_changed (string const & p)
-	{
-		if (p == "vst-scan-timeout") {
-			int const x = _rc_config->get_vst_scan_timeout();
-			_timeout_adjustment.set_value (x);
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("vst-scan-timeout");
-	}
-
-private:
-
-	void timeout_changed ()
-	{
-		int x = floor(_timeout_adjustment.get_value());
-		_rc_config->set_vst_scan_timeout(x);
-	}
-
-	RCConfiguration* _rc_config;
-	Adjustment _timeout_adjustment;
-	HScale _timeout_slider;
 };
 
-
-
-
-
-class ClipLevelOptions : public OptionEditorBox
+class ClipLevelOptions : public OptionEditorComponent
 {
 public:
 	ClipLevelOptions ()
 		: _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
 		, _clip_level_slider (_clip_level_adjustment)
+		, _label (_("Waveform Clip Level (dBFS):"))
 	{
+		_label.set_name ("OptionsLabel");
+
 		_clip_level_adjustment.set_value (UIConfiguration::instance().get_waveform_clip_level ());
 
-		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
-		l->set_name ("OptionsLabel");
-
 		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_clip_level_slider, true, true);
-
-		_box->pack_start (*h, false, false);
 
 		_clip_level_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &ClipLevelOptions::clip_level_changed));
 	}
@@ -1199,6 +1148,14 @@ public:
 		parameter_changed ("waveform-clip-level");
 	}
 
+	void add_to_page (OptionEditorPage* p) {
+		add_widgets_to_page (p, &_label, &_clip_level_slider);
+	}
+
+	Gtk::Widget& tip_widget() {
+		return _clip_level_slider;
+	}
+
 private:
 
 	void clip_level_changed ()
@@ -1210,109 +1167,86 @@ private:
 
 	Adjustment _clip_level_adjustment;
 	HScale _clip_level_slider;
+	Label _label;
 };
 
-class BufferingOptions : public OptionEditorBox
+class BufferingOptions : public OptionEditorComponent
 {
 	public:
 		BufferingOptions (RCConfiguration* c)
 			: _rc_config (c)
-			, _playback_adjustment (5, 1, 60, 1, 4)
-			, _capture_adjustment (5, 1, 60, 1, 4)
-			, _playback_slider (_playback_adjustment)
-			, _capture_slider (_capture_adjustment)
-	{
-		vector<string> presets;
+			, _label (_("Preset:"))
+			, _playback ("playback-buffer-seconds", _("Playback (seconds of buffering)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_audio_playback_buffer_seconds),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_audio_playback_buffer_seconds),
+					1, 60, 1, 4)
+			, _capture ("capture-buffer-seconds", _("Recording (seconds of buffering)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_audio_capture_buffer_seconds),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_audio_capture_buffer_seconds),
+					1, 60, 1, 4)
+		{
+			// TODO use  ComboOption
+			vector<string> presets;
 
-		/* these must match the order of the enums for BufferingPreset */
+			/* these must match the order of the enums for BufferingPreset */
+			presets.push_back (_("Small sessions (4-16 tracks)"));
+			presets.push_back (_("Medium sessions (16-64 tracks)"));
+			presets.push_back (_("Large sessions (64+ tracks)"));
+			presets.push_back (_("Custom (set by sliders below)"));
 
-		presets.push_back (_("Small sessions (4-16 tracks)"));
-		presets.push_back (_("Medium sessions (16-64 tracks)"));
-		presets.push_back (_("Large sessions (64+ tracks)"));
-		presets.push_back (_("Custom (set by sliders below)"));
+			set_popdown_strings (_buffering_presets_combo, presets);
+			_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
 
-		set_popdown_strings (_buffering_presets_combo, presets);
+			_label.set_name ("OptionsLabel");
+			_label.set_alignment (0, 0.5);
+		}
 
-		Label* l = manage (new Label (_("Preset:")));
-		l->set_name ("OptionsLabel");
-		HBox* h = manage (new HBox);
-		h->set_spacing (12);
-		h->pack_start (*l, false, false);
-		h->pack_start (_buffering_presets_combo, true, true);
-		_box->pack_start (*h, false, false);
-
-		_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
-
-		_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
-
-		l = manage (new Label (_("Playback (seconds of buffering):")));
-		l->set_name ("OptionsLabel");
-
-		_playback_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_playback_slider, true, true);
-
-		_box->pack_start (*h, false, false);
-
-		_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
-
-		l = manage (new Label (_("Recording (seconds of buffering):")));
-		l->set_name ("OptionsLabel");
-
-		_capture_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_capture_slider, true, true);
-
-		_box->pack_start (*h, false, false);
-
-		_capture_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::capture_changed));
-		_playback_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::playback_changed));
-	}
+		void
+		add_to_page (OptionEditorPage* p)
+		{
+			add_widgets_to_page (p, &_label, &_buffering_presets_combo);
+			_playback.add_to_page (p);
+			_capture.add_to_page (p);
+		}
 
 		void parameter_changed (string const & p)
 		{
 			if (p == "buffering-preset") {
 				switch (_rc_config->get_buffering_preset()) {
 					case Small:
-						_playback_slider.set_sensitive (false);
-						_capture_slider.set_sensitive (false);
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
 						_buffering_presets_combo.set_active (0);
 						break;
 					case Medium:
-						_playback_slider.set_sensitive (false);
-						_capture_slider.set_sensitive (false);
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
 						_buffering_presets_combo.set_active (1);
 						break;
 					case Large:
-						_playback_slider.set_sensitive (false);
-						_capture_slider.set_sensitive (false);
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
 						_buffering_presets_combo.set_active (2);
 						break;
 					case Custom:
-						_playback_slider.set_sensitive (true);
-						_capture_slider.set_sensitive (true);
+						_playback.set_sensitive (true);
+						_capture.set_sensitive (true);
 						_buffering_presets_combo.set_active (3);
 						break;
 				}
 			}
-
-			if (p == "playback-buffer-seconds") {
-				_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
-			} else if (p == "capture-buffer-seconds") {
-				_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
-			}
+			_playback.parameter_changed (p);
+			_capture.parameter_changed (p);
 		}
 
 		void set_state_from_config ()
 		{
 			parameter_changed ("buffering-preset");
-			parameter_changed ("playback-buffer-seconds");
-			parameter_changed ("capture-buffer-seconds");
+			_playback.set_state_from_config();
+			_capture.set_state_from_config();
 		}
+
+		Gtk::Widget& tip_widget() { return _buffering_presets_combo; }
 
 	private:
 
@@ -1341,25 +1275,14 @@ class BufferingOptions : public OptionEditorBox
 			}
 		}
 
-		void playback_changed ()
-		{
-			_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
-		}
-
-		void capture_changed ()
-		{
-			_rc_config->set_audio_capture_buffer_seconds ((long) _capture_adjustment.get_value());
-		}
-
 		RCConfiguration* _rc_config;
-		Adjustment _playback_adjustment;
-		Adjustment _capture_adjustment;
-		HScale _playback_slider;
-		HScale _capture_slider;
-		ComboBoxText _buffering_presets_combo;
+		Label         _label;
+		HSliderOption _playback;
+		HSliderOption _capture;
+		ComboBoxText  _buffering_presets_combo;
 };
 
-class ControlSurfacesOptions : public OptionEditorPageBox
+class ControlSurfacesOptions : public OptionEditorMiniPage
 {
 	public:
 		ControlSurfacesOptions ()
@@ -1372,15 +1295,8 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 			_view.get_column(0)->set_expand (true);
 			_view.append_column_editable (_("Enable"), _model.enabled);
 
-			Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Control Surfaces"))));
-			l->set_alignment (0, 0.5);
-			l->set_use_markup (true);
-			_box->pack_start (*l, false, false);
-			_box->pack_start (_view, false, false);
-
 			Gtk::HBox* edit_box = manage (new Gtk::HBox);
 			edit_box->set_spacing(3);
-			_box->pack_start (*edit_box, false, false);
 			edit_box->show ();
 
 			Label* label = manage (new Label);
@@ -1393,6 +1309,11 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 			edit_box->pack_start (*edit_button, true, true);
 			edit_button->set_sensitive (false);
 			edit_button->show ();
+
+			int const n = table.property_n_rows();
+			table.resize (n + 2, 3);
+			table.attach (_view, 0, 3, n, n + 1);
+			table.attach (*edit_box, 0, 3, n + 1, n + 2);
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
 			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
@@ -1551,7 +1472,7 @@ class ControlSurfacesOptions : public OptionEditorPageBox
 		Gtk::Button* edit_button;
 };
 
-class VideoTimelineOptions : public OptionEditorPageBox, public OptionEditorPage
+class VideoTimelineOptions : public OptionEditorMiniPage
 {
 	public:
 		VideoTimelineOptions (RCConfiguration* c)
@@ -1562,48 +1483,51 @@ class VideoTimelineOptions : public OptionEditorPageBox, public OptionEditorPage
 			, _xjadeo_browse_button (_("Browse..."))
 		{
 			Table* t = &table;
+			int n = table.property_n_rows();
 
-			Label* l = manage (new Label (string_compose ("<b>%1</b>", _("Video Server"))));
-			l->set_use_markup (true);
-			l->set_alignment (0, 0.5);
-			t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 0);
-
-			t->attach (_show_video_export_info_button, 1, 4, 1, 2);
+			t->attach (_show_video_export_info_button, 1, 4, n, n + 1);
 			_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
 			Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
 					_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
+			++n;
 
-			t->attach (_show_video_server_dialog_button, 1, 4, 2, 3);
+			t->attach (_show_video_server_dialog_button, 1, 4, n, n + 1);
 			_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
 			Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
 					_("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+			++n;
 
-			t->attach (_video_advanced_setup_button, 1, 4, 3, 4, FILL);
+			t->attach (_video_advanced_setup_button, 1, 4, n, n + 1, FILL);
 			_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
 			Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
 					_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+			++n;
 
-			l = manage (new Label (_("Video Server URL:")));
+			Label* l = manage (new Label (_("Video Server URL:")));
 			l->set_alignment (0, 0.5);
-			t->attach (*l, 1, 2, 4, 5, FILL);
-			t->attach (_video_server_url_entry, 2, 4, 4, 5, FILL);
+			t->attach (*l, 1, 2, n, n + 1, FILL);
+			t->attach (_video_server_url_entry, 2, 4, n, n + 1, FILL);
 			Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
 					_("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
+			++n;
 
 			l = manage (new Label (_("Video Folder:")));
 			l->set_alignment (0, 0.5);
-			t->attach (*l, 1, 2, 5, 6, FILL);
-			t->attach (_video_server_docroot_entry, 2, 4, 5, 6);
+			t->attach (*l, 1, 2, n, n + 1, FILL);
+			t->attach (_video_server_docroot_entry, 2, 4, n, n + 1);
 			Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
 					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+			++n;
 
 			l = manage (new Label (""));
-			t->attach (*l, 0, 4, 6, 7, EXPAND | FILL);
+			t->attach (*l, 0, 4, n, n + 1, EXPAND | FILL);
+			++n;
 
 			l = manage (new Label (string_compose ("<b>%1</b>", _("Video Monitor"))));
 			l->set_use_markup (true);
 			l->set_alignment (0, 0.5);
-			t->attach (*l, 0, 4, 7, 8, EXPAND | FILL);
+			t->attach (*l, 0, 4, n, n + 1, EXPAND | FILL);
+			++n;
 
 			l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
 #ifdef __APPLE__
@@ -1615,10 +1539,12 @@ class VideoTimelineOptions : public OptionEditorPageBox, public OptionEditorPage
 #endif
 							)));
 			l->set_alignment (0, 0.5);
-			t->attach (*l, 1, 4, 8, 9, FILL);
-			t->attach (_custom_xjadeo_path, 2, 3, 9, 10, EXPAND|FILL);
+			t->attach (*l, 1, 4, n, n + 1, FILL);
+			++n;
+
+			t->attach (_custom_xjadeo_path, 2, 3, n, n + 1, EXPAND|FILL);
 			Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
-			t->attach (_xjadeo_browse_button, 3, 4, 9, 10, FILL);
+			t->attach (_xjadeo_browse_button, 3, 4, n, n + 1, FILL);
 
 			_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
 			_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
@@ -1629,8 +1555,6 @@ class VideoTimelineOptions : public OptionEditorPageBox, public OptionEditorPage
 
 			// xjadeo-path is a UIConfig parameter
 			UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
-
-			_box->pack_start (*t, true, true);
 		}
 
 		void server_url_changed ()
@@ -1857,7 +1781,7 @@ private:
 };
 
 
-class MidiPortOptions : public OptionEditorPageBox, public sigc::trackable
+class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 {
 	public:
 		MidiPortOptions() {
@@ -1865,31 +1789,32 @@ class MidiPortOptions : public OptionEditorPageBox, public sigc::trackable
 			setup_midi_port_view (midi_output_view, false);
 			setup_midi_port_view (midi_input_view, true);
 
-
-			_box->pack_start (*manage (new Label("")), false, false);
-			input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
-			_box->pack_start (input_label, false, false);
+			OptionEditorHeading* h = new OptionEditorHeading (_("MIDI Inputs"));
+			h->add_to_page (this);
 
 			Gtk::ScrolledWindow* scroller = manage (new Gtk::ScrolledWindow);
 			scroller->add (midi_input_view);
 			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 			scroller->set_size_request (-1, 180);
-			_box->pack_start (*scroller, false, false);
 
-			_box->pack_start (*manage (new Label("")), false, false);
-			output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
-			_box->pack_start (output_label, false, false);
+			int n = table.property_n_rows();
+			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
+
+			h = new OptionEditorHeading (_("MIDI Outputs"));
+			h->add_to_page (this);
 
 			scroller = manage (new Gtk::ScrolledWindow);
 			scroller->add (midi_output_view);
 			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 			scroller->set_size_request (-1, 180);
-			_box->pack_start (*scroller, false, false);
+
+			n = table.property_n_rows();
+			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
 
 			midi_output_view.show ();
 			midi_input_view.show ();
 
-			_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
+			table.signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
 		}
 
 		void parameter_changed (string const&) {}
@@ -2241,7 +2166,6 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Misc/Click"), new OptionEditorHeading (_("Click")));
-
 	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Automation")));
@@ -2493,10 +2417,11 @@ RCOptionEditor::RCOptionEditor ()
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
 	add_option (_("Transport/Sync"), _ltc_send_continuously);
 
-	_ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
-	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
-	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
-	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"), *_ltc_volume_adjustment);
+	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_output_volume),
+					-50, 0, .5, 5,
+					.05, true);
 
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_volume_slider->tip_widget(),
@@ -2622,8 +2547,6 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), fadeshape);
 
-#if 1
-
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
 		     _("Regions in edit groups are edited together"),
@@ -2635,7 +2558,6 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), bco);
 
-#endif
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
 		_("Layering model"),
@@ -3053,6 +2975,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    ));
 
 	add_option (_("MIDI/Ports"), new MidiPortOptions ());
+	add_option (_("MIDI/Ports"), new OptionEditorBlank ());
 
 	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
 
@@ -3150,9 +3073,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	/* Control Surfaces */
 
+	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
 	/* VIDEO Timeline */
+	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
@@ -3199,9 +3124,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
+#if 0
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
 
 #if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
 	bo = new BoolOption (
@@ -3268,7 +3195,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			new RcActionButton (_("Edit"),
 				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 			_("Windows VST Path:")));
-	add_option (_("Plugins"),
+	add_option (_("Plugins/VST"),
 			new RcConfigDisplay (
 				"plugin-path-vst",
 				_("Path:"),
@@ -3279,9 +3206,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 #ifdef AUDIOUNIT_SUPPORT
 
 	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
+#if 0
 	add_option (_("Plugins/Audio Unit"),
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
 
 	bo = new BoolOption (
 			"discover-audio-units",
@@ -3353,6 +3282,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
 
 #endif
+	add_option (_("Plugins"), new OptionEditorBlank ());
 
 	/* INTERFACE */
 #if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
@@ -3383,7 +3313,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (S_("Preferences|GUI"), bgo);
 #endif
-
 	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphical User Interface")));
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
@@ -3425,7 +3354,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
 			    ));
 
-
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
@@ -3433,32 +3361,30 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	/* Image cache size */
 
-	Gtk::Adjustment *ics = manage (new Gtk::Adjustment(0, 1, 1024, 10)); /* 1 MB to 1GB in steps of 10MB */
-	HSliderOption *sics = new HSliderOption("waveform-cache-size",
-						_("Waveform image cache size (megabytes)"),
-						ics,
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size)
+	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
+			_("Waveform image cache size (megabytes)"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
+			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
 			);
 	sics->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip
-		(sics->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (
+			sics->tip_widget(),
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (S_("Preferences|GUI"), sics);
 
 if (!ARDOUR::Profile->get_mixbus()) {
 	/* Lock GUI timeout */
 
-	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
 	HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
 						_("Lock timeout (seconds)"),
-						lts,
 						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds)
+						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
+						0, 1000, 1, 10
 			);
 	slts->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip
-		(slts->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (
+			slts->tip_widget(),
 		 _("Lock GUI after this many idle seconds (zero to never lock)"));
 	add_option (S_("Preferences|GUI"), slts);
 } // !mixbus
@@ -3494,7 +3420,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 #ifdef ENABLE_NLS
 	OptionEditorHeading* i18n_head = new OptionEditorHeading (_("Internationalization"));
-	i18n_head->set_note (string_compose (_("These settings will only take effect after %1 is restarted (if available for your language preferences)."), PROGRAM_NAME));
 
 	add_option (_("GUI/Translation"), i18n_head);
 
@@ -3504,6 +3429,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			sigc::ptr_fun (ARDOUR::translations_are_enabled),
 			sigc::ptr_fun (ARDOUR::set_translations_enabled)
 			);
+
+	bo->set_note (string_compose (_("These settings will only take effect after %1 is restarted (if available for your language preferences)."), PROGRAM_NAME));
 
 	add_option (_("GUI/Translation"), bo);
 
@@ -3569,6 +3496,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
+	add_option (_("GUI/Toolbar"), new OptionEditorBlank ());
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
@@ -3649,15 +3577,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|Metering"), mvu);
 
-	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak threshold [dBFS]"),
-			mpk,
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak)
-			);
-
-
 	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
 		"meter-type-master",
 		_("Default Meter Type for Master Bus"),
@@ -3704,10 +3623,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|Metering"), mtt);
 
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
+			);
 
-	Gtkmm2ext::UI::instance()->set_tip
-		(mpks->tip_widget(),
-		 _("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|Metering"), mpks);
 
@@ -3753,6 +3678,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Theme"), new OptionEditorHeading (_("Theme")));
 	add_page (_("Theme"), *tm);
 
+	add_option (_("Theme/Colors"), new OptionEditorHeading (_("Colors")));
 	add_option (_("Theme/Colors"), new ColorThemeManager);
 
 	Widget::show_all ();
@@ -3770,6 +3696,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		*/
 		Tabbable::set_state (*node, Stateful::loading_state_version);
 	}
+
+	set_current_page (_("Misc"));
 }
 
 void
@@ -3816,10 +3744,6 @@ RCOptionEditor::parameter_changed (string const & p)
 		_l10n->set_sensitive (ARDOUR::translations_are_enabled ());
 #endif
 	}
-}
-
-void RCOptionEditor::ltc_generator_volume_changed () {
-	_rc_config->set_ltc_output_volume (pow(10, _ltc_volume_adjustment->get_value() / 20));
 }
 
 void RCOptionEditor::plugin_scan_refresh () {

@@ -386,6 +386,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
 	add_option (_("Misc"), new FooOption (btn));
 
+	set_current_page (_("Timecode"));
 }
 
 void

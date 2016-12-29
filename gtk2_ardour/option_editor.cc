@@ -91,6 +91,8 @@ OptionEditorComponent::set_note (string const & n)
 	_note = n;
 }
 
+/*--------------------------*/
+
 OptionEditorHeading::OptionEditorHeading (string const & h)
 {
 	std::stringstream s;
@@ -98,6 +100,8 @@ OptionEditorHeading::OptionEditorHeading (string const & h)
 	_label = manage (left_aligned_label (s.str()));
 	_label->set_use_markup (true);
 }
+
+/*--------------------------*/
 
 void
 OptionEditorHeading::add_to_page (OptionEditorPage* p)
@@ -114,50 +118,19 @@ OptionEditorHeading::add_to_page (OptionEditorPage* p)
 	maybe_add_note (p, n + 2);
 }
 
-void
-OptionEditorBox::add_to_page (OptionEditorPage* p)
-{
-	add_widget_to_page (p, _box);
-}
+/*--------------------------*/
 
 void
-OptionEditorPageBox::add_to_page (OptionEditorPage* p)
+OptionEditorBlank::add_to_page (OptionEditorPage* p)
 {
 	int const n = p->table.property_n_rows();
-	int m = n + 2;
-	if (!_note.empty ()) {
-		++m;
-	}
-	_box->set_border_width (0);
-	p->table.resize (m, 3);
-	p->table.attach (*manage (new Label ("")), 0, 3, n, n + 1, FILL | EXPAND);
-	p->table.attach (*_box, 0, 3, n + 1, n + 2, FILL | EXPAND);
-	maybe_add_note (p, n + 2);
+	p->table.resize (n + 1, 3);
+	p->table.attach (_dummy, 2, 3, n, n + 1, FILL | EXPAND, SHRINK, 0, 0);
+	_dummy.set_size_request (-1, 1);
+	_dummy.show ();
 }
 
-RcActionButton::RcActionButton (std::string const & t, const Glib::SignalProxy0< void >::SlotType & slot, std::string const & l)
-	: _label (NULL)
-{
-	_button = manage (new Button (t));
-	_button->signal_clicked().connect (slot);
-	if (!l.empty ()) {
-		_label = manage (right_aligned_label (l));
-	}
-}
-
-void
-RcActionButton::add_to_page (OptionEditorPage *p)
-{
-	int const n = p->table.property_n_rows();
-	int m = n + 1;
-	p->table.resize (m, 3);
-	if (_label) {
-		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
-		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
-	} else {
-		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
-	}
-}
+/*--------------------------*/
 
 RcConfigDisplay::RcConfigDisplay (string const & i, string const & n, sigc::slot<string> g, char s)
 	: _get (g)
@@ -198,6 +171,33 @@ RcConfigDisplay::add_to_page (OptionEditorPage *p)
 	p->table.attach (*_info,  2, 3, n, n + 1, FILL | EXPAND);
 }
 
+/*--------------------------*/
+
+RcActionButton::RcActionButton (std::string const & t, const Glib::SignalProxy0< void >::SlotType & slot, std::string const & l)
+	: _label (NULL)
+{
+	_button = manage (new Button (t));
+	_button->signal_clicked().connect (slot);
+	if (!l.empty ()) {
+		_label = manage (right_aligned_label (l));
+	}
+}
+
+void
+RcActionButton::add_to_page (OptionEditorPage *p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 1;
+	p->table.resize (m, 3);
+	if (_label) {
+		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
+		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
+	} else {
+		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
+	}
+}
+
+/*--------------------------*/
 
 BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: Option (i, n),
@@ -232,6 +232,8 @@ BoolOption::toggled ()
 	}
 }
 
+/*--------------------------*/
+
 RouteDisplayBoolOption::RouteDisplayBoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: BoolOption (i, n, g, s)
 {
@@ -243,6 +245,8 @@ RouteDisplayBoolOption::toggled ()
 	DisplaySuspender ds;
 	BoolOption::toggled ();
 }
+
+/*--------------------------*/
 
 EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string> g, sigc::slot<bool, string> s)
 	: Option (i, n),
@@ -299,6 +303,123 @@ EntryOption::focus_out (GdkEventFocus*)
 	return true;
 }
 
+/*--------------------------*/
+HSliderOption::HSliderOption (
+		std::string const& i,
+		std::string const& n,
+		sigc::slot<float> g,
+		sigc::slot<bool, float> s,
+		double lower, double upper,
+		double step_increment,
+		double page_increment,
+		double mult,
+		bool logarithmic
+		)
+	: Option (i, n)
+	, _get (g)
+	, _set (s)
+	, _adj (lower, lower, upper, step_increment, page_increment, 0)
+	, _hscale (_adj)
+	, _label (n + ":")
+	, _mult (mult)
+	, _log (logarithmic)
+{
+	_label.set_alignment (0, 0.5);
+	_label.set_name ("OptionsLabel");
+	_adj.set_value (_get());
+	_adj.signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
+	_hscale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+}
+
+void
+HSliderOption::set_state_from_config ()
+{
+	if (_log) {
+		_adj.set_value (log10(_get()) / _mult);
+	} else {
+		_adj.set_value (_get() / _mult);
+	}
+}
+
+void
+HSliderOption::changed ()
+{
+	if (_log) {
+		_set (pow (10, _adj.get_value () * _mult));
+	} else {
+		_set (_adj.get_value () * _mult);
+	}
+}
+
+void
+HSliderOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, &_label, &_hscale);
+}
+
+void
+HSliderOption::set_sensitive (bool yn)
+{
+	_hscale.set_sensitive (yn);
+}
+
+/*--------------------------*/
+
+ComboStringOption::ComboStringOption (
+		std::string const & i,
+		std::string const & n,
+		sigc::slot<std::string> g,
+		sigc::slot<bool, std::string> s
+		)
+	: Option (i, n)
+	, _get (g)
+	, _set (s)
+{
+	_label = Gtk::manage (new Gtk::Label (n + ":"));
+	_label->set_alignment (0, 0.5);
+	_combo = Gtk::manage (new Gtk::ComboBoxText);
+	_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboStringOption::changed));
+}
+
+void
+ComboStringOption::set_state_from_config () {
+	_combo->set_active_text (_get());
+}
+
+void
+ComboStringOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, _label, _combo);
+}
+
+/** Set the allowed strings for this option
+ *  @param strings a vector of allowed strings
+ */
+void
+ComboStringOption::set_popdown_strings (const std::vector<std::string>& strings) {
+	_combo->clear_items ();
+	for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
+		_combo->append_text (*i);
+	}
+}
+
+void
+ComboStringOption::clear () {
+	_combo->clear_items();
+}
+
+void
+ComboStringOption::changed () {
+	_set (_combo->get_active_text ());
+}
+
+void
+ComboStringOption::set_sensitive (bool yn) {
+	_combo->set_sensitive (yn);
+}
+
+/*--------------------------*/
+
 /** Construct a BoolComboOption.
  *  @param i id
  *  @param n User-visible name.
@@ -351,7 +472,7 @@ BoolComboOption::set_sensitive (bool yn)
 	_combo->set_sensitive (yn);
 }
 
-
+/*--------------------------*/
 
 FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t> g, sigc::slot<bool, gain_t> s)
 	: Option (i, n)
@@ -430,6 +551,8 @@ FaderOption::add_to_page (OptionEditorPage* p)
 	add_widgets_to_page (p, &_label, &_box);
 }
 
+/*--------------------------*/
+
 ClockOption::ClockOption (string const & i, string const & n, sigc::slot<std::string> g, sigc::slot<bool, std::string> s)
 	: Option (i, n)
 	, _clock (X_("timecode-offset"), true, X_(""), true, false, true, false)
@@ -478,6 +601,8 @@ ClockOption::set_session (Session* s)
 	_clock.set_session (s);
 }
 
+/*--------------------------*/
+
 OptionEditorPage::OptionEditorPage ()
 	: table (1, 3)
 {
@@ -499,6 +624,23 @@ OptionEditorPage::init ()
 	table.set_spacings (4);
 	table.set_col_spacing (0, 32);
 }
+
+/*--------------------------*/
+
+void
+OptionEditorMiniPage::add_to_page (OptionEditorPage* p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 1;
+	if (!_note.empty ()) {
+		++m;
+	}
+	p->table.resize (m, 3);
+	p->table.attach (box, 0, 3, n, n + 1, FILL | EXPAND, SHRINK, 0, 0);
+	maybe_add_note (p, n + 1);
+}
+
+/*--------------------------*/
 
 /** Construct an OptionEditor.
  *  @param o Configuration to edit.
@@ -679,6 +821,7 @@ OptionEditor::set_current_page (string const & p)
 
 }
 
+/*--------------------------*/
 
 DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot<string> g, sigc::slot<bool, string> s)
 	: Option (i, n)
@@ -688,7 +831,6 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
 }
-
 
 void
 DirectoryOption::set_state_from_config ()
