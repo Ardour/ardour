@@ -53,47 +53,6 @@ ThemeManager::ThemeManager()
 {
 	BoolOption* bo;
 
-#ifndef __APPLE__
-	bo = new BoolOption (
-			"all-floating-windows-are-dialogs",
-			_("All floating windows are dialogs"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
-			);
-	bo->add_to_page (this);
-	bo->set_state_from_config ();
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-				_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
-					"This may help with some window managers. This requires a restart of %1 to take effect"),
-				PROGRAM_NAME));
-
-	bo = new BoolOption (
-			"transients-follow-front",
-			_("Transient windows follow front window."),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
-			);
-	bo->add_to_page (this);
-	bo->set_state_from_config ();
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-				_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
-					"This requires a restart of %1 to take effect"), PROGRAM_NAME));
-#endif
-
-	if (!Profile->get_mixbus()) {
-		bo = new BoolOption (
-				"floating-monitor-section",
-				_("Float detached monitor-section window"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
-				);
-		bo->add_to_page (this);
-		bo->set_state_from_config ();
-		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
-						"This requires a restart of %1 to take effect"), PROGRAM_NAME));
-	}
-
 	bo = new BoolOption (
 			"flat-buttons",
 			_("Draw \"flat\" buttons"),

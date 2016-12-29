@@ -3314,13 +3314,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (S_("Preferences|GUI"), bgo);
 #endif
 	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphical User Interface")));
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "use-wm-visibility",
-		     _("Use Window Manager/Desktop visibility information"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
-		     ));
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
@@ -3526,6 +3519,55 @@ if (!ARDOUR::Profile->get_mixbus()) {
 				)
 			);
 	add_option (_("GUI/Toolbar"), new OptionEditorBlank ());
+
+	add_option (_("GUI/Quirks"), new OptionEditorHeading (_("Various Quirks for Windowing systems")));
+	add_option (_("GUI/Quirks"),
+	     new BoolOption (
+		     "use-wm-visibility",
+		     _("Use Window Manager/Desktop visibility information"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
+		     ));
+
+#ifndef __APPLE__
+	bo = new BoolOption (
+			"all-floating-windows-are-dialogs",
+			_("All floating windows are dialogs"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
+				_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
+					"This may help with some window managers. This requires a restart of %1 to take effect"),
+				PROGRAM_NAME));
+	add_option (_("GUI/Quirks"), bo);
+
+	bo = new BoolOption (
+			"transients-follow-front",
+			_("Transient windows follow front window."),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
+				_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
+					"This requires a restart of %1 to take effect"), PROGRAM_NAME));
+	add_option (_("GUI/Quirks"), bo);
+#endif
+
+	if (!Profile->get_mixbus()) {
+		bo = new BoolOption (
+				"floating-monitor-section",
+				_("Float detached monitor-section window"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
+				);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
+					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
+						"This requires a restart of %1 to take effect"), PROGRAM_NAME));
+		add_option (_("GUI/Quirks"), bo);
+	}
+
+	add_option (_("GUI/Quirks"), new OptionEditorBlank ());
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
