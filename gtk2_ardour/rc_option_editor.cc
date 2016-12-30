@@ -2252,7 +2252,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "use-time-rulers-to-zoom-with-vertical-drag",
-			    _("Use time rulers area to zoom when clicking and dragging vertically"),
+			    _("Zoom with vertical drag in rulers"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
 			    ));
@@ -3277,7 +3277,7 @@ if (!Profile->get_mixbus()) {
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",
-		     _("Graphically indicate mouse pointer hovering over various widgets"),
+		     _("Highlight widgets on mouseover"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
 		     ));
@@ -3354,7 +3354,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("GUI/Editor"),
 			new BoolOption (
 			"color-regions-using-track-color",
-			_("Color regions using their track's color"),
+			_("Region color follows track color"),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
 			));
@@ -3383,7 +3383,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("GUI/Editor"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
-		     _("Show waveforms for audio while it is being recorded"),
+		     _("Show waveforms while recording"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
 		     ));
@@ -3487,7 +3487,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-selclock",
-		     _("Display Selection Clock in the Toolbar"),
+		     _("Display Selection Clock"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
 		     ));
@@ -3496,7 +3496,7 @@ if (!Profile->get_mixbus()) {
 		add_option (_("GUI/Toolbar"),
 				new BoolOption (
 					"show-secondary-clock",
-					_("Display Secondary Clock in the Toolbar"),
+					_("Display Secondary Clock"),
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_secondary_clock),
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
 					));
@@ -3505,7 +3505,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-mini-timeline",
-		     _("Display Navigation Timeline in the Toolbar"),
+		     _("Display Navigation Timeline"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
 		     ));
@@ -3513,7 +3513,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-editor-meter",
-		     _("Display Master Level Meter in the Toolbar"),
+		     _("Display Master Level Meter"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
 		     ));
