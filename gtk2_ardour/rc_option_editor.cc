@@ -2201,7 +2201,533 @@ RCOptionEditor::RCOptionEditor ()
 							    PROGRAM_NAME));
 	add_option (_("Misc"), tsf);
 
-	/* TRANSPORT */
+	/* EDITOR */
+
+	add_option (_("Editor"), new OptionEditorHeading (_("Editor Settings")));
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "rubberbanding-snaps-to-grid",
+		     _("Make rubberband selection rectangle snap to the grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
+		     ));
+
+	bo = new BoolOption (
+		     "name-new-markers",
+		     _("Name new markers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
+		);
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+								"\n\nYou can always rename markers by right-clicking on them"));
+
+	add_option (S_("Editor"),
+	     new BoolOption (
+		     "draggable-playhead",
+		     _("Allow dragging of playhead"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
+		     ));
+
+if (!Profile->get_mixbus()) {
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "show-zoom-tools",
+			    _("Show zoom toolbar (if torn off)"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
+			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "use-mouse-position-as-zoom-focus-on-scroll",
+			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
+			    ));
+}  // !mixbus
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "use-time-rulers-to-zoom-with-vertical-drag",
+			    _("Use time rulers area to zoom when clicking and dragging vertically"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
+			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "use-double-click-to-zoom-to-selection",
+			    _("Use double mouse click to zoom to selection"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_double_click_to_zoom_to_selection),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
+			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "update-editor-during-summary-drag",
+			    _("Update editor window during drags of the summary"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_update_editor_during_summary_drag)
+			    ));
+
+	add_option (_("Editor"),
+	    new BoolOption (
+		    "autoscroll-editor",
+		    _("Auto-scroll editor window when dragging near its edges"),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_autoscroll_editor),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
+		    ));
+
+	add_option (_("Editor"),
+	     new BoolComboOption (
+		     "show-region-gain-envelopes",
+		     _("Show gain envelopes in audio regions"),
+		     _("in all modes"),
+		     _("only in Draw and Internal Edit modes"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
+		     ));
+
+	add_option (_("Editor"), new OptionEditorHeading (_("Editor Behavior")));
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "automation-follows-regions",
+		     _("Move relevant automation when audio regions are moved"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
+		     ));
+
+	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
+			"default-fade-shape",
+			_("Default fade shape"),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::get_default_fade_shape),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::set_default_fade_shape)
+			);
+
+	fadeshape->add (FadeLinear,
+			_("Linear (for highly correlated material)"));
+	fadeshape->add (FadeConstantPower, _("Constant power"));
+	fadeshape->add (FadeSymmetric, _("Symmetric"));
+	fadeshape->add (FadeSlow, _("Slow"));
+	fadeshape->add (FadeFast, _("Fast"));
+
+	add_option (_("Editor"), fadeshape);
+
+	bco = new BoolComboOption (
+		     "use-overlap-equivalency",
+		     _("Regions in edit groups are edited together"),
+		     _("whenever they overlap in time"),
+		     _("only if they have identical length and position"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
+		     );
+
+	add_option (_("Editor"), bco);
+
+	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
+		"layer-model",
+		_("Layering model"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_layer_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_layer_model)
+		);
+
+	lm->add (LaterHigher, _("later is higher"));
+	lm->add (Manual, _("manual layering"));
+	add_option (_("Editor"), lm);
+
+	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
+		    "region-selection-after-split",
+		    _("After splitting selected regions, select"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
+
+	// TODO: decide which of these modes are really useful
+	rsas->add(None, _("no regions"));
+	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
+	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
+	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
+	// rsas->add(Existing, _("unmodified regions in the existing selection"));
+	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
+	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
+	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
+
+	add_option (_("Editor"), rsas);
+
+	/* MIXER -- SOLO AND MUTE */
+
+	add_option (_("Mixer"), new OptionEditorHeading (_("Solo")));
+
+	_solo_control_is_listen_control = new BoolOption (
+		"solo-control-is-listen-control",
+		_("Solo controls are Listen controls"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		);
+
+	add_option (_("Mixer"), _solo_control_is_listen_control);
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "show-solo-mutes",
+		     _("Show solo muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "solo-mute-override",
+		     _("Soloing overrides muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     ));
+
+	add_option (_("Mixer"),
+	     new FaderOption (
+		     "solo-mute-gain",
+		     _("Solo-in-place mute cut (dB)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
+		     ));
+
+	_listen_position = new ComboOption<ListenPosition> (
+		"listen-position",
+		_("Listen Position"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
+		);
+
+	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
+	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
+
+	add_option (_("Mixer"), _listen_position);
+
+	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
+		"pfl-position",
+		_("PFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
+		);
+
+	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
+	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
+
+	add_option (_("Mixer"), pp);
+
+	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
+		"afl-position",
+		_("AFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
+		);
+
+	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
+
+	add_option (_("Mixer"), pa);
+
+	add_option (_("Mixer"), new OptionEditorHeading (_("Default track / bus muting options")));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-pre-fader",
+		     _("Mute affects pre-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-post-fader",
+		     _("Mute affects post-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-control-outs",
+		     _("Mute affects control outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-main-outs",
+		     _("Mute affects main outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
+		     ));
+
+
+if (!ARDOUR::Profile->get_mixbus()) {
+	add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "link-send-and-route-panner",
+		     _("Link panners of Aux and External Sends with main panner by default"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+		     ));
+}
+
+
+	/* AUDIO */
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
+
+	add_option (_("Audio"), new BufferingOptions (_rc_config));
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
+
+	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
+		"monitoring-model",
+		_("Record monitoring handled by"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
+		);
+
+	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
+		mm->add (HardwareMonitoring, _("via Audio Driver"));
+	}
+
+	string prog (PROGRAM_NAME);
+	boost::algorithm::to_lower (prog);
+	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
+	mm->add (ExternalMonitoring, _("audio hardware"));
+
+	add_option (_("Audio"), mm);
+
+	add_option (_("Audio"),
+	     new BoolOption (
+		     "tape-machine-mode",
+		     _("Tape machine mode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
+		     ));
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Track and Bus Connections")));
+if (!Profile->get_mixbus()) {
+
+	add_option (_("Audio"),
+		    new BoolOption (
+			    "auto-connect-standard-busses",
+			    _("Auto-connect master/monitor busses"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+			    ));
+
+	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
+		"input-auto-connect",
+		_("Connect track inputs"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
+		);
+
+	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
+	iac->add (ManualConnect, _("manually"));
+
+	add_option (_("Audio"), iac);
+
+	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
+		"output-auto-connect",
+		_("Connect track and bus outputs"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
+		);
+
+	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
+	oac->add (AutoConnectMaster, _("automatically to master bus"));
+	oac->add (ManualConnect, _("manually"));
+
+	add_option (_("Audio"), oac);
+
+	bo = new BoolOption (
+			"strict-io",
+			_("Use 'Strict-I/O' for new tracks or Busses"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
+			);
+
+	add_option (_("Audio"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
+}  // !mixbus
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
+
+	add_option (_("Audio"),
+	     new BoolOption (
+		     "denormal-protection",
+		     _("Use DC bias to protect against denormals"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
+		     ));
+
+	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
+		"denormal-model",
+		_("Processor handling"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
+		);
+
+	int dmsize = 1;
+	dm->add (DenormalNone, _("no processor handling"));
+
+	FPU* fpu = FPU::instance();
+
+	if (fpu->has_flush_to_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZ, _("use FlushToZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (dmsize == 1) {
+		dm->set_sensitive(false);
+	}
+
+	add_option (_("Audio"), dm);
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
+
+	add_option (_("Audio"),
+	     new BoolOption (
+		     "auto-analyse-audio",
+		     _("Enable automatic analysis of audio"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
+		     ));
+
+	add_option (_("Audio"),
+	     new BoolOption (
+		     "replicate-missing-region-channels",
+		     _("Replicate missing region channels"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_replicate_missing_region_channels),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
+		     ));
+
+	/* MIDI */
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
+
+	add_option (_("MIDI"),
+		    new SpinOption<float> (
+			    "midi-readahead",
+			    _("MIDI read-ahead time (seconds)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
+			    0.1, 10, 0.05, 1,
+			    "", 1.0, 2
+			    ));
+
+	add_option (_("MIDI"),
+	     new SpinOption<int32_t> (
+		     "initial-program-change",
+		     _("Initial program change"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_initial_program_change),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
+		     -1, 65536, 1, 10
+		     ));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "display-first-midi-bank-as-zero",
+			    _("Display first MIDI bank/program as 0"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
+			    ));
+
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "never-display-periodic-midi",
+		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
+		     ));
+
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "sound-midi-notes",
+		     _("Sound MIDI notes as they are selected in the editor"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
+		     ));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "midi-feedback",
+			    _("Send MIDI control feedback"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
+			    ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
+
+	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
+		"midi-audition-synth-uri",
+		_("Midi Audition Synth (LV2)"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
+		);
+
+	audition_synth->add(X_(""), _("None"));
+	PluginInfoList all_plugs;
+	PluginManager& manager (PluginManager::instance());
+#ifdef LV2_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		if (!(*i)->is_instrument()) continue;
+		if ((*i)->type != ARDOUR::LV2) continue;
+		if ((*i)->name.length() > 46) {
+			audition_synth->add((*i)->unique_id, (*i)->name.substr (0, 44) + "...");
+		} else {
+			audition_synth->add((*i)->unique_id, (*i)->name);
+		}
+	}
+#endif
+
+	add_option (_("MIDI"), audition_synth);
+
+	/* Click */
+
+	add_option (_("Metronome"), new OptionEditorHeading (_("Click")));
+	add_option (_("Metronome"), new ClickOptions (_rc_config));
+
+
+	/* TRANSPORT & Sync */
 
 	add_option (_("Transport"), new OptionEditorHeading (S_("Transport Options")));
 
@@ -2492,530 +3018,10 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 
-	/* EDITOR */
+	/* Control Surfaces */
 
-	add_option (_("Editing"), new OptionEditorHeading (_("Editor Settings")));
-
-	add_option (_("Editing"),
-	     new BoolOption (
-		     "rubberbanding-snaps-to-grid",
-		     _("Make rubberband selection rectangle snap to the grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
-		     ));
-
-	bo = new BoolOption (
-		     "name-new-markers",
-		     _("Name new markers"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
-		);
-	add_option (_("Editing"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
-								"\n\nYou can always rename markers by right-clicking on them"));
-
-	add_option (S_("Editing"),
-	     new BoolOption (
-		     "draggable-playhead",
-		     _("Allow dragging of playhead"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
-		     ));
-
-if (!Profile->get_mixbus()) {
-	add_option (_("Editing"),
-		    new BoolOption (
-			    "show-zoom-tools",
-			    _("Show zoom toolbar (if torn off)"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
-			    ));
-
-	add_option (_("Editing"),
-		    new BoolOption (
-			    "use-mouse-position-as-zoom-focus-on-scroll",
-			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
-			    ));
-}  // !mixbus
-
-	add_option (_("Editing"),
-		    new BoolOption (
-			    "use-time-rulers-to-zoom-with-vertical-drag",
-			    _("Use time rulers area to zoom when clicking and dragging vertically"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
-			    ));
-
-	add_option (_("Editing"),
-		    new BoolOption (
-			    "use-double-click-to-zoom-to-selection",
-			    _("Use double mouse click to zoom to selection"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_double_click_to_zoom_to_selection),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
-			    ));
-
-	add_option (_("Editing"),
-		    new BoolOption (
-			    "update-editor-during-summary-drag",
-			    _("Update editor window during drags of the summary"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_update_editor_during_summary_drag)
-			    ));
-
-	add_option (_("Editing"),
-	    new BoolOption (
-		    "autoscroll-editor",
-		    _("Auto-scroll editor window when dragging near its edges"),
-		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_autoscroll_editor),
-		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
-		    ));
-
-	add_option (_("Editing"),
-	     new BoolComboOption (
-		     "show-region-gain-envelopes",
-		     _("Show gain envelopes in audio regions"),
-		     _("in all modes"),
-		     _("only in Draw and Internal Edit modes"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
-		     ));
-
-	add_option (_("Editing"), new OptionEditorHeading (_("Editor Behavior")));
-
-	add_option (_("Editing"),
-	     new BoolOption (
-		     "automation-follows-regions",
-		     _("Move relevant automation when audio regions are moved"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
-		     ));
-
-	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
-			"default-fade-shape",
-			_("Default fade shape"),
-			sigc::mem_fun (*_rc_config,
-				&RCConfiguration::get_default_fade_shape),
-			sigc::mem_fun (*_rc_config,
-				&RCConfiguration::set_default_fade_shape)
-			);
-
-	fadeshape->add (FadeLinear,
-			_("Linear (for highly correlated material)"));
-	fadeshape->add (FadeConstantPower, _("Constant power"));
-	fadeshape->add (FadeSymmetric, _("Symmetric"));
-	fadeshape->add (FadeSlow, _("Slow"));
-	fadeshape->add (FadeFast, _("Fast"));
-
-	add_option (_("Editing"), fadeshape);
-
-	bco = new BoolComboOption (
-		     "use-overlap-equivalency",
-		     _("Regions in edit groups are edited together"),
-		     _("whenever they overlap in time"),
-		     _("only if they have identical length and position"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
-		     );
-
-	add_option (_("Editing"), bco);
-
-	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
-		"layer-model",
-		_("Layering model"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_layer_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_layer_model)
-		);
-
-	lm->add (LaterHigher, _("later is higher"));
-	lm->add (Manual, _("manual layering"));
-	add_option (_("Editing"), lm);
-
-	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
-		    "region-selection-after-split",
-		    _("After splitting selected regions, select"),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
-
-	// TODO: decide which of these modes are really useful
-	rsas->add(None, _("no regions"));
-	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
-	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
-	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
-	// rsas->add(Existing, _("unmodified regions in the existing selection"));
-	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
-	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
-	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
-
-	add_option (_("Editing"), rsas);
-
-	/* AUDIO */
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
-
-	add_option (_("Audio"), new BufferingOptions (_rc_config));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
-
-	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
-		"monitoring-model",
-		_("Record monitoring handled by"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
-		);
-
-	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
-		mm->add (HardwareMonitoring, _("via Audio Driver"));
-	}
-
-	string prog (PROGRAM_NAME);
-	boost::algorithm::to_lower (prog);
-	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
-	mm->add (ExternalMonitoring, _("audio hardware"));
-
-	add_option (_("Audio"), mm);
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "tape-machine-mode",
-		     _("Tape machine mode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
-		     ));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
-if (!Profile->get_mixbus()) {
-
-	add_option (_("Audio"),
-		    new BoolOption (
-			    "auto-connect-standard-busses",
-			    _("Auto-connect master/monitor busses"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
-			    ));
-
-	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
-		"input-auto-connect",
-		_("Connect track inputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
-		);
-
-	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
-	iac->add (ManualConnect, _("manually"));
-
-	add_option (_("Audio"), iac);
-
-	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
-		"output-auto-connect",
-		_("Connect track and bus outputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
-		);
-
-	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
-	oac->add (AutoConnectMaster, _("automatically to master bus"));
-	oac->add (ManualConnect, _("manually"));
-
-	add_option (_("Audio"), oac);
-
-	bo = new BoolOption (
-			"strict-io",
-			_("Use 'Strict-I/O' for new tracks or Busses"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
-			);
-
-	add_option (_("Audio"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
-
-}  // !mixbus
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "denormal-protection",
-		     _("Use DC bias to protect against denormals"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
-		     ));
-
-	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
-		"denormal-model",
-		_("Processor handling"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
-		);
-
-	int dmsize = 1;
-	dm->add (DenormalNone, _("no processor handling"));
-
-	FPU* fpu = FPU::instance();
-
-	if (fpu->has_flush_to_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZ, _("use FlushToZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (dmsize == 1) {
-		dm->set_sensitive(false);
-	}
-
-	add_option (_("Audio"), dm);
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "auto-analyse-audio",
-		     _("Enable automatic analysis of audio"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "replicate-missing-region-channels",
-		     _("Replicate missing region channels"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_replicate_missing_region_channels),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
-		     ));
-
-	/* SOLO AND MUTE */
-
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Solo")));
-
-	_solo_control_is_listen_control = new BoolOption (
-		"solo-control-is-listen-control",
-		_("Solo controls are Listen controls"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
-		);
-
-	add_option (_("Solo & mute"), _solo_control_is_listen_control);
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "exclusive-solo",
-		     _("Exclusive solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "show-solo-mutes",
-		     _("Show solo muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "solo-mute-override",
-		     _("Soloing overrides muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new FaderOption (
-		     "solo-mute-gain",
-		     _("Solo-in-place mute cut (dB)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
-		     ));
-
-	_listen_position = new ComboOption<ListenPosition> (
-		"listen-position",
-		_("Listen Position"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
-		);
-
-	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
-	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
-
-	add_option (_("Solo & mute"), _listen_position);
-
-	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
-		"pfl-position",
-		_("PFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
-		);
-
-	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
-	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
-
-	add_option (_("Solo & mute"), pp);
-
-	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
-		"afl-position",
-		_("AFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
-		);
-
-	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
-	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
-
-	add_option (_("Solo & mute"), pa);
-
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Default track / bus muting options")));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-pre-fader",
-		     _("Mute affects pre-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-post-fader",
-		     _("Mute affects post-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-control-outs",
-		     _("Mute affects control outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-main-outs",
-		     _("Mute affects main outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
-		     ));
-
-
-if (!ARDOUR::Profile->get_mixbus()) {
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "link-send-and-route-panner",
-		     _("Link panners of Aux and External Sends with main panner by default"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-		     ));
-}
-
-	/* Click */
-
-	add_option (_("Metronom"), new OptionEditorHeading (_("Click")));
-	add_option (_("Metronom"), new ClickOptions (_rc_config));
-
-	/* MIDI */
-
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
-
-	add_option (_("MIDI"),
-		    new SpinOption<float> (
-			    "midi-readahead",
-			    _("MIDI read-ahead time (seconds)"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
-			    0.1, 10, 0.05, 1,
-			    "", 1.0, 2
-			    ));
-
-	add_option (_("MIDI"),
-	     new SpinOption<int32_t> (
-		     "initial-program-change",
-		     _("Initial program change"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_initial_program_change),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
-		     -1, 65536, 1, 10
-		     ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "display-first-midi-bank-as-zero",
-			    _("Display first MIDI bank/program as 0"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
-			    ));
-
-	add_option (_("MIDI"),
-	     new BoolOption (
-		     "never-display-periodic-midi",
-		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
-		     ));
-
-	add_option (_("MIDI"),
-	     new BoolOption (
-		     "sound-midi-notes",
-		     _("Sound MIDI notes as they are selected in the editor"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
-		     ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "midi-feedback",
-			    _("Send MIDI control feedback"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
-			    ));
-
-	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
-
-	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
-		"midi-audition-synth-uri",
-		_("Midi Audition Synth (LV2)"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
-		);
-
-	audition_synth->add(X_(""), _("None"));
-	PluginInfoList all_plugs;
-	PluginManager& manager (PluginManager::instance());
-#ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
-
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
-		if (!(*i)->is_instrument()) continue;
-		if ((*i)->type != ARDOUR::LV2) continue;
-		if ((*i)->name.length() > 46) {
-			audition_synth->add((*i)->unique_id, (*i)->name.substr (0, 44) + "...");
-		} else {
-			audition_synth->add((*i)->unique_id, (*i)->name);
-		}
-	}
-#endif
-
-	add_option (_("MIDI"), audition_synth);
-
+	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
 	/* MIDI PORTs */
 	add_option (_("MIDI Ports"), new OptionEditorHeading (_("MIDI Port Options")));
@@ -3031,11 +3037,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("MIDI Ports"), new MidiPortOptions ());
 	add_option (_("MIDI Ports"), new OptionEditorBlank ());
 
-
-	/* Control Surfaces */
-
-	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
-	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
+	/* PLUGINS */
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
