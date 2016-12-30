@@ -3951,10 +3951,6 @@ Session::config_changed (std::string p, bool ours)
 
 		_mmc->enable_send (Config->get_send_mmc ());
 
-	} else if (p == "midi-feedback") {
-
-		session_midi_feedback = Config->get_midi_feedback();
-
 	} else if (p == "jack-time-master") {
 
 		engine().reset_timebase ();

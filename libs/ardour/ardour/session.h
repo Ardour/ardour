@@ -1363,7 +1363,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 *  know when to send full MTC messages every so often.
 	 */
 	pframes_t               _pframes_since_last_mtc;
-	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;
 	framepos_t               last_loopend;

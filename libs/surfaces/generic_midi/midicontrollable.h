@@ -75,9 +75,6 @@ class MIDIControllable : public PBD::Stateful
 	void stop_learning ();
 	void drop_external_control ();
 
-	bool get_midi_feedback () { return feedback; }
-	void set_midi_feedback (bool val) { feedback = val; }
-
 	int control_to_midi(float val);
 	float midi_to_control(int val);
 

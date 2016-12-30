@@ -799,7 +799,6 @@ private:
 
 	std::vector<std::string> positional_sync_strings;
 
-	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_send_mtc ();

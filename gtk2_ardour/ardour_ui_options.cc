@@ -105,12 +105,6 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
-ARDOUR_UI::toggle_send_midi_feedback ()
-{
-	ActionManager::toggle_config_state ("Options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
-}
-
-void
 ARDOUR_UI::toggle_auto_input ()
 {
 	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_input), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
@@ -340,8 +334,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("Options", "UseMMC", &RCConfiguration::get_mmc_control);
-	} else if (p == "midi-feedback") {
-		ActionManager::map_some_state ("Options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
 	} else if (p == "auto-play") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_play));
 	} else if (p == "auto-return") {

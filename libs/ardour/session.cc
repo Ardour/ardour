@@ -222,7 +222,6 @@ Session::Session (AudioEngine &eng,
 	, _is_new (true)
 	, _send_qf_mtc (false)
 	, _pframes_since_last_mtc (0)
-	, session_midi_feedback (0)
 	, play_loop (false)
 	, loop_changing (false)
 	, last_loopend (0)

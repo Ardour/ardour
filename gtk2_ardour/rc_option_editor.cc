@@ -2716,16 +2716,6 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
-#if 0 // unused ?!
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "midi-feedback",
-			    _("Send MIDI control feedback"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
-			    ));
-#endif
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),
