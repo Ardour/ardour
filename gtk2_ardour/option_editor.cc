@@ -864,8 +864,12 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 	: OptionEditor (c)
 {
 	set_border_width (4);
-	hpacker.pack_start (treeview(), false, false);
-	hpacker.pack_start (notebook(), false, false, 4);
+	Frame* f = manage (new Frame ());
+	f->add (treeview());
+	f->set_shadow_type (Gtk::SHADOW_OUT);
+	f->set_border_width (0);
+	hpacker.pack_start (*f, false, false, 4);
+	hpacker.pack_start (notebook(), false, false);
 	pack_start (hpacker, true, true);
 
 	show_all ();
@@ -876,7 +880,11 @@ OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str
 	, ArdourWindow (str)
 {
 	container.set_border_width (4);
-	hpacker.pack_start (treeview(), false, false);
+	Frame* f = manage (new Frame ());
+	f->add (treeview());
+	f->set_shadow_type (Gtk::SHADOW_OUT);
+	f->set_border_width (0);
+	hpacker.pack_start (*f, false, false);
 	hpacker.pack_start (notebook(), true, true, 4);
 
 	container.pack_start (hpacker, true, true);
