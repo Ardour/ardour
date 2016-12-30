@@ -865,7 +865,7 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 {
 	set_border_width (4);
 	hpacker.pack_start (treeview(), false, false);
-	hpacker.pack_start (notebook(), false, false);
+	hpacker.pack_start (notebook(), false, false, 4);
 	pack_start (hpacker, true, true);
 
 	show_all ();
@@ -877,7 +877,7 @@ OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str
 {
 	container.set_border_width (4);
 	hpacker.pack_start (treeview(), false, false);
-	hpacker.pack_start (notebook(), true, true);
+	hpacker.pack_start (notebook(), true, true, 4);
 
 	container.pack_start (hpacker, true, true);
 

@@ -440,7 +440,7 @@ public:
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
-		t->attach (*l, col, col + 2, row, row + 1, FILL, FILL);
+		t->attach (*l, col + 1, col + 2, row, row + 1, FILL, FILL);
 		t->attach (_keyboard_layout_selector, col + 2, col + 3, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -2956,8 +2956,9 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("This will reduce the unpleasant increase in perceived volume "
-						   "that occurs when fast-forwarding or rewinding through some kinds of audio"));
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+			_("<b>When enabled</b> rhis will reduce the unpleasant increase in perceived volume "
+				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
 	add_option (_("Transport"), tsf);
 
 	ComboOption<float>* psc = new ComboOption<float> (
@@ -3004,7 +3005,7 @@ if (!Profile->get_mixbus()) {
 							      "which will often cause a small click or delay"), PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
 
-	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) handling")));
+	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) Handling")));
 	tsf = new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
@@ -3786,11 +3787,9 @@ if (!Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
 			);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-				_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
-					"This may help with some window managers. This requires a restart of %1 to take effect"),
-				PROGRAM_NAME));
-	add_option (_("GUI/Quirks"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
+			add_option (_("GUI/Quirks"), bo);
 
 	bo = new BoolOption (
 			"transients-follow-front",
@@ -3798,9 +3797,8 @@ if (!Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
 			);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-				_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
-					"This requires a restart of %1 to take effect"), PROGRAM_NAME));
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("Make transient windows follow the front window when toggling between the editor and mixer."));
 	add_option (_("GUI/Quirks"), bo);
 #endif
 
@@ -3811,9 +3809,8 @@ if (!Profile->get_mixbus()) {
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
 				);
-		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
-					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
-						"This requires a restart of %1 to take effect"), PROGRAM_NAME));
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front."));
 		add_option (_("GUI/Quirks"), bo);
 	}
 
