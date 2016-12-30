@@ -83,7 +83,7 @@ void
 OptionEditorComponent::maybe_add_note (OptionEditorPage* p, int n)
 {
 	if (!_note.empty ()) {
-		Gtk::Label* l = manage (new Gtk::Label (string_compose (X_("<i>%1</i>"), _note)));
+		Gtk::Label* l = manage (left_aligned_label (string_compose (X_("<i>%1</i>"), _note)));
 		l->set_use_markup (true);
 		l->set_line_wrap (true);
 		p->table.attach (*l, 1, 3, n, n + 1, FILL | EXPAND);
