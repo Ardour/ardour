@@ -2671,7 +2671,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("MIDI"),
 	     new BoolOption (
 		     "never-display-periodic-midi",
-		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
+		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
@@ -2692,11 +2692,11 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Audition")));
 
 	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
 		"midi-audition-synth-uri",
-		_("Midi Audition Synth (LV2)"),
+		_("MIDI Audition Synth (LV2)"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
 		);
@@ -2737,7 +2737,6 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
 		     );
-	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
@@ -3290,13 +3289,17 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
 		     ));
 
-	add_option (S_("Preferences|GUI"),
-		    new BoolOption (
-			    "super-rapid-clock-update",
-			    _("Update transport clock display at FPS instead of every 100ms"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
-			    ));
+	bo = new BoolOption (
+			"super-rapid-clock-update",
+			_("Update clocks at TC Frame rate"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> the clock displays are updated every Timecode Frame (fps).\n\n"
+				"<b>When disabled</b> the clock displays are updated only every 100ms."
+			 ));
+	add_option (S_("Preferences|GUI"), bo);
 
 	add_option (S_("Preferences|GUI"),
 			new BoolOption (
