@@ -2208,7 +2208,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
-		     _("Make rubberband selection rectangle snap to the grid"),
+		     _("Snap rubberband to grid"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
@@ -2243,7 +2243,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "use-mouse-position-as-zoom-focus-on-scroll",
-			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
+			    _("Zoom to mouse position when zooming with scroll wheel"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
 			    ));
@@ -2260,7 +2260,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "use-double-click-to-zoom-to-selection",
-			    _("Use double mouse click to zoom to selection"),
+			    _("Double click zooms to selection"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_double_click_to_zoom_to_selection),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
 			    ));
@@ -2952,12 +2952,12 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Sync/LTC"), _ltc_volume_slider);
 
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Clock Generator")));
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
 
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
 			    "send-midi-clock",
-			    _("Send MIDI Clock"),
+			    _("Enable Mclk generator"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
@@ -2967,7 +2967,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
 			    "send-mtc",
-			    _("Send MIDI Time Code"),
+			    _("Enable MTC Generator"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
@@ -2981,7 +2981,7 @@ if (!Profile->get_mixbus()) {
 			    0, 20, 1, 5
 			    ));
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
 
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
@@ -3527,7 +3527,7 @@ if (!Profile->get_mixbus()) {
 			);
 	add_option (_("GUI/Toolbar"), new OptionEditorBlank ());
 
-	add_option (_("GUI/Quirks"), new OptionEditorHeading (_("Various Quirks for Windowing systems")));
+	add_option (_("GUI/Quirks"), new OptionEditorHeading (_("Various Workarounds for Windowing Systems")));
 	add_option (_("GUI/Quirks"),
 	     new BoolOption (
 		     "use-wm-visibility",
