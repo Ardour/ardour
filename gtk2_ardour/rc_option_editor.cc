@@ -2165,9 +2165,6 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 1000, 1, 20
 		     ));
 
-	add_option (_("Misc/Click"), new OptionEditorHeading (_("Click")));
-	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
-
 	add_option (_("Misc"), new OptionEditorHeading (_("Automation")));
 
 	add_option (_("Misc"),
@@ -2429,7 +2426,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Sync/LTC"), _ltc_volume_slider);
 
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Clock")));
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Clock Generator")));
 
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
@@ -2439,7 +2436,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
 
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
@@ -2463,7 +2460,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
 			    "mmc-control",
-			    _("Obey MIDI Machine Control commands"),
+			    _("Respond to MMC commands"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
@@ -2471,7 +2468,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Sync/MIDI"),
 		    new BoolOption (
 			    "send-mmc",
-			    _("Send MIDI Machine Control commands"),
+			    _("Send MMC commands"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
@@ -2930,6 +2927,13 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     ));
 }
 
+	/* Click */
+
+	add_option (_("Metronom"), new OptionEditorHeading (_("Click")));
+	add_option (_("Metronom"), new ClickOptions (_rc_config));
+
+	/* MIDI */
+
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
 
 	add_option (_("MIDI"),
@@ -2983,18 +2987,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
-	add_option (_("MIDI/Ports"), new OptionEditorHeading (_("MIDI Port Options")));
-
-	add_option (_("MIDI/Ports"),
-		    new BoolOption (
-			    "get-midi-input-follows-selection",
-			    _("MIDI input follows MIDI track selection"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
-			    ));
-
-	add_option (_("MIDI/Ports"), new MidiPortOptions ());
-	add_option (_("MIDI/Ports"), new OptionEditorBlank ());
 	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
 
 	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
@@ -3024,14 +3016,26 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("MIDI"), audition_synth);
 
+
+	/* MIDI PORTs */
+	add_option (_("MIDI Ports"), new OptionEditorHeading (_("MIDI Port Options")));
+
+	add_option (_("MIDI Ports"),
+		    new BoolOption (
+			    "get-midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI Ports"), new MidiPortOptions ());
+	add_option (_("MIDI Ports"), new OptionEditorBlank ());
+
+
 	/* Control Surfaces */
 
 	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
-
-	/* VIDEO Timeline */
-	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
-	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
@@ -3743,6 +3747,10 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
 		     ));
+
+	/* VIDEO Timeline */
+	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
+	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 	/* and now the theme manager */
 
