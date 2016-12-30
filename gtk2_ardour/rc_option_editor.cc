@@ -3296,8 +3296,8 @@ if (!Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> the clock displays are updated every Timecode Frame (fps).\n\n"
-				"<b>When disabled</b> the clock displays are updated only every 100ms."
+			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
+				"<b>When disabled</b> clock displays are updated only every 100ms."
 			 ));
 	add_option (S_("Preferences|GUI"), bo);
 
