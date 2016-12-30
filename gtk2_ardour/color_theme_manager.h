@@ -58,6 +58,8 @@ class ColorThemeManager : public OptionEditorMiniPage
 
 	void set_note (std::string const &);
 
+	void add_to_page (OptionEditorPage*);
+
 	Gtk::Widget& tip_widget();
 
   private:

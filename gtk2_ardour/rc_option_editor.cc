@@ -65,7 +65,6 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
-#include "theme_manager.h"
 #include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -85,15 +84,16 @@ public:
 		, _click_browse_button (_("Browse..."))
 		, _click_emphasis_browse_button (_("Browse..."))
 	{
+		// TODO get rid of GTK -> use OptionEditor Widgets
 		Table* t = &table;
 
-		Label* l = manage (left_aligned_label (_("Emphasis on first beat:")));
+		Label* l = manage (left_aligned_label (_("Emphasis on first beat")));
 		_use_emphasis_on_click_check_button.add (*l);
 		t->attach (_use_emphasis_on_click_check_button, 1, 3, 0, 1, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
 
-		l = manage (left_aligned_label (_("Use built-in default sounds:")));
+		l = manage (left_aligned_label (_("Use built-in default sounds")));
 		_use_default_click_check_button.add (*l);
 		t->attach (_use_default_click_check_button, 1, 3, 1, 2, FILL);
 		_use_default_click_check_button.signal_toggled().connect (
@@ -247,6 +247,7 @@ public:
 		_limit_undo_button (_("Limit undo history to")),
 		_save_undo_button (_("Save undo history of"))
 	{
+		// TODO get rid of GTK -> use OptionEditor SpinOption
 		_limit_undo_spin.set_range (0, 512);
 		_limit_undo_spin.set_increments (1, 10);
 
@@ -400,6 +401,8 @@ public:
 		  _insert_note_button_adjustment (3, 1, 5),
 		  _insert_note_button_spin (_insert_note_button_adjustment)
 	{
+		// TODO get rid of GTK -> use OptionEditor Widgets
+
 		const std::string restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
 		/* internationalize and prepare for use with combos */
 
@@ -437,7 +440,7 @@ public:
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
-		t->attach (*l, col, col + 2, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 2, row, row + 1, FILL, FILL);
 		t->attach (_keyboard_layout_selector, col + 2, col + 3, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -454,14 +457,14 @@ public:
 		l = manage (left_aligned_label (_("Edit using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_edit_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, SHRINK , FILL);
 
 		_edit_button_spin.set_name ("OptionsEntry");
 		_edit_button_adjustment.set_value (Keyboard::edit_button());
@@ -484,14 +487,14 @@ public:
 		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_delete_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_delete_button_spin.set_name ("OptionsEntry");
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
@@ -514,14 +517,14 @@ public:
 		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_insert_note_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_insert_note_button_spin.set_name ("OptionsEntry");
 		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
@@ -558,7 +561,7 @@ public:
 		l = manage (left_aligned_label (_("Copy items using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_copy_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 				++row;
@@ -586,7 +589,7 @@ public:
 		l = manage (left_aligned_label (_("Constrain drag using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -609,7 +612,7 @@ public:
 		l = manage (left_aligned_label (_("Push points using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -637,7 +640,7 @@ public:
 		l = manage (left_aligned_label (_("Trim contents using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -660,7 +663,7 @@ public:
 		l = manage (left_aligned_label (_("Anchored trim using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_trim_anchored_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
@@ -681,7 +684,7 @@ public:
 		l = manage (left_aligned_label (_("Jump after trim using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_trim_jump_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
@@ -704,7 +707,7 @@ public:
 		l = manage (left_aligned_label (_("Resize notes relatively using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_note_size_relative_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
@@ -738,7 +741,7 @@ public:
 		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_snap_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -764,7 +767,7 @@ public:
 		l = manage (left_aligned_label (_("Snap relatively using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_snap_delta_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -793,7 +796,7 @@ public:
 		l = manage (left_aligned_label (_("Resize overlapped regions using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_trim_overlap_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -823,7 +826,7 @@ public:
 		l = manage (left_aligned_label (_("Fine adjust using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 	}
 
@@ -2388,8 +2391,9 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), rsas);
 
-	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Modifiers")));
+	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
+	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
 
 	/* MIXER -- SOLO AND MUTE */
 
@@ -2671,7 +2675,7 @@ if (!Profile->get_mixbus()) {
 
 	/* MIDI */
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
+	add_option (_("MIDI"), new OptionEditorHeading (_("Buffering")));
 
 	add_option (_("MIDI"),
 		    new SpinOption<float> (
@@ -2683,6 +2687,8 @@ if (!Profile->get_mixbus()) {
 			    "", 1.0, 2
 			    ));
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
+
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
@@ -2691,6 +2697,8 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
 		     -1, 65536, 1, 10
 		     ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Display")));
 
 	add_option (_("MIDI"),
 		    new BoolOption (
@@ -2708,14 +2716,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
-	add_option (_("MIDI"),
-	     new BoolOption (
-		     "sound-midi-notes",
-		     _("Sound MIDI notes as they are selected in the editor"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
-		     ));
-
+#if 0 // unused ?!
 	add_option (_("MIDI"),
 		    new BoolOption (
 			    "midi-feedback",
@@ -2723,8 +2724,17 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
+#endif
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Audition")));
+	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
+
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "sound-midi-notes",
+		     _("Sound MIDI notes as they are selected in the editor"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
+		     ));
 
 	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
 		"midi-audition-synth-uri",
@@ -2906,24 +2916,6 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
 		     ));
 
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Editor Meters")));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "show-track-meters",
-		     _("Show meters in track headers"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
-		     ));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "editor-stereo-only-meters",
-		     _("Limit track header meters to stereo"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
-		     ));
-
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
 
 	add_option (S_("Preferences|Metering"),
@@ -3042,7 +3034,10 @@ if (!Profile->get_mixbus()) {
 		     );
 	add_option (_("Transport"), tsf);
 
-	add_option (_("Sync"), new OptionEditorHeading (_("Synchronization and Slave Options")));
+
+	/* SYNC */
+
+	add_option (_("Sync"), new OptionEditorHeading (_("External Syncronization")));
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
@@ -3108,7 +3103,7 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Sync"), _sync_source_2997);
 
-	add_option (_("Sync/LTC"), new OptionEditorHeading (_("LTC Reader")));
+	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Reader")));
 
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
@@ -3127,7 +3122,7 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Sync/LTC"), _ltc_port);
 
-	add_option (_("Sync/LTC"), new OptionEditorHeading (_("LTC Generator")));
+	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
 	add_option (_("Sync/LTC"),
 		    new BoolOption (
@@ -3626,6 +3621,24 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("GUI/Editor"), wfsh);
 
+	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Editor Meters")));
+
+	add_option (_("GUI/Editor"),
+	     new BoolOption (
+		     "show-track-meters",
+		     _("Show meters in track headers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
+		     ));
+
+	add_option (_("GUI/Editor"),
+	     new BoolOption (
+		     "editor-stereo-only-meters",
+		     _("Limit track header meters to stereo"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
+		     ));
+
 	add_option (_("GUI/Editor"), new OptionEditorBlank ());
 
 	/* The names of these controls must be the same as those given in MixerStrip
@@ -3710,11 +3723,61 @@ if (!Profile->get_mixbus()) {
 
 	/* and now the theme manager */
 
+	add_option (_("GUI/Theme"), new OptionEditorHeading (_("Theme")));
+
+	add_option (_("GUI/Theme"), new BoolOption (
+				"flat-buttons",
+				_("Draw \"flat\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
+				));
+
+	add_option (_("GUI/Theme"), new BoolOption (
+				"meter-style-led",
+				_("LED meter style"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
+				));
+
+
+	HSliderOption *gui_hs = new HSliderOption(
+			"timeline-item-gradient-depth",
+			_("Waveforms color gradient depth"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
+			0, 1.0, 0.05
+			);
+	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+	add_option (_("GUI/Theme"), gui_hs);
+
+	gui_hs = new HSliderOption(
+			"timeline-item-gradient-depth",
+			_("Timeline item gradient depth"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_timeline_item_gradient_depth),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_timeline_item_gradient_depth),
+			0, 1.0, 0.05
+			);
+	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+	add_option (_("GUI/Theme"), gui_hs);
+
+	vector<string> icon_sets = ::get_icon_sets ();
+	if (icon_sets.size() > 1) {
+		ComboOption<std::string>* io = new ComboOption<std::string> (
+				"icon-set", _("Icon Set"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
+				);
+		for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
+			io->add (*i, *i);
+		}
+		add_option (_("GUI/Theme"), io);
+	}
+
 	add_option (_("GUI/Colors"), new OptionEditorHeading (_("Colors")));
 	add_option (_("GUI/Colors"), new ColorThemeManager);
+	add_option (_("GUI/Colors"), new OptionEditorBlank ());
 
-	add_option (_("GUI/Theme"), new OptionEditorHeading (_("Theme")));
-	add_option (_("GUI/Theme"), new ThemeManager);
+	/* Quirks */
 
 	add_option (_("GUI/Quirks"), quirks_head);
 

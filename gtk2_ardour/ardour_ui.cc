@@ -170,7 +170,6 @@ typedef uint64_t microseconds_t;
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "startup.h"
-#include "theme_manager.h"
 #include "time_axis_view_item.h"
 #include "time_info_box.h"
 #include "timers.h"

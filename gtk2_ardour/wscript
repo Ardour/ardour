@@ -248,7 +248,6 @@ gtk2_ardour_sources = [
         'tempo_curve.cc',
         'tempo_dialog.cc',
         'tempo_lines.cc',
-        'theme_manager.cc',
         'time_axis_view.cc',
         'time_axis_view_item.cc',
         'time_fx_dialog.cc',

@@ -53,7 +53,6 @@
 #include "main_clock.h"
 #include "mixer_ui.h"
 #include "utils.h"
-#include "theme_manager.h"
 #include "time_info_box.h"
 #include "midi_tracer.h"
 #include "global_port_matrix.h"

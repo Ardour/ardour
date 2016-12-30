@@ -602,6 +602,19 @@ ColorThemeManager::set_state_from_config ()
 
 }
 
+void
+ColorThemeManager::add_to_page (OptionEditorPage* p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 1;
+	if (!_note.empty ()) {
+		++m;
+	}
+	p->table.resize (m, 3);
+	p->table.attach (box, 1, 3, n, n + 1, FILL | EXPAND, SHRINK, 0, 0);
+	maybe_add_note (p, n + 1);
+}
+
 Gtk::Widget&
 ColorThemeManager::tip_widget()
 {
