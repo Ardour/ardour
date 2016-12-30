@@ -2268,13 +2268,6 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 if (!Profile->get_mixbus()) {
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "show-zoom-tools",
-			    _("Show zoom toolbar (if torn off)"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
-			    ));
 
 	add_option (_("Editor"),
 		    new BoolOption (
@@ -2765,6 +2758,181 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
 	add_option (_("Metronome"), new ClickOptions (_rc_config));
 
+	/* Meters */
+
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
+
+	ComboOption<float>* mht = new ComboOption<float> (
+		"meter-hold",
+		_("Peak hold time"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_hold),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_hold)
+		);
+
+	mht->add (MeterHoldOff, _("off"));
+	mht->add (MeterHoldShort, _("short"));
+	mht->add (MeterHoldMedium, _("medium"));
+	mht->add (MeterHoldLong, _("long"));
+
+	add_option (S_("Preferences|Metering"), mht);
+
+	ComboOption<float>* mfo = new ComboOption<float> (
+		"meter-falloff",
+		_("DPM fall-off"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
+		);
+
+	mfo->add (METER_FALLOFF_OFF,      _("off"));
+	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
+	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
+	mfo->add (METER_FALLOFF_SLOWISH,  _("moderate [12.0dB/sec] (DIN)"));
+	mfo->add (METER_FALLOFF_MODERATE, _("medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
+	mfo->add (METER_FALLOFF_MEDIUM,   _("fast [20dB/sec]"));
+	mfo->add (METER_FALLOFF_FAST,     _("very fast [32dB/sec]"));
+
+	add_option (S_("Preferences|Metering"), mfo);
+
+	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
+		"meter-line-up-level",
+		_("Meter line-up level; 0dBu"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_level),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_level)
+		);
+
+	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
+
+	add_option (S_("Preferences|Metering"), mlu);
+
+	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
+		"meter-line-up-din",
+		_("IEC1/DIN Meter line-up level; 0dBu"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_din)
+		);
+
+	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
+
+	add_option (S_("Preferences|Metering"), mld);
+
+	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
+		"meter-vu-standard",
+		_("VU Meter standard"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_vu_standard),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_vu_standard)
+		);
+
+	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
+	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
+	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
+
+	add_option (S_("Preferences|Metering"), mvu);
+
+	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
+		"meter-type-master",
+		_("Default Meter Type for Master Bus"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_master),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
+		);
+	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtm->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtm->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtm->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtm->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
+
+	add_option (S_("Preferences|Metering"), mtm);
+
+
+	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
+		"meter-type-bus",
+		_("Default Meter Type for Busses"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
+		);
+	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtb->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtb->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtb->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtb->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
+
+	add_option (S_("Preferences|Metering"), mtb);
+
+	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
+		"meter-type-track",
+		_("Default Meter Type for Tracks"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
+		);
+	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
+
+	add_option (S_("Preferences|Metering"), mtt);
+
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
+
+	add_option (S_("Preferences|Metering"), mpks);
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "meter-style-led",
+		     _("LED meter style"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
+		     ));
+
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Editor Meters")));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "show-track-meters",
+		     _("Show meters in track headers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
+		     ));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "editor-stereo-only-meters",
+		     _("Limit track header meters to stereo"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
+		     ));
+
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "save-export-analysis-image",
+		     _("Save loudness analysis as image file"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
+		     ));
 
 	/* TRANSPORT & Sync */
 
@@ -3286,7 +3454,7 @@ if (!Profile->get_mixbus()) {
 
 	/* INTERFACE */
 #if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
-	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
+	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
@@ -3299,7 +3467,7 @@ if (!Profile->get_mixbus()) {
 
 	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
 				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgc);
+	add_option (S_("Preferences|GUI"), bgc);
 #endif
 
 #ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
@@ -3311,11 +3479,11 @@ if (!Profile->get_mixbus()) {
 		);
 
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgo);
+	add_option (S_("Preferences|GUI"), bgo);
 #endif
-	add_option (_("Appearance"), new OptionEditorHeading (_("Graphical User Interface")));
+	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphical User Interface")));
 
-	add_option (_("Appearance"),
+	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",
 		     _("Highlight widgets on mouseover"),
@@ -3323,7 +3491,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
 		     ));
 
-	add_option (_("Appearance"),
+	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
 		     _("Show tooltips if mouse hovers over a control"),
@@ -3341,9 +3509,9 @@ if (!Profile->get_mixbus()) {
 			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
 				"<b>When disabled</b> clock displays are updated only every 100ms."
 			 ));
-	add_option (_("Appearance"), bo);
+	add_option (S_("Preferences|GUI"), bo);
 
-	add_option (_("Appearance"),
+	add_option (S_("Preferences|GUI"),
 			new BoolOption (
 				"blink-rec-arm",
 				_("Blink Rec-Arm buttons"),
@@ -3354,7 +3522,7 @@ if (!Profile->get_mixbus()) {
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (_("Appearance"), new FontScalingOptions ());
+	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
 #endif
 
 	/* Image cache size */
@@ -3369,7 +3537,7 @@ if (!Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (
 			sics->tip_widget(),
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
-	add_option (_("Appearance"), sics);
+	add_option (S_("Preferences|GUI"), sics);
 
 if (!ARDOUR::Profile->get_mixbus()) {
 	/* Lock GUI timeout */
@@ -3384,11 +3552,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (
 			slts->tip_widget(),
 		 _("Lock GUI after this many idle seconds (zero to never lock)"));
-	add_option (_("Appearance"), slts);
+	add_option (S_("Preferences|GUI"), slts);
 } // !mixbus
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
-	add_option (_("Appearance/Editor"),
+	add_option (_("GUI/Editor"), new OptionEditorHeading (_("General")));
+	add_option (_("GUI/Editor"),
 	     new BoolOption (
 		     "show-name-highlight",
 		     _("Use name highlight bars in region displays (requires a restart)"),
@@ -3396,7 +3564,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-	add_option (_("Appearance/Editor"),
+	add_option (_("GUI/Editor"),
 			new BoolOption (
 			"color-regions-using-track-color",
 			_("Region color follows track color"),
@@ -3404,10 +3572,10 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
 			));
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
+	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Waveforms")));
 
 if (!Profile->get_mixbus()) {
-	add_option (_("Appearance/Editor"),
+	add_option (_("GUI/Editor"),
 	     new BoolOption (
 		     "show-waveforms",
 		     _("Show waveforms in regions"),
@@ -3416,7 +3584,7 @@ if (!Profile->get_mixbus()) {
 		     ));
 }  // !mixbus
 
-	add_option (_("Appearance/Editor"),
+	add_option (_("GUI/Editor"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
 		     _("Show waveforms while recording"),
@@ -3424,7 +3592,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
 		     ));
 
-	add_option (_("Appearance/Editor"),
+	add_option (_("GUI/Editor"),
 			new BoolOption (
 			"show-waveform-clipping",
 			_("Show waveform clipping"),
@@ -3432,7 +3600,7 @@ if (!Profile->get_mixbus()) {
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
 			));
 
-	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
+	add_option (_("GUI/Editor"), new ClipLevelOptions ());
 
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
 		"waveform-scale",
@@ -3444,7 +3612,7 @@ if (!Profile->get_mixbus()) {
 	wfs->add (Linear, _("linear"));
 	wfs->add (Logarithmic, _("logarithmic"));
 
-	add_option (_("Appearance/Editor"), wfs);
+	add_option (_("GUI/Editor"), wfs);
 
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
@@ -3456,9 +3624,9 @@ if (!Profile->get_mixbus()) {
 	wfsh->add (Traditional, _("traditional"));
 	wfsh->add (Rectified, _("rectified"));
 
-	add_option (_("Appearance/Editor"), wfsh);
+	add_option (_("GUI/Editor"), wfsh);
 
-	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
+	add_option (_("GUI/Editor"), new OptionEditorBlank ());
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
@@ -3471,7 +3639,7 @@ if (!Profile->get_mixbus()) {
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
 
-	add_option (_("Appearance/Mixer"),
+	add_option (_("GUI/Mixer"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -3480,7 +3648,7 @@ if (!Profile->get_mixbus()) {
 			)
 		);
 
-	add_option (_("Appearance/Mixer"),
+	add_option (_("GUI/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
@@ -3488,11 +3656,11 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
+	add_option (_("GUI/Mixer"), new OptionEditorBlank ());
 
-	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
+	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-selclock",
 		     _("Display Selection Clock"),
@@ -3501,7 +3669,7 @@ if (!Profile->get_mixbus()) {
 		     ));
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		add_option (_("Appearance/Toolbar"),
+		add_option (_("GUI/Toolbar"),
 				new BoolOption (
 					"show-secondary-clock",
 					_("Display Secondary Clock"),
@@ -3510,7 +3678,7 @@ if (!Profile->get_mixbus()) {
 					));
 	}
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-mini-timeline",
 		     _("Display Navigation Timeline"),
@@ -3518,7 +3686,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("GUI/Toolbar"),
 	     new BoolOption (
 		     "show-editor-meter",
 		     _("Display Master Level Meter"),
@@ -3526,14 +3694,14 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
+	add_option (_("GUI/Toolbar"),
 			new ColumVisibilityOption (
 				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
-	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
+	add_option (_("GUI/Toolbar"), new OptionEditorBlank ());
 
 
 	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
@@ -3542,15 +3710,15 @@ if (!Profile->get_mixbus()) {
 
 	/* and now the theme manager */
 
-	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
-	add_option (_("Appearance/Colors"), new ColorThemeManager);
+	add_option (_("GUI/Colors"), new OptionEditorHeading (_("Colors")));
+	add_option (_("GUI/Colors"), new ColorThemeManager);
 
-	add_option (_("Appearance/Theme"), new OptionEditorHeading (_("Theme")));
-	add_option (_("Appearance/Theme"), new ThemeManager);
+	add_option (_("GUI/Theme"), new OptionEditorHeading (_("Theme")));
+	add_option (_("GUI/Theme"), new ThemeManager);
 
-	add_option (_("Appearance/Quirks"), quirks_head);
+	add_option (_("GUI/Quirks"), quirks_head);
 
-	add_option (_("Appearance/Quirks"),
+	add_option (_("GUI/Quirks"),
 	     new BoolOption (
 		     "use-wm-visibility",
 		     _("Use Window Manager/Desktop visibility information"),
@@ -3569,7 +3737,7 @@ if (!Profile->get_mixbus()) {
 				_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
 					"This may help with some window managers. This requires a restart of %1 to take effect"),
 				PROGRAM_NAME));
-	add_option (_("Appearance/Quirks"), bo);
+	add_option (_("GUI/Quirks"), bo);
 
 	bo = new BoolOption (
 			"transients-follow-front",
@@ -3580,7 +3748,7 @@ if (!Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
 				_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
 					"This requires a restart of %1 to take effect"), PROGRAM_NAME));
-	add_option (_("Appearance/Quirks"), bo);
+	add_option (_("GUI/Quirks"), bo);
 #endif
 
 	if (!Profile->get_mixbus()) {
@@ -3593,188 +3761,11 @@ if (!Profile->get_mixbus()) {
 		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (), string_compose (
 					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
 						"This requires a restart of %1 to take effect"), PROGRAM_NAME));
-		add_option (_("Appearance/Quirks"), bo);
+		add_option (_("GUI/Quirks"), bo);
 	}
 
-	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
+	add_option (_("GUI/Quirks"), new OptionEditorBlank ());
 
-
-
-	/* Meters */
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
-
-	ComboOption<float>* mht = new ComboOption<float> (
-		"meter-hold",
-		_("Peak hold time"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_hold),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_hold)
-		);
-
-	mht->add (MeterHoldOff, _("off"));
-	mht->add (MeterHoldShort, _("short"));
-	mht->add (MeterHoldMedium, _("medium"));
-	mht->add (MeterHoldLong, _("long"));
-
-	add_option (S_("Preferences|Metering"), mht);
-
-	ComboOption<float>* mfo = new ComboOption<float> (
-		"meter-falloff",
-		_("DPM fall-off"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
-		);
-
-	mfo->add (METER_FALLOFF_OFF,      _("off"));
-	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
-	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
-	mfo->add (METER_FALLOFF_SLOWISH,  _("moderate [12.0dB/sec] (DIN)"));
-	mfo->add (METER_FALLOFF_MODERATE, _("medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
-	mfo->add (METER_FALLOFF_MEDIUM,   _("fast [20dB/sec]"));
-	mfo->add (METER_FALLOFF_FAST,     _("very fast [32dB/sec]"));
-
-	add_option (S_("Preferences|Metering"), mfo);
-
-	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
-		"meter-line-up-level",
-		_("Meter line-up level; 0dBu"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_level),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_level)
-		);
-
-	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
-	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
-	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
-	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
-
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
-
-	add_option (S_("Preferences|Metering"), mlu);
-
-	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
-		"meter-line-up-din",
-		_("IEC1/DIN Meter line-up level; 0dBu"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_din),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_din)
-		);
-
-	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
-	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
-	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
-	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
-
-	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
-
-	add_option (S_("Preferences|Metering"), mld);
-
-	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
-		"meter-vu-standard",
-		_("VU Meter standard"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_vu_standard),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_vu_standard)
-		);
-
-	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
-	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
-	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
-	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
-
-	add_option (S_("Preferences|Metering"), mvu);
-
-	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
-		"meter-type-master",
-		_("Default Meter Type for Master Bus"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_master),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
-		);
-	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
-	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
-	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
-	mtm->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
-	mtm->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
-	mtm->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
-	mtm->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
-
-	add_option (S_("Preferences|Metering"), mtm);
-
-
-	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
-		"meter-type-bus",
-		_("Default Meter Type for Busses"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
-		);
-	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
-	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
-	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
-	mtb->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
-	mtb->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
-	mtb->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
-	mtb->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
-
-	add_option (S_("Preferences|Metering"), mtb);
-
-	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
-		"meter-type-track",
-		_("Default Meter Type for Tracks"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
-		);
-	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
-
-	add_option (S_("Preferences|Metering"), mtt);
-
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak threshold [dBFS]"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
-			-10, 0, .1, .1
-			);
-
-	Gtkmm2ext::UI::instance()->set_tip (
-			mpks->tip_widget(),
-			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
-
-	add_option (S_("Preferences|Metering"), mpks);
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "meter-style-led",
-		     _("LED meter style"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
-		     ));
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Editor Meters")));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "show-track-meters",
-		     _("Show meters on tracks in the editor"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
-		     ));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "editor-stereo-only-meters",
-		     _("Show at most stereo meters in the track-header"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
-		     ));
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "save-export-analysis-image",
-		     _("Save loudness analysis as image file"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
-		     ));
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
