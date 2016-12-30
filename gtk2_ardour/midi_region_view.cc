@@ -1252,7 +1252,7 @@ MidiRegionView::redisplay_model()
 
 					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr && gr->trackview.y_position() != -1) {
+						if (gr && !gr->trackview.hidden()) {
 							gr->update_note (sus, !update);
 						}
 					}
@@ -1264,7 +1264,7 @@ MidiRegionView::redisplay_model()
 
 					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr && gr->trackview.y_position() != -1) {
+						if (gr && !gr->trackview.hidden()) {
 							gr->update_hit (hit, !update);
 						}
 					}
