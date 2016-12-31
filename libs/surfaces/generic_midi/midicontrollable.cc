@@ -63,7 +63,6 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	control_nrpn = -1;
 	_control_description = "MIDI Control: none";
 	control_additional = (MIDI::byte) -1;
-	feedback = true; // for now
 }
 
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, Controllable& c, bool m)
@@ -84,7 +83,6 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	control_nrpn = -1;
 	_control_description = "MIDI Control: none";
 	control_additional = (MIDI::byte) -1;
-	feedback = true; // for now
 }
 
 MIDIControllable::~MIDIControllable ()
@@ -610,7 +608,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
-	if (!controllable || !feedback) {
+	if (!controllable || !_surface->get_feedback ()) {
 		return buf;
 	}
 
@@ -738,12 +736,6 @@ MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	if ((prop = node.property ("feedback")) != 0) {
-		feedback = (prop->value() == "yes");
-	} else {
-		feedback = true; // default
-	}
-
 	bind_midi (control_channel, control_type, control_additional);
 
 	return 0;
@@ -769,7 +761,6 @@ MIDIControllable::get_state ()
 		node->add_property ("channel", buf);
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
 		node->add_property ("additional", buf);
-		node->add_property ("feedback", (feedback ? "yes" : "no"));
 	}
 
 	return *node;

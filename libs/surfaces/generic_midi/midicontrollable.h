@@ -134,7 +134,6 @@ class MIDIControllable : public PBD::Stateful
 	std::string     _control_description;
 	int16_t          control_rpn;
 	int16_t          control_nrpn;
-	bool             feedback;
 	uint32_t        _rid;
 	std::string     _what;
 	bool            _bank_relative;
