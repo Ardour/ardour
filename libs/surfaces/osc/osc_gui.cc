@@ -270,10 +270,6 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (*label, 0, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	++fn;
 
-	feedback_enable.add (*manage (new Label (_("Enable Feedback"))));
-	fbtable->attach (feedback_enable, 0, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	++fn;
-
 	label = manage (new Gtk::Label(_("Feedback Value:")));
 	label->set_alignment(1, .5);
 	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 15);
@@ -372,7 +368,6 @@ OSC_GUI::OSC_GUI (OSC& p)
 	// set strips and feedback from loaded default values
 	reshow_values ();
 	// connect signals
-	feedback_enable.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::toggle_feedback_enable));
 	audio_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	midi_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	audio_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
@@ -605,8 +600,6 @@ OSC_GUI::reshow_values ()
 	//hp_gui.set_active (false); // we don't have this yet (Mixbus wants)
 	select_fb.set_active(def_feedback & 8192);
 
-	feedback_enable.set_active (cp.get_feedback ());
-
 	calculate_strip_types ();
 	calculate_feedback ();
 }
@@ -697,12 +690,6 @@ OSC_GUI::calculate_strip_types ()
 	}
 
 	current_strip_types.set_text(string_compose("%1", stvalue));
-}
-
-void
-OSC_GUI::toggle_feedback_enable ()
-{
-	cp.set_feedback (feedback_enable.get_active ());
 }
 
 void

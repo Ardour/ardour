@@ -92,7 +92,6 @@ private:
 	uint32_t def_feedback;
 	void calculate_feedback ();
 	Gtk::Label current_feedback;
-	Gtk::CheckButton feedback_enable;
 	Gtk::CheckButton strip_buttons_button;
 	Gtk::CheckButton strip_control_button;
 	Gtk::CheckButton ssid_as_path;
@@ -109,7 +108,6 @@ private:
 	Gtk::CheckButton select_fb;
 	int fbvalue;
 	void set_bitsets ();
-	void toggle_feedback_enable ();
 
 
 
