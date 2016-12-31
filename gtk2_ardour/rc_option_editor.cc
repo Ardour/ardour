@@ -2270,16 +2270,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
 		     ));
 
-if (!Profile->get_mixbus()) {
+	if (!Profile->get_mixbus()) {
 
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "use-mouse-position-as-zoom-focus-on-scroll",
-			    _("Zoom to mouse position when zooming with scroll wheel"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
-			    ));
-}  // !mixbus
+		add_option (_("Editor"),
+				new BoolOption (
+					"use-mouse-position-as-zoom-focus-on-scroll",
+					_("Zoom to mouse position when zooming with scroll wheel"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
+					));
+	}  // !mixbus
 
 	add_option (_("Editor"),
 		    new BoolOption (
@@ -2511,25 +2511,20 @@ if (!Profile->get_mixbus()) {
 		     ));
 
 
-if (!ARDOUR::Profile->get_mixbus()) {
-	add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "link-send-and-route-panner",
-		     _("Link panners of Aux and External Sends with main panner by default"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-		     ));
-}
+	if (!ARDOUR::Profile->get_mixbus()) {
+		add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
+		add_option (_("Mixer"),
+				new BoolOption (
+					"link-send-and-route-panner",
+					_("Link panners of Aux and External Sends with main panner by default"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+					));
+	}
 
+	/* Signal Flow */
 
-	/* AUDIO */
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
-
-	add_option (_("Audio"), new BufferingOptions (_rc_config));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Monitoring")));
 
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
@@ -2547,9 +2542,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
-	add_option (_("Audio"), mm);
+	add_option (_("Signal Flow"), mm);
 
-	add_option (_("Audio"),
+	add_option (_("Signal Flow"),
 	     new BoolOption (
 		     "tape-machine-mode",
 		     _("Tape machine mode"),
@@ -2557,54 +2552,62 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
 		     ));
 
-	add_option (_("Audio"), new OptionEditorHeading (_("Track and Bus Connections")));
-if (!Profile->get_mixbus()) {
+	if (!Profile->get_mixbus()) {
 
-	add_option (_("Audio"),
-		    new BoolOption (
-			    "auto-connect-standard-busses",
-			    _("Auto-connect master/monitor busses"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
-			    ));
+		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
 
-	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
-		"input-auto-connect",
-		_("Connect track inputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
-		);
+		add_option (_("Signal Flow"),
+				new BoolOption (
+					"auto-connect-standard-busses",
+					_("Auto-connect master/monitor busses"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+					));
 
-	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
-	iac->add (ManualConnect, _("manually"));
+		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
+				"input-auto-connect",
+				_("Connect track inputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
+				);
 
-	add_option (_("Audio"), iac);
+		iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
+		iac->add (ManualConnect, _("manually"));
 
-	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
-		"output-auto-connect",
-		_("Connect track and bus outputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
-		);
+		add_option (_("Signal Flow"), iac);
 
-	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
-	oac->add (AutoConnectMaster, _("automatically to master bus"));
-	oac->add (ManualConnect, _("manually"));
+		ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
+				"output-auto-connect",
+				_("Connect track and bus outputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
+				);
 
-	add_option (_("Audio"), oac);
+		oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
+		oac->add (AutoConnectMaster, _("automatically to master bus"));
+		oac->add (ManualConnect, _("manually"));
 
-	bo = new BoolOption (
-			"strict-io",
-			_("Use 'Strict-I/O' for new tracks or Busses"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
-			);
+		add_option (_("Signal Flow"), oac);
 
-	add_option (_("Audio"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+		bo = new BoolOption (
+				"strict-io",
+				_("Use 'Strict-I/O' for new tracks or Busses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
+				);
 
-}  // !mixbus
+		add_option (_("Signal Flow"), bo);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
+	}  // !mixbus
+
+
+	/* AUDIO */
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
+
+	add_option (_("Audio"), new BufferingOptions (_rc_config));
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
@@ -2898,14 +2901,6 @@ if (!Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|Metering"), mpks);
 
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "meter-style-led",
-		     _("LED meter style"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
-		     ));
-
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
 
 	add_option (S_("Preferences|Metering"),
@@ -3134,7 +3129,7 @@ if (!Profile->get_mixbus()) {
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
 	add_option (_("Sync/LTC"), _ltc_send_continuously);
 
-	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"),
+	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level [dBFS]"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_output_volume),
 					-50, 0, .5, 5,
@@ -3525,21 +3520,21 @@ if (!Profile->get_mixbus()) {
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (S_("Preferences|GUI"), sics);
 
-if (!ARDOUR::Profile->get_mixbus()) {
-	/* Lock GUI timeout */
+	if (!ARDOUR::Profile->get_mixbus()) {
+		/* Lock GUI timeout */
 
-	HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
-						_("Lock timeout (seconds)"),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
-						0, 1000, 1, 10
-			);
-	slts->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip (
-			slts->tip_widget(),
-		 _("Lock GUI after this many idle seconds (zero to never lock)"));
-	add_option (S_("Preferences|GUI"), slts);
-} // !mixbus
+		HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
+				_("Lock timeout (seconds)"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
+				0, 1000, 1, 10
+				);
+		slts->scale().set_digits (0);
+		Gtkmm2ext::UI::instance()->set_tip (
+				slts->tip_widget(),
+				_("Lock GUI after this many idle seconds (zero to never lock)"));
+		add_option (S_("Preferences|GUI"), slts);
+	} // !mixbus
 
 	add_option (_("GUI/Editor"), new OptionEditorHeading (_("General")));
 	add_option (_("GUI/Editor"),
@@ -3560,15 +3555,15 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Waveforms")));
 
-if (!Profile->get_mixbus()) {
-	add_option (_("GUI/Editor"),
-	     new BoolOption (
-		     "show-waveforms",
-		     _("Show waveforms in regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
-		     ));
-}  // !mixbus
+	if (!Profile->get_mixbus()) {
+		add_option (_("GUI/Editor"),
+				new BoolOption (
+					"show-waveforms",
+					_("Show waveforms in regions"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
+					));
+	}  // !mixbus
 
 	add_option (_("GUI/Editor"),
 	     new BoolOption (
