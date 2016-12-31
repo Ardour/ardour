@@ -1192,10 +1192,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\theme_manager.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\time_axis_view.cc"
 				>
 			</File>
@@ -2279,10 +2275,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\tempo_lines.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\theme_manager.h"
 				>
 			</File>
 			<File
