@@ -393,13 +393,13 @@ static const struct {
 class KeyboardOptions : public OptionEditorMiniPage
 {
 public:
-	KeyboardOptions () :
-		  _delete_button_adjustment (3, 1, 12),
-		  _delete_button_spin (_delete_button_adjustment),
-		  _edit_button_adjustment (3, 1, 5),
-		  _edit_button_spin (_edit_button_adjustment),
-		  _insert_note_button_adjustment (3, 1, 5),
-		  _insert_note_button_spin (_insert_note_button_adjustment)
+	KeyboardOptions ()
+		: _delete_button_adjustment (3, 1, 12)
+		, _delete_button_spin (_delete_button_adjustment)
+		, _edit_button_adjustment (3, 1, 5)
+		, _edit_button_spin (_edit_button_adjustment)
+		, _insert_note_button_adjustment (3, 1, 5)
+		, _insert_note_button_spin (_insert_note_button_adjustment)
 	{
 		// TODO get rid of GTK -> use OptionEditor Widgets
 
@@ -414,13 +414,7 @@ public:
 		set_popdown_strings (_edit_modifier_combo, dumb);
 		_edit_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_edit_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"),  Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
-				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"),  Keyboard::primary_modifier_name (), restart_msg)));
 
 		Table* t = &table;
 
@@ -467,7 +461,6 @@ public:
 		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, SHRINK , FILL);
 
 		_edit_button_spin.set_name ("OptionsEntry");
-		_edit_button_adjustment.set_value (Keyboard::edit_button());
 		_edit_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_button_changed));
 
 		++row;
@@ -476,13 +469,7 @@ public:
 		set_popdown_strings (_delete_modifier_combo, dumb);
 		_delete_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_delete_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
-				_delete_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
@@ -497,7 +484,6 @@ public:
 		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_delete_button_spin.set_name ("OptionsEntry");
-		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
 		++row;
@@ -506,13 +492,7 @@ public:
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_insert_note_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 1 (left mouse button)</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
-				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 1 (left mouse button)</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
@@ -527,7 +507,6 @@ public:
 		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_insert_note_button_spin.set_name ("OptionsEntry");
-		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
 		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
 
 		++row;
@@ -551,12 +530,6 @@ public:
 								     Keyboard::primary_modifier_name (),
 #endif
 								     restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
-				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
 
 		l = manage (left_aligned_label (_("Copy items using:")));
 		l->set_name ("OptionsLabel");
@@ -570,7 +543,6 @@ public:
 		/* constraint modifier */
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
-		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
 #ifdef __APPLE__
@@ -579,12 +551,6 @@ public:
 								     Keyboard::tertiary_modifier_name (),
 #endif
 								     restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
-				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
 
 		l = manage (left_aligned_label (_("Constrain drag using:")));
 		l->set_name ("OptionsLabel");
@@ -599,15 +565,9 @@ public:
 		set_popdown_strings (_push_points_combo, dumb);
 		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
-				_push_points_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Push points using:")));
 		l->set_name ("OptionsLabel");
@@ -629,13 +589,7 @@ public:
 		set_popdown_strings (_trim_contents_combo, dumb);
 		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_trim_contents_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
-				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Trim contents using:")));
 		l->set_name ("OptionsLabel");
@@ -652,13 +606,7 @@ public:
 
 		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::tertiary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_trim_anchored_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
-				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Anchored trim using:")));
 		l->set_name ("OptionsLabel");
@@ -673,13 +621,6 @@ public:
 		/* jump trim disabled for now
 		set_popdown_strings (_trim_jump_combo, dumb);
 		_trim_jump_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_jump_modifier_chosen));
-
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
-				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
 
 		l = manage (left_aligned_label (_("Jump after trim using:")));
 		l->set_name ("OptionsLabel");
@@ -696,13 +637,7 @@ public:
 		set_popdown_strings (_note_size_relative_combo, dumb);
 		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_note_size_relative_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
-				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg))); // XXX 2ndary
 
 		l = manage (left_aligned_label (_("Resize notes relatively using:")));
 		l->set_name ("OptionsLabel");
@@ -730,13 +665,7 @@ public:
 		mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
-				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
@@ -756,13 +685,7 @@ public:
 		mod_str = string_compose (X_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::level4_modifier_name ());
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_delta_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
-				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Snap relatively using:")));
 		l->set_name ("OptionsLabel");
@@ -785,13 +708,7 @@ public:
 		_trim_overlap_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_overlap_modifier_chosen));
 
 		Gtkmm2ext::UI::instance()->set_tip (_trim_overlap_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
-				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Resize overlapped regions using:")));
 		l->set_name ("OptionsLabel");
@@ -813,21 +730,24 @@ public:
 		set_popdown_strings (_fine_adjust_combo, dumb);
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ()); // XXX just 2ndary ?!
 		Gtkmm2ext::UI::instance()->set_tip (_fine_adjust_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
-				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Fine adjust using:")));
 		l->set_name ("OptionsLabel");
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		OptionEditorHeading* h = new OptionEditorHeading (_("Reset"));
+		h->add_to_page (this);
+
+		RcActionButton* rb = new RcActionButton (_("Reset to recommended defaults"),
+				sigc::mem_fun (*this, &KeyboardOptions::reset_to_defaults));
+		rb->add_to_page (this);
+
+		set_state_from_config ();
 	}
 
 	void parameter_changed (string const &)
@@ -837,7 +757,56 @@ public:
 
 	void set_state_from_config ()
 	{
-		/* XXX: these aren't really config options... */
+		_delete_button_adjustment.set_value (Keyboard::delete_button());
+		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
+		_edit_button_adjustment.set_value (Keyboard::edit_button());
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
+				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
+				_delete_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
+				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
+				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
+				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
+				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
+				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
+				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
+			}
+#if 0
+			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
+				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
+			}
+#endif
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
+				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
+				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
+				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
+				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
+			}
+		}
 	}
 
 	void add_to_page (OptionEditorPage* p)
@@ -1033,6 +1002,56 @@ private:
 	void insert_note_button_changed ()
 	{
 		Keyboard::set_insert_note_button (_insert_note_button_spin.get_value_as_int());
+	}
+
+	void reset_to_defaults ()
+	{
+		/* when clicking*/
+		Keyboard::set_edit_modifier (Keyboard::PrimaryModifier);
+		Keyboard::set_edit_button (3);
+		Keyboard::set_delete_modifier (Keyboard::TertiaryModifier);
+		Keyboard::set_delete_button (3);
+		Keyboard::set_insert_note_modifier (Keyboard::PrimaryModifier);
+		Keyboard::set_insert_note_button (1);
+
+		/* when beginning a drag */
+#ifdef __APPLE__
+		Keyboard::set_copy_modifier (Keyboard::SecondaryModifier);
+#else
+		Keyboard::set_copy_modifier (Keyboard::PrimaryModifier);
+#endif
+
+#ifdef __APPLE__
+		ArdourKeyboard::set_constraint_modifier (Keyboard::PrimaryModifier);
+#else
+		ArdourKeyboard::set_constraint_modifier (Keyboard::TertiaryModifier);
+#endif
+		ArdourKeyboard::set_push_points_modifier (Keyboard::PrimaryModifier | Keyboard::Level4Modifier);
+
+		/* when beginning a trim */
+		ArdourKeyboard::set_trim_contents_modifier (Keyboard::PrimaryModifier);
+		ArdourKeyboard::set_trim_anchored_modifier (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier);
+		ArdourKeyboard::set_note_size_relative_modifier (Keyboard::TertiaryModifier); // XXX better: 2ndary
+
+		/* while dragging */
+#ifdef __APPLE__
+		Keyboard::set_snap_modifier (Keyboard::TertiaryModifier);
+#else
+		Keyboard::set_snap_modifier (Keyboard::SecondaryModifier);
+#endif
+#ifdef __APPLE__
+		Keyboard::set_snap_delta_modifier (Keyboard::Level4Modifier);
+#else
+		Keyboard::set_snap_delta_modifier (Keyboard::SecondaryModifier | Keyboard::Level4Modifier);
+#endif
+
+		/* while trimming */
+		ArdourKeyboard::set_trim_overlap_modifier (Keyboard::TertiaryModifier);
+
+		/* while dragging ctrl points */
+		ArdourKeyboard::set_fine_adjust_modifier (/*Keyboard::PrimaryModifier | */Keyboard::SecondaryModifier); // XXX
+
+		set_state_from_config ();
 	}
 
 	ComboBoxText _keyboard_layout_selector;
