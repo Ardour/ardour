@@ -33,6 +33,9 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "canvas/utils.h"
+#include "canvas/colors.h"
+
 #include "actions.h"
 #include "rgb_macros.h"
 #include "shuttle_control.h"
@@ -612,7 +615,12 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1);
 	cairo_fill(cr);
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
-	cairo_set_source (cr, pattern);
+	if (_flat_buttons) {
+		uint32_t col = UIConfiguration::instance().color ("shuttle");
+		ArdourCanvas::set_source_rgba (cr, col);
+	} else {
+		cairo_set_source (cr, pattern);
+	}
 	if (UIConfiguration::instance().get_widget_prelight() && _hovering) {
 		cairo_fill_preserve (cr);
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
