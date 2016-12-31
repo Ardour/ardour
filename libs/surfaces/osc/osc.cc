@@ -90,7 +90,6 @@ OSC::OSC (Session& s, uint32_t port)
 	, _shutdown (false)
 	, _osc_server (0)
 	, _osc_unix_server (0)
-	, _send_route_changes (true)
 	, _debugmode (Off)
 	, address_only (false)
 	, remote_port ("8000")
@@ -162,19 +161,6 @@ bool
 OSC::get_active () const
 {
 	return _osc_server != 0;
-}
-
-int
-OSC::set_feedback (bool yn)
-{
-	_send_route_changes = yn;
-	return 0;
-}
-
-bool
-OSC::get_feedback () const
-{
-	return _send_route_changes;
 }
 
 int
@@ -1072,12 +1058,6 @@ OSC::debugmsg (const char *prefix, const char *path, const char* types, lo_arg *
 		}
 	}
 	PBD::info << prefix << ": " << path << ss.str() << endmsg;
-}
-
-void
-OSC::update_clock ()
-{
-
 }
 
 // "Application Hook" Handlers //

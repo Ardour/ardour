@@ -81,9 +81,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int set_active (bool yn);
 	bool get_active () const;
-	int set_feedback (bool yn);
-	bool get_feedback () const;
-
 
 	int start ();
 	int stop ();
@@ -174,7 +171,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	lo_server _osc_unix_server;
 	std::string _osc_unix_socket_path;
 	std::string _osc_url_file;
-	bool _send_route_changes;
 	OSCDebugMode _debugmode;
 	bool address_only;
 	std::string remote_port;
@@ -575,7 +571,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void notify_routes_added (ARDOUR::RouteList &);
 	void notify_vca_added (ARDOUR::VCAList &);
 
-	void update_clock ();
 	int cancel_all_solos ();
 	bool periodic (void);
 	sigc::connection periodic_connection;
