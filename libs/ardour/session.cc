@@ -5241,7 +5241,7 @@ Session::setup_lua ()
 			"   assert(self.scripts[n] == nil, 'Callback \"'.. n ..'\" already exists.')"
 			"   self.scripts[n] = { ['f'] = f, ['a'] = a }"
 			"   local env = _ENV;  env.f = nil env.io = nil env.os = nil env.loadfile = nil env.require = nil env.dofile = nil env.package = nil env.debug = nil"
-			"   local env = { print = print, tostring = tostring, assert = assert, ipairs = ipairs, error = error, select = select, string = string, type = type, tonumber = tonumber, collectgarbage = collectgarbage, pairs = pairs, math = math, table = table, pcall = pcall, Session = Session, PBD = PBD, Timecode = Timecode, Evoral = Evoral, C = C, ARDOUR = ARDOUR }"
+			"   local env = { print = print, tostring = tostring, assert = assert, ipairs = ipairs, error = error, select = select, string = string, type = type, tonumber = tonumber, collectgarbage = collectgarbage, pairs = pairs, math = math, table = table, pcall = pcall, bit32=bit32, Session = Session, PBD = PBD, Timecode = Timecode, Evoral = Evoral, C = C, ARDOUR = ARDOUR }"
 			"   self.instances[n] = load (string.dump(f, true), nil, nil, env)(a)"
 			"   Session:scripts_changed()" // call back
 			"  end"
