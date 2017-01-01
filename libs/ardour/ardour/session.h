@@ -349,7 +349,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	}
 
 	bool record_enabling_legal () const;
-	void maybe_enable_record ();
+	void maybe_enable_record (bool rt_context = false);
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 
