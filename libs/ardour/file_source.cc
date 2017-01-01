@@ -144,22 +144,13 @@ FileSource::init (const string& pathstr, bool must_exist)
 int
 FileSource::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg;
-	XMLProperty const * prop;
-
-	if ((prop = node.property (X_("channel"))) != 0) {
-		_channel = atoi (prop->value());
-	} else {
+	if (!node.get_property (X_("channel"), _channel)) {
 		_channel = 0;
 	}
 
-	if ((prop = node.property (X_("origin"))) != 0) {
-		_origin = prop->value();
-	}
+	node.get_property (X_("origin"), _origin);
 
-	if ((prop = node.property (X_("gain"))) != 0) {
-		_gain = atof (prop->value());
-	} else {
+	if (!node.get_property (X_("gain"), _gain)) {
 		_gain = 1.f;
 	}
 
