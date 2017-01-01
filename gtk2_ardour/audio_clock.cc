@@ -987,7 +987,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_btn.set_text (string_compose ("%1 off", _("Pull")));
+			_right_btn.set_text ("");
 		} else {
 			sprintf (buf, _("%+.4f%%"), vid_pullup);
 			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf));
