@@ -207,7 +207,6 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 XMLNode&
 AudioFileSource::get_state ()
 {
-	LocaleGuard lg;
 	XMLNode& root (AudioSource::get_state());
 	root.set_property (X_("channel"), _channel);
 	root.set_property (X_("origin"), _origin);
