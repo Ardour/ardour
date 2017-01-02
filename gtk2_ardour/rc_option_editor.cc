@@ -2145,6 +2145,21 @@ RCOptionEditor::RCOptionEditor ()
 		add_option (_("General"), procs);
 	}
 
+	/* Image cache size */
+	add_option (_("General"), new OptionEditorHeading (_("Memory Usage")));
+
+	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
+			_("Waveform image cache size (megabytes)"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
+			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
+			);
+	sics->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip (
+			sics->tip_widget(),
+		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
+	add_option (_("General"), sics);
+
 	add_option (_("General"), new OptionEditorHeading (S_("Options|Undo")));
 
 	add_option (_("General"), new UndoOptions (_rc_config));
@@ -2214,7 +2229,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("General"), new OptionEditorHeading (_("Tempo")));
 
 	BoolOption* tsf;
-
 	tsf = new BoolOption (
 		"allow-non-quarter-pulse",
 		_("Allow non quarter-note pulse"),
@@ -2226,6 +2240,23 @@ RCOptionEditor::RCOptionEditor ()
 							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
 							    PROGRAM_NAME));
 	add_option (_("General"), tsf);
+
+	if (!ARDOUR::Profile->get_mixbus()) {
+		add_option (_("General"), new OptionEditorHeading (_("GUI Lock")));
+		/* Lock GUI timeout */
+
+		HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
+				_("Lock timeout (seconds)"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
+				0, 1000, 1, 10
+				);
+		slts->scale().set_digits (0);
+		Gtkmm2ext::UI::instance()->set_tip (
+				slts->tip_widget(),
+				_("Lock GUI after this many idle seconds (zero to never lock)"));
+		add_option (_("General"), slts);
+	} // !mixbus
 
 #ifdef ENABLE_NLS
 
@@ -3524,37 +3555,6 @@ RCOptionEditor::RCOptionEditor ()
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
 #endif
-
-	/* Image cache size */
-
-	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
-			_("Waveform image cache size (megabytes)"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
-			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
-			);
-	sics->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip (
-			sics->tip_widget(),
-		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
-	add_option (S_("Preferences|GUI"), sics);
-
-	if (!ARDOUR::Profile->get_mixbus()) {
-		/* Lock GUI timeout */
-
-		HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
-				_("Lock timeout (seconds)"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
-				0, 1000, 1, 10
-				);
-		slts->scale().set_digits (0);
-		Gtkmm2ext::UI::instance()->set_tip (
-				slts->tip_widget(),
-				_("Lock GUI after this many idle seconds (zero to never lock)"));
-		add_option (S_("Preferences|GUI"), slts);
-	} // !mixbus
-
 	add_option (_("GUI/Editor"), new OptionEditorHeading (_("General")));
 	add_option (_("GUI/Editor"),
 	     new BoolOption (
