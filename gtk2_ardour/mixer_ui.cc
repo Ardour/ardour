@@ -253,15 +253,7 @@ Mixer_UI::Mixer_UI ()
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
-	string vca_text = _("Control Masters");
-	vca_label.set_text (vca_text);
 	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
-
-#ifndef MIXBUS
-	vca_label_bar.set_name (X_("VCALabelBar"));
-	vca_label_bar.add (vca_label);
-#endif
-
 	vca_vpacker.pack_start (vca_label_bar, false, false);
 
 	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
