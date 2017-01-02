@@ -3485,7 +3485,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 #if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
-	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphics Acceleration")));
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
@@ -3498,7 +3498,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
 				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (S_("Preferences|GUI"), bgc);
+	add_option (_("Appearance"), bgc);
 #endif
 
 #ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
@@ -3510,11 +3510,11 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (S_("Preferences|GUI"), bgo);
+	add_option (_("Appearance"), bgo);
 #endif
-	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Graphical User Interface")));
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphical User Interface")));
 
-	add_option (S_("Preferences|GUI"),
+	add_option (_("Appearance"),
 	     new BoolOption (
 		     "widget-prelight",
 		     _("Highlight widgets on mouseover"),
@@ -3522,7 +3522,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
 		     ));
 
-	add_option (S_("Preferences|GUI"),
+	add_option (_("Appearance"),
 	     new BoolOption (
 		     "use-tooltips",
 		     _("Show tooltips if mouse hovers over a control"),
@@ -3540,9 +3540,9 @@ RCOptionEditor::RCOptionEditor ()
 			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
 				"<b>When disabled</b> clock displays are updated only every 100ms."
 			 ));
-	add_option (S_("Preferences|GUI"), bo);
+	add_option (_("Appearance"), bo);
 
-	add_option (S_("Preferences|GUI"),
+	add_option (_("Appearance"),
 			new BoolOption (
 				"blink-rec-arm",
 				_("Blink Rec-Arm buttons"),
@@ -3553,10 +3553,10 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
+	add_option (_("Appearance"), new FontScalingOptions ());
 #endif
-	add_option (_("GUI/Editor"), new OptionEditorHeading (_("General")));
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
+	add_option (_("Appearance/Editor"),
 	     new BoolOption (
 		     "show-name-highlight",
 		     _("Use name highlight bars in region displays (requires a restart)"),
@@ -3564,7 +3564,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"),
 			new BoolOption (
 			"color-regions-using-track-color",
 			_("Region color follows track color"),
@@ -3572,10 +3572,10 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
 			));
 
-	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Waveforms")));
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
 
 	if (!Profile->get_mixbus()) {
-		add_option (_("GUI/Editor"),
+		add_option (_("Appearance/Editor"),
 				new BoolOption (
 					"show-waveforms",
 					_("Show waveforms in regions"),
@@ -3584,7 +3584,7 @@ RCOptionEditor::RCOptionEditor ()
 					));
 	}  // !mixbus
 
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
 		     _("Show waveforms while recording"),
@@ -3592,7 +3592,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
 		     ));
 
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"),
 			new BoolOption (
 			"show-waveform-clipping",
 			_("Show waveform clipping"),
@@ -3600,7 +3600,7 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
 			));
 
-	add_option (_("GUI/Editor"), new ClipLevelOptions ());
+	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
 
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
 		"waveform-scale",
@@ -3612,7 +3612,7 @@ RCOptionEditor::RCOptionEditor ()
 	wfs->add (Linear, _("linear"));
 	wfs->add (Logarithmic, _("logarithmic"));
 
-	add_option (_("GUI/Editor"), wfs);
+	add_option (_("Appearance/Editor"), wfs);
 
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
@@ -3624,11 +3624,11 @@ RCOptionEditor::RCOptionEditor ()
 	wfsh->add (Traditional, _("traditional"));
 	wfsh->add (Rectified, _("rectified"));
 
-	add_option (_("GUI/Editor"), wfsh);
+	add_option (_("Appearance/Editor"), wfsh);
 
-	add_option (_("GUI/Editor"), new OptionEditorHeading (_("Editor Meters")));
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Editor Meters")));
 
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"),
 	     new BoolOption (
 		     "show-track-meters",
 		     _("Show meters in track headers"),
@@ -3636,7 +3636,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
 		     ));
 
-	add_option (_("GUI/Editor"),
+	add_option (_("Appearance/Editor"),
 	     new BoolOption (
 		     "editor-stereo-only-meters",
 		     _("Limit track header meters to stereo"),
@@ -3644,7 +3644,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
 		     ));
 
-	add_option (_("GUI/Editor"), new OptionEditorBlank ());
+	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
@@ -3657,7 +3657,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
 
-	add_option (_("GUI/Mixer"),
+	add_option (_("Appearance/Mixer"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -3666,7 +3666,7 @@ RCOptionEditor::RCOptionEditor ()
 			)
 		);
 
-	add_option (_("GUI/Mixer"),
+	add_option (_("Appearance/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
@@ -3674,11 +3674,11 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (_("GUI/Mixer"), new OptionEditorBlank ());
+	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
 
-	add_option (_("GUI/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
+	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
 
-	add_option (_("GUI/Toolbar"),
+	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-selclock",
 		     _("Display Selection Clock"),
@@ -3687,7 +3687,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		add_option (_("GUI/Toolbar"),
+		add_option (_("Appearance/Toolbar"),
 				new BoolOption (
 					"show-secondary-clock",
 					_("Display Secondary Clock"),
@@ -3696,7 +3696,7 @@ RCOptionEditor::RCOptionEditor ()
 					));
 	}
 
-	add_option (_("GUI/Toolbar"),
+	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-mini-timeline",
 		     _("Display Navigation Timeline"),
@@ -3704,7 +3704,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
 		     ));
 
-	add_option (_("GUI/Toolbar"),
+	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-editor-meter",
 		     _("Display Master Level Meter"),
@@ -3712,14 +3712,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
 		     ));
 
-	add_option (_("GUI/Toolbar"),
+	add_option (_("Appearance/Toolbar"),
 			new ColumVisibilityOption (
 				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
-	add_option (_("GUI/Toolbar"), new OptionEditorBlank ());
+	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
 
 
 	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
@@ -3728,16 +3728,16 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* and now the theme manager */
 
-	add_option (_("GUI/Theme"), new OptionEditorHeading (_("Theme")));
+	add_option (_("Appearance/Theme"), new OptionEditorHeading (_("Theme")));
 
-	add_option (_("GUI/Theme"), new BoolOption (
+	add_option (_("Appearance/Theme"), new BoolOption (
 				"flat-buttons",
 				_("Draw \"flat\" buttons"),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
 				));
 
-	add_option (_("GUI/Theme"), new BoolOption (
+	add_option (_("Appearance/Theme"), new BoolOption (
 				"meter-style-led",
 				_("LED meter style"),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
@@ -3753,7 +3753,7 @@ RCOptionEditor::RCOptionEditor ()
 			0, 1.0, 0.05
 			);
 	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
-	add_option (_("GUI/Theme"), gui_hs);
+	add_option (_("Appearance/Theme"), gui_hs);
 
 	gui_hs = new HSliderOption(
 			"timeline-item-gradient-depth",
@@ -3763,7 +3763,7 @@ RCOptionEditor::RCOptionEditor ()
 			0, 1.0, 0.05
 			);
 	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
-	add_option (_("GUI/Theme"), gui_hs);
+	add_option (_("Appearance/Theme"), gui_hs);
 
 	vector<string> icon_sets = ::get_icon_sets ();
 	if (icon_sets.size() > 1) {
@@ -3775,18 +3775,18 @@ RCOptionEditor::RCOptionEditor ()
 		for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
 			io->add (*i, *i);
 		}
-		add_option (_("GUI/Theme"), io);
+		add_option (_("Appearance/Theme"), io);
 	}
 
-	add_option (_("GUI/Colors"), new OptionEditorHeading (_("Colors")));
-	add_option (_("GUI/Colors"), new ColorThemeManager);
-	add_option (_("GUI/Colors"), new OptionEditorBlank ());
+	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
+	add_option (_("Appearance/Colors"), new ColorThemeManager);
+	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
 
 	/* Quirks */
 
-	add_option (_("GUI/Quirks"), quirks_head);
+	add_option (_("Appearance/Quirks"), quirks_head);
 
-	add_option (_("GUI/Quirks"),
+	add_option (_("Appearance/Quirks"),
 	     new BoolOption (
 		     "use-wm-visibility",
 		     _("Use Window Manager/Desktop visibility information"),
@@ -3803,7 +3803,7 @@ RCOptionEditor::RCOptionEditor ()
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
-			add_option (_("GUI/Quirks"), bo);
+			add_option (_("Appearance/Quirks"), bo);
 
 	bo = new BoolOption (
 			"transients-follow-front",
@@ -3813,7 +3813,7 @@ RCOptionEditor::RCOptionEditor ()
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 				_("Make transient windows follow the front window when toggling between the editor and mixer."));
-	add_option (_("GUI/Quirks"), bo);
+	add_option (_("Appearance/Quirks"), bo);
 #endif
 
 	if (!Profile->get_mixbus()) {
@@ -3825,10 +3825,10 @@ RCOptionEditor::RCOptionEditor ()
 				);
 		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front."));
-		add_option (_("GUI/Quirks"), bo);
+		add_option (_("Appearance/Quirks"), bo);
 	}
 
-	add_option (_("GUI/Quirks"), new OptionEditorBlank ());
+	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
