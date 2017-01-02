@@ -108,7 +108,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
-	global_vpacker.set_border_width (1);
+	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (2);
 	gain_meter.set_spacing(4);
 
@@ -231,7 +231,7 @@ VCAMasterStrip::update_bottom_padding ()
 	comment_button.set_name ("generic button");
 
 
-	int h = 0;
+	int h = 1;
 	if (1) {
 		Gtk::Window window (WINDOW_TOPLEVEL);
 		window.add (meter_point_button);
