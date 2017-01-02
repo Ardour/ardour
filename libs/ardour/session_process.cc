@@ -359,8 +359,14 @@ Session::process_with_events (pframes_t nframes)
 
 	if (events.empty() || next_event == events.end()) {
 		try_run_lua (nframes); // also during export ?? ->move to process_without_events()
-		process_without_events (nframes);
-		return;
+		/* lua scripts may inject events */
+		while (_n_lua_scripts > 0 && pending_events.read (&ev, 1) == 1) {
+			merge_event (ev);
+		}
+		if (events.empty() || next_event == events.end()) {
+			process_without_events (nframes);
+			return;
+		}
 	}
 
 	if (_transport_speed == 1.0) {
