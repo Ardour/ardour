@@ -17,6 +17,7 @@
 
 */
 
+#include <assert.h>
 #include <gdkmm/cursor.h>
 #include "gtkmm2ext/pane.h"
 
@@ -97,14 +98,26 @@ Pane::on_size_request (GtkRequisition* req)
 	for (Children::iterator child = children.begin(); child != children.end(); ++child) {
 		GtkRequisition r;
 
+		if (!child->w->is_visible ()) {
+			continue;
+		}
+
 		child->w->size_request (r);
 
 		if (horizontal) {
 			largest.height = max (largest.height, r.height);
-			largest.width += r.width;
+			if (child->minsize) {
+				largest.width += child->minsize;
+			} else {
+				largest.width += r.width;
+			}
 		} else {
 			largest.width = max (largest.width, r.width);
-			largest.height += r.height;
+			if (child->minsize) {
+				largest.height += child->minsize;
+			} else {
+				largest.height += r.height;
+			}
 		}
 	}
 
@@ -202,6 +215,15 @@ Pane::on_size_allocate (Gtk::Allocation& alloc)
 {
 	reallocate (alloc);
 	Container::on_size_allocate (alloc);
+
+	/* minumum pane size constraints */
+	Dividers::size_type div = 0;
+	for (Dividers::const_iterator d = dividers.begin(); d != dividers.end(); ++d, ++div) {
+		Pane::set_divider (div, (*d)->fract);
+	}
+	// TODO this needs tweaking for panes with > 2 children
+	// if a child grows, re-check the ones before it.
+	assert (dividers.size () < 3);
 }
 
 void
@@ -382,22 +404,44 @@ Pane::set_check_divider_position (bool yn)
 	check_fract = yn;
 }
 
-bool
-Pane::fract_is_ok (Dividers::size_type div, float fract)
+float
+Pane::constrain_fract (Dividers::size_type div, float fract)
 {
-#ifdef __APPLE__
-	if (!check_fract) {
-		return true;
-	}
-
-
 	if (get_allocation().get_width() == 1 && get_allocation().get_height() == 1) {
 		/* space not * allocated - * divider being set from startup code. Let it pass,
-		   since our goal is mostly to catch drags to a position that will interfere with window
-		   resizing.
-		*/
-		return true;
+		 * since our goal is mostly to catch drags to a position that will interfere with window
+		 * resizing.
+		 */
+		return fract;
 	}
+
+	const float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
+
+	// TODO: optimize: cache in Pane::on_size_request
+	Gtk::Requisition prev_req(children.at (div).w->size_request ());
+	Gtk::Requisition next_req(children.at (div + 1).w->size_request ());
+	float prev = divider_width + (horizontal ? prev_req.width : prev_req.height);
+	float next = divider_width + (horizontal ? next_req.width : next_req.height);
+
+	if (children.at (div).minsize) {
+		prev = children.at (div).minsize;
+	}
+	if (children.at (div + 1).minsize) {
+		next = children.at (div + 1).minsize;
+	}
+
+	if (size * fract < prev) {
+		return prev / size;
+	}
+	if (size * (1.f - fract) < next) {
+		return 1.f - next / size;
+	}
+
+	if (!check_fract) {
+		return fract;
+	}
+
+#ifdef __APPLE__
 
 	/* On Quartz, if the pane handle (divider) gets to
 	   be adjacent to the window edge, you can no longer grab it:
@@ -405,37 +449,38 @@ Pane::fract_is_ok (Dividers::size_type div, float fract)
 	   manager ("Finder") as a resize drag on the window edge.
 	*/
 
+
 	if (horizontal) {
 		if (div == dividers.size() - 1) {
 			if (get_allocation().get_width() * (1.0 - fract) < (divider_width*2)) {
 				/* too close to right edge */
-				return false;
+				return 1.f - (divider_width * 2.f) / (float) get_allocation().get_width();
 			}
 		}
 
 		if (div == 0) {
 			if (get_allocation().get_width() * fract < (divider_width*2)) {
 				/* too close to left edge */
-				return false;
+				return (divider_width * 2.f) / (float)get_allocation().get_width();
 			}
 		}
 	} else {
 		if (div == dividers.size() - 1) {
 			if (get_allocation().get_height() * (1.0 - fract) < (divider_width*2)) {
 				/* too close to bottom */
-				return false;
+				return 1.f - (divider_width * 2.f) / (float) get_allocation().get_height();
 			}
 		}
 
 		if (div == 0) {
-			if (get_allocation().get_width() * fract < (divider_width*2)) {
+			if (get_allocation().get_height() * fract < (divider_width*2)) {
 				/* too close to top */
-				return false;
+				return (divider_width * 2.f) / (float) get_allocation().get_height();
 			}
 		}
 	}
 #endif
-	return true;
+	return fract;
 }
 
 bool
@@ -486,10 +531,7 @@ Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 	}
 
 	new_fract = min (1.0f, max (0.0f, new_fract));
-
-	if (!fract_is_ok (div, new_fract)) {
-		return true;
-	}
+	new_fract = constrain_fract (div, new_fract);
 
 	if (new_fract != d->fract) {
 		d->fract = new_fract;
@@ -517,10 +559,7 @@ Pane::set_divider (Dividers::size_type div, float fract)
 	}
 
 	fract = max (0.0f, min (1.0f, fract));
-
-	if (!fract_is_ok (div, fract)) {
-		return;
-	}
+	fract = constrain_fract (div, fract);
 
 	if (fract != (*d)->fract) {
 		(*d)->fract = fract;
