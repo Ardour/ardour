@@ -806,7 +806,7 @@ ARDOUR_UI::show_ui_prefs ()
 {
 	if (rc_option_editor) {
 		show_tabbable (rc_option_editor);
-		rc_option_editor->set_current_page (_("GUI"));
+		rc_option_editor->set_current_page (_("Appearance"));
 	}
 }
 
@@ -819,7 +819,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 	}
 
 	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Misc/Click"));
+	rc_option_editor->set_current_page (_("Metronome"));
 	return true;
 }
 
@@ -832,7 +832,7 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 	}
 
 	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Transport/Sync"));
+	rc_option_editor->set_current_page (_("Sync"));
 	return true;
 }
 
