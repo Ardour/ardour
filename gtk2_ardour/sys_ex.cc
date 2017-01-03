@@ -45,7 +45,9 @@ SysEx::SysEx (
 
 SysEx::~SysEx()
 {
-	delete _flag;
+	/* do not delete flag because it was added to a parent/container which
+	   will delete it.
+	*/
 	_flag = 0;
 }
 
