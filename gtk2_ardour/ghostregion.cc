@@ -381,7 +381,7 @@ MidiGhostRegion::update_note (Note* note, bool hide)
 		return;
 	}
 
-	GhostEvent* ev = find_event (note);
+	GhostEvent* ev = find_event (note->note());
 
 	if (!ev) {
 		return;
@@ -414,7 +414,7 @@ MidiGhostRegion::update_hit (Hit* hit, bool hide)
 		return;
 	}
 
-	GhostEvent* ev = find_event (hit);
+	GhostEvent* ev = find_event (hit->note());
 
 	if (!ev) {
 		return;
@@ -460,7 +460,7 @@ MidiGhostRegion::remove_note (NoteBase* note)
  */
 
 MidiGhostRegion::GhostEvent *
-MidiGhostRegion::find_event (NoteBase* parent)
+MidiGhostRegion::find_event (boost::shared_ptr<NoteType> parent)
 {
 	/* we are using _optimization_iterator to speed up the common case where a caller
 	   is going through our notes in order.
@@ -468,12 +468,12 @@ MidiGhostRegion::find_event (NoteBase* parent)
 
 	if (_optimization_iterator != events.end()) {
 		++_optimization_iterator;
-		if (_optimization_iterator != events.end() && _optimization_iterator->second->event == parent) {
+		if (_optimization_iterator != events.end() && _optimization_iterator->first == parent) {
 			return _optimization_iterator->second;
 		}
 	}
 
-	_optimization_iterator = events.find (parent->note());
+	_optimization_iterator = events.find (parent);
 	if (_optimization_iterator != events.end()) {
 		return _optimization_iterator->second;
 	}

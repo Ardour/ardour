@@ -409,9 +409,9 @@ private:
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 
-	typedef std::list<NoteBase*>                          Events;
-	typedef std::map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::vector< boost::shared_ptr<SysEx> >       SysExes;
+	typedef boost::unordered_map<boost::shared_ptr<NoteType>, NoteBase*>                 Events;
+	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
+	typedef std::vector< boost::shared_ptr<SysEx> >                                      SysExes;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
@@ -437,9 +437,6 @@ private:
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
-
-	bool _sort_needed;
-	void time_sort_events ();
 
 	MidiCutBuffer* selection_as_cut_buffer () const;
 

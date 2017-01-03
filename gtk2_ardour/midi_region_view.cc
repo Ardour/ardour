@@ -113,7 +113,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
-	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -160,7 +159,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
-	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -214,7 +212,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
-	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -246,7 +243,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _channel_selection_scoped_note (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
-	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
@@ -1105,18 +1101,18 @@ MidiRegionView::abort_command()
 NoteBase*
 MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 {
+
 	if (_optimization_iterator != _events.end()) {
 		++_optimization_iterator;
 	}
 
-	if (_optimization_iterator != _events.end() && (*_optimization_iterator)->note() == note) {
-		return *_optimization_iterator;
+	if (_optimization_iterator != _events.end() && _optimization_iterator->first == note) {
+		return _optimization_iterator->second;
 	}
 
-	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
-		if ((*_optimization_iterator)->note() == note) {
-			return *_optimization_iterator;
-		}
+	_optimization_iterator = _events.find (note);
+	if (_optimization_iterator != _events.end()) {
+		return _optimization_iterator->second;
 	}
 
 	return 0;
@@ -1129,8 +1125,8 @@ MidiRegionView::find_canvas_note (Evoral::event_id_t id)
 	Events::iterator it;
 
 	for (it = _events.begin(); it != _events.end(); ++it) {
-		if ((*it)->note()->id() == id) {
-			return *it;
+		if (it->first->id() == id) {
+			return it->second;
 		}
 	}
 
@@ -1158,7 +1154,7 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOper
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 		NoteBase* cne = find_canvas_note (*n);
 		if (cne) {
-			e.push_back (cne);
+			e.insert (make_pair (*n, cne));
 		}
 	}
 }
@@ -1174,8 +1170,8 @@ MidiRegionView::redisplay_model()
 			   touching model.  Leave active notes (with length 0) alone since
 			   they are being extended. */
 			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-				if ((*i)->note()->length() > 0) {
-					update_note(*i);
+				if (i->second->note()->length() > 0) {
+					update_note(i->second);
 				}
 			}
 			_last_display_zoom = zoom;
@@ -1187,51 +1183,28 @@ MidiRegionView::redisplay_model()
 		return;
 	}
 
+	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
+		_optimization_iterator->second->invalidate();
+	}
+
 	bool empty_when_starting = _events.empty();
-	MidiModel::ReadLock lock(_model->read_lock());
-	MidiModel::Notes missing_notes = _model->notes(); // copy
+	_optimization_iterator = _events.begin();
+	MidiModel::Notes missing_notes;
 	Note* sus = NULL;
 	Hit*  hit = NULL;
 
-	if (!empty_when_starting) {
-		MidiModel::Notes::iterator f;
-		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
-			NoteBase* cne = (*i);
-			boost::shared_ptr<NoteType> note = cne->note();
+	MidiModel::ReadLock lock(_model->read_lock());
+	MidiModel::Notes& notes (_model->notes());
 
-			/* if event item's note exists in the model, we can just update it.
-			 * don't mark it as missing.
-			*/
-			if ((f = missing_notes.find (note)) != missing_notes.end()) {
-				if ((*f) == note) {
-					cne->validate();
-					missing_notes.erase (f);
-				} else {
-					if (cne->selected()) {
-						_marked_for_selection.insert (note);
-					}
+	NoteBase* cne;
+	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
-					cne->invalidate();
-				}
+		boost::shared_ptr<NoteType> note (*n);
+		bool visible;
 
-			} else {
-				cne->invalidate();
-			}
-			/* remove note items that are no longer valid */
-			if (!cne->valid()) {
-
-				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
-					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
-					if (gr) {
-						gr->remove_note (cne);
-					}
-				}
-
-				delete cne;
-				i = _events.erase (i);
-
-			} else {
-				bool visible;
+		if (note_in_region_range (note, visible)) {
+			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
+				cne->validate ();
 				bool update = false;
 
 				if (note_in_region_range (note, visible)) {
@@ -1269,11 +1242,36 @@ MidiRegionView::redisplay_model()
 						}
 					}
 				}
-				++i;
+			} else {
+				missing_notes.insert (note);
 			}
 		}
 	}
 
+	if (!empty_when_starting) {
+		MidiModel::Notes::iterator f;
+		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
+
+			NoteBase* cne = i->second;
+
+			/* remove note items that are no longer valid */
+			if (!cne->valid()) {
+
+				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
+					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
+					if (gr) {
+						gr->remove_note (cne);
+					}
+				}
+
+				delete cne;
+				i = _events.erase (i);
+
+			} else {
+				++i;
+			}
+		}
+	}
 
 	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
 		boost::shared_ptr<NoteType> note (*n);
@@ -1306,12 +1304,6 @@ MidiRegionView::redisplay_model()
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
 
-	/* we may have caused _events to contain things out of order (e.g. if a note
-	   moved earlier or later). we don't generally need them in time order, but
-	   make a note that a sort is required for those cases that require it.
-	*/
-
-	_sort_needed = true;
 }
 
 void
@@ -1494,12 +1486,12 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 	bool hide_all = false;
 	PatchChanges::iterator x = _patch_changes.begin();
 	if (x != _patch_changes.end()) {
-		hide_all = (*x).second->flag()->width() >= _pixel_width;
+		hide_all = x->second->flag()->width() >= _pixel_width;
 	}
 
 	if (hide_all) {
 		for (; x != _patch_changes.end(); ++x) {
-			(*x).second->hide();
+			x->second->hide();
 		}
 	}
 
@@ -1572,11 +1564,11 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_duration (_region->length() / samples_per_pixel);
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		ghost->add_note(*i);
+		ghost->add_note(i->second);
 	}
 
 	ghosts.push_back (ghost);
-
+	enable_display (true);
 	return ghost;
 }
 
@@ -1873,7 +1865,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 		}
 
 		event->on_channel_selection_change (get_selected_channels());
-		_events.push_back(event);
+		_events.insert (make_pair (event->note(), event));
 
 		if (visible) {
 			event->show();
@@ -2239,7 +2231,7 @@ MidiRegionView::select_all_notes ()
 	clear_editor_note_selection ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		add_to_selection (*i);
+		add_to_selection (i->second);
 	}
 }
 
@@ -2249,9 +2241,9 @@ MidiRegionView::select_range (framepos_t start, framepos_t end)
 	clear_editor_note_selection ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		framepos_t t = source_beats_to_absolute_frames((*i)->note()->time());
+		framepos_t t = source_beats_to_absolute_frames(i->first->time());
 		if (t >= start && t <= end) {
-			add_to_selection (*i);
+			add_to_selection (i->second);
 		}
 	}
 }
@@ -2260,10 +2252,10 @@ void
 MidiRegionView::invert_selection ()
 {
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((*i)->selected()) {
-			remove_from_selection(*i);
+		if (i->second->selected()) {
+			remove_from_selection(i->second);
 		} else {
-			add_to_selection (*i);
+			add_to_selection (i->second);
 		}
 	}
 }
@@ -2423,11 +2415,10 @@ MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 
 			/* find notes entirely within OR spanning the earliest..latest range */
 
-			if (((*i)->note()->time() >= earliest && (*i)->note()->end_time() <= latest) ||
-			    ((*i)->note()->time() <= earliest && (*i)->note()->end_time() >= latest)) {
-				add_to_selection (*i);
+			if ((i->first->time() >= earliest && i->first->end_time() <= latest) ||
+			    (i->first->time() <= earliest && i->first->end_time() >= latest)) {
+				add_to_selection (i->second);
 			}
-
 		}
 	}
 }
@@ -2456,14 +2447,14 @@ MidiRegionView::update_drag_selection(framepos_t start, framepos_t end, double g
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((*i)->x0() < x1 && (*i)->x1() > x0 && (*i)->y0() < y1 && (*i)->y1() > y0) {
+		if (i->second->x0() < x1 && i->second->x1() > x0 && i->second->y0() < y1 && i->second->y1() > y0) {
 			// Rectangles intersect
-			if (!(*i)->selected()) {
-				add_to_selection (*i);
+			if (!i->second->selected()) {
+				add_to_selection (i->second);
 			}
-		} else if ((*i)->selected() && !extend) {
+		} else if (i->second->selected() && !extend) {
 			// Rectangles do not intersect
-			remove_from_selection (*i);
+			remove_from_selection (i->second);
 		}
 	}
 
@@ -2498,13 +2489,13 @@ MidiRegionView::update_vertical_drag_selection (double y1, double y2, bool exten
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if (((*i)->y1() >= y1 && (*i)->y1() <= y2)) {
+		if ((i->second->y1() >= y1 && i->second->y1() <= y2)) {
 			// within y- (note-) range
-			if (!(*i)->selected()) {
-				add_to_selection (*i);
+			if (!i->second->selected()) {
+				add_to_selection (i->second);
 			}
-		} else if ((*i)->selected() && !extend) {
-			remove_from_selection (*i);
+		} else if (i->second->selected() && !extend) {
+			remove_from_selection (i->second);
 		}
 	}
 }
@@ -3494,7 +3485,7 @@ MidiRegionView::midi_channel_mode_changed ()
 
 	// Update notes for selection
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->on_channel_selection_change (mask);
+		i->second->on_channel_selection_change (mask);
 	}
 
 	_patch_changes.clear ();
@@ -3664,52 +3655,46 @@ struct EventNoteTimeEarlyFirstComparator {
 };
 
 void
-MidiRegionView::time_sort_events ()
-{
-	if (!_sort_needed) {
-		return;
-	}
-
-	EventNoteTimeEarlyFirstComparator cmp;
-	_events.sort (cmp);
-
-	_sort_needed = false;
-}
-
-void
 MidiRegionView::goto_next_note (bool add_to_selection)
 {
 	bool use_next = false;
 
-	if (_events.back()->selected()) {
-		return;
-	}
-
-	time_sort_events ();
-
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	uint16_t const channel_mask = mtv->midi_track()->get_playback_channel_mask();
+	NoteBase* first_note = 0;
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((*i)->selected()) {
-			use_next = true;
-			continue;
-		} else if (use_next) {
-			if (channel_mask & (1 << (*i)->note()->channel())) {
-				if (!add_to_selection) {
-					unique_select (*i);
-				} else {
-					note_selected (*i, true, false);
+	MidiModel::ReadLock lock(_model->read_lock());
+	MidiModel::Notes& notes (_model->notes());
+
+	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+		NoteBase* cne = 0;
+		if ((cne = find_canvas_note (*n))) {
+
+			if (!first_note && (channel_mask & (1 << (*n)->channel()))) {
+				first_note = cne;
+			}
+
+			if (cne->selected()) {
+				use_next = true;
+				continue;
+			} else if (use_next) {
+				if (channel_mask & (1 << (*n)->channel())) {
+					if (!add_to_selection) {
+						unique_select (cne);
+					} else {
+						note_selected (cne, true, false);
+					}
+
+					return;
 				}
-				return;
 			}
 		}
 	}
 
 	/* use the first one */
 
-	if (!_events.empty() && (channel_mask & (1 << _events.front()->note()->channel ()))) {
-		unique_select (_events.front());
+	if (!_events.empty() && first_note) {
+		unique_select (first_note);
 	}
 }
 
@@ -3718,35 +3703,43 @@ MidiRegionView::goto_previous_note (bool add_to_selection)
 {
 	bool use_next = false;
 
-	if (_events.front()->selected()) {
-		return;
-	}
-
-	time_sort_events ();
-
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	uint16_t const channel_mask = mtv->midi_track()->get_playback_channel_mask ();
+	NoteBase* last_note = 0;
 
-	for (Events::reverse_iterator i = _events.rbegin(); i != _events.rend(); ++i) {
-		if ((*i)->selected()) {
-			use_next = true;
-			continue;
-		} else if (use_next) {
-			if (channel_mask & (1 << (*i)->note()->channel())) {
-				if (!add_to_selection) {
-					unique_select (*i);
-				} else {
-					note_selected (*i, true, false);
+	MidiModel::ReadLock lock(_model->read_lock());
+	MidiModel::Notes& notes (_model->notes());
+
+	for (MidiModel::Notes::reverse_iterator n = notes.rbegin(); n != notes.rend(); ++n) {
+		NoteBase* cne = 0;
+		if ((cne = find_canvas_note (*n))) {
+
+			if (!last_note && (channel_mask & (1 << (*n)->channel()))) {
+				last_note = cne;
+			}
+
+			if (cne->selected()) {
+				use_next = true;
+				continue;
+
+			} else if (use_next) {
+				if (channel_mask & (1 << (*n)->channel())) {
+					if (!add_to_selection) {
+						unique_select (cne);
+					} else {
+						note_selected (cne, true, false);
+					}
+
+					return;
 				}
-				return;
 			}
 		}
 	}
 
 	/* use the last one */
 
-	if (!_events.empty() && (channel_mask & (1 << (*_events.rbegin())->note()->channel ()))) {
-		unique_select (*(_events.rbegin()));
+	if (!_events.empty() && last_note) {
+		unique_select (last_note);
 	}
 }
 
@@ -3755,18 +3748,18 @@ MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_s
 {
 	bool had_selected = false;
 
-	time_sort_events ();
+	/* we previously time sorted events here, but Notes is a multiset sorted by time */
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((*i)->selected()) {
-			selected.insert ((*i)->note());
+		if (i->second->selected()) {
+			selected.insert (i->first);
 			had_selected = true;
 		}
 	}
 
 	if (allow_all_if_none_selected && !had_selected) {
 		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-			selected.insert ((*i)->note());
+			selected.insert (i->first);
 		}
 	}
 }
@@ -3899,8 +3892,8 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 	}
 
 	for (Events::iterator i = e.begin(); i != e.end(); ++i) {
-		if (_selection.insert (*i).second) {
-			(*i)->set_selected (true);
+		if (_selection.insert (i->second).second) {
+			i->second->set_selected (true);
 		}
 	}
 
@@ -3919,7 +3912,7 @@ MidiRegionView::color_handler ()
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->set_selected ((*i)->selected()); // will change color
+		i->second->set_selected (i->second->selected()); // will change color
 	}
 
 	/* XXX probably more to do here */

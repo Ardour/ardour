@@ -21,6 +21,7 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "pbd/signals.h"
 
 namespace ArdourCanvas {
@@ -122,10 +123,10 @@ private:
 	ArdourCanvas::Rectangle* _tmp_rect;
 	ArdourCanvas::Polygon* _tmp_poly;
 
-	MidiGhostRegion::GhostEvent* find_event (NoteBase*);
 	typedef Evoral::Note<Evoral::Beats> NoteType;
+	MidiGhostRegion::GhostEvent* find_event (boost::shared_ptr<NoteType>);
 
-	typedef std::map<boost::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
+	typedef boost::unordered_map<boost::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;
 	EventList events;
 	EventList::iterator _optimization_iterator;
 };
