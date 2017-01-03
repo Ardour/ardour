@@ -854,7 +854,7 @@ def build(bld):
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Application/Product specific resources (icon, splash)
-    pgmname = Options.options.program_name;
+    pgmname = bld.env['PROGRAM_NAME']
     bld.install_files(os.path.join(bld.env['DATADIR'], 'resources'), bld.path.ant_glob('resources/' + pgmname + '*'))
 
     if bld.env['build_target'] == 'mingw':
@@ -867,7 +867,7 @@ def build(bld):
     bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
     # Color Themes. Find each color file for this program only
     # and install
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + Options.options.program_name.lower() + '.colors'));
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + pgmname.lower() + '.colors'));
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))
