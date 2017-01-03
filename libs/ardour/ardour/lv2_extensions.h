@@ -121,6 +121,8 @@ typedef struct {
 #define LV2_PLUGINLICENSE_URI "http://harrisonconsoles.com/lv2/license"
 #define LV2_PLUGINLICENSE_PREFIX LV2_PLUGINLICENSE_URI "#"
 #define LV2_PLUGINLICENSE__interface LV2_PLUGINLICENSE_PREFIX "interface"
+#define LV2_PLUGINLICENSE__interface2 LV2_PLUGINLICENSE_PREFIX "interface2"
+
 
 typedef struct _LV2_License_Interface {
 	/* @return -1 if no license is needed; 0 if unlicensed, 1 if licensed */
@@ -133,6 +135,12 @@ typedef struct _LV2_License_Interface {
 	const char* (*product_name)(LV2_Handle instance);
 	/* @return link to website or webstore */
 	const char* (*store_url)(LV2_Handle instance);
+	/* interface2 ext: preferred location to install the license file, the caller needs to free this */
+	char* (*preferred_license_file_path)(LV2_Handle instance);
+	/* interface2 ext: currently used license file (if any, may be NULL), the caller needs to free this */
+	char* (*current_license_file_path)(LV2_Handle instance);
+	/* interface2 ext: free() allocated strings (licensee, license_file_paths) */
+	void (*free)(char*);
 } LV2_License_Interface;
 
 /**
