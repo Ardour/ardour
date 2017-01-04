@@ -95,6 +95,9 @@ class LIBARDOUR_API Meter {
 	double frames_per_bar (const Tempo&, framecnt_t sr) const;
 	double frames_per_grid (const Tempo&, framecnt_t sr) const;
 
+	inline bool operator==(const Meter& other)
+	{ return _divisions_per_bar == other.divisions_per_bar() && _note_type == other.note_divisor(); }
+
   protected:
 	/** The number of divisions in a bar.  This is a floating point value because
 	    there are musical traditions on our planet that do not limit
