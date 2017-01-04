@@ -292,7 +292,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf)
 			bbt  = new_map.bbt_at_beat ((t->time_pulses/smf.ppqn()));
 		}
 		new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
-
+		have_meter = true;
 		cerr << "@ " << t->time_pulses/smf.ppqn() << " ("
 		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
 	}
