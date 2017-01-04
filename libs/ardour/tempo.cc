@@ -1058,6 +1058,10 @@ TempoMap::do_insert (MetricSection* section)
 TempoSection*
 TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
 {
+	if (tempo.note_types_per_minute() <= 0.0) {
+		return 0;
+	}
+
 	TempoSection* ts = 0;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
@@ -1073,6 +1077,10 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 void
 TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
 {
+	if (tempo.note_types_per_minute() <= 0.0) {
+		return;
+	}
+
 	const bool locked_to_meter = ts.locked_to_meter();
 
 	{
