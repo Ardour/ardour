@@ -276,23 +276,34 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf)
 
 	const framecnt_t sample_rate = _session->frame_rate ();
 	TempoMap new_map (sample_rate);
-	bool have_meter = false;
+	Meter last_meter (4.0, 4.0);
+	bool have_initial_meter = false;
 
 	for (size_t n = 0; n < num_tempos; ++n) {
 
 		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
 		assert (t);
 
-		Tempo tempo (60 * (1000000 / t->microseconds_per_quarter_note), 4.0);
-		new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
-
+		Tempo tempo (60 * (1000000 / (double) t->microseconds_per_quarter_note), 4.0);
 		Meter meter (t->numerator, t->denominator);
 		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
-		if (have_meter) {
-			bbt  = new_map.bbt_at_beat ((t->time_pulses/smf.ppqn()));
+
+		if (have_initial_meter) {
+			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
+			if (!(meter == last_meter)) {
+				bbt = new_map.bbt_at_quarter_note ((t->time_pulses/smf.ppqn()));
+				new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
+			}
+
+		} else {
+			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, AudioTime);
+			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, 0, AudioTime);
+			have_initial_meter = true;
+
 		}
-		new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
-		have_meter = true;
+
+		last_meter = meter;
+
 		cerr << "@ " << t->time_pulses/smf.ppqn() << " ("
 		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
 	}
