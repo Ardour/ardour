@@ -277,7 +277,7 @@ style "time_info_box"
 
 style "status_bar_box"
 {
-        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+        bg[NORMAL] = @darkest
 }
 
 style "very_small_text"
