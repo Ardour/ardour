@@ -2751,24 +2751,6 @@ RCOptionEditor::RCOptionEditor ()
 		     -1, 65536, 1, 10
 		     ));
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Display")));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "display-first-midi-bank-as-zero",
-			    _("Display first MIDI bank/program as 0"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
-			    ));
-
-	add_option (_("MIDI"),
-	     new BoolOption (
-		     "never-display-periodic-midi",
-		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
-		     ));
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),
@@ -3642,6 +3624,24 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Limit track header meters to stereo"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
+		     ));
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
+
+	add_option (_("Appearance/Editor"),
+		    new BoolOption (
+			    "display-first-midi-bank-as-zero",
+			    _("Display first MIDI bank/program as 0"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
+			    ));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "never-display-periodic-midi",
+		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
