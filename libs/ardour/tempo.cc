@@ -1075,7 +1075,7 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 }
 
 void
-TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
+TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
 		return;
@@ -1086,9 +1086,18 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
-		if (ts.frame() != first.frame()) {
-			remove_tempo_locked (ts);
-			add_tempo_locked (tempo, pulse, minute_at_frame (frame), type, pls, true, locked_to_meter);
+		if (!ts.initial()) {
+			if (ts.locked_to_meter()) {
+				ts.set_type (type);
+				{
+					/* cannot move a meter-locked tempo section */
+					*static_cast<Tempo*>(&ts) = tempo;
+					recompute_map (_metrics);
+				}
+			} else {
+				remove_tempo_locked (ts);
+				add_tempo_locked (tempo, pulse, minute_at_frame (frame), type, pls, true, locked_to_meter);
+			}
 		} else {
 			first.set_type (type);
 			first.set_pulse (0.0);
@@ -3990,6 +3999,14 @@ TempoMap::tempo_section_at_frame (framepos_t frame) const
 	return tempo_section_at_minute_locked (_metrics, minute_at_frame (frame));
 }
 
+TempoSection&
+TempoMap::tempo_section_at_frame (framepos_t frame)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return tempo_section_at_minute_locked (_metrics, minute_at_frame (frame));
+}
+
 const TempoSection&
 TempoMap::tempo_section_at_minute_locked (const Metrics& metrics, double minute) const
 {
@@ -4019,7 +4036,35 @@ TempoMap::tempo_section_at_minute_locked (const Metrics& metrics, double minute)
 
 	return *prev;
 }
+TempoSection&
+TempoMap::tempo_section_at_minute_locked (const Metrics& metrics, double minute)
+{
+	TempoSection* prev = 0;
 
+	TempoSection* t;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+
+		if ((*i)->is_tempo()) {
+			t = static_cast<TempoSection*> (*i);
+			if (!t->active()) {
+				continue;
+			}
+			if (prev && t->minute() > minute) {
+				break;
+			}
+
+			prev = t;
+		}
+	}
+
+	if (prev == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return *prev;
+}
 const TempoSection&
 TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const
 {

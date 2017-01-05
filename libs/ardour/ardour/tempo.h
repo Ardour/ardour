@@ -352,6 +352,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double frames_per_quarter_note_at (const framepos_t&, const framecnt_t& sr) const;
 
 	const TempoSection& tempo_section_at_frame (framepos_t frame) const;
+	TempoSection& tempo_section_at_frame (framepos_t frame);
 	const MeterSection& meter_section_at_frame (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
 
@@ -380,7 +381,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
+	void replace_tempo (TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
 			    , TempoSection::Type type, PositionLockStyle pls);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
@@ -533,6 +534,7 @@ private:
 	double quarter_notes_between_frames_locked (const Metrics& metrics, const framecnt_t  start, const framecnt_t end) const;
 
 	const TempoSection& tempo_section_at_minute_locked (const Metrics& metrics, double minute) const;
+	TempoSection& tempo_section_at_minute_locked (const Metrics& metrics, double minute);
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
 	const MeterSection& meter_section_at_minute_locked (const Metrics& metrics, double minute) const;
