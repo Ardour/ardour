@@ -95,6 +95,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_inactive_color (_vca->presentation_info().color ());
+	number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press));
 
 	update_bottom_padding ();
 
@@ -385,6 +386,18 @@ VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
 		spill ();
 	}
 
+	return true;
+}
+
+bool
+VCAMasterStrip::number_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		if (!context_menu) {
+			build_context_menu ();
+		}
+		context_menu->popup (1, ev->time);
+	}
 	return true;
 }
 
