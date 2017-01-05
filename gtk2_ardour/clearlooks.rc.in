@@ -408,6 +408,12 @@ style "base_frame"
 	bg[NORMAL] = @background
 }
 
+style "transport_frame"
+{
+	fg[NORMAL] = shade (1.1, @background)
+	bg[NORMAL] = shade (1.1, @background)
+}
+
 style "transport_base" = "medium_bold_text"
 {
 }
@@ -1088,6 +1094,7 @@ widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
 
 widget "*BaseFrame" style:highest "base_frame"
+widget "*TransportFrame" style:highest "transport_frame"
 
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"

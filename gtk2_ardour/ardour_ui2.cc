@@ -459,7 +459,7 @@ ARDOUR_UI::setup_transport ()
 	transport_table.set_row_spacings (4);
 	transport_table.set_border_width (2);
 	transport_frame.add (transport_table);
-	transport_frame.set_name ("BaseFrame");
+	transport_frame.set_name ("TransportFrame");
 	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
 
 	transport_table.signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::transport_expose), false);
