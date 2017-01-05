@@ -79,7 +79,6 @@ KeyEditor::KeyEditor ()
 	, unbind_box (BUTTONBOX_END)
 	, filter_entry (_("Search..."), true)
 	, filter_string("")
-	, print_button (_("Print"))
 	, sort_column(0)
 	, sort_type(Gtk::SORT_ASCENDING)
 {
@@ -94,19 +93,22 @@ KeyEditor::KeyEditor ()
 	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
 	vpacker.pack_start (filter_entry, false, false);
 
-	Label* hint = manage (new Label (_("To remove a shortcut select an action then press this: ")));
+	Label* hint = manage (new Label (_("To remove a shortcut, select an action then press this: ")));
 	hint->show ();
-	unbind_box.set_spacing (6);
 	unbind_box.pack_start (*hint, false, true);
 	unbind_box.pack_start (unbind_button, false, false);
 	unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
+	vpacker.set_spacing (4);
 	vpacker.pack_start (unbind_box, false, false);
 	unbind_box.show ();
 	unbind_button.show ();
 
 	reset_button.add (reset_label);
-	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
+	reset_label.set_markup (string_compose ("  <span size=\"large\" weight=\"bold\">%1</span>  ", _("Reset Bindings to Defaults")));
+
+	print_button.add (print_label);
+	print_label.set_markup (string_compose ("  <span size=\"large\" weight=\"bold\">%1</span>  ", _("Print Bindings (to your web browser)")));
 
 	print_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::print));
 
@@ -117,6 +119,7 @@ KeyEditor::KeyEditor ()
 	reset_label.show ();
 	print_button.show ();
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
+	vpacker.pack_start (*(manage (new  HSeparator())), true, true, 5);
 	vpacker.pack_start (reset_box, false, false);
 
 	add (vpacker);

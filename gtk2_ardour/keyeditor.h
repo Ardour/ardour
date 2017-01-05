@@ -112,6 +112,7 @@ class KeyEditor : public ArdourWindow
 	Gtkmm2ext::SearchBar filter_entry;
 	std::string filter_string;
 	Gtk::Button print_button;
+	Gtk::Label print_label;
 
 	typedef std::vector<Tab*> Tabs;
 
