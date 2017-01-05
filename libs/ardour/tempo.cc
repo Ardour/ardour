@@ -1059,6 +1059,7 @@ TempoSection*
 TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
+		warning << "Cannot add tempo. note types per minute must be greater than zero." << endmsg;
 		return 0;
 	}
 
@@ -1078,6 +1079,7 @@ void
 TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
+		warning << "Cannot replace tempo. note types per minute must be greater than zero." << endmsg;
 		return;
 	}
 
