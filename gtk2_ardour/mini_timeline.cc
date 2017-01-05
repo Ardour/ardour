@@ -587,6 +587,7 @@ bool
 MiniTimeline::on_button_release_event (GdkEventButton *ev)
 {
 	if (!_session) { return true; }
+	if (_session->actively_recording ()) { return true; }
 	if (ev->y < 0 || ev->y > get_height () || ev->x < 0 || ev->x > get_width ()) {
 		return true;
 	}
@@ -612,6 +613,7 @@ bool
 MiniTimeline::on_motion_notify_event (GdkEventMotion *ev)
 {
 	if (!_session) { return true; }
+	if (_session->actively_recording ()) { return true; }
 
 	_pointer_x = ev->x;
 	_pointer_y = ev->y;
@@ -656,6 +658,7 @@ bool
 MiniTimeline::on_scroll_event (GdkEventScroll *ev)
 {
 	if (!_session) { return true; }
+	if (_session->actively_recording ()) { return true; }
 	const framecnt_t time_span = _session->config.get_minitimeline_span ();
 	framepos_t when = _session->audible_frame ();
 
