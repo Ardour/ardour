@@ -3957,7 +3957,9 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 			const TempoSection tempo = tempo_section_at_minute_locked (_metrics, minute_at_frame (pos));
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_frame (pos));
 			const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, tempo.c_func()));
+			const double c = (tempo.type() == TempoSection::Constant) ? 0.0 : tempo.c_func();
+
+			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, c));
 			++cnt;
 		}
 	} else {
