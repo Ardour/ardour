@@ -40,9 +40,9 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, _section (0)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
-	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
-	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
+	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Tempo tempo (map.tempo_at_frame (frame));
@@ -57,9 +57,9 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, _section (&section)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
-	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
-	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
+	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
@@ -202,7 +202,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		++row;
 		++row;
 
-		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
+		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_RIGHT, ALIGN_CENTER));
 		table->attach (*lock_style_label, 0, 1, row, row + 1);
 		table->attach (lock_style, 1, 5, row, row + 1);
 
@@ -210,7 +210,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	}
 
 
-	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_RIGHT, ALIGN_CENTER));
 	table->attach (*tempo_type_label, 0, 1, row, row + 1);
 	table->attach (tempo_type, 1, 5, row, row + 1);
 
@@ -228,6 +228,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 	bpm_spinner.show ();
 	tap_tempo_button.show ();
+	get_vbox()->set_spacing (6);
 	get_vbox()->pack_end (tap_tempo_button);
 	bpm_spinner.grab_focus ();
 
@@ -499,9 +500,9 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 		lock_style.set_active_text (strings[0]); // "music"
 	}
 
-	Label* note_label = manage (new Label (_("Note value:"), ALIGN_LEFT, ALIGN_CENTER));
-	Label* lock_label = manage (new Label (_("Lock style:"), ALIGN_LEFT, ALIGN_CENTER));
-	Label* bpb_label = manage (new Label (_("Beats per bar:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* note_label = manage (new Label (_("Note value:"), ALIGN_RIGHT, ALIGN_CENTER));
+	Label* lock_label = manage (new Label (_("Lock style:"), ALIGN_RIGHT, ALIGN_CENTER));
+	Label* bpb_label = manage (new Label (_("Beats per bar:"), ALIGN_RIGHT, ALIGN_CENTER));
 	Table* table = manage (new Table (3, 3));
 	table->set_spacings (6);
 
