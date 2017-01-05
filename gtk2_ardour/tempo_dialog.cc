@@ -63,7 +63,8 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
-	init (when, section.note_types_per_minute(), section.note_type(), section.type(), section.initial(), section.position_lock_style());
+	init (when, section.note_types_per_minute(), section.note_type(), section.type()
+	      , section.initial() || section.locked_to_meter(), section.position_lock_style());
 }
 
 void
