@@ -153,7 +153,7 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	boost::shared_ptr<const Control> c = control_names->control(param.id());
 
 	if (c) {
-		return c->name();
+		return string_compose(c->name() + " [%1]", int(param.channel()) + 1);
 	}
 
 	return "";
