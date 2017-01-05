@@ -410,8 +410,6 @@ style "base_frame"
 
 style "transport_frame"
 {
-	fg[NORMAL] = shade (1.1, @background)
-	bg[NORMAL] = shade (1.1, @background)
 }
 
 style "transport_base" = "medium_bold_text"
