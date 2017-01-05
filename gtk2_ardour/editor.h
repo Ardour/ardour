@@ -1421,7 +1421,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
-	void import_smf_tempo_map (Evoral::SMF const &);
+	void import_smf_tempo_map (Evoral::SMF const &, framepos_t pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();

@@ -262,7 +262,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::import_smf_tempo_map (Evoral::SMF const & smf)
+Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 {
 	if (!_session) {
 		return;
@@ -296,8 +296,8 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf)
 			}
 
 		} else {
-			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, AudioTime);
-			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, 0, AudioTime);
+			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, pos, AudioTime);
+			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, TempoSection::Constant, AudioTime);
 			have_initial_meter = true;
 
 		}
@@ -340,7 +340,7 @@ Editor::do_import (vector<string>        paths,
 				continue;
 			}
 			if (smf.num_tempos() > 0) {
-				import_smf_tempo_map (smf);
+				import_smf_tempo_map (smf, pos);
 				smf.close ();
 				break;
 			}
