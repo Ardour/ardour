@@ -141,6 +141,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		(*x)->set_min_tempo (min_tempo);
 		++tmp;
 		if (tmp != tempo_curves.end()) {
+
+			if (!(*x)->tempo().active()) {
+				(*x)->hide();
+			} else {
+				(*x)->show();
+			}
+
 			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
@@ -243,6 +250,13 @@ Editor::marker_position_changed ()
 		(*x)->set_min_tempo (min_tempo);
 		++tmp;
 		if (tmp != tempo_curves.end()) {
+
+			if (!(*x)->tempo().active()) {
+				(*x)->hide();
+			} else {
+				(*x)->show();
+			}
+
 			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
@@ -441,7 +455,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (!tempo_marker->tempo().initial()) {
+	if (!tempo_marker->tempo().locked_to_meter() && tempo_marker->tempo().active()) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }

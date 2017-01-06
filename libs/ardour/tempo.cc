@@ -743,6 +743,8 @@ TempoMap::TempoMap (framecnt_t fr)
 	MeterSection *m = new MeterSection (0.0, 0.0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor(), AudioTime, fr);
 
 	t->set_initial (true);
+	t->set_locked_to_meter (true);
+
 	m->set_initial (true);
 
 	/* note: frame time is correct (zero) for both of these */
@@ -2609,13 +2611,12 @@ TempoMap::set_active_tempi (const Metrics& metrics, const framepos_t& frame)
 		TempoSection* t;
 		if ((*i)->is_tempo()) {
 			t = static_cast<TempoSection*> (*i);
-			if (t->initial()) {
+			if (t->locked_to_meter()) {
 				t->set_active (true);
-				continue;
 			} else if (t->position_lock_style() == AudioTime) {
-				if (t->active () && t->frame() < frame) {
+				if (t->frame() < frame) {
 					t->set_active (false);
-					t->set_pulse (0.0);
+					t->set_pulse (-1.0);
 				} else if (t->frame() > frame) {
 					t->set_active (true);
 				} else if (t->frame() == frame) {
@@ -2806,7 +2807,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, MeterSection* section, const dou
 
 	if (section->initial()) {
 		/* lock the first tempo to our first meter */
-		if (!set_active_tempi (imaginary, section->frame_at_minute (minute))) {
+		if (!set_active_tempi (imaginary, frame_at_minute (minute))) {
 			return false;
 		}
 	}
