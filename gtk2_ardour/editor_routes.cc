@@ -1016,6 +1016,9 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 	bool master_is_first = false;
 	uint32_t count = 0;
 
+	OrderingKeys sorted;
+	const size_t cmp_max = rows.size ();
+
 	// special case master if it's got PI order 0 lets keep it there
 	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
 		order++;
@@ -1060,8 +1063,22 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 			change = true;
 		}
 
+		sorted.push_back (OrderKeys (order, stripable, cmp_max));
+
 		++order;
 		++count;
+	}
+
+	if (!change) {
+		// VCA (and Mixbus) special cases according to SortByNewDisplayOrder
+		uint32_t n = 0;
+		SortByNewDisplayOrder cmp;
+		sort (sorted.begin(), sorted.end(), cmp);
+		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+			if (sr->old_display_order != n) {
+				change = true;
+			}
+		}
 	}
 
 	if (change) {
@@ -1120,7 +1137,17 @@ EditorRoutes::sync_treeview_from_presentation_info ()
 
 	if (changed) {
 		Unwinder<bool> uw (_ignore_reorder, true);
+		/* prevent traverse_cells: assertion 'row_path != NULL'
+		 * in case of DnD re-order: row-removed + row-inserted.
+		 *
+		 * The rows (stripables) are not actually removed from the model,
+		 * but only from the display in the DnDTreeView.
+		 * ->reorder() will fail to find the row_path.
+		 * (re-order drag -> remove row -> rync PI from TV -> notify -> sync TV from PI -> crash)
+		 */
+		_display.unset_model();
 		_model->reorder (neworder);
+		_display.set_model (_model);
 	}
 
 	redisplay ();
@@ -1514,6 +1541,7 @@ EditorRoutes::initial_display ()
 	}
 
 	_editor->add_stripables (s);
+	sync_treeview_from_presentation_info ();
 }
 
 void

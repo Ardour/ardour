@@ -706,6 +706,9 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	bool change = false;
 	uint32_t order = 0;
 
+	OrderingKeys sorted;
+	const size_t cmp_max = rows.size ();
+
 	// special case master if it's got PI order 0 lets keep it there
 	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
 		order++;
@@ -743,7 +746,21 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			change = true;
 		}
 
+		sorted.push_back (OrderKeys (order, stripable, cmp_max));
+
 		++order;
+	}
+
+	if (!change) {
+		// VCA (and Mixbus) special cases according to SortByNewDisplayOrder
+		uint32_t n = 0;
+		SortByNewDisplayOrder cmp;
+		sort (sorted.begin(), sorted.end(), cmp);
+		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+			if (sr->old_display_order != n) {
+				change = true;
+			}
+		}
 	}
 
 	if (change) {
@@ -1487,6 +1504,7 @@ Mixer_UI::initial_track_display ()
 	}
 
 	redisplay_track_list ();
+	sync_treeview_from_presentation_info ();
 }
 
 void
