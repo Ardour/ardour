@@ -1181,7 +1181,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 			*static_cast<Meter*>(&first) = meter;
 			first.set_position_lock_style (AudioTime);
 			first.set_pulse (0.0);
-			//first.set_minute (minute_at_frame (frame));
+			first.set_minute (minute_at_frame (frame));
 			pair<double, BBT_Time> beat = make_pair (0.0, BBT_Time (1, 1, 0));
 			first.set_beat (beat);
 			first_t.set_minute (first.minute());
