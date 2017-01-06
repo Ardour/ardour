@@ -2245,21 +2245,26 @@ TempoMap::bbt_at_frame (framepos_t frame)
 		warning << string_compose (_("tempo map was asked for BBT time at frame %1\n"), frame) << endmsg;
 		return bbt;
 	}
+
+	const double minute =  minute_at_frame (frame);
+
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return bbt_at_minute_locked (_metrics, minute_at_frame (frame));
+	return bbt_at_minute_locked (_metrics, minute);
 }
 
 BBT_Time
 TempoMap::bbt_at_frame_rt (framepos_t frame)
 {
+	const double minute =  minute_at_frame (frame);
+
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		throw std::logic_error ("TempoMap::bbt_at_frame_rt() could not lock tempo map");
 	}
 
-	return bbt_at_minute_locked (_metrics, minute_at_frame (frame));
+	return bbt_at_minute_locked (_metrics, minute);
 }
 
 Timecode::BBT_Time
@@ -2348,9 +2353,14 @@ TempoMap::frame_at_bbt (const BBT_Time& bbt)
 	if (bbt.beats < 1) {
 		throw std::logic_error ("beats are counted from one");
 	}
-	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
+	double minute;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+		minute = minute_at_bbt_locked (_metrics, bbt);
+	}
+
+	return frame_at_minute (minute);
 }
 
 /* meter & tempo section based */
@@ -2383,15 +2393,15 @@ TempoMap::quarter_note_at_frame (const framepos_t frame) const
 double
 TempoMap::quarter_note_at_frame_rt (const framepos_t frame) const
 {
+	const double minute =  minute_at_frame (frame);
+
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		throw std::logic_error ("TempoMap::quarter_note_at_frame_rt() could not lock tempo map");
 	}
 
-	const double ret = pulse_at_minute_locked (_metrics, minute_at_frame (frame)) * 4.0;
-
-	return ret;
+	return pulse_at_minute_locked (_metrics, minute) * 4.0;
 }
 
 /**
@@ -2458,9 +2468,14 @@ TempoMap::beat_at_quarter_note (const double quarter_note) const
 framecnt_t
 TempoMap::frames_between_quarter_notes (const double start, const double end) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	double minutes;
 
-	return frame_at_minute (minutes_between_quarter_notes_locked (_metrics, start, end));
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+		minutes = minutes_between_quarter_notes_locked (_metrics, start, end);
+	}
+
+	return frame_at_minute (minutes);
 }
 
 double
