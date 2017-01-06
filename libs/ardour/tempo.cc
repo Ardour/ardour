@@ -1462,7 +1462,7 @@ TempoMap::recompute_meters (Metrics& metrics)
 					TempoSection* t;
 					if ((*ii)->is_tempo()) {
 						t = static_cast<TempoSection*> (*ii);
-						if ((t->locked_to_meter() || t->initial()) && t->frame() == meter->frame()) {
+						if (t->locked_to_meter() && t->frame() == meter->frame()) {
 							meter_locked_tempo = t;
 							break;
 						}
@@ -2824,7 +2824,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, MeterSection* section, const dou
 		TempoSection* t;
 		if ((*ii)->is_tempo()) {
 			t = static_cast<TempoSection*> (*ii);
-			if ((t->locked_to_meter() || t->initial()) && t->frame() == section->frame()) {
+			if (t->locked_to_meter() && t->frame() == section->frame()) {
 				meter_locked_tempo = t;
 				break;
 			}
@@ -3000,7 +3000,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 					TempoSection* t;
 					if ((*ii)->is_tempo()) {
 						t = static_cast<TempoSection*> (*ii);
-						if ((t->locked_to_meter() || t->initial()) && t->frame() == m->frame()) {
+						if (t->locked_to_meter() && t->frame() == m->frame()) {
 							meter_locked_tempo = t;
 							break;
 						}
