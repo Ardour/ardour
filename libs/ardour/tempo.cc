@@ -1683,6 +1683,11 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		if ((*i)->is_tempo()) {
 			t = static_cast<TempoSection*> (*i);
+
+			if (!t->active()) {
+				continue;
+			}
+
 			if (prev_t && ((t->pulse() - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat() > beat) {
 				break;
 			}
@@ -4079,6 +4084,11 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		if ((*i)->is_tempo()) {
 			t = static_cast<TempoSection*> (*i);
+
+			if (!t->active()) {
+				continue;
+			}
+
 			if (prev_t && ((t->pulse() - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat() > beat) {
 				break;
 			}
