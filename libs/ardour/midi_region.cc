@@ -110,6 +110,8 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	if (offset != 0) {
 		_start_beats = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) - other->_quarter_note) + other->_start_beats;
 		update_length_beats (sub_num);
+		/* we've potentially shifted _start_beats, now reset _start frames to match */
+		_start = _session.tempo_map().frame_at_quarter_note (other->_quarter_note -  other->_start_beats);
 	}
 
 	register_properties ();
