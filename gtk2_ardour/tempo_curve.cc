@@ -120,7 +120,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		points->push_back (ArdourCanvas::Duple (0.0, y_pos));
 		points->push_back (ArdourCanvas::Duple (1.0, y_pos));
 
-	} else if (_tempo.type() == ARDOUR::TempoSection::Constant || _tempo.c_func() == 0.0) {
+	} else if (_tempo.type() == ARDOUR::TempoSection::Constant || _tempo.c() == 0.0) {
 		const double tempo_at = _tempo.note_types_per_minute();
 		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 

@@ -190,7 +190,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& pulse, const double& minute, double qpm, double note_type, Type tempo_type, PositionLockStyle pls, framecnt_t sr)
-		: MetricSection (pulse, minute, pls, true, sr), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
+		: MetricSection (pulse, minute, pls, true, sr), Tempo (qpm, note_type), _type (tempo_type), _c (0.0), _active (true), _locked_to_meter (false)  {}
 
 	TempoSection (const XMLNode&, const framecnt_t sample_rate);
 
@@ -198,8 +198,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	XMLNode& get_state() const;
 
-	double c_func () const { return _c_func; }
-	void set_c_func (double c_func) { _c_func = c_func; }
+	double c () const { return _c; }
+	void set_c (double c) { _c = c; }
 
 	void set_type (Type type);
 	Type type () const { return _type; }
@@ -254,7 +254,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   position within the bar if/when the meter changes.
 	*/
 	Type _type;
-	double _c_func;
+	double _c;
 	bool _active;
 	bool _locked_to_meter;
 	Timecode::BBT_Time _legacy_bbt;

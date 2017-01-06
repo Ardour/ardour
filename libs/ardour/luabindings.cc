@@ -1471,7 +1471,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <TempoSection, MetricSection> ("TempoSection")
-		.addFunction ("c_func", (double(TempoSection::*)()const)&TempoSection::c_func)
+		.addFunction ("c", (double(TempoSection::*)()const)&TempoSection::c)
 		.endClass ()
 
 		.deriveClass <MeterSection, MetricSection> ("MeterSection")
