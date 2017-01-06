@@ -424,7 +424,7 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
  * @return the calculated function constant
 */
 double
-TempoSection::compute_c_func_pulse (const double& end_npm, const double& end_pulse) const
+TempoSection::compute_c_pulse (const double& end_npm, const double& end_pulse) const
 {
 	if (note_types_per_minute() == end_npm || _type == Constant) {
 		return 0.0;
@@ -440,7 +440,7 @@ TempoSection::compute_c_func_pulse (const double& end_npm, const double& end_pul
  * @return the calculated function constant
 */
 double
-TempoSection::compute_c_func_minute (const double& end_npm, const double& end_minute) const
+TempoSection::compute_c_minute (const double& end_npm, const double& end_minute) const
 {
 	if (note_types_per_minute() == end_npm || _type == Constant) {
 		return 0.0;
@@ -1422,13 +1422,13 @@ TempoMap::recompute_tempi (Metrics& metrics)
 			}
 			if (prev_t) {
 				if (t->position_lock_style() == AudioTime) {
-					prev_t->set_c (prev_t->compute_c_func_minute (t->note_types_per_minute(), t->minute()));
+					prev_t->set_c (prev_t->compute_c_minute (t->note_types_per_minute(), t->minute()));
 					if (!t->locked_to_meter()) {
 						t->set_pulse (prev_t->pulse_at_ntpm (t->note_types_per_minute(), t->minute()));
 					}
 
 				} else {
-					prev_t->set_c (prev_t->compute_c_func_pulse (t->note_types_per_minute(), t->pulse()));
+					prev_t->set_c (prev_t->compute_c_pulse (t->note_types_per_minute(), t->pulse()));
 					t->set_minute (prev_t->minute_at_ntpm (t->note_types_per_minute(), t->pulse()));
 
 				}
@@ -2683,7 +2683,7 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 				if (prev_t && !section_prev && ((sml && tlm && t->pulse() > section->pulse()) || (!tlm && t->minute() > minute))) {
 					section_prev = prev_t;
 
-					section_prev->set_c (section_prev->compute_c_func_minute (section->note_types_per_minute(), minute));
+					section_prev->set_c (section_prev->compute_c_minute (section->note_types_per_minute(), minute));
 					if (!section->locked_to_meter()) {
 						section->set_pulse (section_prev->pulse_at_ntpm (section->note_types_per_minute(), minute));
 					}
@@ -2691,10 +2691,10 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 				}
 
 				if (t->position_lock_style() == MusicTime) {
-					prev_t->set_c (prev_t->compute_c_func_pulse (t->note_types_per_minute(), t->pulse()));
+					prev_t->set_c (prev_t->compute_c_pulse (t->note_types_per_minute(), t->pulse()));
 					t->set_minute (prev_t->minute_at_ntpm (t->note_types_per_minute(), t->pulse()));
 				} else {
-					prev_t->set_c (prev_t->compute_c_func_minute (t->note_types_per_minute(), t->minute()));
+					prev_t->set_c (prev_t->compute_c_minute (t->note_types_per_minute(), t->minute()));
 					if (!t->locked_to_meter()) {
 						t->set_pulse (prev_t->pulse_at_ntpm (t->note_types_per_minute(), t->minute()));
 					}
@@ -2753,10 +2753,10 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 				}
 
 				if (t->position_lock_style() == MusicTime) {
-					prev_t->set_c (prev_t->compute_c_func_pulse (t->note_types_per_minute(), t->pulse()));
+					prev_t->set_c (prev_t->compute_c_pulse (t->note_types_per_minute(), t->pulse()));
 					t->set_minute (prev_t->minute_at_ntpm (t->note_types_per_minute(), t->pulse()));
 				} else {
-					prev_t->set_c (prev_t->compute_c_func_minute (t->note_types_per_minute(), t->minute()));
+					prev_t->set_c (prev_t->compute_c_minute (t->note_types_per_minute(), t->minute()));
 					if (!t->locked_to_meter()) {
 						t->set_pulse (prev_t->pulse_at_ntpm (t->note_types_per_minute(), t->minute()));
 					}
@@ -2767,7 +2767,7 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 	}
 
 	if (section_prev) {
-		section_prev->set_c (section_prev->compute_c_func_pulse (section->note_types_per_minute(), pulse));
+		section_prev->set_c (section_prev->compute_c_pulse (section->note_types_per_minute(), pulse));
 		section->set_minute (section_prev->minute_at_ntpm (section->note_types_per_minute(), pulse));
 	}
 

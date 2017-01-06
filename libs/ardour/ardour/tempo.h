@@ -219,8 +219,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double pulse_at_minute (const double& minute) const;
 	double minute_at_pulse (const double& pulse) const;
 
-	double compute_c_func_pulse (const double& end_ntpm, const double& end_pulse) const;
-	double compute_c_func_minute (const double& end_ntpm, const double& end_minute) const;
+	double compute_c_pulse (const double& end_ntpm, const double& end_pulse) const;
+	double compute_c_minute (const double& end_ntpm, const double& end_minute) const;
 
 	double pulse_at_frame (const framepos_t& frame) const;
 	framepos_t frame_at_pulse (const double& pulse) const;
