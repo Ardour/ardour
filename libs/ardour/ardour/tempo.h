@@ -524,12 +524,6 @@ private:
 	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
 	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
-	double minute_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const;
-	double quarter_note_at_minute_locked (const Metrics& metrics, const double minute) const;
-
-	double quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const;
-	double beat_at_quarter_note_locked (const Metrics& metrics, const double beat) const;
-
 	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn) const;
 	double quarter_notes_between_frames_locked (const Metrics& metrics, const framecnt_t  start, const framecnt_t end) const;
 

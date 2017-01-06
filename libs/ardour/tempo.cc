@@ -2373,19 +2373,11 @@ TempoMap::minute_at_bbt_locked (const Metrics& metrics, const BBT_Time& bbt) con
 double
 TempoMap::quarter_note_at_frame (const framepos_t frame) const
 {
+	const double minute =  minute_at_frame (frame);
+
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double ret = quarter_note_at_minute_locked (_metrics, minute_at_frame (frame));
-
-	return ret;
-}
-
-double
-TempoMap::quarter_note_at_minute_locked (const Metrics& metrics, const double minute) const
-{
-	const double ret = pulse_at_minute_locked (metrics, minute) * 4.0;
-
-	return ret;
+	return pulse_at_minute_locked (_metrics, minute) * 4.0;
 }
 
 double
@@ -2413,19 +2405,14 @@ TempoMap::quarter_note_at_frame_rt (const framepos_t frame) const
 framepos_t
 TempoMap::frame_at_quarter_note (const double quarter_note) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	double minute;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const framepos_t ret = frame_at_minute (minute_at_quarter_note_locked (_metrics, quarter_note));
+		minute = minute_at_pulse_locked (_metrics, quarter_note / 4.0);
+	}
 
-	return ret;
-}
-
-double
-TempoMap::minute_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const
-{
-	const double ret = minute_at_pulse_locked (metrics, quarter_note / 4.0);
-
-	return ret;
+	return frame_at_minute (minute);
 }
 
 /** Returns the quarter-note beats corresponding to the supplied BBT (meter-based) beat.
@@ -2440,17 +2427,7 @@ TempoMap::quarter_note_at_beat (const double beat) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double ret = quarter_note_at_beat_locked (_metrics, beat);
-
-	return ret;
-}
-
-double
-TempoMap::quarter_note_at_beat_locked (const Metrics& metrics, const double beat) const
-{
-	const double ret = pulse_at_beat_locked (metrics, beat) * 4.0;
-
-	return ret;
+	return pulse_at_beat_locked (_metrics, beat) * 4.0;
 }
 
 /** Returns the BBT (meter-based) beat position corresponding to the supplied quarter-note beats.
@@ -2465,16 +2442,7 @@ TempoMap::beat_at_quarter_note (const double quarter_note) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	const double ret = beat_at_quarter_note_locked (_metrics, quarter_note);
-
-	return ret;
-}
-
-double
-TempoMap::beat_at_quarter_note_locked (const Metrics& metrics, const double quarter_note) const
-{
-
-	return beat_at_pulse_locked (metrics, quarter_note / 4.0);
+	return beat_at_pulse_locked (_metrics, quarter_note / 4.0);
 }
 
 /** Returns the duration in frames between two supplied quarter-note beat positions.
@@ -3267,7 +3235,7 @@ TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, con
 					 * in the future map rather than the existing one.
 					 */
 					const double qn = exact_qn_at_frame_locked (future_map, frame, sub_num);
-					const framepos_t snapped_frame = frame_at_minute (minute_at_quarter_note_locked (future_map, qn));
+					const framepos_t snapped_frame = frame_at_minute (minute_at_pulse_locked (future_map, qn / 4.0));
 
 					if (solve_map_minute (future_map, tempo_copy, minute_at_frame (snapped_frame))) {
 						solve_map_minute (_metrics, ts, minute_at_frame (snapped_frame));
@@ -3587,13 +3555,13 @@ TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num) con
 double
 TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num) const
 {
-	double qn = quarter_note_at_minute_locked (metrics, minute_at_frame (frame));
+	double qn = pulse_at_minute_locked (metrics, minute_at_frame (frame)) * 4.0;
 
 	if (sub_num > 1) {
 		qn = floor (qn) + (floor (((qn - floor (qn)) * (double) sub_num) + 0.5) / sub_num);
 	} else if (sub_num == 1) {
 		/* the gui requested exact musical (BBT) beat */
-		qn = quarter_note_at_beat_locked (metrics, floor (beat_at_minute_locked (metrics, minute_at_frame (frame)) + 0.5));
+		qn = pulse_at_beat_locked (metrics, (floor (beat_at_minute_locked (metrics, minute_at_frame (frame)) + 0.5)) * 4.0);
 	} else if (sub_num == -1) {
 		/* snap to  bar */
 		Timecode::BBT_Time bbt = bbt_at_pulse_locked (metrics, qn / 4.0);
@@ -3801,7 +3769,7 @@ framepos_t
 TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	uint32_t ticks = (uint32_t) floor (max (0.0, quarter_note_at_minute_locked (_metrics, minute_at_frame (fr))) * BBT_Time::ticks_per_beat);
+	uint32_t ticks = (uint32_t) floor (max (0.0, pulse_at_minute_locked (_metrics, minute_at_frame (fr))) * BBT_Time::ticks_per_beat * 4.0);
 	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
 	uint32_t ticks_one_subdivisions_worth = (uint32_t) BBT_Time::ticks_per_beat / sub_num;
 
@@ -3893,7 +3861,7 @@ TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMo
 		}
 	}
 
-	const framepos_t ret_frame = frame_at_minute (minute_at_quarter_note_locked (_metrics, beats + (ticks / BBT_Time::ticks_per_beat)));
+	const framepos_t ret_frame = frame_at_minute (minute_at_pulse_locked (_metrics, (beats + (ticks / BBT_Time::ticks_per_beat)) / 4.0));
 
 	return ret_frame;
 }
@@ -4542,9 +4510,9 @@ framepos_t
 TempoMap::framepos_plus_qn (framepos_t frame, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const double frame_qn = quarter_note_at_minute_locked (_metrics, minute_at_frame (frame));
+	const double frame_qn = pulse_at_minute_locked (_metrics, minute_at_frame (frame)) * 4.0;
 
-	return frame_at_minute (minute_at_quarter_note_locked (_metrics, frame_qn + beats.to_double()));
+	return frame_at_minute (minute_at_pulse_locked (_metrics, (frame_qn + beats.to_double()) / 4.0));
 }
 
 framepos_t
