@@ -141,17 +141,17 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		(*x)->set_min_tempo (min_tempo);
 		++tmp;
 		if (tmp != tempo_curves.end()) {
-
-			if (!(*x)->tempo().active()) {
-				(*x)->hide();
-			} else {
-				(*x)->show();
-			}
-
 			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
 		}
+
+		if (!(*x)->tempo().active()) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
+
 		++x;
 	}
 
@@ -250,17 +250,17 @@ Editor::marker_position_changed ()
 		(*x)->set_min_tempo (min_tempo);
 		++tmp;
 		if (tmp != tempo_curves.end()) {
-
-			if (!(*x)->tempo().active()) {
-				(*x)->hide();
-			} else {
-				(*x)->show();
-			}
-
 			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
 		}
+
+		if (!(*x)->tempo().active()) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
+
 		++x;
 	}
 
