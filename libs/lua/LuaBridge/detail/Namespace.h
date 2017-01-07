@@ -473,6 +473,15 @@ private:
       return 1;
     }
 
+    template <class Params, class T, class C>
+    static int ctorPtrPlacementProxy (lua_State* L)
+    {
+      ArgList <Params, 2> args (L);
+      T newobject (Constructor <C, Params>::call (args));
+      Stack<T>::push (L, newobject);
+      return 1;
+    }
+
     //--------------------------------------------------------------------------
     /**
       Pop the Lua stack.
@@ -1037,9 +1046,26 @@ private:
       return *this;
     }
 
+    template <class MemFn, class PT>
+    Class <T>& addPtrConstructor ()
+    {
+      FUNDOC("Constructor", "", MemFn)
+      lua_pushcclosure (L,
+        &ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, T, PT>, 0);
+      rawsetfield(L, -2, "__call");
+
+      return *this;
+    }
+
     Class <T>& addVoidConstructor ()
     {
       return addConstructor <void (*) ()> ();
+    }
+
+    template <class PT>
+    Class <T>& addVoidPtrConstructor ()
+    {
+      return addPtrConstructor <void (*) (), PT> ();
     }
 
     Class <T>& addEqualCheck ()
@@ -1235,13 +1261,15 @@ private:
     {
       FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
       set_weak_class ();
+      // NOTE: this constructs an empty weak-ptr,
+      // ideally we'd construct a weak-ptr from a referenced shared-ptr
       lua_pushcclosure (L,
           &weak. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
       rawsetfield(L, -2, "__call");
 
       set_shared_class ();
       lua_pushcclosure (L,
-          &shared. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T> >, 0);
+          &shared. template ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T>, T >, 0);
       rawsetfield(L, -2, "__call");
       return *this;
     }
@@ -1831,9 +1859,8 @@ public:
   Class<boost::shared_ptr<std::list<T> > > beginPtrStdList (char const* name)
   {
     typedef std::list<T> LT;
-
     return beginClass<boost::shared_ptr<LT> > (name)
-      .addVoidConstructor ()
+      //.addVoidPtrConstructor<LT> ()
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("size", &LT::size)
       .addPtrFunction ("reverse", &LT::reverse)
@@ -1852,7 +1879,7 @@ public:
     typedef typename std::vector<T>::size_type T_SIZE;
 
     return beginClass<boost::shared_ptr<LT> > (name)
-      .addVoidConstructor ()
+      //.addVoidPtrConstructor<LT> ()
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("size", &LT::size)

@@ -672,7 +672,6 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
-		.addVoidConstructor ()
 		.addData ("name", &PluginInfo::name, false)
 		.addData ("category", &PluginInfo::category, false)
 		.addData ("creator", &PluginInfo::creator, false)
@@ -1388,6 +1387,7 @@ LuaBindings::common (lua_State* L)
 
 		// boost::shared_ptr<RouteList>
 		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
+		.addVoidPtrConstructor<std::list<boost::shared_ptr <Route> > > ()
 		.endClass ()
 
 		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
@@ -1412,6 +1412,7 @@ LuaBindings::common (lua_State* L)
 
 		// boost::shared_ptr <std::list<boost::shared_ptr<Region> > >
 		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
+		.addVoidPtrConstructor<std::list<boost::shared_ptr <Region> > > ()
 		.endClass ()
 
 		//std::list<boost::shared_ptr<Port> > PortList;
