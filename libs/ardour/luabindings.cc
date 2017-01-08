@@ -2060,6 +2060,7 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("save_state", &Session::save_state)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
+		.addFunction ("export_track_state", &Session::export_track_state)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track

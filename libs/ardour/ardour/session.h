@@ -563,6 +563,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template();
+	bool     export_track_state (boost::shared_ptr<RouteList> rl, const std::string& path);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);

@@ -1053,6 +1053,80 @@ Session::get_template()
 	return state(false);
 }
 
+typedef std::set<boost::shared_ptr<Playlist> > PlaylistSet;
+typedef std::set<boost::shared_ptr<Source> > SourceSet;
+
+bool
+Session::export_track_state (boost::shared_ptr<RouteList> rl, const string& path)
+{
+	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
+		return false;
+	}
+	if (g_mkdir_with_parents (path.c_str(), 0755) != 0) {
+		return false;
+	}
+
+	PBD::Unwinder<std::string> uw (_template_state_dir, path);
+
+	LocaleGuard lg;
+	XMLNode* node = new XMLNode("TrackState"); // XXX
+	XMLNode* child;
+
+	PlaylistSet playlists; // SessionPlaylists
+	SourceSet sources;
+
+	// these will work with  new_route_from_template()
+	// TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	child = node->add_child ("Routes");
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->is_auditioner()) {
+			continue;
+		}
+		if ((*i)->is_master() || (*i)->is_monitor()) {
+			continue;
+		}
+		child->add_child_nocopy ((*i)->get_state());
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
+		if (track) {
+			playlists.insert (track->playlist ());
+		}
+	}
+
+	// on load, Regions in the playlists need to resolve and map Source-IDs
+	// also playlist needs to be merged or created with new-name..
+	// ... and Diskstream in tracks adjusted to use the correct playlist
+	child = node->add_child ("Playlists"); // SessionPlaylists::add_state
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		child->add_child_nocopy ((*i)->get_state ());
+		boost::shared_ptr<RegionList> prl = (*i)->region_list ();
+		for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
+			const Region::SourceList& sl = (*s)->sources ();
+			for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+				sources.insert (*sli);
+			}
+		}
+	}
+
+	child = node->add_child ("Sources");
+	for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		child->add_child_nocopy ((*i)->get_state ());
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (*i);
+		if (fs) {
+#ifdef PLATFORM_WINDOWS
+			fs->close ();
+#endif
+			string p = fs->path ();
+			PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
+		}
+	}
+
+	std::string sn = Glib::build_filename (path, "share.axml");
+
+	XMLTree tree;
+	tree.set_root (node);
+	return tree.write (sn.c_str());
+}
+
 XMLNode&
 Session::state (bool full_state)
 {
