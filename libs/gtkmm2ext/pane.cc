@@ -225,6 +225,7 @@ Pane::on_size_allocate (Gtk::Allocation& alloc)
 	/* minumum pane size constraints */
 	Dividers::size_type div = 0;
 	for (Dividers::const_iterator d = dividers.begin(); d != dividers.end(); ++d, ++div) {
+		// XXX skip dividers that were just hidden in reallocate()
 		Pane::set_divider (div, (*d)->fract);
 	}
 	// TODO this needs tweaking for panes with > 2 children
@@ -246,7 +247,9 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 
         if (children.size() == 1) {
 	        /* only child gets the full allocation */
-	        children.front()->w->size_allocate (alloc);
+					if (children.front()->w->is_visible ()) {
+						children.front()->w->size_allocate (alloc);
+					}
 	        return;
         }
 
@@ -319,7 +322,9 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		        }
 	        }
 
-	        (*child)->w->size_allocate (child_alloc);
+					if ((*child)->w->is_visible ()) {
+						(*child)->w->size_allocate (child_alloc);
+					}
 
 	        if (next == children.end()) {
 		        /* done, no more children, no need for a divider */
@@ -421,13 +426,16 @@ Pane::constrain_fract (Dividers::size_type div, float fract)
 		return fract;
 	}
 
+	if (children.size () <= div + 1) { return fract; } // XXX remove once hidden divs are skipped
+	assert(children.size () > div + 1);
+
 	const float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
 
 	// TODO: optimize: cache in Pane::on_size_request
 	Gtk::Requisition prev_req(children.at (div)->w->size_request ());
 	Gtk::Requisition next_req(children.at (div + 1)->w->size_request ());
-	float prev = divider_width + (horizontal ? prev_req.width : prev_req.height);
-	float next = divider_width + (horizontal ? next_req.width : next_req.height);
+	float prev = (horizontal ? prev_req.width : prev_req.height);
+	float next = (horizontal ? next_req.width : next_req.height);
 
 	if (children.at (div)->minsize) {
 		prev = children.at (div)->minsize;
@@ -538,6 +546,7 @@ Pane::handle_motion_event (GdkEventMotion* ev, Divider* d)
 
 	new_fract = min (1.0f, max (0.0f, new_fract));
 	new_fract = constrain_fract (div, new_fract);
+	new_fract = min (1.0f, max (0.0f, new_fract));
 
 	if (new_fract != d->fract) {
 		d->fract = new_fract;
@@ -566,6 +575,7 @@ Pane::set_divider (Dividers::size_type div, float fract)
 
 	fract = max (0.0f, min (1.0f, fract));
 	fract = constrain_fract (div, fract);
+	fract = max (0.0f, min (1.0f, fract));
 
 	if (fract != (*d)->fract) {
 		(*d)->fract = fract;
