@@ -55,7 +55,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 		Child (Pane* p, Gtk::Widget* widget, uint32_t ms) : pane (p), w (widget), minsize (ms) {}
 	};
 
-	typedef std::vector<Child> Children;
+	typedef std::vector<Child*> Children;
 
 	Pane (bool horizontal);
 	~Pane();

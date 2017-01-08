@@ -49,19 +49,21 @@ Pane::Pane (bool h)
 Pane::~Pane ()
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
-		c->show_con.disconnect ();
-		c->hide_con.disconnect ();
-		c->w->remove_destroy_notify_callback (&(*c));
-		c->w->unparent ();
+		(*c)->show_con.disconnect ();
+		(*c)->hide_con.disconnect ();
+		(*c)->w->remove_destroy_notify_callback (*c);
+		(*c)->w->unparent ();
+		delete (*c);
 	}
+	children.clear ();
 }
 
 void
 Pane::set_child_minsize (Gtk::Widget const& w, int32_t minsize)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
-		if (c->w == &w) {
-			c->minsize = minsize;
+		if ((*c)->w == &w) {
+			(*c)->minsize = minsize;
 			break;
 		}
 	}
@@ -95,26 +97,26 @@ Pane::on_size_request (GtkRequisition* req)
 		largest.width = 0;
 	}
 
-	for (Children::iterator child = children.begin(); child != children.end(); ++child) {
+	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		GtkRequisition r;
 
-		if (!child->w->is_visible ()) {
+		if (!(*c)->w->is_visible ()) {
 			continue;
 		}
 
-		child->w->size_request (r);
+		(*c)->w->size_request (r);
 
 		if (horizontal) {
 			largest.height = max (largest.height, r.height);
-			if (child->minsize) {
-				largest.width += child->minsize;
+			if ((*c)->minsize) {
+				largest.width += (*c)->minsize;
 			} else {
 				largest.width += r.width;
 			}
 		} else {
 			largest.width = max (largest.width, r.width);
-			if (child->minsize) {
-				largest.height += child->minsize;
+			if ((*c)->minsize) {
+				largest.height += (*c)->minsize;
 			} else {
 				largest.height += r.height;
 			}
@@ -156,18 +158,18 @@ Pane::handle_child_visibility ()
 void
 Pane::on_add (Widget* w)
 {
-	children.push_back (Child (this, w, 0));
-	Child& kid = children.back ();
+	children.push_back (new Child (this, w, 0));
+	Child* kid = children.back ();
 
 	w->set_parent (*this);
 	/* Gtkmm 2.4 does not correctly arrange for ::on_remove() to be called
 	   for custom containers that derive from Gtk::Container. So ... we need
 	   to ensure that we hear about child destruction ourselves.
 	*/
-	w->add_destroy_notify_callback (&children.back(), &Pane::notify_child_destroyed);
+	w->add_destroy_notify_callback (kid, &Pane::notify_child_destroyed);
 
-	kid.show_con = w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
-	kid.hide_con = w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
+	kid->show_con = w->signal_show().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
+	kid->hide_con = w->signal_hide().connect (sigc::mem_fun (*this, &Pane::handle_child_visibility));
 
 	while (dividers.size() < (children.size() - 1)) {
 		add_divider ();
@@ -185,10 +187,12 @@ void*
 Pane::child_destroyed (Gtk::Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
-		if (c->w == w) {
-			c->show_con.disconnect ();
-			c->hide_con.disconnect ();
+		if ((*c)->w == w) {
+			(*c)->show_con.disconnect ();
+			(*c)->hide_con.disconnect ();
+			Child* kid = *c;
 			children.erase (c);
+			delete kid;
 			break;
 		}
 	}
@@ -199,12 +203,14 @@ void
 Pane::on_remove (Widget* w)
 {
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
-		if (c->w == w) {
-			c->show_con.disconnect ();
-			c->hide_con.disconnect ();
-			w->remove_destroy_notify_callback (&(*c));
+		if ((*c)->w == w) {
+			(*c)->show_con.disconnect ();
+			(*c)->hide_con.disconnect ();
+			w->remove_destroy_notify_callback (*c);
 			w->unparent ();
+			Child* kid = *c;
 			children.erase (c);
+			delete kid;
 			break;
 		}
 	}
@@ -240,7 +246,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 
         if (children.size() == 1) {
 	        /* only child gets the full allocation */
-	        children.front().w->size_allocate (alloc);
+	        children.front()->w->size_allocate (alloc);
 	        return;
         }
 
@@ -259,7 +265,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
         /* skip initial hidden children */
 
         while (child != children.end()) {
-	        if (child->w->is_visible()) {
+	        if ((*child)->w->is_visible()) {
 		        break;
 	        }
 	        ++child;
@@ -274,7 +280,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        /* Move on to next *visible* child */
 
 	        while (++next != children.end()) {
-		        if (next->w->is_visible()) {
+		        if ((*next)->w->is_visible()) {
 			        break;
 		        }
 	        }
@@ -291,7 +297,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        }
 
 	        Gtk::Requisition cr;
-	        child->w->size_request (cr);
+	        (*child)->w->size_request (cr);
 
 	        if (horizontal) {
 		        child_alloc.set_width ((gint) floor (remaining * fract));
@@ -305,15 +311,15 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		        ypos += child_alloc.get_height ();
 	        }
 
-	        if (child->minsize) {
+	        if ((*child)->minsize) {
 		        if (horizontal) {
-			        child_alloc.set_width (max (child_alloc.get_width(), child->minsize));
+			        child_alloc.set_width (max (child_alloc.get_width(), (*child)->minsize));
 		        } else {
-			        child_alloc.set_height (max (child_alloc.get_height(), child->minsize));
+			        child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
 		        }
 	        }
 
-	        child->w->size_allocate (child_alloc);
+	        (*child)->w->size_allocate (child_alloc);
 
 	        if (next == children.end()) {
 		        /* done, no more children, no need for a divider */
@@ -362,8 +368,8 @@ Pane::on_expose_event (GdkEventExpose* ev)
 
 	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child) {
 
-		if (child->w->is_visible()) {
-			propagate_expose (*(child->w), ev);
+		if ((*child)->w->is_visible()) {
+			propagate_expose (*((*child)->w), ev);
 		}
 
 		if (div != dividers.end()) {
@@ -392,7 +398,7 @@ Pane::handle_release_event (GdkEventButton* ev, Divider* d)
 	d->dragging = false;
 
 	if (did_move && !children.empty()) {
-		children.front().w->queue_resize ();
+		children.front()->w->queue_resize ();
 		did_move = false;
 	}
 
@@ -418,16 +424,16 @@ Pane::constrain_fract (Dividers::size_type div, float fract)
 	const float size = horizontal ? get_allocation().get_width() : get_allocation().get_height();
 
 	// TODO: optimize: cache in Pane::on_size_request
-	Gtk::Requisition prev_req(children.at (div).w->size_request ());
-	Gtk::Requisition next_req(children.at (div + 1).w->size_request ());
+	Gtk::Requisition prev_req(children.at (div)->w->size_request ());
+	Gtk::Requisition next_req(children.at (div + 1)->w->size_request ());
 	float prev = divider_width + (horizontal ? prev_req.width : prev_req.height);
 	float next = divider_width + (horizontal ? next_req.width : next_req.height);
 
-	if (children.at (div).minsize) {
-		prev = children.at (div).minsize;
+	if (children.at (div)->minsize) {
+		prev = children.at (div)->minsize;
 	}
-	if (children.at (div + 1).minsize) {
-		next = children.at (div + 1).minsize;
+	if (children.at (div + 1)->minsize) {
+		next = children.at (div + 1)->minsize;
 	}
 
 	if (size * fract < prev) {
@@ -598,7 +604,7 @@ Pane::forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer c
 	for (Children::iterator c = children.begin(); c != children.end(); ) {
 		Children::iterator next = c;
 		++next;
-		callback (c->w->gobj(), callback_data);
+		callback ((*c)->w->gobj(), callback_data);
 		c = next;
 	}
 
