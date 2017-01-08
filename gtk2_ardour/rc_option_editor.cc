@@ -2304,7 +2304,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	bo = new BoolOption (
 		     "name-new-markers",
-		     _("Prompt for a new marker name"),
+		     _("Prompt for new marker names"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
 		);
