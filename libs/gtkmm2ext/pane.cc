@@ -236,133 +236,133 @@ Pane::on_size_allocate (Gtk::Allocation& alloc)
 void
 Pane::reallocate (Gtk::Allocation const & alloc)
 {
-        int remaining;
-        int xpos = alloc.get_x();
-        int ypos = alloc.get_y();
-        float fract;
+	int remaining;
+	int xpos = alloc.get_x();
+	int ypos = alloc.get_y();
+	float fract;
 
-        if (children.empty()) {
-	        return;
-        }
+	if (children.empty()) {
+		return;
+	}
 
-        if (children.size() == 1) {
-	        /* only child gets the full allocation */
-					if (children.front()->w->is_visible ()) {
-						children.front()->w->size_allocate (alloc);
-					}
-	        return;
-        }
+	if (children.size() == 1) {
+		/* only child gets the full allocation */
+		if (children.front()->w->is_visible ()) {
+			children.front()->w->size_allocate (alloc);
+		}
+		return;
+	}
 
-        if (horizontal) {
-	        remaining = alloc.get_width ();
-        } else {
-	        remaining = alloc.get_height ();
-        }
+	if (horizontal) {
+		remaining = alloc.get_width ();
+	} else {
+		remaining = alloc.get_height ();
+	}
 
-        Children::iterator child;
-        Children::iterator next;
-        Dividers::iterator div;
+	Children::iterator child;
+	Children::iterator next;
+	Dividers::iterator div;
 
-        child = children.begin();
+	child = children.begin();
 
-        /* skip initial hidden children */
+	/* skip initial hidden children */
 
-        while (child != children.end()) {
-	        if ((*child)->w->is_visible()) {
-		        break;
-	        }
-	        ++child;
-        }
+	while (child != children.end()) {
+		if ((*child)->w->is_visible()) {
+			break;
+		}
+		++child;
+	}
 
-        for (div = dividers.begin(); child != children.end(); ) {
+	for (div = dividers.begin(); child != children.end(); ) {
 
-	        Gtk::Allocation child_alloc;
+		Gtk::Allocation child_alloc;
 
-	        next = child;
+		next = child;
 
-	        /* Move on to next *visible* child */
+		/* Move on to next *visible* child */
 
-	        while (++next != children.end()) {
-		        if ((*next)->w->is_visible()) {
-			        break;
-		        }
-	        }
+		while (++next != children.end()) {
+			if ((*next)->w->is_visible()) {
+				break;
+			}
+		}
 
-	        child_alloc.set_x (xpos);
-	        child_alloc.set_y (ypos);
+		child_alloc.set_x (xpos);
+		child_alloc.set_y (ypos);
 
-	        if (next == children.end()) {
-		        /* last child gets all the remaining space */
-		        fract = 1.0;
-	        } else {
-		        /* child gets the fraction of the remaining space given by the divider that follows it */
-		        fract = (*div)->fract;
-	        }
+		if (next == children.end()) {
+			/* last child gets all the remaining space */
+			fract = 1.0;
+		} else {
+			/* child gets the fraction of the remaining space given by the divider that follows it */
+			fract = (*div)->fract;
+		}
 
-	        Gtk::Requisition cr;
-	        (*child)->w->size_request (cr);
+		Gtk::Requisition cr;
+		(*child)->w->size_request (cr);
 
-	        if (horizontal) {
-		        child_alloc.set_width ((gint) floor (remaining * fract));
-		        child_alloc.set_height (alloc.get_height());
-		        remaining = max (0, (remaining - child_alloc.get_width()));
-		        xpos += child_alloc.get_width();
-	        } else {
-		        child_alloc.set_width (alloc.get_width());
-		        child_alloc.set_height ((gint) floor (remaining * fract));
-		        remaining = max (0, (remaining - child_alloc.get_height()));
-		        ypos += child_alloc.get_height ();
-	        }
+		if (horizontal) {
+			child_alloc.set_width ((gint) floor (remaining * fract));
+			child_alloc.set_height (alloc.get_height());
+			remaining = max (0, (remaining - child_alloc.get_width()));
+			xpos += child_alloc.get_width();
+		} else {
+			child_alloc.set_width (alloc.get_width());
+			child_alloc.set_height ((gint) floor (remaining * fract));
+			remaining = max (0, (remaining - child_alloc.get_height()));
+			ypos += child_alloc.get_height ();
+		}
 
-	        if ((*child)->minsize) {
-		        if (horizontal) {
-			        child_alloc.set_width (max (child_alloc.get_width(), (*child)->minsize));
-		        } else {
-			        child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
-		        }
-	        }
+		if ((*child)->minsize) {
+			if (horizontal) {
+				child_alloc.set_width (max (child_alloc.get_width(), (*child)->minsize));
+			} else {
+				child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
+			}
+		}
 
-					if ((*child)->w->is_visible ()) {
-						(*child)->w->size_allocate (child_alloc);
-					}
+		if ((*child)->w->is_visible ()) {
+			(*child)->w->size_allocate (child_alloc);
+		}
 
-	        if (next == children.end()) {
-		        /* done, no more children, no need for a divider */
-		        break;
-	        }
+		if (next == children.end()) {
+			/* done, no more children, no need for a divider */
+			break;
+		}
 
-	        child = next;
+		child = next;
 
-	        /* add a divider between children */
+		/* add a divider between children */
 
-	        Gtk::Allocation divider_allocation;
+		Gtk::Allocation divider_allocation;
 
-	        divider_allocation.set_x (xpos);
-	        divider_allocation.set_y (ypos);
+		divider_allocation.set_x (xpos);
+		divider_allocation.set_y (ypos);
 
-	        if (horizontal) {
-		        divider_allocation.set_width (divider_width);
-		        divider_allocation.set_height (alloc.get_height());
-		        remaining = max (0, remaining - divider_width);
-		        xpos += divider_width;
-	        } else {
-		        divider_allocation.set_width (alloc.get_width());
-		        divider_allocation.set_height (divider_width);
-		        remaining = max (0, remaining - divider_width);
-		        ypos += divider_width;
-	        }
+		if (horizontal) {
+			divider_allocation.set_width (divider_width);
+			divider_allocation.set_height (alloc.get_height());
+			remaining = max (0, remaining - divider_width);
+			xpos += divider_width;
+		} else {
+			divider_allocation.set_width (alloc.get_width());
+			divider_allocation.set_height (divider_width);
+			remaining = max (0, remaining - divider_width);
+			ypos += divider_width;
+		}
 
-	        (*div)->size_allocate (divider_allocation);
-	        (*div)->show ();
-	        ++div;
-        }
+		(*div)->size_allocate (divider_allocation);
+		(*div)->show ();
+		++div;
+	}
 
-        /* hide all remaining dividers */
+	/* hide all remaining dividers */
 
-        while (div != dividers.end()) {
-	        (*div)->hide ();
-	        ++div;
-        }
+	while (div != dividers.end()) {
+		(*div)->hide ();
+		++div;
+	}
 }
 
 bool
@@ -383,9 +383,9 @@ Pane::on_expose_event (GdkEventExpose* ev)
 			}
 			++div;
 		}
-        }
+	}
 
-        return true;
+	return true;
 }
 
 bool
@@ -643,15 +643,15 @@ bool
 Pane::Divider::on_expose_event (GdkEventExpose* ev)
 {
 	Gdk::Color c = (dragging ? get_style()->get_fg (Gtk::STATE_ACTIVE) :
-	                get_style()->get_fg (get_state()));
+			get_style()->get_fg (get_state()));
 
 	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-        draw_context->clip_preserve ();
-        draw_context->set_source_rgba (c.get_red_p(), c.get_green_p(), c.get_blue_p(), 1.0);
-        draw_context->fill ();
+	draw_context->clip_preserve ();
+	draw_context->set_source_rgba (c.get_red_p(), c.get_green_p(), c.get_blue_p(), 1.0);
+	draw_context->fill ();
 
-        return true;
+	return true;
 }
 
 bool
