@@ -790,7 +790,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 
 	_line = line;
 
-	line->set_height (height);
+	line->set_height (height - 2.5);
 
 	/* pick up the current state */
 	automation_state_changed ();
