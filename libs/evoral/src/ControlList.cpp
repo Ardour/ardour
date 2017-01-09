@@ -492,6 +492,11 @@ ControlList::editor_add (double when, double value, bool with_guard)
 		maybe_add_insert_guard (when);
 	}
 
+	/* clamp new value to allowed range */
+
+	value = max (_min_yval, value);
+	value = min (_max_yval, value);
+
 	iterator result;
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
 	result = _events.insert (i, new ControlEvent (when, value));
