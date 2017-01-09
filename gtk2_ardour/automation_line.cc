@@ -1198,6 +1198,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 	/* TODO: This should be more generic (use ParameterDescriptor)
 	 * or better yet:  Controllable -> set_interface();
 	 */
+
 	if (   alist->parameter().type() == GainAutomation
 	    || alist->parameter().type() == EnvelopeAutomation
 	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
@@ -1214,8 +1215,12 @@ AutomationLine::view_to_model_coord_y (double& y) const
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
 	           alist->parameter().type() == PanElevationAutomation) {
 		y = 1.0 - y;
+		y = max ((double) _desc.lower, y);
+		y = min ((double) _desc.upper, y);
 	} else if (alist->parameter().type() == PanWidthAutomation) {
 		y = 2.0 * y - 1.0;
+		y = max ((double) _desc.lower, y);
+		y = min ((double) _desc.upper, y);
 	} else {
 		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
 		if (_desc.integer_step) {
@@ -1223,6 +1228,8 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		} else if (_desc.toggled) {
 			y = (y > 0.5) ? 1.0 : 0.0;
 		}
+		y = max ((double) _desc.lower, y);
+		y = min ((double) _desc.upper, y);
 	}
 }
 
