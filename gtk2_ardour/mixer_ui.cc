@@ -142,6 +142,7 @@ Mixer_UI::Mixer_UI ()
 	b->pack_start (*_group_tabs, PACK_SHRINK);
 	b->pack_start (strip_packer);
 	b->show_all ();
+	b->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 
 	scroller.add (*b);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
@@ -400,7 +401,6 @@ Mixer_UI::use_own_window (bool and_fill_it)
 	if (win && new_window) {
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
-		win->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
