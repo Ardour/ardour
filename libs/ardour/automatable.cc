@@ -280,7 +280,7 @@ Automatable::get_automation_xml_state ()
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
-		if (l && !l->empty()) {
+		if (l) {
 			node->add_child_nocopy (l->get_state ());
 		}
 	}
