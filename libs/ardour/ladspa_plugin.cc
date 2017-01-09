@@ -497,10 +497,11 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 			desc.upper = prh.UpperBound;
 		}
 	} else {
-		desc.max_unbound = true;
 		if (LADSPA_IS_HINT_TOGGLED (prh.HintDescriptor)) {
+			desc.max_unbound = false;
 			desc.upper = 1;
 		} else {
+			desc.max_unbound = true;
 			desc.upper = 4; /* completely arbitrary */
 		}
 	}
