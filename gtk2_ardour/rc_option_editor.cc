@@ -3985,6 +3985,8 @@ RCOptionEditor::use_own_window (bool and_fill_it)
 	if (win && new_window) {
 		win->set_name ("PreferencesWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Preferences"), this);
+		win->resize (1, 1);
+		win->set_resizable (false);
 	}
 
 	return win;
