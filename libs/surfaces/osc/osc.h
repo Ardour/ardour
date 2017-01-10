@@ -37,6 +37,7 @@
 #include "pbd/abstract_ui.h"
 
 #include "ardour/types.h"
+#include "ardour/send.h"
 #include "control_protocol/control_protocol.h"
 
 #include "pbd/i18n.h"
@@ -45,6 +46,7 @@ class OSCControllable;
 class OSCRouteObserver;
 class OSCGlobalObserver;
 class OSCSelectObserver;
+class OSCCueObserver;
 
 namespace ARDOUR {
 class Session;
@@ -95,8 +97,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types);
-	// cue
-	//Sorted cue_get_sorted_stripables(boost::shared_ptr<Route> aux);
 
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
@@ -112,6 +112,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		bool expand_enable;			// use expand instead of select
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
 		Sorted strips;				// list of stripables for this surface
+		bool cue;					// is this a cue surface
+		uint32_t aux;				// aux index for this cue surface
+		Sorted sends;				// list of sends for cue aux
 	};
 		/*
 		 * feedback bits:
@@ -214,6 +217,23 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void transport_frame (lo_message msg);
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
+
+	// cue
+	Sorted cue_get_sorted_stripables(boost::shared_ptr<ARDOUR::Stripable> aux, uint32_t id, lo_message msg);
+	int cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int cue_set (uint32_t aux, lo_message msg);
+	int _cue_set (uint32_t aux, lo_address addr);
+	int cue_next (lo_message msg);
+	int cue_previous (lo_message msg);
+	int cue_send_fader (uint32_t id, float position, lo_message msg);
+	int cue_send_enable (uint32_t id, float state, lo_message msg);
+	int cue_aux_fader (float position, lo_message msg);
+	int cue_aux_mute (float state, lo_message msg);
+	void cue_set_aux (uint32_t aux, lo_message msg);
+	int cue_float_message (std::string, float value, lo_address addr);
+	int text_message (std::string path, std::string val, lo_address addr);
+	boost::shared_ptr<ARDOUR::Send> cue_get_send (uint32_t id, lo_address addr);
+	// end cue
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \
@@ -575,6 +595,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool periodic (void);
 	sigc::connection periodic_connection;
 	PBD::ScopedConnectionList session_connections;
+	PBD::ScopedConnectionList cueobserver_connections;
 
 	int route_send_fail (std::string path, uint32_t ssid, float val, lo_address addr);
 	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
@@ -586,6 +607,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	typedef std::list<OSCGlobalObserver*> GlobalObservers;
 	GlobalObservers global_observers;
+
+	typedef std::list<OSCCueObserver*> CueObservers;
+	CueObservers cue_observers;
 
 	void debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc);
 

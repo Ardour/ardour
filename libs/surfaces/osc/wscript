@@ -20,6 +20,7 @@ def build(bld):
             osc_route_observer.cc
             osc_select_observer.cc
             osc_global_observer.cc
+            osc_cue_observer.cc
             interface.cc
             osc_gui.cc
     '''
