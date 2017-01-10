@@ -210,6 +210,10 @@ MixerStrip::init ()
 
 	solo_iso_table.set_homogeneous (true);
 	solo_iso_table.set_spacings (2);
+	if (!ARDOUR::Profile->get_trx()) {
+		solo_iso_table.attach (*solo_isolated_led, 0, 1, 0, 1);
+		solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
+	}
 	solo_iso_table.show ();
 
 	rec_mon_table.set_homogeneous (true);
@@ -541,18 +545,13 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_solo_table.remove (*mute_button);
 	}
 
-	if (solo_safe_led->get_parent()) {
-		solo_iso_table.remove (*solo_safe_led);
-	}
-
-	if (solo_isolated_led->get_parent()) {
-		solo_iso_table.remove (*solo_isolated_led);
-	}
-
 	if (route()->is_master()) {
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
+		if (solo_iso_table.get_parent()) {
+			solo_iso_table.get_parent()->remove(solo_iso_table);
+		}
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -573,10 +572,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		rec_mon_table.show ();
-		if (!ARDOUR::Profile->get_trx()) {
-			solo_iso_table.attach (*solo_isolated_led, 0, 1, 0, 1);
-			solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
-		}
 	}
 
 	if (_mixer_owned && route()->is_master() ) {
