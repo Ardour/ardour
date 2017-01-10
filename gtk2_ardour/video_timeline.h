@@ -107,6 +107,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 
 	std::string _xjadeo_bin;
 	void find_xjadeo ();
+	void find_harvid ();
 
 
 	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-samples - video-file */
@@ -124,7 +125,9 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	std::string server_docroot;
 
 	void xjadeo_readversion (std::string d, size_t s);
+	void harvid_readversion (std::string d, size_t s);
 	std::string xjadeo_version;
+	std::string harvid_version;
 
 	typedef std::list<VideoImageFrame*> VideoFrames;
 	VideoFrames video_frames;

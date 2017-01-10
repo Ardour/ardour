@@ -174,6 +174,7 @@ typedef uint64_t microseconds_t;
 #include "time_info_box.h"
 #include "timers.h"
 #include "utils.h"
+#include "utils_videotl.h"
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
@@ -4379,15 +4380,18 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 
 		std::string icsd_exec = video_server_dialog->get_exec_path();
 		std::string icsd_docroot = video_server_dialog->get_docroot();
-		if (icsd_docroot.empty()) {
 #ifndef PLATFORM_WINDOWS
-			icsd_docroot = X_("/");
-#else
-			icsd_docroot = X_("C:\\");
-#endif
+		if (icsd_docroot.empty()) {
+			icsd_docroot = VideoUtils::video_get_docroot (Config);
 		}
+#endif
 
 		GStatBuf sb;
+#ifdef PLATFORM_WINDOWS
+		if (VideoUtils::harvid_version >= 0x000802 && icsd_docroot.empty()) {
+			/* OK, allow all drive letters */
+		} else
+#endif
 		if (g_lstat (icsd_docroot.c_str(), &sb) != 0 || !S_ISDIR(sb.st_mode)) {
 			warning << _("Specified docroot is not an existing directory.") << endmsg;
 			continue;

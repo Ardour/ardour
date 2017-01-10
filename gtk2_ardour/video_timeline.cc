@@ -68,6 +68,7 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	vmonitor=0;
 	reopen_vmonitor=false;
 	find_xjadeo();
+	find_harvid();
 
 	VtlUpdate.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 	GuiUpdate.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
@@ -776,6 +777,61 @@ VideoTimeLine::find_xjadeo () {
 					"Video-monitor 'xjadeo' is too old. "
 					"Please install xjadeo version 0.7.7 or later. http://xjadeo.sf.net/"
 					) << endmsg;
+		}
+	}
+}
+
+void
+VideoTimeLine::harvid_readversion (std::string d, size_t /* s */) {
+	harvid_version += d;
+}
+
+void
+VideoTimeLine::find_harvid () {
+	/* This is mainly for the benefit of the windows version:
+	 * harvid >= 0.8.2 allows an empty docroot and ardour can
+	 * pass the drive-letter along.
+	 *
+	 * It is a chicken/egg w.r.t. the video-server dialog
+	 * but needed for default preferences and initial settings.
+	 */
+	std::string harvid_bin;
+	if (VideoUtils::harvid_version != 0x0) {
+		return;
+	}
+	if (!ArdourVideoToolPaths::harvid_exe(harvid_bin)) {
+		return;
+	}
+	if (harvid_bin.empty ()) {
+		return;
+	}
+	ARDOUR::SystemExec version_check(harvid_bin, X_("--version"));
+	harvid_version = "";
+	version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
+	version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));
+	if (version_check.start(2)) {
+		return;
+	}
+
+#ifdef PLATFORM_WINDOWS
+	version_check.wait (); // 40ms timeout
+#else
+	version_check.wait (WNOHANG);
+#endif
+
+	int timeout = 300;
+	while (harvid_version.empty() && --timeout) {
+		Glib::usleep(10000);
+	}
+
+	size_t vo = harvid_version.find("harvid v");
+	if (vo != string::npos) {
+		int v_major, v_minor, v_micro;
+		if(sscanf(harvid_version.substr(vo + 8, string::npos).c_str(),"%d.%d.%d",
+					&v_major, &v_minor, &v_micro) == 3)
+		{
+			VideoUtils::harvid_version = (v_major << 16) | (v_minor << 8) | v_micro;
+			info << "harvid version: "<< hex << VideoUtils::harvid_version << endmsg;
 		}
 	}
 }

@@ -47,6 +47,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace VideoUtils;
 
+unsigned int VideoUtils::harvid_version = 0x0;
+
 bool
 VideoUtils::confirm_video_outfn (Gtk::Window& parent, std::string outfn, std::string docroot)
 {
@@ -111,7 +113,11 @@ VideoUtils::video_get_docroot (ARDOUR::RCConfiguration* config)
 #ifndef PLATFORM_WINDOWS
 	return X_("/");
 #else
-	return X_("C:\\");
+	if (harvid_version >= 0x000802) { // 0.8.2
+		return X_("");
+	} else {
+		return X_("C:\\");
+	}
 #endif
 }
 

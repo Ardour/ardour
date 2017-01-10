@@ -34,6 +34,8 @@
 
 namespace VideoUtils {
 
+extern unsigned int harvid_version;
+
 bool confirm_video_outfn (Gtk::Window& parent, std::string, std::string docroot="");
 std::string video_dest_dir (const std::string, const std::string);
 std::string video_dest_file (const std::string, const std::string);

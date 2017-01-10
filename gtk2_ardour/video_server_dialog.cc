@@ -101,6 +101,11 @@ VideoServerDialog::VideoServerDialog (Session* s)
 			<< endmsg;
 	}
 
+#ifdef PLATFORM_WINDOWS
+	if (VideoUtils::harvid_version >= 0x000802) {
+		/* empty docroot -> all drive letters */
+	} else
+#endif
 	if (docroot_entry.get_text().empty()) {
 	  std::string docroot =  Glib::path_get_dirname(_session->session_directory().root_path());
 	  if ((docroot.empty() || docroot.at(docroot.length()-1) != '/')) { docroot += "/"; }
