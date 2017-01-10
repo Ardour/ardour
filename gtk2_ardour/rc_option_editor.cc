@@ -2601,7 +2601,7 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input in case the transport is stopped."),
+			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input if the transport is stopped."),
 					PROGRAM_NAME));
 
 	if (!Profile->get_mixbus()) {
