@@ -549,9 +549,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
-		if (solo_iso_table.get_parent()) {
-			solo_iso_table.get_parent()->remove(solo_iso_table);
-		}
+		solo_iso_table.set_sensitive(false);
+		control_slave_ui.set_sensitive(false);
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -572,6 +571,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		rec_mon_table.show ();
+		solo_iso_table.set_sensitive(true);
+		control_slave_ui.set_sensitive(true);
 	}
 
 	if (_mixer_owned && route()->is_master() ) {
