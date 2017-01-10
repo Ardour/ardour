@@ -33,7 +33,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boost::shared_ptr<ARDOUR::Stripable>>& snds, lo_address a)
+OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boost::shared_ptr<ARDOUR::Stripable> >& snds, lo_address a)
 	: sends (snds)
 	, _strip (s)
 	, tick_enable (false)

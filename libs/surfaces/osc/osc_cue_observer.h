@@ -33,7 +33,7 @@ class OSCCueObserver
 {
 
   public:
-	OSCCueObserver (boost::shared_ptr<ARDOUR::Stripable>, std::vector<boost::shared_ptr<ARDOUR::Stripable>>& sends, lo_address addr);
+	OSCCueObserver (boost::shared_ptr<ARDOUR::Stripable>, std::vector<boost::shared_ptr<ARDOUR::Stripable> >& sends, lo_address addr);
 	~OSCCueObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
