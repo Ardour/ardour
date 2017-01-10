@@ -5202,32 +5202,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				}
 			}
 
-			//now find any tracks that are GROUPED with the tracks we selected
-			TrackViewList grouped_add = new_selection;
-			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
-				RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
-				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() && n->route()->route_group()->enabled_property (ARDOUR::Properties::group_select.property_id) ) {
-					for (TrackViewList::const_iterator j = all_tracks.begin(); j != all_tracks.end(); ++j) {
-						RouteTimeAxisView *check = dynamic_cast<RouteTimeAxisView *>(*j);
-						if ( check && (n != check) && (check->route()->route_group() == n->route()->route_group()) )
-							grouped_add.push_back (*j);
-					}
-				}
-			}
-
-			//now compare our list with the current selection, and add or remove as necessary
+			//now compare our list with the current selection, and add as necessary
 			//( NOTE: most mouse moves don't change the selection so we can't just SET it for every mouse move; it gets clunky )
 			TrackViewList tracks_to_add;
 			TrackViewList tracks_to_remove;
-			for (TrackViewList::const_iterator i = grouped_add.begin(); i != grouped_add.end(); ++i)
+			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) 
 				if ( !_editor->selection->tracks.contains ( *i ) )
 					tracks_to_add.push_back ( *i );
-			for (TrackViewList::const_iterator i = _editor->selection->tracks.begin(); i != _editor->selection->tracks.end(); ++i)
-				if ( !grouped_add.contains ( *i ) )
-					tracks_to_remove.push_back ( *i );
 			_editor->selection->add(tracks_to_add);
-			_editor->selection->remove(tracks_to_remove);
-
 		}
 	}
 	break;
