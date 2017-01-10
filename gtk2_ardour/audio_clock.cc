@@ -927,7 +927,7 @@ AudioClock::set_slave_info ()
 				TimecodeSlave* tcslave;
 				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-					_left_btn.set_text (string_compose ("%1 <span face=\"monospace\" foreground=\"%3\">%2</span>",
+					_left_btn.set_text (string_compose ("%1<span face=\"monospace\" foreground=\"%3\">%2</span>",
 								sync_source_to_string(sync_src, true)[0],
 								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position (),
 								matching ? "#66ff66" : "#ff3333"
