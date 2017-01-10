@@ -77,7 +77,7 @@ EditorRegions::EditorRegions (Editor* e)
 	, _show_automatic_regions (true)
 	, ignore_region_list_selection_change (false)
 	, ignore_selected_region_change (false)
- 	, _no_redisplay (false)
+	, _no_redisplay (false)
 	, _sort_type ((Editing::RegionListSortType) 0)
 	, expanded (false)
 {
@@ -96,13 +96,10 @@ EditorRegions::EditorRegions (Editor* e)
 	_model->set_sort_column (0, SORT_ASCENDING);
 
 	/* column widths */
-	int bbt_width, sync_width, check_width, height;
+	int bbt_width, check_width, height;
 
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
 	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
-
-	layout = _display.create_pango_layout (X_("Start "));
-	Gtkmm2ext::get_pixel_size (layout, sync_width, height);
 
 	check_width = 20;
 
@@ -119,7 +116,7 @@ EditorRegions::EditorRegions (Editor* e)
 	col_length->set_fixed_width (bbt_width);
 	col_length->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_sync = manage (new TreeViewColumn ("", _columns.sync));
-	col_sync->set_fixed_width (sync_width);
+	col_sync->set_fixed_width (bbt_width);
 	col_sync->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_fadein = manage (new TreeViewColumn ("", _columns.fadein));
 	col_fadein->set_fixed_width (bbt_width);
@@ -522,6 +519,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	our_interests.add (ARDOUR::Properties::position);
 	our_interests.add (ARDOUR::Properties::length);
 	our_interests.add (ARDOUR::Properties::start);
+	our_interests.add (ARDOUR::Properties::sync_position);
 	our_interests.add (ARDOUR::Properties::locked);
 	our_interests.add (ARDOUR::Properties::position_lock_style);
 	our_interests.add (ARDOUR::Properties::muted);
@@ -800,7 +798,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	if (all || what_changed.contains (Properties::position)) {
 		populate_row_position (region, row, used);
 	}
-	if (all || what_changed.contains (Properties::start)) {
+	if (all || what_changed.contains (Properties::start) || what_changed.contains (Properties::sync_position)) {
 		populate_row_sync (region, row, used);
 	}
 	if (all || what_changed.contains (Properties::fade_in)) {
@@ -1322,7 +1320,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
-			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, 
+			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
 			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
