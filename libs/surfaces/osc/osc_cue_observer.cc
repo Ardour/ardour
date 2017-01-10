@@ -149,9 +149,9 @@ OSCCueObserver::send_end ()
 {
 	send_connections.drop_connections ();
 	for (uint32_t i = 1; i <= sends.size(); i++) {
-		clear_strip (string_compose ("/select/send/fader/%1", i), 0);
-		clear_strip (string_compose ("/select/send/enable/%1", i), 0);
-		text_with_id (string_compose("/cue/send/name/%1", i), i, " ");
+		clear_strip (string_compose ("/cue/send/fader/%1", i), 0);
+		clear_strip (string_compose ("/cue/send/enable/%1", i), 0);
+		text_with_id ("/cue/send/name", i, " ");
 	}
 }
 
