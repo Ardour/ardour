@@ -2228,18 +2228,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("General"), new OptionEditorHeading (_("Tempo")));
 
-	BoolOption* tsf;
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		"allow-non-quarter-pulse",
 		_("Allow non quarter-note pulse"),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
 		);
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
 							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
 							    PROGRAM_NAME));
-	add_option (_("General"), tsf);
+	add_option (_("General"), bo);
 
 	if (!ARDOUR::Profile->get_mixbus()) {
 		add_option (_("General"), new OptionEditorHeading (_("GUI Lock")));
@@ -2594,13 +2593,16 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Signal Flow"), mm);
 
-	add_option (_("Signal Flow"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "tape-machine-mode",
 		     _("Tape machine mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
-		     ));
+		     );
+	add_option (_("Signal Flow"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input in case the transport is stopped."),
+					PROGRAM_NAME));
 
 	if (!Profile->get_mixbus()) {
 
@@ -2947,46 +2949,48 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), new OptionEditorHeading (_("General")));
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
 							      "when it reaches the current session end marker\n\n"
 							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
 							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
 		     );
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> master record will remain engaged when the transport transitions to stop.\n<b>When disabled</b> master record will be disabled when the transport transitions to stop."));
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take"));
-	add_option (_("Transport"), tsf);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take."));
+	add_option (_("Transport"), bo);
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "quieten_at_speed",
 		     _("12dB gain reduction during fast-forward and fast-rewind"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> rhis will reduce the unpleasant increase in perceived volume "
 				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
 	ComboOption<float>* psc = new ComboOption<float> (
 		     "preroll-seconds",
@@ -3008,49 +3012,49 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "loop-is-mode",
 		     _("Play loop is a transport mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_is_mode)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "seamless-loop",
 		     _("Do seamless looping (not possible when slaved to MTC, LTC etc)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
 							      "preventing any need to do a transport locate at the end of the loop\n\n"
 							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
 							      "which will often cause a small click or delay"), PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) Handling")));
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
 							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
-	tsf = new BoolOption (
+	bo = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
 		     );
-	add_option (_("Transport"), tsf);
+	add_option (_("Transport"), bo);
 
 
 	/* SYNC */
