@@ -746,6 +746,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			flush_all_inserts ();
 		}
 
+		// rg: what is the logic behind this case?
+		// _requested_return_frame should be ignored when synced_to_engine/slaved.
+		// currently worked around in MTC_Slave by forcing _requested_return_frame to -1
+		// 2016-01-10
 		if ((auto_return_enabled || synced_to_engine() || _requested_return_frame >= 0) &&
 		    !(ptw & PostTransportLocate)) {
 

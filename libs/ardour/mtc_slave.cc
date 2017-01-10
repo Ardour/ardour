@@ -426,9 +426,10 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 						 now, timecode, mtc_frame, was_full, speedup_due_to_tc_mismatch));
 
 	if (was_full || outside_window (mtc_frame)) {
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2\n", was_full, outside_window (mtc_frame)));
-		session.request_locate (mtc_frame, false);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
+		session.set_requested_return_frame (-1);
 		session.request_transport_speed (0);
+		session.request_locate (mtc_frame, false);
 		update_mtc_status (MIDI::MTC_Stopped);
 		reset (false);
 		reset_window (mtc_frame);
@@ -491,7 +492,7 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 	/* XXX !!! thread safety ... called from MIDI I/O context
 	 * on locate (via ::update_mtc_time())
 	 */
-	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1\n", pthread_name()));
+	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1 MTC:%2\n", pthread_name(), mtc_frame));
 	return; // why was this fn needed anyway ? it just messes up things -> use reset.
 	busy_guard1++;
 
@@ -624,12 +625,13 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > labs(seekahead_distance())) {
 		speed = 0;
 		pos = last.position;
+		session.set_requested_return_frame (-1);
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
 		engine_dll_initstate = 0;
 		queue_reset (false);
-        ActiveChanged (false);
-		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 2 frames - reset pending\n");
+		ActiveChanged (false);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC not seen for 2 frames - reset pending, pos = %1\n", pos));
 		return false;
 	}
 
