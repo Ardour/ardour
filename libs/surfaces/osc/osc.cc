@@ -3948,10 +3948,11 @@ OSC::cue_aux_mute (float state, lo_message msg)
 	if (sur->cue) {
 		if (sur->aux) {
 			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));
-
-			if (s->mute_control()) {
-				s->mute_control()->set_value (state ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-				return 0;
+			if (s) {
+				if (s->mute_control()) {
+					s->mute_control()->set_value (state ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+					return 0;
+				}
 			}
 		}
 	}
