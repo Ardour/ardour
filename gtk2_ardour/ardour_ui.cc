@@ -4423,6 +4423,11 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		argp[8] = 0;
 		stop_video_server();
 
+#ifdef PLATFORM_WINDOWS
+		if (VideoUtils::harvid_version >= 0x000802 && icsd_docroot.empty()) {
+			/* OK, allow all drive letters */
+		} else
+#endif
 		if (icsd_docroot == X_("/") || icsd_docroot == X_("C:\\")) {
 			Config->set_video_advanced_setup(false);
 		} else {

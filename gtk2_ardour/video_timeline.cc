@@ -59,8 +59,6 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	video_offset_lock = false;
 	video_aspect_ratio = 4.0/3.0;
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
-	video_server_url = video_get_server_url(Config);
-	server_docroot   = video_get_docroot(Config);
 	video_filename = "";
 	local_file = true;
 	video_file_fps = 25.0;
@@ -69,6 +67,8 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	reopen_vmonitor=false;
 	find_xjadeo();
 	find_harvid();
+	video_server_url = video_get_server_url(Config);
+	server_docroot   = video_get_docroot(Config);
 
 	VtlUpdate.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 	GuiUpdate.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());

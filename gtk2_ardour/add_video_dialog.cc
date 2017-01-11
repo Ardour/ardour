@@ -193,8 +193,11 @@ AddVideoDialog::AddVideoDialog (Session* s)
 
 	/* xjadeo checkbox */
 	if (ARDOUR_UI::instance()->video_timeline->found_xjadeo()
+#ifndef PLATFORM_WINDOWS
 			/* TODO xjadeo setup w/ xjremote */
-			&& video_get_docroot(Config).size() > 0) {
+			&& video_get_docroot(Config).size() > 0
+#endif
+		 ) {
 		xjadeo_checkbox.set_active(true);  /* set in ardour_ui.cpp ?! */
 	} else {
 		printf("xjadeo was not found or video-server docroot is unset (remote video-server)\n");
@@ -323,8 +326,14 @@ AddVideoDialog::file_name (bool &local_file)
 		std::string video_server_url = video_get_server_url(Config);
 
 		/* check if video server is running locally */
-		if (video_get_docroot(Config).size() > 0 &&
-			(0 == video_server_url.compare (0, 16, "http://127.0.0.1") || 0 == video_server_url.compare (0, 16, "http://localhost"))
+		if (
+#ifdef PLATFORM_WINDOWS
+				(video_get_docroot(Config).size() > 0 || !show_advanced)
+#else
+				video_get_docroot(Config).size() > 0
+#endif
+				&&
+				(0 == video_server_url.compare (0, 16, "http://127.0.0.1") || 0 == video_server_url.compare (0, 16, "http://localhost"))
 		   )
 		{
 			/* check if the file can be accessed */
