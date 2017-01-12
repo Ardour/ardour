@@ -2376,6 +2376,14 @@ Editor::jump_backward_to_mark ()
 
 	framepos_t pos = _session->locations()->first_mark_before (playhead_cursor->current_frame());
 
+	//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
+	if ( _session->transport_rolling() ) {
+		if ( (playhead_cursor->current_frame() - pos) < _session->frame_rate()/2 ) {
+			framepos_t prior = _session->locations()->first_mark_before ( pos );
+			pos = prior;
+		}
+	}
+
 	if (pos < 0) {
 		return;
 	}
