@@ -1047,6 +1047,17 @@ Bindings::is_bound (KeyboardKey const& kb, Operation op) const
 	return km.find(kb) != km.end();
 }
 
+std::string
+Bindings::bound_name (KeyboardKey const& kb, Operation op) const
+{
+	const KeybindingMap& km = get_keymap(op);
+	KeybindingMap::const_iterator b = km.find(kb);
+	if (b == km.end()) {
+		return "";
+	}
+	return b->second.action_name;
+}
+
 bool
 Bindings::is_registered (Operation op, std::string const& action_name) const
 {

@@ -178,6 +178,7 @@ class LIBGTKMM2EXT_API Bindings {
 	bool activate (MouseButton, Operation);
 
 	bool is_bound (KeyboardKey const&, Operation) const;
+	std::string bound_name (KeyboardKey const&, Operation) const;
 	bool is_registered (Operation op, std::string const& action_name) const;
 
 	KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
