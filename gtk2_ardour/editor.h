@@ -655,6 +655,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 
+	void jump_forward_to_mark ();
+	void jump_backward_to_mark ();
+
 	uint32_t location_marker_color;
 	uint32_t location_range_color;
 	uint32_t location_loop_color;
@@ -1337,8 +1340,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* import & embed */
 
 	void add_external_audio_action (Editing::ImportMode);
-	void external_audio_dialog ();
-	void session_import_dialog ();
 
 	int  check_whether_and_how_to_import(std::string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<std::string>& paths);
@@ -1401,6 +1402,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	AnalysisWindow* analysis_window;
 
+	/* import & embed */
+	void external_audio_dialog ();
+	void session_import_dialog ();
+
 	/* import specific info */
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
@@ -1439,8 +1444,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void clear_locations ();
 	void unhide_markers ();
 	void unhide_ranges ();
-	void jump_forward_to_mark ();
-	void jump_backward_to_mark ();
 	void cursor_align (bool playhead_to_edit);
 	void toggle_skip_playback ();
 

@@ -192,6 +192,10 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
 
+	/* import dialogs -> ardour-ui ?! */
+	virtual void external_audio_dialog () = 0;
+	virtual void session_import_dialog () = 0;
+
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
 
@@ -217,6 +221,9 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void remove_tracks () = 0;
 	virtual void set_loop_range (framepos_t start, framepos_t end, std::string cmd) = 0;
 	virtual void set_punch_range (framepos_t start, framepos_t end, std::string cmd) = 0;
+
+	virtual void jump_forward_to_mark () = 0;
+	virtual void jump_backward_to_mark () = 0;
 
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
@@ -256,9 +263,9 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 
-        virtual void set_stationary_playhead (bool yn) = 0;
-        virtual void toggle_stationary_playhead () = 0;
-        virtual bool stationary_playhead() const = 0;
+	virtual void set_stationary_playhead (bool yn) = 0;
+	virtual void toggle_stationary_playhead () = 0;
+	virtual bool stationary_playhead() const = 0;
 
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.

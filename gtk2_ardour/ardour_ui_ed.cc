@@ -341,6 +341,19 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
+	act = global_actions.register_action (common_actions,
+			"jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_backward_to_mark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions,
+			"jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions,
+			X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*editor, &PublicEditor::external_audio_dialog));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	Glib::RefPtr<ActionGroup> transport_actions = global_actions.create_action_group (X_("Transport"));
 
 	/* do-nothing action for the "transport" menu bar item */
