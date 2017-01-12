@@ -74,7 +74,7 @@ void bindings_collision_dialog (Gtk::Window& parent)
 }
 
 KeyEditor::KeyEditor ()
-	: ArdourWindow (_("Key Bindings"))
+	: ArdourWindow (_("Keyboard Shortcuts"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
 	, filter_entry (_("Search..."), true)
