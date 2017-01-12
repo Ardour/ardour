@@ -3728,7 +3728,11 @@ RCOptionEditor::RCOptionEditor ()
 
 	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
 
-	quirks_head->set_note (string_compose (_("These settings will only take effect after %1 is restarted."), PROGRAM_NAME));
+	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary\n\
+with each version of your OS, and the preferences that you've set in your OS.\n\n\
+You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
+These settings will only take effect after %1 is restarted.\n\
+	"), PROGRAM_NAME));
 
 	/* and now the theme manager */
 
@@ -3790,13 +3794,15 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Quirks"), quirks_head);
 
-	add_option (_("Appearance/Quirks"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "use-wm-visibility",
-		     _("Use Window Manager/Desktop visibility information"),
+		     _("Use visibility information provided by your Window Manager/Desktop"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("If you have trouble toggling between hidden Editor and Mixer windows, try changing this setting."));
+	add_option (_("Appearance/Quirks"), bo);
 
 #ifndef __APPLE__
 	bo = new BoolOption (
@@ -3807,7 +3813,7 @@ RCOptionEditor::RCOptionEditor ()
 			);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
-			add_option (_("Appearance/Quirks"), bo);
+	add_option (_("Appearance/Quirks"), bo);
 
 	bo = new BoolOption (
 			"transients-follow-front",
