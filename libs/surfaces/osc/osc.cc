@@ -1386,7 +1386,8 @@ OSC::get_surface (lo_address addr)
 	s.sel_obs = 0;
 	s.expand = 0;
 	s.expand_enable = false;
-	s.strips = get_sorted_stripables(s.strip_types);
+	s.cue = false;
+	s.strips = get_sorted_stripables(s.strip_types, s.cue);
 
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
@@ -1514,7 +1515,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		usleep ((uint32_t) 10);
 	}
 
-	s->strips = get_sorted_stripables(s->strip_types);
+	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 	s->nstrips = s->strips.size();
 
 	uint32_t b_size;
@@ -3667,7 +3668,7 @@ OSC::set_state (const XMLNode& node, int version)
 				s.sel_obs = 0;
 				s.expand = 0;
 				s.expand_enable = false;
-				s.strips = get_sorted_stripables(s.strip_types);
+				s.strips = get_sorted_stripables(s.strip_types, s.cue);
 				s.nstrips = s.strips.size();
 				_surface.push_back (s);
 			}
@@ -3699,7 +3700,7 @@ struct StripableByPresentationOrder
 };
 
 OSC::Sorted
-OSC::get_sorted_stripables(std::bitset<32> types)
+OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 {
 	Sorted sorted;
 
@@ -3712,7 +3713,7 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
 		boost::shared_ptr<Stripable> s = *it;
-		if ((!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
+		if ((!cue) && (!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 			// do nothing... skip it
 		} else {
 
@@ -3831,7 +3832,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	s->gainmode = 1;
 	s->cue = true;
 	s->aux = aux;
-	s->strips = get_sorted_stripables(s->strip_types);
+	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 
 	s->nstrips = s->strips.size();
 	// get rid of any old CueObsevers for this address
