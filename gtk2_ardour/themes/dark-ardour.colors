@@ -503,6 +503,7 @@
   <Modifiers>
     <Modifier name="audio bus base" modifier="= alpha:0.3"/>
     <Modifier name="audio track base" modifier="= alpha:0.3"/>
+    <Modifier name="automation line fill" modifier="= alpha:0.3"/>
     <Modifier name="automation track fill" modifier="= alpha:0.3"/>
     <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>

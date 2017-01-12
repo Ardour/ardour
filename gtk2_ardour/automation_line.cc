@@ -244,7 +244,10 @@ AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
 	line->set_outline_color (color);
-	line->set_fill_color ((color & 0xffff00) + 80); // XXX TODO configurable transparency
+
+	ArdourCanvas::SVAModifier mod = UIConfiguration::instance().modifier ("automation line fill");
+
+	line->set_fill_color ((color & 0xffffff00) + mod.a()*255);
 }
 
 void
