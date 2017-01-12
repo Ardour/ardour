@@ -62,10 +62,11 @@ using Gtkmm2ext::Bindings;
 
 sigc::signal<void> KeyEditor::UpdateBindings;
 
-void bindings_collision_dialog (Gtk::Window& parent)
+static void bindings_collision_dialog (Gtk::Window& parent, const std::string& bound_name)
 {
 	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
-	Label label (_("The key sequence is already bound. Please remove the other binding first."));
+	Label label (string_compose(
+				_("The key sequence is already bound to '%1'. Please remove the other binding first."), bound_name));
 
 	dialog.get_vbox()->pack_start (label, true, true);
 	dialog.add_button (_("Ok"), Gtk::RESPONSE_ACCEPT);
@@ -319,7 +320,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
 	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press)) {
-		bindings_collision_dialog (owner);
+		bindings_collision_dialog (owner, bindings->bound_name (new_binding, Gtkmm2ext::Bindings::Press));
 		return;
 	}
 
