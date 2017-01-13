@@ -5400,6 +5400,16 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 			next_tv = (*i);
 		}
 
+		// skip VCAs (cannot be selected, n/a in editor-mixer)
+		if (dynamic_cast<VCATimeAxisView*> (next_tv)) {
+			/* VCAs are sorted last in line -- route_sorter.h, jump to top */
+			next_tv = track_views.front();
+		}
+		if (dynamic_cast<VCATimeAxisView*> (next_tv)) {
+			/* just in case: no master, only a VCA remains */
+			next_tv = 0;
+		}
+
 
 		if (next_tv) {
 			set_selected_mixer_strip (*next_tv);
