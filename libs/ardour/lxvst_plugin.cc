@@ -63,6 +63,8 @@ LXVSTPlugin::LXVSTPlugin (const LXVSTPlugin &other)
 	other.add_state (root);
 	set_state (*root, Stateful::loading_state_version);
 	delete root;
+
+	set_plugin (_state->plugin);
 }
 
 LXVSTPlugin::~LXVSTPlugin ()
