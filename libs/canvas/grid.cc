@@ -163,10 +163,19 @@ Grid::reposition_children ()
 	uint32_t max_row = 0;
 	uint32_t max_col = 0;
 
+	/* since we encourage dynamic and essentially random placement of
+	 * children, begin by determining the maximum row and column given
+	 * our current set of children and placements.
+	 */
+
 	for (CoordsByItem::const_iterator c = coords_by_item.begin(); c != coords_by_item.end(); ++c) {
 		max_col = max (max_col, (uint32_t) c->second.x);
 		max_row = max (max_row, (uint32_t) c->second.y);
 	}
+
+	/* Now compute the width of the widest child for each column, and the
+	 * height of the tallest child for each row.
+	 */
 
 	vector<double> row_dimens;
 	vector<double> col_dimens;
@@ -187,6 +196,32 @@ Grid::reposition_children ()
 		col_dimens[c->second.y] = max (col_dimens[c->second.y], bb.get().height());
 	}
 
+	/* now sum the row and column widths, so that row_dimens is transformed
+	 * into the y coordinate of the upper left of each row, and col_dimens
+	 * is transformed into the x coordinate of the left edge of each
+	 * column.
+	 */
+
+	double prev = row_dimens[0];
+	row_dimens[0] = 0;
+
+	for (uint32_t n = 1; n < max_row; ++n) {
+		row_dimens[n] = row_dimens[n-1] + prev;
+		prev = row_dimens[n];
+	}
+
+	prev = col_dimens[0];
+	col_dimens[0] = 0;
+
+	for (uint32_t n = 1; n < max_col; ++n) {
+		col_dimens[n] = col_dimens[n-1] + prev;
+		prev = col_dimens[n];
+	}
+
+	/* position each item at the upper left of its (row, col) coordinate,
+	 * given the width of all rows or columns before it.
+	 */
+
 	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
@@ -194,14 +229,7 @@ Grid::reposition_children ()
 			continue;
 		}
 
-		Duple pos (0,0);
-
-		for (uint32_t n = 0; n < c->second.x; ++n) {
-			pos.x += row_dimens[n];
-			pos.y += col_dimens[n];
-		}
-
-		(*i)->set_position (pos);
+		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
 	_bounding_box_dirty = true;
