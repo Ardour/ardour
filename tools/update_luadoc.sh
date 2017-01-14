@@ -1,6 +1,8 @@
 #!/bin/sh
 ## ardour needs to be configured with  --luadoc and build should be up-to date.
 
+AMANUAL=$HOME/src/ardour-manual
+
 cd `dirname $0`
 DIR=`pwd`
 set -e
@@ -16,10 +18,10 @@ fi
 # generate ../doc/luadoc.json.gz
 $DIR/../gtk2_ardour/arluadoc
 
-if test -f $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html; then
-	php $DIR/fmt-luadoc.php -m > $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html
-	ls -l $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html
-	cd $HOME/src/ardour-manual/
+if test -f $AMANUAL/_manual/25_lua-scripting/02_class_reference.html; then
+	php $DIR/fmt-luadoc.php -m > $AMANUAL/_manual/25_lua-scripting/02_class_reference.html
+	ls -l $AMANUAL/_manual/25_lua-scripting/02_class_reference.html
+	cd $AMANUAL/
 	./build.rb
 else
 	php $DIR/fmt-luadoc.php > /tmp/luadoc.html
