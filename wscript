@@ -1347,3 +1347,7 @@ def tarball(bld):
 
 def test(bld):
     subprocess.call("gtk2_ardour/artest")
+
+def help2man(bld):
+    cmd = "help2man -s 1 -N -o ardour.1 -n Ardour --version-string='Ardour %s' gtk2_ardour/ardev" % PROGRAM_VERSION
+    subprocess.call(cmd, shell=True)
