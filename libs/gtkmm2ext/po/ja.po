@@ -1,0 +1,148 @@
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Hiroki Inagaki <hiroki.ingk@gmail.com>, 2017.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-11-08 22:01-0800\n"
+"PO-Revision-Date: 2017-01-03 17:53+0100\n"
+"Last-Translator: Hiroki Inagaki <hiroki_ingk@gmail.com>\n"
+"Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: actions.cc:261
+msgid "Unknown action name: %1"
+msgstr "不明なアクション名: %1"
+
+#: binding_proxy.cc:81
+msgid "operate controller now"
+msgstr "今すぐコントローラーを操作"
+
+#: bindable_button.cc:48
+msgid "button cannot watch state of non-existing Controllable\n"
+msgstr "ボタンが存在しない Controllable が状態を監視できません\n"
+
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "カーソル・ホットスポット情報ファイル %1 は %2 行目にエラーがあります"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:119
+msgid "Log"
+msgstr "ログ"
+
+#: gtk_ui.cc:388
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"ショートカット: "
+
+#: gtk_ui.cc:688
+msgid "Press To Exit"
+msgstr "押して終了"
+
+#: gtk_ui.cc:724
+msgid "I'm sorry %1, I can't do that"
+msgstr "すみません %1、それはできません"
+
+#: keyboard.cc:71
+msgid "Command"
+msgstr "Command"
+
+#: keyboard.cc:72 keyboard.cc:94
+msgid "Control"
+msgstr "Control"
+
+#: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
+msgid "Key|Shift"
+msgstr "Shift"
+
+#: keyboard.cc:74
+msgid "Option"
+msgstr "Option"
+
+#: keyboard.cc:76
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:77 keyboard.cc:99
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: keyboard.cc:79
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:95 keyboard.cc:100
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:97
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:102
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:154 keyboard.cc:635
+msgid "Unknown"
+msgstr "不明"
+
+#: keyboard.cc:646
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr "“%2” にキーバインドファイルが見つからなか、エラーが含まれています。"
+
+#: keyboard.cc:672
+msgid "Keyboard binding found without a name"
+msgstr "名前のないキーボードバインドが見つかりました"
+
+#: keyboard.cc:702
+msgid "Cannot save key bindings to %1"
+msgstr "キーバインドを %1 に保存できません"
+
+#: keyboard.cc:718
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "利用中のキーバインドファイルを名前変更できません (%1)"
+
+#: paths_dialog.cc:32
+msgid "Add"
+msgstr "追加"
+
+#: paths_dialog.cc:33
+msgid "Delete"
+msgstr "削除"
+
+#: paths_dialog.cc:34
+msgid "Reset to Default"
+msgstr "デフォルトに戻す"
+
+#: paths_dialog.cc:109
+msgid "Add folder to search path"
+msgstr "検索するパスのフォルダを追加"
+
+#: tearoff.cc:57
+msgid "Click to tear this into its own window"
+msgstr "クリックして個別のウインドウに切り離す"
+
+#: tearoff.cc:63
+msgid "Click to put this back in the main window"
+msgstr "クリックしてメインウインドウに戻す"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "閉じる"
