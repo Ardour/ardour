@@ -19,6 +19,8 @@
 #ifndef __CANVAS_GRID_H__
 #define __CANVAS_GRID_H__
 
+#include <map>
+
 #include "canvas/item.h"
 
 namespace ArdourCanvas
@@ -58,6 +60,9 @@ public:
 
 	void child_changed ();
   private:
+	typedef std::map<Item*,Duple> CoordsByItem;
+	CoordsByItem coords_by_item;
+
 	Rectangle *self;
 	bool collapse_on_hide;
 	bool homogenous;

@@ -17,11 +17,14 @@
 */
 
 #include <algorithm>
+#include <vector>
 
 #include "canvas/grid.h"
 #include "canvas/rectangle.h"
 
 using namespace ArdourCanvas;
+using std::vector;
+using std::max;
 
 Grid::Grid (Canvas* canvas)
 	: Item (canvas)
@@ -157,23 +160,48 @@ Grid::reset_self ()
 void
 Grid::reposition_children ()
 {
-	Duple previous_edge (0, 0);
-	Distance largest_width = 0;
-	Distance largest_height = 0;
+	uint32_t max_row = 0;
+	uint32_t max_col = 0;
 
-	if (homogenous) {
+	for (CoordsByItem::const_iterator c = coords_by_item.begin(); c != coords_by_item.end(); ++c) {
+		max_col = max (max_col, (uint32_t) c->second.x);
+		max_row = max (max_row, (uint32_t) c->second.y);
+	}
 
-		for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
-			boost::optional<Rect> bb = (*i)->bounding_box();
-			if (bb) {
-				largest_height = std::max (largest_height, bb.get().height());
-				largest_width = std::max (largest_width, bb.get().width());
-			}
+	vector<double> row_dimens;
+	vector<double> col_dimens;
+
+	row_dimens.assign (0, max_row);
+	col_dimens.assign (0, max_col);
+
+	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
+		boost::optional<Rect> bb = (*i)->bounding_box();
+
+		if (!bb) {
+			continue;
 		}
+
+		CoordsByItem::const_iterator c = coords_by_item.find (*i);
+
+		row_dimens[c->second.x] = max (row_dimens[c->second.x], bb.get().width());
+		col_dimens[c->second.y] = max (col_dimens[c->second.y], bb.get().height());
 	}
 
 	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
+		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
+		if (c == coords_by_item.end()) {
+			continue;
+		}
+
+		Duple pos (0,0);
+
+		for (uint32_t n = 0; n < c->second.x; ++n) {
+			pos.x += row_dimens[n];
+			pos.y += col_dimens[n];
+		}
+
+		(*i)->set_position (pos);
 	}
 
 	_bounding_box_dirty = true;
@@ -183,7 +211,8 @@ Grid::reposition_children ()
 void
 Grid::place (Item* i, Duple at)
 {
-
+	add (i);
+	coords_by_item.insert (std::make_pair (i, at));
 }
 
 void
