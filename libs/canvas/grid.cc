@@ -85,10 +85,10 @@ Grid::compute_bounding_box () const
 	if (_bounding_box) {
 		Rect r = _bounding_box.get();
 
-		_bounding_box = r.expand (top_padding + outline_width() + top_margin,
-		                          right_padding + outline_width() + right_margin,
-		                          bottom_padding + outline_width() + bottom_margin,
-		                          left_padding + outline_width() + left_margin);
+		_bounding_box = r.expand (outline_width() + top_margin,
+		                          outline_width() + right_margin,
+		                          outline_width() + bottom_margin,
+		                          outline_width() + left_margin);
 	}
 
 	_bounding_box_dirty = false;
@@ -175,9 +175,6 @@ Grid::reposition_children ()
 		max_row = max (max_row, (uint32_t) c->second.y);
 	}
 
-	cerr << "max row = " << max_row << " max_col " << max_col << endl;
-	cerr << "with items = " << _items.size() << " coords " << coords_by_item.size()<< endl;
-
 	max_row++;
 	max_col++;
 
@@ -195,13 +192,10 @@ Grid::reposition_children ()
 		boost::optional<Rect> bb = (*i)->bounding_box();
 
 		if (!bb) {
-			cerr << "no bounding box\n";
 			continue;
 		}
 
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
-
-		cerr << "item BB = " << bb.get() << endl;
 
 		row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.get().height());
 		col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.get().width());
@@ -214,20 +208,18 @@ Grid::reposition_children ()
 	 */
 
 	double prev = row_dimens[0];
-	row_dimens[0] = 0;
+	row_dimens[0] = top_margin;
 
 	for (uint32_t n = 1; n < max_row; ++n) {
-		row_dimens[n] = row_dimens[n-1] + prev;
-		cerr << "B: row[" << n << "] @ " << row_dimens[n] << endl;
-		prev = row_dimens[n];
+		row_dimens[n] = row_dimens[n-1] + prev + top_padding + bottom_padding;
+		prev = row_dimens[n] + bottom_padding;
 	}
 
 	prev = col_dimens[0];
-	col_dimens[0] = 0;
+	col_dimens[0] = left_margin;
 
 	for (uint32_t n = 1; n < max_col; ++n) {
-		col_dimens[n] = col_dimens[n-1] + prev;
-		cerr << "B: col[" << n << "] @ " << col_dimens[n] << endl;
+		col_dimens[n] = col_dimens[n-1] + prev + left_padding + right_padding;
 		prev = col_dimens[n];
 	}
 
@@ -239,19 +231,14 @@ Grid::reposition_children ()
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
 		if (c == coords_by_item.end()) {
-			cerr << "item not found\n";
 			continue;
 		}
 
-		cerr << " place item at " << Duple (col_dimens[c->second.x], row_dimens[c->second.y]) << endl;
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
+
 	_bounding_box_dirty = true;
-
-
-
-
 	reset_self ();
 }
 
@@ -266,7 +253,6 @@ Grid::place (Item* i, Duple at)
 void
 Grid::child_changed ()
 {
-	cerr << "Child changed!\n";
 	/* catch visibility and size changes */
 
 	Item::child_changed ();
