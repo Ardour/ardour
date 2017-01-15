@@ -25,6 +25,8 @@
 using namespace ArdourCanvas;
 using std::vector;
 using std::max;
+using std::cerr;
+using std::endl;
 
 Grid::Grid (Canvas* canvas)
 	: Item (canvas)
@@ -173,6 +175,12 @@ Grid::reposition_children ()
 		max_row = max (max_row, (uint32_t) c->second.y);
 	}
 
+	cerr << "max row = " << max_row << " max_col " << max_col << endl;
+	cerr << "with items = " << _items.size() << " coords " << coords_by_item.size()<< endl;
+
+	max_row++;
+	max_col++;
+
 	/* Now compute the width of the widest child for each column, and the
 	 * height of the tallest child for each row.
 	 */
@@ -180,20 +188,23 @@ Grid::reposition_children ()
 	vector<double> row_dimens;
 	vector<double> col_dimens;
 
-	row_dimens.assign (0, max_row);
-	col_dimens.assign (0, max_col);
+	row_dimens.assign (max_row, 0);
+	col_dimens.assign (max_col, 0);
 
 	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
 		boost::optional<Rect> bb = (*i)->bounding_box();
 
 		if (!bb) {
+			cerr << "no bounding box\n";
 			continue;
 		}
 
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
-		row_dimens[c->second.x] = max (row_dimens[c->second.x], bb.get().width());
-		col_dimens[c->second.y] = max (col_dimens[c->second.y], bb.get().height());
+		cerr << "item BB = " << bb.get() << endl;
+
+		row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.get().height());
+		col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.get().width());
 	}
 
 	/* now sum the row and column widths, so that row_dimens is transformed
@@ -207,6 +218,7 @@ Grid::reposition_children ()
 
 	for (uint32_t n = 1; n < max_row; ++n) {
 		row_dimens[n] = row_dimens[n-1] + prev;
+		cerr << "B: row[" << n << "] @ " << row_dimens[n] << endl;
 		prev = row_dimens[n];
 	}
 
@@ -215,6 +227,7 @@ Grid::reposition_children ()
 
 	for (uint32_t n = 1; n < max_col; ++n) {
 		col_dimens[n] = col_dimens[n-1] + prev;
+		cerr << "B: col[" << n << "] @ " << col_dimens[n] << endl;
 		prev = col_dimens[n];
 	}
 
@@ -226,13 +239,19 @@ Grid::reposition_children ()
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
 		if (c == coords_by_item.end()) {
+			cerr << "item not found\n";
 			continue;
 		}
 
+		cerr << " place item at " << Duple (col_dimens[c->second.x], row_dimens[c->second.y]) << endl;
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
 	_bounding_box_dirty = true;
+
+
+
+
 	reset_self ();
 }
 
@@ -241,11 +260,13 @@ Grid::place (Item* i, Duple at)
 {
 	add (i);
 	coords_by_item.insert (std::make_pair (i, at));
+	reposition_children ();
 }
 
 void
 Grid::child_changed ()
 {
+	cerr << "Child changed!\n";
 	/* catch visibility and size changes */
 
 	Item::child_changed ();
