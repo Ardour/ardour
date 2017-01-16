@@ -3907,11 +3907,13 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "auto-loop") {
 
+	} else if (p == "session-monitoring") {
+
 	} else if (p == "auto-input") {
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
-                        set_track_monitor_input_status (!config.get_auto_input());
+			set_track_monitor_input_status (!config.get_auto_input());
 		}
 
 	} else if (p == "punch-in") {

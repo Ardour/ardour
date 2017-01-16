@@ -833,6 +833,20 @@ std::ostream& operator<<(std::ostream& o, const TracksAutoNamingRule& var)
 	return o << s;
 }
 
+std::istream& operator>>(std::istream& o, MonitorChoice& var)
+{
+	std::string s;
+	o >> s;
+	var = (MonitorChoice) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MonitorChoice& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, MonitorModel& var)
 {
 	std::string s;

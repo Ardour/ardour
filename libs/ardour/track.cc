@@ -929,6 +929,17 @@ Track::monitoring_state () const
 		return MonitoringDisk;
 	}
 
+	switch (_session.config.get_session_monitoring ()) {
+		case MonitorDisk:
+			return MonitoringDisk;
+			break;
+		case MonitorInput:
+			return MonitoringInput;
+			break;
+		default:
+			break;
+	}
+
 	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
 	   I don't think it's ever going to be too pretty too look at.
 	*/
