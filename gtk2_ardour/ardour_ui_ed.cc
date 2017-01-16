@@ -513,6 +513,13 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = global_actions.register_toggle_action (transport_actions, X_("SessionMonitorIn"), _("All Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_monitoring_in));
+	act->set_short_label (_("All In"));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_toggle_action (transport_actions, X_("SessionMonitorDisk"), _("All Disk"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_monitoring_disk));
+	act->set_short_label (_("All Disk"));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = global_actions.register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
 	act->set_short_label (_("In"));
 	ActionManager::session_sensitive_actions.push_back (act);

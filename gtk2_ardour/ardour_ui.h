@@ -391,6 +391,9 @@ protected:
 	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
+	bool ignore_session_monitoring;
+	void toggle_session_monitoring_in ();
+	void toggle_session_monitoring_disk ();
 	void show_loop_punch_ruler_and_disallow_hide ();
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
@@ -526,6 +529,10 @@ private:
 	ArdourButton punch_out_button;
 	ArdourButton layered_button;
 
+	ArdourButton monitor_in_button;
+	ArdourButton monitor_disk_button;
+	ArdourButton auto_input_button;
+
 	Gtk::Label   punch_label;
 	Gtk::Label   layered_label;
 
@@ -539,7 +546,6 @@ private:
 
 	ArdourButton auto_return_button;
 	ArdourButton follow_edits_button;
-	ArdourButton auto_input_button;
 	ArdourButton click_button;
 	ArdourButton sync_button;
 

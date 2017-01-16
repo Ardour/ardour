@@ -84,7 +84,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
-	set_tip (auto_input_button, _("Be sensible about input monitoring"));
+	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
@@ -349,6 +349,11 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action ("Transport", "TogglePunchOut");
 	punch_out_button.set_related_action (act);
 
+	act = ActionManager::get_action ("Transport", "SessionMonitorIn");
+	monitor_in_button.set_related_action (act);
+	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
+	monitor_disk_button.set_related_action (act);
+
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
@@ -371,7 +376,6 @@ ARDOUR_UI::setup_transport ()
 
 	auto_return_button.set_name ("transport option button");
 	follow_edits_button.set_name ("transport option button");
-	auto_input_button.set_name ("transport option button");
 
 	solo_alert_button.set_name ("rude solo");
 	auditioning_alert_button.set_name ("rude audition");
@@ -394,16 +398,23 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_name ("punch button");
 	layered_button.set_name (("layered button"));
 
+	monitor_in_button.set_name ("punch button"); // XXX
+	monitor_disk_button.set_name ("punch button"); // XXX
+	auto_input_button.set_name ("transport option button");
+
 	click_button.set_name ("transport button");
 	sync_button.set_name ("transport active option button");
 
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
 	follow_edits_button.set_text(_("Follow Range"));
-	//auto_input_button.set_text (_("Auto Input"));
 	punch_in_button.set_text (_("In"));
 	punch_out_button.set_text (_("Out"));
 	layered_button.set_text (_("Non-Layered"));
+
+	monitor_in_button.set_text (_("All In"));
+	monitor_disk_button.set_text (_("All Disk"));
+	auto_input_button.set_text (_("Auto-Input"));
 
 	punch_label.set_text (_("Punch:"));
 	layered_label.set_text (_("Rec:"));
@@ -424,6 +435,9 @@ ARDOUR_UI::setup_transport ()
 
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
+
+	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all implicit monitoed tracks to monitor input"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all implicit monitored tracks to disk-monitoring"));
 
 	/* setup icons */
 
@@ -451,6 +465,10 @@ ARDOUR_UI::setup_transport ()
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
+
+	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	monitor_button_size_group->add_widget (monitor_in_button);
+	monitor_button_size_group->add_widget (monitor_disk_button);
 
 	/* and now the layout... */
 
@@ -549,10 +567,19 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
 	++col;
 
-	transport_table.attach (punch_in_button,  col,     col + 1, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 0, 2);
 	transport_table.attach (*(manage (new Label (""))), col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (punch_out_button, col + 2, col + 3, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (layered_button,   col,     col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	col += 3;
+
+	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	transport_table.attach (monitor_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (*(manage (new Label (""))),   col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (monitor_disk_button, col + 2, col + 3, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (auto_input_button,  col,      col + 3, 1, 2 , FILL, SHRINK, 0, 2);
 	col += 3;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);

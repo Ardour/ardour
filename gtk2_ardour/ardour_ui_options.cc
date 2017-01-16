@@ -23,6 +23,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -126,6 +127,64 @@ void
 ARDOUR_UI::toggle_click ()
 {
 	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
+}
+
+void
+ARDOUR_UI::toggle_session_monitoring_in ()
+{
+	if (ignore_session_monitoring) {
+		return;
+	}
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+	if (tact->get_active()) {
+		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
+		if (dact) {
+			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
+			if (tdact) {
+				PBD::Unwinder<bool> (ignore_session_monitoring, true);
+				tdact->set_active (false);
+			}
+		}
+		_session->config.set_session_monitoring (MonitorInput);
+	} else {
+		_session->config.set_session_monitoring (MonitorAuto);
+	}
+}
+
+void
+ARDOUR_UI::toggle_session_monitoring_disk ()
+{
+	if (ignore_session_monitoring) {
+		return;
+	}
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+	if (tact->get_active()) {
+		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
+		if (iact) {
+			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
+			if (tiact) {
+				PBD::Unwinder<bool> (ignore_session_monitoring, true);
+				tiact->set_active (false);
+			}
+		}
+		_session->config.set_session_monitoring (MonitorDisk);
+	} else {
+		_session->config.set_session_monitoring (MonitorAuto);
+	}
 }
 
 void
@@ -340,6 +399,27 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_return));
 	} else if (p == "auto-input") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
+	} else if (p == "session-monitoring") {
+		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
+		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
+		if (iact && dact) {
+			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
+			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
+			if (tdact && tiact) {
+				switch (_session->config.get_session_monitoring ()) {
+					case MonitorDisk:
+						tdact->set_active (true);
+						break;
+					case MonitorInput:
+						tiact->set_active (true);
+						break;
+					default:
+						tdact->set_active (false);
+						tiact->set_active (false);
+						break;
+				}
+			}
+		}
 	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (_session->config, &SessionConfiguration::get_punch_out));
 		if (!_session->config.get_punch_out()) {

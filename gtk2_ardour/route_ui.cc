@@ -1940,6 +1940,8 @@ RouteUI::parameter_changed (string const & p)
 		check_rec_enable_sensitivity ();
 	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
+	} else if (p == "session-monitoring") {
+		update_monitoring_display ();
 	} else if (p == "auto-input") {
 		update_monitoring_display ();
 	} else if (p == "blink-rec-arm") {
