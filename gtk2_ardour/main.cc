@@ -306,7 +306,11 @@ int main (int argc, char *argv[])
 		} catch (...) {
 			std::cerr << "Cannot set C++ locale\n";
 		}
+#ifndef COMPILER_MSVC
+		// LC_MESSAGES isn't a supported locale setting when building
+		// with MSVC (in fact, I doubt if it's valid for Windows at all)
 		l_msg = setlocale (LC_MESSAGES, NULL);
+#endif
 		l_num = setlocale (LC_NUMERIC, NULL);
 		if (l_msg) { l_msg = strdup (l_msg); }
 		if (l_num) { l_num = strdup (l_num); }
