@@ -1354,11 +1354,13 @@ Mixer_UI::redisplay_track_list ()
 		return;
 	}
 
-	boost::shared_ptr<VCA> sv = spilled_vca.lock ();
-
-	if (sv) {
-		spill_redisplay (sv);
-		return;
+	boost::shared_ptr<Stripable> ss = spilled_strip.lock ();
+	if (ss) {
+		boost::shared_ptr<VCA> sv = boost::dynamic_pointer_cast<VCA> (ss);
+		if (sv) {
+			spill_redisplay (sv);
+			return;
+		}
 	}
 
 	TreeModel::Children rows = track_model->children();
@@ -2830,13 +2832,13 @@ Mixer_UI::do_vca_unassign (boost::shared_ptr<VCA> vca)
 }
 
 void
-Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
+Mixer_UI::show_spill (boost::shared_ptr<Stripable> s)
 {
-	boost::shared_ptr<VCA> v = spilled_vca.lock();
-	if (v != vca) {
-		spilled_vca = vca;
-		show_vca_change (vca); /* EMIT SIGNAL */
-		if (vca) {
+	boost::shared_ptr<Stripable> ss = spilled_strip.lock();
+	if (ss != s) {
+		spilled_strip = s;
+		show_spill_change (s); /* EMIT SIGNAL */
+		if (s) {
 			_group_tabs->hide ();
 		} else {
 			_group_tabs->show ();
@@ -2846,9 +2848,9 @@ Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
 }
 
 bool
-Mixer_UI::showing_vca_slaves_for (boost::shared_ptr<VCA> vca) const
+Mixer_UI::showing_spill_for (boost::shared_ptr<Stripable> s) const
 {
-       return vca == spilled_vca.lock();
+	return s == spilled_strip.lock();
 }
 
 void

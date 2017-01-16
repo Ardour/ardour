@@ -148,7 +148,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	mute_changed ();
 	spill_change (boost::shared_ptr<VCA>());
 
-	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
+	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 	_vca->presentation_info().PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
@@ -165,9 +165,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 VCAMasterStrip::~VCAMasterStrip ()
 {
-	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 
 	delete delete_dialog;
@@ -179,9 +179,9 @@ VCAMasterStrip::~VCAMasterStrip ()
 void
 VCAMasterStrip::self_delete ()
 {
-	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 	/* Drop reference immediately, delete self when idle */
 	_vca.reset ();
@@ -457,15 +457,15 @@ VCAMasterStrip::build_context_menu ()
 void
 VCAMasterStrip::spill ()
 {
-	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	} else {
-		Mixer_UI::instance()->show_vca_slaves (_vca);
+		Mixer_UI::instance()->show_spill (_vca);
 	}
 }
 
 void
-VCAMasterStrip::spill_change (boost::shared_ptr<VCA> vca)
+VCAMasterStrip::spill_change (boost::shared_ptr<Stripable> vca)
 {
 	if (vca != _vca) {
 		vertical_button.set_active_state (Gtkmm2ext::Off);
@@ -491,8 +491,8 @@ VCAMasterStrip::drop_all_slaves ()
 {
 	_vca->Drop (); /* EMIT SIGNAL */
 
-	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 }
 

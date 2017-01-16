@@ -77,7 +77,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	PBD::ScopedConnectionList vca_connections;
 
 	void spill ();
-	void spill_change (boost::shared_ptr<ARDOUR::VCA>);
+	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 	void set_selected (bool);
