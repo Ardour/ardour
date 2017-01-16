@@ -73,6 +73,7 @@
 #include "add_route_dialog.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
+#include "ardour_spacer.h"
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
@@ -529,12 +530,18 @@ private:
 	ArdourButton punch_out_button;
 	ArdourButton layered_button;
 
+	ArdourVSpacer recpunch_spacer;
+	ArdourVSpacer monitoring_spacer;
+
 	ArdourButton monitor_in_button;
 	ArdourButton monitor_disk_button;
 	ArdourButton auto_input_button;
 
 	Gtk::Label   punch_label;
 	Gtk::Label   layered_label;
+
+	Gtk::Label   punch_space;
+	Gtk::Label   mon_space;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();

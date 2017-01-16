@@ -477,6 +477,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-mini-timeline") {
 		repack_transport_hbox ();
+	} else if (p == "show-toolbar-recpunch") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-monitoring") {
+		repack_transport_hbox ();
 	} else if (p == "show-toolbar-selclock") {
 		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {

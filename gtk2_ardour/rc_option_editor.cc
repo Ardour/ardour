@@ -3684,6 +3684,22 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
+		     "show-toolbar-recpunch",
+		     _("Display Record/Punch Options"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_recpunch),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_recpunch)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-monitoring",
+		     _("Display Monitor Options"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitoring),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitoring)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
 		     "show-toolbar-selclock",
 		     _("Display Selection Clock"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),

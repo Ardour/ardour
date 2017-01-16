@@ -73,6 +73,8 @@ UI_CONFIG_VARIABLE (ARDOUR::LocaleMode, locale_mode, "locale-mode", ARDOUR::SET_
 UI_CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 UI_CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", false)
 UI_CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
+UI_CONFIG_VARIABLE (bool, show_toolbar_recpunch, "show-toolbar-recpunch", true)
+UI_CONFIG_VARIABLE (bool, show_toolbar_monitoring, "show-toolbar-monitoring", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_selclock, "show-toolbar-selclock", false)
 UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
 UI_CONFIG_VARIABLE (bool, show_secondary_clock, "show-secondary-clock", true)

@@ -44,7 +44,6 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
-#include "ardour_spacer.h"
 #include "ardour_ui.h"
 #include "keyboard.h"
 #include "public_editor.h"
@@ -211,6 +210,37 @@ ARDOUR_UI::repack_transport_hbox ()
 			editor_meter_peak_display.show();
 		}
 	}
+
+	bool show_mon = UIConfiguration::instance().get_show_toolbar_monitoring ();
+	if (show_mon) {
+		monitor_in_button.show ();
+		monitor_disk_button.show ();
+		auto_input_button.show ();
+		monitoring_spacer.show ();
+	} else {
+		monitor_in_button.hide ();
+		monitor_disk_button.hide ();
+		auto_input_button.hide ();
+		monitoring_spacer.hide ();
+	}
+
+	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
+	if (show_rec) {
+		punch_label.show ();
+		layered_label.show ();
+		punch_in_button.show ();
+		punch_out_button.show ();
+		layered_button.show ();
+		recpunch_spacer.show ();
+	} else {
+		punch_label.hide ();
+		layered_label.hide ();
+		punch_in_button.hide ();
+		punch_out_button.hide ();
+		layered_button.hide ();
+		recpunch_spacer.hide ();
+	}
+
 }
 
 void
@@ -568,21 +598,21 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (*(manage (new Label (""))), col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 2, 2);
 	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 0, 2);
 	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 0, 2);
 	col += 3;
 
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (monitor_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (*(manage (new Label (""))),   col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (monitor_in_button,   col,     col + 1, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (mon_space,           col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
 	transport_table.attach (monitor_disk_button, col + 2, col + 3, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (auto_input_button,  col,      col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (auto_input_button,   col,     col + 3, 1, 2 , FILL, SHRINK, 0, 2);
 	col += 3;
 
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, 2, 0);
