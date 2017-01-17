@@ -391,6 +391,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
 				));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Metronome")));
+
+	add_option (_("Misc"), new BoolOption (
+				"count-in",
+				_("Count in before recording"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_count_in),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_count_in)
+				));
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
 
 	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
