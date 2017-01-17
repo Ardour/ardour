@@ -1896,6 +1896,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void   setup_click_sounds (Sample**, Sample const *, framecnt_t*, framecnt_t, std::string const &);
 	void   clear_clicks ();
 	void   click (framepos_t start, framecnt_t nframes);
+	void   run_click (framepos_t start, framecnt_t nframes);
+	void   add_click (framepos_t pos, bool emphasis);
 
 	std::vector<Route*> master_outs;
 
