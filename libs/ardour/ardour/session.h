@@ -1898,6 +1898,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void   click (framepos_t start, framecnt_t nframes);
 	void   run_click (framepos_t start, framecnt_t nframes);
 	void   add_click (framepos_t pos, bool emphasis);
+	framecnt_t _count_in_samples;
 
 	std::vector<Route*> master_outs;
 

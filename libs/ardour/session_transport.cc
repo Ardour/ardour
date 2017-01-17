@@ -45,6 +45,7 @@
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
+#include "ardour/tempo.h"
 #include "ardour/operations.h"
 
 #include "pbd/i18n.h"
@@ -1615,6 +1616,38 @@ Session::start_transport ()
 		timecode_time_subframes (_transport_frame, time);
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+		}
+
+		if (actively_recording() && click_data && config.get_count_in ()) {
+			/* calculate count-in duration (in audio samples)
+			 * - use [fixed] tempo/meter at _transport_frame
+			 * - calc duration of 1 bar + time-to-beat before or at transport_frame
+			 */
+			const Tempo& tempo = _tempo_map->tempo_at_frame (_transport_frame);
+			const Meter& meter = _tempo_map->meter_at_frame (_transport_frame);
+
+			double div = meter.divisions_per_bar ();
+			double pulses = _tempo_map->exact_qn_at_frame (_transport_frame, 0) * div / 4.0;
+			double beats_left = fmod (pulses, div);
+
+			_count_in_samples = meter.frames_per_bar (tempo, _current_frame_rate);
+
+			double dt = _count_in_samples / div;
+			if (beats_left == 0) {
+				/* at bar boundary, count-in 2 bars before start. */
+				_count_in_samples *= 2;
+			} else {
+				/* beats left after full bar until roll position */
+				_count_in_samples += meter.frames_per_grid (tempo, _current_frame_rate) * beats_left;
+			}
+
+			int clickbeat = 0;
+			framepos_t cf = _transport_frame - _count_in_samples;
+			while (cf < _transport_frame) {
+				add_click (cf - _worst_track_latency, clickbeat == 0);
+				cf += dt;
+				clickbeat = fmod (clickbeat + 1, div);
+			}
 		}
 	}
 

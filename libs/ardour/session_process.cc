@@ -314,6 +314,47 @@ Session::process_with_events (pframes_t nframes)
 		process_event (ev);
 	}
 
+	/* count in */
+	if (_transport_speed != 1.0 && _count_in_samples > 0) {
+		_count_in_samples = 0;
+	}
+
+	if (_count_in_samples > 0) {
+		framecnt_t ns = std::min ((framecnt_t)nframes, _count_in_samples);
+
+		no_roll (ns);
+		run_click (_transport_frame - _count_in_samples, ns);
+
+		_count_in_samples -= ns;
+		nframes -= ns;
+
+		/* process events.. */
+		if (!events.empty() && next_event != events.end()) {
+			SessionEvent* this_event = *next_event;
+			Events::iterator the_next_one = next_event;
+			++the_next_one;
+
+			while (this_event && this_event->action_frame == _transport_frame) {
+				process_event (this_event);
+				if (the_next_one == events.end()) {
+					this_event = 0;
+				} else {
+					this_event = *the_next_one;
+					++the_next_one;
+				}
+			}
+			set_next_event ();
+		}
+
+		check_declick_out ();
+
+		if (nframes == 0) {
+			return;
+		} else {
+			_engine.split_cycle (ns);
+		}
+	}
+
 	/* Decide on what to do with quarter-frame MTC during this cycle */
 
 	bool const was_sending_qf_mtc = _send_qf_mtc;

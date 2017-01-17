@@ -300,6 +300,7 @@ Session::Session (AudioEngine &eng,
 	, click_length (0)
 	, click_emphasis_length (0)
 	, _clicks_cleared (0)
+	, _count_in_samples (0)
 	, _play_range (false)
 	, _range_selection (-1,-1)
 	, _object_selection (-1,-1)
