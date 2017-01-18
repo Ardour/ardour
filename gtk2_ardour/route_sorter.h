@@ -30,9 +30,11 @@ struct OrderKeys {
     uint32_t old_display_order;
     uint32_t new_display_order;
     uint32_t compare_order;
+		boost::shared_ptr<ARDOUR::Stripable> stripable;
 
 	OrderKeys (uint32_t ok, boost::shared_ptr<ARDOUR::Stripable> s, uint32_t cmp_max)
 		: old_display_order (ok)
+		, stripable (s)
 	{
 		new_display_order = s->presentation_info().order();
 		compare_order = new_display_order;

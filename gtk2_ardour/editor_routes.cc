@@ -1079,6 +1079,14 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 				change = true;
 			}
 		}
+		if (change) {
+			n = 0;
+			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+				if (sr->stripable->presentation_info().order() != n) {
+					sr->stripable->set_presentation_order (n, false);
+				}
+			}
+		}
 	}
 
 	if (change) {
