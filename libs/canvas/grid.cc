@@ -188,7 +188,13 @@ Grid::reposition_children ()
 	row_dimens.assign (max_row, 0);
 	col_dimens.assign (max_col, 0);
 
-	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
+	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+
+		if (*i == self) {
+			/* self-rect is not a normal child */
+			continue;
+		}
+
 		boost::optional<Rect> bb = (*i)->bounding_box();
 
 		if (!bb) {
@@ -207,27 +213,33 @@ Grid::reposition_children ()
 	 * column.
 	 */
 
-	double prev = row_dimens[0];
-	row_dimens[0] = top_margin;
+	double current_top_edge = top_margin;
 
-	for (uint32_t n = 1; n < max_row; ++n) {
-		row_dimens[n] = row_dimens[n-1] + prev + top_padding + bottom_padding;
-		prev = row_dimens[n] + bottom_padding;
+	for (uint32_t n = 0; n < max_row; ++n) {
+		if (row_dimens[n]) {
+			/* height defined for this row */
+			const double h = row_dimens[n]; /* save height */
+			row_dimens[n] = current_top_edge;
+			current_top_edge = current_top_edge + h + top_padding + bottom_padding;
+		}
 	}
 
-	prev = col_dimens[0];
-	col_dimens[0] = left_margin;
+	double current_right_edge = left_margin;
 
-	for (uint32_t n = 1; n < max_col; ++n) {
-		col_dimens[n] = col_dimens[n-1] + prev + left_padding + right_padding;
-		prev = col_dimens[n];
+	for (uint32_t n = 0; n < max_col; ++n) {
+		if (col_dimens[n]) {
+			/* a width was defined for this column */
+			const double w = col_dimens[n]; /* save width of this column */
+			col_dimens[n] = current_right_edge;
+			current_right_edge = current_right_edge + w + left_padding + right_padding;
+		}
 	}
 
 	/* position each item at the upper left of its (row, col) coordinate,
 	 * given the width of all rows or columns before it.
 	 */
 
-	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
+	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
 		if (c == coords_by_item.end()) {
@@ -236,7 +248,6 @@ Grid::reposition_children ()
 
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
-
 
 	_bounding_box_dirty = true;
 	reset_self ();
