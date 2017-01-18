@@ -677,6 +677,7 @@ private:
 	void transport_roll ();
 	void transport_play_selection();
 	void transport_play_preroll();
+	void transport_rec_preroll();
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();

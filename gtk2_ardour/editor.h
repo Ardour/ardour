@@ -264,6 +264,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framepos_t get_preroll ();
 	void maybe_locate_with_edit_preroll (framepos_t);
 	void play_with_preroll ();
+	void rec_with_preroll ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all_objects (Selection::Operation op);
 	void invert_selection_in_track ();

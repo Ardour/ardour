@@ -2450,6 +2450,15 @@ ARDOUR_UI::transport_play_preroll ()
 }
 
 void
+ARDOUR_UI::transport_rec_preroll ()
+{
+	if (!_session) {
+		return;
+	}
+	editor->rec_with_preroll ();
+}
+
+void
 ARDOUR_UI::transport_rewind (int option)
 {
 	float current_transport_speed;

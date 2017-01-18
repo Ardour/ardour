@@ -2666,6 +2666,20 @@ Editor::play_with_preroll ()
 }
 
 void
+Editor::rec_with_preroll ()
+{
+	framepos_t preroll = get_preroll();
+	framepos_t ph = playhead_cursor->current_frame ();
+	framepos_t start = std::max ((framepos_t)0, ph - preroll);
+
+	_session->request_preroll_record (ph);
+	_session->maybe_enable_record ();
+	_session->request_locate (start, true);
+	_session->set_requested_return_frame (ph);
+}
+
+
+void
 Editor::play_location (Location& location)
 {
 	if (location.start() <= location.end()) {
