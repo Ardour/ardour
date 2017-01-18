@@ -75,7 +75,7 @@ Widget::queue_resize ()
 void
 Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	// std::cerr << "Render widget\n";
+	//std::cerr << "Render widget " << name << " @ " << position() << endl;
 
 	if (!_bounding_box) {
 		std::cerr << "no bbox\n";
@@ -97,11 +97,12 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	crect.height = draw.height();
 	crect.width = draw.width();
 
-	// std::cerr << "will draw " << draw << "\n";
+	Duple p = position_offset();
+
 	context->save ();
-	context->translate (-draw.x0, -draw.y0);
+	context->translate (p.x, p.y);
 	//context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-	// context->clip ();
+	//context->clip ();
 
 	_widget.render (context->cobj(), &crect);
 
@@ -132,4 +133,3 @@ Widget::compute_bounding_box () const
 
 	_bounding_box_dirty = false;
 }
-
