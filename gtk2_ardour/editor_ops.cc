@@ -2609,17 +2609,16 @@ Editor::play_selection ()
 framepos_t
 Editor::get_preroll (framepos_t pos)
 {
-#if 0 // TODO: this needs a config option, or special case (e.g. negative get_preroll_seconds ())
-	if (pos >= 0) {
+	const float pr = Config->get_preroll_seconds();
+	if (pos >= 0 && pr < 0) {
 		/* currently 1 bar's worth of pre-roll, not aligned to bar/beat
 		 * to align to a bar before pos, see count_in, session_transport.cc
 		 */
 		const Tempo& tempo = _session->tempo_map().tempo_at_frame (pos);
 		const Meter& meter = _session->tempo_map().meter_at_frame (pos);
-		return meter.frames_per_bar (tempo, _session->frame_rate());
+		return meter.frames_per_bar (tempo, _session->frame_rate()) * -pr;
 	}
-#endif
-	return Config->get_preroll_seconds() * _session->frame_rate();
+	return pr * _session->frame_rate();
 }
 
 

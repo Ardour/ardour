@@ -2999,8 +2999,11 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_preroll_seconds)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (psc->tip_widget(),
-					    (_("The amount of preroll (in seconds) to apply when <b>Play with Preroll</b> is initiated.\n\n"
+					    (_("The amount of preroll to apply when <b>Play with Preroll</b> or <b>Record with Preroll</b>is initiated.\n\n"
 					       "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead position when a region is selected or trimmed.")));
+	psc->add (-4.0, _("4 Bars"));
+	psc->add (-2.0, _("2 Bars"));
+	psc->add (-1.0, _("1 Bar"));
 	psc->add (0.0, _("0 (no pre-roll)"));
 	psc->add (0.1, _("0.1 second"));
 	psc->add (0.25, _("0.25 second"));
