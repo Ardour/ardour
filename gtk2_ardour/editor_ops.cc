@@ -2607,23 +2607,34 @@ Editor::play_selection ()
 }
 
 framepos_t
-Editor::get_preroll ()
+Editor::get_preroll (framepos_t pos)
 {
+#if 0 // TODO: this needs a config option, or special case (e.g. negative get_preroll_seconds ())
+	if (pos >= 0) {
+		/* currently 1 bar's worth of pre-roll, not aligned to bar/beat
+		 * to align to a bar before pos, see count_in, session_transport.cc
+		 */
+		const Tempo& tempo = _session->tempo_map().tempo_at_frame (pos);
+		const Meter& meter = _session->tempo_map().meter_at_frame (pos);
+		return meter.frames_per_bar (tempo, _session->frame_rate());
+	}
+#endif
 	return Config->get_preroll_seconds() * _session->frame_rate();
 }
 
 
 void
-Editor::maybe_locate_with_edit_preroll ( framepos_t location )
+Editor::maybe_locate_with_edit_preroll (framepos_t location)
 {
 	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _session->config.get_external_sync() )
 		return;
 
-	location -= get_preroll();
+	location -= get_preroll (location);
 
 	//don't try to locate before the beginning of time
-	if ( location < 0 )
+	if (location < 0) {
 		location = 0;
+	}
 
 	//if follow_playhead is on, keep the playhead on the screen
 	if ( _follow_playhead )
@@ -2636,14 +2647,15 @@ Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 void
 Editor::play_with_preroll ()
 {
-	framepos_t preroll = get_preroll();
 	framepos_t start, end;
 	if ( UIConfiguration::instance().get_follow_edits() && get_selection_extents ( start, end) ) {
+		const framepos_t preroll = get_preroll (start);
 
 		framepos_t ret = start;
 		
-		if (start > preroll)
+		if (start > preroll) {
 			start = start - preroll;
+		}
 
 		end = end + preroll;  //"post-roll"
 
@@ -2652,24 +2664,26 @@ Editor::play_with_preroll ()
 		lar.push_back (ar);
 
 		_session->request_play_range (&lar, true);
-		_session->set_requested_return_frame( ret );  //force auto-return to return to range start, without the preroll
+		_session->set_requested_return_frame (ret);  //force auto-return to return to range start, without the preroll
 	} else {
 		framepos_t ph = playhead_cursor->current_frame ();
+		const framepos_t preroll = get_preroll (ph);
 		framepos_t start;
-		if (ph > preroll)
+		if (ph > preroll) {
 			start = ph - preroll; 
-		else
+		} else {
 			start = 0;
-		_session->request_locate ( start, true);
-		_session->set_requested_return_frame( ph );  //force auto-return to return to playhead location, without the preroll
+		}
+		_session->request_locate (start, true);
+		_session->set_requested_return_frame (ph);  //force auto-return to return to playhead location, without the preroll
 	}
 }
 
 void
 Editor::rec_with_preroll ()
 {
-	framepos_t preroll = get_preroll();
 	framepos_t ph = playhead_cursor->current_frame ();
+	framepos_t preroll = get_preroll (ph);
 	framepos_t start = std::max ((framepos_t)0, ph - preroll);
 
 	_session->request_preroll_record (ph);

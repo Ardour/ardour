@@ -261,7 +261,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
-	framepos_t get_preroll ();
+	framepos_t get_preroll (framepos_t);
 	void maybe_locate_with_edit_preroll (framepos_t);
 	void play_with_preroll ();
 	void rec_with_preroll ();
