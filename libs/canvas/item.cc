@@ -410,7 +410,7 @@ Item::unparent ()
 }
 
 void
-Item::reparent (Item* new_parent)
+Item::reparent (Item* new_parent, bool already_added)
 {
 	if (new_parent == _parent) {
 		return;
@@ -429,7 +429,9 @@ Item::reparent (Item* new_parent)
 
 	find_scroll_parent ();
 
-	_parent->add (this);
+	if (!already_added) {
+		_parent->add (this);
+	}
 }
 
 void
@@ -862,7 +864,7 @@ Item::add (Item* i)
 	/* XXX should really notify canvas about this */
 
 	_items.push_back (i);
-	i->reparent (this);
+	i->reparent (this, true);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 }
@@ -873,7 +875,7 @@ Item::add_front (Item* i)
 	/* XXX should really notify canvas about this */
 
 	_items.push_front (i);
-	i->reparent (this);
+	i->reparent (this, true);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 }

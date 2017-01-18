@@ -99,7 +99,7 @@ public:
 	void ungrab ();
 
 	void unparent ();
-	void reparent (Item *);
+	void reparent (Item *, bool already_added = false);
 
 	/** @return Parent group, or 0 if this is the root group */
 	Item* parent () const {
