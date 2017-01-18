@@ -428,8 +428,8 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_name ("punch button");
 	layered_button.set_name (("layered button"));
 
-	monitor_in_button.set_name ("punch button"); // XXX
-	monitor_disk_button.set_name ("punch button"); // XXX
+	monitor_in_button.set_name ("monitor button");
+	monitor_disk_button.set_name ("monitor button");
 	auto_input_button.set_name ("transport option button");
 
 	click_button.set_name ("transport button");
@@ -466,8 +466,8 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all implicit monitoed tracks to monitor input"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all implicit monitored tracks to disk-monitoring"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all implicitly monitoed tracks to monitor input"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all implicitly monitored tracks to disk-monitoring"));
 
 	/* setup icons */
 

@@ -132,9 +132,6 @@ ARDOUR_UI::toggle_click ()
 void
 ARDOUR_UI::toggle_session_monitoring_in ()
 {
-	if (ignore_session_monitoring) {
-		return;
-	}
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
 	if (!act) {
 		return;
@@ -143,15 +140,15 @@ ARDOUR_UI::toggle_session_monitoring_in ()
 	if (!tact) {
 		return;
 	}
+
+	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorInput) {
+		return;
+	}
+	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorInput) {
+		return;
+	}
+
 	if (tact->get_active()) {
-		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
-		if (dact) {
-			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
-			if (tdact) {
-				PBD::Unwinder<bool> (ignore_session_monitoring, true);
-				tdact->set_active (false);
-			}
-		}
 		_session->config.set_session_monitoring (MonitorInput);
 	} else {
 		_session->config.set_session_monitoring (MonitorAuto);
@@ -161,9 +158,6 @@ ARDOUR_UI::toggle_session_monitoring_in ()
 void
 ARDOUR_UI::toggle_session_monitoring_disk ()
 {
-	if (ignore_session_monitoring) {
-		return;
-	}
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
 	if (!act) {
 		return;
@@ -172,15 +166,14 @@ ARDOUR_UI::toggle_session_monitoring_disk ()
 	if (!tact) {
 		return;
 	}
+	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorDisk) {
+		return;
+	}
+	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorDisk) {
+		return;
+	}
+
 	if (tact->get_active()) {
-		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
-		if (iact) {
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
-			if (tiact) {
-				PBD::Unwinder<bool> (ignore_session_monitoring, true);
-				tiact->set_active (false);
-			}
-		}
 		_session->config.set_session_monitoring (MonitorDisk);
 	} else {
 		_session->config.set_session_monitoring (MonitorAuto);
@@ -409,9 +402,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 				switch (_session->config.get_session_monitoring ()) {
 					case MonitorDisk:
 						tdact->set_active (true);
+						tiact->set_active (false);
 						break;
 					case MonitorInput:
 						tiact->set_active (true);
+						tdact->set_active (false);
 						break;
 					default:
 						tdact->set_active (false);

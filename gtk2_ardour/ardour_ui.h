@@ -392,7 +392,6 @@ protected:
 	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
-	bool ignore_session_monitoring;
 	void toggle_session_monitoring_in ();
 	void toggle_session_monitoring_disk ();
 	void show_loop_punch_ruler_and_disallow_hide ();
