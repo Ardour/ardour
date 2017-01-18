@@ -560,10 +560,21 @@ ARDOUR_UI::setup_transport ()
 
 	button_height_size_group->add_widget (stop_button);
 //	button_height_size_group->add_widget (sync_button);
-//	button_height_size_group->add_widget (layered_button);
 	button_height_size_group->add_widget (auto_return_button);
+	
+	//tab selections
 	button_height_size_group->add_widget (editor_visibility_button);
 	button_height_size_group->add_widget (mixer_visibility_button);
+
+	//punch section
+	button_height_size_group->add_widget (punch_in_button);
+	button_height_size_group->add_widget (punch_out_button);
+	button_height_size_group->add_widget (layered_button);
+
+	//input monitoring section
+	button_height_size_group->add_widget (monitor_in_button);
+	button_height_size_group->add_widget (monitor_disk_button);
+	button_height_size_group->add_widget (auto_input_button);
 
 	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
 	clock1_size_group->add_widget (*primary_clock->left_btn());
@@ -606,10 +617,10 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (monitor_in_button,   col,     col + 1, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (mon_space,           col + 1, col + 2, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (auto_input_button,   col,     col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 4, 2);
+	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 0, 2);
 	col += 3;
 
 	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
