@@ -576,11 +576,11 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (monitor_disk_button);
 	button_height_size_group->add_widget (auto_input_button);
 
-	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
+	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	clock1_size_group->add_widget (*primary_clock->left_btn());
 	clock1_size_group->add_widget (*primary_clock->right_btn());
 
-	Glib::RefPtr<SizeGroup> clock2_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
+	Glib::RefPtr<SizeGroup> clock2_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	clock2_size_group->add_widget (*secondary_clock->left_btn());
 	clock2_size_group->add_widget (*secondary_clock->right_btn());
 
@@ -608,19 +608,19 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
 	++col;
 
-	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, 2);
+	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 2, 2);
 	col += 3;
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 0, 2);
-	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 4, 2);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 0, 2);
+	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 2, 2);
+	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 2, 2);
+	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 2);
+	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 2, 2);
 	col += 3;
 
 	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
