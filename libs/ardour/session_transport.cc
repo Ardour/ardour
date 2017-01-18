@@ -162,6 +162,27 @@ Session::force_locate (framepos_t target_frame, bool with_roll)
 }
 
 void
+Session::unset_preroll_record ()
+{
+	if (_preroll_record_in >= 0) {
+		remove_event (_preroll_record_in, SessionEvent::RecordStart);
+	}
+	_preroll_record_in = -1;
+}
+
+void
+Session::request_preroll_record (framepos_t rec_in)
+{
+	unset_preroll_record ();
+	_preroll_record_in = rec_in;
+	if (_preroll_record_in >= 0) {
+		replace_event (SessionEvent::RecordStart, _preroll_record_in);
+		config.set_punch_in (false);
+		config.set_punch_out (false);
+	}
+}
+
+void
 Session::request_play_loop (bool yn, bool change_transport_roll)
 {
 	if (_slave && yn) {
@@ -1583,7 +1604,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!config.get_punch_in()) {
+		if (!config.get_punch_in() && !preroll_record_enabled()) {
 			enable_record ();
 		}
 		break;

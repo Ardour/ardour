@@ -1156,7 +1156,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (config.get_punch_in() && record_status() == Enabled) {
+		if (config.get_punch_in() && record_status() == Enabled && !preroll_record_enabled()) {
 			enable_record ();
 		}
 		remove = false;
@@ -1165,8 +1165,16 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (config.get_punch_out()) {
+		if (config.get_punch_out() && !preroll_record_enabled()) {
 			step_back_from_record ();
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::RecordStart:
+		if (preroll_record_enabled() && record_status() == Enabled) {
+			enable_record ();
 		}
 		remove = false;
 		del = false;
@@ -1271,6 +1279,9 @@ Session::compute_stop_limit () const
 		return max_framepos;
 	}
 
+	if (preroll_record_enabled ()) {
+		return max_framepos;
+	}
 
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
 	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());

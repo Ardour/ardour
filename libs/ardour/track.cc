@@ -957,7 +957,7 @@ Track::monitoring_state () const
 	 * enabled and those where it is not.
 	 */
 
-	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+	if (_session.config.get_punch_in() || _session.config.get_punch_out() || _session.preroll_record_in () >= 0) {
 		session_rec = _session.actively_recording ();
 	} else {
 		session_rec = _session.get_record_enabled();

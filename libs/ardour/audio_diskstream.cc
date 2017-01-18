@@ -1923,7 +1923,9 @@ AudioDiskstream::get_state ()
 
 		Location* pi;
 
-		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
+		if (_session.preroll_record_enabled ()) {
+			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_in ());
+		} else if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());

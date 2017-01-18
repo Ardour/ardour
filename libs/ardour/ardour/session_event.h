@@ -47,6 +47,7 @@ public:
 		SetLoop,
 		PunchIn,
 		PunchOut,
+		RecordStart,
 		RangeStop,
 		RangeLocate,
 		Overwrite,
