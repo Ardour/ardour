@@ -382,7 +382,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
-#if 0 // DEBUG style (print on hover)
+#if 1 // DEBUG style (print on hover)
 		if (_hovering || (_elements & Inactive)) {
 			bool layout_font = true;
 			Pango::FontDescription fd = _layout->get_font_description();
@@ -428,8 +428,17 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			ww = get_width();
 			wh = get_height();
 
-			cairo_save (cr);
-			cairo_rotate(cr, _angle * M_PI / 180.0);
+			cairo_matrix_t m1;
+			cairo_get_matrix (cr, &m1);
+			cairo_matrix_t m2 = m1;
+			m2.x0 = 0;
+			m2.y0 = 0;
+			cairo_set_matrix (cr, &m2);
+
+			if (_angle) {
+				cairo_rotate(cr, _angle * M_PI / 180.0);
+			}
+
 			cairo_device_to_user(cr, &ww, &wh);
 			xa = text_margin + (ww - _text_width - 2 * text_margin) * _xalign;
 			ya = (wh - _text_height) * _yalign;
@@ -440,10 +449,9 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa, ya);
+			cairo_move_to (cr, xa + m1.x0, ya + m1.y0);
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
-			cairo_restore (cr);
 		}
 		cairo_restore (cr);
 	}
