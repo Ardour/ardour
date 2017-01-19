@@ -1647,7 +1647,8 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
 			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
 		}
-		rbs = max((size_t) bufsiz * 8, rbs);
+		int fact = ceilf(_session.frame_rate () / 3000.f);
+		rbs = max((size_t) bufsiz * std::max (8, fact), rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
