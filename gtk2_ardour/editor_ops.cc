@@ -2668,6 +2668,7 @@ Editor::rec_with_preroll ()
 {
 	framepos_t ph = playhead_cursor->current_frame ();
 	framepos_t preroll = _session->preroll_samples (ph);
+	_session->request_preroll_record_trim (ph, preroll);
 }
 
 
