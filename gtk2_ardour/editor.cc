@@ -757,6 +757,8 @@ Editor::Editor ()
 	global_vpacker.set_spacing (2);
 	global_vpacker.set_border_width (0);
 
+	//the next three EventBoxes provide the ability for their child widgets to have a background color.  That is all.
+
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);  //a themeable box
 	ebox->set_name("EditorWindow");
 	ebox->add (toolbar_hbox);
