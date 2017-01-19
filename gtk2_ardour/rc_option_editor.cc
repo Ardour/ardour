@@ -113,15 +113,15 @@ public:
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
 		t->attach (_click_emphasis_browse_button, 3, 4, 3, 4, FILL);
 
-		FaderOption* fo = new FaderOption (
+		_click_fader = new FaderOption (
 				"click-gain",
 				_("Gain level"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
 				);
 
-		fo->add_to_page (this);
-		fo->set_state_from_config ();
+		_click_fader->add_to_page (this);
+		_click_fader->set_state_from_config ();
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
@@ -146,6 +146,8 @@ public:
 		} else if (p == "use-click-emphasis") {
 			bool x = _rc_config->get_use_click_emphasis ();
 			_use_emphasis_on_click_check_button.set_active (x);
+		} else if (p == "click-gain") {
+			_click_fader->set_state_from_config ();
 		}
 	}
 
@@ -237,6 +239,7 @@ private:
 	Entry _click_emphasis_path_entry;
 	Button _click_browse_button;
 	Button _click_emphasis_browse_button;
+	FaderOption* _click_fader;
 };
 
 class UndoOptions : public OptionEditorComponent
