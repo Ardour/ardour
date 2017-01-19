@@ -367,7 +367,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 	adjust_capture_position = 0;
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_enabled()))) {
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_punch_enabled()))) {
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
 
@@ -1238,8 +1238,8 @@ MidiDiskstream::get_state ()
 
 		Location* pi;
 
-		if (_session.preroll_record_enabled ()) {
-			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_in ());
+		if (_session.preroll_record_punch_enabled ()) {
+			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_punch_pos ());
 		} else if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
 		} else {

@@ -162,24 +162,32 @@ Session::force_locate (framepos_t target_frame, bool with_roll)
 }
 
 void
-Session::unset_preroll_record ()
+Session::unset_preroll_record_punch ()
 {
-	if (_preroll_record_in >= 0) {
-		remove_event (_preroll_record_in, SessionEvent::RecordStart);
+	if (_preroll_record_punch_pos >= 0) {
+		remove_event (_preroll_record_punch_pos, SessionEvent::RecordStart);
 	}
-	_preroll_record_in = -1;
+	_preroll_record_punch_pos = -1;
 }
 
 void
-Session::request_preroll_record (framepos_t rec_in)
+Session::request_preroll_record_punch (framepos_t rec_in, framecnt_t preroll)
 {
-	unset_preroll_record ();
-	_preroll_record_in = rec_in;
-	if (_preroll_record_in >= 0) {
-		replace_event (SessionEvent::RecordStart, _preroll_record_in);
+	if (actively_recording ()) {
+		return;
+	}
+	unset_preroll_record_punch ();
+	framepos_t start = std::max ((framepos_t)0, rec_in - preroll);
+
+	_preroll_record_punch_pos = rec_in;
+	if (_preroll_record_punch_pos >= 0) {
+		replace_event (SessionEvent::RecordStart, _preroll_record_punch_pos);
 		config.set_punch_in (false);
 		config.set_punch_out (false);
 	}
+	maybe_enable_record ();
+	request_locate (start, true);
+	set_requested_return_frame (rec_in);
 }
 
 void
@@ -1604,7 +1612,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!config.get_punch_in() && !preroll_record_enabled()) {
+		if (!config.get_punch_in() && !preroll_record_punch_enabled()) {
 			enable_record ();
 		}
 		break;

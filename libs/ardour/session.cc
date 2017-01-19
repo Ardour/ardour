@@ -304,7 +304,7 @@ Session::Session (AudioEngine &eng,
 	, _play_range (false)
 	, _range_selection (-1,-1)
 	, _object_selection (-1,-1)
-	, _preroll_record_in (-1)
+	, _preroll_record_punch_pos (-1)
 	, main_outs (0)
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
@@ -2001,7 +2001,7 @@ Session::disable_record (bool rt_context, bool force)
 		if (!rt_context) {
 			remove_pending_capture_state ();
 		}
-		unset_preroll_record ();
+		unset_preroll_record_punch ();
 	}
 }
 
@@ -2039,7 +2039,7 @@ Session::maybe_enable_record (bool rt_context)
 	}
 
 	if (_transport_speed) {
-		if (!config.get_punch_in() && !preroll_record_enabled ()) {
+		if (!config.get_punch_in() && !preroll_record_punch_enabled ()) {
 			enable_record ();
 		}
 	} else {
