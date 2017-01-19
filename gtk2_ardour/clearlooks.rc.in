@@ -412,6 +412,10 @@ style "transport_frame"
 {
 }
 
+style "editor_window"
+{
+}
+
 style "transport_base" = "medium_bold_text"
 {
 }
@@ -1094,6 +1098,8 @@ widget "*timecodeoffset clock" style:highest "medium_text"
 widget "*BaseFrame" style:highest "base_frame"
 widget "*TransportFrame" style:highest "transport_frame"
 widget "*TransportFrame*" style:highest  "transport_frame"
+widget "*EditorWindow*" style:highest  "editor_window"
+widget "*EditorWindow" style:highest  "editor_window"
 
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"

@@ -757,9 +757,21 @@ Editor::Editor ()
 	global_vpacker.set_spacing (2);
 	global_vpacker.set_border_width (0);
 
-	global_vpacker.pack_start (toolbar_hbox, false, false);
-	global_vpacker.pack_start (edit_pane, true, true);
-	global_hpacker.pack_start (global_vpacker, true, true);
+	Gtk::EventBox* ebox = manage (new Gtk::EventBox);  //a themeable box
+	ebox->set_name("EditorWindow");
+	ebox->add (toolbar_hbox);
+
+	Gtk::EventBox* epane_box = manage (new Gtk::EventBox);  //a themeable box
+	epane_box->set_name("EditorWindow");
+	epane_box->add (edit_pane);
+
+	Gtk::EventBox* epane_box2 = manage (new Gtk::EventBox);  //a themeable box
+	epane_box2->set_name("EditorWindow");
+	epane_box2->add (global_vpacker);
+
+	global_vpacker.pack_start (*ebox, false, false);
+	global_vpacker.pack_start (*epane_box, true, true);
+	global_hpacker.pack_start (*epane_box2, true, true);
 
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */
