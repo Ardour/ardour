@@ -84,7 +84,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
-	set_tip (click_button, _("Enable/Disable audio click"));
+	set_tip (click_button, _("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
@@ -328,6 +328,7 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
+	click_button.signal_scroll_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_scroll), false);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
@@ -900,6 +901,29 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 
 	show_tabbable (rc_option_editor);
 	rc_option_editor->set_current_page (_("Metronome"));
+	return true;
+}
+
+bool
+ARDOUR_UI::click_button_scroll (GdkEventScroll* ev)
+{
+	gain_t gain = Config->get_click_gain();
+	float gain_db = accurate_coefficient_to_dB (gain);
+
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+		case GDK_SCROLL_LEFT:
+			gain_db += 1;
+			break;
+		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_RIGHT:
+			gain_db -= 1;
+			break;
+	}
+	gain_db = std::max (-60.f, gain_db);
+	gain = dB_to_coefficient (gain_db);
+	gain = std::min (gain, Config->get_max_gain());
+	Config->set_click_gain (gain);
 	return true;
 }
 
