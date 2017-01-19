@@ -2558,7 +2558,9 @@ AUPlugin::find_presets ()
 	/* add factory presets */
 
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
-		/* XXX: dubious */
+		/* XXX: dubious -- deleting & re-adding a preset -> same URI
+		 * good that we don't support deleting AU presets :)
+		 */
 		string const uri = string_compose ("%1", _presets.size ());
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, false)));
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
