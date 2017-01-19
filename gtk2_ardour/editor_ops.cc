@@ -2668,12 +2668,6 @@ Editor::rec_with_preroll ()
 {
 	framepos_t ph = playhead_cursor->current_frame ();
 	framepos_t preroll = _session->preroll_samples (ph);
-	framepos_t start = std::max ((framepos_t)0, ph - preroll);
-
-	_session->request_preroll_record (ph);
-	_session->maybe_enable_record ();
-	_session->request_locate (start, true);
-	_session->set_requested_return_frame (ph);
 }
 
 
