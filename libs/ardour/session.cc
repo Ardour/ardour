@@ -2105,6 +2105,22 @@ Session::audible_frame () const
 	return std::max ((framepos_t)0, ret);
 }
 
+
+framecnt_t
+Session::preroll_samples (framepos_t pos) const
+{
+	const float pr = Config->get_preroll_seconds();
+	if (pos >= 0 && pr < 0) {
+		const Tempo& tempo = _tempo_map->tempo_at_frame (pos);
+		const Meter& meter = _tempo_map->meter_at_frame (pos);
+		return meter.frames_per_bar (tempo, frame_rate()) * -pr;
+	}
+	if (pr < 0) {
+		return 0;
+	}
+	return pr * frame_rate();
+}
+
 void
 Session::set_frame_rate (framecnt_t frames_per_second)
 {

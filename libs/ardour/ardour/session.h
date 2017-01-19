@@ -1001,6 +1001,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void request_preroll_record (framepos_t);
 	framepos_t preroll_record_in () const { return _preroll_record_in; }
 	bool preroll_record_enabled () const { return _preroll_record_in >= 0; }
+	framecnt_t preroll_samples (framepos_t) const;
 
 	/* temporary hacks to allow selection to be pushed from GUI into backend.
 	   Whenever we move the selection object into libardour, these will go away.
