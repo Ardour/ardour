@@ -73,7 +73,7 @@ Grid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void
 Grid::compute_bounding_box () const
 {
-	_bounding_box = boost::none;
+	_bounding_box = Rect();
 
 	if (_items.empty()) {
 		_bounding_box_dirty = false;
@@ -83,7 +83,7 @@ Grid::compute_bounding_box () const
 	add_child_bounding_boxes (!collapse_on_hide);
 
 	if (_bounding_box) {
-		Rect r = _bounding_box.get();
+		Rect r = _bounding_box;
 
 		_bounding_box = r.expand (outline_width() + top_margin,
 		                          outline_width() + right_margin,
@@ -152,7 +152,7 @@ Grid::reset_self ()
 		return;
 	}
 
-	Rect r (_bounding_box.get());
+	Rect r (_bounding_box);
 
 	/* XXX need to shrink by margin */
 
@@ -195,7 +195,7 @@ Grid::reposition_children ()
 			continue;
 		}
 
-		boost::optional<Rect> bb = (*i)->bounding_box();
+		Rect bb = (*i)->bounding_box();
 
 		if (!bb) {
 			continue;
@@ -203,8 +203,8 @@ Grid::reposition_children ()
 
 		CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
-		row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.get().height());
-		col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.get().width());
+		row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.height());
+		col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.width());
 	}
 
 	/* now sum the row and column widths, so that row_dimens is transformed

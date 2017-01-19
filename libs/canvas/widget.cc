@@ -82,15 +82,15 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		return;
 	}
 
-	Rect self = item_to_window (_bounding_box.get());
-	boost::optional<Rect> r = self.intersection (area);
+	Rect self = item_to_window (_bounding_box);
+	Rect r = self.intersection (area);
 
 	if (!r) {
 		std::cerr << "no intersection\n";
 		return;
 	}
 
-	Rect draw = r.get ();
+	Rect draw = r;
 	cairo_rectangle_t crect;
 	crect.x = draw.x0;
 	crect.y = draw.y0;

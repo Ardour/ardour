@@ -37,7 +37,7 @@ Root::compute_bounding_box () const
 	Container::compute_bounding_box ();
 
 	if (_bounding_box) {
-		Rect r (_bounding_box.get());
+		Rect r (_bounding_box);
 		_canvas->request_size (Duple (r.width (), r.height ()));
 	}
 }

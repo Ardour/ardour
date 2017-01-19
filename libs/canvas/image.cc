@@ -55,11 +55,11 @@ Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 
 	Rect self = item_to_window (Rect (0, 0, _width, _height));
-	boost::optional<Rect> draw = self.intersection (area);
+	Rect draw = self.intersection (area);
 
 	if (_surface && draw) {
 		context->set_source (_surface, self.x0, self.y0);
-		context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
 	}
 }
@@ -67,7 +67,7 @@ Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 void
 Image::compute_bounding_box () const
 {
-	_bounding_box = boost::optional<Rect> (Rect (0, 0, _width, _height));
+	_bounding_box = Rect (0, 0, _width, _height);
 	_bounding_box_dirty = false;
 }
 

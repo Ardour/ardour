@@ -95,11 +95,11 @@ public:
         ArdourCanvas::Color background_color() const { return _bg_color; }
 
 	/** Called when an item is being destroyed */
-	virtual void item_going_away (Item *, boost::optional<Rect>) {}
+	virtual void item_going_away (Item *, Rect) {}
 	void item_shown_or_hidden (Item *);
         void item_visual_property_changed (Item*);
-	void item_changed (Item *, boost::optional<Rect>);
-	void item_moved (Item *, boost::optional<Rect>);
+	void item_changed (Item *, Rect);
+	void item_moved (Item *, Rect);
 
         Duple canvas_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_canvas (Duple const&) const;
@@ -224,7 +224,7 @@ public:
         void pick_current_item (Duple const &, int state);
 
 private:
-	void item_going_away (Item *, boost::optional<Rect>);
+	void item_going_away (Item *, Rect);
 	bool send_leave_event (Item const *, double, double) const;
 
 	Cairo::RefPtr<Cairo::Surface> canvas_image;

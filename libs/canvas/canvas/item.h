@@ -136,7 +136,7 @@ public:
 
 	ScrollGroup* scroll_parent() const { return _scroll_parent; }
 
-	boost::optional<Rect> bounding_box () const;
+	Rect bounding_box () const;
         Coord height() const;
         Coord width() const;
 
@@ -275,10 +275,10 @@ protected:
 	/** true if this item is visible (ie to be drawn), otherwise false */
 	bool _visible;
 	/** our bounding box before any change that is currently in progress */
-	boost::optional<Rect> _pre_change_bounding_box;
+	Rect _pre_change_bounding_box;
 
 	/** our bounding box; may be out of date if _bounding_box_dirty is true */
-	mutable boost::optional<Rect> _bounding_box;
+	mutable Rect _bounding_box;
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
 
