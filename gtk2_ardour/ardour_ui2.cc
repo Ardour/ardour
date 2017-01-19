@@ -453,21 +453,21 @@ ARDOUR_UI::setup_transport ()
 
 	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), editor->name()));
+	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), editor->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (mixer_visibility_button,
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), mixer->name()));
+	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), mixer->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
+	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all implicitly monitoed tracks to monitor input"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all implicitly monitored tracks to disk-monitoring"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
 
 	/* setup icons */
 
