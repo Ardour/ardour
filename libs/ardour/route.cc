@@ -1663,13 +1663,21 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 			if (is_monitor()) {
 				// restriction for Monitor Section Processors
 				if (in.n_audio() != out.n_audio() || out.n_midi() > 0) {
-					/* do not allow to add/remove channels (for now)
-					 * The Monitor follows the master-bus and has no panner (unpan)
-					 * but do allow processors with midi-in to be added (e.g VSTs with control that
-					 * will remain unconnected)
+					/* Note: The Monitor follows the master-bus and has no panner.
+					 *
+					 * The general idea is to only allow plugins that retain the channel-count
+					 * and plugins with MIDI in (e.g VSTs with control that will remain unconnected).
+					 * Then again 5.1 in, monitor stereo is a valid use-case.
+					 *
+					 * and worse: we only refuse adding plugins *here*.
+					 *
+					 * 1) stereo-master, stereo-mon, add a stereo-plugin, OK
+					 * 2) change master-bus, add a channel
+					 * 2a) monitor-secion follows
+					 * 3) monitor processors fail to re-reconfigure (stereo plugin)
+					 * 4) re-load session, monitor-processor remains unconfigured, crash.
 					 */
-					DEBUG_TRACE (DEBUG::Processors, "Monitor: Channel configuration not allowed.\n");
-					return list<pair<ChanCount, ChanCount> > ();
+					DEBUG_TRACE (DEBUG::Processors, "Monitor: Channel configuration change.\n");
 				}
 				if (boost::dynamic_pointer_cast<InternalSend> (*p)) {
 					// internal sends make no sense, only feedback
