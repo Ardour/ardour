@@ -1141,6 +1141,9 @@ LuaProc::do_save_preset (std::string name) {
 		return "";
 	}
 
+	// prevent dups -- just in case
+	t->root()->remove_nodes_and_delete (X_("label"), name);
+
 	std::string uri (preset_name_to_uri (name));
 
 	XMLNode* p = new XMLNode (X_("Preset"));

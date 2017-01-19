@@ -456,6 +456,8 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	return false;
 }
 
+#include "sha1.c"
+
 string
 VSTPlugin::do_save_preset (string name)
 {
@@ -464,9 +466,23 @@ VSTPlugin::do_save_preset (string name)
 		return "";
 	}
 
+	// prevent dups -- just in case
+	t->root()->remove_nodes_and_delete (X_("label"), name);
+
 	XMLNode* p = 0;
-	/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
-	string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
+
+	char tmp[32];
+	snprintf (tmp, 31, "%d", _presets.size() + 1);
+	tmp[31] = 0;
+
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+	sha1_write (&s, (const uint8_t *) name.c_str(), name.size ());
+	sha1_write (&s, (const uint8_t *) tmp, strlen(tmp));
+	sha1_result_hash (&s, hash);
+
+	string const uri = string_compose (X_("VST:%1:x%2"), unique_id (), hash);
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
