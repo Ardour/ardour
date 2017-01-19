@@ -69,6 +69,7 @@ MonitorSection::MonitorSection (Session* s)
 	: SessionHandlePtr (s)
 	, RouteUI (s)
 	, _tearoff (0)
+	, channel_table (0)
 	, channel_table_viewport (*channel_table_scroller.get_hadjustment()
 	                          , *channel_table_scroller.get_vadjustment ())
 	, gain_control (0)
@@ -98,6 +99,8 @@ MonitorSection::MonitorSection (Session* s)
 		register_actions ();
 		load_bindings ();
 	}
+
+	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
 	set_data ("ardour-bindings", bindings);
 
@@ -308,10 +311,7 @@ MonitorSection::MonitorSection (Session* s)
 	channel_table_scroller.show ();
 	channel_table_scroller.add (channel_table_viewport);
 
-	channel_size_group  = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	channel_size_group->add_widget (channel_table_header);
-	channel_size_group->add_widget (channel_table);
-
 	channel_table_header.resize (1, 5);
 
 	Label* l1 = manage (new Label (X_("  ")));
@@ -383,10 +383,6 @@ MonitorSection::MonitorSection (Session* s)
 	level_tbl->attach (*dim_label,           1, 3, 3, 4, EXPAND|FILL, SHRINK, 1, 2);
 	level_tbl->attach (*dim_control,         1, 3, 4, 5, EXPAND|FILL, SHRINK, 1, 2);
 	level_tbl->attach (*dim_display,         1, 3, 5, 6, EXPAND     , SHRINK, 1, 2);
-
-	/* note that we don't pack the table_hpacker till later
-	 * -> top level channel_table_packer */
-	table_hpacker.pack_start (channel_table, true, true);
 
 	// mono, dim
 	HBox* mono_dim_box = manage (new HBox);
@@ -464,7 +460,6 @@ MonitorSection::MonitorSection (Session* s)
 	mono_dim_box->show ();
 	spin_packer->show ();
 	master_packer.show ();
-	channel_table.show ();
 
 	rude_box->show();
 	solo_tbl->show_all();
@@ -475,7 +470,6 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker.show ();
 	hpacker.show ();
 
-	populate_buttons ();
 	map_state ();
 	assign_controllables ();
 
@@ -515,7 +509,7 @@ MonitorSection::~MonitorSection ()
 	}
 
 	_channel_buttons.clear ();
-	_output_changed_connection.disconnect ();
+	output_changed_connections.drop_connections ();
 
 	delete insert_box; insert_box = 0;
 	delete output_button; output_button = 0;
@@ -529,6 +523,7 @@ MonitorSection::~MonitorSection ()
 	delete solo_cut_display; solo_cut_display = 0;
 	delete _tearoff; _tearoff = 0;
 	delete _output_selector; _output_selector = 0;
+	delete channel_table; channel_table = 0;
 }
 
 bool
@@ -606,62 +601,30 @@ MonitorSection::set_session (Session* s)
 			/* session with monitor section */
 			_monitor = _route->monitor_control ();
 			assign_controllables ();
-			_route->output()->changed.connect (_output_changed_connection, invalidator (*this),
+			_route->output()->changed.connect (output_changed_connections, invalidator (*this),
 											boost::bind (&MonitorSection::update_output_display, this),
 											gui_context());
 			insert_box->set_route (_route);
 			_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
+			_route->output()->PortCountChanged.connect (output_changed_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
 			if (_ui_initialized) {
 				update_processor_box ();
 			}
 		} else {
 			/* session with no monitor section */
-			_output_changed_connection.disconnect();
+			output_changed_connections.drop_connections();
 			_monitor.reset ();
 			_route.reset ();
 			delete _output_selector;
 			_output_selector = 0;
 		}
 
-		if (channel_table_scroller.get_parent()) {
-			/* scroller is packed, so remove it */
-			channel_table_packer.remove (channel_table_scroller);
-		}
-
-		if (table_hpacker.get_parent () == &channel_table_packer) {
-			/* this occurs when the table hpacker is directly
-				 packed, so remove it.
-				 */
-			channel_table_packer.remove (table_hpacker);
-		} else if (table_hpacker.get_parent()) {
-			channel_table_viewport.remove ();
-		}
-
-		if (_monitor->output_streams().n_audio() > 7) {
-			/* put the table into a scrolled window, and then put
-			 * that into the channel vpacker, after the table header
-			 */
-			channel_table_viewport.add (table_hpacker);
-			channel_table_packer.pack_start (channel_table_scroller, true, true);
-			channel_table_viewport.show ();
-			channel_table_scroller.show ();
-
-		} else {
-			/* just put the channel table itself into the channel
-			 * vpacker, after the table header
-			 */
-
-			channel_table_packer.pack_start (table_hpacker, true, true);
-			channel_table_scroller.hide ();
-		}
-
-		table_hpacker.show ();
-		channel_table.show ();
+		populate_buttons ();
 
 	} else {
 		/* no session */
 
-		_output_changed_connection.disconnect();
+		output_changed_connections.drop_connections();
 		_monitor.reset ();
 		_route.reset ();
 		control_connections.drop_connections ();
@@ -687,20 +650,37 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 	invert.unset_flags (Gtk::CAN_FOCUS);
 }
 
-	void
+void
 MonitorSection::populate_buttons ()
 {
 	if (!_monitor) {
 		return;
 	}
 
+	if (channel_table) {
+		channel_size_group->remove_widget (*channel_table);
+		delete channel_table;
+	}
+
+	channel_table = new Gtk::Table();
+
+	channel_table->set_col_spacings (6);
+	channel_table->set_row_spacings (6);
+	channel_table->set_homogeneous (true);
+
+	channel_size_group->add_widget (*channel_table);
+	channel_table->show ();
+	table_hpacker.pack_start (*channel_table, true, true);
+
+	for (ChannelButtons::iterator i = _channel_buttons.begin(); i != _channel_buttons.end(); ++i) {
+		delete *i;
+	}
+	_channel_buttons.clear ();
+
 	Glib::RefPtr<Action> act;
 	uint32_t nchans = _monitor->output_streams().n_audio();
 
-	channel_table.resize (nchans, 5);
-	channel_table.set_col_spacings (6);
-	channel_table.set_row_spacings (6);
-	channel_table.set_homogeneous (true);
+	channel_table->resize (nchans, 5);
 
 	const uint32_t row_offset = 0;
 
@@ -722,16 +702,16 @@ MonitorSection::populate_buttons ()
 		}
 
 		Label* label = manage (new Label (l));
-		channel_table.attach (*label, 0, 1, i+row_offset, i+row_offset+1, EXPAND|FILL);
+		channel_table->attach (*label, 0, 1, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
 		ChannelButtonSet* cbs = new ChannelButtonSet;
 
 		_channel_buttons.push_back (cbs);
 
-		channel_table.attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, EXPAND|FILL);
-		channel_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, EXPAND|FILL);
-		channel_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, EXPAND|FILL);
-		channel_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, EXPAND|FILL);
+		channel_table->attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, EXPAND|FILL);
+		channel_table->attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, EXPAND|FILL);
+		channel_table->attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, EXPAND|FILL);
+		channel_table->attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
 		snprintf (buf, sizeof (buf), "monitor-cut-%u", i);
 		act = ActionManager::get_action (X_("Monitor"), buf);
@@ -758,7 +738,40 @@ MonitorSection::populate_buttons ()
 		}
 	}
 
-	channel_table.show_all ();
+	channel_table->show_all ();
+
+	if (channel_table_scroller.get_parent()) {
+		/* scroller is packed, so remove it */
+		channel_table_packer.remove (channel_table_scroller);
+	}
+
+	if (table_hpacker.get_parent () == &channel_table_packer) {
+		/* this occurs when the table hpacker is directly
+			 packed, so remove it.
+			 */
+		channel_table_packer.remove (table_hpacker);
+	} else if (table_hpacker.get_parent()) {
+		channel_table_viewport.remove ();
+	}
+
+	if (nchans > 7) {
+		/* put the table into a scrolled window, and then put
+		 * that into the channel vpacker, after the table header
+		 */
+		channel_table_viewport.add (table_hpacker);
+		channel_table_packer.pack_start (channel_table_scroller, true, true);
+		channel_table_viewport.show ();
+		channel_table_scroller.show ();
+
+	} else {
+		/* just put the channel table itself into the channel
+		 * vpacker, after the table header
+		 */
+		channel_table_packer.pack_start (table_hpacker, true, true);
+		channel_table_scroller.hide ();
+	}
+	table_hpacker.show ();
+	channel_table->show ();
 }
 
 void

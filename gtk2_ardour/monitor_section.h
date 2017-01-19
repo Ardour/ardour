@@ -61,8 +61,8 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 	Gtk::HBox  channel_table_packer;
 	Gtk::HBox  table_hpacker;
 	Gtk::HBox  master_packer;
-	Gtk::Table channel_table;
 	Gtk::Table channel_table_header;
+	Gtk::Table *channel_table;
 	Gtk::ScrolledWindow channel_table_scroller;
 	Gtk::Viewport channel_table_viewport;
 	Glib::RefPtr<Gtk::SizeGroup> channel_size_group;
@@ -178,7 +178,7 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 
 	PBD::ScopedConnection config_connection;
 	PBD::ScopedConnectionList control_connections;
-	PBD::ScopedConnection _output_changed_connection;
+	PBD::ScopedConnectionList output_changed_connections;
 
 	bool _inhibit_solo_model_update;
 
