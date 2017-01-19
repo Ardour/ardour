@@ -2606,21 +2606,6 @@ Editor::play_selection ()
 	_session->request_play_range (&lar, true);
 }
 
-framepos_t
-Editor::get_preroll (framepos_t pos)
-{
-	const float pr = Config->get_preroll_seconds();
-	if (pos >= 0 && pr < 0) {
-		/* currently 1 bar's worth of pre-roll, not aligned to bar/beat
-		 * to align to a bar before pos, see count_in, session_transport.cc
-		 */
-		const Tempo& tempo = _session->tempo_map().tempo_at_frame (pos);
-		const Meter& meter = _session->tempo_map().meter_at_frame (pos);
-		return meter.frames_per_bar (tempo, _session->frame_rate()) * -pr;
-	}
-	return pr * _session->frame_rate();
-}
-
 
 void
 Editor::maybe_locate_with_edit_preroll (framepos_t location)
@@ -2628,7 +2613,7 @@ Editor::maybe_locate_with_edit_preroll (framepos_t location)
 	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _session->config.get_external_sync() )
 		return;
 
-	location -= get_preroll (location);
+	location -= _session->preroll_samples (location);
 
 	//don't try to locate before the beginning of time
 	if (location < 0) {
@@ -2648,7 +2633,7 @@ Editor::play_with_preroll ()
 {
 	framepos_t start, end;
 	if ( UIConfiguration::instance().get_follow_edits() && get_selection_extents ( start, end) ) {
-		const framepos_t preroll = get_preroll (start);
+		const framepos_t preroll = _session->preroll_samples (start);
 
 		framepos_t ret = start;
 		
@@ -2666,7 +2651,7 @@ Editor::play_with_preroll ()
 		_session->set_requested_return_frame (ret);  //force auto-return to return to range start, without the preroll
 	} else {
 		framepos_t ph = playhead_cursor->current_frame ();
-		const framepos_t preroll = get_preroll (ph);
+		const framepos_t preroll = _session->preroll_samples (ph);
 		framepos_t start;
 		if (ph > preroll) {
 			start = ph - preroll; 
@@ -2682,7 +2667,7 @@ void
 Editor::rec_with_preroll ()
 {
 	framepos_t ph = playhead_cursor->current_frame ();
-	framepos_t preroll = get_preroll (ph);
+	framepos_t preroll = _session->preroll_samples (ph);
 	framepos_t start = std::max ((framepos_t)0, ph - preroll);
 
 	_session->request_preroll_record (ph);
