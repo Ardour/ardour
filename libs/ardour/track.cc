@@ -955,6 +955,8 @@ Track::monitoring_state () const
 	 * time, but just to keep the semantics the same as they were before
 	 * sept 26th 2012, we differentiate between the cases where punch is
 	 * enabled and those where it is not.
+	 *
+	 * rg: I suspect this is not the case: monitoring may differ
 	 */
 
 	if (_session.config.get_punch_in() || _session.config.get_punch_out() || _session.preroll_record_punch_enabled ()) {
