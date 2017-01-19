@@ -1002,9 +1002,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t preroll_samples (framepos_t) const;
 
 	void request_preroll_record_punch (framepos_t start, framecnt_t preroll);
+	void request_preroll_record_trim (framepos_t start, framecnt_t preroll);
 
 	framepos_t preroll_record_punch_pos () const { return _preroll_record_punch_pos; }
 	bool preroll_record_punch_enabled () const { return _preroll_record_punch_pos >= 0; }
+
+	framecnt_t preroll_record_trim_len () const { return _preroll_record_trim_len; }
 
 	/* temporary hacks to allow selection to be pushed from GUI into backend.
 	   Whenever we move the selection object into libardour, these will go away.
@@ -1924,8 +1927,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	Evoral::Range<framepos_t> _object_selection;
 
 	void unset_preroll_record_punch ();
+	void unset_preroll_record_trim ();
 
 	framepos_t _preroll_record_punch_pos;
+	framecnt_t _preroll_record_trim_len;
 
 	/* main outs */
 	uint32_t main_outs;

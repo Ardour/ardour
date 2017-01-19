@@ -171,12 +171,19 @@ Session::unset_preroll_record_punch ()
 }
 
 void
+Session::unset_preroll_record_trim ()
+{
+	_preroll_record_trim_len = 0;
+}
+
+void
 Session::request_preroll_record_punch (framepos_t rec_in, framecnt_t preroll)
 {
 	if (actively_recording ()) {
 		return;
 	}
 	unset_preroll_record_punch ();
+	unset_preroll_record_trim ();
 	framepos_t start = std::max ((framepos_t)0, rec_in - preroll);
 
 	_preroll_record_punch_pos = rec_in;
@@ -187,6 +194,25 @@ Session::request_preroll_record_punch (framepos_t rec_in, framecnt_t preroll)
 	}
 	maybe_enable_record ();
 	request_locate (start, true);
+	set_requested_return_frame (rec_in);
+}
+
+void
+Session::request_preroll_record_trim (framepos_t rec_in, framecnt_t preroll)
+{
+	if (actively_recording ()) {
+		return;
+	}
+	unset_preroll_record_punch ();
+	unset_preroll_record_trim ();
+
+	config.set_punch_in (false);
+	config.set_punch_out (false);
+
+	framepos_t pos = std::max ((framepos_t)0, rec_in - preroll);
+	_preroll_record_trim_len = preroll;
+	maybe_enable_record ();
+	request_locate (pos, true);
 	set_requested_return_frame (rec_in);
 }
 
@@ -819,6 +845,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	clear_clicks();
+	unset_preroll_record_trim ();
 
 	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/

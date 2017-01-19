@@ -1641,6 +1641,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
 
+		const framepos_t preroll_off = _session.preroll_record_trim_len ();
 		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 			string region_name;
@@ -1660,6 +1661,9 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
+				if (preroll_off > 0) {
+					region->trim_front (buffer_position + preroll_off);
+				}
 			}
 
 			catch (failed_constructor& err) {
@@ -1669,7 +1673,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			i_am_the_modifier++;
 
-			_playlist->add_region (region, (*ci)->start, 1, non_layered());
+			_playlist->add_region (region, (*ci)->start + preroll_off, 1, non_layered());
 			_playlist->set_layer (region, DBL_MAX);
 			i_am_the_modifier--;
 

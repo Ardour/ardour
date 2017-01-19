@@ -1035,6 +1035,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				initial_capture = capture_info.front()->start;
 			}
 
+			const framepos_t preroll_off = _session.preroll_record_trim_len ();
 			for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 				string region_name;
@@ -1058,6 +1059,9 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 					boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 					region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+					if (preroll_off > 0) {
+						region->trim_front ((*ci)->start - initial_capture + preroll_off);
+					}
 				}
 
 				catch (failed_constructor& err) {
@@ -1068,7 +1072,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
 				i_am_the_modifier++;
-				_playlist->add_region (region, (*ci)->start);
+				_playlist->add_region (region, (*ci)->start + preroll_off);
 				i_am_the_modifier--;
 			}
 
