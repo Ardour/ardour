@@ -442,7 +442,21 @@ int main (int argc, char *argv[])
 	ui = 0;
 
 	ARDOUR::cleanup ();
+#ifndef NDEBUG
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		Glib::usleep(100000);
+		sched_yield();
+	}
+#endif
+
 	pthread_cancel_all ();
+
+#ifndef NDEBUG
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		Glib::usleep(100000);
+		sched_yield();
+	}
+#endif
 
 	console_madness_end ();
 
