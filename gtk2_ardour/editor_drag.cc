@@ -37,6 +37,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 
@@ -1442,7 +1443,9 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
-			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(),
+			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port,
+			                                                  Config->get_strict_io () || Profile->get_mixbus (),
+			                                                  boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
 			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
 			tav = _editor->axis_view_from_stripable (midi_tracks.front());

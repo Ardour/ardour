@@ -1940,15 +1940,18 @@ ARDOUR_UI::session_add_mixed_track (
 		Plugin::PresetRecord* pset,
 		ARDOUR::PresentationInfo::order_t order)
 {
-	list<boost::shared_ptr<MidiTrack> > tracks;
-
 	if (_session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
 		return;
 	}
 
+	if (Profile->get_mixbus ()) {
+		strict_io = true;
+	}
+
 	try {
-		tracks = _session->new_midi_track (input, output, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
+		list<boost::shared_ptr<MidiTrack> > tracks;
+		tracks = _session->new_midi_track (input, output, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
 
 		if (tracks.size() != how_many) {
 			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
@@ -1958,12 +1961,6 @@ ARDOUR_UI::session_add_mixed_track (
 	catch (...) {
 		display_insufficient_ports_message ();
 		return;
-	}
-
-	if (strict_io) {
-		for (list<boost::shared_ptr<MidiTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
-			(*i)->set_strict_io (true);
-		}
 	}
 }
 
@@ -1977,16 +1974,18 @@ ARDOUR_UI::session_add_midi_bus (
 		Plugin::PresetRecord* pset,
 		ARDOUR::PresentationInfo::order_t order)
 {
-	RouteList routes;
-
 	if (_session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
 		return;
 	}
 
-	try {
+	if (Profile->get_mixbus ()) {
+		strict_io = true;
+	}
 
-		routes = _session->new_midi_route (route_group, how_many, name_template, instrument, pset, PresentationInfo::MidiBus, order);
+	try {
+		RouteList routes;
+		routes = _session->new_midi_route (route_group, how_many, name_template, strict_io, instrument, pset, PresentationInfo::MidiBus, order);
 		if (routes.size() != how_many) {
 			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
 		}
@@ -1995,12 +1994,6 @@ ARDOUR_UI::session_add_midi_bus (
 	catch (...) {
 		display_insufficient_ports_message ();
 		return;
-	}
-
-	if (strict_io) {
-		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-			(*i)->set_strict_io (true);
-		}
 	}
 }
 

@@ -39,6 +39,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -1029,6 +1030,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				list<boost::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
 					                          ChanCount (DataType::MIDI, 1),
+					                          Config->get_strict_io () || Profile->get_mixbus (),
 					                          instrument, (Plugin::PresetRecord*) 0,
 					                          (RouteGroup*) 0,
 					                          1,
@@ -1037,11 +1039,6 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 
 				if (mt.empty()) {
 					return -1;
-				}
-				if (Config->get_strict_io ()) {
-					for (list<boost::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
-						(*i)->set_strict_io (true);
-					}
 				}
 
 				// TODO set strict_io from preferences
