@@ -4428,11 +4428,11 @@ Session::rename (const std::string& new_name)
 }
 
 int
-Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& created_version)
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
-	created_version = "";
+	program_version = "";
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		return -1;
@@ -4470,9 +4470,13 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	node = node->children;
 	while (node != NULL) {
 		 if (!strcmp((const char*) node->name, "ProgramVersion")) {
-			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"created-with");
+			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"modified-with");
 			 if (val) {
-				 created_version = string ((const char*)val);
+				 program_version = string ((const char*)val);
+				 size_t sep = program_version.find_first_of("-");
+				 if (sep != string::npos) {
+					 program_version = program_version.substr (0, sep);
+				 }
 			 }
 			 xmlFree (val);
 		 }
