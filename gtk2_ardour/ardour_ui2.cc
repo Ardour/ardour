@@ -84,7 +84,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
-	set_tip (click_button, _("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level"));
+	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
