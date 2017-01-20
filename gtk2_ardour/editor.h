@@ -2221,8 +2221,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _region_selection_change_updates_region_list;
 
 	void setup_fade_images ();
-	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;
-	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_out_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_in_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_out_images;
 
