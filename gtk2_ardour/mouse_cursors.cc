@@ -72,6 +72,11 @@ MouseCursors::MouseCursors ()
 {
 }
 
+MouseCursors::~MouseCursors ()
+{
+	drop_all ();
+}
+
 void
 MouseCursors::drop_all ()
 {

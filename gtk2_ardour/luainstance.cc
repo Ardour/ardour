@@ -833,6 +833,13 @@ LuaInstance::instance ()
 	return _instance;
 }
 
+void
+LuaInstance::destroy_instance ()
+{
+	delete _instance;
+	_instance = 0;
+}
+
 LuaInstance::LuaInstance ()
 {
 	lua.Print.connect (&_lua_print);

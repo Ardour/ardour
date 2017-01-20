@@ -268,7 +268,7 @@ UIConfiguration::color_file_name (bool use_my, bool with_version) const
 
 	basename += color_name;
 	basename += "-";
-	basename += downcase(PROGRAM_NAME);
+	basename += downcase(std::string(PROGRAM_NAME));
 
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");

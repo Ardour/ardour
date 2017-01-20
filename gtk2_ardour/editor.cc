@@ -890,9 +890,20 @@ Editor::~Editor()
 	delete _locations;
 	delete _playlist_selector;
 	delete _time_info_box;
+	delete selection;
+	delete cut_buffer;
+	delete _cursors;
+
+	LuaInstance::destroy_instance ();
 
 	for (list<XMLNode *>::iterator i = selection_op_history.begin(); i != selection_op_history.end(); ++i) {
 		delete *i;
+	}
+	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_in_images.begin(); i != _xfade_in_images.end (); ++i) {
+		delete i->second;
+	}
+	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_out_images.begin(); i != _xfade_out_images.end (); ++i) {
+		delete i->second;
 	}
 }
 

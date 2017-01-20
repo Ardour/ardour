@@ -746,6 +746,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete luawindow; luawindow = 0;
 		delete editor; editor = 0;
 		delete mixer; mixer = 0;
+		delete rc_option_editor; rc_option_editor = 0; // failed to wrap object warning
 		delete nsm; nsm = 0;
 		delete gui_object_state; gui_object_state = 0;
 		delete main_window_visibility;
@@ -5566,7 +5567,7 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	}
 
 	window.set_title (title.get_string());
-	window.set_wmclass (string_compose (X_("%1_%1"), downcase (PROGRAM_NAME), downcase (name)), PROGRAM_NAME);
+	window.set_wmclass (string_compose (X_("%1_%1"), downcase (std::string(PROGRAM_NAME)), downcase (name)), PROGRAM_NAME);
 
 	window.set_flags (CAN_FOCUS);
 	window.add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
