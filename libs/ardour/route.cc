@@ -905,6 +905,7 @@ int
 Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
 {
 	ProcessorList::iterator loc;
+	boost::shared_ptr <PluginInsert> fanout;
 
 	if (before) {
 		loc = find(_processors.begin(), _processors.end(), before);
@@ -963,7 +964,8 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 		if (flags != None) {
 			boost::optional<int> rv = PluginSetup (shared_from_this (), pi, flags);  /* EMIT SIGNAL */
-			switch (rv.get_value_or (0)) {
+			int mode = rv.get_value_or (0);
+			switch (mode & 3) {
 				case 1:
 					to_skip.push_back (*i); // don't add this one;
 					break;
@@ -973,6 +975,9 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 					break;
 				default:
 					break;
+			}
+			if ((mode & 5) == 4) {
+				fanout = pi;
 			}
 		}
 	}
@@ -1060,6 +1065,11 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
+	if (fanout && fanout->configured ()
+			&& fanout->output_streams().n_audio() > 2
+			&& boost::dynamic_pointer_cast<PluginInsert> (the_instrument ()) == fanout) {
+		fan_out (); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
@@ -1968,6 +1978,35 @@ Route::apply_processor_order (const ProcessorList& new_order)
 
 	/* If the meter is in a custom position, find it and make a rough note of its position */
 	maybe_note_meter_position ();
+}
+
+void
+Route::move_instrument_down (bool postfader)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	ProcessorList new_order;
+	boost::shared_ptr<Processor> instrument;
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+		if (pi && pi->plugin ()->get_info ()->is_instrument ()) {
+			instrument = *i;
+		} else if (instrument && *i == _amp) {
+			if (postfader) {
+				new_order.push_back (*i);
+				new_order.push_back (instrument);
+			} else {
+				new_order.push_back (instrument);
+				new_order.push_back (*i);
+			}
+		} else {
+			new_order.push_back (*i);
+		}
+	}
+	if (!instrument) {
+		return;
+	}
+	lm.release ();
+	reorder_processors (new_order, 0);
 }
 
 int

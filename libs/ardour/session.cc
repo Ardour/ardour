@@ -2574,7 +2574,12 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				if (strict_io) {
 					pi->set_strict_io (true);
 				}
+
 				(*r)->add_processor (pi, PreFader);
+
+				if (Profile->get_mixbus () && pi->configured () && pi->output_streams().n_audio() > 2) {
+					(*r)->move_instrument_down (false);
+				}
 			}
 		}
 	}
@@ -2669,7 +2674,12 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				if (strict_io) {
 					pi->set_strict_io (true);
 				}
+
 				(*r)->add_processor (pi, PreFader);
+
+				if (Profile->get_mixbus () && pi->configured () && pi->output_streams().n_audio() > 2) {
+					(*r)->move_instrument_down (false);
+				}
 			}
 		}
 	}
