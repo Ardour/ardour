@@ -50,6 +50,9 @@ Worker::~Worker()
 	if (_thread) {
 		_thread->join();
 	}
+	delete _responses;
+	delete _requests;
+	free (_response);
 }
 
 bool
