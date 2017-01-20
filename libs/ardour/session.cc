@@ -2474,9 +2474,10 @@ Session::default_track_name_pattern (DataType t)
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (const ChanCount& input, const ChanCount& output,
+Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool strict_io,
                          boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
-                         RouteGroup* route_group, uint32_t how_many, string name_template, PresentationInfo::order_t order,
+                         RouteGroup* route_group, uint32_t how_many,
+                         string name_template, PresentationInfo::order_t order,
                          TrackMode mode)
 {
 	string track_name;
@@ -2503,7 +2504,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output,
 				goto failed;
 			}
 
-			if (Profile->get_mixbus ()) {
+			if (strict_io) {
 				track->set_strict_io (true);
 			}
 
@@ -2569,8 +2570,11 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output,
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
-				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
-				(*r)->add_processor (p, PreFader);
+				boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
+				if (strict_io) {
+					pi->set_strict_io (true);
+				}
+				(*r)->add_processor (pi, PreFader);
 			}
 		}
 	}
@@ -2579,7 +2583,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output,
 }
 
 RouteList
-Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
+Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, bool strict_io,
+                         boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          PresentationInfo::Flag flag, PresentationInfo::order_t order)
 {
 	string bus_name;
@@ -2602,7 +2607,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				goto failure;
 			}
 
-			if (Profile->get_mixbus ()) {
+			if (strict_io) {
 				bus->set_strict_io (true);
 			}
 
@@ -2660,8 +2665,11 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				if (pset) {
 					plugin->load_preset (*pset);
 				}
-				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
-				(*r)->add_processor (p, PreFader);
+				boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
+				if (strict_io) {
+					pi->set_strict_io (true);
+				}
+				(*r)->add_processor (pi, PreFader);
 			}
 		}
 	}

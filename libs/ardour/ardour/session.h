@@ -655,7 +655,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-		const ChanCount& input, const ChanCount& output,
+		const ChanCount& input, const ChanCount& output, bool strict_io,
 		boost::shared_ptr<PluginInfo> instrument,
 		Plugin::PresetRecord* pset,
 		RouteGroup* route_group, uint32_t how_many, std::string name_template,
@@ -664,7 +664,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
-	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, bool strict_io, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
 
 	void remove_routes (boost::shared_ptr<RouteList>);
 	void remove_route (boost::shared_ptr<Route>);
