@@ -472,7 +472,7 @@ VSTPlugin::do_save_preset (string name)
 	XMLNode* p = 0;
 
 	char tmp[32];
-	snprintf (tmp, 31, "%d", _presets.size() + 1);
+	snprintf (tmp, 31, "%ld", _presets.size() + 1);
 	tmp[31] = 0;
 
 	char hash[41];
