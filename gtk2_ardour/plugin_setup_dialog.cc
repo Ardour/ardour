@@ -31,6 +31,7 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 	, _route (r)
 	, _pi (pi)
 	, _keep_mapping (_("Copy I/O Map"), ArdourButton::led_default_elements)
+	, _fan_out (_("Fan out"), ArdourButton::led_default_elements)
 {
 	assert (flags != Route::None);
 
@@ -71,7 +72,7 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 		f->add (*box);
 		tbl->attach (*f, 0, 1, row, row + 1, EXPAND|FILL, SHRINK, 0, 8);
 
-		_keep_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::apply_mapping)); 
+		_keep_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::apply_mapping));
 		add_button ("Replace", 2);
 	} else {
 
@@ -86,16 +87,19 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 		Box* box = manage (new HBox ());
 		box->set_border_width (2);
 		box->pack_start (_out_presets, true, true);
+		box->pack_start (_fan_out, false, false);
 		Frame* f = manage (new Frame ());
 		f->set_label (_("Output Configuration"));
 		f->add (*box);
 		tbl->attach (*f, 1, 2, row, row + 1, EXPAND|FILL, SHRINK, 0, 8);
+		_fan_out.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::toggle_fan_out));
 	} else {
 		_pi->set_preset_out (_pi->natural_output_streams ());
 		update_sensitivity (_pi->natural_output_streams ().n_audio ());
 	}
 
 	_keep_mapping.set_active (false);
+	_fan_out.set_active (false);
 	apply_mapping ();
 
 	add_button (Stock::ADD, 0);
@@ -162,6 +166,7 @@ PluginSetupDialog::update_sensitivity (uint32_t n_audio)
 	} else {
 		_keep_mapping.set_sensitive (false);
 	}
+	_fan_out.set_sensitive (n_audio > 2);
 }
 
 bool
@@ -188,6 +193,12 @@ PluginSetupDialog::apply_mapping ()
 	} else {
 		_pi->pre_seed (ChanCount (), ChanCount (), ChanMapping (), ChanMapping (), ChanMapping());
 	}
+}
+
+void
+PluginSetupDialog::toggle_fan_out ()
+{
+	_fan_out.set_active (!_fan_out.get_active ());
 }
 
 std::string

@@ -285,6 +285,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+	_route->fan_out.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::fan_out, this, true, true), gui_context());
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());

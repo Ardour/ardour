@@ -1894,5 +1894,6 @@ int
 EditorRoutes::plugin_setup (boost::shared_ptr<Route> r, boost::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
 {
 	PluginSetupDialog psd (r, pi, flags);
-	return psd.run ();
+	int rv = psd.run ();
+	return rv + (psd.fan_out() ? 4 : 0);
 }
