@@ -519,6 +519,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
 		}
+	} else if (p == "click-gain") {
+		float gain_db = accurate_coefficient_to_dB (Config->get_click_gain());
+		set_tip (click_button, string_compose ("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\n\nLevel %1dbFS", gain_db));
 	}
 }
 
