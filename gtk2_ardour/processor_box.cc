@@ -4234,6 +4234,7 @@ ProcessorWindowProxy::processor_going_away ()
 	   send DropReferences is about to be deleted, but lets do it anyway.
 	*/
 	going_away_connection.disconnect();
+	delete this;
 }
 
 ARDOUR::SessionHandlePtr*
@@ -4369,6 +4370,7 @@ PluginPinWindowProxy::processor_going_away ()
 	_window = 0;
 	WM::Manager::instance().remove (this);
 	going_away_connection.disconnect();
+	delete this;
 }
 
 void

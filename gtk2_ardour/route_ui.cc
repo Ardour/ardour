@@ -2289,6 +2289,7 @@ RoutePinWindowProxy::route_going_away ()
 	_window = 0;
 	WM::Manager::instance().remove (this);
 	going_away_connection.disconnect();
+	delete this;
 }
 
 void
