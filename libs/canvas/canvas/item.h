@@ -145,7 +145,7 @@ public:
 
 	/* item implementations can override this if they need to */
 	virtual Rect size_request() const { return bounding_box (true); }
-	virtual void size_allocate (Rect const&);
+	void size_allocate (Rect const&);
 
 	/** bounding box is the public API to get the size of the item.
 	   If @param for_own_purposes is false, then it will return the
