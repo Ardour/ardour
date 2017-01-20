@@ -4452,6 +4452,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	if (node == NULL) {
 		xmlFreeParserCtxt(ctxt);
+		xmlFreeDoc (doc);
 		return -1;
 	}
 
@@ -4490,6 +4491,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	}
 
 	xmlFreeParserCtxt(ctxt);
+	xmlFreeDoc (doc);
 
 	return !(found_sr && found_data_format); // zero if they are both found
 }
