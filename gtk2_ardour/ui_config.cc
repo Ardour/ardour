@@ -164,7 +164,7 @@ UIConfiguration::reset_dpi ()
 	/* FT2 rendering - used by GnomeCanvas, sigh */
 
 #ifndef PLATFORM_WINDOWS
-	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024);
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024); // XXX pango_ft2_font_map_new leaks
 #endif
 
 	/* Cairo rendering, in case there is any */

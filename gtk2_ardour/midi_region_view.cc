@@ -1827,7 +1827,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 	if (midi_view()->note_mode() == Sustained) {
 
-		Note* ev_rect = new Note (*this, _note_group, note);
+		Note* ev_rect = new Note (*this, _note_group, note); // XXX may leak
 
 		update_sustained (ev_rect);
 
@@ -1837,7 +1837,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 		const double diamond_size = std::max(1., floor(note_height()) - 2.);
 
-		Hit* ev_diamond = new Hit (*this, _note_group, diamond_size, note);
+		Hit* ev_diamond = new Hit (*this, _note_group, diamond_size, note); // XXX may leak
 
 		update_hit (ev_diamond);
 
