@@ -45,6 +45,18 @@ EventLoop::EventLoop (string const& name)
 {
 }
 
+EventLoop::~EventLoop ()
+{
+	trash.sort();
+	trash.unique();
+	for (std::list<InvalidationRecord*>::iterator r = trash.begin(); r != trash.end(); ++r) {
+		if (!(*r)->in_use ()) {
+			delete *r;
+		}
+	}
+	trash.clear ();
+}
+
 EventLoop*
 EventLoop::get_event_loop_for_thread()
 {

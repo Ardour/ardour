@@ -47,7 +47,7 @@ class LIBPBD_API EventLoop
 {
 public:
 	EventLoop (std::string const&);
-	virtual ~EventLoop() {}
+	virtual ~EventLoop();
 
 	enum RequestType {
 		range_guarantee = ~0
