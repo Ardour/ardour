@@ -734,6 +734,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 		float sr;
 		SampleFormat sf;
+		std::string created_version;
 
 		std::string state_file_basename;
 
@@ -755,10 +756,9 @@ SessionDialog::redisplay_recent_sessions ()
 		g_stat (s.c_str(), &gsb);
 
 		row[recent_session_columns.fullpath] = s;
-		row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 		row[recent_session_columns.time_modified] = gsb.st_mtime;
 
-		if (Session::get_info_from_path (s, sr, sf) == 0) {
+		if (Session::get_info_from_path (s, sr, sf, created_version) == 0) {
 			row[recent_session_columns.sample_rate] = rate_as_string (sr);
 			switch (sf) {
 			case FormatFloat:
@@ -774,6 +774,12 @@ SessionDialog::redisplay_recent_sessions ()
 		} else {
 			row[recent_session_columns.sample_rate] = "??";
 			row[recent_session_columns.disk_format] = "--";
+		}
+
+		if (created_version.empty()) {
+			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
+		} else {
+			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + created_version);
 		}
 
 		++session_snapshot_count;
@@ -794,7 +800,11 @@ SessionDialog::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = s;
-				child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
+				if (created_version.empty()) {
+					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
+				} else {
+					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + created_version);
+				}
 				g_stat (s.c_str(), &gsb);
 				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
 
@@ -805,7 +815,7 @@ SessionDialog::redisplay_recent_sessions ()
 					most_recent = gsb.st_mtime;
 				}
 #if 0
-				if (Session::get_info_from_path (s, sr, sf) == 0) {
+				if (Session::get_info_from_path (s, sr, sf, created_version) == 0) {
 					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 					switch (sf) {
 					case FormatFloat:

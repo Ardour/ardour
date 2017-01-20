@@ -120,9 +120,10 @@ static Session * _load_session (string dir, string state)
 
 	float sr;
 	SampleFormat sf;
+	std::string v;
 
 	std::string s = Glib::build_filename (dir, state + statefile_suffix);
-	if (Session::get_info_from_path (s, sr, sf) == 0) {
+	if (Session::get_info_from_path (s, sr, sf, v) == 0) {
 		if (engine->set_sample_rate (sr)) {
 			std::cerr << "Cannot set session's samplerate.\n";
 			return 0;
