@@ -51,9 +51,10 @@ Pane::~Pane ()
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		(*c)->show_con.disconnect ();
 		(*c)->hide_con.disconnect ();
-		(*c)->w->remove_destroy_notify_callback (*c);
-		(*c)->w->unparent ();
-		delete (*c);
+		if ((*c)->w) {
+			(*c)->w->remove_destroy_notify_callback ((*c).get());
+			(*c)->w->unparent ();
+		}
 	}
 	children.clear ();
 }
@@ -158,8 +159,8 @@ Pane::handle_child_visibility ()
 void
 Pane::on_add (Widget* w)
 {
-	children.push_back (new Child (this, w, 0));
-	Child* kid = children.back ();
+	children.push_back (boost::shared_ptr<Child> (new Child (this, w, 0)));
+	Child* kid = children.back ().get();
 
 	w->set_parent (*this);
 	/* Gtkmm 2.4 does not correctly arrange for ::on_remove() to be called
@@ -190,9 +191,8 @@ Pane::child_destroyed (Gtk::Widget* w)
 		if ((*c)->w == w) {
 			(*c)->show_con.disconnect ();
 			(*c)->hide_con.disconnect ();
-			Child* kid = *c;
+			(*c)->w = NULL; // mark invalid
 			children.erase (c);
-			delete kid;
 			break;
 		}
 	}
@@ -206,11 +206,10 @@ Pane::on_remove (Widget* w)
 		if ((*c)->w == w) {
 			(*c)->show_con.disconnect ();
 			(*c)->hide_con.disconnect ();
-			w->remove_destroy_notify_callback (*c);
+			w->remove_destroy_notify_callback ((*c).get());
 			w->unparent ();
-			Child* kid = *c;
+			(*c)->w = NULL; // mark invalid
 			children.erase (c);
-			delete kid;
 			break;
 		}
 	}
@@ -610,12 +609,11 @@ Pane::forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer c
 	/* since the callback could modify the child list(s), make sure we keep
 	 * the iterators safe;
 	 */
-
-	for (Children::iterator c = children.begin(); c != children.end(); ) {
-		Children::iterator next = c;
-		++next;
-		callback ((*c)->w->gobj(), callback_data);
-		c = next;
+	Children kids (children);
+	for (Children::const_iterator c = kids.begin(); c != kids.end(); ++c) {
+		if ((*c)->w) {
+			callback ((*c)->w->gobj(), callback_data);
+		}
 	}
 
 	if (include_internals) {

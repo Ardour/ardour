@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 #include <stdint.h>
 
@@ -55,7 +56,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 		Child (Pane* p, Gtk::Widget* widget, uint32_t ms) : pane (p), w (widget), minsize (ms) {}
 	};
 
-	typedef std::vector<Child*> Children;
+	typedef std::vector<boost::shared_ptr<Child> > Children;
 
 	Pane (bool horizontal);
 	~Pane();
