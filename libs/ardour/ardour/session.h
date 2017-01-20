@@ -199,7 +199,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	virtual ~Session ();
 
-	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& created_version);
 	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
 	/** a monotonic counter used for naming user-visible things uniquely

@@ -4428,10 +4428,11 @@ Session::rename (const std::string& new_name)
 }
 
 int
-Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format)
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& created_version)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
+	created_version = "";
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		return -1;
@@ -4468,6 +4469,13 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	node = node->children;
 	while (node != NULL) {
+		 if (!strcmp((const char*) node->name, "ProgramVersion")) {
+			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"created-with");
+			 if (val) {
+				 created_version = string ((const char*)val);
+			 }
+			 xmlFree (val);
+		 }
 		 if (strcmp((const char*) node->name, "Config")) {
 			 node = node->next;
 			 continue;
