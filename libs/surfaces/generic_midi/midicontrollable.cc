@@ -88,6 +88,8 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 MIDIControllable::~MIDIControllable ()
 {
 	drop_external_control ();
+	delete _descriptor;
+	_descriptor = 0;
 }
 
 int
