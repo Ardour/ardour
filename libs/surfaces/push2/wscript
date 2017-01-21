@@ -6,8 +6,6 @@ import os
 top = '.'
 out = 'build'
 
-print "this is push2"
-
 def options(opt):
     autowaf.set_options(opt)
     
