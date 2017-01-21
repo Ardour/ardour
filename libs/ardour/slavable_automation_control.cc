@@ -88,11 +88,11 @@ SlavableAutomationControl::get_value() const
 {
 	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
 
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	if (!from_list) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_value_locked ();
 	} else {
-		return Control::get_double (from_list, _session.transport_frame());
+		return get_masters_value_locked () * Control::get_double (from_list, _session.transport_frame());
 	}
 }
 
