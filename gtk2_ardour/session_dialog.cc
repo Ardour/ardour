@@ -800,11 +800,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = s;
-				if (program_version.empty()) {
-					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
-				} else {
-					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + string_compose (_("Last modified with: %1"), program_version));
-				}
+				child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 				g_stat (s.c_str(), &gsb);
 				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
 
@@ -831,6 +827,9 @@ SessionDialog::redisplay_recent_sessions ()
 				} else {
 					child_row[recent_session_columns.sample_rate] = "??";
 					child_row[recent_session_columns.disk_format] = "--";
+				}
+				if (!program_version.empty()) {
+					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (string_compose (_("Last modified with: %1"), program_version));
 				}
 #else
 				child_row[recent_session_columns.sample_rate] = "";
