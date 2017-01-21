@@ -612,6 +612,13 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		}
 		break;
 	case 3: // name
+		ival = ParameterDescriptor::midi_note_num (text);
+		if (ival < 128) {
+			idelta = ival - note->note();
+			prop = MidiModel::NoteDiffCommand::NoteNumber;
+			opname = _("change note number");
+			apply = true;
+		}
 		break;
 	case 4: // velocity
 		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->velocity()) {
