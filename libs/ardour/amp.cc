@@ -406,9 +406,7 @@ Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framec
 		if (_gain_control->slaved()) {
 			const double master_gain = _gain_control->get_masters_value ();
 			if (master_gain != 1.0) {
-				for (framecnt_t n = 0; n < nframes; ++n) {
-					_gain_automation_buffer[n] *= master_gain;
-				}
+				apply_gain_to_buffer (_gain_automation_buffer, nframes, master_gain);
 			}
 		}
 
