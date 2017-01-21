@@ -482,6 +482,14 @@ private:
       return 1;
     }
 
+    template <class T>
+    static int ctorNilPtrPlacementProxy (lua_State* L)
+    {
+      const T* newobject = new T ();
+      Stack<T>::push (L, *newobject);
+      return 1;
+    }
+
     //--------------------------------------------------------------------------
     /**
       Pop the Lua stack.
@@ -1277,6 +1285,24 @@ private:
     WSPtrClass <T>& addVoidConstructor ()
     {
       return addConstructor <void (*) ()> ();
+    }
+
+    WSPtrClass <T>& addNilPtrConstructor ()
+    {
+      FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
+      set_shared_class ();
+      lua_pushcclosure (L,
+          &shared. template ctorNilPtrPlacementProxy <boost::shared_ptr<T> >, 0);
+      rawsetfield(L, -2, "__call");
+
+      set_weak_class ();
+      // NOTE: this constructs an empty weak-ptr,
+      // ideally we'd construct a weak-ptr from a referenced shared-ptr
+      lua_pushcclosure (L,
+          &weak. template ctorNilPtrPlacementProxy <boost::weak_ptr<T> >, 0);
+      rawsetfield(L, -2, "__call");
+
+      return *this;
     }
 
     WSPtrClass <T>& addExtCFunction (char const* name, int (*const fp)(lua_State*))
