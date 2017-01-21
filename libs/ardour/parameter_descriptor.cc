@@ -219,4 +219,37 @@ ParameterDescriptor::midi_note_name (const uint8_t b)
 	return buf;
 }
 
+uint8_t
+ParameterDescriptor::midi_note_num (const std::string& name)
+{
+	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
+
+	if (name.size() < 2 or 4 < name.size())
+		return num;
+
+	// Parse note letter
+	std::string::size_type pos = 0;
+	switch(name[pos]) {
+	case 'C': num = 0; break;
+	case 'D': num = 2; break;
+	case 'E': num = 4; break;
+	case 'F': num = 5; break;
+	case 'G': num = 7; break;
+	case 'A': num = 9; break;
+	case 'B': num = 11; break;
+	default: return num;
+	}
+
+	// Parse sharp
+	if ('#' == name[++pos]) {
+		++num;
+		++pos;
+	}
+
+	// Parse octave
+	num += (atoi(name.substr(pos).c_str()) + 1) * 12;
+
+	return num;
+}
+
 } // namespace ARDOUR

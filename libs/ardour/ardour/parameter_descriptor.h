@@ -45,6 +45,9 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 
 	static std::string midi_note_name (uint8_t);
 
+	/** Dual of midi_note_name, convert a note name intoa  midi note number. */
+	static uint8_t midi_note_num (const std::string& name);
+
 	ParameterDescriptor(const Evoral::Parameter& parameter);
 
 	ParameterDescriptor();
