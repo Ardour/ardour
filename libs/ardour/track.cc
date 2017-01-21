@@ -21,6 +21,7 @@
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/diskstream.h"
+#include "ardour/event_type_map.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
@@ -66,13 +67,13 @@ Track::init ()
 	boost::shared_ptr<Route> rp (shared_from_this());
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
-	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
+	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this));
 	add_control (_record_enable_control);
 
-	_record_safe_control.reset (new RecordSafeControl (_session, X_("recsafe"), *this));
+	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this));
 	add_control (_record_safe_control);
 
-	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
+	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this));
 	add_control (_monitoring_control);
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
