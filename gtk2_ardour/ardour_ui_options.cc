@@ -521,7 +521,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "click-gain") {
 		float gain_db = accurate_coefficient_to_dB (Config->get_click_gain());
-		set_tip (click_button, string_compose ("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\n\nLevel %1dbFS", gain_db));
+		char tmp[32];
+		snprintf(tmp, 31, "%+.1f", gain_db);
+		set_tip (click_button, string_compose (_("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\nSignal Level: %1 dBFS"), tmp));
 	}
 }
 
