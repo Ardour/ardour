@@ -395,6 +395,23 @@ Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framec
 		assert (_gain_automation_buffer);
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 			start_frame, end_frame, _gain_automation_buffer, nframes);
+
+		/* XXX the future requires a way to automate the control master
+		 * and merge its own automation vector/curve with this one. We
+		 * don't have a way to do that just yet, so for now, just get
+		 * the master's current gain and scale our own automation
+		 * vector/curve by this value.
+		 */
+
+		if (_gain_control->slaved()) {
+			const double master_gain = _gain_control->get_masters_value ();
+			if (master_gain != 1.0) {
+				for (framecnt_t n = 0; n < nframes; ++n) {
+					_gain_automation_buffer[n] *= master_gain;
+				}
+			}
+		}
+
 		if (start_frame != _current_automation_frame && _session.bounce_processing ()) {
 			_current_gain = _gain_automation_buffer[0];
 		}
