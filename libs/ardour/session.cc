@@ -4336,18 +4336,6 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	return boost::shared_ptr<Stripable>();
 }
 
-boost::shared_ptr<Route>
-Session::route_by_selected_count (uint32_t id) const
-{
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		/* NOT IMPLEMENTED */
-	}
-
-	return boost::shared_ptr<Route> ((Route*) 0);
-}
-
 struct PresentationOrderSorter {
 	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
 		if (a->presentation_info().special() && !b->presentation_info().special()) {
@@ -4361,6 +4349,27 @@ struct PresentationOrderSorter {
 		}
 	}
 };
+
+boost::shared_ptr<Route>
+Session::route_by_selected_count (uint32_t id) const
+{
+	RouteList r (*(routes.reader ()));
+	PresentationOrderSorter sorter;
+	r.sort (sorter);
+
+	RouteList::iterator i;
+
+	for (i = r.begin(); i != r.end(); ++i) {
+		if ((*i)->presentation_info().selected()) {
+			if (id == 0) {
+				return *i;
+			}
+			--id;
+		}
+	}
+
+	return boost::shared_ptr<Route> ();
+}
 
 void
 Session::reassign_track_numbers ()
