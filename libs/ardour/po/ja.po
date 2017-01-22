@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-11 13:52-0800\n"
-"PO-Revision-Date: 2017-01-14 23:48-0800\n"
+"POT-Creation-Date: 2017-01-21 12:53-0800\n"
+"PO-Revision-Date: 2017-01-21 13:39-0800\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: amp.cc:419
+#: amp.cc:434
 #, c-format
 msgid "%.2fdB"
 msgstr "%.2fdB"
@@ -174,7 +174,7 @@ msgstr "メモリー不足エラー"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "オーディオ/MIDI エンジンに再接続できませんでした"
 
-#: audio_backend.cc:107 export_formats.cc:52 session.cc:6822 session.cc:6842
+#: audio_backend.cc:107 export_formats.cc:52 session.cc:6861 session.cc:6881
 msgid "None"
 msgstr "なし"
 
@@ -217,32 +217,32 @@ msgstr ""
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: 出来上がったオーディオファイルにリージョンを作成できませんでした"
 
-#: audio_diskstream.cc:1666
+#: audio_diskstream.cc:1670
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 "AudioDiskstream: キャプチャしたオーディオにリージョンを作成できませんでした"
 
-#: audio_diskstream.cc:1762
+#: audio_diskstream.cc:1766
 msgid "programmer error: %1"
 msgstr "プログラマーエラー: %1"
 
-#: audio_diskstream.cc:2019
+#: audio_diskstream.cc:2025
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: チャンネル %1 は範囲外です"
 
-#: audio_diskstream.cc:2033 midi_diskstream.cc:1305
+#: audio_diskstream.cc:2039 midi_diskstream.cc:1311
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 新規キャプチャファイルを正しく初期化できませんでした"
 
-#: audio_diskstream.cc:2328
+#: audio_diskstream.cc:2334
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: 保留中のキャプチャソースファイル %2 をリストアできませんでした"
 
-#: audio_diskstream.cc:2350
+#: audio_diskstream.cc:2356
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr "%1: リスト上の保留中のソースの数が間違っています - すべて無視します"
 
-#: audio_diskstream.cc:2384
+#: audio_diskstream.cc:2390
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 "%1: 保留中のキャプチャソースからファイル全体のリージョンを作成できませんでし"
@@ -294,8 +294,8 @@ msgstr "オーディオプレイリスト (未使用)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:1048 midi_playlist_source.cc:149
 #: midi_playlist_source.cc:157 midi_playlist_source.cc:164 midi_source.cc:390
-#: midi_source.cc:417 plugin_insert.cc:1282 rb_effect.cc:327 session.cc:5354
-#: session.cc:5381 session.cc:5501 session_handle.cc:88 sndfilesource.cc:174
+#: midi_source.cc:417 plugin_insert.cc:1282 rb_effect.cc:327 session.cc:5393
+#: session.cc:5420 session.cc:5540 session_handle.cc:88 sndfilesource.cc:174
 msgid "programming error: %1"
 msgstr "プログラミングエラー: %1"
 
@@ -532,7 +532,7 @@ msgstr "オーディションデータを読み込むための %2 を開けま�
 msgid "cannot load automation data from %2"
 msgstr "%2 からオーディションデータを読み込めません"
 
-#: automatable.cc:178 send.cc:95 session.cc:856
+#: automatable.cc:178 send.cc:95 session.cc:860
 msgid "Fader"
 msgstr "フェーダー"
 
@@ -644,7 +644,7 @@ msgstr "/proc/cpuinfo に cpu MHz が見つかりません"
 msgid "audio"
 msgstr "オーディオ"
 
-#: data_type.cc:28 session.cc:2471
+#: data_type.cc:28 session.cc:2493
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -1081,7 +1081,7 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "設定を読み込み中"
 
-#: globals.cc:554 route.cc:188 route.cc:4167 session.cc:1174
+#: globals.cc:554 route.cc:188 route.cc:4214 session.cc:1178
 msgid "Monitor"
 msgstr "モニター"
 
@@ -1162,103 +1162,103 @@ msgstr "プリセット %1 (バンク %2)"
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 - ID %2 の接続するトラック/バスが見つかりません"
 
-#: io.cc:214
+#: io.cc:215
 msgid "IO: cannot disconnect port %1 from %2"
 msgstr "IO: ポート %1 を %2 から接続解除できません"
 
-#: io.cc:349 io.cc:457
+#: io.cc:350 io.cc:458
 msgid "IO: cannot register input port %1"
 msgstr "IO: インプットポート %1 を登録できません"
 
-#: io.cc:354 io.cc:462
+#: io.cc:355 io.cc:463
 msgid "IO: cannot register output port %1"
 msgstr "IO: アウトプットポート %1 を登録できません"
 
-#: io.cc:629 io.cc:690
+#: io.cc:630 io.cc:692
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr "誤った XML ノード \"%1\" が IO オブジェクトに渡されました"
 
-#: io.cc:752
+#: io.cc:755
 msgid "in"
 msgstr "in"
 
-#: io.cc:752
+#: io.cc:755
 msgid "out"
 msgstr "out"
 
-#: io.cc:753
+#: io.cc:756
 msgid "input"
 msgstr "インプット"
 
-#: io.cc:753
+#: io.cc:756
 msgid "output"
 msgstr "アウトプット"
 
-#: io.cc:763
+#: io.cc:766
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
 msgstr "不明なバンドル \"%1\" が %3 の %2 としてリストに登録されています"
 
-#: io.cc:829
+#: io.cc:832
 msgid "Bundle %1 was not available - \"%2\" used instead"
 msgstr "バンドル %1 は利用できません - 代わりに \"%2\" が使用されます"
 
-#: io.cc:832
+#: io.cc:835
 msgid "No %1 bundles available as a replacement"
 msgstr "置き換えられる %1 バンドルがありません"
 
-#: io.cc:936
+#: io.cc:939
 msgid "%1: cannot create I/O ports"
 msgstr "%1: I/O ポートを作成できません"
 
-#: io.cc:1064 io.cc:1165
+#: io.cc:1067 io.cc:1168
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr "IO: インプット \"%1\" の XML ノードに不正な形の文字列が含まれています"
 
-#: io.cc:1069 io.cc:1170
+#: io.cc:1072 io.cc:1173
 msgid "bad input string in XML node \"%1\""
 msgstr "XML ノード \"%1\" に不正なインプット文字列が含まれています"
 
-#: io.cc:1108
+#: io.cc:1111
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr ""
 "IO: アウトプット \"%1\" の XML ノードに不正な形の文字列が含まれています"
 
-#: io.cc:1113
+#: io.cc:1116
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: XML ノード \"%1\" に不正なアウトプット文字列が含まれています"
 
-#: io.cc:1278 plugin.cc:287
+#: io.cc:1281 plugin.cc:291
 msgid "Out"
 msgstr "Out"
 
-#: io.cc:1278 plugin.cc:285
+#: io.cc:1281 plugin.cc:289
 msgid "In"
 msgstr "In"
 
-#: io.cc:1476
+#: io.cc:1479
 #, c-format
 msgid "%s %u"
 msgstr "%s %u"
 
-#: io.cc:1523
+#: io.cc:1526
 #, c-format
 msgid "%s in"
 msgstr "%s in"
 
-#: io.cc:1525
+#: io.cc:1528
 #, c-format
 msgid "%s out"
 msgstr "%s out"
 
-#: io.cc:1600 session.cc:973 session.cc:1007
+#: io.cc:1603 session.cc:977 session.cc:1011
 msgid "mono"
 msgstr "モノラル"
 
-#: io.cc:1602 session.cc:986 session.cc:1021
+#: io.cc:1605 session.cc:990 session.cc:1025
 msgid "L"
 msgstr "L"
 
-#: io.cc:1602 session.cc:988 session.cc:1023
+#: io.cc:1605 session.cc:992 session.cc:1027
 msgid "R"
 msgstr "R"
 
@@ -1351,9 +1351,9 @@ msgstr "Locations: 選択した位置として不明な位置を使用しよう�
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "不正な XML モードを Locations::set_state に渡しました"
 
-#: location.cc:1091 session.cc:1684 session.cc:6353 session_state.cc:1299
+#: location.cc:1091 session.cc:1688 session.cc:6392 session_state.cc:1299
 msgid "session"
-msgstr "セッション"
+msgstr "session"
 
 #: location.cc:1158
 msgid "could not load location from session file - ignored"
@@ -1510,11 +1510,11 @@ msgstr ""
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: 出来上がった MIDI ファイルにリージョンを作成できませんでした"
 
-#: midi_diskstream.cc:1064
+#: midi_diskstream.cc:1068
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: キャプチャした MIDIにリージョンを作成できませんでした!"
 
-#: midi_diskstream.cc:1504
+#: midi_diskstream.cc:1510
 msgid "MidiDiskstream %1: skipped %2 events, possible underflow"
 msgstr ""
 "MidiDiskstream %1: %2 イベントをスキップしました。アンダーフローの可能性があ"
@@ -1801,27 +1801,31 @@ msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr ""
 "セッションデータから PlaylistSource にプレイリストを構築できませんでした"
 
-#: plugin.cc:132
+#: plugin.cc:130
+msgid "Trying to remove nonexistent preset."
+msgstr "存在しないプリセットの削除を試行中"
+
+#: plugin.cc:134
 msgid "Cannot remove plugin factory preset."
 msgstr "プラグイン・ファクトリー・プリセットを削除できません。"
 
-#: plugin.cc:150
+#: plugin.cc:153
 msgid "Preset with given name already exists."
 msgstr "与えられた名前のプリセットは既に存在します。"
 
-#: plugin.cc:275
+#: plugin.cc:279
 msgid "Audio"
 msgstr "オーディオ"
 
-#: plugin.cc:278
+#: plugin.cc:282
 msgid "Midi"
 msgstr "MIDI"
 
-#: plugin.cc:281
+#: plugin.cc:285
 msgid "?"
 msgstr "?"
 
-#: plugin.cc:424
+#: plugin.cc:416
 msgid ""
 "Plugin presets are not supported in this build of %1. Consider paying for a "
 "full version"
@@ -1829,7 +1833,7 @@ msgstr ""
 "%1 のこのビルドではプラグイン・プリセットはサポートされていません。寄付による"
 "フルバージョンの利用を検討してください"
 
-#: plugin.cc:509
+#: plugin.cc:501
 msgid ""
 "Saving plugin settings is not supported in this build of %1. Consider paying "
 "for the full version"
@@ -2228,7 +2232,7 @@ msgstr "インポート: src_new() に失敗しました : %1"
 msgid "return %1"
 msgstr "return %1"
 
-#: route.cc:868 route.cc:2802
+#: route.cc:868 route.cc:2849
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "不明なプロセッサタイプ \"%1\" です。無視します"
 
@@ -2236,63 +2240,63 @@ msgstr "不明なプロセッサタイプ \"%1\" です。無視します"
 msgid "processor could not be created. Ignored."
 msgstr "プロセッサを作成できませんでした。無視します。"
 
-#: route.cc:2347 route.cc:2512
+#: route.cc:2394 route.cc:2559
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "不正なノードが Route::set_state() に送信されました [%1]"
 
-#: route.cc:2400
+#: route.cc:2447
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "パンナーのないルート (%1) に Pannable なステートが見つかりました!"
 
-#: route.cc:3279
+#: route.cc:3326
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr "不正な独立ソロの伝搬です: from:%1 new:%2 - old:%3 = delta:%4"
 
-#: route.cc:4414
+#: route.cc:4461
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
 msgstr "ルート '%1' のアンプ/フェーダー が AWOL になりました。再追加します。"
 
-#: route.cc:5015
+#: route.cc:5062
 msgid "lo"
 msgstr "ロー"
 
-#: route.cc:5017
+#: route.cc:5064
 msgid "mid"
 msgstr "ミッド"
 
-#: route.cc:5019
+#: route.cc:5066
 msgid "hi"
 msgstr "ハイ"
 
-#: route.cc:5126
+#: route.cc:5173
 msgid "Leveler"
 msgstr "レベラー"
 
-#: route.cc:5128
+#: route.cc:5175
 msgid "Compressor"
 msgstr "コンプレッサー"
 
-#: route.cc:5130 route.cc:5132
+#: route.cc:5177 route.cc:5179
 msgid "Limiter"
 msgstr "リミッター"
 
-#: route.cc:5132
+#: route.cc:5179
 msgid "Sidechain"
 msgstr "サイドチェーン"
 
-#: route.cc:5135 route.cc:5137 route.cc:5154 route.cc:5156
+#: route.cc:5182 route.cc:5184 route.cc:5201 route.cc:5203
 msgid "???"
 msgstr "???"
 
-#: route.cc:5147
+#: route.cc:5194
 msgid "Attk"
 msgstr "アタック"
 
-#: route.cc:5149
+#: route.cc:5196
 msgid "Ratio"
 msgstr "レシオ"
 
-#: route.cc:5152
+#: route.cc:5199
 msgid "Rels"
 msgstr "リリース"
 
@@ -2325,146 +2329,146 @@ msgstr "センド %1"
 msgid "programming error: send created using role %1"
 msgstr "プログラミングエラー: ロール %1 でセンドが作成されました"
 
-#: session.cc:348 session.cc:403
+#: session.cc:351 session.cc:406
 msgid "Cannot connect to audio/midi engine"
 msgstr "オーディオ/MIDI エンジンに接続できません"
 
-#: session.cc:358
+#: session.cc:361
 msgid "Session initialization failed"
 msgstr "セッションの初期化に失敗しました"
 
-#: session.cc:374
+#: session.cc:377
 msgid "Failed to load template/snapshot state"
 msgstr "テンプレート/スナップショット・ステートの読み込みに失敗しました"
 
-#: session.cc:385
+#: session.cc:388
 msgid "Failed to load state"
 msgstr "スタートの読み込みに失敗しました"
 
-#: session.cc:409
+#: session.cc:412
 msgid "Cannot configure audio/midi engine with session parameters"
 msgstr "セッションパラメータでオーディオ/MIDI エンジンを設定できません"
 
-#: session.cc:433
+#: session.cc:436
 msgid "Connect to engine"
 msgstr "エンジンに接続"
 
-#: session.cc:486
+#: session.cc:489
 msgid "Session loading complete"
 msgstr "セッションの読み込みが完了しました"
 
-#: session.cc:577
+#: session.cc:580
 msgid "Set up LTC"
 msgstr "LTC のセットアップ"
 
-#: session.cc:579
+#: session.cc:582
 msgid "Set up Click"
 msgstr "クリックのセットアップ"
 
-#: session.cc:581
+#: session.cc:584
 msgid "Set up standard connections"
 msgstr "スタンダード・コネクションのセットアップ"
 
-#: session.cc:893
+#: session.cc:897
 msgid "could not setup Click I/O"
 msgstr "クリック I/O のセットアップができませんでした"
 
-#: session.cc:967
+#: session.cc:971
 #, c-format
 msgid "out %s"
 msgstr "out %s"
 
-#: session.cc:969
+#: session.cc:973
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "out %<PRIu32>"
 
-#: session.cc:984
+#: session.cc:988
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "out %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1001
+#: session.cc:1005
 #, c-format
 msgid "in %s"
 msgstr "in %s"
 
-#: session.cc:1003
+#: session.cc:1007
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "in %<PRIu32>"
 
-#: session.cc:1018
+#: session.cc:1022
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "in %<PRIu32>+%<PRIu32>"
 
-#: session.cc:1099
+#: session.cc:1103
 msgid "cannot connect master output %1 to %2"
 msgstr "マスターアウトプット %1 から %2 に接続できません"
 
-#: session.cc:1187
+#: session.cc:1191
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 "モニターセクションが作成できません。'Monitor' ポート名が一意ではありません。"
 
-#: session.cc:1221 session.cc:1352
+#: session.cc:1225 session.cc:1356
 msgid "cannot connect control input %1 to %2"
 msgstr "コントロールインプット %1 を %2 に接続できません"
 
-#: session.cc:1241 session.cc:1371
+#: session.cc:1245 session.cc:1375
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "モニターバス (%1) に好ましい I/O が見つかりません"
 
-#: session.cc:1272 session.cc:1402
+#: session.cc:1276 session.cc:1406
 msgid "cannot connect control output %1 to %2"
 msgstr "コントロールアウトプット %1 を %2 に接続できません"
 
-#: session.cc:1460
+#: session.cc:1464
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 "Auditioner を作成できません: オーディションできるリージョンがありません"
 
-#: session.cc:1661
+#: session.cc:1665
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "Session: オートパンチに指定した位置を使用できません (開始 <= 終了)"
 
-#: session.cc:1688
+#: session.cc:1692
 msgid "Session: you can't use that location for session start/end)"
 msgstr "Session: セッション開始/終了に指定した位置を使用できません"
 
-#: session.cc:1720
+#: session.cc:1724
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
 "長さがゼロまたはマイナスのため、オートループに指定された位置を使用できません"
 
-#: session.cc:1903
+#: session.cc:1907
 msgid "programming error: session range removed!"
 msgstr "プログラミングエラー: セッションレンジが削除されています!"
 
-#: session.cc:2174
+#: session.cc:2195
 msgid "feedback loop setup between %1 and %2"
 msgstr "%1 および %2 の間でフィードバックループがあります"
 
-#: session.cc:2438
+#: session.cc:2459
 msgid "Track "
 msgstr "トラック "
 
-#: session.cc:2440
+#: session.cc:2461
 msgid "Audio "
 msgstr "オーディオ "
 
-#: session.cc:2445
+#: session.cc:2466
 msgid "MIDI "
 msgstr "MIDI "
 
-#: session.cc:2519
+#: session.cc:2541
 msgid "Session: could not create new midi track."
 msgstr "Session: 新規 MIDI トラックを作成できませんでした。"
 
-#: session.cc:2525
+#: session.cc:2547
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2472,92 +2476,92 @@ msgstr ""
 "これ以上使用できる JACK ポートがありません。多くのトラックが必要な場合に"
 "は 、%1 を終了し、ポートを増やして JACK を再起動する必要があります。"
 
-#: session.cc:2569 session.cc:2572
+#: session.cc:2600 session.cc:2603
 msgid "Midi Bus"
 msgstr "MIDI バス"
 
-#: session.cc:2594
+#: session.cc:2625
 msgid "cannot configure new midi bus input"
 msgstr "新規 MIDI バスインプットを設定できません"
 
-#: session.cc:2600
+#: session.cc:2631
 msgid "cannot configure new midi bus output"
 msgstr "新規 MIDI バスアウトプットを設定できません"
 
-#: session.cc:2614 session.cc:3163
+#: session.cc:2645 session.cc:3202
 msgid "Session: could not create new audio route."
 msgstr "Session: 新規オーディオルートを作成できません"
 
-#: session.cc:3048 session.cc:3056 session.cc:3139 session.cc:3147
+#: session.cc:3087 session.cc:3095 session.cc:3178 session.cc:3186
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "新規オーディオトラックに %1 イン/%2 アウト の設定を適用できません"
 
-#: session.cc:3076
+#: session.cc:3115
 msgid "Session: could not create new audio track."
 msgstr "Session: 新規オーディオトラックを作成できませんでした。"
 
-#: session.cc:3114 session.cc:3117
+#: session.cc:3153 session.cc:3156
 msgid "Bus"
 msgstr "バス"
 
-#: session.cc:3234 session.cc:3244
+#: session.cc:3273 session.cc:3283
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Session: UINT_MAX ルート? 不可能です!"
 
-#: session.cc:3330
+#: session.cc:3369
 msgid "Session: cannot create track/bus from template description"
 msgstr "Session: テンプレートの記述からトラック/バスを作成できません"
 
-#: session.cc:3353
+#: session.cc:3392
 msgid "Session: could not create new route from template"
 msgstr "Session: テンプレートから新規ルートを作成できませんでした"
 
-#: session.cc:3387
+#: session.cc:3426
 msgid "Adding new tracks/busses failed"
 msgstr "新規トラック/バスの追加に失敗しました"
 
-#: session.cc:4824
+#: session.cc:4863
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr ""
 "埋め込みファイル %1 をマージ中: 名前および md5 ハッシュが衝突しています!"
 
-#: session.cc:4954 session.cc:5027
+#: session.cc:4993 session.cc:5066
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "%2 にはすでに %1 個のレコーディングがありません。これは多すぎます。"
 
-#: session.cc:5703
+#: session.cc:5742
 msgid "send ID %1 appears to be in use already"
 msgstr "センド ID %1 はすでに使われているようです"
 
-#: session.cc:5715
+#: session.cc:5754
 msgid "aux send ID %1 appears to be in use already"
 msgstr "AUX センド ID %1 はすでに使われているようです"
 
-#: session.cc:5727
+#: session.cc:5766
 msgid "return ID %1 appears to be in use already"
 msgstr "リターン ID %1 はすでに使われているようです"
 
-#: session.cc:5739
+#: session.cc:5778
 msgid "insert ID %1 appears to be in use already"
 msgstr "インサート ID %1 はすでに使われているようです"
 
-#: session.cc:5865
+#: session.cc:5904
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "“終了 <= 開始” となっているレンジは書き込みできません (例: %1 <= %2)"
 
-#: session.cc:5874
+#: session.cc:5913
 msgid "Cannot write a range with no data."
 msgstr "データのないレンジは書き込みできません"
 
-#: session.cc:5916
+#: session.cc:5955
 msgid "cannot create new file \"%1\" for %2"
 msgstr "%2 に新規ファイル \"%1\" を作成できません"
 
-#: session_click.cc:162
+#: session_click.cc:184
 msgid "cannot open click soundfile %1 (%2)"
 msgstr "クリックサウンドファイル %1 を開けません (%2)"
 
-#: session_click.cc:175
+#: session_click.cc:197
 msgid "cannot read data from click soundfile"
 msgstr "クリックサウンドファイルからデータを読み込めません"
 
@@ -2661,7 +2665,7 @@ msgstr "Session: XML 記述からプレイリストを作成できません"
 msgid "Session: error in no roll for %1"
 msgstr "Session: %1 にロールがないためエラーです"
 
-#: session_process.cc:1208
+#: session_process.cc:1257
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 "プログラミングエラー: process_event (%1) に不正なイベントタイプがあります"
@@ -3068,37 +3072,37 @@ msgstr ""
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "%1 XMLNode 外に Command を作成する方法が見つかりませんでした。"
 
-#: session_state.cc:4121
+#: session_state.cc:4123
 msgid "Session: unknown diskstream type in XML"
 msgstr "Session: XML のディスクストリームタイプが不明です"
 
-#: session_state.cc:4126
+#: session_state.cc:4128
 msgid "Session: could not load diskstream via XML state"
 msgstr "Session: XML ステートからディスクストリームを読み込めません"
 
-#: session_state.cc:4223
+#: session_state.cc:4225
 msgid "Cannot rename read-only session."
 msgstr "リードオンリーセッションを名前変更できません"
 
-#: session_state.cc:4227
+#: session_state.cc:4229
 msgid "Cannot rename session while recording"
 msgstr "録音中にセッション名を変更できません"
 
-#: session_state.cc:4312 session_state.cc:4313 session_state.cc:4355
-#: session_state.cc:4359
+#: session_state.cc:4314 session_state.cc:4315 session_state.cc:4357
+#: session_state.cc:4361
 msgid "renaming %s as %2 failed (%3)"
 msgstr "%s の %2 への名前変更に失敗しました (%3)"
 
-#: session_state.cc:4375 session_state.cc:4376 session_state.cc:4390
-#: session_state.cc:4391
+#: session_state.cc:4377 session_state.cc:4378 session_state.cc:4392
+#: session_state.cc:4393
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "%1 の %2 への名前変更に失敗しました (%3)"
 
-#: session_state.cc:4702
+#: session_state.cc:4718
 msgid "Cannot create new session folder %1"
 msgstr "新規セッションフォルダ %1 を作成できません"
 
-#: session_state.cc:4764 session_state.cc:4839
+#: session_state.cc:4780 session_state.cc:4855
 msgid ""
 "\n"
 "copying \"%1\" failed !"
@@ -3106,7 +3110,7 @@ msgstr ""
 "\n"
 "\"%1\" のコピーに失敗しました!"
 
-#: session_state.cc:5037
+#: session_state.cc:5053
 msgid "unknown reason"
 msgstr "不明な理由"
 
@@ -3114,11 +3118,11 @@ msgstr "不明な理由"
 msgid "Unknown transport state %1 in sync callback"
 msgstr "同期コールバックに不明なトランスポート・ステート %1 があります"
 
-#: session_transport.cc:177
+#: session_transport.cc:233
 msgid "Cannot loop - no loop range defined"
 msgstr "ループできません - ループレンジが定義されていません"
 
-#: session_transport.cc:972
+#: session_transport.cc:1029
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -3126,12 +3130,12 @@ msgstr ""
 "%1 JACK トランスポートではシームレースループはサポートされていません。\n"
 "設定の変更を推奨します"
 
-#: session_transport.cc:1054
+#: session_transport.cc:1111
 msgid "Locate called for negative sample position - ignored"
 msgstr ""
 "負のサンプルポジションに対して位置の特定が呼び出されました - 無視します"
 
-#: session_transport.cc:1405
+#: session_transport.cc:1462
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
