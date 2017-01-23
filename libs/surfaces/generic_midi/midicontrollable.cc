@@ -280,6 +280,8 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 		}
 	}
 
+	_surface->maybe_start_touch (controllable);
+
 	if (!controllable->is_toggle()) {
 		if (control_additional == msg->note_number) {
 			controllable->set_value (midi_to_control (msg->velocity), Controllable::NoGroup);
@@ -307,9 +309,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 	assert (controllable);
 
-	if (controllable->touching()) {
-		return; // to prevent feedback fights when e.g. dragging a UI slider
-	}
+	_surface->maybe_start_touch (controllable);
 
 	if (control_additional == msg->controller_number) {
 
@@ -411,6 +411,9 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 			return;
 		}
 	}
+
+	_surface->maybe_start_touch (controllable);
+
 	if (msg == control_additional) {
 
 		if (!controllable->is_toggle()) {
@@ -434,6 +437,8 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 			return;
 		}
 	}
+
+	_surface->maybe_start_touch (controllable);
 
 	if (!controllable->is_toggle()) {
 		controllable->set_value (midi_to_control (pb), Controllable::NoGroup);

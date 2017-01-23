@@ -67,6 +67,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
         boost::shared_ptr<PBD::Controllable> lookup_controllable (const ARDOUR::ControllableDescriptor&) const;
 
+	void maybe_start_touch (PBD::Controllable*);
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 

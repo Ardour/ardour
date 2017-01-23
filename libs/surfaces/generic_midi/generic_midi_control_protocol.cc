@@ -1258,3 +1258,15 @@ GenericMidiControlProtocol::input_port() const
 {
 	return _input_port;
 }
+
+void
+GenericMidiControlProtocol::maybe_start_touch (Controllable* controllable)
+{
+	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+	if (actl) {
+		if (actl->automation_state() == Touch && !actl->touching()) {
+			actl->start_touch (session->audible_frame ());
+		}
+	}
+}
+
