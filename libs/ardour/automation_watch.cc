@@ -111,6 +111,30 @@ AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> a
 	ac->list()->set_in_write_pass (false);
 }
 
+void
+AutomationWatch::transport_stop_automation_watches (framepos_t when)
+{
+	DEBUG_TRACE (DEBUG::Automation, "clear all automation watches\n");
+
+	AutomationWatches tmp;
+
+	{
+		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
+		/* copy automation watches */
+		tmp = automation_watches;
+		/* clear existing container so that each
+		   ::remove_automation_watch() call from
+		   AutomationControl::stop_touch() is faster.
+		*/
+
+		automation_watches.clear ();
+	}
+
+	for (AutomationWatches::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+		(*i)->stop_touch (true, when);
+	}
+}
+
 gint
 AutomationWatch::timer ()
 {

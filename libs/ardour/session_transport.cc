@@ -37,6 +37,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
+#include "ardour/automation_watch.h"
 #include "ardour/butler.h"
 #include "ardour/click.h"
 #include "ardour/debug.h"
@@ -932,6 +933,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
+	AutomationWatch::instance().transport_stop_automation_watches (_transport_frame);
 
 	/* and start it up again if relevant */
 
