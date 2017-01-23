@@ -846,6 +846,11 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering Windows VST plugins along %1\n", path));
 
+	if (Session::get_disable_all_loaded_plugins ()) {
+		info << _("Disabled WindowsVST scan (safe mode)") << endmsg;
+		return -1;
+	}
+
 	if (Config->get_verbose_plugin_scan()) {
 		info << string_compose (_("--- Windows VST plugins Scan: %1"), path) << endmsg;
 	}
@@ -1047,6 +1052,11 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
 
+	if (Session::get_disable_all_loaded_plugins ()) {
+		info << _("Disabled MacVST scan (safe mode)") << endmsg;
+		return -1;
+	}
+
 	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
@@ -1149,6 +1159,11 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
 	int ret = 0;
+
+	if (Session::get_disable_all_loaded_plugins ()) {
+		info << _("Disabled LinuxVST scan (safe mode)") << endmsg;
+		return -1;
+	}
 
 #ifndef NDEBUG
 	(void) path;
