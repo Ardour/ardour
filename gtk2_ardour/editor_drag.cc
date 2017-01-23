@@ -5209,7 +5209,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			//( NOTE: most mouse moves don't change the selection so we can't just SET it for every mouse move; it gets clunky )
 			TrackViewList tracks_to_add;
 			TrackViewList tracks_to_remove;
-			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) 
+			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i)
 				if ( !_editor->selection->tracks.contains ( *i ) )
 					tracks_to_add.push_back ( *i );
 			_editor->selection->add(tracks_to_add);
@@ -5611,6 +5611,7 @@ NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	, _cumulative_dx (0)
 	, _cumulative_dy (0)
 	, _was_selected (false)
+	, _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteDrag\n");
 
@@ -5624,6 +5625,13 @@ void
 NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+		_copy = true;
+	} else {
+		_copy = false;
+	}
+
 	setup_snap_delta (_region->source_beats_to_absolute_frames (_primary->note()->time ()));
 
 	if (!(_was_selected = _primary->selected())) {
@@ -5720,8 +5728,13 @@ NoteDrag::total_dy () const
 }
 
 void
-NoteDrag::motion (GdkEvent * event, bool)
+NoteDrag::motion (GdkEvent * event, bool first_move)
 {
+	if (_copy && first_move) {
+		/* make copies of all the selected notes */
+		_primary = _region->copy_selection ();
+	}
+
 	/* Total change in x and y since the start of the drag */
 	frameoffset_t const dx = total_dx (event->button.state);
 	int8_t const dy = total_dy ();
@@ -5737,7 +5750,11 @@ NoteDrag::motion (GdkEvent * event, bool)
 		int8_t note_delta = total_dy();
 
 		if (tdx || tdy) {
-			_region->move_selection (tdx, tdy, note_delta);
+			if (_copy) {
+				_region->move_copies (tdx, tdy, note_delta);
+			} else {
+				_region->move_selection (tdx, tdy, note_delta);
+			}
 
 			/* the new note value may be the same as the old one, but we
 			 * don't know what that means because the selection may have
@@ -5797,7 +5814,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx (ev->button.state), total_dy());
+		_region->note_dropped (_primary, total_dx (ev->button.state), total_dy(), _copy);
 	}
 }
 

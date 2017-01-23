@@ -1052,7 +1052,7 @@ MidiRegionView::note_diff_add_change (NoteBase* ev,
 }
 
 void
-MidiRegionView::apply_diff (bool as_subcommand)
+MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 {
 	bool add_or_remove;
 	bool commit = false;
@@ -1061,15 +1061,14 @@ MidiRegionView::apply_diff (bool as_subcommand)
 		return;
 	}
 
-	if ((add_or_remove = _note_diff_command->adds_or_removes())) {
+	if (!was_copy && (add_or_remove = _note_diff_command->adds_or_removes())) {
 		// Mark all selected notes for selection when model reloads
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			_marked_for_selection.insert((*i)->note());
 		}
 	}
 
-	midi_view()->midi_track()->midi_playlist()->region_edited(
-		_region, _note_diff_command);
+	midi_view()->midi_track()->midi_playlist()->region_edited (_region, _note_diff_command);
 
 	if (as_subcommand) {
 		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
@@ -2587,68 +2586,190 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 	}
 }
 
+NoteBase*
+MidiRegionView::copy_selection ()
+{
+	NoteBase* note;
+	_copy_drag_events.clear ();
+
+	if (_selection.empty()) {
+		return 0;
+	}
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		boost::shared_ptr<NoteType> g (new NoteType (*((*i)->note())));
+		if (midi_view()->note_mode() == Sustained) {
+			Note* n = new Note (*this, _note_group, g);
+			update_sustained (n, false);
+			note = n;
+		} else {
+			Hit* h = new Hit (*this, _note_group, 10, g);
+			update_hit (h, false);
+			note = h;
+		}
+
+		_copy_drag_events.push_back (note);
+	}
+
+	return _copy_drag_events.front ();
+}
+
 void
-MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
+MidiRegionView::move_copies (double dx, double dy, double cumulative_dy)
+{
+	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
+	PossibleChord to_play;
+	Evoral::Beats earliest = Evoral::MaxBeats;
+
+	for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
+		if ((*i)->note()->time() < earliest) {
+			earliest = (*i)->note()->time();
+		}
+	}
+
+	for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
+		if ((*i)->note()->time() == earliest) {
+			to_play.push_back ((*i)->note());
+		}
+		(*i)->move_event(dx, dy);
+	}
+
+	if (dy && !_copy_drag_events.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
+
+		if (to_play.size() > 1) {
+
+			PossibleChord shifted;
+
+			for (PossibleChord::iterator n = to_play.begin(); n != to_play.end(); ++n) {
+				boost::shared_ptr<NoteType> moved_note (new NoteType (**n));
+				moved_note->set_note (moved_note->note() + cumulative_dy);
+				shifted.push_back (moved_note);
+			}
+
+			start_playing_midi_chord (shifted);
+
+		} else if (!to_play.empty()) {
+
+			boost::shared_ptr<NoteType> moved_note (new NoteType (*to_play.front()));
+			moved_note->set_note (moved_note->note() + cumulative_dy);
+			start_playing_midi_note (moved_note);
+		}
+	}
+}
+
+void
+MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote, bool copy)
 {
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;
 	uint8_t highest_note_difference   = 0;
 
-	// find highest and lowest notes first
+	if (!copy) {
+		// find highest and lowest notes first
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		uint8_t pitch = (*i)->note()->note();
-		lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
-		highest_note_in_selection = std::max(highest_note_in_selection, pitch);
-	}
-
-	/*
-	  cerr << "dnote: " << (int) dnote << endl;
-	  cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note())
-	  << " highest note (streamview): " << int(midi_stream_view()->highest_note()) << endl;
-	  cerr << "lowest note (selection): " << int(lowest_note_in_selection) << " highest note(selection): "
-	  << int(highest_note_in_selection) << endl;
-	  cerr << "selection size: " << _selection.size() << endl;
-	  cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
-	*/
-
-	// Make sure the note pitch does not exceed the MIDI standard range
-	if (highest_note_in_selection + dnote > 127) {
-		highest_note_difference = highest_note_in_selection - 127;
-	}
-	TempoMap& map (trackview.session()->tempo_map());
-
-	start_note_diff_command (_("move notes"));
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
-
-		double const start_qn = _region->quarter_note() - midi_region()->start_beats();
-		framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
-		Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
-		if (new_time < 0) {
-			continue;
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+			uint8_t pitch = (*i)->note()->note();
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, pitch);
 		}
 
-		note_diff_add_change (*i, MidiModel::NoteDiffCommand::StartTime, new_time);
+		/*
+		  cerr << "dnote: " << (int) dnote << endl;
+		  cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note())
+		  << " highest note (streamview): " << int(midi_stream_view()->highest_note()) << endl;
+		  cerr << "lowest note (selection): " << int(lowest_note_in_selection) << " highest note(selection): "
+		  << int(highest_note_in_selection) << endl;
+		  cerr << "selection size: " << _selection.size() << endl;
+		  cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
+		*/
 
-		uint8_t original_pitch = (*i)->note()->note();
-		uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+		// Make sure the note pitch does not exceed the MIDI standard range
+		if (highest_note_in_selection + dnote > 127) {
+			highest_note_difference = highest_note_in_selection - 127;
+		}
+		TempoMap& map (trackview.session()->tempo_map());
 
-		// keep notes in standard midi range
-		clamp_to_0_127(new_pitch);
+		start_note_diff_command (_("move notes"));
 
-		lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
-		highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-		note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			double const start_qn = _region->quarter_note() - midi_region()->start_beats();
+			framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
+			Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
+			if (new_time < 0) {
+				continue;
+			}
+
+			note_diff_add_change (*i, MidiModel::NoteDiffCommand::StartTime, new_time);
+
+			uint8_t original_pitch = (*i)->note()->note();
+			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+
+			// keep notes in standard midi range
+			clamp_to_0_127(new_pitch);
+
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+
+			note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+		}
+	} else {
+
+		clear_editor_note_selection ();
+
+		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
+			uint8_t pitch = (*i)->note()->note();
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, pitch);
+		}
+
+		// Make sure the note pitch does not exceed the MIDI standard range
+		if (highest_note_in_selection + dnote > 127) {
+			highest_note_difference = highest_note_in_selection - 127;
+		}
+
+		TempoMap& map (trackview.session()->tempo_map());
+		start_note_diff_command (_("copy notes"));
+
+		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end() ; ++i) {
+
+			/* update time */
+
+			double const start_qn = _region->quarter_note() - midi_region()->start_beats();
+			framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
+			Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
+
+			if (new_time < 0) {
+				continue;
+			}
+
+			(*i)->note()->set_time (new_time);
+
+			/* update pitch */
+
+			uint8_t original_pitch = (*i)->note()->note();
+			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
+
+			// keep notes in standard midi range
+			clamp_to_0_127(new_pitch);
+
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+
+			note_diff_add_note ((*i)->note(), true);
+
+			delete *i;
+		}
+
+		_copy_drag_events.clear ();
 	}
 
-	apply_diff();
+	apply_diff (false, copy);
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
 	    highest_note_in_selection > midi_stream_view()->highest_note()) {
-		midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
+		midi_stream_view()->set_note_range (MidiStreamView::ContentsRange);
 	}
 }
 

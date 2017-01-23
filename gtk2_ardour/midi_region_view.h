@@ -180,7 +180,7 @@ public:
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
-	void apply_diff (bool as_subcommand = false);
+	void apply_diff (bool as_subcommand = false, bool was_copy = false);
 	void abort_command();
 
 	void   note_entered(NoteBase* ev);
@@ -201,7 +201,9 @@ public:
 	void   invert_selection ();
 
 	void move_selection(double dx, double dy, double cumulative_dy);
-	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
+	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note, bool copy);
+	NoteBase* copy_selection ();
+	void move_copies(double dx, double dy, double cumulative_dy);
 
 	void select_notes (std::list<Evoral::event_id_t>);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -412,6 +414,7 @@ private:
 	typedef boost::unordered_map<boost::shared_ptr<NoteType>, NoteBase*>                 Events;
 	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
 	typedef std::vector< boost::shared_ptr<SysEx> >                                      SysExes;
+	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
@@ -419,6 +422,7 @@ private:
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
+	CopyDragEvents                       _copy_drag_events;
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	Note**                               _active_notes;

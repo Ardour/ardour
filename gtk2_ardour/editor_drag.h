@@ -567,6 +567,7 @@ class NoteDrag : public Drag
 	double _cumulative_dy;
 	bool   _was_selected;
 	double _note_height;
+	bool   _copy;
 };
 
 class NoteCreateDrag : public Drag
