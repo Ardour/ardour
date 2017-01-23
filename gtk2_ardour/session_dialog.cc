@@ -793,6 +793,7 @@ SessionDialog::redisplay_recent_sessions ()
 			int64_t most_recent = 0;
 
 			// add the children
+			int kidcount = 0;
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
 				s = Glib::build_filename (dirname, *i2 + statefile_suffix);
@@ -800,11 +801,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = s;
-				if (program_version.empty()) {
-					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
-				} else {
-					child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + string_compose (_("Last modified with: %1"), program_version));
-				}
+				child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 				g_stat (s.c_str(), &gsb);
 				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
 
@@ -814,28 +811,38 @@ SessionDialog::redisplay_recent_sessions ()
 				if (gsb.st_mtime > most_recent) {
 					most_recent = gsb.st_mtime;
 				}
+
+				if (++kidcount < 5) {
+					// parse "modified with" for the first 5 snapshots
+					if (Session::get_info_from_path (s, sr, sf, program_version) == 0) {
 #if 0
-				if (Session::get_info_from_path (s, sr, sf, program_version) == 0) {
-					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
-					switch (sf) {
-					case FormatFloat:
-						child_row[recent_session_columns.disk_format] = _("32-bit float");
-						break;
-					case FormatInt24:
-						child_row[recent_session_columns.disk_format] = _("24-bit");
-						break;
-					case FormatInt16:
-						child_row[recent_session_columns.disk_format] = _("16-bit");
-						break;
+						child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
+						switch (sf) {
+							case FormatFloat:
+								child_row[recent_session_columns.disk_format] = _("32-bit float");
+								break;
+							case FormatInt24:
+								child_row[recent_session_columns.disk_format] = _("24-bit");
+								break;
+							case FormatInt16:
+								child_row[recent_session_columns.disk_format] = _("16-bit");
+								break;
+						}
+#else
+						child_row[recent_session_columns.sample_rate] = "";
+						child_row[recent_session_columns.disk_format] = "";
+#endif
+					} else {
+						child_row[recent_session_columns.sample_rate] = "??";
+						child_row[recent_session_columns.disk_format] = "--";
+					}
+					if (!program_version.empty()) {
+						child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (string_compose (_("Last modified with: %1"), program_version));
 					}
 				} else {
-					child_row[recent_session_columns.sample_rate] = "??";
-					child_row[recent_session_columns.disk_format] = "--";
+					child_row[recent_session_columns.sample_rate] = "";
+					child_row[recent_session_columns.disk_format] = "";
 				}
-#else
-				child_row[recent_session_columns.sample_rate] = "";
-				child_row[recent_session_columns.disk_format] = "";
-#endif
 
 				++session_snapshot_count;
 			}

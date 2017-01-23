@@ -2528,7 +2528,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Mixer"), pa);
 
-	add_option (_("Mixer"), new OptionEditorHeading (_("Default track / bus muting options")));
+	add_option (_("Mixer"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
 
 	add_option (_("Mixer"),
 	     new BoolOption (

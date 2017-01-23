@@ -189,6 +189,7 @@ PresentationInfo::set_selected (bool yn)
 			_flags = Flag (_flags & ~Selected);
 		}
 		send_change (PropertyChange (Properties::selected));
+		Change (); /* EMIT SIGNAL */
 	}
 }
 
@@ -204,6 +205,7 @@ PresentationInfo::set_hidden (bool yn)
 		}
 
 		send_change (PropertyChange (Properties::hidden));
+		Change (); /* EMIT SIGNAL */
 	}
 }
 
@@ -215,6 +217,7 @@ PresentationInfo::set_order (order_t order)
 	if (order != _order) {
 		_order = order;
 		send_change (PropertyChange (Properties::order));
+		Change (); /* EMIT SIGNAL */
 	}
 }
 

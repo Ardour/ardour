@@ -1,0 +1,10 @@
+#!/bin/sh
+
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export ARDOUR_INSIDE_GDB=1
+if test -z "`which rr`"; then
+	echo "rr was not found."
+	exit
+fi
+exec rr replay "$@"
