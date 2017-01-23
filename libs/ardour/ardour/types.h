@@ -209,6 +209,12 @@ namespace ARDOUR {
 		MeterCustom
 	};
 
+	enum MeterPointChangeTarget {
+		MeterPointChangeAll,
+		MeterPointChangeGroup,
+		MeterPointChangeSingle
+	};
+
 	enum MeterType {
 		MeterMaxSignal = 0x0001,
 		MeterMaxPeak   = 0x0002,
