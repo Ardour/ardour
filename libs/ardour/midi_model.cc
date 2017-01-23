@@ -96,10 +96,10 @@ MidiModel::new_patch_change_diff_command (const string& name)
 void
 MidiModel::apply_command(Session& session, Command* cmd)
 {
-	session.begin_reversible_command(cmd->name());
+	session.begin_reversible_command (cmd->name());
 	(*cmd)();
-	session.commit_reversible_command(cmd);
-	set_edited(true);
+	session.commit_reversible_command (cmd);
+	set_edited (true);
 }
 
 /** Apply a command as part of a larger reversible transaction
@@ -111,8 +111,8 @@ void
 MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 {
 	(*cmd)();
-	session.add_command(cmd);
-	set_edited(true);
+	session.add_command (cmd);
+	set_edited (true);
 }
 
 /************** DIFF COMMAND ********************/
