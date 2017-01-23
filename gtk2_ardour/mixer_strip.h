@@ -185,8 +185,6 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
 
-	ArdourButton                 meter_point_button;
-
 	void meter_changed ();
 	void monitor_changed ();
 
