@@ -97,7 +97,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
-	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
@@ -130,7 +129,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
-	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
@@ -179,13 +177,7 @@ MixerStrip::init ()
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 
-	set_tooltip (&meter_point_button, _("Click to select metering point"));
-	meter_point_button.set_name ("mixer strip button");
-
-	bottom_button_table.attach (meter_point_button, 2, 3, 0, 1);
-
-	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
-	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
+	bottom_button_table.attach (gpm.meter_point_button, 2, 3, 0, 1);
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
@@ -646,7 +638,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -714,7 +706,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	mute_solo_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
-	meter_point_button.show();
+	gpm.meter_point_button.show();
 	input_button_box.show_all();
 	output_button.show();
 	name_button.show();
@@ -2086,7 +2078,7 @@ MixerStrip::monitor_changed ()
 void
 MixerStrip::meter_changed ()
 {
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
@@ -2127,7 +2119,7 @@ MixerStrip::drop_send ()
 	output_button.set_sensitive (true);
 	group_button.set_sensitive (true);
 	set_invert_sensitive (true);
-	meter_point_button.set_sensitive (true);
+	gpm.meter_point_button.set_sensitive (true);
 	mute_button->set_sensitive (true);
 	solo_button->set_sensitive (true);
 	solo_isolated_led->set_sensitive (true);
@@ -2174,7 +2166,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
 	set_invert_sensitive (false);
-	meter_point_button.set_sensitive (false);
+	gpm.meter_point_button.set_sensitive (false);
 	mute_button->set_sensitive (false);
 	solo_button->set_sensitive (false);
 	rec_enable_button->set_sensitive (false);
@@ -2280,9 +2272,9 @@ MixerStrip::set_button_names ()
 	}
 
 	if (_route) {
-		meter_point_button.set_text (meter_point_string (_route->meter_point()));
+		gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	} else {
-		meter_point_button.set_text ("");
+		gpm.meter_point_button.set_text ("");
 	}
 }
 

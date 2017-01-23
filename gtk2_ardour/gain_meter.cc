@@ -92,6 +92,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	                   dB_coeff_step(Config->get_max_gain()))  // page increment
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
+	, meter_point_button (_("pre"))
 	, gain_astate_propagate (false)
 	, _data_type (DataType::AUDIO)
 {
@@ -164,6 +165,35 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astate_menu.set_reserve_toggle_size(false);
 	gain_astyle_menu.set_name ("ArdourContextMenu");
+
+	meter_point_button.set_name ("mixer strip button");
+
+	set_tooltip (&meter_point_button, _("Metering point"));
+
+	meter_point_button.unset_flags (Gtk::CAN_FOCUS);
+
+	meter_point_button.set_size_request(15, 15);
+
+	meter_point_menu.set_name ("ArdourContextMenu");
+	meter_point_menu.set_reserve_toggle_size(false);
+
+	meter_point_menu.items().clear ();
+	meter_point_menu.items().push_back (MenuElem(_("Input"),
+	 sigc::bind (sigc::mem_fun (*this,
+	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterInput)));
+	meter_point_menu.items().push_back (MenuElem(_("Pre Fader"),
+	 sigc::bind (sigc::mem_fun (*this,
+	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPreFader)));
+	meter_point_menu.items().push_back (MenuElem(_("Post Fader"),
+	 sigc::bind (sigc::mem_fun (*this,
+	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPostFader)));
+	meter_point_menu.items().push_back (MenuElem(_("Output"),
+	 sigc::bind (sigc::mem_fun (*this,
+	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterOutput)));
+	meter_point_menu.items().push_back (MenuElem(_("Custom"),
+	 sigc::bind (sigc::mem_fun (*this,
+	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterCustom)));
+	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeter::meter_press), false);
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
@@ -611,112 +641,42 @@ GainMeterBase::update_gain_sensitive ()
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
 }
 
-static MeterPoint
-next_meter_point (MeterPoint mp)
-{
-	switch (mp) {
-	case MeterInput:
-		return MeterPreFader;
-		break;
-
-	case MeterPreFader:
-		return MeterPostFader;
-		break;
-
-	case MeterPostFader:
-		return MeterOutput;
-		break;
-
-	case MeterOutput:
-		return MeterCustom;
-		break;
-
-	case MeterCustom:
-		return MeterInput;
-		break;
-	}
-
-	abort(); /*NOTREACHED*/
-	return MeterInput;
-}
-
 gint
 GainMeterBase::meter_press(GdkEventButton* ev)
 {
-	wait_for_release = false;
-
 	if (!_route) {
 		return FALSE;
 	}
-
 	if (!ignore_toggle) {
-
-		if (Keyboard::is_context_menu_event (ev)) {
-
-			// no menu at this time.
-
-		} else {
-
-			if (Keyboard::is_button2_event(ev)) {
-
-				// Primary-button2 click is the midi binding click
-				// button2-click is "momentary"
-
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					wait_for_release = true;
-					old_meter_point = _route->meter_point ();
-				}
-			}
-
-			if (_route && (ev->button == 1 || Keyboard::is_button2_event (ev))) {
-
+		switch (ev->button) {
+			case 1:
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					/* Primary+Tertiary-click applies change to all routes */
 
-					_session->foreach_route (this, &GainMeterBase::set_meter_point, next_meter_point (_route->meter_point()));
-
+					meter_point_change_target = MeterPointChangeAll;
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-					/* Primary-click: solo mix group.
-					   NOTE: Primary-button2 is MIDI learn.
-					*/
+					/* Primary-click: apply change to all routes in group */
 
-					if (ev->button == 1) {
-						set_route_group_meter_point (*_route, next_meter_point (_route->meter_point()));
-					}
+					meter_point_change_target = MeterPointChangeGroup;
 
 				} else {
 
 					/* click: change just this route */
 
-					// XXX no undo yet
-
-					_route->set_meter_point (next_meter_point (_route->meter_point()));
+					meter_point_change_target = MeterPointChangeSingle;
 				}
-			}
+				Gtkmm2ext::anchored_menu_popup(&meter_point_menu,
+			  	                             &meter_point_button,
+			    	                           "", 1, ev->time);
+				break;
+			default:
+				break;
 		}
 	}
-
-	return true;
-
-}
-
-gint
-GainMeterBase::meter_release(GdkEventButton*)
-{
-	if (!ignore_toggle) {
-		if (wait_for_release) {
-			wait_for_release = false;
-
-			if (_route) {
-				set_meter_point (*_route, old_meter_point);
-			}
-		}
-	}
-
-	return true;
+	return TRUE;
 }
 
 void
@@ -738,10 +698,20 @@ GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 }
 
 void
-GainMeterBase::meter_point_clicked ()
+GainMeterBase::meter_point_clicked (MeterPoint mp)
 {
 	if (_route) {
-		/* WHAT? */
+		switch (meter_point_change_target) {
+			case MeterPointChangeAll:
+				_session->foreach_route (this, &GainMeterBase::set_meter_point, mp);
+				break;
+			case MeterPointChangeGroup:
+				set_route_group_meter_point (*_route, mp);
+				break;
+			case MeterPointChangeSingle:
+				_route->set_meter_point (mp);
+				break;
+		}
 	}
 }
 
