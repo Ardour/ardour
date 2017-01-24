@@ -645,7 +645,7 @@ gint
 GainMeterBase::meter_press(GdkEventButton* ev)
 {
 	if (!_route) {
-		return FALSE;
+		return false;
 	}
 	if (!ignore_toggle) {
 		switch (ev->button) {
@@ -676,7 +676,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 				break;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 void
