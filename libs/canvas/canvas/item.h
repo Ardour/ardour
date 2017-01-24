@@ -136,18 +136,7 @@ public:
 
 	ScrollGroup* scroll_parent() const { return _scroll_parent; }
 
-	/* item implementations can override this if they need to */
-	virtual Rect size_request() const { return bounding_box (true); }
-	void size_allocate (Rect const&);
-
-	/** bounding box is the public API to get the size of the item.
-	   If @param for_own_purposes is false, then it will return the
-	   allocated bounding box (if there is one) in preference to the
-	   one that would naturally be computed by the item.
-	*/
-	Rect bounding_box (bool for_own_purposes = false) const;
-	Rect allocation() const { return _allocation; }
-
+	Rect bounding_box () const;
         Coord height() const;
         Coord width() const;
 
@@ -292,7 +281,6 @@ protected:
 	mutable Rect _bounding_box;
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
-	Rect _allocation;
 
 	/* XXX: this is a bit grubby */
 	std::map<std::string, void *> _data;

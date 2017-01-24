@@ -571,26 +571,14 @@ Item::grab_focus ()
 	/* XXX */
 }
 
-void
-Item::size_allocate (Rect const & r)
-{
-	_allocation = r;
-}
-
 /** @return Bounding box in this item's coordinates */
 ArdourCanvas::Rect
-Item::bounding_box (bool for_own_purposes) const
+Item::bounding_box () const
 {
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
 		assert (!_bounding_box_dirty);
 		add_child_bounding_boxes ();
-	}
-
-	if (!for_own_purposes) {
-		if (_allocation) {
-			return _allocation;
-		}
 	}
 
 	return _bounding_box;
