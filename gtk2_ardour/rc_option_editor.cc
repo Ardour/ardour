@@ -2163,50 +2163,14 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (_("General"), sics);
 
-	add_option (_("General"), new OptionEditorHeading (S_("Options|Undo")));
-
-	add_option (_("General"), new UndoOptions (_rc_config));
+	add_option (_("General"), new OptionEditorHeading (_("Engine")));
 
 	add_option (_("General"),
 	     new BoolOption (
-		     "verify-remove-last-capture",
-		     _("Verify removal of last capture"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
-		     ));
-
-	add_option (_("General"), new OptionEditorHeading (_("Session Management")));
-
-	add_option (_("General"),
-	     new BoolOption (
-		     "periodic-safety-backups",
-		     _("Make periodic backups of the session file"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
-		     ));
-
-	add_option (_("General"),
-	     new BoolOption (
-		     "only-copy-imported-files",
-		     _("Always copy imported files"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
-		     ));
-
-	add_option (_("General"), new DirectoryOption (
-			    X_("default-session-parent-dir"),
-			    _("Default folder for new sessions:"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
-			    ));
-
-	add_option (_("General"),
-	     new SpinOption<uint32_t> (
-		     "max-recent-sessions",
-		     _("Maximum number of recent sessions"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
-		     0, 1000, 1, 20
+		     "try-autostart-engine",
+		     _("Try to auto-launch audio/midi engine"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_try_autostart_engine),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_try_autostart_engine)
 		     ));
 
 	add_option (_("General"), new OptionEditorHeading (_("Automation")));
@@ -2259,6 +2223,53 @@ RCOptionEditor::RCOptionEditor ()
 				_("Lock GUI after this many idle seconds (zero to never lock)"));
 		add_option (_("General"), slts);
 	} // !mixbus
+
+	add_option (_("General/Session"), new OptionEditorHeading (S_("Options|Undo")));
+
+	add_option (_("General/Session"), new UndoOptions (_rc_config));
+
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "verify-remove-last-capture",
+		     _("Verify removal of last capture"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     ));
+
+	add_option (_("General/Session"), new OptionEditorHeading (_("Session Management")));
+
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "periodic-safety-backups",
+		     _("Make periodic backups of the session file"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
+		     ));
+
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "only-copy-imported-files",
+		     _("Always copy imported files"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
+		     ));
+
+	add_option (_("General/Session"), new DirectoryOption (
+			    X_("default-session-parent-dir"),
+			    _("Default folder for new sessions:"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
+			    ));
+
+	add_option (_("General/Session"),
+	     new SpinOption<uint32_t> (
+		     "max-recent-sessions",
+		     _("Maximum number of recent sessions"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
+		     0, 1000, 1, 20
+		     ));
+
 
 #ifdef ENABLE_NLS
 
