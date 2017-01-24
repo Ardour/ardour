@@ -2750,6 +2750,8 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote, bool co
 			uint8_t original_pitch = (*i)->note()->note();
 			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
+			(*i)->note()->set_note (new_pitch);
+
 			// keep notes in standard midi range
 			clamp_to_0_127(new_pitch);
 
