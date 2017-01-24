@@ -378,6 +378,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		waves[n]->gain_changed ();
 	}
+	region_renamed ();
 }
 
 void
@@ -391,6 +392,14 @@ AudioRegionView::region_renamed ()
 
 	if (_region->muted()) {
 		str = string ("!") + str;
+	}
+
+
+	boost::shared_ptr<AudioRegion> ar (audio_region());
+	if (ar->scale_amplitude() != 1.0) {
+		char tmp[32];
+		snprintf (tmp, 32, " (%.1fdB)", accurate_coefficient_to_dB (ar->scale_amplitude()));
+		str += tmp;
 	}
 
 	set_item_name (str, this);
