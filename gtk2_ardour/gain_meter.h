@@ -64,6 +64,12 @@ namespace Gtk {
 	class Menu;
 }
 
+enum MeterPointChangeTarget {
+	MeterPointChangeAll,
+	MeterPointChangeGroup,
+	MeterPointChangeSingle
+};
+
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
   public:
@@ -139,6 +145,10 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Menu gain_astate_menu;
 	Gtk::Menu gain_astyle_menu;
 
+	ArdourButton meter_point_button;
+
+	Gtk::Menu meter_point_menu;
+
 	void set_gain_astate (ARDOUR::AutoState);
 	bool gain_astate_propagate;
 	static sigc::signal<void, ARDOUR::AutoState> ChangeGainAutomationState;
@@ -163,7 +173,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void fader_moved ();
 	void gain_changed ();
 
-	void meter_point_clicked ();
+	void meter_point_clicked (ARDOUR::MeterPoint);
 	void gain_unit_changed ();
 
 	virtual void hide_all_meters ();
@@ -181,10 +191,10 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
-	gint meter_release (GdkEventButton*);
 	gint meter_press (GdkEventButton*);
-	bool wait_for_release;
 	ARDOUR::MeterPoint old_meter_point;
+
+	MeterPointChangeTarget meter_point_change_target;
 
 	void parameter_changed (const char*);
 
