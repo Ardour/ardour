@@ -864,11 +864,6 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
 		y2 = current_height() - 1;
 
-		/* rect must be visible for the change in its bounding box to
-		   cause a redraw.
-		*/
-
-		rect->rect->show ();
 		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
 		// trim boxes are at the top for selections
@@ -884,6 +879,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 			rect->end_trim->hide();
 		}
 
+		rect->rect->show ();
 		used_selection_rects.push_back (rect);
 	}
 }
