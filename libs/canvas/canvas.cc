@@ -183,7 +183,7 @@ Canvas::item_shown_or_hidden (Item* item)
 {
 	Rect bbox = item->bounding_box ();
 	if (bbox) {
-		if (item->item_to_window (bbox.intersection (visible_area ()))) {
+		if (item->item_to_window (bbox).intersection (visible_area ())) {
 			queue_draw_item_area (item, bbox);
 		}
 	}
