@@ -1204,42 +1204,10 @@ MidiRegionView::redisplay_model()
 		if (note_in_region_range (note, visible)) {
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 				cne->validate ();
-				bool update = false;
-
-				if (note_in_region_range (note, visible)) {
-					if (visible) {
-						update = true;
-						cne->show ();
-					} else {
-						cne->hide ();
-					}
+				if (visible) {
+					cne->show ();
 				} else {
 					cne->hide ();
-				}
-				if ((sus = dynamic_cast<Note*>(cne))) {
-
-					if (update) {
-						update_sustained (sus);
-					}
-
-					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr && !gr->trackview.hidden()) {
-							gr->update_note (sus, !update);
-						}
-					}
-				} else if ((hit = dynamic_cast<Hit*>(cne))) {
-
-					if (update) {
-						update_hit (hit);
-					}
-
-					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr && !gr->trackview.hidden()) {
-							gr->update_hit (hit, !update);
-						}
-					}
 				}
 			} else {
 				missing_notes.insert (note);
@@ -1267,6 +1235,33 @@ MidiRegionView::redisplay_model()
 				i = _events.erase (i);
 
 			} else {
+				bool visible = cne->item()->visible();
+
+				if ((sus = dynamic_cast<Note*>(cne))) {
+
+					if (visible) {
+						update_sustained (sus);
+					}
+
+					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+						if (gr) {
+							gr->update_note (sus, !visible || gr->trackview.hidden());
+						}
+					}
+				} else if ((hit = dynamic_cast<Hit*>(cne))) {
+
+					if (visible) {
+						update_hit (hit);
+					}
+
+					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+						if (gr) {
+							gr->update_hit (hit, !visible || gr->trackview.hidden());
+						}
+					}
+				}
 				++i;
 			}
 		}
