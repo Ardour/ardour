@@ -947,20 +947,19 @@ frameoffset_t
 RegionView::snap_frame_to_frame (frameoffset_t x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
-
 	/* x is region relative, convert it to global absolute frames */
 	framepos_t const session_frame = x + _region->position();
 
 	/* try a snap in either direction */
-	framepos_t frame = session_frame;
+	MusicFrame frame (session_frame, 0);
 	editor.snap_to (frame, RoundNearest, false, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
-	if (frame < _region->position ()) {
-		frame = session_frame;
+	if (frame.frame < _region->position ()) {
+		frame.frame = session_frame;
 		editor.snap_to (frame, RoundUpAlways, false, ensure_snap);
 	}
 
 	/* back to region relative */
-	return frame - _region->position();
+	return frame.frame - _region->position();
 }

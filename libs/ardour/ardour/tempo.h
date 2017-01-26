@@ -386,10 +386,10 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
 
-	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
-	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
+	MusicFrame round_to_bar  (framepos_t frame, RoundMode dir);
+	MusicFrame round_to_beat (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
-	framepos_t round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir);
+	MusicFrame round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 
 	void set_length (framepos_t frames);
 
@@ -564,7 +564,7 @@ private:
 	void recompute_meters (Metrics& metrics);
 	void recompute_map (Metrics& metrics, framepos_t end = -1);
 
-	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
+	MusicFrame round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
 
 	const MeterSection& first_meter() const;
 	MeterSection&       first_meter();

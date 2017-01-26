@@ -423,7 +423,7 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Meter"))
 {
-	frame = map.round_to_bar(frame, RoundNearest);
+	frame = map.round_to_bar(frame, RoundNearest).frame;
 	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 	Meter meter (map.meter_at_frame (frame));
 

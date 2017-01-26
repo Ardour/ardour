@@ -1347,11 +1347,10 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	/* don't create points that can't be seen */
 
 	update_envelope_visibility ();
-
 	framepos_t rpos = region ()->position ();
-	framepos_t fx = trackview.editor().pixel_to_sample (mx) + rpos;
-	trackview.editor ().snap_to_with_modifier (fx, ev);
-	fx -= rpos;
+	MusicFrame snap_pos (trackview.editor().pixel_to_sample (mx) + rpos, 0);
+	trackview.editor ().snap_to_with_modifier (snap_pos, ev);
+	framepos_t fx = snap_pos.frame - rpos;
 
 	if (fx > _region->length()) {
 		return;

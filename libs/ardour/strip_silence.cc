@@ -116,7 +116,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		plist.add (Properties::position, r->position() + (i->first - r->start()));
 
 		copy = boost::dynamic_pointer_cast<AudioRegion> (
-			RegionFactory::create (region, (i->first - r->start()), plist)
+			RegionFactory::create (region, MusicFrame (i->first - r->start(), 0), plist)
 			);
 
 		copy->set_name (RegionFactory::new_region_name (region->name ()));

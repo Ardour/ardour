@@ -83,7 +83,7 @@ public:
 
 	void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 
-	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool, const int32_t sub_num);
+	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
 	void show_all_automation (bool apply_to_selection = false);
 	void show_existing_automation (bool apply_to_selection = false);

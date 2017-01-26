@@ -33,7 +33,9 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/types.h"
 
 #include "pbd/i18n.h"
@@ -380,6 +382,80 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	}
 
 	return changed;
+}
+void
+MidiPlaylist::_split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
+{
+	if (!region->covers (playlist_position.frame)) {
+		return;
+	}
+
+	if (region->position() == playlist_position.frame ||
+	    region->last_frame() == playlist_position.frame) {
+		return;
+	}
+
+	boost::shared_ptr<const MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
+
+	if (mr == 0) {
+		return;
+	}
+
+	boost::shared_ptr<Region> left;
+	boost::shared_ptr<Region> right;
+
+	string before_name;
+	string after_name;
+	const double before_qn = _session.tempo_map().exact_qn_at_frame (playlist_position.frame, playlist_position.division) - region->quarter_note();
+	const double after_qn = mr->length_beats() - before_qn;
+	MusicFrame before (playlist_position.frame - region->position(), playlist_position.division);
+	MusicFrame after (region->length() - before.frame, playlist_position.division);
+
+	/* split doesn't change anything about length, so don't try to splice */
+	bool old_sp = _splicing;
+	_splicing = true;
+
+	RegionFactory::region_name (before_name, region->name(), false);
+
+	{
+		PropertyList plist;
+
+		plist.add (Properties::length, before.frame);
+		plist.add (Properties::length_beats, before_qn);
+		plist.add (Properties::name, before_name);
+		plist.add (Properties::left_of_split, true);
+		plist.add (Properties::layering_index, region->layering_index ());
+		plist.add (Properties::layer, region->layer ());
+
+		/* note: we must use the version of ::create with an offset here,
+		   since it supplies that offset to the Region constructor, which
+		   is necessary to get audio region gain envelopes right.
+		*/
+		left = RegionFactory::create (region, MusicFrame (0, 0), plist, true);
+	}
+
+	RegionFactory::region_name (after_name, region->name(), false);
+
+	{
+		PropertyList plist;
+
+		plist.add (Properties::length, after.frame);
+		plist.add (Properties::length_beats, after_qn);
+		plist.add (Properties::name, after_name);
+		plist.add (Properties::right_of_split, true);
+		plist.add (Properties::layering_index, region->layering_index ());
+		plist.add (Properties::layer, region->layer ());
+
+		/* same note as above */
+		right = RegionFactory::create (region, before, plist, true);
+	}
+
+	add_region_internal (left, region->position(), 0, region->quarter_note(), true);
+	add_region_internal (right, region->position() + before.frame, before.division, region->quarter_note() + before_qn, true);
+
+	remove_region_internal (region);
+
+	_splicing = old_sp;
 }
 
 set<Evoral::Parameter>

@@ -148,10 +148,10 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 * Snap a value according to the current snap setting.
 	 * ensure_snap overrides SnapOff and magnetic snap
 	 */
-	virtual void snap_to (framepos_t&       first,
-	                      ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                      bool              for_mark  = false,
-			      bool              ensure_snap = false) = 0;
+	virtual void snap_to (ARDOUR::MusicFrame& first,
+	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                      bool                for_mark  = false,
+			      bool                ensure_snap = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -320,7 +320,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void restore_editing_space () = 0;
 	virtual framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_regions_at (framepos_t, RegionSelection&, const int32_t sub_num, bool snap) = 0;
+	virtual void split_regions_at (ARDOUR::MusicFrame, RegionSelection&, bool snap) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
@@ -435,10 +435,10 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool &) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
 
-	virtual void snap_to_with_modifier (framepos_t &      first,
-	                                    GdkEvent const *  ev,
-	                                    ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                                    bool              for_mark  = false) = 0;
+	virtual void snap_to_with_modifier (ARDOUR::MusicFrame& first,
+	                                    GdkEvent const *    ev,
+	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                                    bool                for_mark  = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const = 0;

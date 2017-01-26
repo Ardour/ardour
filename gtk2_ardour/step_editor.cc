@@ -116,13 +116,12 @@ StepEditor::prepare_step_edit_region ()
 	} else {
 
 		const Meter& m = _mtv.session()->tempo_map().meter_at_frame (step_edit_insert_position);
-
 		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position));
 		double next_bar_in_beats =  baf + m.divisions_per_bar();
 		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
 		framecnt_t len = next_bar_pos - step_edit_insert_position;
 
-		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true, _editor.get_grid_music_divisions (0));
+		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
 
 		RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
@@ -411,7 +410,7 @@ StepEditor::step_edit_bar_sync ()
 	}
 
 	framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
-	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways);
+	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).frame;
 	step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
