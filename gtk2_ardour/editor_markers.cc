@@ -1693,11 +1693,18 @@ Editor::toggle_marker_menu_glue ()
 		return;
 	}
 
+	begin_reversible_command (_("change marker lock style"));
+	XMLNode &before = _session->locations()->get_state();
+
 	if (loc->position_lock_style() == MusicTime) {
 		loc->set_position_lock_style (AudioTime);
 	} else {
 		loc->set_position_lock_style (MusicTime);
 	}
+
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	commit_reversible_command ();
 }
 
 void
