@@ -418,6 +418,8 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
+	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this));
+
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
 
@@ -3484,81 +3486,85 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("ensure order gap starting at %1 for %2\n", order, new_routes.size()));
 	ensure_route_presentation_info_gap (order, new_routes.size());
 
-	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
+	{
+		PresentationInfo::ChangeSuspender cs;
 
-		boost::weak_ptr<Route> wpr (*x);
-		boost::shared_ptr<Route> r (*x);
+		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
-		r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2,wpr));
-		r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
-		r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
+			boost::weak_ptr<Route> wpr (*x);
+			boost::shared_ptr<Route> r (*x);
 
-		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
-		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		r->processor_latency_changed.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
+			r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2,wpr));
+			r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
+			r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
 
-		if (r->is_master()) {
-			_master_out = r;
-		}
+			r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
+			r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+			r->processor_latency_changed.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
 
-		if (r->is_monitor()) {
-			_monitor_out = r;
-		}
-
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (r);
-		if (tr) {
-			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
-			track_playlist_changed (boost::weak_ptr<Track> (tr));
-			tr->rec_enable_control()->Changed.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
-
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
-			if (mt) {
-				mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
-				mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
-				mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, boost::weak_ptr<MidiTrack>(mt)));
+			if (r->is_master()) {
+				_master_out = r;
 			}
-		}
 
-		if (!r->presentation_info().special()) {
+			if (r->is_monitor()) {
+				_monitor_out = r;
+			}
 
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("checking PI state for %1\n", r->name()));
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (r);
+			if (tr) {
+				tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
+				track_playlist_changed (boost::weak_ptr<Track> (tr));
+				tr->rec_enable_control()->Changed.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
 
-			/* presentation info order may already have been set from XML */
-
-			if (!r->presentation_info().order_set()) {
-
-				if (order == PresentationInfo::max_order) {
-					/* just add to the end */
-					r->set_presentation_order (n_routes + added, false);
-					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to NR %1 + %2 = %3\n", n_routes, added, n_routes + added));
-				} else {
-					r->set_presentation_order (order + added);
-					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to %1 + %2 = %3\n", order, added, order + added));
+				boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
+				if (mt) {
+					mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
+					mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
+					mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, boost::weak_ptr<MidiTrack>(mt)));
 				}
-			} else {
-				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order already set to %1\n", r->presentation_info().order()));
 			}
-		}
+
+			if (!r->presentation_info().special()) {
+
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("checking PI state for %1\n", r->name()));
+
+				/* presentation info order may already have been set from XML */
+
+				if (!r->presentation_info().order_set()) {
+
+					if (order == PresentationInfo::max_order) {
+						/* just add to the end */
+						r->set_presentation_order (n_routes + added);
+						DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to NR %1 + %2 = %3\n", n_routes, added, n_routes + added));
+					} else {
+						r->set_presentation_order (order + added);
+						DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to %1 + %2 = %3\n", order, added, order + added));
+					}
+				} else {
+					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order already set to %1\n", r->presentation_info().order()));
+				}
+			}
 
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
-		/* clang complains: 'operator<<' should be declared prior to the call site or in an associated namespace of one of its
-		 * arguments std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid)"
-		 */
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 type %3 (summary: %4)\n",
-		                                               r->name(),
-		                                               r->presentation_info().order(),
-		                                               enum_2_string (r->presentation_info().flags()),
-		                                               r->presentation_info()));
+			/* clang complains: 'operator<<' should be declared prior to the call site or in an associated namespace of one of its
+			 * arguments std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid)"
+			 */
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 type %3 (summary: %4)\n",
+			                                               r->name(),
+			                                               r->presentation_info().order(),
+			                                               enum_2_string (r->presentation_info().flags()),
+			                                               r->presentation_info()));
 #endif
 
 
-		if (input_auto_connect || output_auto_connect) {
-			auto_connect_route (r, input_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
-			existing_inputs += r->n_inputs();
-			existing_outputs += r->n_outputs();
-		}
+			if (input_auto_connect || output_auto_connect) {
+				auto_connect_route (r, input_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
+				existing_inputs += r->n_inputs();
+				existing_outputs += r->n_outputs();
+			}
 
-		ARDOUR::GUIIdle ();
+			ARDOUR::GUIIdle ();
+		}
 	}
 
 	if (_monitor_out && IO::connecting_legal) {
@@ -3773,7 +3779,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		return;
 	}
 
-	PresentationInfo::Change(); /* EMIT SIGNAL */
+	PropertyChange so;
+	so.add (Properties::selected);
+	so.add (Properties::order);
+	PresentationInfo::Change (PropertyChange (so));
 
 	/* save the new state of the world */
 
@@ -6830,7 +6839,6 @@ Session::notify_presentation_info_change ()
 		return;
 	}
 
-	PresentationInfo::Change (); /* EMIT SIGNAL */
 	reassign_track_numbers();
 
 #ifdef USE_TRACKS_CODE_FEATURES

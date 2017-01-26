@@ -37,7 +37,10 @@ using namespace PBD;
 using std::string;
 
 string PresentationInfo::state_node_name = X_("PresentationInfo");
-PBD::Signal0<void> PresentationInfo::Change;
+
+PBD::Signal1<void,PropertyChange const &> PresentationInfo::Change;
+int PresentationInfo::_change_signal_suspended = 0;
+PBD::PropertyChange PresentationInfo::_pending_static_changes;
 
 namespace ARDOUR {
 	namespace Properties {
@@ -45,6 +48,42 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint32_t> order;
 		PBD::PropertyDescriptor<uint32_t> color;
 	}
+}
+
+void
+PresentationInfo::suspend_change_signal ()
+{
+	g_atomic_int_add (&_change_signal_suspended, 1);
+}
+
+void
+PresentationInfo::unsuspend_change_signal ()
+{
+	PropertyChange pc = _pending_static_changes;
+
+	/* XXX some possible race condition here; _pending_static_changes could
+	 * be reset by another thread before or after we decrement.
+	 */
+
+	if (g_atomic_int_dec_and_test (const_cast<gint*> (&_change_signal_suspended))) {
+		_pending_static_changes.clear ();
+		Change (pc); /* EMIT SIGNAL */
+	}
+}
+
+void
+PresentationInfo::send_static_change (const PropertyChange& what_changed)
+{
+	if (what_changed.empty()) {
+		return;
+	}
+
+	if (g_atomic_int_get (&_change_signal_suspended)) {
+		_pending_static_changes.add (what_changed);
+		return;
+	}
+
+	Change (what_changed);
 }
 
 const PresentationInfo::order_t PresentationInfo::max_order = UINT32_MAX;
@@ -164,7 +203,7 @@ PresentationInfo::set_color (PresentationInfo::color_t c)
 	if (c != _color) {
 		_color = c;
 		send_change (PropertyChange (Properties::color));
-		Change (); /* EMIT SIGNAL */
+		send_static_change (PropertyChange (Properties::color));
 	}
 }
 
@@ -189,7 +228,7 @@ PresentationInfo::set_selected (bool yn)
 			_flags = Flag (_flags & ~Selected);
 		}
 		send_change (PropertyChange (Properties::selected));
-		Change (); /* EMIT SIGNAL */
+		send_static_change (PropertyChange (Properties::selected));
 	}
 }
 
@@ -205,7 +244,7 @@ PresentationInfo::set_hidden (bool yn)
 		}
 
 		send_change (PropertyChange (Properties::hidden));
-		Change (); /* EMIT SIGNAL */
+		send_static_change (PropertyChange (Properties::hidden));
 	}
 }
 
@@ -217,7 +256,7 @@ PresentationInfo::set_order (order_t order)
 	if (order != _order) {
 		_order = order;
 		send_change (PropertyChange (Properties::order));
-		Change (); /* EMIT SIGNAL */
+		send_static_change (PropertyChange (Properties::order));
 	}
 }
 

@@ -77,7 +77,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	/* set just the order */
 
-	void  set_presentation_order (PresentationInfo::order_t, bool notify_class_listeners = true);
+	void  set_presentation_order (PresentationInfo::order_t);
 
 	struct PresentationOrderSorter {
 		bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
