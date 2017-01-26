@@ -184,6 +184,7 @@ public:
 
 	double   to_double()              const { return _time; }
 	uint64_t to_ticks()               const { return lrint(_time * PPQN); }
+	int64_t  to_relative_ticks()      const { return lrint(_time * PPQN); }
 	uint64_t to_ticks(uint32_t ppqn)  const { return lrint(_time * ppqn); }
 
 	uint32_t get_beats() const { return floor(_time); }

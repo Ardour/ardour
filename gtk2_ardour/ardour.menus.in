@@ -340,6 +340,7 @@
         <menuitem action='transform-region'/>
         <menuitem action='fork-region'/>
         <menuitem action='show-region-list-editor'/>
+        <menuitem action='show-region-tracker-editor'/>
       </menu>
       <menu action='RegionMenuGain'>
         <menuitem action='toggle-opaque-region'/>
@@ -750,6 +751,7 @@
       <menuitem action='transform-region'/>
       <menuitem action='fork-region'/>
       <menuitem action='show-region-list-editor'/>
+      <menuitem action='show-region-tracker-editor'/>
     </menu>
     <menu action='RegionMenuPosition'>
       <menuitem action='naturalize-region'/>

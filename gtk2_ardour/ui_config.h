@@ -83,6 +83,10 @@ private:
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 	ArdourCanvas::SVAModifier modifier (const std::string&) const;
 
+	// Like color but return the color encoded as string instead of
+	// ArdourCanvas::Color
+	std::string color_str (const std::string&, bool* failed = 0) const;
+
 	sigc::signal<void>  ColorsChanged;
 
 	void reset_dpi ();

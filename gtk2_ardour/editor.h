@@ -1245,6 +1245,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_clicked_region ();
 	void show_region_properties ();
 	void show_midi_list_editor ();
+	void show_midi_tracker_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
@@ -1802,8 +1803,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void snap_type_selection_done (Editing::SnapType);
 	void snap_mode_selection_done (Editing::SnapMode);
-	void snap_mode_chosen (Editing::SnapMode);
 	void snap_type_chosen (Editing::SnapType);
+	void snap_mode_chosen (Editing::SnapMode);
 
 	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);

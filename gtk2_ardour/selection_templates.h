@@ -46,6 +46,7 @@ Selection::foreach_regionview (void (RegionView::*method)(void)) {
 	}
 }
 
+
 inline void
 Selection::foreach_midi_regionview (void (MidiRegionView::*method)(void)) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {

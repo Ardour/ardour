@@ -2811,6 +2811,13 @@ Editor::show_midi_list_editor ()
 	selection->foreach_midi_regionview (&MidiRegionView::show_list_editor);
 }
 
+/** Show the midi tracker editor for the selected MIDI regions */
+void
+Editor::show_midi_tracker_editor ()
+{
+	selection->foreach_midi_regionview (&MidiRegionView::show_tracker_editor);
+}
+
 void
 Editor::rename_region ()
 {

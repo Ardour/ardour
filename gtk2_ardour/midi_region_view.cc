@@ -61,6 +61,7 @@
 #include "midi_channel_dialog.h"
 #include "midi_cut_buffer.h"
 #include "midi_list_editor.h"
+#include "midi_tracker_editor.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
@@ -115,6 +116,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, _tracker_editor (0)
 	, _no_sound_notes (false)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
@@ -161,6 +163,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, _tracker_editor (0)
 	, _no_sound_notes (false)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
@@ -214,6 +217,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, _tracker_editor (0)
 	, _no_sound_notes (false)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
@@ -245,6 +249,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, _tracker_editor (0)
 	, _no_sound_notes (false)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
@@ -916,6 +921,16 @@ MidiRegionView::show_list_editor ()
 	_list_editor->present ();
 }
 
+void
+MidiRegionView::show_tracker_editor ()
+{
+	if (!_tracker_editor) {
+		MidiTimeAxisView* const mtv  = dynamic_cast<MidiTimeAxisView*>(&trackview);
+		_tracker_editor = new MidiTrackerEditor (trackview.session(), mtv, mtv->_route, midi_region(), midi_view()->midi_track());
+	}
+	_tracker_editor->present ();
+}
+
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
  * \param t time in frames relative to the position of the region
  * \param y vertical position in pixels
@@ -1428,6 +1443,7 @@ MidiRegionView::~MidiRegionView ()
 	hide_verbose_cursor ();
 
 	delete _list_editor;
+	delete _tracker_editor;
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 

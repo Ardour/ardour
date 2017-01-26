@@ -41,7 +41,7 @@ namespace Evoral {
 class LIBEVORAL_API Parameter
 {
 public:
-	inline Parameter(ParameterType type, uint8_t channel=0, uint32_t id=0)
+	inline Parameter(ParameterType type=0, uint8_t channel=0, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
 
