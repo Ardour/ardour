@@ -237,7 +237,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
-	, _snap_delta (0, 0)
+	, _snap_delta (0)
 	, _constraint_pressed (false)
 {
 
@@ -350,7 +350,7 @@ frameoffset_t
 Drag::snap_delta (guint state) const
 {
 	if (ArdourKeyboard::indicates_snap_delta (state)) {
-		return _snap_delta.frame;
+		return _snap_delta;
 	}
 
 	return 0;
@@ -373,11 +373,11 @@ Drag::current_pointer_y () const
 }
 
 void
-Drag::setup_snap_delta (MusicFrame pos)
+Drag::setup_snap_delta (framepos_t pos)
 {
-	MusicFrame snap (pos);
+	MusicFrame snap (pos, 0);
 	_editor->snap_to (snap, ARDOUR::RoundNearest, false, true);
-	_snap_delta = snap - pos;
+	_snap_delta = snap.frame - pos;
 }
 
 bool
@@ -618,7 +618,7 @@ void
 RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	setup_snap_delta (_last_position);
+	setup_snap_delta (_last_position.frame);
 
 	show_verbose_cursor_time (_last_position.frame);
 
@@ -2852,7 +2852,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framecnt_t const region_length = (framecnt_t) (_primary->region()->length() / speed);
 
 	framepos_t const pf = adjusted_current_frame (event);
-	setup_snap_delta (MusicFrame (region_start, 0));
+	setup_snap_delta (region_start);
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
@@ -3631,8 +3631,7 @@ void
 CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
-	const framepos_t current_frame = _editor->playhead_cursor->current_frame();
-	setup_snap_delta (MusicFrame (current_frame, 0));
+	setup_snap_delta (_editor->playhead_cursor->current_frame());
 
 	_grab_zoom = _editor->samples_per_pixel;
 
@@ -3735,8 +3734,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
-	const int32_t division = _editor->get_grid_music_divisions (event->button.state);
-	setup_snap_delta (MusicFrame (r->position(), division));
+	setup_snap_delta (r->position());
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
 }
@@ -3862,8 +3860,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
-	const int32_t division = _editor->get_grid_music_divisions (event->button.state);
-	setup_snap_delta (MusicFrame (r->last_frame(), division));
+	setup_snap_delta (r->last_frame());
 
 	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
 }
@@ -4024,9 +4021,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	} else {
 		show_verbose_cursor_time (location->end());
 	}
-	const int32_t division = _editor->get_grid_music_divisions (event->button.state);
-	const framepos_t pos = is_start ? location->start() : location->end();
-	setup_snap_delta (MusicFrame (pos, division));
+	setup_snap_delta (is_start ? location->start() : location->end());
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
@@ -4413,9 +4408,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_x = _point->get_x() + _editor->sample_to_pixel_unrounded (_point->line().offset());
 	_fixed_grab_y = _point->get_y();
 
-	const framepos_t pos = _editor->pixel_to_sample (_fixed_grab_x);
-	const int32_t division = _editor->get_grid_music_divisions (event->button.state);
-	setup_snap_delta (MusicFrame (pos, division));
+	setup_snap_delta (_editor->pixel_to_sample (_fixed_grab_x));
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
@@ -4914,8 +4907,7 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_editor->get_selection().add (_primary);
 
 	framepos_t where = _primary->region()->position();
-	const int32_t division = _editor->get_grid_music_divisions (event->button.state);
-	setup_snap_delta (MusicFrame (where, division));
+	setup_snap_delta (where);
 
 	show_verbose_cursor_duration (where, adjusted_current_frame (event), 0);
 }
@@ -5647,7 +5639,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		_copy = false;
 	}
 
-	setup_snap_delta (MusicFrame (_region->source_beats_to_absolute_frames (_primary->note()->time ()), 0));
+	setup_snap_delta (_region->source_beats_to_absolute_frames (_primary->note()->time ()));
 
 	if (!(_was_selected = _primary->selected())) {
 
