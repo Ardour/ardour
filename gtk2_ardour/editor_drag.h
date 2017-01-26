@@ -34,6 +34,7 @@
 #include "editor_items.h"
 #include "mouse_cursors.h"
 #include "editing.h"
+#include "track_selection.h"
 
 namespace ARDOUR {
 	class Location;
@@ -1106,7 +1107,7 @@ public:
 private:
 	Operation _operation;
 	bool _add;
-	std::list<TimeAxisView*> _added_time_axes;
+	TrackSelection _track_selection_at_start;
 	bool _time_selection_at_start;
         framepos_t start_at_start;
         framepos_t end_at_start;

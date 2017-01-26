@@ -5038,6 +5038,7 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
 	, _add (false)
+	, _track_selection_at_start (e)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
@@ -5134,6 +5135,10 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
+	if (first_move) {
+		_track_selection_at_start = _editor->selection->tracks;
+	}
+
 	switch (_operation) {
 	case CreateSelection:
 	{
@@ -5209,10 +5214,26 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			//( NOTE: most mouse moves don't change the selection so we can't just SET it for every mouse move; it gets clunky )
 			TrackViewList tracks_to_add;
 			TrackViewList tracks_to_remove;
-			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i)
-				if ( !_editor->selection->tracks.contains ( *i ) )
-					tracks_to_add.push_back ( *i );
-			_editor->selection->add(tracks_to_add);
+
+			if (!first_move) {
+				for (TrackViewList::const_iterator i = _editor->selection->tracks.begin(); i != _editor->selection->tracks.end(); ++i) {
+					if (!new_selection.contains (*i) && !_track_selection_at_start.contains (*i)) {
+						tracks_to_remove.push_back (*i);
+					}
+				}
+			}
+
+			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+				if (!_editor->selection->tracks.contains (*i)) {
+					tracks_to_add.push_back (*i);
+				}
+			}
+
+			_editor->selection->add (tracks_to_add);
+
+			if (!tracks_to_remove.empty()) {
+				_editor->selection->remove (tracks_to_remove);
+			}
 		}
 	}
 	break;
