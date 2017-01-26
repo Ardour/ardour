@@ -187,6 +187,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void remove_master (VCAMasterStrip*);
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
+	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 	AxisView* axis_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 
 	void hide_all_strips (bool with_select);

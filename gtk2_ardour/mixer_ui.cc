@@ -874,6 +874,18 @@ Mixer_UI::strip_by_route (boost::shared_ptr<Route> r) const
 	return 0;
 }
 
+MixerStrip*
+Mixer_UI::strip_by_stripable (boost::shared_ptr<Stripable> s) const
+{
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->stripable() == s) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
 AxisView*
 Mixer_UI::axis_by_stripable (boost::shared_ptr<Stripable> s) const
 {
@@ -911,8 +923,19 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 
 				tmp.push_back (strip);
 
+				OrderingKeys sorted;
+				const size_t cmp_max = strips.size ();
 				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-					if ((*i) == strip) {
+					sorted.push_back (OrderKeys (-1, (*i)->stripable(), cmp_max));
+				}
+				SortByNewDisplayOrder cmp;
+				sort (sorted.begin(), sorted.end(), cmp);
+
+				for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr) {
+					MixerStrip* ms = strip_by_stripable (sr->stripable);
+					assert (ms);
+
+					if (ms == strip) {
 						/* hit clicked strip, start accumulating till we hit the first
 						   selected strip
 						*/
@@ -922,7 +945,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 						} else {
 							accumulate = true;
 						}
-					} else if (_selection.selected (*i)) {
+					} else if (_selection.selected (ms)) {
 						/* hit selected strip. if currently accumulating others,
 						   we're done. if not accumulating others, start doing so.
 						*/
@@ -935,7 +958,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 						}
 					} else {
 						if (accumulate) {
-							tmp.push_back (*i);
+							tmp.push_back (ms);
 						}
 					}
 				}
