@@ -394,7 +394,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
 		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), (*v)->number())));
+			f.push_back (MenuElem (((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : string_compose ("%1",(*v)->name())), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), (*v)->number())));
 		}
 	}
 
@@ -403,9 +403,9 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	vca_menu = new Menu;
 	{
 		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_recenabled_to_master), 0)));
 		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), (*v)->number())));
+			f.push_back (MenuElem (((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : string_compose ("%1",(*v)->name())), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_recenabled_to_master), (*v)->number())));
 		}
 
 	}
@@ -414,13 +414,13 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	vca_menu = new Menu;
 	{
 		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_soloed_to_master), 0)));
 		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), (*v)->number())));
+			f.push_back (MenuElem (((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : string_compose ("%1",(*v)->name())), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_soloed_to_master), (*v)->number())));
 		}
 
 	}
-	items.push_back (MenuElem (_("Assign Soloed to Control Master...")));
+	items.push_back (MenuElem (_("Assign Soloed to Control Master..."), *vca_menu));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
