@@ -247,7 +247,7 @@ protected:
 	double current_pointer_y () const;
 
 	/* sets snap delta from unsnapped pos */
-	void setup_snap_delta (ARDOUR::MusicFrame pos);
+	void setup_snap_delta (framepos_t pos);
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
@@ -281,7 +281,7 @@ private:
 	/* difference between some key position's snapped and unsnapped
 	 *  framepos. used for relative snap.
 	 */
-	ARDOUR::MusicFrame _snap_delta;
+	framepos_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
