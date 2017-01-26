@@ -340,13 +340,13 @@ MidiGhostRegion::add_note (NoteBase* n)
 	MidiStreamView* mv = midi_view();
 
 	if (mv) {
-		uint8_t const note_num = n->note()->note();
-		double const  h        = note_height(trackview, mv);
-		double const  y        = note_y(trackview, mv, note_num);
 
 		if (!n->item()->visible()) {
 			event->item->hide();
 		} else {
+			uint8_t const note_num = n->note()->note();
+			double const  h        = note_height(trackview, mv);
+			double const  y        = note_y(trackview, mv, note_num);
 			if (!event->is_hit) {
 				_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(event->item);
 				_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
@@ -387,15 +387,15 @@ MidiGhostRegion::update_note (Note* note, bool hide)
 		return;
 	}
 
-	uint8_t const note_num = note->note()->note();
-
-	double const y = note_y(trackview, mv, note_num);
-	double const h = note_height(trackview, mv);
-
 	if (hide) {
 		ev->item->hide();
 	} else if (!ev->is_hit) {
 		_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(ev->item);
+
+		uint8_t const note_num = note->note()->note();
+		double const y = note_y(trackview, mv, note_num);
+		double const h = note_height(trackview, mv);
+
 		_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
 
 		ev->item->show();
@@ -420,15 +420,15 @@ MidiGhostRegion::update_hit (Hit* hit, bool hide)
 		return;
 	}
 
-	uint8_t const note_num = ev->event->note()->note();
-
-	double const h = note_height(trackview, mv);
-	double const y = note_y(trackview, mv, note_num);
-
 	if (hide) {
 		ev->item->hide();
 	} else if (ev->is_hit) {
 		_tmp_poly = static_cast<ArdourCanvas::Polygon*>(ev->item);
+
+		uint8_t const note_num = ev->event->note()->note();
+		double const h = note_height(trackview, mv);
+		double const y = note_y(trackview, mv, note_num);
+
 		ArdourCanvas::Duple ppos = hit->position();
 		ArdourCanvas::Duple gpos = _tmp_poly->position();
 		gpos.x = ppos.x;
