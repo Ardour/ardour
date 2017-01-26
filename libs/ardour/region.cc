@@ -329,7 +329,7 @@ Region::Region (boost::shared_ptr<const Region> other)
     the start within \a other is given by \a offset
     (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
 */
-Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, const int32_t sub_num)
+Region::Region (boost::shared_ptr<const Region> other, MusicFrame offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -343,7 +343,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 	/* override state that may have been incorrectly inherited from the other region
 	 */
 
-	_position = other->_position + offset;
 	_locked = false;
 	_whole_file = false;
 	_hidden = false;
@@ -351,9 +350,17 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, con
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_start = other->_start + offset;
-	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
+	_position = other->_position + offset.frame;
+	_start = other->_start + offset.frame;
+
+	/* prevent offset of 0 from altering musical position */
+	if (offset.frame != 0) {
+		const double offset_qn = _session.tempo_map().exact_qn_at_frame (other->_position + offset.frame, offset.division)
+			- other->_quarter_note;
+
+		_quarter_note = other->_quarter_note + offset_qn;
+		_beat = _session.tempo_map().beat_at_quarter_note (_quarter_note);
+	}
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -589,6 +596,13 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 		return;
 	}
 
+	/* do this even if the position is the same. this helps out
+	   a GUI that has moved its representation already.
+	*/
+	PropertyChange p_and_l;
+
+	p_and_l.add (Properties::position);
+
 	if (position_lock_style() == AudioTime) {
 		set_position_internal (pos, true, sub_num);
 	} else {
@@ -596,8 +610,54 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
 		}
 
-		/* will set pulse accordingly */
+		/* will set quarter note accordingly */
 		set_position_internal (pos, false, sub_num);
+	}
+
+	if (position_lock_style() == MusicTime) {
+		p_and_l.add (Properties::length);
+	}
+
+	send_change (p_and_l);
+
+}
+
+void
+Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
+{
+	/* We emit a change of Properties::position even if the position hasn't changed
+	   (see Region::set_position), so we must always set this up so that
+	   e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
+	*/
+	_last_position = _position;
+
+	if (_position != pos) {
+		_position = pos;
+
+		if (allow_bbt_recompute) {
+			recompute_position_from_lock_style (sub_num);
+		} else {
+			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
+		}
+
+		/* check that the new _position wouldn't make the current
+		   length impossible - if so, change the length.
+
+		   XXX is this the right thing to do?
+		*/
+		if (max_framepos - _length < _position) {
+			_last_length = _length;
+			_length = max_framepos - _position;
+		}
+	}
+}
+
+void
+Region::set_position_music (double qn)
+{
+	if (!can_move()) {
+		return;
 	}
 
 	/* do this even if the position is the same. this helps out
@@ -606,15 +666,44 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	PropertyChange p_and_l;
 
 	p_and_l.add (Properties::position);
-	/* Currently length change due to position change is only implemented
-	   for MidiRegion (Region has no length in beats).
-	   Notify a length change regardless (its more efficient for MidiRegions),
-	   and when Region has a _length_beats we will need it here anyway).
-	*/
-	p_and_l.add (Properties::length);
+
+	if (!_session.loading()) {
+		_beat = _session.tempo_map().beat_at_quarter_note (qn);
+	}
+
+	/* will set frame accordingly */
+	set_position_music_internal (qn);
+
+	if (position_lock_style() == MusicTime) {
+		p_and_l.add (Properties::length);
+	}
 
 	send_change (p_and_l);
+}
 
+void
+Region::set_position_music_internal (double qn)
+{
+	/* We emit a change of Properties::position even if the position hasn't changed
+	   (see Region::set_position), so we must always set this up so that
+	   e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
+	*/
+	_last_position = _position;
+
+	if (_quarter_note != qn) {
+		_position = _session.tempo_map().frame_at_quarter_note (qn);
+		_quarter_note = qn;
+
+		/* check that the new _position wouldn't make the current
+		   length impossible - if so, change the length.
+
+		   XXX is this the right thing to do?
+		*/
+		if (max_framepos - _length < _position) {
+			_last_length = _length;
+			_length = max_framepos - _position;
+		}
+	}
 }
 
 /** A gui may need to create a region, then place it in an initial
@@ -653,37 +742,6 @@ Region::set_initial_position (framepos_t pos)
 	   a GUI that has moved its representation already.
 	*/
 	send_change (Properties::position);
-}
-
-void
-Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
-{
-	/* We emit a change of Properties::position even if the position hasn't changed
-	   (see Region::set_position), so we must always set this up so that
-	   e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
-	*/
-	_last_position = _position;
-
-	if (_position != pos) {
-		_position = pos;
-
-		if (allow_bbt_recompute) {
-			recompute_position_from_lock_style (sub_num);
-		} else {
-			/* MusicTime dictates that we glue to ardour beats. the pulse may have changed.*/
-			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
-		}
-
-		/* check that the new _position wouldn't make the current
-		   length impossible - if so, change the length.
-
-		   XXX is this the right thing to do?
-		*/
-		if (max_framepos - _length < _position) {
-			_last_length = _length;
-			_length = max_framepos - _position;
-		}
-	}
 }
 
 void

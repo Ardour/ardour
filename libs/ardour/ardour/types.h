@@ -319,6 +319,27 @@ namespace ARDOUR {
 		}
 	};
 
+	/* used for translating audio frames to an exact musical position using a note divisor.
+	   an exact musical position almost never falls exactly on an audio frame, but for sub-sample
+	   musical accuracy we need to derive exact musical locations from a frame position
+	   the division follows TempoMap::exact_beat_at_frame().
+	   division
+	   -1       musical location is the bar closest to frame
+	    0       musical location is the musical position of the frame
+	    1       musical location is the BBT beat closest to frame
+	    n       musical location is the quarter-note division n closest to frame
+	*/
+	struct MusicFrame {
+		framepos_t frame;
+		int32_t    division;
+
+		MusicFrame (framepos_t f, int32_t d) : frame (f), division (d) {}
+
+		void set (framepos_t f, int32_t d) {frame = f; division = d; }
+
+		MusicFrame operator- (MusicFrame other) { return MusicFrame (frame - other.frame, 0); }
+	};
+
 	/* XXX: slightly unfortunate that there is this and Evoral::Range<>,
 	   but this has a uint32_t id which Evoral::Range<> does not.
 	*/

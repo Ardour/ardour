@@ -669,7 +669,7 @@ Playlist::clear_pending ()
 
 /** Note: this calls set_layer (..., DBL_MAX) so it will reset the layering index of region */
 void
-Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, const int32_t sub_num)
+Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, int32_t sub_num, double quarter_note, bool for_music)
 {
 	RegionWriteLock rlock (this);
 	times = fabs (times);
@@ -688,19 +688,18 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 	}
 
 	if (itimes >= 1) {
-		add_region_internal (region, pos, sub_num);
+		add_region_internal (region, pos, sub_num, quarter_note, for_music);
 		set_layer (region, DBL_MAX);
 		pos += region->length();
 		--itimes;
 	}
-
 
 	/* note that itimes can be zero if we being asked to just
 	   insert a single fraction of the region.
 	*/
 
 	for (int i = 0; i < itimes; ++i) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, sub_num);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
 		add_region_internal (copy, pos, sub_num);
 		set_layer (copy, DBL_MAX);
 		pos += region->length();
@@ -743,7 +742,7 @@ Playlist::set_region_ownership ()
 }
 
 bool
-Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, const int32_t sub_num)
+Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, int32_t sub_num, double quarter_note, bool for_music)
 {
 	if (region->data_type() != _type) {
 		return false;
@@ -755,8 +754,11 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 		boost::shared_ptr<Playlist> foo (shared_from_this());
 		region->set_playlist (boost::weak_ptr<Playlist>(foo));
 	}
-
-	region->set_position (position, sub_num);
+	if (for_music) {
+		region->set_position_music (quarter_note);
+	} else {
+		region->set_position (position, sub_num);
+	}
 
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	all_regions.insert (region);
@@ -1411,7 +1413,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::split (framepos_t at, const int32_t sub_num)
+ Playlist::split (MusicFrame at)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1420,33 +1422,34 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	  */
 
 	 for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
-		 _split_region (*r, at, sub_num);
+		 _split_region (*r, at);
 	 }
  }
 
  void
- Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t sub_num)
+ Playlist::split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
  {
 	 RegionWriteLock rl (this);
-	 _split_region (region, playlist_position, sub_num);
+	 _split_region (region, playlist_position);
  }
 
  void
- Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position, const int32_t sub_num)
+ Playlist::_split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
  {
-	 if (!region->covers (playlist_position)) {
+	 if (!region->covers (playlist_position.frame)) {
 		 return;
 	 }
 
-	 if (region->position() == playlist_position ||
-	     region->last_frame() == playlist_position) {
+	 if (region->position() == playlist_position.frame ||
+	     region->last_frame() == playlist_position.frame) {
 		 return;
 	 }
 
 	 boost::shared_ptr<Region> left;
 	 boost::shared_ptr<Region> right;
-	 frameoffset_t before;
-	 frameoffset_t after;
+
+	 MusicFrame before (playlist_position.frame - region->position(), playlist_position.division);
+	 MusicFrame after (region->length() - before.frame, 0);
 	 string before_name;
 	 string after_name;
 
@@ -1455,15 +1458,12 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 bool old_sp = _splicing;
 	 _splicing = true;
 
-	 before = playlist_position - region->position();
-	 after = region->length() - before;
-
 	 RegionFactory::region_name (before_name, region->name(), false);
 
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::length, before);
+		 plist.add (Properties::length, before.frame);
 		 plist.add (Properties::name, before_name);
 		 plist.add (Properties::left_of_split, true);
 		 plist.add (Properties::layering_index, region->layering_index ());
@@ -1473,7 +1473,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 		    since it supplies that offset to the Region constructor, which
 		    is necessary to get audio region gain envelopes right.
 		 */
-		 left = RegionFactory::create (region, 0, plist, true, sub_num);
+		 left = RegionFactory::create (region, MusicFrame (0, 0), plist, true);
 	 }
 
 	 RegionFactory::region_name (after_name, region->name(), false);
@@ -1481,18 +1481,19 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::length, after);
+		 plist.add (Properties::length, after.frame);
 		 plist.add (Properties::name, after_name);
 		 plist.add (Properties::right_of_split, true);
 		 plist.add (Properties::layering_index, region->layering_index ());
 		 plist.add (Properties::layer, region->layer ());
 
 		 /* same note as above */
-		 right = RegionFactory::create (region, before, plist, true, sub_num);
+		 right = RegionFactory::create (region, before, plist, true);
 	 }
 
-	 add_region_internal (left, region->position());
-	 add_region_internal (right, region->position() + before);
+	 add_region_internal (left, region->position(), 0);
+	 add_region_internal (right, region->position() + before.frame, before.division);
+
 	 remove_region_internal (region);
 
 	 _splicing = old_sp;

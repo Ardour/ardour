@@ -2734,7 +2734,7 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundMode direction, bool for_mark)
+Editor::snap_to_with_modifier (MusicFrame& start, GdkEvent const * event, RoundMode direction, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2743,6 +2743,8 @@ Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundM
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
 			snap_to_internal (start, direction, for_mark);
+		} else {
+			start.set (start.frame, 0);
 		}
 	} else {
 		if (_snap_mode != SnapOff) {
@@ -2750,14 +2752,17 @@ Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundM
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
 			snap_to_internal (start, direction, for_mark);
+		} else {
+			start.set (start.frame, 0);
 		}
 	}
 }
 
 void
-Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to (MusicFrame& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
+		start.set (start.frame, 0);
 		return;
 	}
 
@@ -2765,8 +2770,9 @@ Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark, bool ens
 }
 
 void
-Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool /*for_mark*/)
+Editor::timecode_snap_to_internal (MusicFrame& pos, RoundMode direction, bool /*for_mark*/)
 {
+	framepos_t start = pos.frame;
 	const framepos_t one_timecode_second = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
 	framepos_t one_timecode_minute = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
 
@@ -2828,14 +2834,16 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
 		abort(); /*NOTREACHED*/
 	}
+
+	pos.set (start, 0);
 }
 
 void
-Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to_internal (MusicFrame& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	const framepos_t one_second = _session->frame_rate();
 	const framepos_t one_minute = _session->frame_rate() * 60;
-	framepos_t presnap = start;
+	framepos_t presnap = start.frame;
 	framepos_t before;
 	framepos_t after;
 
@@ -2847,95 +2855,104 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 
 	case SnapToCDFrame:
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start % (one_second/75) == 0) {
+		    start.frame % (one_second/75) == 0) {
 			/* start is already on a whole CD frame, do nothing */
-		} else if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			start = (framepos_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
+		} else if (((direction == 0) && (start.frame % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
+			start.frame = (framepos_t) ceil ((double) start.frame / (one_second / 75)) * (one_second / 75);
 		} else {
-			start = (framepos_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
+			start.frame = (framepos_t) floor ((double) start.frame / (one_second / 75)) * (one_second / 75);
 		}
+
+		start.set (start.frame, 0);
+
 		break;
 
 	case SnapToSeconds:
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start % one_second == 0) {
+		    start.frame % one_second == 0) {
 			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
-			start = (framepos_t) ceil ((double) start / one_second) * one_second;
+		} else if (((direction == 0) && (start.frame % one_second > one_second / 2)) || (direction > 0)) {
+			start.frame = (framepos_t) ceil ((double) start.frame / one_second) * one_second;
 		} else {
-			start = (framepos_t) floor ((double) start / one_second) * one_second;
+			start.frame = (framepos_t) floor ((double) start.frame / one_second) * one_second;
 		}
+
+		start.set (start.frame, 0);
+
 		break;
 
 	case SnapToMinutes:
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start % one_minute == 0) {
+		    start.frame % one_minute == 0) {
 			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
-			start = (framepos_t) ceil ((double) start / one_minute) * one_minute;
+		} else if (((direction == 0) && (start.frame % one_minute > one_minute / 2)) || (direction > 0)) {
+			start.frame = (framepos_t) ceil ((double) start.frame / one_minute) * one_minute;
 		} else {
-			start = (framepos_t) floor ((double) start / one_minute) * one_minute;
+			start.frame = (framepos_t) floor ((double) start.frame / one_minute) * one_minute;
 		}
+
+		start.set (start.frame, 0);
+
 		break;
 
 	case SnapToBar:
-		start = _session->tempo_map().round_to_bar (start, direction);
+		start = _session->tempo_map().round_to_bar (start.frame, direction);
 		break;
 
 	case SnapToBeat:
-		start = _session->tempo_map().round_to_beat (start, direction);
+		start = _session->tempo_map().round_to_beat (start.frame, direction);
 		break;
 
 	case SnapToBeatDiv128:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 128, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 128, direction);
 		break;
 	case SnapToBeatDiv64:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 64, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 64, direction);
 		break;
 	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 32, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 32, direction);
 		break;
 	case SnapToBeatDiv28:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 28, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 28, direction);
 		break;
 	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 24, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 24, direction);
 		break;
 	case SnapToBeatDiv20:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 20, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 20, direction);
 		break;
 	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 16, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 16, direction);
 		break;
 	case SnapToBeatDiv14:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 14, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 14, direction);
 		break;
 	case SnapToBeatDiv12:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 12, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 12, direction);
 		break;
 	case SnapToBeatDiv10:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 10, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 10, direction);
 		break;
 	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 8, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 8, direction);
 		break;
 	case SnapToBeatDiv7:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 7, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 7, direction);
 		break;
 	case SnapToBeatDiv6:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 6, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 6, direction);
 		break;
 	case SnapToBeatDiv5:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 5, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 5, direction);
 		break;
 	case SnapToBeatDiv4:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 4, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 4, direction);
 		break;
 	case SnapToBeatDiv3:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 3, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 3, direction);
 		break;
 	case SnapToBeatDiv2:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start, 2, direction);
+		start = _session->tempo_map().round_to_quarter_note_subdivision (start.frame, 2, direction);
 		break;
 
 	case SnapToMark:
@@ -2943,28 +2960,30 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 			return;
 		}
 
-		_session->locations()->marks_either_side (start, before, after);
+		_session->locations()->marks_either_side (start.frame, before, after);
 
 		if (before == max_framepos && after == max_framepos) {
 			/* No marks to snap to, so just don't snap */
 			return;
 		} else if (before == max_framepos) {
-			start = after;
+			start.frame = after;
 		} else if (after == max_framepos) {
-			start = before;
+			start.frame = before;
 		} else if (before != max_framepos && after != max_framepos) {
 			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
-				start = after;
+				start.frame = after;
 			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
-				start = before;
+				start.frame = before;
 			else if (direction ==  0 ) {
-				if ((start - before) < (after - start)) {
-					start = before;
+				if ((start.frame - before) < (after - start.frame)) {
+					start.frame = before;
 				} else {
-					start = after;
+					start.frame = after;
 				}
 			}
 		}
+
+		start.set (start.frame, 0);
 
 		break;
 
@@ -2978,9 +2997,9 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 			vector<framepos_t>::iterator next = region_boundary_cache.end ();
 
 			if (direction > 0) {
-				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
+				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.frame);
 			} else {
-				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
+				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.frame);
 			}
 
 			if (next != region_boundary_cache.begin ()) {
@@ -2991,12 +3010,15 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 			framepos_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
 			framepos_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
 
-			if (start > (p + n) / 2) {
-				start = n;
+			if (start.frame > (p + n) / 2) {
+				start.frame = n;
 			} else {
-				start = p;
+				start.frame = p;
 			}
 		}
+
+		start.set (start.frame, 0);
+
 		break;
 	}
 
@@ -3010,21 +3032,20 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 			return;
 		}
 
-		if (presnap > start) {
-			if (presnap > (start + pixel_to_sample(snap_threshold))) {
-				start = presnap;
+		if (presnap > start.frame) {
+			if (presnap > (start.frame + pixel_to_sample(snap_threshold))) {
+				start.set (presnap, 0);
 			}
 
-		} else if (presnap < start) {
-			if (presnap < (start - pixel_to_sample(snap_threshold))) {
-				start = presnap;
+		} else if (presnap < start.frame) {
+			if (presnap < (start.frame - pixel_to_sample(snap_threshold))) {
+				start.set (presnap, 0);
 			}
 		}
 
 	default:
 		/* handled at entry */
 		return;
-
 	}
 }
 
@@ -4067,9 +4088,9 @@ Editor::get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t durat
 	framecnt_t offset = paste_count * duration;
 
 	/* snap offset so pos + offset is aligned to the grid */
-	framepos_t offset_pos = pos + offset;
+	MusicFrame offset_pos (pos + offset, 0);
 	snap_to(offset_pos, RoundUpMaybe);
-	offset = offset_pos - pos;
+	offset = offset_pos.frame - pos;
 
 	return offset;
 }
@@ -4740,6 +4761,8 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 		ep = EditAtPlayhead;
 	}
 
+	MusicFrame snap_mf (0, 0);
+
 	switch (ep) {
 	case EditAtPlayhead:
 		if (_dragging_playhead) {
@@ -4772,7 +4795,9 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 			/* XXX not right but what can we do ? */
 			return 0;
 		}
-		snap_to (where);
+		snap_mf.frame = where;
+		snap_to (snap_mf);
+		where = snap_mf.frame;
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use mouse @ %1\n", where));
 		break;
 	}

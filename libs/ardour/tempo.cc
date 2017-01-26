@@ -3672,13 +3672,13 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 	return 0;
 }
 
-framepos_t
+MusicFrame
 TempoMap::round_to_bar (framepos_t fr, RoundMode dir)
 {
 	return round_to_type (fr, dir, Bar);
 }
 
-framepos_t
+MusicFrame
 TempoMap::round_to_beat (framepos_t fr, RoundMode dir)
 {
 	return round_to_type (fr, dir, Beat);
@@ -3780,7 +3780,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 	return ret_frame;
 }
 
-framepos_t
+MusicFrame
 TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
@@ -3861,7 +3861,7 @@ TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMo
 			if (rem > ticks) {
 				if (beats == 0) {
 					/* can't go backwards past zero, so ... */
-					return 0;
+					return MusicFrame (0, 0);
 				}
 				/* step back to previous beat */
 				--beats;
@@ -3876,35 +3876,46 @@ TempoMap::round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMo
 		}
 	}
 
-	const framepos_t ret_frame = frame_at_minute (minute_at_pulse_locked (_metrics, (beats + (ticks / BBT_Time::ticks_per_beat)) / 4.0));
+	MusicFrame ret (0, 0);
+	ret.frame = frame_at_minute (minute_at_pulse_locked (_metrics, (beats + (ticks / BBT_Time::ticks_per_beat)) / 4.0));
+	ret.division = sub_num;
 
-	return ret_frame;
+	return ret;
 }
 
-framepos_t
+MusicFrame
 TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-
-	const double beat_at_framepos = max (0.0, beat_at_minute_locked (_metrics, minute_at_frame (frame)));
+	const double minute = minute_at_frame (frame);
+	const double beat_at_framepos = max (0.0, beat_at_minute_locked (_metrics, minute));
 	BBT_Time bbt (bbt_at_beat_locked (_metrics, beat_at_framepos));
+	MusicFrame ret (0, 0);
 
 	switch (type) {
 	case Bar:
+		ret.division = -1;
+
 		if (dir < 0) {
 			/* find bar previous to 'frame' */
 			if (bbt.bars > 0)
 				--bbt.bars;
 			bbt.beats = 1;
 			bbt.ticks = 0;
-			return frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
+
+			ret.frame = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
+
+			return ret;
 
 		} else if (dir > 0) {
 			/* find bar following 'frame' */
 			++bbt.bars;
 			bbt.beats = 1;
 			bbt.ticks = 0;
-			return frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
+
+			ret.frame = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
+
+			return ret;
 		} else {
 			/* true rounding: find nearest bar */
 			framepos_t raw_ft = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
@@ -3915,26 +3926,39 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 			framepos_t next_ft = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
 
 			if ((raw_ft - prev_ft) > (next_ft - prev_ft) / 2) {
-				return next_ft;
+				ret.frame = next_ft;
+
+				return ret;
 			} else {
-				return prev_ft;
+				--bbt.bars;
+				ret.frame = prev_ft;
+
+				return ret;
 			}
 		}
 
 		break;
 
 	case Beat:
+		ret.division = 1;
+
 		if (dir < 0) {
-			return frame_at_minute (minute_at_beat_locked (_metrics, floor (beat_at_framepos)));
+			ret.frame = frame_at_minute (minute_at_beat_locked (_metrics, floor (beat_at_framepos)));
+
+			return ret;
 		} else if (dir > 0) {
-			return frame_at_minute (minute_at_beat_locked (_metrics, ceil (beat_at_framepos)));
+			ret.frame = frame_at_minute (minute_at_beat_locked (_metrics, ceil (beat_at_framepos)));
+
+			return ret;
 		} else {
-			return frame_at_minute (minute_at_beat_locked (_metrics, floor (beat_at_framepos + 0.5)));
+			ret.frame = frame_at_minute (minute_at_beat_locked (_metrics, floor (beat_at_framepos + 0.5)));
+
+			return ret;
 		}
 		break;
 	}
 
-	return 0;
+	return MusicFrame (0, 0);
 }
 
 void

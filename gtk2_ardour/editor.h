@@ -452,20 +452,20 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
-	void snap_to (framepos_t&       first,
-	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	              bool              for_mark  = false,
-		      bool              ensure_snap = false);
+	void snap_to (ARDOUR::MusicFrame& first,
+	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	              bool                for_mark  = false,
+		      bool                ensure_snap = false);
 
-	void snap_to_with_modifier (framepos_t&       first,
-	                            GdkEvent const *  ev,
-	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                            bool              for_mark  = false);
+	void snap_to_with_modifier (ARDOUR::MusicFrame& first,
+	                            GdkEvent const *    ev,
+	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                            bool                for_mark  = false);
 
-	void snap_to (framepos_t&       first,
-	              framepos_t&       last,
-	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	              bool              for_mark  = false);
+	void snap_to (ARDOUR::MusicFrame& first,
+	              ARDOUR::MusicFrame& last,
+	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	              bool                for_mark  = false);
 
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
@@ -542,7 +542,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false);
-	void split_regions_at (framepos_t, RegionSelection&, const int32_t sub_num, bool snap = true);
+	void split_regions_at (ARDOUR::MusicFrame, RegionSelection&, bool snap = true);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
 
@@ -2152,14 +2152,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_next_route ();
 	void select_prev_route ();
 
-	void snap_to_internal (framepos_t&       first,
-	                       ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                       bool              for_mark  = false,
-			       bool              ensure_snap = false);
+	void snap_to_internal (ARDOUR::MusicFrame& first,
+	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                       bool                for_mark  = false,
+			       bool                ensure_snap = false);
 
-	void timecode_snap_to_internal (framepos_t&       first,
-	                                ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                                bool              for_mark  = false);
+	void timecode_snap_to_internal (ARDOUR::MusicFrame& first,
+	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                                bool                for_mark  = false);
 
 	RhythmFerret* rhythm_ferret;
 

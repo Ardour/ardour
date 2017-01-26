@@ -166,8 +166,7 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int32_t sub_num,
-                          bool snap_frame)
+Editor::split_regions_at (MusicFrame where, RegionSelection& regions, bool snap_frame)
 {
 	bool frozen = false;
 
@@ -214,7 +213,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 		   have something to split.
 		*/
 
-		if (!(*a)->region()->covers (where)) {
+		if (!(*a)->region()->covers (where.frame)) {
 			++a;
 			continue;
 		}
@@ -246,7 +245,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 
 		if (pl) {
 			pl->clear_changes ();
-			pl->split_region ((*a)->region(), where, sub_num);
+			pl->split_region ((*a)->region(), where);
 			_session->add_command (new StatefulDiffCommand (pl));
 		}
 
@@ -292,7 +291,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions, const int3
 		}
 
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
-			if ((*ri)->region()->position() < where) {
+			if ((*ri)->region()->position() < where.frame) {
 				// new regions created before the split
 				if (rsas & NewlyCreatedLeft) {
 					selection->add (*ri);
@@ -4260,7 +4259,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 		}
 
 		/* Add all selected points to the relevant copy ControlLists */
-		framepos_t start = std::numeric_limits<framepos_t>::max();
+		MusicFrame start (std::numeric_limits<framepos_t>::max(), 0);
 		for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
 			boost::shared_ptr<AutomationList>    al = (*sel_point)->line().the_list();
 			AutomationList::const_iterator ctrl_evt = (*sel_point)->model ();
@@ -4271,7 +4270,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 				earliest = std::min(earliest, Evoral::Beats((*ctrl_evt)->when));
 			} else {
 				/* Update earliest session start time in frames */
-				start = std::min(start, (*sel_point)->line().session_position(ctrl_evt));
+				start.frame = std::min(start.frame, (*sel_point)->line().session_position(ctrl_evt));
 			}
 		}
 
@@ -4282,13 +4281,13 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 			}
 			earliest.round_down_to_beat();
 		} else {
-			if (start == std::numeric_limits<double>::max()) {
-				start = 0;  // Weird... don't offset
+			if (start.frame == std::numeric_limits<double>::max()) {
+				start.frame = 0;  // Weird... don't offset
 			}
 			snap_to(start, RoundDownMaybe);
 		}
 
-		const double line_offset = midi ? earliest.to_double() : start;
+		const double line_offset = midi ? earliest.to_double() : start.frame;
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			/* Correct this copy list so that it is relative to the earliest
 			   start time, so relative ordering between points is preserved
@@ -4691,22 +4690,21 @@ void
 Editor::paste (float times, bool from_context)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
-
-	paste_internal (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), times, get_grid_music_divisions (0));
+	MusicFrame where (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), 0);
+	paste_internal (where.frame, times, 0);
 }
 
 void
 Editor::mouse_paste ()
 {
-	framepos_t where;
+	MusicFrame where (0, 0);
 	bool ignored;
-
-	if (!mouse_frame (where, ignored)) {
+	if (!mouse_frame (where.frame, ignored)) {
 		return;
 	}
 
 	snap_to (where);
-	paste_internal (where, 1, get_grid_music_divisions (0));
+	paste_internal (where.frame, 1, where.division);
 }
 
 void
@@ -6171,10 +6169,10 @@ Editor::update_region_fade_visibility ()
 void
 Editor::set_edit_point ()
 {
-	framepos_t where;
 	bool ignored;
+	MusicFrame where (0, 0);
 
-	if (!mouse_frame (where, ignored)) {
+	if (!mouse_frame (where.frame, ignored)) {
 		return;
 	}
 
@@ -6182,7 +6180,7 @@ Editor::set_edit_point ()
 
 	if (selection->markers.empty()) {
 
-		mouse_add_new_marker (where);
+		mouse_add_new_marker (where.frame);
 
 	} else {
 		bool ignored;
@@ -6190,7 +6188,7 @@ Editor::set_edit_point ()
 		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
 
 		if (loc) {
-			loc->move_to (where, get_grid_music_divisions(0));
+			loc->move_to (where.frame, where.division);
 		}
 	}
 }
@@ -6201,17 +6199,17 @@ Editor::set_playhead_cursor ()
 	if (entered_marker) {
 		_session->request_locate (entered_marker->position(), _session->transport_rolling());
 	} else {
-		framepos_t where;
+		MusicFrame where (0, 0);
 		bool ignored;
 
-		if (!mouse_frame (where, ignored)) {
+		if (!mouse_frame (where.frame, ignored)) {
 			return;
 		}
 
 		snap_to (where);
 
 		if (_session) {
-			_session->request_locate (where, _session->transport_rolling());
+			_session->request_locate (where.frame, _session->transport_rolling());
 		}
 	}
 
@@ -6239,18 +6237,16 @@ Editor::split_region ()
 	if (current_mouse_mode() == MouseObject) {  //don't try this for Internal Edit, Stretch, Draw, etc.
 
 		RegionSelection rs = get_regions_from_selection_and_edit_point ();
-
-		framepos_t where = get_preferred_edit_position ();
+		const framepos_t pos = get_preferred_edit_position();
+		const int32_t division = get_grid_music_divisions (0);
+		MusicFrame where (pos, division);
 
 		if (rs.empty()) {
 			return;
 		}
 
-		if (snap_musical()) {
-			split_regions_at (where, rs, get_grid_music_divisions (0));
-		} else {
-			split_regions_at (where, rs, 0);
-		}
+		split_regions_at (where, rs);
+
 	}
 }
 
@@ -6458,7 +6454,7 @@ Editor::set_punch_start_from_edit_point ()
 {
 	if (_session) {
 
-		framepos_t start = 0;
+		MusicFrame start (0, 0);
 		framepos_t end = max_framepos;
 
 		//use the existing punch end, if any
@@ -6468,20 +6464,20 @@ Editor::set_punch_start_from_edit_point ()
 		}
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-			start = _session->audible_frame();
+			start.frame = _session->audible_frame();
 		} else {
-			start = get_preferred_edit_position();
+			start.frame = get_preferred_edit_position();
 		}
 
 		//snap the selection start/end
 		snap_to(start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
-		if ( start > end ) {
+		if (start.frame > end ) {
 			end = max_framepos;
 		}
 
-		set_punch_range (start, end, _("set punch start from EP"));
+		set_punch_range (start.frame, end, _("set punch start from EP"));
 	}
 
 }
@@ -6492,7 +6488,7 @@ Editor::set_punch_end_from_edit_point ()
 	if (_session) {
 
 		framepos_t start = 0;
-		framepos_t end = max_framepos;
+		MusicFrame end (max_framepos, 0);
 
 		//use the existing punch start, if any
 		Location* tpl = transport_punch_location();
@@ -6501,15 +6497,15 @@ Editor::set_punch_end_from_edit_point ()
 		}
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-			end = _session->audible_frame();
+			end.frame = _session->audible_frame();
 		} else {
-			end = get_preferred_edit_position();
+			end.frame = get_preferred_edit_position();
 		}
 
 		//snap the selection start/end
-		snap_to(end);
+		snap_to (end);
 
-		set_punch_range (start, end, _("set punch end from EP"));
+		set_punch_range (start, end.frame, _("set punch end from EP"));
 
 	}
 }
@@ -6519,7 +6515,7 @@ Editor::set_loop_start_from_edit_point ()
 {
 	if (_session) {
 
-		framepos_t start = 0;
+		MusicFrame start (0, 0);
 		framepos_t end = max_framepos;
 
 		//use the existing loop end, if any
@@ -6529,20 +6525,20 @@ Editor::set_loop_start_from_edit_point ()
 		}
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-			start = _session->audible_frame();
+			start.frame = _session->audible_frame();
 		} else {
-			start = get_preferred_edit_position();
+			start.frame = get_preferred_edit_position();
 		}
 
 		//snap the selection start/end
-		snap_to(start);
+		snap_to (start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
-		if ( start > end ) {
+		if (start.frame > end ) {
 			end = max_framepos;
 		}
 
-		set_loop_range (start, end, _("set loop start from EP"));
+		set_loop_range (start.frame, end, _("set loop start from EP"));
 	}
 
 }
@@ -6553,7 +6549,7 @@ Editor::set_loop_end_from_edit_point ()
 	if (_session) {
 
 		framepos_t start = 0;
-		framepos_t end = max_framepos;
+		MusicFrame end (max_framepos, 0);
 
 		//use the existing loop start, if any
 		Location* tpl = transport_loop_location();
@@ -6562,15 +6558,15 @@ Editor::set_loop_end_from_edit_point ()
 		}
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-			end = _session->audible_frame();
+			end.frame = _session->audible_frame();
 		} else {
-			end = get_preferred_edit_position();
+			end.frame = get_preferred_edit_position();
 		}
 
 		//snap the selection start/end
 		snap_to(end);
 
-		set_loop_range (start, end, _("set loop end from EP"));
+		set_loop_range (start, end.frame, _("set loop end from EP"));
 	}
 }
 
@@ -6985,9 +6981,9 @@ Editor::snap_regions_to_grid ()
 			pl->freeze();
 		}
 
-		framepos_t start_frame = (*r)->region()->first_frame ();
-		snap_to (start_frame);
-		(*r)->region()->set_position (start_frame);
+		MusicFrame start ((*r)->region()->first_frame (), 0);
+		snap_to (start);
+		(*r)->region()->set_position (start.frame, start.division);
 	}
 
 	while (used_playlists.size() > 0) {
@@ -7187,11 +7183,12 @@ Editor::playhead_forward_to_grid ()
 		return;
 	}
 
-	framepos_t pos = playhead_cursor->current_frame ();
-	if (pos < max_framepos - 1) {
-		pos += 2;
+	MusicFrame pos (playhead_cursor->current_frame (), 0);
+
+	if (pos.frame < max_framepos - 1) {
+		pos.frame += 2;
 		snap_to_internal (pos, RoundUpAlways, false);
-		_session->request_locate (pos);
+		_session->request_locate (pos.frame);
 	}
 }
 
@@ -7203,11 +7200,12 @@ Editor::playhead_backward_to_grid ()
 		return;
 	}
 
-	framepos_t pos = playhead_cursor->current_frame ();
-	if (pos > 2) {
-		pos -= 2;
+	MusicFrame pos  (playhead_cursor->current_frame (), 0);
+
+	if (pos.frame > 2) {
+		pos.frame -= 2;
 		snap_to_internal (pos, RoundDownAlways, false);
-		_session->request_locate (pos);
+		_session->request_locate (pos.frame);
 	}
 }
 
@@ -7472,7 +7470,7 @@ Editor::insert_time (
 
 			if (opt == SplitIntersected) {
 				/* non musical split */
-				(*i)->split (pos, 0);
+				(*i)->split (MusicFrame (pos, 0));
 			}
 
 			(*i)->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);

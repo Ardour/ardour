@@ -102,19 +102,19 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 }
 
 /** Create a new MidiRegion that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, const int32_t sub_num)
-	: Region (other, offset, sub_num)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, MusicFrame offset)
+	: Region (other, offset)
 	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, other->_length_beats)
 {
-	if (offset != 0) {
-		_start_beats = (_session.tempo_map().exact_qn_at_frame (other->_position + offset, sub_num) - other->_quarter_note) + other->_start_beats;
-		update_length_beats (sub_num);
-		/* we've potentially shifted _start_beats, now reset _start frames to match */
-		_start = _session.tempo_map().frames_between_quarter_notes (_quarter_note - _start_beats, _quarter_note);
-	}
 
 	register_properties ();
+
+	const double offset_quarter_note = _session.tempo_map().exact_qn_at_frame (other->_position + offset.frame, offset.division) - other->_quarter_note;
+	if (offset.frame != 0) {
+		_start_beats = other->_start_beats + offset_quarter_note;
+		_length_beats = other->_length_beats - offset_quarter_note;
+	}
 
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
@@ -342,6 +342,24 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute, con
 		   at the new position (tempo map may dictate a different number of frames).
 		*/
 		Region::set_length_internal (_session.tempo_map().frames_between_quarter_notes (quarter_note(), quarter_note() + length_beats()), sub_num);
+	}
+}
+
+void
+MidiRegion::set_position_music_internal (double qn)
+{
+	Region::set_position_music_internal (qn);
+	/* set _start to new position in tempo map */
+	_start = _session.tempo_map().frames_between_quarter_notes (quarter_note() - start_beats(), quarter_note());
+
+	if (position_lock_style() == AudioTime) {
+		_length_beats = _session.tempo_map().quarter_note_at_frame (_position + _length) - quarter_note();
+
+	} else {
+		/* leave _length_beats alone, and change _length to reflect the state of things
+		   at the new position (tempo map may dictate a different number of frames).
+		*/
+		_length = _session.tempo_map().frames_between_quarter_notes (quarter_note(), quarter_note() + length_beats());
 	}
 }
 
