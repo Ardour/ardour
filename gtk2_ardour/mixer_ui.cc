@@ -714,6 +714,8 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		order++;
 	}
 
+	PresentationInfo::ChangeSuspender cs;
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		bool visible = (*ri)[stripable_columns.visible];
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
@@ -742,7 +744,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		}
 
 		if (order != stripable->presentation_info().order()) {
-			stripable->set_presentation_order (order, false);
+			stripable->set_presentation_order (order);
 			change = true;
 		}
 
@@ -765,7 +767,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			n = 0;
 			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 				if (sr->stripable->presentation_info().order() != n) {
-					sr->stripable->set_presentation_order (n, false);
+					sr->stripable->set_presentation_order (n);
 				}
 			}
 		}
@@ -773,7 +775,6 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 
 	if (change) {
 		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
-		_session->notify_presentation_info_change ();
 		_session->set_dirty();
 	}
 }

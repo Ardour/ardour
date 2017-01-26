@@ -666,6 +666,9 @@ GroupTabs::collect (RouteGroup* g)
 
 	int diff = 0;
 	int coll = -1;
+
+	PresentationInfo::ChangeSuspender cs;
+
 	while (i != group_routes->end() && j != routes->end()) {
 
 		PresentationInfo::order_t const k = (*j)->presentation_info ().order();
@@ -679,21 +682,19 @@ GroupTabs::collect (RouteGroup* g)
 				--diff;
 			}
 
-			(*j)->set_presentation_order (coll, false);
+			(*j)->set_presentation_order (coll);
 
 			++coll;
 			++i;
 
 		} else {
 
-			(*j)->set_presentation_order (k + diff, false);
+			(*j)->set_presentation_order (k + diff);
 
 		}
 
 		++j;
 	}
-
-	_session->notify_presentation_info_change ();
 }
 
 void
@@ -724,10 +725,11 @@ GroupTabs::remove_group (RouteGroup* g)
 	RouteList rl (*(g->route_list().get()));
 	_session->remove_route_group (*g);
 
+	PresentationInfo::ChangeSuspender cs;
+
 	for (RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
 		(*i)->presentation_info().PropertyChanged (Properties::color);
 	}
-	PresentationInfo::Change (); // notify summary & port-matrix
 }
 
 /** Set the color of the tab of a route group */
@@ -841,7 +843,6 @@ GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 	}
 
 	r->presentation_info().PropertyChanged (Properties::color);
-	PresentationInfo::Change (); // notify summary & port-matrix
 
 	set_dirty ();
 }
@@ -857,7 +858,6 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 	}
 
 	r->presentation_info().PropertyChanged (Properties::color);
-	PresentationInfo::Change (); // notify summary & port-matrix
 
 	set_dirty ();
 }
@@ -865,8 +865,9 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 void
 GroupTabs::emit_gui_changed_for_members (RouteGroup* rg)
 {
+	PresentationInfo::ChangeSuspender cs;
+
 	for (RouteList::iterator i = rg->route_list()->begin(); i != rg->route_list()->end(); ++i) {
 		(*i)->presentation_info().PropertyChanged (Properties::color);
 	}
-	PresentationInfo::Change (); // notify summary & port-matrix
 }
