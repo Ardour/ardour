@@ -1729,7 +1729,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t left, framepos_t right);
 
 	void tempo_map_changed (const PBD::PropertyChange&);
-	void marker_position_changed ();
+	void tempometric_position_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 
 	uint32_t bbt_beat_subdivision;

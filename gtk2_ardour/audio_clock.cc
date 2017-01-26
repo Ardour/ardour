@@ -774,12 +774,6 @@ AudioClock::session_property_changed (const PropertyChange&)
 }
 
 void
-AudioClock::metric_position_changed ()
-{
-	set (last_when, true);
-}
-
-void
 AudioClock::session_configuration_changed (std::string p)
 {
 	if (_negative_allowed) {
@@ -1194,7 +1188,7 @@ AudioClock::set_session (Session *s)
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
-		_session->tempo_map().MetricPositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::metric_position_changed, this), gui_context());
+		_session->tempo_map().MetricPositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
 
 		XMLProperty const * prop;
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));

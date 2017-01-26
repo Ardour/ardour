@@ -3271,7 +3271,7 @@ TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, con
 		++d;
 	}
 
-	MetricPositionChanged (); // Emit Signal
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
 }
 
 /** moves a MeterSection to a specified position.
@@ -3319,7 +3319,7 @@ TempoMap::gui_set_meter_position (MeterSection* ms, const framepos_t& frame)
 		++d;
 	}
 
-	MetricPositionChanged (); // Emit Signal
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
 }
 
 bool
@@ -3346,7 +3346,7 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 		++d;
 	}
 	if (can_solve) {
-		MetricPositionChanged (); // Emit Signal
+		MetricPositionChanged (PropertyChange ()); // Emit Signal
 	}
 	return can_solve;
 }
@@ -3498,7 +3498,7 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t& frame, const fr
 		++d;
 	}
 
-	MetricPositionChanged (); // Emit Signal
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
 }
 
 /** Returns the exact bbt-based beat corresponding to the bar, beat or quarter note subdivision nearest to

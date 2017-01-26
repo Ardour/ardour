@@ -189,7 +189,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 }
 
 void
-Editor::marker_position_changed ()
+Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 {
 	if (!_session) {
 		return;

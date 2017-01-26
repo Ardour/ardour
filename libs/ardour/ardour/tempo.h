@@ -495,7 +495,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
-	PBD::Signal0<void> MetricPositionChanged;
+	PBD::Signal1<void,const PBD::PropertyChange&> MetricPositionChanged;
 	void fix_legacy_session();
 
 private:
