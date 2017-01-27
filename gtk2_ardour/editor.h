@@ -256,7 +256,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Selection& get_selection() const { return *selection; }
 	bool get_selection_extents (framepos_t &start, framepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
-	void track_mixer_selection ();
 
 	bool extend_selection_to_track (TimeAxisView&);
 

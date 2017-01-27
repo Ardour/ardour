@@ -101,9 +101,6 @@ ARDOUR_UI::we_have_dependents ()
 
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
 
-	editor->track_mixer_selection ();
-	mixer->track_editor_selection ();
-
 	/* catch up on parameters */
 
 	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));

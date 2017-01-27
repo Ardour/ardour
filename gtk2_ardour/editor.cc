@@ -578,7 +578,6 @@ Editor::Editor ()
 	_summary = new EditorSummary (this);
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
-	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
 
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 

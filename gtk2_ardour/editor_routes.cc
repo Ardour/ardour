@@ -77,6 +77,7 @@ struct ColumnInfo {
 EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
 	, _ignore_reorder (false)
+	, _ignore_selection_change (false)
 	, _no_redisplay (false)
 	, _adding_routes (false)
 	, _route_deletion_in_progress (false)
@@ -252,7 +253,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	}
 
 	_display.set_headers_visible (true);
-	_display.get_selection()->set_mode (SELECTION_SINGLE);
+	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
 	_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::selection_changed));
 	_display.set_reorderable (true);
@@ -318,7 +319,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_enable_search (false);
 
 	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
-	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_presentation_info, this), gui_context());
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::presentation_info_changed, this, _1), gui_context());
 }
 
 bool
@@ -925,7 +926,6 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 
 			if (what_changed.contains (ARDOUR::Properties::hidden)) {
 				(*i)[_columns.visible] = !stripable->presentation_info().hidden();
-				cerr << stripable->name() << " visibility changed, redisplay\n";
 				redisplay ();
 
 			}
@@ -1093,7 +1093,20 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 }
 
 void
-EditorRoutes::sync_treeview_from_presentation_info ()
+EditorRoutes::presentation_info_changed (PropertyChange const & what_changed)
+{
+	PropertyChange soh;
+	soh.add (Properties::selected);
+	soh.add (Properties::order);
+	soh.add (Properties::hidden);
+
+	if (what_changed.contains (soh)) {
+		sync_treeview_from_presentation_info (what_changed);
+	}
+}
+
+void
+EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_changed)
 {
 	/* Some route order key(s) have been changed, make sure that
 	   we update out tree/list model and GUI to reflect the change.
@@ -1105,53 +1118,85 @@ EditorRoutes::sync_treeview_from_presentation_info ()
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync model from presentation info.\n");
 
-	vector<int> neworder;
+	PropertyChange hidden_or_order;
+	hidden_or_order.add (Properties::hidden);
+	hidden_or_order.add (Properties::order);
+
 	TreeModel::Children rows = _model->children();
-	uint32_t old_order = 0;
-	bool changed = false;
 
-	if (rows.empty()) {
-		return;
-	}
+	if (what_changed.contains (hidden_or_order)) {
 
-	OrderingKeys sorted;
-	const size_t cmp_max = rows.size ();
+		vector<int> neworder;
+		uint32_t old_order = 0;
+		bool changed = false;
 
-	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
-		boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
-		/* use global order */
-		sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
-	}
+		if (rows.empty()) {
+			return;
+		}
 
-	SortByNewDisplayOrder cmp;
+		OrderingKeys sorted;
+		const size_t cmp_max = rows.size ();
 
-	sort (sorted.begin(), sorted.end(), cmp);
-	neworder.assign (sorted.size(), 0);
+		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
+			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
+			/* use global order */
+			sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
+		}
 
-	uint32_t n = 0;
+		SortByNewDisplayOrder cmp;
 
-	for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+		sort (sorted.begin(), sorted.end(), cmp);
+		neworder.assign (sorted.size(), 0);
 
-		neworder[n] = sr->old_display_order;
+		uint32_t n = 0;
 
-		if (sr->old_display_order != n) {
-			changed = true;
+		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+
+			neworder[n] = sr->old_display_order;
+
+			if (sr->old_display_order != n) {
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			Unwinder<bool> uw (_ignore_reorder, true);
+			/* prevent traverse_cells: assertion 'row_path != NULL'
+			 * in case of DnD re-order: row-removed + row-inserted.
+			 *
+			 * The rows (stripables) are not actually removed from the model,
+			 * but only from the display in the DnDTreeView.
+			 * ->reorder() will fail to find the row_path.
+			 * (re-order drag -> remove row -> rync PI from TV -> notify -> sync TV from PI -> crash)
+			 */
+			_display.unset_model();
+			_model->reorder (neworder);
+			_display.set_model (_model);
 		}
 	}
 
-	if (changed) {
-		Unwinder<bool> uw (_ignore_reorder, true);
-		/* prevent traverse_cells: assertion 'row_path != NULL'
-		 * in case of DnD re-order: row-removed + row-inserted.
-		 *
-		 * The rows (stripables) are not actually removed from the model,
-		 * but only from the display in the DnDTreeView.
-		 * ->reorder() will fail to find the row_path.
-		 * (re-order drag -> remove row -> rync PI from TV -> notify -> sync TV from PI -> crash)
-		 */
-		_display.unset_model();
-		_model->reorder (neworder);
-		_display.set_model (_model);
+	if (what_changed.contains (Properties::selected)) {
+
+		TrackViewList tvl;
+		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
+
+		/* step one: set the treeview model selection state */
+		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
+			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
+			if (stripable && stripable->presentation_info().selected()) {
+				TimeAxisView* tav = (*ri)[_columns.tv];
+				if (tav) {
+					tvl.push_back (tav);
+				}
+				_display.get_selection()->select (*ri);
+			} else {
+				_display.get_selection()->unselect (*ri);
+			}
+		}
+
+		/* step two: set the Selection (for stripables/routes) */
+
+		_editor->get_selection().set (tvl);
 	}
 
 	redisplay ();
@@ -1457,6 +1502,10 @@ EditorRoutes::button_press (GdkEventButton* ev)
 void
 EditorRoutes::selection_changed ()
 {
+	if (_ignore_selection_change) {
+		return;
+	}
+
 	_editor->begin_reversible_selection_op (X_("Select Track from Route List"));
 
 	if (_display.get_selection()->count_selected_rows() > 0) {
@@ -1464,8 +1513,6 @@ EditorRoutes::selection_changed ()
 		TreeIter iter;
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
 		TrackViewList selected;
-
-		_editor->get_selection().clear_regions ();
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
@@ -1545,7 +1592,8 @@ EditorRoutes::initial_display ()
 	}
 
 	_editor->add_stripables (s);
-	sync_treeview_from_presentation_info ();
+
+	sync_treeview_from_presentation_info (Properties::order);
 }
 
 void

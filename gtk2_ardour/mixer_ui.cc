@@ -107,7 +107,6 @@ Mixer_UI::Mixer_UI ()
 	, ignore_reorder (false)
         , _in_group_rebuild_or_clear (false)
         , _route_deletion_in_progress (false)
-	, _following_editor_selection (false)
 	, _maximised (false)
 	, _show_mixer_list (true)
 	, myactions (X_("mixer"))
@@ -116,7 +115,7 @@ Mixer_UI::Mixer_UI ()
 	load_bindings ();
 	_content.set_data ("ardour-bindings", bindings);
 
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 
 	scroller.set_can_default (true);
 	// set_default (scroller);
@@ -382,12 +381,6 @@ void
 Mixer_UI::escape ()
 {
 	select_none ();
-}
-
-void
-Mixer_UI::track_editor_selection ()
-{
-	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
 }
 
 Gtk::Window*
@@ -688,6 +681,19 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 }
 
 void
+Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
+{
+	PropertyChange soh;
+	soh.add (Properties::selected);
+	soh.add (Properties::order);
+	soh.add (Properties::hidden);
+
+	if (what_changed.contains (soh)) {
+		sync_treeview_from_presentation_info (what_changed);
+	}
+}
+
+void
 Mixer_UI::sync_presentation_info_from_treeview ()
 {
 	if (ignore_reorder || !_session || _session->deletion_in_progress()) {
@@ -780,7 +786,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 }
 
 void
-Mixer_UI::sync_treeview_from_presentation_info ()
+Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_changed)
 {
 	if (!_session || _session->deletion_in_progress()) {
 		return;
@@ -831,35 +837,21 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 		track_model->reorder (neworder);
 	}
 
-	redisplay_track_list ();
-}
+	if (what_changed.contains (Properties::selected)) {
 
-void
-Mixer_UI::follow_editor_selection ()
-{
-	if (_following_editor_selection) {
-		return;
-	}
+		PresentationInfo::ChangeSuspender cs;
 
-	_following_editor_selection = true;
-	_selection.block_routes_changed (true);
-
-	TrackSelection& s (PublicEditor::instance().get_selection().tracks);
-
-	_selection.clear_routes ();
-
-	for (TrackViewList::iterator i = s.begin(); i != s.end(); ++i) {
-		TimeAxisView* tav = dynamic_cast<TimeAxisView*> (*i);
-		if (tav) {
-			AxisView* axis = axis_by_stripable (tav->stripable());
-			if (axis) {
-				_selection.add (axis);
+		for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+			boost::shared_ptr<Stripable> stripable = (*i)->stripable();
+			if (stripable && stripable->presentation_info().selected()) {
+				_selection.add (*i);
+			} else {
+				_selection.remove (*i);
 			}
 		}
 	}
 
-	_following_editor_selection = false;
-	_selection.block_routes_changed (false);
+	redisplay_track_list ();
 }
 
 
@@ -1537,8 +1529,7 @@ Mixer_UI::initial_track_display ()
 		add_stripables (sl);
 	}
 
-	redisplay_track_list ();
-	sync_treeview_from_presentation_info ();
+	sync_treeview_from_presentation_info (Properties::order);
 }
 
 void

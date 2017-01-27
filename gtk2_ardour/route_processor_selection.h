@@ -37,9 +37,6 @@ class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::t
 	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
 
 	sigc::signal<void> ProcessorsChanged;
-	sigc::signal<void> RoutesChanged;
-
-	void block_routes_changed (bool);
 
 	void clear ();
 	bool empty();
@@ -58,8 +55,6 @@ class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::t
 
   private:
 	void removed (AxisView*);
-	static unsigned int _no_route_change_signal;
-
 };
 
 bool operator==(const RouteProcessorSelection& a, const RouteProcessorSelection& b);

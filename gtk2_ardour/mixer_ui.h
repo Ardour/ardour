@@ -86,7 +86,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void show_window ();
 
 	void set_session (ARDOUR::Session *);
-	void track_editor_selection ();
 
 	PluginSelector* plugin_selector();
 
@@ -337,8 +336,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	Width _strip_width;
 
+	void presentation_info_changed (PBD::PropertyChange const &);
+	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void sync_presentation_info_from_treeview ();
-	void sync_treeview_from_presentation_info ();
 
 	bool ignore_reorder;
 
@@ -361,9 +361,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	MixerStrip* strip_by_x (int x);
 
 	friend class MixerGroupTabs;
-
-	void follow_editor_selection ();
-	bool _following_editor_selection;
 
 	void monitor_section_going_away ();
 

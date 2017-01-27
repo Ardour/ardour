@@ -207,7 +207,6 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual Selection& get_selection () const = 0;
 	virtual bool get_selection_extents (framepos_t &start, framepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
-	virtual void track_mixer_selection () = 0;
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_selection () = 0;
 	virtual void play_with_preroll () = 0;
