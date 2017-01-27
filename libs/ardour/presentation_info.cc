@@ -26,6 +26,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 
 #include "ardour/presentation_info.h"
@@ -66,8 +67,17 @@ PresentationInfo::unsuspend_change_signal ()
 	 */
 
 	if (g_atomic_int_dec_and_test (const_cast<gint*> (&_change_signal_suspended))) {
-		_pending_static_changes.clear ();
-		Change (pc); /* EMIT SIGNAL */
+		if (!pc.empty()) {
+			_pending_static_changes.clear ();
+
+			std::cerr << "PI change (unsuspended): ";
+			for (PropertyChange::const_iterator x = pc.begin(); x != pc.end(); ++x) {
+				std::cerr << g_quark_to_string (*x) << ',';
+			}
+			std::cerr << '\n';
+
+			Change (pc); /* EMIT SIGNAL */
+		}
 	}
 }
 
@@ -82,6 +92,12 @@ PresentationInfo::send_static_change (const PropertyChange& what_changed)
 		_pending_static_changes.add (what_changed);
 		return;
 	}
+
+	std::cerr << "PI change (direct): ";
+	for (PropertyChange::const_iterator x = what_changed.begin(); x != what_changed.end(); ++x) {
+		std::cerr << g_quark_to_string (*x) << ',';
+	}
+	std::cerr << '\n';
 
 	Change (what_changed);
 }
