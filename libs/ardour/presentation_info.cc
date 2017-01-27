@@ -40,6 +40,7 @@ using std::string;
 string PresentationInfo::state_node_name = X_("PresentationInfo");
 
 PBD::Signal1<void,PropertyChange const &> PresentationInfo::Change;
+Glib::Threads::Mutex PresentationInfo::static_signal_lock;
 int PresentationInfo::_change_signal_suspended = 0;
 PBD::PropertyChange PresentationInfo::_pending_static_changes;
 
@@ -60,24 +61,30 @@ PresentationInfo::suspend_change_signal ()
 void
 PresentationInfo::unsuspend_change_signal ()
 {
-	PropertyChange pc = _pending_static_changes;
+	Glib::Threads::Mutex::Lock lm (static_signal_lock);
 
-	/* XXX some possible race condition here; _pending_static_changes could
-	 * be reset by another thread before or after we decrement.
-	 */
+	if (g_atomic_int_get (const_cast<gint*> (&_change_signal_suspended)) == 1) {
 
-	if (g_atomic_int_dec_and_test (const_cast<gint*> (&_change_signal_suspended))) {
-		if (!pc.empty()) {
-			_pending_static_changes.clear ();
+		if (!_pending_static_changes.empty()) {
 
 			std::cerr << "PI change (unsuspended): ";
-			for (PropertyChange::const_iterator x = pc.begin(); x != pc.end(); ++x) {
+			for (PropertyChange::const_iterator x = _pending_static_changes.begin(); x != _pending_static_changes.end(); ++x) {
 				std::cerr << g_quark_to_string (*x) << ',';
 			}
 			std::cerr << '\n';
 
-			Change (pc); /* EMIT SIGNAL */
+			/* emit the signal with further emissions still
+			 * blocked, so that if the handlers modify other PI
+			 * states, the signal for that won't be sent while
+			 * they are handling this one.
+			 */
+
+			Change (_pending_static_changes); /* EMIT SIGNAL */
+
+			_pending_static_changes.clear ();
 		}
+
+		g_atomic_int_add (const_cast<gint*>(&_change_signal_suspended), -1);
 	}
 }
 
@@ -87,6 +94,8 @@ PresentationInfo::send_static_change (const PropertyChange& what_changed)
 	if (what_changed.empty()) {
 		return;
 	}
+
+	Glib::Threads::Mutex::Lock lm (static_signal_lock);
 
 	if (g_atomic_int_get (&_change_signal_suspended)) {
 		_pending_static_changes.add (what_changed);

@@ -265,6 +265,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	color_t _color;
 
 	static PBD::PropertyChange _pending_static_changes;
+	static Glib::Threads::Mutex static_signal_lock;
 	static int _change_signal_suspended;
 	static void send_static_change (const PBD::PropertyChange&);
 };
