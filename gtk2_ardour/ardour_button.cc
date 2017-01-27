@@ -382,7 +382,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
-#if 1 // DEBUG style (print on hover)
+#if 0 // DEBUG style (print on hover)
 		if (_hovering || (_elements & Inactive)) {
 			bool layout_font = true;
 			Pango::FontDescription fd = _layout->get_font_description();
