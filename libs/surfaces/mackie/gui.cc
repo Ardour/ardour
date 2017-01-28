@@ -389,11 +389,11 @@ MackieControlProtocolGUI::device_dependent_widget ()
 
 			if (n_surfaces > 1) {
 				if (n == main_pos) {
-					send_string = _("Main surface sends via:");
-					receive_string = _("Main surface receives via:");
+					send_string = string_compose(_("Main surface at position %1 sends via:"), n + 1);
+					receive_string = string_compose(_("Main surface at position %1 receives via:"), n + 1);
 				} else {
-					send_string = string_compose (_("Extender %1 sends via:"), n);
-					receive_string = string_compose (_("Extender %1 receives via:"), n);
+					send_string = string_compose (_("Extender at position %1 sends via:"), n + 1);
+					receive_string = string_compose (_("Extender at position %1 receives via:"), n + 1);
 				}
 			} else {
 				send_string = _("Surface sends via:");
