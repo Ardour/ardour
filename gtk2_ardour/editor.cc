@@ -828,6 +828,8 @@ Editor::Editor ()
 
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Editor::presentation_info_changed, this, _1), gui_context());
+
 	/* handle escape */
 
 	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&Editor::escape, this), gui_context());
@@ -903,6 +905,14 @@ Editor::~Editor()
 	}
 	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_out_images.begin(); i != _xfade_out_images.end (); ++i) {
 		delete i->second;
+	}
+}
+
+void
+Editor::presentation_info_changed (PropertyChange const & what_changed)
+{
+	if (what_changed.contains (Properties::selected)) {
+		track_selection_changed ();
 	}
 }
 

@@ -366,8 +366,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* fades */
 
- 	void toggle_region_fades (int dir);
- 	void update_region_fade_visibility ();
+	void toggle_region_fades (int dir);
+	void update_region_fade_visibility ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 
@@ -1829,6 +1829,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::HBox                toolbar_hbox;
 
 	void setup_midi_toolbar ();
+
+	void presentation_info_changed (PBD::PropertyChange const &);
 
 	/* selection process */
 
