@@ -61,37 +61,31 @@ PresentationInfo::suspend_change_signal ()
 void
 PresentationInfo::unsuspend_change_signal ()
 {
+	Glib::Threads::Mutex::Lock lm (static_signal_lock);
+
 	if (g_atomic_int_get (const_cast<gint*> (&_change_signal_suspended)) == 1) {
 
 		/* atomically grab currently pending flags */
 
-		PropertyChange pc;
-
-		{
-			Glib::Threads::Mutex::Lock lm (static_signal_lock);
-			pc = _pending_static_changes;
-			_pending_static_changes.clear ();
-		}
+		PropertyChange pc = _pending_static_changes;
+		_pending_static_changes.clear ();
 
 		if (!pc.empty()) {
 
-			std::cerr << "PI change (unsuspended): ";
-			for (PropertyChange::const_iterator x = pc.begin(); x != pc.end(); ++x) {
-				std::cerr << g_quark_to_string (*x) << ',';
-			}
-			std::cerr << '\n';
-
-			/* emit the signal with further emissions still
-			 * blocked, so that if the handlers modify other PI
-			 * states, the signal for that won't be sent while
-			 * they are handling this one.
+			/* emit the signal with further emissions still blocked
+			 * by _change_signal_suspended, but not by the lock.
+			 *
+			 * This means that if the handlers modify other PI
+			 * states, the signal for that won't be sent while they
+			 * are handling the current signal.
 			 */
-
+			lm.release ();
 			Change (pc); /* EMIT SIGNAL */
+			lm.acquire ();
 		}
-
-		g_atomic_int_add (const_cast<gint*>(&_change_signal_suspended), -1);
 	}
+
+	g_atomic_int_add (const_cast<gint*>(&_change_signal_suspended), -1);
 }
 
 void
