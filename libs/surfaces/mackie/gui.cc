@@ -333,6 +333,7 @@ MackieControlProtocolGUI::device_dependent_widget ()
 	int row = 0;
 
 	uint32_t n_surfaces = 1 + _cp.device_info().extenders();
+	uint32_t main_pos = _cp.device_info().master_position();
 
 	if (!_cp.device_info().uses_ipmidi()) {
 		dd_table = Gtk::manage (new Gtk::Table (n_surfaces, 2));
@@ -387,7 +388,7 @@ MackieControlProtocolGUI::device_dependent_widget ()
 			string receive_string;
 
 			if (n_surfaces > 1) {
-				if (n == 0) {
+				if (n == main_pos) {
 					send_string = _("Main surface sends via:");
 					receive_string = _("Main surface receives via:");
 				} else {
