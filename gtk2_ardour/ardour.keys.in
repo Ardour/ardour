@@ -245,21 +245,21 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-next-route|<@SECONDARY@>Down|select next track/bus
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>Down|move selected tracks down
 
-@movp|Editor/playhead-backward-to-grid|Left|to previous grid point
+@movp|Common/playhead-backward-to-grid|Left|to previous grid point
 @movp|Editor/playhead-to-previous-region-boundary|<@SECONDARY@><@TERTIARY@>Left|to previous region edge
 ;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>Left|to previous edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>Left|to previous region sync
 @movp|Editor/tab-to-transient-backwards|<@PRIMARY@>Left|to previous transient
-@movp|Editor/nudge-playhead-backward|<@SECONDARY@>Left|nudge backward
+@movp|Common/nudge-playhead-backward|<@SECONDARY@>Left|nudge backward
 @trans|Transport/Rewind|<@TERTIARY@>Left|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>Left|move to prev region edge
 
-@movp|Editor/playhead-forward-to-grid|Right|to next grid point
+@movp|Common/playhead-forward-to-grid|Right|to next grid point
 @movp|Editor/playhead-to-next-region-boundary|<@SECONDARY@><@TERTIARY@>Right|to next region edge
 ;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>Right|to next region edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>Right|to next region sync
 @movp|Editor/tab-to-transient-forwards|<@PRIMARY@>Right|to next transient
-@movp|Editor/nudge-playhead-forward|<@SECONDARY@>Right|nudge forwards
+@movp|Common/nudge-playhead-forward|<@SECONDARY@>Right|nudge forwards
 @trans|Transport/Forward|<@TERTIARY@>Right|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>Right|move to next region edge
 
@@ -279,13 +279,13 @@ This mode provides many different operations on both regions and control points,
 ;; keypad
 
 @rop|Region/nudge-backward|KP_Subtract|nudge backward
-@-edit|Editor/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
+@-edit|Common/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
 
-@movp|Editor/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
-@movp|Editor/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
+@movp|Common/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
+@movp|Common/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
 
 @rop|Region/nudge-forward|KP_Add|nudge forward
-@-edit|Editor/nudge-next-forward|<@PRIMARY@>KP_Add|some text
+@-edit|Common/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
 @-edit|Editor/start-range|comma|some text
 @-edit|Editor/finish-range|period|some text
@@ -296,8 +296,8 @@ This mode provides many different operations on both regions and control points,
 @-edit|Editor/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
 @-edit|Editor/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
-@markers|Editor/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
-@markers|Editor/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
+@markers|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
+@markers|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock
 
 @trans|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
