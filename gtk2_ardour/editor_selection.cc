@@ -962,7 +962,10 @@ Editor::track_selection_changed ()
 	case 0:
 		break;
 	default:
-		set_selected_mixer_strip (*(selection->tracks.front()));
+		/* last element in selection list is the most recently
+		 * selected, because we always append to that list.
+		 */
+		set_selected_mixer_strip (*(selection->tracks.back()));
 		break;
 	}
 
