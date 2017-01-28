@@ -47,9 +47,11 @@ just align the first region and moves other selected regions to maintain relativ
 
 %epp Editor Edit Point Playback
 
-%movp Editor Moving the Playhead
+%movp Global Moving the Playhead
 A left click in the rulers positions the playhead unless Ardour is recording. You can use {\tt KP$\_$n} to move the 
 playhead to the n-th marker.
+
+%emov Editor Moving the Playhead in the Editor
 
 %rop Editor Region Operations
 
@@ -112,8 +114,8 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
-@edit|Common/add-location-from-playhead|Tab|add marker
-@edit|Common/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
+@trans|Common/add-location-from-playhead|Tab|add marker
+@trans|Common/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
 @trans|Transport/alternate-GotoStart|Return|to start marker
 
 @edit|Editor/editor-fade-range|slash|fade range selection
@@ -246,19 +248,19 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>Down|move selected tracks down
 
 @movp|Common/playhead-backward-to-grid|Left|to previous grid point
-@movp|Editor/playhead-to-previous-region-boundary|<@SECONDARY@><@TERTIARY@>Left|to previous region edge
-;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>Left|to previous edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>Left|to previous region sync
-@movp|Editor/tab-to-transient-backwards|<@PRIMARY@>Left|to previous transient
+@emov|Editor/playhead-to-previous-region-boundary|<@SECONDARY@><@TERTIARY@>Left|to previous region edge
+;@emov|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>Left|to previous edge \linebreak[4] (ignoring selection)
+@emov|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>Left|to previous region sync
+@emov|Editor/tab-to-transient-backwards|<@PRIMARY@>Left|to previous transient
 @movp|Common/nudge-playhead-backward|<@SECONDARY@>Left|nudge backward
 @trans|Transport/Rewind|<@TERTIARY@>Left|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>Left|move to prev region edge
 
 @movp|Common/playhead-forward-to-grid|Right|to next grid point
-@movp|Editor/playhead-to-next-region-boundary|<@SECONDARY@><@TERTIARY@>Right|to next region edge
-;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>Right|to next region edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>Right|to next region sync
-@movp|Editor/tab-to-transient-forwards|<@PRIMARY@>Right|to next transient
+@emov|Editor/playhead-to-next-region-boundary|<@SECONDARY@><@TERTIARY@>Right|to next region edge
+;@emov|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>Right|to next region edge \linebreak[4] (ignoring selection)
+@emov|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>Right|to next region sync
+@emov|Editor/tab-to-transient-forwards|<@PRIMARY@>Right|to next transient
 @movp|Common/nudge-playhead-forward|<@SECONDARY@>Right|nudge forwards
 @trans|Transport/Forward|<@TERTIARY@>Right|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>Right|move to next region edge
@@ -279,25 +281,25 @@ This mode provides many different operations on both regions and control points,
 ;; keypad
 
 @rop|Region/nudge-backward|KP_Subtract|nudge backward
-@-edit|Common/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
+@-trans|Common/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
 
 @movp|Common/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
 @movp|Common/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
 
 @rop|Region/nudge-forward|KP_Add|nudge forward
-@-edit|Common/nudge-next-forward|<@PRIMARY@>KP_Add|some text
+@-trans|Common/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
-@-edit|Common/start-range|comma|some text
-@-edit|Common/finish-range|period|some text
-@-edit|Common/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
-@-edit|Common/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
-@-edit|Common/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
-@-edit|Common/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
-@-edit|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
-@-edit|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
+@-trans|Common/start-range|comma|some text
+@-trans|Common/finish-range|period|some text
+@-trans|Common/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
+@-trans|Common/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
+@-trans|Common/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
+@-trans|Common/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
+@-trans|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
+@-trans|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
-@markers|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
-@markers|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
+@trans|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
+@trans|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock
 
 @trans|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
