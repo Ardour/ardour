@@ -493,7 +493,7 @@ Push2::button_fixed_length ()
 void
 Push2::button_browse ()
 {
-	access_action ("Editor/addExistingAudioFiles");
+	access_action ("Common/addExistingAudioFiles");
 }
 
 void
