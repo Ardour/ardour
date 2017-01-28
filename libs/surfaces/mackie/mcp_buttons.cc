@@ -425,7 +425,7 @@ LedState
 MackieControlProtocol::marker_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/remove-location-from-playhead");
+		access_action ("Common/remove-location-from-playhead");
 		return off;
 	} else {
 		_modifier_state |= MODIFIER_MARKER;
@@ -525,7 +525,7 @@ MackieControlProtocol::rewind_press (Button &)
 	if (modifier_state() & MODIFIER_MARKER) {
 		prev_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
-		access_action ("Editor/nudge-playhead-backward");
+		access_action ("Common/nudge-playhead-backward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_start ();
 	} else {
@@ -546,7 +546,7 @@ MackieControlProtocol::ffwd_press (Button &)
 	if (modifier_state() & MODIFIER_MARKER) {
 		next_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
-		access_action ("Editor/nudge-playhead-forward");
+		access_action ("Common/nudge-playhead-forward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_end();
 	} else {
