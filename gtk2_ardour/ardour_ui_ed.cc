@@ -283,6 +283,46 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 
+	/* these actions are all currently implemented by the Editor, but need
+	 * to be accessible from anywhere as actions.
+	 */
+
+	act = global_actions.register_action (common_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(editor, &PublicEditor::jump_forward_to_mark));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(editor, &PublicEditor::jump_backward_to_mark));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(editor, &PublicEditor::set_session_start_from_playhead));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(editor, &PublicEditor::set_session_end_from_playhead));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "toggle-location-at-playhead", _("Toggle Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::toggle_location_at_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_location_from_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_location_from_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_forward), true, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_backward), true, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_forward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_backward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_forward_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_backward_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	/* These "change" actions are not intended to be used inside menus, but
 	   are for the tab/window control buttons, which have somewhat odd
 	   semantics.

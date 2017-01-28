@@ -225,6 +225,17 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void jump_forward_to_mark () = 0;
 	virtual void jump_backward_to_mark () = 0;
 
+	virtual void set_session_start_from_playhead () = 0;
+	virtual void set_session_end_from_playhead () = 0;
+
+	virtual void toggle_location_at_playhead_cursor () = 0;
+
+	virtual void nudge_forward (bool next, bool force_playhead) = 0;
+	virtual void nudge_backward (bool next, bool force_playhead) = 0;
+
+	virtual void playhead_forward_to_grid () = 0;
+	virtual void playhead_backward_to_grid () = 0;
+
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */
