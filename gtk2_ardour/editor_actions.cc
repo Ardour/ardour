@@ -367,21 +367,6 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 
-	reg_sens (editor_actions, "start-range-from-playhead", _("Start Range from Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_MOUSE ));
-	reg_sens (editor_actions, "finish-range-from-playhead", _("Finish Range from Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_MOUSE ));
-
-	reg_sens (editor_actions, "start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_NONE));
-	reg_sens (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_NONE));
-
-	reg_sens (editor_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_start_from_edit_point));
-	reg_sens (editor_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_end_from_edit_point));
-
-	reg_sens (editor_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_start_from_edit_point));
-	reg_sens (editor_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_end_from_edit_point));
-
-	reg_sens (editor_actions, "alt-start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_NONE));
-	reg_sens (editor_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_NONE));
-
 //	reg_sens (editor_actions, "finish-add-range", _("Finish Add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
 
 	reg_sens (

@@ -49,6 +49,7 @@
 #include "monitor_section.h"
 #include "engine_dialog.h"
 #include "editor.h"
+#include "editing.h"
 #include "actions.h"
 #include "meterbridge.h"
 #include "luawindow.h"
@@ -321,6 +322,27 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (common_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_forward_to_grid));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (common_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(editor, &PublicEditor::playhead_backward_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (common_actions, "start-range-from-playhead", _("Start Range from Playhead"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_MOUSE ));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "finish-range-from-playhead", _("Finish Range from Playhead"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_MOUSE ));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "start-range", _("Start Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(editor, &PublicEditor::set_punch_start_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(editor, &PublicEditor::set_punch_end_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(editor, &PublicEditor::set_loop_start_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(editor, &PublicEditor::set_loop_end_from_edit_point));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "alt-start-range", _("Start Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_begin), Editing::EDIT_IGNORE_NONE));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* These "change" actions are not intended to be used inside menus, but

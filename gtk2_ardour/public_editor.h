@@ -236,6 +236,14 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void playhead_forward_to_grid () = 0;
 	virtual void playhead_backward_to_grid () = 0;
 
+	virtual void keyboard_selection_begin ( Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE) = 0;
+	virtual void keyboard_selection_finish (bool add, Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE) = 0;
+
+	virtual void set_punch_start_from_edit_point () = 0;
+	virtual void set_punch_end_from_edit_point () = 0;
+	virtual void set_loop_start_from_edit_point () = 0;
+	virtual void set_loop_end_from_edit_point () = 0;
+
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */
