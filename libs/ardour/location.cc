@@ -1035,12 +1035,19 @@ Locations::remove (Location *loc)
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
 			if ((*i) == loc) {
+				bool was_loop = (*i)->is_auto_loop();
 				delete *i;
 				locations.erase (i);
 				was_removed = true;
 				if (current_location == loc) {
 					current_location = 0;
 					was_current = true;
+				}
+				if (was_loop) {
+					if (_session.get_play_loop()) {
+						_session.request_play_loop (false, false);
+					}
+					_session.auto_loop_location_changed (0);
 				}
 				break;
 			}
