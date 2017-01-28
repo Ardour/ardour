@@ -426,7 +426,7 @@ void BasicUI::stop_forget () { access_action("Transport/ToggleRollForgetCapture"
 
 void BasicUI::set_punch_range () { access_action("Common/set-punch-from-edit-range"); }
 void BasicUI::set_loop_range () { access_action("Common/set-loop-from-edit-range"); }
-void BasicUI::set_session_range () { access_action("Editor/set-session-from-edit-range"); }
+void BasicUI::set_session_range () { access_action("Common/set-session-from-edit-range"); }
 
 void BasicUI::toggle_monitor_mute () { /*access_action("Editor/toggle_monitor_mute");  */ }
 void BasicUI::toggle_monitor_dim () {  /*access_action("Editor/toggle_monitor_dim");  */ }
