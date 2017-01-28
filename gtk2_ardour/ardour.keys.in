@@ -287,14 +287,14 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/nudge-forward|KP_Add|nudge forward
 @-edit|Common/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
-@-edit|Editor/start-range|comma|some text
-@-edit|Editor/finish-range|period|some text
-@-edit|Editor/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
-@-edit|Editor/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
-@-edit|Editor/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
-@-edit|Editor/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
-@-edit|Editor/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
-@-edit|Editor/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
+@-edit|Common/start-range|comma|some text
+@-edit|Common/finish-range|period|some text
+@-edit|Common/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
+@-edit|Common/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
+@-edit|Common/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
+@-edit|Common/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
+@-edit|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
+@-edit|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
 @markers|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
 @markers|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
