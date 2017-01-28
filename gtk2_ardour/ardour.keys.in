@@ -112,8 +112,8 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
-@edit|Editor/add-location-from-playhead|Tab|add marker
-@edit|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
+@edit|Common/add-location-from-playhead|Tab|add marker
+@edit|Common/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
 @trans|Transport/alternate-GotoStart|Return|to start marker
 
 @edit|Editor/editor-fade-range|slash|fade range selection
