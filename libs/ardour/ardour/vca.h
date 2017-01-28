@@ -56,6 +56,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	~VCA();
 
 	int32_t number () const { return _number; }
+	std::string full_name() const;
 
 	int init ();
 	XMLNode& get_state();
