@@ -1585,11 +1585,13 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 #endif
 	bool found = false;
 	int x0 = 0;
+	Gtk::Allocation alloc;
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route() == s) {
 			int y;
 			found = true;
 			(*i)->translate_coordinates (strip_packer, 0, 0, x0, y);
+			alloc = (*i)->get_allocation ();
 			break;
 		}
 	}
@@ -1599,7 +1601,7 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 
-	if ((x0 < adj->get_value()) || x0 >= (adj->get_value() + adj->get_page_size())) {
+	if ((x0 < adj->get_value()) || (x0 + alloc.get_width()) >= (adj->get_value() + adj->get_page_size())) {
 		/* try to put left edge of strip in the middle */
 		double half_page = adj->get_page_size() / 2.0;
 		if (x0 >= half_page) {
