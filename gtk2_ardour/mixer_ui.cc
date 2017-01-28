@@ -849,6 +849,10 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 				_selection.remove (*i);
 			}
 		}
+
+		if (!_selection.axes.empty()) {
+			move_stripable_into_view ((*_selection.axes.begin())->stripable());
+		}
 	}
 
 	redisplay_track_list ();
