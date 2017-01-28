@@ -61,14 +61,22 @@ PresentationInfo::suspend_change_signal ()
 void
 PresentationInfo::unsuspend_change_signal ()
 {
-	Glib::Threads::Mutex::Lock lm (static_signal_lock);
-
 	if (g_atomic_int_get (const_cast<gint*> (&_change_signal_suspended)) == 1) {
 
-		if (!_pending_static_changes.empty()) {
+		/* atomically grab currently pending flags */
+
+		PropertyChange pc;
+
+		{
+			Glib::Threads::Mutex::Lock lm (static_signal_lock);
+			pc = _pending_static_changes;
+			_pending_static_changes.clear ();
+		}
+
+		if (!pc.empty()) {
 
 			std::cerr << "PI change (unsuspended): ";
-			for (PropertyChange::const_iterator x = _pending_static_changes.begin(); x != _pending_static_changes.end(); ++x) {
+			for (PropertyChange::const_iterator x = pc.begin(); x != pc.end(); ++x) {
 				std::cerr << g_quark_to_string (*x) << ',';
 			}
 			std::cerr << '\n';
@@ -79,9 +87,7 @@ PresentationInfo::unsuspend_change_signal ()
 			 * they are handling this one.
 			 */
 
-			Change (_pending_static_changes); /* EMIT SIGNAL */
-
-			_pending_static_changes.clear ();
+			Change (pc); /* EMIT SIGNAL */
 		}
 
 		g_atomic_int_add (const_cast<gint*>(&_change_signal_suspended), -1);
@@ -95,9 +101,9 @@ PresentationInfo::send_static_change (const PropertyChange& what_changed)
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (static_signal_lock);
 
 	if (g_atomic_int_get (&_change_signal_suspended)) {
+		Glib::Threads::Mutex::Lock lm (static_signal_lock);
 		_pending_static_changes.add (what_changed);
 		return;
 	}
