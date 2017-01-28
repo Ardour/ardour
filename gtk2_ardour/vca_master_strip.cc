@@ -437,7 +437,7 @@ void
 VCAMasterStrip::update_vca_name ()
 {
 	/* 20 is a rough guess at the number of letters we can fit. */
-	vertical_button.set_text (short_version (_vca->name(), 20));
+	vertical_button.set_text (short_version (_vca->full_name(), 20));
 }
 
 void
