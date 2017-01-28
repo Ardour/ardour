@@ -966,6 +966,7 @@ Editor::track_selection_changed ()
 		 * selected, because we always append to that list.
 		 */
 		set_selected_mixer_strip (*(selection->tracks.back()));
+		ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
 		break;
 	}
 
