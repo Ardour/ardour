@@ -848,7 +848,15 @@ ARDOUR_UI::error_blink (bool onoff)
 	}
 }
 
-
+void
+ARDOUR_UI::set_loop_sensitivity ()
+{
+	if (!_session || _session->config.get_external_sync()) {
+		auto_loop_button.set_sensitive (false);
+	} else {
+		auto_loop_button.set_sensitive (_session && _session->locations()->auto_loop_location());
+	}
+}
 
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)

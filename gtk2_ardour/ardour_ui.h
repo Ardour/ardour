@@ -657,6 +657,7 @@ private:
 	void edit_metadata ();
 	void import_metadata ();
 
+	void set_loop_sensitivity ();
 	void set_transport_sensitivity (bool);
 
 	//stuff for ProTools-style numpad

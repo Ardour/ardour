@@ -353,7 +353,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		if (!_session->config.get_external_sync()) {
 			sync_button.set_text (S_("SyncSource|Int."));
-			auto_loop_button.set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
@@ -365,12 +364,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 				// but makes it clear to the user that it's disabled.
 				_session->request_play_loop (false, false);
 			}
-			auto_loop_button.set_sensitive (false);
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
+		set_loop_sensitivity ();
 
 	} else if (p == "follow-edits") {
 
