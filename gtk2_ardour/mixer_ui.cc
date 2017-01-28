@@ -1598,7 +1598,15 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
+
+	if ((x0 < adj->get_value()) || x0 >= (adj->get_value() + adj->get_page_size())) {
+		/* try to put left edge of strip in the middle */
+		double half_page = adj->get_page_size() / 2.0;
+		if (x0 >= half_page) {
+			x0 -= half_page;
+		}
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), (double) x0)));
+	}
 }
 
 void
