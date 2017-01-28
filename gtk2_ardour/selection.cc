@@ -271,6 +271,8 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 void
 Selection::toggle (const TrackViewList& track_list)
 {
+	PresentationInfo::ChangeSuspender cs;
+
 	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 		toggle ((*i));
 	}
@@ -282,11 +284,11 @@ Selection::toggle (TimeAxisView* track)
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
-		track->set_selected (true);
 		tracks.push_back (track);
+		track->set_selected (true);
 	} else {
-		track->set_selected (false);
 		tracks.erase (i);
+		track->set_selected (false);
 	}
 
 }
