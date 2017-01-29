@@ -31,6 +31,7 @@
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
 #include "region_view.h"
+#include "midi_region_view.h"
 #include "rgb_macros.h"
 #include "note.h"
 #include "hit.h"
@@ -174,12 +175,13 @@ AudioGhostRegion::set_colors ()
  *  @param tv TimeAxisView that this ghost region is on.
  *  @param source_tv TimeAxisView that we are the ghost for.
  */
-MidiGhostRegion::MidiGhostRegion(RegionView& rv,
+MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  TimeAxisView& tv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
     : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
     , _note_group (new ArdourCanvas::Container (group))
+    ,  parent_mrv (rv)
     , _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
@@ -192,7 +194,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
  *  @param msv MidiStreamView that this ghost region is on.
  *  @param source_tv TimeAxisView that we are the ghost for.
  */
-MidiGhostRegion::MidiGhostRegion(RegionView& rv,
+MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  MidiStreamView& msv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
@@ -202,6 +204,7 @@ MidiGhostRegion::MidiGhostRegion(RegionView& rv,
                   source_tv,
                   initial_unit_pos)
     , _note_group (new ArdourCanvas::Container (group))
+    , 	parent_mrv (rv)
     , _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
@@ -369,11 +372,11 @@ MidiGhostRegion::clear_events()
 	_optimization_iterator = events.end();
 }
 
-/** Update the x positions of our representation of a parent's note.
- *  @param parent The CanvasNote from the parent MidiRegionView.
+/** Update the  positions of our representation of a note.
+ *  @param ev The GhostEvent from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_note (Note* note, bool hide)
+MidiGhostRegion::update_note (GhostEvent* ev)
 {
 	MidiStreamView* mv = midi_view();
 
@@ -381,32 +384,20 @@ MidiGhostRegion::update_note (Note* note, bool hide)
 		return;
 	}
 
-	GhostEvent* ev = find_event (note->note());
+	_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(ev->item);
 
-	if (!ev) {
-		return;
-	}
+	uint8_t const note_num = ev->event->note()->note();
+	double const y = note_y(trackview, mv, note_num);
+	double const h = note_height(trackview, mv);
 
-	if (hide) {
-		ev->item->hide();
-	} else if (!ev->is_hit) {
-		_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(ev->item);
-
-		uint8_t const note_num = note->note()->note();
-		double const y = note_y(trackview, mv, note_num);
-		double const h = note_height(trackview, mv);
-
-		_tmp_rect->set (ArdourCanvas::Rect (note->x0(), y, note->x1(), y + h));
-
-		ev->item->show();
-	}
+	_tmp_rect->set (ArdourCanvas::Rect (ev->event->x0(), y, ev->event->x1(), y + h));
 }
 
-/** Update the x positions of our representation of a parent's hit.
- *  @param hit The CanvasHit from the parent MidiRegionView.
+/** Update the positions of our representation of a parent's hit.
+ *  @param ev The GhostEvent from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_hit (Hit* hit, bool hide)
+MidiGhostRegion::update_hit (GhostEvent* ev)
 {
 	MidiStreamView* mv = midi_view();
 
@@ -414,30 +405,19 @@ MidiGhostRegion::update_hit (Hit* hit, bool hide)
 		return;
 	}
 
-	GhostEvent* ev = find_event (hit->note());
+	_tmp_poly = static_cast<ArdourCanvas::Polygon*>(ev->item);
 
-	if (!ev) {
-		return;
-	}
+	uint8_t const note_num = ev->event->note()->note();
+	double const h = note_height(trackview, mv);
+	double const y = note_y(trackview, mv, note_num);
 
-	if (hide) {
-		ev->item->hide();
-	} else if (ev->is_hit) {
-		_tmp_poly = static_cast<ArdourCanvas::Polygon*>(ev->item);
+	ArdourCanvas::Duple ppos = ev->item->position();
+	ArdourCanvas::Duple gpos = _tmp_poly->position();
+	gpos.x = ppos.x;
+	gpos.y = y;
 
-		uint8_t const note_num = ev->event->note()->note();
-		double const h = note_height(trackview, mv);
-		double const y = note_y(trackview, mv, note_num);
-
-		ArdourCanvas::Duple ppos = hit->position();
-		ArdourCanvas::Duple gpos = _tmp_poly->position();
-		gpos.x = ppos.x;
-		gpos.y = y;
-		_tmp_poly->set_position(gpos);
-		_tmp_poly->set(Hit::points(h));
-
-		ev->item->show();
-	}
+	_tmp_poly->set_position(gpos);
+	_tmp_poly->set(Hit::points(h));
 }
 
 void
@@ -452,6 +432,31 @@ MidiGhostRegion::remove_note (NoteBase* note)
 	events.erase (f);
 
 	_optimization_iterator = events.end ();
+}
+void
+MidiGhostRegion::redisplay_model ()
+{
+	/* we rely on the parent MRV having removed notes not in the model */
+	for (EventList::iterator i = events.begin(); i != events.end(); ) {
+
+		boost::shared_ptr<NoteType> note = i->first;
+		GhostEvent* cne = i->second;
+		const bool visible = (note->note() >= parent_mrv._current_range_min) &&
+			(note->note() <= parent_mrv._current_range_max);
+
+		if (visible) {
+			if (cne->is_hit) {
+				update_hit (cne);
+			} else {
+				update_note (cne);
+			}
+			cne->item->show ();
+		} else {
+			cne->item->hide ();
+		}
+
+		++i;
+	}
 }
 
 /** Given a note in our parent region (ie the actual MidiRegionView), find our

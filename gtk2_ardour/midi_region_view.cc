@@ -1243,24 +1243,12 @@ MidiRegionView::redisplay_model()
 						update_sustained (sus);
 					}
 
-					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr) {
-							gr->update_note (sus, !visible || gr->trackview.hidden());
-						}
-					}
 				} else if ((hit = dynamic_cast<Hit*>(cne))) {
 
 					if (visible) {
 						update_hit (hit);
 					}
 
-					for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-						MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
-						if (gr) {
-							gr->update_hit (hit, !visible || gr->trackview.hidden());
-						}
-					}
 				}
 				++i;
 			}
@@ -1286,6 +1274,13 @@ MidiRegionView::redisplay_model()
 			if ((*it) == note->id()) {
 				add_to_selection (cne);
 			}
+		}
+	}
+
+	for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
+		MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
+		if (gr && !gr->trackview.hidden()) {
+			gr->redisplay_model ();
 		}
 	}
 

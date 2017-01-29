@@ -34,6 +34,7 @@ class Hit;
 class MidiStreamView;
 class TimeAxisView;
 class RegionView;
+class MidiRegionView;
 
 class GhostRegion : public sigc::trackable
 {
@@ -90,12 +91,12 @@ public:
 	    bool is_hit;
 	};
 
-	MidiGhostRegion(RegionView& rv,
+	MidiGhostRegion(MidiRegionView& rv,
 	                TimeAxisView& tv,
 	                TimeAxisView& source_tv,
 	                double initial_unit_pos);
 
-	MidiGhostRegion(RegionView& rv,
+	MidiGhostRegion(MidiRegionView& rv,
 	                MidiStreamView& msv,
 	                TimeAxisView& source_tv,
 	                double initial_unit_pos);
@@ -111,10 +112,11 @@ public:
 	void update_contents_height();
 
 	void add_note(NoteBase*);
-	void update_note (Note* note,  bool hide);
-	void update_hit (Hit* hit, bool hide);
+	void update_note (GhostEvent* note);
+	void update_hit (GhostEvent* hit);
 	void remove_note (NoteBase*);
 
+	void redisplay_model();
 	void clear_events();
 
 private:
@@ -123,6 +125,7 @@ private:
 	ArdourCanvas::Rectangle* _tmp_rect;
 	ArdourCanvas::Polygon* _tmp_poly;
 
+	MidiRegionView& parent_mrv;
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 	MidiGhostRegion::GhostEvent* find_event (boost::shared_ptr<NoteType>);
 

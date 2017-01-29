@@ -361,6 +361,7 @@ private:
 	friend class NoteDrag;
 	friend class NoteCreateDrag;
 	friend class HitCreateDrag;
+	friend class MidiGhostRegion;
 
 	friend class EditNoteDialog;
 
