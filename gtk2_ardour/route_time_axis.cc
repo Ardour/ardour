@@ -632,21 +632,27 @@ RouteTimeAxisView::build_display_menu ()
 
 		int overlaid = 0;
 		int stacked = 0;
+		int unchangeable = 0;
 		TrackSelection const & s = _editor.get_selection().tracks;
+
 		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 			StreamView* v = (*i)->view ();
 			if (!v) {
 				continue;
 			}
 
-			switch (v->layer_display ()) {
-			case Overlaid:
-				++overlaid;
-				break;
-			case Stacked:
-			case Expanded:
-				++stacked;
-				break;
+			if (v->can_change_layer_display()) {
+				switch (v->layer_display ()) {
+				case Overlaid:
+					++overlaid;
+					break;
+				case Stacked:
+				case Expanded:
+					++stacked;
+					break;
+				}
+			} else {
+				unchangeable++;
 			}
 		}
 
@@ -664,11 +670,19 @@ RouteTimeAxisView::build_display_menu ()
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid, true));
 
+		if (unchangeable) {
+			i->set_sensitive (false);
+		}
+
 		layers_items.push_back (RadioMenuElem (layers_group, _("Stacked")));
 		i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
 		i->set_active (overlaid == 0 && stacked != 0);
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true));
+
+		if (unchangeable) {
+			i->set_sensitive (false);
+		}
 
 		_ignore_set_layer_display = false;
 

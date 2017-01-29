@@ -243,6 +243,16 @@ MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
 }
 
 void
+MidiStreamView::set_layer_display (LayerDisplay d)
+{
+	if (d != Overlaid) {
+		return;
+	}
+
+	StreamView::set_layer_display (d);
+}
+
+void
 MidiStreamView::redisplay_track ()
 {
 	if (!_trackview.is_midi_track()) {

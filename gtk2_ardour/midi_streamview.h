@@ -77,6 +77,8 @@ class MidiStreamView : public StreamView
 
 	void update_note_range(uint8_t note_num);
 
+	void set_layer_display (LayerDisplay);
+	bool can_change_layer_display() const { return false; }
 	void redisplay_track ();
 
 	inline double contents_height() const
