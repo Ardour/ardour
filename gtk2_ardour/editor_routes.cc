@@ -1641,6 +1641,8 @@ EditorRoutes::move_selected_tracks (bool up)
 	list<ViewStripable>::iterator trailing;
 	list<ViewStripable>::iterator leading;
 
+	TimeAxisView* scroll_to = NULL;
+
 	if (up) {
 
 		trailing = view_stripables.begin();
@@ -1651,6 +1653,9 @@ EditorRoutes::move_selected_tracks (bool up)
 		while (leading != view_stripables.end()) {
 			if (_editor->selection->selected (leading->tav)) {
 				view_stripables.insert (trailing, ViewStripable (*leading));
+				if (!scroll_to) {
+					scroll_to = leading->tav;
+				}
 				leading = view_stripables.erase (leading);
 			} else {
 				++leading;
@@ -1675,6 +1680,9 @@ EditorRoutes::move_selected_tracks (bool up)
 		while (1) {
 
 			if (_editor->selection->selected (leading->tav)) {
+				if (!scroll_to) {
+					scroll_to = leading->tav;
+				}
 				list<ViewStripable>::iterator tmp;
 
 				/* need to insert *after* trailing, not *before* it,
@@ -1740,6 +1748,11 @@ EditorRoutes::move_selected_tracks (bool up)
 
 
 	_model->reorder (neworder);
+
+	if (scroll_to) {
+		_editor->ensure_time_axis_view_is_visible (*scroll_to, false);
+	}
+
 }
 
 void
