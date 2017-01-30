@@ -172,11 +172,12 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 			ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 
 	grid = new ArdourCanvas::Grid (scroll_group);
-	grid->set_padding (10.0);
-	grid->set_margin (20.0);
+	grid->set_padding (0.0);
+	grid->set_margin (0.0);
 	grid->set_outline_width (3.0);
 	grid->set_outline_color (Color (0x3daec1ff));
 	grid->set_outline (true);
+	grid->set_homogenous (true);
 
 	ArdourCanvas::Text* text1 = new ArdourCanvas::Text (&canvas);
 	text1->set ("hello, world");
@@ -194,12 +195,11 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	text4->set ("I am fourth");
 	text4->set_color (Color (0xffff00ff));
 
-#if 0
 	grid->place (text1, ArdourCanvas::Duple (0, 0));
 	grid->place (text2, ArdourCanvas::Duple (1, 0));
 	grid->place (text3, ArdourCanvas::Duple (0, 1));
 	grid->place (text4, ArdourCanvas::Duple (1, 1));
-#endif
+
 	ArdourButton* button1 = new ArdourButton ("auto-return");
 	ArdourButton* button2 = new ArdourButton ("auto-play");
 	ArdourButton* button3 = new ArdourButton ("follow range");
