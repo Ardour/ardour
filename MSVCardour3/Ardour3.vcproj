@@ -25,7 +25,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -98,7 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;ardour.keys&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Debug32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -112,7 +112,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -182,7 +182,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(PackagerFolderLocal)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;ardour.keys&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(PackagerFolderLocal)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -196,7 +196,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;resources\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\resources&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)\icons&quot;&#x0D;&#x0A;copy /Y &quot;ardour.keys&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\$(LibardourFolder)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
