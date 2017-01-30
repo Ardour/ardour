@@ -59,6 +59,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _instrument_list;
 	InstrumentListColumns        _instrument_list_columns;
 	uint32_t                     _reasonable_synth_id;
+	uint32_t                     _gmsynth_id;
 	PBD::ScopedConnection        _update_connection;
 };
 

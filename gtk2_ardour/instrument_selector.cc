@@ -29,6 +29,7 @@ using namespace ARDOUR;
 
 InstrumentSelector::InstrumentSelector()
 	: _reasonable_synth_id(0)
+	, _gmsynth_id(UINT32_MAX)
 {
 	refill ();
 
@@ -51,7 +52,11 @@ InstrumentSelector::refill()
 	set_model(_instrument_list);
 	pack_start(_instrument_list_columns.name);
 	if (selected.empty ()) {
-		set_active(_reasonable_synth_id);
+		if (_gmsynth_id != UINT32_MAX) {
+			set_active(_gmsynth_id);
+		} else {
+			set_active(_reasonable_synth_id);
+		}
 	} else {
 		TreeModel::Children rows = _instrument_list->children();
 		TreeModel::Children::iterator i;
@@ -145,6 +150,9 @@ InstrumentSelector::build_instrument_list()
 		}
 		row[_instrument_list_columns.info_ptr] = p;
 		if (p->unique_id == "https://community.ardour.org/node/7596") {
+			_reasonable_synth_id = n;
+		}
+		if (p->unique_id == "http://gareus.org/oss/lv2/gmsynth") {
 			_reasonable_synth_id = n;
 		}
 		prev = p->name;
