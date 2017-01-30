@@ -115,6 +115,7 @@ void
 RouteProcessorSelection::remove (AxisView* r)
 {
 	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
+	PresentationInfo::ChangeSuspender cs;
 
 	AxisViewSelection::iterator i;
 	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
