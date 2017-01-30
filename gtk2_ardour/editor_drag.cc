@@ -1982,7 +1982,9 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 
 	_editor->begin_reversible_command (Operations::insert_region);
 	playlist->clear_changes ();
-	playlist->add_region (_primary->region (), _last_position.frame, _editor->get_grid_music_divisions (event->button.state));
+	_editor->snap_to_with_modifier (_last_position, event);
+
+	playlist->add_region (_primary->region (), _last_position.frame, 1.0, false, _last_position.division);
 
 	// Mixbus doesn't seem to ripple when inserting regions from the list: should we? yes, probably
 	if (Config->get_edit_mode() == Ripple) {
