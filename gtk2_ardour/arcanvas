@@ -3,4 +3,12 @@ TOP=`dirname "$0"`/..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh
 export UBUNTU_MENUPROXY=""
 exec $TOP/build/gtk2_ardour/canvas_test "$@"
+
 #exec gdb --args $TOP/build/gtk2_ardour/canvas_test "$@"
+
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --num-callers=50"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
+#export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+#exec valgrind --tool=memcheck $VALGRIND_OPTIONS \
+#     --track-origins=yes --suppressions=$TOP/tools/valgrind.supp \
+#       $TOP/build/gtk2_ardour/canvas_test "$@"
