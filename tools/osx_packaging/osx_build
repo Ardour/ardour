@@ -686,11 +686,31 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
+if true; then
+	echo "Bundling General MIDI Synth LV2"
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+
+	for proj in x42-gmsynth; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+	done
+
+	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
+		mv ${file}.thin ${file}
+	done
+
+fi
+
 if test x$WITH_X42_LV2 != x ; then
 	echo "bundling x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree; do
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \

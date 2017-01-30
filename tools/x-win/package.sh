@@ -248,12 +248,26 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
+if true ; then
+	mkdir -p $ALIBDIR/LV2
+
+	echo "Adding General MIDI Synth LV2"
+
+	for proj in x42-gmsynth; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
+			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+		unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+	done
+fi
+
 if test x$WITH_X42_LV2 != x ; then
 	mkdir -p $ALIBDIR/LV2
 
 	echo "Adding x42 Plugins"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree; do
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
