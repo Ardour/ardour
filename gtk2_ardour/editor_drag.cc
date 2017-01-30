@@ -928,8 +928,13 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	/* Work out the change in x */
+	TempoMap& tmap = _editor->session()->tempo_map();
 	MusicFrame pending_region_position (0, 0);
 	double const x_delta = compute_x_delta (event, &pending_region_position);
+
+	double const last_pos_qn = tmap.exact_qn_at_frame (_last_position.frame, _last_position.division);
+	double const qn_delta = tmap.exact_qn_at_frame (pending_region_position.frame, pending_region_position.division) - last_pos_qn;
+
 	_last_position = pending_region_position;
 
 	/* calculate hidden tracks in current y-axis delta */
@@ -1173,7 +1178,14 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		/* Now move the region view */
-		rv->move (x_delta, y_delta);
+		if (rv->region()->position_lock_style() == MusicTime) {
+			double const last_qn = tmap.quarter_note_at_frame (rv->get_position());
+			framepos_t const x_pos_music = tmap.frame_at_quarter_note (last_qn + qn_delta);
+
+			rv->set_position (x_pos_music, 0);
+		} else {
+			rv->move (x_delta, y_delta);
+		}
 
 	} /* foreach region */
 
