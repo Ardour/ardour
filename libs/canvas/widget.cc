@@ -110,6 +110,18 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
+Widget::size_allocate (Rect const & r)
+{
+	Item::size_allocate (r);
+	Gtk::Allocation alloc;
+	alloc.set_x (0);
+	alloc.set_y (0);
+	alloc.set_width (r.width());
+	alloc.set_height (r.height());
+	_widget.size_allocate (alloc);
+}
+
+void
 Widget::compute_bounding_box () const
 {
 	std::cerr << "cbbox for widget\n";
