@@ -679,23 +679,19 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, MusicFrame* pending_r
 	if ((pending_region_position->frame != _last_position.frame) && x_move_allowed) {
 
 		/* x movement since last time (in pixels) */
-		dx = (static_cast<double> (pending_region_position->frame) - _last_position.frame) / _editor->samples_per_pixel;
+		dx = _editor->sample_to_pixel_unrounded (pending_region_position->frame - _last_position.frame);
 
 		/* total x movement */
-		framecnt_t total_dx = pending_region_position->frame;
-		if (regions_came_from_canvas()) {
-			total_dx = total_dx - grab_frame ();
-		}
+		framecnt_t total_dx = _editor->pixel_to_sample (_total_x_delta + dx);
 
-		/* check that no regions have gone off the start of the session */
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			if ((i->view->region()->position() + total_dx) < 0) {
-				dx = 0;
-				*pending_region_position = _last_position;
+			frameoffset_t const off = i->view->region()->position() + total_dx;
+			if (off < 0) {
+				dx = dx - _editor->sample_to_pixel_unrounded (off);
+				*pending_region_position = MusicFrame (pending_region_position->frame - off, 0);
 				break;
 			}
 		}
-
 	}
 
 	return dx;
