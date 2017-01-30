@@ -165,6 +165,7 @@ Box::reposition_children ()
 	Duple previous_edge (0, 0);
 	Distance largest_width = 0;
 	Distance largest_height = 0;
+	Rect uniform_size;
 
 	if (homogenous) {
 
@@ -175,33 +176,35 @@ Box::reposition_children ()
 				largest_width = std::max (largest_width, bb.width());
 			}
 		}
+
+		uniform_size = Rect (0, 0, largest_width, largest_height);
 	}
 
 	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
 
 		(*i)->set_position (previous_edge);
 
+		if (homogenous) {
+			(*i)->size_allocate (uniform_size);
+		}
+
 		if (orientation == Vertical) {
 
 			Distance shift = 0;
 
-			if (homogenous) {
-				shift = largest_height;
-			} else {
-				Rect bb = (*i)->bounding_box();
+			Rect bb = (*i)->bounding_box();
 
-				if (!(*i)->visible()) {
-					/* invisible child */
-					if (!collapse_on_hide) {
-						/* still add in its size */
-						if (bb) {
-							shift += bb.height();
-						}
-					}
-				} else {
+			if (!(*i)->visible()) {
+				/* invisible child */
+				if (!collapse_on_hide) {
+					/* still add in its size */
 					if (bb) {
 						shift += bb.height();
-					}
+						}
+				}
+			} else {
+				if (bb) {
+					shift += bb.height();
 				}
 			}
 
@@ -210,22 +213,17 @@ Box::reposition_children ()
 		} else {
 
 			Distance shift = 0;
+			Rect bb = (*i)->bounding_box();
 
-			if (homogenous) {
-				shift = largest_width;
-			} else {
-				Rect bb = (*i)->bounding_box();
-
-				if (!(*i)->visible()) {
-					if (!collapse_on_hide) {
-						if (bb) {
-							shift += bb.width();
-						}
-					}
-				} else {
+			if (!(*i)->visible()) {
+				if (!collapse_on_hide) {
 					if (bb) {
 						shift += bb.width();
 					}
+				}
+			} else {
+				if (bb) {
+					shift += bb.width();
 				}
 			}
 

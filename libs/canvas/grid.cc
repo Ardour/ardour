@@ -33,7 +33,7 @@ Grid::Grid (Canvas* canvas)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
+	, homogenous (true)
 {
 	self = new Rectangle (this);
 	self->set_outline (false);
@@ -45,7 +45,7 @@ Grid::Grid (Item* parent)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
+	, homogenous (true)
 {
 	self = new Rectangle (this);
 	self->set_outline (false);
@@ -57,7 +57,7 @@ Grid::Grid (Item* parent, Duple const & p)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
+	, homogenous (true)
 {
 	self = new Rectangle (this);
 	self->set_outline (false);
@@ -188,23 +188,55 @@ Grid::reposition_children ()
 	row_dimens.assign (max_row, 0);
 	col_dimens.assign (max_col, 0);
 
-	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+	Rect uniform_size;
 
-		if (*i == self) {
-			/* self-rect is not a normal child */
-			continue;
+	if (homogenous) {
+		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+
+			Rect bb = (*i)->bounding_box();
+
+			if (!bb) {
+				continue;
+			}
+			cerr << "\tbb is " << bb << endl;
+			uniform_size.y1 = max (uniform_size.y1, bb.height());
+			uniform_size.x1 = max (uniform_size.x1, bb.width());
 		}
 
-		Rect bb = (*i)->bounding_box();
+		cerr << "Uniform size will be " << uniform_size << endl;
 
-		if (!bb) {
-			continue;
+		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+			if (*i == self) {
+				/* self-rect is not a normal child */
+				continue;
+			}
+			(*i)->size_allocate (uniform_size);
+			for (uint32_t n = 0; n < max_row; ++n) {
+				col_dimens[n] = uniform_size.width();
+			}
+			for (uint32_t n = 0; n < max_col; ++n) {
+				row_dimens[n] = uniform_size.height();
+			}
 		}
+	} else {
+		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-		CoordsByItem::const_iterator c = coords_by_item.find (*i);
+			if (*i == self) {
+				/* self-rect is not a normal child */
+				continue;
+			}
 
-		row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.height());
-		col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.width());
+			Rect bb = (*i)->bounding_box();
+
+			if (!bb) {
+				continue;
+			}
+
+			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+
+			row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.height());
+			col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.width());
+		}
 	}
 
 	/* now sum the row and column widths, so that row_dimens is transformed

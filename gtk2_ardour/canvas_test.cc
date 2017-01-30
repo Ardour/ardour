@@ -23,6 +23,8 @@
 #include "canvas/canvas.h"
 #include "canvas/container.h"
 #include "canvas/colors.h"
+#include "canvas/debug.h"
+#include "canvas/grid.h"
 #include "canvas/scroll_group.h"
 #include "canvas/text.h"
 #include "canvas/widget.h"
@@ -110,6 +112,7 @@ private:
 
 	ArdourCanvas::GtkCanvas* canvas;
 	ArdourCanvas::Container* group;
+	ArdourCanvas::Grid* grid;
 
 	ArdourButton test_button;
 };
@@ -163,12 +166,60 @@ ArdourCanvas::Container*
 CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 {
 	using namespace ArdourCanvas;
-	canvas.set_background_color (rgba_to_color (0.0, 0.0, 1.0, 1.0));
+	canvas.set_background_color (rgba_to_color (0.0, 0.0, 0.4, 1.0));
 
 	ScrollGroup* scroll_group = new ScrollGroup (canvas.root(),
 			ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 
-	ArdourCanvas::Widget* w = new ArdourCanvas::Widget (scroll_group, test_button);
+	grid = new ArdourCanvas::Grid (scroll_group);
+	grid->set_padding (10.0);
+	grid->set_margin (20.0);
+	grid->set_outline_width (3.0);
+	grid->set_outline_color (Color (0x3daec1ff));
+	grid->set_outline (true);
+
+	ArdourCanvas::Text* text1 = new ArdourCanvas::Text (&canvas);
+	text1->set ("hello, world");
+	text1->set_color (Color (0xff0000ff));
+
+	ArdourCanvas::Text* text2 = new ArdourCanvas::Text (&canvas);
+	text2->set ("goodbye, cruel world");
+	text2->set_color (Color (0x00ff00ff));
+
+	ArdourCanvas::Text* text3 = new ArdourCanvas::Text (&canvas);
+	text3->set ("I am the third");
+	text3->set_color (Color (0xff00ffff));
+
+	ArdourCanvas::Text* text4 = new ArdourCanvas::Text (&canvas);
+	text4->set ("I am fourth");
+	text4->set_color (Color (0xffff00ff));
+
+#if 0
+	grid->place (text1, ArdourCanvas::Duple (0, 0));
+	grid->place (text2, ArdourCanvas::Duple (1, 0));
+	grid->place (text3, ArdourCanvas::Duple (0, 1));
+	grid->place (text4, ArdourCanvas::Duple (1, 1));
+#endif
+	ArdourButton* button1 = new ArdourButton ("auto-return");
+	ArdourButton* button2 = new ArdourButton ("auto-play");
+	ArdourButton* button3 = new ArdourButton ("follow range");
+	ArdourButton* button4 = new ArdourButton ("auto-input");
+
+	ArdourCanvas::Widget* w1 = new ArdourCanvas::Widget (&canvas, *button1);
+	CANVAS_DEBUG_NAME (w1, "w1");
+	grid->place (w1, ArdourCanvas::Duple (3, 0));
+	ArdourCanvas::Widget* w2 = new ArdourCanvas::Widget (&canvas, *button2);
+	CANVAS_DEBUG_NAME (w2, "w2");
+	grid->place (w2, ArdourCanvas::Duple (4, 0));
+	ArdourCanvas::Widget* w3 = new ArdourCanvas::Widget (&canvas, *button3);
+	CANVAS_DEBUG_NAME (w3, "w3");
+	grid->place (w3, ArdourCanvas::Duple (3, 1));
+	ArdourCanvas::Widget* w4 = new ArdourCanvas::Widget (&canvas, *button4);
+	CANVAS_DEBUG_NAME (w4, "w4");
+	grid->place (w4, ArdourCanvas::Duple (4, 1));
+
+	//ArdourCanvas::Widget* w = new ArdourCanvas::Widget (scroll_group, test_button);
+	//CANVAS_DEBUG_NAME (w, "TheW");
 
 	return new ArdourCanvas::Container (scroll_group);
 }
