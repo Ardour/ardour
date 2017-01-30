@@ -327,7 +327,7 @@ Drag::end_grab (GdkEvent* event)
 MusicFrame
 Drag::adjusted_frame (framepos_t f, GdkEvent const * event, bool snap) const
 {
-	MusicFrame pos (f, 0);
+	MusicFrame pos (0, 0);
 
 	if (f > _pointer_frame_offset) {
 		pos.frame = f - _pointer_frame_offset;
