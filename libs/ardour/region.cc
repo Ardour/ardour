@@ -1910,9 +1910,7 @@ Region::is_compound () const
 void
 Region::post_set (const PropertyChange& pc)
 {
-	if (pc.contains (Properties::position)) {
-		_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
-	}
+	_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 }
 
 void
