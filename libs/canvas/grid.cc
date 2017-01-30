@@ -313,10 +313,10 @@ Grid::reposition_children ()
 }
 
 void
-Grid::place (Item* i, Duple at)
+Grid::place (Item* i, double x, double y, double col_span, double row_span)
 {
 	add (i);
-	coords_by_item.insert (std::make_pair (i, at));
+	coords_by_item.insert (std::make_pair (i, Duple (x, y)));
 	reposition_children ();
 }
 

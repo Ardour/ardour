@@ -47,7 +47,7 @@ public:
 	void set_border_width (double w) { set_outline_width (w); }
 	void set_border_color (Color c)  { set_outline_color (c); }
 
-	void place (Item*, Duple coord);
+	void place (Item*, double x, double y, double col_span = 1, double row_span = 1);
 
 	void set_collapse_on_hide (bool);
 	void set_homogenous (bool);
