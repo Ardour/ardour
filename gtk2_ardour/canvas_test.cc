@@ -172,11 +172,15 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 			ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 
 	grid = new ArdourCanvas::Grid (scroll_group);
-	grid->set_padding (0.0);
+
+	grid->set_padding (40.0);
 	grid->set_margin (0.0);
+
 	grid->set_outline_width (3.0);
 	grid->set_outline_color (Color (0x3daec1ff));
-	grid->set_outline (true);
+	grid->set_outline (false);
+	grid->set_row_spacing (60.0);
+	grid->set_col_spacing (3.0);
 	grid->set_homogenous (true);
 
 	ArdourCanvas::Text* text1 = new ArdourCanvas::Text (&canvas);
@@ -195,10 +199,10 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	text4->set ("I am fourth");
 	text4->set_color (Color (0xffff00ff));
 
-	grid->place (text1, ArdourCanvas::Duple (0, 0));
-	grid->place (text2, ArdourCanvas::Duple (1, 0));
-	grid->place (text3, ArdourCanvas::Duple (0, 1));
-	grid->place (text4, ArdourCanvas::Duple (1, 1));
+	grid->place (text1, 0, 0);
+	grid->place (text2, 1, 0);
+	grid->place (text3, 0, 1);
+	grid->place (text4, 1, 1);
 
 	ArdourButton* button1 = new ArdourButton ("auto-return");
 	ArdourButton* button2 = new ArdourButton ("auto-play");
@@ -207,16 +211,16 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 
 	ArdourCanvas::Widget* w1 = new ArdourCanvas::Widget (&canvas, *button1);
 	CANVAS_DEBUG_NAME (w1, "w1");
-	grid->place (w1, ArdourCanvas::Duple (3, 0));
+	grid->place (w1, 3, 0);
 	ArdourCanvas::Widget* w2 = new ArdourCanvas::Widget (&canvas, *button2);
 	CANVAS_DEBUG_NAME (w2, "w2");
-	grid->place (w2, ArdourCanvas::Duple (4, 0));
+	grid->place (w2, 4, 0);
 	ArdourCanvas::Widget* w3 = new ArdourCanvas::Widget (&canvas, *button3);
 	CANVAS_DEBUG_NAME (w3, "w3");
-	grid->place (w3, ArdourCanvas::Duple (3, 1));
+	grid->place (w3, 3, 1);
 	ArdourCanvas::Widget* w4 = new ArdourCanvas::Widget (&canvas, *button4);
 	CANVAS_DEBUG_NAME (w4, "w4");
-	grid->place (w4, ArdourCanvas::Duple (4, 1));
+	grid->place (w4, 4, 1);
 
 	//ArdourCanvas::Widget* w = new ArdourCanvas::Widget (scroll_group, test_button);
 	//CANVAS_DEBUG_NAME (w, "TheW");
