@@ -30,38 +30,44 @@ using std::endl;
 
 Grid::Grid (Canvas* canvas)
 	: Item (canvas)
-	, spacing (0)
+	, row_spacing (0)
+	, col_spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
 	, homogenous (false)
 {
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
+	bg = new Rectangle (this);
+	bg->set_outline (false);
+	bg->set_fill (false);
+	bg->hide ();
 }
 
 Grid::Grid (Item* parent)
 	: Item (parent)
-	, spacing (0)
+	, row_spacing (0)
+	, col_spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
 	, homogenous (false)
 {
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
+	bg = new Rectangle (this);
+	bg->set_outline (false);
+	bg->set_fill (false);
+	bg->hide ();
 }
 
 Grid::Grid (Item* parent, Duple const & p)
 	: Item (parent, p)
-	, spacing (0)
+	, row_spacing (0)
+	, col_spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
 	, homogenous (true)
 {
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
+	bg = new Rectangle (this);
+	bg->set_outline (false);
+	bg->set_fill (false);
+	bg->hide ();
 }
 
 void
@@ -91,19 +97,25 @@ Grid::compute_bounding_box () const
 	if (_bounding_box) {
 		Rect r = _bounding_box;
 
-		_bounding_box = r.expand (outline_width() + top_margin,
-		                          outline_width() + right_margin,
-		                          outline_width() + bottom_margin,
-		                          outline_width() + left_margin);
+		_bounding_box = r.expand (outline_width() + top_margin + top_padding,
+		                          outline_width() + right_margin + right_padding,
+		                          outline_width() + bottom_margin + bottom_padding,
+		                          outline_width() + left_margin + left_padding);
 	}
 
 	_bounding_box_dirty = false;
 }
 
 void
-Grid::set_spacing (double s)
+Grid::set_row_spacing (double s)
 {
-	spacing = s;
+	row_spacing = s;
+}
+
+void
+Grid::set_col_spacing (double s)
+{
+	col_spacing = s;
 }
 
 void
@@ -147,14 +159,14 @@ Grid::set_margin (double t, double r, double b, double l)
 }
 
 void
-Grid::reset_self ()
+Grid::reset_bg ()
 {
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
 	}
 
 	if (!_bounding_box) {
-		self->hide ();
+		bg->hide ();
 		return;
 	}
 
@@ -162,7 +174,7 @@ Grid::reset_self ()
 
 	/* XXX need to shrink by margin */
 
-	self->set (r);
+	bg->set (r);
 }
 
 void
@@ -199,7 +211,7 @@ Grid::reposition_children ()
 	if (homogenous) {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == self) {
+			if (*i == bg) {
 				continue;
 			}
 
@@ -216,8 +228,8 @@ Grid::reposition_children ()
 		cerr << "Uniform size will be " << uniform_size << endl;
 
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-			if (*i == self) {
-				/* self-rect is not a normal child */
+			if (*i == bg) {
+				/* bg rect is not a normal child */
 				continue;
 			}
 			(*i)->size_allocate (uniform_size);
@@ -231,8 +243,8 @@ Grid::reposition_children ()
 	} else {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == self) {
-				/* self-rect is not a normal child */
+			if (*i == bg) {
+				/* bg rect is not a normal child */
 				continue;
 			}
 
@@ -255,7 +267,7 @@ Grid::reposition_children ()
 	 * column.
 	 */
 
-	double current_top_edge = top_margin;
+	double current_top_edge = top_margin + top_padding;
 
 	for (uint32_t n = 0; n < max_row; ++n) {
 		if (row_dimens[n]) {
@@ -263,11 +275,11 @@ Grid::reposition_children ()
 			const double h = row_dimens[n]; /* save height */
 			row_dimens[n] = current_top_edge;
 			cerr << "row[" << n << "] @ " << row_dimens[n] << endl;
-			current_top_edge = current_top_edge + h + top_padding + bottom_padding;
+			current_top_edge = current_top_edge + h + row_spacing;
 		}
 	}
 
-	double current_right_edge = left_margin;
+	double current_right_edge = left_margin + left_padding;
 
 	for (uint32_t n = 0; n < max_col; ++n) {
 		if (col_dimens[n]) {
@@ -275,7 +287,7 @@ Grid::reposition_children ()
 			const double w = col_dimens[n]; /* save width of this column */
 			col_dimens[n] = current_right_edge;
 			cerr << "col[" << n << "] @ " << col_dimens[n] << endl;
-			current_right_edge = current_right_edge + w + left_padding + right_padding;
+			current_right_edge = current_right_edge + w + col_spacing;
 		}
 	}
 
@@ -297,7 +309,7 @@ Grid::reposition_children ()
 	}
 
 	_bounding_box_dirty = true;
-	reset_self ();
+	reset_bg ();
 }
 
 void

@@ -37,7 +37,9 @@ public:
 	Grid (Item *);
 	Grid (Item *, Duple const & position);
 
-	void set_spacing (double s);
+	void set_row_spacing (double s);
+	void set_col_spacing (double s);
+
 	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 	void set_margin (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 
@@ -54,7 +56,8 @@ public:
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
   protected:
-	double spacing;
+	double row_spacing;
+	double col_spacing;
 	double top_padding, right_padding, bottom_padding, left_padding;
 	double top_margin, right_margin, bottom_margin, left_margin;
 
@@ -63,11 +66,11 @@ public:
 	typedef std::map<Item*,Duple> CoordsByItem;
 	CoordsByItem coords_by_item;
 
-	Rectangle *self;
+	Rectangle *bg;
 	bool collapse_on_hide;
 	bool homogenous;
 
-	void reset_self ();
+	void reset_bg ();
 	void reposition_children ();
 };
 
