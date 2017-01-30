@@ -388,7 +388,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	MusicFrame round_to_bar  (framepos_t frame, RoundMode dir);
 	MusicFrame round_to_beat (framepos_t frame, RoundMode dir);
-	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 	MusicFrame round_to_quarter_note_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 
 	void set_length (framepos_t frames);
