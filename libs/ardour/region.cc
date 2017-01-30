@@ -360,6 +360,8 @@ Region::Region (boost::shared_ptr<const Region> other, MusicFrame offset)
 
 		_quarter_note = other->_quarter_note + offset_qn;
 		_beat = _session.tempo_map().beat_at_quarter_note (_quarter_note);
+	} else {
+		_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 	}
 
 	/* if the other region had a distinct sync point
