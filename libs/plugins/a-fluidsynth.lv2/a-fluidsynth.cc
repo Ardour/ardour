@@ -762,6 +762,11 @@ mn_file (LV2_Handle instance)
 	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
 		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
 		if (i->second.size() > 0) {
+			pf ("        <MIDICommands>\n");
+			// this seems wrong (swapped MSB/LSB) but works - double check fluid + ardour.
+			pf ("            <ControlChange Control=\"0\" Value=\"%d\"/>\n", i->first & 127);
+			pf ("            <ControlChange Control=\"32\" Value=\"%d\"/>\n", (i->first >> 8) & 127);
+			pf ("        </MIDICommands>\n");
 			pf ("        <PatchNameList>\n");
 			int n = 0;
 			for (BPList::const_iterator j = i->second.begin(); j != i->second.end(); ++j, ++n) {
