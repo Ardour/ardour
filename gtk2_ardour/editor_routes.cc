@@ -1535,7 +1535,7 @@ EditorRoutes::selection_changed ()
 }
 
 bool
-EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const&, bool /*selected*/)
+EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const& model, TreeModel::Path const& path, bool /*selected*/)
 {
 	if (selection_countdown) {
 		if (--selection_countdown == 0) {
@@ -1545,6 +1545,15 @@ EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path
 			return false;
 		}
 	}
+
+	TreeModel::iterator iter = model->get_iter (path);
+	if (iter) {
+		boost::shared_ptr<Stripable> stripable = (*iter)[_columns.stripable];
+		if (boost::dynamic_pointer_cast<VCA> (stripable)) {
+			return false;
+		}
+	}
+
 	return true;
 }
 
