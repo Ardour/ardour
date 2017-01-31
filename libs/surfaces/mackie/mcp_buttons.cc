@@ -469,7 +469,7 @@ MackieControlProtocol::marker_release (Button &)
 		return off;
 	}
 
-	session->locations()->next_available_name (markername,"marker");
+	session->locations()->next_available_name (markername,"mark");
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding marker called %1\n", markername));
 	add_marker (markername);
 
