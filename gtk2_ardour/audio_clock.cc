@@ -902,16 +902,16 @@ AudioClock::set_slave_info ()
 
 		switch (sync_src) {
 		case Engine:
-			_left_btn.set_text (sync_source_to_string (sync_src, true));
-			_right_btn.set_text ("");
+			_left_btn.set_text (sync_source_to_string (sync_src, true), true);
+			_right_btn.set_text ("", true);
 			break;
 		case MIDIClock:
 			if (slave) {
-				_left_btn.set_text (sync_source_to_string (sync_src, true));
+				_left_btn.set_text (sync_source_to_string (sync_src, true), true);
 				_right_btn.set_text (slave->approximate_current_delta (), true);
 			} else {
-				_left_btn.set_text (_("--pending--"));
-				_right_btn.set_text ("");
+				_left_btn.set_text (_("--pending--"), true);
+				_right_btn.set_text ("", true);
 			}
 			break;
 		case LTC:
@@ -929,15 +929,15 @@ AudioClock::set_slave_info ()
 					_right_btn.set_text (slave->approximate_current_delta (), true);
 				}
 			} else {
-				_left_btn.set_text (_("--pending--"));
-				_right_btn.set_text ("");
+				_left_btn.set_text (_("--pending--"), true);
+				_right_btn.set_text ("", true);
 			}
 			break;
 		}
 	} else {
 		_left_btn.set_text (string_compose ("%1/%2",
-					_("INT"), sync_source_to_string(sync_src, true)));
-		_right_btn.set_text ("");
+					_("INT"), sync_source_to_string(sync_src, true)), true);
+		_right_btn.set_text ("", true);
 	}
 }
 
@@ -949,8 +949,8 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ----------");
-		_left_btn.set_text ("");
-		_right_btn.set_text ("");
+		_left_btn.set_text ("", true);
+		_right_btn.set_text ("", true);
 		return;
 	}
 
@@ -976,15 +976,15 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 			sprintf (buf, "%" PRId64 "Hz", rate);
 		}
 
-		_left_btn.set_text (string_compose ("%1 %2", _("SR"), buf));
+		_left_btn.set_text (string_compose ("%1 %2", _("SR"), buf), true);
 
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_btn.set_text ("");
+			_right_btn.set_text ("", true);
 		} else {
 			sprintf (buf, _("%+.4f%%"), vid_pullup);
-			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf));
+			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf), true);
 		}
 	}
 }
@@ -1030,8 +1030,8 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--.---");
-		_left_btn.set_text ("");
-		_right_btn.set_text ("");
+		_left_btn.set_text ("", true);
+		_right_btn.set_text ("", true);
 
 		return;
 	}
@@ -1050,8 +1050,8 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--:--");
-		_left_btn.set_text ("");
-		_right_btn.set_text ("");
+		_left_btn.set_text ("", true);
+		_right_btn.set_text ("", true);
 		return;
 	}
 
@@ -1082,8 +1082,8 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ---|--|----");
-		_left_btn.set_text ("");
-		_right_btn.set_text ("");
+		_left_btn.set_text ("", true);
+		_right_btn.set_text ("", true);
 		return;
 	}
 
@@ -1164,17 +1164,17 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1", buf));
+			_left_btn.set_text (string_compose ("%1", buf), true);
 		} else if (m.tempo().note_type() == 8) {
 			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1", buf));
+			_left_btn.set_text (string_compose ("%1", buf), true);
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_frame (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf));
+			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf), true);
 		}
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf));
+		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf), true);
 	}
 }
 
