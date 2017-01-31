@@ -2043,7 +2043,8 @@ MackieControlProtocol::select_range (uint32_t pressed)
 
 	pull_stripable_range (_down_select_buttons, stripables, pressed);
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables, first = %2\n", stripables.size(), stripables.front()->name()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables, first = %2\n", stripables.size(),
+	                                                   (stripables.empty() ? "null" : stripables.front()->name())));
 
 	if (stripables.empty()) {
 		return;
