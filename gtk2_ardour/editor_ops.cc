@@ -5743,11 +5743,19 @@ Editor::toggle_region_lock_style ()
 		return;
 	}
 
+	bool inconsistent = false;
+	CheckMenuItem* cm = dynamic_cast<CheckMenuItem*> (
+		ActionManager::get_widget (X_("/Main/RegionMenu/RegionMenuPosition/toggle-region-lock-style")));
+
+	if (cm && cm->get_inconsistent()) {
+		inconsistent = true;
+	}
+
 	begin_reversible_command (_("region lock style"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_changes ();
-		PositionLockStyle const ns = (*i)->region()->position_lock_style() == AudioTime ? MusicTime : AudioTime;
+		PositionLockStyle const ns = ((*i)->region()->position_lock_style() == AudioTime && !inconsistent) ? MusicTime : AudioTime;
 		(*i)->region()->set_position_lock_style (ns);
 		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
