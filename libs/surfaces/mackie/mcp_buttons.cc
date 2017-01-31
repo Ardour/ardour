@@ -424,6 +424,8 @@ MackieControlProtocol::timecode_beats_release (Button &)
 LedState
 MackieControlProtocol::marker_press (Button &)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, "marker press\n");
+
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Common/remove-location-from-playhead");
 		return off;
@@ -437,6 +439,8 @@ MackieControlProtocol::marker_press (Button &)
 LedState
 MackieControlProtocol::marker_release (Button &)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, "marker release\n");
+
 	_modifier_state &= ~MODIFIER_MARKER;
 
 	if (main_modifier_state() & MODIFIER_SHIFT)

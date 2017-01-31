@@ -1598,11 +1598,15 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	/* lookup using the device-INDEPENDENT button ID */
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("now looking up button ID %1", button_id));
+
 	ButtonMap::iterator b = button_map.find (button_id);
 
 	if (b != button_map.end()) {
 
 		ButtonHandlers& bh (b->second);
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("button found in map, now invoking %1\n", (bs == press ? "press" : "release")));
 
 		switch  (bs) {
 		case press:
