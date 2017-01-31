@@ -284,13 +284,13 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 
 	if (!controllable->is_toggle()) {
 		if (control_additional == msg->note_number) {
-			controllable->set_value (midi_to_control (msg->velocity), Controllable::NoGroup);
+			controllable->set_value (midi_to_control (msg->velocity), Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Note %1 value %2  %3\n", (int) msg->note_number, (float) midi_to_control (msg->velocity), current_uri() ));
 		}
 	} else {
 		if (control_additional == msg->note_number) {
 			float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-			controllable->set_value (new_value, Controllable::NoGroup);
+			controllable->set_value (new_value, Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Note %1 Value %2  %3\n", (int) msg->note_number, (float) new_value, current_uri()));
 		}
 	}
@@ -333,7 +333,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 				*/
 
 				if (in_sync || _surface->motorised ()) {
-					controllable->set_value (midi_to_control (new_value), Controllable::NoGroup);
+					controllable->set_value (midi_to_control (new_value), Controllable::UseGroup);
 				}
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
@@ -343,30 +343,30 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 				switch (get_encoder()) {
 					case Enc_L:
 						if (msg->value > 0x40) {
-							controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::UseGroup);
 						} else {
-							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
 						}
 						break;
 					case Enc_R:
 						if (msg->value > 0x40) {
-							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
 						} else {
-							controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::UseGroup);
 						}
 						break;
 					case Enc_2:
 						if (msg->value > 0x40) {
-							controllable->set_value (midi_to_control (last_value - (0x7f - msg->value) + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value - (0x7f - msg->value) + 1), Controllable::UseGroup);
 						} else {
-							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
 						}
 						break;
 					case Enc_B:
 						if (msg->value > 0x40) {
-							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
 						} else {
-							controllable->set_value (midi_to_control (last_value - (0x40 - offset)), Controllable::NoGroup);
+							controllable->set_value (midi_to_control (last_value - (0x40 - offset)), Controllable::UseGroup);
 						}
 						break;
 					default:
@@ -394,7 +394,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			 */
 
 			if (msg->value >= 0x40) {
-				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::NoGroup);
+				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
 			}
 		}
@@ -417,11 +417,11 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 	if (msg == control_additional) {
 
 		if (!controllable->is_toggle()) {
-			controllable->set_value (1.0, Controllable::NoGroup);
+			controllable->set_value (1.0, Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
 		} else  {
 			float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-			controllable->set_value (new_value, Controllable::NoGroup);
+			controllable->set_value (new_value, Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
 		}
 	}
@@ -441,14 +441,14 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 	_surface->maybe_start_touch (controllable);
 
 	if (!controllable->is_toggle()) {
-		controllable->set_value (midi_to_control (pb), Controllable::NoGroup);
+		controllable->set_value (midi_to_control (pb), Controllable::UseGroup);
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) midi_to_control (pb), current_uri() ));
 	} else {
 		if (pb > 8065.0f) {
-			controllable->set_value (1, Controllable::NoGroup);
+			controllable->set_value (1, Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi pitchbend %1 value 1  %2\n", (int) control_channel, current_uri()));
 		} else {
-			controllable->set_value (0, Controllable::NoGroup);
+			controllable->set_value (0, Controllable::UseGroup);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi pitchbend %1 value 0  %2\n", (int) control_channel, current_uri()));
 		}
 	}
@@ -478,7 +478,7 @@ MIDIControllable::rpn_value_change (Parser&, uint16_t rpn, float val)
 {
 	if (control_rpn == rpn) {
 		if (controllable) {
-			controllable->set_value (val, Controllable::NoGroup);
+			controllable->set_value (val, Controllable::UseGroup);
 		}
 	}
 }
@@ -488,7 +488,7 @@ MIDIControllable::nrpn_value_change (Parser&, uint16_t nrpn, float val)
 {
 	if (control_nrpn == nrpn) {
 		if (controllable) {
-			controllable->set_value (val, Controllable::NoGroup);
+			controllable->set_value (val, Controllable::UseGroup);
 		}
 	}
 }
