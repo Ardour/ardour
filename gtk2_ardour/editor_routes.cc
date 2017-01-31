@@ -1738,13 +1738,22 @@ EditorRoutes::move_selected_tracks (bool up)
 		};
 	}
 
-	for (leading = view_stripables.begin(); leading != view_stripables.end(); ++leading) {
+	bool changed = false;
+	unsigned int i = 0;
+	for (leading = view_stripables.begin(); leading != view_stripables.end(); ++leading, ++i) {
+		if (leading->old_order != i) {
+			changed = true;
+		}
 		neworder.push_back (leading->old_order);
 #ifndef NDEBUG
 		if (leading->old_order != neworder.size() - 1) {
 			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("move %1 to %2\n", leading->old_order, neworder.size() - 1));
 		}
 #endif
+	}
+
+	if (!changed) {
+		return;
 	}
 
 #ifndef NDEBUG
@@ -1754,7 +1763,6 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 	DEBUG_TRACE (DEBUG::OrderKeys, "-------\n");
 #endif
-
 
 	_model->reorder (neworder);
 
