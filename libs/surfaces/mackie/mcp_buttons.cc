@@ -424,8 +424,6 @@ MackieControlProtocol::timecode_beats_release (Button &)
 LedState
 MackieControlProtocol::marker_press (Button &)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "marker press\n");
-
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Common/remove-location-from-playhead");
 		return off;
@@ -439,12 +437,9 @@ MackieControlProtocol::marker_press (Button &)
 LedState
 MackieControlProtocol::marker_release (Button &)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "marker release\n");
-
 	_modifier_state &= ~MODIFIER_MARKER;
 
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		DEBUG_TRACE (DEBUG::MackieControl, "shift was being held down, do nothing\n");
 		return off;   //if shift was held, we already did the action
 	}
 
@@ -465,12 +460,10 @@ MackieControlProtocol::marker_release (Button &)
 	framepos_t where = session->audible_frame();
 
 	if (session->transport_stopped() && session->locations()->mark_at (where, session->frame_rate() / 100.0)) {
-		DEBUG_TRACE (DEBUG::MackieControl, "transport stopped, marker already exists\n");
 		return off;
 	}
 
 	session->locations()->next_available_name (markername,"mark");
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding marker called %1\n", markername));
 	add_marker (markername);
 
 	return off;
