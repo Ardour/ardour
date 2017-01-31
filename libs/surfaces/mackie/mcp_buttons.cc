@@ -568,9 +568,7 @@ MackieControlProtocol::loop_press (Button &)
 		access_action ("Common/set-loop-from-edit-range");
 		return off;
 	} else {
-		bool was_on = session->get_play_loop();
-		session->request_play_loop (!was_on);
-		return was_on ? off : on;
+		loop_toggle ();
 	}
 }
 
