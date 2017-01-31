@@ -443,10 +443,13 @@ MackieControlProtocol::marker_release (Button &)
 
 	_modifier_state &= ~MODIFIER_MARKER;
 
-	if (main_modifier_state() & MODIFIER_SHIFT)
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		DEBUG_TRACE (DEBUG::MackieControl, "shift was being held down, do nothing\n");
 		return off;   //if shift was held, we already did the action
+	}
 
 	if (marker_modifier_consumed_by_button) {
+		DEBUG_TRACE (DEBUG::MackieControl, "marked modifier consumed by button, ignored\n");
 		/* marker was used a modifier for some other button(s), so do
 		   nothing
 		*/
