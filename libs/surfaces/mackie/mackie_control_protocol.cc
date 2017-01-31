@@ -1554,6 +1554,8 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device profile returned [%1] for that button\n", action));
+
 	if (!action.empty()) {
 
 		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
