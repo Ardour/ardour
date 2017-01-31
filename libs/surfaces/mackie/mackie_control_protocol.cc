@@ -1533,6 +1533,7 @@ void
 MackieControlProtocol::handle_button_event (Surface& surface, Button& button, ButtonState bs)
 {
 	Button::ID button_id = button.bid();
+	bool remapped_once = false;
 
 	if  (bs != press && bs != release) {
 		update_led (surface, button, none);
@@ -1552,6 +1553,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	/* check profile first */
 
+  retry:
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device profile returned [%1] for that button\n", action));
@@ -1593,6 +1595,16 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 			button_id = (Button::ID) bid;
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handling button %1 as if it was %2 (%3)\n", Button::id_to_name (button.bid()), button_id, Button::id_to_name (button_id)));
+
+			if (!remapped_once) {
+				remapped_once = true;
+				DEBUG_TRACE (DEBUG::MackieControl, "looping back to retry key/action lookup\n");
+				goto retry;
+			} else {
+				warning << string_compose ("Mackie Control: remapping of keys/buttons is not supported (seen for %1); no action will be invoked.",
+				                           Button::id_to_name (button.bid())) << endmsg;
+			}
+
 		}
 	}
 
