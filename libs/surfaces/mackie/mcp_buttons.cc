@@ -462,10 +462,12 @@ MackieControlProtocol::marker_release (Button &)
 	framepos_t where = session->audible_frame();
 
 	if (session->transport_stopped() && session->locations()->mark_at (where, session->frame_rate() / 100.0)) {
+		DEBUG_TRACE (DEBUG::MackieControl, "transport stopped, marker already exists\n");
 		return off;
 	}
 
 	session->locations()->next_available_name (markername,"marker");
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("adding marker called %1\n", markername));
 	add_marker (markername);
 
 	return off;

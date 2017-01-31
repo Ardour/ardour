@@ -1598,7 +1598,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	/* lookup using the device-INDEPENDENT button ID */
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("now looking up button ID %1", button_id));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("now looking up button ID %1\n", button_id));
 
 	ButtonMap::iterator b = button_map.find (button_id);
 
