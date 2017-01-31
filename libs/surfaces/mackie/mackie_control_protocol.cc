@@ -1554,7 +1554,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	/* check profile first */
 
   retry:
-	string action = _device_profile.get_button_action (button_id, _modifier_state);
+	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device profile returned [%1] for that button\n", action));
 
@@ -1592,8 +1592,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("apparent button name %1 not found\n", action));
 				return;
 			}
-
-			/* reset button_id to the result of the lookup */
 
 			button_id = (Button::ID) bid;
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handling button %1 as if it was %2 (%3)\n", Button::id_to_name (button.bid()), button_id, Button::id_to_name (button_id)));
