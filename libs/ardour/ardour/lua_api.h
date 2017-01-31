@@ -99,6 +99,15 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	float get_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, bool &ok);
 
+	/** reset a processor to its default values (only works for plugins )
+	 *
+	 * This is a wrapper which looks up the Processor by plugin-insert.
+	 *
+	 * @param proc Plugin-Insert
+	 * @returns true on success, false when the processor is not a plugin
+	 */
+	bool reset_processor_to_default (boost::shared_ptr<Processor> proc);
+
 	/** set a plugin control-input parameter value
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
