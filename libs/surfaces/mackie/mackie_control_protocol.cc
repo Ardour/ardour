@@ -1539,14 +1539,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		return;
 	}
 
-	if ((button_id != Button::Marker) && (modifier_state() & MODIFIER_MARKER)) {
-		marker_modifier_consumed_by_button = true;
-	}
-
-	if ((button_id != Button::Nudge) && (modifier_state() & MODIFIER_NUDGE)) {
-		nudge_modifier_consumed_by_button = true;
-	}
-
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2 (%3)\n", (bs == press ? "press" : "release"), button.id(),
 							   Button::id_to_name (button.bid())));
 
@@ -1594,6 +1586,18 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 			button_id = (Button::ID) bid;
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handling button %1 as if it was %2 (%3)\n", Button::id_to_name (button.bid()), button_id, Button::id_to_name (button_id)));
 		}
+	}
+
+	/* Now that we have the correct (maybe remapped) button ID, do these
+	 * checks on it.
+	 */
+
+	if ((button_id != Button::Marker) && (modifier_state() & MODIFIER_MARKER)) {
+		marker_modifier_consumed_by_button = true;
+	}
+
+	if ((button_id != Button::Nudge) && (modifier_state() & MODIFIER_NUDGE)) {
+		nudge_modifier_consumed_by_button = true;
 	}
 
 	/* lookup using the device-INDEPENDENT button ID */
