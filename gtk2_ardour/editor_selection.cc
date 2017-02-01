@@ -1301,19 +1301,13 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
-
-	CheckMenuItem* cm = dynamic_cast<CheckMenuItem*> (
-		ActionManager::get_widget (X_("/Main/RegionMenu/RegionMenuPosition/toggle-region-lock-style")));
-
-	if (cm) {
-		cm->set_inconsistent (false);
-	}
-
 	a->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
 
-	if (have_position_lock_style_music && have_position_lock_style_audio) {
-		if (cm) {
-			cm->set_inconsistent (true);
+	vector<Widget*> proxies = a->get_proxies();
+	for (vector<Widget*>::iterator p = proxies.begin(); p != proxies.end(); ++p) {
+		CheckMenuItem* cmi = dynamic_cast<CheckMenuItem*> (*p);
+		if (cmi) {
+			cmi->set_inconsistent (have_position_lock_style_music && have_position_lock_style_audio);
 		}
 	}
 
