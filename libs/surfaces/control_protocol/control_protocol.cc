@@ -59,6 +59,7 @@ PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelect
 
 Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
 boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
+boost::weak_ptr<Stripable> ControlProtocol::_leftmost_mixer_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
 bool ControlProtocol::selection_connected = false;
 PBD::ScopedConnection ControlProtocol::selection_connection;
@@ -354,14 +355,14 @@ boost::shared_ptr<Stripable>
 ControlProtocol::leftmost_mixer_stripable ()
 {
 	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	return _first_selected_stripable.lock();
+	return _leftmost_mixer_stripable.lock();
 }
 
 void
 ControlProtocol::set_leftmost_mixer_stripable (boost::shared_ptr<Stripable> s)
 {
 	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	_first_selected_stripable = s;
+	_leftmost_mixer_stripable = s;
 }
 
 void
