@@ -184,13 +184,13 @@ Grid::reposition_children ()
 	uint32_t max_col = 0;
 
 	/* since we encourage dynamic and essentially random placement of
-	 * children, begin by determining the maximum row and column given
+	 * children, begin by determining the maximum row and column extents given
 	 * our current set of children and placements.
 	 */
 
 	for (CoordsByItem::const_iterator c = coords_by_item.begin(); c != coords_by_item.end(); ++c) {
-		max_col = max (max_col, (uint32_t) c->second.x);
-		max_row = max (max_row, (uint32_t) c->second.y);
+		max_col = max (max_col, (uint32_t) (c->second.x + c->second.col_span));
+		max_row = max (max_row, (uint32_t) (c->second.y + c->second.row_span));
 	}
 
 	max_row++;
