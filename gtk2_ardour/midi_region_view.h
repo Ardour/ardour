@@ -412,9 +412,9 @@ private:
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 
-	typedef boost::unordered_map<boost::shared_ptr<NoteType>, NoteBase*>                 Events;
+	typedef boost::unordered_map<boost::shared_ptr<NoteType>, NoteBase*>                             Events;
 	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::vector< boost::shared_ptr<SysEx> >                                      SysExes;
+	typedef boost::unordered_map<ARDOUR::MidiModel::constSysExPtr, boost::shared_ptr<SysEx> >        SysExes;
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
@@ -466,6 +466,7 @@ private:
 	Events::iterator _optimization_iterator;
 
 	boost::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
+	boost::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);

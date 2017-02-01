@@ -1144,6 +1144,18 @@ MidiRegionView::find_canvas_patch_change (MidiModel::PatchChangePtr p)
 	return boost::shared_ptr<PatchChange>();
 }
 
+boost::shared_ptr<SysEx>
+MidiRegionView::find_canvas_sys_ex (MidiModel::SysExPtr s)
+{
+	SysExes::const_iterator f = _sys_exes.find (s);
+
+	if (f != _sys_exes.end()) {
+		return f->second;
+	}
+
+	return 0;
+}
+
 void
 MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOperator op, uint8_t val, int chan_mask)
 {
@@ -1284,8 +1296,6 @@ MidiRegionView::redisplay_model()
 		}
 	}
 
-	_sys_exes.clear();
-
 	display_sysexes();
 	display_patch_changes ();
 
@@ -1377,7 +1387,8 @@ MidiRegionView::display_sysexes()
 	}
 
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-		Evoral::Beats time = (*i)->time();
+		MidiModel::SysExPtr sysex_ptr = *i;
+		Evoral::Beats time = sysex_ptr->time();
 
 		if ((*i)->is_spp() || (*i)->is_mtc_quarter() || (*i)->is_mtc_full()) {
 			if (!display_periodic_messages) {
@@ -1401,9 +1412,13 @@ MidiRegionView::display_sysexes()
 
 		// CAIROCANVAS: no longer passing *i (the sysex event) to the
 		// SysEx canvas object!!!
+		boost::shared_ptr<SysEx> sysex = find_canvas_sys_ex (sysex_ptr);
 
-		boost::shared_ptr<SysEx> sysex = boost::shared_ptr<SysEx>(
-			new SysEx (*this, _note_group, text, height, x, 1.0));
+		if (!sysex) {
+			sysex = boost::shared_ptr<SysEx>(
+				new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
+			_sys_exes.insert (make_pair (sysex_ptr, sysex));
+		}
 
 		// Show unless message is beyond the region bounds
 		if (time - _region->start() >= _region->length() || time < _region->start()) {
@@ -1411,8 +1426,6 @@ MidiRegionView::display_sysexes()
 		} else {
 			sysex->show();
 		}
-
-		_sys_exes.push_back(sysex);
 	}
 }
 
