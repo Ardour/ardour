@@ -190,13 +190,17 @@ ParameterDescriptor::update_steps()
 }
 
 std::string
-ParameterDescriptor::midi_note_name (const uint8_t b)
+ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
 {
 	char buf[16];
 	if (b > 127) {
 		snprintf(buf, sizeof(buf), "%d", b);
 		return buf;
 	}
+
+	static const char* en_notes[] = {
+		"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+	};
 
 	static const char* notes[] = {
 		S_("Note|C"),
@@ -215,7 +219,8 @@ ParameterDescriptor::midi_note_name (const uint8_t b)
 
 	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
 	const int octave = b / 12 - 1;
-	snprintf (buf, sizeof (buf), "%s%d", notes[b % 12], octave);
+	const size_t p = b % 12;
+	snprintf (buf, sizeof (buf), "%s%d", translate ? notes[p] : en_notes[p], octave);
 	return buf;
 }
 
