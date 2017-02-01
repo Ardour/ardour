@@ -57,7 +57,7 @@ PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
 
 PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
 
-Glib::Threads::Mutex ControlProtocol::first_selected_mutex;
+Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
 boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
 bool ControlProtocol::selection_connected = false;
@@ -346,14 +346,28 @@ ControlProtocol::set_state (XMLNode const & node, int /* version */)
 boost::shared_ptr<Stripable>
 ControlProtocol::first_selected_stripable ()
 {
-	Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
 	return _first_selected_stripable.lock();
+}
+
+boost::shared_ptr<Stripable>
+ControlProtocol::leftmost_mixer_stripable ()
+{
+	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
+	return _first_selected_stripable.lock();
+}
+
+void
+ControlProtocol::set_leftmost_mixer_stripable (boost::shared_ptr<Stripable> s)
+{
+	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
+	_first_selected_stripable = s;
 }
 
 void
 ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
 {
-	Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
 	_first_selected_stripable = s;
 }
 
@@ -365,7 +379,7 @@ ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
 	_last_selected = *sp;
 
 	{
-		Glib::Threads::Mutex::Lock lm (first_selected_mutex);
+		Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
 
 		if (!_last_selected.empty()) {
 			if (!had_selection) {

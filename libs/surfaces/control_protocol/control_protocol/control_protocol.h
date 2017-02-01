@@ -95,6 +95,9 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable ();
 	static void set_first_selected_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
+	static boost::shared_ptr<ARDOUR::Stripable> leftmost_mixer_stripable ();
+	static void set_leftmost_mixer_stripable (boost::shared_ptr<ARDOUR::Stripable>);
+
 	/* the model here is as follows:
 
 	   we imagine most control surfaces being able to control
@@ -156,7 +159,8 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
         bool _active;
 
 
-        static Glib::Threads::Mutex first_selected_mutex;
+        static Glib::Threads::Mutex special_stripable_mutex;
+        static boost::weak_ptr<ARDOUR::Stripable> _leftmost_mixer_stripable;
         static boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
         static StripableNotificationList _last_selected;
         static void stripable_selection_changed (StripableNotificationListPtr);
