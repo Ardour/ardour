@@ -43,8 +43,9 @@ public:
 	void hide ();
 	void show ();
 
-        ArdourCanvas::Item& item() const { return *_flag; }
-	ArdourCanvas::Flag* flag() const { return _flag; }
+	void set_height (ArdourCanvas::Distance h) { _flag->set_height (h); }
+
+	ArdourCanvas::Item& item() const { return *_flag; }
 
 private:
 	bool event_handler (GdkEvent* ev);

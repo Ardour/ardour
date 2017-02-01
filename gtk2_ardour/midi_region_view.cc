@@ -1339,7 +1339,7 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 				const double x = trackview.editor().sample_to_pixel (region_frames);
 				const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
 				p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
-				p->flag()->set_text (patch_name);
+				p->set_text (patch_name);
 
 				p->show();
 			}
@@ -1419,7 +1419,7 @@ MidiRegionView::display_sysexes()
 				new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
 		} else {
-			sysex->flag()->set_height (height);
+			sysex->set_height (height);
 			sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
 		}
 
@@ -1491,7 +1491,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 	bool hide_all = false;
 	PatchChanges::iterator x = _patch_changes.begin();
 	if (x != _patch_changes.end()) {
-		hide_all = x->second->flag()->width() >= _pixel_width;
+		hide_all = x->second->width() >= _pixel_width;
 	}
 
 	if (hide_all) {
