@@ -44,6 +44,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
 			PRODUCT_NAME=mixbus
+			MANUAL_NAME="mixbus${major_version}-live-manual"
 			shift ;;
 		--mixbus32c)
 			MIXBUS=1
@@ -53,6 +54,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_KEY=Mixbus32C
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
 			PROGRAM_VERSION=""
+			MANUAL_NAME="mixbus32c-${major_version}-live-manual"
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -371,7 +373,7 @@ if test -n "$MIXBUS"; then
 !define MUI_FINISHPAGE_TITLE "Welcome to Harrison Mixbus"
 !define MUI_FINISHPAGE_TEXT "Thanks for your purchase of Mixbus!\$\\r\$\\nYou will find the Mixbus application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the Mixbus manual, and learn ways to get involved with the Mixbus community."
 !define MUI_FINISHPAGE_LINK "Mixbus Manual"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://harrisonconsoles.com/site/${PRODUCT_NAME}-info.html"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://www.harrisonconsoles.com/mixbus/${MANUAL_NAME}/"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
 
