@@ -44,6 +44,7 @@ public:
 	void show ();
 
         ArdourCanvas::Item& item() const { return *_flag; }
+	ArdourCanvas::Flag* flag() const { return _flag; }
 
 private:
 	bool event_handler (GdkEvent* ev);
