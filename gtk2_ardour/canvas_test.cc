@@ -199,10 +199,10 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	text4->set ("I am fourth");
 	text4->set_color (Color (0xffff00ff));
 
-	grid->place (text1, 0, 0);
-	grid->place (text2, 1, 0);
-	grid->place (text3, 0, 1);
-	grid->place (text4, 1, 1);
+	grid->place (text1, 0, 0, 2, 1);
+	grid->place (text2, 2, 0);
+	grid->place (text3, 0, 2, 1, 2);
+	grid->place (text4, 1, 3);
 
 	ArdourButton* button1 = new ArdourButton ("auto-return");
 	ArdourButton* button2 = new ArdourButton ("auto-play");
@@ -211,10 +211,10 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 
 	ArdourCanvas::Widget* w1 = new ArdourCanvas::Widget (&canvas, *button1);
 	CANVAS_DEBUG_NAME (w1, "w1");
-	grid->place (w1, 3, 0);
+	grid->place (w1, 3, 0, 2, 0);
 	ArdourCanvas::Widget* w2 = new ArdourCanvas::Widget (&canvas, *button2);
 	CANVAS_DEBUG_NAME (w2, "w2");
-	grid->place (w2, 4, 0);
+	grid->place (w2, 5, 0, 2, 0);
 	ArdourCanvas::Widget* w3 = new ArdourCanvas::Widget (&canvas, *button3);
 	CANVAS_DEBUG_NAME (w3, "w3");
 	grid->place (w3, 3, 1);
