@@ -286,6 +286,9 @@ WindowProxy::configure_handler (GdkEventConfigure* ev)
 
 	   the difference is generally down to window manager framing.
 	*/
+	if (!visible() || !_window->is_mapped()) {
+		return false;
+	}
 	save_pos_and_size ();
 	return false;
 }
