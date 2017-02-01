@@ -1418,6 +1418,9 @@ MidiRegionView::display_sysexes()
 			sysex = boost::shared_ptr<SysEx>(
 				new SysEx (*this, _note_group, text, height, x, 1.0, sysex_ptr));
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
+		} else {
+			sysex->flag()->set_height (height);
+			sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
 		}
 
 		// Show unless message is beyond the region bounds
