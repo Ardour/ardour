@@ -190,7 +190,7 @@ class MackieControlProtocol
 	void notify_routes_added (ARDOUR::RouteList &);
 	void notify_vca_added (ARDOUR::VCAList &);
 
-	void notify_presentation_info_changed();
+	void notify_presentation_info_changed(PBD::PropertyChange const &);
 
 	void recalibrate_faders ();
 	void toggle_backlight ();
