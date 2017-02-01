@@ -189,29 +189,30 @@ Grid::reposition_children ()
 	 */
 
 	for (CoordsByItem::const_iterator c = coords_by_item.begin(); c != coords_by_item.end(); ++c) {
+		if (collapse_on_hide && !c->second.item->visible()) {
+			continue;
+		}
 		max_col = max (max_col, (uint32_t) (c->second.x + c->second.col_span));
 		max_row = max (max_row, (uint32_t) (c->second.y + c->second.row_span));
 	}
 
-	max_row++;
-	max_col++;
-
 	/* Now compute the width of the widest child for each column, and the
-	 * height of the tallest child for each row.
+	 * height of the tallest child for each row. Store the results in
+	 * row_dimens and col_dimens, making sure they are suitably sized first.
 	 */
 
 	vector<double> row_dimens;
 	vector<double> col_dimens;
 
-	row_dimens.assign (max_row, 0);
-	col_dimens.assign (max_col, 0);
+	row_dimens.assign (max_row + 1, 0);
+	col_dimens.assign (max_col + 1, 0);
 
-	Rect uniform_size;
+	Rect uniform_cell_size;
 
 	if (homogenous) {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == bg) {
+			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
 				continue;
 			}
 
@@ -220,30 +221,41 @@ Grid::reposition_children ()
 			if (!bb) {
 				continue;
 			}
-			cerr << "\tbb for " << (*i)->whatami() << " is " << bb << endl;
-			uniform_size.y1 = max (uniform_size.y1, bb.height());
-			uniform_size.x1 = max (uniform_size.x1, bb.width());
+
+			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+
+			uniform_cell_size.x1 = max (uniform_cell_size.x1, (bb.width()/c->second.col_span));
+			uniform_cell_size.y1 = max (uniform_cell_size.y1, (bb.height()/c->second.row_span));
 		}
 
-		cerr << "Uniform size will be " << uniform_size << endl;
+		for (uint32_t n = 0; n < max_col; ++n) {
+			col_dimens[n] = uniform_cell_size.width();
+		}
+
+		for (uint32_t n = 0; n < max_row; ++n) {
+			row_dimens[n] = uniform_cell_size.height();
+		}
 
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-			if (*i == bg) {
+
+			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
 				/* bg rect is not a normal child */
 				continue;
 			}
-			(*i)->size_allocate (uniform_size);
-			for (uint32_t n = 0; n < max_col; ++n) {
-				col_dimens[n] = uniform_size.width();
-			}
-			for (uint32_t n = 0; n < max_row; ++n) {
-				row_dimens[n] = uniform_size.height();
-			}
+
+			CoordsByItem::const_iterator c = coords_by_item.find (*i);
+
+			Rect r = uniform_cell_size;
+			r.x1 *= c->second.col_span;
+			r.y1 *= c->second.row_span;
+
+			(*i)->size_allocate (r);
 		}
+
 	} else {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == bg) {
+			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
 				/* bg rect is not a normal child */
 				continue;
 			}
@@ -286,7 +298,6 @@ Grid::reposition_children ()
 			/* a width was defined for this column */
 			const double w = col_dimens[n]; /* save width of this column */
 			col_dimens[n] = current_right_edge;
-			cerr << "col[" << n << "] @ " << col_dimens[n] << endl;
 			current_right_edge = current_right_edge + w + col_spacing;
 		}
 	}
@@ -298,7 +309,6 @@ Grid::reposition_children ()
 			/* height defined for this row */
 			const double h = row_dimens[n]; /* save height */
 			row_dimens[n] = current_top_edge;
-			cerr << "row[" << n << "] @ " << row_dimens[n] << endl;
 			current_top_edge = current_top_edge + h + row_spacing;
 		}
 	}
@@ -314,10 +324,11 @@ Grid::reposition_children ()
 			continue;
 		}
 
+		/* do this even for hidden items - it will be corrected when
+		 * they become visible again.
+		 */
+
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
-		cerr << "place " << (*i)->whatami() << " @ " << c->second.x << ", " << c->second.y << " at "
-		     << Duple (col_dimens[c->second.x], row_dimens[c->second.y])
-		     << endl;
 	}
 
 	_bounding_box_dirty = true;
@@ -331,10 +342,11 @@ Grid::place (Item* i, double x, double y, double col_span, double row_span)
 
 	add (i);
 
+	ci.item = i;
 	ci.x = x;
 	ci.y = y;
-	ci.col_span = col_span;
-	ci.row_span = row_span;
+	ci.col_span = max (1.0, col_span);
+	ci.row_span = max (1.0, row_span);
 
 	coords_by_item.insert (std::make_pair (i, ci));
 	reposition_children ();

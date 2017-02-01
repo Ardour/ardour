@@ -64,6 +64,7 @@ public:
 	void child_changed ();
   private:
 	struct ChildInfo {
+		Item* item;
 		double x;
 		double y;
 		double col_span;
