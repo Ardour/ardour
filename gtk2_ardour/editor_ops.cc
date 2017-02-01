@@ -5743,15 +5743,18 @@ Editor::toggle_region_lock_style ()
 		return;
 	}
 
-	bool inconsistent = false;
-	CheckMenuItem* cm = dynamic_cast<CheckMenuItem*> (
-		ActionManager::get_widget (X_("/Main/RegionMenu/RegionMenuPosition/toggle-region-lock-style")));
-
-	if (cm && cm->get_inconsistent()) {
-		inconsistent = true;
+	bool have_position_lock_style_audio = false;
+	bool have_position_lock_style_music = false;
+	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+		if ((*i)->region()->position_lock_style() == MusicTime) {
+			have_position_lock_style_music = true;
+		} else {
+			have_position_lock_style_audio = true;
+		}
 	}
+	bool const inconsistent = have_position_lock_style_audio && have_position_lock_style_music;
 
-	begin_reversible_command (_("region lock style"));
+	begin_reversible_command (_("toggle region lock style"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_changes ();
