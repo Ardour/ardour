@@ -2242,7 +2242,9 @@ TempoMap::bbt_at_frame (framepos_t frame)
 		bbt.bars = 1;
 		bbt.beats = 1;
 		bbt.ticks = 0;
+#ifndef NDEBUG
 		warning << string_compose (_("tempo map was asked for BBT time at frame %1\n"), frame) << endmsg;
+#endif
 		return bbt;
 	}
 
@@ -2346,7 +2348,9 @@ framepos_t
 TempoMap::frame_at_bbt (const BBT_Time& bbt)
 {
 	if (bbt.bars < 1) {
+#ifndef NDEBUG
 		warning << string_compose (_("tempo map asked for frame time at bar < 1  (%1)\n"), bbt) << endmsg;
+#endif
 		return 0;
 	}
 
