@@ -256,28 +256,28 @@ Grid::reposition_children ()
 
 			CoordsByItem::const_iterator c = coords_by_item.find (*i);
 
-			row_dimens[c->second.y] = max (row_dimens[c->second.y], bb.height());
-			col_dimens[c->second.x] = max (col_dimens[c->second.x]	, bb.width());
+			const double per_col_width = bb.width() / c->second.col_span;
+			const double per_row_height = bb.height() / c->second.row_span;
+
+			/* set the width of each column spanned by this item
+			 */
+
+			for (int n = 0; n < (int) c->second.col_span; ++n) {
+				col_dimens[c->second.x + n] = max (col_dimens[c->second.x + n], per_col_width);
+			}
+			for (int n = 0; n < (int) c->second.row_span; ++n) {
+				row_dimens[c->second.y + n] = max (row_dimens[c->second.y + n], per_row_height);
+			}
 		}
 	}
 
-	/* now sum the row and column widths, so that row_dimens is transformed
-	 * into the y coordinate of the upper left of each row, and col_dimens
-	 * is transformed into the x coordinate of the left edge of each
-	 * column.
+	/* now progressively sum the row and column widths, once we're done:
+	 *
+	 * col_dimens: transformed into the x coordinate of the left edge of each column.
+	 *
+	 * row_dimens: transformed into the y coordinate of the upper left of each row,
+	 *
 	 */
-
-	double current_top_edge = top_margin + top_padding;
-
-	for (uint32_t n = 0; n < max_row; ++n) {
-		if (row_dimens[n]) {
-			/* height defined for this row */
-			const double h = row_dimens[n]; /* save height */
-			row_dimens[n] = current_top_edge;
-			cerr << "row[" << n << "] @ " << row_dimens[n] << endl;
-			current_top_edge = current_top_edge + h + row_spacing;
-		}
-	}
 
 	double current_right_edge = left_margin + left_padding;
 
@@ -288,6 +288,18 @@ Grid::reposition_children ()
 			col_dimens[n] = current_right_edge;
 			cerr << "col[" << n << "] @ " << col_dimens[n] << endl;
 			current_right_edge = current_right_edge + w + col_spacing;
+		}
+	}
+
+	double current_top_edge = top_margin + top_padding;
+
+	for (uint32_t n = 0; n < max_row; ++n) {
+		if (row_dimens[n]) {
+			/* height defined for this row */
+			const double h = row_dimens[n]; /* save height */
+			row_dimens[n] = current_top_edge;
+			cerr << "row[" << n << "] @ " << row_dimens[n] << endl;
+			current_top_edge = current_top_edge + h + row_spacing;
 		}
 	}
 
@@ -315,8 +327,16 @@ Grid::reposition_children ()
 void
 Grid::place (Item* i, double x, double y, double col_span, double row_span)
 {
+	ChildInfo ci;
+
 	add (i);
-	coords_by_item.insert (std::make_pair (i, Duple (x, y)));
+
+	ci.x = x;
+	ci.y = y;
+	ci.col_span = col_span;
+	ci.row_span = row_span;
+
+	coords_by_item.insert (std::make_pair (i, ci));
 	reposition_children ();
 }
 

@@ -63,7 +63,14 @@ public:
 
 	void child_changed ();
   private:
-	typedef std::map<Item*,Duple> CoordsByItem;
+	struct ChildInfo {
+		double x;
+		double y;
+		double col_span;
+		double row_span;
+	};
+
+	typedef std::map<Item*,ChildInfo> CoordsByItem;
 	CoordsByItem coords_by_item;
 
 	Rectangle *bg;
