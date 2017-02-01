@@ -238,12 +238,6 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 {
 	static std::map<std::string, uint8_t> name2num = build_midi_name2num();
 
-	std::cout << "ParameterDescriptor::midi_note_num (" << name << ")" << std::endl;
-	for (std::map<std::string, uint8_t>::const_iterator it = name2num.begin();
-	     it != name2num.end(); ++it) {
-		std::cout << "name = " << it->first << ", num = " << it->second << std::endl;
-	}
-
 	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
 
 	std::map<std::string, uint8_t>::const_iterator it = name2num.find(name);
