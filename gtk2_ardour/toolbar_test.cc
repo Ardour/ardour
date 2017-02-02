@@ -128,14 +128,14 @@ private:
 	void finish () { quit (); }
 	Gtk::Window _main_window;
 
-	void initialize_canvas (ArdourCanvas::Canvas& canvas);
+	void initialize_canvas (ArdourCanvas::Canvas& canvas, std::string const & toolbar_path);
+	void build_toolbar (ArdourCanvas::Item* parent, std::string const& toolbar_path);
 
 	void canvas_size_request (Gtk::Requisition* req);
 	void canvas_size_allocated (Gtk::Allocation& alloc);
 
 	ArdourCanvas::GtkCanvas* canvas;
 	ArdourCanvas::Container* group;
-	ArdourCanvas::Grid* grid;
 
 	ArdourButton test_button;
 };
@@ -155,7 +155,7 @@ CANVAS_UI::CANVAS_UI (int *argcp, char **argvp[], const char* localedir)
 
 	canvas = new ArdourCanvas::GtkCanvas ();
 
-	initialize_canvas (*canvas);
+	initialize_canvas (*canvas, (*argvp)[1]);
 
 	canvas->signal_size_request().connect (sigc::mem_fun (*this, &CANVAS_UI::canvas_size_request));
 	canvas->signal_size_allocate().connect (sigc::mem_fun (*this, &CANVAS_UI::canvas_size_allocated));
@@ -177,7 +177,7 @@ CANVAS_UI::starting ()
 }
 
 void
-CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
+CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas, std::string const & spec_path)
 {
 	using namespace ArdourCanvas;
 	canvas.set_background_color (rgba_to_color (0.0, 0.0, 0.4, 1.0));
@@ -185,7 +185,13 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	ScrollGroup* scroll_group = new ScrollGroup (canvas.root(),
 			ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 
-	grid = new ArdourCanvas::Grid (scroll_group);
+	build_toolbar (scroll_group, spec_path);
+}
+
+void
+CANVAS_UI::build_toolbar (ArdourCanvas::Item* parent, std::string const & spec_path)
+{
+	ArdourCanvas::Grid* grid = new ArdourCanvas::Grid (parent);
 
 	grid->set_padding (3.0);
 	grid->set_row_spacing (3.0);
@@ -196,7 +202,7 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	double col = 0;
 	double row = 0;
 
-	toolbar_spec.open ("/tmp/t1", ios::in);
+	toolbar_spec.open (spec_path.c_str(), ios::in);
 
 	if (!toolbar_spec) {
 		return;
@@ -223,8 +229,7 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 
 		Gtkmm2ext::ArdourIcon::Icon i = (ArdourIcon::Icon) string_2_enum (string ("ArdourIcon::") + icon, i);
 
-		ArdourCanvas::Widget* w = new ArdourCanvas::Widget
-			(&canvas, *make_action_button (action, i, theme_name));
+		ArdourCanvas::Widget* w = new ArdourCanvas::Widget (canvas, *make_action_button (action, i, theme_name));
 		grid->place (w, col, row);
 		col++;
 	}
