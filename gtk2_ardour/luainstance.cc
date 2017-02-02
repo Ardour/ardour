@@ -1681,10 +1681,6 @@ LuaCallback::session_going_away ()
 	_session = 0;
 
 	drop_callback (); /* EMIT SIGNAL */
-
-	lua_State* L = lua.getState();
-	LuaBindings::set_session (L, 0);
-	lua.do_command ("collectgarbage();");
 }
 
 void
