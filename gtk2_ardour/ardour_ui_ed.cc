@@ -775,7 +775,6 @@ ARDOUR_UI::save_ardour_state ()
 	LocaleGuard lg; // one guard to rule them all
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
-	Config->add_extra_xml (get_transport_controllable_state());
 
 	XMLNode* window_node = new XMLNode (X_("UI"));
 	window_node->add_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
