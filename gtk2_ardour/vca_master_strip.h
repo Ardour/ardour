@@ -99,6 +99,8 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void self_delete ();
 	void remove ();
 	void drop_all_slaves ();
+	void assign_all_selected ();
+	void unassign_all_selected ();
 
 	void parameter_changed (std::string const& p);
 	void set_button_names ();

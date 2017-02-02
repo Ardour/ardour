@@ -426,6 +426,22 @@ MixerStrip::~MixerStrip ()
 		_entered_mixer_strip = NULL;
 }
 
+void
+MixerStrip::vca_assign (boost::shared_ptr<ARDOUR::VCA> vca)
+{
+	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	if (sl)
+		sl->assign(vca);
+}
+
+void
+MixerStrip::vca_unassign (boost::shared_ptr<ARDOUR::VCA> vca)
+{
+	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	if (sl)
+		sl->unassign(vca);
+}
+
 bool
 MixerStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 {

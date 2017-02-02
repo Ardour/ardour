@@ -3087,26 +3087,22 @@ void
 Mixer_UI::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-#if 0
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_assign (vca);
 		}
 	}
-#endif
 }
 
 void
 Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-#if 0
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);
 		}
 	}
-#endif
 }

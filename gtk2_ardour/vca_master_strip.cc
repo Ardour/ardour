@@ -449,6 +449,9 @@ VCAMasterStrip::build_context_menu ()
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &VCAMasterStrip::start_color_edit)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Assign Selected Channels"), sigc::mem_fun (*this, &VCAMasterStrip::assign_all_selected)));
+	items.push_back (MenuElem (_("Drop Selected Channels"), sigc::mem_fun (*this, &VCAMasterStrip::unassign_all_selected)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::drop_all_slaves)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
@@ -484,6 +487,18 @@ VCAMasterStrip::remove ()
 	}
 
 	_session->vca_manager().remove_vca (_vca);
+}
+
+void
+VCAMasterStrip::assign_all_selected ()
+{
+	Mixer_UI::instance()->do_vca_assign (_vca);
+}
+
+void
+VCAMasterStrip::unassign_all_selected ()
+{
+	Mixer_UI::instance()->do_vca_unassign (_vca);
 }
 
 void

@@ -185,6 +185,9 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
 
+	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
+	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+
 	void meter_changed ();
 	void monitor_changed ();
 
