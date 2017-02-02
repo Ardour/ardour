@@ -3318,6 +3318,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 void
 Playlist::fade_range (list<AudioRange>& ranges)
 {
+	RegionReadLock rlock (this);
 	 for (list<AudioRange>::iterator r = ranges.begin(); r != ranges.end(); ++r) {
 		 for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 			 (*i)->fade_range ((*r).start, (*r).end);
