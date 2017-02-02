@@ -1,9 +1,12 @@
+#include <fstream>
+
 #include <glibmm.h>
 #include <gtkmm/main.h>
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 
 #include "pbd/debug.h"
+#include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
@@ -31,6 +34,7 @@
 #include "canvas/widget.h"
 
 #include "ardour_button.h"
+#include "enums.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -95,15 +99,21 @@ LogReceiver::receive (Transmitter::Channel chn, const char * str)
 /* ***************************************************************************/
 /* ***************************************************************************/
 
-ArdourButton*
-make_transport_button (std::string const & action, Gtkmm2ext::ArdourIcon::Icon icon)
+void
+setup_action_button (ArdourButton& button, std::string const & action, Gtkmm2ext::ArdourIcon::Icon icon, std::string const & button_theme_name)
 {
-	ArdourButton* button = new ArdourButton;
-	button->set_name ("transport button");
+	button.set_name (button_theme_name + string (" button"));
 	Glib::RefPtr<Gtk::Action> act;
 	act = ActionManager::get_action (action.c_str());
-	button->set_related_action (act);
-	button->set_icon (icon);
+	button.set_related_action (act);
+	button.set_icon (icon);
+}
+
+ArdourButton*
+make_action_button (std::string const & action, Gtkmm2ext::ArdourIcon::Icon icon, std::string const & button_theme_name)
+{
+	ArdourButton* button = new ArdourButton;
+	setup_action_button (*button, action, icon, button_theme_name);
 	return button;
 }
 
@@ -178,23 +188,48 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	grid = new ArdourCanvas::Grid (scroll_group);
 
 	grid->set_padding (3.0);
-
 	grid->set_row_spacing (3.0);
 	grid->set_col_spacing (3.0);
 	grid->set_homogenous (true);
 
-	ArdourCanvas::Widget* w1 = new ArdourCanvas::Widget (&canvas, *make_transport_button ("Transport/Roll", ArdourIcon::TransportPlay));
-	CANVAS_DEBUG_NAME (w1, "w1");
-	grid->place (w1, 0, 0);
-	ArdourCanvas::Widget* w2 = new ArdourCanvas::Widget (&canvas, *make_transport_button ("Transport/Stop", ArdourIcon::TransportStop));
-	CANVAS_DEBUG_NAME (w2, "w2");
-	grid->place (w2, 1, 0);
-	ArdourCanvas::Widget* w3 = new ArdourCanvas::Widget (&canvas, *make_transport_button ("Transport/Record", ArdourIcon::RecButton));
-	CANVAS_DEBUG_NAME (w3, "w3");
-	grid->place (w3, 2, 0);
-	ArdourCanvas::Widget* w4 = new ArdourCanvas::Widget (&canvas, *make_transport_button ("Transport/Loop", ArdourIcon::TransportLoop));
-	CANVAS_DEBUG_NAME (w4, "w4");
-	grid->place (w4, 3, 0);
+	std::ifstream toolbar_spec;
+	double col = 0;
+	double row = 0;
+
+	toolbar_spec.open ("/tmp/t1", ios::in);
+
+	if (!toolbar_spec) {
+		return;
+	}
+
+	while (toolbar_spec) {
+		string action;
+		string icon;
+		string theme_name;
+
+		toolbar_spec >> action;
+		if (action.empty()) {
+			break;
+		}
+		toolbar_spec >> icon;
+		if (icon.empty()) {
+			break;
+		}
+
+		toolbar_spec >> theme_name;
+		if (theme_name.empty()) {
+			break;
+		}
+
+		Gtkmm2ext::ArdourIcon::Icon i = (ArdourIcon::Icon) string_2_enum (string ("ArdourIcon::") + icon, i);
+
+		ArdourCanvas::Widget* w = new ArdourCanvas::Widget
+			(&canvas, *make_action_button (action, i, theme_name));
+		grid->place (w, col, row);
+		col++;
+	}
+
+	toolbar_spec.close ();
 }
 
 void
@@ -239,6 +274,8 @@ int main (int argc, char **argv)
 	log_receiver.listen_to (info);
 	log_receiver.listen_to (fatal);
 	log_receiver.listen_to (warning);
+
+	setup_gtk_ardour_enums ();
 
 	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;

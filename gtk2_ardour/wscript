@@ -519,7 +519,7 @@ def build(bld):
         obj.linkflags = ''
         obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
         # obj.source += [ 'canvas_test.cc', ]
-        obj.source += [ 'toolbar_test.cc', ]
+        obj.source += [ 'toolbar_test.cc', 'enums.cc']
 
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
