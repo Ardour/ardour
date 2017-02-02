@@ -32,6 +32,7 @@
 
 #include "ardour_http.h"
 #include "ardour_ui.h"
+#include "automation_time_axis.h"
 #include "public_editor.h"
 #include "region_selection.h"
 #include "luainstance.h"
@@ -39,6 +40,7 @@
 #include "marker.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
+#include "route_time_axis.h"
 #include "selection.h"
 #include "script_selector.h"
 #include "timers.h"
@@ -567,14 +569,57 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("_type", &ArdourMarker::type)
 		.endClass ()
 
-#if 0
+		.beginClass <RouteUI> ("RouteUI")
+		.addFunction ("request_redraw", &RouteUI::request_redraw)
+		.addFunction ("is_track", &RouteUI::is_track)
+		.addFunction ("is_audio_track", &RouteUI::is_audio_track)
+		.addFunction ("is_midi_track", &RouteUI::is_midi_track)
+		.endClass ()
+
 		.beginClass <AxisView> ("AxisView")
+		.addCast<TimeAxisView> ("to_timeaxisview")
+		.addFunction ("set_marked_for_display", &AxisView::set_marked_for_display)
+		.addFunction ("gui_property", &AxisView::gui_property)
+		.addFunction ("marked_for_display", &AxisView::marked_for_display)
+		.addFunction ("set_marked_for_display", &AxisView::set_marked_for_display)
 		.endClass ()
+
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
-		.endClass ()
-		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
-		.endClass ()
+		.addCast<RouteTimeAxisView> ("to_routetimeaxisview")
+		.addCast<AutomationTimeAxisView> ("to_automationtimeaxisview")
+		.addFunction ("order", &TimeAxisView::order)
+		.addFunction ("effective_height", &TimeAxisView::effective_height)
+		.addFunction ("current_height", &TimeAxisView::current_height)
+		.addFunction ("set_selected", &TimeAxisView::set_selected)
+#if 0
+		.addFunction ("hide", &TimeAxisView::hide)
+		.addFunction ("hidden", &TimeAxisView::hidden)
 #endif
+		.addFunction ("selectable", &TimeAxisView::selectable)
+		//.addFunction ("set_height_enum", &TimeAxisView::set_height_enum)
+		.addFunction ("playlist", &TimeAxisView::playlist)
+		.endClass ()
+
+		.deriveClass <AutomationTimeAxisView, TimeAxisView> ("AutomationTimeAxisView")
+		.addFunction ("name", &RouteTimeAxisView::name)
+		.addFunction ("stripable", &AutomationTimeAxisView::stripable)
+		.addFunction ("presentation_info", &AutomationTimeAxisView::presentation_info)
+		.endClass ()
+
+		.deriveClass <RouteTimeAxisView, RouteUI> ("RouteTimeAxisView")
+		.addCast<TimeAxisView> ("to_timeaxisview")
+		.addFunction ("name", &RouteTimeAxisView::name)
+		.addFunction ("stripable", &RouteTimeAxisView::stripable)
+		.addFunction ("automation_tav", &RouteTimeAxisView::automation_tav)
+#if 0 // needs further bindings
+		.addFunction ("set_layer_display", &RouteTimeAxisView::set_layer_display)
+		.addFunction ("automation_tracks", &RouteTimeAxisView::automation_tracks)
+		.addFunction ("automation_child_menu_item", &RouteTimeAxisView::automation_child_menu_item)
+#endif
+		.endClass ()
+
+		.beginConstStdList <TimeAxisView*> ("TimeAxisViewList")
+		.endClass ()
 
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("clear_all", &RegionSelection::clear_all)
@@ -595,6 +640,7 @@ LuaInstance::register_classes (lua_State* L)
 
 		.beginClass <TrackViewList> ("TrackViewList")
 		.addFunction ("routelist", &TrackViewList::routelist) // XXX check windows binding (libardour)
+		.addCast <std::list<TimeAxisView*> > ("timeaxisviewlist")
 		.endClass ()
 
 		.deriveClass <TrackSelection, TrackViewList> ("TrackSelection")
@@ -670,13 +716,13 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("get_current_zoom", &PublicEditor::get_current_zoom)
 		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
 
-#if 0 // These need TimeAxisView* which isn't exposed, yet
+#if 0 // These need PlaylistSelector& and ARDOUR::Playlist
 		.addFunction ("playlist_selector", &PublicEditor::playlist_selector)
 		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
+#endif
 		.addFunction ("new_playlists", &PublicEditor::new_playlists)
 		.addFunction ("copy_playlists", &PublicEditor::copy_playlists)
 		.addFunction ("clear_playlists", &PublicEditor::clear_playlists)
-#endif
 
 		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)
 		.addFunction ("deselect_all", &PublicEditor::deselect_all)

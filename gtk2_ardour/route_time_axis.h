@@ -135,6 +135,12 @@ public:
 	const AutomationTracks& automation_tracks() const { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
+
+	AutomationTimeAxisView* automation_tav (Evoral::Parameter param) {
+		boost::shared_ptr<AutomationTimeAxisView> atav = automation_child (param);
+		return atav ? atav.get() : 0;
+	}
+
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StreamView*         view() const { return _view; }

@@ -30,6 +30,24 @@ function factory () return function ()
 		print ("Route:", r:name ())
 	end
 
+	-- Track/Bus Selection
+	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:TrackViewList
+	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:TimeAxisViewList
+	for tav in sel.tracks:timeaxisviewlist ():iter () do
+		local rtav = tav:to_routetimeaxisview ()
+		if rtav then
+			print ("RTAV:", rtav:name())
+			local atav = rtav:automation_tav (Evoral.Parameter(ARDOUR.AutomationType.MuteAutomation, 0, 0))
+			if atav then
+				-- XXX doesn't work... we need to access the   automation_child_menu_item()..
+				atav:set_marked_for_display (true)
+				rtav:request_redraw ()
+			end
+			-- may assert if the menu hasn't been used
+			--rtav:toggle_automation_track (Evoral.Parameter(ARDOUR.AutomationType.MuteAutomation, 0, 0))
+		end
+	end
+
 	-- Region selection
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
 	for r in sel.regions:regionlist ():iter () do
