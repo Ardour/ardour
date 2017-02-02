@@ -19,6 +19,8 @@
 
 #include "pbd/enumwriter.h"
 
+#include "gtkmm2ext/ardour_icon.h"
+
 #include "audio_clock.h"
 #include "editing.h"
 #include "enums.h"
@@ -184,5 +186,38 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseCut);
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
+
+	Gtkmm2ext::ArdourIcon::Icon icons;
+
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::NoIcon);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::RecButton);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::RecTapeMode);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::CloseCross);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::StripWidth);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::DinMidi);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportStop);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportPlay);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportLoop);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportRange);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportStart);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportEnd);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportPanic);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TransportMetronom);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::NudgeLeft);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::NudgeRight);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ZoomIn);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ZoomOut);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ZoomFull);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ZoomExpand);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TimeAxisShrink);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::TimeAxisExpand);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolGrab);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolRange);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolCut);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolStretch);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolAudition);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolDraw);
+	REGISTER_ENUM (Gtkmm2ext::ArdourIcon::ToolContent);
+	REGISTER (icons);
 
 }
