@@ -181,7 +181,7 @@ CANVAS_UI::initialize_canvas (ArdourCanvas::Canvas& canvas)
 	grid->set_outline (false);
 	grid->set_row_spacing (60.0);
 	grid->set_col_spacing (3.0);
-	grid->set_homogenous (true);
+	grid->set_homogenous (false);
 
 	ArdourCanvas::Text* text1 = new ArdourCanvas::Text (&canvas);
 	text1->set ("hello, world");
