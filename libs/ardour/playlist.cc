@@ -3319,11 +3319,17 @@ void
 Playlist::fade_range (list<AudioRange>& ranges)
 {
 	RegionReadLock rlock (this);
-	 for (list<AudioRange>::iterator r = ranges.begin(); r != ranges.end(); ++r) {
-		 for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-			 (*i)->fade_range ((*r).start, (*r).end);
-		 }
-	 }
+	for (list<AudioRange>::iterator r = ranges.begin(); r != ranges.end(); ) {
+		list<AudioRange>::iterator tmpr = r;
+		++tmpr;
+		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ) {
+			RegionList::const_iterator tmpi = i;
+			++tmpi;
+			(*i)->fade_range ((*r).start, (*r).end);
+			i = tmpi;
+		}
+		r = tmpr;
+	}
 }
 
 uint32_t
