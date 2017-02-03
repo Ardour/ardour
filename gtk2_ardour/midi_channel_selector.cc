@@ -367,16 +367,9 @@ MidiChannelSelectorWindow::build ()
         vpacker->set_spacing (6);
         vpacker->set_border_width (12);
 
-	l = manage (new Label (string_compose (("<span size=\"larger\" weight=\"bold\">%1: %2</span>"), _("MIDI Channel Control"), track->name())));
+    l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
 	l->set_use_markup (true);
-	l->set_alignment (0.5, 0.0);
-
-	vpacker->pack_start (*l, true, true);
-
-        l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
-	l->set_use_markup (true);
-        vpacker->pack_start (*l);
-
+    vpacker->pack_start (*l, true, true);
 
 	vpacker->pack_start (capture_all_button);
 	capture_all_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), AllChannels));
@@ -409,6 +402,9 @@ MidiChannelSelectorWindow::build ()
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::invert_capture_mask));
 
         vpacker->pack_start (*capture_controls);
+
+	Gtk::HSeparator *hseparator2 = manage(new Gtk::HSeparator);
+	vpacker->pack_start (*hseparator2, false, false, 6);
 
         l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Playback"))));
 	l->set_use_markup (true);
