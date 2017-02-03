@@ -866,17 +866,6 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 
-	if (is_midi_track()) {
-		Menu* midi_menu = manage (new Menu);
-		MenuList& midi_items = midi_menu->items();
-		midi_menu->set_name (X_("ArdourContextMenu"));
-
-		midi_items.push_back (MenuElem (_("Channel Management"), sigc::mem_fun (*this, &RouteTimeAxisView::toggle_channel_selector)));
-
-		items.push_back (MenuElem (_("MIDI"), *midi_menu));
-		items.push_back (SeparatorElem());
-	}
-
 	int active = 0;
 	int inactive = 0;
 	TrackSelection const & s = _editor.get_selection().tracks;
