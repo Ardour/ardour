@@ -2720,7 +2720,7 @@ MidiRegionView::note_dropped(NoteBase *, double d_qn, int8_t dnote, bool copy)
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-			Evoral::Beats new_time = Evoral::Beats (max ((*i)->note()->time().to_double() + d_qn, midi_region()->start_beats()));
+			Evoral::Beats new_time = Evoral::Beats ((*i)->note()->time().to_double() + d_qn);
 
 			if (new_time < 0) {
 				continue;
@@ -2759,7 +2759,7 @@ MidiRegionView::note_dropped(NoteBase *, double d_qn, int8_t dnote, bool copy)
 		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end() ; ++i) {
 
 			/* update time */
-			Evoral::Beats new_time = Evoral::Beats (max ((*i)->note()->time().to_double() + d_qn, midi_region()->start_beats()));
+			Evoral::Beats new_time = Evoral::Beats ((*i)->note()->time().to_double() + d_qn);
 
 			if (new_time < 0) {
 				continue;
