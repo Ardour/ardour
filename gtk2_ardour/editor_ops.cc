@@ -5745,7 +5745,7 @@ Editor::toggle_region_lock_style ()
 
 	Glib::RefPtr<ToggleAction> a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
 	vector<Widget*> proxies = a->get_proxies();
-	CheckMenuItem* cmi = dynamic_cast<CheckMenuItem*> (proxies.front());
+	Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem*> (proxies.front());
 
 	assert (cmi);
 

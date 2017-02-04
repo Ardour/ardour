@@ -1305,7 +1305,7 @@ Editor::sensitize_the_right_region_actions ()
 
 	vector<Widget*> proxies = a->get_proxies();
 	for (vector<Widget*>::iterator p = proxies.begin(); p != proxies.end(); ++p) {
-		CheckMenuItem* cmi = dynamic_cast<CheckMenuItem*> (*p);
+		Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem*> (*p);
 		if (cmi) {
 			cmi->set_inconsistent (have_position_lock_style_music && have_position_lock_style_audio);
 		}
