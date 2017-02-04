@@ -943,7 +943,7 @@ RegionView::move_contents (frameoffset_t distance)
  *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
  *  @return Snapped frame offset from this region's position.
  */
-frameoffset_t
+MusicFrame
 RegionView::snap_frame_to_frame (frameoffset_t x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
@@ -960,6 +960,6 @@ RegionView::snap_frame_to_frame (frameoffset_t x, bool ensure_snap) const
 		editor.snap_to (frame, RoundUpAlways, false, ensure_snap);
 	}
 
-	/* back to region relative */
-	return frame.frame - _region->position();
+	/* back to region relative, keeping the relevant divisor */
+	return MusicFrame (frame.frame - _region->position(), frame.division);
 }

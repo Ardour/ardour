@@ -200,10 +200,11 @@ public:
 	void   select_range(framepos_t start, framepos_t end);
 	void   invert_selection ();
 
+	Evoral::Beats earliest_in_selection ();
 	void move_selection(double dx, double dy, double cumulative_dy);
-	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note, bool copy);
-	NoteBase* copy_selection ();
-	void move_copies(double dx, double dy, double cumulative_dy);
+	void note_dropped (NoteBase* ev, double d_qn, int8_t d_note, bool copy);
+	NoteBase* copy_selection (NoteBase* primary);
+	void move_copies(double dx_qn, double dy, double cumulative_dy);
 
 	void select_notes (std::list<Evoral::event_id_t>);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -296,6 +297,8 @@ public:
 	ARDOUR::DoubleBeatsFramesConverter const & region_relative_time_converter_double () const {
 		return _region_relative_time_converter_double;
 	}
+
+	double session_relative_qn (double qn) const;
 
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);

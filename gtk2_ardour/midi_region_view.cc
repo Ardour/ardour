@@ -2549,11 +2549,9 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 	}
 }
 
-void
-MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
+Evoral::Beats
+MidiRegionView::earliest_in_selection ()
 {
-	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
-	PossibleChord to_play;
 	Evoral::Beats earliest = Evoral::MaxBeats;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
@@ -2562,10 +2560,27 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 		}
 	}
 
+	return earliest;
+}
+
+void
+MidiRegionView::move_selection(double dx_qn, double dy, double cumulative_dy)
+{
+	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
+	Editor* editor = dynamic_cast<Editor*> (&trackview.editor());
+	TempoMap& tmap (editor->session()->tempo_map());
+	PossibleChord to_play;
+	Evoral::Beats earliest = earliest_in_selection();
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		if ((*i)->note()->time() == earliest) {
-			to_play.push_back ((*i)->note());
+		NoteBase* n = *i;
+		if (n->note()->time() == earliest) {
+			to_play.push_back (n->note());
 		}
+		double const note_time_qn = session_relative_qn (n->note()->time().to_double());
+		double const dx = editor->sample_to_pixel_unrounded (tmap.frame_at_quarter_note (note_time_qn + dx_qn))
+			- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+
 		(*i)->move_event(dx, dy);
 	}
 
@@ -2593,14 +2608,16 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 }
 
 NoteBase*
-MidiRegionView::copy_selection ()
+MidiRegionView::copy_selection (NoteBase* primary)
 {
-	NoteBase* note;
 	_copy_drag_events.clear ();
 
 	if (_selection.empty()) {
 		return 0;
 	}
+
+	NoteBase* note;
+	NoteBase* ret = 0;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		boost::shared_ptr<NoteType> g (new NoteType (*((*i)->note())));
@@ -2614,29 +2631,34 @@ MidiRegionView::copy_selection ()
 			note = h;
 		}
 
+		if ((*i) == primary) {
+			ret = note;
+		}
+
 		_copy_drag_events.push_back (note);
 	}
 
-	return _copy_drag_events.front ();
+	return ret;
 }
 
 void
-MidiRegionView::move_copies (double dx, double dy, double cumulative_dy)
+MidiRegionView::move_copies (double dx_qn, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
+	Editor* editor = dynamic_cast<Editor*> (&trackview.editor());
+	TempoMap& tmap (editor->session()->tempo_map());
 	PossibleChord to_play;
-	Evoral::Beats earliest = Evoral::MaxBeats;
+	Evoral::Beats earliest = earliest_in_selection();
 
 	for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
-		if ((*i)->note()->time() < earliest) {
-			earliest = (*i)->note()->time();
+		NoteBase* n = *i;
+		if (n->note()->time() == earliest) {
+			to_play.push_back (n->note());
 		}
-	}
+		double const note_time_qn = session_relative_qn (n->note()->time().to_double());
+		double const dx = editor->sample_to_pixel_unrounded (tmap.frame_at_quarter_note (note_time_qn + dx_qn))
+			- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
 
-	for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
-		if ((*i)->note()->time() == earliest) {
-			to_play.push_back ((*i)->note());
-		}
 		(*i)->move_event(dx, dy);
 	}
 
@@ -2664,7 +2686,7 @@ MidiRegionView::move_copies (double dx, double dy, double cumulative_dy)
 }
 
 void
-MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote, bool copy)
+MidiRegionView::note_dropped(NoteBase *, double d_qn, int8_t dnote, bool copy)
 {
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;
@@ -2693,15 +2715,13 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote, bool co
 		if (highest_note_in_selection + dnote > 127) {
 			highest_note_difference = highest_note_in_selection - 127;
 		}
-		TempoMap& map (trackview.session()->tempo_map());
 
 		start_note_diff_command (_("move notes"));
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-			double const start_qn = _region->quarter_note() - midi_region()->start_beats();
-			framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
-			Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
+			Evoral::Beats new_time = Evoral::Beats (max ((*i)->note()->time().to_double() + d_qn, midi_region()->start_beats()));
+
 			if (new_time < 0) {
 				continue;
 			}
@@ -2734,16 +2754,12 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote, bool co
 			highest_note_difference = highest_note_in_selection - 127;
 		}
 
-		TempoMap& map (trackview.session()->tempo_map());
 		start_note_diff_command (_("copy notes"));
 
 		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end() ; ++i) {
 
 			/* update time */
-
-			double const start_qn = _region->quarter_note() - midi_region()->start_beats();
-			framepos_t new_frames = map.frame_at_quarter_note (start_qn + (*i)->note()->time().to_double()) + dt;
-			Evoral::Beats new_time = Evoral::Beats (map.quarter_note_at_frame (new_frames) - start_qn);
+			Evoral::Beats new_time = Evoral::Beats (max ((*i)->note()->time().to_double() + d_qn, midi_region()->start_beats()));
 
 			if (new_time < 0) {
 				continue;
@@ -2790,7 +2806,7 @@ framepos_t
 MidiRegionView::snap_pixel_to_sample(double x, bool ensure_snap)
 {
 	PublicEditor& editor (trackview.editor());
-	return snap_frame_to_frame (editor.pixel_to_sample (x), ensure_snap);
+	return snap_frame_to_frame (editor.pixel_to_sample (x), ensure_snap).frame;
 }
 
 /** @param x Pixel relative to the region position.
@@ -4368,4 +4384,10 @@ double
 MidiRegionView::note_to_y(uint8_t note) const
 {
 	return contents_height() - (note + 1 - _current_range_min) * note_height() + 1;
+}
+
+double
+MidiRegionView::session_relative_qn (double qn) const
+{
+	return qn + (region()->quarter_note() - midi_region()->start_beats());
 }

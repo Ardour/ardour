@@ -238,6 +238,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
 	, _snap_delta (0)
+	, _snap_delta_music (0.0)
 	, _constraint_pressed (false)
 {
 
@@ -355,6 +356,15 @@ Drag::snap_delta (guint state) const
 
 	return 0;
 }
+double
+Drag::snap_delta_music (guint state) const
+{
+	if (ArdourKeyboard::indicates_snap_delta (state)) {
+		return _snap_delta_music;
+	}
+
+	return 0.0;
+}
 
 double
 Drag::current_pointer_x() const
@@ -373,11 +383,18 @@ Drag::current_pointer_y () const
 }
 
 void
-Drag::setup_snap_delta (framepos_t pos)
+Drag::setup_snap_delta (MusicFrame pos)
 {
-	MusicFrame snap (pos, 0);
+	TempoMap& map (_editor->session()->tempo_map());
+	MusicFrame snap (pos);
 	_editor->snap_to (snap, ARDOUR::RoundNearest, false, true);
-	_snap_delta = snap.frame - pos;
+	_snap_delta = snap.frame - pos.frame;
+
+	_snap_delta_music = 0.0;
+
+	if (_snap_delta != 0) {
+		_snap_delta_music = map.exact_qn_at_frame (snap.frame, snap.division) - map.exact_qn_at_frame (pos.frame, pos.division);
+	}
 }
 
 bool
@@ -618,7 +635,7 @@ void
 RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	setup_snap_delta (_last_position.frame);
+	setup_snap_delta (_last_position);
 
 	show_verbose_cursor_time (_last_position.frame);
 
@@ -2862,7 +2879,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framecnt_t const region_length = (framecnt_t) (_primary->region()->length() / speed);
 
 	framepos_t const pf = adjusted_current_frame (event);
-	setup_snap_delta (region_start);
+	setup_snap_delta (MusicFrame(region_start, 0));
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
@@ -3641,7 +3658,7 @@ void
 CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
-	setup_snap_delta (_editor->playhead_cursor->current_frame());
+	setup_snap_delta (MusicFrame (_editor->playhead_cursor->current_frame(), 0));
 
 	_grab_zoom = _editor->samples_per_pixel;
 
@@ -3744,7 +3761,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
-	setup_snap_delta (r->position());
+	setup_snap_delta (MusicFrame (r->position(), 0));
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
 }
@@ -3870,7 +3887,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
-	setup_snap_delta (r->last_frame());
+	setup_snap_delta (MusicFrame (r->last_frame(), 0));
 
 	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
 }
@@ -4031,7 +4048,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	} else {
 		show_verbose_cursor_time (location->end());
 	}
-	setup_snap_delta (is_start ? location->start() : location->end());
+	setup_snap_delta (MusicFrame (is_start ? location->start() : location->end(), 0));
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
@@ -4418,7 +4435,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_x = _point->get_x() + _editor->sample_to_pixel_unrounded (_point->line().offset());
 	_fixed_grab_y = _point->get_y();
 
-	setup_snap_delta (_editor->pixel_to_sample (_fixed_grab_x));
+	setup_snap_delta (MusicFrame (_editor->pixel_to_sample (_fixed_grab_x), 0));
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
@@ -4916,10 +4933,10 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	_editor->get_selection().add (_primary);
 
-	framepos_t where = _primary->region()->position();
+	MusicFrame where (_primary->region()->position(), 0);
 	setup_snap_delta (where);
 
-	show_verbose_cursor_duration (where, adjusted_current_frame (event), 0);
+	show_verbose_cursor_duration (where.frame, adjusted_current_frame (event), 0);
 }
 
 void
@@ -5627,6 +5644,7 @@ NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _cumulative_dx (0)
 	, _cumulative_dy (0)
+	, _earliest (0.0)
 	, _was_selected (false)
 	, _copy (false)
 {
@@ -5636,6 +5654,13 @@ NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	assert (_primary);
 	_region = &_primary->region_view ();
 	_note_height = _region->midi_stream_view()->note_height ();
+}
+
+void
+NoteDrag::setup_pointer_frame_offset ()
+{
+	_pointer_frame_offset = raw_grab_frame()
+		- _editor->session()->tempo_map().frame_at_quarter_note (_region->session_relative_qn (_primary->note()->time().to_double()));
 }
 
 void
@@ -5649,7 +5674,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		_copy = false;
 	}
 
-	setup_snap_delta (_region->source_beats_to_absolute_frames (_primary->note()->time ()));
+	setup_snap_delta (MusicFrame (_region->source_beats_to_absolute_frames (_primary->note()->time ()), 0));
 
 	if (!(_was_selected = _primary->selected())) {
 
@@ -5673,55 +5698,38 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	}
 }
 
-/** @return Current total drag x change in frames */
-frameoffset_t
-NoteDrag::total_dx (const guint state) const
+/** @return Current total drag x change in quarter notes */
+double
+NoteDrag::total_dx (GdkEvent * event) const
 {
 	if (_x_constrained) {
 		return 0;
 	}
+
 	TempoMap& map (_editor->session()->tempo_map());
 
 	/* dx in frames */
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
-	double const quarter_note_start = _region->region()->quarter_note() - _region->midi_region()->start_beats();
-	frameoffset_t const n = map.frame_at_quarter_note (quarter_note_start + _primary->note()->time().to_double());
+	frameoffset_t const n = map.frame_at_quarter_note (_region->session_relative_qn (_primary->note()->time().to_double()));
+
+	/* primary note time in quarter notes */
+	double const n_qn = _region->session_relative_qn (_primary->note()->time().to_double());
 
 	/* new time of the primary note in session frames */
-	frameoffset_t st = n + dx + snap_delta (state);
+	frameoffset_t st = n + dx + snap_delta (event->button.state);
 
-	framepos_t const rp = _region->region()->position ();
+	/* possibly snap and return corresponding delta in quarter notes */
+	MusicFrame snap (st, 0);
+	_editor->snap_to_with_modifier (snap, event);
+	double ret = map.exact_qn_at_frame (snap.frame, snap.division) - n_qn - snap_delta_music (event->button.state);
 
-	/* prevent the note being dragged earlier than the region's position */
-	st = max (st, rp);
-
-	/* possibly snap and return corresponding delta */
-
-	bool snap = true;
-
-	if (ArdourKeyboard::indicates_snap (state)) {
-		if (_editor->snap_mode () != SnapOff) {
-			snap = false;
-		}
-	} else {
-		if (_editor->snap_mode () == SnapOff) {
-			snap = false;
-			/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-			if (ArdourKeyboard::indicates_snap_delta (state)) {
-				snap = true;
-			}
-		}
+	/* prevent the earliest note being dragged earlier than the region's start position */
+	if (_earliest + ret < _region->midi_region()->start_beats()) {
+		ret -= (_earliest + ret) - _region->midi_region()->start_beats();
 	}
 
-	frameoffset_t ret;
-	if (snap) {
-		bool const ensure_snap = _editor->snap_mode () != SnapMagnetic;
-		ret =  _region->snap_frame_to_frame (st - rp, ensure_snap) + rp - n - snap_delta (state);
-	} else {
-		ret = st - n - snap_delta (state);
-	}
 	return ret;
 }
 
@@ -5747,30 +5755,33 @@ NoteDrag::total_dy () const
 void
 NoteDrag::motion (GdkEvent * event, bool first_move)
 {
-	if (_copy && first_move) {
-		/* make copies of all the selected notes */
-		_primary = _region->copy_selection ();
+	if (first_move) {
+		_earliest = _region->earliest_in_selection().to_double();
+		if (_copy) {
+			/* make copies of all the selected notes */
+			_primary = _region->copy_selection (_primary);
+		}
 	}
 
 	/* Total change in x and y since the start of the drag */
-	frameoffset_t const dx = total_dx (event->button.state);
+	double const dx_qn = total_dx (event);
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
-	double const tdx = _x_constrained ? 0 : _editor->sample_to_pixel (dx) - _cumulative_dx;
+	double const tdx = _x_constrained ? 0 : dx_qn - _cumulative_dx;
 	double const tdy = _y_constrained ? 0 : -dy * _note_height - _cumulative_dy;
 
 	if (tdx || tdy) {
-		_cumulative_dx += tdx;
+		_cumulative_dx = dx_qn;
 		_cumulative_dy += tdy;
 
 		int8_t note_delta = total_dy();
 
 		if (tdx || tdy) {
 			if (_copy) {
-				_region->move_copies (tdx, tdy, note_delta);
+				_region->move_copies (dx_qn, tdy, note_delta);
 			} else {
-				_region->move_selection (tdx, tdy, note_delta);
+				_region->move_selection (dx_qn, tdy, note_delta);
 			}
 
 			/* the new note value may be the same as the old one, but we
@@ -5831,7 +5842,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx (ev->button.state), total_dy(), _copy);
+		_region->note_dropped (_primary, total_dx (ev), total_dy(), _copy);
 	}
 }
 

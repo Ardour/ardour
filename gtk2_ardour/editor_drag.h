@@ -242,12 +242,13 @@ protected:
 	}
 
 	ARDOUR::frameoffset_t snap_delta (guint const) const;
+	double  snap_delta_music (guint const) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
 
 	/* sets snap delta from unsnapped pos */
-	void setup_snap_delta (framepos_t pos);
+	void setup_snap_delta (ARDOUR::MusicFrame pos);
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
@@ -282,6 +283,7 @@ private:
 	 *  framepos. used for relative snap.
 	 */
 	framepos_t _snap_delta;
+	double     _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
@@ -557,15 +559,17 @@ class NoteDrag : public Drag
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	void setup_pointer_frame_offset ();
   private:
 
-	ARDOUR::frameoffset_t total_dx (const guint) const;
+	double total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;
 	NoteBase* _primary;
 	double _cumulative_dx;
 	double _cumulative_dy;
+	double _earliest; // earliest quarter note in note selection
 	bool   _was_selected;
 	double _note_height;
 	bool   _copy;
