@@ -236,6 +236,7 @@ string fonts_conf_file;
 	if (!fonts_conf_file.empty()) {
 		fonts_conf_file += "\\";
 		fonts_conf_file += PROGRAM_NAME;
+		fonts_conf_file += PROGRAM_VERSION;
 		fonts_conf_file += FONTS_CONF_LOCATION;
 #else
 	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "fonts.conf", fonts_conf_file)) {
@@ -261,6 +262,7 @@ string pango_modules_file;
 	if (!pango_modules_file.empty()) {
 		pango_modules_file += "\\";
 		pango_modules_file += PROGRAM_NAME;
+		pango_modules_file += PROGRAM_VERSION;
 		pango_modules_file += PANGO_CONF_LOCATION;
 #if 0
 // JE - handy for non-English locale testing (Greek, in this case)
@@ -299,6 +301,7 @@ string gdk_pixbuf_loaders_file;
 	if (!gdk_pixbuf_loaders_file.empty()) {
 		gdk_pixbuf_loaders_file += "\\";
 		gdk_pixbuf_loaders_file += PROGRAM_NAME;
+		gdk_pixbuf_loaders_file += PROGRAM_VERSION;
 		gdk_pixbuf_loaders_file += PIXBUFLOADERS_CONF_LOCATION;
 #else
 	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "gdk-pixbuf.loaders", gdk_pixbuf_loaders_file)) {
@@ -325,6 +328,7 @@ string clearlooks_la_file;
 	if (!clearlooks_la_file.empty()) {
 		clearlooks_la_file += "\\";
 		clearlooks_la_file += PROGRAM_NAME;
+		clearlooks_la_file += PROGRAM_VERSION;
 		clearlooks_la_file += CLEARLOOKS_CONF_LOCATION;
 #else
 	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "libclearlooks.la", clearlooks_la_file)) {
@@ -373,6 +377,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	// Next, set up 'ARDOUR_DATA_PATH'
 	path  = get_module_folder() + "\\";
 	path += PROGRAM_NAME;
+	path += PROGRAM_VERSION;
 	path += "\\share";
 	Glib::setenv ("ARDOUR_DATA_PATH", path, true);
 
@@ -410,6 +415,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	}
 	path += get_module_folder() + "\\";
 	path += PROGRAM_NAME;
+	path += PROGRAM_VERSION;
 	path += "\\bin\\vamp";
 	path += G_SEARCHPATH_SEPARATOR;
 	path += "%ProgramFiles%\\Vamp Plugins";
