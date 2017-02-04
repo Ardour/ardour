@@ -1091,7 +1091,7 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
 		if (!ts.initial()) {
-			if (ts.locked_to_meter()) {
+			if (locked_to_meter) {
 				ts.set_type (type);
 				{
 					/* cannot move a meter-locked tempo section */
@@ -1107,6 +1107,7 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 			first.set_pulse (0.0);
 			first.set_minute (minute_at_frame (frame));
 			first.set_position_lock_style (AudioTime);
+			first.set_locked_to_meter (true);
 			{
 				/* cannot move the first tempo section */
 				*static_cast<Tempo*>(&first) = tempo;
@@ -1185,6 +1186,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 			pair<double, BBT_Time> beat = make_pair (0.0, BBT_Time (1, 1, 0));
 			first.set_beat (beat);
 			first_t.set_minute (first.minute());
+			first_t.set_locked_to_meter (true);
 			first_t.set_pulse (0.0);
 			first_t.set_position_lock_style (AudioTime);
 			recompute_map (_metrics);
