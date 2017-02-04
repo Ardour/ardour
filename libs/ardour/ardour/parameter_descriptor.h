@@ -20,6 +20,8 @@
 #ifndef __ardour_parameter_descriptor_h__
 #define __ardour_parameter_descriptor_h__
 
+#include <boost/algorithm/string/compare.hpp>
+
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
@@ -46,7 +48,8 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	static std::string midi_note_name (uint8_t, bool translate=true);
 
 	/** Dual of midi_note_name, convert a note name into its midi note number. */
-	static std::map<std::string, uint8_t> build_midi_name2num();
+	typedef std::map<std::string, uint8_t, boost::algorithm::is_iequal> NameNumMap;
+	static NameNumMap build_midi_name2num();
 	static uint8_t midi_note_num (const std::string& name);
 
 	ParameterDescriptor(const Evoral::Parameter& parameter);

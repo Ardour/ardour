@@ -224,10 +224,10 @@ ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
 	return buf;
 }
 
-std::map<std::string, uint8_t>
+ParameterDescriptor::NameNumMap
 ParameterDescriptor::build_midi_name2num()
 {
-	std::map<std::string, uint8_t> name2num;
+	NameNumMap name2num;
 	for (uint8_t num = 0; num < 128; num++)
 		name2num[midi_note_name(num)] = num;
 	return name2num;
@@ -236,11 +236,11 @@ ParameterDescriptor::build_midi_name2num()
 uint8_t
 ParameterDescriptor::midi_note_num (const std::string& name)
 {
-	static std::map<std::string, uint8_t> name2num = build_midi_name2num();
+	static NameNumMap name2num = build_midi_name2num();
 
 	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
 
-	std::map<std::string, uint8_t>::const_iterator it = name2num.find(name);
+	NameNumMap::const_iterator it = name2num.find(name);
 	if (it != name2num.end())
 		num = it->second;
 
