@@ -1153,7 +1153,7 @@ MidiRegionView::find_canvas_sys_ex (MidiModel::SysExPtr s)
 		return f->second;
 	}
 
-	return 0;
+	return boost::shared_ptr<SysEx>();
 }
 
 void
