@@ -1448,6 +1448,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	} else {
 		set_tooltip (&output_button, tooltip_cstr);
 	}
+	delete[] tooltip_cstr;
 
 	delete [] tooltip_cstr;
 
