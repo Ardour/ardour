@@ -5,7 +5,8 @@
 # Igor Blinov pitstop@nm.ru, 2004.
 # Александр Кольцов <ag1455@mail.ru>, 2014-2016
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006-2016, 2016.
-#
+#Петр Семилетов <tea@list.ru>, 2016
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
@@ -380,11 +381,13 @@ msgid ""
 "Russian:\n"
 "\t Igor Blinov <pitstop@nm.ru>\n"
 "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
+"\tPeter Semiletov <tea@list.ru>\n"
 msgstr ""
 "Русский:\n"
 "\tИгорь Блинов <pitstop@nm.ru>\n"
 "\tАлександр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "\tАлександр Кольцов <ag1455@mail.ru>\n"
+"\tПетр Семилетов <tea@list.ru>\n"
 
 #: about.cc:216
 msgid ""
@@ -781,11 +784,11 @@ msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_http.cc:165 ardour_http.cc:179
 msgid "HTTP request failed: (%1) %2"
-msgstr ""
+msgstr "HTTP-запрос провален: (%1) %2"
 
 #: ardour_http.cc:169 ardour_http.cc:182
 msgid "HTTP request status: %1"
-msgstr ""
+msgstr "Статус HTTP-запроса: %1"
 
 #: ardour_ui.cc:198
 msgid ""
@@ -893,7 +896,7 @@ msgstr "Ваши файлы с настройками скопированы. М
 
 #: ardour_ui.cc:509
 msgid "Pre-Release Warning"
-msgstr ""
+msgstr "Предупреждение предварительного выпуска"
 
 #: ardour_ui.cc:513
 msgid ""
@@ -1831,15 +1834,15 @@ msgstr ""
 
 #: ardour_ui.cc:4875
 msgid "Ignore crash data"
-msgstr "Проигнорировать"
+msgstr "Пропустить сбойные данные"
 
 #: ardour_ui.cc:4876
 msgid "Recover from crash"
-msgstr "Восстановить данные"
+msgstr "Восстановить после сбоя"
 
 #: ardour_ui.cc:4896
 msgid "Sample Rate Mismatch"
-msgstr "Несовпадение частот сэмплирования"
+msgstr "Несовпадение частоты оцифровки"
 
 #: ardour_ui.cc:4897
 msgid ""
@@ -2217,7 +2220,7 @@ msgstr "Обработка отклонений"
 
 #: ardour_ui_ed.cc:152 route_time_axis.cc:1683
 msgid "New..."
-msgstr "Создать..."
+msgstr "Новый..."
 
 #: ardour_ui_ed.cc:154
 msgid "Open..."
@@ -2277,11 +2280,11 @@ msgstr "Сделать снимок и перейти к новой версии
 
 #: ardour_ui_ed.cc:200
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Быстрый снимок (и продолжать работать с текущей сессией)"
 
 #: ardour_ui_ed.cc:203
 msgid "Quick Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Быстрый снимок (и переключиться на новую сессию)"
 
 #: ardour_ui_ed.cc:207
 msgid "Save As..."
@@ -2328,7 +2331,7 @@ msgstr "Очистить неиспользуемые источники..."
 
 #: ardour_ui_ed.cc:239
 msgid "Reset Peak Files"
-msgstr ""
+msgstr "Сбросить файлы пиков"
 
 #: ardour_ui_ed.cc:243
 msgid "Flush Wastebasket"
@@ -2388,11 +2391,11 @@ msgstr "Показать больше предустановок UI"
 
 #: ardour_ui_ed.cc:308
 msgid "Window|Scripting"
-msgstr "Скрипты"
+msgstr "Окно|Скрипты"
 
 #: ardour_ui_ed.cc:309 meterbridge.cc:214 meterbridge.cc:220
 msgid "Window|Meterbridge"
-msgstr "Панель индикаторов"
+msgstr "Окно|Индикаторы"
 
 #: ardour_ui_ed.cc:311 midi_tracer.cc:45
 msgid "MIDI Tracer"
@@ -2404,11 +2407,11 @@ msgstr "Пообщаться"
 
 #: ardour_ui_ed.cc:316
 msgid "Help|Manual"
-msgstr "Справка"
+msgstr "Помощь|Руководство"
 
 #: ardour_ui_ed.cc:317
 msgid "Manual|Reference"
-msgstr "Справка"
+msgstr "Помощь|Указатель"
 
 #: ardour_ui_ed.cc:318
 msgid "Report a Bug"
@@ -2531,7 +2534,7 @@ msgstr "В конец"
 
 #: ardour_ui_ed.cc:424
 msgid "Go to Wall Clock"
-msgstr "К  текущему времени"
+msgstr "К текущему времени"
 
 #: ardour_ui_ed.cc:429 ardour_ui_ed.cc:432
 msgid "Numpad Decimal"
@@ -2725,7 +2728,7 @@ msgid ""
 "It is not possible to use JACK as the the sync source\n"
 "when the pull up/down setting is non-zero."
 msgstr ""
-"Не возможно использовать JACK, как синхронизатор источника,\n"
+"Невозможно использовать JACK, как синхронизатор источника,\n"
 "когда установки растяжки вверх/вниз не равны нулю."
 
 #: ardour_ui_options.cc:309
@@ -2878,7 +2881,7 @@ msgstr "Скрыть дорожку"
 #: automation_time_axis.cc:556 gain_meter.cc:230 generic_pluginui.cc:601
 #: generic_pluginui.cc:949 panner_ui.cc:151
 msgid "Automation|Manual"
-msgstr "Вручную"
+msgstr "Автоматизация|Вручную"
 
 #: automation_time_axis.cc:312 automation_time_axis.cc:373
 #: automation_time_axis.cc:561 editor.cc:2034 editor.cc:2112
@@ -5022,7 +5025,7 @@ msgstr "Удалить синхронизатор"
 #: editor_actions.cc:1821 mixer_strip.cc:2200 monitor_section.cc:253
 #: monitor_section.cc:321 route_time_axis.cc:264 route_time_axis.cc:550
 msgid "Mute"
-msgstr "Молча"
+msgstr "Заглушить"
 
 #: editor_actions.cc:1824
 msgid "Normalize..."
@@ -5030,7 +5033,7 @@ msgstr "Нормировать сигнал..."
 
 #: editor_actions.cc:1827
 msgid "Reverse"
-msgstr "Развернуть"
+msgstr "Перевернуть"
 
 #: editor_actions.cc:1830
 msgid "Make Mono Regions"
@@ -5432,7 +5435,7 @@ msgstr "Скопировать маркер счетчика"
 
 #: editor_drag.cc:3278
 msgid "inactive"
-msgstr ""
+msgstr "неактивно"
 
 #: editor_drag.cc:3323
 msgid "move tempo mark"
@@ -5444,7 +5447,7 @@ msgstr "Скопировать маркер темпа"
 
 #: editor_drag.cc:3461
 msgid "dilate tempo"
-msgstr ""
+msgstr "распространить темп"
 
 #: editor_drag.cc:3735
 msgid "change fade in length"
@@ -5710,7 +5713,7 @@ msgstr ""
 
 #: editor_markers.cc:989
 msgid "Make Constant"
-msgstr ""
+msgstr "Сделать постоянным"
 
 #: editor_markers.cc:993 editor_markers.cc:1013
 msgid "Lock to Music"
@@ -5734,7 +5737,7 @@ msgstr ""
 
 #: editor_markers.cc:1441
 msgid "change tempo type"
-msgstr ""
+msgstr "смена типа темпа"
 
 #: editor_markers.cc:1509 editor_ops.cc:2119
 msgid "New Name:"
@@ -5791,11 +5794,11 @@ msgstr "Правка ноты"
 
 #: editor_mouse.cc:2193
 msgid "start point trim"
-msgstr "Обрезка начальной точки"
+msgstr "начальная точка обрезки"
 
 #: editor_mouse.cc:2218
 msgid "end point trim"
-msgstr ""
+msgstr "конечная точка обрезки"
 
 #: editor_mouse.cc:2270
 msgid "Name for region:"
@@ -6057,7 +6060,7 @@ msgstr "Удаление области"
 
 #: editor_ops.cc:4844
 msgid "duplicate range selection"
-msgstr ""
+msgstr "повторить диапазон выделения"
 
 #: editor_ops.cc:4938
 msgid "nudge track"
@@ -6074,11 +6077,11 @@ msgstr ""
 #: editor_ops.cc:4968 editor_ops.cc:7202 editor_regions.cc:503
 #: editor_snapshots.cc:171
 msgid "No, do nothing."
-msgstr "Нет"
+msgstr "Нет, ничего не делать."
 
 #: editor_ops.cc:4969
 msgid "Yes, destroy it."
-msgstr "Да"
+msgstr "Да, уничтожить."
 
 #: editor_ops.cc:4971
 msgid "Destroy last capture"
@@ -6371,11 +6374,11 @@ msgstr "Вставка времени"
 
 #: editor_ops.cc:7436
 msgid "Cannot insert or delete time when in Lock edit."
-msgstr ""
+msgstr "Не могу вставить или удалить время в режиме Блокировки"
 
 #: editor_ops.cc:7456 editor_ops.cc:7468 editor_ops.cc:7541 editor_ops.cc:7554
 msgid "remove time"
-msgstr ""
+msgstr "удалить время"
 
 #: editor_ops.cc:7628
 msgid "There are too many tracks to fit in the current window"
@@ -6564,7 +6567,7 @@ msgstr ""
 
 #: editor_routes.cc:238
 msgid "Record Safe"
-msgstr ""
+msgstr "Безопасная запись"
 
 #: editor_routes.cc:239
 msgid "Muted"
@@ -6746,7 +6749,7 @@ msgstr "Обновить список устройств"
 
 #: engine_dialog.cc:90
 msgid "Use Buffered I/O"
-msgstr ""
+msgstr "Использовать буферизированный ввод-вывод"
 
 #: engine_dialog.cc:91 engine_dialog.cc:3000
 msgid "Measure"
@@ -8197,11 +8200,11 @@ msgstr "Вернуть"
 
 #: luawindow.cc:166
 msgid "Select Editor Buffer"
-msgstr ""
+msgstr "Выбрать буфер редактора"
 
 #: luawindow.cc:253 luawindow.cc:258
 msgid "Window|Lua"
-msgstr "Lua"
+msgstr "Окно|Lua"
 
 #: luawindow.cc:286 luawindow.cc:304
 msgid "LuaException: %1"
@@ -10901,7 +10904,7 @@ msgstr "По умолчанию"
 
 #: rc_option_editor.cc:1058
 msgid "Adjusting the scale requires an application restart to re-layout."
-msgstr ""
+msgstr "Изменение масштаба требует перезапуска программы для вступления изменений в силу."
 
 #: rc_option_editor.cc:1100
 msgid "∞"
@@ -10936,6 +10939,8 @@ msgid ""
 "Specify the default timeout for plugin instantiation. Plugins that require "
 "more time to load will be blacklisted. A value of 0 disables the timeout."
 msgstr ""
+"Установить минимальное время, за которое создается экземпляр плагина."
+"Плагины, которым нужно больше времени, заносятся в черный список. Значение 0 отключает минимальное время."
 
 #: rc_option_editor.cc:1111
 msgid "Scan Time Out:"
@@ -10959,7 +10964,7 @@ msgstr "Большие сессии (от 64 дорожек и больше)"
 
 #: rc_option_editor.cc:1215
 msgid "Custom (set by sliders below)"
-msgstr ""
+msgstr "Задать (используя ползунки ниже)"
 
 #: rc_option_editor.cc:1219 export_video_dialog.cc:167
 msgid "Preset:"
@@ -11889,7 +11894,7 @@ msgstr "Клавиатура"
 #: rc_option_editor.cc:2848 rc_option_editor.cc:2890 rc_option_editor.cc:2960
 #: startup.cc:352
 msgid "Scan for Plugins"
-msgstr "Просканировать плагины"
+msgstr "Найти установленные плагины"
 
 #: rc_option_editor.cc:2853
 msgid "General"
@@ -11918,6 +11923,8 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>Если включено</b> состояние плагинов будет сброшено при остановке воспроизведения."
+"Большей частью это влияет на эффекты с \"хвостомl\" вроде ревербераторов."
 
 #: rc_option_editor.cc:2879
 msgid "Make new plugins active"
@@ -12069,6 +12076,9 @@ msgid ""
 "using 2D-graphics acceleration.\n"
 "This requires restarting %1 before having an effect"
 msgstr ""
+"Отрисовка больших частей интерфейса программно"
+"вместо 2D-ускорения.\n"
+"Требует перезапуска."
 
 #: rc_option_editor.cc:3046 rc_option_editor.cc:3058 rc_option_editor.cc:3061
 #: rc_option_editor.cc:3069 rc_option_editor.cc:3077 rc_option_editor.cc:3085
@@ -12080,18 +12090,19 @@ msgstr "Интерфейс"
 
 #: rc_option_editor.cc:3052
 msgid "Possibly improve slow graphical performance (requires restart)"
-msgstr ""
+msgstr "Возможное улучшение медленной отрисовки (требует перезапуска)"
 
 #: rc_option_editor.cc:3057
 msgid ""
 "Disables hardware gradient rendering on buggy video drivers (\"buggy "
 "gradients patch\").\n"
 "This requires restarting %1 before having an effect"
-msgstr ""
+msgstr "Отключить аппаратный градиент на глючных видеодрайверах.\n"
+"Необходим перезапуск %1"
 
 #: rc_option_editor.cc:3064
 msgid "Use Window Manager/Desktop visibility information"
-msgstr ""
+msgstr "Использовать настройки видимости оконного менеджера/рабочего стола"
 
 #: rc_option_editor.cc:3072
 msgid "Graphically indicate mouse pointer hovering over various widgets"
@@ -12722,7 +12733,7 @@ msgstr "Новый список воспроизведения"
 
 #: route_time_axis.cc:1441
 msgid "The name \"%1\" is reserved for %2"
-msgstr ""
+msgstr "Название \"%1\" зарезервировано для %2"
 
 #: route_time_axis.cc:1684
 msgid "New Copy..."
@@ -12742,7 +12753,7 @@ msgstr "Очистить текущий"
 
 #: route_time_axis.cc:1697
 msgid "Select from All..."
-msgstr ""
+msgstr "Выделить из всего..."
 
 #: route_time_axis.cc:1785
 msgid "Take: %1.%2"
@@ -12798,7 +12809,7 @@ msgstr "Мониторинг воспроизведения"
 
 #: route_ui.cc:710
 msgid "Not connected to AudioEngine - cannot engage record"
-msgstr "Не подключено к AudioEngine.  Нельзя записывать."
+msgstr "Не подключено к звуковому движку. Нельзя записывать."
 
 #: route_ui.cc:887
 msgid "Rec-Safe"
@@ -12984,11 +12995,11 @@ msgstr ""
 
 #: script_selector.cc:55
 msgid "<b>Description:</b>"
-msgstr ""
+msgstr "<b>Описание:</b>"
 
 #: script_selector.cc:131
 msgid "Select Script to unload"
-msgstr ""
+msgstr "Выберите скрипт для выгрузки"
 
 #: script_selector.cc:165
 msgid "<b>Name:</b>"
@@ -14795,7 +14806,7 @@ msgstr "Временные окна следуют за получающим ф�
 
 #: theme_manager.cc:63
 msgid "Float detached monitor-section window"
-msgstr ""
+msgstr "Отсоединненное окно монитора в плавающем режиме"
 
 #: theme_manager.cc:64
 msgid "Icon Set"
@@ -14850,7 +14861,7 @@ msgstr "Без фильтрации"
 
 #: time_fx_dialog.cc:62
 msgid "Contents"
-msgstr ""
+msgstr "Содержимое"
 
 #: time_fx_dialog.cc:63
 msgid "Minimize time distortion"
@@ -14914,55 +14925,55 @@ msgstr "Ошибка в программе: запрос в несуществу
 
 #: transform_dialog.cc:39
 msgid "this note's"
-msgstr ""
+msgstr "этой ноты"
 
 #: transform_dialog.cc:40
 msgid "the previous note's"
-msgstr ""
+msgstr "предыдущей ноты"
 
 #: transform_dialog.cc:41
 msgid "this note's index"
-msgstr ""
+msgstr "индекс этой ноты"
 
 #: transform_dialog.cc:42
 msgid "the number of notes"
-msgstr ""
+msgstr "количество нот"
 
 #: transform_dialog.cc:43
 msgid "exactly"
-msgstr ""
+msgstr "точно"
 
 #: transform_dialog.cc:44
 msgid "a random number from"
-msgstr ""
+msgstr "случайное число от"
 
 #: transform_dialog.cc:55
 msgid "equal steps from"
-msgstr ""
+msgstr "равные шаги от"
 
 #: transform_dialog.cc:58
 msgid "note number"
-msgstr ""
+msgstr "номер ноты"
 
 #: transform_dialog.cc:59
 msgid "velocity"
-msgstr ""
+msgstr "скорость"
 
 #: transform_dialog.cc:60
 msgid "start time"
-msgstr ""
+msgstr "время начала"
 
 #: transform_dialog.cc:61
 msgid "length"
-msgstr ""
+msgstr "длина"
 
 #: transform_dialog.cc:82 transform_dialog.cc:113
 msgid "Transform"
-msgstr ""
+msgstr "Преобразовать"
 
 #: transform_dialog.cc:91
 msgid "Set "
-msgstr ""
+msgstr "Установить "
 
 #: transpose_dialog.cc:30
 msgid "Transpose MIDI"
