@@ -409,8 +409,8 @@ BufferSet::VSTBuffer::push_back (Evoral::Event<framepos_t> const & ev)
 		*/
 		return;
 	}
-	int const n = _events->numEvents;
-	assert (n < (int) _capacity);
+	uint32_t const n = _events->numEvents;
+	assert (n < _capacity);
 	if (n >= _capacity) {
 		return;
 	}
