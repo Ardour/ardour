@@ -142,7 +142,7 @@ LIBPBD_API     char* 	PBD_APICALLTYPE     dlerror () __THROW;
 /* For whatever reason, Ardour's 'libevoral' refuses to build as a DLL if we include both 'rpc.h' */
 /* and 'WinSock2.h'. It doesn't seem to matter which order we #include them. Given that we can't  */
 /* edit 'rpc.h' or 'WinSock2.h', just make sure we don't #include them when building libevoral.   */
-#ifndef BUILDING_EVORAL
+#if !defined(BUILDING_EVORAL) && !defined(BUILDING_VAMPPLUGINS)
 #include <rpc.h>
 typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
 #endif
