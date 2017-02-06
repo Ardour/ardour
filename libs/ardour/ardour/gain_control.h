@@ -48,9 +48,6 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	double lower_db;
 	double range_db;
 
-	int set_state (XMLNode const&, int);
-	XMLNode& get_state();
-
 	void inc_gain (gain_t);
 
   private:

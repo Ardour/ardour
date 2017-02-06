@@ -133,7 +133,6 @@ GainControl::recompute_masters_ratios (double val)
 	   Mr(n) is the new ratio number for the slaves
 	*/
 
-
 	const double nmasters = _masters.size();
 	double masters_total_gain_coefficient = 1.0;
 
@@ -146,39 +145,5 @@ GainControl::recompute_masters_ratios (double val)
 	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 		mr->second.reset_ratio (new_universal_ratio);
 	}
-}
-
-XMLNode&
-GainControl::get_state ()
-{
-	XMLNode& node (AutomationControl::get_state());
-
-#if 0
-	/* store VCA master IDs */
-
-	string str;
-
-	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-			if (!str.empty()) {
-				str += ',';
-			}
-			str += PBD::to_string (mr->first, std::dec);
-		}
-	}
-
-	if (!str.empty()) {
-		node.add_property (X_("masters"), str);
-	}
-#endif
-
-	return node;
-}
-
-int
-GainControl::set_state (XMLNode const& node, int version)
-{
-	return AutomationControl::set_state (node, version);
 }
 

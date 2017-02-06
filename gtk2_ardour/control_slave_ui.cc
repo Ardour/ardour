@@ -128,7 +128,7 @@ ControlSlaveUI::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
 	if (!menuitem->get_active()) {
 		sl->unassign (vca);
 	} else {
-		sl->assign (vca);
+		sl->assign (vca, false);
 	}
 }
 

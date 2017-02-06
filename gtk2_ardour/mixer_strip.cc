@@ -431,7 +431,7 @@ MixerStrip::vca_assign (boost::shared_ptr<ARDOUR::VCA> vca)
 {
 	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
 	if (sl)
-		sl->assign(vca);
+		sl->assign(vca, false);
 }
 
 void

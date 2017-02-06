@@ -500,7 +500,7 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
 	}
 
 	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		(*r)->assign (master);
+		(*r)->assign (master, false);
 	}
 }
 

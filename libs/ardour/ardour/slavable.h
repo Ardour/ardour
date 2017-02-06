@@ -49,7 +49,7 @@ class LIBARDOUR_API Slavable
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int);
 
-	void assign (boost::shared_ptr<VCA>);
+	void assign (boost::shared_ptr<VCA>, bool loading);
 	void unassign (boost::shared_ptr<VCA>);
 
 	PBD::Signal2<void,boost::shared_ptr<VCA>,bool> AssignmentChange;
@@ -62,7 +62,7 @@ class LIBARDOUR_API Slavable
 	static PBD::Signal1<void,VCAManager*> Assign;
 
     protected:
-	virtual int assign_controls (boost::shared_ptr<VCA>);
+	virtual int assign_controls (boost::shared_ptr<VCA>, bool loading);
 	virtual int unassign_controls (boost::shared_ptr<VCA>);
 
     private:
