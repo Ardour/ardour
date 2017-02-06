@@ -2582,6 +2582,15 @@ MidiRegionView::move_selection(double dx_qn, double dy, double cumulative_dy)
 			- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
 
 		(*i)->move_event(dx, dy);
+
+		/* update length */
+		if (midi_view()->note_mode() == Sustained) {
+			Note* sus = dynamic_cast<Note*> (*i);
+			double const len_dx = editor->sample_to_pixel_unrounded (
+				tmap.frame_at_quarter_note (note_time_qn + dx_qn + n->note()->length().to_double()));
+
+			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
+		}
 	}
 
 	if (dy && !_selection.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
@@ -2660,6 +2669,14 @@ MidiRegionView::move_copies (double dx_qn, double dy, double cumulative_dy)
 			- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
 
 		(*i)->move_event(dx, dy);
+
+		if (midi_view()->note_mode() == Sustained) {
+			Note* sus = dynamic_cast<Note*> (*i);
+			double const len_dx = editor->sample_to_pixel_unrounded (
+				tmap.frame_at_quarter_note (note_time_qn + dx_qn + n->note()->length().to_double()));
+
+			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
+		}
 	}
 
 	if (dy && !_copy_drag_events.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
