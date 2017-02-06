@@ -1200,6 +1200,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			framepos_t const x_pos_music = tmap.frame_at_quarter_note (last_qn + qn_delta);
 
 			rv->set_position (x_pos_music, 0);
+			rv->move (0, y_delta);
 		} else {
 			rv->move (x_delta, y_delta);
 		}
