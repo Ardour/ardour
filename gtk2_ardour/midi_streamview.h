@@ -78,7 +78,7 @@ class MidiStreamView : public StreamView
 	void update_note_range(uint8_t note_num);
 
 	void set_layer_display (LayerDisplay);
-	bool can_change_layer_display() const { return false; }
+//	bool can_change_layer_display() const { return false; }  //revert this change for now.  Although stacked view is weirdly implemented wrt the "scroomer", it is still necessary to be able to manage layered regions.
 	void redisplay_track ();
 
 	inline double contents_height() const
