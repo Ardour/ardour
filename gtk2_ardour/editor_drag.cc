@@ -5668,7 +5668,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+	if (ArdourKeyboard::indicates_copy (event->button.state)) {
 		_copy = true;
 	} else {
 		_copy = false;
