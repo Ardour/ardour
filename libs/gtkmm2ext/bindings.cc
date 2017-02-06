@@ -782,60 +782,60 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << PROGRAM_NAME;
 	ostr << "</title>\n";
 
-
-	ostr << "<style>\n";
-	ostr << "\n\
-.key-name-even, .key-name-odd\n\
-{\n\
-    font-weight: bold;\n\
-}\n\
-\n\
-.key-action-odd, .key-action-even\n\
-{\n\
-    font-weight: normal;\n\
-    font-style: italic;\n\
-}";
-	ostr << "</style>\n";
-
 	ostr << "</head>\n<body>\n";
 
-	ostr << "<div class=\"container\">\n";
-
+	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
+	ostr << "<tr>\n\n";
+	
+	/* first column: separate by group */
+	ostr << "<td>\n\n";
 	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
-		(*b)->save_as_html (ostr);
+		(*b)->save_as_html (ostr, true);
 	}
+	ostr << "</td>\n\n";
 
-	ostr << "</div>\n";
+	//second column
+	ostr << "<td style=\"vertical-align:top\">\n\n";
+	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
+		(*b)->save_as_html (ostr, false);
+	}
+	ostr << "</td>\n\n";
+
+
+	ostr << "</tr>\n\n";
+	ostr << "</tbody></table>\n\n";
+
 	ostr << "</body>\n";
 	ostr << "</html>\n";
 }
 
 void
-Bindings::save_as_html (ostream& ostr) const
+Bindings::save_as_html (ostream& ostr, bool categorize) const
 {
 
 	if (!press_bindings.empty()) {
 
-		ostr << "<div class=\"binding-set\">\n";
-		ostr << "<h1>";
-		ostr << name();
-		ostr << "</h1>\n\n";
-
-		/* first pass: separate by group */
+		ostr << "<h2><u>";
+		if (categorize)
+			ostr << _("Window") << ": " << name() << _(" (Categorized)");
+		else
+			ostr << _("Window") << ": " << name() << _(" (Alphabetical)");
+		ostr << "</u></h2>\n\n";
 
 		typedef std::map<std::string, std::vector<KeybindingMap::const_iterator> > GroupMap;
 		GroupMap group_map;
 
 		for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+			
 			if (k->first.name().empty()) {
 				continue;
 			}
 
 			string group_name;
-			if (!k->second.group_name.empty()) {
+			if (categorize && !k->second.group_name.empty()) {
 				group_name = k->second.group_name;
 			} else {
-				group_name = X_("nogroup");
+				group_name = _("Uncategorized");
 			}
 
 			GroupMap::iterator gm = group_map.find (group_name);
@@ -848,11 +848,13 @@ Bindings::save_as_html (ostream& ostr) const
 			}
 		}
 
+		
 		for (GroupMap::const_iterator gm = group_map.begin(); gm != group_map.end(); ++gm) {
 
-			ostr << "<div class=\"group\">\n";
-			ostr << "<div class=\"group-name\">" << gm->first << "</div>\n";
-
+			if (categorize) {
+				ostr << "<h3>" << gm->first << "</h3>\n";
+			}
+			
 			for (vector<KeybindingMap::const_iterator>::const_iterator k = gm->second.begin(); k != gm->second.end(); ++k) {
 
 				if ((*k)->first.name().empty()) {
@@ -875,6 +877,7 @@ Bindings::save_as_html (ostream& ostr) const
 
 				string key_name = (*k)->first.native_short_name ();
 				replace_all (key_name, X_("KP_"), X_("Numpad "));
+				replace_all (key_name, X_("nabla"), X_("Tab"));
 
 				string::size_type pos;
 
@@ -900,14 +903,20 @@ Bindings::save_as_html (ostream& ostr) const
 						key_name.replace (pos, strlen (targets[n]), replacements[n]);
 					}
 				}
+				
+				key_name.append(" ");
 
-				ostr << "<div class=\"key\">" << key_name << "</div>";
-				ostr << "<div class=\"action\">" << action->get_label() << "</div>\n";
+				while (key_name.length()<28)
+					key_name.append("-");
+
+				ostr << "<span style=\"font-family:monospace;\">" << key_name;
+				ostr << "<i>" << action->get_label() << "</i></span></br>\n";
 			}
-			ostr << "</div>\n\n";
-		}
+			ostr << "\n\n";
 
-		ostr << "</div>\n";
+		}
+		
+		ostr << "\n";
 	}
 }
 

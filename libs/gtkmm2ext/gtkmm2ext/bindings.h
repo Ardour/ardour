@@ -186,7 +186,7 @@ class LIBGTKMM2EXT_API Bindings {
 	bool load (XMLNode const& node);
 	void load_operation (XMLNode const& node);
 	void save (XMLNode& root);
-	void save_as_html (std::ostream&) const;
+	void save_as_html (std::ostream&, bool) const;
 
 	/* GTK has the following position a Gtk::Action:
 	 *
