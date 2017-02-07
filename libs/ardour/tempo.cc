@@ -185,6 +185,11 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	} else {
 		set_locked_to_meter (string_is_affirmative (prop->value()));
 	}
+
+	/* 5.5 marked initial tempo as not locked to meter. this should always be true anyway */
+	if (initial()) {
+		set_locked_to_meter (true);
+	}
 }
 
 XMLNode&
