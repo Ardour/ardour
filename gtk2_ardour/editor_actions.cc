@@ -1887,7 +1887,7 @@ Editor::register_region_actions ()
 	/* Open the region properties dialogue for the selected regions */
 	reg_sens (_region_actions, "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
 
-	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
+	reg_sens (_region_actions, "play-selected-regions", _("Play selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
 	reg_sens (_region_actions, "bounce-regions-processed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
 	reg_sens (_region_actions, "bounce-regions-unprocessed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));

@@ -128,7 +128,7 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<ActionGroup> main_menu_actions = global_actions.create_action_group (X_("Main_menu"));
 	Glib::RefPtr<Action> act;
 
-	global_actions.register_action (main_actions, X_("Escape"), _("Escape"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
+	global_actions.register_action (main_actions, X_("Escape"), _("Escape (deselect all)"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
 	/* This is hard-wired into the Keyboard code as "Primary-w". Maybe it
 	   doesn't need to be. This action makes it possible to do this from a
 	   control surface.
@@ -648,7 +648,7 @@ ARDOUR_UI::install_actions ()
 	/* MIDI */
 
 	Glib::RefPtr<ActionGroup> midi_actions = global_actions.create_action_group (X_("MIDI"));
-	global_actions.register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
+	global_actions.register_action (midi_actions, X_("panic"), _("Panic (Send MIDI all-notes-off)"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
 }
 
 void
