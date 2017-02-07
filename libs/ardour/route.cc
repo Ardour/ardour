@@ -3383,47 +3383,58 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (_solo_control->soloed_by_others_downstream()) {
-		int sbod = 0;
-		/* checking all all downstream routes for
-		 * explicit of implict solo is a rather drastic measure,
-		 * ideally the input_change_handler() of the other route
-		 * would propagate the change to us.
+	if ((change.type & IOChange::ConnectionsChanged)) {
+
+		/* do this ONLY if connections have changed. Configuration
+		 * changes do not, by themselves alter solo upstream or
+		 * downstream status.
 		 */
-		boost::shared_ptr<RouteList> routes = _session.get_routes ();
-		if (_output->connected()) {
-			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
-					continue;
-				}
-				bool sends_only;
-				bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
-				if (does_feed && !sends_only) {
-					if ((*i)->soloed()) {
-						++sbod;
-						break;
+
+		if (_solo_control->soloed_by_others_downstream()) {
+			int sbod = 0;
+			/* checking all all downstream routes for
+			 * explicit of implict solo is a rather drastic measure,
+			 * ideally the input_change_handler() of the other route
+			 * would propagate the change to us.
+			 */
+			boost::shared_ptr<RouteList> routes = _session.get_routes ();
+			if (_output->connected()) {
+				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+					if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+						continue;
+					}
+					bool sends_only;
+					bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
+					if (does_feed && !sends_only) {
+						if ((*i)->soloed()) {
+							++sbod;
+							break;
+						}
 					}
 				}
 			}
-		}
-		int delta = sbod - _solo_control->soloed_by_others_downstream();
-		if (delta <= 0) {
-			// do not allow new connections to change implicit solo (no propagation)
-			_solo_control->mod_solo_by_others_downstream (delta);
-			// Session::route_solo_changed() does not propagate indirect solo-changes
-			// propagate upstream to tracks
-			boost::shared_ptr<Route> shared_this = shared_from_this();
-			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-				if ((*i).get() == this || !can_solo()) {
-					continue;
-				}
-				bool sends_only;
-				bool does_feed = (*i)->feeds (shared_this, &sends_only);
-				if (delta != 0 && does_feed && !sends_only) {
-					(*i)->solo_control()->mod_solo_by_others_downstream (delta);
-				}
-			}
 
+			cerr << "computed sbod = " << sbod << endl;
+
+			int delta = sbod - _solo_control->soloed_by_others_downstream();
+			if (delta <= 0) {
+				// do not allow new connections to change implicit solo (no propagation)
+				_solo_control->mod_solo_by_others_downstream (delta);
+				// Session::route_solo_changed() does not propagate indirect solo-changes
+				// propagate upstream to tracks
+				boost::shared_ptr<Route> shared_this = shared_from_this();
+				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+					if ((*i).get() == this || !can_solo()) {
+						continue;
+					}
+					bool sends_only;
+					bool does_feed = (*i)->feeds (shared_this, &sends_only);
+					if (delta != 0 && does_feed && !sends_only) {
+						(*i)->solo_control()->mod_solo_by_others_downstream (delta);
+					}
+				}
+
+			}
 		}
 	}
 }
