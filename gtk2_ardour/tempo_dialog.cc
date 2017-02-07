@@ -74,7 +74,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	NoteTypes::iterator x;
 
 	bpm_spinner.set_numeric (true);
-	bpm_spinner.set_digits (2);
+	bpm_spinner.set_digits (3);
 	bpm_spinner.set_wrap (true);
 	bpm_spinner.set_value (bpm);
 	bpm_spinner.set_alignment (1.0);
