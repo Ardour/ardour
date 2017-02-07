@@ -177,7 +177,11 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	}
 
 	if ((prop = node.property ("locked-to-meter")) == 0) {
-		set_locked_to_meter (false);
+		if (initial()) {
+			set_locked_to_meter (true);
+		} else {
+			set_locked_to_meter (false);
+		}
 	} else {
 		set_locked_to_meter (string_is_affirmative (prop->value()));
 	}
