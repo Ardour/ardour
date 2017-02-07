@@ -1,21 +1,21 @@
  <Bindings name="Mixer">
   <Press>
-   <Binding key="s" action="Mixer/solo"/>
-   <Binding key="m" action="Mixer/mute"/>
-   <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active"/>
-   <Binding key="r" action="Mixer/recenable"/>
-   <Binding key="0" action="Mixer/unity-gain"/>
-   <Binding key="Up" action="Mixer/increment-gain"/>
-   <Binding key="Down" action="Mixer/decrement-gain"/>
-   <Binding key="Left" action="Mixer/scroll-left"/>
-   <Binding key="Right" action="Mixer/scroll-right"/>
-   <Binding key="Primary-x" action="Mixer/cut-processors"/>
-   <Binding key="Primary-c" action="Mixer/copy-processors"/>
-   <Binding key="Primary-v" action="Mixer/paste-processors"/>
-   <Binding key="Delete" action="Mixer/delete-processors"/>
-   <Binding key="BackSpace" action="Mixer/delete-processors"/>
-   <Binding key="Return" action="Mixer/toggle-processors"/>
-   <Binding key="Primary-a" action="Mixer/select-all-processors"/>
-   <Binding key="slash" action="Mixer/ab-plugins"/>
+   <Binding key="s" action="Mixer/solo" group="Operations on the selected strip(s)"/>
+   <Binding key="m" action="Mixer/mute" group="Operations on the selected strip(s)"/>
+   <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active" group="Operations on the selected strip(s)"/>
+   <Binding key="r" action="Mixer/recenable" group="Operations on the selected strip(s)"/>
+   <Binding key="0" action="Mixer/unity-gain" group="Operations on the selected strip(s)"/>
+   <Binding key="Up" action="Mixer/increment-gain" group="Operations on the selected strip(s)"/>
+   <Binding key="Down" action="Mixer/decrement-gain" group="Operations on the selected strip(s)"/>
+   <Binding key="Left" action="Mixer/scroll-left" group="Navigation operations"/>
+   <Binding key="Right" action="Mixer/scroll-right" group="Navigation operations"/>
+   <Binding key="Primary-x" action="Mixer/cut-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="Primary-c" action="Mixer/copy-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="Primary-v" action="Mixer/paste-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="Delete" action="Mixer/delete-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="BackSpace" action="Mixer/delete-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="Return" action="Mixer/toggle-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="Primary-a" action="Mixer/select-all-processors" group="Processor operations on the selected strip(s)"/>
+   <Binding key="slash" action="Mixer/ab-plugins" group="Processor operations on the selected strip(s)"/>
   </Press>
  </Bindings>
