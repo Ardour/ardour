@@ -3412,12 +3412,13 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 			_solo_control->mod_solo_by_others_downstream (delta);
 			// Session::route_solo_changed() does not propagate indirect solo-changes
 			// propagate upstream to tracks
+			boost::shared_ptr<Route> shared_this = shared_from_this();
 			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 				if ((*i).get() == this || !can_solo()) {
 					continue;
 				}
 				bool sends_only;
-				bool does_feed = (*i)->feeds (shared_from_this(), &sends_only);
+				bool does_feed = (*i)->feeds (shared_this, &sends_only);
 				if (delta != 0 && does_feed && !sends_only) {
 					(*i)->solo_control()->mod_solo_by_others_downstream (delta);
 				}
