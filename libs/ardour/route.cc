@@ -3414,8 +3414,6 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 				}
 			}
 
-			cerr << "computed sbod = " << sbod << endl;
-
 			int delta = sbod - _solo_control->soloed_by_others_downstream();
 			if (delta <= 0) {
 				// do not allow new connections to change implicit solo (no propagation)
