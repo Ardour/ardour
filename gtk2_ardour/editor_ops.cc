@@ -2635,7 +2635,7 @@ Editor::play_with_preroll ()
 		const framepos_t preroll = _session->preroll_samples (start);
 
 		framepos_t ret = start;
-		
+
 		if (start > preroll) {
 			start = start - preroll;
 		}
@@ -2653,7 +2653,7 @@ Editor::play_with_preroll ()
 		const framepos_t preroll = _session->preroll_samples (ph);
 		framepos_t start;
 		if (ph > preroll) {
-			start = ph - preroll; 
+			start = ph - preroll;
 		} else {
 			start = 0;
 		}
@@ -4237,7 +4237,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 
 	/* user could select points in any order */
 	selection->points.sort(PointsSelectionPositionSorter ());
-	
+
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
 	for (PointSelection::iterator sel_point = selection->points.begin(); sel_point != selection->points.end(); ++sel_point) {
 		const AutomationLine&                   line = (*sel_point)->line();
@@ -4316,7 +4316,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 			boost::shared_ptr<AutomationList> al = line.the_list();
 
 			bool erase = true;
-			
+
 			if (dynamic_cast<AudioRegionGainLine*> (&line)) {
 				/* removing of first and last gain point in region gain lines is prohibited*/
 				if (line.is_last_point (*(*sel_point)) || line.is_first_point (*(*sel_point))) {
@@ -6406,7 +6406,7 @@ Editor::set_auto_punch_range ()
 			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
 			_session->config.set_punch_out(true);
 		}
-	} else 	{
+	} else	{
 		if (_session->config.get_punch_out()) {
 			_session->config.set_punch_out(false);
 		}
