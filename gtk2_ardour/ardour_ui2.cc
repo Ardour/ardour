@@ -547,9 +547,9 @@ ARDOUR_UI::setup_transport ()
 	alert_box->set_homogeneous (true);
 	alert_box->set_spacing (1);
 	alert_box->set_border_width (0);
-	alert_box->pack_start (solo_alert_button, true, false, 0);
-	alert_box->pack_start (auditioning_alert_button, true, false, 0);
-	alert_box->pack_start (feedback_alert_button, true, false, 0);
+	alert_box->pack_start (solo_alert_button, true, true);
+	alert_box->pack_start (auditioning_alert_button, true, true);
+	alert_box->pack_start (feedback_alert_button, true, true);
 
 	/* clock button size groups */
 	Glib::RefPtr<SizeGroup> button_height_size_group = SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
