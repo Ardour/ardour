@@ -516,7 +516,7 @@ ARDOUR_UI::setup_transport ()
 	   nothing inside the transport_frame actually draws a background. We
 	   would therefore end up seeing the background of the parent widget,
 	   which is probably some default color. Adding the EventBox adds a
-	   widget that will draw the background, using a style based on 
+	   widget that will draw the background, using a style based on
 	   the parent, "TransportFrame".
 	*/
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);
@@ -562,7 +562,7 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (stop_button);
 //	button_height_size_group->add_widget (sync_button);
 	button_height_size_group->add_widget (auto_return_button);
-	
+
 	//tab selections
 	button_height_size_group->add_widget (editor_visibility_button);
 	button_height_size_group->add_widget (mixer_visibility_button);
