@@ -642,12 +642,15 @@ Selection::remove (TimeAxisView* track)
 void
 Selection::remove (const TrackViewList& track_list)
 {
+	PresentationInfo::ChangeSuspender cs;
+
 	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 
 		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
+
 		if (x != tracks.end()) {
-			(*i)->set_selected (false);
 			tracks.erase (x);
+			(*i)->set_selected (false);
 		}
 	}
 }
