@@ -112,6 +112,10 @@ public:
 			, clocks_per_click (-1)
 			, notes_per_note (-1) {}
 		Tempo (smf_tempo_t*);
+
+		double tempo() const {
+			return 60.0 * (1000000.0 / (double) microseconds_per_quarter_note);
+		}
 	};
 
 	Tempo* tempo_at_smf_pulse (size_t smf_pulse) const;
