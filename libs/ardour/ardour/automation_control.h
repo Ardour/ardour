@@ -140,6 +140,9 @@ class LIBARDOUR_API AutomationControl
 	   change for execution in a realtime context. C++ access control sucks.
 	*/
 	friend class Session;
+	/* this is what the session invokes */
+	void pre_realtime_queue_stuff (double new_value, PBD::Controllable::GroupControlDisposition);
+	/* this will be invoked in turn on behalf of the group or the control by itself */
 	virtual void do_pre_realtime_queue_stuff (double new_value) {}
 
   private:

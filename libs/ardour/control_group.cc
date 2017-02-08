@@ -153,6 +153,16 @@ ControlGroup::add_control (boost::shared_ptr<AutomationControl> ac)
 }
 
 void
+ControlGroup::pre_realtime_queue_stuff (double val)
+{
+	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+
+	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
+		c->second->do_pre_realtime_queue_stuff (val);
+	}
+}
+
+void
 ControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, double val)
 {
 	double old = control->get_value ();

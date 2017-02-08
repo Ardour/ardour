@@ -86,6 +86,16 @@ AutomationControl::get_value() const
 }
 
 void
+AutomationControl::pre_realtime_queue_stuff (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	if (_group && _group->use_me (gcd)) {
+		_group->pre_realtime_queue_stuff (val);
+	} else {
+		do_pre_realtime_queue_stuff (val);
+	}
+}
+
+void
 AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
 {
 	if (!writable()) {
