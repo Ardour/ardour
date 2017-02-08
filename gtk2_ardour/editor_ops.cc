@@ -7085,11 +7085,14 @@ Editor::close_region_gaps ()
 
 		(*r)->region()->clear_changes ();
 		(*r)->region()->trim_front( (position - pull_back_frames));
+
+		last_region->clear_changes ();
 		last_region->trim_end( (position - pull_back_frames + crossfade_len));
 
 		_session->add_command (new StatefulDiffCommand ((*r)->region()));
-		last_region = (*r)->region();
+		_session->add_command (new StatefulDiffCommand (last_region));
 
+		last_region = (*r)->region();
 		idx++;
 	}
 
