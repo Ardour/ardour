@@ -344,7 +344,7 @@ SoundFileBox::setup_labels (const string& filename)
 				tempomap_value.set_text (string_compose (_("%1/%2 \u2669 = %3"),
 				                                         t->numerator,
 				                                         t->denominator,
-				                                         (1000000 / t->microseconds_per_quarter_note) * 60));
+				                                         t->tempo ()));
 				break;
 			}
 			default:
