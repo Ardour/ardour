@@ -1956,13 +1956,10 @@ Editor::register_region_actions ()
 
 	/* PART 3: actions that operate on the selection and also require the edit point location */
 
+	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-
-	/* These 3 do not need to be senstive to region selection */
-
-	myactions.register_action (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
-	myactions.register_action (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
-	myactions.register_action (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
+	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
+	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 
 	reg_sens (
 		_region_actions,
