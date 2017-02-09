@@ -368,7 +368,6 @@ int
 MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
-	PBD::stacktrace (cerr, 20);
 
 	if (initial == _current_initial_bank && !force) {
 		/* everything is as it should be */
