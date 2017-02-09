@@ -2668,6 +2668,7 @@ ARDOUR_UI::save_session_as ()
 	if (!sa.include_media) {
 		unload_session (false);
 		load_session (sa.final_session_folder_name, sa.new_name);
+		hide_splash ();
 	}
 }
 
