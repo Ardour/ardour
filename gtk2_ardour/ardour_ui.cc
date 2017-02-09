@@ -3107,7 +3107,7 @@ void
 ARDOUR_UI::load_from_application_api (const std::string& path)
 {
 	/* OS X El Capitan (and probably later) now somehow passes the command
-	   line arguments to an app via the openFile delegate protocol. Ardour 
+	   line arguments to an app via the openFile delegate protocol. Ardour
 	   already does its own command line processing, and having both
 	   pathways active causes crashes. So, if the command line was already
 	   set, do nothing here.
