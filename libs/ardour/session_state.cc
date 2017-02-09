@@ -3513,12 +3513,10 @@ Session::set_dirty ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
 
-
 	if (!was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
 	}
 }
-
 
 void
 Session::set_clean ()
@@ -3526,7 +3524,6 @@ Session::set_clean ()
 	bool was_dirty = dirty();
 
 	_state_of_the_state = Clean;
-
 
 	if (was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
@@ -4953,7 +4950,6 @@ Session::save_as (SaveAs& saveas)
 #endif /* PLATFORM_WINDOWS */
 			}
 		}
-
 
 		_path = to_dir;
 		set_snapshot_name (saveas.new_name);
