@@ -4976,7 +4976,6 @@ Session::save_as (SaveAs& saveas)
 
 		bool was_dirty = dirty ();
 
-		save_state ("", false, false, !saveas.include_media);
 		save_default_options ();
 
 		if (saveas.copy_media && saveas.copy_external) {
@@ -4990,6 +4989,10 @@ Session::save_as (SaveAs& saveas)
 		store_recent_sessions (_name, _path);
 
 		if (!saveas.switch_to) {
+
+			/* save the new state */
+
+			save_state ("", false, false, !saveas.include_media);
 
 			/* switch back to the way things were */
 
@@ -5023,6 +5026,19 @@ Session::save_as (SaveAs& saveas)
 			/* ensure that all existing tracks reset their current capture source paths
 			 */
 			reset_write_sources (true, true);
+
+			/* creating new write sources marks the session as
+			   dirty. If the new session is empty, then
+			   save_state() thinks we're saving a template and will
+			   not mark the session as clean. So do that here,
+			   before we save state.
+			*/
+
+			if (!saveas.include_media) {
+				_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+			}
+
+			save_state ("", false, false, !saveas.include_media);
 
 			/* the copying above was based on actually discovering files, not just iterating over the sources list.
 			   But if we're going to switch to the new (copied) session, we need to change the paths in the sources also.
