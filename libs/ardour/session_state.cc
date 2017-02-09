@@ -1294,6 +1294,7 @@ Session::state (bool full_state)
 		}
 	} else {
 		Locations loc (*this);
+		const bool was_dirty = dirty();
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
 		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
@@ -1310,6 +1311,15 @@ Session::state (bool full_state)
 			}
 		}
 		node->add_child_nocopy (locations_state);
+
+		/* adding a location above will have marked the session
+		 * dirty. This is an artifact, so fix it if the session wasn't
+		 * already dirty
+		 */
+
+		if (!was_dirty) {
+			_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+		}
 	}
 
 	child = node->add_child ("Bundles");
