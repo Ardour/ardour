@@ -512,6 +512,16 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	if (from_headers) {
 		alloc = controls_layout.get_allocation ();
+
+		int wx, wy;
+
+		controls_layout.get_parent()->translate_coordinates (*toplevel,
+		                                                     alloc.get_x(), alloc.get_y(),
+		                                                     wx, wy);
+
+		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
+
+
 	} else {
 		alloc = _track_canvas_viewport->get_allocation ();
 
@@ -542,9 +552,14 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 			alloc.set_x (alloc.get_x() + 10);
 		}
 
-	}
+		int wx, wy;
 
-	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
+		_track_canvas_viewport->get_parent()->translate_coordinates (*toplevel,
+		                                                             alloc.get_x(), alloc.get_y(),
+		                                                             wx, wy);
+
+		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
+	}
 
 	int x, y;
 	Gdk::ModifierType mask;
