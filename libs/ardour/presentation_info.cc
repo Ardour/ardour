@@ -102,12 +102,6 @@ PresentationInfo::send_static_change (const PropertyChange& what_changed)
 		return;
 	}
 
-	std::cerr << "PI change (direct): ";
-	for (PropertyChange::const_iterator x = what_changed.begin(); x != what_changed.end(); ++x) {
-		std::cerr << g_quark_to_string (*x) << ',';
-	}
-	std::cerr << '\n';
-
 	Change (what_changed);
 }
 
