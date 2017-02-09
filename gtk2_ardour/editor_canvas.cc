@@ -173,7 +173,7 @@ Editor::initialize_canvas ()
 
 	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
- 	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
@@ -414,7 +414,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, frame, is.selected_instrument());
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
-			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, 
+			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
 			           SrcBest, SMFTrackName, SMFTempoIgnore, frame);
 		} else {
 			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
