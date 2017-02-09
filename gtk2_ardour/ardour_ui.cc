@@ -2665,7 +2665,15 @@ ARDOUR_UI::save_session_as ()
 		msg.run ();
 	}
 
-	if (!sa.include_media) {
+	/* the logic here may seem odd: why isn't the condition sa.switch_to ?
+	 * the trick is this: if the new session was copy with media included,
+	 * then Session::save_as() will have already done a neat trick to avoid
+	 * us having to unload and load the new state. But if the media was not
+	 * included, then this is required (it avoids us having to otherwise
+	 * drop all references to media (sources).
+	 */
+
+	if (!sa.include_media && sa.switch_to) {
 		unload_session (false);
 		load_session (sa.final_session_folder_name, sa.new_name);
 		hide_splash ();
