@@ -1485,7 +1485,7 @@ Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
 
 		   What a carry on :(
 		*/
-		sensitize_the_right_region_actions ();
+		sensitize_the_right_region_actions (false, !within_track_canvas);
 		_last_region_menu_was_main = true;
 	}
 }
@@ -1717,7 +1717,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	/* When the region menu is opened, we setup the actions so that they look right
 	   in the menu.
 	*/
-	sensitize_the_right_region_actions ();
+	sensitize_the_right_region_actions (true, false);
 	_last_region_menu_was_main = false;
 
 	menu->signal_hide().connect (sigc::bind (sigc::mem_fun (*this, &Editor::sensitize_all_region_actions), true));
@@ -4738,6 +4738,8 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
+	cerr << "ig " << ignore << " fcm " << from_context_menu << " foc " << from_outside_canvas << endl;
+
 	if (Profile->get_mixbus()) {
 		if (ep == EditAtSelectedMarker) {
 			ep = EditAtPlayhead;
@@ -4764,6 +4766,8 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	}
 
 	MusicFrame snap_mf (0, 0);
+
+	cerr << "Using EP " << enum_2_string (ep) << endl;
 
 	switch (ep) {
 	case EditAtPlayhead:
@@ -4949,7 +4953,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
  */
 
 RegionSelection
-Editor::get_regions_from_selection_and_edit_point ()
+Editor::get_regions_from_selection_and_edit_point (EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
 {
 	RegionSelection regions;
 
@@ -4966,7 +4970,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
 			 */
-			framepos_t const where = get_preferred_edit_position ();
+			framepos_t const where = get_preferred_edit_position (ignore, from_outside_canvas, from_outside_canvas);
 			get_regions_at(regions, where, tracks);
 		}
 	}

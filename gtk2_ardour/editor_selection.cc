@@ -1087,17 +1087,20 @@ Editor::sensitize_all_region_actions (bool s)
 }
 
 /** Sensitize region-based actions based on the selection ONLY, ignoring the entered_regionview.
- *  This method should be called just before displaying a Region menu.  When a Region menu is not
- *  currently being shown, all region actions are sensitized so that hotkey-triggered actions
- *  on entered_regionviews work without having to check sensitivity every time the selection or
- *  entered_regionview changes.
+ *  This method is called from three places:
+ *
+ *    1. just before the top level Region menu is shown
+ *    2. whenever the region selection changes
+ *    3. just before popping up a track context menu
  *
  *  This method also sets up toggle action state as appropriate.
  */
 void
-Editor::sensitize_the_right_region_actions ()
+Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_outside_canvas)
 {
-	RegionSelection rs = get_regions_from_selection_and_entered ();
+	PBD::stacktrace (cerr, 20);
+	RegionSelection rs = get_regions_from_selection_and_edit_point (Editing::EDIT_IGNORE_NONE, from_context_menu, from_outside_canvas);
+
 	sensitize_all_region_actions (!rs.empty ());
 
 	_ignore_region_action = true;
@@ -1251,12 +1254,71 @@ Editor::sensitize_the_right_region_actions ()
 		/* others were already marked sensitive */
 	}
 
-	if (_edit_point == EditAtMouse) {
-		_region_actions->get_action("set-region-sync-position")->set_sensitive (false);
-		_region_actions->get_action("trim-front")->set_sensitive (false);
-		_region_actions->get_action("trim-back")->set_sensitive (false);
-		_region_actions->get_action("place-transient")->set_sensitive (false);
+	/* these actions all require a single location, taken from the edit
+	 * point.
+	 */
+
+	vector<string> edit_point_actions;
+	edit_point_actions.push_back ("set-region-sync-position");
+	edit_point_actions.push_back ("trim-front");
+	edit_point_actions.push_back ("trim-back");
+	edit_point_actions.push_back ("place-transient");
+	edit_point_actions.push_back ("align-regions-start");
+	edit_point_actions.push_back ("align-regions-start-relative");
+	edit_point_actions.push_back ("align-regions-end");
+	edit_point_actions.push_back ("align-regions-end-relative");
+	edit_point_actions.push_back ("align-regions-sync");
+	edit_point_actions.push_back ("align-regions-sync-relative");
+
+	/* They all use Editor::get_regions_from_selection_and_edit_point(),
+	 * which is the same method used at the start of this to determine if
+	 * any regions are eligible/valid for editing.
+	 *
+	 * there are two possible reasons why these actions should still
+	 * be sensitive.
+	 *
+	 *  1. regions are selected
+	 *  2. the edit point is inside some regions on selected tracks
+	 *
+	 * the first condition is satisfied if selection->regions is not empty.
+	 * the second condition is satisfied if selection->regions is empty,
+	 *    but @param rs (set above by the call to get_regions_from_selection_and_edit_point()
+	 *    is not empty.
+	 *
+	 * if the mouse is the edit point, then whether get_regions_from_selection_and_edit_point()
+	 * will have identified any regions will depend on the edit point setting.
+	 *
+	 * Editing::EditIgnoreOption that we passed to it, which in turn will
+	 * depend on whether or not the pointer is still inside the track
+	 * canvas. If it was, then the pointer position will determine whether
+	 * or not any non-selected regions are considered eligible. If it
+	 * wasn't, then we will ignore the pointer position and fallback on a
+	 * secondary edit point (at this writing, that will likely be the
+	 * playhead but see get_regions_from_selection_and_edit_point() to see
+	 * how this works).
+	 *
+	 * if the edit point is not the mouse, then
+	 * get_regions_from_selection_and_edit_point() will just do the right
+	 * thing.
+	 *
+	 * However, the implementation of the actions will still use the edit
+	 * point, ...
+	 * 
+	 */
+
+	bool sensitivity;
+
+	if (!selection->regions.empty() || !rs.empty()) { /* conditions 1 and 2 above */
+		sensitivity = true;
+	} else {
+		sensitivity = false;
 	}
+
+	for (vector<string>::const_iterator a = edit_point_actions.begin(); a != edit_point_actions.end(); ++a) {
+		_region_actions->get_action (*a)->set_sensitive (sensitivity);
+	}
+
+	/* ok, moving along... */
 
 	if (have_compound_regions) {
 		_region_actions->get_action("uncombine-regions")->set_sensitive (true);
@@ -1362,7 +1424,6 @@ Editor::sensitize_the_right_region_actions ()
 	_all_region_actions_sensitized = false;
 }
 
-
 void
 Editor::region_selection_changed ()
 {
@@ -1384,16 +1445,7 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 
-	if (selection->regions.empty()) {
-		sensitize_all_region_actions (false);
-	} else {
-		if (!_all_region_actions_sensitized) {
-			/* This selection change might have changed what region actions
-			   are allowed, so sensitize them all in case a key is pressed.
-			*/
-			sensitize_all_region_actions (true);
-		}
-	}
+	sensitize_the_right_region_actions (false, false);
 
 	/* propagate into backend */
 
