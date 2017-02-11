@@ -378,6 +378,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		waves[n]->gain_changed ();
 	}
+	region_renamed ();
 }
 
 void
@@ -391,6 +392,14 @@ AudioRegionView::region_renamed ()
 
 	if (_region->muted()) {
 		str = string ("!") + str;
+	}
+
+
+	boost::shared_ptr<AudioRegion> ar (audio_region());
+	if (ar->scale_amplitude() != 1.0) {
+		char tmp[32];
+		snprintf (tmp, 32, " (%.1fdB)", accurate_coefficient_to_dB (ar->scale_amplitude()));
+		str += tmp;
 	}
 
 	set_item_name (str, this);
@@ -1338,11 +1347,10 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	/* don't create points that can't be seen */
 
 	update_envelope_visibility ();
-
 	framepos_t rpos = region ()->position ();
-	framepos_t fx = trackview.editor().pixel_to_sample (mx) + rpos;
-	trackview.editor ().snap_to_with_modifier (fx, ev);
-	fx -= rpos;
+	MusicFrame snap_pos (trackview.editor().pixel_to_sample (mx) + rpos, 0);
+	trackview.editor ().snap_to_with_modifier (snap_pos, ev);
+	framepos_t fx = snap_pos.frame - rpos;
 
 	if (fx > _region->length()) {
 		return;
@@ -1615,17 +1623,14 @@ AudioRegionView::set_fade_visibility (bool yn)
 void
 AudioRegionView::update_coverage_frames (LayerDisplay d)
 {
-	if (d != Stacked) {
-		/* don't do coverage frames unless we're in stacked mode */
-		return;
-	}
-
 	RegionView::update_coverage_frames (d);
 
-	if (fade_in_handle)       { fade_in_handle->raise_to_top (); }
-	if (fade_out_handle)      { fade_out_handle->raise_to_top (); }
-	if (fade_in_trim_handle)  { fade_in_trim_handle->raise_to_top (); }
-	if (fade_out_trim_handle) { fade_out_trim_handle->raise_to_top (); }
+	if (d == Stacked) {
+		if (fade_in_handle)       { fade_in_handle->raise_to_top (); }
+		if (fade_out_handle)      { fade_out_handle->raise_to_top (); }
+		if (fade_in_trim_handle)  { fade_in_trim_handle->raise_to_top (); }
+		if (fade_out_trim_handle) { fade_out_trim_handle->raise_to_top (); }
+	}
 }
 
 void

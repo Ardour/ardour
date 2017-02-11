@@ -63,7 +63,7 @@ PolyItem::compute_bounding_box () const
 
 
 	} else {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 	}
 
 	_bounding_box_dirty = false;

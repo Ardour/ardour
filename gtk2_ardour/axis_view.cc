@@ -67,7 +67,7 @@ AxisView::gui_property (const string& property_name) const
 	if (property_hashtable.count(property_name)) {
 		return property_hashtable[property_name];
 	} else {
-	  string rv = gui_object_state().get_string (state_id(), property_name);
+		string rv = gui_object_state().get_string (state_id(), property_name);
 		property_hashtable.erase(property_name);
 		property_hashtable.emplace(property_name, rv);
 		return rv;

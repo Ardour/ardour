@@ -117,15 +117,15 @@ struct LIBCANVAS_API Rect
 	Coord x1;
 	Coord y1;
 
-	boost::optional<Rect> intersection (Rect const & o) const throw () {
+	Rect intersection (Rect const & o) const throw () {
 		Rect i (std::max (x0, o.x0), std::max (y0, o.y0),
 			std::min (x1, o.x1), std::min (y1, o.y1));
 
 		if (i.x0 > i.x1 || i.y0 > i.y1) {
-			return boost::optional<Rect> ();
+			return Rect();
 		}
 
-		return boost::optional<Rect> (i);
+		return i;
 	}
 
 	Rect extend (Rect const & o) const throw () {
@@ -165,6 +165,7 @@ struct LIBCANVAS_API Rect
 	}
 
 	bool empty() const throw () { return (x0 == x1 && y0 == y1); }
+	operator bool() const throw () { return !empty(); }
 
 	Distance width () const  throw () {
 		return x1 - x0;

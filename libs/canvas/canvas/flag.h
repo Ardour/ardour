@@ -45,6 +45,8 @@ public:
 
         bool covers (Duple const &) const;
 
+	double width() const;
+
 private:
 	void setup (Distance height, Duple position);
 

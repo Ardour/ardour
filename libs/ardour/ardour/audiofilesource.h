@@ -63,6 +63,7 @@ public:
 	void mark_streaming_write_completed (const Lock& lock);
 
 	int setup_peakfile ();
+	void set_gain (float g, bool temporarily = false);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

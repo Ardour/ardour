@@ -56,7 +56,7 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 {
 public:
 	AbstractUI (const std::string& name);
-	virtual ~AbstractUI() {}
+	virtual ~AbstractUI();
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);

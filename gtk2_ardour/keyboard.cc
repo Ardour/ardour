@@ -54,13 +54,13 @@ guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
 guint ArdourKeyboard::trim_anchored_mod = Keyboard::PrimaryModifier|Keyboard::TertiaryModifier;
 
 /* ControlPointDrag::motion() && LineDrag::motion()*/
-guint ArdourKeyboard::fine_adjust_mod = Keyboard::PrimaryModifier|Keyboard::SecondaryModifier;
+guint ArdourKeyboard::fine_adjust_mod = Keyboard::PrimaryModifier|Keyboard::SecondaryModifier; // XXX better just 2ndary
 
 /* ControlPointDrag::start_grab() && MarkerDrag::motion() */
 guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier|Keyboard::Level4Modifier;
 
 /* NoteResizeDrag::start_grab() */
-guint ArdourKeyboard::note_size_relative_mod = Keyboard::TertiaryModifier;
+guint ArdourKeyboard::note_size_relative_mod = Keyboard::TertiaryModifier; // XXX better: 2ndary
 
 ArdourKeyboard::ArdourKeyboard (ARDOUR_UI& ardour_ui) : ui (ardour_ui)
 {

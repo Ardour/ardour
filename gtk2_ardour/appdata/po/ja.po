@@ -1,0 +1,59 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2015-11-06 11:59+0100\n"
+"PO-Revision-Date: 2017-01-21 13:44-0800\n"
+"Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
+"Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+# Intentionally left untranslated.
+#. (itstool) path: component/name
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:6
+msgid "Ardour"
+msgstr ""
+
+#. (itstool) path: component/summary
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:8
+msgid "Digital Audio Workstation"
+msgstr "デジタル・オーディオ・ワークステーション"
+
+#. (itstool) path: description/p
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:10
+msgid ""
+"Ardour is a multi-channel digital audio workstation, allowing you to record, "
+"edit, mix and master audio and MIDI projects."
+msgstr ""
+"Ardour はマルチチャンネル・デジタル・オーディオ・ワークステーション (DAW) で"
+"す。オーディオや MIDI のレコーディング、編集、ミックス、マスタリングができま"
+"す。"
+
+#. (itstool) path: description/p
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:14
+msgid ""
+"It is targeted at audio engineers, musicians, soundtrack editors and "
+"composers."
+msgstr ""
+"オーディオエンジニア、ミュージシャン、サウンドトラック・エディター、作曲家を"
+"利用対象者としています。"
+
+#. (itstool) path: screenshot/caption
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:23
+msgid ""
+"The Editor window where you can arrange audio and MIDI data along a timeline"
+msgstr ""
+"エディターウインドウではオーディオや MIDI データをタイムラインに沿ってアレン"
+"ジできます"
+
+#. (itstool) path: screenshot/caption
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:27
+msgid "The Mixer window which includes channel strips for each track and bus"
+msgstr ""
+"ミキサーウインドウにはトラックやバスごとにチャンネルストリップが用意されてい"
+"ます"

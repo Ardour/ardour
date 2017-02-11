@@ -37,7 +37,9 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/session.h"
+#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
+#endif
 #include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"
@@ -278,7 +280,7 @@ Automatable::get_automation_xml_state ()
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
-		if (l && !l->empty()) {
+		if (l) {
 			node->add_child_nocopy (l->get_state ());
 		}
 	}

@@ -25,12 +25,14 @@
 using namespace std;
 
 SysEx::SysEx (
-	MidiRegionView& region,
-	ArdourCanvas::Container* parent,
-	string&         text,
-	double          height,
-	double          x,
-	double          y)
+	MidiRegionView&             region,
+	ArdourCanvas::Container*    parent,
+	string&                     text,
+	double                      height,
+	double                      x,
+	double                      y,
+	ARDOUR::MidiModel::SysExPtr sysex)
+	: _sysex (sysex)
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,
@@ -45,7 +47,9 @@ SysEx::SysEx (
 
 SysEx::~SysEx()
 {
-	delete _flag;
+	/* do not delete flag because it was added to a parent/container which
+	   will delete it.
+	*/
 	_flag = 0;
 }
 

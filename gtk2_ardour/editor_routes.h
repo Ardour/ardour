@@ -78,7 +78,8 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
-	void sync_treeview_from_presentation_info ();
+	void presentation_info_changed (PBD::PropertyChange const &);
+	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);
@@ -165,6 +166,7 @@ private:
 	int _active_column;
 
 	bool _ignore_reorder;
+	bool _ignore_selection_change;
 	bool _no_redisplay;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;

@@ -42,6 +42,7 @@ canvas_sources = [
         'fill.cc',
         'flag.cc',
         'framed_curve.cc',
+        'grid.cc',
         'image.cc',
         'line.cc',
         'line_set.cc',

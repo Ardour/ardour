@@ -24,7 +24,9 @@
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
+#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
+#endif
 #include "evoral/Parameter.hpp"
 #include "evoral/ParameterDescriptor.hpp"
 #include "evoral/midi_events.h"
@@ -135,6 +137,10 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = TrimAutomation;
 	} else if (str == "solo") {
 		p_type = SoloAutomation;
+	} else if (str == "solo-iso") {
+		p_type = SoloIsolateAutomation;
+	} else if (str == "solo-safe") {
+		p_type = SoloSafeAutomation;
 	} else if (str == "mute") {
 		p_type = MuteAutomation;
 	} else if (str == "fadein") {
@@ -151,6 +157,16 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = PanElevationAutomation;
 	} else if (str == "pan-frontback") {
 		p_type = PanFrontBackAutomation;
+	} else if (str == "pan-lfe") {
+		p_type = PanLFEAutomation;
+	} else if (str == "rec-enable") {
+		p_type = RecEnableAutomation;
+	} else if (str == "rec-safe") {
+		p_type = RecSafeAutomation;
+	} else if (str == "phase") {
+		p_type = PhaseAutomation;
+	} else if (str == "monitor") {
+		p_type = MonitoringAutomation;
 	} else if (str == "pan-lfe") {
 		p_type = PanLFEAutomation;
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
@@ -239,6 +255,18 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "fadeout";
 	} else if (t == EnvelopeAutomation) {
 		return "envelope";
+	} else if (t == PhaseAutomation) {
+		return "phase";
+	} else if (t == SoloIsolateAutomation) {
+		return "solo-iso";
+	} else if (t == SoloSafeAutomation) {
+		return "solo-safe";
+	} else if (t == MonitoringAutomation) {
+		return "monitor";
+	} else if (t == RecEnableAutomation) {
+		return "rec-enable";
+	} else if (t == RecSafeAutomation) {
+		return "rec-safe";
 	} else if (t == PluginAutomation) {
 		return string_compose("parameter-%1", param.id());
 #ifdef LV2_SUPPORT

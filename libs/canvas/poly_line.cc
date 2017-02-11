@@ -44,10 +44,10 @@ PolyLine::compute_bounding_box () const
 {
 	PolyItem::compute_bounding_box ();
 	if (_y1 > 0 && _bounding_box) {
-		_bounding_box.get().x0 = 0;
-		_bounding_box.get().x1 = COORD_MAX;
-		if (_y1 > _bounding_box.get().y1) {
-			_bounding_box.get().y1 = _y1;
+		_bounding_box.x0 = 0;
+		_bounding_box.x1 = COORD_MAX;
+		if (_y1 > _bounding_box.y1) {
+			_bounding_box.y1 = _y1;
 		}
 	}
 }

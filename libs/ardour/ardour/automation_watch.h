@@ -27,6 +27,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -38,6 +39,7 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
 
     void add_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
     void remove_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
+    void transport_stop_automation_watches (ARDOUR::framepos_t);
     void set_session (ARDOUR::Session*);
 
     gint timer ();

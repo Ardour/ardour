@@ -117,6 +117,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool reset_map (bool emit = true);
 	bool sanitize_maps ();
 	bool check_inplace ();
+	bool configured () const { return _configured; }
 
 	// these are ports visible on the outside
 	ChanCount output_streams() const;

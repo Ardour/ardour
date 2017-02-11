@@ -90,10 +90,10 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		return;
 	}
 
-	Rect self = item_to_window (_bounding_box.get());
-	boost::optional<Rect> d = self.intersection (area);
+	Rect self = item_to_window (_bounding_box);
+	Rect d = self.intersection (area);
 	assert (d);
-	Rect draw = d.get ();
+	Rect draw = d;
 
 	/* Our approach is to always draw n_segments across our total size.
 	 *

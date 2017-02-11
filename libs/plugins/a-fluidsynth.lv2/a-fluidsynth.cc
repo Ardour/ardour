@@ -327,6 +327,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	fluid_settings_setnum (self->settings, "synth.sample-rate", rate);
 	fluid_settings_setint (self->settings, "synth.parallel-render", 1);
 	fluid_settings_setint (self->settings, "synth.threadsafe-api", 0);
+	fluid_settings_setstr (self->settings, "synth.midi-bank-select", "mma");
 
 	self->synth = new_fluid_synth (self->settings);
 
@@ -762,6 +763,10 @@ mn_file (LV2_Handle instance)
 	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
 		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
 		if (i->second.size() > 0) {
+			pf ("        <MIDICommands>\n");
+			pf ("            <ControlChange Control=\"0\" Value=\"%d\"/>\n", (i->first >> 7) & 127);
+			pf ("            <ControlChange Control=\"32\" Value=\"%d\"/>\n", i->first & 127);
+			pf ("        </MIDICommands>\n");
 			pf ("        <PatchNameList>\n");
 			int n = 0;
 			for (BPList::const_iterator j = i->second.begin(); j != i->second.end(); ++j, ++n) {

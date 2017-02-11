@@ -25,6 +25,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 #include "gtkmm2ext/cairo_widget.h"
@@ -34,6 +35,10 @@
 
 namespace ARDOUR {
 	class Session;
+}
+
+namespace Gtk {
+	class Menu;
 }
 
 class MiniTimeline : public CairoWidget, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
@@ -60,13 +65,20 @@ private:
 	void calculate_time_spacing ();
 	void update_minitimeline ();
 	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
-	int  draw_mark (cairo_t*, int x0, int x1, int h, const std::string&);
+	int  draw_mark (cairo_t*, int x0, int x1, const std::string&, bool& prelight);
 
 	void render (cairo_t*, cairo_rectangle_t*);
 	void format_time (framepos_t when);
 
-	bool on_button_release_event (GdkEventButton *ev);
+	bool on_button_press_event (GdkEventButton*);
+	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll*);
+	bool on_motion_notify_event (GdkEventMotion*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+
+	void build_minitl_context_menu ();
+	void show_minitl_context_menu ();
+	void set_span (ARDOUR::framecnt_t);
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	sigc::connection super_rapid_connection;
@@ -80,15 +92,22 @@ private:
 
 	int _n_labels;
 	double _px_per_sample;
-	framepos_t _time_granularity;
-	framepos_t _time_span_samples;
+	ARDOUR::framecnt_t _time_granularity;
+	ARDOUR::framecnt_t _time_span_samples;
+	int _marker_height;
+
+	int _pointer_x;
+	int _pointer_y;
+
+	Gtk::Menu* _minitl_context_menu;
 
 	struct JumpRange {
-		JumpRange (int l, int r, framepos_t t)
-			: left (l), right (r), to (t) {}
+		JumpRange (int l, int r, framepos_t t, bool p = false)
+			: left (l), right (r), to (t), prelight (p) {}
 		int left;
 		int right;
 		framepos_t to;
+		bool prelight;
 	};
 
 	typedef std::list <JumpRange> JumpList;

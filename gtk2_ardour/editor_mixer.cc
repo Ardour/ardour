@@ -285,34 +285,3 @@ Editor::mixer_strip_width_changed ()
 	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
 }
 
-void
-Editor::track_mixer_selection ()
-{
-	Mixer_UI::instance()->selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_selection));
-}
-
-void
-Editor::follow_mixer_selection ()
-{
-	if (_following_mixer_selection) {
-		return;
-	}
-
-	_following_mixer_selection = true;
-	selection->block_tracks_changed (true);
-
-	AxisViewSelection& s (Mixer_UI::instance()->selection().axes);
-
-	selection->clear_tracks ();
-
-	for (AxisViewSelection::iterator i = s.begin(); i != s.end(); ++i) {
-		TimeAxisView* tav = axis_view_from_stripable ((*i)->stripable());
-		if (tav) {
-			selection->add (tav);
-		}
-	}
-
-	_following_mixer_selection = false;
-	selection->block_tracks_changed (false);
-	selection->TracksChanged (); /* EMIT SIGNAL */
-}

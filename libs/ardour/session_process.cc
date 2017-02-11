@@ -314,6 +314,47 @@ Session::process_with_events (pframes_t nframes)
 		process_event (ev);
 	}
 
+	/* count in */
+	if (_transport_speed != 1.0 && _count_in_samples > 0) {
+		_count_in_samples = 0;
+	}
+
+	if (_count_in_samples > 0) {
+		framecnt_t ns = std::min ((framecnt_t)nframes, _count_in_samples);
+
+		no_roll (ns);
+		run_click (_transport_frame - _count_in_samples, ns);
+
+		_count_in_samples -= ns;
+		nframes -= ns;
+
+		/* process events.. */
+		if (!events.empty() && next_event != events.end()) {
+			SessionEvent* this_event = *next_event;
+			Events::iterator the_next_one = next_event;
+			++the_next_one;
+
+			while (this_event && this_event->action_frame == _transport_frame) {
+				process_event (this_event);
+				if (the_next_one == events.end()) {
+					this_event = 0;
+				} else {
+					this_event = *the_next_one;
+					++the_next_one;
+				}
+			}
+			set_next_event ();
+		}
+
+		check_declick_out ();
+
+		if (nframes == 0) {
+			return;
+		} else {
+			_engine.split_cycle (ns);
+		}
+	}
+
 	/* Decide on what to do with quarter-frame MTC during this cycle */
 
 	bool const was_sending_qf_mtc = _send_qf_mtc;
@@ -359,8 +400,14 @@ Session::process_with_events (pframes_t nframes)
 
 	if (events.empty() || next_event == events.end()) {
 		try_run_lua (nframes); // also during export ?? ->move to process_without_events()
-		process_without_events (nframes);
-		return;
+		/* lua scripts may inject events */
+		while (_n_lua_scripts > 0 && pending_events.read (&ev, 1) == 1) {
+			merge_event (ev);
+		}
+		if (events.empty() || next_event == events.end()) {
+			process_without_events (nframes);
+			return;
+		}
 	}
 
 	if (_transport_speed == 1.0) {
@@ -1109,7 +1156,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (config.get_punch_in() && record_status() == Enabled) {
+		if (config.get_punch_in() && record_status() == Enabled && !preroll_record_punch_enabled()) {
 			enable_record ();
 		}
 		remove = false;
@@ -1118,8 +1165,16 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (config.get_punch_out()) {
+		if (config.get_punch_out() && !preroll_record_punch_enabled()) {
 			step_back_from_record ();
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::RecordStart:
+		if (preroll_record_punch_enabled() && record_status() == Enabled) {
+			enable_record ();
 		}
 		remove = false;
 		del = false;
@@ -1224,6 +1279,9 @@ Session::compute_stop_limit () const
 		return max_framepos;
 	}
 
+	if (preroll_record_punch_enabled ()) {
+		return max_framepos;
+	}
 
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
 	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());

@@ -374,6 +374,9 @@ AddRouteDialog::refill_track_modes ()
 	s.push_back (_("Non Layered"));
 #endif
 	s.push_back (_("Tape"));
+	if (!ARDOUR::Profile->get_mixbus ()) {
+		s.push_back (_("Tape"));
+	}
 
 	set_popdown_strings (mode_combo, s);
 	mode_combo.set_active_text (s.front());

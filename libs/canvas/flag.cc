@@ -80,10 +80,10 @@ Flag::set_text (string const & text)
 		_text->set (text);
 	}
 
-	boost::optional<Rect> bbox = _text->bounding_box ();
+	Rect bbox = _text->bounding_box ();
 	assert (bbox);
 
-	Duple flag_size (bbox.get().width() + 10, bbox.get().height() + 4);
+	Duple flag_size (bbox.width() + 10, bbox.height() + 4);
 
 	if (_invert) {
 		const Distance h = fabs(_line->y1() - _line->y0());
@@ -101,9 +101,9 @@ Flag::set_height (Distance h)
 	_line->set (Duple (0, 0), Duple (0, h));
 
 	if (_invert) {
-		boost::optional<Rect> bbox = _text->bounding_box ();
+		Rect bbox = _text->bounding_box ();
 		if (bbox) {
-			Duple flag_size (bbox.get().width() + 10, bbox.get().height() + 4);
+			Duple flag_size (bbox.width() + 10, bbox.height() + 4);
 			_rectangle->set (Rect (0, h - flag_size.y, flag_size.x, h));
 			_text->set_position (Duple (5, h - flag_size.y + 2));
 		}
@@ -118,4 +118,13 @@ Flag::covers (Duple const & point) const
 	}
 
 	return false;
+}
+
+double
+Flag::width () const
+{
+	Rect bbox = _text->bounding_box ();
+	assert (bbox);
+
+	return bbox.width() + 10;
 }

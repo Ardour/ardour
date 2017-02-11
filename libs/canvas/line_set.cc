@@ -50,7 +50,7 @@ void
 LineSet::compute_bounding_box () const
 {
 	if (_lines.empty ()) {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 	} else {
 
 		if (_orientation == Horizontal) {
@@ -100,13 +100,13 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			self = item_to_window (Rect (i->pos - (i->width/2.0), 0, i->pos + (i->width/2.0), _extent));
 		}
 
-		boost::optional<Rect> isect = self.intersection (area);
+		Rect isect = self.intersection (area);
 
 		if (!isect) {
 			continue;
 		}
 
-		Rect intersection (isect.get());
+		Rect intersection (isect);
 
 		set_source_rgba (context, i->color);
 		context->set_line_width (i->width);

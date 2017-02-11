@@ -527,7 +527,10 @@ SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
 	vector<boost::shared_ptr<Playlist> > pl_tr;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
-		if (((*i)->get_orig_track_id() == tr->id()) || (tr->playlist()->id() == (*i)->id())) {
+		if ( ((*i)->get_orig_track_id() == tr->id()) ||
+			(tr->playlist()->id() == (*i)->id())    ||
+			((*i)->shared_with (tr->id())) )
+		{
 			pl_tr.push_back (*i);
 		}
 	}

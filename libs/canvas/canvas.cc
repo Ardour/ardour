@@ -107,20 +107,20 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	render_count = 0;
 
-	boost::optional<Rect> root_bbox = _root.bounding_box();
+	Rect root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
 		return;
 	}
 
-	boost::optional<Rect> draw = root_bbox->intersection (area);
+	Rect draw = root_bbox.intersection (area);
 	if (draw) {
 
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
 
-		_root.render (*draw, context);
+		_root.render (draw, context);
 
 #if defined CANVAS_DEBUG && !PLATFORM_WINDOWS
 		if (getenv ("CANVAS_HARLEQUIN_DEBUGGING")) {
@@ -128,7 +128,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 			double r = (random() % 65536) /65536.0;
 			double g = (random() % 65536) /65536.0;
 			double b = (random() % 65536) /65536.0;
-			context->rectangle (draw->x0, draw->y0, draw->x1 - draw->x0, draw->y1 - draw->y0);
+			context->rectangle (draw.x0, draw.y0, draw.x1 - draw.x0, draw.y1 - draw.y0);
 			context->set_source_rgba (r, g, b, 0.25);
 			context->fill ();
 		}
@@ -181,10 +181,10 @@ Canvas::dump (ostream& o) const
 void
 Canvas::item_shown_or_hidden (Item* item)
 {
-	boost::optional<Rect> bbox = item->bounding_box ();
+	Rect bbox = item->bounding_box ();
 	if (bbox) {
-		if (item->item_to_window (*bbox).intersection (visible_area ())) {
-			queue_draw_item_area (item, bbox.get ());
+		if (item->item_to_window (bbox).intersection (visible_area ())) {
+			queue_draw_item_area (item, bbox);
 		}
 	}
 }
@@ -196,10 +196,10 @@ Canvas::item_shown_or_hidden (Item* item)
 void
 Canvas::item_visual_property_changed (Item* item)
 {
-	boost::optional<Rect> bbox = item->bounding_box ();
+	Rect bbox = item->bounding_box ();
 	if (bbox) {
-		if (item->item_to_window (*bbox).intersection (visible_area ())) {
-			queue_draw_item_area (item, bbox.get ());
+		if (item->item_to_window (bbox).intersection (visible_area ())) {
+			queue_draw_item_area (item, bbox);
 		}
 	}
 }
@@ -210,25 +210,23 @@ Canvas::item_visual_property_changed (Item* item)
  *  in the item's coordinates.
  */
 void
-Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
+Canvas::item_changed (Item* item, Rect pre_change_bounding_box)
 {
-
 	Rect window_bbox = visible_area ();
 
 	if (pre_change_bounding_box) {
-
-		if (item->item_to_window (*pre_change_bounding_box).intersection (window_bbox)) {
+		if (item->item_to_window (pre_change_bounding_box).intersection (window_bbox)) {
 			/* request a redraw of the item's old bounding box */
-			queue_draw_item_area (item, pre_change_bounding_box.get ());
+			queue_draw_item_area (item, pre_change_bounding_box);
 		}
 	}
 
-	boost::optional<Rect> post_change_bounding_box = item->bounding_box ();
-	if (post_change_bounding_box) {
+	Rect post_change_bounding_box = item->bounding_box ();
 
-		if (item->item_to_window (*post_change_bounding_box).intersection (window_bbox)) {
+	if (post_change_bounding_box) {
+		if (item->item_to_window (post_change_bounding_box).intersection (window_bbox)) {
 			/* request a redraw of the item's new bounding box */
-			queue_draw_item_area (item, post_change_bounding_box.get ());
+			queue_draw_item_area (item, post_change_bounding_box);
 		}
 	}
 }
@@ -324,7 +322,7 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
  *  the move, in its parent's coordinates.
  */
 void
-Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding_box)
+Canvas::item_moved (Item* item, Rect pre_change_parent_bounding_box)
 {
 	if (pre_change_parent_bounding_box) {
 		/* request a redraw of where the item used to be. The box has
@@ -336,13 +334,13 @@ Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding
 		 * invalidation area. If we use the parent (which has not
 		 * moved, then this will work.
 		 */
-		queue_draw_item_area (item->parent(), pre_change_parent_bounding_box.get ());
+		queue_draw_item_area (item->parent(), pre_change_parent_bounding_box);
 	}
 
-	boost::optional<Rect> post_change_bounding_box = item->bounding_box ();
+	Rect post_change_bounding_box = item->bounding_box ();
 	if (post_change_bounding_box) {
 		/* request a redraw of where the item now is */
-		queue_draw_item_area (item, post_change_bounding_box.get ());
+		queue_draw_item_area (item, post_change_bounding_box);
 	}
 }
 
@@ -367,10 +365,10 @@ Canvas::set_background_color (Color c)
 {
         _bg_color = c;
 
-        boost::optional<Rect> r = _root.bounding_box();
+        Rect r = _root.bounding_box();
 
         if (r) {
-                request_redraw (_root.item_to_window (r.get()));
+                request_redraw (_root.item_to_window (r));
         }
 }
 
@@ -720,10 +718,10 @@ GtkCanvas::deliver_event (GdkEvent* event)
  *  @param bounding_box Last known bounding box of the item.
  */
 void
-GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
+GtkCanvas::item_going_away (Item* item, Rect bounding_box)
 {
 	if (bounding_box) {
-		queue_draw_item_area (item, bounding_box.get ());
+		queue_draw_item_area (item, bounding_box);
 	}
 
 	if (_new_current_item == item) {

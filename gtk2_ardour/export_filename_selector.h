@@ -74,7 +74,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label        label_label;
 	Gtk::Entry        label_entry;
 
-	Gtk::CheckButton  session_checkbox;
+	Gtk::ComboBoxText session_snap_name;
 	Gtk::CheckButton  timespan_checkbox;
 
 	Gtk::CheckButton  revision_checkbox;

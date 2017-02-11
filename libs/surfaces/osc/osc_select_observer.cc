@@ -243,14 +243,14 @@ OSCSelectObserver::send_init()
 	do {
 		sends = false;
 		if (_strip->send_level_controllable (nsends)) {
-			_strip->send_level_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, nsends, _strip->send_level_controllable(nsends)), OSC::instance());
+			_strip->send_level_controllable(nsends)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, nsends, _strip->send_level_controllable(nsends)), OSC::instance());
 			send_timeout.push_back (0);
 			send_gain (nsends, _strip->send_level_controllable(nsends));
 			sends = true;
 		}
 
 		if (_strip->send_enable_controllable (nsends)) {
-			_strip->send_enable_controllable(nsends)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), nsends + 1, _strip->send_enable_controllable(nsends)), OSC::instance());
+			_strip->send_enable_controllable(nsends)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), nsends + 1, _strip->send_enable_controllable(nsends)), OSC::instance());
 			enable_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
 			sends = true;
 		} else if (sends) {
@@ -262,7 +262,7 @@ OSCSelectObserver::send_init()
 			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(nsends));
 			if (snd) {
 				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
-				proc->ActiveChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
+				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
 				clear_strip_with_id ("/select/send_enable", nsends + 1, proc->enabled());
 			}
 		}

@@ -41,7 +41,7 @@ struct LIBTIMECODE_API BBT_Time {
 	BBT_Time (uint32_t ba, uint32_t be, uint32_t t)
 		: bars (ba), beats (be), ticks (t) {}
 
-        BBT_Time (double beats);
+	BBT_Time (double beats);
 
 	bool operator< (const BBT_Time& other) const {
 		return bars < other.bars ||

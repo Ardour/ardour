@@ -1,5 +1,6 @@
 #!/bin/sh
 MASSIF_OPTIONS="$MASSIF_OPTIONS --time-unit=ms"
+MASSIF_OPTIONS="$MASSIF_OPTIONS --threshold=0.2 --peak-inaccuracy=0.2 --max-snapshots=500"
 
 TOP=`dirname "$0"`/..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh

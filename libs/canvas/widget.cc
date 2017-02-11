@@ -75,37 +75,50 @@ Widget::queue_resize ()
 void
 Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	// std::cerr << "Render widget\n";
+	//std::cerr << "Render widget " << name << " @ " << position() << endl;
 
 	if (!_bounding_box) {
 		std::cerr << "no bbox\n";
 		return;
 	}
 
-	Rect self = item_to_window (_bounding_box.get());
-	boost::optional<Rect> r = self.intersection (area);
+	Rect self = item_to_window (_bounding_box);
+	Rect r = self.intersection (area);
 
 	if (!r) {
 		std::cerr << "no intersection\n";
 		return;
 	}
 
-	Rect draw = r.get ();
+	Rect draw = r;
 	cairo_rectangle_t crect;
 	crect.x = draw.x0;
 	crect.y = draw.y0;
 	crect.height = draw.height();
 	crect.width = draw.width();
 
-	// std::cerr << "will draw " << draw << "\n";
+	Duple p = position_offset();
+
 	context->save ();
-	context->translate (-draw.x0, -draw.y0);
+	context->translate (p.x, p.y);
 	//context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-	// context->clip ();
+	//context->clip ();
 
 	_widget.render (context->cobj(), &crect);
 
 	context->restore ();
+}
+
+void
+Widget::size_allocate (Rect const & r)
+{
+	Item::size_allocate (r);
+	Gtk::Allocation alloc;
+	alloc.set_x (0);
+	alloc.set_y (0);
+	alloc.set_width (r.width());
+	alloc.set_height (r.height());
+	_widget.size_allocate (alloc);
 }
 
 void
@@ -132,4 +145,3 @@ Widget::compute_bounding_box () const
 
 	_bounding_box_dirty = false;
 }
-

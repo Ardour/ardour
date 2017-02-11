@@ -364,7 +364,7 @@ MackieControlProtocol::drop_press (Button &)
 		toggle_punch_in();
 		return none;
 	} else {
-		access_action ("Editor/start-range-from-playhead");
+		access_action ("Common/start-range-from-playhead");
 	}
 	return none;
 }
@@ -425,7 +425,7 @@ LedState
 MackieControlProtocol::marker_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/remove-location-from-playhead");
+		access_action ("Common/remove-location-from-playhead");
 		return off;
 	} else {
 		_modifier_state |= MODIFIER_MARKER;
@@ -439,10 +439,12 @@ MackieControlProtocol::marker_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_MARKER;
 
-	if (main_modifier_state() & MODIFIER_SHIFT)
+	if (main_modifier_state() & MODIFIER_SHIFT) {
 		return off;   //if shift was held, we already did the action
+	}
 
 	if (marker_modifier_consumed_by_button) {
+		DEBUG_TRACE (DEBUG::MackieControl, "marked modifier consumed by button, ignored\n");
 		/* marker was used a modifier for some other button(s), so do
 		   nothing
 		*/
@@ -461,7 +463,7 @@ MackieControlProtocol::marker_release (Button &)
 		return off;
 	}
 
-	session->locations()->next_available_name (markername,"marker");
+	session->locations()->next_available_name (markername,"mark");
 	add_marker (markername);
 
 	return off;
@@ -525,7 +527,7 @@ MackieControlProtocol::rewind_press (Button &)
 	if (modifier_state() & MODIFIER_MARKER) {
 		prev_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
-		access_action ("Editor/nudge-playhead-backward");
+		access_action ("Common/nudge-playhead-backward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_start ();
 	} else {
@@ -546,7 +548,7 @@ MackieControlProtocol::ffwd_press (Button &)
 	if (modifier_state() & MODIFIER_MARKER) {
 		next_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
-		access_action ("Editor/nudge-playhead-forward");
+		access_action ("Common/nudge-playhead-forward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_end();
 	} else {
@@ -565,11 +567,11 @@ LedState
 MackieControlProtocol::loop_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/set-loop-from-edit-range");
+		access_action ("Common/set-loop-from-edit-range");
 		return off;
 	} else {
 		bool was_on = session->get_play_loop();
-		session->request_play_loop (!was_on);
+		loop_toggle ();
 		return was_on ? off : on;
 	}
 }
@@ -883,7 +885,7 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 	// clears all solos and listens (pfl/afl)
 
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/set-session-from-edit-range");
+		access_action ("Common/set-session-from-edit-range");
 		return none;
 	}
 
@@ -1079,7 +1081,7 @@ MackieControlProtocol::replace_press (Mackie::Button&)
 		toggle_punch_out();
 		return none;
 	} else {
-		access_action ("Editor/finish-range-from-playhead");
+		access_action ("Common/finish-range-from-playhead");
 	}
 	return none;
 }
@@ -1092,7 +1094,7 @@ Mackie::LedState
 MackieControlProtocol::click_press (Mackie::Button&)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/set-punch-from-edit-range");
+		access_action ("Common/set-punch-from-edit-range");
 		return off;
 	} else {
 		bool state = !Config->get_clicking();

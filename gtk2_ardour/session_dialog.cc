@@ -412,6 +412,12 @@ SessionDialog::setup_initial_choice_box ()
 	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	existing_session_chooser.add_filter (session_filter);
+
+	FileFilter archive_filter;
+	archive_filter.add_pattern (X_("*.tar.xz"));
+	archive_filter.set_name (_("Session Archives"));
+	existing_session_chooser.add_filter (archive_filter);
+
 	existing_session_chooser.set_filter (session_filter);
 
 	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);
@@ -728,6 +734,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 		float sr;
 		SampleFormat sf;
+		std::string program_version;
 
 		std::string state_file_basename;
 
@@ -749,10 +756,9 @@ SessionDialog::redisplay_recent_sessions ()
 		g_stat (s.c_str(), &gsb);
 
 		row[recent_session_columns.fullpath] = s;
-		row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 		row[recent_session_columns.time_modified] = gsb.st_mtime;
 
-		if (Session::get_info_from_path (s, sr, sf) == 0) {
+		if (Session::get_info_from_path (s, sr, sf, program_version) == 0) {
 			row[recent_session_columns.sample_rate] = rate_as_string (sr);
 			switch (sf) {
 			case FormatFloat:
@@ -770,6 +776,12 @@ SessionDialog::redisplay_recent_sessions ()
 			row[recent_session_columns.disk_format] = "--";
 		}
 
+		if (program_version.empty()) {
+			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
+		} else {
+			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + string_compose (_("Last modified with: %1"), program_version));
+		}
+
 		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
@@ -781,6 +793,7 @@ SessionDialog::redisplay_recent_sessions ()
 			int64_t most_recent = 0;
 
 			// add the children
+			int kidcount = 0;
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
 				s = Glib::build_filename (dirname, *i2 + statefile_suffix);
@@ -798,28 +811,38 @@ SessionDialog::redisplay_recent_sessions ()
 				if (gsb.st_mtime > most_recent) {
 					most_recent = gsb.st_mtime;
 				}
+
+				if (++kidcount < 5) {
+					// parse "modified with" for the first 5 snapshots
+					if (Session::get_info_from_path (s, sr, sf, program_version) == 0) {
 #if 0
-				if (Session::get_info_from_path (s, sr, sf) == 0) {
-					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
-					switch (sf) {
-					case FormatFloat:
-						child_row[recent_session_columns.disk_format] = _("32-bit float");
-						break;
-					case FormatInt24:
-						child_row[recent_session_columns.disk_format] = _("24-bit");
-						break;
-					case FormatInt16:
-						child_row[recent_session_columns.disk_format] = _("16-bit");
-						break;
+						child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
+						switch (sf) {
+							case FormatFloat:
+								child_row[recent_session_columns.disk_format] = _("32-bit float");
+								break;
+							case FormatInt24:
+								child_row[recent_session_columns.disk_format] = _("24-bit");
+								break;
+							case FormatInt16:
+								child_row[recent_session_columns.disk_format] = _("16-bit");
+								break;
+						}
+#else
+						child_row[recent_session_columns.sample_rate] = "";
+						child_row[recent_session_columns.disk_format] = "";
+#endif
+					} else {
+						child_row[recent_session_columns.sample_rate] = "??";
+						child_row[recent_session_columns.disk_format] = "--";
+					}
+					if (!program_version.empty()) {
+						child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (string_compose (_("Last modified with: %1"), program_version));
 					}
 				} else {
-					child_row[recent_session_columns.sample_rate] = "??";
-					child_row[recent_session_columns.disk_format] = "--";
+					child_row[recent_session_columns.sample_rate] = "";
+					child_row[recent_session_columns.disk_format] = "";
 				}
-#else
-				child_row[recent_session_columns.sample_rate] = "";
-				child_row[recent_session_columns.disk_format] = "";
-#endif
 
 				++session_snapshot_count;
 			}

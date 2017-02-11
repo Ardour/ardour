@@ -90,11 +90,11 @@ public:
 
 	virtual boost::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc);
 
-        void dump (std::ostream&);
+	void dump (std::ostream&);
 
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
-        void copy_events (const ControlList&);
+	void copy_events (const ControlList&);
 
 	virtual void freeze();
 	virtual void thaw ();
@@ -107,7 +107,7 @@ public:
 	void                       set_descriptor(const ParameterDescriptor& d) { _desc = d; }
 
 	EventList::size_type size() const { return _events.size(); }
-        double length() const {
+	double length() const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
@@ -314,7 +314,7 @@ public:
 
 	bool operator!= (ControlList const &) const;
 
-        void invalidate_insert_iterator ();
+	void invalidate_insert_iterator ();
 
 protected:
 

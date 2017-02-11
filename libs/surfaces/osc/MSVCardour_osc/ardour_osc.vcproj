@@ -280,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\osc_cue_observer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\osc_global_observer.cc"
 				>
 			</File>
@@ -307,6 +311,10 @@
 			</File>
 			<File
 				RelativePath="..\osc_controllable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\osc_cue_observer.h"
 				>
 			</File>
 			<File

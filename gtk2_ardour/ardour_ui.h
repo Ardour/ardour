@@ -73,9 +73,12 @@
 #include "add_route_dialog.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
+#include "ardour_spacer.h"
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
+#include "mini_timeline.h"
+#include "shuttle_control.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
@@ -115,6 +118,7 @@ class GlobalPortMatrixWindow;
 
 class VideoTimeLine;
 class ArdourKeyboard;
+class ArdourVSpacer;
 class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
@@ -126,9 +130,8 @@ class PublicEditor;
 class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditorWindow;
-class ShuttleControl;
 class Splash;
-class MiniTimeline;
+class TimeInfoBox;
 class Meterbridge;
 class LuaWindow;
 class MidiTracer;
@@ -253,7 +256,6 @@ public:
 	MainClock* secondary_clock;
 	void focus_on_clock ();
 	AudioClock*   big_clock;
-	MiniTimeline* mini_timeline;
 
 	VideoTimeLine *video_timeline;
 
@@ -390,6 +392,8 @@ protected:
 	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
+	void toggle_session_monitoring_in ();
+	void toggle_session_monitoring_disk ();
 	void show_loop_punch_ruler_and_disallow_hide ();
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
@@ -478,6 +482,10 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
+	ArdourVSpacer *secondary_clock_spacer;
+	void repack_transport_hbox ();
+	void update_clock_visibility ();
+
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {
 		    Roll = 0,
@@ -497,18 +505,7 @@ private:
 	    ToggleType type;
 	};
 
-	boost::shared_ptr<TransportControllable> roll_controllable;
-	boost::shared_ptr<TransportControllable> stop_controllable;
-	boost::shared_ptr<TransportControllable> goto_start_controllable;
-	boost::shared_ptr<TransportControllable> goto_end_controllable;
-	boost::shared_ptr<TransportControllable> auto_loop_controllable;
-	boost::shared_ptr<TransportControllable> play_selection_controllable;
-	boost::shared_ptr<TransportControllable> rec_controllable;
-
 	void toggle_follow_edits ();
-
-	void set_transport_controllable_state (const XMLNode&);
-	XMLNode& get_transport_controllable_state ();
 
 	ArdourButton roll_button;
 	ArdourButton stop_button;
@@ -521,18 +518,29 @@ private:
 	ArdourButton punch_out_button;
 	ArdourButton layered_button;
 
+	ArdourVSpacer recpunch_spacer;
+	ArdourVSpacer monitoring_spacer;
+
+	ArdourButton monitor_in_button;
+	ArdourButton monitor_disk_button;
+	ArdourButton auto_input_button;
+
 	Gtk::Label   punch_label;
 	Gtk::Label   layered_label;
+
+	Gtk::Label   punch_space;
+	Gtk::Label   mon_space;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	ShuttleControl* shuttle_box;
+	ShuttleControl shuttle_box;
+	MiniTimeline   mini_timeline;
+	TimeInfoBox   *time_info_box;
 
 	ArdourButton auto_return_button;
 	ArdourButton follow_edits_button;
-	ArdourButton auto_input_button;
 	ArdourButton click_button;
 	ArdourButton sync_button;
 
@@ -638,6 +646,7 @@ private:
 	void edit_metadata ();
 	void import_metadata ();
 
+	void set_loop_sensitivity ();
 	void set_transport_sensitivity (bool);
 
 	//stuff for ProTools-style numpad
@@ -658,6 +667,7 @@ private:
 	void transport_roll ();
 	void transport_play_selection();
 	void transport_play_preroll();
+	void transport_rec_preroll();
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
@@ -792,7 +802,6 @@ private:
 
 	std::vector<std::string> positional_sync_strings;
 
-	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_send_mtc ();
@@ -831,6 +840,8 @@ private:
 	int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
+	bool click_button_scroll (GdkEventScroll *);
+	bool sync_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;
 

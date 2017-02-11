@@ -7,7 +7,7 @@
 typedef long          __suseconds_t;
 typedef __suseconds_t   suseconds_t;
 #endif
-#ifndef BUILDING_EVORAL
+#if !defined(BUILDING_EVORAL) && !defined(BUILDING_QMDSP) && !defined(BUILDING_VAMPPLUGINS)
 #include <WinSock2.h> /* gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h> */
 /* For whatever reason, Ardour's 'libevoral' refuses to build as a DLL if we include both 'rpc.h' */
 /* and 'WinSock2.h'. It doesn't seem to matter which order we #include them. Given that we can't  */

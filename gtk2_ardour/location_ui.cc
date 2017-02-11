@@ -414,12 +414,14 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 		return;
 	}
 
+	const int32_t divisions = PublicEditor::instance().get_grid_music_divisions (0);
+
 	switch (part) {
 		case LocStart:
-			location->set_start (_session->transport_frame ());
+			location->set_start (_session->transport_frame (), false, true, divisions);
 			break;
 		case LocEnd:
-			location->set_end (_session->transport_frame ());
+			location->set_end (_session->transport_frame (), false, true,divisions);
 			if (location->is_session_range()) {
 				_session->set_end_is_free (false);
 			}
@@ -461,18 +463,20 @@ LocationEditRow::clock_changed (LocationPart part)
 		return;
 	}
 
+	const int32_t divisions = PublicEditor::instance().get_grid_music_divisions (0);
+
 	switch (part) {
 		case LocStart:
-			location->set_start (start_clock.current_time());
+			location->set_start (start_clock.current_time(), false, true, divisions);
 			break;
 		case LocEnd:
-			location->set_end (end_clock.current_time());
+			location->set_end (end_clock.current_time(), false, true, divisions);
 			if (location->is_session_range()) {
 				_session->set_end_is_free (false);
 			}
 			break;
 		case LocLength:
-			location->set_end (location->start() + length_clock.current_duration());
+			location->set_end (location->start() + length_clock.current_duration(), false, true, divisions);
 			if (location->is_session_range()) {
 				_session->set_end_is_free (false);
 			}

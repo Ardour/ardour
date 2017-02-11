@@ -40,10 +40,23 @@ using namespace PBD;
 Pool Click::pool ("click", sizeof (Click), 1024);
 
 void
+Session::add_click (framepos_t pos, bool emphasis)
+{
+	if (emphasis) {
+		if (click_emphasis_data && Config->get_use_click_emphasis () == true) {
+			clicks.push_back (new Click (pos, click_emphasis_length, click_emphasis_data));
+		} else if (click_data && Config->get_use_click_emphasis () == false) {
+			clicks.push_back (new Click (pos, click_length, click_data));
+		}
+	} else if (click_data) {
+		clicks.push_back (new Click (pos, click_length, click_data));
+	}
+}
+
+void
 Session::click (framepos_t start, framecnt_t nframes)
 {
 	vector<TempoMap::BBTPoint> points;
-	Sample *buf;
 	framecnt_t click_distance;
 
 	if (_click_io == 0) {
@@ -68,9 +81,6 @@ Session::click (framepos_t start, framecnt_t nframes)
 	/* correct start, potentially */
 	start = max (start, (framepos_t) 0);
 
-	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
-	buf = bufs.get_audio(0).data();
-
 	_tempo_map->get_grid (points, start, end);
 
 	if (distance (points.begin(), points.end()) == 0) {
@@ -80,22 +90,34 @@ Session::click (framepos_t start, framecnt_t nframes)
 	for (vector<TempoMap::BBTPoint>::iterator i = points.begin(); i != points.end(); ++i) {
 		switch ((*i).beat) {
 		case 1:
-			if (click_emphasis_data && Config->get_use_click_emphasis () == true) {
-				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
-			} else if (click_data && Config->get_use_click_emphasis () == false) {
-				clicks.push_back (new Click ((*i).frame, click_length, click_data));
-			}
+			add_click ((*i).frame, true);
 			break;
-
 		default:
-			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) {
-				clicks.push_back (new Click ((*i).frame, click_length, click_data));
+			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??
+				add_click ((*i).frame, false);
 			}
 			break;
 		}
 	}
 
   run_clicks:
+	clickm.release ();
+	run_click (start, nframes);
+}
+
+void
+Session::run_click (framepos_t start, framepos_t nframes)
+{
+	Glib::Threads::RWLock::ReaderLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+
+	if (!clickm.locked() || click_data == 0) {
+		_click_io->silence (nframes);
+		return;
+	}
+
+	Sample *buf;
+	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
+	buf = bufs.get_audio(0).data();
 	memset (buf, 0, sizeof (Sample) * nframes);
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {

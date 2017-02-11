@@ -29,6 +29,7 @@ class MouseCursors
 {
 public:
 	MouseCursors ();
+	~MouseCursors ();
 
 	void set_cursor_set (const std::string& name);
 	std::string cursor_set() const { return _cursor_set; }

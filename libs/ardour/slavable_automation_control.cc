@@ -20,6 +20,8 @@
 #define __libardour_slavable_automation_control_h__
 
 #include "pbd/enumwriter.h"
+#include "pbd/error.h"
+#include "pbd/i18n.h"
 
 #include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
@@ -35,7 +37,16 @@ SlavableAutomationControl::SlavableAutomationControl(ARDOUR::Session& s,
                                                      const std::string&                        name,
                                                      Controllable::Flag                        flags)
 	: AutomationControl (s, parameter, desc, l, name, flags)
+	, _masters_node (0)
 {
+}
+
+SlavableAutomationControl::~SlavableAutomationControl ()
+{
+	if (_masters_node) {
+		delete _masters_node;
+		_masters_node = 0;
+	}
 }
 
 double
@@ -88,11 +99,11 @@ SlavableAutomationControl::get_value() const
 {
 	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
 
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	if (!from_list) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_value_locked ();
 	} else {
-		return Control::get_double (from_list, _session.transport_frame());
+		return get_masters_value_locked () * Control::get_double (from_list, _session.transport_frame());
 	}
 }
 
@@ -116,7 +127,7 @@ SlavableAutomationControl::actually_set_value (double val, Controllable::GroupCo
 }
 
 void
-SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
+SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, bool loading)
 {
 	std::pair<Masters::iterator,bool> res;
 
@@ -131,7 +142,9 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 		if (res.second) {
 
-			recompute_masters_ratios (current_value);
+			if (!loading) {
+				recompute_masters_ratios (current_value);
+			}
 
 			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
 			   avoiding holding a reference to the control in the binding
@@ -143,11 +156,11 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			/* Store the connection inside the MasterRecord, so
 			   that when we destroy it, the connection is destroyed
 			   and we no longer hear about changes to the
-			   AutomationControl. 
+			   AutomationControl.
 
 			   Note that this also makes it safe to store a
 			   boost::shared_ptr<AutomationControl> in the functor,
-			   since we know we will destroy the functor when the 
+			   since we know we will destroy the functor when the
 			   connection is destroyed, which happens when we
 			   disconnect from the master (for any reason).
 
@@ -157,7 +170,6 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			*/
 
 			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2, m));
-			cerr << this << enum_2_string ((AutomationType) _parameter.type()) << " now listening to Changed from " << m << endl;
 		}
 	}
 
@@ -329,5 +341,110 @@ SlavableAutomationControl::slaved () const
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	return !_masters.empty();
 }
+
+void
+SlavableAutomationControl::use_saved_master_ratios ()
+{
+	if (!_masters_node) {
+		return;
+	}
+
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+
+	/* use stored state, do not recompute */
+
+	if (_desc.toggled) {
+
+		XMLNodeList nlist = _masters_node->children();
+		XMLNodeIterator niter;
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			XMLProperty const * id_prop = (*niter)->property (X_("id"));
+			if (!id_prop) {
+				continue;
+			}
+			XMLProperty const * yn_prop = (*niter)->property (X_("yn"));
+			if (!yn_prop) {
+				continue;
+			}
+			Masters::iterator mi = _masters.find (ID (id_prop->value()));
+			if (mi != _masters.end()) {
+				mi->second.set_yn (string_is_affirmative (yn_prop->value()));
+			}
+		}
+
+	} else {
+
+		XMLProperty const * prop = _masters_node->property (X_("ratio"));
+
+		if (prop) {
+
+			gain_t ratio;
+			sscanf (prop->value().c_str(), "%g", &ratio);
+
+			for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+				mr->second.reset_ratio (ratio);
+			}
+		} else {
+			PBD::error << string_compose (_("programming error: %1"), X_("missing ratio information for control slave"))<< endmsg;
+		}
+	}
+
+	delete _masters_node;
+	_masters_node = 0;
+
+	return;
+}
+
+
+XMLNode&
+SlavableAutomationControl::get_state ()
+{
+	XMLNode& node (AutomationControl::get_state());
+
+	/* store VCA master ratios */
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+
+		if (!_masters.empty()) {
+
+			XMLNode* masters_node = new XMLNode (X_("masters"));
+
+			if (_desc.toggled) {
+				for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+					XMLNode* mnode = new XMLNode (X_("master"));
+					mnode->add_property (X_("id"), mr->second.master()->id().to_s());
+					mnode->add_property (X_("yn"), mr->second.yn());
+					masters_node->add_child_nocopy (*mnode);
+				}
+			} else {
+				XMLNode* masters_node = new XMLNode (X_("masters"));
+				/* ratio is the same for all masters, so just store one */
+				masters_node->add_property (X_("ratio"), PBD::to_string (_masters.begin()->second.ratio(), std::dec));
+			}
+
+			node.add_child_nocopy (*masters_node);
+		}
+	}
+
+	return node;
+}
+
+int
+SlavableAutomationControl::set_state (XMLNode const& node, int version)
+{
+	XMLNodeList nlist = node.children();
+	XMLNodeIterator niter;
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == X_("masters")) {
+			_masters_node = new XMLNode (**niter);
+		}
+	}
+
+	return AutomationControl::set_state (node, version);
+}
+
 
 #endif /* __libardour_slavable_automation_control_h__ */

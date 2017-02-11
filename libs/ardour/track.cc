@@ -21,6 +21,7 @@
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/diskstream.h"
+#include "ardour/event_type_map.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
@@ -66,13 +67,13 @@ Track::init ()
 	boost::shared_ptr<Route> rp (shared_from_this());
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
-	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
+	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this));
 	add_control (_record_enable_control);
 
-	_record_safe_control.reset (new RecordSafeControl (_session, X_("recsafe"), *this));
+	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this));
 	add_control (_record_safe_control);
 
-	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
+	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this));
 	add_control (_monitoring_control);
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
@@ -929,6 +930,17 @@ Track::monitoring_state () const
 		return MonitoringDisk;
 	}
 
+	switch (_session.config.get_session_monitoring ()) {
+		case MonitorDisk:
+			return MonitoringDisk;
+			break;
+		case MonitorInput:
+			return MonitoringInput;
+			break;
+		default:
+			break;
+	}
+
 	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
 	   I don't think it's ever going to be too pretty too look at.
 	*/
@@ -944,9 +956,11 @@ Track::monitoring_state () const
 	 * time, but just to keep the semantics the same as they were before
 	 * sept 26th 2012, we differentiate between the cases where punch is
 	 * enabled and those where it is not.
+	 *
+	 * rg: I suspect this is not the case: monitoring may differ
 	 */
 
-	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+	if (_session.config.get_punch_in() || _session.config.get_punch_out() || _session.preroll_record_punch_enabled ()) {
 		session_rec = _session.actively_recording ();
 	} else {
 		session_rec = _session.get_record_enabled();

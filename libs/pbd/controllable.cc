@@ -124,7 +124,7 @@ Controllable::get_state ()
 	id().print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
 	node->add_property (X_("flags"), enum_2_string (_flags));
-	snprintf (buf, sizeof (buf), "%2.12f", get_value());
+	snprintf (buf, sizeof (buf), "%2.12f", get_save_value());
         node->add_property (X_("value"), buf);
 
 	if (_extra_xml) {
@@ -133,7 +133,6 @@ Controllable::get_state ()
 
 	return *node;
 }
-
 
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)

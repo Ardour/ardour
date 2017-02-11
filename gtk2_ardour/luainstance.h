@@ -79,6 +79,7 @@ class LuaInstance : public PBD::ScopedConnectionList, public ARDOUR::SessionHand
 {
 public:
 	static LuaInstance* instance();
+	static void destroy_instance();
 	~LuaInstance();
 
 	static void register_classes (lua_State* L);

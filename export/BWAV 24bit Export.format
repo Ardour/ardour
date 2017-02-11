@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="BWAV 24bit Export" id="e61c1d0f-95bd-48fb-b812-def99dbabe28" with-cue="false" with-toc="false" with-mp4chaps="false" command="" analyse="false" soundcloud-upload="false">
+  <Encoding id="F_WAV" type="T_Sndfile" extension="wav" name="BWF" has-sample-format="true" channel-limit="256"/>
+  <SampleRate rate="1"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_24"/>
+    <Option name="dithering" value="D_None"/>
+    <Option name="tag-metadata" value="false"/>
+    <Option name="tag-support" value="false"/>
+    <Option name="broadcast-info" value="true"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="false" loudness="no" dbfs="0" lufs="-23" dbtp="-1"/>
+    <Silence>
+      <Start>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>

@@ -99,7 +99,7 @@ public:
 	void ungrab ();
 
 	void unparent ();
-	void reparent (Item *);
+	void reparent (Item *, bool already_added = false);
 
 	/** @return Parent group, or 0 if this is the root group */
 	Item* parent () const {
@@ -136,7 +136,18 @@ public:
 
 	ScrollGroup* scroll_parent() const { return _scroll_parent; }
 
-	boost::optional<Rect> bounding_box () const;
+	/* item implementations can override this if they need to */
+	virtual Rect size_request() const { return bounding_box (true); }
+	virtual void size_allocate (Rect const&);
+
+	/** bounding box is the public API to get the size of the item.
+	   If @param for_own_purposes is false, then it will return the
+	   allocated bounding box (if there is one) in preference to the
+	   one that would naturally be computed by the item.
+	*/
+	Rect bounding_box (bool for_own_purposes = false) const;
+	Rect allocation() const { return _allocation; }
+
         Coord height() const;
         Coord width() const;
 
@@ -275,12 +286,13 @@ protected:
 	/** true if this item is visible (ie to be drawn), otherwise false */
 	bool _visible;
 	/** our bounding box before any change that is currently in progress */
-	boost::optional<Rect> _pre_change_bounding_box;
+	Rect _pre_change_bounding_box;
 
 	/** our bounding box; may be out of date if _bounding_box_dirty is true */
-	mutable boost::optional<Rect> _bounding_box;
+	mutable Rect _bounding_box;
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
+	Rect _allocation;
 
 	/* XXX: this is a bit grubby */
 	std::map<std::string, void *> _data;

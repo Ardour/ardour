@@ -85,6 +85,17 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	}
 }
 
+template <typename RequestObject>
+AbstractUI<RequestObject>::~AbstractUI ()
+{
+	for (RequestBufferMapIterator i = request_buffers.begin(); i != request_buffers.end(); ++i) {
+		if ((*i).second->dead) {
+			EventLoop::remove_request_buffer_from_map ((*i).second);
+			delete (*i).second;
+		}
+	}
+}
+
 template <typename RequestObject> void
 AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_name, uint32_t num_requests)
 {
@@ -113,7 +124,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2\n", thread_name, event_loop_name()));
 
-		b = new RequestBuffer (num_requests);
+		b = new RequestBuffer (num_requests); // XXX leaks
 		/* set this thread's per_thread_request_buffer to this new
 		   queue/ringbuffer. remember that only this thread will
 		   get this queue when it calls per_thread_request_buffer.get()
@@ -469,7 +480,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 template<typename RequestObject> void*
 AbstractUI<RequestObject>::request_buffer_factory (uint32_t num_requests)
 {
-	RequestBuffer*  mcr = new RequestBuffer (num_requests); // leaks
+	RequestBuffer*  mcr = new RequestBuffer (num_requests); // XXX leaks
 	per_thread_request_buffer.set (mcr);
 	return mcr;
 }

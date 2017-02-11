@@ -1239,13 +1239,6 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 void
 MidiTimeAxisView::update_range()
 {
-	MidiGhostRegion* mgr;
-
-	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if ((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
-			mgr->update_range();
-		}
-	}
 }
 
 void
@@ -1653,9 +1646,11 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, const int32_t sub_num)
+MidiTimeAxisView::add_region (framepos_t f, framecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
+	MusicFrame pos (f, 0);
+
 	if (commit) {
 		real_editor->begin_reversible_command (Operations::create_region);
 	}
@@ -1672,8 +1667,8 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit, co
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 	/* sets beat position */
-	region->set_position (pos, sub_num);
-	playlist()->add_region (region, pos, 1.0, false, sub_num);
+	region->set_position (pos.frame, pos.division);
+	playlist()->add_region (region, pos.frame, 1.0, false, pos.division);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 
 	if (commit) {

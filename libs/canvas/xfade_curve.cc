@@ -118,7 +118,7 @@ XFadeCurve::compute_bounding_box () const
 		_bounding_box = bbox.expand (1.0);
 
 	} else {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 	}
 
 	_bounding_box_dirty = false;
@@ -233,10 +233,10 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	if (_in.points.size() < 2) { return; }
 	if (_out.points.size() < 2) { return; }
 
-	Rect self = item_to_window (_bounding_box.get());
-	boost::optional<Rect> d = self.intersection (area);
+	Rect self = item_to_window (_bounding_box);
+	Rect d = self.intersection (area);
 	assert (d);
-	Rect draw = d.get ();
+	Rect draw = d;
 
 	context->save ();
 	context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());

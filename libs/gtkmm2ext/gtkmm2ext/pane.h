@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 #include <stdint.h>
 
@@ -49,11 +50,13 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 		Pane* pane;
 		Gtk::Widget* w;
 		int32_t minsize;
+		sigc::connection show_con;
+		sigc::connection hide_con;
 
 		Child (Pane* p, Gtk::Widget* widget, uint32_t ms) : pane (p), w (widget), minsize (ms) {}
 	};
 
-	typedef std::list<Child> Children;
+	typedef std::vector<boost::shared_ptr<Child> > Children;
 
 	Pane (bool horizontal);
 	~Pane();
@@ -108,7 +111,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	void add_divider ();
 	void handle_child_visibility ();
-	bool fract_is_ok (Dividers::size_type, float fract);
+	float constrain_fract (Dividers::size_type, float fract);
 
 	static void* notify_child_destroyed (void*);
 	void* child_destroyed (Gtk::Widget*);

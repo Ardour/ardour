@@ -42,43 +42,43 @@ class AudioClock;
 
 class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
 {
-  public:
-    TimeInfoBox ();
-    ~TimeInfoBox ();
+public:
+	TimeInfoBox (bool with_punch);
+	~TimeInfoBox ();
 
-    void set_session (ARDOUR::Session*);
+	void set_session (ARDOUR::Session*);
 
-  private:
-    Gtk::Table table;
+private:
+	Gtk::Table table;
 
-    AudioClock* selection_start;
-    AudioClock* selection_end;
-    AudioClock* selection_length;
+	AudioClock* selection_start;
+	AudioClock* selection_end;
+	AudioClock* selection_length;
 
-    AudioClock* punch_start;
-    AudioClock* punch_end;
+	AudioClock* punch_start;
+	AudioClock* punch_end;
 
-    Gtk::Label selection_title;
-    Gtk::Label punch_title;
-    bool syncing_selection;
-    bool syncing_punch;
+	Gtk::Label selection_title;
+	Gtk::Label punch_title;
+	bool syncing_selection;
+	bool syncing_punch;
+	bool with_punch_clock;
 
-    void punch_changed (ARDOUR::Location*);
-    void punch_location_changed (ARDOUR::Location*);
-    void watch_punch (ARDOUR::Location*);
-    PBD::ScopedConnectionList punch_connections;
-    PBD::ScopedConnectionList editor_connections;
-    PBD::ScopedConnectionList region_property_connections;
+	void punch_changed (ARDOUR::Location*);
+	void punch_location_changed (ARDOUR::Location*);
+	void watch_punch (ARDOUR::Location*);
+	PBD::ScopedConnectionList punch_connections;
+	PBD::ScopedConnectionList editor_connections;
+	PBD::ScopedConnectionList region_property_connections;
 
-    void selection_changed ();
+	void selection_changed ();
 
-    void sync_selection_mode (AudioClock*);
-    void sync_punch_mode (AudioClock*);
+	void sync_selection_mode (AudioClock*);
+	void sync_punch_mode (AudioClock*);
 
-    bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
-    void track_mouse_mode ();
-    void region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed);
+	bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
+	void track_mouse_mode ();
+	void region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed);
 };
-
 
 #endif /* __time_info_box_h__ */

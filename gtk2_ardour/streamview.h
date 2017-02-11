@@ -76,7 +76,8 @@ public:
 	virtual int set_samples_per_pixel (double);
 	gdouble     get_samples_per_pixel () const { return _samples_per_pixel; }
 
- 	void set_layer_display (LayerDisplay);
+	virtual void set_layer_display (LayerDisplay);
+	virtual bool can_change_layer_display() const { return true; }
 	LayerDisplay layer_display () const { return _layer_display; }
 
 	ArdourCanvas::Container* canvas_item() { return _canvas_group; }

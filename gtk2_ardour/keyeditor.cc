@@ -62,10 +62,11 @@ using Gtkmm2ext::Bindings;
 
 sigc::signal<void> KeyEditor::UpdateBindings;
 
-void bindings_collision_dialog (Gtk::Window& parent)
+static void bindings_collision_dialog (Gtk::Window& parent, const std::string& bound_name)
 {
 	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
-	Label label (_("The key sequence is already bound. Please remove the other binding first."));
+	Label label (string_compose(
+				_("The key sequence is already bound to '%1'. Please remove the other binding first."), bound_name));
 
 	dialog.get_vbox()->pack_start (label, true, true);
 	dialog.add_button (_("Ok"), Gtk::RESPONSE_ACCEPT);
@@ -74,12 +75,11 @@ void bindings_collision_dialog (Gtk::Window& parent)
 }
 
 KeyEditor::KeyEditor ()
-	: ArdourWindow (_("Key Bindings"))
+	: ArdourWindow (_("Keyboard Shortcuts"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
 	, filter_entry (_("Search..."), true)
 	, filter_string("")
-	, print_button (_("Print"))
 	, sort_column(0)
 	, sort_type(Gtk::SORT_ASCENDING)
 {
@@ -94,19 +94,22 @@ KeyEditor::KeyEditor ()
 	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
 	vpacker.pack_start (filter_entry, false, false);
 
-	Label* hint = manage (new Label (_("To remove a shortcut select an action then press this: ")));
+	Label* hint = manage (new Label (_("To remove a shortcut, select an action then press this: ")));
 	hint->show ();
-	unbind_box.set_spacing (6);
 	unbind_box.pack_start (*hint, false, true);
 	unbind_box.pack_start (unbind_button, false, false);
 	unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
+	vpacker.set_spacing (4);
 	vpacker.pack_start (unbind_box, false, false);
 	unbind_box.show ();
 	unbind_button.show ();
 
 	reset_button.add (reset_label);
-	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
+	reset_label.set_markup (string_compose ("  <span size=\"large\" weight=\"bold\">%1</span>  ", _("Reset Bindings to Defaults")));
+
+	print_button.add (print_label);
+	print_label.set_markup (string_compose ("  <span size=\"large\" weight=\"bold\">%1</span>  ", _("Print Bindings (to your web browser)")));
 
 	print_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::print));
 
@@ -117,6 +120,7 @@ KeyEditor::KeyEditor ()
 	reset_label.show ();
 	print_button.show ();
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
+	vpacker.pack_start (*(manage (new  HSeparator())), false, false, 5);
 	vpacker.pack_start (reset_box, false, false);
 
 	add (vpacker);
@@ -316,7 +320,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
 	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press)) {
-		bindings_collision_dialog (owner);
+		bindings_collision_dialog (owner, bindings->bound_name (new_binding, Gtkmm2ext::Bindings::Press));
 		return;
 	}
 

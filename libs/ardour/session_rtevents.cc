@@ -43,7 +43,7 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 
 	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 		/* as of july 2017 this is a no-op for everything except record enable */
-		(*ci)->do_pre_realtime_queue_stuff (val);
+		(*ci)->pre_realtime_queue_stuff (val, gcd);
 	}
 
 	queue_event (get_rt_event (cl, val, gcd));

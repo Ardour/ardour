@@ -95,7 +95,6 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	// Selection& operator= (const Selection& other);
 
 	sigc::signal<void> RegionsChanged;
-	sigc::signal<void> TracksChanged;
 	sigc::signal<void> TimeChanged;
 	sigc::signal<void> LinesChanged;
 	sigc::signal<void> PlaylistsChanged;
@@ -103,8 +102,6 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	sigc::signal<void> MarkersChanged;
 	sigc::signal<void> MidiNotesChanged;
 	sigc::signal<void> MidiRegionsChanged;
-
-	void block_tracks_changed (bool);
 
 	void clear ();
 
@@ -231,7 +228,6 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
   private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;
-	bool _no_tracks_changed;
 };
 
 bool operator==(const Selection& a, const Selection& b);

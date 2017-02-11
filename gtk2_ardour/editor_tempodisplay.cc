@@ -145,6 +145,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
 		}
+
+		if (!(*x)->tempo().active()) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
+
 		++x;
 	}
 
@@ -182,7 +189,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 }
 
 void
-Editor::marker_position_changed ()
+Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 {
 	if (!_session) {
 		return;
@@ -247,6 +254,13 @@ Editor::marker_position_changed ()
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
 		}
+
+		if (!(*x)->tempo().active()) {
+			(*x)->hide();
+		} else {
+			(*x)->show();
+		}
+
 		++x;
 	}
 
@@ -441,7 +455,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (!tempo_marker->tempo().initial()) {
+	if (!tempo_marker->tempo().locked_to_meter() && tempo_marker->tempo().active()) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }

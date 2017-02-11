@@ -659,6 +659,9 @@ LuaBindings::common (lua_State* L)
 		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
 		.endClass ()
 
+		.beginClass <Progress> ("Progress")
+		.endClass ()
+
 		.beginClass <AudioRange> ("AudioRange")
 		.addConstructor <void (*) (framepos_t, framepos_t, uint32_t)> ()
 		.addFunction ("length", &AudioRange::length)
@@ -669,7 +672,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
-		.addVoidConstructor ()
+		.addNilPtrConstructor ()
 		.addData ("name", &PluginInfo::name, false)
 		.addData ("category", &PluginInfo::category, false)
 		.addData ("creator", &PluginInfo::creator, false)
@@ -1104,6 +1107,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("audio_source", &AudioRegion::audio_source)
 		.addFunction ("set_scale_amplitude", &AudioRegion::set_scale_amplitude)
 		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
+		.addFunction ("maximum_amplitude", &AudioRegion::maximum_amplitude)
+		.addFunction ("rms", &AudioRegion::rms)
 		.endClass ()
 
 		.deriveWSPtrClass <Source, SessionObject> ("Source")
@@ -1383,6 +1388,7 @@ LuaBindings::common (lua_State* L)
 
 		// boost::shared_ptr<RouteList>
 		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
+		.addVoidPtrConstructor<std::list<boost::shared_ptr <Route> > > ()
 		.endClass ()
 
 		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
@@ -1407,6 +1413,7 @@ LuaBindings::common (lua_State* L)
 
 		// boost::shared_ptr <std::list<boost::shared_ptr<Region> > >
 		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
+		.addVoidPtrConstructor<std::list<boost::shared_ptr <Region> > > ()
 		.endClass ()
 
 		//std::list<boost::shared_ptr<Port> > PortList;
@@ -1451,7 +1458,8 @@ LuaBindings::common (lua_State* L)
 		.beginClass <TempoMap> ("TempoMap")
 		.addFunction ("add_tempo", &TempoMap::add_tempo)
 		.addFunction ("add_meter", &TempoMap::add_meter)
-		.addFunction ("tempo_section_at_frame", &TempoMap::tempo_section_at_frame)
+		.addFunction ("tempo_section_at_frame", (TempoSection& (TempoMap::*)(framepos_t))&TempoMap::tempo_section_at_frame)
+		.addFunction ("tempo_section_at_frame", (const TempoSection& (TempoMap::*)(framepos_t) const)&TempoMap::tempo_section_at_frame)
 		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_frame)
 		.addFunction ("meter_section_at_beat", &TempoMap::meter_section_at_beat)
 		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_frame)
@@ -1465,7 +1473,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <TempoSection, MetricSection> ("TempoSection")
-		.addFunction ("c_func", (double(TempoSection::*)()const)&TempoSection::c_func)
+		.addFunction ("c", (double(TempoSection::*)()const)&TempoSection::c)
 		.endClass ()
 
 		.deriveClass <MeterSection, MetricSection> ("MeterSection")
@@ -1609,6 +1617,17 @@ LuaBindings::common (lua_State* L)
 		.addConst ("CopyPlaylist", ARDOUR::PlaylistDisposition(CopyPlaylist))
 		.addConst ("NewPlaylist", ARDOUR::PlaylistDisposition(NewPlaylist))
 		.addConst ("SharePlaylist", ARDOUR::PlaylistDisposition(SharePlaylist))
+		.endNamespace ()
+
+		.beginNamespace ("MidiTrackNameSource")
+		.addConst ("SMFTrackNumber", ARDOUR::MidiTrackNameSource(SMFTrackNumber))
+		.addConst ("SMFTrackName", ARDOUR::MidiTrackNameSource(SMFTrackName))
+		.addConst ("SMFInstrumentName", ARDOUR::MidiTrackNameSource(SMFInstrumentName))
+		.endNamespace ()
+
+		.beginNamespace ("MidiTempoMapDisposition")
+		.addConst ("SMFTempoIgnore", ARDOUR::MidiTrackNameSource(SMFTempoIgnore))
+		.addConst ("SMFTempoUse", ARDOUR::MidiTrackNameSource(SMFTempoUse))
 		.endNamespace ()
 
 		.beginNamespace ("RegionPoint")
@@ -1869,6 +1888,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addFunction ("reset_processor_to_default", ARDOUR::LuaAPI::reset_processor_to_default)
 		.addRefFunction ("get_processor_param", ARDOUR::LuaAPI::get_processor_param)
 		.addRefFunction ("get_plugin_insert_param", ARDOUR::LuaAPI::get_plugin_insert_param)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
@@ -2053,6 +2073,7 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("save_state", &Session::save_state)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
+		.addFunction ("export_track_state", &Session::export_track_state)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track

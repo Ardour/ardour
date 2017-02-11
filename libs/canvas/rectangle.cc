@@ -71,13 +71,13 @@ Rectangle::get_self_for_render () const
 void
 Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
 {
-	boost::optional<Rect> r = self.intersection (area);
+	Rect r = self.intersection (area);
 
 	if (!r) {
 		return;
 	}
 
-	Rect draw = r.get ();
+	Rect draw = r;
 
 	if (_fill && !_transparent) {
 		if (_stops.empty()) {
@@ -273,12 +273,12 @@ Rectangle::vertical_fraction (double y) const
         /* y is in canvas coordinates */
 
         Duple i (canvas_to_item (Duple (0, y)));
-        boost::optional<Rect> r = bounding_box();
+        Rect r = bounding_box();
         if (!r) {
                 return 0; /* not really correct, but what else can we do? */
         }
 
-        Rect bbox (r.get());
+        Rect bbox (r);
 
         if (i.y < bbox.y0 || i.y >= bbox.y1) {
                 return 0;

@@ -39,6 +39,7 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 	MuteControl (Session& session, std::string const& name, Muteable&);
 
 	double get_value () const;
+	double get_save_value() const { return muted_by_self(); }
 
 	/* Export additional API so that objects that only get access
 	 * to a Controllable/AutomationControl can do more fine-grained

@@ -67,12 +67,12 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	 * (in order to make controls behave logarithmically).
 	 * 3. `internal' --- as passed to a processor, track, plugin, or whatever.
 	 *
-	 * Note that in some cases user and processor may be the same
+	 * Note that in some cases user and internal may be the same
 	 * (and interface different) e.g. frequency, which is presented
 	 * to the user and passed to the processor in linear terms, but
 	 * which needs log scaling in the interface.
 	 *
-	 * In other cases, user and interface may be the same (and processor different)
+	 * In other cases, user and interface may be the same (and internal different)
 	 * e.g. gain, which is presented to the user in log terms (dB)
 	 * but passed to the processor as a linear quantity.
 	 */
@@ -103,6 +103,13 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
          */
         virtual void set_value (double, GroupControlDisposition group_override) = 0;
 	virtual double get_value (void) const = 0;
+
+	/** This is used when saving state. By default it just calls
+	 * get_value(), but a class with more complex semantics might override
+	 * this to save some value that differs from what get_value() would 
+	 * return.
+	 */
+	virtual double get_save_value () const { return get_value(); }
 
 	/** Conversions between `internal', 'interface', and 'user' values */
 	virtual double internal_to_interface (double i) const {return  (i-lower())/(upper() - lower());}  //by default, the interface range is just a linear interpolation between lower and upper values

@@ -1101,13 +1101,13 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	/* Now lets get the intersection with the area we've been asked to draw */
 
-	boost::optional<Rect> d = self.intersection (area);
+	Rect d = self.intersection (area);
 
 	if (!d) {
 		return;
 	}
 
-	Rect draw = d.get();
+	Rect draw = d;
 
 	/* "draw" is now a rectangle that defines the rectangle we need to
 	 * update/render the waveview into, in window coordinate space.
@@ -1276,7 +1276,7 @@ WaveView::compute_bounding_box () const
 	if (_region) {
 		_bounding_box = Rect (0.0, 0.0, region_length() / _samples_per_pixel, _height);
 	} else {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 	}
 
 	_bounding_box_dirty = false;

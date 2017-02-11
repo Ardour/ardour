@@ -40,35 +40,6 @@ using namespace ARDOUR;
 
 #define SHOW_CALLBACK(MSG) DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose (MSG " val = %1 idx = %2\n", index, value))
 
-static double
-vst_ppq (const TempoMetric& tm, const Timecode::BBT_Time& bbt, double& ppqBar)
-{
-
-	/* PPQ = pulse per quarter
-	 * VST's "pulse" is our "division".
-	 *
-	 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
-	 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
-	 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
-	 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
-	 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
-	 *
-	 * general: divs_per_bar / (note_type / 4.0)
-	 */
-	const double ppq_scaling =  tm.meter().note_divisor() / 4.0;
-
-	/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
-	ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
-	double ppqBeat = double(bbt.beats - 1);
-	double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-
-	ppqBar *= ppq_scaling;
-	ppqBeat *= ppq_scaling;
-	ppqTick *= ppq_scaling;
-
-	return ppqBar + ppqBeat + ppqTick;
-}
-
 int Session::vst_current_loading_id = 0;
 const char* Session::vst_can_do_strings[] = {
 	X_("supplyIdle"),

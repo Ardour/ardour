@@ -32,7 +32,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-unsigned int RouteProcessorSelection::_no_route_change_signal = 0;
+
 RouteProcessorSelection::RouteProcessorSelection()
 {
 }
@@ -71,14 +71,13 @@ RouteProcessorSelection::clear_processors ()
 void
 RouteProcessorSelection::clear_routes ()
 {
+	PresentationInfo::ChangeSuspender cs;
+
 	for (AxisViewSelection::iterator i = axes.begin(); i != axes.end(); ++i) {
 		(*i)->set_selected (false);
 	}
 	axes.clear ();
 	drop_connections ();
-	if (0 == _no_route_change_signal) {
-		RoutesChanged ();
-	}
 }
 
 void
@@ -109,10 +108,6 @@ RouteProcessorSelection::add (AxisView* r)
 		if (ms) {
 			ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
 		}
-
-		if (0 == _no_route_change_signal) {
-			RoutesChanged();
-		}
 	}
 }
 
@@ -120,14 +115,12 @@ void
 RouteProcessorSelection::remove (AxisView* r)
 {
 	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
+	PresentationInfo::ChangeSuspender cs;
 
 	AxisViewSelection::iterator i;
 	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
 		(*i)->set_selected (false);
 		axes.erase (i);
-		if (0 == _no_route_change_signal) {
-			RoutesChanged ();
-		}
 	}
 }
 
@@ -148,15 +141,4 @@ bool
 RouteProcessorSelection::empty ()
 {
 	return processors.empty () && axes.empty ();
-}
-
-void
-RouteProcessorSelection::block_routes_changed (bool yn)
-{
-	if (yn) {
-		++_no_route_change_signal;
-	} else {
-		assert (_no_route_change_signal > 0);
-		--_no_route_change_signal;
-	}
 }

@@ -279,13 +279,13 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset, const int32_t sub_num)
-	: Region (other, offset, sub_num)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, MusicFrame offset)
+	: Region (other, offset)
 	, AUDIOREGION_COPY_STATE (other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
-	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), offset, other->_length)))
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), offset.frame, other->_length)))
 	, _automatable (other->session())
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -1454,13 +1454,12 @@ AudioRegion::rms (Progress* p) const
 
 	framecnt_t total = 0;
 
-	if (n_chan == 0) {
+	if (n_chan == 0 || fend == fpos) {
 		return 0;
 	}
 
 	while (fpos < fend) {
 		framecnt_t const to_read = min (fend - fpos, blocksize);
-		total += to_read;
 		for (uint32_t c = 0; c < n_chan; ++c) {
 			if (read_raw_internal (buf, fpos, to_read, c) != to_read) {
 				return 0;
@@ -1468,12 +1467,13 @@ AudioRegion::rms (Progress* p) const
 			for (framepos_t i = 0; i < to_read; ++i) {
 				rms += buf[i] * buf[i];
 			}
-			fpos += to_read;
-			if (p) {
-				p->set_progress (float (fpos - _start) / _length);
-				if (p->cancelled ()) {
-					return -1;
-				}
+		}
+		total += to_read;
+		fpos += to_read;
+		if (p) {
+			p->set_progress (float (fpos - _start) / _length);
+			if (p->cancelled ()) {
+				return -1;
 			}
 		}
 	}

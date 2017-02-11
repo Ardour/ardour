@@ -71,6 +71,11 @@ MixerGroupTabs::compute_tabs () const
 		if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
 			continue;
 		}
+#ifdef MIXBUS
+		if (s->route()->mixbus()) {
+			continue;
+		}
+#endif
 
 		RouteGroup* g = s->route_group ();
 

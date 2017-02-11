@@ -249,6 +249,12 @@ namespace ARDOUR {
 		TrackColor
 	};
 
+	enum LocaleMode {
+		SET_LC_ALL,
+		SET_LC_MESSAGES,
+		SET_LC_MESSAGES_AND_LC_NUMERIC
+	};
+
 	enum RoundMode {
 		RoundDownMaybe  = -2,  ///< Round down only if necessary
 		RoundDownAlways = -1,  ///< Always round down, even if on a division
@@ -311,6 +317,27 @@ namespace ARDOUR {
 			abort(); /* NOTREACHED */
 			return false;
 		}
+	};
+
+	/* used for translating audio frames to an exact musical position using a note divisor.
+	   an exact musical position almost never falls exactly on an audio frame, but for sub-sample
+	   musical accuracy we need to derive exact musical locations from a frame position
+	   the division follows TempoMap::exact_beat_at_frame().
+	   division
+	   -1       musical location is the bar closest to frame
+	    0       musical location is the musical position of the frame
+	    1       musical location is the BBT beat closest to frame
+	    n       musical location is the quarter-note division n closest to frame
+	*/
+	struct MusicFrame {
+		framepos_t frame;
+		int32_t    division;
+
+		MusicFrame (framepos_t f, int32_t d) : frame (f), division (d) {}
+
+		void set (framepos_t f, int32_t d) {frame = f; division = d; }
+
+		MusicFrame operator- (MusicFrame other) { return MusicFrame (frame - other.frame, 0); }
 	};
 
 	/* XXX: slightly unfortunate that there is this and Evoral::Range<>,
@@ -715,6 +742,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::TracksAutoNamingRule& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MonitorChoice& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
@@ -738,6 +766,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::TracksAutoNamingRule& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorChoice& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
@@ -762,11 +791,13 @@ LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& s
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
 LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::LocaleMode& sf);
 
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::LocaleMode& sf);
 
 
 static inline ARDOUR::framepos_t

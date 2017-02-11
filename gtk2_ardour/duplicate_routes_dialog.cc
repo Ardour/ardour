@@ -34,9 +34,10 @@ using namespace Gtk;
 
 DuplicateRouteDialog::DuplicateRouteDialog ()
 	: ArdourDialog (_("Duplicate Tracks & Busses"), false, false)
-	, copy_playlists_button (playlist_button_group, _("Copy playlists"))
-	, new_playlists_button (playlist_button_group, _("Create new (empty) playlists"))
-	, share_playlists_button (playlist_button_group, _("Share playlists"))
+	, playlist_option_label (_("For each Track:"))
+	, copy_playlists_button (playlist_button_group, _("Copy playlist"))
+	, new_playlists_button (playlist_button_group, _("New playlist"))
+	, share_playlists_button (playlist_button_group, _("Share playlist"))
 	, count_adjustment (1.0, 1.0, 999, 1.0, 10.0)
 	, count_spinner (count_adjustment)
 	, count_label (_("Duplicate each track/bus this number of times:"))
@@ -44,6 +45,10 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 	count_box.pack_start (count_label, false, false);
 	count_box.pack_start (count_spinner, false, false, 5);
 	get_vbox()->pack_start (count_box, false, false, 10);
+
+	Gtk::HBox* hb = manage (new HBox);
+	hb->pack_start (playlist_option_label, false, false);
+	get_vbox()->pack_start (*hb, false, false, 10);
 
 	playlist_button_box.pack_start (copy_playlists_button, false, false);
 	playlist_button_box.pack_start (new_playlists_button, false, false);

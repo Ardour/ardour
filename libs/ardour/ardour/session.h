@@ -199,7 +199,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	virtual ~Session ();
 
-	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version);
 	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
 	/** a monotonic counter used for naming user-visible things uniquely
@@ -349,7 +349,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	}
 
 	bool record_enabling_legal () const;
-	void maybe_enable_record ();
+	void maybe_enable_record (bool rt_context = false);
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 
@@ -563,6 +563,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template();
+	bool     export_track_state (boost::shared_ptr<RouteList> rl, const std::string& path);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
@@ -654,7 +655,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-		const ChanCount& input, const ChanCount& output,
+		const ChanCount& input, const ChanCount& output, bool strict_io,
 		boost::shared_ptr<PluginInfo> instrument,
 		Plugin::PresetRecord* pset,
 		RouteGroup* route_group, uint32_t how_many, std::string name_template,
@@ -663,7 +664,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
-	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, bool strict_io, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
 
 	void remove_routes (boost::shared_ptr<RouteList>);
 	void remove_route (boost::shared_ptr<Route>);
@@ -996,6 +997,17 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool get_play_range () const { return _play_range; }
 
 	void maybe_update_session_range (framepos_t, framepos_t);
+
+	/* preroll */
+	framecnt_t preroll_samples (framepos_t) const;
+
+	void request_preroll_record_punch (framepos_t start, framecnt_t preroll);
+	void request_preroll_record_trim (framepos_t start, framecnt_t preroll);
+
+	framepos_t preroll_record_punch_pos () const { return _preroll_record_punch_pos; }
+	bool preroll_record_punch_enabled () const { return _preroll_record_punch_pos >= 0; }
+
+	framecnt_t preroll_record_trim_len () const { return _preroll_record_trim_len; }
 
 	/* temporary hacks to allow selection to be pushed from GUI into backend.
 	   Whenever we move the selection object into libardour, these will go away.
@@ -1363,7 +1375,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 *  know when to send full MTC messages every so often.
 	 */
 	pframes_t               _pframes_since_last_mtc;
-	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;
 	framepos_t               last_loopend;
@@ -1523,7 +1534,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void auto_connect_thread_terminate ();
 
 	pthread_t       _auto_connect_thread;
-	bool            _ac_thread_active;
+	gint            _ac_thread_active;
 	pthread_mutex_t _auto_connect_mutex;
 	pthread_cond_t  _auto_connect_cond;
 
@@ -1694,7 +1705,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
-	void          gui_tempo_map_changed ();
 
 	/* edit/mix groups */
 
@@ -1896,6 +1906,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void   setup_click_sounds (Sample**, Sample const *, framecnt_t*, framecnt_t, std::string const &);
 	void   clear_clicks ();
 	void   click (framepos_t start, framecnt_t nframes);
+	void   run_click (framepos_t start, framecnt_t nframes);
+	void   add_click (framepos_t pos, bool emphasis);
+	framecnt_t _count_in_samples;
 
 	std::vector<Route*> master_outs;
 
@@ -1911,6 +1924,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	Evoral::Range<framepos_t> _range_selection;
 	Evoral::Range<framepos_t> _object_selection;
+
+	void unset_preroll_record_punch ();
+	void unset_preroll_record_trim ();
+
+	framepos_t _preroll_record_punch_pos;
+	framecnt_t _preroll_record_trim_len;
 
 	/* main outs */
 	uint32_t main_outs;

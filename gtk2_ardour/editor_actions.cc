@@ -249,30 +249,6 @@ Editor::register_actions ()
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
 	}
 
-
-	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
-	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
-
-	reg_sens (editor_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(*this, &Editor::set_session_start_from_playhead));
-	reg_sens (editor_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(*this, &Editor::set_session_end_from_playhead));
-
-	reg_sens (editor_actions, "toggle-location-at-playhead", _("Toggle Mark at Playhead"), sigc::mem_fun(*this, &Editor::toggle_location_at_playhead_cursor));
-	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
-	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
-
-	reg_sens (editor_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*this, &Editor::remove_location_at_playhead_cursor));
-	reg_sens (editor_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*this, &Editor::remove_location_at_playhead_cursor));
-
-	reg_sens (editor_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), true, false));
-	reg_sens (editor_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), true, false));
-
-	reg_sens (editor_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, true));
-	reg_sens (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, true));
-	reg_sens (editor_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
-	reg_sens (editor_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
-
 	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
@@ -371,6 +347,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
 	reg_sens (editor_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
 
+	reg_sens (editor_actions, "split-region", _("Split/Separate"), sigc::mem_fun (*this, &Editor::split_region));
+
 	reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
 	reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
 
@@ -388,21 +366,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
 
 	reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
-
-	reg_sens (editor_actions, "start-range-from-playhead", _("Start Range from Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_MOUSE ));
-	reg_sens (editor_actions, "finish-range-from-playhead", _("Finish Range from Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_MOUSE ));
-
-	reg_sens (editor_actions, "start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_NONE));
-	reg_sens (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_NONE));
-
-	reg_sens (editor_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_start_from_edit_point));
-	reg_sens (editor_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_end_from_edit_point));
-
-	reg_sens (editor_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_start_from_edit_point));
-	reg_sens (editor_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_end_from_edit_point));
-
-	reg_sens (editor_actions, "alt-start-range", _("Start Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_begin), EDIT_IGNORE_NONE));
-	reg_sens (editor_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false, EDIT_IGNORE_NONE));
 
 //	reg_sens (editor_actions, "finish-add-range", _("Finish Add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
 
@@ -735,9 +698,6 @@ Editor::register_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	/* the next two are duplicate items with different names for use in two different contexts */
-
-	act = reg_sens (editor_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*this, &Editor::external_audio_dialog));
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -1927,7 +1887,7 @@ Editor::register_region_actions ()
 	/* Open the region properties dialogue for the selected regions */
 	reg_sens (_region_actions, "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
 
-	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
+	reg_sens (_region_actions, "play-selected-regions", _("Play selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
 	reg_sens (_region_actions, "bounce-regions-processed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
 	reg_sens (_region_actions, "bounce-regions-unprocessed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));
@@ -1998,7 +1958,6 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	reg_sens (_region_actions, "split-region", _("Split/Separate"), sigc::mem_fun (*this, &Editor::split_region));
 	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
 	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 

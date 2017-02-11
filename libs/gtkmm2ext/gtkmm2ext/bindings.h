@@ -178,6 +178,7 @@ class LIBGTKMM2EXT_API Bindings {
 	bool activate (MouseButton, Operation);
 
 	bool is_bound (KeyboardKey const&, Operation) const;
+	std::string bound_name (KeyboardKey const&, Operation) const;
 	bool is_registered (Operation op, std::string const& action_name) const;
 
 	KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
@@ -185,7 +186,7 @@ class LIBGTKMM2EXT_API Bindings {
 	bool load (XMLNode const& node);
 	void load_operation (XMLNode const& node);
 	void save (XMLNode& root);
-	void save_as_html (std::ostream&) const;
+	void save_as_html (std::ostream&, bool) const;
 
 	/* GTK has the following position a Gtk::Action:
 	 *

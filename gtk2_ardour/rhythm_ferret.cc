@@ -253,28 +253,34 @@ RhythmFerret::run_analysis ()
 int
 RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, frameoffset_t /*offset*/, AnalysisFeatureList& results)
 {
-	TransientDetector t (_session->frame_rate());
+	try {
+		TransientDetector t (_session->frame_rate());
 
-	for (uint32_t i = 0; i < readable->n_channels(); ++i) {
+		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
-		AnalysisFeatureList these_results;
+			AnalysisFeatureList these_results;
 
-		t.reset ();
-		float dB = detection_threshold_adjustment.get_value();
-		float coeff = dB > -80.0f ? pow (10.0f, dB * 0.05f) : 0.0f;
-		t.set_threshold (coeff);
-		t.set_sensitivity (4, sensitivity_adjustment.get_value());
+			t.reset ();
+			float dB = detection_threshold_adjustment.get_value();
+			float coeff = dB > -80.0f ? pow (10.0f, dB * 0.05f) : 0.0f;
+			t.set_threshold (coeff);
+			t.set_sensitivity (4, sensitivity_adjustment.get_value());
 
-		if (t.run ("", readable.get(), i, these_results)) {
-			continue;
+			if (t.run ("", readable.get(), i, these_results)) {
+				continue;
+			}
+
+			/* merge */
+
+			results.insert (results.end(), these_results.begin(), these_results.end());
+			these_results.clear ();
+
+			t.update_positions (readable.get(), i, results);
 		}
 
-		/* merge */
-
-		results.insert (results.end(), these_results.begin(), these_results.end());
-		these_results.clear ();
-
-		t.update_positions (readable.get(), i, results);
+	} catch (failed_constructor& err) {
+		error << "Could not load percussion onset detection plugin" << endmsg;
+		return -1;
 	}
 
 	return 0;

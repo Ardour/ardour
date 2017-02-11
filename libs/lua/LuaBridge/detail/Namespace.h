@@ -473,6 +473,23 @@ private:
       return 1;
     }
 
+    template <class Params, class T, class C>
+    static int ctorPtrPlacementProxy (lua_State* L)
+    {
+      ArgList <Params, 2> args (L);
+      T newobject (Constructor <C, Params>::call (args));
+      Stack<T>::push (L, newobject);
+      return 1;
+    }
+
+    template <class T>
+    static int ctorNilPtrPlacementProxy (lua_State* L)
+    {
+      const T* newobject = new T ();
+      Stack<T>::push (L, *newobject);
+      return 1;
+    }
+
     //--------------------------------------------------------------------------
     /**
       Pop the Lua stack.
@@ -1037,9 +1054,26 @@ private:
       return *this;
     }
 
+    template <class MemFn, class PT>
+    Class <T>& addPtrConstructor ()
+    {
+      FUNDOC("Constructor", "", MemFn)
+      lua_pushcclosure (L,
+        &ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, T, PT>, 0);
+      rawsetfield(L, -2, "__call");
+
+      return *this;
+    }
+
     Class <T>& addVoidConstructor ()
     {
       return addConstructor <void (*) ()> ();
+    }
+
+    template <class PT>
+    Class <T>& addVoidPtrConstructor ()
+    {
+      return addPtrConstructor <void (*) (), PT> ();
     }
 
     Class <T>& addEqualCheck ()
@@ -1177,8 +1211,8 @@ private:
   public:
     WSPtrClass (char const* name, Namespace const* parent)
       : ClassBase (parent->L)
-      , weak (name, parent)
       , shared (name, parent)
+      , weak (name, parent)
     {
 #ifdef LUABINDINGDOC
       _parent = parent;
@@ -1187,21 +1221,21 @@ private:
       PRINTDOC ("[C] Weak/Shared Pointer Class",
           parent->_name + name,
           std::string(), type_name <T>())
-      m_stackSize = weak.m_stackSize;
+      m_stackSize = shared.m_stackSize;
       parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
       lua_pop (L, 3);
     }
 
     WSPtrClass (char const* name, Namespace const* parent, void const* const sharedkey, void const* const weakkey)
       : ClassBase (parent->L)
-      , weak (name, parent, weakkey)
       , shared (name, parent, sharedkey)
+      , weak (name, parent, weakkey)
     {
 #ifdef LUABINDINGDOC
       _parent = parent;
       _name = parent->_name + name + ":";
 #endif
-      m_stackSize = weak.m_stackSize;
+      m_stackSize = shared.m_stackSize;
       parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
       lua_pop (L, 3);
     }
@@ -1210,11 +1244,11 @@ private:
     WSPtrClass <T>& addFunction (char const* name, MemFn mf)
     {
       FUNDOC ("Weak/Shared Pointer Function", name, MemFn)
-      set_weak_class ();
-      CFunc::CallMemberWPtrFunctionHelper <MemFn>::add (L, name, mf);
-
       set_shared_class ();
       CFunc::CallMemberPtrFunctionHelper <MemFn>::add (L, name, mf);
+
+      set_weak_class ();
+      CFunc::CallMemberWPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
     }
 
@@ -1222,11 +1256,11 @@ private:
     WSPtrClass <T>& addRefFunction (char const* name, MemFn mf)
     {
       FUNDOC ("Weak/Shared Pointer Function RefReturn", name, MemFn)
-      set_weak_class ();
-      CFunc::CallMemberRefWPtrFunctionHelper <MemFn>::add (L, name, mf);
-
       set_shared_class ();
       CFunc::CallMemberRefPtrFunctionHelper <MemFn>::add (L, name, mf);
+
+      set_weak_class ();
+      CFunc::CallMemberRefWPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
     }
 
@@ -1234,14 +1268,16 @@ private:
     WSPtrClass <T>& addConstructor ()
     {
       FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
-      set_weak_class ();
-      lua_pushcclosure (L,
-          &weak. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
-      rawsetfield(L, -2, "__call");
-
       set_shared_class ();
       lua_pushcclosure (L,
-          &shared. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T> >, 0);
+          &shared. template ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T>, T >, 0);
+      rawsetfield(L, -2, "__call");
+
+      set_weak_class ();
+      // NOTE: this constructs an empty weak-ptr,
+      // ideally we'd construct a weak-ptr from a referenced shared-ptr
+      lua_pushcclosure (L,
+          &weak. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
       rawsetfield(L, -2, "__call");
       return *this;
     }
@@ -1251,15 +1287,33 @@ private:
       return addConstructor <void (*) ()> ();
     }
 
+    WSPtrClass <T>& addNilPtrConstructor ()
+    {
+      FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
+      set_shared_class ();
+      lua_pushcclosure (L,
+          &shared. template ctorNilPtrPlacementProxy <boost::shared_ptr<T> >, 0);
+      rawsetfield(L, -2, "__call");
+
+      set_weak_class ();
+      // NOTE: this constructs an empty weak-ptr,
+      // ideally we'd construct a weak-ptr from a referenced shared-ptr
+      lua_pushcclosure (L,
+          &weak. template ctorNilPtrPlacementProxy <boost::weak_ptr<T> >, 0);
+      rawsetfield(L, -2, "__call");
+
+      return *this;
+    }
+
     WSPtrClass <T>& addExtCFunction (char const* name, int (*const fp)(lua_State*))
     {
       DATADOC ("Weak/Shared Ext C Function", name, fp)
-      set_weak_class ();
+      set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
       rawsetfield (L, -3, name); // class table
 
-      set_shared_class ();
+      set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
       rawsetfield (L, -3, name); // class table
@@ -1285,14 +1339,14 @@ private:
     WSPtrClass <T>& addNullCheck ()
     {
       PRINTDOC("Weak/Shared Null Check", _name << "isnil", std::string("bool"), std::string("void (*)()"))
-      set_weak_class ();
-      assert (lua_istable (L, -1));
-      lua_pushcclosure (L, &CFunc::WPtrNullCheck <T>::f, 0);
-      rawsetfield (L, -3, "isnil"); // class table
-
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrNullCheck <T>::f, 0);
+      rawsetfield (L, -3, "isnil"); // class table
+
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::WPtrNullCheck <T>::f, 0);
       rawsetfield (L, -3, "isnil"); // class table
 
       return *this;
@@ -1301,14 +1355,14 @@ private:
     WSPtrClass <T>& addEqualCheck ()
     {
       PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
-      set_weak_class ();
-      assert (lua_istable (L, -1));
-      lua_pushcclosure (L, &CFunc::WPtrEqualCheck <T>::f, 0);
-      rawsetfield (L, -3, "sameinstance"); // class table
-
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "sameinstance"); // class table
+
+      set_weak_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::WPtrEqualCheck <T>::f, 0);
       rawsetfield (L, -3, "sameinstance"); // class table
 
       return *this;
@@ -1396,8 +1450,8 @@ private:
       lua_insert (L, -3);
       lua_insert (L, -2);
     }
-    Class<boost::weak_ptr<T> > weak;
     Class<boost::shared_ptr<T> > shared;
+    Class<boost::weak_ptr<T> > weak;
   };
 
 
@@ -1831,9 +1885,8 @@ public:
   Class<boost::shared_ptr<std::list<T> > > beginPtrStdList (char const* name)
   {
     typedef std::list<T> LT;
-
     return beginClass<boost::shared_ptr<LT> > (name)
-      .addVoidConstructor ()
+      //.addVoidPtrConstructor<LT> ()
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("size", &LT::size)
       .addPtrFunction ("reverse", &LT::reverse)
@@ -1852,7 +1905,7 @@ public:
     typedef typename std::vector<T>::size_type T_SIZE;
 
     return beginClass<boost::shared_ptr<LT> > (name)
-      .addVoidConstructor ()
+      //.addVoidPtrConstructor<LT> ()
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("size", &LT::size)

@@ -36,6 +36,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "ardour/runtime_functions.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/sndfile_helpers.h"
 #include "ardour/utils.h"
@@ -275,16 +276,41 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		throw failed_constructor();
 	}
 
-	/* copy file */
 	Sample buf[8192];
 	framecnt_t off = 0;
+	float peak = 0;
+	float norm = 1.f;
+
+	/* normalize before converting to fixed point, calc gain factor */
 	framecnt_t len = other.read (buf, off, 8192, /*channel*/0);
 	while (len > 0) {
+		peak = compute_peak (buf, len, peak);
+		off += len;
+		len = other.read (buf, off, 8192, /*channel*/0);
+		if (progress) {
+			progress->set_progress (0.5f * (float) off / other.readable_length ());
+		}
+	}
+
+	if (peak > 0) {
+		_gain *= peak;
+		norm = 1.f / peak;
+	}
+
+	/* copy file */
+	off = 0;
+	len = other.read (buf, off, 8192, /*channel*/0);
+	while (len > 0) {
+		if (norm != 1.f) {
+			for (framecnt_t i = 0; i < len; ++i) {
+				buf[i] *= norm;
+			}
+		}
 		write (buf, len);
 		off += len;
 		len = other.read (buf, off, 8192, /*channel*/0);
 		if (progress) {
-			progress->set_progress ((float) off / other.readable_length ());
+			progress->set_progress (0.5f + 0.5f * (float) off / other.readable_length ());
 		}
 	}
 }
@@ -523,6 +549,11 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name.val().substr (1), errbuf, _length, ret) << endl;
 			}
+			if (_gain != 1.f) {
+				for (framecnt_t i = 0; i < ret; ++i) {
+					dst[i] *= _gain;
+				}
+			}
 			return ret;
 		}
 	}
@@ -537,9 +568,16 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	/* stride through the interleaved data */
 
-	for (framecnt_t n = 0; n < nread; ++n) {
-		dst[n] = *ptr;
-		ptr += _info.channels;
+	if (_gain != 1.f) {
+		for (framecnt_t n = 0; n < nread; ++n) {
+			dst[n] = *ptr * _gain;
+			ptr += _info.channels;
+		}
+	} else {
+		for (framecnt_t n = 0; n < nread; ++n) {
+			dst[n] = *ptr;
+			ptr += _info.channels;
+		}
 	}
 
 	return nread;

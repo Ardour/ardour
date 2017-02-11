@@ -103,13 +103,13 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	}
 
 	Rect self (item_to_window (get()));
-	boost::optional<Rect> i = self.intersection (area);
+	Rect i = self.intersection (area);
 
 	if (!i) {
 		return;
 	}
 
-	Rect intersection (i.get());
+	Rect intersection (i);
 
 	Distance height = self.height();
 

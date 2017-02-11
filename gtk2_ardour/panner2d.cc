@@ -108,6 +108,9 @@ Panner2d::~Panner2d()
 	for (Targets::iterator i = speakers.begin(); i != speakers.end(); ++i) {
 		delete *i;
 	}
+	for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
+		delete *i;
+	}
 }
 
 void

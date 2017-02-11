@@ -605,7 +605,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, double y, bool with_guard_points)
+AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame, double y, bool with_guard_points)
 {
 	if (!_line) {
 		return;
@@ -632,16 +632,18 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	_line->view_to_model_coord (x, y);
 
+	MusicFrame when (frame, 0);
 	_editor.snap_to_with_modifier (when, event);
 
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
-	if (list->editor_add (when, y, with_guard_points)) {
+
+	if (list->editor_add (when.frame, y, with_guard_points)) {
 		XMLNode& after = list->get_state();
 		_editor.begin_reversible_command (_("add automation event"));
 		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
-		_line->get_selectables (when, when, 0.0, 1.0, results);
+		_line->get_selectables (when.frame, when.frame, 0.0, 1.0, results);
 		_editor.get_selection ().set (results);
 
 		_editor.commit_reversible_command ();
@@ -650,7 +652,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 }
 
 bool
-AutomationTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+AutomationTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t divisions)
 {
 	if (_line) {
 		return paste_one (pos, ctx.count, ctx.times, selection, ctx.counts, ctx.greedy);
@@ -790,7 +792,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 
 	_line = line;
 
-	line->set_height (height);
+	line->set_height (height - 2.5);
 
 	/* pick up the current state */
 	automation_state_changed ();

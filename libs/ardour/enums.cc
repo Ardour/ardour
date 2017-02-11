@@ -63,6 +63,7 @@ setup_enum_writer ()
 	NoteMode _NoteMode;
 	ChannelMode _ChannelMode;
 	ColorMode _ColorMode;
+	LocaleMode _LocaleMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
 	VUMeterStandard _VUMeterStandard;
@@ -246,6 +247,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (ChannelColors);
 	REGISTER_ENUM (TrackColor);
 	REGISTER (_ColorMode);
+
+	REGISTER_ENUM (SET_LC_ALL);
+	REGISTER_ENUM (SET_LC_MESSAGES);
+	REGISTER_ENUM (SET_LC_MESSAGES_AND_LC_NUMERIC);
+	REGISTER (_LocaleMode);
 
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
@@ -827,6 +833,20 @@ std::ostream& operator<<(std::ostream& o, const TracksAutoNamingRule& var)
 	return o << s;
 }
 
+std::istream& operator>>(std::istream& o, MonitorChoice& var)
+{
+	std::string s;
+	o >> s;
+	var = (MonitorChoice) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MonitorChoice& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, MonitorModel& var)
 {
 	std::string s;
@@ -864,6 +884,20 @@ std::istream& operator>>(std::istream& o, MeterLineUp& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const MeterLineUp& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, LocaleMode& var)
+{
+	std::string s;
+	o >> s;
+	var = (LocaleMode) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const LocaleMode& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

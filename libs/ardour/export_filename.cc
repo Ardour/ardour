@@ -49,6 +49,7 @@ namespace ARDOUR
 ExportFilename::ExportFilename (Session & session) :
   include_label (false),
   include_session (false),
+  use_session_snapshot_name (false),
   include_revision (false),
   include_channel_config (false),
   include_format_name (false),
@@ -91,6 +92,7 @@ ExportFilename::get_state ()
 
 	add_field (node, "label", include_label, label);
 	add_field (node, "session", include_session);
+	add_field (node, "snapshot", use_session_snapshot_name);
 	add_field (node, "timespan", include_timespan);
 	add_field (node, "revision", include_revision);
 	add_field (node, "time", include_time, enum_2_string (time_format));
@@ -142,6 +144,9 @@ ExportFilename::set_state (const XMLNode & node)
 	pair = get_field (node, "session");
 	include_session = pair.first;
 
+	pair = get_field (node, "snapshot");
+	use_session_snapshot_name = pair.first;
+
 	pair = get_field (node, "timespan");
 	include_timespan = pair.first;
 
@@ -189,7 +194,11 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 
 	if (include_session) {
 		path += filename_empty ? "" : "_";
-		path += session.name();
+		if (use_session_snapshot_name) {
+			path += session.snap_name();
+		} else {
+			path += session.name();
+		}
 		filename_empty = false;
 	}
 

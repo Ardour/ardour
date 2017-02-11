@@ -1647,7 +1647,8 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
 			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
 		}
-		rbs = max((size_t) bufsiz * 8, rbs);
+		int fact = ceilf(_session.frame_rate () / 3000.f);
+		rbs = max((size_t) bufsiz * std::max (8, fact), rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
@@ -1824,14 +1825,26 @@ load_parameter_descriptor(LV2World&            world,
 	if (label) {
 		desc.label = lilv_node_as_string(label);
 	}
-	if (def && lilv_node_is_float(def)) {
-		desc.normal = lilv_node_as_float(def);
+	if (def) {
+		if (lilv_node_is_float(def)) {
+			desc.normal = lilv_node_as_float(def);
+		} else if (lilv_node_is_int(def)) {
+			desc.normal = lilv_node_as_int(def);
+		}
 	}
-	if (minimum && lilv_node_is_float(minimum)) {
-		desc.lower = lilv_node_as_float(minimum);
+	if (minimum) {
+		if (lilv_node_is_float(minimum)) {
+			desc.lower = lilv_node_as_float(minimum);
+		} else if (lilv_node_is_int(minimum)) {
+			desc.lower = lilv_node_as_int(minimum);
+		}
 	}
-	if (maximum && lilv_node_is_float(maximum)) {
-		desc.upper = lilv_node_as_float(maximum);
+	if (maximum) {
+		if (lilv_node_is_float(maximum)) {
+			desc.upper = lilv_node_as_float(maximum);
+		} else if (lilv_node_is_int(maximum)) {
+			desc.upper = lilv_node_as_int(maximum);
+		}
 	}
 	load_parameter_descriptor_units(lworld, desc, units);
 	desc.datatype      = datatype;

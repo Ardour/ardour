@@ -358,8 +358,6 @@ private:
 	/** Fill _presets with our presets */
 	virtual void find_presets () = 0;
 
-	void update_presets (std::string src_unique_id, Plugin* src );
-
 	/** Add state to an existing XMLNode */
 	virtual void add_state (XMLNode *) const = 0;
 

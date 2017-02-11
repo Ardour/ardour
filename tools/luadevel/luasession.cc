@@ -239,13 +239,14 @@ static Session * _load_session (string dir, string state) // throws
 
 	float sr;
 	SampleFormat sf;
+	std::string v;
 	std::string s = Glib::build_filename (dir, state + statefile_suffix);
 	if (!Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
 		std::cerr << "Cannot find session: " << s << "\n";
 		return 0;
 	}
 
-	if (Session::get_info_from_path (s, sr, sf) != 0) {
+	if (Session::get_info_from_path (s, sr, sf, v) != 0) {
 		std::cerr << "Cannot get samplerate from session.\n";
 		return 0;
 	}

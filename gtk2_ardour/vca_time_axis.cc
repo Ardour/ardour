@@ -177,7 +177,7 @@ VCATimeAxisView::vca_property_changed (PropertyChange const & what_changed)
 void
 VCATimeAxisView::update_vca_name ()
 {
-	name_label.set_text (_vca->name());
+	name_label.set_text (_vca->full_name());
 }
 
 void

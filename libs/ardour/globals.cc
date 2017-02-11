@@ -111,8 +111,9 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
-
+#endif
 #include "audiographer/routines.h"
 
 #if defined (__APPLE__)
@@ -284,7 +285,7 @@ lotsa_files_please ()
 	if (newmax > 0) {
 		info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, newmax) << endmsg;
 	} else {
-		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio)  << endmsg;
+		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio())  << endmsg;
 	}
 #endif
 }
@@ -721,6 +722,7 @@ ARDOUR::set_translations_enabled (bool yn)
 	(void) ::write (fd, &c, 1);
 	(void) ::close (fd);
 
+	Config->ParameterChanged ("enable-translation");
 	return true;
 }
 

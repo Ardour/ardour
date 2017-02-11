@@ -36,9 +36,11 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	                          PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
+	~SlavableAutomationControl ();
+
 	double get_value () const;
 
-	void add_master (boost::shared_ptr<AutomationControl>);
+	void add_master (boost::shared_ptr<AutomationControl>, bool loading);
 	void remove_master (boost::shared_ptr<AutomationControl>);
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
@@ -56,6 +58,11 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	std::vector<PBD::ID> masters () const;
 
 	PBD::Signal0<void> MasterStatusChange;
+
+	void use_saved_master_ratios ();
+
+	int set_state (XMLNode const&, int);
+	XMLNode& get_state();
 
     protected:
 
@@ -111,7 +118,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	virtual void   pre_remove_master (boost::shared_ptr<AutomationControl>) {}
 	virtual void   post_add_master (boost::shared_ptr<AutomationControl>) {}
 
-
+	XMLNode* _masters_node; /* used to store master ratios in ::set_state() for later use */
 };
 
 } // namespace ARDOUR

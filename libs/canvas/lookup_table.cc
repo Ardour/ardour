@@ -47,9 +47,9 @@ DumbLookupTable::get (Rect const &area)
 	vector<Item *> vitems;
 #if 1
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
-		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = (*i)->bounding_box ();
 		if (!item_bbox) continue;
-		Rect item = (*i)->item_to_window (item_bbox.get());
+		Rect item = (*i)->item_to_window (item_bbox);
 		if (item.intersection (area)) {
 			vitems.push_back (*i);
 		}
@@ -121,28 +121,28 @@ OptimizingLookupTable::OptimizingLookupTable (Item const & item, int items_per_c
 	}
 
 	/* our item's bounding box in its coordinates */
-	boost::optional<Rect> bbox = _item.bounding_box ();
+	Rect bbox = _item.bounding_box ();
 	if (!bbox) {
 		return;
 	}
 
-	_cell_size.x = bbox.get().width() / _dimension;
-	_cell_size.y = bbox.get().height() / _dimension;
-	_offset.x = bbox.get().x0;
-	_offset.y = bbox.get().y0;
+	_cell_size.x = bbox.width() / _dimension;
+	_cell_size.y = bbox.height() / _dimension;
+	_offset.x = bbox.x0;
+	_offset.y = bbox.y0;
 
-//	cout << "BUILD bbox=" << bbox.get() << ", cellsize=" << _cell_size << ", offset=" << _offset << ", dimension=" << _dimension << "\n";
+//	cout << "BUILD bbox=" << bbox << ", cellsize=" << _cell_size << ", offset=" << _offset << ", dimension=" << _dimension << "\n";
 
 	for (list<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
 
 		/* item bbox in its own coordinates */
-		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = (*i)->bounding_box ();
 		if (!item_bbox) {
 			continue;
 		}
 
 		/* and in the item's coordinates */
-		Rect const item_bbox_in_item = (*i)->item_to_parent (item_bbox.get ());
+		Rect const item_bbox_in_item = (*i)->item_to_parent (item_bbox);
 
 		int x0, y0, x1, y1;
 		area_to_indices (item_bbox_in_item, x0, y0, x1, y1);
@@ -158,19 +158,19 @@ OptimizingLookupTable::OptimizingLookupTable (Item const & item, int items_per_c
 		//assert (y1 <= _dimension);
 
 		if (x0 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x0 - bbox.get().x0) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x0 - bbox.x0) << "\n";
 			x0 = _dimension;
 		}
 		if (x1 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x1 - bbox.get().x1) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x1 - bbox.x1) << "\n";
 			x1 = _dimension;
 		}
 		if (y0 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y0 - bbox.get().y0) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y0 - bbox.y0) << "\n";
 			y0 = _dimension;
 		}
 		if (y1 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y1 - bbox.get().y1) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y1 - bbox.y1) << "\n";
 			y1 = _dimension;
 		}
 
@@ -246,9 +246,9 @@ OptimizingLookupTable::items_at_point (Duple const & point) const
 	Cell const & cell = _cells[x][y];
 	vector<Item*> items;
 	for (Cell::const_iterator i = cell.begin(); i != cell.end(); ++i) {
-		boost::optional<Rect> const item_bbox = (*i)->bounding_box ();
+		Rect const item_bbox = (*i)->bounding_box ();
 		if (item_bbox) {
-			Rect parent_bbox = (*i)->item_to_parent (item_bbox.get ());
+			Rect parent_bbox = (*i)->item_to_parent (item_bbox);
 			if (parent_bbox.contains (point)) {
 				items.push_back (*i);
 			}
@@ -283,9 +283,9 @@ OptimizingLookupTable::has_item_at_point (Duple const & point) const
 	Cell const & cell = _cells[x][y];
 	vector<Item*> items;
 	for (Cell::const_iterator i = cell.begin(); i != cell.end(); ++i) {
-		boost::optional<Rect> const item_bbox = (*i)->bounding_box ();
+		Rect const item_bbox = (*i)->bounding_box ();
 		if (item_bbox) {
-			Rect parent_bbox = (*i)->item_to_parent (item_bbox.get ());
+			Rect parent_bbox = (*i)->item_to_parent (item_bbox);
 			if (parent_bbox.contains (point)) {
 				return true;
 			}

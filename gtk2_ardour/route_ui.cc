@@ -285,6 +285,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+	_route->fan_out.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::fan_out, this, true, true), gui_context());
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
@@ -1199,28 +1200,28 @@ RouteUI::update_solo_display ()
 		solo_isolated_check->set_active (yn);
 	}
 
-        set_button_names ();
+	set_button_names ();
 
-        if (solo_isolated_led) {
-	        if (_route->solo_isolate_control()->solo_isolated()) {
+	if (solo_isolated_led) {
+		if (_route->solo_isolate_control()->solo_isolated()) {
 			solo_isolated_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_isolated_led->unset_active_state ();
 		}
-        }
+	}
 
-        if (solo_safe_led) {
-	        if (_route->solo_safe_control()->solo_safe()) {
+	if (solo_safe_led) {
+		if (_route->solo_safe_control()->solo_safe()) {
 			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_safe_led->unset_active_state ();
 		}
-        }
+	}
 
 	solo_button->set_active_state (solo_active_state (_route));
 
-        /* some changes to solo status can affect mute display, so catch up
-         */
+	/* some changes to solo status can affect mute display, so catch up
+	 */
 
 	update_mute_display ();
 }
@@ -1940,6 +1941,8 @@ RouteUI::parameter_changed (string const & p)
 		check_rec_enable_sensitivity ();
 	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
+	} else if (p == "session-monitoring") {
+		update_monitoring_display ();
 	} else if (p == "auto-input") {
 		update_monitoring_display ();
 	} else if (p == "blink-rec-arm") {
@@ -2287,6 +2290,7 @@ RoutePinWindowProxy::route_going_away ()
 	_window = 0;
 	WM::Manager::instance().remove (this);
 	going_away_connection.disconnect();
+	delete this;
 }
 
 void

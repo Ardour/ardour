@@ -1,0 +1,14 @@
+#!/bin/sh
+# echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
+
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export ARDOUR_INSIDE_GDB=1
+if test -z "`which rr`"; then
+	echo "rr was not found."
+	exit
+fi
+exec rr record $TOP/$EXECUTABLE "$@"
+
+# trace is in ~/.local/share/rr/latest-trace/
+# ./arrr-replay

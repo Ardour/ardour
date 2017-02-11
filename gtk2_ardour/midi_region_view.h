@@ -180,7 +180,7 @@ public:
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
-	void apply_diff (bool as_subcommand = false);
+	void apply_diff (bool as_subcommand = false, bool was_copy = false);
 	void abort_command();
 
 	void   note_entered(NoteBase* ev);
@@ -200,8 +200,11 @@ public:
 	void   select_range(framepos_t start, framepos_t end);
 	void   invert_selection ();
 
+	Evoral::Beats earliest_in_selection ();
 	void move_selection(double dx, double dy, double cumulative_dy);
-	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
+	void note_dropped (NoteBase* ev, double d_qn, int8_t d_note, bool copy);
+	NoteBase* copy_selection (NoteBase* primary);
+	void move_copies(double dx_qn, double dy, double cumulative_dy);
 
 	void select_notes (std::list<Evoral::event_id_t>);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -295,6 +298,8 @@ public:
 		return _region_relative_time_converter_double;
 	}
 
+	double session_relative_qn (double qn) const;
+
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Evoral::Beats beats, bool start, bool end);
@@ -359,6 +364,7 @@ private:
 	friend class NoteDrag;
 	friend class NoteCreateDrag;
 	friend class HitCreateDrag;
+	friend class MidiGhostRegion;
 
 	friend class EditNoteDialog;
 
@@ -381,7 +387,7 @@ private:
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed ();
-        PBD::ScopedConnection _channel_mode_changed_connection;
+	PBD::ScopedConnection _channel_mode_changed_connection;
 	void instrument_settings_changed ();
 	PBD::ScopedConnection _instrument_changed_connection;
 
@@ -409,9 +415,10 @@ private:
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 
-	typedef std::list<NoteBase*>                          Events;
-	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::vector< boost::shared_ptr<SysEx> >       SysExes;
+	typedef boost::unordered_map<boost::shared_ptr<NoteType>, NoteBase*>                             Events;
+	typedef boost::unordered_map<ARDOUR::MidiModel::PatchChangePtr, boost::shared_ptr<PatchChange> > PatchChanges;
+	typedef boost::unordered_map<ARDOUR::MidiModel::constSysExPtr, boost::shared_ptr<SysEx> >        SysExes;
+	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
@@ -419,6 +426,7 @@ private:
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
+	CopyDragEvents                       _copy_drag_events;
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	Note**                               _active_notes;
@@ -437,9 +445,6 @@ private:
 
 	/** Currently selected NoteBase objects */
 	Selection _selection;
-
-	bool _sort_needed;
-	void time_sort_events ();
 
 	MidiCutBuffer* selection_as_cut_buffer () const;
 
@@ -464,6 +469,7 @@ private:
 	Events::iterator _optimization_iterator;
 
 	boost::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
+	boost::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);
@@ -524,8 +530,8 @@ private:
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;
 
-        ARDOUR::ChannelMode get_channel_mode() const;
-        uint16_t get_selected_channels () const;
+	ARDOUR::ChannelMode get_channel_mode() const;
+	uint16_t get_selected_channels () const;
 
 	inline double contents_height() const { return (_height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 	inline double contents_note_range () const { return (double)(_current_range_max - _current_range_min + 1); }

@@ -97,7 +97,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
-	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
@@ -130,9 +129,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
-	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
+	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
@@ -178,13 +177,7 @@ MixerStrip::init ()
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 
-	set_tooltip (&meter_point_button, _("Click to select metering point"));
-	meter_point_button.set_name ("mixer strip button");
-
-	bottom_button_table.attach (meter_point_button, 2, 3, 0, 1);
-
-	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
-	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
+	bottom_button_table.attach (gpm.meter_point_button, 2, 3, 0, 1);
 
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
@@ -321,14 +314,23 @@ MixerStrip::init ()
 		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	}
 
+#ifndef MIXBUS
 	//add a spacer underneath the master bus;
 	//this fills the area that is taken up by the scrollbar on the tracks;
 	//and therefore keeps the faders "even" across the bottom
-	HScrollbar scrollbar;
-	Gtk::Requisition requisition(scrollbar.size_request ());
-	int scrollbar_height = requisition.height;
-	spacer.set_size_request (-1, scrollbar_height+2);  //+2 is a fudge factor to accomodate extra padding in mixer strip
+	int scrollbar_height = 0;
+	{
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		HScrollbar scrollbar;
+		window.add (scrollbar);
+		scrollbar.set_name ("MixerWindow");
+		scrollbar.ensure_style();
+		Gtk::Requisition requisition(scrollbar.size_request ());
+		scrollbar_height = requisition.height;
+	}
+	spacer.set_size_request (-1, scrollbar_height);
 	global_vpacker.pack_end (spacer, false, false);
+#endif
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -422,6 +424,22 @@ MixerStrip::~MixerStrip ()
 
 	if (this ==_entered_mixer_strip)
 		_entered_mixer_strip = NULL;
+}
+
+void
+MixerStrip::vca_assign (boost::shared_ptr<ARDOUR::VCA> vca)
+{
+	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	if (sl)
+		sl->assign(vca, false);
+}
+
+void
+MixerStrip::vca_unassign (boost::shared_ptr<ARDOUR::VCA> vca)
+{
+	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	if (sl)
+		sl->unassign(vca);
 }
 
 bool
@@ -539,9 +557,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
-		if (solo_iso_table.get_parent()) {
-			solo_iso_table.get_parent()->remove(solo_iso_table);
-		}
+		solo_iso_table.set_sensitive(false);
+		control_slave_ui.set_sensitive(false);
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -562,6 +579,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		rec_mon_table.show ();
+		solo_iso_table.set_sensitive(true);
+		control_slave_ui.set_sensitive(true);
 	}
 
 	if (_mixer_owned && route()->is_master() ) {
@@ -635,7 +654,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -703,7 +722,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	mute_solo_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
-	meter_point_button.show();
+	gpm.meter_point_button.show();
 	input_button_box.show_all();
 	output_button.show();
 	name_button.show();
@@ -2075,7 +2094,7 @@ MixerStrip::monitor_changed ()
 void
 MixerStrip::meter_changed ()
 {
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
@@ -2116,7 +2135,7 @@ MixerStrip::drop_send ()
 	output_button.set_sensitive (true);
 	group_button.set_sensitive (true);
 	set_invert_sensitive (true);
-	meter_point_button.set_sensitive (true);
+	gpm.meter_point_button.set_sensitive (true);
 	mute_button->set_sensitive (true);
 	solo_button->set_sensitive (true);
 	solo_isolated_led->set_sensitive (true);
@@ -2163,7 +2182,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
 	set_invert_sensitive (false);
-	meter_point_button.set_sensitive (false);
+	gpm.meter_point_button.set_sensitive (false);
 	mute_button->set_sensitive (false);
 	solo_button->set_sensitive (false);
 	rec_enable_button->set_sensitive (false);
@@ -2269,9 +2288,9 @@ MixerStrip::set_button_names ()
 	}
 
 	if (_route) {
-		meter_point_button.set_text (meter_point_string (_route->meter_point()));
+		gpm.meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	} else {
-		meter_point_button.set_text ("");
+		gpm.meter_point_button.set_text ("");
 	}
 }
 

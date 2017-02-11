@@ -266,7 +266,6 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->set_col_spacings (6);
 	fbtable->set_border_width (12);
 
-	// show our url
 	label = manage (new Gtk::Label(_("Select Desired Types of Feedback")));
 	fbtable->attach (*label, 0, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	++fn;

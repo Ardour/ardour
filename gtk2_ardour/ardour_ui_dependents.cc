@@ -43,6 +43,7 @@
 #include "splash.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
+#include "time_info_box.h"
 #include "opts.h"
 #include "utils.h"
 
@@ -99,9 +100,6 @@ ARDOUR_UI::we_have_dependents ()
 	/* all actions are defined */
 
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
-
-	editor->track_mixer_selection ();
-	mixer->track_editor_selection ();
 
 	/* catch up on parameters */
 
@@ -271,6 +269,7 @@ ARDOUR_UI::setup_windows ()
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
 
+	time_info_box = new TimeInfoBox (false);
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();

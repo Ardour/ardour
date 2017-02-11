@@ -227,6 +227,7 @@ public:
 
 	void set_session (ARDOUR::Session *);
 private:
+	Gtk::ScrolledWindow* scroller;
 	Gtk::VBox *vbox;
 	typedef boost::shared_ptr<PluginPinWidget> PluginPinWidgetPtr;
 	typedef std::vector<PluginPinWidgetPtr> PluginPinWidgetList;
@@ -234,10 +235,12 @@ private:
 	void route_going_away ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void add_processor (boost::weak_ptr<ARDOUR::Processor>);
+	void map_height (Gtk::Allocation&);
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PluginPinWidgetList ppw;
 	PBD::ScopedConnectionList _route_connections;
+	bool _height_mapped;
 };
 
 #endif

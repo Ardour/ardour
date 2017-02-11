@@ -256,14 +256,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Selection& get_selection() const { return *selection; }
 	bool get_selection_extents (framepos_t &start, framepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
-	void track_mixer_selection ();
 
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
-	framepos_t get_preroll ();
 	void maybe_locate_with_edit_preroll (framepos_t);
 	void play_with_preroll ();
+	void rec_with_preroll ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all_objects (Selection::Operation op);
 	void invert_selection_in_track ();
@@ -367,8 +366,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* fades */
 
- 	void toggle_region_fades (int dir);
- 	void update_region_fade_visibility ();
+	void toggle_region_fades (int dir);
+	void update_region_fade_visibility ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 
@@ -453,20 +452,20 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
-	void snap_to (framepos_t&       first,
-	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	              bool              for_mark  = false,
-		      bool              ensure_snap = false);
+	void snap_to (ARDOUR::MusicFrame& first,
+	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	              bool                for_mark  = false,
+		      bool                ensure_snap = false);
 
-	void snap_to_with_modifier (framepos_t&       first,
-	                            GdkEvent const *  ev,
-	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                            bool              for_mark  = false);
+	void snap_to_with_modifier (ARDOUR::MusicFrame& first,
+	                            GdkEvent const *    ev,
+	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                            bool                for_mark  = false);
 
-	void snap_to (framepos_t&       first,
-	              framepos_t&       last,
-	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	              bool              for_mark  = false);
+	void snap_to (ARDOUR::MusicFrame& first,
+	              ARDOUR::MusicFrame& last,
+	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	              bool                for_mark  = false);
 
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
@@ -543,7 +542,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false);
-	void split_regions_at (framepos_t, RegionSelection&, const int32_t sub_num, bool snap = true);
+	void split_regions_at (ARDOUR::MusicFrame, RegionSelection&, bool snap = true);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
 
@@ -626,6 +625,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	boost::optional<float>  pre_notebook_shrink_pane_width;
 
+	Gtk::VBox _editor_list_vbox;
 	Gtk::Notebook _the_notebook;
 	bool _notebook_shrunk;
 	void add_notebook_page (std::string const &, Gtk::Widget &);
@@ -653,6 +653,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void trigger_script (int nth);
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
+
+	void jump_forward_to_mark ();
+	void jump_backward_to_mark ();
 
 	uint32_t location_marker_color;
 	uint32_t location_range_color;
@@ -1336,8 +1339,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* import & embed */
 
 	void add_external_audio_action (Editing::ImportMode);
-	void external_audio_dialog ();
-	void session_import_dialog ();
 
 	int  check_whether_and_how_to_import(std::string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<std::string>& paths);
@@ -1400,6 +1401,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	AnalysisWindow* analysis_window;
 
+	/* import & embed */
+	void external_audio_dialog ();
+	void session_import_dialog ();
+
 	/* import specific info */
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
@@ -1420,7 +1425,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
-	void import_smf_tempo_map (Evoral::SMF const &);
+	void import_smf_tempo_map (Evoral::SMF const &, framepos_t pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();
@@ -1438,8 +1443,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void clear_locations ();
 	void unhide_markers ();
 	void unhide_ranges ();
-	void jump_forward_to_mark ();
-	void jump_backward_to_mark ();
 	void cursor_align (bool playhead_to_edit);
 	void toggle_skip_playback ();
 
@@ -1697,7 +1700,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void build_range_marker_menu (bool, bool);
+	void build_range_marker_menu (ARDOUR::Location *, bool, bool);
 	void build_marker_menu (ARDOUR::Location *);
 	void build_tempo_marker_menu (TempoMarker *, bool);
 	void build_meter_marker_menu (MeterMarker *, bool);
@@ -1725,7 +1728,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t left, framepos_t right);
 
 	void tempo_map_changed (const PBD::PropertyChange&);
-	void marker_position_changed ();
+	void tempometric_position_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 
 	uint32_t bbt_beat_subdivision;
@@ -1827,6 +1830,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void setup_midi_toolbar ();
 
+	void presentation_info_changed (PBD::PropertyChange const &);
+
 	/* selection process */
 
 	Selection* selection;
@@ -1849,8 +1854,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _last_region_menu_was_main;
 	void point_selection_changed ();
 	void marker_selection_changed ();
-
-	bool _ignore_follow_edits;
 
 	void cancel_selection ();
 	void cancel_time_selection ();
@@ -2149,14 +2152,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_next_route ();
 	void select_prev_route ();
 
-	void snap_to_internal (framepos_t&       first,
-	                       ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                       bool              for_mark  = false,
-			       bool              ensure_snap = false);
+	void snap_to_internal (ARDOUR::MusicFrame& first,
+	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                       bool                for_mark  = false,
+			       bool                ensure_snap = false);
 
-	void timecode_snap_to_internal (framepos_t&       first,
-	                                ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                                bool              for_mark  = false);
+	void timecode_snap_to_internal (ARDOUR::MusicFrame& first,
+	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                                bool                for_mark  = false);
 
 	RhythmFerret* rhythm_ferret;
 
@@ -2219,8 +2222,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _region_selection_change_updates_region_list;
 
 	void setup_fade_images ();
-	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;
-	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_out_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_in_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _xfade_out_images;
 

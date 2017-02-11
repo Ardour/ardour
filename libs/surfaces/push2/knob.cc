@@ -240,7 +240,7 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 Push2Knob::compute_bounding_box () const
 {
 	if (!_canvas || _r == 0) {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 		_bounding_box_dirty = false;
 		return;
 	}

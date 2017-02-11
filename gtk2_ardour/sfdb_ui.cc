@@ -57,6 +57,7 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/srcfilesource.h"
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "editing.h"
@@ -343,7 +344,7 @@ SoundFileBox::setup_labels (const string& filename)
 				tempomap_value.set_text (string_compose (_("%1/%2 \u2669 = %3"),
 				                                         t->numerator,
 				                                         t->denominator,
-				                                         (1000000 / t->microseconds_per_quarter_note) * 60));
+				                                         t->tempo ()));
 				break;
 			}
 			default:
@@ -1446,7 +1447,9 @@ SoundFileOmega::reset_options ()
 
 	action_strings.push_back (importmode2string (ImportAsTrack));
 	action_strings.push_back (importmode2string (ImportAsRegion));
-	action_strings.push_back (importmode2string (ImportAsTapeTrack));
+	if (!Profile->get_mixbus()) {
+		action_strings.push_back (importmode2string (ImportAsTapeTrack));
+	}
 
 	existing_choice = action_combo.get_active_text();
 

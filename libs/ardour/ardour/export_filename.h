@@ -90,6 +90,7 @@ class LIBARDOUR_API ExportFilename {
 
 	bool include_label;
 	bool include_session;
+	bool use_session_snapshot_name;
 	bool include_revision;
 	bool include_channel_config;
 	bool include_format_name;

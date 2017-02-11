@@ -121,7 +121,7 @@ class RegionView : public TimeAxisViewItem
 		}
 	};
 
-	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t, bool ensure_snap = false) const;
+	ARDOUR::MusicFrame snap_frame_to_frame (ARDOUR::frameoffset_t, bool ensure_snap = false) const;
 
   protected:
 

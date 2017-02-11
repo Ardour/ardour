@@ -45,7 +45,7 @@ StatefulImage::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	ImageHandle image = _states[_state].image;
 	Rect self = item_to_window (Rect (0, 0, image->get_width(), image->get_height()));
 
-	boost::optional<Rect> draw = self.intersection (area);
+	Rect draw = self.intersection (area);
 
 	if (!draw) {
 		return;
@@ -55,7 +55,7 @@ StatefulImage::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	   ("window" coordinates) and render it.
 	*/
 	context->set_source (image, self.x0, self.y0);
-	context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
+	context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 	context->fill ();
 
 	if (!_text.empty()) {

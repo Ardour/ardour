@@ -14,9 +14,7 @@
       <menuitem action='SnapshotSwitch'/>
 #endif
       <menuitem action='SaveTemplate'/>
-#if 0
       <menuitem action='Archive'/>
-#endif
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
@@ -76,6 +74,7 @@
       <menuitem action='record-roll'/>
       <menuitem action='ToggleRollForgetCapture'/>
       <menuitem action='Record'/>
+      <menuitem action='RecordPreroll'/>
 #if 0
       <menuitem action='toggle-skip-playback'/>
 #endif
@@ -318,7 +317,6 @@
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
         <menuitem action='pitch-shift-region'/>
-        <menuitem action='split-region'/>
         <menuitem action='split-region-at-transients'/>
         <menuitem action='split-multichannel-region'/>
         <menuitem action='close-region-gaps'/>

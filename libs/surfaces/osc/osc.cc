@@ -57,6 +57,7 @@
 #include "osc_controllable.h"
 #include "osc_route_observer.h"
 #include "osc_global_observer.h"
+#include "osc_cue_observer.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -90,7 +91,6 @@ OSC::OSC (Session& s, uint32_t port)
 	, _shutdown (false)
 	, _osc_server (0)
 	, _osc_unix_server (0)
-	, _send_route_changes (true)
 	, _debugmode (Off)
 	, address_only (false)
 	, remote_port ("8000")
@@ -110,6 +110,7 @@ OSC::OSC (Session& s, uint32_t port)
 OSC::~OSC()
 {
 	stop ();
+	tear_down_gui ();
 	_instance = 0;
 }
 
@@ -161,19 +162,6 @@ bool
 OSC::get_active () const
 {
 	return _osc_server != 0;
-}
-
-int
-OSC::set_feedback (bool yn)
-{
-	_send_route_changes = yn;
-	return 0;
-}
-
-bool
-OSC::get_feedback () const
-{
-	return _send_route_changes;
 }
 
 int
@@ -341,6 +329,7 @@ OSC::stop ()
 
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
+	cueobserver_connections.drop_connections ();
 	// Delete any active route observers
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
 
@@ -365,12 +354,26 @@ OSC::stop ()
 			++x;
 		}
 	}
+
 // delete select observers
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
 		OSCSelectObserver* so;
 		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
 			delete so;
+		}
+	}
+
+// delete cue observers
+	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end();) {
+
+		OSCCueObserver* co;
+
+		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
+			delete *x;
+			x = cue_observers.erase (x);
+		} else {
+			++x;
 		}
 	}
 
@@ -860,7 +863,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	} else
 	if (!strncmp (path, "/cue/", 5)) {
 
-		//cue_parse (path, types, argv, argc, msg)
+		cue_parse (path, types, argv, argc, msg);
 
 		ret = 0;
 	} else
@@ -1071,12 +1074,6 @@ OSC::debugmsg (const char *prefix, const char *path, const char* types, lo_arg *
 		}
 	}
 	PBD::info << prefix << ": " << path << ss.str() << endmsg;
-}
-
-void
-OSC::update_clock ()
-{
-
 }
 
 // "Application Hook" Handlers //
@@ -1389,7 +1386,8 @@ OSC::get_surface (lo_address addr)
 	s.sel_obs = 0;
 	s.expand = 0;
 	s.expand_enable = false;
-	s.strips = get_sorted_stripables(s.strip_types);
+	s.cue = false;
+	s.strips = get_sorted_stripables(s.strip_types, s.cue);
 
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
@@ -1461,7 +1459,11 @@ OSC::_recalcbanks ()
 		OSCSurface* sur = &_surface[it];
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-		_set_bank (sur->bank, addr);
+		if (sur->cue) {
+			_cue_set (sur->aux, addr);
+		} else {
+			_set_bank (sur->bank, addr);
+		}
 	}
 }
 
@@ -1513,7 +1515,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		usleep ((uint32_t) 10);
 	}
 
-	s->strips = get_sorted_stripables(s->strip_types);
+	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 	s->nstrips = s->strips.size();
 
 	uint32_t b_size;
@@ -3491,6 +3493,14 @@ OSC::periodic (void)
 			so->tick();
 		}
 	}
+	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end(); x++) {
+
+		OSCCueObserver* co;
+
+		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
+			co->tick();
+		}
+	}
 	return true;
 }
 
@@ -3658,7 +3668,7 @@ OSC::set_state (const XMLNode& node, int version)
 				s.sel_obs = 0;
 				s.expand = 0;
 				s.expand_enable = false;
-				s.strips = get_sorted_stripables(s.strip_types);
+				s.strips = get_sorted_stripables(s.strip_types, s.cue);
 				s.nstrips = s.strips.size();
 				_surface.push_back (s);
 			}
@@ -3690,7 +3700,7 @@ struct StripableByPresentationOrder
 };
 
 OSC::Sorted
-OSC::get_sorted_stripables(std::bitset<32> types)
+OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 {
 	Sorted sorted;
 
@@ -3703,7 +3713,7 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
 		boost::shared_ptr<Stripable> s = *it;
-		if ((!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
+		if ((!cue) && (!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 			// do nothing... skip it
 		} else {
 
@@ -3750,6 +3760,301 @@ OSC::get_sorted_stripables(std::bitset<32> types)
 	if (types[6]) {
 		sorted.push_back (session->monitor_out());
 	}
+	return sorted;
+}
+
+int
+OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	int ret = 1; /* unhandled */
+
+	if (!strncmp (path, "/cue/aux", 8)) {
+		// set our Aux bus
+		cue_set (argv[0]->i, msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/connect", 12)) {
+		// switch to next Aux bus
+		cue_set (0, msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/next_aux", 13)) {
+		// switch to next Aux bus
+		cue_next (msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/previous_aux", 17)) {
+		// switch to previous Aux bus
+		cue_previous (msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
+		int id = atoi (&path[16]);
+		cue_send_fader (id, argv[0]->f, msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/send/enable/", 17) && strlen (path) > 17) {
+		int id = atoi (&path[17]);
+		cue_send_enable (id, argv[0]->f, msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/fader", 10)) {
+		cue_aux_fader (argv[0]->f, msg);
+		ret = 0;
+	}
+	else if (!strncmp (path, "/cue/mute", 9)) {
+		cue_aux_mute (argv[0]->f, msg);
+		ret = 0;
+	}
+
+	if ((ret && _debugmode == Unhandled)) {
+		debugmsg (_("Unhandled OSC cue message"), path, types, argv, argc);
+	} else if ((!ret && _debugmode == All)) {
+		debugmsg (_("OSC cue"), path, types, argv, argc);
+	}
+
+	return ret;
+}
+
+int
+OSC::cue_set (uint32_t aux, lo_message msg)
+{
+	return _cue_set (aux, get_address (msg));
+}
+
+int
+OSC::_cue_set (uint32_t aux, lo_address addr)
+{
+	OSCSurface *s = get_surface(addr);
+	s->bank_size = 0;
+	s->strip_types = 128;
+	s->feedback = 0;
+	s->gainmode = 1;
+	s->cue = true;
+	s->aux = aux;
+	s->strips = get_sorted_stripables(s->strip_types, s->cue);
+
+	s->nstrips = s->strips.size();
+	// get rid of any old CueObsevers for this address
+	cueobserver_connections.drop_connections ();
+	CueObservers::iterator x;
+	for (x = cue_observers.begin(); x != cue_observers.end();) {
+
+		OSCCueObserver* co;
+
+		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
+
+			int res = strcmp(lo_address_get_url(co->address()), lo_address_get_url(addr));
+
+			if (res == 0) {
+				delete *x;
+				x = cue_observers.erase (x);
+			} else {
+				++x;
+			}
+		} else {
+			++x;
+		}
+	}
+
+	// get a list of Auxes
+	for (uint32_t n = 0; n < s->nstrips; ++n) {
+		boost::shared_ptr<Stripable> stp = s->strips[n];
+		if (stp) {
+			text_message (string_compose ("/cue/name/%1", n+1), stp->name(), addr);
+			if (aux == n+1) {
+				// aux must be at least one
+				// need a signal if aux vanishes
+				stp->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, aux, addr), this);
+
+				// make a list of stripables with sends that go to this bus
+				s->sends = cue_get_sorted_stripables(stp, aux, addr);
+				// start cue observer
+				OSCCueObserver* co = new OSCCueObserver (stp, s->sends, addr);
+				cue_observers.push_back (co);
+			}
+
+		}
+	}
+
+	return 0;
+}
+
+int
+OSC::cue_next (lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	if (s->aux < s->nstrips) {
+		cue_set (s->aux + 1, msg);
+	} else {
+		cue_set (s->nstrips, msg);
+	}
+	return 0;
+}
+
+int
+OSC::cue_previous (lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	if (s->aux > 1) {
+		cue_set (s->aux - 1, msg);
+	}
+	return 0;
+}
+
+boost::shared_ptr<Send>
+OSC::cue_get_send (uint32_t id, lo_address addr)
+{
+	OSCSurface *s = get_surface(addr);
+	if (id && s->aux > 0 && id <= s->sends.size()) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s->sends[id - 1]);
+		boost::shared_ptr<Stripable> aux = get_strip (s->aux, addr);
+		if (r && aux) {
+			return r->internal_send_for (boost::dynamic_pointer_cast<Route> (aux));
+		}
+	}
+	return boost::shared_ptr<Send>();
+
+}
+
+int
+OSC::cue_aux_fader (float position, lo_message msg)
+{
+	if (!session) return -1;
+
+	OSCSurface *sur = get_surface(get_address (msg));
+	if (sur->cue) {
+		if (sur->aux) {
+			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));
+
+			if (s) {
+				float abs;
+				abs = slider_position_to_gain_with_max (position, 2.0);
+				if (s->gain_control()) {
+					s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+					return 0;
+				}
+			}
+		}
+	}
+	return cue_float_message ("/cue/fader", 0, get_address (msg));
+}
+
+int
+OSC::cue_aux_mute (float state, lo_message msg)
+{
+	if (!session) return -1;
+
+	OSCSurface *sur = get_surface(get_address (msg));
+	if (sur->cue) {
+		if (sur->aux) {
+			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));
+			if (s) {
+				if (s->mute_control()) {
+					s->mute_control()->set_value (state ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+					return 0;
+				}
+			}
+		}
+	}
+	return cue_float_message ("/cue/mute", 0, get_address (msg));
+}
+
+int
+OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
+	float abs;
+	if (s) {
+		if (s->gain_control()) {
+			abs = slider_position_to_gain_with_max (val, 2.0);
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return cue_float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
+}
+
+int
+OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
+{
+	if (!session)
+		return -1;
+	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
+	if (s) {
+		if (state) {
+			s->activate ();
+		} else {
+			s->deactivate ();
+		}
+		return 0;
+	}
+	return cue_float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
+}
+
+int
+OSC::cue_float_message (string path, float val, lo_address addr)
+{
+
+	lo_message reply;
+	reply = lo_message_new ();
+	lo_message_add_float (reply, (float) val);
+
+	lo_send_message (addr, path.c_str(), reply);
+	lo_message_free (reply);
+
+	return 0;
+}
+
+int
+OSC::text_message (string path, string val, lo_address addr)
+{
+
+	lo_message reply;
+	reply = lo_message_new ();
+	lo_message_add_string (reply, val.c_str());
+
+	lo_send_message (addr, path.c_str(), reply);
+	lo_message_free (reply);
+
+	return 0;
+}
+
+
+// we have to have a sorted list of stripables that have sends pointed at our aux
+// we can use the one in osc.cc to get an aux list
+OSC::Sorted
+OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo_message msg)
+{
+	Sorted sorted;
+	cueobserver_connections.drop_connections ();
+	// fetch all stripables
+	StripableList stripables;
+
+	session->get_stripables (stripables);
+
+	// Look for stripables that have a send to aux
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+
+		boost::shared_ptr<Stripable> s = *it;
+		// we only want routes
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+		if (r) {
+			r->processors_changed.connect  (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+			boost::shared_ptr<Send> snd = r->internal_send_for (boost::dynamic_pointer_cast<Route> (aux));
+			if (snd) { // test for send to aux
+				sorted.push_back (s);
+				s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::cue_set, this, id, msg), this);
+			}
+		}
+
+
+	}
+	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+
 	return sorted;
 }
 

@@ -57,7 +57,6 @@ Selection::Selection (const PublicEditor* e)
 	: tracks (e)
 	, editor (e)
 	, next_time_id (0)
-	, _no_tracks_changed (false)
 {
 	clear ();
 
@@ -132,13 +131,13 @@ void
 Selection::clear_tracks (bool with_signal)
 {
 	if (!tracks.empty()) {
+		PresentationInfo::ChangeSuspender cs;
+
 		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
 			(*x)->set_selected (false);
 		}
+
 		tracks.clear ();
-		if (!_no_tracks_changed && with_signal) {
-			TracksChanged();
-		}
 	}
 }
 
@@ -272,6 +271,8 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 void
 Selection::toggle (const TrackViewList& track_list)
 {
+	PresentationInfo::ChangeSuspender cs;
+
 	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 		toggle ((*i));
 	}
@@ -283,16 +284,13 @@ Selection::toggle (TimeAxisView* track)
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
-		track->set_selected (true);
 		tracks.push_back (track);
+		track->set_selected (true);
 	} else {
-		track->set_selected (false);
 		tracks.erase (i);
+		track->set_selected (false);
 	}
 
-	if (!_no_tracks_changed) {
-		TracksChanged();
-	}
 }
 
 void
@@ -429,18 +427,17 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 }
 
 void
-Selection::add (const TrackViewList& track_list)
+Selection::add (TrackViewList const & track_list)
 {
 	clear_objects();  //enforce object/range exclusivity
+
+	PresentationInfo::ChangeSuspender cs;
 
 	TrackViewList added = tracks.add (track_list);
 
 	if (!added.empty()) {
 		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
 			(*x)->set_selected (true);
-		}
-		if (!_no_tracks_changed) {
-			TracksChanged ();
 		}
 	}
 }
@@ -639,31 +636,21 @@ Selection::remove (TimeAxisView* track)
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
 		track->set_selected (false);
 		tracks.erase (i);
-
-		if (!_no_tracks_changed) {
-			TracksChanged();
-		}
 	}
 }
 
 void
 Selection::remove (const TrackViewList& track_list)
 {
-	bool changed = false;
+	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 
 		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
-		if (x != tracks.end()) {
-			(*i)->set_selected (false);
-			tracks.erase (x);
-			changed = true;
-		}
-	}
 
-	if (changed) {
-		if (!_no_tracks_changed) {
-			TracksChanged();
+		if (x != tracks.end()) {
+			tracks.erase (x);
+			(*i)->set_selected (false);
 		}
 	}
 }
@@ -797,7 +784,23 @@ void
 Selection::set (TimeAxisView* track)
 {
 	clear_objects ();  //enforce object/range exclusivity
-	clear_tracks (false);
+
+	PresentationInfo::ChangeSuspender cs;
+
+	if (!tracks.empty()) {
+
+		if (tracks.size() == 1 && tracks.front() == track) {
+			/* already single selection: nothing to do */
+			return;
+		}
+
+		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
+			(*x)->set_selected (false);
+		}
+
+		tracks.clear ();
+	}
+
 	add (track);
 }
 
@@ -805,7 +808,40 @@ void
 Selection::set (const TrackViewList& track_list)
 {
 	clear_objects();  //enforce object/range exclusivity
-	clear_tracks (false);
+
+	PresentationInfo::ChangeSuspender cs;
+
+	if (!tracks.empty()) {
+
+		/* cannot use set<T>::operator== (set<T> const &) here, because
+		 * apparently the ordering used within 2 sets is not
+		 * necessarily the same.
+		 */
+
+		if (tracks.size() == track_list.size()) {
+			bool missing = false;
+
+			for (TrackViewList::const_iterator x = track_list.begin(); x != track_list.end(); ++x) {
+				if (find (tracks.begin(), tracks.end(), *x) == tracks.end()) {
+					missing = true;
+				}
+			}
+
+			if (!missing) {
+				/* already same selection: nothing to do */
+				return;
+			}
+		}
+
+		/* argument is different from existing selection */
+
+		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
+			(*x)->set_selected (false);
+		}
+
+		tracks.clear ();
+	}
+
 	add (track_list);
 }
 
@@ -1550,10 +1586,4 @@ Selection::remove_regions (TimeAxisView* t)
 
 		i = tmp;
 	}
-}
-
-void
-Selection::block_tracks_changed (bool yn)
-{
-	_no_tracks_changed = yn;
 }

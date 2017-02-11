@@ -107,7 +107,6 @@ Mixer_UI::Mixer_UI ()
 	, ignore_reorder (false)
         , _in_group_rebuild_or_clear (false)
         , _route_deletion_in_progress (false)
-	, _following_editor_selection (false)
 	, _maximised (false)
 	, _show_mixer_list (true)
 	, myactions (X_("mixer"))
@@ -116,7 +115,7 @@ Mixer_UI::Mixer_UI ()
 	load_bindings ();
 	_content.set_data ("ardour-bindings", bindings);
 
-	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
 
 	scroller.set_can_default (true);
 	// set_default (scroller);
@@ -137,9 +136,12 @@ Mixer_UI::Mixer_UI ()
 
 	_group_tabs = new MixerGroupTabs (this);
 	VBox* b = manage (new VBox);
+	b->set_spacing (0);
+	b->set_border_width (0);
 	b->pack_start (*_group_tabs, PACK_SHRINK);
 	b->pack_start (strip_packer);
 	b->show_all ();
+	b->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 
 	scroller.add (*b);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
@@ -251,17 +253,7 @@ Mixer_UI::Mixer_UI ()
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
-	string vca_text = _("Control Masters");
-	Gtk::HBox* vca_top_padding = manage (new Gtk::HBox);
-	vca_top_padding->set_size_request (-1, 2);
-	vca_vpacker.pack_start (*vca_top_padding, false, false);
-
-	vca_label.set_text (vca_text);
-	vca_label_bar.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
-
-	vca_label_bar.set_name (X_("VCALabelBar"));
-	vca_label_bar.add (vca_label);
-
+	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 	vca_vpacker.pack_start (vca_label_bar, false, false);
 
 	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -284,6 +276,7 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.set_check_divider_position (true);
 	list_hpane.add (list_vpacker);
 	list_hpane.add (global_hpacker);
+	list_hpane.set_child_minsize (list_vpacker, 1);
 
 
 	XMLNode const * settings = ARDOUR_UI::instance()->mixer_settings();
@@ -348,7 +341,6 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.show();
 	strip_packer.show();
 	inner_pane.show();
-	vca_top_padding->show ();
 	vca_scroller.show();
 	vca_vpacker.show();
 	vca_hpacker.show();
@@ -391,12 +383,6 @@ Mixer_UI::escape ()
 	select_none ();
 }
 
-void
-Mixer_UI::track_editor_selection ()
-{
-	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
-}
-
 Gtk::Window*
 Mixer_UI::use_own_window (bool and_fill_it)
 {
@@ -408,7 +394,6 @@ Mixer_UI::use_own_window (bool and_fill_it)
 	if (win && new_window) {
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
-		win->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
@@ -621,7 +606,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 			(*s)->presentation_info().PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
 			(*s)->PropertyChanged.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::stripable_property_changed, this, _1, boost::weak_ptr<Stripable>(*s)), gui_context());
-						}
+		}
 
 	} catch (const std::exception& e) {
 		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;
@@ -696,6 +681,19 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 }
 
 void
+Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
+{
+	PropertyChange soh;
+	soh.add (Properties::selected);
+	soh.add (Properties::order);
+	soh.add (Properties::hidden);
+
+	if (what_changed.contains (soh)) {
+		sync_treeview_from_presentation_info (what_changed);
+	}
+}
+
+void
 Mixer_UI::sync_presentation_info_from_treeview ()
 {
 	if (ignore_reorder || !_session || _session->deletion_in_progress()) {
@@ -714,10 +712,15 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	bool change = false;
 	uint32_t order = 0;
 
+	OrderingKeys sorted;
+	const size_t cmp_max = rows.size ();
+
 	// special case master if it's got PI order 0 lets keep it there
 	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
 		order++;
 	}
+
+	PresentationInfo::ChangeSuspender cs;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		bool visible = (*ri)[stripable_columns.visible];
@@ -747,22 +750,43 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		}
 
 		if (order != stripable->presentation_info().order()) {
-			stripable->set_presentation_order (order, false);
+			stripable->set_presentation_order (order);
 			change = true;
 		}
+
+		sorted.push_back (OrderKeys (order, stripable, cmp_max));
 
 		++order;
 	}
 
+	if (!change) {
+		// VCA (and Mixbus) special cases according to SortByNewDisplayOrder
+		uint32_t n = 0;
+		SortByNewDisplayOrder cmp;
+		sort (sorted.begin(), sorted.end(), cmp);
+		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+			if (sr->old_display_order != n) {
+				change = true;
+			}
+		}
+		if (change) {
+			n = 0;
+			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+				if (sr->stripable->presentation_info().order() != n) {
+					sr->stripable->set_presentation_order (n);
+				}
+			}
+		}
+	}
+
 	if (change) {
 		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
-		_session->notify_presentation_info_change ();
 		_session->set_dirty();
 	}
 }
 
 void
-Mixer_UI::sync_treeview_from_presentation_info ()
+Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_changed)
 {
 	if (!_session || _session->deletion_in_progress()) {
 		return;
@@ -785,10 +809,11 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 	}
 
 	OrderingKeys sorted;
+	const size_t cmp_max = rows.size ();
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
-		sorted.push_back (OrderKeys (old_order, stripable->presentation_info().order()));
+		sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -812,35 +837,25 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 		track_model->reorder (neworder);
 	}
 
-	redisplay_track_list ();
-}
+	if (what_changed.contains (Properties::selected)) {
 
-void
-Mixer_UI::follow_editor_selection ()
-{
-	if (_following_editor_selection) {
-		return;
-	}
+		PresentationInfo::ChangeSuspender cs;
 
-	_following_editor_selection = true;
-	_selection.block_routes_changed (true);
-
-	TrackSelection& s (PublicEditor::instance().get_selection().tracks);
-
-	_selection.clear_routes ();
-
-	for (TrackViewList::iterator i = s.begin(); i != s.end(); ++i) {
-		TimeAxisView* tav = dynamic_cast<TimeAxisView*> (*i);
-		if (tav) {
-			AxisView* axis = axis_by_stripable (tav->stripable());
-			if (axis) {
-				_selection.add (axis);
+		for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+			boost::shared_ptr<Stripable> stripable = (*i)->stripable();
+			if (stripable && stripable->presentation_info().selected()) {
+				_selection.add (*i);
+			} else {
+				_selection.remove (*i);
 			}
+		}
+
+		if (!_selection.axes.empty()) {
+			move_stripable_into_view ((*_selection.axes.begin())->stripable());
 		}
 	}
 
-	_following_editor_selection = false;
-	_selection.block_routes_changed (false);
+	redisplay_track_list ();
 }
 
 
@@ -849,6 +864,18 @@ Mixer_UI::strip_by_route (boost::shared_ptr<Route> r) const
 {
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route() == r) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
+MixerStrip*
+Mixer_UI::strip_by_stripable (boost::shared_ptr<Stripable> s) const
+{
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->stripable() == s) {
 			return (*i);
 		}
 	}
@@ -893,8 +920,19 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 
 				tmp.push_back (strip);
 
+				OrderingKeys sorted;
+				const size_t cmp_max = strips.size ();
 				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-					if ((*i) == strip) {
+					sorted.push_back (OrderKeys (-1, (*i)->stripable(), cmp_max));
+				}
+				SortByNewDisplayOrder cmp;
+				sort (sorted.begin(), sorted.end(), cmp);
+
+				for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr) {
+					MixerStrip* ms = strip_by_stripable (sr->stripable);
+					assert (ms);
+
+					if (ms == strip) {
 						/* hit clicked strip, start accumulating till we hit the first
 						   selected strip
 						*/
@@ -904,7 +942,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 						} else {
 							accumulate = true;
 						}
-					} else if (_selection.selected (*i)) {
+					} else if (_selection.selected (ms)) {
 						/* hit selected strip. if currently accumulating others,
 						   we're done. if not accumulating others, start doing so.
 						*/
@@ -917,7 +955,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 						}
 					} else {
 						if (accumulate) {
-							tmp.push_back (*i);
+							tmp.push_back (ms);
 						}
 					}
 				}
@@ -1280,8 +1318,18 @@ void
 Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 {
 	TreeModel::Children rows = track_model->children();
+	std::list<boost::shared_ptr<VCA> > vcas;
+	vcas.push_back (vca);
 
-	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+		AxisView* av = (*i)[stripable_columns.strip];
+		VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+		if (vms && vms->vca()->slaved_to (vca)) {
+			vcas.push_back (vms->vca());
+		}
+	}
+
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
 
 		AxisView* av = (*i)[stripable_columns.strip];
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
@@ -1300,7 +1348,15 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 			continue;
 		}
 
-		if (strip->route()->slaved_to (vca)) {
+		bool slaved = false;
+		for (std::list<boost::shared_ptr<VCA> >::const_iterator m = vcas.begin(); m != vcas.end(); ++m) {
+			if (strip->route()->slaved_to (*m)) {
+				slaved = true;
+				break;
+			}
+		}
+
+		if (slaved) {
 
 			if (strip->packed()) {
 				strip_packer.reorder_child (*strip, -1); /* put at end */
@@ -1326,11 +1382,13 @@ Mixer_UI::redisplay_track_list ()
 		return;
 	}
 
-	boost::shared_ptr<VCA> sv = spilled_vca.lock ();
-
-	if (sv) {
-		spill_redisplay (sv);
-		return;
+	boost::shared_ptr<Stripable> ss = spilled_strip.lock ();
+	if (ss) {
+		boost::shared_ptr<VCA> sv = boost::dynamic_pointer_cast<VCA> (ss);
+		if (sv) {
+			spill_redisplay (sv);
+			return;
+		}
 	}
 
 	TreeModel::Children rows = track_model->children();
@@ -1475,7 +1533,7 @@ Mixer_UI::initial_track_display ()
 		add_stripables (sl);
 	}
 
-	redisplay_track_list ();
+	sync_treeview_from_presentation_info (Properties::order);
 }
 
 void
@@ -1517,13 +1575,23 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	if (!scroller.get_hscrollbar()) {
 		return;
 	}
+	if (s->presentation_info().special () || s->presentation_info().flag_match (PresentationInfo::VCA)) {
+		return;
+	}
+#ifdef MIXBUS
+	if (s->mixbus ()) {
+		return;
+	}
+#endif
 	bool found = false;
 	int x0 = 0;
+	Gtk::Allocation alloc;
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route() == s) {
 			int y;
 			found = true;
 			(*i)->translate_coordinates (strip_packer, 0, 0, x0, y);
+			alloc = (*i)->get_allocation ();
 			break;
 		}
 	}
@@ -1532,7 +1600,13 @@ Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
-	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), x0 - 1.0)));
+
+	if (x0 < adj->get_value()) {
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), (double) x0)));
+	} else if (x0 + alloc.get_width() >= adj->get_value() + adj->get_page_size()) {
+		int x1 = x0 + alloc.get_width() - adj->get_page_size();
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), (double) x1)));
+	}
 }
 
 void
@@ -2793,13 +2867,13 @@ Mixer_UI::do_vca_unassign (boost::shared_ptr<VCA> vca)
 }
 
 void
-Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
+Mixer_UI::show_spill (boost::shared_ptr<Stripable> s)
 {
-	boost::shared_ptr<VCA> v = spilled_vca.lock();
-	if (v != vca) {
-		spilled_vca = vca;
-		show_vca_change (vca); /* EMIT SIGNAL */
-		if (vca) {
+	boost::shared_ptr<Stripable> ss = spilled_strip.lock();
+	if (ss != s) {
+		spilled_strip = s;
+		show_spill_change (s); /* EMIT SIGNAL */
+		if (s) {
 			_group_tabs->hide ();
 		} else {
 			_group_tabs->show ();
@@ -2809,9 +2883,9 @@ Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
 }
 
 bool
-Mixer_UI::showing_vca_slaves_for (boost::shared_ptr<VCA> vca) const
+Mixer_UI::showing_spill_for (boost::shared_ptr<Stripable> s) const
 {
-       return vca == spilled_vca.lock();
+	return s == spilled_strip.lock();
 }
 
 void
@@ -3013,26 +3087,22 @@ void
 Mixer_UI::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-#if 0
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_assign (vca);
 		}
 	}
-#endif
 }
 
 void
 Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 {
 	set_axis_targets_for_operation ();
-#if 0
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);
 		}
 	}
-#endif
 }

@@ -38,6 +38,7 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	SoloControl (Session& session, std::string const & name, Soloable& soloable, Muteable& m);
 
 	double get_value () const;
+	double get_save_value() const { return self_soloed(); }
 
 	bool can_solo() const;
 

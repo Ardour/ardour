@@ -25,7 +25,7 @@ using std::vector;
 using std::cerr;
 using std::endl;
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) && !defined(_MSC_VER)
 #include <alloca.h>
 #endif
 

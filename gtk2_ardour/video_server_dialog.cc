@@ -76,7 +76,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	path_entry.set_width_chars(38);
 	path_entry.set_text("/usr/bin/harvid");
 	docroot_entry.set_width_chars(38);
-	docroot_entry.set_text(Config->get_video_server_docroot());
+	docroot_entry.set_text(video_get_docroot (Config));
 
 #ifndef __APPLE__
 	/* Note: on OSX icsd is not able to bind to IPv4 localhost */
@@ -101,6 +101,11 @@ VideoServerDialog::VideoServerDialog (Session* s)
 			<< endmsg;
 	}
 
+#ifdef PLATFORM_WINDOWS
+	if (VideoUtils::harvid_version >= 0x000802) {
+		/* empty docroot -> all drive letters */
+	} else
+#endif
 	if (docroot_entry.get_text().empty()) {
 	  std::string docroot =  Glib::path_get_dirname(_session->session_directory().root_path());
 	  if ((docroot.empty() || docroot.at(docroot.length()-1) != '/')) { docroot += "/"; }
@@ -148,11 +153,6 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	if (Config->get_video_advanced_setup()){
 		vbox->pack_start (*docroot_hbox, false, false);
 	} else {
-#ifndef PLATFORM_WINDOWS
-		docroot_entry.set_text(X_("/"));
-#else
-		docroot_entry.set_text(X_("C:\\"));
-#endif
 		listenport_spinner.set_sensitive(false);
 	}
 	vbox->pack_start (*options_box, false, true);

@@ -67,7 +67,7 @@ VCA::get_next_vca_number ()
 	return next_number;
 }
 
-VCA::VCA (Session& s,  int32_t num, const string& name)
+VCA::VCA (Session& s, int32_t num, const string& name)
 	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
 	, Automatable (s)
@@ -101,6 +101,13 @@ VCA::~VCA ()
 			next_number--;
 		}
 	}
+}
+
+string
+VCA::full_name() const
+{
+	/* name() is never empty - default is VCA %n */
+	return string_compose (_("VCA %1 : %2"), _number, name());
 }
 
 XMLNode&

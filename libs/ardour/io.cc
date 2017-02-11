@@ -96,6 +96,7 @@ IO::~IO ()
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		_session.engine().unregister_port (*i);
 	}
+	delete pending_state_node; pending_state_node = 0;
 }
 
 void
@@ -662,6 +663,7 @@ IO::set_state (const XMLNode& node, int version)
 
 	} else {
 
+		delete pending_state_node;
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = false;
@@ -716,6 +718,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 
 	} else {
 
+		delete pending_state_node;
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = in;

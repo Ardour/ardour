@@ -357,6 +357,8 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'yosemite'
         elif re.search ("^15[.]", version) != None:
             conf.env['build_host'] = 'el_capitan'
+        elif re.search ("^16[.]", version) != None:
+            conf.env['build_host'] = 'sierra'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -380,8 +382,10 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'mavericks'
             elif re.search ("^14[.]", version) != None:
                 conf.env['build_target'] = 'yosemite'
-            else:
+            elif re.search ("^15[.]", version) != None:
                 conf.env['build_target'] = 'el_capitan'
+            else:
+                conf.env['build_target'] = 'sierra'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -402,11 +406,11 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan' ]:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -414,7 +418,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -423,7 +427,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite', 'el_capitan']:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -538,6 +542,11 @@ int main() { return 0; }''',
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
+
+    elif conf.env['build_target'] in [ 'sierra' ]:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
+                 "-mmacosx-version-min=10.9"))
 
     #
     # save off CPU element in an env
@@ -1338,3 +1347,7 @@ def tarball(bld):
 
 def test(bld):
     subprocess.call("gtk2_ardour/artest")
+
+def help2man(bld):
+    cmd = "help2man -s 1 -N -o ardour.1 -n Ardour --version-string='Ardour %s' gtk2_ardour/ardev" % PROGRAM_VERSION
+    subprocess.call(cmd, shell=True)

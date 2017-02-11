@@ -56,10 +56,12 @@ public:
 	void hide ();
 	void show ();
 
+	double width() const { return _flag->width(); }
+	void set_text (std::string const & s) { _flag->set_text (s); }
+
 	ARDOUR::MidiModel::PatchChangePtr patch()       const { return _patch; }
 	ArdourCanvas::Item*               canvas_item() const { return _flag; }
 	ArdourCanvas::Item&               item()        const { return *_flag; }
-	ArdourCanvas::Flag*               flag()        const { return _flag; }
 
 private:
 	bool event_handler (GdkEvent *);

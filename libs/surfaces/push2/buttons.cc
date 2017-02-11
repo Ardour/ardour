@@ -367,9 +367,9 @@ Push2::button_play ()
 	if (_modifier_state & ModSelect) {
 		if (in_range_select) {
 			in_range_select = true;
-			access_action ("Editor/start-range-from-playhead");
+			access_action ("Common/start-range-from-playhead");
 		} else {
-			access_action ("Editor/finish-range-from-playhead");
+			access_action ("Common/finish-range-from-playhead");
 			in_range_select = false;
 		}
 		return;
@@ -461,7 +461,7 @@ Push2::button_solo ()
 void
 Push2::button_new ()
 {
-	access_action ("Editor/start-range-from-playhead");
+	access_action ("Common/start-range-from-playhead");
 
 	id_button_map[New]->set_color (LED::White);
 	id_button_map[New]->set_state (LED::NoTransition);
@@ -478,7 +478,7 @@ Push2::button_new ()
 void
 Push2::button_fixed_length ()
 {
-	access_action ("Editor/finish-range-from-playhead");
+	access_action ("Common/finish-range-from-playhead");
 
 	/* turn off both buttons for this operation */
 
@@ -493,7 +493,7 @@ Push2::button_fixed_length ()
 void
 Push2::button_browse ()
 {
-	access_action ("Editor/addExistingAudioFiles");
+	access_action ("Common/addExistingAudioFiles");
 }
 
 void

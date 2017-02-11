@@ -46,7 +46,7 @@ Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 void
 Container::compute_bounding_box () const
 {
-	_bounding_box = boost::none;
+	_bounding_box = Rect ();
 	add_child_bounding_boxes ();
 	_bounding_box_dirty = false;
 }

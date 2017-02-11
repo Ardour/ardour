@@ -63,6 +63,7 @@ class LIBARDOUR_API ControlGroup : public boost::enable_shared_from_this<Control
 	Evoral::Parameter parameter() const { return _parameter; }
 
 	virtual void set_group_value (boost::shared_ptr<AutomationControl>, double val);
+	virtual void pre_realtime_queue_stuff (double val);
 
 	bool use_me (PBD::Controllable::GroupControlDisposition gcd) const {
 		switch (gcd) {

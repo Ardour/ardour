@@ -193,9 +193,13 @@ ArdourButton::set_text_internal () {
 void
 ArdourButton::set_text (const std::string& str, bool markup)
 {
+	if (!(_elements & Text)) {
+		return;
+	}
 	if (_text == str && _markup == markup) {
 		return;
 	}
+
 	_text = str;
 	_markup = markup;
 	if (!is_realized()) {
@@ -366,7 +370,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 	else /* VectorIcons are exclusive to Pixbuf Icons */
 	if (_elements & VectorIcon) {
-		Gtkmm2ext::ArdourIcon::render (cr, _icon, get_width(), get_height(), active_state(), text_color);
+		int vw = get_width();
+		int vh = get_height();
+		if (_elements & Menu) {
+			vw -= _diameter + 4;
+		}
+		Gtkmm2ext::ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
 	}
 
 	const int text_margin = char_pixel_width();
@@ -419,8 +428,17 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			ww = get_width();
 			wh = get_height();
 
-			cairo_save (cr);
-			cairo_rotate(cr, _angle * M_PI / 180.0);
+			cairo_matrix_t m1;
+			cairo_get_matrix (cr, &m1);
+			cairo_matrix_t m2 = m1;
+			m2.x0 = 0;
+			m2.y0 = 0;
+			cairo_set_matrix (cr, &m2);
+
+			if (_angle) {
+				cairo_rotate(cr, _angle * M_PI / 180.0);
+			}
+
 			cairo_device_to_user(cr, &ww, &wh);
 			xa = text_margin + (ww - _text_width - 2 * text_margin) * _xalign;
 			ya = (wh - _text_height) * _yalign;
@@ -431,10 +449,9 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa, ya);
+			cairo_move_to (cr, xa + m1.x0, ya + m1.y0);
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
-			cairo_restore (cr);
 		}
 		cairo_restore (cr);
 	}
@@ -1033,6 +1050,7 @@ ArdourButton::setup_led_rect ()
 void
 ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 {
+	 _elements = (ArdourButton::Element) (_elements & ~ArdourButton::Text);
 	_pixbuf = img;
 	if (is_realized()) {
 		queue_resize ();

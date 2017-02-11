@@ -59,7 +59,7 @@ public:
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
 	/** create a "pure copy" of Region @param other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false, const int32_t sub_num = 0);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false);
 
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>,
@@ -72,8 +72,8 @@ public:
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
 	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of @param other starting at @param offset within @param other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, frameoffset_t offset,
-	                                         const PBD::PropertyList&, bool announce = true, const int32_t sub_num = 0);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, ARDOUR::MusicFrame offset,
+	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a "copy" of @param other but using a different set of sources @param srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
 	                                         const PBD::PropertyList&, bool announce = true);

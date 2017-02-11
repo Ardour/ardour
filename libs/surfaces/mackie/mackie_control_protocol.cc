@@ -138,7 +138,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 		_last_bank[i] = 0;
 	}
 
-	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
+	PresentationInfo::Change.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this, _1), this);
 
 	_instance = this;
 
@@ -1297,8 +1297,17 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 }
 
 void
-MackieControlProtocol::notify_presentation_info_changed ()
+MackieControlProtocol::notify_presentation_info_changed (PBD::PropertyChange const & what_changed)
 {
+	PBD::PropertyChange order_or_hidden;
+
+	order_or_hidden.add (Properties::hidden);
+	order_or_hidden.add (Properties::order);
+
+	if (!what_changed.contains (order_or_hidden)) {
+		return;
+	}
+
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
@@ -1307,23 +1316,7 @@ MackieControlProtocol::notify_presentation_info_changed ()
 		}
 	}
 
-	Sorted sorted = get_sorted_stripables();
-	uint32_t sz = n_strips();
-
-	// if a remote id has been moved off the end, we need to shift
-	// the current bank backwards.
-
-	if (sorted.size() - _current_initial_bank < sz) {
-		// but don't shift backwards past the zeroth channel
-		if (sorted.size() < sz) {  // avoid unsigned math mistake below
-			(void) switch_banks(0, true);
-		} else {
-			(void) switch_banks (max((Sorted::size_type) 0, sorted.size() - sz), true);
-		}
-	} else {
-		// Otherwise just refresh the current bank
-		refresh_current_bank();
-	}
+	refresh_current_bank();
 }
 
 ///////////////////////////////////////////
@@ -1539,20 +1532,14 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		return;
 	}
 
-	if ((button_id != Button::Marker) && (modifier_state() & MODIFIER_MARKER)) {
-		marker_modifier_consumed_by_button = true;
-	}
-
-	if ((button_id != Button::Nudge) && (modifier_state() & MODIFIER_NUDGE)) {
-		nudge_modifier_consumed_by_button = true;
-	}
-
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2 (%3)\n", (bs == press ? "press" : "release"), button.id(),
 							   Button::id_to_name (button.bid())));
 
 	/* check profile first */
 
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device profile returned [%1] for that button\n", action));
 
 	if (!action.empty()) {
 
@@ -1594,13 +1581,29 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		}
 	}
 
+	/* Now that we have the correct (maybe remapped) button ID, do these
+	 * checks on it.
+	 */
+
+	if ((button_id != Button::Marker) && (modifier_state() & MODIFIER_MARKER)) {
+		marker_modifier_consumed_by_button = true;
+	}
+
+	if ((button_id != Button::Nudge) && (modifier_state() & MODIFIER_NUDGE)) {
+		nudge_modifier_consumed_by_button = true;
+	}
+
 	/* lookup using the device-INDEPENDENT button ID */
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("now looking up button ID %1\n", button_id));
 
 	ButtonMap::iterator b = button_map.find (button_id);
 
 	if (b != button_map.end()) {
 
 		ButtonHandlers& bh (b->second);
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("button found in map, now invoking %1\n", (bs == press ? "press" : "release")));
 
 		switch  (bs) {
 		case press:
@@ -2033,7 +2036,8 @@ MackieControlProtocol::select_range (uint32_t pressed)
 
 	pull_stripable_range (_down_select_buttons, stripables, pressed);
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables, first = %2\n", stripables.size(), stripables.front()->name()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("select range: found %1 stripables, first = %2\n", stripables.size(),
+	                                                   (stripables.empty() ? "null" : stripables.front()->name())));
 
 	if (stripables.empty()) {
 		return;

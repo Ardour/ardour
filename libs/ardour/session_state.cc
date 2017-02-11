@@ -92,7 +92,9 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
+#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
+#endif
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
@@ -258,7 +260,7 @@ Session::post_engine_init ()
 		delete _tempo_map;
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::gui_tempo_map_changed, this));
+		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 
 		/* MidiClock requires a tempo map */
 
@@ -634,7 +636,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 		/* Initial loop location, from absolute zero, length 10 seconds  */
 
-		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop);
+		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop, 0);
 		_locations->add (loc, true);
 		set_auto_loop_location (loc);
 	}
@@ -1051,6 +1053,80 @@ Session::get_template()
 	return state(false);
 }
 
+typedef std::set<boost::shared_ptr<Playlist> > PlaylistSet;
+typedef std::set<boost::shared_ptr<Source> > SourceSet;
+
+bool
+Session::export_track_state (boost::shared_ptr<RouteList> rl, const string& path)
+{
+	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS))  {
+		return false;
+	}
+	if (g_mkdir_with_parents (path.c_str(), 0755) != 0) {
+		return false;
+	}
+
+	PBD::Unwinder<std::string> uw (_template_state_dir, path);
+
+	LocaleGuard lg;
+	XMLNode* node = new XMLNode("TrackState"); // XXX
+	XMLNode* child;
+
+	PlaylistSet playlists; // SessionPlaylists
+	SourceSet sources;
+
+	// these will work with  new_route_from_template()
+	// TODO: LV2 plugin-state-dir needs to be relative (on load?)
+	child = node->add_child ("Routes");
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->is_auditioner()) {
+			continue;
+		}
+		if ((*i)->is_master() || (*i)->is_monitor()) {
+			continue;
+		}
+		child->add_child_nocopy ((*i)->get_state());
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
+		if (track) {
+			playlists.insert (track->playlist ());
+		}
+	}
+
+	// on load, Regions in the playlists need to resolve and map Source-IDs
+	// also playlist needs to be merged or created with new-name..
+	// ... and Diskstream in tracks adjusted to use the correct playlist
+	child = node->add_child ("Playlists"); // SessionPlaylists::add_state
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		child->add_child_nocopy ((*i)->get_state ());
+		boost::shared_ptr<RegionList> prl = (*i)->region_list ();
+		for (RegionList::const_iterator s = prl->begin(); s != prl->end(); ++s) {
+			const Region::SourceList& sl = (*s)->sources ();
+			for (Region::SourceList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+				sources.insert (*sli);
+			}
+		}
+	}
+
+	child = node->add_child ("Sources");
+	for (SourceSet::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		child->add_child_nocopy ((*i)->get_state ());
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (*i);
+		if (fs) {
+#ifdef PLATFORM_WINDOWS
+			fs->close ();
+#endif
+			string p = fs->path ();
+			PBD::copy_file (p, Glib::build_filename (path, Glib::path_get_basename (p)));
+		}
+	}
+
+	std::string sn = Glib::build_filename (path, "share.axml");
+
+	XMLTree tree;
+	tree.set_root (node);
+	return tree.write (sn.c_str());
+}
+
 XMLNode&
 Session::state (bool full_state)
 {
@@ -1218,9 +1294,10 @@ Session::state (bool full_state)
 		}
 	} else {
 		Locations loc (*this);
+		const bool was_dirty = dirty();
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
+		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
 		range->set (max_framepos, 0);
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
@@ -1234,6 +1311,15 @@ Session::state (bool full_state)
 			}
 		}
 		node->add_child_nocopy (locations_state);
+
+		/* adding a location above will have marked the session
+		 * dirty. This is an artifact, so fix it if the session wasn't
+		 * already dirty
+		 */
+
+		if (!was_dirty) {
+			_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+		}
 	}
 
 	child = node->add_child ("Bundles");
@@ -3427,12 +3513,10 @@ Session::set_dirty ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
 
-
 	if (!was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
 	}
 }
-
 
 void
 Session::set_clean ()
@@ -3440,7 +3524,6 @@ Session::set_clean ()
 	bool was_dirty = dirty();
 
 	_state_of_the_state = Clean;
-
 
 	if (was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
@@ -3831,11 +3914,13 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "auto-loop") {
 
+	} else if (p == "session-monitoring") {
+
 	} else if (p == "auto-input") {
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
-                        set_track_monitor_input_status (!config.get_auto_input());
+			set_track_monitor_input_status (!config.get_auto_input());
 		}
 
 	} else if (p == "punch-in") {
@@ -3950,10 +4035,6 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "send-mmc") {
 
 		_mmc->enable_send (Config->get_send_mmc ());
-
-	} else if (p == "midi-feedback") {
-
-		session_midi_feedback = Config->get_midi_feedback();
 
 	} else if (p == "jack-time-master") {
 
@@ -4354,10 +4435,11 @@ Session::rename (const std::string& new_name)
 }
 
 int
-Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format)
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
+	program_version = "";
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		return -1;
@@ -4378,6 +4460,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	if (node == NULL) {
 		xmlFreeParserCtxt(ctxt);
+		xmlFreeDoc (doc);
 		return -1;
 	}
 
@@ -4393,6 +4476,17 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	node = node->children;
 	while (node != NULL) {
+		 if (!strcmp((const char*) node->name, "ProgramVersion")) {
+			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"modified-with");
+			 if (val) {
+				 program_version = string ((const char*)val);
+				 size_t sep = program_version.find_first_of("-");
+				 if (sep != string::npos) {
+					 program_version = program_version.substr (0, sep);
+				 }
+			 }
+			 xmlFree (val);
+		 }
 		 if (strcmp((const char*) node->name, "Config")) {
 			 node = node->next;
 			 continue;
@@ -4416,6 +4510,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	}
 
 	xmlFreeParserCtxt(ctxt);
+	xmlFreeDoc (doc);
 
 	return !(found_sr && found_data_format); // zero if they are both found
 }
@@ -4856,7 +4951,6 @@ Session::save_as (SaveAs& saveas)
 			}
 		}
 
-
 		_path = to_dir;
 		set_snapshot_name (saveas.new_name);
 		_name = saveas.new_name;
@@ -4882,7 +4976,6 @@ Session::save_as (SaveAs& saveas)
 
 		bool was_dirty = dirty ();
 
-		save_state ("", false, false, !saveas.include_media);
 		save_default_options ();
 
 		if (saveas.copy_media && saveas.copy_external) {
@@ -4896,6 +4989,10 @@ Session::save_as (SaveAs& saveas)
 		store_recent_sessions (_name, _path);
 
 		if (!saveas.switch_to) {
+
+			/* save the new state */
+
+			save_state ("", false, false, !saveas.include_media);
 
 			/* switch back to the way things were */
 
@@ -4929,6 +5026,19 @@ Session::save_as (SaveAs& saveas)
 			/* ensure that all existing tracks reset their current capture source paths
 			 */
 			reset_write_sources (true, true);
+
+			/* creating new write sources marks the session as
+			   dirty. If the new session is empty, then
+			   save_state() thinks we're saving a template and will
+			   not mark the session as clean. So do that here,
+			   before we save state.
+			*/
+
+			if (!saveas.include_media) {
+				_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+			}
+
+			save_state ("", false, false, !saveas.include_media);
 
 			/* the copying above was based on actually discovering files, not just iterating over the sources list.
 			   But if we're going to switch to the new (copied) session, we need to change the paths in the sources also.
@@ -5075,6 +5185,7 @@ Session::archive_session (const std::string& dest,
 	blacklist_dirs.push_back (string (plugins_dir_name) + G_DIR_SEPARATOR);
 
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
+	std::map<boost::shared_ptr<AudioFileSource>, float> orig_gain;
 
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 	if (only_used_sources) {
@@ -5141,6 +5252,7 @@ Session::archive_session (const std::string& dest,
 			}
 
 			orig_sources[afs] = afs->path();
+			orig_gain[afs]    = afs->gain();
 
 			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
 			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
@@ -5153,6 +5265,7 @@ Session::archive_session (const std::string& dest,
 			try {
 				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
 				afs->replace_file (new_path);
+				afs->set_gain (ns->gain(), true);
 				delete ns;
 			} catch (...) {
 				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
@@ -5226,8 +5339,9 @@ Session::archive_session (const std::string& dest,
 	/* write session file */
 	_path = to_dir;
 	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
-
+#ifdef LV2_SUPPORT
 	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, true);
+#endif
 	save_state (name);
 	save_default_options ();
 
@@ -5278,6 +5392,9 @@ Session::archive_session (const std::string& dest,
 
 	for (std::map<boost::shared_ptr<AudioFileSource>, std::string>::iterator i = orig_sources.begin (); i != orig_sources.end (); ++i) {
 		i->first->replace_file (i->second);
+	}
+	for (std::map<boost::shared_ptr<AudioFileSource>, float>::iterator i = orig_gain.begin (); i != orig_gain.end (); ++i) {
+		i->first->set_gain (i->second, true);
 	}
 
 	int rv = ar.create (filemap);

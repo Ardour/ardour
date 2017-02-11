@@ -367,7 +367,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 	adjust_capture_position = 0;
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in())) {
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_punch_enabled()))) {
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
 
@@ -1035,6 +1035,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				initial_capture = capture_info.front()->start;
 			}
 
+			const framepos_t preroll_off = _session.preroll_record_trim_len ();
 			for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 				string region_name;
@@ -1058,6 +1059,9 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 					boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 					region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+					if (preroll_off > 0) {
+						region->trim_front ((*ci)->start - initial_capture + preroll_off);
+					}
 				}
 
 				catch (failed_constructor& err) {
@@ -1068,7 +1072,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
 				i_am_the_modifier++;
-				_playlist->add_region (region, (*ci)->start);
+				_playlist->add_region (region, (*ci)->start + preroll_off);
 				i_am_the_modifier--;
 			}
 
@@ -1238,7 +1242,9 @@ MidiDiskstream::get_state ()
 
 		Location* pi;
 
-		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
+		if (_session.preroll_record_punch_enabled ()) {
+			snprintf (buf, sizeof (buf), "%" PRId64, _session.preroll_record_punch_pos ());
+		} else if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());

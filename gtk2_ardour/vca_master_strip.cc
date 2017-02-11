@@ -94,8 +94,10 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_name ("generic button");
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
+	number_label.set_inactive_color (_vca->presentation_info().color ());
+	number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press));
 
-	bottom_padding.set_size_request (-1, 55); /* this one is a hack. there's no trivial way to compute it */
+	update_bottom_padding ();
 
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
@@ -107,14 +109,15 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
-	global_vpacker.set_border_width (1);
-	global_vpacker.set_spacing (0);
+	global_vpacker.set_border_width (0);
+	global_vpacker.set_spacing (2);
+	gain_meter.set_spacing(4);
 
 	global_vpacker.pack_start (number_label, false, false);
 	global_vpacker.pack_start (hide_button, false, false);
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
-	global_vpacker.pack_start (gain_meter, false, false, 2);
+	global_vpacker.pack_start (gain_meter, false, false);
 	global_vpacker.pack_start (control_slave_ui, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
 
@@ -145,7 +148,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	mute_changed ();
 	spill_change (boost::shared_ptr<VCA>());
 
-	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
+	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 	_vca->presentation_info().PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
@@ -162,9 +165,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 VCAMasterStrip::~VCAMasterStrip ()
 {
-	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 
 	delete delete_dialog;
@@ -176,9 +179,9 @@ VCAMasterStrip::~VCAMasterStrip ()
 void
 VCAMasterStrip::self_delete ()
 {
-	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 	/* Drop reference immediately, delete self when idle */
 	_vca.reset ();
@@ -190,6 +193,8 @@ VCAMasterStrip::parameter_changed (std::string const & p)
 {
 	if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
+	} else if (p == "mixer-element-visibility") {
+		update_bottom_padding ();
 	}
 }
 
@@ -211,6 +216,42 @@ VCAMasterStrip::set_button_names ()
 		solo_button.set_text (S_("Solo|S"));
 		set_tooltip (solo_button, _("Solo"));
 	}
+}
+
+void
+VCAMasterStrip::update_bottom_padding ()
+{
+	std::string viz = UIConfiguration::instance().get_mixer_strip_visibility ();
+
+	ArdourButton meter_point_button (_("pre"));
+	ArdourButton output_button (_("Output"));
+	ArdourButton comment_button (_("Comments"));
+
+	meter_point_button.set_name ("mixer strip button");
+	output_button.set_name ("mixer strip button");
+	comment_button.set_name ("generic button");
+
+
+	int h = 1;
+	if (1) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (meter_point_button);
+		Gtk::Requisition requisition(meter_point_button.size_request ());
+		h += requisition.height;
+	}
+	if (viz.find ("Output") != std::string::npos) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (output_button);
+		Gtk::Requisition requisition(output_button.size_request ());
+		h += requisition.height + 2;
+	}
+	if (viz.find ("Comments") != std::string::npos) {
+		Gtk::Window window (WINDOW_TOPLEVEL);
+		window.add (comment_button);
+		Gtk::Requisition requisition(comment_button.size_request ());
+		h += requisition.height + 2;
+	}
+	bottom_padding.set_size_request (-1, h);
 }
 
 string
@@ -348,6 +389,18 @@ VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
 	return true;
 }
 
+bool
+VCAMasterStrip::number_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		if (!context_menu) {
+			build_context_menu ();
+		}
+		context_menu->popup (1, ev->time);
+	}
+	return true;
+}
+
 void
 VCAMasterStrip::start_name_edit ()
 {
@@ -372,6 +425,7 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::color)) {
 		vertical_button.set_active_color (_vca->presentation_info().color ());
+		number_label.set_inactive_color (_vca->presentation_info().color ());
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
@@ -383,7 +437,7 @@ void
 VCAMasterStrip::update_vca_name ()
 {
 	/* 20 is a rough guess at the number of letters we can fit. */
-	vertical_button.set_text (short_version (_vca->name(), 20));
+	vertical_button.set_text (short_version (_vca->full_name(), 20));
 }
 
 void
@@ -395,6 +449,9 @@ VCAMasterStrip::build_context_menu ()
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &VCAMasterStrip::start_color_edit)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Assign Selected Channels"), sigc::mem_fun (*this, &VCAMasterStrip::assign_all_selected)));
+	items.push_back (MenuElem (_("Drop Selected Channels"), sigc::mem_fun (*this, &VCAMasterStrip::unassign_all_selected)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::drop_all_slaves)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
@@ -403,15 +460,15 @@ VCAMasterStrip::build_context_menu ()
 void
 VCAMasterStrip::spill ()
 {
-	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	} else {
-		Mixer_UI::instance()->show_vca_slaves (_vca);
+		Mixer_UI::instance()->show_spill (_vca);
 	}
 }
 
 void
-VCAMasterStrip::spill_change (boost::shared_ptr<VCA> vca)
+VCAMasterStrip::spill_change (boost::shared_ptr<Stripable> vca)
 {
 	if (vca != _vca) {
 		vertical_button.set_active_state (Gtkmm2ext::Off);
@@ -433,12 +490,24 @@ VCAMasterStrip::remove ()
 }
 
 void
+VCAMasterStrip::assign_all_selected ()
+{
+	Mixer_UI::instance()->do_vca_assign (_vca);
+}
+
+void
+VCAMasterStrip::unassign_all_selected ()
+{
+	Mixer_UI::instance()->do_vca_unassign (_vca);
+}
+
+void
 VCAMasterStrip::drop_all_slaves ()
 {
 	_vca->Drop (); /* EMIT SIGNAL */
 
-	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
-		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	}
 }
 

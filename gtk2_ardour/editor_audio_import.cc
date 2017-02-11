@@ -39,6 +39,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -262,7 +263,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::import_smf_tempo_map (Evoral::SMF const & smf)
+Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 {
 	if (!_session) {
 		return;
@@ -276,22 +277,33 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf)
 
 	const framecnt_t sample_rate = _session->frame_rate ();
 	TempoMap new_map (sample_rate);
-	bool have_meter = false;
+	Meter last_meter (4.0, 4.0);
+	bool have_initial_meter = false;
 
 	for (size_t n = 0; n < num_tempos; ++n) {
 
 		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
 		assert (t);
 
-		Tempo tempo (60 * (1000000 / t->microseconds_per_quarter_note), 4.0);
-		new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
-
+		Tempo tempo (t->tempo(), 4.0);
 		Meter meter (t->numerator, t->denominator);
 		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
-		if (have_meter) {
-			bbt  = new_map.bbt_at_beat ((t->time_pulses/smf.ppqn()));
+
+		if (have_initial_meter) {
+			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
+			if (!(meter == last_meter)) {
+				bbt = new_map.bbt_at_quarter_note ((t->time_pulses/smf.ppqn()));
+				new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
+			}
+
+		} else {
+			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, pos, AudioTime);
+			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, TempoSection::Constant, AudioTime);
+			have_initial_meter = true;
+
 		}
-		new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
+
+		last_meter = meter;
 
 		cerr << "@ " << t->time_pulses/smf.ppqn() << " ("
 		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
@@ -329,7 +341,7 @@ Editor::do_import (vector<string>        paths,
 				continue;
 			}
 			if (smf.num_tempos() > 0) {
-				import_smf_tempo_map (smf);
+				import_smf_tempo_map (smf, pos);
 				smf.close ();
 				break;
 			}
@@ -1018,6 +1030,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				list<boost::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
 					                          ChanCount (DataType::MIDI, 1),
+					                          Config->get_strict_io () || Profile->get_mixbus (),
 					                          instrument, (Plugin::PresetRecord*) 0,
 					                          (RouteGroup*) 0,
 					                          1,
@@ -1026,11 +1039,6 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 
 				if (mt.empty()) {
 					return -1;
-				}
-				if (Config->get_strict_io ()) {
-					for (list<boost::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
-						(*i)->set_strict_io (true);
-					}
 				}
 
 				// TODO set strict_io from preferences

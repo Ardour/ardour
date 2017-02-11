@@ -277,7 +277,7 @@ style "time_info_box"
 
 style "status_bar_box"
 {
-        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+        bg[NORMAL] = @darkest
 }
 
 style "very_small_text"
@@ -406,6 +406,14 @@ style "base_frame"
 {
 	fg[NORMAL] = @background
 	bg[NORMAL] = @background
+}
+
+style "transport_frame"
+{
+}
+
+style "editor_window"
+{
 }
 
 style "transport_base" = "medium_bold_text"
@@ -1088,6 +1096,10 @@ widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
 
 widget "*BaseFrame" style:highest "base_frame"
+widget "*TransportFrame" style:highest "transport_frame"
+widget "*TransportFrame*" style:highest  "transport_frame"
+widget "*EditorWindow*" style:highest  "editor_window"
+widget "*EditorWindow" style:highest  "editor_window"
 
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"

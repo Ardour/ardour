@@ -962,7 +962,11 @@ Editor::track_selection_changed ()
 	case 0:
 		break;
 	default:
-		set_selected_mixer_strip (*(selection->tracks.front()));
+		/* last element in selection list is the most recently
+		 * selected, because we always append to that list.
+		 */
+		set_selected_mixer_strip (*(selection->tracks.back()));
+		ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
 		break;
 	}
 
@@ -1251,7 +1255,6 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("set-region-sync-position")->set_sensitive (false);
 		_region_actions->get_action("trim-front")->set_sensitive (false);
 		_region_actions->get_action("trim-back")->set_sensitive (false);
-		_region_actions->get_action("split-region")->set_sensitive (false);
 		_region_actions->get_action("place-transient")->set_sensitive (false);
 	}
 
@@ -1300,8 +1303,12 @@ Editor::sensitize_the_right_region_actions ()
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
 	a->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
 
-	if (have_position_lock_style_music && have_position_lock_style_audio) {
-		// a->set_inconsistent ();
+	vector<Widget*> proxies = a->get_proxies();
+	for (vector<Widget*>::iterator p = proxies.begin(); p != proxies.end(); ++p) {
+		Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem*> (*p);
+		if (cmi) {
+			cmi->set_inconsistent (have_position_lock_style_music && have_position_lock_style_audio);
+		}
 	}
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"));
@@ -1386,10 +1393,6 @@ Editor::region_selection_changed ()
 			*/
 			sensitize_all_region_actions (true);
 		}
-	}
-
-	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
-		maybe_locate_with_edit_preroll (selection->regions.start());
 	}
 
 	/* propagate into backend */

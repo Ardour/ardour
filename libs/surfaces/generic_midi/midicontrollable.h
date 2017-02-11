@@ -75,9 +75,6 @@ class MIDIControllable : public PBD::Stateful
 	void stop_learning ();
 	void drop_external_control ();
 
-	bool get_midi_feedback () { return feedback; }
-	void set_midi_feedback (bool val) { feedback = val; }
-
 	int control_to_midi(float val);
 	float midi_to_control(int val);
 
@@ -137,12 +134,11 @@ class MIDIControllable : public PBD::Stateful
 	std::string     _control_description;
 	int16_t          control_rpn;
 	int16_t          control_nrpn;
-	bool             feedback;
 	uint32_t        _rid;
 	std::string     _what;
 	bool            _bank_relative;
 
-  void drop_controllable (PBD::Controllable*);
+	void drop_controllable (PBD::Controllable*);
 
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
@@ -156,7 +152,6 @@ class MIDIControllable : public PBD::Stateful
 	void rpn_value_change (MIDI::Parser&, uint16_t nrpn, float val);
 	void rpn_change (MIDI::Parser&, uint16_t nrpn, int direction);
 	void nrpn_change (MIDI::Parser&, uint16_t nrpn, int direction);
-
 };
 
 #endif // __gm_midicontrollable_h__

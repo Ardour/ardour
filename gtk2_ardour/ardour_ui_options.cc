@@ -23,6 +23,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -105,12 +106,6 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
-ARDOUR_UI::toggle_send_midi_feedback ()
-{
-	ActionManager::toggle_config_state ("Options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
-}
-
-void
 ARDOUR_UI::toggle_auto_input ()
 {
 	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_input), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
@@ -132,6 +127,57 @@ void
 ARDOUR_UI::toggle_click ()
 {
 	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
+}
+
+void
+ARDOUR_UI::toggle_session_monitoring_in ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorInput) {
+		return;
+	}
+	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorInput) {
+		return;
+	}
+
+	if (tact->get_active()) {
+		_session->config.set_session_monitoring (MonitorInput);
+	} else {
+		_session->config.set_session_monitoring (MonitorAuto);
+	}
+}
+
+void
+ARDOUR_UI::toggle_session_monitoring_disk ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorDisk) {
+		return;
+	}
+	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorDisk) {
+		return;
+	}
+
+	if (tact->get_active()) {
+		_session->config.set_session_monitoring (MonitorDisk);
+	} else {
+		_session->config.set_session_monitoring (MonitorAuto);
+	}
 }
 
 void
@@ -307,7 +353,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		if (!_session->config.get_external_sync()) {
 			sync_button.set_text (S_("SyncSource|Int."));
-			auto_loop_button.set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
@@ -319,12 +364,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 				// but makes it clear to the user that it's disabled.
 				_session->request_play_loop (false, false);
 			}
-			auto_loop_button.set_sensitive (false);
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
+		set_loop_sensitivity ();
 
 	} else if (p == "follow-edits") {
 
@@ -340,14 +385,35 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("Options", "UseMMC", &RCConfiguration::get_mmc_control);
-	} else if (p == "midi-feedback") {
-		ActionManager::map_some_state ("Options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
 	} else if (p == "auto-play") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_play));
 	} else if (p == "auto-return") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_return));
 	} else if (p == "auto-input") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
+	} else if (p == "session-monitoring") {
+		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
+		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
+		if (iact && dact) {
+			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
+			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
+			if (tdact && tiact) {
+				switch (_session->config.get_session_monitoring ()) {
+					case MonitorDisk:
+						tdact->set_active (true);
+						tiact->set_active (false);
+						break;
+					case MonitorInput:
+						tiact->set_active (true);
+						tdact->set_active (false);
+						break;
+					default:
+						tdact->set_active (false);
+						tiact->set_active (false);
+						break;
+				}
+			}
+		}
 	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (_session->config, &SessionConfiguration::get_punch_out));
 		if (!_session->config.get_punch_out()) {
@@ -403,22 +469,18 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+	} else if (p == "show-mini-timeline") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-recpunch") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-monitoring") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-selclock") {
+		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
-		bool show = UIConfiguration::instance().get_show_editor_meter();
-
-		if (editor_meter) {
-			if (meter_box.get_parent()) {
-				transport_hbox.remove (meter_box);
-				transport_hbox.remove (editor_meter_peak_display);
-			}
-
-			if (show) {
-				transport_hbox.pack_start (meter_box, false, false);
-				transport_hbox.pack_start (editor_meter_peak_display, false, false);
-				meter_box.show();
-				editor_meter_peak_display.show();
-			}
-		}
+		repack_transport_hbox ();
+	} else if (p == "show-secondary-clock") {
+		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
 		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
@@ -445,6 +507,22 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());
+	} else if (p == "show-waveform-clipping") {
+		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
+	} else if (p == "waveform-gradient-depth") {
+		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+	} else if (p == "flat-buttons") {
+		bool flat = UIConfiguration::instance().get_flat_buttons();
+		if (ArdourButton::flat_buttons () != flat) {
+			ArdourButton::set_flat_buttons (flat);
+			/* force a redraw */
+			gtk_rc_reset_styles (gtk_settings_get_default());
+		}
+	} else if (p == "click-gain") {
+		float gain_db = accurate_coefficient_to_dB (Config->get_click_gain());
+		char tmp[32];
+		snprintf(tmp, 31, "%+.1f", gain_db);
+		set_tip (click_button, string_compose (_("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\nSignal Level: %1 dBFS"), tmp));
 	}
 }
 

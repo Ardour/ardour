@@ -34,6 +34,7 @@
 #include "editor_items.h"
 #include "mouse_cursors.h"
 #include "editing.h"
+#include "track_selection.h"
 
 namespace ARDOUR {
 	class Location;
@@ -143,7 +144,7 @@ public:
 	bool motion_handler (GdkEvent*, bool);
 	void abort ();
 
-	ARDOUR::framepos_t adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
+	ARDOUR::MusicFrame adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
 	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
 
         bool was_double_click() const { return _was_double_click; }
@@ -241,14 +242,15 @@ protected:
 	}
 
 	ARDOUR::frameoffset_t snap_delta (guint const) const;
+	double  snap_delta_music (guint const) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
 
 	/* sets snap delta from unsnapped pos */
-	void setup_snap_delta (framepos_t pos);
+	void setup_snap_delta (ARDOUR::MusicFrame pos);
 
-	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit, const int32_t sub_num);
+	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
 	void show_verbose_cursor_time (framepos_t);
 	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
@@ -280,7 +282,8 @@ private:
 	/* difference between some key position's snapped and unsnapped
 	 *  framepos. used for relative snap.
 	 */
-	ARDOUR::frameoffset_t _snap_delta;
+	framepos_t _snap_delta;
+	double     _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
@@ -327,7 +330,6 @@ protected:
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
 	int apply_track_delta (const int start, const int delta, const int skip, const bool distance_only = false) const;
-	int32_t current_music_divisor (framepos_t pos, int32_t button_state);
 
 	int _visible_y_low;
 	int _visible_y_high;
@@ -362,12 +364,12 @@ public:
 
 protected:
 
-	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
+	double compute_x_delta (GdkEvent const *, ARDOUR::MusicFrame *);
 	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
 	bool _brushing;
 	bool _ignore_video_lock;
-	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
+	ARDOUR::MusicFrame _last_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
@@ -409,14 +411,14 @@ private:
 	void finished_no_copy (
 		bool const,
 		bool const,
-		ARDOUR::framecnt_t const,
+		ARDOUR::MusicFrame,
 		int32_t const ev_state
 		);
 
 	void finished_copy (
 		bool const,
 		bool const,
-		ARDOUR::framecnt_t const,
+		ARDOUR::MusicFrame,
 		int32_t const ev_state
 		);
 
@@ -424,9 +426,10 @@ private:
 		boost::shared_ptr<ARDOUR::Region>,
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
-		ARDOUR::framecnt_t,
+		ARDOUR::MusicFrame,
+		double quarter_note,
 		PlaylistSet&,
-		const int32_t sub_num
+		bool for_music = false
 		);
 
 	void remove_region_from_playlist (
@@ -556,17 +559,20 @@ class NoteDrag : public Drag
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	void setup_pointer_frame_offset ();
   private:
 
-	ARDOUR::frameoffset_t total_dx (const guint) const;
+	double total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;
 	NoteBase* _primary;
 	double _cumulative_dx;
 	double _cumulative_dy;
+	double _earliest; // earliest quarter note in note selection
 	bool   _was_selected;
 	double _note_height;
+	bool   _copy;
 };
 
 class NoteCreateDrag : public Drag
@@ -1105,7 +1111,7 @@ public:
 private:
 	Operation _operation;
 	bool _add;
-	std::list<TimeAxisView*> _added_time_axes;
+	TrackSelection _track_selection_at_start;
 	bool _time_selection_at_start;
         framepos_t start_at_start;
         framepos_t end_at_start;

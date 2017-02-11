@@ -25,17 +25,19 @@
 #include "gtkmm2ext/cairo_widget.h"
 
 #include "pbd/controllable.h"
+
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
+
+#include "ardour_button.h"
 
 namespace Gtk {
 	class Menu;
 }
 
-#include "ardour/types.h"
-
 class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	ShuttleControl ();
 	~ShuttleControl ();
 
@@ -49,8 +51,8 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		double get_value (void) const;
 
-                double lower() const { return -1.0; }
-                double upper() const { return  1.0; }
+		double lower() const { return -1.0; }
+		double upper() const { return  1.0; }
 
 		ShuttleControl& sc;
 	};
@@ -58,7 +60,9 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
 	void set_colors ();
 
-  protected:
+	ArdourButton* info_button () { return &_info_button; }
+
+protected:
 	bool _hovering;
 	float  shuttle_max_speed;
 	float  last_speed_displayed;
@@ -71,13 +75,11 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	cairo_pattern_t* shine_pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
+	ArdourButton _info_button;
 	Gtk::Menu*        shuttle_unit_menu;
 	Gtk::Menu*        shuttle_style_menu;
 	Gtk::Menu*        shuttle_context_menu;
 	BindingProxy      binding_proxy;
-	Glib::RefPtr<Pango::Layout> _text;
-	Pango::AttrList text_attributes;
-	Pango::AttrColor* text_color;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
 	void show_shuttle_context_menu ();
@@ -98,8 +100,8 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);
 
-        gint mouse_shuttle (double x, bool force);
-        void use_shuttle_fract (bool force, bool zero_ok = false);
+	gint mouse_shuttle (double x, bool force);
+	void use_shuttle_fract (bool force, bool zero_ok = false);
 	void parameter_changed (std::string);
 
 	void set_shuttle_units (ARDOUR::ShuttleUnits);

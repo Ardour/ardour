@@ -341,6 +341,10 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Learn binding: Controlable number: %1\n", c));
 
+	/* drop any existing mappings for the same controllable for which
+	 * learning has just started.
+	 */
+
 	MIDIControllables::iterator tmp;
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
 		tmp = i;
@@ -351,6 +355,10 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		}
 		i = tmp;
 	}
+
+	/* check pending controllables (those for which a learn is underway) to
+	 * see if it is for the same one for which learning has just started.
+	 */
 
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
@@ -386,6 +394,8 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		own_mc = true;
 	}
 
+	/* stuff the new controllable into pending */
+
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 
@@ -418,6 +428,10 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 
 		i = tmp;
 	}
+
+	/* add the controllable for which learning stopped to our list of
+	 * controllables
+	 */
 
 	controllables.push_back (mc);
 }
@@ -1244,3 +1258,15 @@ GenericMidiControlProtocol::input_port() const
 {
 	return _input_port;
 }
+
+void
+GenericMidiControlProtocol::maybe_start_touch (Controllable* controllable)
+{
+	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+	if (actl) {
+		if (actl->automation_state() == Touch && !actl->touching()) {
+			actl->start_touch (session->audible_frame ());
+		}
+	}
+}
+

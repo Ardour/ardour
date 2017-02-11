@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-11-23 13:56+0100\n"
-"PO-Revision-Date: 2016-11-23 14:07+0100\n"
+"PO-Revision-Date: 2016-12-05 12:43+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -2373,7 +2373,7 @@ msgstr "Peakdateien zurücksetzen"
 
 #: ardour_ui_ed.cc:258
 msgid "Flush Wastebasket"
-msgstr "Müll leeren"
+msgstr "Mülleimer leeren"
 
 #: ardour_ui_ed.cc:266
 msgid "Quit"
@@ -2957,7 +2957,7 @@ msgstr "Automation zurücksetzen"
 #: automation_time_axis.cc:539 rc_option_editor.cc:3233
 #: rc_option_editor.cc:3238 rc_option_editor.cc:3288 rc_option_editor.cc:3293
 msgid "Clear"
-msgstr "Leeren"
+msgstr "Löschen"
 
 #: automation_time_axis.cc:570
 msgid "State"
@@ -6112,7 +6112,7 @@ msgstr "Kopieren"
 
 #: editor_ops.cc:4142
 msgid "clear"
-msgstr "Leeren"
+msgstr "löschen"
 
 #: editor_ops.cc:4191
 msgid "objects"
@@ -10799,15 +10799,15 @@ msgstr "Send Optionen"
 
 #: processor_box.cc:3716
 msgid "Clear (all)"
-msgstr "Leeren (alle)"
+msgstr "Löschen (alle)"
 
 #: processor_box.cc:3718
 msgid "Clear (pre-fader)"
-msgstr "Leeren (Pre-Fader)"
+msgstr "Löschen (Pre-Fader)"
 
 #: processor_box.cc:3720
 msgid "Clear (post-fader)"
-msgstr "Leeren (Post-Fader)"
+msgstr "Löschen (Post-Fader)"
 
 #: processor_box.cc:3750
 msgid "Activate All"
@@ -10999,7 +10999,7 @@ msgstr "Relative Notenlängenänderung mittels:"
 
 #: rc_option_editor.cc:690
 msgid "While Dragging:"
-msgstr "Währens Mausziehens:"
+msgstr "Während des Mausziehens:"
 
 #: rc_option_editor.cc:714
 msgid "Ignore snap using:"
@@ -12972,7 +12972,7 @@ msgstr "Take kopieren"
 
 #: route_time_axis.cc:1712
 msgid "Clear Current"
-msgstr "Aktuelle leeren"
+msgstr "Aktuelle löschen"
 
 #: route_time_axis.cc:1715
 msgid "Select from All..."
@@ -15996,4 +15996,5 @@ msgstr ""
 "Sehen Sie bitte im Handbuch unter %2/Video-Zeitleiste/Bearbeitung/#Export.\n"
 "\n"
 "Handbuch im Browser öffnen? "
+
 

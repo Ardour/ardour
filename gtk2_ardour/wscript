@@ -248,7 +248,6 @@ gtk2_ardour_sources = [
         'tempo_curve.cc',
         'tempo_dialog.cc',
         'tempo_lines.cc',
-        'theme_manager.cc',
         'time_axis_view.cc',
         'time_axis_view_item.cc',
         'time_fx_dialog.cc',
@@ -519,7 +518,8 @@ def build(bld):
                 ]
         obj.linkflags = ''
         obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
-        obj.source += [ 'canvas_test.cc', ]
+        # obj.source += [ 'canvas_test.cc', ]
+        obj.source += [ 'toolbar_test.cc', 'enums.cc']
 
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
@@ -855,7 +855,7 @@ def build(bld):
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Application/Product specific resources (icon, splash)
-    pgmname = Options.options.program_name;
+    pgmname = bld.env['PROGRAM_NAME']
     bld.install_files(os.path.join(bld.env['DATADIR'], 'resources'), bld.path.ant_glob('resources/' + pgmname + '*'))
 
     if bld.env['build_target'] == 'mingw':
@@ -868,7 +868,7 @@ def build(bld):
     bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
     # Color Themes. Find each color file for this program only
     # and install
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + Options.options.program_name.lower() + '.colors'));
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + pgmname.lower() + '.colors'));
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))

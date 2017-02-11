@@ -73,7 +73,7 @@ Box::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void
 Box::compute_bounding_box () const
 {
-	_bounding_box = boost::none;
+	_bounding_box = Rect();
 
 	if (_items.empty()) {
 		_bounding_box_dirty = false;
@@ -83,7 +83,7 @@ Box::compute_bounding_box () const
 	add_child_bounding_boxes (!collapse_on_hide);
 
 	if (_bounding_box) {
-		Rect r = _bounding_box.get();
+		Rect r = _bounding_box;
 
 		_bounding_box = r.expand (top_padding + outline_width() + top_margin,
 		                          right_padding + outline_width() + right_margin,
@@ -152,7 +152,7 @@ Box::reset_self ()
 		return;
 	}
 
-	Rect r (_bounding_box.get());
+	Rect r (_bounding_box);
 
 	/* XXX need to shrink by margin */
 
@@ -165,43 +165,46 @@ Box::reposition_children ()
 	Duple previous_edge (0, 0);
 	Distance largest_width = 0;
 	Distance largest_height = 0;
+	Rect uniform_size;
 
 	if (homogenous) {
 
 		for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
-			boost::optional<Rect> bb = (*i)->bounding_box();
+			Rect bb = (*i)->bounding_box();
 			if (bb) {
-				largest_height = std::max (largest_height, bb.get().height());
-				largest_width = std::max (largest_width, bb.get().width());
+				largest_height = std::max (largest_height, bb.height());
+				largest_width = std::max (largest_width, bb.width());
 			}
 		}
+
+		uniform_size = Rect (0, 0, largest_width, largest_height);
 	}
 
 	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
 
 		(*i)->set_position (previous_edge);
 
+		if (homogenous) {
+			(*i)->size_allocate (uniform_size);
+		}
+
 		if (orientation == Vertical) {
 
 			Distance shift = 0;
 
-			if (homogenous) {
-				shift = largest_height;
-			} else {
-				boost::optional<Rect> bb = (*i)->bounding_box();
+			Rect bb = (*i)->bounding_box();
 
-				if (!(*i)->visible()) {
-					/* invisible child */
-					if (!collapse_on_hide) {
-						/* still add in its size */
-						if (bb) {
-							shift += bb.get().height();
-						}
-					}
-				} else {
+			if (!(*i)->visible()) {
+				/* invisible child */
+				if (!collapse_on_hide) {
+					/* still add in its size */
 					if (bb) {
-						shift += bb.get().height();
-					}
+						shift += bb.height();
+						}
+				}
+			} else {
+				if (bb) {
+					shift += bb.height();
 				}
 			}
 
@@ -210,22 +213,17 @@ Box::reposition_children ()
 		} else {
 
 			Distance shift = 0;
+			Rect bb = (*i)->bounding_box();
 
-			if (homogenous) {
-				shift = largest_width;
-			} else {
-				boost::optional<Rect> bb = (*i)->bounding_box();
-
-				if (!(*i)->visible()) {
-					if (!collapse_on_hide) {
-						if (bb) {
-							shift += bb.get().width();
-						}
-					}
-				} else {
+			if (!(*i)->visible()) {
+				if (!collapse_on_hide) {
 					if (bb) {
-						shift += bb.get().width();
+						shift += bb.width();
 					}
+				}
+			} else {
+				if (bb) {
+					shift += bb.width();
 				}
 			}
 

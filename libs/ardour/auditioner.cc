@@ -100,7 +100,10 @@ Auditioner::lookup_synth ()
 		boost::shared_ptr<Plugin> p;
 		p = find_plugin (_session, plugin_id, ARDOUR::LV2);
 		if (!p) {
-			p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
+			p = find_plugin (_session, "http://gareus.org/oss/lv2/gmsynth", ARDOUR::LV2);
+			if (!p) {
+				p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
+			}
 			if (p) {
 				warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
 			} else {

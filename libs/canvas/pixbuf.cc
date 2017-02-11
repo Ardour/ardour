@@ -46,9 +46,9 @@ void
 Pixbuf::compute_bounding_box () const
 {
 	if (_pixbuf) {
-		_bounding_box = boost::optional<Rect> (Rect (0, 0, _pixbuf->get_width(), _pixbuf->get_height()));
+		_bounding_box = Rect (Rect (0, 0, _pixbuf->get_width(), _pixbuf->get_height()));
 	} else {
-		_bounding_box = boost::optional<Rect> ();
+		_bounding_box = Rect ();
 	}
 
 	_bounding_box_dirty = false;

@@ -6702,7 +6702,7 @@ msgstr "Frequenza di campionamento"
 
 #: engine_dialog.cc:597 engine_dialog.cc:706
 msgid "Buffer size:"
-msgstr "Dimenzione buffer:"
+msgstr "Dimensione buffer:"
 
 #: engine_dialog.cc:606
 msgid "Periods:"

@@ -275,6 +275,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\grid.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\image.cc"
 				>
 			</File>
@@ -426,6 +430,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\fwd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\grid.h"
 				>
 			</File>
 			<File

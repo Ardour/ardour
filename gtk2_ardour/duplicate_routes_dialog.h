@@ -48,6 +48,7 @@ class DuplicateRouteDialog : public ArdourDialog
   private:
 	Gtk::Entry name_template_entry;
 	Gtk::VBox playlist_button_box;
+	Gtk::Label playlist_option_label;
 	Gtk::RadioButtonGroup playlist_button_group;
 	Gtk::RadioButton copy_playlists_button;
 	Gtk::RadioButton new_playlists_button;

@@ -31,7 +31,6 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	include_label ("", Gtk::ALIGN_LEFT),
 
 	label_label (_("Label:"), Gtk::ALIGN_LEFT),
-	session_checkbox (_("Session Name")),
 	timespan_checkbox (_("Timespan Name")),
 	revision_checkbox (_("Revision:")),
 
@@ -44,12 +43,17 @@ ExportFilenameSelector::ExportFilenameSelector () :
 {
 	include_label.set_markup (_("Build filename(s) from these components:"));
 
+	session_snap_name.append_text (_("No Name"));
+	session_snap_name.append_text (_("Session Name"));
+	session_snap_name.append_text (_("Snapshot Name"));
+	session_snap_name.set_active (0);
+
 	pack_start (path_hbox, false, false, 12);
 	pack_start (include_label, false, false, 6);
 	pack_start (include_hbox, false, false, 0);
 	pack_start (example_filename_label, false, false, 12);
 
-	include_hbox.pack_start (session_checkbox, false, false, 3);
+	include_hbox.pack_start (session_snap_name, false, false, 3);
 	include_hbox.pack_start (label_label, false, false, 3);
 	include_hbox.pack_start (label_entry, false, false, 3);
 	include_hbox.pack_start (revision_checkbox, false, false, 3);
@@ -100,7 +104,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	path_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::update_folder));
 	path_entry.signal_activate().connect (sigc::mem_fun (*this, &ExportFilenameSelector::check_folder), false);
 
-	session_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_session_selection));
+	session_snap_name.signal_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_session_selection));
 	timespan_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_timespan_selection));
 
 	revision_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_revision_selection));
@@ -123,7 +127,15 @@ ExportFilenameSelector::load_state ()
 	}
 
 	label_entry.set_text (filename->include_label ? filename->get_label() : "");
-	session_checkbox.set_active (filename->include_session);
+	if (filename->include_session) {
+		if (filename->use_session_snapshot_name) {
+			session_snap_name.set_active (2);
+		} else {
+			session_snap_name.set_active (1);
+		}
+	} else {
+		session_snap_name.set_active (0);
+	}
 	timespan_checkbox.set_active (filename->include_timespan);
 	revision_checkbox.set_active (filename->include_revision);
 	revision_spinbutton.set_value (filename->get_revision());
@@ -341,7 +353,20 @@ ExportFilenameSelector::change_session_selection ()
 		return;
 	}
 
-	filename->include_session = session_checkbox.get_active();
+	switch (session_snap_name.get_active_row_number ()) {
+		case 1:
+			filename->include_session = true;
+			filename->use_session_snapshot_name = false;
+			break;
+		case 2:
+			filename->include_session = true;
+			filename->use_session_snapshot_name = true;
+			break;
+		default:
+			filename->include_session = false;
+			filename->use_session_snapshot_name = false;
+			break;
+	}
 	CriticalSelectionChanged();
 }
 

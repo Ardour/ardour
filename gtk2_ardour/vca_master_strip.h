@@ -77,7 +77,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	PBD::ScopedConnectionList vca_connections;
 
 	void spill ();
-	void spill_change (boost::shared_ptr<ARDOUR::VCA>);
+	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 	void set_selected (bool);
@@ -91,6 +91,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void start_name_edit ();
 	void finish_name_edit (std::string, int);
 	bool vertical_button_press (GdkEventButton*);
+	bool number_button_press (GdkEventButton*);
 	void vca_property_changed (PBD::PropertyChange const & what_changed);
 	void update_vca_name ();
 	void build_context_menu ();
@@ -98,9 +99,12 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void self_delete ();
 	void remove ();
 	void drop_all_slaves ();
+	void assign_all_selected ();
+	void unassign_all_selected ();
 
 	void parameter_changed (std::string const& p);
 	void set_button_names ();
+	void update_bottom_padding ();
 
 	void start_color_edit ();
 	void finish_color_edit (int, Gtk::ColorSelectionDialog*);

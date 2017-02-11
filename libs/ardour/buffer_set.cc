@@ -34,10 +34,10 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
-#include "ardour/uri_map.h"
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #include "lv2_evbuf.h"
+#include "ardour/uri_map.h"
 #endif
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 #include "ardour/vestige/aeffectx.h"
@@ -409,8 +409,8 @@ BufferSet::VSTBuffer::push_back (Evoral::Event<framepos_t> const & ev)
 		*/
 		return;
 	}
-	int const n = _events->numEvents;
-	assert (n < (int) _capacity);
+	uint32_t const n = _events->numEvents;
+	assert (n < _capacity);
 	if (n >= _capacity) {
 		return;
 	}

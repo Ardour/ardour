@@ -65,7 +65,6 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
-#include "theme_manager.h"
 #include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -77,7 +76,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-class ClickOptions : public OptionEditorBox
+class ClickOptions : public OptionEditorMiniPage
 {
 public:
 	ClickOptions (RCConfiguration* c)
@@ -85,36 +84,44 @@ public:
 		, _click_browse_button (_("Browse..."))
 		, _click_emphasis_browse_button (_("Browse..."))
 	{
-		Table* t = manage (new Table (4, 3));
-		t->set_spacings (4);
+		// TODO get rid of GTK -> use OptionEditor Widgets
+		Table* t = &table;
 
-		Label* l = manage (left_aligned_label (_("Emphasis on first beat:")));
-		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_use_emphasis_on_click_check_button, 1, 2, 1, 2, FILL);
+		Label* l = manage (left_aligned_label (_("Emphasis on first beat")));
+		_use_emphasis_on_click_check_button.add (*l);
+		t->attach (_use_emphasis_on_click_check_button, 1, 3, 0, 1, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
 
-		l = manage (left_aligned_label (_("Use default Click:")));
-		t->attach (*l, 0, 1, 0, 1, FILL);
-		t->attach (_use_default_click_check_button, 1, 2, 0, 1, FILL);
+		l = manage (left_aligned_label (_("Use built-in default sounds")));
+		_use_default_click_check_button.add (*l);
+		t->attach (_use_default_click_check_button, 1, 3, 1, 2, FILL);
 		_use_default_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
 
-		l = manage (left_aligned_label (_("Click audio file:")));
-		t->attach (*l, 0, 1, 2, 3, FILL);
-		t->attach (_click_path_entry, 1, 2, 2, 3, FILL);
+		l = manage (left_aligned_label (_("Audio file:")));
+		t->attach (*l, 1, 2, 2, 3, FILL);
+		t->attach (_click_path_entry, 2, 3, 2, 3, FILL);
 		_click_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (_click_browse_button, 2, 3, 2, 3, FILL);
+		t->attach (_click_browse_button, 3, 4, 2, 3, FILL);
 
-		l = manage (left_aligned_label (_("Click emphasis audio file:")));
-		t->attach (*l, 0, 1, 3, 4, FILL);
-		t->attach (_click_emphasis_path_entry, 1, 2, 3, 4, FILL);
+		l = manage (left_aligned_label (_("Emphasis audio file:")));
+		t->attach (*l, 1, 2, 3, 4, FILL);
+		t->attach (_click_emphasis_path_entry, 2, 3, 3, 4, FILL);
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (_click_emphasis_browse_button, 2, 3, 3, 4, FILL);
+		t->attach (_click_emphasis_browse_button, 3, 4, 3, 4, FILL);
 
-		_box->pack_start (*t, true, false);
+		_click_fader = new FaderOption (
+				"click-gain",
+				_("Gain level"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
+				);
+
+		_click_fader->add_to_page (this);
+		_click_fader->set_state_from_config ();
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
@@ -139,6 +146,8 @@ public:
 		} else if (p == "use-click-emphasis") {
 			bool x = _rc_config->get_use_click_emphasis ();
 			_use_emphasis_on_click_check_button.set_active (x);
+		} else if (p == "click-gain") {
+			_click_fader->set_state_from_config ();
 		}
 	}
 
@@ -230,9 +239,10 @@ private:
 	Entry _click_emphasis_path_entry;
 	Button _click_browse_button;
 	Button _click_emphasis_browse_button;
+	FaderOption* _click_fader;
 };
 
-class UndoOptions : public OptionEditorBox
+class UndoOptions : public OptionEditorComponent
 {
 public:
 	UndoOptions (RCConfiguration* c) :
@@ -240,24 +250,12 @@ public:
 		_limit_undo_button (_("Limit undo history to")),
 		_save_undo_button (_("Save undo history of"))
 	{
-		Table* t = new Table (2, 3);
-		t->set_spacings (4);
-
-		t->attach (_limit_undo_button, 0, 1, 0, 1, FILL);
+		// TODO get rid of GTK -> use OptionEditor SpinOption
 		_limit_undo_spin.set_range (0, 512);
 		_limit_undo_spin.set_increments (1, 10);
-		t->attach (_limit_undo_spin, 1, 2, 0, 1, FILL | EXPAND);
-		Label* l = manage (left_aligned_label (_("commands")));
-		t->attach (*l, 2, 3, 0, 1);
 
-		t->attach (_save_undo_button, 0, 1, 1, 2, FILL);
 		_save_undo_spin.set_range (0, 512);
 		_save_undo_spin.set_increments (1, 10);
-		t->attach (_save_undo_spin, 1, 2, 1, 2, FILL | EXPAND);
-		l = manage (left_aligned_label (_("commands")));
-		t->attach (*l, 2, 3, 1, 2);
-
-		_box->pack_start (*t);
 
 		_limit_undo_button.signal_toggled().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_toggled));
 		_limit_undo_spin.signal_value_changed().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_changed));
@@ -313,6 +311,34 @@ public:
 		_rc_config->set_saved_history_depth (_save_undo_spin.get_value_as_int ());
 	}
 
+	void add_to_page (OptionEditorPage* p)
+	{
+		int const n = p->table.property_n_rows();
+		Table* t = & p->table;
+
+		t->resize (n + 2, 3);
+
+		Label* l = manage (left_aligned_label (_("commands")));
+		HBox* box = manage (new HBox());
+		box->set_spacing (4);
+		box->pack_start (_limit_undo_spin, false, false);
+		box->pack_start (*l, true, true);
+		t->attach (_limit_undo_button, 1, 2, n, n +1, FILL);
+		t->attach (*box, 2, 3, n, n + 1, FILL | EXPAND);
+
+		l = manage (left_aligned_label (_("commands")));
+		box = manage (new HBox());
+		box->set_spacing (4);
+		box->pack_start (_save_undo_spin, false, false);
+		box->pack_start (*l, true, true);
+		t->attach (_save_undo_button, 1, 2, n + 1, n + 2, FILL);
+		t->attach (*box, 2, 3, n + 1, n + 2, FILL | EXPAND);
+	}
+
+	Gtk::Widget& tip_widget() {
+		return _limit_undo_button; // unused
+	}
+
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _limit_undo_button;
@@ -322,10 +348,9 @@ private:
 };
 
 
-
 static const struct {
-    const char *name;
-    guint modifier;
+	const char *name;
+	guint modifier;
 } modifiers[] = {
 
 	{ "Unmodified", 0 },
@@ -368,17 +393,19 @@ static const struct {
 };
 
 
-class KeyboardOptions : public OptionEditorBox
+class KeyboardOptions : public OptionEditorMiniPage
 {
 public:
-	KeyboardOptions () :
-		  _delete_button_adjustment (3, 1, 12),
-		  _delete_button_spin (_delete_button_adjustment),
-		  _edit_button_adjustment (3, 1, 5),
-		  _edit_button_spin (_edit_button_adjustment),
-		  _insert_note_button_adjustment (3, 1, 5),
-		  _insert_note_button_spin (_insert_note_button_adjustment)
+	KeyboardOptions ()
+		: _delete_button_adjustment (3, 1, 12)
+		, _delete_button_spin (_delete_button_adjustment)
+		, _edit_button_adjustment (3, 1, 5)
+		, _edit_button_spin (_edit_button_adjustment)
+		, _insert_note_button_adjustment (3, 1, 5)
+		, _insert_note_button_spin (_insert_note_button_adjustment)
 	{
+		// TODO get rid of GTK -> use OptionEditor Widgets
+
 		const std::string restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
 		/* internationalize and prepare for use with combos */
 
@@ -390,16 +417,9 @@ public:
 		set_popdown_strings (_edit_modifier_combo, dumb);
 		_edit_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_edit_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"),  Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
-				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"),  Keyboard::primary_modifier_name (), restart_msg)));
 
-		Table* t = manage (new Table (5, 11));
-		t->set_spacings (4);
+		Table* t = &table;
 
 		int row = 0;
 		int col = 0;
@@ -417,14 +437,15 @@ public:
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_keyboard_layout_selector, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 1, col + 2, row, row + 1, FILL, FILL);
+		t->attach (_keyboard_layout_selector, col + 2, col + 3, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 		col = 0;
 
-		l = manage (left_aligned_label (_("When Clicking:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Clicking:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, col, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -433,17 +454,16 @@ public:
 		l = manage (left_aligned_label (_("Edit using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_edit_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, SHRINK , FILL);
 
 		_edit_button_spin.set_name ("OptionsEntry");
-		_edit_button_adjustment.set_value (Keyboard::edit_button());
 		_edit_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_button_changed));
 
 		++row;
@@ -452,28 +472,21 @@ public:
 		set_popdown_strings (_delete_modifier_combo, dumb);
 		_delete_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_delete_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
-				_delete_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_delete_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_delete_button_spin.set_name ("OptionsEntry");
-		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
 		++row;
@@ -482,34 +495,28 @@ public:
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_insert_note_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 1 (left mouse button)</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
-				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1 + button 1 (left mouse button)</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_insert_note_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
-		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL, FILL);
+		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, SHRINK, FILL);
 
 		_insert_note_button_spin.set_name ("OptionsEntry");
-		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
 		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
 
 		++row;
 
-		l = manage (left_aligned_label (_("When Beginning a Drag:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Beginning a Drag:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -526,17 +533,11 @@ public:
 								     Keyboard::primary_modifier_name (),
 #endif
 								     restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
-				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
 
 		l = manage (left_aligned_label (_("Copy items using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_copy_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 				++row;
@@ -545,7 +546,6 @@ public:
 		/* constraint modifier */
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
-		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
 #ifdef __APPLE__
@@ -554,17 +554,11 @@ public:
 								     Keyboard::tertiary_modifier_name (),
 #endif
 								     restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
-				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
 
 		l = manage (left_aligned_label (_("Constrain drag using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -574,26 +568,21 @@ public:
 		set_popdown_strings (_push_points_combo, dumb);
 		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::level4_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_push_points_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
-				_push_points_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Push points using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 
-		l = manage (left_aligned_label (_("When Beginning a Trim:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("When Beginning a Trim:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -603,18 +592,12 @@ public:
 		set_popdown_strings (_trim_contents_combo, dumb);
 		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_trim_contents_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
-				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Trim contents using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -626,18 +609,12 @@ public:
 
 		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::tertiary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_trim_anchored_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
-				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Anchored trim using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_trim_anchored_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
@@ -648,17 +625,10 @@ public:
 		set_popdown_strings (_trim_jump_combo, dumb);
 		_trim_jump_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_jump_modifier_chosen));
 
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
-				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
-
 		l = manage (left_aligned_label (_("Jump after trim using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_trim_jump_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
@@ -670,25 +640,20 @@ public:
 		set_popdown_strings (_note_size_relative_combo, dumb);
 		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_note_size_relative_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
-				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg))); // XXX 2ndary
 
 		l = manage (left_aligned_label (_("Resize notes relatively using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		++col;
 		t->attach (_note_size_relative_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Dragging:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Dragging:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -703,18 +668,12 @@ public:
 		mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
-				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_snap_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -729,24 +688,19 @@ public:
 		mod_str = string_compose (X_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::level4_modifier_name ());
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_delta_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
-				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Snap relatively using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_snap_delta_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Trimming:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Trimming:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -757,24 +711,19 @@ public:
 		_trim_overlap_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_overlap_modifier_chosen));
 
 		Gtkmm2ext::UI::instance()->set_tip (_trim_overlap_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
-				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::tertiary_modifier_name (), restart_msg)));
 
 		l = manage (left_aligned_label (_("Resize overlapped regions using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_trim_overlap_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 
-		l = manage (left_aligned_label (_("While Dragging Control Points:")));
+		l = manage (left_aligned_label (string_compose ("<b>%1</b>", _("While Dragging Control Points:"))));
 		l->set_name ("OptionEditorHeading");
+		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
@@ -784,23 +733,24 @@ public:
 		set_popdown_strings (_fine_adjust_combo, dumb);
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
-		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ());
+		mod_str = string_compose (X_("%1-%2"), Keyboard::primary_modifier_name (), Keyboard::secondary_modifier_name ()); // XXX just 2ndary ?!
 		Gtkmm2ext::UI::instance()->set_tip (_fine_adjust_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
-		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
-				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
-				break;
-			}
-		}
+				(string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 
 		l = manage (left_aligned_label (_("Fine adjust using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
 		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
-		_box->pack_start (*t, false, false);
+		OptionEditorHeading* h = new OptionEditorHeading (_("Reset"));
+		h->add_to_page (this);
+
+		RcActionButton* rb = new RcActionButton (_("Reset to recommended defaults"),
+				sigc::mem_fun (*this, &KeyboardOptions::reset_to_defaults));
+		rb->add_to_page (this);
+
+		set_state_from_config ();
 	}
 
 	void parameter_changed (string const &)
@@ -810,7 +760,63 @@ public:
 
 	void set_state_from_config ()
 	{
-		/* XXX: these aren't really config options... */
+		_delete_button_adjustment.set_value (Keyboard::delete_button());
+		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
+		_edit_button_adjustment.set_value (Keyboard::edit_button());
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
+				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
+				_delete_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
+				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
+				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
+				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
+				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
+				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
+				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
+			}
+#if 0
+			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
+				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
+			}
+#endif
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
+				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
+				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
+				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
+			}
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
+				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
+			}
+		}
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		int const n = p->table.property_n_rows();
+		p->table.resize (n + 1, 3);
+		p->table.attach (box, 1, 3, n, n + 1, FILL | EXPAND, SHRINK, 0, 0);
 	}
 
 private:
@@ -1001,6 +1007,56 @@ private:
 		Keyboard::set_insert_note_button (_insert_note_button_spin.get_value_as_int());
 	}
 
+	void reset_to_defaults ()
+	{
+		/* when clicking*/
+		Keyboard::set_edit_modifier (Keyboard::PrimaryModifier);
+		Keyboard::set_edit_button (3);
+		Keyboard::set_delete_modifier (Keyboard::TertiaryModifier);
+		Keyboard::set_delete_button (3);
+		Keyboard::set_insert_note_modifier (Keyboard::PrimaryModifier);
+		Keyboard::set_insert_note_button (1);
+
+		/* when beginning a drag */
+#ifdef __APPLE__
+		Keyboard::set_copy_modifier (Keyboard::SecondaryModifier);
+#else
+		Keyboard::set_copy_modifier (Keyboard::PrimaryModifier);
+#endif
+
+#ifdef __APPLE__
+		ArdourKeyboard::set_constraint_modifier (Keyboard::PrimaryModifier);
+#else
+		ArdourKeyboard::set_constraint_modifier (Keyboard::TertiaryModifier);
+#endif
+		ArdourKeyboard::set_push_points_modifier (Keyboard::PrimaryModifier | Keyboard::Level4Modifier);
+
+		/* when beginning a trim */
+		ArdourKeyboard::set_trim_contents_modifier (Keyboard::PrimaryModifier);
+		ArdourKeyboard::set_trim_anchored_modifier (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier);
+		ArdourKeyboard::set_note_size_relative_modifier (Keyboard::TertiaryModifier); // XXX better: 2ndary
+
+		/* while dragging */
+#ifdef __APPLE__
+		Keyboard::set_snap_modifier (Keyboard::TertiaryModifier);
+#else
+		Keyboard::set_snap_modifier (Keyboard::SecondaryModifier);
+#endif
+#ifdef __APPLE__
+		Keyboard::set_snap_delta_modifier (Keyboard::Level4Modifier);
+#else
+		Keyboard::set_snap_delta_modifier (Keyboard::SecondaryModifier | Keyboard::Level4Modifier);
+#endif
+
+		/* while trimming */
+		ArdourKeyboard::set_trim_overlap_modifier (Keyboard::TertiaryModifier);
+
+		/* while dragging ctrl points */
+		ArdourKeyboard::set_fine_adjust_modifier (/*Keyboard::PrimaryModifier | */Keyboard::SecondaryModifier); // XXX
+
+		set_state_from_config ();
+	}
+
 	ComboBoxText _keyboard_layout_selector;
 	ComboBoxText _edit_modifier_combo;
 	ComboBoxText _delete_modifier_combo;
@@ -1025,155 +1081,82 @@ private:
 
 };
 
-class FontScalingOptions : public OptionEditorBox
+class FontScalingOptions : public HSliderOption
 {
-public:
-	FontScalingOptions () :
-		_dpi_adjustment (100, 50, 250, 1, 5),
-		_dpi_slider (_dpi_adjustment)
+	public:
+		FontScalingOptions ()
+			: HSliderOption ("font-scale", _("GUI and Font scaling"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_font_scale),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_font_scale),
+					50, 250, 1, 5,
+					1024, false)
 	{
-		_dpi_adjustment.set_value (UIConfiguration::instance().get_font_scale() / 1024.);
-
-		Label* l = manage (new Label (_("GUI and Font scaling:")));
-		l->set_name ("OptionsLabel");
-
-		const std::string dflt = _("Default");
+		const std::string dflt = _("100%");
 		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
-		_dpi_slider.set_name("FontScaleSlider");
-		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		_dpi_slider.set_draw_value(false);
-		_dpi_slider.add_mark(50,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(60,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(70,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(80,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(90,  Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(100, Gtk::POS_TOP, dflt);
-		_dpi_slider.add_mark(125, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(150, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(175, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(200, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(225, Gtk::POS_TOP, empty);
-		_dpi_slider.add_mark(250, Gtk::POS_TOP, empty);
-
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_dpi_slider, true, true);
-
-		_box->pack_start (*h, false, false);
+		_hscale.set_name("FontScaleSlider");
+		_hscale.set_draw_value(false);
+		_hscale.add_mark(50,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(60,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(70,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(80,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(90,  Gtk::POS_TOP, empty);
+		_hscale.add_mark(100, Gtk::POS_TOP, dflt);
+		_hscale.add_mark(125, Gtk::POS_TOP, empty);
+		_hscale.add_mark(150, Gtk::POS_TOP, empty);
+		_hscale.add_mark(175, Gtk::POS_TOP, empty);
+		_hscale.add_mark(200, Gtk::POS_TOP, empty);
+		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
 		set_note (_("Adjusting the scale requires an application restart to re-layout."));
-
-		_dpi_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FontScalingOptions::dpi_changed));
 	}
 
-	void parameter_changed (string const & p)
+	void changed ()
 	{
-		if (p == "font-scale") {
-			_dpi_adjustment.set_value (UIConfiguration::instance().get_font_scale() / 1024.);
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("font-scale");
-	}
-
-private:
-
-	void dpi_changed ()
-	{
-		UIConfiguration::instance().set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024.));
+		HSliderOption::changed ();
 		/* XXX: should be triggered from the parameter changed signal */
 		UIConfiguration::instance().reset_dpi ();
 	}
-
-	Adjustment _dpi_adjustment;
-	HScale _dpi_slider;
 };
 
-class VstTimeOutSliderOption : public OptionEditorBox
+class VstTimeOutSliderOption : public HSliderOption
 {
 public:
 	VstTimeOutSliderOption (RCConfiguration* c)
-		: _rc_config (c)
-		, _timeout_adjustment (0, 0, 3000, 50, 50)
-		, _timeout_slider (_timeout_adjustment)
+		: HSliderOption ("vst-scan-timeout", _("Scan Time Out"),
+				sigc::mem_fun (*c, &RCConfiguration::get_vst_scan_timeout),
+				sigc::mem_fun (*c, &RCConfiguration::set_vst_scan_timeout),
+				0, 3000, 50, 50)
 	{
-		_timeout_slider.set_digits (0);
-		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &VstTimeOutSliderOption::timeout_changed));
+		_label.set_alignment (1.0, 0.5); // match buttons below
+		_hscale.set_digits (0);
+		_hscale.set_draw_value(false);
+		_hscale.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
+		_hscale.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
+		_hscale.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
+		_hscale.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
+		_hscale.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
+		_hscale.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
+		_hscale.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
 
-		_timeout_slider.set_draw_value(false);
-		_timeout_slider.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
-		_timeout_slider.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
-		_timeout_slider.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
-		_timeout_slider.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
-		_timeout_slider.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
-		_timeout_slider.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
-		_timeout_slider.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
-
-		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
+		Gtkmm2ext::UI::instance()->set_tip(_hscale,
 			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
-
-		Label* l = manage (left_aligned_label (_("Scan Time Out:")));
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_timeout_slider, true, true);
-
-		_box->pack_start (*h, false, false);
 	}
-
-	void parameter_changed (string const & p)
-	{
-		if (p == "vst-scan-timeout") {
-			int const x = _rc_config->get_vst_scan_timeout();
-			_timeout_adjustment.set_value (x);
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("vst-scan-timeout");
-	}
-
-private:
-
-	void timeout_changed ()
-	{
-		int x = floor(_timeout_adjustment.get_value());
-		_rc_config->set_vst_scan_timeout(x);
-	}
-
-	RCConfiguration* _rc_config;
-	Adjustment _timeout_adjustment;
-	HScale _timeout_slider;
 };
 
-
-
-
-
-class ClipLevelOptions : public OptionEditorBox
+class ClipLevelOptions : public OptionEditorComponent
 {
 public:
 	ClipLevelOptions ()
 		: _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
 		, _clip_level_slider (_clip_level_adjustment)
+		, _label (_("Waveform Clip Level (dBFS):"))
 	{
+		_label.set_name ("OptionsLabel");
+
 		_clip_level_adjustment.set_value (UIConfiguration::instance().get_waveform_clip_level ());
 
-		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
-		l->set_name ("OptionsLabel");
-
 		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_clip_level_slider, true, true);
-
-		_box->pack_start (*h, false, false);
 
 		_clip_level_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &ClipLevelOptions::clip_level_changed));
 	}
@@ -1183,11 +1166,23 @@ public:
 		if (p == "waveform-clip-level") {
 			_clip_level_adjustment.set_value (UIConfiguration::instance().get_waveform_clip_level());
 		}
+		if (p == "show-waveform-clipping") {
+			_clip_level_slider.set_sensitive (UIConfiguration::instance().get_show_waveform_clipping ());
+		}
 	}
 
 	void set_state_from_config ()
 	{
 		parameter_changed ("waveform-clip-level");
+		parameter_changed ("show-waveform-clipping");
+	}
+
+	void add_to_page (OptionEditorPage* p) {
+		add_widgets_to_page (p, &_label, &_clip_level_slider);
+	}
+
+	Gtk::Widget& tip_widget() {
+		return _clip_level_slider;
 	}
 
 private:
@@ -1201,530 +1196,490 @@ private:
 
 	Adjustment _clip_level_adjustment;
 	HScale _clip_level_slider;
+	Label _label;
 };
 
-class BufferingOptions : public OptionEditorBox
+class BufferingOptions : public OptionEditorComponent
 {
-public:
-	BufferingOptions (RCConfiguration* c)
-                : _rc_config (c)
-		, _playback_adjustment (5, 1, 60, 1, 4)
-                , _capture_adjustment (5, 1, 60, 1, 4)
-                , _playback_slider (_playback_adjustment)
-		, _capture_slider (_capture_adjustment)
-	{
-		vector<string> presets;
-
-		/* these must match the order of the enums for BufferingPreset */
-
-		presets.push_back (_("Small sessions (4-16 tracks)"));
-		presets.push_back (_("Medium sessions (16-64 tracks)"));
-		presets.push_back (_("Large sessions (64+ tracks)"));
-		presets.push_back (_("Custom (set by sliders below)"));
-
-		set_popdown_strings (_buffering_presets_combo, presets);
-
-		Label* l = manage (new Label (_("Preset:")));
-		l->set_name ("OptionsLabel");
-		HBox* h = manage (new HBox);
-		h->set_spacing (12);
-		h->pack_start (*l, false, false);
-		h->pack_start (_buffering_presets_combo, true, true);
-		_box->pack_start (*h, false, false);
-
-		_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
-
-		_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
-
-		l = manage (new Label (_("Playback (seconds of buffering):")));
-		l->set_name ("OptionsLabel");
-
-		_playback_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_playback_slider, true, true);
-
-		_box->pack_start (*h, false, false);
-
-		_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
-
-		l = manage (new Label (_("Recording (seconds of buffering):")));
-		l->set_name ("OptionsLabel");
-
-		_capture_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_capture_slider, true, true);
-
-		_box->pack_start (*h, false, false);
-
-		_capture_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::capture_changed));
-		_playback_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::playback_changed));
-	}
-
-	void parameter_changed (string const & p)
-	{
-		if (p == "buffering-preset") {
-			switch (_rc_config->get_buffering_preset()) {
-			case Small:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (0);
-				break;
-			case Medium:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (1);
-				break;
-			case Large:
-				_playback_slider.set_sensitive (false);
-				_capture_slider.set_sensitive (false);
-				_buffering_presets_combo.set_active (2);
-				break;
-			case Custom:
-				_playback_slider.set_sensitive (true);
-				_capture_slider.set_sensitive (true);
-				_buffering_presets_combo.set_active (3);
-				break;
-			}
-		}
-
-		if (p == "playback-buffer-seconds") {
-			_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
-		} else if (p == "capture-buffer-seconds") {
-			_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
-                }
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("buffering-preset");
-		parameter_changed ("playback-buffer-seconds");
-		parameter_changed ("capture-buffer-seconds");
-	}
-
-private:
-
-	void preset_changed ()
-	{
-		int index = _buffering_presets_combo.get_active_row_number ();
-		if (index < 0) {
-			return;
-		}
-		switch (index) {
-		case 0:
-			_rc_config->set_buffering_preset (Small);
-			break;
-		case 1:
-			_rc_config->set_buffering_preset (Medium);
-			break;
-		case 2:
-			_rc_config->set_buffering_preset (Large);
-			break;
-		case 3:
-			_rc_config->set_buffering_preset (Custom);
-			break;
-		default:
-			error << string_compose (_("programming error: unknown buffering preset string, index = %1"), index) << endmsg;
-			break;
-		}
-	}
-
-	void playback_changed ()
-	{
-		_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
-	}
-
-	void capture_changed ()
-	{
-		_rc_config->set_audio_capture_buffer_seconds ((long) _capture_adjustment.get_value());
-	}
-
-	RCConfiguration* _rc_config;
-	Adjustment _playback_adjustment;
-	Adjustment _capture_adjustment;
-	HScale _playback_slider;
-	HScale _capture_slider;
-	ComboBoxText _buffering_presets_combo;
-};
-
-class ControlSurfacesOptions : public OptionEditorBox
-{
-public:
-	ControlSurfacesOptions ()
-		: _ignore_view_change (0)
-	{
-		_store = ListStore::create (_model);
-		_view.set_model (_store);
-		_view.append_column (_("Control Surface Protocol"), _model.name);
-		_view.get_column(0)->set_resizable (true);
-		_view.get_column(0)->set_expand (true);
-		_view.append_column_editable (_("Enabled"), _model.enabled);
-		_view.append_column_editable (_("Feedback"), _model.feedback);
-
-		_box->pack_start (_view, false, false);
-
-		Gtk::HBox* edit_box = manage (new Gtk::HBox);
-		edit_box->set_spacing(3);
-		_box->pack_start (*edit_box, false, false);
-		edit_box->show ();
-
-		Label* label = manage (new Label);
-		label->set_text (_("Click to edit the settings for selected protocol ( it must be ENABLED first ):"));
-		edit_box->pack_start (*label, false, false);
-		label->show ();
-
-		edit_button = manage (new Button(_("Show Protocol Settings")));
-		edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
-		edit_box->pack_start (*edit_button, true, true);
-		edit_button->set_sensitive (false);
-		edit_button->show ();
-
-		ControlProtocolManager& m = ControlProtocolManager::instance ();
-		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
-						boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
-
-		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
-		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
-		_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
-	}
-
-	void parameter_changed (std::string const &)
-	{
-
-	}
-
-	void set_state_from_config ()
-	{
-		_store->clear ();
-
-		ControlProtocolManager& m = ControlProtocolManager::instance ();
-		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-
-			if (!(*i)->mandatory) {
-				TreeModel::Row r = *_store->append ();
-				r[_model.name] = (*i)->name;
-				r[_model.enabled] = ((*i)->protocol || (*i)->requested);
-				r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
-				r[_model.protocol_info] = *i;
-			}
-		}
-	}
-
-private:
-
-        void protocol_status_changed (ControlProtocolInfo* cpi) {
-		/* find the row */
-		TreeModel::Children rows = _store->children();
-
-		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
-			string n = ((*x)[_model.name]);
-
-			if ((*x)[_model.protocol_info] == cpi) {
-				_ignore_view_change++;
-				(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
-				_ignore_view_change--;
-				break;
-			}
-		}
-	}
-
-	void selection_changed ()
-	{
-		//enable the Edit button when a row is selected for editing
-		TreeModel::Row row = *(_view.get_selection()->get_selected());
-		if (row && row[_model.enabled])
-			edit_button->set_sensitive (true);
-		else
-			edit_button->set_sensitive (false);
-	}
-
-	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
-	{
-		TreeModel::Row r = *i;
-
-		if (_ignore_view_change) {
-			return;
-		}
-
-		ControlProtocolInfo* cpi = r[_model.protocol_info];
-		if (!cpi) {
-			return;
-		}
-
-		bool const was_enabled = (cpi->protocol != 0);
-		bool const is_enabled = r[_model.enabled];
-
-
-		if (was_enabled != is_enabled) {
-
-			if (!was_enabled) {
-				ControlProtocolManager::instance().activate (*cpi);
-			} else {
-				ControlProtocolManager::instance().deactivate (*cpi);
-			}
-		}
-
-		bool const was_feedback = (cpi->protocol && cpi->protocol->get_feedback ());
-		bool const is_feedback = r[_model.feedback];
-
-		if (was_feedback != is_feedback && cpi->protocol) {
-			cpi->protocol->set_feedback (is_feedback);
-		}
-	}
-
-	void edit_btn_clicked ()
-	{
-		std::string name;
-		ControlProtocolInfo* cpi;
-		TreeModel::Row row;
-
-		row = *(_view.get_selection()->get_selected());
-		if (!row[_model.enabled]) {
-			return;
-		}
-		cpi = row[_model.protocol_info];
-		if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
-			return;
-		}
-		Box* box = (Box*) cpi->protocol->get_gui ();
-		if (!box) {
-			return;
-		}
-		if (box->get_parent()) {
-			static_cast<ArdourWindow*>(box->get_parent())->present();
-			return;
-		}
-		WindowTitle title (Glib::get_application_name());
-		title += row[_model.name];
-		title += _("Configuration");
-		/* once created, the window is managed by the surface itself (as ->get_parent())
-		 * Surface's tear_down_gui() is called on session close, when de-activating
-		 * or re-initializing a surface.
-		 * tear_down_gui() hides an deletes the Window if it exists.
-		 */
-		ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
-		win->set_title ("Control Protocol Options");
-		win->add (*box);
-		box->show ();
-		win->present ();
-	}
-
-	void edit_clicked (GdkEventButton* ev)
-	{
-		if (ev->type != GDK_2BUTTON_PRESS) {
-			return;
-		}
-
-		edit_btn_clicked();
-	}
-
-        class ControlSurfacesModelColumns : public TreeModelColumnRecord
-	{
 	public:
-
-		ControlSurfacesModelColumns ()
+		BufferingOptions (RCConfiguration* c)
+			: _rc_config (c)
+			, _label (_("Preset:"))
+			, _playback ("playback-buffer-seconds", _("Playback (seconds of buffering)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_audio_playback_buffer_seconds),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_audio_playback_buffer_seconds),
+					1, 60, 1, 4)
+			, _capture ("capture-buffer-seconds", _("Recording (seconds of buffering)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_audio_capture_buffer_seconds),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_audio_capture_buffer_seconds),
+					1, 60, 1, 4)
 		{
-			add (name);
-			add (enabled);
-			add (feedback);
-			add (protocol_info);
+			// TODO use  ComboOption
+			vector<string> presets;
+
+			/* these must match the order of the enums for BufferingPreset */
+			presets.push_back (_("Small sessions (4-16 tracks)"));
+			presets.push_back (_("Medium sessions (16-64 tracks)"));
+			presets.push_back (_("Large sessions (64+ tracks)"));
+			presets.push_back (_("Custom (set by sliders below)"));
+
+			set_popdown_strings (_buffering_presets_combo, presets);
+			_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
+
+			_label.set_name ("OptionsLabel");
+			_label.set_alignment (0, 0.5);
 		}
 
-		TreeModelColumn<string> name;
-		TreeModelColumn<bool> enabled;
-		TreeModelColumn<bool> feedback;
-		TreeModelColumn<ControlProtocolInfo*> protocol_info;
+		void
+		add_to_page (OptionEditorPage* p)
+		{
+			add_widgets_to_page (p, &_label, &_buffering_presets_combo);
+			_playback.add_to_page (p);
+			_capture.add_to_page (p);
+		}
+
+		void parameter_changed (string const & p)
+		{
+			if (p == "buffering-preset") {
+				switch (_rc_config->get_buffering_preset()) {
+					case Small:
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
+						_buffering_presets_combo.set_active (0);
+						break;
+					case Medium:
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
+						_buffering_presets_combo.set_active (1);
+						break;
+					case Large:
+						_playback.set_sensitive (false);
+						_capture.set_sensitive (false);
+						_buffering_presets_combo.set_active (2);
+						break;
+					case Custom:
+						_playback.set_sensitive (true);
+						_capture.set_sensitive (true);
+						_buffering_presets_combo.set_active (3);
+						break;
+				}
+			}
+			_playback.parameter_changed (p);
+			_capture.parameter_changed (p);
+		}
+
+		void set_state_from_config ()
+		{
+			parameter_changed ("buffering-preset");
+			_playback.set_state_from_config();
+			_capture.set_state_from_config();
+		}
+
+		Gtk::Widget& tip_widget() { return _buffering_presets_combo; }
+
+	private:
+
+		void preset_changed ()
+		{
+			int index = _buffering_presets_combo.get_active_row_number ();
+			if (index < 0) {
+				return;
+			}
+			switch (index) {
+				case 0:
+					_rc_config->set_buffering_preset (Small);
+					break;
+				case 1:
+					_rc_config->set_buffering_preset (Medium);
+					break;
+				case 2:
+					_rc_config->set_buffering_preset (Large);
+					break;
+				case 3:
+					_rc_config->set_buffering_preset (Custom);
+					break;
+				default:
+					error << string_compose (_("programming error: unknown buffering preset string, index = %1"), index) << endmsg;
+					break;
+			}
+		}
+
+		RCConfiguration* _rc_config;
+		Label         _label;
+		HSliderOption _playback;
+		HSliderOption _capture;
+		ComboBoxText  _buffering_presets_combo;
+};
+
+class ControlSurfacesOptions : public OptionEditorMiniPage
+{
+	public:
+		ControlSurfacesOptions ()
+			: _ignore_view_change (0)
+		{
+			_store = ListStore::create (_model);
+			_view.set_model (_store);
+			_view.append_column (_("Control Surface Protocol"), _model.name);
+			_view.get_column(0)->set_resizable (true);
+			_view.get_column(0)->set_expand (true);
+			_view.append_column_editable (_("Enable"), _model.enabled);
+
+			Gtk::HBox* edit_box = manage (new Gtk::HBox);
+			edit_box->set_spacing(3);
+			edit_box->show ();
+
+			Label* label = manage (new Label);
+			label->set_text (_("Edit the settings for selected protocol (it must be ENABLED first):"));
+			edit_box->pack_start (*label, false, false);
+			label->show ();
+
+			edit_button = manage (new Button(_("Show Protocol Settings")));
+			edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
+			edit_box->pack_start (*edit_button, true, true);
+			edit_button->set_sensitive (false);
+			edit_button->show ();
+
+			int const n = table.property_n_rows();
+			table.resize (n + 2, 3);
+			table.attach (_view, 0, 3, n, n + 1);
+			table.attach (*edit_box, 0, 3, n + 1, n + 2);
+
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
+					boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
+
+			_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
+			_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
+			_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
+		}
+
+		void parameter_changed (std::string const &)
+		{
+
+		}
+
+		void set_state_from_config ()
+		{
+			_store->clear ();
+
+			ControlProtocolManager& m = ControlProtocolManager::instance ();
+			for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+
+				if (!(*i)->mandatory) {
+					TreeModel::Row r = *_store->append ();
+					r[_model.name] = (*i)->name;
+					r[_model.enabled] = ((*i)->protocol || (*i)->requested);
+					r[_model.protocol_info] = *i;
+				}
+			}
+		}
+
+	private:
+
+		void protocol_status_changed (ControlProtocolInfo* cpi) {
+			/* find the row */
+			TreeModel::Children rows = _store->children();
+
+			for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+				string n = ((*x)[_model.name]);
+
+				if ((*x)[_model.protocol_info] == cpi) {
+					_ignore_view_change++;
+					(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+					_ignore_view_change--;
+					break;
+				}
+			}
+		}
+
+		void selection_changed ()
+		{
+			//enable the Edit button when a row is selected for editing
+			TreeModel::Row row = *(_view.get_selection()->get_selected());
+			if (row && row[_model.enabled])
+				edit_button->set_sensitive (true);
+			else
+				edit_button->set_sensitive (false);
+		}
+
+		void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
+		{
+			TreeModel::Row r = *i;
+
+			if (_ignore_view_change) {
+				return;
+			}
+
+			ControlProtocolInfo* cpi = r[_model.protocol_info];
+			if (!cpi) {
+				return;
+			}
+
+			bool const was_enabled = (cpi->protocol != 0);
+			bool const is_enabled = r[_model.enabled];
+
+
+			if (was_enabled != is_enabled) {
+
+				if (!was_enabled) {
+					ControlProtocolManager::instance().activate (*cpi);
+				} else {
+					ControlProtocolManager::instance().deactivate (*cpi);
+				}
+			}
+
+			selection_changed ();
+		}
+
+		void edit_btn_clicked ()
+		{
+			std::string name;
+			ControlProtocolInfo* cpi;
+			TreeModel::Row row;
+
+			row = *(_view.get_selection()->get_selected());
+			if (!row[_model.enabled]) {
+				return;
+			}
+			cpi = row[_model.protocol_info];
+			if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+				return;
+			}
+			Box* box = (Box*) cpi->protocol->get_gui ();
+			if (!box) {
+				return;
+			}
+			if (box->get_parent()) {
+				static_cast<ArdourWindow*>(box->get_parent())->present();
+				return;
+			}
+			WindowTitle title (Glib::get_application_name());
+			title += row[_model.name];
+			title += _("Configuration");
+			/* once created, the window is managed by the surface itself (as ->get_parent())
+			 * Surface's tear_down_gui() is called on session close, when de-activating
+			 * or re-initializing a surface.
+			 * tear_down_gui() hides an deletes the Window if it exists.
+			 */
+			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
+			win->set_title ("Control Protocol Options");
+			win->add (*box);
+			box->show ();
+			win->present ();
+		}
+
+		void edit_clicked (GdkEventButton* ev)
+		{
+			if (ev->type != GDK_2BUTTON_PRESS) {
+				return;
+			}
+
+			edit_btn_clicked();
+		}
+
+		class ControlSurfacesModelColumns : public TreeModelColumnRecord
+	{
+		public:
+
+			ControlSurfacesModelColumns ()
+			{
+				add (name);
+				add (enabled);
+				add (protocol_info);
+			}
+
+			TreeModelColumn<string> name;
+			TreeModelColumn<bool> enabled;
+			TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
-	Glib::RefPtr<ListStore> _store;
-	ControlSurfacesModelColumns _model;
-	TreeView _view;
-        PBD::ScopedConnection protocol_status_connection;
-        uint32_t _ignore_view_change;
-	Gtk::Button* edit_button;
+		Glib::RefPtr<ListStore> _store;
+		ControlSurfacesModelColumns _model;
+		TreeView _view;
+		PBD::ScopedConnection protocol_status_connection;
+		uint32_t _ignore_view_change;
+		Gtk::Button* edit_button;
 };
 
-class VideoTimelineOptions : public OptionEditorBox
+class VideoTimelineOptions : public OptionEditorMiniPage
 {
-public:
-	VideoTimelineOptions (RCConfiguration* c)
-		: _rc_config (c)
-		, _show_video_export_info_button (_("Show Video Export Info before export"))
-		, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
-		, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
-		, _xjadeo_browse_button (_("Browse..."))
-	{
-		Table* t = manage (new Table (8, 4));
-		t->set_spacings (4);
+	public:
+		VideoTimelineOptions (RCConfiguration* c)
+			: _rc_config (c)
+			, _show_video_export_info_button (_("Show Video Export Info before export"))
+			, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
+			, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
+			, _xjadeo_browse_button (_("Browse..."))
+		{
+			Table* t = &table;
+			int n = table.property_n_rows();
 
-		std::stringstream s;
-		s << "<b>" << _("Video Server") << "</b>";
-		Label* l = manage (new Label (s.str()));
-		l->set_use_markup (true);
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 8);
+			t->attach (_show_video_export_info_button, 1, 4, n, n + 1);
+			_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
+					_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
+			++n;
 
-		t->attach (_video_advanced_setup_button, 1, 4, 1, 2);
-		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
-					    _("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+			t->attach (_show_video_server_dialog_button, 1, 4, n, n + 1);
+			_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
+					_("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+			++n;
 
-		l = manage (new Label (_("Video Server URL:")));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 2, 2, 3, FILL);
-		t->attach (_video_server_url_entry, 2, 4, 2, 3, FILL);
-		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
-					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
+			t->attach (_video_advanced_setup_button, 1, 4, n, n + 1, FILL);
+			_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
+			Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
+					_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+			++n;
 
-		l = manage (new Label (_("Video Folder:")));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 2, 3, 4, FILL);
-		t->attach (_video_server_docroot_entry, 2, 4, 3, 4);
-		Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-					    _("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+			Label* l = manage (new Label (_("Video Server URL:")));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 2, n, n + 1, FILL);
+			t->attach (_video_server_url_entry, 2, 4, n, n + 1, FILL);
+			Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
+					_("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
+			++n;
 
-		t->attach (_show_video_export_info_button, 1, 4, 4, 5);
-		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
-					    _("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
+			l = manage (new Label (_("Video Folder:")));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 2, n, n + 1, FILL);
+			t->attach (_video_server_docroot_entry, 2, 4, n, n + 1);
+			Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
+					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+			++n;
 
-		t->attach (_show_video_server_dialog_button, 1, 4, 5, 6);
-		_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
-					    _("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+			l = manage (new Label (""));
+			t->attach (*l, 0, 4, n, n + 1, EXPAND | FILL);
+			++n;
 
-		s.str (std::string ());
-		s << "<b>" << _("Video Monitor") << "</b>";
-		l = manage (new Label (s.str()));
-		l->set_use_markup (true);
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL, FILL | EXPAND, 0, 8);
+			l = manage (new Label (string_compose ("<b>%1</b>", _("Video Monitor"))));
+			l->set_use_markup (true);
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 0, 4, n, n + 1, EXPAND | FILL);
+			++n;
 
-		l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
+			l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
 #ifdef __APPLE__
-						"Jadeo.app"
+							"Jadeo.app"
 #elif defined PLATFORM_WINDOWS
-						"xjadeo.exe"
+							"xjadeo.exe"
 #else
-						"xjadeo"
+							"xjadeo"
 #endif
-						)));
-		l->set_alignment (0, 0.5);
-		t->attach (*l, 1, 4, 7, 8, FILL);
-		t->attach (_custom_xjadeo_path, 2, 3, 8, 9);
-		Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
-		t->attach (_xjadeo_browse_button, 3, 4, 8, 9, FILL);
+							)));
+			l->set_alignment (0, 0.5);
+			t->attach (*l, 1, 4, n, n + 1, FILL);
+			++n;
 
-		_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
-		_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
-		_video_server_docroot_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
-		_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
-		_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
-		_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
+			t->attach (_custom_xjadeo_path, 2, 3, n, n + 1, EXPAND|FILL);
+			Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
+			t->attach (_xjadeo_browse_button, 3, 4, n, n + 1, FILL);
 
-		// xjadeo-path is a UIConfig parameter
-		UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
+			_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
+			_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
+			_video_server_docroot_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
+			_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
+			_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
+			_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
 
-		_box->pack_start (*t,true,true);
-	}
+			// xjadeo-path is a UIConfig parameter
+			UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
+		}
 
-	void server_url_changed ()
-	{
-		_rc_config->set_video_server_url (_video_server_url_entry.get_text());
-	}
+		void server_url_changed ()
+		{
+			_rc_config->set_video_server_url (_video_server_url_entry.get_text());
+		}
 
-	void server_docroot_changed ()
-	{
-		_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
-	}
+		void server_docroot_changed ()
+		{
+			_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
+		}
 
-	void show_video_export_info_toggled ()
-	{
-		bool const x = _show_video_export_info_button.get_active ();
-		_rc_config->set_show_video_export_info (x);
-	}
+		void show_video_export_info_toggled ()
+		{
+			bool const x = _show_video_export_info_button.get_active ();
+			_rc_config->set_show_video_export_info (x);
+		}
 
-	void show_video_server_dialog_toggled ()
-	{
-		bool const x = _show_video_server_dialog_button.get_active ();
-		_rc_config->set_show_video_server_dialog (x);
-	}
+		void show_video_server_dialog_toggled ()
+		{
+			bool const x = _show_video_server_dialog_button.get_active ();
+			_rc_config->set_show_video_server_dialog (x);
+		}
 
-	void video_advanced_setup_toggled ()
-	{
-		bool const x = _video_advanced_setup_button.get_active ();
-		_rc_config->set_video_advanced_setup(x);
-	}
+		void video_advanced_setup_toggled ()
+		{
+			bool const x = _video_advanced_setup_button.get_active ();
+			_rc_config->set_video_advanced_setup(x);
+		}
 
-	void custom_xjadeo_path_changed ()
-	{
-		UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
-	}
+		void custom_xjadeo_path_changed ()
+		{
+			UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
+		}
 
-	void xjadeo_browse_clicked ()
-	{
-		Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-		dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
-		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-		if (dialog.run () == Gtk::RESPONSE_OK) {
-			const std::string& filename = dialog.get_filename();
-			if (!filename.empty() && (
+		void xjadeo_browse_clicked ()
+		{
+			Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+			dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
+			dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+			if (dialog.run () == Gtk::RESPONSE_OK) {
+				const std::string& filename = dialog.get_filename();
+				if (!filename.empty() && (
 #ifdef __APPLE__
-					Glib::file_test (filename + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE) ||
+							Glib::file_test (filename + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE) ||
 #endif
-					Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
-					)) {
-				UIConfiguration::instance().set_xjadeo_binary (filename);
+							Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
+							)) {
+					UIConfiguration::instance().set_xjadeo_binary (filename);
+				}
 			}
 		}
-	}
 
-	void parameter_changed (string const & p)
-	{
-		if (p == "video-server-url") {
-			_video_server_url_entry.set_text (_rc_config->get_video_server_url());
-		} else if (p == "video-server-docroot") {
-			_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
-		} else if (p == "show-video-export-info") {
-			bool const x = _rc_config->get_show_video_export_info();
-			_show_video_export_info_button.set_active (x);
-		} else if (p == "show-video-server-dialog") {
-			bool const x = _rc_config->get_show_video_server_dialog();
-			_show_video_server_dialog_button.set_active (x);
-		} else if (p == "video-advanced-setup") {
-			bool const x = _rc_config->get_video_advanced_setup();
-			_video_advanced_setup_button.set_active(x);
-			_video_server_docroot_entry.set_sensitive(x);
-			_video_server_url_entry.set_sensitive(x);
-		} else if (p == "xjadeo-binary") {
-			_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
+		void parameter_changed (string const & p)
+		{
+			if (p == "video-server-url") {
+				_video_server_url_entry.set_text (_rc_config->get_video_server_url());
+			} else if (p == "video-server-docroot") {
+				_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
+			} else if (p == "show-video-export-info") {
+				bool const x = _rc_config->get_show_video_export_info();
+				_show_video_export_info_button.set_active (x);
+			} else if (p == "show-video-server-dialog") {
+				bool const x = _rc_config->get_show_video_server_dialog();
+				_show_video_server_dialog_button.set_active (x);
+			} else if (p == "video-advanced-setup") {
+				bool const x = _rc_config->get_video_advanced_setup();
+				_video_advanced_setup_button.set_active(x);
+				_video_server_docroot_entry.set_sensitive(x);
+				_video_server_url_entry.set_sensitive(x);
+			} else if (p == "xjadeo-binary") {
+				_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
+			}
 		}
-	}
 
-	void set_state_from_config ()
-	{
-		parameter_changed ("video-server-url");
-		parameter_changed ("video-server-docroot");
-		parameter_changed ("video-monitor-setup-dialog");
-		parameter_changed ("show-video-export-info");
-		parameter_changed ("show-video-server-dialog");
-		parameter_changed ("video-advanced-setup");
-		parameter_changed ("xjadeo-binary");
-	}
+		void set_state_from_config ()
+		{
+			parameter_changed ("video-server-url");
+			parameter_changed ("video-server-docroot");
+			parameter_changed ("video-monitor-setup-dialog");
+			parameter_changed ("show-video-export-info");
+			parameter_changed ("show-video-server-dialog");
+			parameter_changed ("video-advanced-setup");
+			parameter_changed ("xjadeo-binary");
+		}
 
-private:
-	RCConfiguration* _rc_config;
-	Entry _video_server_url_entry;
-	Entry _video_server_docroot_entry;
-	Entry _custom_xjadeo_path;
-	CheckButton _show_video_export_info_button;
-	CheckButton _show_video_server_dialog_button;
-	CheckButton _video_advanced_setup_button;
-	Button _xjadeo_browse_button;
+	private:
+		RCConfiguration* _rc_config;
+		Entry _video_server_url_entry;
+		Entry _video_server_docroot_entry;
+		Entry _custom_xjadeo_path;
+		CheckButton _show_video_export_info_button;
+		CheckButton _show_video_server_dialog_button;
+		CheckButton _video_advanced_setup_button;
+		Button _xjadeo_browse_button;
 };
 
 class ColumVisibilityOption : public Option
@@ -1836,7 +1791,7 @@ public:
 		add_widget_to_page (p, _visibility_group->list_view ());
 	}
 
-        Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
+	Gtk::Widget& tip_widget() { return *_visibility_group->list_view (); }
 
 private:
 	void changed ()
@@ -1855,98 +1810,111 @@ private:
 };
 
 
-class MidiPortOptions : public OptionEditorBox, public sigc::trackable
+class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 {
-  public:
-	MidiPortOptions() {
+	public:
+		MidiPortOptions() {
 
-		setup_midi_port_view (midi_output_view, false);
-		setup_midi_port_view (midi_input_view, true);
+			setup_midi_port_view (midi_output_view, false);
+			setup_midi_port_view (midi_input_view, true);
 
+			OptionEditorHeading* h = new OptionEditorHeading (_("MIDI Inputs"));
+			h->add_to_page (this);
 
-		input_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
-		_box->pack_start (input_label, false, false);
-		_box->pack_start (midi_input_view);
+			Gtk::ScrolledWindow* scroller = manage (new Gtk::ScrolledWindow);
+			scroller->add (midi_input_view);
+			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			scroller->set_size_request (-1, 180);
 
-		output_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
-		_box->pack_start (output_label, false, false);
-		_box->pack_start (midi_output_view);
+			int n = table.property_n_rows();
+			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
 
-		midi_output_view.show ();
-		midi_input_view.show ();
+			h = new OptionEditorHeading (_("MIDI Outputs"));
+			h->add_to_page (this);
 
-		_box->signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
-	}
+			scroller = manage (new Gtk::ScrolledWindow);
+			scroller->add (midi_output_view);
+			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			scroller->set_size_request (-1, 180);
 
-	void parameter_changed (string const&) {}
-	void set_state_from_config() {}
+			n = table.property_n_rows();
+			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
 
-	void on_show () {
-		refill ();
+			midi_output_view.show ();
+			midi_input_view.show ();
 
-		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
-		                                                               invalidator (*this),
-		                                                               boost::bind (&MidiPortOptions::refill, this),
-		                                                               gui_context());
-		AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
-		                                                      invalidator (*this),
-		                                                      boost::bind (&MidiPortOptions::refill, this),
-		                                                      gui_context());
-		AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
-		                                                            invalidator (*this),
-		                                                            boost::bind (&MidiPortOptions::refill, this),
-		                                                            gui_context());
-	}
-
-	void refill () {
-
-		if (refill_midi_ports (true, midi_input_view)) {
-			input_label.show ();
-		} else {
-		       input_label.hide ();
-		}
-		if (refill_midi_ports (false, midi_output_view)) {
-			output_label.show ();
-		} else {
-			output_label.hide ();
-		}
-	}
-
-  private:
-	PBD::ScopedConnectionList connections;
-
-	/* MIDI port management */
-	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
-
-		MidiPortColumns () {
-			add (pretty_name);
-			add (music_data);
-			add (control_data);
-			add (selection);
-			add (name);
-			add (filler);
+			table.signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
 		}
 
-		Gtk::TreeModelColumn<std::string> pretty_name;
-		Gtk::TreeModelColumn<bool> music_data;
-		Gtk::TreeModelColumn<bool> control_data;
-		Gtk::TreeModelColumn<bool> selection;
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> filler;
-	};
+		void parameter_changed (string const&) {}
+		void set_state_from_config() {}
 
-	MidiPortColumns midi_port_columns;
-	Gtk::TreeView midi_input_view;
-	Gtk::TreeView midi_output_view;
-	Gtk::Label input_label;
-	Gtk::Label output_label;
+		void on_show () {
+			refill ();
 
-	void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
-	bool refill_midi_ports (bool for_input, Gtk::TreeView&);
-	void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
-	void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
-	void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
-	void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
+			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+			AudioEngine::instance()->MidiPortInfoChanged.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+			AudioEngine::instance()->MidiSelectionPortsChanged.connect (connections,
+					invalidator (*this),
+					boost::bind (&MidiPortOptions::refill, this),
+					gui_context());
+		}
+
+		void refill () {
+
+			if (refill_midi_ports (true, midi_input_view)) {
+				input_label.show ();
+			} else {
+				input_label.hide ();
+			}
+			if (refill_midi_ports (false, midi_output_view)) {
+				output_label.show ();
+			} else {
+				output_label.hide ();
+			}
+		}
+
+	private:
+		PBD::ScopedConnectionList connections;
+
+		/* MIDI port management */
+		struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+
+			MidiPortColumns () {
+				add (pretty_name);
+				add (music_data);
+				add (control_data);
+				add (selection);
+				add (name);
+				add (filler);
+			}
+
+			Gtk::TreeModelColumn<std::string> pretty_name;
+			Gtk::TreeModelColumn<bool> music_data;
+			Gtk::TreeModelColumn<bool> control_data;
+			Gtk::TreeModelColumn<bool> selection;
+			Gtk::TreeModelColumn<std::string> name;
+			Gtk::TreeModelColumn<std::string> filler;
+		};
+
+		MidiPortColumns midi_port_columns;
+		Gtk::TreeView midi_input_view;
+		Gtk::TreeView midi_output_view;
+		Gtk::Label input_label;
+		Gtk::Label output_label;
+
+		void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
+		bool refill_midi_ports (bool for_input, Gtk::TreeView&);
+		void pretty_name_edit (std::string const & path, std::string const & new_text, Gtk::TreeView*);
+		void midi_music_column_toggled (std::string const & path, Gtk::TreeView*);
+		void midi_control_column_toggled (std::string const & path, Gtk::TreeView*);
+		void midi_selection_column_toggled (std::string const & path, Gtk::TreeView*);
 };
 
 void
@@ -2011,6 +1979,8 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 
 	view.get_selection()->set_mode (SELECTION_NONE);
 	view.set_tooltip_column (4); /* port "real" name */
+	view.get_column(0)->set_resizable (true);
+	view.get_column(0)->set_expand (true);
 }
 
 bool
@@ -2145,100 +2115,67 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
 	, Tabbable (*this, _("Preferences")) /* pack self-as-vbox into tabbable */
-        , _rc_config (Config)
+	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 
 	/* MISC */
 
-        uint32_t hwcpus = hardware_concurrency ();
+	uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
 	BoolComboOption* bco;
 
-        if (hwcpus > 1) {
-                add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
+	if (hwcpus > 1) {
+		add_option (_("General"), new OptionEditorHeading (_("DSP CPU Utilization")));
 
-                ComboOption<int32_t>* procs = new ComboOption<int32_t> (
-                        "processor-usage",
-                        _("Signal processing uses"),
-                        sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
-                        sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
-                        );
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"processor-usage",
+				_("Signal processing uses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
+				);
 
-                procs->add (-1, _("all but one processor"));
-                procs->add (0, _("all available processors"));
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
 
-                for (uint32_t i = 1; i <= hwcpus; ++i) {
-	                procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
-                }
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
+		}
 
 		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
 
-                add_option (_("Misc"), procs);
-        }
+		add_option (_("General"), procs);
+	}
 
-	add_option (_("Misc"), new OptionEditorHeading (S_("Options|Undo")));
+	/* Image cache size */
+	add_option (_("General"), new OptionEditorHeading (_("Memory Usage")));
 
-	add_option (_("Misc"), new UndoOptions (_rc_config));
+	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
+			_("Waveform image cache size (megabytes)"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
+			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
+			);
+	sics->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip (
+			sics->tip_widget(),
+		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
+	add_option (_("General"), sics);
 
-	add_option (_("Misc"),
+	add_option (_("General"), new OptionEditorHeading (_("Engine")));
+
+	add_option (_("General"),
 	     new BoolOption (
-		     "verify-remove-last-capture",
-		     _("Verify removal of last capture"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     "try-autostart-engine",
+		     _("Try to auto-launch audio/midi engine"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_try_autostart_engine),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_try_autostart_engine)
 		     ));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Session Management")));
+	add_option (_("General"), new OptionEditorHeading (_("Automation")));
 
-	add_option (_("Misc"),
-	     new BoolOption (
-		     "periodic-safety-backups",
-		     _("Make periodic backups of the session file"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
-		     ));
-
-	add_option (_("Misc"),
-	     new BoolOption (
-		     "only-copy-imported-files",
-		     _("Always copy imported files"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
-		     ));
-
-	add_option (_("Misc"), new DirectoryOption (
-			    X_("default-session-parent-dir"),
-			    _("Default folder for new sessions:"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
-			    ));
-
-	add_option (_("Misc"),
-	     new SpinOption<uint32_t> (
-		     "max-recent-sessions",
-		     _("Maximum number of recent sessions"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
-		     0, 1000, 1, 20
-		     ));
-
-	add_option (_("Misc/Click"), new OptionEditorHeading (_("Click")));
-
-	add_option (_("Misc/Click"), new ClickOptions (_rc_config));
-
-	add_option (_("Misc/Click"),
-	     new FaderOption (
-		     "click-gain",
-		     _("Click gain level"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_gain)
-		     ));
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Automation")));
-
-	add_option (_("Misc"),
+	add_option (_("General"),
 	     new SpinOption<double> (
 		     "automation-thinning-factor",
 		     _("Thinning factor (larger value => less data)"),
@@ -2247,7 +2184,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 1000, 1, 20
 		     ));
 
-	add_option (_("Misc"),
+	add_option (_("General"),
 	     new SpinOption<double> (
 		     "automation-interval-msecs",
 		     _("Automation sampling interval (milliseconds)"),
@@ -2256,245 +2193,131 @@ RCOptionEditor::RCOptionEditor ()
 		     1, 1000, 1, 20
 		     ));
 
-	/* TRANSPORT */
+	add_option (_("General"), new OptionEditorHeading (_("Tempo")));
 
-	add_option (_("Transport"), new OptionEditorHeading (S_("Transport Options")));
-
-	BoolOption* tsf;
-
-	tsf = new BoolOption (
-		     "latched-record-enable",
-		     _("Keep record-enable engaged on stop"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
-		     );
-	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
-	add_option (_("Transport"), tsf);
-
-	tsf = new BoolOption (
-		     "loop-is-mode",
-		     _("Play loop is a transport mode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_is_mode)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
-					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
-					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
-	add_option (_("Transport"), tsf);
-
-	tsf = new BoolOption (
-		     "stop-recording-on-xrun",
-		     _("Stop recording when an xrun occurs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
-					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
+	bo = new BoolOption (
+		"allow-non-quarter-pulse",
+		_("Allow non quarter-note pulse"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
+							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
 							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+	add_option (_("General"), bo);
 
-	tsf = new BoolOption (
-		     "create-xrun-marker",
-		     _("Create markers where xruns occur"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
-		     );
-	// Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _(""));
-	add_option (_("Transport"), tsf);
+	if (!ARDOUR::Profile->get_mixbus()) {
+		add_option (_("General"), new OptionEditorHeading (_("GUI Lock")));
+		/* Lock GUI timeout */
 
-	tsf = new BoolOption (
-		     "stop-at-session-end",
-		     _("Stop at the end of the session"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
-					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
-							      "when it reaches the current session end marker\n\n"
-							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
-							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+		HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
+				_("Lock timeout (seconds)"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds),
+				0, 1000, 1, 10
+				);
+		slts->scale().set_digits (0);
+		Gtkmm2ext::UI::instance()->set_tip (
+				slts->tip_widget(),
+				_("Lock GUI after this many idle seconds (zero to never lock)"));
+		add_option (_("General"), slts);
+	} // !mixbus
 
-	tsf = new BoolOption (
-		     "seamless-loop",
-		     _("Do seamless looping (not possible when slaved to MTC, LTC etc)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
-					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
-							      "preventing any need to do a transport locate at the end of the loop\n\n"
-							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
-							      "which will often cause a small click or delay"), PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
+	add_option (_("General/Session"), new OptionEditorHeading (S_("Options|Undo")));
 
-	tsf = new BoolOption (
-		     "disable-disarm-during-roll",
-		     _("Disable per-track record disarm while rolling"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take"));
-	add_option (_("Transport"), tsf);
+	add_option (_("General/Session"), new UndoOptions (_rc_config));
 
-	tsf = new BoolOption (
-		     "quieten_at_speed",
-		     _("12dB gain reduction during fast-forward and fast-rewind"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("This will reduce the unpleasant increase in perceived volume "
-						   "that occurs when fast-forwarding or rewinding through some kinds of audio"));
-	add_option (_("Transport"), tsf);
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "verify-remove-last-capture",
+		     _("Verify removal of last capture"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     ));
 
-	ComboOption<float>* psc = new ComboOption<float> (
-		     "preroll-seconds",
-		     _("Preroll"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_preroll_seconds),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_preroll_seconds)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (psc->tip_widget(),
-					    (_("The amount of preroll (in seconds) to apply when <b>Play with Preroll</b> is initiated.\n\n"
-					       "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead position when a region is selected or trimmed.")));
-	psc->add (0.0, _("0 (no pre-roll)"));
-	psc->add (0.1, _("0.1 second"));
-	psc->add (0.25, _("0.25 second"));
-	psc->add (0.5, _("0.5 second"));
-	psc->add (1.0, _("1.0 second"));
-	psc->add (2.0, _("2.0 seconds"));
-	add_option (_("Transport"), psc);
+	add_option (_("General/Session"), new OptionEditorHeading (_("Session Management")));
 
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("Synchronization and Slave Options")));
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "periodic-safety-backups",
+		     _("Make periodic backups of the session file"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
+		     ));
 
-	_sync_source = new ComboOption<SyncSource> (
-		"sync-source",
-		_("External timecode source"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_source),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
-		);
+	add_option (_("General/Session"),
+	     new BoolOption (
+		     "only-copy-imported-files",
+		     _("Always copy imported files"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
+		     ));
 
-	add_option (_("Transport/Sync"), _sync_source);
-
-	_sync_framerate = new BoolOption (
-		     "timecode-sync-frame-rate",
-		     _("Match session video frame rate to external timecode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_framerate->tip_widget(),
-		 string_compose (_("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
-				   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
-				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
-				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
-				   "timecode standard and the session standard."), PROGRAM_NAME));
-
-	add_option (_("Transport/Sync"), _sync_framerate);
-
-	_sync_genlock = new BoolOption (
-		"timecode-source-is-synced",
-		_("Sync-lock timecode to clock (disable drift compensation)"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
-		);
-	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_genlock->tip_widget(),
-		 string_compose (_("<b>When enabled</b> %1 will never varispeed when slaved to external timecode. "
-				   "Sync Lock indicates that the selected external timecode source shares clock-sync "
-				   "(Black &amp; Burst, Wordclock, etc) with the audio interface. "
-				   "This option disables drift compensation. The transport speed is fixed at 1.0. "
-				   "Vari-speed LTC will be ignored and cause drift."
-				   "\n\n"
-				   "<b>When disabled</b> %1 will compensate for potential drift, regardless if the "
-				   "timecode sources shares clock sync."
-				  ), PROGRAM_NAME));
-
-
-	add_option (_("Transport/Sync"), _sync_genlock);
-
-	_sync_source_2997 = new BoolOption (
-		"timecode-source-2997",
-		_("Lock to 29.9700 fps instead of 30000/1001"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_2997),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_2997)
-		);
-	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_source_2997->tip_widget(),
-		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
-			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
-			 "drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
-			 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
-			 "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
-			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
-			 ));
-
-	add_option (_("Transport/Sync"), _sync_source_2997);
-
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Reader")));
-
-	_ltc_port = new ComboStringOption (
-		"ltc-source-port",
-		_("LTC incoming port"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
-		);
-
-	vector<string> physical_inputs;
-	physical_inputs.push_back (_("None"));
-	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
-	_ltc_port->set_popdown_strings (physical_inputs);
-
-	populate_sync_options ();
-	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
-
-	add_option (_("Transport/Sync"), _ltc_port);
-
-	// TODO; rather disable this button than not compile it..
-	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Generator")));
-
-	add_option (_("Transport/Sync"),
-		    new BoolOption (
-			    "send-ltc",
-			    _("Enable LTC generator"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_ltc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_ltc)
+	add_option (_("General/Session"), new DirectoryOption (
+			    X_("default-session-parent-dir"),
+			    _("Default folder for new sessions:"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
 			    ));
 
-	_ltc_send_continuously = new BoolOption (
-			    "ltc-send-continuously",
-			    _("Send LTC while stopped"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
-			    );
-	Gtkmm2ext::UI::instance()->set_tip
-		(_ltc_send_continuously->tip_widget(),
-		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
-	add_option (_("Transport"), _ltc_send_continuously);
+	add_option (_("General/Session"),
+	     new SpinOption<uint32_t> (
+		     "max-recent-sessions",
+		     _("Maximum number of recent sessions"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
+		     0, 1000, 1, 20
+		     ));
 
-	_ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
-	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
-	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
-	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"), *_ltc_volume_adjustment);
 
-	Gtkmm2ext::UI::instance()->set_tip
-		(_ltc_volume_slider->tip_widget(),
-		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
+#ifdef ENABLE_NLS
 
-	add_option (_("Transport/Sync"), _ltc_volume_slider);
+	add_option (_("General/Translation"), new OptionEditorHeading (_("Internationalization")));
+
+	bo = new BoolOption (
+			"enable-translation",
+			_("Use translations"),
+			sigc::ptr_fun (ARDOUR::translations_are_enabled),
+			sigc::ptr_fun (ARDOUR::set_translations_enabled)
+			);
+
+	bo->set_note (string_compose (_("These settings will only take effect after %1 is restarted (if available for your language preferences)."), PROGRAM_NAME));
+
+	add_option (_("General/Translation"), bo);
+
+	_l10n = new ComboOption<ARDOUR::LocaleMode> (
+		"locale-mode",
+		_("Localization"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_locale_mode),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_locale_mode)
+		);
+
+	_l10n->add (ARDOUR::SET_LC_ALL, _("Set complete locale"));
+	_l10n->add (ARDOUR::SET_LC_MESSAGES, _("Enable only message translation"));
+	_l10n->add (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC, _("Translate messages and format numeric format"));
+	_l10n->set_note (_("This setting is provided for plugin compatibility. e.g. some plugins on some systems expect the decimal point to be a dot."));
+
+	add_option (_("General/Translation"), _l10n);
+	parameter_changed ("enable-translation");
+#endif // ENABLE_NLS
+
 
 	/* EDITOR */
+
+	add_option (_("Editor"), new OptionEditorHeading (_("General")));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
-		     _("Make rubberband selection rectangle snap to the grid"),
+		     _("Snap rubberband to grid"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
 
 	bo = new BoolOption (
 		     "name-new-markers",
-		     _("Name new markers"),
+		     _("Prompt for new marker names"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
 		);
@@ -2502,7 +2325,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them"));
 
-	add_option (S_("Editor"),
+	add_option (_("Editor"),
 	     new BoolOption (
 		     "draggable-playhead",
 		     _("Allow dragging of playhead"),
@@ -2510,36 +2333,21 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "show-editor-meter",
-		     _("Display master-meter in the toolbar"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
-		     ));
+	if (!Profile->get_mixbus()) {
 
-if (!Profile->get_mixbus()) {
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "show-zoom-tools",
-			    _("Show zoom toolbar (if torn off)"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
-			    ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "use-mouse-position-as-zoom-focus-on-scroll",
-			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
-			    ));
-}  // !mixbus
+		add_option (_("Editor"),
+				new BoolOption (
+					"use-mouse-position-as-zoom-focus-on-scroll",
+					_("Zoom to mouse position when zooming with scroll wheel"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
+					));
+	}  // !mixbus
 
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "use-time-rulers-to-zoom-with-vertical-drag",
-			    _("Use time rulers area to zoom when clicking and dragging vertically"),
+			    _("Zoom with vertical drag in rulers"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
 			    ));
@@ -2547,7 +2355,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "use-double-click-to-zoom-to-selection",
-			    _("Use double mouse click to zoom to selection"),
+			    _("Double click zooms to selection"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_double_click_to_zoom_to_selection),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_double_click_to_zoom_to_selection)
 			    ));
@@ -2606,12 +2414,11 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), fadeshape);
 
-
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
-		     _("Regions in active edit groups are edited together"),
+		     _("Regions in edit groups are edited together"),
 		     _("whenever they overlap in time"),
-		     _("only if they have identical length, position and origin"),
+		     _("only if they have identical length and position"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     );
@@ -2647,60 +2454,140 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"), rsas);
 
-	add_option (_("Editor/Waveforms"), new OptionEditorHeading (_("Waveforms")));
+	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
+	add_option (_("Editor/Modifiers"), new KeyboardOptions);
+	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
 
-if (!Profile->get_mixbus()) {
-	add_option (_("Editor/Waveforms"),
-	     new BoolOption (
-		     "show-waveforms",
-		     _("Show waveforms in regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
-		     ));
-}  // !mixbus
+	/* MIXER -- SOLO AND MUTE */
 
-	add_option (_("Editor/Waveforms"),
-	     new BoolOption (
-		     "show-waveforms-while-recording",
-		     _("Show waveforms for audio while it is being recorded"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
-		     ));
+	add_option (_("Mixer"), new OptionEditorHeading (_("Solo")));
 
-	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
-		"waveform-scale",
-		_("Waveform scale"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
+	_solo_control_is_listen_control = new BoolOption (
+		"solo-control-is-listen-control",
+		_("Solo controls are Listen controls"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
 		);
 
-	wfs->add (Linear, _("linear"));
-	wfs->add (Logarithmic, _("logarithmic"));
+	add_option (_("Mixer"), _solo_control_is_listen_control);
 
-	add_option (_("Editor/Waveforms"), wfs);
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
+		     ));
 
-	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
-		"waveform-shape",
-		_("Waveform shape"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "show-solo-mutes",
+		     _("Show solo muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "solo-mute-override",
+		     _("Soloing overrides muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     ));
+
+	add_option (_("Mixer"),
+	     new FaderOption (
+		     "solo-mute-gain",
+		     _("Solo-in-place mute cut (dB)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
+		     ));
+
+	_listen_position = new ComboOption<ListenPosition> (
+		"listen-position",
+		_("Listen Position"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
 
-	wfsh->add (Traditional, _("traditional"));
-	wfsh->add (Rectified, _("rectified"));
+	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
+	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
 
-	add_option (_("Editor/Waveforms"), wfsh);
+	add_option (_("Mixer"), _listen_position);
 
-	add_option (_("Editor/Waveforms"), new ClipLevelOptions ());
+	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
+		"pfl-position",
+		_("PFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
+		);
+
+	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
+	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
+
+	add_option (_("Mixer"), pp);
+
+	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
+		"afl-position",
+		_("AFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
+		);
+
+	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
+
+	add_option (_("Mixer"), pa);
+
+	add_option (_("Mixer"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-pre-fader",
+		     _("Mute affects pre-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-post-fader",
+		     _("Mute affects post-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-control-outs",
+		     _("Mute affects control outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
+		     ));
+
+	add_option (_("Mixer"),
+	     new BoolOption (
+		     "mute-affects-main-outs",
+		     _("Mute affects main outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
+		     ));
 
 
-	/* AUDIO */
+	if (!ARDOUR::Profile->get_mixbus()) {
+		add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
+		add_option (_("Mixer"),
+				new BoolOption (
+					"link-send-and-route-panner",
+					_("Link panners of Aux and External Sends with main panner by default"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+					));
+	}
 
-	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
+	/* Signal Flow */
 
-	add_option (_("Audio"), new BufferingOptions (_rc_config));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Monitoring")));
 
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
@@ -2709,73 +2596,84 @@ if (!Profile->get_mixbus()) {
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-        if (AudioEngine::instance()->port_engine().can_monitor_input()) {
-                mm->add (HardwareMonitoring, _("via Audio Driver"));
-        }
+	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
+		mm->add (HardwareMonitoring, _("via Audio Driver"));
+	}
 
 	string prog (PROGRAM_NAME);
 	boost::algorithm::to_lower (prog);
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
-	add_option (_("Audio"), mm);
+	add_option (_("Signal Flow"), mm);
 
-	add_option (_("Audio"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "tape-machine-mode",
 		     _("Tape machine mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
-		     ));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
-if (!Profile->get_mixbus()) {
-
-	add_option (_("Audio"),
-		    new BoolOption (
-			    "auto-connect-standard-busses",
-			    _("Auto-connect master/monitor busses"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
-			    ));
-
-	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
-		"input-auto-connect",
-		_("Connect track inputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
-		);
-
-	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
-	iac->add (ManualConnect, _("manually"));
-
-	add_option (_("Audio"), iac);
-
-	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
-		"output-auto-connect",
-		_("Connect track and bus outputs"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
-		);
-
-	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
-	oac->add (AutoConnectMaster, _("automatically to master bus"));
-	oac->add (ManualConnect, _("manually"));
-
-	add_option (_("Audio"), oac);
-
-	bo = new BoolOption (
-			"strict-io",
-			_("Use 'Strict-I/O' for new tracks or Busses"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
-			);
-
-	add_option (_("Audio"), bo);
+		     );
+	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input if the transport is stopped."),
+					PROGRAM_NAME));
 
-}  // !mixbus
+	if (!Profile->get_mixbus()) {
+
+		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
+
+		add_option (_("Signal Flow"),
+				new BoolOption (
+					"auto-connect-standard-busses",
+					_("Auto-connect master/monitor busses"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+					));
+
+		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
+				"input-auto-connect",
+				_("Connect track inputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
+				);
+
+		iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
+		iac->add (ManualConnect, _("manually"));
+
+		add_option (_("Signal Flow"), iac);
+
+		ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
+				"output-auto-connect",
+				_("Connect track and bus outputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
+				);
+
+		oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
+		oac->add (AutoConnectMaster, _("automatically to master bus"));
+		oac->add (ManualConnect, _("manually"));
+
+		add_option (_("Signal Flow"), oac);
+
+		bo = new BoolOption (
+				"strict-io",
+				_("Use 'Strict-I/O' for new tracks or Busses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
+				);
+
+		add_option (_("Signal Flow"), bo);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
+	}  // !mixbus
+
+
+	/* AUDIO */
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
+
+	add_option (_("Audio"), new BufferingOptions (_rc_config));
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
@@ -2844,134 +2742,9 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
 		     ));
 
-	/* SOLO AND MUTE */
+	/* MIDI */
 
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Solo")));
-
-	_solo_control_is_listen_control = new BoolOption (
-		"solo-control-is-listen-control",
-		_("Solo controls are Listen controls"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
-		);
-
-	add_option (_("Solo & mute"), _solo_control_is_listen_control);
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "exclusive-solo",
-		     _("Exclusive solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "show-solo-mutes",
-		     _("Show solo muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "solo-mute-override",
-		     _("Soloing overrides muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new FaderOption (
-		     "solo-mute-gain",
-		     _("Solo-in-place mute cut (dB)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
-		     ));
-
-	_listen_position = new ComboOption<ListenPosition> (
-		"listen-position",
-		_("Listen Position"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
-		);
-
-	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
-	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
-
-	add_option (_("Solo & mute"), _listen_position);
-
-	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
-		"pfl-position",
-		_("PFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
-		);
-
-	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
-	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
-
-	add_option (_("Solo & mute"), pp);
-
-	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
-		"afl-position",
-		_("AFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
-		);
-
-	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
-	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
-
-	add_option (_("Solo & mute"), pa);
-
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Default track / bus muting options")));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-pre-fader",
-		     _("Mute affects pre-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-post-fader",
-		     _("Mute affects post-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-control-outs",
-		     _("Mute affects control outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
-		     ));
-
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "mute-affects-main-outs",
-		     _("Mute affects main outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
-		     ));
-
-
-if (!ARDOUR::Profile->get_mixbus()) {
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
-	add_option (_("Solo & mute"),
-	     new BoolOption (
-		     "link-send-and-route-panner",
-		     _("Link panners of Aux and External Sends with main panner by default"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-		     ));
-}
-
-	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
+	add_option (_("MIDI"), new OptionEditorHeading (_("Buffering")));
 
 	add_option (_("MIDI"),
 		    new SpinOption<float> (
@@ -2979,9 +2752,11 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			    _("MIDI read-ahead time (seconds)"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
-			    0.1, 10, 0.1, 1,
-			    "", 1.0, 1
+			    0.1, 10, 0.05, 1,
+			    "", 1.0, 2
 			    ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
@@ -2992,21 +2767,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     -1, 65536, 1, 10
 		     ));
 
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "display-first-midi-bank-as-zero",
-			    _("Display first MIDI bank/program as 0"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
-			    ));
-
-	add_option (_("MIDI"),
-	     new BoolOption (
-		     "never-display-periodic-midi",
-		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
-		     ));
+	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),
 	     new BoolOption (
@@ -3016,94 +2777,9 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
 		     ));
 
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "midi-feedback",
-			    _("Send MIDI control feedback"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
-			    ));
-
-	add_option (_("MIDI/Ports"),
-		    new BoolOption (
-			    "get-midi-input-follows-selection",
-			    _("MIDI input follows MIDI track selection"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
-			    ));
-
-	add_option (_("MIDI/Ports"), new MidiPortOptions ());
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Clock")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-midi-clock",
-			    _("Send MIDI Clock"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
-			    ));
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-mtc",
-			    _("Send MIDI Time Code"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-		    new SpinOption<int> (
-			    "mtc-qf-speed-tolerance",
-			    _("Percentage either side of normal transport speed to transmit MTC"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
-			    0, 20, 1, 5
-			    ));
-
-	add_option (_("MIDI/Sync"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "mmc-control",
-			    _("Obey MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-		    new BoolOption (
-			    "send-mmc",
-			    _("Send MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
-			    ));
-
-	add_option (_("MIDI/Sync"),
-	     new SpinOption<uint8_t> (
-		     "mmc-receive-device-id",
-		     _("Inbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 128, 1, 10
-		     ));
-
-	add_option (_("MIDI/Sync"),
-	     new SpinOption<uint8_t> (
-		     "mmc-send-device-id",
-		     _("Outbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
-		     0, 128, 1, 10
-		     ));
-
-	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
-
 	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
 		"midi-audition-synth-uri",
-		_("Midi Audition Synth (LV2)"),
+		_("MIDI Audition Synth (LV2)"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
 		);
@@ -3118,382 +2794,22 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 		if (!(*i)->is_instrument()) continue;
 		if ((*i)->type != ARDOUR::LV2) continue;
-		audition_synth->add((*i)->unique_id, (*i)->name);
+		if ((*i)->name.length() > 46) {
+			audition_synth->add((*i)->unique_id, (*i)->name.substr (0, 44) + "...");
+		} else {
+			audition_synth->add((*i)->unique_id, (*i)->name);
+		}
 	}
 #endif
 
 	add_option (_("MIDI"), audition_synth);
 
-	/* USER INTERACTION */
+	/* Click */
 
-	if (
-#ifdef PLATFORM_WINDOWS
-			true
-#else
-			getenv ("ARDOUR_BUNDLED")
-#endif
-	   )
-	{
-		add_option (_("User interaction"),
-			    new BoolOption (
-				    "enable-translation",
-				    string_compose (_("Use translations of %1 messages\n"
-						      "   <i>(requires a restart of %1 to take effect)</i>\n"
-						      "   <i>(if available for your language preferences)</i>"), PROGRAM_NAME),
-				    sigc::ptr_fun (ARDOUR::translations_are_enabled),
-				    sigc::ptr_fun (ARDOUR::set_translations_enabled)));
-	}
+	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
+	add_option (_("Metronome"), new ClickOptions (_rc_config));
 
-	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
-
-	add_option (_("User interaction"), new KeyboardOptions);
-
-	/* Control Surfaces */
-
-	add_option (_("Control Surfaces"), new ControlSurfacesOptions);
-
-	/* VIDEO Timeline */
-	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
-
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
-	add_option (_("Plugins"),
-			new RcActionButton (_("Scan for Plugins"),
-				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
-
-#endif
-
-	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
-
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
-	bo = new BoolOption (
-			"show-plugin-scan-window",
-			_("Always Display Plugin Scan Progress"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_plugin_scan_window),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_plugin_scan_window)
-			);
-	add_option (_("Plugins"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
-#endif
-
-	bo = new BoolOption (
-		"plugins-stop-with-transport",
-		_("Silence plugins when the transport is stopped"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
-		);
-	add_option (_("Plugins"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
-
-	bo = new BoolOption (
-		"new-plugins-active",
-			_("Make new plugins active"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
-			);
-	add_option (_("Plugins"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
-
-#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
-	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Scan for Plugins"),
-				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
-
-#if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
-	bo = new BoolOption (
-			"",
-			_("Enable Mac VST support (requires restart or re-scan)"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
-			);
-	add_option (_("Plugins/VST"), bo);
-#endif
-
-	bo = new BoolOption (
-			"discover-vst-on-start",
-			_("Scan for [new] VST Plugins on Application Start"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_vst_on_start),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_vst_on_start)
-			);
-	add_option (_("Plugins/VST"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
-
-#ifdef WINDOWS_VST_SUPPORT
-	// currently verbose logging is only implemented for Windows VST.
-	bo = new BoolOption (
-			"verbose-plugin-scan",
-			_("Verbose Plugin Scan"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
-			);
-	add_option (_("Plugins/VST"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
-#endif
-
-	add_option (_("Plugins/VST"), new VstTimeOutSliderOption (_rc_config));
-
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_cache),
-				_("VST Cache:")));
-
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_blacklist),
-				_("VST Blacklist:")));
-#endif
-
-#ifdef LXVST_SUPPORT
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Edit"),
-				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
-			_("Linux VST Path:")));
-
-	add_option (_("Plugins/VST"),
-			new RcConfigDisplay (
-				"plugin-path-lxvst",
-				_("Path:"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
-				0));
-#endif
-
-#ifdef WINDOWS_VST_SUPPORT
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Edit"),
-				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
-			_("Windows VST Path:")));
-	add_option (_("Plugins"),
-			new RcConfigDisplay (
-				"plugin-path-vst",
-				_("Path:"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
-				';'));
-#endif
-
-#ifdef AUDIOUNIT_SUPPORT
-
-	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
-	add_option (_("Plugins/Audio Unit"),
-			new RcActionButton (_("Scan for Plugins"),
-				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
-
-	bo = new BoolOption (
-			"discover-audio-units",
-			_("Scan for [new] AudioUnit Plugins on Application Start"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
-			);
-	add_option (_("Plugins/Audio Unit"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
-
-	add_option (_("Plugins/Audio Unit"),
-			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_au_cache),
-				_("AU Cache:")));
-
-	add_option (_("Plugins/Audio Unit"),
-			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_au_blacklist),
-				_("AU Blacklist:")));
-#endif
-
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
-	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
-	add_option (_("Plugins"),
-	     new BoolOption (
-		     "open-gui-after-adding-plugin",
-		     _("Automatically open the plugin GUI when adding a new plugin"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
-		     ));
-
-#if (defined LV2_SUPPORT && defined LV2_EXTENDED)
-	add_option (_("Plugins"),
-	     new BoolOption (
-		     "show-inline-display-by-default",
-		     _("Show Plugin Inline Display on Mixerstrip by default"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
-		     ));
-
-	_plugin_prefer_inline = new BoolOption (
-			"prefer-inline-over-gui",
-			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
-			);
-	add_option (_("Plugins"), _plugin_prefer_inline);
-#endif
-
-	add_option (_("Plugins"), new OptionEditorHeading (_("Instrument")));
-
-	bo = new BoolOption (
-			"ask-replace-instrument",
-			_("Ask to replace existing instrument plugin"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_replace_instrument),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_replace_instrument)
-			);
-	add_option (_("Plugins"), bo);
-
-	bo = new BoolOption (
-			"ask-setup_instrument",
-			_("Interactively configure instrument plugins on insert"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_setup_instrument),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_setup_instrument)
-			);
-	add_option (_("Plugins"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
-
-#endif
-
-	/* INTERFACE */
-
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	BoolOption* bgc = new BoolOption (
-		"cairo-image-surface",
-		_("Disable Graphics Hardware Acceleration (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
-		);
-
-	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
-				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (S_("Preferences|GUI"), bgc);
-#endif
-
-#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
-	BoolOption* bgo = new BoolOption (
-		"buggy-gradients",
-		_("Possibly improve slow graphical performance (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
-		);
-
-	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (S_("Preferences|GUI"), bgo);
-#endif
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "use-wm-visibility",
-		     _("Use Window Manager/Desktop visibility information"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "widget-prelight",
-		     _("Graphically indicate mouse pointer hovering over various widgets"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "use-tooltips",
-		     _("Show tooltips if mouse hovers over a control"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_tooltips),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "show-name-highlight",
-		     _("Use name highlight bars in region displays (requires a restart)"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
-		    new BoolOption (
-			    "super-rapid-clock-update",
-			    _("Update transport clock display at FPS instead of every 100ms"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
-			    ));
-
-
-#ifndef __APPLE__
-	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
-#endif
-
-	/* Image cache size */
-
-	Gtk::Adjustment *ics = manage (new Gtk::Adjustment(0, 1, 1024, 10)); /* 1 MB to 1GB in steps of 10MB */
-	HSliderOption *sics = new HSliderOption("waveform-cache-size",
-						_("Waveform image cache size (megabytes)"),
-						ics,
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size)
-			);
-	sics->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip
-		(sics->tip_widget(),
-		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
-	add_option (S_("Preferences|GUI"), sics);
-
-if (!ARDOUR::Profile->get_mixbus()) {
-	/* Lock GUI timeout */
-
-	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
-	HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
-						_("Lock timeout (seconds)"),
-						lts,
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_lock_gui_after_seconds),
-						sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_lock_gui_after_seconds)
-			);
-	slts->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip
-		(slts->tip_widget(),
-		 _("Lock GUI after this many idle seconds (zero to never lock)"));
-	add_option (S_("Preferences|GUI"), slts);
-} // !mixbus
-
-	/* The names of these controls must be the same as those given in MixerStrip
-	   for the actual widgets being controlled.
-	*/
-	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
-	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
-	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
-	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
-	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
-	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
-	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
-
-	add_option (
-		S_("Preferences|GUI"),
-		new VisibilityOption (
-			_("Mixer Strip"),
-			&_mixer_strip_visibility,
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_mixer_strip_visibility),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_mixer_strip_visibility)
-			)
-		);
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "default-narrow_ms",
-		     _("Use narrow strips in the mixer by default"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
-		     ));
-
-	add_option (S_("Preferences|GUI"),
-			new ColumVisibilityOption (
-				"action-table-columns", _("Action Script Button Visibility"), 4,
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
-				)
-			);
+	/* Meters */
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
@@ -3574,15 +2890,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|Metering"), mvu);
 
-	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak threshold [dBFS]"),
-			mpk,
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak)
-			);
-
-
 	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
 		"meter-type-master",
 		_("Default Meter Type for Master Bus"),
@@ -3629,38 +2936,18 @@ if (!ARDOUR::Profile->get_mixbus()) {
 
 	add_option (S_("Preferences|Metering"), mtt);
 
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
+			);
 
-	Gtkmm2ext::UI::instance()->set_tip
-		(mpks->tip_widget(),
-		 _("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|Metering"), mpks);
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "meter-style-led",
-		     _("LED meter style"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
-		     ));
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Editor Meters")));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "show-track-meters",
-		     _("Show meters on tracks in the editor"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
-		     ));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "editor-stereo-only-meters",
-		     _("Show at most stereo meters in the track-header"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
-		     ));
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
 
@@ -3672,12 +2959,923 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
 		     ));
 
+	/* TRANSPORT & Sync */
+
+	add_option (_("Transport"), new OptionEditorHeading (_("General")));
+
+	bo = new BoolOption (
+		     "stop-at-session-end",
+		     _("Stop at the end of the session"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
+							      "when it reaches the current session end marker\n\n"
+							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
+							    PROGRAM_NAME));
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption (
+		     "latched-record-enable",
+		     _("Keep record-enable engaged on stop"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
+		     );
+	add_option (_("Transport"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> master record will remain engaged when the transport transitions to stop.\n<b>When disabled</b> master record will be disabled when the transport transitions to stop."));
+
+	bo = new BoolOption (
+		     "disable-disarm-during-roll",
+		     _("Disable per-track record disarm while rolling"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take."));
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption (
+		     "quieten_at_speed",
+		     _("12dB gain reduction during fast-forward and fast-rewind"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> rhis will reduce the unpleasant increase in perceived volume "
+				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
+	add_option (_("Transport"), bo);
+
+	ComboOption<float>* psc = new ComboOption<float> (
+		     "preroll-seconds",
+		     _("Preroll"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_preroll_seconds),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_preroll_seconds)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (psc->tip_widget(),
+					    (_("The amount of preroll to apply when <b>Play with Preroll</b> or <b>Record with Preroll</b>is initiated.\n\n"
+					       "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead position when a region is selected or trimmed.")));
+	psc->add (-4.0, _("4 Bars"));
+	psc->add (-2.0, _("2 Bars"));
+	psc->add (-1.0, _("1 Bar"));
+	psc->add (0.0, _("0 (no pre-roll)"));
+	psc->add (0.1, _("0.1 second"));
+	psc->add (0.25, _("0.25 second"));
+	psc->add (0.5, _("0.5 second"));
+	psc->add (1.0, _("1.0 second"));
+	psc->add (2.0, _("2.0 seconds"));
+	add_option (_("Transport"), psc);
+
+
+	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
+
+	bo = new BoolOption (
+		     "loop-is-mode",
+		     _("Play loop is a transport mode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_is_mode)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
+					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption (
+		     "seamless-loop",
+		     _("Do seamless looping (not possible when slaved to MTC, LTC etc)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
+							      "preventing any need to do a transport locate at the end of the loop\n\n"
+							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
+							      "which will often cause a small click or delay"), PROGRAM_NAME));
+	add_option (_("Transport"), bo);
+
+	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) Handling")));
+	bo = new BoolOption (
+		     "stop-recording-on-xrun",
+		     _("Stop recording when an xrun occurs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
+							    PROGRAM_NAME));
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption (
+		     "create-xrun-marker",
+		     _("Create markers where xruns occur"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
+		     );
+	add_option (_("Transport"), bo);
+
+
+	/* SYNC */
+
+	add_option (_("Sync"), new OptionEditorHeading (_("External Syncronization")));
+
+	_sync_source = new ComboOption<SyncSource> (
+		"sync-source",
+		_("External timecode source"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_source),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
+		);
+
+	add_option (_("Sync"), _sync_source);
+
+	_sync_framerate = new BoolOption (
+		     "timecode-sync-frame-rate",
+		     _("Match session video frame rate to external timecode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip
+		(_sync_framerate->tip_widget(),
+		 string_compose (_("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
+				   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
+				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
+				   "timecode standard and the session standard."), PROGRAM_NAME));
+
+	add_option (_("Sync"), _sync_framerate);
+
+	_sync_genlock = new BoolOption (
+		"timecode-source-is-synced",
+		_("Sync-lock timecode to clock (disable drift compensation)"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
+		);
+	Gtkmm2ext::UI::instance()->set_tip
+		(_sync_genlock->tip_widget(),
+		 string_compose (_("<b>When enabled</b> %1 will never varispeed when slaved to external timecode. "
+				   "Sync Lock indicates that the selected external timecode source shares clock-sync "
+				   "(Black &amp; Burst, Wordclock, etc) with the audio interface. "
+				   "This option disables drift compensation. The transport speed is fixed at 1.0. "
+				   "Vari-speed LTC will be ignored and cause drift."
+				   "\n\n"
+				   "<b>When disabled</b> %1 will compensate for potential drift, regardless if the "
+				   "timecode sources shares clock sync."
+				  ), PROGRAM_NAME));
+
+
+	add_option (_("Sync"), _sync_genlock);
+
+	_sync_source_2997 = new BoolOption (
+		"timecode-source-2997",
+		_("Lock to 29.9700 fps instead of 30000/1001"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_2997),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_2997)
+		);
+	Gtkmm2ext::UI::instance()->set_tip
+		(_sync_source_2997->tip_widget(),
+		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
+			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
+			 "drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
+			 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
+			 "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
+			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
+			 ));
+
+	add_option (_("Sync"), _sync_source_2997);
+
+	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Reader")));
+
+	_ltc_port = new ComboStringOption (
+		"ltc-source-port",
+		_("LTC incoming port"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
+		);
+
+	vector<string> physical_inputs;
+	physical_inputs.push_back (_("None"));
+	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
+	_ltc_port->set_popdown_strings (physical_inputs);
+
+	populate_sync_options ();
+	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
+
+	add_option (_("Sync/LTC"), _ltc_port);
+
+	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
+
+	add_option (_("Sync/LTC"),
+		    new BoolOption (
+			    "send-ltc",
+			    _("Enable LTC generator"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_ltc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_ltc)
+			    ));
+
+	_ltc_send_continuously = new BoolOption (
+			    "ltc-send-continuously",
+			    _("Send LTC while stopped"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
+			    );
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_send_continuously->tip_widget(),
+		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
+	add_option (_("Sync/LTC"), _ltc_send_continuously);
+
+	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level [dBFS]"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_output_volume),
+					-50, 0, .5, 5,
+					.05, true);
+
+	Gtkmm2ext::UI::instance()->set_tip
+		(_ltc_volume_slider->tip_widget(),
+		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
+
+	add_option (_("Sync/LTC"), _ltc_volume_slider);
+
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-midi-clock",
+			    _("Enable Mclk generator"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
+			    ));
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-mtc",
+			    _("Enable MTC Generator"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+		    new SpinOption<int> (
+			    "mtc-qf-speed-tolerance",
+			    _("Percentage either side of normal transport speed to transmit MTC"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
+			    0, 20, 1, 5
+			    ));
+
+	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "mmc-control",
+			    _("Respond to MMC commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+		    new BoolOption (
+			    "send-mmc",
+			    _("Send MMC commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
+			    ));
+
+	add_option (_("Sync/MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-receive-device-id",
+		     _("Inbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
+		     0, 128, 1, 10
+		     ));
+
+	add_option (_("Sync/MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-send-device-id",
+		     _("Outbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
+		     0, 128, 1, 10
+		     ));
+
+
+	/* Control Surfaces */
+
+	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
+
+	/* MIDI PORTs */
+	add_option (_("MIDI Ports"), new OptionEditorHeading (_("MIDI Port Options")));
+
+	add_option (_("MIDI Ports"),
+		    new BoolOption (
+			    "get-midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI Ports"), new MidiPortOptions ());
+	add_option (_("MIDI Ports"), new OptionEditorBlank ());
+
+	/* PLUGINS */
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
+	add_option (_("Plugins"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+
+#endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+	bo = new BoolOption (
+			"show-plugin-scan-window",
+			_("Always Display Plugin Scan Progress"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_plugin_scan_window),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_plugin_scan_window)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
+#endif
+
+	bo = new BoolOption (
+		"plugins-stop-with-transport",
+		_("Silence plugins when the transport is stopped"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
+		);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
+
+	bo = new BoolOption (
+		"new-plugins-active",
+			_("Make new plugins active"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
+
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
+#if 0
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
+
+#if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
+	bo = new BoolOption (
+			"",
+			_("Enable Mac VST support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+	bo = new BoolOption (
+			"discover-vst-on-start",
+			_("Scan for [new] VST Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_vst_on_start),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_vst_on_start)
+			);
+	add_option (_("Plugins/VST"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
+
+#ifdef WINDOWS_VST_SUPPORT
+	// currently verbose logging is only implemented for Windows VST.
+	bo = new BoolOption (
+			"verbose-plugin-scan",
+			_("Verbose Plugin Scan"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
+			);
+	add_option (_("Plugins/VST"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
+#endif
+
+	add_option (_("Plugins/VST"), new VstTimeOutSliderOption (_rc_config));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_cache),
+				_("VST Cache:")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_blacklist),
+				_("VST Blacklist:")));
+#endif
+
+#ifdef LXVST_SUPPORT
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Edit"),
+				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
+			_("Linux VST Path:")));
+
+	add_option (_("Plugins/VST"),
+			new RcConfigDisplay (
+				"plugin-path-lxvst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
+				0));
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Edit"),
+				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+			_("Windows VST Path:")));
+	add_option (_("Plugins/VST"),
+			new RcConfigDisplay (
+				"plugin-path-vst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+				';'));
+#endif
+
+#ifdef AUDIOUNIT_SUPPORT
+
+	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
+#if 0
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
+
+	bo = new BoolOption (
+			"discover-audio-units",
+			_("Scan for [new] AudioUnit Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
+			);
+	add_option (_("Plugins/Audio Unit"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
+
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_au_cache),
+				_("AU Cache:")));
+
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_au_blacklist),
+				_("AU Blacklist:")));
+#endif
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
+	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "open-gui-after-adding-plugin",
+		     _("Automatically open the plugin GUI when adding a new plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
+		     ));
+
+#if (defined LV2_SUPPORT && defined LV2_EXTENDED)
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "show-inline-display-by-default",
+		     _("Show Plugin Inline Display on Mixerstrip by default"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
+		     ));
+
+	_plugin_prefer_inline = new BoolOption (
+			"prefer-inline-over-gui",
+			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
+			);
+	add_option (_("Plugins"), _plugin_prefer_inline);
+#endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("Instrument")));
+
+	bo = new BoolOption (
+			"ask-replace-instrument",
+			_("Ask to replace existing instrument plugin"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_replace_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_replace_instrument)
+			);
+	add_option (_("Plugins"), bo);
+
+	bo = new BoolOption (
+			"ask-setup_instrument",
+			_("Interactively configure instrument plugins on insert"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_setup_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_setup_instrument)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
+
+#endif
+	add_option (_("Plugins"), new OptionEditorBlank ());
+
+	/* INTERFACE */
+#if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
+#endif
+
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	BoolOption* bgc = new BoolOption (
+		"cairo-image-surface",
+		_("Disable Graphics Hardware Acceleration (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
+				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), bgc);
+#endif
+
+#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
+	BoolOption* bgo = new BoolOption (
+		"buggy-gradients",
+		_("Possibly improve slow graphical performance (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), bgo);
+#endif
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphical User Interface")));
+
+	add_option (_("Appearance"),
+	     new BoolOption (
+		     "widget-prelight",
+		     _("Highlight widgets on mouseover"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
+		     ));
+
+	add_option (_("Appearance"),
+	     new BoolOption (
+		     "use-tooltips",
+		     _("Show tooltips if mouse hovers over a control"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_tooltips),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
+		     ));
+
+	bo = new BoolOption (
+			"super-rapid-clock-update",
+			_("Update clocks at TC Frame rate"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
+				"<b>When disabled</b> clock displays are updated only every 100ms."
+			 ));
+	add_option (_("Appearance"), bo);
+
+	add_option (_("Appearance"),
+			new BoolOption (
+				"blink-rec-arm",
+				_("Blink Rec-Arm buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_rec_arm),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
+				));
+
+
+#ifndef __APPLE__
+	/* font scaling does nothing with GDK/Quartz */
+	add_option (_("Appearance"), new FontScalingOptions ());
+#endif
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "show-name-highlight",
+		     _("Use name highlight bars in region displays (requires a restart)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"color-regions-using-track-color",
+			_("Region color follows track color"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
+			));
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
+
+	if (!Profile->get_mixbus()) {
+		add_option (_("Appearance/Editor"),
+				new BoolOption (
+					"show-waveforms",
+					_("Show waveforms in regions"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
+					));
+	}  // !mixbus
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms while recording"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"show-waveform-clipping",
+			_("Show waveform clipping"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
+			));
+
+	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
+
+	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
+		"waveform-scale",
+		_("Waveform scale"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
+		);
+
+	wfs->add (Linear, _("linear"));
+	wfs->add (Logarithmic, _("logarithmic"));
+
+	add_option (_("Appearance/Editor"), wfs);
+
+	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
+		"waveform-shape",
+		_("Waveform shape"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
+		);
+
+	wfsh->add (Traditional, _("traditional"));
+	wfsh->add (Rectified, _("rectified"));
+
+	add_option (_("Appearance/Editor"), wfsh);
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Editor Meters")));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "show-track-meters",
+		     _("Show meters in track headers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "editor-stereo-only-meters",
+		     _("Limit track header meters to stereo"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
+		     ));
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
+
+	add_option (_("Appearance/Editor"),
+		    new BoolOption (
+			    "display-first-midi-bank-as-zero",
+			    _("Display first MIDI bank/program as 0"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
+			    ));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "never-display-periodic-midi",
+		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
+		     ));
+
+	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
+
+	/* The names of these controls must be the same as those given in MixerStrip
+	   for the actual widgets being controlled.
+	*/
+	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
+	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
+	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
+	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
+	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
+	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
+	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
+
+	add_option (_("Appearance/Mixer"),
+		new VisibilityOption (
+			_("Mixer Strip"),
+			&_mixer_strip_visibility,
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_mixer_strip_visibility),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_mixer_strip_visibility)
+			)
+		);
+
+	add_option (_("Appearance/Mixer"),
+	     new BoolOption (
+		     "default-narrow_ms",
+		     _("Use narrow strips in the mixer by default"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
+		     ));
+
+	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
+
+	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-recpunch",
+		     _("Display Record/Punch Options"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_recpunch),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_recpunch)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-monitoring",
+		     _("Display Monitor Options"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitoring),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitoring)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-selclock",
+		     _("Display Selection Clock"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
+		     ));
+
+	if (!ARDOUR::Profile->get_small_screen()) {
+		add_option (_("Appearance/Toolbar"),
+				new BoolOption (
+					"show-secondary-clock",
+					_("Display Secondary Clock"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_secondary_clock),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
+					));
+	}
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-mini-timeline",
+		     _("Display Navigation Timeline"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-editor-meter",
+		     _("Display Master Level Meter"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+			new ColumVisibilityOption (
+				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
+				)
+			);
+	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
+
+
+	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
+
+	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary\n\
+with each version of your OS, and the preferences that you've set in your OS.\n\n\
+You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
+These settings will only take effect after %1 is restarted.\n\
+	"), PROGRAM_NAME));
+
 	/* and now the theme manager */
 
-	ThemeManager* tm = manage (new ThemeManager);
-	add_page (_("Theme"), *tm);
+	add_option (_("Appearance/Theme"), new OptionEditorHeading (_("Theme")));
 
-	add_option (_("Theme/Colors"), new ColorThemeManager);
+	add_option (_("Appearance/Theme"), new BoolOption (
+				"flat-buttons",
+				_("Draw \"flat\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
+				));
+
+	add_option (_("Appearance/Theme"), new BoolOption (
+				"meter-style-led",
+				_("LED meter style"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
+				));
+
+
+	HSliderOption *gui_hs = new HSliderOption(
+			"timeline-item-gradient-depth",
+			_("Waveforms color gradient depth"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
+			0, 1.0, 0.05
+			);
+	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+	add_option (_("Appearance/Theme"), gui_hs);
+
+	gui_hs = new HSliderOption(
+			"timeline-item-gradient-depth",
+			_("Timeline item gradient depth"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_timeline_item_gradient_depth),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_timeline_item_gradient_depth),
+			0, 1.0, 0.05
+			);
+	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+	add_option (_("Appearance/Theme"), gui_hs);
+
+	vector<string> icon_sets = ::get_icon_sets ();
+	if (icon_sets.size() > 1) {
+		ComboOption<std::string>* io = new ComboOption<std::string> (
+				"icon-set", _("Icon Set"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
+				);
+		for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
+			io->add (*i, *i);
+		}
+		add_option (_("Appearance/Theme"), io);
+	}
+
+	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
+	add_option (_("Appearance/Colors"), new ColorThemeManager);
+	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
+
+	/* Quirks */
+
+	add_option (_("Appearance/Quirks"), quirks_head);
+
+	bo = new BoolOption (
+		     "use-wm-visibility",
+		     _("Use visibility information provided by your Window Manager/Desktop"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("If you have trouble toggling between hidden Editor and Mixer windows, try changing this setting."));
+	add_option (_("Appearance/Quirks"), bo);
+
+#ifndef __APPLE__
+	bo = new BoolOption (
+			"all-floating-windows-are-dialogs",
+			_("All floating windows are dialogs"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
+	add_option (_("Appearance/Quirks"), bo);
+
+	bo = new BoolOption (
+			"transients-follow-front",
+			_("Transient windows follow front window."),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("Make transient windows follow the front window when toggling between the editor and mixer."));
+	add_option (_("Appearance/Quirks"), bo);
+#endif
+
+	if (!Profile->get_mixbus()) {
+		bo = new BoolOption (
+				"floating-monitor-section",
+				_("Float detached monitor-section window"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
+				);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front."));
+		add_option (_("Appearance/Quirks"), bo);
+	}
+
+	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
+
+	/* VIDEO Timeline */
+	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
+	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 	Widget::show_all ();
 
@@ -3694,6 +3892,8 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		*/
 		Tabbable::set_state (*node, Stateful::loading_state_version);
 	}
+
+	set_current_page (_("General"));
 }
 
 void
@@ -3735,11 +3935,11 @@ RCOptionEditor::parameter_changed (string const & p)
 #if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
+#ifdef ENABLE_NLS
+	} else if (p == "enable-translation") {
+		_l10n->set_sensitive (ARDOUR::translations_are_enabled ());
+#endif
 	}
-}
-
-void RCOptionEditor::ltc_generator_volume_changed () {
-	_rc_config->set_ltc_output_volume (pow(10, _ltc_volume_adjustment->get_value() / 20));
 }
 
 void RCOptionEditor::plugin_scan_refresh () {
@@ -3824,6 +4024,8 @@ RCOptionEditor::use_own_window (bool and_fill_it)
 	if (win && new_window) {
 		win->set_name ("PreferencesWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Preferences"), this);
+		win->resize (1, 1);
+		win->set_resizable (false);
 	}
 
 	return win;
