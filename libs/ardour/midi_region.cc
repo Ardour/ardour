@@ -203,6 +203,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::start, _start);
 	plist.add (Properties::start_beats, _start_beats);
 	plist.add (Properties::length, _length);
+	plist.add (Properties::position, _position);
 	plist.add (Properties::beat, _beat);
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
