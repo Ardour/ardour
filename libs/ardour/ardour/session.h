@@ -1003,6 +1003,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void request_preroll_record_punch (framepos_t start, framecnt_t preroll);
 	void request_preroll_record_trim (framepos_t start, framecnt_t preroll);
+	void request_count_in_record ();
 
 	framepos_t preroll_record_punch_pos () const { return _preroll_record_punch_pos; }
 	bool preroll_record_punch_enabled () const { return _preroll_record_punch_pos >= 0; }
@@ -1930,6 +1931,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	framepos_t _preroll_record_punch_pos;
 	framecnt_t _preroll_record_trim_len;
+	bool _count_in_once;
 
 	/* main outs */
 	uint32_t main_outs;

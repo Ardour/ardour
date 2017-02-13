@@ -218,6 +218,20 @@ Session::request_preroll_record_trim (framepos_t rec_in, framecnt_t preroll)
 }
 
 void
+Session::request_count_in_record ()
+{
+	if (actively_recording ()) {
+		return;
+	}
+	if (transport_rolling()) {
+		return;
+	}
+	maybe_enable_record ();
+	_count_in_once = true;
+	request_transport_speed (1.0, true);
+}
+
+void
 Session::request_play_loop (bool yn, bool change_transport_roll)
 {
 	if (_slave && yn) {
@@ -1406,6 +1420,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 				   take care of it.
 				*/
 				_play_range = false;
+				_count_in_once = false;
 				unset_play_loop ();
 			}
 			_engine.transport_stop ();
@@ -1451,6 +1466,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 
 		if (synced_to_engine()) {
 			_engine.transport_start ();
+			_count_in_once = false;
 		} else {
 			start_transport ();
 		}
@@ -1543,6 +1559,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 void
 Session::stop_transport (bool abort, bool clear_state)
 {
+	_count_in_once = false;
 	if (_transport_speed == 0.0f) {
 		return;
 	}
@@ -1676,7 +1693,8 @@ Session::start_transport ()
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 
-		if (actively_recording() && click_data && config.get_count_in ()) {
+		if (actively_recording() && click_data && (config.get_count_in () || _count_in_once)) {
+			_count_in_once = false;
 			/* calculate count-in duration (in audio samples)
 			 * - use [fixed] tempo/meter at _transport_frame
 			 * - calc duration of 1 bar + time-to-beat before or at transport_frame
@@ -1737,6 +1755,7 @@ Session::post_transport ()
 	if (ptw & PostTransportLocate) {
 
 		if (((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (ptw & PostTransportRoll)) {
+			_count_in_once = false;
 			start_transport ();
 		} else {
 			transport_sub_state = 0;

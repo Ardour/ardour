@@ -306,6 +306,7 @@ Session::Session (AudioEngine &eng,
 	, _object_selection (-1,-1)
 	, _preroll_record_punch_pos (-1)
 	, _preroll_record_trim_len (0)
+	, _count_in_once (false)
 	, main_outs (0)
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
