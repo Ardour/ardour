@@ -75,6 +75,7 @@
       <menuitem action='ToggleRollForgetCapture'/>
       <menuitem action='Record'/>
       <menuitem action='RecordPreroll'/>
+      <menuitem action='RecordCountIn'/>
 #if 0
       <menuitem action='toggle-skip-playback'/>
 #endif

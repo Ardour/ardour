@@ -2398,6 +2398,15 @@ ARDOUR_UI::transport_rec_preroll ()
 }
 
 void
+ARDOUR_UI::transport_rec_count_in ()
+{
+	if (!_session) {
+		return;
+	}
+	editor->rec_with_count_in ();
+}
+
+void
 ARDOUR_UI::transport_rewind (int option)
 {
 	float current_transport_speed;

@@ -2670,6 +2670,11 @@ Editor::rec_with_preroll ()
 	_session->request_preroll_record_trim (ph, preroll);
 }
 
+void
+Editor::rec_with_count_in ()
+{
+	_session->request_count_in_record ();
+}
 
 void
 Editor::play_location (Location& location)

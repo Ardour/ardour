@@ -474,6 +474,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
+	act = global_actions.register_action (transport_actions, X_("RecordCountIn"), _("Record w/Count-In"), sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_count_in));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	act = global_actions.register_action (transport_actions, X_("Record"), _("Enable Record"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
