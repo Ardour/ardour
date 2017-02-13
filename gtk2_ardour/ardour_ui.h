@@ -435,8 +435,6 @@ private:
 	void setup_transport ();
 	void setup_clock ();
 
-	bool transport_expose (GdkEventExpose*);
-
 	static ARDOUR_UI *theArdourUI;
 	SessionDialog *_session_dialog;
 

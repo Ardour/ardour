@@ -266,59 +266,6 @@ ARDOUR_UI::update_clock_visibility ()
 	}
 }
 
-bool
-ARDOUR_UI::transport_expose (GdkEventExpose* ev)
-{
-return false;
-	int x0, y0;
-	Gtk::Widget* window_parent;
-	Glib::RefPtr<Gdk::Window> win = Gtkmm2ext::window_to_draw_on (transport_table, &window_parent);
-	Glib::RefPtr<Gtk::Style> style = transport_table.get_style();
-	if (!win || !style) {
-		return false;
-	}
-
-	Cairo::RefPtr<Cairo::Context> cr = transport_table.get_window()->create_cairo_context ();
-
-	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cr->clip ();
-
-	transport_table.translate_coordinates (*window_parent, 0, 0, x0, y0);
-
-	cr->rectangle (x0, y0, transport_table.get_width(), transport_table.get_height());
-	Gdk::Color bg (style->get_bg (transport_table.get_state()));
-	cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-	cr->fill ();
-
-	static const int xmargin = 2;
-	static const int ymargin = 1;
-
-	/* draw box around record-options */
-	int xx, ww, hh, uu;
-
-	punch_label.translate_coordinates (transport_table, -xmargin, 0, xx, uu); // left
-	punch_out_button.translate_coordinates (transport_table, xmargin, 0, ww, uu); // right
-	ww += punch_out_button.get_width () - xx; // width
-	hh = transport_table.get_height() - 1;
-
-	Gtkmm2ext::rounded_rectangle (cr->cobj(), x0 + xx - 0.5, y0 + 0.5, ww + 1, hh, 6);
-	cr->set_source_rgb (0, 0, 0);
-	cr->set_line_width (1.0);
-	cr->stroke ();
-
-	/* line to rec-enable */
-	int rx;
-	rec_button.translate_coordinates (transport_table, -xmargin, 0, rx, uu); // top
-	int dx = rx + rec_button.get_width() - xx;
-
-	cr->move_to (x0 + xx, 1.5 + y0 + ymargin + round (punch_in_button.get_height () * .5));
-	cr->rel_line_to (dx, 0);
-	cr->set_line_width (2.0);
-	cr->stroke ();
-
-	return false;
-}
-
 void
 ARDOUR_UI::setup_transport ()
 {
@@ -522,8 +469,6 @@ ARDOUR_UI::setup_transport ()
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);
 	transport_frame.add (*ebox);
 	ebox->add (transport_table);
-
-	transport_table.signal_expose_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::transport_expose), false);
 
 	/* transport controls sub-group */
 	click_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
