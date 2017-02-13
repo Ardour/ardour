@@ -248,7 +248,7 @@ function factory (params) return function ()
 
 		-- do the actual work
 		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false)
-		playlist:add_region (region, playhead, n_paste, false, 0)
+		playlist:add_region (region, playhead, n_paste, false, 0, false)
 
 		n_regions_created = n_regions_created + 1
 
