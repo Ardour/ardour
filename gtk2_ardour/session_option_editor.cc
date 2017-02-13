@@ -395,7 +395,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Misc"), new BoolOption (
 				"count-in",
-				_("Count in before recording"),
+				_("Always count-in when recording"),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::get_count_in),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_count_in)
 				));
