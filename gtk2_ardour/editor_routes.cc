@@ -1167,8 +1167,10 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 			 * The rows (stripables) are not actually removed from the model,
 			 * but only from the display in the DnDTreeView.
 			 * ->reorder() will fail to find the row_path.
-			 * (re-order drag -> remove row -> rync PI from TV -> notify -> sync TV from PI -> crash)
+			 * (re-order drag -> remove row -> sync PI from TV -> notify -> sync TV from PI -> crash)
 			 */
+			Unwinder<bool> uw2 (_ignore_selection_change, true);
+
 			_display.unset_model();
 			_model->reorder (neworder);
 			_display.set_model (_model);
@@ -1195,7 +1197,6 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 		}
 
 		/* step two: set the Selection (for stripables/routes) */
-
 		_editor->get_selection().set (tvl);
 	}
 
@@ -1622,153 +1623,109 @@ EditorRoutes::display_drag_data_received (const RefPtr<Gdk::DragContext>& contex
 struct ViewStripable {
 	TimeAxisView* tav;
 	boost::shared_ptr<Stripable> stripable;
-	uint32_t old_order;
 
-	ViewStripable (TimeAxisView* t, boost::shared_ptr<Stripable> s, uint32_t n)
-		: tav (t), stripable (s), old_order (n) {}
+	ViewStripable (TimeAxisView* t, boost::shared_ptr<Stripable> s)
+		: tav (t), stripable (s) {}
 };
 
 void
 EditorRoutes::move_selected_tracks (bool up)
 {
-	if (_editor->selection->tracks.empty()) {
+	StripableList sl;
+	_session->get_stripables (sl);
+
+	if (sl.size() < 2) {
+		/* nope */
 		return;
 	}
+
+	sl.sort (Stripable::PresentationOrderSorter());
 
 	std::list<ViewStripable> view_stripables;
-	std::vector<int> neworder;
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator ri;
-	TreeModel::Children::size_type n;
 
-	for (n = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
-		TimeAxisView* tv = (*ri)[_columns.tv];
-		boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
-		view_stripables.push_back (ViewStripable (tv, stripable, n));
+	/* build a list that includes time axis view information */
+
+	for (StripableList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+		TimeAxisView* tv = _editor->axis_view_from_stripable (*sli);
+		view_stripables.push_back (ViewStripable (tv, *sli));
 	}
 
-	list<ViewStripable>::iterator trailing;
-	list<ViewStripable>::iterator leading;
+	/* for each selected stripable, move it above or below the adjacent
+	 * stripable that has a time-axis view representation here. If there's
+	 * no such representation, then
+	 */
 
-	TimeAxisView* scroll_to = NULL;
+	list<ViewStripable>::iterator unselected_neighbour;
+	list<ViewStripable>::iterator vsi;
 
-	if (up) {
+	{
+		PresentationInfo::ChangeSuspender cs;
 
-		trailing = view_stripables.begin();
-		leading = view_stripables.begin();
+		if (up) {
+			unselected_neighbour = view_stripables.end ();
+			vsi = view_stripables.begin();
+			++vsi;
 
-		++leading;
+			while (vsi != view_stripables.end()) {
 
-		while (leading != view_stripables.end()) {
-			if (_editor->selection->selected (leading->tav)) {
-				view_stripables.insert (trailing, ViewStripable (*leading));
-				if (!scroll_to) {
-					scroll_to = leading->tav;
+				if (vsi->stripable->presentation_info().selected()) {
+
+					if (unselected_neighbour != view_stripables.end()) {
+
+						PresentationInfo::order_t unselected_neighbour_order = unselected_neighbour->stripable->presentation_info().order();
+						PresentationInfo::order_t my_order = vsi->stripable->presentation_info().order();
+
+						unselected_neighbour->stripable->set_presentation_order (my_order);
+						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+					}
+
+				} else {
+
+					if (vsi->tav) {
+						unselected_neighbour = vsi;
+					}
+
 				}
-				leading = view_stripables.erase (leading);
-			} else {
-				++leading;
-				++trailing;
+
+				++vsi;
 			}
+
+		} else {
+
+			unselected_neighbour = view_stripables.end();
+			vsi = unselected_neighbour;
+			--vsi;
+
+			do {
+
+				if (vsi->stripable->presentation_info().selected()) {
+
+					if (unselected_neighbour != view_stripables.end()) {
+
+						PresentationInfo::order_t unselected_neighbour_order = unselected_neighbour->stripable->presentation_info().order();
+						PresentationInfo::order_t my_order = vsi->stripable->presentation_info().order();
+
+						unselected_neighbour->stripable->set_presentation_order (my_order);
+						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+					}
+
+				} else {
+
+					if (vsi->tav) {
+						unselected_neighbour = vsi;
+					}
+
+				}
+
+				--vsi;
+
+			} while (vsi != view_stripables.begin());
 		}
-
-	} else {
-
-		/* if we could use reverse_iterator in list::insert, this code
-		   would be a beautiful reflection of the code above. but we can't
-		   and so it looks like a bit of a mess.
-		*/
-
-		trailing = view_stripables.end();
-		leading = view_stripables.end();
-
-		--leading; if (leading == view_stripables.begin()) { return; }
-		--leading;
-		--trailing;
-
-		while (1) {
-
-			if (_editor->selection->selected (leading->tav)) {
-				if (!scroll_to) {
-					scroll_to = leading->tav;
-				}
-				list<ViewStripable>::iterator tmp;
-
-				/* need to insert *after* trailing, not *before* it,
-				   which is what insert (iter, val) normally does.
-				*/
-
-				tmp = trailing;
-				tmp++;
-
-				view_stripables.insert (tmp, ViewStripable (*leading));
-
-				/* can't use iter = cont.erase (iter); form here, because
-				   we need iter to move backwards.
-				*/
-
-				tmp = leading;
-				--tmp;
-
-				bool done = false;
-
-				if (leading == view_stripables.begin()) {
-					/* the one we've just inserted somewhere else
-					   was the first in the list. erase this copy,
-					   and then break, because we're done.
-					*/
-					done = true;
-				}
-
-				view_stripables.erase (leading);
-
-				if (done) {
-					break;
-				}
-
-				leading = tmp;
-
-			} else {
-				if (leading == view_stripables.begin()) {
-					break;
-				}
-				--leading;
-				--trailing;
-			}
-		};
 	}
 
-	bool changed = false;
-	unsigned int i = 0;
-	for (leading = view_stripables.begin(); leading != view_stripables.end(); ++leading, ++i) {
-		if (leading->old_order != i) {
-			changed = true;
-		}
-		neworder.push_back (leading->old_order);
-#ifndef NDEBUG
-		if (leading->old_order != neworder.size() - 1) {
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("move %1 to %2\n", leading->old_order, neworder.size() - 1));
-		}
-#endif
-	}
-
-	if (!changed) {
-		return;
-	}
-
-#ifndef NDEBUG
-	DEBUG_TRACE (DEBUG::OrderKeys, "New order after moving tracks:\n");
-	for (vector<int>::iterator i = neworder.begin(); i != neworder.end(); ++i) {
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("\t%1\n", *i));
-	}
-	DEBUG_TRACE (DEBUG::OrderKeys, "-------\n");
-#endif
-
-	_model->reorder (neworder);
-
-	if (scroll_to) {
-		_editor->ensure_time_axis_view_is_visible (*scroll_to, false);
-	}
+//	if (scroll_to) {
+//		_editor->ensure_time_axis_view_is_visible (*scroll_to, false);
+//	}
 
 }
 
