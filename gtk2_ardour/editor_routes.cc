@@ -1631,6 +1631,7 @@ struct ViewStripable {
 void
 EditorRoutes::move_selected_tracks (bool up)
 {
+	TimeAxisView* scroll_to = 0;
 	StripableList sl;
 	_session->get_stripables (sl);
 
@@ -1677,6 +1678,10 @@ EditorRoutes::move_selected_tracks (bool up)
 
 						unselected_neighbour->stripable->set_presentation_order (my_order);
 						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+
+						if (!scroll_to) {
+							scroll_to = vsi->tav;
+						}
 					}
 
 				} else {
@@ -1707,6 +1712,10 @@ EditorRoutes::move_selected_tracks (bool up)
 
 						unselected_neighbour->stripable->set_presentation_order (my_order);
 						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+
+						if (!scroll_to) {
+							scroll_to = vsi->tav;
+						}
 					}
 
 				} else {
@@ -1723,10 +1732,9 @@ EditorRoutes::move_selected_tracks (bool up)
 		}
 	}
 
-//	if (scroll_to) {
-//		_editor->ensure_time_axis_view_is_visible (*scroll_to, false);
-//	}
-
+	if (scroll_to) {
+		_editor->ensure_time_axis_view_is_visible (*scroll_to, false);
+	}
 }
 
 void
