@@ -221,6 +221,13 @@ enum ZoomAxis {
 	Both
 };
 
+enum RegionActionTarget {
+	SelectedRegions = 0x1,
+	EnteredRegions = 0x2,
+	EditPointRegions = 0x4,
+	ListSelection = 0x8
+};
+
 } // namespace Editing
 
 #endif // __gtk_ardour_editing_h__

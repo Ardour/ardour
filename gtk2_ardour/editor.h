@@ -2262,7 +2262,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	QuantizeDialog* quantize_dialog;
 	MainMenuDisabler* _main_menu_disabler;
 
-	/* private helper functions to help with registering axis */
+	/* private helper functions to help with registering region actions */
+
+	Glib::RefPtr<Gtk::Action> register_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const * name, char const * label, sigc::slot<void> slot);
+	void register_toggle_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const * name, char const * label, sigc::slot<void> slot);
 
 	Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot);
 	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot);

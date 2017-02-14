@@ -353,6 +353,16 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
         static sigc::signal<void> DropDownKeys;
 
+	struct RegionAction {
+		Glib::RefPtr<Gtk::Action> action;
+		Editing::RegionActionTarget target;
+
+		RegionAction (Glib::RefPtr<Gtk::Action> a, Editing::RegionActionTarget tgt)
+			: action (a), target (tgt) {}
+	};
+
+	std::map<std::string,RegionAction> region_action_map;
+
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
