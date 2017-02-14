@@ -53,7 +53,8 @@ PatchChangeDialog::PatchChangeDialog (
 	, _time (X_("patchchangetime"), true, "", true, false)
 	, _channel (*manage (new Adjustment (1, 1, 16, 1, 4)))
 	, _program (*manage (new Adjustment (1, 1, 128, 1, 16)))
-	, _bank (*manage (new Adjustment (1, 1, 16384, 1, 64)))
+	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
+	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _ignore_signals (false)
 {
 	Table* t = manage (new Table (4, 2));
@@ -103,13 +104,21 @@ PatchChangeDialog::PatchChangeDialog (
 	_program.set_value (patch.program () + 1);
 	_program.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::program_changed));
 
-	l = manage (left_aligned_label (_("Bank")));
+	l = manage (left_aligned_label (_("Bank MSB")));
 	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_bank, 1, 2, r, r + 1);
+	t->attach (_bank_msb, 1, 2, r, r + 1);
 	++r;
 
-	_bank.set_value (patch.bank() + 1);
-	_bank.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
+	l = manage (left_aligned_label (_("Bank LSB")));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_bank_lsb, 1, 2, r, r + 1);
+	++r;
+
+	_bank_msb.set_value ((patch.bank() >> 7));
+	_bank_msb.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
+
+	_bank_lsb.set_value ((patch.bank() & 127));
+	_bank_lsb.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
 
 	get_vbox()->add (*t);
 
@@ -128,6 +137,12 @@ PatchChangeDialog::PatchChangeDialog (
 			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
 
 	show_all ();
+}
+
+int
+PatchChangeDialog::get_14bit_bank () const
+{
+	return _bank_msb.get_value_as_int() << 7 + _bank_lsb.get_value_as_int();
 }
 
 void
@@ -152,7 +167,7 @@ PatchChangeDialog::patch () const
 		t,
 		_channel.get_value_as_int() - 1,
 		_program.get_value_as_int() - 1,
-		_bank.get_value_as_int() - 1
+		get_14bit_bank ()
 		);
 }
 
@@ -192,7 +207,7 @@ PatchChangeDialog::set_active_bank_combo ()
 		string n = (*i)->name ();
 		boost::replace_all (n, "_", " ");
 
-		if ((*i)->number() == _bank.get_value () - 1) {
+		if ((*i)->number() == get_14bit_bank()) {
 			_current_patch_bank = *i;
 			_ignore_signals = true;
 			_bank_combo.set_active_text (n);
@@ -242,7 +257,8 @@ PatchChangeDialog::bank_combo_changed ()
 	set_active_patch_combo ();
 
 	_ignore_signals = true;
-	_bank.set_value (_current_patch_bank->number() + 1);
+	_bank_msb.set_value (_current_patch_bank->number() >> 7);
+	_bank_lsb.set_value (_current_patch_bank->number() & 127);
 	_ignore_signals = false;
 }
 

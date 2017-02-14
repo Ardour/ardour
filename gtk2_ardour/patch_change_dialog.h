@@ -62,12 +62,15 @@ private:
 	void bank_changed ();
 	void program_changed ();
 
+	int get_14bit_bank () const;
+
 	const ARDOUR::BeatsFramesConverter* _time_converter;
-        ARDOUR::InstrumentInfo& _info;
+	ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
 	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;
-	Gtk::SpinButton _bank;
+	Gtk::SpinButton _bank_msb;
+	Gtk::SpinButton _bank_lsb;
 	Gtk::ComboBoxText _bank_combo;
 	Gtk::ComboBoxText _patch_combo;
 
