@@ -4286,6 +4286,7 @@ ProcessorWindowProxy::get (bool create)
 	}
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
+		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
 		drop_window ();
 	}
 
@@ -4310,6 +4311,7 @@ ProcessorWindowProxy::show_the_right_window ()
 {
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
+		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
 		drop_window ();
 	}
 	toggle ();
