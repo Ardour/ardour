@@ -828,11 +828,6 @@ div.luafooter      { text-align:center; font-size:80%; color: #888; margin: 2em 
 } else {
 
 ?>
----
-layout: default
-style: luadoc
-title: Class Reference
----
 
 <p class="warning">
 This documentation is far from complete may be inaccurate and subject to change.
