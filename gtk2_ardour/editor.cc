@@ -2552,6 +2552,7 @@ Editor::set_state (const XMLNode& node, int version)
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
 		_regions->set_state (**i);
+		_locations->set_state (**i);
 	}
 
 	if ((prop = node.property ("maximised"))) {
@@ -2693,6 +2694,7 @@ Editor::get_state ()
 
 	node->add_child_nocopy (LuaInstance::instance()->get_action_state());
 	node->add_child_nocopy (LuaInstance::instance()->get_hook_state());
+	node->add_child_nocopy (_locations->get_state ());
 
 	return *node;
 }

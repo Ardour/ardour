@@ -750,9 +750,12 @@ LocationEditRow::set_clock_editable_status ()
 
 /*------------------------------------------------------------------------*/
 
-LocationUI::LocationUI ()
+LocationUI::LocationUI (std::string state_node_name)
 	: add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
+	, _mode (AudioClock::Frames)
+	, _mode_set (false)
+	, _state_node_name (state_node_name)
 {
 	i_am_the_modifier = 0;
 
@@ -1111,6 +1114,8 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
+	} else {
+		_mode_set = false;
 	}
 
 	loop_edit_row.set_session (s);
@@ -1137,21 +1142,49 @@ LocationUI::session_going_away()
 	punch_edit_row.set_session (0);
 	punch_edit_row.set_location (0);
 
+	_mode_set = false;
+
 	SessionHandlePtr::session_going_away ();
 }
 
 XMLNode &
 LocationUI::get_state () const
 {
-	XMLNode* node = new XMLNode (X_("LocationUI"));
-	node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
+	XMLNode* node = new XMLNode (_state_node_name);
+	if (_mode_set) {
+		node->add_property (X_("clock-mode"), enum_2_string (_mode));
+	} else {
+		node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
+	}
 	return *node;
 }
 
-AudioClock::Mode
-LocationUI::clock_mode_from_session_instant_xml () const
+int
+LocationUI::set_state (const XMLNode& node)
 {
-	XMLNode* node = _session->instant_xml (X_("LocationUI"));
+	if (node.name() != _state_node_name) {
+		return -1;
+	}
+	XMLProperty const* p = node.property (X_("clock-mode"));
+	if (!p) {
+		return -1;
+	}
+	_mode = (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
+	_mode_set = true;
+	if (_clock_group) {
+		_clock_group->set_clock_mode (_mode);
+	}
+	return 0;
+}
+
+AudioClock::Mode
+LocationUI::clock_mode_from_session_instant_xml ()
+{
+	if (_mode_set) {
+		return _mode;
+	}
+
+	XMLNode* node = _session->instant_xml (_state_node_name);
 	if (!node) {
 		return AudioClock::Frames;
 	}
@@ -1161,7 +1194,9 @@ LocationUI::clock_mode_from_session_instant_xml () const
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 
-	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
+	_mode = (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
+	_mode_set = true;
+	return _mode;
 }
 
 

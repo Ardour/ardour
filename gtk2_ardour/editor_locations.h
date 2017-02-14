@@ -20,6 +20,8 @@
 #ifndef __gtk_ardour_editor_locations_h__
 #define __gtk_ardour_editor_locations_h__
 
+#include "pbd/xml++.h"
+
 #include <gtkmm/scrolledwindow.h>
 #include "ardour/session_handle.h"
 #include "editor_component.h"
@@ -38,6 +40,8 @@ class EditorLocations : public EditorComponent, public ARDOUR::SessionHandlePtr
 	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget ();
+	XMLNode & get_state () const;
+	int set_state (const XMLNode&);
 
   private:
 	Gtk::ScrolledWindow _scroller;

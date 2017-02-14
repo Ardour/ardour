@@ -153,7 +153,7 @@ protected:
 class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	LocationUI ();
+	LocationUI (std::string state_node_name = "LocationUI");
 	~LocationUI ();
 
 	void set_session (ARDOUR::Session *);
@@ -165,6 +165,7 @@ public:
 	void refresh_location_list ();
 
 	XMLNode & get_state () const;
+	int set_state (const XMLNode&);
 
 private:
 	/** set to the location that has just been created with the LocationUI `add' button
@@ -209,7 +210,12 @@ private:
 	void map_locations (const ARDOUR::Locations::LocationList&);
 
 	ClockGroup* _clock_group;
-	AudioClock::Mode clock_mode_from_session_instant_xml () const;
+	AudioClock::Mode clock_mode_from_session_instant_xml ();
+
+	AudioClock::Mode _mode;
+	bool _mode_set;
+
+	std::string _state_node_name;
 };
 
 class LocationUIWindow : public ArdourWindow
