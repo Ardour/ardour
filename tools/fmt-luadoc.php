@@ -270,7 +270,17 @@ foreach ($doc as $b) {
 		$classlist[luafn2class ($b['lua'])]['ctor'][] = array (
 			'name' => luafn2class ($b['lua']),
 			'args' => decl2args ($b['ldec']),
-			'cand' => canonical_ctor ($b)
+			'cand' => canonical_ctor ($b),
+			'nil' => false
+		);
+		break;
+	case "Weak/Shared Pointer NIL Constructor":
+		checkclass ($b);
+		$classlist[luafn2class ($b['lua'])]['ctor'][] = array (
+			'name' => luafn2class ($b['lua']),
+			'args' => decl2args ($b['ldec']),
+			'cand' => canonical_ctor ($b),
+			'nil' => true
 		);
 		break;
 	case "Property":
@@ -642,7 +652,13 @@ function format_class_members ($ns, $cl, &$dups) {
 		usort ($cl['ctor'], 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Constructor</th></tr>'.NL;
 		foreach ($cl['ctor'] as $f) {
-			$rv.= ' <tr><td class="def">&Copf;</td><td class="decl">';
+			$rv.= ' <tr>';
+			if ($f['nil']) {
+				$rv.= '<td class="def"><abbr title="Nil Pointer Constructor">&alefsym;</abbr></td>';
+			} else {
+				$rv.= '<td class="def">&Copf;</td>';
+			}
+			$rv.= '<td class="decl">';
 			$rv.= '<span class="functionname">'.ctorname ($f['name']).'</span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
@@ -790,6 +806,7 @@ div.luafooter      { text-align:center; font-size:80%; color: #888; margin: 2em 
 #luaref table.classmembers td.fill { width: 99%; }
 #luaref table.classmembers span.em { font-style: italic; }
 #luaref span.functionname abbr     { text-decoration:none; cursor:default; }
+#luaref table.classmembers td.def abbr { text-decoration:none; cursor:default; }
 </style>
 </head>
 <body>

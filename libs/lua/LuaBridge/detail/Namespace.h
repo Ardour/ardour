@@ -1289,7 +1289,7 @@ private:
 
     WSPtrClass <T>& addNilPtrConstructor ()
     {
-      FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
+      FUNDOC ("Weak/Shared Pointer NIL Constructor", "", void (*) ())
       set_shared_class ();
       lua_pushcclosure (L,
           &shared. template ctorNilPtrPlacementProxy <boost::shared_ptr<T> >, 0);
