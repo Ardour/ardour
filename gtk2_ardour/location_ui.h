@@ -47,7 +47,7 @@ class ClockGroup;
 
 class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	LocationEditRow (ARDOUR::Session *sess=0, ARDOUR::Location *loc=0, int32_t num=-1);
 	virtual ~LocationEditRow();
 
@@ -58,13 +58,13 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void set_number (int);
 	void focus_name();
-        void set_clock_group (ClockGroup&);
-        void unset_clock_group () { _clock_group = 0; }
+	void set_clock_group (ClockGroup&);
+	void unset_clock_group () { _clock_group = 0; }
 
 	sigc::signal<void,ARDOUR::Location*> remove_requested;
 	sigc::signal<void> redraw_ranges;
 
-  protected:
+protected:
 
 	enum LocationPart {
 		LocStart,
@@ -106,12 +106,12 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label    performer_label;
 	Gtk::Entry    performer_entry;
 	Gtk::Label    composer_label;
- 	Gtk::Entry    composer_entry;
+	Gtk::Entry    composer_entry;
 	Gtk::CheckButton   scms_check_button;
 	Gtk::Label         scms_label;
 	Gtk::CheckButton   preemph_check_button;
 	Gtk::Label         preemph_label;
-        ClockGroup* _clock_group;
+	ClockGroup* _clock_group;
 
 	guint32 i_am_the_modifier;
 	int   number;
@@ -152,12 +152,12 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	LocationUI ();
 	~LocationUI ();
 
 	void set_session (ARDOUR::Session *);
-        void set_clock_mode (AudioClock::Mode);
+	void set_clock_mode (AudioClock::Mode);
 
 	void add_new_location();
 	void add_new_range();
@@ -166,7 +166,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	XMLNode & get_state () const;
 
-  private:
+private:
 	/** set to the location that has just been created with the LocationUI `add' button
 	    (if Config->get_name_new_markers() is true); if it is non-0, the name entry of
 	    the location is given the focus by location_added().
@@ -208,13 +208,13 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void location_added (ARDOUR::Location *);
 	void map_locations (const ARDOUR::Locations::LocationList&);
 
-        ClockGroup* _clock_group;
+	ClockGroup* _clock_group;
 	AudioClock::Mode clock_mode_from_session_instant_xml () const;
 };
 
 class LocationUIWindow : public ArdourWindow
 {
-  public:
+public:
 	LocationUIWindow ();
 	~LocationUIWindow ();
 
@@ -223,7 +223,7 @@ class LocationUIWindow : public ArdourWindow
 
 	LocationUI& ui() { return _ui; }
 
-  protected:
+protected:
 	LocationUI _ui;
 	bool on_delete_event (GdkEventAny*);
 	void session_going_away();
