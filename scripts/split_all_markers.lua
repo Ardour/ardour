@@ -40,7 +40,7 @@ function factory (params) return function ()
 			if l:is_mark() then
 				-- get all regions on the given track's playlist (may be stacked)
 				for reg in playlist:regions_at (l:start ()):iter () do
-					playlist:split_region (reg, l:start (), 0)
+					playlist:split_region (reg, ARDOUR.MusicFrame (l:start(), 0))
 					-- the above operation will invalidate the playlist's region list:
 					-- split creates 2 new regions.
 					--
