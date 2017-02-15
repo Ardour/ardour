@@ -610,9 +610,9 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 	} else {
 		if (!_session.loading()) {
 			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
 
-		/* will set quarter note accordingly */
 		set_position_internal (pos, false, sub_num);
 	}
 
