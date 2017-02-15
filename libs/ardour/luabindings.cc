@@ -950,7 +950,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("nth_send", &Route::nth_send)
 		.addFunction ("add_processor_by_index", &Route::add_processor_by_index)
 		.addFunction ("remove_processor", &Route::remove_processor)
+		.addFunction ("remove_processors", &Route::remove_processors)
 		.addFunction ("replace_processor", &Route::replace_processor)
+		.addFunction ("reorder_processors", &Route::reorder_processors)
 		.addFunction ("the_instrument", &Route::the_instrument)
 		.addFunction ("n_inputs", &Route::n_inputs)
 		.addFunction ("n_outputs", &Route::n_outputs)
@@ -1422,6 +1424,10 @@ LuaBindings::common (lua_State* L)
 		// boost::shared_ptr <std::list<boost::shared_ptr<Region> > >
 		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
 		.addVoidPtrConstructor<std::list<boost::shared_ptr <Region> > > ()
+		.endClass ()
+
+		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
+		.beginStdList <boost::shared_ptr<Processor> > ("ProcessorList")
 		.endClass ()
 
 		//std::list<boost::shared_ptr<Port> > PortList;
