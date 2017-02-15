@@ -808,22 +808,46 @@ Editor::get_enter_context(ItemType type)
 }
 
 bool
-Editor::left_track_canvas (GdkEventCrossing */*ev*/)
+Editor::left_track_canvas (GdkEventCrossing* ev)
 {
+	const bool was_within = within_track_canvas;
 	DropDownKeys ();
 	within_track_canvas = false;
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
+
+	if (was_within) {
+		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
+		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
+			/* context menu or something similar */
+			sensitize_the_right_region_actions (true, false);
+		} else {
+			sensitize_the_right_region_actions (false, true);
+		}
+	}
+
 	return false;
 }
 
 bool
-Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
+Editor::entered_track_canvas (GdkEventCrossing* ev)
 {
+	const bool was_within = within_track_canvas;
 	within_track_canvas = true;
 	reset_canvas_action_sensitivity (true);
-	return FALSE;
+
+	if (!was_within) {
+		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
+		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
+			/* context menu or something similar */
+			sensitize_the_right_region_actions (true, false);
+		} else {
+			sensitize_the_right_region_actions (false, true);
+		}
+	}
+
+	return false;
 }
 
 void

@@ -1086,17 +1086,14 @@ Editor::sensitize_all_region_actions (bool s)
 	_all_region_actions_sensitized = s;
 }
 
-/** Sensitize region-based actions based on the selection ONLY, ignoring the entered_regionview.
- *  This method is called from three places:
+/** Sensitize region-based actions.
  *
- *    1. just before the top level Region menu is shown
- *    2. whenever the region selection changes
- *    3. just before popping up a track context menu
- *
- *  This method also sets up toggle action state as appropriate.
+ *  This method is called from whenever we leave the canvas, either by moving
+ *  the pointer out of it, or by popping up a context menu. See
+ *  Editor::{entered,left}_track_canvas() for details there.
  */
 void
-Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_outside_canvas)
+Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_canvas_crossing)
 {
 	bool have_selection = false;
 	bool have_entered = false;
@@ -1113,15 +1110,28 @@ Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_ou
 		rs.add (entered_regionview);
 	}
 
-	if (!selection->tracks.empty()) {
-		RegionSelection at_edit_point;
-		framepos_t const where = get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, from_context_menu, from_outside_canvas);
-		get_regions_at (at_edit_point, where, selection->tracks);
-		if (!at_edit_point.empty()) {
-			have_edit_point = true;
-		}
-		if (rs.empty()) {
-			rs.insert (rs.end(), at_edit_point.begin(), at_edit_point.end());
+	if (rs.empty() && !selection->tracks.empty()) {
+
+		/* no selected regions, but some selected tracks. what we do
+		 * here depends on the context in which we are called
+		 */
+
+		if (from_canvas_crossing) {
+			if (!within_track_canvas && _edit_point == EditAtMouse) {
+				have_edit_point = false;
+			} else {
+				RegionSelection at_edit_point;
+				framepos_t const where = get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, !within_track_canvas);
+				get_regions_at (at_edit_point, where, selection->tracks);
+				if (!at_edit_point.empty()) {
+					have_edit_point = true;
+				}
+				if (rs.empty()) {
+					rs.insert (rs.end(), at_edit_point.begin(), at_edit_point.end());
+				}
+			}
+		} else if (from_context_menu) {
+			/* we have a context click event */
 		}
 	}
 

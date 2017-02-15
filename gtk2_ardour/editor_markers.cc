@@ -892,6 +892,7 @@ Editor::build_marker_menu (Location* loc)
 	using namespace Menu_Helpers;
 
 	marker_menu = new Menu;
+
 	MenuList& items = marker_menu->items();
 	marker_menu->set_name ("ArdourContextMenu");
 
@@ -931,7 +932,8 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 
 	bool const loop_or_punch_or_session = loop_or_punch || session;
 
-	Menu *markerMenu = new Menu;
+	Menu* markerMenu = new Menu;
+
 	if (loop_or_punch_or_session) {
 		transport_marker_menu = markerMenu;
 	} else {
@@ -985,6 +987,7 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	using namespace Menu_Helpers;
 
 	tempo_marker_menu = new Menu;
+
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
@@ -1011,6 +1014,7 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 	using namespace Menu_Helpers;
 
 	meter_marker_menu = new Menu;
+
 	MenuList& items = meter_marker_menu->items();
 	meter_marker_menu->set_name ("ArdourContextMenu");
 
@@ -1032,6 +1036,7 @@ Editor::build_new_transport_marker_menu ()
 	using namespace Menu_Helpers;
 
 	new_transport_marker_menu = new Menu;
+
 	MenuList& items = new_transport_marker_menu->items();
 	new_transport_marker_menu->set_name ("ArdourContextMenu");
 

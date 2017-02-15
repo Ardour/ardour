@@ -1466,28 +1466,9 @@ Editor::set_session (Session *t)
 	_session->register_with_memento_command_factory(id(), this);
 	_session->register_with_memento_command_factory(_selection_memento->id(), _selection_memento);
 
-	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
-
 	LuaInstance::instance()->set_session(_session);
 
 	start_updating_meters ();
-}
-
-void
-Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
-{
-	if (a->get_name() == "RegionMenu") {
-		/* When the main menu's region menu is opened, we setup the actions so that they look right
-		   in the menu.  I can't find a way of getting a signal when this menu is subsequently closed,
-		   so we resensitize all region actions when the entered regionview or the region selection
-		   changes.  HOWEVER we can't always resensitize on entered_regionview change because that
-		   happens after the region context menu is opened.  So we set a flag here, too.
-
-		   What a carry on :(
-		*/
-		sensitize_the_right_region_actions (false, !within_track_canvas);
-		_last_region_menu_was_main = true;
-	}
 }
 
 void
@@ -4738,8 +4719,6 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
-	cerr << "ig " << ignore << " fcm " << from_context_menu << " foc " << from_outside_canvas << endl;
-
 	if (Profile->get_mixbus()) {
 		if (ep == EditAtSelectedMarker) {
 			ep = EditAtPlayhead;
@@ -4766,8 +4745,6 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	}
 
 	MusicFrame snap_mf (0, 0);
-
-	cerr << "Using EP " << enum_2_string (ep) << endl;
 
 	switch (ep) {
 	case EditAtPlayhead:
@@ -4970,7 +4947,7 @@ Editor::get_regions_from_selection_and_edit_point (EditIgnoreOption ignore, bool
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
 			 */
-			framepos_t const where = get_preferred_edit_position (ignore, from_outside_canvas, from_outside_canvas);
+			framepos_t const where = get_preferred_edit_position (ignore, from_context_menu, from_outside_canvas);
 			get_regions_at(regions, where, tracks);
 		}
 	}
