@@ -1658,7 +1658,7 @@ RegionMoveDrag::finished_no_copy (
 
 			/* insert into new playlist */
 			RegionView* new_view;
-			if (rv == _primary) {
+			if (rv == _primary && !_x_constrained) {
 				new_view = insert_region_into_playlist (
 					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, last_position, last_pos_qn,
 					modified_playlists, true
