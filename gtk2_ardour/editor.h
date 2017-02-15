@@ -1845,7 +1845,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void region_selection_changed ();
 	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_all_region_actions (bool);
-	void sensitize_the_right_region_actions (bool from_context_menu, bool from_outside_canvas);
+	void sensitize_the_right_region_actions (bool because_canvas_crossing);
 	bool _all_region_actions_sensitized;
 	/** Flag to block region action handlers from doing what they normally do;
 	 *  I tried Gtk::Action::block_activate() but this doesn't work (ie it doesn't

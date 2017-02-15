@@ -1093,7 +1093,7 @@ Editor::sensitize_all_region_actions (bool s)
  *  Editor::{entered,left}_track_canvas() for details there.
  */
 void
-Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_canvas_crossing)
+Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 {
 	bool have_selection = false;
 	bool have_entered = false;
@@ -1116,7 +1116,7 @@ Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_ca
 		 * here depends on the context in which we are called
 		 */
 
-		if (from_canvas_crossing) {
+		if (because_canvas_crossing) {
 			if (!within_track_canvas && _edit_point == EditAtMouse) {
 				have_edit_point = false;
 			} else {
@@ -1130,8 +1130,6 @@ Editor::sensitize_the_right_region_actions (bool from_context_menu, bool from_ca
 					rs.insert (rs.end(), at_edit_point.begin(), at_edit_point.end());
 				}
 			}
-		} else if (from_context_menu) {
-			/* we have a context click event */
 		}
 	}
 
@@ -1430,7 +1428,7 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 
-	sensitize_the_right_region_actions (false, false);
+	sensitize_the_right_region_actions (false);
 
 	/* propagate into backend */
 

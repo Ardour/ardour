@@ -1698,7 +1698,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	/* When the region menu is opened, we setup the actions so that they look right
 	   in the menu.
 	*/
-	sensitize_the_right_region_actions (true, false);
+	sensitize_the_right_region_actions (false);
 	_last_region_menu_was_main = false;
 
 	menu->signal_hide().connect (sigc::bind (sigc::mem_fun (*this, &Editor::sensitize_all_region_actions), true));

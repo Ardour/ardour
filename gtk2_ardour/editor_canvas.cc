@@ -821,9 +821,9 @@ Editor::left_track_canvas (GdkEventCrossing* ev)
 		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
 		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
 			/* context menu or something similar */
-			sensitize_the_right_region_actions (true, false);
+			sensitize_the_right_region_actions (false);
 		} else {
-			sensitize_the_right_region_actions (false, true);
+			sensitize_the_right_region_actions (true);
 		}
 	}
 
@@ -841,9 +841,9 @@ Editor::entered_track_canvas (GdkEventCrossing* ev)
 		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
 		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
 			/* context menu or something similar */
-			sensitize_the_right_region_actions (true, false);
+			sensitize_the_right_region_actions (false);
 		} else {
-			sensitize_the_right_region_actions (false, true);
+			sensitize_the_right_region_actions (true);
 		}
 	}
 
