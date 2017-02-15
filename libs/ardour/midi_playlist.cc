@@ -384,7 +384,7 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 void
-MidiPlaylist::_split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
+MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicFrame& playlist_position)
 {
 	if (!region->covers (playlist_position.frame)) {
 		return;

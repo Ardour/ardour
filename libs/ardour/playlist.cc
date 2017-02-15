@@ -1413,7 +1413,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::split (MusicFrame at)
+ Playlist::split (const MusicFrame& at)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1427,14 +1427,14 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
+ Playlist::split_region (boost::shared_ptr<Region> region, const MusicFrame& playlist_position)
  {
 	 RegionWriteLock rl (this);
 	 _split_region (region, playlist_position);
  }
 
  void
- Playlist::_split_region (boost::shared_ptr<Region> region, MusicFrame playlist_position)
+ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicFrame& playlist_position)
  {
 	 if (!region->covers (playlist_position.frame)) {
 		 return;
