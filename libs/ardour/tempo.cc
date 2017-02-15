@@ -4184,7 +4184,8 @@ TempoMap::fix_legacy_session ()
 					prev_t->set_pulse (0.0);
 					prev_t->set_minute (0.0);
 					prev_t->set_position_lock_style (AudioTime);
-					t->set_initial (true);
+					prev_t->set_initial (true);
+					prev_t->set_locked_to_meter (true);
 					have_initial_t = true;
 				}
 
