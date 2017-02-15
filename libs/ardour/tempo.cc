@@ -4135,6 +4135,7 @@ TempoMap::fix_legacy_session ()
 {
 	MeterSection* prev_m = 0;
 	TempoSection* prev_t = 0;
+	bool have_initial_t = false;
 
 	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 		MeterSection* m;
@@ -4173,10 +4174,20 @@ TempoMap::fix_legacy_session ()
 				t->set_minute (0.0);
 				t->set_position_lock_style (AudioTime);
 				prev_t = t;
+				have_initial_t = true;
 				continue;
 			}
 
 			if (prev_t) {
+				/* some 4.x sessions have no initial (non-movable) tempo. */
+				if (!have_initial_t) {
+					prev_t->set_pulse (0.0);
+					prev_t->set_minute (0.0);
+					prev_t->set_position_lock_style (AudioTime);
+					t->set_initial (true);
+					have_initial_t = true;
+				}
+
 				const double beat = ((t->legacy_bbt().bars - 1) * ((prev_m) ? prev_m->note_divisor() : 4.0))
 					+ (t->legacy_bbt().beats - 1)
 					+ (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
