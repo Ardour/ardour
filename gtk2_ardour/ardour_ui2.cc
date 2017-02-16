@@ -539,7 +539,8 @@ ARDOUR_UI::setup_transport ()
 
 
 	/* and the main table layout */
-
+	int vpadding = 1;
+	int hpadding = 2;
 	int col = 0;
 #define TCOL col, col + 1
 
@@ -554,43 +555,43 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
 	++col;
 
-	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, 0);
-	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, vpadding);
+	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 2, 0);
-	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 0);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, vpadding);
+	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
 	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (*primary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, 2, 0);
-	transport_table.attach (*primary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (*primary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+	transport_table.attach (*primary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+	transport_table.attach (*primary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 	col += 2;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	if (!ARDOUR::Profile->get_small_screen()) {
-		transport_table.attach (*secondary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, 2, 0);
-		transport_table.attach (*secondary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 0);
+		transport_table.attach (*secondary_clock,              col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, 0);
+		transport_table.attach (*secondary_clock->left_btn(),  col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, 0);
+		transport_table.attach (*secondary_clock->right_btn(), col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, 0);
 		secondary_clock->set_no_show_all (true);
 		secondary_clock->left_btn()->set_no_show_all (true);
 		secondary_clock->right_btn()->set_no_show_all (true);
@@ -601,7 +602,7 @@ ARDOUR_UI::setup_transport ()
 		++col;
 	}
 
-	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, 2, 0);
+	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
 
 	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
@@ -609,15 +610,15 @@ ARDOUR_UI::setup_transport ()
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */
 	transport_hbox.set_spacing (3);
-	transport_table.attach (transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, 2, 0);
+	transport_table.attach (transport_hbox, TCOL, 0, 2, EXPAND|FILL, EXPAND|FILL, hpadding, 0);
 	++col;
 
 	/* lua script action buttons */
 	transport_table.attach (action_script_table, TCOL, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
 	++col;
 
-	transport_table.attach (editor_visibility_button, TCOL, 0, 1 , FILL, SHRINK, 2, 0);
-	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (editor_visibility_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
 	repack_transport_hbox ();
