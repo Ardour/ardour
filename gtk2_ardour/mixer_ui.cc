@@ -765,13 +765,20 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		SortByNewDisplayOrder cmp;
 		sort (sorted.begin(), sorted.end(), cmp);
 		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+			if (_session->master_out() && (_session->master_out()->presentation_info().order() == n)) {
+				++n;
+			}
 			if (sr->old_display_order != n) {
 				change = true;
+				break;
 			}
 		}
 		if (change) {
 			n = 0;
 			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+				if (_session->master_out() && (_session->master_out()->presentation_info().order() == n)) {
+					++n;
+				}
 				if (sr->stripable->presentation_info().order() != n) {
 					sr->stripable->set_presentation_order (n);
 				}
