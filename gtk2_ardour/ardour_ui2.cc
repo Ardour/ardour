@@ -554,19 +554,19 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
 	++col;
 
-	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, 2);
-	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 2, 2);
+	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, 0);
+	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, 2, 0);
 	col += 3;
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
-	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 2, 2);
-	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 2, 2);
-	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 2);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 2, 2);
+	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, 2, 0);
+	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, 0);
+	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, 2, 0);
 	col += 3;
 
 	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
