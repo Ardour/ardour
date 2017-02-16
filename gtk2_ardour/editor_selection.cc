@@ -1002,6 +1002,8 @@ Editor::track_selection_changed ()
 
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 
+	sensitize_the_right_region_actions (false);
+
 	/* notify control protocols */
 
 	ControlProtocol::StripableSelectionChanged (stripables);

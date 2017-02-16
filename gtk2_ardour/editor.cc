@@ -2346,6 +2346,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	}
 
 	reset_canvas_action_sensitivity (in_track_canvas);
+	sensitize_the_right_region_actions (false);
 
 	instant_save ();
 }
