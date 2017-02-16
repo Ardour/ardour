@@ -1100,6 +1100,9 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_edit_point = false;
 	RegionSelection rs;
 
+	// std::cerr << "STRRA: crossing ? " << because_canvas_crossing << " within ? " << within_track_canvas
+	// << std::endl;
+
 	if (!selection->regions.empty()) {
 		have_selection = true;
 		rs = selection->regions;
@@ -1112,26 +1115,38 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 
 	if (rs.empty() && !selection->tracks.empty()) {
 
-		/* no selected regions, but some selected tracks. what we do
-		 * here depends on the context in which we are called
+		/* no selected regions, but some selected tracks.
 		 */
 
-		if (because_canvas_crossing) {
-			if (!within_track_canvas && _edit_point == EditAtMouse) {
+		if (_edit_point == EditAtMouse) {
+			if (!within_track_canvas) {
+				/* pointer is not in canvas, so edit point is meaningless */
 				have_edit_point = false;
 			} else {
-				RegionSelection at_edit_point;
-				framepos_t const where = get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, !within_track_canvas);
-				get_regions_at (at_edit_point, where, selection->tracks);
-				if (!at_edit_point.empty()) {
-					have_edit_point = true;
-				}
-				if (rs.empty()) {
-					rs.insert (rs.end(), at_edit_point.begin(), at_edit_point.end());
-				}
+				/* inside canvas. we don't know where the edit
+				   point will be when an action is invoked, but
+				   assume it could intersect with a region.
+				*/
+				have_edit_point = true;
+			}
+		} else {
+			RegionSelection at_edit_point;
+			framepos_t const where = get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, !within_track_canvas);
+			get_regions_at (at_edit_point, where, selection->tracks);
+			if (!at_edit_point.empty()) {
+				have_edit_point = true;
+			}
+			if (rs.empty()) {
+				rs.insert (rs.end(), at_edit_point.begin(), at_edit_point.end());
 			}
 		}
 	}
+
+	//std::cerr << "\tfinal have selection: " << have_selection
+	// << " have entered " << have_entered
+	// << " have edit point " << have_edit_point
+	// << " EP = " << enum_2_string (_edit_point)
+	// << std::endl;
 
 	typedef std::map<std::string,RegionAction> RegionActionMap;
 
