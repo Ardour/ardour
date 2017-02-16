@@ -23,6 +23,7 @@
 #include "pbd/basename.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/revision.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -102,6 +103,16 @@ ArdourKeyboard::setup_keybindings ()
 	/* set up the per-user bindings path */
 
 	string lowercase_program_name = downcase (string(PROGRAM_NAME));
+
+#ifndef MIXBUS // not for v4.0 just yet
+	/* extract and append minor vesion */
+	std::string rev (revision);
+	std::size_t pos = rev.find_first_of("-");
+	if (pos != string::npos && pos > 0) {
+		lowercase_program_name += "-";
+		lowercase_program_name += rev.substr (0, pos);
+	}
+#endif
 
 	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + binding_filename_suffix);
 
