@@ -142,7 +142,7 @@ PatchChangeDialog::PatchChangeDialog (
 int
 PatchChangeDialog::get_14bit_bank () const
 {
-	return _bank_msb.get_value_as_int() << 7 + _bank_lsb.get_value_as_int();
+	return (_bank_msb.get_value_as_int() << 7) + _bank_lsb.get_value_as_int();
 }
 
 void
