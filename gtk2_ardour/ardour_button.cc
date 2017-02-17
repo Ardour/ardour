@@ -62,6 +62,8 @@ ArdourButton::ArdourButton (Element e)
 	, _markup (false)
 	, _elements (e)
 	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
+	, _icon_render_cb (0)
+	, _icon_render_cb_data (0)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -368,14 +370,22 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
-	else /* VectorIcons are exclusive to Pixbuf Icons */
-	if (_elements & VectorIcon) {
+	else /* VectorIcon, IconRenderCallback are exclusive to Pixbuf Icons */
+	if (_elements & (VectorIcon | IconRenderCallback)) {
 		int vw = get_width();
 		int vh = get_height();
 		if (_elements & Menu) {
 			vw -= _diameter + 4;
 		}
-		Gtkmm2ext::ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
+		if (_elements & VectorIcon) {
+			Gtkmm2ext::ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
+		} else {
+			cairo_save (cr);
+			rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
+			cairo_clip (cr);
+			_icon_render_cb (cr, vw, vh, text_color, _icon_render_cb_data);
+			cairo_restore (cr);
+		}
 	}
 
 	const int text_margin = char_pixel_width();
@@ -1271,7 +1281,24 @@ void
 ArdourButton::set_icon (Gtkmm2ext::ArdourIcon::Icon i)
 {
 	_icon = i;
-	_elements = (ArdourButton::Element) ((_elements | ArdourButton::VectorIcon) & ~ArdourButton::Text);
+	_icon_render_cb = 0;
+	_icon_render_cb_data = 0;
+	_elements = (ArdourButton::Element) ((_elements | VectorIcon) & ~(ArdourButton::Text | IconRenderCallback));
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::set_icon (rendercallback_t cb, void* d)
+{
+	if (!cb) {
+		_elements = (ArdourButton::Element) ((_elements | ArdourButton::Text) & ~(IconRenderCallback | VectorIcon));
+		_icon_render_cb = 0;
+		_icon_render_cb_data = 0;
+	} else {
+		_elements = (ArdourButton::Element) ((_elements | IconRenderCallback) & ~(ArdourButton::Text | VectorIcon));
+		_icon_render_cb = cb;
+		_icon_render_cb_data = d;
+	}
 	CairoWidget::set_dirty ();
 }
 
