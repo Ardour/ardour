@@ -1441,6 +1441,14 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <Location*> ("LocationList")
 		.endClass ()
 
+		// std::list<boost::shared_ptr<AutomationControl> > ControlList;
+		.beginStdList <boost::shared_ptr<AutomationControl> > ("ControlList")
+		.endClass ()
+
+		.beginPtrStdList <boost::shared_ptr<AutomationControl> > ("ControlListPtr")
+		.addVoidPtrConstructor<std::list<boost::shared_ptr <AutomationControl> > > ()
+		.endClass ()
+
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
 	// typedef Evoral::Note<Evoral::Beats> Note;
 	// std::set< boost::weak_ptr<Note> >
@@ -1855,6 +1863,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("master_out", &Session::master_out)
 		.addFunction ("tempo_map", (TempoMap& (Session::*)())&Session::tempo_map)
 		.addFunction ("locations", &Session::locations)
+		.addFunction ("soloing", &Session::soloing)
+		.addFunction ("listening", &Session::listening)
+		.addFunction ("solo_isolated", &Session::solo_isolated)
+		.addFunction ("cancel_all_solo", &Session::cancel_all_solo)
+		.addFunction ("clear_all_solo_state", &Session::clear_all_solo_state)
+		.addFunction ("set_controls", &Session::set_controls)
+		.addFunction ("set_control", &Session::set_control)
+		.addFunction ("set_exclusive_input_active", &Session::set_exclusive_input_active)
 		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
 		.addFunction ("commit_reversible_command", &Session::commit_reversible_command)
 		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
