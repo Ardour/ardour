@@ -400,7 +400,7 @@ MixLayout::button_solo ()
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
-			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+			session.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 		}
 	}
 }

@@ -2003,8 +2003,8 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 	}
 	if (s) {
 		if (s->solo_control()) {
-			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return sel_fail ("solo", (float) s->solo_control()->get_value(), get_address (msg));
+			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			return sel_fail ("solo", yn, get_address (msg));
 		}
 	}
 	return sel_fail ("solo", 0, get_address (msg));

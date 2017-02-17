@@ -140,7 +140,7 @@ FaderPort::solo ()
 		return;
 	}
 
-	_current_stripable->solo_control()->set_value (!_current_stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->solo_control(), !_current_stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
 }
 
 void
