@@ -704,7 +704,6 @@ PTFFormat::parsemidi(void) {
 	uint64_t midi_pos, midi_len, max_pos;
 	uint8_t midi_velocity, midi_note;
 	uint16_t rsize;
-	std::vector<midi_ev_t> midi;
 	midi_ev_t m;
 	bool found = false;
 	int max_regions = regions.size();
@@ -716,6 +715,7 @@ PTFFormat::parsemidi(void) {
 	// Parse all midi tracks, treat each group of midi bytes as a track
 	while (k + 35 < len) {
 		max_pos = 0;
+		std::vector<midi_ev_t> midi;
 
 		while (k < len) {
 			if (		(ptfunxored[k  ] == 'M') &&
