@@ -4,28 +4,6 @@ ardour { ["type"] = "EditorAction", name = "Marker Split",
 	description = [[Split regions on selected tracks at all locations markers]]
 }
 
-function icon (params) return function (ctx, w, h, fg)
-	local mh = h - 3.5;
-	local m3 = w / 3;
-	local m6 = w / 6;
-	ctx:set_source_rgba (.8, .8, .2, 1.0)
-	ctx:move_to (w / 2 - m6, 2)
-	ctx:rel_line_to (m3, 0)
-	ctx:rel_line_to (0, mh * 0.4)
-	ctx:rel_line_to (-m6, mh * 0.6)
-	ctx:rel_line_to (-m6, -mh * 0.6)
-	ctx:close_path ()
-	ctx:fill ()
-	-- TODO: better draw a left/right arrow <--|-->
-	-- yet this is a handy text example, so..
-	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. (h - 7) .. "px")
-	ctx:set_source_rgba (1, 0, 0, 0.7)
-	txt:set_text ("S")
-	local tw, th = txt:get_pixel_size ()
-	ctx:move_to (.5 * (w - tw), 1)
-	txt:show_in_cairo_context (ctx)
-end end
-
 function factory (params) return function ()
 
 	local loc = Session:locations () -- all marker locations
@@ -89,4 +67,52 @@ function factory (params) return function ()
 		Session:abort_reversible_command ()
 	end
 
+end end
+
+
+-- render an icon for the toolbar action-button
+-- this is genrally square width == height.
+-- The background is set according to the theme (leave transparent when drawing).
+-- A foreground color is passed as parameter 'fg'
+--
+-- ctx is-a http://manual.ardour.org/lua-scripting/class_reference/#Cairo:Context
+-- 2D vector graphics http://cairographics.org/
+function icon (params) return function (ctx, width, height, fg)
+	local mh = height - 3.5;
+	local m3 = width / 3;
+	local m6 = width / 6;
+
+	-- compare to gtk2_ardour/marker.cc "Marker"
+	ctx:set_source_rgba (.8, .8, .2, 1.0)
+	ctx:move_to (width / 2 - m6, 2)
+	ctx:rel_line_to (m3, 0)
+	ctx:rel_line_to (0, mh * 0.4)
+	ctx:rel_line_to (-m6, mh * 0.6)
+	ctx:rel_line_to (-m6, -mh * 0.6)
+	ctx:close_path ()
+	ctx:fill ()
+
+	-- draw an arrow  <--|--> on top, using the foreground color
+	ctx:set_source_rgba (LuaCairo.color_to_rgba (fg))
+	ctx:set_line_width (1)
+
+	ctx:move_to (width * .5, height * .4)
+	ctx:line_to (width * .5, height * .6)
+	ctx:stroke ()
+
+	ctx:move_to (2, height * .5)
+	ctx:line_to (width - 2, height * .5)
+	ctx:stroke ()
+
+	ctx:move_to (width - 2, height * .5)
+	ctx:rel_line_to (-m6, -m6)
+	ctx:rel_line_to (0, m3)
+	ctx:close_path ()
+	ctx:fill ()
+
+	ctx:move_to (2, height * .5)
+	ctx:rel_line_to (m6, -m6)
+	ctx:rel_line_to (0, m3)
+	ctx:close_path ()
+	ctx:fill ()
 end end
