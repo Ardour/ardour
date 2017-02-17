@@ -40,6 +40,7 @@
 #include "automation_time_axis.h"
 #include "public_editor.h"
 #include "control_point.h"
+#include "vca_time_axis.h"
 
 #include "pbd/i18n.h"
 
@@ -274,6 +275,9 @@ Selection::toggle (const TrackViewList& track_list)
 	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+		if (dynamic_cast<VCATimeAxisView*> (*i)) {
+			continue;
+		}
 		toggle ((*i));
 	}
 }
@@ -281,6 +285,10 @@ Selection::toggle (const TrackViewList& track_list)
 void
 Selection::toggle (TimeAxisView* track)
 {
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
+
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
@@ -437,6 +445,9 @@ Selection::add (TrackViewList const & track_list)
 
 	if (!added.empty()) {
 		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
+			if (dynamic_cast<VCATimeAxisView*> (*x)) {
+				continue;
+			}
 			(*x)->set_selected (true);
 		}
 	}
@@ -445,6 +456,9 @@ Selection::add (TrackViewList const & track_list)
 void
 Selection::add (TimeAxisView* track)
 {
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
 	clear_objects();  //enforce object/range exclusivity
 
 	TrackViewList tr;
@@ -783,6 +797,9 @@ Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 void
 Selection::set (TimeAxisView* track)
 {
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
 	clear_objects ();  //enforce object/range exclusivity
 
 	PresentationInfo::ChangeSuspender cs;
@@ -822,6 +839,9 @@ Selection::set (const TrackViewList& track_list)
 			bool missing = false;
 
 			for (TrackViewList::const_iterator x = track_list.begin(); x != track_list.end(); ++x) {
+				if (dynamic_cast<VCATimeAxisView*> (*x)) {
+					continue;
+				}
 				if (find (tracks.begin(), tracks.end(), *x) == tracks.end()) {
 					missing = true;
 				}
@@ -836,6 +856,9 @@ Selection::set (const TrackViewList& track_list)
 		/* argument is different from existing selection */
 
 		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
+			if (dynamic_cast<VCATimeAxisView*> (*x)) {
+				continue;
+			}
 			(*x)->set_selected (false);
 		}
 

@@ -25,6 +25,7 @@
 #include "track_selection.h"
 #include "time_axis_view.h"
 #include "public_editor.h"
+#include "vca_time_axis.h"
 
 using namespace std;
 
@@ -44,6 +45,9 @@ TrackSelection::add (TrackViewList const & t)
 	TrackViewList added;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		if (dynamic_cast<VCATimeAxisView*> (*i)) {
+			continue;
+		}
 
 		/* select anything in the same select-enabled route group */
 		ARDOUR::RouteGroup* rg = (*i)->route_group ();
