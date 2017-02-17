@@ -37,6 +37,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "meterbridge.h"
+#include "luainstance.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
@@ -309,6 +310,7 @@ ARDOUR_UI::setup_windows ()
 		assert (act);
 		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
 		action_script_call_btn[i].set_related_action (act);
+		action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::bind_lua_action_script), i), false);
 		if (act->get_sensitive ()) {
 			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
 		} else {
@@ -397,4 +399,15 @@ ARDOUR_UI::setup_windows ()
 	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
 
 	return 0;
+}
+
+bool
+ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
+{
+	if (ev->button != 3) {
+		return false;
+	}
+	LuaInstance *li = LuaInstance::instance();
+	li->interactive_add (LuaScriptInfo::EditorAction, i);
+	return true;
 }
