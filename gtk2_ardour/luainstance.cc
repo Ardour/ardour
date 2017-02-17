@@ -1207,6 +1207,7 @@ LuaInstance::set_lua_action (
 		cerr << "LuaException:" << e.what () << endl;
 		return false;
 	}
+	_session->set_dirty ();
 	return true;
 }
 
@@ -1220,6 +1221,7 @@ LuaInstance::remove_lua_action (const int id)
 		return false;
 	}
 	ActionChanged (id, ""); /* EMIT SIGNAL */
+	_session->set_dirty ();
 	return true;
 }
 
@@ -1328,6 +1330,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
 	}
+	_session->set_dirty ();
 	return false;
 }
 
@@ -1340,6 +1343,7 @@ LuaInstance::unregister_lua_slot (const PBD::ID& id)
 		_callbacks.erase (i);
 		return true;
 	}
+	_session->set_dirty ();
 	return false;
 }
 
