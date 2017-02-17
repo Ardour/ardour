@@ -287,6 +287,8 @@ void
 Strip::notify_solo_changed ()
 {
 	if (_stripable && _solo) {
+		// TODO use session->set_control(), subscribe to solo_control changes later
+		// call_surface->write(), see 9d8829f5bf
 		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
 	}
 }
