@@ -3973,6 +3973,13 @@ void RCOptionEditor::edit_lxvst_path () {
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
 		_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
+
+		MessageDialog msg (_("Re-scan Plugins now?"),
+				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
+		msg.set_default_response (Gtk::RESPONSE_YES);
+		if (msg.run() == Gtk::RESPONSE_YES) {
+			plugin_scan_refresh ();
+		}
 	}
 	delete pd;
 }
@@ -3987,6 +3994,12 @@ void RCOptionEditor::edit_vst_path () {
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
 		_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
+		MessageDialog msg (_("Re-scan Plugins now?"),
+				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
+		msg.set_default_response (Gtk::RESPONSE_YES);
+		if (msg.run() == Gtk::RESPONSE_YES) {
+			plugin_scan_refresh ();
+		}
 	}
 	delete pd;
 }
