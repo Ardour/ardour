@@ -21,6 +21,7 @@
 #include <pango/pangocairo.h>
 
 #include "gtkmm2ext/gui_thread.h"
+#include "canvas/colors.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/diskstream.h"
@@ -312,6 +313,30 @@ class PangoLayout {
 		Glib::RefPtr<Pango::Layout> _layout;
 };
 
+/** expand RGBA color to parameters
+ *
+ * convert a Canvas::Color (uint32_t 0xRRGGBBAA) into
+ * double RGBA values which can be passed as parameters to
+ * Cairo::Context::set_source_rgba
+ *
+ * @returns r, g, b, a
+ */
+static int color_to_rgba (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 1) {
+		return luaL_argerror (L, 1, "invalid number of arguments, color_to_rgba (uint32_t)");
+	}
+	uint32_t color = luabridge::Stack<uint32_t>::get (L, 1);
+	double r, g, b, a;
+	ArdourCanvas::color_to_rgba (color, r, g, b, a);
+	luabridge::Stack <double>::push (L, r);
+	luabridge::Stack <double>::push (L, g);
+	luabridge::Stack <double>::push (L, b);
+	luabridge::Stack <double>::push (L, a);
+	return 4;
+}
+
 }; // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -515,6 +540,11 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addConst ("WordChar", Pango::WRAP_WORD_CHAR)
 		.endNamespace ()
 
+
+		.endNamespace ()
+
+		.beginNamespace ("LuaCairo")
+		.addCFunction ("color_to_rgba", &LuaCairo::color_to_rgba)
 		.endNamespace ();
 
 /* Lua/cairo bindings operate on Cairo::Context, there is no Cairo::RefPtr wrapper [yet].
