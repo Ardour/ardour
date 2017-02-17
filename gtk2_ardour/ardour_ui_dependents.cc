@@ -304,6 +304,8 @@ ARDOUR_UI::setup_windows ()
 	main_vpacker.pack_start (status_bar_hpacker, false, false);
 #endif
 
+	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_action_script_btn));
+
 	for (int i = 0; i < 9; ++i) {
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
 		Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
@@ -410,4 +412,15 @@ ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 	LuaInstance *li = LuaInstance::instance();
 	li->interactive_add (LuaScriptInfo::EditorAction, i);
 	return true;
+}
+
+void
+ARDOUR_UI::update_action_script_btn (int i, const std::string&)
+{
+	if (LuaInstance::instance()->lua_action_has_icon (i)) {
+		uintptr_t ii = i;
+		action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
+	} else {
+		action_script_call_btn[i].set_icon (0, 0);
+	}
 }

@@ -868,7 +868,6 @@ Editor::Editor ()
 
 	setup_fade_images ();
 
-	LuaInstance::instance(); // instantiate
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &Editor::set_script_action_name));
 
 	instant_save ();

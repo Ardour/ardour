@@ -851,6 +851,7 @@ LuaInstance::LuaInstance ()
 LuaInstance::~LuaInstance ()
 {
 	delete _lua_call_action;
+	delete _lua_render_icon;
 	delete _lua_add_action;
 	delete _lua_del_action;
 	delete _lua_get_action;
@@ -866,22 +867,28 @@ LuaInstance::init ()
 {
 	lua.do_command (
 			"function ScriptManager ()"
-			"  local self = { scripts = {}, instances = {} }"
+			"  local self = { scripts = {}, instances = {}, icons = {} }"
 			""
 			"  local remove = function (id)"
 			"   self.scripts[id] = nil"
 			"   self.instances[id] = nil"
+			"   self.icons[id] = nil"
 			"  end"
 			""
-			"  local addinternal = function (i, n, s, f, a)"
+			"  local addinternal = function (i, n, s, f, c, a)"
 			"   assert(type(i) == 'number', 'id must be numeric')"
 			"   assert(type(n) == 'string', 'Name must be string')"
 			"   assert(type(s) == 'string', 'Script must be string')"
 			"   assert(type(f) == 'function', 'Factory is a not a function')"
 			"   assert(type(a) == 'table' or type(a) == 'nil', 'Given argument is invalid')"
-			"   self.scripts[i] = { ['n'] = n, ['s'] = s, ['f'] = f, ['a'] = a }"
+			"   self.scripts[i] = { ['n'] = n, ['s'] = s, ['f'] = f, ['a'] = a, ['c'] = c }"
 			"   local env = _ENV;  env.f = nil env.debug = nil os.exit = nil require = nil dofile = nil loadfile = nil package = nil"
 			"   self.instances[i] = load (string.dump(f, true), nil, nil, env)(a)"
+			"   if type(c) == 'function' then"
+			"     self.icons[i] = load (string.dump(c, true), nil, nil, env)(a)"
+			"   else"
+			"     self.icons[i] = nil"
+			"   end"
 			"  end"
 			""
 			"  local call = function (id)"
@@ -895,17 +902,26 @@ LuaInstance::init ()
 			"   collectgarbage()"
 			"  end"
 			""
-			"  local add = function (i, n, s, b, a)"
+			"  local icon = function (id, ...)"
+			"   if type(self.icons[id]) == 'function' then"
+			"     pcall (self.icons[id], ...)"
+			"   end"
+			"   collectgarbage()"
+			"  end"
+			""
+			"  local add = function (i, n, s, b, c, a)"
 			"   assert(type(b) == 'string', 'ByteCode must be string')"
-			"   load (b)()" // assigns f
+			"   f = nil load (b)()" // assigns f
+			"   icn = nil load (c)()" // may assign "icn"
 			"   assert(type(f) == 'string', 'Assigned ByteCode must be string')"
-			"   addinternal (i, n, s, load(f), a)"
+			"   addinternal (i, n, s, load(f), type(icn) ~= \"string\" or icn == '' or load(icn), a)"
 			"  end"
 			""
 			"  local get = function (id)"
 			"   if type(self.scripts[id]) == 'table' then"
 			"    return { ['name'] = self.scripts[id]['n'],"
 			"             ['script'] = self.scripts[id]['s'],"
+			"             ['icon'] = type(self.scripts[id]['c']) == 'function',"
 			"             ['args'] = self.scripts[id]['a'] }"
 			"   end"
 			"   return nil"
@@ -934,6 +950,8 @@ LuaInstance::init ()
 			"    return rv;"
 			"   elseif type(value) == \"function\" then"
 			"     return rv .. string.format(\"%q\", string.dump(value, true))"
+			"   elseif type(value) == \"boolean\" then"
+			"     return rv .. tostring (value)"
 			"   else"
 			"    error('cannot save a ' .. type(value))"
 			"   end"
@@ -947,6 +965,7 @@ LuaInstance::init ()
 			"  local clear = function ()"
 			"   self.scripts = {}"
 			"   self.instances = {}"
+			"   self.icons = {}"
 			"   collectgarbage()"
 			"  end"
 			""
@@ -954,13 +973,13 @@ LuaInstance::init ()
 			"   clear()"
 			"   load (state)()"
 			"   for i, s in pairs (scripts) do"
-			"    addinternal (i, s['n'], s['s'], load(s['f']), s['a'])"
+			"    addinternal (i, s['n'], s['s'], load(s['f']), type (s['c']) ~= \"string\" or s['c'] == '' or load (s['c']), s['a'])"
 			"   end"
 			"   collectgarbage()"
 			"  end"
 			""
 			" return { call = call, add = add, remove = remove, get = get,"
-			"          restore = restore, save = save, clear = clear}"
+			"          restore = restore, save = save, clear = clear, icon = icon}"
 			" end"
 			" "
 			" manager = ScriptManager ()"
@@ -978,6 +997,7 @@ LuaInstance::init ()
 		_lua_del_action = new luabridge::LuaRef(lua_mgr["remove"]);
 		_lua_get_action = new luabridge::LuaRef(lua_mgr["get"]);
 		_lua_call_action = new luabridge::LuaRef(lua_mgr["call"]);
+		_lua_render_icon = new luabridge::LuaRef(lua_mgr["icon"]);
 		_lua_save = new luabridge::LuaRef(lua_mgr["save"]);
 		_lua_load = new luabridge::LuaRef(lua_mgr["restore"]);
 		_lua_clear = new luabridge::LuaRef(lua_mgr["clear"]);
@@ -1184,6 +1204,23 @@ LuaInstance::call_action (const int id)
 	}
 }
 
+void
+LuaInstance::render_action_icon (cairo_t* cr, int w, int h, uint32_t c, void* i) {
+	int ii = reinterpret_cast<uintptr_t> (i);
+	instance()->render_icon (ii, cr, w, h, c);
+}
+
+void
+LuaInstance::render_icon (int i, cairo_t* cr, int w, int h, uint32_t clr)
+{
+	 Cairo::Context ctx (cr);
+	 try {
+		 (*_lua_render_icon)(i + 1, (Cairo::Context *)&ctx, w, h, clr);
+	 } catch (luabridge::LuaException const& e) {
+		 cerr << "LuaException:" << e.what () << endl;
+	 }
+}
+
 bool
 LuaInstance::set_lua_action (
 		const int id,
@@ -1196,12 +1233,13 @@ LuaInstance::set_lua_action (
 		// get bytcode of factory-function in a sandbox
 		// (don't allow scripts to interfere)
 		const std::string& bytecode = LuaScripting::get_factory_bytecode (script);
+		const std::string& iconfunc = LuaScripting::get_factory_bytecode (script, "icon", "icn");
 		luabridge::LuaRef tbl_arg (luabridge::newTable(L));
 		for (LuaScriptParamList::const_iterator i = args.begin(); i != args.end(); ++i) {
 			if ((*i)->optional && !(*i)->is_set) { continue; }
 			tbl_arg[(*i)->name] = (*i)->value;
 		}
-		(*_lua_add_action)(id + 1, name, script, bytecode, tbl_arg);
+		(*_lua_add_action)(id + 1, name, script, bytecode, iconfunc, tbl_arg);
 		ActionChanged (id, name); /* EMIT SIGNAL */
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
@@ -1256,6 +1294,23 @@ LuaInstance::lua_action_names ()
 		}
 	}
 	return rv;
+}
+
+bool
+LuaInstance::lua_action_has_icon (const int id)
+{
+	try {
+		luabridge::LuaRef ref ((*_lua_get_action)(id + 1));
+		if (ref.isNil()) {
+			return false;
+		}
+		if (ref["icon"].isBoolean()) {
+			return ref["icon"].cast<bool>();
+		}
+	} catch (luabridge::LuaException const& e) {
+		cerr << "LuaException:" << e.what () << endl;
+	}
+	return false;
 }
 
 bool
@@ -1570,6 +1625,8 @@ LuaCallback::init (void)
 			"    return rv;"
 			"   elseif type(value) == \"function\" then"
 			"     return rv .. string.format(\"%q\", string.dump(value, true))"
+			"   elseif type(value) == \"boolean\" then"
+			"     return rv .. tostring (value)"
 			"   else"
 			"    error('cannot save a ' .. type(value))"
 			"   end"

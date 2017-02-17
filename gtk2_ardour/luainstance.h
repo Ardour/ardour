@@ -3,6 +3,8 @@
 
 #include <bitset>
 
+#include <cairo.h>
+
 #include "pbd/id.h"
 #include "pbd/signals.h"
 #include "pbd/xml++.h"
@@ -86,6 +88,8 @@ public:
 	static void register_hooks (lua_State* L);
 	static void bind_cairo (lua_State* L);
 
+	static void render_action_icon (cairo_t* cr, int w, int h, uint32_t c, void* i);
+
 	void set_session (ARDOUR::Session* s);
 
 	int set_state (const XMLNode&);
@@ -96,12 +100,14 @@ public:
 
 	/* actions */
 	void call_action (const int);
+	void render_icon (int i, cairo_t*, int, int, uint32_t);
 
 	bool set_lua_action (const int, const std::string&, const std::string&, const ARDOUR::LuaScriptParamList&);
 	bool remove_lua_action (const int);
 	bool lua_action_name (const int, std::string&);
 	std::vector<std::string> lua_action_names ();
 	bool lua_action (const int, std::string&, std::string&, ARDOUR::LuaScriptParamList&);
+	bool lua_action_has_icon (const int);
 	sigc::signal<void,int,std::string> ActionChanged;
 
 	/* callbacks */
@@ -125,6 +131,7 @@ private:
 	LuaState lua;
 
 	luabridge::LuaRef * _lua_call_action;
+	luabridge::LuaRef * _lua_render_icon;
 	luabridge::LuaRef * _lua_add_action;
 	luabridge::LuaRef * _lua_del_action;
 	luabridge::LuaRef * _lua_get_action;
