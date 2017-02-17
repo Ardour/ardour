@@ -4,6 +4,28 @@ ardour { ["type"] = "EditorAction", name = "Marker Split",
 	description = [[Split regions on selected tracks at all locations markers]]
 }
 
+function icon (params) return function (ctx, w, h, fg)
+	local mh = h - 3.5;
+	local m3 = w / 3;
+	local m6 = w / 6;
+	ctx:set_source_rgba (.8, .8, .2, 1.0)
+	ctx:move_to (w / 2 - m6, 2)
+	ctx:rel_line_to (m3, 0)
+	ctx:rel_line_to (0, mh * 0.4)
+	ctx:rel_line_to (-m6, mh * 0.6)
+	ctx:rel_line_to (-m6, -mh * 0.6)
+	ctx:close_path ()
+	ctx:fill ()
+	-- TODO: better draw a left/right arrow <--|-->
+	-- yet this is a handy text example, so..
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. (h - 7) .. "px")
+	ctx:set_source_rgba (1, 0, 0, 0.7)
+	txt:set_text ("S")
+	local tw, th = txt:get_pixel_size ()
+	ctx:move_to (.5 * (w - tw), 1)
+	txt:show_in_cairo_context (ctx)
+end end
+
 function factory (params) return function ()
 
 	local loc = Session:locations () -- all marker locations
