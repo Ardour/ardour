@@ -450,7 +450,7 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 }
 
 std::string
-LuaScripting::get_factory_bytecode (const std::string& script)
+LuaScripting::get_factory_bytecode (const std::string& script, const std::string& ffn, const std::string& fp)
 {
 	LuaState l;
 	l.Print.connect (&LuaScripting::lua_print);
@@ -461,7 +461,7 @@ LuaScripting::get_factory_bytecode (const std::string& script)
 			""
 			" function dump_function (f)"
 			"  assert(type(f) == 'function', 'Factory is a not a function')"
-			"  return string.format(\"f = %q\", string.dump(f, true))"
+			"  return string.format(\"" + fp + " = %q\", string.dump(f, true))"
 			" end"
 			);
 
@@ -469,7 +469,7 @@ LuaScripting::get_factory_bytecode (const std::string& script)
 		luabridge::LuaRef lua_dump = luabridge::getGlobal (L, "dump_function");
 		l.do_command ("dump_function = nil"); // hide it
 		l.do_command (script); // register "factory"
-		luabridge::LuaRef lua_factory = luabridge::getGlobal (L, "factory");
+		luabridge::LuaRef lua_factory = luabridge::getGlobal (L, ffn.c_str());
 
 		if (lua_factory.isFunction()) {
 			return (lua_dump(lua_factory)).cast<std::string> ();

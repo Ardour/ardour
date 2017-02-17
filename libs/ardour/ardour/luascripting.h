@@ -107,7 +107,7 @@ public:
 
 	static LuaScriptInfoPtr script_info (const std::string &script);
 	static bool try_compile (const std::string&, const LuaScriptParamList&);
-	static std::string get_factory_bytecode (const std::string&);
+	static std::string get_factory_bytecode (const std::string&, const std::string& ffn = "factory", const std::string& fp = "f");
 	static std::string user_script_dir ();
 
 private:
