@@ -1340,6 +1340,7 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 
 		AxisView* av = (*i)[stripable_columns.strip];
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
+		bool const visible = (*i)[stripable_columns.visible];
 
 		if (!strip) {
 			/* we're in the middle of changing a row, don't worry */
@@ -1363,7 +1364,7 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 			}
 		}
 
-		if (slaved) {
+		if (slaved && visible) {
 
 			if (strip->packed()) {
 				strip_packer.reorder_child (*strip, -1); /* put at end */
