@@ -624,7 +624,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			 * of text.
 			 */
 
-		} else { //if (!_text.empty() || !_sizing_text.empty()) {
+		} else /*if (!_text.empty() || !_sizing_text.empty()) */ {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
 			req->width += rint(1.75 * char_pixel_width()); // padding
@@ -671,7 +671,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width += _diameter + 4;
 	}
 
-	if (_elements & VectorIcon) {
+	if (_elements & (VectorIcon | IconRenderCallback)) {
 		assert(!(_elements & Text));
 		const int wh = std::max (6., std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
 		req->width += wh;
