@@ -51,6 +51,13 @@ public:
 
 	};
 
+	struct midi_ev_t {
+		uint64_t pos;
+		uint64_t length;
+		uint8_t note;
+		uint8_t velocity;
+	};
+
 	typedef struct region {
 		std::string name;
 		uint16_t    index;
@@ -58,6 +65,7 @@ public:
 		int64_t     sampleoffset;
 		int64_t     length;
 		wav_t       wave;
+		std::vector<midi_ev_t> midi;
 
 		bool operator ==(const struct region& other) {
 			return (this->index == other.index);
@@ -85,7 +93,8 @@ public:
 		std::vector<region_t>::iterator found;
 
 		wav_t w = { std::string(""), 0, 0, 0 };
-		region_t r = { std::string(""), index, 0, 0, 0, w };
+		std::vector<midi_ev_t> m;
+		region_t r = { std::string(""), index, 0, 0, 0, w, m};
 
 		if ((found = std::find(begin, finish, r)) != finish) {
 			return true;
@@ -109,6 +118,8 @@ public:
 	int64_t sessionrate;
 	int64_t targetrate;
 	uint8_t version;
+	uint8_t *product;
+
 
 	unsigned char c0;
 	unsigned char c1;
@@ -118,8 +129,8 @@ public:
 private:
 	bool foundin(std::string haystack, std::string needle);
 	int parse(void);
-	void unxor10(void);
-	void unxor_ptx_to_ptf(void);
+	bool parse_version();
+	uint8_t gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative);
 	void setrates(void);
 	void parse5header(void);
 	void parse7header(void);
@@ -131,8 +142,8 @@ private:
 	void parserest10(void);
 	void parseaudio5(void);
 	void parseaudio(void);
+	void parsemidi(void);
 	void resort(std::vector<wav_t>& ws);
-	uint8_t mostfrequent(uint32_t start, uint32_t stop);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;
 	std::string extension;

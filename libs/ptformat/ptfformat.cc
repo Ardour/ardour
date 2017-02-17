@@ -26,63 +26,29 @@
 
 using namespace std;
 
-static const uint32_t baselut[16] = {
-	0xaaaaaaaa, 0xaa955555, 0xa9554aaa, 0xa552a955,
-	0xb56ad5aa, 0x95a95a95, 0x94a5294a, 0x9696b4b5,
-	0xd2d25a5a, 0xd24b6d25, 0xdb6db6da, 0xd9249b6d,
-	0xc9b64d92, 0xcd93264d, 0xccd99b32, 0xcccccccd
-};
+static void
+hexdump(uint8_t *data, int len)
+{
+	int i,j,end,step=16;
 
-static const uint32_t xorlut[16] = {
-	0x00000000, 0x00000b00, 0x000100b0, 0x00b0b010,
-	0x010b0b01, 0x0b10b10b, 0x01bb101b, 0x0111bbbb,
-	0x1111bbbb, 0x1bbb10bb, 0x1bb0bb0b, 0xbb0b0bab,
-	0xbab0b0ba, 0xb0abaaba, 0xba0aabaa, 0xbaaaaaaa
-};
-
-static uint32_t swapbytes32 (const uint32_t v) {
-	uint32_t rv = 0;
-	rv |= ((v >>  0) & 0xf) << 28;
-	rv |= ((v >>  4) & 0xf) << 24;
-	rv |= ((v >>  8) & 0xf) << 20;
-	rv |= ((v >> 12) & 0xf) << 16;
-	rv |= ((v >> 16) & 0xf) << 12;
-	rv |= ((v >> 20) & 0xf) <<  8;
-	rv |= ((v >> 24) & 0xf) <<  4;
-	rv |= ((v >> 28) & 0xf) <<  0;
-	return rv;
+	for (i = 0; i < len; i += step) {
+		printf("0x%02X: ", i);
+		end = i + step;
+		if (end > len) end = len;
+		for (j = i; j < end; j++) {
+			printf("0x%02X ", data[j]);
+		}
+		for (j = i; j < end; j++) {
+			if (data[j] < 128 && data[j] > 32)
+				printf("%c", data[j]);
+			else
+				printf(".");
+		}
+		printf("\n");
+	}
 }
 
-static uint64_t gen_secret (int i) {
-	assert (i > 0 && i < 256);
-	int iwrap = i & 0x7f; // wrap at 0x80;
-	uint32_t xor_lo = 0;  // 0x40 flag
-	int idx;              // mirror at 0x40;
-
-	if (iwrap & 0x40) {
-		xor_lo = 0x1;
-		idx    = 0x80 - iwrap;
-	} else {
-		idx    = iwrap;
-	}
-
-	int i16 = (idx >> 1) & 0xf;
-	if (idx & 0x20) {
-		i16 = 15 - i16;
-	}
-
-	uint32_t lo = baselut [i16];
-	uint32_t xk = xorlut  [i16];
-
-	if (idx & 0x20) {
-		lo ^= 0xaaaaaaab;
-		xk ^= 0x10000000;
-	}
-	uint32_t hi = swapbytes32 (lo) ^ xk;
-	return  ((uint64_t)hi << 32) | (lo ^ xor_lo);
-}
-
-PTFFormat::PTFFormat() {
+PTFFormat::PTFFormat() : version(0), product(NULL) {
 }
 
 PTFFormat::~PTFFormat() {
@@ -110,12 +76,11 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 	FILE *fp;
 	unsigned char xxor[256];
 	unsigned char ct;
-	unsigned char v;
-	unsigned char voff;
-	uint64_t key;
 	uint64_t i;
-	uint64_t j;
-	int inv;
+	uint8_t xor_type;
+	uint8_t xor_value;
+	uint8_t xor_delta;
+	uint16_t xor_len;
 	int err;
 
 	if (! (fp = g_fopen(path.c_str(), "rb"))) {
@@ -124,17 +89,10 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 
 	fseek(fp, 0, SEEK_END);
 	len = ftell(fp);
-	if (len < 0x40) {
+	if (len < 0x14) {
 		fclose(fp);
 		return -1;
 	}
-	fseek(fp, 0x40, SEEK_SET);
-	fread(&c0, 1, 1, fp);
-	fread(&c1, 1, 1, fp);
-
-	// For version <= 7 support:
-	version = c0 & 0x0f;
-	c0 = c0 & 0xc0;
 
 	if (! (ptfunxored = (unsigned char*) malloc(len * sizeof(unsigned char)))) {
 		/* Silently fail -- out of memory*/
@@ -143,195 +101,142 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 		return -1;
 	}
 
-	switch (c0) {
-	case 0x00:
-		// Success! easy one
-		xxor[0] = c0;
-		xxor[1] = c1;
-		//fprintf(stderr, "0 %02x\n1 %02x\n", c0, c1);
-
-		for (i = 2; i < 256; i++) {
-			if (i%64 == 0) {
-				xxor[i] = c0;
-			} else {
-				xxor[i] = (xxor[i-1] + c1 - c0) & 0xff;
-				//fprintf(stderr, "%x %02x\n", i, xxor[i]);
-			}
-		}
-		break;
-	case 0x80:
-		//Success! easy two
-		xxor[0] = c0;
-		xxor[1] = c1;
-		for (i = 2; i < 256; i++) {
-			if (i%64 == 0) {
-				xxor[i] = c0;
-			} else {
-				xxor[i] = ((xxor[i-1] + c1 - c0) & 0xff);
-			}
-		}
-		for (i = 0; i < 64; i++) {
-			xxor[i] ^= 0x80;
-		}
-		for (i = 128; i < 192; i++) {
-			xxor[i] ^= 0x80;
-		}
-		break;
-	case 0x40:
-	case 0xc0:
-		xxor[0] = c0;
-		xxor[1] = c1;
-		for (i = 2; i < 256; i++) {
-			if (i%64 == 0) {
-				xxor[i] = c0;
-			} else {
-				xxor[i] = ((xxor[i-1] + c1 - c0) & 0xff);
-			}
-		}
-
-		key = gen_secret(c1);
-
-		for (i = 0; i < 64; i++) {
-			xxor[i] ^= (((key >> i) & 1) * 2 * 0x40) + 0x40;
-		}
-		for (i = 128; i < 192; i++) {
-			inv = (((key >> (i-128)) & 1) == 1) ? 1 : 3;
-			xxor[i] ^= (inv * 0x40);
-		}
-
-		for (i = 192; i < 256; i++) {
-			xxor[i] ^= 0x80;
-		}
-		break;
-		break;
-	default:
-		//Should not happen, failed c[0] c[1]
+	/* The first 20 bytes are always unencrypted */
+	fseek(fp, 0x00, SEEK_SET);
+	i = fread(ptfunxored, 1, 0x14, fp);
+	if (i < 0x14) {
+		fclose(fp);
 		return -1;
-		break;
 	}
 
-	/* Read file */
-	i = 0;
-	fseek(fp, 0, SEEK_SET);
+	xor_type = ptfunxored[0x12];
+	xor_value = ptfunxored[0x13];
+
+	// xor_type 0x01 = ProTools 5, 6, 7, 8 and 9
+	// xor_type 0x05 = ProTools 10, 11, 12
+	switch(xor_type) {
+	case 0x01:
+		xor_delta = gen_xor_delta(xor_value, 53, false);
+		xor_len = 256;
+		break;
+	case 0x05:
+		xor_delta = gen_xor_delta(xor_value, 11, true);
+		xor_len = 128;
+		break;
+	default:
+		fclose(fp);
+		return -1;
+	}
+
+	/* Generate the xor_key */
+	for (i=0; i < xor_len; i++)
+		xxor[i] = (i * xor_delta) & 0xff;
+
+	/* hexdump(xxor, xor_len); */
+
+	/* Read file and decrypt rest of file */
+	i = 0x14;
+	fseek(fp, i, SEEK_SET);
 	while (fread(&ct, 1, 1, fp) != 0) {
-		ptfunxored[i++] = ct;
+		uint8_t xor_index = (xor_type == 0x01) ? i & 0xff : (i >> 12) & 0x7f;
+		ptfunxored[i++] = ct ^ xxor[xor_index];
 	}
 	fclose(fp);
 
-	/* version detection */
-	voff = 0x36;
-	v = ptfunxored[voff];
-	if (v == 0x20) {
-		voff += 7;
-	} else if (v == 0x03) {
-		voff += 4;
-	} else {
-		voff = 0;
-	}
-	v = ptfunxored[voff];
-	if (v == 10 || v == 11 || v == 12) {
-		version = v;
-		unxor10();
-	}
-
-	// Special case when ptx is exported to ptf in PT
-	if (v == 3) {
-		version = 11;
-		unxor_ptx_to_ptf();
-	}
-
-	if (version == 0 || version == 5 || version == 7) {
-		/* Haven't detected version yet so decipher */
-		j = 0;
-		for (i = 0; i < len; i++) {
-			if (j%256 == 0) {
-				j = 0;
-			}
-			ptfunxored[i] ^= xxor[j];
-			j++;
-		}
-
-		/* version detection */
-		voff = 0x36;
-		v = ptfunxored[voff];
-		if (v == 0x20) {
-			voff += 7;
-		} else if (v == 0x03) {
-			voff += 4;
-		} else {
-			voff = 0;
-		}
-		v = ptfunxored[voff];
-		if (v == 5 || v == 7 || v == 8 || v == 9) {
-			version = v;
-		}
-	}
+	if (!parse_version())
+		return -1;
 
 	if (version < 5 || version > 12)
 		return -1;
+
 	targetrate = targetsr;
 	err = parse();
 	if (err)
 		return -1;
+
 	return 0;
 }
 
+bool
+PTFFormat::parse_version() {
+	uint32_t seg_len,str_len;
+	uint8_t *data = ptfunxored + 0x14;
+	uintptr_t data_end = ((uintptr_t)ptfunxored) + 0x100;
+	uint8_t seg_type; 
+	bool success = false;
+
+	while( ((uintptr_t)data < data_end) && (success == false) ) {
+
+		if (data[0] != 0x5a) {
+			success = false;
+			break;
+		}
+
+		seg_type = data[1];
+		/* Skip segment header */
+		data += 3;
+		if (data[0] == 0 && data[1] == 0) {
+			/* LE */
+			seg_len = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+		} else {
+			/* BE */
+			seg_len = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0];
+		}
+		/* Skip seg_len */
+		data += 4;
+		if (!(seg_type == 0x04 || seg_type == 0x03) || data[0] != 0x03) {
+			/* Go to next segment */
+			data += seg_len;
+			continue;
+		}
+		/* Skip 0x03 0x00 0x00 */
+		data += 3;
+		seg_len -= 3;
+		str_len = (*(uint8_t *)data);
+		if (! (product = (uint8_t *)malloc((str_len+1) * sizeof(uint8_t)))) {
+			success = false;
+			break;
+		}
+
+		/* Skip str_len */
+		data += 4;
+		seg_len -= 4;
+
+		memcpy(product, data, str_len);
+		product[str_len] = 0;
+		data += str_len;
+		seg_len -= str_len;
+
+		/* Skip 0x03 0x00 0x00 0x00 */
+		data += 4;
+		seg_len -= 4;
+
+		version = data[0];
+		if (version == 0) {
+			version = data[3];
+		}
+		data += seg_len;
+		success = true;
+	}
+
+	/* If the above does not work, assume old version 5,6,7 */
+	if ((uintptr_t)data >= data_end - seg_len) {
+		version = ptfunxored[0x40];
+		success = true;
+	}
+	return success;
+}
+
 uint8_t
-PTFFormat::mostfrequent(uint32_t start, uint32_t stop)
-{
-	uint32_t counts[256] = {0};
-	uint64_t i;
-	uint32_t max = 0;
-	uint8_t maxi = 0;
-
-	for (i = start; i < stop; i++) {
-		counts[ptfunxored[i]]++;
-	}
-
+PTFFormat::gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative) {
+	uint16_t i;
 	for (i = 0; i < 256; i++) {
-		if (counts[i] > max) {
-			maxi = i;
-			max = counts[i];
+		if (((i * mul) & 0xff) == xor_value) {
+				return (negative) ? i * (-1) : i;
 		}
 	}
-	return maxi;
-}
-
-void
-PTFFormat::unxor10(void)
-{
-	uint64_t j;
-	uint8_t x = mostfrequent(0x1000, 0x2000);
-	uint8_t dx = 0x100-x;
-
-	for (j = 0x1000; j < len; j++) {
-		if(j % 0x1000 == 0xfff) {
-			x = (x - dx) & 0xff;
-		}
-		ptfunxored[j] ^= x;
-	}
-}
-
-void
-PTFFormat::unxor_ptx_to_ptf(void)
-{
-	unsigned char keyy[16] = {	0x00,0x10,0x20,0x30,0x40,0x50,0x60,0x70,
-					0x80,0x90,0xa0,0xb0,0xc0,0xd0,0xe0,0xf0
-	};
-	uint64_t j;
-	uint8_t i;
-
-	for (i = 0, j = 0x10; j < len; j++,i++) {
-		ptfunxored[j] ^= keyy[i];
-		if ((j % 16) == 0) {
-			i = 0;
-			if (ptfunxored[j] % 2 == 0) {
-				ptfunxored[j]++;
-			} else {
-				ptfunxored[j]--;
-			}
-		}
-	}
+	// Should not occur
+	return 0;
 }
 
 int
@@ -343,6 +248,7 @@ PTFFormat::parse(void) {
 		  return -1;
 		parseaudio5();
 		parserest5();
+		parsemidi();
 	} else if (version == 7) {
 		parse7header();
 		setrates();
@@ -350,6 +256,7 @@ PTFFormat::parse(void) {
 		  return -1;
 		parseaudio();
 		parserest89();
+		parsemidi();
 	} else if (version == 8) {
 		parse8header();
 		setrates();
@@ -357,6 +264,7 @@ PTFFormat::parse(void) {
 		  return -1;
 		parseaudio();
 		parserest89();
+		parsemidi();
 	} else if (version == 9) {
 		parse9header();
 		setrates();
@@ -364,6 +272,7 @@ PTFFormat::parse(void) {
 		  return -1;
 		parseaudio();
 		parserest89();
+		parsemidi();
 	} else if (version == 10 || version == 11 || version == 12) {
 		parse10header();
 		setrates();
@@ -371,6 +280,7 @@ PTFFormat::parse(void) {
 		  return -1;
 		parseaudio();
 		parserest10();
+		parsemidi();
 	} else {
 		// Should not occur
 		return -1;
@@ -625,6 +535,7 @@ PTFFormat::parserest5(void) {
 			vector<wav_t>::iterator found;
 			// Add file to lists
 			if ((found = std::find(begin, finish, f)) != finish) {
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
@@ -632,6 +543,7 @@ PTFFormat::parserest5(void) {
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
 					*found,
+					m
 				};
 				regions.push_back(r);
 				vector<track_t>::iterator ti;
@@ -651,6 +563,7 @@ PTFFormat::parserest5(void) {
 				};
 				tracks.push_back(t);
 			} else {
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
@@ -658,6 +571,7 @@ PTFFormat::parserest5(void) {
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
 					f,
+					m,
 				};
 				regions.push_back(r);
 				vector<track_t>::iterator ti;
@@ -782,6 +696,95 @@ PTFFormat::parseaudio5(void) {
 	}
 	resort(actualwavs);
 	resort(audiofiles);
+}
+
+void
+PTFFormat::parsemidi(void) {
+	uint64_t i, k, n_midi_events, zero_ticks;
+	uint64_t midi_pos, midi_len, max_pos;
+	uint8_t midi_velocity, midi_note;
+	uint16_t rsize;
+	std::vector<midi_ev_t> midi;
+	midi_ev_t m;
+	bool found = false;
+	int max_regions = regions.size();
+	char midiname[26] = { 0 };
+
+	// Find MdNLB
+	k = 0;
+
+	// Parse all midi tracks, treat each group of midi bytes as a track
+	while (k + 35 < len) {
+		max_pos = 0;
+
+		while (k < len) {
+			if (		(ptfunxored[k  ] == 'M') &&
+					(ptfunxored[k+1] == 'd') &&
+					(ptfunxored[k+2] == 'N') &&
+					(ptfunxored[k+3] == 'L') &&
+					(ptfunxored[k+4] == 'B')) {
+				found = true;
+				break;
+			}
+			k++;
+		}
+
+		if (!found) {
+			return;
+		}
+
+		k += 11;
+		n_midi_events = ptfunxored[k] | ptfunxored[k+1] << 8 |
+				ptfunxored[k+2] << 16 | ptfunxored[k+3] << 24;
+
+		k += 4;
+		zero_ticks = (uint64_t)ptfunxored[k] |
+				(uint64_t)ptfunxored[k+1] << 8 |
+				(uint64_t)ptfunxored[k+2] << 16 |
+				(uint64_t)ptfunxored[k+3] << 24 |
+				(uint64_t)ptfunxored[k+4] << 32;
+		for (i = 0; i < n_midi_events && k < len; i++, k += 35) {
+			midi_pos = (uint64_t)ptfunxored[k] |
+				(uint64_t)ptfunxored[k+1] << 8 |
+				(uint64_t)ptfunxored[k+2] << 16 |
+				(uint64_t)ptfunxored[k+3] << 24 |
+				(uint64_t)ptfunxored[k+4] << 32;
+			midi_pos -= zero_ticks;
+			midi_note = ptfunxored[k+8];
+			midi_len = (uint64_t)ptfunxored[k+9] |
+				(uint64_t)ptfunxored[k+10] << 8 |
+				(uint64_t)ptfunxored[k+11] << 16 |
+				(uint64_t)ptfunxored[k+12] << 24 |
+				(uint64_t)ptfunxored[k+13] << 32;
+			midi_velocity = ptfunxored[k+17];
+
+			if (midi_pos + midi_len > max_pos) {
+				max_pos = midi_pos + midi_len;
+			}
+
+			m.pos = midi_pos;
+			m.length = midi_len;
+			m.note = midi_note;
+			m.velocity = midi_velocity;
+			midi.push_back(m);
+
+			//fprintf(stderr, "MIDI:  Note=%d Vel=%d Start=%d(samples) Len=%d(samples)\n", midi_note, midi_velocity, midi_pos, midi_len);
+		}
+
+		rsize = (uint16_t)regions.size();
+		snprintf(midiname, 20, "MIDI-%d", rsize - max_regions + 1);
+		wav_t w = { std::string(""), 0, 0, 0 };
+		region_t r = {
+			midiname,
+			rsize,
+			(int64_t)(0),
+			(int64_t)(0),
+			(int64_t)(max_pos*sessionrate*60/(960000*120)),
+			w,
+			midi,
+		};
+		regions.push_back(r);
+	}
 }
 
 void
@@ -995,13 +998,15 @@ PTFFormat::parserest89(void) {
 			if ((found = std::find(begin, finish, f)) != finish) {
 				audiofiles.push_back(f);
 				// Also add plain wav as region
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
 					(int64_t)(start*ratefactor),
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
-					f
+					f,
+					m
 				};
 				regions.push_back(r);
 			// Region only
@@ -1009,13 +1014,15 @@ PTFFormat::parserest89(void) {
 				if (foundin(filename, string(".grp"))) {
 					continue;
 				}
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
 					(int64_t)(start*ratefactor),
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
-					f
+					f,
+					m
 				};
 				regions.push_back(r);
 			}
@@ -1269,13 +1276,15 @@ PTFFormat::parserest10(void) {
 			if ((found = std::find(begin, finish, f)) != finish) {
 				audiofiles.push_back(f);
 				// Also add plain wav as region
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
 					(int64_t)(start*ratefactor),
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
-					f
+					f,
+					m
 				};
 				regions.push_back(r);
 			// Region only
@@ -1283,13 +1292,15 @@ PTFFormat::parserest10(void) {
 				if (foundin(filename, string(".grp"))) {
 					continue;
 				}
+				std::vector<midi_ev_t> m;
 				region_t r = {
 					name,
 					rindex,
 					(int64_t)(start*ratefactor),
 					(int64_t)(sampleoffset*ratefactor),
 					(int64_t)(length*ratefactor),
-					f
+					f,
+					m
 				};
 				regions.push_back(r);
 			}
