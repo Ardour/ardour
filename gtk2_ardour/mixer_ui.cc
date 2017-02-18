@@ -857,7 +857,7 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 			}
 		}
 
-		if (!_selection.axes.empty()) {
+		if (!_selection.axes.empty() && !PublicEditor::instance().track_selection_change_without_scroll ()) {
 			move_stripable_into_view ((*_selection.axes.begin())->stripable());
 		}
 	}

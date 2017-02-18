@@ -21,6 +21,7 @@
 #include <cstdlib>
 
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/playlist.h"
@@ -174,6 +175,7 @@ Editor::select_all_tracks ()
 			visible_views.push_back (*i);
 		}
 	}
+	PBD::Unwinder<bool> uw (_track_selection_change_without_scroll, true);
 	selection->set (visible_views);
 }
 
@@ -966,7 +968,9 @@ Editor::track_selection_changed ()
 		 * selected, because we always append to that list.
 		 */
 		set_selected_mixer_strip (*(selection->tracks.back()));
-		ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
+		if (!_track_selection_change_without_scroll) {
+			ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
+		}
 		break;
 	}
 

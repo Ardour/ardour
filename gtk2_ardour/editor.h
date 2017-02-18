@@ -1606,6 +1606,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void queue_visual_videotimeline_update ();
 	void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true);
 
+	bool track_selection_change_without_scroll () const {
+		return _track_selection_change_without_scroll;
+	}
+
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
@@ -1855,6 +1859,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _last_region_menu_was_main;
 	void point_selection_changed ();
 	void marker_selection_changed ();
+
+	bool _track_selection_change_without_scroll;
 
 	void cancel_selection ();
 	void cancel_time_selection ();
