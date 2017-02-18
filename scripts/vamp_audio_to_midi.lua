@@ -68,3 +68,12 @@ function factory () return function ()
 		end
 	end
 end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(width * .7) .. "px")
+	txt:set_text ("\u{2669}") -- quarter note symbol UTF8
+	local tw, th = txt:get_pixel_size ()
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+	ctx:move_to (.5 * (width - tw), .5 * (height - th))
+	txt:show_in_cairo_context (ctx)
+end end

@@ -278,3 +278,42 @@ function factory (params) return function ()
 	::errorout::
 end -- end of anonymous action script function
 end -- end of script factory
+
+
+function icon (params) return function (ctx, width, height)
+	local x = width * .5
+	local y = height * .5
+	local r = math.min (x, y)
+
+	ctx:set_line_width (1)
+
+	function stroke_outline ()
+		ctx:set_source_rgba (0, 0, 0, 1)
+		ctx:stroke_preserve ()
+		ctx:set_source_rgba (1, 1, 1, 1)
+		ctx:fill ()
+	end
+
+	ctx:rectangle (x - r * .6, y - r * .05, r * .6, r * .3)
+	stroke_outline ()
+
+	ctx:arc (x, y, r * .61, math.pi, 0.2 * math.pi)
+	ctx:arc_negative (x, y, r * .35, 0.2 * math.pi, math.pi);
+	stroke_outline ()
+
+	function arc_arrow (rad, ang)
+		return x - rad * math.sin (ang * 2.0 * math.pi), y - rad * math.cos (ang * 2.0 * math.pi)
+	end
+
+	ctx:move_to (arc_arrow (r * .36, .72))
+	ctx:line_to (arc_arrow (r * .17, .72))
+	ctx:line_to (arc_arrow (r * .56, .60))
+	ctx:line_to (arc_arrow (r * .75, .72))
+	ctx:line_to (arc_arrow (r * .62, .72))
+
+	ctx:set_source_rgba (0, 0, 0, 1)
+	ctx:stroke_preserve ()
+	ctx:close_path ()
+	ctx:set_source_rgba (1, 1, 1, 1)
+	ctx:fill ()
+end end

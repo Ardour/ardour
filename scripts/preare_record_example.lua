@@ -67,7 +67,7 @@ function icon (params) return function (ctx, width, height)
 	local r = math.min (x, y) * .55
 
 	ctx:arc (x, y, r, 0, 2 * math.pi)
-	ctx:set_source_rgba (9, .3, .3, 1.)
+	ctx:set_source_rgba (.9, .3, .3, 1.)
 	ctx:fill_preserve ()
 	ctx:set_source_rgba (0, 0, 0, .8)
 	ctx:set_line_width (1)

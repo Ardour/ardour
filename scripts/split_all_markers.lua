@@ -82,6 +82,8 @@ function icon (params) return function (ctx, width, height, fg)
 	local m3 = width / 3;
 	local m6 = width / 6;
 
+	ctx:set_line_width (.5)
+
 	-- compare to gtk2_ardour/marker.cc "Marker"
 	ctx:set_source_rgba (.8, .8, .2, 1.0)
 	ctx:move_to (width / 2 - m6, 2)
@@ -90,10 +92,12 @@ function icon (params) return function (ctx, width, height, fg)
 	ctx:rel_line_to (-m6, mh * 0.6)
 	ctx:rel_line_to (-m6, -mh * 0.6)
 	ctx:close_path ()
-	ctx:fill ()
+	ctx:fill_preserve ()
+	ctx:set_source_rgba (.0, .0, .0, 1.0)
+	ctx:stroke ()
 
 	-- draw an arrow  <--|--> on top, using the foreground color
-	ctx:set_source_rgba (LuaCairo.color_to_rgba (fg))
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
 	ctx:set_line_width (1)
 
 	ctx:move_to (width * .5, height * .4)
