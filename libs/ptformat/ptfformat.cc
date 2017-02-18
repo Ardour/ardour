@@ -766,6 +766,14 @@ PTFFormat::parsemidi(void) {
 			m.length = midi_len;
 			m.note = midi_note;
 			m.velocity = midi_velocity;
+#if 1
+// stop gap measure to prevent crashes in ardour,
+// remove when decryption is fully solved for .ptx
+			if ((m.velocity & 0x80) || (m.note & 0x80) ||
+					(m.pos & 0xff00000000) || (m.length & 0xff00000000)) {
+				continue;
+			}
+#endif
 			midi.push_back(m);
 
 			//fprintf(stderr, "MIDI:  Note=%d Vel=%d Start=%d(samples) Len=%d(samples)\n", midi_note, midi_velocity, midi_pos, midi_len);
