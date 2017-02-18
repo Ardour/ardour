@@ -166,7 +166,7 @@ Editor::register_actions ()
 	myactions.register_action (editor_menu_actions, X_("View"), _("View"));
 	myactions.register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	myactions.register_action (editor_menu_actions, X_("ZoomMenu"), _("Zoom"));
-	myactions.register_action (editor_menu_actions, X_("ActionScripts"), _("Scripted Actions"));
+	myactions.register_action (editor_menu_actions, X_("LuaScripts"), _("Lua Scripts"));
 
 	register_region_actions ();
 

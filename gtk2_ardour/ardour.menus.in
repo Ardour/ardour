@@ -28,11 +28,6 @@
 #endif
       <!--menuitem action='importFromSession'/-->
 
-      <menu name='Scripting' action='Scripting'>
-        <menuitem action='AddLuaScript'/>
-        <menuitem action='RemoveLuaScript'/>
-      </menu>
-
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 
@@ -287,7 +282,7 @@
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
       <separator/>
-      <menu action="ActionScripts">
+      <menu action="LuaScripts">
         <menuitem action='toggle-script-manager'/>
         <separator/>
         <menuitem action='script-action-1'/>
