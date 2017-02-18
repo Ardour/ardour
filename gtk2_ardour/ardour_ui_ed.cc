@@ -186,14 +186,6 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (main_actions, X_("Scripting"), S_("Session|Scripting"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("AddLuaScript"), _("Add Lua Script..."),
-	              sigc::mem_fun (*this, &ARDOUR_UI::add_lua_script));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = global_actions.register_action (main_actions, X_("RemoveLuaScript"), _("Remove Lua Script"),
-	              sigc::mem_fun (*this, &ARDOUR_UI::remove_lua_script));
-	ActionManager::session_sensitive_actions.push_back (act);
-
 	act = global_actions.register_action (main_actions, X_("OpenVideo"), _("Open Video..."),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
