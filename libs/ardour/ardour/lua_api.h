@@ -167,6 +167,22 @@ namespace ARDOUR { namespace LuaAPI {
 	int hsla_to_rgba (lua_State *lua);
 
 	/**
+	 * A convenience function to expand RGBA parameters from an integer
+	 *
+	 * convert a Canvas::Color (uint32_t 0xRRGGBBAA) into
+	 * double RGBA values which can be passed as parameters to
+	 * Cairo::Context::set_source_rgba
+	 *
+	 * Example:
+	 * @code
+	 * local r, g, b, a = ARDOUR.LuaAPI.color_to_rgba (0x88aa44ff)
+	 * cairo_ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (0x11336699)
+	 * @endcode
+	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
+	 */
+	int color_to_rgba (lua_State *lua);
+
+	/**
 	 * Creates a filename from a series of elements using the correct separator for filenames.
 	 *
 	 * No attempt is made to force the resulting filename to be an absolute path.

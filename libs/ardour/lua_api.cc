@@ -503,6 +503,32 @@ ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
 }
 
 int
+ARDOUR::LuaAPI::color_to_rgba (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top < 1) {
+		return luaL_argerror (L, 1, "invalid number of arguments, color_to_rgba (uint32_t)");
+	}
+	uint32_t color = luabridge::Stack<uint32_t>::get (L, 1);
+	double r, g, b, a;
+
+	/* libardour is no user of libcanvas, otherwise
+	 * we could just call
+	 * ArdourCanvas::color_to_rgba (color, r, g, b, a);
+	 */
+	r = ((color >> 24) & 0xff) / 255.0;
+	g = ((color >> 16) & 0xff) / 255.0;
+	b = ((color >>  8) & 0xff) / 255.0;
+	a = ((color >>  0) & 0xff) / 255.0;
+
+	luabridge::Stack <double>::push (L, r);
+	luabridge::Stack <double>::push (L, g);
+	luabridge::Stack <double>::push (L, b);
+	luabridge::Stack <double>::push (L, a);
+	return 4;
+}
+
+int
 ARDOUR::LuaAPI::build_filename (lua_State *L)
 {
 	std::vector<std::string> elem;
