@@ -6991,10 +6991,12 @@ Editor::snap_regions_to_grid ()
 			used_playlists.push_back(pl);
 			pl->freeze();
 		}
+		(*r)->region()->clear_changes ();
 
 		MusicFrame start ((*r)->region()->first_frame (), 0);
 		snap_to (start);
 		(*r)->region()->set_position (start.frame, start.division);
+		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
 
 	while (used_playlists.size() > 0) {
