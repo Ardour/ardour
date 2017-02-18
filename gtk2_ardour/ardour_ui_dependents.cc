@@ -41,6 +41,7 @@
 #include "luawindow.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
+#include "keyeditor.h"
 #include "splash.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
@@ -419,7 +420,7 @@ ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 }
 
 void
-ARDOUR_UI::update_action_script_btn (int i, const std::string&)
+ARDOUR_UI::update_action_script_btn (int i, const std::string& n)
 {
 	if (LuaInstance::instance()->lua_action_has_icon (i)) {
 		uintptr_t ii = i;
@@ -427,4 +428,18 @@ ARDOUR_UI::update_action_script_btn (int i, const std::string&)
 	} else {
 		action_script_call_btn[i].set_icon (0, 0);
 	}
+
+	std::string const a = string_compose (X_("script-action-%1"), i + 1);
+	Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
+	assert (act);
+	if (n.empty ()) {
+		act->set_label (string_compose (_("Unset #%1"), i + 1));
+		act->set_tooltip (_("No action bound\nRight-click to assign"));
+		act->set_sensitive (false);
+	} else {
+		act->set_label (n);
+		act->set_tooltip (string_compose (_("%1\n\nClick to run\nRight-click to re-assign\nShift+right-click to unassign"), n));
+		act->set_sensitive (true);
+	}
+	KeyEditor::UpdateBindings ();
 }
