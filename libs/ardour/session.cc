@@ -5271,6 +5271,9 @@ Session::register_lua_function (
 		tbl_arg[(*i)->name] = (*i)->value;
 	}
 	(*_lua_add)(name, bytecode, tbl_arg); // throws luabridge::LuaException
+	lm.release();
+
+	LuaScriptsChanged (); /* EMIT SIGNAL */
 	set_dirty();
 }
 
@@ -5280,6 +5283,9 @@ Session::unregister_lua_function (const std::string& name)
 	Glib::Threads::Mutex::Lock lm (lua_lock);
 	(*_lua_del)(name); // throws luabridge::LuaException
 	lua.collect_garbage ();
+	lm.release();
+
+	LuaScriptsChanged (); /* EMIT SIGNAL */
 	set_dirty();
 }
 

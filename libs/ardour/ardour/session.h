@@ -823,6 +823,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	uint32_t registered_lua_function_count () const { return _n_lua_scripts; }
 	void scripts_changed (); // called from lua, updates _n_lua_scripts
 
+	PBD::Signal0<void> LuaScriptsChanged;
+
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (Track&, framepos_t start, framepos_t end,
