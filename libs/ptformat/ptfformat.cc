@@ -770,7 +770,7 @@ PTFFormat::parsemidi(void) {
 // stop gap measure to prevent crashes in ardour,
 // remove when decryption is fully solved for .ptx
 			if ((m.velocity & 0x80) || (m.note & 0x80) ||
-					(m.pos & 0xff00000000) || (m.length & 0xff00000000)) {
+					(m.pos & 0xff00000000LL) || (m.length & 0xff00000000LL)) {
 				continue;
 			}
 #endif
