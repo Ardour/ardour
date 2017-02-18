@@ -42,22 +42,22 @@ ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType typ
 
 	l = manage (new Label (_("<b>Type:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_type, 1, 2, ty, ty+1);
+	t->attach (*l, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	t->attach (_type, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
 	l = manage (new Label (_("<b>Author:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_author, 1, 2, ty, ty+1);
+	t->attach (*l, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	t->attach (_author, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
-	l = manage (new Label (_("<b>Description:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_description, 1, 2, ty, ty+1);
+	Frame* f = manage(new Frame (_("Description")));
+	f->add (_description);
+	t->attach (*f, 0, 2, ty, ty+1);
 	++ty;
 
+	_description.set_padding (5, 5);
 	_description.set_line_wrap();
 
 	get_vbox()->set_spacing (6);
