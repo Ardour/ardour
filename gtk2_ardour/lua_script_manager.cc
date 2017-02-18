@@ -52,6 +52,9 @@ LuaScriptManager::LuaScriptManager ()
 	_a_view.get_column(1)->set_resizable (true);
 	_a_view.get_column(1)->set_expand (true);
 
+	Frame* f;
+	Gtk::Label* doc;
+
 	Gtk::HBox* edit_box = manage (new Gtk::HBox);
 	edit_box->set_spacing(3);
 
@@ -69,9 +72,18 @@ LuaScriptManager::LuaScriptManager ()
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &LuaScriptManager::set_action_script_name));
 	LuaInstance::instance()->SlotChanged.connect (sigc::mem_fun (*this, &LuaScriptManager::set_callback_script_name));
 
+	f = manage (new Frame (_("Description")));
+	doc = manage (new Label (
+				_("Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) for batch processing or customized tasks.")
+				));
+	doc->set_padding (5, 5);
+	doc->set_line_wrap();
+	f->add (*doc);
+
 	Gtk::VBox *vbox = manage (new VBox());
 	vbox->pack_start (_a_view, false, false);
 	vbox->pack_end (*edit_box, false, false);
+	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
 	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Scripts"));
@@ -98,9 +110,18 @@ LuaScriptManager::LuaScriptManager ()
 	_c_del_button.signal_clicked().connect (sigc::mem_fun(*this, &LuaScriptManager::del_callback_btn_clicked));
 	_c_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &LuaScriptManager::callback_selection_changed));
 
+	f = manage (new Frame (_("Description")));
+	doc = manage (new Label (
+				_("Lua action hooks are event-triggered callbacks for the Editor/Mixer GUI. Once a script is registered it is automatically triggered by events to perform some task.")
+				));
+	doc->set_padding (5, 5);
+	doc->set_line_wrap();
+	f->add (*doc);
+
 	vbox = manage (new VBox());
 	vbox->pack_start (_c_view, false, false);
 	vbox->pack_end (*edit_box, false, false);
+	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
 	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Hooks"));
@@ -122,9 +143,18 @@ LuaScriptManager::LuaScriptManager ()
 	_s_del_button.signal_clicked().connect (sigc::mem_fun(*this, &LuaScriptManager::del_sess_btn_clicked));
 	_s_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &LuaScriptManager::session_script_selection_changed));
 
+	f = manage (new Frame (_("Description")));
+	doc = manage (new Label (
+				_("Lua session scripts are loaded into processing engine and run in realtime. They are called periodically at the start of every audio cycle in the realtime process context before any processing takes place.")
+				));
+	doc->set_padding (5, 5);
+	doc->set_line_wrap();
+	f->add (*doc);
+
 	vbox = manage (new VBox());
 	vbox->pack_start (_s_view, false, false);
 	vbox->pack_end (*edit_box, false, false);
+	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
 	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Session Scripts"));
