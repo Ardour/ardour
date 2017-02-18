@@ -116,6 +116,7 @@ ARDOUR_UI::set_session (Session *s)
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
+	lua_script_window->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
 

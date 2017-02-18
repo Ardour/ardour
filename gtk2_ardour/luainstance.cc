@@ -1101,16 +1101,25 @@ bool
 LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 {
 	std::string title;
+	std::string param_function = "action_params";
 	std::vector<std::string> reg;
 
 	switch (type) {
 		case LuaScriptInfo::EditorAction:
 			reg = lua_action_names ();
-			title = "Add Lua Action";
+			title = _("Add Lua Action");
 			break;
 		case LuaScriptInfo::EditorHook:
 			reg = lua_slot_names ();
-			title = "Add Lua Callback Hook";
+			title = _("Add Lua Callback Hook");
+			break;
+		case LuaScriptInfo::Session:
+			if (!_session) {
+				return false;
+			}
+			reg = _session->registered_lua_functions ();
+			title = _("Add Lua Session Script");
+			param_function = "sess_params";
 			break;
 		default:
 			return false;
@@ -1138,7 +1147,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		return false;
 	}
 
-	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, "action_params");
+	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, param_function);
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
 	switch (spd.run ()) {
@@ -1155,6 +1164,18 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		case LuaScriptInfo::EditorHook:
 			return register_lua_slot (spd.name(), script, lsp);
 			break;
+		case LuaScriptInfo::Session:
+			try {
+				_session->register_lua_function (spd.name(), script, lsp);
+			} catch (luabridge::LuaException const& e) {
+				string msg = string_compose (_("Session script '%1' instantiation failed: %2"), spd.name(), e.what ());
+				Gtk::MessageDialog am (msg);
+				am.run ();
+			} catch (SessionException e) {
+				string msg = string_compose (_("Loading Session script '%1' failed: %2"), spd.name(), e.what ());
+				Gtk::MessageDialog am (msg);
+				am.run ();
+			}
 		default:
 			break;
 	}
