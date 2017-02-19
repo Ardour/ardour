@@ -24,6 +24,7 @@
 #include "LuaBridge/LuaBridge.h"
 
 #include "lua_script_manager.h"
+#include "luawindow.h"
 #include "script_selector.h"
 #include "pbd/i18n.h"
 
@@ -226,7 +227,7 @@ LuaScriptManager::action_selection_changed ()
 
 	if (row && row[_a_model.enabled]) {
 		_a_del_button.set_sensitive (true);
-		_a_edit_button.set_sensitive (false); // TODO
+		_a_edit_button.set_sensitive (true);
 		_a_call_button.set_sensitive (true);
 	} else {
 		_a_del_button.set_sensitive (false);
@@ -276,20 +277,7 @@ LuaScriptManager::edit_action_btn_clicked ()
 	if (!li->lua_action (id, name, script, args)) {
 		return;
 	}
-
-	// TODO text-editor window, update script directly
-
-	if (!LuaScripting::try_compile (script, args)) {
-		// compilation failed, keep editing
-		return;
-	}
-
-	if (li->set_lua_action (id, name, script, args)) {
-		// OK
-	} else {
-		// load failed,  keep editing..
-	}
-	action_selection_changed ();
+	LuaWindow::instance()->edit_script (name, script);
 }
 
 void

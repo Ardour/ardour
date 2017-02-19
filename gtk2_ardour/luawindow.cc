@@ -323,6 +323,17 @@ LuaWindow::clear_output ()
 }
 
 void
+LuaWindow::edit_script (const std::string& name, const std::string& script)
+{
+	ScriptBuffer* sb = new LuaWindow::ScriptBuffer (name);
+	sb->script = script;
+	script_buffers.push_back (ScriptBufferPtr (sb));
+	script_selection_changed (script_buffers.back ());
+	refresh_scriptlist ();
+	show_window ();
+}
+
+void
 LuaWindow::new_script ()
 {
 	char buf[32];
