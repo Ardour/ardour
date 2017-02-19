@@ -1462,7 +1462,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			 * tear_down_gui() hides an deletes the Window if it exists.
 			 */
 			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
-			win->set_title ("Control Protocol Options");
+			win->set_title (_("Control Protocol Settings"));
 			win->add (*box);
 			box->show ();
 			win->present ();
