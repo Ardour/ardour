@@ -3667,6 +3667,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	_editor->snap_to_with_modifier (where, event);
 	_editor->_dragging_playhead = true;
+	_editor->_control_scroll_target = where.frame;
 
 	Session* s = _editor->session ();
 
