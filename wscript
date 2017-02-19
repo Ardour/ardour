@@ -716,6 +716,8 @@ def options(opt):
                    help='Build internal libs as static libraries')
     opt.add_option('--use-external-libs', action='store_true', default=False, dest='use_external_libs',
                    help='Use external/system versions of some bundled libraries')
+    opt.add_option('--keepflags', action='store_true', default=False, dest='keepflags',
+                    help='Do not ignore CFLAGS/CXXFLAGS environment vars')
     opt.add_option('--luadoc', action='store_true', default=False, dest='luadoc',
                     help='Compile Tool to dump LuaBindings (needs C++11)')
     opt.add_option('--canvasui', action='store_true', default=False, dest='canvasui',
@@ -808,7 +810,7 @@ def configure(conf):
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
 
-    if Options.options.debug:
+    if Options.options.debug and not Options.options.keepflags:
         # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
         conf.env['CFLAGS'] = []
         conf.env['CXXFLAGS'] = []

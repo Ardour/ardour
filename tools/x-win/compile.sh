@@ -67,6 +67,7 @@ export DLLTOOL=${XPREFIX}-dlltool
 CFLAGS="-mstackrealign" \
 CXXFLAGS="-mstackrealign" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
+	--keepflags \
 	--dist-target=mingw \
 	--also-include=${PREFIX}/include \
 	$ARDOURCFG \
