@@ -1,4 +1,3 @@
-
 ardour {
 	["type"] = "EditorAction",
 	name = "Create Drum Tracks",
@@ -6,36 +5,32 @@ ardour {
 	description = [[Creates 8 new tracks with representative names and colors.]]
 }
 
-names = {
-"Kick",
-"Snare",
-"Hat",
-"Fl Tom",
-"OH L",
-"OH R",
-"Room 1",
-"Room 2"
-}
+function factory () return function ()
 
-color = 0xff8800ff  --orange
+		local names = {
+			"Kick",
+			"Snare",
+			"Hat",
+			"Fl Tom",
+			"OH L",
+			"OH R",
+			"Room 1",
+			"Room 2"
+		}
 
-    
-function factory (params)
-	return function ()
+		local color = 0xff8800ff  --orange
 
 		local i = 1
 		while names[i] do
-			Session:new_audio_track(1,2,RouteGroup,1,names[i],i,ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (1, 2, nil, 1, names[i],
+			                                    ARDOUR.PresentationInfo.max_order,
+			                                    ARDOUR.TrackMode.Normal)
 
-			track = Session:route_by_name(names[i])
-			if (not track:isnil()) then
-				trkinfo = track:presentation_info_ptr ()	
-				trkinfo:set_color (color)
+			for track in tl:iter () do
+				track:presentation_info_ptr ():set_color (color)
 			end
 
 			i = i + 1
 		end --foreach track
 
-	end  --function
-
-end --factory
+end end -- function factory
