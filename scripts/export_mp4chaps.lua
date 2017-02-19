@@ -53,3 +53,26 @@ function factory (unused_params) return function ()
 
 	::out::
 end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local mh = height - 3.5;
+	local m3 = width / 3;
+	local m6 = width / 6;
+
+	ctx:set_line_width (.5)
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+
+	ctx:move_to (width / 2 - m6, 2)
+	ctx:rel_line_to (m3, 0)
+	ctx:rel_line_to (0, mh * 0.4)
+	ctx:rel_line_to (-m6, mh * 0.6)
+	ctx:rel_line_to (-m6, -mh * 0.6)
+	ctx:close_path ()
+	ctx:stroke ()
+
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(math.min (width, height) * .5) .. "px")
+	txt:set_text ("MP4")
+	local tw, th = txt:get_pixel_size ()
+	ctx:move_to (.5 * (width - tw), .5 * (height - th))
+	txt:show_in_cairo_context (ctx)
+end end

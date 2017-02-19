@@ -62,3 +62,39 @@ function factory (params) return function ()
 	end
 
 end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local wh = math.min (width, height) * .5
+	local ar = wh * .2
+
+	ctx:set_line_width (1)
+	function stroke_outline (c)
+		ctx:set_source_rgba (0, 0, 0, 1)
+		ctx:stroke_preserve ()
+		ctx:set_source_rgba (c, c, c, 1)
+		ctx:fill ()
+	end
+
+	ctx:rectangle (wh - wh * .6, wh - .7 * wh, wh * 1.2, .5 * wh)
+	stroke_outline (.7)
+
+	ctx:rectangle (wh - wh * .6, wh + .1 * wh, wh * 1.2, .5 * wh)
+	stroke_outline (.9)
+
+	-- arrow
+	ctx:set_source_rgba (0, 1, 0, 1)
+	ctx:set_line_width (ar * .7)
+
+	ctx:move_to (wh, wh - .5 * wh)
+	ctx:rel_line_to (0, wh)
+	ctx:stroke ()
+
+	ctx:move_to (wh, wh + .5 * wh)
+	ctx:rel_line_to (-ar, -ar)
+	ctx:rel_line_to (2 * ar, 0)
+	ctx:close_path ()
+	ctx:stroke ()
+
+
+
+end end
