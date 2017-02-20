@@ -1663,8 +1663,7 @@ EditorRoutes::move_selected_tracks (bool up)
 		PresentationInfo::ChangeSuspender cs;
 
 		if (up) {
-			unselected_neighbour = view_stripables.begin ();
-			++unselected_neighbour;
+			unselected_neighbour = view_stripables.end ();
 			vsi = view_stripables.begin();
 
 			while (vsi != view_stripables.end()) {
