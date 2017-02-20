@@ -390,13 +390,16 @@ Mixer_UI::use_own_window (bool and_fill_it)
 
 	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
 
-
 	if (win && new_window) {
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
 		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
+		if (!win->get_focus()) {
+			/* set focus widget to something, anything */
+			win->set_focus (scroller);
+		}
 	}
 
 	return win;
