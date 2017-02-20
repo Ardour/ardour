@@ -1687,13 +1687,25 @@ MixerStrip::build_route_ops_menu ()
 
 	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
 
-	items.push_back (SeparatorElem());
+	if (!Profile->get_mixbus()) {
+		items.push_back (SeparatorElem());
+	}
 
-	if (!_route->is_master()) {
+	if (!_route->is_master()
+#ifdef MIXBUS
+			&& !_route->mixbus()
+#endif
+			) {
+		if (Profile->get_mixbus()) {
+			items.push_back (SeparatorElem());
+		}
 		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	}
-	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
-	rename_menu_item = &items.back();
+
+	if (!Profile->get_mixbus()) {
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+		rename_menu_item = &items.back();
+	}
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
