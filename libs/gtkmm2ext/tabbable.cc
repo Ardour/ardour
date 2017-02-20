@@ -35,11 +35,11 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using std::string;
 
-Tabbable::Tabbable (Widget& w, const string& name)
+Tabbable::Tabbable (Widget& w, const string& name, bool tabbed_by_default)
 	: WindowProxy (name)
 	, _contents (w)
 	, _parent_notebook (0)
-	, tab_requested_by_state (true)
+	, tab_requested_by_state (tabbed_by_default)
 {
 }
 
