@@ -1663,9 +1663,9 @@ EditorRoutes::move_selected_tracks (bool up)
 		PresentationInfo::ChangeSuspender cs;
 
 		if (up) {
-			unselected_neighbour = view_stripables.end ();
+			unselected_neighbour = view_stripables.begin ();
+			++unselected_neighbour;
 			vsi = view_stripables.begin();
-			++vsi;
 
 			while (vsi != view_stripables.end()) {
 
@@ -1699,9 +1699,10 @@ EditorRoutes::move_selected_tracks (bool up)
 
 			unselected_neighbour = view_stripables.end();
 			vsi = unselected_neighbour;
-			--vsi;
 
 			do {
+
+				--vsi;
 
 				if (vsi->stripable->presentation_info().selected()) {
 
@@ -1725,8 +1726,6 @@ EditorRoutes::move_selected_tracks (bool up)
 					}
 
 				}
-
-				--vsi;
 
 			} while (vsi != view_stripables.begin());
 		}
