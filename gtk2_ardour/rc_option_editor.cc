@@ -2117,7 +2117,7 @@ RCOptionEditor::RCOptionEditor ()
 	, Tabbable (*this, _("Preferences")
 #ifdef MIXBUS
 			, false // detached by default (first start, no instant.xml)
-#else
+#endif
 			) /* pack self-as-vbox into tabbable */
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
