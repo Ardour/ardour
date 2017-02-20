@@ -65,6 +65,7 @@
 #include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/application.h"
@@ -324,6 +325,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	UIConfiguration::instance().post_gui_init ();
 
 	if (ARDOUR::handle_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
+		{
+			/* "touch" the been-here-before path now that config has been migrated */
+			PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
+		}
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */
