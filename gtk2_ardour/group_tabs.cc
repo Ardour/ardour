@@ -362,7 +362,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
 			f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
 		}
-		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
+		items.push_back (MenuElem (_("Assign Group to VCA..."), *vca_menu));
 
 
 		items.push_back (SeparatorElem());
@@ -398,7 +398,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 	}
 
-	items.push_back (MenuElem (_("Assign Selection to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Selection to VCA..."), *vca_menu));
 
 	vca_menu = new Menu;
 	{
@@ -409,7 +409,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 
 	}
-	items.push_back (MenuElem (_("Assign Record Enabled to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Record Enabled to VCA..."), *vca_menu));
 
 	vca_menu = new Menu;
 	{
@@ -420,7 +420,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 
 	}
-	items.push_back (MenuElem (_("Assign Soloed to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Soloed to VCA..."), *vca_menu));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));

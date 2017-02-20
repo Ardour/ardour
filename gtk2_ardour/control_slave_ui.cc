@@ -47,7 +47,7 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 {
 	set_no_show_all (true);
 
-	Gtkmm2ext::UI::instance()->set_tip (*this, _("Control Masters"));
+	Gtkmm2ext::UI::instance()->set_tip (*this, _("VCAs"));
 
 	initial_button.set_no_show_all (true);
 	initial_button.set_name (X_("vca assign"));
