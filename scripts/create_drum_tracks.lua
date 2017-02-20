@@ -6,7 +6,6 @@ ardour {
 }
 
 function factory () return function ()
-
 		local names = {
 			"Kick",
 			"Snare",
@@ -34,3 +33,41 @@ function factory () return function ()
 		end --foreach track
 
 end end -- function factory
+
+
+function icon (params) return function (ctx, width, height)
+	local x = width * .5
+	local y = height * .5
+	local r = math.min (x, y) * .7
+	ctx:save ()
+	ctx:translate (x, y)
+	ctx:scale (1, .5)
+	ctx:translate (-x, -y)
+	ctx:arc (x, y, r, 0, 2 * math.pi)
+	ctx:set_source_rgba (.9, .9, 1, 1)
+	ctx:fill ()
+	ctx:arc (x, y, r, 0, math.pi)
+	ctx:arc_negative (x, y * 1.6, r, math.pi, 0)
+	ctx:set_source_rgba (.7, .7, .7, 1)
+	ctx:fill ()
+	ctx:restore ()
+
+	ctx:set_source_rgba (.6, .4, .2, 1)
+	ctx:translate (x, y)
+	ctx:scale (.7, 1)
+	ctx:translate (-x, -y)
+	ctx:set_line_cap (Cairo.LineCap.Round)
+
+	function drumstick (xp, lr)
+		ctx:set_line_width (r * .3)
+		ctx:move_to (x * xp, y)
+		ctx:close_path ()
+		ctx:stroke ()
+		ctx:set_line_width (r * .2)
+		ctx:move_to (x * xp, y)
+		ctx:rel_line_to (lr * x, y)
+		ctx:stroke ()
+	end
+	drumstick (1.2, 1.2)
+	drumstick (0.7, -.5)
+end end
