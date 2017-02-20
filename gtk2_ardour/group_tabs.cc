@@ -144,10 +144,10 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 		RouteGroup* g = t ? t->group : 0;
 
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
-			/* edit */
-			RouteGroupDialog d (g, false);
-			d.present ();
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) && g) {
+			remove_group (g);
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
+			edit_group (g);
 		} else {
 			Menu* m = get_menu (g, true);
 			if (m) {
