@@ -159,6 +159,7 @@ LuaWindow::LuaWindow ()
 	Gtkmm2ext::VPane *vpane = manage (new Gtkmm2ext::VPane ());
 	vpane->add (*vbox);
 	vpane->add (scrollout);
+	vpane->set_divider (0, 0.75);
 
 	vpane->show_all ();
 	add (*vpane);
