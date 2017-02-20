@@ -308,6 +308,11 @@ class PangoLayout {
 			pango_cairo_show_layout (c->cobj (), _layout->gobj());
 		}
 
+		void layout_cairo_path (Cairo::Context* c) {
+			pango_cairo_update_layout (c->cobj (), _layout->gobj());
+			pango_cairo_layout_path (c->cobj (), _layout->gobj());
+		}
+
 	private:
 		Glib::RefPtr<Pango::Layout> _layout;
 };
@@ -491,6 +496,7 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("get_text", &LuaCairo::PangoLayout::get_text)
 		.addFunction ("set_text", &LuaCairo::PangoLayout::set_text)
 		.addFunction ("show_in_cairo_context", &LuaCairo::PangoLayout::show_in_cairo_context)
+		.addFunction ("layout_cairo_path", &LuaCairo::PangoLayout::layout_cairo_path)
 		.addFunction ("set_markup", &LuaCairo::PangoLayout::set_markup)
 		.addFunction ("set_width", &LuaCairo::PangoLayout::set_width)
 		.addFunction ("set_ellipsize", &LuaCairo::PangoLayout::set_ellipsize)
