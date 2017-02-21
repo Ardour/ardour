@@ -122,6 +122,7 @@ ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 #ifdef LV2_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lv2_plugin_info ().begin (), manager.lv2_plugin_info ().end ());
 #endif
+	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin (); i != all_plugs.end (); ++i) {
 		if (((*i)->name == name || (*i)->unique_id == name) && (*i)->type == type) {
