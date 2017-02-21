@@ -21,6 +21,7 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/types_convert.h"
 #include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
@@ -374,17 +375,15 @@ SlavableAutomationControl::use_saved_master_ratios ()
 		XMLNodeIterator niter;
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			XMLProperty const * id_prop = (*niter)->property (X_("id"));
-			if (!id_prop) {
+			ID id_val;
+			bool yn;
+			if (!(*niter)->get_property (X_("id"), id_val) || !(*niter)->get_property (X_("yn"), yn)) {
 				continue;
-			}
-			XMLProperty const * yn_prop = (*niter)->property (X_("yn"));
-			if (!yn_prop) {
-				continue;
-			}
-			Masters::iterator mi = _masters.find (ID (id_prop->value()));
+		  }
+
+			Masters::iterator mi = _masters.find (id_val);
 			if (mi != _masters.end()) {
-				mi->second.set_yn (string_is_affirmative (yn_prop->value()));
+				mi->second.set_yn (yn);
 			}
 		}
 
@@ -416,8 +415,8 @@ SlavableAutomationControl::get_state ()
 			if (_desc.toggled) {
 				for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 					XMLNode* mnode = new XMLNode (X_("master"));
-					mnode->add_property (X_("id"), mr->second.master()->id().to_s());
-					mnode->add_property (X_("yn"), mr->second.yn());
+					mnode->set_property (X_("id"), mr->second.master()->id());
+					mnode->set_property (X_("yn"), mr->second.yn());
 					masters_node->add_child_nocopy (*mnode);
 				}
 			} else {
