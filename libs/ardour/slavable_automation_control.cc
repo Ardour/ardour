@@ -23,6 +23,7 @@
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
 
@@ -52,7 +53,6 @@ SlavableAutomationControl::~SlavableAutomationControl ()
 double
 SlavableAutomationControl::get_masters_value_locked () const
 {
-	double v = _desc.normal;
 
 	if (_desc.toggled) {
 		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
@@ -61,14 +61,16 @@ SlavableAutomationControl::get_masters_value_locked () const
 			}
 		}
 		return _desc.lower;
-	}
+	} else {
 
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		v *= mr->second.master()->get_value () * mr->second.ratio();
-	}
+		double v = 1.0; /* the masters function as a scaling factor */
 
-	return min ((double) _desc.upper, v);
+		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+			v *= mr->second.master()->get_value ();
+		}
+
+		return v;
+	}
 }
 
 double
@@ -90,7 +92,23 @@ SlavableAutomationControl::get_value_locked() const
 		}
 	}
 
-	return get_masters_value_locked ();
+	return Control::get_double() * get_masters_value_locked ();
+}
+
+void
+SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
+
+		if (!_masters.empty()) {
+			/* need to scale given value by current master's scaling */
+			value /= get_masters_value_locked();
+		}
+	}
+
+	/* this will call Control::set_double() and emit Changed signals as appropriate */
+	AutomationControl::actually_set_value (value, gcd);
 }
 
 /** Get the current effective `user' value based on automation state */
@@ -103,27 +121,8 @@ SlavableAutomationControl::get_value() const
 	if (!from_list) {
 		return get_value_locked ();
 	} else {
-		return get_masters_value_locked () * Control::get_double (from_list, _session.transport_frame());
+		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
 	}
-}
-
-void
-SlavableAutomationControl::actually_set_value (double val, Controllable::GroupControlDisposition group_override)
-{
-	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-
-		if (!_masters.empty()) {
-			recompute_masters_ratios (val);
-		}
-	}
-
-	/* this sets the Evoral::Control::_user_value for us, which will
-	   be retrieved by AutomationControl::get_value ()
-	*/
-	AutomationControl::actually_set_value (val, group_override);
 }
 
 void
@@ -133,9 +132,6 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		const double current_value = get_value_locked ();
-
-		/* ratio will be recomputed below */
 
 		pair<PBD::ID,MasterRecord> newpair (m->id(), MasterRecord (m, 1.0));
 		res = _masters.insert (newpair);
@@ -143,7 +139,20 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 		if (res.second) {
 
 			if (!loading) {
-				recompute_masters_ratios (current_value);
+
+				if (!_desc.toggled) {
+					const double master_value = m->get_value();
+
+					if (master_value == 0.0) {
+						actually_set_value (0.0, Controllable::NoGroup);
+					} else {
+						/* scale control's own value by
+						   amount that the master will
+						   contribute.
+						*/
+						AutomationControl::set_double ((Control::get_double() / master_value), Controllable::NoGroup);
+					}
+				}
 			}
 
 			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
@@ -254,22 +263,34 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
-	double current_value;
-	double new_value;
-	bool masters_left;
 	Masters::size_type erased = 0;
 
 	pre_remove_master (m);
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-		erased = _masters.erase (m->id());
-		if (erased && !_session.deletion_in_progress()) {
-			recompute_masters_ratios (current_value);
+
+		if (!_masters.erase (m->id())) {
+			return;
 		}
-		masters_left = _masters.size ();
-		new_value = get_value_locked ();
+
+		if (!_session.deletion_in_progress()) {
+
+			const double master_value = m->get_value ();
+
+			if (master_value == 0.0) {
+				/* slave would have been set to 0.0 as well,
+				   so just leave it there, and the user can
+				   bring it back up. this fits with the
+				   "removing a VCA does not change the level" rule.
+				*/
+			} else {
+				/* bump up the control's own value by the level
+				   of the master that is being removed.
+				*/
+				AutomationControl::set_double (AutomationControl::get_double() * master_value, Controllable::NoGroup);
+			}
+		}
 	}
 
 	if (_session.deletion_in_progress()) {
@@ -279,15 +300,6 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	if (erased) {
 		MasterStatusChange (); /* EMIT SIGNAL */
-	}
-
-	if (new_value != current_value) {
-		if (masters_left == 0) {
-			/* no masters left, make sure we keep the same value
-			   that we had before.
-			*/
-			actually_set_value (current_value, Controllable::UseGroup);
-		}
 	}
 
 	/* no need to update boolean masters records, since the MR will have
@@ -375,19 +387,6 @@ SlavableAutomationControl::use_saved_master_ratios ()
 
 	} else {
 
-		XMLProperty const * prop = _masters_node->property (X_("ratio"));
-
-		if (prop) {
-
-			gain_t ratio;
-			sscanf (prop->value().c_str(), "%g", &ratio);
-
-			for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-				mr->second.reset_ratio (ratio);
-			}
-		} else {
-			PBD::error << string_compose (_("programming error: %1"), X_("missing ratio information for control slave"))<< endmsg;
-		}
 	}
 
 	delete _masters_node;
@@ -419,9 +418,7 @@ SlavableAutomationControl::get_state ()
 					masters_node->add_child_nocopy (*mnode);
 				}
 			} else {
-				XMLNode* masters_node = new XMLNode (X_("masters"));
-				/* ratio is the same for all masters, so just store one */
-				masters_node->add_property (X_("ratio"), PBD::to_string (_masters.begin()->second.ratio(), std::dec));
+
 			}
 
 			node.add_child_nocopy (*masters_node);

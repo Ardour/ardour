@@ -49,9 +49,6 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	double range_db;
 
 	void inc_gain (gain_t);
-
-  private:
-	void recompute_masters_ratios (double val);
 };
 
 } /* namespace */

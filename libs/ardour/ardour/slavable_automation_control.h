@@ -70,7 +70,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
           public:
 		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
 			: _master (gc)
-			, _ratio (r)
+			, _yn (false)
 		{}
 
 		boost::shared_ptr<AutomationControl> master() const { return _master; }
@@ -83,23 +83,12 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 		bool yn() const { return _yn; }
 		void set_yn (bool yn) { _yn = yn; }
 
-		/* for non-boolean/non-toggled controls, we store a ratio that
-		 * connects the value of the master with the value of this
-		 * slave. See comments in the source for more details on how
-		 * this is computed and used.
-		 */
-
-		double ratio () const { return _ratio; }
-		void reset_ratio (double r) { _ratio = r; }
-
 		PBD::ScopedConnection connection;
 
          private:
 		boost::shared_ptr<AutomationControl> _master;
-		union {
-			double _ratio;
-			bool   _yn;
-		};
+		/* holds most recently seen master value for boolean/toggle controls */
+		bool   _yn;
 	};
 
 	mutable Glib::Threads::RWLock master_lock;
@@ -109,11 +98,10 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 
 	void   master_going_away (boost::weak_ptr<AutomationControl>);
 	double get_value_locked() const;
-	void   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
-	virtual void   recompute_masters_ratios (double val) { /* do nothing by default */}
 	virtual double get_masters_value_locked () const;
 	virtual void   pre_remove_master (boost::shared_ptr<AutomationControl>) {}
 	virtual void   post_add_master (boost::shared_ptr<AutomationControl>) {}

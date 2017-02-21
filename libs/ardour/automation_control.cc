@@ -169,9 +169,9 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	Control::set_double (value, pos, to_list);
 
 	if (old_value != value) {
-		// AutomationType at = (AutomationType) _parameter.type();
-		// std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
-		// << " (was " << old_value << ") @ " << this << std::endl;
+		//AutomationType at = (AutomationType) _parameter.type();
+		//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
+		//<< " (was " << old_value << ") @ " << this << std::endl;
 
 		Changed (true, gcd);
 		_session.set_dirty ();
