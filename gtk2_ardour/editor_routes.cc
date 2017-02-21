@@ -1582,13 +1582,14 @@ struct PresentationInfoVCASorter
 void
 EditorRoutes::initial_display ()
 {
-	_model->clear ();
 
 	if (!_session) {
+		_model->clear ();
 		return;
 	}
 
 	DisplaySuspender ds;
+	_model->clear ();
 
 	StripableList s;
 
