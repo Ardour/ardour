@@ -256,6 +256,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	 */
 	PBD::Signal0<void> PresetDirty;
 
+	/** Emitted for preset-load to set a control-port */
+	PBD::Signal2<void, uint32_t, float> PresetPortSetValue;
+
 	virtual bool has_editor () const = 0;
 
 	/** Emitted when a parameter is altered by something outside of our

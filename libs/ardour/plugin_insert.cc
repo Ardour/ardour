@@ -490,7 +490,9 @@ PluginInsert::create_automatable_parameters ()
 			ac->Changed.connect_same_thread (*this, boost::bind (&PluginInsert::enable_changed, this));
 		}
 	}
+	plugin->PresetPortSetValue.connect_same_thread (*this, boost::bind (&PluginInsert::preset_load_set_value, this, _1, _2));
 }
+
 /** Called when something outside of this host has modified a plugin
  * parameter. Responsible for propagating the change to two places:
  *
@@ -647,6 +649,23 @@ void
 PluginInsert::bypassable_changed ()
 {
 	BypassableChanged ();
+}
+
+void
+PluginInsert::preset_load_set_value (uint32_t p, float v)
+{
+	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter(PluginAutomation, 0, p));
+	if (!ac) {
+		return;
+	}
+
+	if (ac->automation_state() & Play) {
+		return;
+	}
+
+	start_touch (p);
+	ac->set_value (v, Controllable::NoGroup);
+	end_touch (p);
 }
 
 void
@@ -3014,19 +3033,21 @@ PluginInsert::latency_changed ()
 void
 PluginInsert::start_touch (uint32_t param_id)
 {
-        boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
-        if (ac) {
-                ac->start_touch (session().audible_frame());
-        }
+	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
+	if (ac) {
+		// ToDo subtract _plugin_signal_latency  from audible_frame() when rolling, assert > 0
+		ac->start_touch (session().audible_frame());
+	}
 }
 
 void
 PluginInsert::end_touch (uint32_t param_id)
 {
-        boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
-        if (ac) {
-                ac->stop_touch (true, session().audible_frame());
-        }
+	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
+	if (ac) {
+		// ToDo subtract _plugin_signal_latency  from audible_frame() when rolling, assert > 0
+		ac->stop_touch (true, session().audible_frame());
+	}
 }
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)

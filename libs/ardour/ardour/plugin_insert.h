@@ -374,6 +374,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void latency_changed ();
 	bool _latency_changed;
 	uint32_t _bypass_port;
+
+	void preset_load_set_value (uint32_t, float);
 };
 
 } // namespace ARDOUR
