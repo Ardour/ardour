@@ -274,6 +274,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _initial_verbose_plugin_scan (false)
 	, first_time_engine_run (true)
 	, secondary_clock_spacer (0)
+	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
+	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
+	, goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart))
+	, goto_end_controllable (new TransportControllable ("transport goto end", *this, TransportControllable::GotoEnd))
+	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
+	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
+	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 	, auto_input_button (ArdourButton::led_default_elements)
 	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
@@ -360,22 +367,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
-	Glib::RefPtr<Gtk::Action> act;
-
-	act = ActionManager::get_action ("Transport/Roll");
-	roll_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/Stop");
-	stop_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/GotoStart");
-	goto_start_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/GotoEnd");
-	goto_end_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/Loop");
-	auto_loop_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/PlaySelection");
-	play_selection_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport/Record");
-	rec_button.set_related_action (act);
+	roll_button.set_controllable (roll_controllable);
+	stop_button.set_controllable (stop_controllable);
+	goto_start_button.set_controllable (goto_start_controllable);
+	goto_end_button.set_controllable (goto_end_controllable);
+	auto_loop_button.set_controllable (auto_loop_controllable);
+	play_selection_button.set_controllable (play_selection_controllable);
+	rec_button.set_controllable (rec_controllable);
 
 	roll_button.set_name ("transport button");
 	stop_button.set_name ("transport button");
@@ -810,6 +808,63 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* /*conf*/)
 	}
 
 	return FALSE;
+}
+
+void
+ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
+{
+	XMLProperty const * prop;
+
+	if ((prop = node.property ("roll")) != 0) {
+		roll_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("stop")) != 0) {
+		stop_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("goto-start")) != 0) {
+		goto_start_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("goto-end")) != 0) {
+		goto_end_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("auto-loop")) != 0) {
+		auto_loop_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("play-selection")) != 0) {
+		play_selection_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("rec")) != 0) {
+		rec_controllable->set_id (prop->value());
+	}
+	if ((prop = node.property ("shuttle")) != 0) {
+		shuttle_box.controllable()->set_id (prop->value());
+	}
+}
+
+XMLNode&
+ARDOUR_UI::get_transport_controllable_state ()
+{
+	XMLNode* node = new XMLNode(X_("TransportControllables"));
+	char buf[64];
+
+	roll_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("roll"), buf);
+	stop_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("stop"), buf);
+	goto_start_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("goto_start"), buf);
+	goto_end_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("goto_end"), buf);
+	auto_loop_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("auto_loop"), buf);
+	play_selection_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("play_selection"), buf);
+	rec_controllable->id().print (buf, sizeof (buf));
+	node->add_property (X_("rec"), buf);
+	shuttle_box.controllable()->id().print (buf, sizeof (buf));
+	node->add_property (X_("shuttle"), buf);
+
+	return *node;
 }
 
 void
@@ -3572,6 +3627,16 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		msg.hide ();
 	}
 
+
+	/* Now the session been created, add the transport controls */
+	new_session->add_controllable(roll_controllable);
+	new_session->add_controllable(stop_controllable);
+	new_session->add_controllable(goto_start_controllable);
+	new_session->add_controllable(goto_end_controllable);
+	new_session->add_controllable(auto_loop_controllable);
+	new_session->add_controllable(play_selection_controllable);
+	new_session->add_controllable(rec_controllable);
+
 	set_session (new_session);
 
 	session_loaded = true;
@@ -4947,6 +5012,10 @@ Menu > Window > Audio/Midi Setup"),
 void
 ARDOUR_UI::use_config ()
 {
+	XMLNode* node = Config->extra_xml (X_("TransportControllables"));
+	if (node) {
+		set_transport_controllable_state (*node);
+	}
 }
 
 void
@@ -5039,6 +5108,86 @@ ARDOUR_UI::store_clock_modes ()
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
+}
+
+ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOUR_UI& u, ToggleType tp)
+	: Controllable (name), ui (u), type(tp)
+{
+
+}
+
+void
+ARDOUR_UI::TransportControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
+{
+	if (val < 0.5) {
+		/* do nothing: these are radio-style actions */
+		return;
+	}
+
+	const char *action = 0;
+
+	switch (type) {
+	case Roll:
+		action = X_("Roll");
+		break;
+	case Stop:
+		action = X_("Stop");
+		break;
+	case GotoStart:
+		action = X_("GotoStart");
+		break;
+	case GotoEnd:
+		action = X_("GotoEnd");
+		break;
+	case AutoLoop:
+		action = X_("Loop");
+		break;
+	case PlaySelection:
+		action = X_("PlaySelection");
+		break;
+	case RecordEnable:
+		action = X_("Record");
+		break;
+	default:
+		break;
+	}
+
+	if (action == 0) {
+		return;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", action);
+
+	if (act) {
+		act->activate ();
+	}
+}
+
+double
+ARDOUR_UI::TransportControllable::get_value (void) const
+{
+	float val = 0.0;
+
+	switch (type) {
+	case Roll:
+		break;
+	case Stop:
+		break;
+	case GotoStart:
+		break;
+	case GotoEnd:
+		break;
+	case AutoLoop:
+		break;
+	case PlaySelection:
+		break;
+	case RecordEnable:
+		break;
+	default:
+		break;
+	}
+
+	return val;
 }
 
 void

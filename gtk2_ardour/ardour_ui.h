@@ -500,7 +500,18 @@ private:
 	    ToggleType type;
 	};
 
+	boost::shared_ptr<TransportControllable> roll_controllable;
+	boost::shared_ptr<TransportControllable> stop_controllable;
+	boost::shared_ptr<TransportControllable> goto_start_controllable;
+	boost::shared_ptr<TransportControllable> goto_end_controllable;
+	boost::shared_ptr<TransportControllable> auto_loop_controllable;
+	boost::shared_ptr<TransportControllable> play_selection_controllable;
+	boost::shared_ptr<TransportControllable> rec_controllable;
+
 	void toggle_follow_edits ();
+
+	void set_transport_controllable_state (const XMLNode&);
+	XMLNode& get_transport_controllable_state ();
 
 	ArdourButton roll_button;
 	ArdourButton stop_button;
