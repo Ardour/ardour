@@ -446,8 +446,10 @@ VSTPlugin::load_user_preset (PresetRecord r)
 
 						assert (index);
 						assert (value);
-
-						set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
+						const uint32_t p = atoi (index->value().c_str());
+						const float v = atof (value->value().c_str ());
+						set_parameter (p, v);
+						PresetPortSetValue (p, v); /* EMIT SIGNAL */
 				}
 			}
 			return true;

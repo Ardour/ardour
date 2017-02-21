@@ -1434,6 +1434,7 @@ set_port_value(const char* port_symbol,
 	const uint32_t port_index = self->port_index(port_symbol);
 	if (port_index != (uint32_t)-1) {
 		self->set_parameter(port_index, *(const float*)value);
+		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
 	}
 }
 
