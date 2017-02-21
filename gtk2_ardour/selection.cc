@@ -648,8 +648,14 @@ Selection::remove (TimeAxisView* track)
 {
 	list<TimeAxisView*>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
-		track->set_selected (false);
+		/* erase first, because set_selected() will remove the track
+		   from the selection, invalidating the iterator.
+
+		   In fact, we don't really even need to do the erase, but this is
+		   a hangover of axis view selection being in the GUI.
+		*/
 		tracks.erase (i);
+		track->set_selected (false);
 	}
 }
 
