@@ -522,6 +522,7 @@ PluginInsert::parameter_changed_externally (uint32_t which, float val)
 
 	if (pc) {
 		pc->catch_up_with_external_value (val);
+		//val += pc->modulation_delta ();
 	}
 
 	/* Second propagation: tell all plugins except the first to
@@ -2793,6 +2794,7 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
                                             boost::shared_ptr<AutomationList> list)
 	: AutomationControl (p->session(), param, desc, list, p->describe_parameter(param))
 	, _plugin (p)
+	, _modulation_delta (0)
 {
 	if (alist()) {
 		alist()->reset_default (desc.normal);
@@ -2807,24 +2809,54 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 void
 PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
-	/* FIXME: probably should be taking out some lock here.. */
-
-	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), user_val);
-	}
-
-	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
-	if (iasp) {
-		iasp->set_parameter (_list->parameter().id(), user_val);
-	}
-
+	set_plugin_parameters (user_val);
 	AutomationControl::actually_set_value (user_val, group_override);
 }
 
 void
+PluginInsert::PluginControl::set_plugin_parameters (double user_val)
+{
+	/* FIXME: probably should be taking out some lock here.. */
+	double val = user_val + _modulation_delta;
+	//val = std::min (upper(), std::max (lower(), val));
+
+	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
+		(*i)->set_parameter (_list->parameter().id(), val);
+	}
+
+	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->set_parameter (_list->parameter().id(), val);
+	}
+}
+
+
+void
 PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 {
-	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
+	AutomationControl::actually_set_value (user_val - _modulation_delta, Controllable::NoGroup);
+}
+
+void
+PluginInsert::PluginControl::modulate_by (double delta)
+{
+	const double current = AutomationControl::get_value ();
+	// limit _modulation_delta so that sum does not exceed range
+	_modulation_delta = std::min (upper(), std::max (lower(), delta + current)) - current;
+	set_plugin_parameters (AutomationControl::get_value ());
+
+	// XXX calling plugin->set_parameter() implies Plugin::set_paramter() which
+	// markes the session and current preset as dirty..
+}
+
+void
+PluginInsert::PluginControl::modulate_to (double val)
+{
+	const double current = AutomationControl::get_value ();
+	val = std::min (upper(), std::max (lower(), val));
+	_modulation_delta = val - current;
+	set_plugin_parameters (current);
+	// XXX see above  session+preset are marked as dirty
 }
 
 XMLNode&
@@ -2855,7 +2887,7 @@ PluginInsert::PluginControl::get_value () const
 		return 0.0;
 	}
 
-	return plugin->get_parameter (_list->parameter().id());
+	return plugin->get_parameter (_list->parameter().id()) - _modulation_delta;
 }
 
 PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,

@@ -194,12 +194,18 @@ class LIBARDOUR_API PluginInsert : public Processor
 		               boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
 		double get_value (void) const;
+		double modulation_delta (void) const { return _modulation_delta; }
+		double modulated_value (void) const { return get_value () + _modulation_delta; }
 		void catch_up_with_external_value (double val);
+		void modulate_to (double val);
+		void modulate_by (double val);
 		XMLNode& get_state();
 
 	private:
 		PluginInsert* _plugin;
 		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		void set_plugin_parameters (double val);
+		double _modulation_delta; // ac_value + _modulation_delta = plugin_parameter
 	};
 
 	/** A control that manipulates a plugin property (message). */
