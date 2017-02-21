@@ -93,8 +93,6 @@ private:
 	void set_freq_beats(double beats);
 	bool on_button_release(GdkEventButton* ev);
 
-	void value_changed();
-
 	Gtk::Widget*                                 _widget;
 	boost::shared_ptr<ARDOUR::Automatable>       _printer;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
