@@ -263,8 +263,6 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
-	Masters::size_type erased = 0;
-
 	pre_remove_master (m);
 
 	{
@@ -298,9 +296,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 		return;
 	}
 
-	if (erased) {
-		MasterStatusChange (); /* EMIT SIGNAL */
-	}
+	MasterStatusChange (); /* EMIT SIGNAL */
 
 	/* no need to update boolean masters records, since the MR will have
 	 * been removed already.
