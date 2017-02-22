@@ -2189,10 +2189,11 @@ Session::load_sources (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	boost::shared_ptr<Source> source; /* don't need this but it stops some
-					   * versions of gcc complaining about
-					   * discarded return values.
-					   */
+	/* don't need this but it stops some
+	 * versions of gcc complaining about
+	 * discarded return values.
+	 */
+	boost::shared_ptr<Source> source;
 
 	nlist = node.children();
 
@@ -2203,7 +2204,7 @@ Session::load_sources (const XMLNode& node)
 		int old_mode = 0;
 #endif
 
-          retry:
+retry:
 		try {
 #ifdef PLATFORM_WINDOWS
 			// do not show "insert media" popups (files embedded from removable media).
@@ -2221,72 +2222,71 @@ Session::load_sources (const XMLNode& node)
 			SetErrorMode(old_mode);
 #endif
 
-                        int user_choice;
+			int user_choice;
 
 			if (err.type == DataType::MIDI && Glib::path_is_absolute (err.path)) {
 				error << string_compose (_("A external MIDI file is missing. %1 cannot currently recover from missing external MIDI files"),
-							 PROGRAM_NAME) << endmsg;
+						PROGRAM_NAME) << endmsg;
 				return -1;
 			}
 
-                        if (!no_questions_about_missing_files) {
+			if (!no_questions_about_missing_files) {
 				user_choice = MissingFile (this, err.path, err.type).get_value_or (-1);
 			} else {
-                                user_choice = -2;
-                        }
+				user_choice = -2;
+			}
 
-                        switch (user_choice) {
-                        case 0:
-                                /* user added a new search location, so try again */
-                                goto retry;
+			switch (user_choice) {
+				case 0:
+					/* user added a new search location, so try again */
+					goto retry;
 
 
-                        case 1:
-                                /* user asked to quit the entire session load
-                                 */
-                                return -1;
+				case 1:
+					/* user asked to quit the entire session load */
+					return -1;
 
-                        case 2:
-                                no_questions_about_missing_files = true;
-                                goto retry;
+				case 2:
+					no_questions_about_missing_files = true;
+					goto retry;
 
-                        case 3:
-                                no_questions_about_missing_files = true;
-                                /* fallthru */
+				case 3:
+					no_questions_about_missing_files = true;
+					/* fallthru */
 
-                        case -1:
-                        default:
-				switch (err.type) {
+				case -1:
+				default:
+					switch (err.type) {
 
-				case DataType::AUDIO:
-					source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
-					break;
+						case DataType::AUDIO:
+							source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+							break;
 
-				case DataType::MIDI:
-					/* The MIDI file is actually missing so
-					 * just create a new one in the same
-					 * location. Do not announce its
-					 */
-					string fullpath;
+						case DataType::MIDI:
+							/* The MIDI file is actually missing so
+							 * just create a new one in the same
+							 * location. Do not announce its
+							 */
+							string fullpath;
 
-					if (!Glib::path_is_absolute (err.path)) {
-						fullpath = Glib::build_filename (source_search_path (DataType::MIDI).front(), err.path);
-					} else {
-						/* this should be an unrecoverable error: we would be creating a MIDI file outside
-						   the session tree.
-						*/
-						return -1;
+							if (!Glib::path_is_absolute (err.path)) {
+								fullpath = Glib::build_filename (source_search_path (DataType::MIDI).front(), err.path);
+							} else {
+								/* this should be an unrecoverable error: we would be creating a MIDI file outside
+								 * the session tree.
+								 */
+								return -1;
+							}
+							/* Note that we do not announce the source just yet - we need to reset its ID before we do that */
+							source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, false, _current_frame_rate, false, false);
+							/* reset ID to match the missing one */
+							source->set_id (**niter);
+							/* Now we can announce it */
+							SourceFactory::SourceCreated (source);
+							break;
 					}
-					/* Note that we do not announce the source just yet - we need to reset its ID before we do that */
-					source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, false, _current_frame_rate, false, false);
-					/* reset ID to match the missing one */
-					source->set_id (**niter);
-					/* Now we can announce it */
-					SourceFactory::SourceCreated (source);
 					break;
-				}
-                                break;
-                        }
+			}
 		}
 	}
 
