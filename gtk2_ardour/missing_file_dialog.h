@@ -35,24 +35,24 @@ namespace ARDOUR {
 
 class MissingFileDialog : public ArdourDialog
 {
-  public:
-        MissingFileDialog (ARDOUR::Session*, const std::string& path, ARDOUR::DataType type);
+public:
+	MissingFileDialog (ARDOUR::Session*, const std::string& path, ARDOUR::DataType type);
 
-        int get_action();
+	int get_action();
 
-  private:
-        ARDOUR::DataType filetype;
+private:
+	ARDOUR::DataType filetype;
 
-        Gtk::FileChooserButton chooser;
-        Gtk::RadioButton use_chosen;
-        Gtk::RadioButton::Group choice_group;
-        Gtk::RadioButton use_chosen_and_no_more_questions;
-        Gtk::RadioButton stop_loading_button;
-        Gtk::RadioButton all_missing_ok;
-        Gtk::RadioButton this_missing_ok;
-        Gtk::Label msg;
+	Gtk::FileChooserButton chooser;
+	Gtk::RadioButton use_chosen;
+	Gtk::RadioButton::Group choice_group;
+	Gtk::RadioButton use_chosen_and_no_more_questions;
+	Gtk::RadioButton stop_loading_button;
+	Gtk::RadioButton all_missing_ok;
+	Gtk::RadioButton this_missing_ok;
+	Gtk::Label msg;
 
-        void add_chosen ();
+	void add_chosen ();
 };
 
 #endif /* __gtk_ardour_missing_file_dialog_h__ */
