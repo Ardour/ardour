@@ -103,7 +103,12 @@ SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::
 
 		if (!_masters.empty()) {
 			/* need to scale given value by current master's scaling */
-			value /= get_masters_value_locked();
+			const double masters_value = get_masters_value_locked();
+			if (masters_value == 0.0) {
+				value = 0.0;
+			} else {
+				value /= masters_value;
+			}
 		}
 	}
 
