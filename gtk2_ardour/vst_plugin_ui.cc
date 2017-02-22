@@ -47,6 +47,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	box->pack_end (_preset_combo, false, false);
 	box->pack_end (_preset_modified, false, false);
 	box->pack_end (pin_management_button, false, false);
+	box->pack_end (modulate_script_button, false, false);
 
 	bypass_button.set_active (!insert->active ());
 

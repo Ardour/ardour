@@ -242,6 +242,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.pack_end (_preset_combo, false, false);
 	_ardour_buttons_box.pack_end (_preset_modified, false, false);
 	_ardour_buttons_box.pack_end (pin_management_button, false, false);
+	_ardour_buttons_box.pack_end (modulate_script_button, false, false);
 
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }

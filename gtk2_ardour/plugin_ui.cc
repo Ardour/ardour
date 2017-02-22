@@ -72,6 +72,7 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
+#include "plugin_modulate_script_dialog.h"
 #include "new_plugin_preset_dialog.h"
 #include "tooltips.h"
 
@@ -459,6 +460,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, reset_button (_("Reset"))
 	, bypass_button (ArdourButton::led_default_elements)
 	, pin_management_button (_("Pinout"))
+	, modulate_script_button (_("Modulate"))
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
 	, latency_gui (0)
@@ -473,6 +475,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	set_tooltip (delete_button, _("Delete the current preset"));
 	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
 	set_tooltip (pin_management_button, _("Show Plugin Pin Management Dialog"));
+	set_tooltip (modulate_script_button, _("Set a Lua script to modulate controls"));
 	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
 
@@ -493,6 +496,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	pin_management_button.set_name ("generic button");
 	pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
+	modulate_script_button.set_name ("generic button");
+	modulate_script_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::modulate_it));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -709,6 +714,27 @@ PlugUIBase::manage_pins ()
 		proxy->present ();
 		proxy->get ()->raise();
 	}
+}
+
+void
+PlugUIBase::modulate_it ()
+{
+	PluginModulateScriptProxy* proxy = insert->modscript_proxy ();
+
+	if (!proxy) {
+		proxy = new PluginModulateScriptProxy (string_compose ("MM-%2-%3", insert->id()), insert);
+		proxy->set_session (&insert->session());
+		const XMLNode* ui_xml = insert->session().extra_xml (X_("UI"));
+		if (ui_xml) {
+			proxy->set_state (*ui_xml, 0);
+		}
+		insert->set_modscript_proxy (proxy);
+		WM::Manager::instance().register_window (proxy);
+	}
+
+	proxy->get (true);
+	proxy->present ();
+	proxy->get ()->raise();
 }
 
 bool
