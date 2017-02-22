@@ -1200,7 +1200,8 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
 		.addCast<Automatable> ("to_automatable")
-		.addCast<PluginInsert> ("to_insert")
+		.addCast<PluginInsert> ("to_insert") // deprecated
+		.addCast<PluginInsert> ("to_plugininsert")
 		.addCast<SideChain> ("to_sidechain")
 		.addCast<IOProcessor> ("to_ioprocessor")
 		.addCast<UnknownProcessor> ("to_unknownprocessor")
@@ -1213,6 +1214,7 @@ LuaBindings::common (lua_State* L)
 #endif
 		.addCast<PeakMeter> ("to_meter")
 		.addFunction ("display_name", &Processor::display_name)
+		.addFunction ("display_to_user", &Processor::display_to_user)
 		.addFunction ("active", &Processor::active)
 		.addFunction ("activate", &Processor::activate)
 		.addFunction ("deactivate", &Processor::deactivate)
