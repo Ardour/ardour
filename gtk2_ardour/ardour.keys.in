@@ -159,7 +159,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/redo|<@PRIMARY@>r|redo
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
-@edit|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
+@select|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
 @mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|<@PRIMARY@>u|all enclosed by edit range
