@@ -149,7 +149,7 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 					const double master_value = m->get_value();
 
 					if (master_value == 0.0) {
-						actually_set_value (0.0, Controllable::NoGroup);
+						AutomationControl::set_double (0.0, Controllable::NoGroup);
 					} else {
 						/* scale control's own value by
 						   amount that the master will
