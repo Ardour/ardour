@@ -119,8 +119,6 @@ ArdourStartup::~ArdourStartup ()
 bool
 ArdourStartup::required ()
 {
-	const int current_version = atoi (PROGRAM_VERSION);
-
 	if (Glib::file_test (ARDOUR::been_here_before_path (), Glib::FILE_TEST_EXISTS)) {
 		return false;
 	}
