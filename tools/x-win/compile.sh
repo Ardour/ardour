@@ -72,8 +72,8 @@ else
 	OPT=" -Og"
 fi
 
-CFLAGS="-mstackrealign$BIGOBJ" \
-CXXFLAGS="-mstackrealign$BIGOBJ" \
+CFLAGS="-mstackrealign$OPT" \
+CXXFLAGS="-mstackrealign$OPT" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	--keepflags \
 	--dist-target=mingw \
