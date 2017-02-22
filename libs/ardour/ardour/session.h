@@ -1145,6 +1145,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	static PBD::Signal3<int,Session*,std::string,DataType> MissingFile;
 
+	void set_missing_file_replacement (const std::string& mfr) {
+		_missing_file_replacement = mfr;
+	}
+
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
@@ -1259,6 +1263,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _was_seamless;
 	bool                    _under_nsm_control;
 	unsigned int            _xrun_count;
+
+	std::string             _missing_file_replacement;
 
 	void mtc_status_changed (bool);
 	PBD::ScopedConnection mtc_status_connection;

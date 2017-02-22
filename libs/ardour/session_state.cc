@@ -2198,11 +2198,15 @@ Session::load_sources (const XMLNode& node)
 	nlist = node.children();
 
 	set_dirty();
+	std::map<std::string, std::string> relocation;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 #ifdef PLATFORM_WINDOWS
 		int old_mode = 0;
 #endif
+
+		XMLNode srcnode (**niter);
+		bool try_replace_abspath = true;
 
 retry:
 		try {
@@ -2210,7 +2214,7 @@ retry:
 			// do not show "insert media" popups (files embedded from removable media).
 			old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
-			if ((source = XMLSourceFactory (**niter)) == 0) {
+			if ((source = XMLSourceFactory (srcnode)) == 0) {
 				error << _("Session: cannot create Source from XML description.") << endmsg;
 			}
 #ifdef PLATFORM_WINDOWS
@@ -2222,10 +2226,25 @@ retry:
 			SetErrorMode(old_mode);
 #endif
 
+			/* try previous abs path replacements first */
+			if (try_replace_abspath && Glib::path_is_absolute (err.path)) {
+				std::string dir = Glib::path_get_dirname (err.path);
+				std::map<std::string, std::string>::const_iterator rl = relocation.find (dir);
+				if (rl != relocation.end ()) {
+					std::string newpath = Glib::build_filename (rl->second, Glib::path_get_basename (err.path));
+					if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+						srcnode.add_property ("origin", newpath);
+						try_replace_abspath = false;
+						goto retry;
+					}
+				}
+			}
+
 			int user_choice;
+			_missing_file_replacement = "";
 
 			if (err.type == DataType::MIDI && Glib::path_is_absolute (err.path)) {
-				error << string_compose (_("A external MIDI file is missing. %1 cannot currently recover from missing external MIDI files"),
+				error << string_compose (_("An external MIDI file is missing. %1 cannot currently recover from missing external MIDI files"),
 						PROGRAM_NAME) << endmsg;
 				return -1;
 			}
@@ -2238,7 +2257,19 @@ retry:
 
 			switch (user_choice) {
 				case 0:
-					/* user added a new search location, so try again */
+					/* user added a new search location
+					 * or selected a new absolute path,
+					 * so try again */
+					if (Glib::path_is_absolute (err.path)) {
+						if (!_missing_file_replacement.empty ()) {
+							/* replace origin, in XML */
+							std::string newpath = Glib::build_filename (
+									_missing_file_replacement, Glib::path_get_basename (err.path));
+							srcnode.add_property ("origin", newpath);
+							relocation[Glib::path_get_dirname (err.path)] = _missing_file_replacement;
+							_missing_file_replacement = "";
+						}
+					}
 					goto retry;
 
 
