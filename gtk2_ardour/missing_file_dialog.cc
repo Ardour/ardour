@@ -35,6 +35,7 @@ using namespace PBD;
 MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataType type)
 	: ArdourDialog (_("Missing File"), true, false)
 	, filetype (type)
+	, is_absolute_path (Glib::path_is_absolute (path))
 	, chooser (_("Select a folder to search"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, use_chosen (_("Add chosen folder to search path, and try again"))
 	, choice_group (use_chosen.get_group())
@@ -122,6 +123,12 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
 }
 
 void
+MissingFileDialog::set_absolute ()
+{
+	_session->set_missing_file_replacement (chooser.get_filename ());
+}
+
+void
 MissingFileDialog::add_chosen ()
 {
 	string str;
@@ -167,7 +174,11 @@ int
 MissingFileDialog::get_action ()
 {
 	if (use_chosen.get_active ()) {
-		add_chosen ();
+		if (is_absolute_path) {
+			set_absolute ();
+		} else {
+			add_chosen ();
+		}
 		return 0;
 	}
 

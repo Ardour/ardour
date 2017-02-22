@@ -42,6 +42,7 @@ public:
 
 private:
 	ARDOUR::DataType filetype;
+	bool is_absolute_path;
 
 	Gtk::FileChooserButton chooser;
 	Gtk::RadioButton use_chosen;
@@ -53,6 +54,7 @@ private:
 	Gtk::Label msg;
 
 	void add_chosen ();
+	void set_absolute ();
 };
 
 #endif /* __gtk_ardour_missing_file_dialog_h__ */
