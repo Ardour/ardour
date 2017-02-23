@@ -98,7 +98,8 @@ SlavableAutomationControl::get_value_locked() const
 void
 SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	{
+	if (!_desc.toggled) {
+
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
 		if (!_masters.empty()) {
