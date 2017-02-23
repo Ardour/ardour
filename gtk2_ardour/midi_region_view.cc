@@ -2675,8 +2675,17 @@ MidiRegionView::move_copies (double dx_qn, double dy, double cumulative_dy)
 			to_play.push_back (n->note());
 		}
 		double const note_time_qn = session_relative_qn (n->note()->time().to_double());
-		double const dx = editor->sample_to_pixel_unrounded (tmap.frame_at_quarter_note (note_time_qn + dx_qn))
-			- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+		double dx = 0.0;
+		if (midi_view()->note_mode() == Sustained) {
+			dx = editor->sample_to_pixel_unrounded (tmap.frame_at_quarter_note (note_time_qn + dx_qn))
+				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+		} else {
+			Hit* hit = dynamic_cast<Hit*>(n);
+			if (hit) {
+				dx = editor->sample_to_pixel_unrounded (tmap.frame_at_quarter_note (note_time_qn + dx_qn))
+					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
+			}
+		}
 
 		(*i)->move_event(dx, dy);
 
