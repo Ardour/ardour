@@ -141,10 +141,14 @@ CLASSINFO(ArdourMarker);
 CLASSINFO(MarkerSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(RegionSelection);
+CLASSINFO(RegionView);
+CLASSINFO(Selectable);
 CLASSINFO(Selection);
+CLASSINFO(TimeAxisViewItem);
 CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
+
 
 CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
 
@@ -153,6 +157,8 @@ CLASSKEYS(float);
 CLASSKEYS(unsigned char);
 
 CLASSKEYS(ArdourMarker*);
+CLASSKEYS(Selectable*);
+CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BufferSet);
@@ -1721,7 +1727,7 @@ LuaBindings::common (lua_State* L)
 		.beginClass <AudioBackendInfo> ("AudioBackendInfo")
 		.addData ("name", &AudioBackendInfo::name)
 		.endClass()
-		.beginStdVector <const AudioBackendInfo*> ("BackendVector").endClass ()
+		.beginConstStdVector <const AudioBackendInfo*> ("BackendVector").endClass ()
 
 		.beginClass <AudioBackend::DeviceStatus> ("DeviceStatus")
 		.addData ("name", &AudioBackend::DeviceStatus::name)
