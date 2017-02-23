@@ -1952,7 +1952,6 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 	if (s) {
 		if (s->solo_control()) {
 			s->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return route_send_fail ("solo", ssid, (float) s->solo_control()->get_value(), get_address (msg));
 		}
 	}
 
@@ -2004,7 +2003,6 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 	if (s) {
 		if (s->solo_control()) {
 			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return sel_fail ("solo", yn, get_address (msg));
 		}
 	}
 	return sel_fail ("solo", 0, get_address (msg));
@@ -2547,7 +2545,6 @@ OSC::sel_pan_position (float val, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
-			return sel_fail ("pan_stereo_position", s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ()), get_address (msg));
 			return 0;
 		}
 	}
@@ -2582,7 +2579,6 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (pos), PBD::Controllable::NoGroup);
-			return route_send_fail ("pan_stereo_position", ssid, s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ()), get_address (msg));
 		}
 	}
 
