@@ -1864,7 +1864,34 @@ public:
   }
 
   template <class T>
-  Class<std::vector<T> > beginStdVector (char const* name)
+  Class<std::list<T*> > beginConstStdCPtrList (char const* name)
+  {
+    typedef T* TP;
+    typedef std::list<TP> LT;
+    return beginClass<LT> (name)
+      .addVoidConstructor ()
+      .addFunction ("empty", &LT::empty)
+      .addFunction ("size", &LT::size)
+      .addFunction ("reverse", &LT::reverse)
+      .addFunction ("front", static_cast<const TP& (LT::*)() const>(&LT::front))
+      .addFunction ("back", static_cast<const TP& (LT::*)() const>(&LT::back))
+      .addExtCFunction ("iter", &CFunc::listIter<T*, LT>)
+      .addExtCFunction ("table", &CFunc::listToTable<T*, LT>);
+  }
+
+  template <class T>
+  Class<std::list<T*> > beginStdCPtrList (char const* name)
+  {
+    typedef T* TP;
+    typedef std::list<TP> LT;
+    return beginConstStdCPtrList<T> (name)
+      .addFunction ("unique", (void (LT::*)())&LT::unique)
+      .addFunction ("push_back", (void (LT::*)(const TP&))&LT::push_back);
+  }
+
+
+  template <class T>
+  Class<std::vector<T> > beginConstStdVector (char const* name)
   {
     typedef std::vector<T> LT;
     typedef typename std::vector<T>::reference T_REF;
@@ -1874,12 +1901,22 @@ public:
       .addVoidConstructor ()
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
-      .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
-      .addExtCFunction ("add", &CFunc::tableToList<T, LT>)
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
   }
+
+  template <class T>
+  Class<std::vector<T> > beginStdVector (char const* name)
+  {
+    typedef std::vector<T> LT;
+    return beginConstStdVector<T> (name)
+      .addVoidConstructor ()
+      .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
+      .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
+  }
+
+
 
   //----------------------------------------------------------------------------
 
