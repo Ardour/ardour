@@ -37,8 +37,10 @@
 #include "luainstance.h"
 #include "luasignal.h"
 #include "marker.h"
+#include "region_view.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
+#include "time_axis_view_item.h"
 #include "selection.h"
 #include "script_selector.h"
 #include "timers.h"
@@ -582,8 +584,17 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 #endif
 
+		.beginClass <Selectable> ("Selectable")
+		.endClass ()
+		.deriveClass <TimeAxisViewItem, Selectable> ("TimeAxisViewItem")
+		.endClass ()
+		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
+		.endClass ()
+
+		.beginStdCPtrList <Selectable> ("SelectionList")
+		.endClass ()
+
 		.beginClass <RegionSelection> ("RegionSelection")
-		.addFunction ("clear_all", &RegionSelection::clear_all)
 		.addFunction ("start", &RegionSelection::start)
 		.addFunction ("end_frame", &RegionSelection::end_frame)
 		.addFunction ("n_midi_regions", &RegionSelection::n_midi_regions)
@@ -646,6 +657,8 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
 		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
+		.addFunction ("set_selection", &PublicEditor::set_selection)
+
 		.addFunction ("play_selection", &PublicEditor::play_selection)
 		.addFunction ("play_with_preroll", &PublicEditor::play_with_preroll)
 		.addFunction ("maybe_locate_with_edit_preroll", &PublicEditor::maybe_locate_with_edit_preroll)
@@ -691,6 +704,8 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("set_selected_mixer_strip", &PublicEditor::set_selected_mixer_strip)
 		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
 #endif
+
+		.addFunction ("get_regionview_from_region", &PublicEditor::get_regionview_from_region)
 		.addFunction ("set_stationary_playhead", &PublicEditor::set_stationary_playhead)
 		.addFunction ("stationary_playhead", &PublicEditor::stationary_playhead)
 		.addFunction ("set_follow_playhead", &PublicEditor::set_follow_playhead)
@@ -781,6 +796,13 @@ LuaInstance::register_classes (lua_State* L)
 		.addConst ("LoopEnd", ArdourMarker::Type(ArdourMarker::LoopEnd))
 		.addConst ("PunchIn", ArdourMarker::Type(ArdourMarker::PunchIn))
 		.addConst ("PunchOut", ArdourMarker::Type(ArdourMarker::PunchOut))
+		.endNamespace ()
+
+		.beginNamespace ("SelectionOp")
+		.addConst ("Toggle", Selection::Operation(Selection::Toggle))
+		.addConst ("Set", Selection::Operation(Selection::Set))
+		.addConst ("Extend", Selection::Operation(Selection::Extend))
+		.addConst ("Add", Selection::Operation(Selection::Add))
 		.endNamespace ()
 
 		.endNamespace (); // end ArdourUI

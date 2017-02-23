@@ -893,6 +893,30 @@ out:
 	return commit;
 }
 
+void
+Editor::set_selection (std::list<Selectable*> s, Selection::Operation op)
+{
+	if (s.empty()) {
+		return;
+	}
+	begin_reversible_selection_op (X_("set selection"));
+	switch (op) {
+		case Selection::Toggle:
+			selection->toggle (s);
+			break;
+		case Selection::Set:
+			selection->set (s);
+			break;
+		case Selection::Extend:
+			selection->add (s);
+			break;
+		case Selection::Add:
+			selection->add (s);
+			break;
+	}
+
+	commit_reversible_selection_op () ;
+}
 
 void
 Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> region, Selection::Operation op)

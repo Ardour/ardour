@@ -204,9 +204,13 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual framepos_t playhead_cursor_sample () const = 0;
 	virtual double sample_to_pixel (framepos_t frame) const = 0;
 	virtual double sample_to_pixel_unrounded (framepos_t frame) const = 0;
+
 	virtual Selection& get_selection () const = 0;
 	virtual bool get_selection_extents (framepos_t &start, framepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
+
+	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
+
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_selection () = 0;
 	virtual void play_with_preroll () = 0;
@@ -348,6 +352,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
+	virtual RegionView* get_regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;

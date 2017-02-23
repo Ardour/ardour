@@ -257,6 +257,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool get_selection_extents (framepos_t &start, framepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
+	void set_selection (std::list<Selectable*>, Selection::Operation);
+
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
@@ -732,6 +734,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
+	RegionView* get_regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
+
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 

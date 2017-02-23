@@ -5087,6 +5087,24 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 	}
 }
 
+RegionView*
+Editor::get_regionview_from_region (boost::shared_ptr<Region> region) const
+{
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* tatv;
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+			if (!tatv->track()) {
+				continue;
+			}
+			RegionView* marv = tatv->view()->find_view (region);
+			if (marv) {
+				return marv;
+			}
+		}
+	}
+	return NULL;
+}
+
 void
 Editor::show_rhythm_ferret ()
 {
