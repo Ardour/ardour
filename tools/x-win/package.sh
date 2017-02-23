@@ -192,6 +192,9 @@ cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/${PRODUCT_ICON} $DESTDIR/share/
 cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 
+#prefer built-in defaults
+rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/system_config
+
 # replace default cursor with square version (sans hotspot file)
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
