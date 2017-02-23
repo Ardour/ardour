@@ -108,6 +108,7 @@ SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::
 				value = 0.0;
 			} else {
 				value /= masters_value;
+				value = std::max (lower(), std::min(upper(), value));
 			}
 		}
 	}
