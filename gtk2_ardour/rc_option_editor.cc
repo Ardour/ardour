@@ -3694,7 +3694,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",
-		     _("Use narrow strips in the mixer by default"),
+		     _("Use narrow strips in the mixer for new strips by default"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
