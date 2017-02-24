@@ -1155,12 +1155,10 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 							bool const lm = new_ts->locked_to_meter();
 							if ((ipm && this_t->pulse() > new_ts->pulse()) || (!ipm && this_t->frame() > new_ts->frame())
 							    || (lm && this_t->pulse() > new_ts->pulse())) {
-								//if (prev_tempo && prev_tempo->type() == TempoSection::Ramp) {
-								new_ts->set_end_note_types_per_minute (this_t->note_types_per_minute());
-									//}
+								new_ts->set_end_note_types_per_minute (tempo.end_note_types_per_minute());
+
 								break;
 							}
-							//prev_tempo = this_t;
 						}
 					}
 				}
