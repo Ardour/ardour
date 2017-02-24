@@ -40,3 +40,21 @@ function factory () return function ()
 	-- set/replace current selection in the editor
 	Editor:set_selection (sl, ArdourUI.SelectionOp.Set);
 end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local wh = math.min (width, height) * .5
+
+	ctx:set_line_width (1)
+	ctx:rectangle (wh * .25, wh * .75, wh * 1.5 , .5 * wh)
+	ctx:set_source_rgba (0, 0, 0, 1)
+	ctx:stroke_preserve ()
+	ctx:set_source_rgba (.9, .9, .9, 1)
+	ctx:fill ()
+
+	ctx:set_source_rgba (1, 0, 0, 1)
+	ctx:rectangle (.5 + math.ceil(wh * 0.25), .5 + math.ceil(wh * .75), math.floor(wh * .5) - 1, math.floor(.5 * wh) - 1)
+	ctx:stroke_preserve ()
+
+	ctx:rectangle (.5 + math.ceil(wh * 1.25), .5 + math.ceil(wh * .75), math.floor(wh * .5) - 1, math.floor(.5 * wh) - 1)
+	ctx:stroke_preserve ()
+end end
