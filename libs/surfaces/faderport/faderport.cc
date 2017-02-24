@@ -1115,7 +1115,12 @@ FaderPort::Button::get_state () const
 void
 FaderPort::gui_track_selection_changed (StripableNotificationListPtr stripables)
 {
-	set_current_stripable (ControlProtocol::first_selected_stripable());
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	cerr << "Faderport: GUI track selection changed, first = "
+	     << (s ? s->name() : " --none-- ")
+	     << endl;
+
+	set_current_stripable (s);
 }
 
 void
