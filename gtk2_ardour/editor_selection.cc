@@ -991,6 +991,9 @@ Editor::track_selection_changed ()
 		/* last element in selection list is the most recently
 		 * selected, because we always append to that list.
 		 */
+		cerr << "setting selected mixer strip to "
+		     << selection->tracks.back()->name()
+		     << endl;
 		set_selected_mixer_strip (*(selection->tracks.back()));
 		if (!_track_selection_change_without_scroll) {
 			ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
