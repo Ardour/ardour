@@ -132,8 +132,13 @@ private:
 	void find_presets ();
 
 	/* END Plugin interface */
+
+public:
+	void set_origin (std::string& path) { _origin = path; }
+
 protected:
 	const std::string& script() const { return _script; }
+	const std::string& origin() const { return _origin; }
 
 private:
 #ifdef USE_TLSF
@@ -144,6 +149,7 @@ private:
 	LuaState lua;
 	luabridge::LuaRef * _lua_dsp;
 	std::string _script;
+	std::string _origin;
 	std::string _docs;
 	bool _lua_does_channelmapping;
 	bool _lua_has_inline_display;
