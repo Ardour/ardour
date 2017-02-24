@@ -54,7 +54,9 @@ class LIBARDOUR_API Tempo {
 	 * @param type Note Type (default `4': quarter note)
 	 */
 	Tempo (double npm, double type=4.0) // defaulting to quarter note
-		: _note_types_per_minute (npm), _note_type(type) {}
+		: _note_types_per_minute (npm), _note_type (type), _end_note_types_per_minute (npm) {}
+	Tempo (double start_npm, double type, double end_npm)
+		: _note_types_per_minute (start_npm), _note_type (type), _end_note_types_per_minute (end_npm) {}
 
 	double note_types_per_minute () const { return _note_types_per_minute; }
 	double note_types_per_minute (double note_type) const { return (_note_types_per_minute / _note_type) * note_type; }
@@ -63,6 +65,14 @@ class LIBARDOUR_API Tempo {
 
 	double quarter_notes_per_minute () const { return note_types_per_minute (4.0); }
 	double pulses_per_minute () const { return note_types_per_minute (1.0); }
+
+	double end_note_types_per_minute () const { return _end_note_types_per_minute; }
+	double end_note_types_per_minute (double note_type) const { return (_end_note_types_per_minute / _note_type) * note_type; }
+	void set_end_note_types_per_minute (double npm) { _end_note_types_per_minute = npm; }
+
+	double end_quarter_notes_per_minute () const { return end_note_types_per_minute (4.0); }
+	double end_pulses_per_minute () const { return end_note_types_per_minute (1.0); }
+
 	/** audio samples per note type.
 	 * if you want an instantaneous value for this, use TempoMap::frames_per_quarter_note_at() instead.
 	 * @param sr samplerate
@@ -81,6 +91,7 @@ class LIBARDOUR_API Tempo {
   protected:
 	double _note_types_per_minute;
 	double _note_type;
+	double _end_note_types_per_minute;
 };
 
 /** Meter, or time signature (beats per bar, and which note type is a beat). */
@@ -189,8 +200,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 		Constant,
 	};
 
-	TempoSection (const double& pulse, const double& minute, double qpm, double note_type, Type tempo_type, PositionLockStyle pls, framecnt_t sr)
-		: MetricSection (pulse, minute, pls, true, sr), Tempo (qpm, note_type), _type (tempo_type), _c (0.0), _active (true), _locked_to_meter (false)  {}
+	TempoSection (const double& pulse, const double& minute, Tempo tempo, Type tempo_type, PositionLockStyle pls, framecnt_t sr)
+		: MetricSection (pulse, minute, pls, true, sr), Tempo (tempo), _type (tempo_type), _c (0.0), _active (true), _locked_to_meter (false)  {}
 
 	TempoSection (const XMLNode&, const framecnt_t sample_rate);
 
@@ -226,6 +237,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	framepos_t frame_at_pulse (const double& pulse) const;
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
+	bool legacy_end () { return _legacy_end; }
 
   private:
 
@@ -258,6 +270,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool _active;
 	bool _locked_to_meter;
 	Timecode::BBT_Time _legacy_bbt;
+	bool _legacy_end;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -329,7 +342,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 		BBTPoint (const MeterSection& m, const Tempo& t, framepos_t f,
 		          uint32_t b, uint32_t e, double func_c)
-		: frame (f), meter (m.divisions_per_bar(), m.note_divisor()), tempo (t.note_types_per_minute(), t.note_type()), c (func_c), bar (b), beat (e) {}
+		: frame (f), meter (m.divisions_per_bar(), m.note_divisor()), tempo (t.note_types_per_minute(), t.note_type(), t.end_note_types_per_minute()), c (func_c), bar (b), beat (e) {}
 
 		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
 		operator Timecode::BBT_Time() const { return bbt(); }
@@ -407,8 +420,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	Metrics::const_iterator metrics_end() { return _metrics.end(); }
 
-	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
-	void change_initial_tempo (double bpm, double note_type);
+	void change_existing_tempo_at (framepos_t, double bpm, double note_type, double end_ntpm);
+	void change_initial_tempo (double ntpm, double note_type, double end_ntpm);
 
 	void insert_time (framepos_t, framecnt_t);
 	bool remove_time (framepos_t where, framecnt_t amount);  //returns true if anything was moved
@@ -488,14 +501,18 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void gui_set_tempo_position (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_set_meter_position (MeterSection*, const framepos_t& frame);
-	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
-	void gui_stretch_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame);
+	bool gui_change_tempo (TempoSection*, const Tempo& bpm, bool change_end);
+	void gui_stretch_tempo (TempoSection* tempo, const framepos_t frame, const framepos_t end_frame);
+	void gui_stretch_tempo_end (TempoSection* tempo, const framepos_t frame, const framepos_t end_frame);
+	bool gui_twist_tempi (TempoSection* first, const Tempo& bpm, const framepos_t frame, const framepos_t end_frame);
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
+	std::pair<double, double> ntpm_minmax () { return _ntpm_minmax; }
 
 	PBD::Signal1<void,const PBD::PropertyChange&> MetricPositionChanged;
 	void fix_legacy_session();
+	void fix_legacy_end_session();
 
 private:
 
