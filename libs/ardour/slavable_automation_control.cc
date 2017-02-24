@@ -95,6 +95,20 @@ SlavableAutomationControl::get_value_locked() const
 	return Control::get_double() * get_masters_value_locked ();
 }
 
+/** Get the current effective `user' value based on automation state */
+double
+SlavableAutomationControl::get_value() const
+{
+	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
+
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	if (!from_list) {
+		return get_value_locked ();
+	} else {
+		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
+	}
+}
+
 void
 SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
@@ -116,20 +130,6 @@ SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::
 
 	/* this will call Control::set_double() and emit Changed signals as appropriate */
 	AutomationControl::actually_set_value (value, gcd);
-}
-
-/** Get the current effective `user' value based on automation state */
-double
-SlavableAutomationControl::get_value() const
-{
-	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
-
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	if (!from_list) {
-		return get_value_locked ();
-	} else {
-		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
-	}
 }
 
 void
