@@ -86,6 +86,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 	char buf[64];
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
+	const TempoSection *prev_ts = 0;
 
 	remove_metric_marks (); // also clears tempo curves
 
@@ -110,10 +111,18 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			}
 
 			max_tempo = max (max_tempo, ts->note_types_per_minute());
+			max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 			min_tempo = min (min_tempo, ts->note_types_per_minute());
+			min_tempo = min (min_tempo, ts->end_note_types_per_minute());
+			uint32_t tc_color = UIConfiguration::instance().color ("tempo curve");
 
-			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("tempo curve"),
+			if (prev_ts &&  abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 2) {
+				tc_color = UIConfiguration::instance().color ("location loop");
+			}
+
+			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, tc_color,
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
+
 			if (ts->position_lock_style() == MusicTime) {
 				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker music"), buf,
 								 *(const_cast<TempoSection*>(ts))));
@@ -121,6 +130,8 @@ Editor::draw_metric_marks (const Metrics& metrics)
 				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
 								 *(const_cast<TempoSection*>(ts))));
 			}
+
+			prev_ts = ts;
 
 		}
 
@@ -224,7 +235,9 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 				tempo_marker->set_name (buf);
 
 				max_tempo = max (max_tempo, ts->note_types_per_minute());
+				max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 				min_tempo = min (min_tempo, ts->note_types_per_minute());
+				min_tempo = min (min_tempo, ts->end_note_types_per_minute());
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -250,6 +263,11 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 		(*x)->set_min_tempo (min_tempo);
 		++tmp;
 		if (tmp != tempo_curves.end()) {
+			if (abs ((*tmp)->tempo().note_types_per_minute() - (*x)->tempo().end_note_types_per_minute()) < 2) {
+				(*tmp)->set_color_rgba (UIConfiguration::instance().color ("location loop"));
+			} else {
+				(*tmp)->set_color_rgba (UIConfiguration::instance().color ("tempo curve"));
+			}
 			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
 		} else {
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);

@@ -1415,11 +1415,11 @@ Editor::toggle_marker_lock_style ()
 	} else if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = tsp->type();
 		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
 
 		begin_reversible_command (_("change tempo lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
@@ -1442,7 +1442,7 @@ Editor::toggle_tempo_type ()
 	if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
 		const double pulse = tsp->pulse();
 		const framepos_t frame = tsp->frame();
 		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;

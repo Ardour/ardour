@@ -3362,7 +3362,8 @@ MeterMarkerDrag::aborted (bool moved)
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
-	, _grab_bpm (0.0)
+	, _grab_bpm (120.0, 4.0)
+	, _grab_qn (0.0)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3370,7 +3371,8 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
 	_movable = !_real_section->initial();
-	_grab_bpm = _real_section->note_types_per_minute();
+	_grab_bpm = Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), _real_section->end_note_types_per_minute());
+	_grab_qn = _real_section->pulse() * 4.0;
 	assert (_marker);
 }
 
@@ -3397,6 +3399,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (!_real_section->active()) {
 		return;
 	}
+	TempoMap& map (_editor->session()->tempo_map());
 
 	if (first_move) {
 
@@ -3419,7 +3422,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 		_marker->hide();
 
-		TempoMap& map (_editor->session()->tempo_map());
 		/* get current state */
 		before_state = &map.get_state();
 
@@ -3449,13 +3451,18 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
-		/* use vertical movement to alter tempo .. should be log */
-		double new_bpm = max (1.5, _grab_bpm + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
-		stringstream strs;
-		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
-		strs << new_bpm;
-		show_verbose_cursor_text (strs.str());
 
+		/**
+		   adjust the end tempo of the previous ramped marker, or start and end tempo if constant.
+		   depending on position lock style, this may or may not move the mark.
+		*/
+		framepos_t const pf = adjusted_current_frame (event, false);
+		map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_real_section->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
+
+		ostringstream sstr;
+		sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_real_section->frame() - 1).end_note_types_per_minute() << "\n";
+		sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_real_section->frame() - 1).note_types_per_minute();
+		show_verbose_cursor_text (sstr.str());
 	} else if (_movable && !_real_section->locked_to_meter()) {
 		framepos_t pf;
 
@@ -3467,8 +3474,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			pf = adjusted_current_frame (event);
 		}
-
-		TempoMap& map (_editor->session()->tempo_map());
 
 		/* snap to beat is 1, snap to bar is -1 (sorry) */
 		const int sub_num = _editor->get_grid_music_divisions (event->button.state);
@@ -3534,10 +3539,9 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 	ostringstream sstr;
 
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute() << "\n";
-	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute() << "\n";
 	show_verbose_cursor_text (sstr.str());
-	finished (event, false);
 }
 
 void
@@ -3588,8 +3592,8 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
 	}
 	ostringstream sstr;
-	sstr << "^" << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute() << "\n";
-	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute() << "\n";
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3615,6 +3619,198 @@ BBTRulerDrag::aborted (bool moved)
 	}
 }
 
+TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+	, _grab_qn (0.0)
+	, _grab_tempo (0.0)
+	, _tempo (0)
+	, before_state (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New TempoTwistDrag\n");
+
+}
+
+void
+TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+	TempoMap& map (_editor->session()->tempo_map());
+	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
+	_grab_tempo = Tempo (_tempo->note_types_per_minute(), _tempo->note_type());
+
+	ostringstream sstr;
+	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << ">" << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	show_verbose_cursor_text (sstr.str());
+}
+
+void
+TempoTwistDrag::setup_pointer_frame_offset ()
+{
+	TempoMap& map (_editor->session()->tempo_map());
+	const double beat_at_frame = max (0.0, map.beat_at_frame (raw_grab_frame()));
+	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
+	double beat = 0.0;
+
+	if (divisions > 0) {
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * divisions)) / divisions);
+	} else {
+		/* while it makes some sense for the user to determine the division to 'grab',
+		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
+		   and the result over steep tempo curves. Use sixteenths.
+		*/
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
+	}
+
+	_grab_qn = map.quarter_note_at_beat (beat);
+
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_quarter_note (_grab_qn);
+
+}
+
+void
+TempoTwistDrag::motion (GdkEvent* event, bool first_move)
+{
+	TempoMap& map (_editor->session()->tempo_map());
+
+	if (first_move) {
+		/* get current state */
+		before_state = &map.get_state();
+		_editor->begin_reversible_command (_("twist tempo"));
+	}
+
+	framepos_t pf;
+
+	if (_editor->snap_musical()) {
+		pf = adjusted_current_frame (event, false);
+	} else {
+		pf = adjusted_current_frame (event);
+	}
+
+	if (ArdourKeyboard::indicates_copy (event->button.state)) {
+		/* adjust this and the next tempi to match pointer frame */
+		double new_bpm = max (1.5, _grab_tempo.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+
+		_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.frame_at_quarter_note (_grab_qn), pf);
+	}
+	ostringstream sstr;
+	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << ">" << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	show_verbose_cursor_text (sstr.str());
+}
+
+void
+TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		return;
+	}
+
+	TempoMap& map (_editor->session()->tempo_map());
+
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+TempoTwistDrag::aborted (bool moved)
+{
+	if (moved) {
+		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
+	}
+}
+
+TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+	, _grab_qn (0.0)
+	, _tempo (0)
+	, before_state (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New TempoEndDrag\n");
+
+}
+
+void
+TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+	TempoMap& map (_editor->session()->tempo_map());
+	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
+
+	ostringstream sstr;
+	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (raw_grab_frame()).note_types_per_minute();
+	show_verbose_cursor_text (sstr.str());
+}
+
+void
+TempoEndDrag::setup_pointer_frame_offset ()
+{
+	TempoMap& map (_editor->session()->tempo_map());
+	const double beat_at_frame = max (0.0, map.beat_at_frame (raw_grab_frame()));
+	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
+	double beat = 0.0;
+
+	if (divisions > 0) {
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * divisions)) / divisions);
+	} else {
+		/* while it makes some sense for the user to determine the division to 'grab',
+		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
+		   and the result over steep tempo curves. Use sixteenths.
+		*/
+		beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
+	}
+
+	_grab_qn = map.quarter_note_at_beat (beat);
+
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_quarter_note (_grab_qn);
+
+}
+
+void
+TempoEndDrag::motion (GdkEvent* event, bool first_move)
+{
+	TempoMap& map (_editor->session()->tempo_map());
+
+	if (first_move) {
+		/* get current state */
+		before_state = &map.get_state();
+		_editor->begin_reversible_command (_("stretch end tempo"));
+	}
+
+
+
+	framepos_t const pf = adjusted_current_frame (event, false);
+	map.gui_stretch_tempo_end (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
+
+	ostringstream sstr;
+	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute();
+	show_verbose_cursor_text (sstr.str());
+}
+
+void
+TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		return;
+	}
+
+	TempoMap& map (_editor->session()->tempo_map());
+
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+TempoEndDrag::aborted (bool moved)
+{
+	if (moved) {
+		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
+	}
+}
 
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 	: Drag (e, &c.track_canvas_item(), false)

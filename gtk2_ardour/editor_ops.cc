@@ -6710,11 +6710,11 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	XMLNode& before (_session->tempo_map().get_state());
 
 	if (do_global) {
-		_session->tempo_map().change_initial_tempo (beats_per_minute, t.note_type());
+		_session->tempo_map().change_initial_tempo (beats_per_minute, t.note_type(), t.end_note_types_per_minute());
 	} else if (t.frame() == start) {
-		_session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
+		_session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type(), t.end_note_types_per_minute());
 	} else {
-		const Tempo tempo (beats_per_minute, t.note_type());
+		const Tempo tempo (beats_per_minute, t.note_type(), t.end_note_types_per_minute());
 		_session->tempo_map().add_tempo (tempo, 0.0, start, TempoSection::Constant, AudioTime);
 	}
 

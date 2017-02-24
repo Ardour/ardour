@@ -175,7 +175,7 @@ void
 TempoCurve::set_color_rgba (uint32_t c)
 {
 	_color = c;
-	_curve->set_fill_color (UIConfiguration::instance().color_mod ("tempo curve", "selection rect"));
+	_curve->set_fill_color (UIConfiguration::instance().color_mod (c, "selection rect"));
 	_curve->set_outline_color (_color);
 
 }

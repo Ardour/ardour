@@ -1477,7 +1477,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <Tempo> ("Tempo")
-		.addConstructor <void (*) (double, double)> ()
+		.addConstructor <void (*) (double, double, double)> ()
 		.addFunction ("note_type", &Tempo::note_type)
 		.addFunction ("note_types_per_minute",  (double (Tempo::*)() const)&Tempo::note_types_per_minute)
 		.addFunction ("quarter_notes_per_minute", &Tempo::quarter_notes_per_minute)

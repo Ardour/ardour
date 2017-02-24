@@ -792,7 +792,8 @@ private:
 
 	bool _copy;
 	bool _movable;
-	double _grab_bpm;
+	ARDOUR::Tempo _grab_bpm;
+	double _grab_qn;
 	XMLNode* before_state;
 };
 
@@ -813,6 +814,62 @@ public:
 
 	bool y_movement_matters () const {
 		return false;
+	}
+
+	void setup_pointer_frame_offset ();
+
+private:
+	double _grab_qn;
+	ARDOUR::TempoSection* _tempo;
+	XMLNode* before_state;
+};
+
+/** tempo curve twist drag */
+class TempoTwistDrag : public Drag
+{
+public:
+	TempoTwistDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return true;
+	}
+
+	void setup_pointer_frame_offset ();
+
+private:
+	double _grab_qn;
+	ARDOUR::Tempo  _grab_tempo;
+	ARDOUR::TempoSection* _tempo;
+	XMLNode* before_state;
+};
+
+
+/** tempo curve twist drag */
+class TempoEndDrag : public Drag
+{
+public:
+	TempoEndDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return true;
 	}
 
 	void setup_pointer_frame_offset ();
