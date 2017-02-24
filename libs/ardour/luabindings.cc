@@ -138,12 +138,16 @@ luabridge::getIdentityKey ()
 	template void const* luabridge::ClassInfo< CLS >::getConstKey();
 
 CLASSINFO(ArdourMarker);
+CLASSINFO(AxisView);
 CLASSINFO(MarkerSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(RegionSelection);
 CLASSINFO(RegionView);
+CLASSINFO(RouteTimeAxisView);
+CLASSINFO(RouteUI);
 CLASSINFO(Selectable);
 CLASSINFO(Selection);
+CLASSINFO(TimeAxisView);
 CLASSINFO(TimeAxisViewItem);
 CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
