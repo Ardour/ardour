@@ -209,6 +209,7 @@ CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
 
 CLASSKEYS(std::list<ArdourMarker*>);
+CLASSKEYS(std::list<TimeAxisView*>);
 CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
