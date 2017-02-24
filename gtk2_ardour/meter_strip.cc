@@ -142,7 +142,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->set_type (_route->meter_type());
+	level_meter->set_meter_type (_route->meter_type());
 	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
@@ -927,7 +927,7 @@ MeterStrip::set_meter_type (MeterType type)
 	if (_suspend_menu_callbacks) return;
 	if (_route->meter_type() == type) return;
 
-	level_meter->set_type (type);
+	level_meter->set_meter_type (type);
 }
 
 void
@@ -953,14 +953,14 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 	switch (what) {
 		case -1:
 			if (_route && group == _route->route_group()) {
-				level_meter->set_type (type);
+				level_meter->set_meter_type (type);
 			}
 			break;
 		case 0:
-			level_meter->set_type (type);
+			level_meter->set_meter_type (type);
 		default:
 			if (what == _strip_type) {
-				level_meter->set_type (type);
+				level_meter->set_meter_type (type);
 			}
 			break;
 	}

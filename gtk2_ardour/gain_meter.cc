@@ -384,7 +384,7 @@ GainMeterBase::setup_meters (int len)
 void
 GainMeterBase::set_type (MeterType t)
 {
-	level_meter->set_type(t);
+	level_meter->set_meter_type(t);
 }
 
 void
