@@ -1011,25 +1011,25 @@ Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 }
 
 bool
-Selection::selected (ArdourMarker* m)
+Selection::selected (ArdourMarker* m) const
 {
 	return find (markers.begin(), markers.end(), m) != markers.end();
 }
 
 bool
-Selection::selected (TimeAxisView* tv)
+Selection::selected (TimeAxisView* tv) const
 {
 	return tv->selected ();
 }
 
 bool
-Selection::selected (RegionView* rv)
+Selection::selected (RegionView* rv) const
 {
 	return find (regions.begin(), regions.end(), rv) != regions.end();
 }
 
 bool
-Selection::selected (ControlPoint* cp)
+Selection::selected (ControlPoint* cp) const
 {
 	return find (points.begin(), points.end(), cp) != points.end();
 }

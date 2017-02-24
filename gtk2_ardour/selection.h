@@ -113,10 +113,10 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void dump_region_layers();
 
-	bool selected (TimeAxisView*);
-	bool selected (RegionView*);
-	bool selected (ArdourMarker*);
-	bool selected (ControlPoint*);
+	bool selected (TimeAxisView*) const;
+	bool selected (RegionView*) const;
+	bool selected (ArdourMarker*) const;
+	bool selected (ControlPoint*) const;
 
 	void set (std::list<Selectable*> const &);
 	void add (std::list<Selectable*> const &);
