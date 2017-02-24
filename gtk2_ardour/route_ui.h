@@ -74,7 +74,7 @@ class RoutePinWindowProxy : public WM::ProxyBase
 	PBD::ScopedConnection going_away_connection;
 };
 
-class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual Selectable, public virtual sigc::trackable
+class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual sigc::trackable
 {
   public:
 	RouteUI (ARDOUR::Session*);

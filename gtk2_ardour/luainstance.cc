@@ -575,20 +575,26 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("_type", &ArdourMarker::type)
 		.endClass ()
 
-#if 0
 		.beginClass <AxisView> ("AxisView")
 		.endClass ()
+
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
 		.endClass ()
-		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
-		.endClass ()
-#endif
 
 		.beginClass <Selectable> ("Selectable")
 		.endClass ()
+
 		.deriveClass <TimeAxisViewItem, Selectable> ("TimeAxisViewItem")
 		.endClass ()
+
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
+		.endClass ()
+
+		.deriveClass <RouteUI, Selectable> ("RouteUI")
+		.endClass ()
+
+		.deriveClass <RouteTimeAxisView, RouteUI> ("RouteTimeAxisView")
+		.addCast<TimeAxisView> ("to_timeaxisview")
 		.endClass ()
 
 		.beginStdCPtrList <Selectable> ("SelectionList")
