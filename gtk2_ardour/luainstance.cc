@@ -1197,6 +1197,9 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 			return false;
 	}
 
+	LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false));
+	lsp.push_back (lspp);
+
 	switch (type) {
 		case LuaScriptInfo::EditorAction:
 			return set_lua_action (id, spd.name(), script, lsp);
