@@ -29,7 +29,7 @@ function factory () return function ()
 			else
 				skip = true;
 				-- get RegionView (GUI object to be selected)
-				local rv = Editor:get_regionview_from_region (region)
+				local rv = Editor:regionview_from_region (region)
 				-- add it to the list of Objects to be selected
 				sl:push_back (rv);
 			end

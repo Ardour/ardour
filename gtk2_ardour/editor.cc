@@ -5088,7 +5088,7 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 }
 
 RegionView*
-Editor::get_regionview_from_region (boost::shared_ptr<Region> region) const
+Editor::regionview_from_region (boost::shared_ptr<Region> region) const
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		RouteTimeAxisView* tatv;
@@ -5099,6 +5099,20 @@ Editor::get_regionview_from_region (boost::shared_ptr<Region> region) const
 			RegionView* marv = tatv->view()->find_view (region);
 			if (marv) {
 				return marv;
+			}
+		}
+	}
+	return NULL;
+}
+
+RouteTimeAxisView*
+Editor::rtav_from_route (boost::shared_ptr<Route> route) const
+{
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* rtav;
+		if ((rtav = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+			if (rtav->route() == route) {
+				return rtav;
 			}
 		}
 	}
@@ -5484,6 +5498,9 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 void
 Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 {
+	if (!tv) {
+		return;
+	}
 	if (apply_to_selection) {
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ) {
 
@@ -5503,6 +5520,18 @@ Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 		}
 
 		_routes->hide_track_in_display (*tv);
+	}
+}
+
+void
+Editor::show_track_in_display (TimeAxisView* tv, bool move_into_view)
+{
+	if (!tv) {
+		return;
+	}
+	_routes->show_track_in_display (*tv);
+	if (move_into_view) {
+		ensure_time_axis_view_is_visible (*tv, false);
 	}
 }
 

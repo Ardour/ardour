@@ -597,8 +597,14 @@ LuaInstance::register_classes (lua_State* L)
 		.addCast<TimeAxisView> ("to_timeaxisview")
 		.endClass ()
 
+		// std::list<Selectable*>
 		.beginStdCPtrList <Selectable> ("SelectionList")
 		.endClass ()
+
+		// std::list<TimeAxisView*>
+		.beginStdCPtrList <TimeAxisView> ("TrackViewStdList")
+		.endClass ()
+
 
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("start", &RegionSelection::start)
@@ -616,8 +622,9 @@ LuaInstance::register_classes (lua_State* L)
 		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
-		.beginClass <TrackViewList> ("TrackViewList")
-		.addFunction ("routelist", &TrackViewList::routelist) // XXX check windows binding (libardour)
+		.deriveClass <TrackViewList, std::list<TimeAxisView*> > ("TrackViewList")
+		.addFunction ("contains", &TrackViewList::contains)
+		.addFunction ("routelist", &TrackViewList::routelist)
 		.endClass ()
 
 		.deriveClass <TrackSelection, TrackViewList> ("TrackSelection")
@@ -695,23 +702,23 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("get_current_zoom", &PublicEditor::get_current_zoom)
 		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
 
-#if 0 // These need TimeAxisView* which isn't exposed, yet
-		.addFunction ("playlist_selector", &PublicEditor::playlist_selector)
 		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
 		.addFunction ("new_playlists", &PublicEditor::new_playlists)
 		.addFunction ("copy_playlists", &PublicEditor::copy_playlists)
 		.addFunction ("clear_playlists", &PublicEditor::clear_playlists)
-#endif
 
 		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)
 		.addFunction ("deselect_all", &PublicEditor::deselect_all)
-#if 0
+
+#if 0 // TimeAxisView&  can't be bound (pure virtual fn)
 		.addFunction ("set_selected_track", &PublicEditor::set_selected_track)
 		.addFunction ("set_selected_mixer_strip", &PublicEditor::set_selected_mixer_strip)
-		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
+		.addFunction ("ensure_time_axis_view_is_visible", &PublicEditor::ensure_time_axis_view_is_visible)
 #endif
+		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
+		.addFunction ("show_track_in_display", &PublicEditor::show_track_in_display)
 
-		.addFunction ("get_regionview_from_region", &PublicEditor::get_regionview_from_region)
+		.addFunction ("regionview_from_region", &PublicEditor::regionview_from_region)
 		.addFunction ("set_stationary_playhead", &PublicEditor::set_stationary_playhead)
 		.addFunction ("stationary_playhead", &PublicEditor::stationary_playhead)
 		.addFunction ("set_follow_playhead", &PublicEditor::set_follow_playhead)
@@ -722,7 +729,6 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("current_page_samples", &PublicEditor::current_page_samples)
 		.addFunction ("visible_canvas_height", &PublicEditor::visible_canvas_height)
 		.addFunction ("temporal_zoom_step", &PublicEditor::temporal_zoom_step)
-		//.addFunction ("ensure_time_axis_view_is_visible", &PublicEditor::ensure_time_axis_view_is_visible)
 		.addFunction ("override_visible_track_count", &PublicEditor::override_visible_track_count)
 
 		.addFunction ("scroll_tracks_down_line", &PublicEditor::scroll_tracks_down_line)
@@ -754,14 +760,14 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("set_video_timeline_height", &PublicEditor::set_video_timeline_height)
 
 #if 0
-		.addFunction ("get_route_view_by_route_id", &PublicEditor::get_route_view_by_route_id)
 		.addFunction ("get_equivalent_regions", &PublicEditor::get_equivalent_regions)
-
-		.addFunction ("axis_view_from_route", &PublicEditor::axis_view_from_route)
-		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)
-		.addFunction ("get_track_views", &PublicEditor::get_track_views)
 		.addFunction ("drags", &PublicEditor::drags)
 #endif
+
+		.addFunction ("get_route_view_by_route_id", &PublicEditor::get_route_view_by_route_id)
+		.addFunction ("get_track_views", &PublicEditor::get_track_views)
+		.addFunction ("rtav_from_route", &PublicEditor::rtav_from_route)
+		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)
 
 		.addFunction ("center_screen", &PublicEditor::center_screen)
 

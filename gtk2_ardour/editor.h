@@ -331,6 +331,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_selected_mixer_strip (TimeAxisView&);
 	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
+	void show_track_in_display (TimeAxisView* tv, bool move_into_view = false);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
@@ -734,7 +735,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
-	RegionView* get_regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
+	RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
+	RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;

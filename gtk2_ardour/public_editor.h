@@ -286,6 +286,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
+	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;
 
 	virtual void set_stationary_playhead (bool yn) = 0;
 	virtual void toggle_stationary_playhead () = 0;
@@ -352,7 +353,8 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
-	virtual RegionView* get_regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
+	virtual RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
+	virtual RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
