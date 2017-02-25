@@ -3538,8 +3538,8 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 	ostringstream sstr;
 
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
-	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3591,8 +3591,8 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
 	}
 	ostringstream sstr;
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
-	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
