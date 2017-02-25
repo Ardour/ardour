@@ -2894,6 +2894,24 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|Metering"), mvu);
 
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak indicator threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
+
+	add_option (S_("Preferences|Metering"), mpks);
+
+	OptionEditorHeading* default_meter_head = new OptionEditorHeading (_("Default Meter Types"));
+	default_meter_head->set_note (_("These settings are used when creating new tracks, busses or new sessions in case of the master-meter and do not affect the current settings."));
+
+	add_option (S_("Preferences|Metering"), default_meter_head);
+
 	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
 		"meter-type-master",
 		_("Default Meter Type for Master Bus"),
@@ -2939,19 +2957,6 @@ RCOptionEditor::RCOptionEditor ()
 	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
 
 	add_option (S_("Preferences|Metering"), mtt);
-
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak threshold [dBFS]"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
-			-10, 0, .1, .1
-			);
-
-	Gtkmm2ext::UI::instance()->set_tip (
-			mpks->tip_widget(),
-			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
-
-	add_option (S_("Preferences|Metering"), mpks);
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
 
