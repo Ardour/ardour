@@ -3448,20 +3448,21 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 	}
+	if (ArdourKeyboard::indicates_constraint (event->button.state) && ArdourKeyboard::indicates_copy (event->button.state)) {
+		double new_bpm = max (1.5, _grab_bpm.end_note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+		stringstream strs;
+		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()), true);
+		strs << "end:" << fixed << setprecision(3) << new_bpm;
+		show_verbose_cursor_text (strs.str());
 
-	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
+	} else if (ArdourKeyboard::indicates_constraint (event->button.state)) {
+		/* use vertical movement to alter tempo .. should be log */
+		double new_bpm = max (1.5, _grab_bpm.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+		stringstream strs;
+		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()), false);
+		strs << "start:" << fixed << setprecision(3) << new_bpm;
+		show_verbose_cursor_text (strs.str());
 
-		/**
-		   adjust the end tempo of the previous ramped marker, or start and end tempo if constant.
-		   depending on position lock style, this may or may not move the mark.
-		*/
-		framepos_t const pf = adjusted_current_frame (event, false);
-		map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_real_section->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
-
-		ostringstream sstr;
-		sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_real_section->frame() - 1).end_note_types_per_minute() << "\n";
-		sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_real_section->frame() - 1).note_types_per_minute();
-		show_verbose_cursor_text (sstr.str());
 	} else if (_movable && !_real_section->locked_to_meter()) {
 		framepos_t pf;
 
@@ -3739,7 +3740,7 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	ostringstream sstr;
 	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (raw_grab_frame()).note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3781,11 +3782,11 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 
 
 	framepos_t const pf = adjusted_current_frame (event, false);
-	map.gui_stretch_tempo_end (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
+	map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_tempo->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
 	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (pf).note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
