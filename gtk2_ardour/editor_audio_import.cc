@@ -290,7 +290,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
-			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
+			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, MusicTime);
 			if (!(meter == last_meter)) {
 				bbt = new_map.bbt_at_quarter_note ((t->time_pulses/smf.ppqn()));
 				new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
@@ -298,7 +298,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 
 		} else {
 			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, pos, AudioTime);
-			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, TempoSection::Constant, AudioTime);
+			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, AudioTime);
 			have_initial_meter = true;
 
 		}

@@ -171,12 +171,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 		set_active (string_is_affirmative (prop->value()));
 	}
 
-	if ((prop = node.property ("tempo-type")) == 0) {
-		_type = Constant;
-	} else {
-		_type = Type (string_2_enum (prop->value(), _type));
-	}
-
 	if ((prop = node.property ("lock-style")) == 0) {
 		if (!initial()) {
 			set_position_lock_style (MusicTime);
@@ -224,17 +218,10 @@ TempoSection::get_state() const
 	root->add_property ("movable", buf);
 	snprintf (buf, sizeof (buf), "%s", active()?"yes":"no");
 	root->add_property ("active", buf);
-	root->add_property ("tempo-type", enum_2_string (_type));
 	root->add_property ("lock-style", enum_2_string (position_lock_style()));
 	root->add_property ("locked-to-meter", locked_to_meter()?"yes":"no");
 
 	return *root;
-}
-
-void
-TempoSection::set_type (Type type)
-{
-	_type = type;
 }
 
 /** returns the Tempo at the session-relative minute.
@@ -242,7 +229,7 @@ TempoSection::set_type (Type type)
 Tempo
 TempoSection::tempo_at_minute (const double& m) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && m < minute());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && m < minute());
 	if (constant) {
 		return Tempo (note_types_per_minute(), note_type());
 	}
@@ -268,7 +255,7 @@ TempoSection::tempo_at_minute (const double& m) const
 double
 TempoSection::minute_at_ntpm (const double& ntpm, const double& p) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && p < pulse());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && p < pulse());
 	if (constant) {
 		return ((p - pulse()) / pulses_per_minute()) + minute();
 	}
@@ -281,7 +268,7 @@ TempoSection::minute_at_ntpm (const double& ntpm, const double& p) const
 Tempo
 TempoSection::tempo_at_pulse (const double& p) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && p < pulse());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && p < pulse());
 
 	if (constant) {
 		return Tempo (note_types_per_minute(), note_type());
@@ -303,7 +290,7 @@ TempoSection::tempo_at_pulse (const double& p) const
 double
 TempoSection::pulse_at_ntpm (const double& ntpm, const double& m) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && m < minute());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && m < minute());
 	if (constant) {
 		return ((m - minute()) * pulses_per_minute()) + pulse();
 	}
@@ -316,7 +303,7 @@ TempoSection::pulse_at_ntpm (const double& ntpm, const double& m) const
 double
 TempoSection::pulse_at_minute (const double& m) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && m < minute());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && m < minute());
 	if (constant) {
 		return ((m - minute()) * pulses_per_minute()) + pulse();
 	}
@@ -329,7 +316,7 @@ TempoSection::pulse_at_minute (const double& m) const
 double
 TempoSection::minute_at_pulse (const double& p) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && p < pulse());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && p < pulse());
 	if (constant) {
 		return ((p - pulse()) / pulses_per_minute()) + minute();
 	}
@@ -346,7 +333,7 @@ TempoSection::minute_at_pulse (const double& p) const
 double
 TempoSection::pulse_at_frame (const framepos_t& f) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && f < frame());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && f < frame());
 	if (constant) {
 		return (minute_at_frame (f - frame()) * pulses_per_minute()) + pulse();
 	}
@@ -357,7 +344,7 @@ TempoSection::pulse_at_frame (const framepos_t& f) const
 framepos_t
 TempoSection::frame_at_pulse (const double& p) const
 {
-	const bool constant = _type == Constant || _c == 0.0 || (initial() && p < pulse());
+	const bool constant = type() == Constant || _c == 0.0 || (initial() && p < pulse());
 	if (constant) {
 		return frame_at_minute (((p - pulse()) / pulses_per_minute()) + minute());
 	}
@@ -448,7 +435,7 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
 double
 TempoSection::compute_c_pulse (const double& end_npm, const double& end_pulse) const
 {
-	if (note_types_per_minute() == end_npm || _type == Constant) {
+	if (note_types_per_minute() == end_npm || type() == Constant) {
 		return 0.0;
 	}
 
@@ -464,7 +451,7 @@ TempoSection::compute_c_pulse (const double& end_npm, const double& end_pulse) c
 double
 TempoSection::compute_c_minute (const double& end_npm, const double& end_minute) const
 {
-	if (note_types_per_minute() == end_npm || _type == Constant) {
+	if (note_types_per_minute() == end_npm || type() == Constant) {
 		return 0.0;
 	}
 
@@ -761,7 +748,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	_frame_rate = fr;
 	BBT_Time start (1, 1, 0);
 
-	TempoSection *t = new TempoSection (0.0, 0.0, _default_tempo, TempoSection::Ramp, AudioTime, fr);
+	TempoSection *t = new TempoSection (0.0, 0.0, _default_tempo, AudioTime, fr);
 	MeterSection *m = new MeterSection (0.0, 0.0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor(), AudioTime, fr);
 
 	t->set_initial (true);
@@ -989,10 +976,6 @@ TempoMap::do_insert (MetricSection* section)
 
 					*(dynamic_cast<Tempo*>(*i)) = *(dynamic_cast<Tempo*>(insert_tempo));
 					(*i)->set_position_lock_style (AudioTime);
-					TempoSection* t;
-					if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
-						t->set_type (insert_tempo->type());
-					}
 					need_add = false;
 				} else {
 					delete (*i);
@@ -1080,7 +1063,7 @@ TempoMap::do_insert (MetricSection* section)
 }
 /* user supplies the exact pulse if pls == MusicTime */
 TempoSection*
-TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
+TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
 		warning << "Cannot add tempo. note types per minute must be greater than zero." << endmsg;
@@ -1091,7 +1074,7 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 	TempoSection* prev_tempo = 0;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), type, pls, true);
+		ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), pls, true);
 		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 
 			if ((*i)->is_tempo()) {
@@ -1118,7 +1101,7 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 }
 
 void
-TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
+TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
 		warning << "Cannot replace tempo. note types per minute must be greater than zero." << endmsg;
@@ -1133,7 +1116,6 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 		TempoSection& first (first_tempo());
 		if (!ts.initial()) {
 			if (locked_to_meter) {
-				ts.set_type (type);
 				{
 					/* cannot move a meter-locked tempo section */
 					*static_cast<Tempo*>(&ts) = tempo;
@@ -1141,7 +1123,7 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 				}
 			} else {
 				remove_tempo_locked (ts);
-				new_ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), type, pls, true, locked_to_meter);
+				new_ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), pls, true, locked_to_meter);
 
 				if (new_ts && new_ts->type() == TempoSection::Constant) {
 					new_ts->set_end_note_types_per_minute (new_ts->note_types_per_minute());
@@ -1165,7 +1147,6 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 			}
 
 		} else {
-			first.set_type (type);
 			first.set_pulse (0.0);
 			first.set_minute (minute_at_frame (frame));
 			first.set_position_lock_style (AudioTime);
@@ -1183,9 +1164,9 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 
 TempoSection*
 TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, double minute
-			    , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter)
+			    , PositionLockStyle pls, bool recompute, bool locked_to_meter)
 {
-	TempoSection* t = new TempoSection (pulse, minute, tempo, type, pls, _frame_rate);
+	TempoSection* t = new TempoSection (pulse, minute, tempo, pls, _frame_rate);
 	t->set_locked_to_meter (locked_to_meter);
 
 	do_insert (t);
@@ -1263,7 +1244,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 
 	if (pls == AudioTime) {
 		/* add meter-locked tempo */
-		mlt = add_tempo_locked (tempo_at_minute_locked (_metrics, time_minutes), pulse, minute_at_frame (frame), TempoSection::Ramp, AudioTime, true, true);
+		mlt = add_tempo_locked (tempo_at_minute_locked (_metrics, time_minutes), pulse, minute_at_frame (frame), AudioTime, true, true);
 
 		if (!mlt) {
 			return 0;
@@ -3483,10 +3464,7 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 			goto out;
 		}
 
-		/* this should be everywhere. no _type because type() is constant if note_types_per_minute() == end_types_per_minute()
-		   but what to do with legact sessions?
-		*/
-		if (prev_t && prev_t->note_types_per_minute() != prev_t->end_note_types_per_minute()) {
+		if (prev_t && prev_t->type() == TempoSection::Ramp) {
 			prev_t->set_note_types_per_minute (new_bpm);
 		} else {
 			prev_t->set_end_note_types_per_minute (new_bpm);
@@ -3497,7 +3475,7 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 		recompute_meters (future_map);
 
 		if (check_solved (future_map)) {
-			if (prev_t && prev_t->note_types_per_minute() != prev_t->end_note_types_per_minute()) {
+			if (prev_t && prev_t->type() == TempoSection::Ramp) {
 				ts->set_note_types_per_minute (new_bpm);
 			} else {
 				ts->set_end_note_types_per_minute (new_bpm);
@@ -3575,27 +3553,14 @@ TempoMap::gui_stretch_tempo_end (TempoSection* ts, const framepos_t frame, const
 			goto out;
 		}
 
-		if (prev_t && prev_t->type() == TempoSection::Ramp) {
-			prev_t->set_end_note_types_per_minute (new_bpm);
-		} else {
-			if (prev_t) {
-				prev_t->set_note_types_per_minute (new_bpm);
-				prev_t->set_end_note_types_per_minute (prev_t->note_types_per_minute());
-			}
-		}
+		prev_t->set_end_note_types_per_minute (new_bpm);
 
 		recompute_tempi (future_map);
 		recompute_meters (future_map);
 
 		if (check_solved (future_map)) {
-			if (prev_t && prev_t->type() == TempoSection::Ramp) {
-				ts->set_end_note_types_per_minute (new_bpm);
-			} else {
-				if (prev_t) {
-					ts->set_end_note_types_per_minute (prev_t->note_types_per_minute());
-					ts->set_note_types_per_minute (prev_t->note_types_per_minute());
-				}
-			}
+			ts->set_end_note_types_per_minute (new_bpm);
+
 			recompute_tempi (_metrics);
 			recompute_meters (_metrics);
 		}

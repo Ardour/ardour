@@ -36,9 +36,9 @@ TempoTest::recomputeMapTest48 ()
 	*/
 
 	Tempo tempoA (120.0, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240.0, 4.0);
-	map.add_tempo (tempoB, 3.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 3.0, 0, MusicTime);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
 	//map.dump (map._metrics, std::cout);
@@ -134,9 +134,9 @@ TempoTest::recomputeMapTest44 ()
 	*/
 
 	Tempo tempoA (120.0, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240.0, 4.0);
-	map.add_tempo (tempoB, 3.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 3.0, 0, MusicTime);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 288e3, MusicTime);
 
@@ -234,21 +234,21 @@ TempoTest::qnDistanceTestConstant ()
 	*/
 
 	Tempo tempoA (120.0, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	/* should have no effect on pulse */
 	Tempo tempoB (120.0, 4.0);
-	map.add_tempo (tempoB, 2.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 2.0, 0, MusicTime);
 	/* equivalent to pulse 3.0 @ 120 bpm*/
 	Tempo tempoC (240.0, 4.0);
-	map.add_tempo (tempoC, 0.0, 6 * sampling_rate, TempoSection::Constant, AudioTime);
+	map.add_tempo (tempoC, 0.0, 6 * sampling_rate, AudioTime);
 	Tempo tempoD (90.4, 4.0);
-	map.add_tempo (tempoD, 9.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoD, 9.0, 0, MusicTime);
 	Tempo tempoE (110.6, 4.0);
-	map.add_tempo (tempoE, 12.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoE, 12.0, 0, MusicTime);
 	Tempo tempoF (123.7, 4.0);
-	map.add_tempo (tempoF, 15.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoF, 15.0, 0, MusicTime);
 	Tempo tempoG (111.8, 4.0);
-	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, TempoSection::Constant, AudioTime);
+	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, AudioTime);
 
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 288e3, MusicTime);
@@ -313,23 +313,24 @@ TempoTest::qnDistanceTestRamp ()
 
 	*/
 
-	Tempo tempoA (120.2, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
-	Tempo tempoB (240.5, 4.0);
-	map.add_tempo (tempoB, 3.0, 0, TempoSection::Ramp, MusicTime);
+	Tempo tempoA (120.2, 4.0, 240.5);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
+	Tempo tempoB (240.5, 4.0, 130.1);
+	map.add_tempo (tempoB, 3.0, 0, MusicTime);
 
-	Tempo tempoC (130.1, 4.0);
-	map.add_tempo (tempoC, 0.0, 6 * sampling_rate, TempoSection::Ramp, AudioTime);
-	Tempo tempoD (90.3, 4.0);
-	map.add_tempo (tempoD, 9.0, 0, TempoSection::Ramp, MusicTime);
-	Tempo tempoE (110.7, 4.0);
-	map.add_tempo (tempoE, 12.0, 0, TempoSection::Ramp, MusicTime);
-	Tempo tempoF (123.9, 4.0);
-	map.add_tempo (tempoF, 15.0, 0, TempoSection::Ramp, MusicTime);
+	Tempo tempoC (130.1, 4.0, 90.3);
+	map.add_tempo (tempoC, 0.0, 6 * sampling_rate, AudioTime);
+	Tempo tempoD (90.3, 4.0, 110.7);
+	map.add_tempo (tempoD, 9.0, 0, MusicTime);
+	Tempo tempoE (110.7, 4.0, 123.9);
+	map.add_tempo (tempoE, 12.0, 0, MusicTime);
+	Tempo tempoF (123.9, 4.0, 111.8);
+	map.add_tempo (tempoF, 15.0, 0, MusicTime);
 	Tempo tempoG (111.8, 4.0);
-	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, TempoSection::Ramp, AudioTime);
+	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, AudioTime);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 4.0, BBT_Time (2, 1, 0), 288e3, AudioTime);
+	map.dump (std::cout);
 	map.recompute_map (map._metrics, 1);
 
 	list<MetricSection*>::iterator i = map._metrics.begin();
@@ -367,10 +368,10 @@ TempoTest::rampTest48 ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	Tempo tempoA (77.0, 4.0);
+	Tempo tempoA (77.0, 4.0, 217.0);
 	Tempo tempoB (217.0, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
-	map.add_tempo (tempoB, 0.0, (framepos_t) 60 * sampling_rate, TempoSection::Ramp, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
+	map.add_tempo (tempoB, 0.0, (framepos_t) 60 * sampling_rate, AudioTime);
 	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
@@ -429,10 +430,10 @@ TempoTest::rampTest44 ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	Tempo tempoA (77.0, 4.0);
+	Tempo tempoA (77.0, 4.0, 217.0);
 	Tempo tempoB (217.0, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
-	map.add_tempo (tempoB, 0.0, (framepos_t) 60 * sampling_rate, TempoSection::Ramp, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
+	map.add_tempo (tempoB, 0.0, (framepos_t) 60 * sampling_rate, AudioTime);
 	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
@@ -491,15 +492,15 @@ TempoTest::tempoAtPulseTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 8);
-	Tempo tempoA (80.0, 8.0);
-	Tempo tempoB (160.0, 3.0);
+	Tempo tempoA (80.0, 8.0, 160.0);
+	Tempo tempoB (160.0, 3.0, 123.0);
 	Tempo tempoC (123.0, 4.0);
 
 	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Ramp, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 
-	map.add_tempo (tempoB, 20.0, 0, TempoSection::Ramp, MusicTime);
-	map.add_tempo (tempoC, 30.0, 0, TempoSection::Ramp, MusicTime);
+	map.add_tempo (tempoB, 20.0, 0, MusicTime);
+	map.add_tempo (tempoC, 30.0, 0, MusicTime);
 
 	TempoSection* tA = 0;
 	TempoSection* tB = 0;
@@ -569,13 +570,13 @@ TempoTest::tempoFundamentalsTest ()
 	Tempo tempoE (123.0, 3.0);
 
 	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 
-	map.add_tempo (tempoB, 20.0, 0, TempoSection::Constant, MusicTime);
-	map.add_tempo (tempoC, 30.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 20.0, 0, MusicTime);
+	map.add_tempo (tempoC, 30.0, 0, MusicTime);
 
-	map.add_tempo (tempoD, 40.0, 0, TempoSection::Constant, MusicTime);
-	map.add_tempo (tempoE, 50.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoD, 40.0, 0, MusicTime);
+	map.add_tempo (tempoE, 50.0, 0, MusicTime);
 
 	TempoSection* tA = 0;
 	TempoSection* tB = 0;

@@ -21,7 +21,7 @@ FramewalkToBeatsTest::singleTempoTest ()
 	Meter meter (4, 4);
 
 	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, AudioTime);
 
 	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1).to_double();
@@ -71,9 +71,9 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), 0, MusicTime);
 
 	/* Now some tests */
 
@@ -127,11 +127,11 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	*/
 
 	Tempo tempoA (120, 4.0);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240, 4.0);
-	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), 0, MusicTime);
 	Tempo tempoC (160, 4.0);
-	map.add_tempo (tempoC, 8.0 / tempoB.note_type(), 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoC, 8.0 / tempoB.note_type(), 0, MusicTime);
 
 	/* Walk from 1|3 to 4|1 */
 	double r = map.framewalk_to_qn (2 * 24e3, (2 * 24e3) + (4 * 12e3) + (4 * 18e3)).to_double();
@@ -151,7 +151,7 @@ FramewalkToBeatsTest::singleTempoMeterTest ()
 	Meter meter (7, 8);
 
 	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, AudioTime);
 
 	/* Walk 1 qn beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1).to_double();

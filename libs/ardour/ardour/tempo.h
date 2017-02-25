@@ -200,8 +200,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 		Constant,
 	};
 
-	TempoSection (const double& pulse, const double& minute, Tempo tempo, Type tempo_type, PositionLockStyle pls, framecnt_t sr)
-		: MetricSection (pulse, minute, pls, true, sr), Tempo (tempo), _type (tempo_type), _c (0.0), _active (true), _locked_to_meter (false)  {}
+	TempoSection (const double& pulse, const double& minute, Tempo tempo, PositionLockStyle pls, framecnt_t sr)
+		: MetricSection (pulse, minute, pls, true, sr), Tempo (tempo), _c (0.0), _active (true), _locked_to_meter (false)  {}
 
 	TempoSection (const XMLNode&, const framecnt_t sample_rate);
 
@@ -212,8 +212,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double c () const { return _c; }
 	void set_c (double c) { _c = c; }
 
-	void set_type (Type type);
-	Type type () const { return _type; }
+	Type type () const { if (note_types_per_minute() == end_note_types_per_minute()) { return Constant; } else { return Ramp; } }
 
 	bool active () const { return _active; }
 	void set_active (bool yn) { _active = yn; }
@@ -265,7 +264,6 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   this enables us to keep the tempo change at the same relative
 	   position within the bar if/when the meter changes.
 	*/
-	Type _type;
 	double _c;
 	bool _active;
 	bool _locked_to_meter;
@@ -374,7 +372,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 * @param type type of new tempo section (Ramp, Constant)
 	 */
-	TempoSection* add_tempo (const Tempo&, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls);
+	TempoSection* add_tempo (const Tempo&, const double& pulse, const framepos_t& frame, PositionLockStyle pls);
 
 	/** add a meter section locked to pls.. ignored values will be set in recompute_meters()
 	 * @param meter the Meter to be added
@@ -394,8 +392,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	void replace_tempo (TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
-			    , TempoSection::Type type, PositionLockStyle pls);
+	void replace_tempo (TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame, PositionLockStyle pls);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
 
@@ -589,7 +586,7 @@ private:
 	void do_insert (MetricSection* section);
 
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
-			       , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
+			       , PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
 	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute);
 

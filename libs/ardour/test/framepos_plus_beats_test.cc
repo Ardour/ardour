@@ -22,7 +22,7 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	Meter meter (4, 4);
 
 	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, AudioTime);
 
 	/* Add 1 beat to beat 3 of the first bar */
 	framepos_t r = map.framepos_plus_qn (frames_per_beat * 2, Evoral::Beats(1));
@@ -63,9 +63,9 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240, 4.0);
-	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, MusicTime);
 
 	/* Now some tests */
 
@@ -116,9 +116,9 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	*/
 
 	Tempo tempoA (120, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240, 4.0);
-	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, MusicTime);
 	Meter meterB (3, 8);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
 
@@ -173,9 +173,9 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 	*/
 
 	Tempo tempoA (120, 4.0);
-	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, TempoSection::Constant, AudioTime);
+	map.replace_tempo (map.first_tempo(), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240, 4.0);
-	map.add_tempo (tempoB, 12.0 / 4.0, 0, TempoSection::Constant, MusicTime);
+	map.add_tempo (tempoB, 12.0 / 4.0, 0, MusicTime);
 	Meter meterB (5, 8);
 	map.add_meter (meterB, 9.0, BBT_Time (4, 1, 0), 0, MusicTime);
 	/* Now some tests */
