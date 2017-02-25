@@ -2661,7 +2661,7 @@ RCOptionEditor::RCOptionEditor ()
 
 		bo = new BoolOption (
 				"strict-io",
-				_("Use 'Strict-I/O' for new tracks or Busses"),
+				_("Use 'Strict-I/O' for new tracks or busses"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
 				);
@@ -2932,7 +2932,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
 		"meter-type-bus",
-		_("Default Meter Type for Busses"),
+		_("Default meter type for busses"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
 		);
@@ -2949,7 +2949,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
 		"meter-type-track",
-		_("Default Meter Type for Tracks"),
+		_("Default meter type for tracks"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
 		);
