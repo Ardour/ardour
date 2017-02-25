@@ -27,7 +27,7 @@ PROGRAM_NAME=Ardour
 PROGRAM_KEY=Ardour
 PROGRAM_VERSION=${major_version}
 
-PRODUCT_NAME=ardour
+PRODUCT_NAME=Ardour
 PRODUCT_VERSION=${major_version}
 
 WITH_HARRISON_LV2=1 ;
@@ -43,14 +43,14 @@ while [ $# -gt 0 ] ; do
 			WITH_X42_LV2=1 ;
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
-			PRODUCT_NAME=mixbus
+			PRODUCT_NAME=Mixbus
 			MANUAL_NAME="mixbus${major_version}-live-manual"
 			shift ;;
 		--mixbus32c)
 			MIXBUS=1
 			WITH_HARRISON_LV2=1 ;
 			WITH_X42_LV2=1 ;
-			PRODUCT_NAME=mixbus32c
+			PRODUCT_NAME=Mixbus32C
 			PROGRAM_KEY=Mixbus32C
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
 			PROGRAM_VERSION=""
