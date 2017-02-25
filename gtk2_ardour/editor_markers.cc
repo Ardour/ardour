@@ -991,10 +991,8 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
-	if (loc->tempo().type() == TempoSection::Constant) {
-		items.push_back (MenuElem (_("Make Ramped"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
-	} else {
-		items.push_back (MenuElem (_("Make Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	if (loc->tempo().type() == TempoSection::Ramp) {
+		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
 	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
