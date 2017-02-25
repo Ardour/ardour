@@ -2908,7 +2908,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Preferences|Metering"), mpks);
 
 	OptionEditorHeading* default_meter_head = new OptionEditorHeading (_("Default Meter Types"));
-	default_meter_head->set_note (_("These settings are used when creating new tracks, busses or new sessions in case of the master-meter and do not affect the current settings."));
+	default_meter_head->set_note (_("These settings apply to newly created tracks and busses. For the Master bus, this will be when a new session is created."));
 
 	add_option (S_("Preferences|Metering"), default_meter_head);
 
