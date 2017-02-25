@@ -127,6 +127,7 @@ RouteProcessorSelection::remove (AxisView* r)
 void
 RouteProcessorSelection::set (AxisView* r)
 {
+	PresentationInfo::ChangeSuspender cs;
 	clear_routes ();
 	add (r);
 }
