@@ -3483,7 +3483,10 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 			goto out;
 		}
 
-		if (prev_t && prev_t->type() == TempoSection::Ramp) {
+		/* this should be everywhere. no _type because type() is constant if note_types_per_minute() == end_types_per_minute()
+		   but what to do with legact sessions?
+		*/
+		if (prev_t && prev_t->note_types_per_minute() != prev_t->end_note_types_per_minute()) {
 			prev_t->set_note_types_per_minute (new_bpm);
 		} else {
 			prev_t->set_end_note_types_per_minute (new_bpm);
@@ -3494,7 +3497,7 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 		recompute_meters (future_map);
 
 		if (check_solved (future_map)) {
-			if (prev_t && prev_t->type() == TempoSection::Ramp) {
+			if (prev_t && prev_t->note_types_per_minute() != prev_t->end_note_types_per_minute()) {
 				ts->set_note_types_per_minute (new_bpm);
 			} else {
 				ts->set_end_note_types_per_minute (new_bpm);
