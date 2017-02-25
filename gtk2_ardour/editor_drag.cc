@@ -3431,15 +3431,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			const Tempo tempo (_marker->tempo());
 			const framepos_t frame = adjusted_current_frame (event) + 1;
-			const TempoSection::Type type = _real_section->type();
 
 			_editor->begin_reversible_command (_("copy tempo mark"));
 
 			if (_real_section->position_lock_style() == MusicTime) {
 				const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
-				_real_section = map.add_tempo (tempo, map.exact_qn_at_frame (frame, divisions), 0, type, MusicTime);
+				_real_section = map.add_tempo (tempo, map.exact_qn_at_frame (frame, divisions), 0, MusicTime);
 			} else {
-				_real_section = map.add_tempo (tempo, 0.0, frame, type, AudioTime);
+				_real_section = map.add_tempo (tempo, 0.0, frame, AudioTime);
 			}
 
 			if (!_real_section) {

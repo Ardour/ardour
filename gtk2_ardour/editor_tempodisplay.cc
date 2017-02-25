@@ -404,7 +404,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	if (pulse > 0.0) {
 		XMLNode &before = map.get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
-		map.add_tempo (map.tempo_at_frame (frame), pulse, 0, TempoSection::Ramp, MusicTime);
+		map.add_tempo (map.tempo_at_frame (frame), pulse, 0, MusicTime);
 
 		XMLNode &after = map.get_state();
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
@@ -531,17 +531,15 @@ Editor::edit_tempo_section (TempoSection* section)
 	Timecode::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
-	const TempoSection::Type ttype (tempo_dialog.get_tempo_type());
-
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
 
 	if (tempo_dialog.get_lock_style() == AudioTime) {
 		framepos_t const f = _session->tempo_map().predict_tempo_position (section, when).second;
-		_session->tempo_map().replace_tempo (*section, tempo, 0.0, f, ttype, AudioTime);
+		_session->tempo_map().replace_tempo (*section, tempo, 0.0, f, AudioTime);
 	} else {
 		double const p = _session->tempo_map().predict_tempo_position (section, when).first;
-		_session->tempo_map().replace_tempo (*section, tempo, p, 0, ttype, MusicTime);
+		_session->tempo_map().replace_tempo (*section, tempo, p, 0, MusicTime);
 	}
 
 	XMLNode &after = _session->tempo_map().get_state();
