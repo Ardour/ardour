@@ -3737,8 +3737,8 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 
 	ostringstream sstr;
-	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-	sstr << "start: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3783,8 +3783,8 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 	map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_tempo->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
-	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
