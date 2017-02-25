@@ -371,11 +371,6 @@ ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
 {
 	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
 	_first_selected_stripable = s;
-	if (s) {
-		std::cerr << "control protocol now has first selected as " << s->name() << endl;
-	} else {
-		std::cerr << "control protocol: first selected unset\n";
-	}
 }
 
 void
