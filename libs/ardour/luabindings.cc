@@ -214,6 +214,7 @@ CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
@@ -232,6 +233,8 @@ CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(boost::shared_ptr<Evoral::Note<Evoral::Beats> >);
 CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Evoral::Beats> >);
 
+CLASSKEYS(boost::shared_ptr<ARDOUR::Playlist>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Route>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 
 CLASSKEYS(Vamp::RealTime);
