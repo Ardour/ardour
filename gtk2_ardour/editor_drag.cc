@@ -3537,8 +3537,9 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	TempoMap& map (_editor->session()->tempo_map());
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
-	ostringstream sstr;
+	_editor->tempo_curve_selected (_tempo, true);
 
+	ostringstream sstr;
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
 	sstr << "mouse: " << fixed << setprecision(3) << map.tempo_at_frame (adjusted_current_frame (event)).note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
@@ -3609,6 +3610,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode &after = map.get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 	_editor->commit_reversible_command ();
+	_editor->tempo_curve_selected (_tempo, false);
 }
 
 void
@@ -3692,7 +3694,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.frame_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
@@ -3735,10 +3737,10 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	TempoMap& map (_editor->session()->tempo_map());
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
+	_editor->tempo_curve_selected (&map.tempo_section_at_frame (_tempo->frame() - 1), true);
 
 	ostringstream sstr;
 	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute() << "\n";
-	sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3783,8 +3785,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 	map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_tempo->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
-	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute() << "\n";
-	sstr << "start: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).note_types_per_minute();
+	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_frame (_tempo->frame() - 1).end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3800,6 +3801,7 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode &after = map.get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 	_editor->commit_reversible_command ();
+	_editor->tempo_curve_selected (&map.tempo_section_at_frame (_tempo->frame() - 1), false);
 }
 
 void
