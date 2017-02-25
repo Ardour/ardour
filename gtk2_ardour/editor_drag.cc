@@ -3639,8 +3639,8 @@ TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_grab_tempo = Tempo (_tempo->note_types_per_minute(), _tempo->note_type());
 
 	ostringstream sstr;
-	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
-	sstr << ">" << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
@@ -3687,15 +3687,13 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 		pf = adjusted_current_frame (event);
 	}
 
-	if (ArdourKeyboard::indicates_copy (event->button.state)) {
-		/* adjust this and the next tempi to match pointer frame */
-		double new_bpm = max (1.5, _grab_tempo.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+	/* adjust this and the next tempi to match pointer frame */
+	double new_bpm = max (1.5, _grab_tempo.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+	_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.frame_at_quarter_note (_grab_qn), pf);
 
-		_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.frame_at_quarter_note (_grab_qn), pf);
-	}
 	ostringstream sstr;
-	sstr << "<" << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
-	sstr << ">" << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
