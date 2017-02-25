@@ -206,7 +206,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (midi_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
-	label = manage (new Gtk::Label(_("Audio Buses:")));
+	label = manage (new Gtk::Label(_("Audio Busses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (audio_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
@@ -218,7 +218,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (audio_auxes, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
-	label = manage (new Gtk::Label(_("Midi Buses:")));
+	label = manage (new Gtk::Label(_("Midi Busses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (midi_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
