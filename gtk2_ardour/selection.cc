@@ -830,46 +830,29 @@ Selection::set (const TrackViewList& track_list)
 {
 	clear_objects();  //enforce object/range exclusivity
 
-	PresentationInfo::ChangeSuspender cs;
 
-	if (!tracks.empty()) {
+	TrackViewList to_be_added;
+	TrackViewList to_be_removed;
 
-		/* cannot use set<T>::operator== (set<T> const &) here, because
-		 * apparently the ordering used within 2 sets is not
-		 * necessarily the same.
-		 */
-
-		if (tracks.size() == track_list.size()) {
-			bool missing = false;
-
-			for (TrackViewList::const_iterator x = track_list.begin(); x != track_list.end(); ++x) {
-				if (dynamic_cast<VCATimeAxisView*> (*x)) {
-					continue;
-				}
-				if (find (tracks.begin(), tracks.end(), *x) == tracks.end()) {
-					missing = true;
-				}
-			}
-
-			if (!missing) {
-				/* already same selection: nothing to do */
-				return;
-			}
+	for (TrackViewList::const_iterator x = tracks.begin(); x != tracks.end(); ++x) {
+		if (find (track_list.begin(), track_list.end(), *x) == track_list.end()) {
+			to_be_removed.push_back (*x);
 		}
-
-		/* argument is different from existing selection */
-
-		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
-			if (dynamic_cast<VCATimeAxisView*> (*x)) {
-				continue;
-			}
-			(*x)->set_selected (false);
-		}
-
-		tracks.clear ();
 	}
 
-	add (track_list);
+	for (TrackViewList::const_iterator x = track_list.begin(); x != track_list.end(); ++x) {
+		if (dynamic_cast<VCATimeAxisView*> (*x)) {
+			continue;
+		}
+		if (find (tracks.begin(), tracks.end(), *x) == tracks.end()) {
+			to_be_added.push_back (*x);
+		}
+	}
+
+	PresentationInfo::ChangeSuspender cs;
+	remove (to_be_removed);
+	add (to_be_added);
+
 }
 
 void
