@@ -155,6 +155,17 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 			_end_note_types_per_minute = _note_types_per_minute;
 			_legacy_end = true;
 		}
+	} else {
+		_legacy_end = true;
+	}
+
+	if ((prop = node.property ("tempo-type")) != 0) {
+		TempoSection::Type old_type;
+
+		old_type = Type (string_2_enum (prop->value(), old_type));
+		if (old_type == TempoSection::Constant) {
+			_end_note_types_per_minute = _note_types_per_minute;
+		}
 	}
 
 	if ((prop = node.property ("movable")) == 0) {
@@ -4501,8 +4512,6 @@ TempoMap::fix_legacy_end_session ()
 			if (prev_t) {
 				if (prev_t->type() == TempoSection::Ramp) {
 					prev_t->set_end_note_types_per_minute (t->note_types_per_minute());
-				} else {
-					prev_t->set_end_note_types_per_minute (prev_t->note_types_per_minute());
 				}
 			}
 
