@@ -1198,6 +1198,9 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 
 		/* step two: set the Selection (for stripables/routes) */
 		_editor->get_selection().set (tvl);
+
+		/* step three, tell the editor */
+		_editor->track_selection_changed ();
 	}
 
 	redisplay ();

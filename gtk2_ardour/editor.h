@@ -1839,8 +1839,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void setup_midi_toolbar ();
 
-	void presentation_info_changed (PBD::PropertyChange const &);
-
 	/* selection process */
 
 	Selection* selection;
