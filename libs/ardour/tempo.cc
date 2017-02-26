@@ -1816,9 +1816,9 @@ TempoMap::minute_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) co
 			if (prev_t) {
 				const double prev_t_bpm = prev_t->note_types_per_minute();
 				const double prev_t_end_bpm = prev_t->end_note_types_per_minute();
-				if (prev_t_bpm > tempo_bpm && prev_t_end_bpm < tempo_bpm
-				    || prev_t_bpm < tempo_bpm && prev_t_end_bpm > tempo_bpm
-				    || prev_t_end_bpm == tempo_bpm) {
+				if ((prev_t_bpm > tempo_bpm && prev_t_end_bpm < tempo_bpm)
+				    || (prev_t_bpm < tempo_bpm && prev_t_end_bpm > tempo_bpm)
+				    || (prev_t_end_bpm == tempo_bpm)) {
 
 					return prev_t->minute_at_ntpm (tempo_bpm, t->pulse());
 				}
@@ -4274,6 +4274,38 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 	return *prev_t;
 }
 
+TempoSection*
+TempoMap::next_tempo_section (TempoSection* ts) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	TempoSection* prev = 0;
+
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+
+		if ((*i)->is_tempo()) {
+			TempoSection* t = static_cast<TempoSection*> (*i);
+
+			if (!t->active()) {
+				continue;
+			}
+
+			if (prev && prev == ts) {
+
+				return t;
+			}
+
+			prev = t;
+		}
+	}
+
+	if (prev == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return 0;
+}
 /* don't use this to calculate length (the tempo is only correct for this frame).
    do that stuff based on the beat_at_frame and frame_at_beat api
 */
