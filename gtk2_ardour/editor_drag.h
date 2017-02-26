@@ -849,6 +849,8 @@ private:
 	double _grab_qn;
 	ARDOUR::Tempo  _grab_tempo;
 	ARDOUR::TempoSection* _tempo;
+	ARDOUR::TempoSection* _next_tempo;
+	bool _drag_valid;
 	XMLNode* before_state;
 };
 
