@@ -820,3 +820,83 @@ LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length
 {
 	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
 }
+
+/* modulation related */
+
+static boost::shared_ptr<PluginInsert::PluginControl>
+_lookup_plugin_control (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port)
+{
+	Evoral::Parameter p (AutomationType::PluginAutomation, 0, port);
+	Evoral::ControlSet::Controls::const_iterator i = ctrlmap.find (p);
+	if (i == ctrlmap.end()) {
+		return boost::shared_ptr<PluginInsert::PluginControl> ();
+	}
+	boost::shared_ptr<PluginInsert::PluginControl> c = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (i->second);
+	return c;
+}
+
+bool
+LuaAPI::modulate_to (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return false;
+	}
+	value = std::min (c->upper(), std::max (c->lower(), value));
+	c->modulate_to (value);
+	return true;
+}
+
+bool
+LuaAPI::modulate_by (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return false;
+	}
+	c->modulate_by (value);
+	return true;
+}
+
+bool
+LuaAPI::modulate_range (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return false;
+	}
+	// value -1 .. + 1, we should take the baseline into account
+	c->modulate_by (value * (c->upper() - c->lower()));
+	return true;
+}
+
+
+double
+LuaAPI::control_baseline (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return 0;
+	}
+	return c->get_value ();
+}
+
+double
+LuaAPI::control_modulation_delta (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return 0;
+	}
+	return c->modulation_delta ();
+}
+
+double
+LuaAPI::control_modulated_value (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port)
+{
+	boost::shared_ptr<PluginInsert::PluginControl> c = _lookup_plugin_control (ctrlmap, port);
+	if (!c) {
+		return 0;
+	}
+	return c->modulated_value ();
+}

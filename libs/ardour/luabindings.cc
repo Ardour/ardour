@@ -1969,6 +1969,17 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
 
+		// modulation
+		.addFunction ("control_baseline", ARDOUR::LuaAPI::control_baseline)
+		.addFunction ("control_modulation_delta", ARDOUR::LuaAPI::control_modulation_delta)
+		.addFunction ("control_modulated_value", ARDOUR::LuaAPI::control_modulated_value)
+
+		// modulation -- should be RT context, modulation scripts
+		.addFunction ("modulate_to", ARDOUR::LuaAPI::modulate_to)
+		.addFunction ("modulate_by", ARDOUR::LuaAPI::modulate_by)
+		.addFunction ("modulate_range", ARDOUR::LuaAPI::modulate_range)
+		// end RT only
+
 		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
 		.addConstructor <void (*) (const std::string&, float)> ()
 		.addStaticFunction ("list_plugins", &ARDOUR::LuaAPI::Vamp::list_plugins)
