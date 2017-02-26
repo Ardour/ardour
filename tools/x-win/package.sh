@@ -190,7 +190,7 @@ cp -r $PREFIX/etc/${LOWERCASE_DIRNAME}/* $DESTDIR/share/${LOWERCASE_DIRNAME}/
 
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/${PRODUCT_ICON} $DESTDIR/share/
-cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
+cp gtk2_ardour/icons/ArdourBug.ico $DESTDIR/share/
 
 #prefer built-in defaults
 rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/system_config
@@ -448,7 +448,7 @@ EOF
 
 if test -f "$DESTDIR/debug.bat"; then
 	cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ArdourBug.ico" 0
 EOF
 fi
 
