@@ -4510,7 +4510,7 @@ TempoMap::fix_legacy_end_session ()
 			}
 
 			if (prev_t) {
-				if (prev_t->type() == TempoSection::Ramp) {
+				if (prev_t->type() != TempoSection::Constant) {
 					prev_t->set_end_note_types_per_minute (t->note_types_per_minute());
 				}
 			}
