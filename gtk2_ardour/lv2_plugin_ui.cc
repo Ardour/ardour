@@ -128,7 +128,9 @@ void
 LV2PluginUI::control_changed (uint32_t port_index)
 {
 	/* Must run in GUI thread because we modify _updates with no lock */
-	if (_lv2->get_parameter (port_index) != _values_last_sent_to_ui[port_index]) {
+	float val = _controllables[port_index] ? _controllables[port_index]->get_value() : _lv2->get_parameter (port_index);
+
+	if (val != _values_last_sent_to_ui[port_index]) {
 		/* current plugin parameter does not match last value received
 		   from GUI, so queue an update to push it to the GUI during
 		   our regular timeout.
@@ -212,7 +214,7 @@ LV2PluginUI::output_update()
 	*/
 
 	for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
-		float val = _lv2->get_parameter (*i);
+		float val = _controllables[*i] ? _controllables[*i]->get_value() : _lv2->get_parameter (*i);
 		/* push current value to the GUI */
 		suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
 		_values_last_sent_to_ui[(*i)] = val;
@@ -396,12 +398,13 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			   whether it is input or output
 			*/
 
-			_values_last_sent_to_ui[port]        = _lv2->get_parameter(port);
+			_values_last_sent_to_ui[port] = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
 				if (_controllables[port]) {
+					_values_last_sent_to_ui[port] = _controllables[port]->get_value ();
 					_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
 				}
 			}
