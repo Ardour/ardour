@@ -43,6 +43,7 @@ PBD::Signal1<void,PropertyChange const &> PresentationInfo::Change;
 Glib::Threads::Mutex PresentationInfo::static_signal_lock;
 int PresentationInfo::_change_signal_suspended = 0;
 PBD::PropertyChange PresentationInfo::_pending_static_changes;
+int PresentationInfo::selection_counter = 0;
 
 namespace ARDOUR {
 	namespace Properties {
@@ -243,8 +244,10 @@ PresentationInfo::set_selected (bool yn)
 	if (yn != selected()) {
 		if (yn) {
 			_flags = Flag (_flags | Selected);
+			_selection_cnt = g_atomic_int_add (&selection_counter, 1);
 		} else {
 			_flags = Flag (_flags & ~Selected);
+			_selection_cnt = 0;
 		}
 		send_change (PropertyChange (Properties::selected));
 		send_static_change (PropertyChange (Properties::selected));
