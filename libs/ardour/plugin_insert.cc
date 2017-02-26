@@ -38,6 +38,9 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 
+#include "LuaBridge/LuaBridge.h"
+#include "ardour/luabindings.h"
+
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #endif
@@ -83,6 +86,10 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _maps_from_state (false)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
+	, _mempool ("LuaModulator", 3145728)
+	, _lua (0)
+	, _lua_modulate (0)
+	, _modscript_proxy (0)
 {
 	/* the first is the master */
 
@@ -94,10 +101,157 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 			add_sidechain (sc.n_audio (), sc.n_midi ());
 		}
 	}
+	reinit_lua ();
 }
 
 PluginInsert::~PluginInsert ()
 {
+	delete _lua_modulate;
+	delete _lua;
+}
+
+void
+PluginInsert::reinit_lua ()
+{
+	delete _lua_modulate;
+	delete _lua;
+#ifdef RAP_WITH_CALL_STATS
+	assert (_mempool->mem_used () == 0);
+#endif
+	_lua_modulate = 0;
+	_lua = new LuaState (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool));
+
+
+	_lua->tweak_rt_gc ();
+	_lua->Print.connect (sigc::mem_fun (*this, &PluginInsert::lua_print));
+
+	// register session object
+	lua_State* L = _lua->getState ();
+	LuaBindings::stddef (L);
+	LuaBindings::common (L);
+	LuaBindings::dsp (L);
+
+	luabridge::push <Session *> (L, &_session);
+	lua_setglobal (L, "Session");
+
+	// sandbox
+	_lua->do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
+}
+
+void
+PluginInsert::lua_print (std::string s) {
+	std::cout <<"PluginInsert: " << s << "\n";
+	PBD::error << "PluginInsert: " << s << "\n";
+}
+
+bool
+PluginInsert::load_modulation_script (const std::string& s)
+{
+	std::string bytecode =
+		LuaScripting::get_factory_bytecode (s, "dsp_modulate", "f");
+
+	if (bytecode.empty ()) {
+		return false;
+	}
+
+	Glib::Threads::Mutex::Lock lm (_lua_lock);
+	reinit_lua ();
+
+	lua_State* L = _lua->getState ();
+
+	luabridge::LuaRef load = luabridge::getGlobal (L, "load");
+	_lua->do_command ("f = nil");
+	load (bytecode)(); // assigns f = "bytecode"
+	_lua->do_command ("assert (type (f) == 'string') dsp_modulate = load(f) f = nil"); // assigns dsp_modulate
+	// consider just loading the script (globals and all)
+	luabridge::LuaRef lua_modulate = luabridge::getGlobal (L, "dsp_modulate");
+	if (lua_modulate.type () != LUA_TFUNCTION) {
+		return false;
+	}
+
+	_lua_modulate = new luabridge::LuaRef (lua_modulate);
+	_script = s;
+
+	lm.release ();
+	clear_modulation ();
+	ModulationScriptChanged (); /* EMIT SIGNAL */
+
+	return true;
+}
+
+void
+PluginInsert::unload_modulation_script ()
+{
+	{
+		Glib::Threads::Mutex::Lock lm (_lua_lock);
+		_lua_modulate = 0;
+	}
+	_script = "";
+	clear_modulation ();
+	ModulationScriptChanged (); /* EMIT SIGNAL */
+}
+
+bool
+PluginInsert::modulation_script_loaded () const
+{
+	return _lua_modulate ? true : false;
+}
+
+void
+PluginInsert::clear_modulation ()
+{
+	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
+		boost::shared_ptr<PluginControl> c
+			= boost::dynamic_pointer_cast<PluginControl>(li->second);
+		if (c) {
+			c->modulate_by (0);
+		}
+	}
+}
+
+std::string
+PluginInsert::modulation_script () const
+{
+	if (_lua_modulate) {
+		return _script;
+	}
+	return
+		"--  EXAMPLE MODULATION SCRIPT --\n"
+		"\n"
+		"-- modulation callback, this function is called every process\n"
+		"-- cycle befor running the plugin\n"
+		"function dsp_modulate (ctrl, bufs, n_samples, offset, start)\n"
+		"\n"
+		"	init = init or 0 if init == 0 then init = 1\n"
+		"		-- one time initialization code, persistent setup\n"
+		"\n"
+		"		-- query session sample-rate, store in global variable\n"
+		"		samplerate = Session:nominal_frame_rate ()\n"
+		"\n"
+		"		-- create an envelope follower, 100ms rise, 2sec fall time\n"
+		"		env = ARDOUR.DSP.EnvFollower (samplerate, 100, 2000)\n"
+		"\n"
+		"		-- initialize a counter for a LFO\n"
+		"		lfo = 0\n"
+		"\n"
+		"	end\n"
+		"\n"
+		"\n"
+		"	-- feed the envelope follower with data from the 1st audio input\n"
+		"	env:process_bufs (bufs, 0 --[[ input buffer 0..N ]], n_samples, offset)\n"
+		"\n"
+		"	-- set the plugin's 1st input to 10 times the envelope-value\n"
+		"	ARDOUR.LuaAPI.modulate_to (ctrl, 0 --[[plugin control port 0..N]], 10 * env:value())\n"
+		"\n"
+		"	-- LFO 1 second period (1 sec = sample-rate number of samples)\n"
+		"	lfo = lfo + n_samples\n"
+		"	if lfo > samplerate then lfo = lfo - samplerate end -- wrap around\n"
+		"	local val = math.sin (2 * math.pi * lfo / samplerate); -- use a sine OSC [-1...1]\n"
+		"\n"
+		"	-- modulate the plugin's 2nd input over 50% of its total range\n"
+		"	ARDOUR.LuaAPI.modulate_range (ctrl, 1 --[[plugin control port 0..N]], val * 0.5)\n"
+		"\n"
+		"end";
 }
 
 void
@@ -257,11 +411,11 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 	if (which.type() != PluginAutomation)
 		return;
 
-	boost::shared_ptr<AutomationControl> c
-			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
+	boost::shared_ptr<PluginControl> c
+			= boost::dynamic_pointer_cast<PluginControl>(control (which));
 
 	if (c && s != Off) {
-		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_frame()));
+		_plugins[0]->set_parameter (which.id(), c->modulation_delta() + c->list()->eval (_session.transport_frame()));
 	}
 }
 
@@ -786,6 +940,26 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 					c->set_value_unchecked(val);
 				}
 
+			}
+		}
+	}
+
+	if (_lua_modulate) {
+		Glib::Threads::Mutex::Lock lm (_lua_lock, Glib::Threads::TRY_LOCK);
+		if (lm.locked()) {
+			try {
+				(*_lua_modulate) (controls(), &bufs, nframes, offset, start);
+				_lua->collect_garbage_step ();
+			} catch (luabridge::LuaException const& e) {
+				_lua_modulate = 0;
+				_script = "";
+
+				lm.release ();
+				clear_modulation ();
+				ModulationScriptChanged (); /* EMIT SIGNAL */
+#ifndef NDEBUG
+				std::cerr << "LuaException: " << e.what () << "\n";
+#endif
 			}
 		}
 	}
@@ -2323,6 +2497,16 @@ PluginInsert::state (bool full)
 		node.add_child_nocopy (_sidechain->state (full));
 	}
 
+	if (!_script.empty()) {
+		gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
+		std::string b64s (b64);
+		g_free (b64);
+		XMLNode* script_node = new XMLNode (X_("script"));
+		script_node->add_property (X_("lua"), LUA_VERSION);
+		script_node->add_content (b64s);
+		node.add_child_nocopy (*script_node);
+	}
+
 	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
 
@@ -2626,6 +2810,17 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			}
 			if (!regenerate_xml_or_string_ids ()) {
 				_sidechain->set_state (**i, version);
+			}
+		}
+
+		if ((*i)->name () == X_("script")) {
+			for (XMLNodeList::const_iterator n = (*i)->children ().begin (); n != (*i)->children ().end (); ++n) {
+				if (!(*n)->is_content ()) { continue; }
+				gsize size;
+				guchar* buf = g_base64_decode ((*n)->content ().c_str (), &size);
+				load_modulation_script (std::string ((const char*)buf, size));
+				g_free (buf);
+				break;
 			}
 		}
 	}

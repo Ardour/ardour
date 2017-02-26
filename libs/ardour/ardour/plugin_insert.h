@@ -37,6 +37,16 @@
 #include "ardour/sidechain.h"
 #include "ardour/automation_control.h"
 
+#include "ardour/luascripting.h"
+#include "pbd/reallocpool.h"
+#include "lua/luastate.h"
+
+namespace luabridge {
+	class LuaRef;
+}
+
+class PluginModulateScriptProxy;
+
 class XMLNode;
 
 namespace ARDOUR {
@@ -110,6 +120,16 @@ class LIBARDOUR_API PluginInsert : public Processor
 #ifdef MIXBUS
 	bool is_channelstrip () const;
 #endif
+
+	bool load_modulation_script (const std::string&);
+	void unload_modulation_script ();
+	bool modulation_script_loaded () const;
+	void clear_modulation ();
+	std::string modulation_script () const;
+	PBD::Signal0<void> ModulationScriptChanged;
+
+	PluginModulateScriptProxy* modscript_proxy () const { return _modscript_proxy; }
+	void set_modscript_proxy (PluginModulateScriptProxy* wp) { _modscript_proxy = wp ; }
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
@@ -382,6 +402,15 @@ class LIBARDOUR_API PluginInsert : public Processor
 	uint32_t _bypass_port;
 
 	void preset_load_set_value (uint32_t, float);
+
+	void reinit_lua();
+	PBD::ReallocPool _mempool;
+	LuaState* _lua;
+	luabridge::LuaRef* _lua_modulate;
+	std::string _script;
+	Glib::Threads::Mutex _lua_lock;
+	void lua_print (std::string s);
+	PluginModulateScriptProxy *_modscript_proxy;
 };
 
 } // namespace ARDOUR
