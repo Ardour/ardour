@@ -1277,7 +1277,7 @@ const char* const ardour_config_info = "\\n\\
     print('')
 
     if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
-        create_resource_file(Options.options.program_name.lower())
+        create_resource_file(Options.options.program_name)
 
 def build(bld):
     create_stored_revision()
