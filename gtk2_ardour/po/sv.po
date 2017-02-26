@@ -19,283 +19,287 @@ msgstr ""
 
 #: about.cc:127
 msgid "Fons Adriaensen"
-msgstr ""
+msgstr "Fons Adriaensen"
 
 #: about.cc:128
 msgid "Brian Ahr"
-msgstr ""
+msgstr "Brian Ahr"
 
 #: about.cc:129
 msgid "John Anderson"
-msgstr ""
+msgstr "John Anderson"
 
 #: about.cc:130
 msgid "Marcus Andersson"
-msgstr ""
+msgstr "Marcus Andersson"
 
 #: about.cc:131
 msgid "Nedko Arnaudov"
-msgstr ""
+msgstr "Nedko Arnaudov"
 
 #: about.cc:132
 msgid "Hans Baier"
-msgstr ""
+msgstr "Hans Baier"
 
 #: about.cc:133
 msgid "Ben Bell"
-msgstr ""
+msgstr "Ben Bell"
 
 #: about.cc:134
 msgid "Sakari Bergen"
-msgstr ""
+msgstr "Sakari Bergen"
 
 #: about.cc:135
 msgid "Christian Borss"
-msgstr ""
+msgstr "Christian Borss"
 
 #: about.cc:136
 msgid "Chris Cannam"
-msgstr ""
+msgstr "Chris Cannam"
 
 #: about.cc:137
 msgid "Jeremy Carter"
-msgstr ""
+msgstr "Jeremy Carter"
 
 #: about.cc:138
 msgid "Jesse Chappell"
-msgstr ""
+msgstr "Jesse Chappell"
 
 #: about.cc:139
 msgid "Thomas Charbonnel"
-msgstr ""
+msgstr "Thomas Charbonel"
 
 #: about.cc:140
 msgid "Sam Chessman"
-msgstr ""
+msgstr "Sam Chessman"
 
 #: about.cc:141
 msgid "André Colomb"
-msgstr ""
+msgstr "André Colomb"
 
 #: about.cc:142
 msgid "Paul Davis"
-msgstr ""
+msgstr "Paul Davis"
 
 #: about.cc:143
 msgid "Gerard van Dongen"
-msgstr ""
+msgstr "Gerard van Dongen"
 
 #: about.cc:144
 msgid "John Emmas"
-msgstr ""
+msgstr "John Emmas"
 
 #: about.cc:145
 msgid "Colin Fletcher"
-msgstr ""
+msgstr "Colin Fletcher"
 
 #: about.cc:146
 msgid "Dave Flick"
-msgstr ""
+msgstr "Dave Flick"
 
 #: about.cc:147
 msgid "Hans Fugal"
-msgstr ""
+msgstr "Hans Fugal"
 
 #: about.cc:148
 msgid "Robin Gareus"
-msgstr ""
+msgstr "Robin Gareus"
 
 #: about.cc:149
 msgid "Nil Geisweiller"
-msgstr ""
+msgstr "Nil Geisweiller"
 
 #: about.cc:150
 msgid "Christopher George"
-msgstr ""
+msgstr "Christopher George"
 
 #: about.cc:151
 msgid "Chris Goddard"
-msgstr ""
+msgstr "Chris Goddard"
 
 #: about.cc:152
 msgid "J. Abelardo Gutierrez"
-msgstr ""
+msgstr "J. Abelardo Gutierrez"
 
 #: about.cc:153
 msgid "Jeremy Hall"
-msgstr ""
+msgstr "Jeremy Hall"
 
 #: about.cc:154
 msgid "Audun Halland"
-msgstr ""
+msgstr "Audun Halland"
 
 #: about.cc:155
 msgid "David Halter"
-msgstr ""
+msgstr "David Halter"
 
 #: about.cc:156
 msgid "Steve Harris"
-msgstr ""
+msgstr "Steve Harris"
 
 #: about.cc:157
 msgid "Melvin Ray Herr"
-msgstr ""
+msgstr "Melvin Ray Herr"
 
 #: about.cc:158
 msgid "Carl Hetherington"
-msgstr ""
+msgstr "Carl Hetherington"
 
 #: about.cc:159
 msgid "Rob Holland"
-msgstr ""
+msgstr "Rob Holland"
 
 #: about.cc:160
 msgid "Robert Jordens"
-msgstr ""
+msgstr "Robert Jordens"
 
 #: about.cc:161
 msgid "Stefan Kersten"
-msgstr ""
+msgstr "Stefan Kersten"
 
 #: about.cc:162
 msgid "Armand Klenk"
-msgstr ""
+msgstr "Armand Klenk"
 
 #: about.cc:163
 msgid "Julien de Kozak"
-msgstr ""
+msgstr "Julien de Kozak"
 
 #: about.cc:164
 msgid "Matt Krai"
-msgstr ""
+msgstr "Matt Krai"
 
 #: about.cc:165
 msgid "Georg Krause"
-msgstr ""
+msgstr "Georg Krause"
 
 #: about.cc:166
 msgid "Nick Lanham"
-msgstr ""
+msgstr "Nick Lanham"
 
 #: about.cc:167
 msgid "Colin Law"
-msgstr ""
+msgstr "Colin Law"
 
 #: about.cc:168
 msgid "Joshua Leach"
-msgstr ""
+msgstr "Joshua Leach"
 
 #: about.cc:169
 msgid "Ben Loftis"
-msgstr ""
+msgstr "Ben Loftis"
 
 #: about.cc:170
 msgid "Nick Mainsbridge"
-msgstr ""
+msgstr "Nick Mainsbridge"
 
 #: about.cc:171
 msgid "Tim Mayberry"
-msgstr ""
+msgstr "Tim Mayberry"
 
 #: about.cc:172
 msgid "Doug Mclain"
-msgstr ""
+msgstr "Doug Mclain"
 
 #: about.cc:173
 msgid "Todd Naugle"
-msgstr ""
+msgstr "Todd Naugle"
 
 #: about.cc:174
 msgid "André Nusser"
-msgstr ""
+msgstr "André Nusser"
 
 #: about.cc:175
 msgid "Bent Bisballe Nyeng"
-msgstr ""
+msgstr "Bent Bisballe Nyeng"
 
 #: about.cc:176
 msgid "Jack O'Quin"
-msgstr ""
+msgstr "Jack O'Quin"
 
 #: about.cc:177
 msgid "Pavel Potocek"
-msgstr ""
+msgstr "Pavel Potocek"
 
 #: about.cc:178
 msgid "Nimal Ratnayake"
-msgstr ""
+msgstr "Nimal Ratnayake"
 
 #: about.cc:179
 msgid "Julien Rivaud"
-msgstr ""
+msgstr "Julien Rivaud"
 
 #: about.cc:180
 msgid "David Robillard"
-msgstr ""
+msgstr "David Robillard"
 
 #: about.cc:181
 msgid "Julien Roger"
-msgstr ""
+msgstr "Julien Roger"
 
 #: about.cc:182
 msgid "Taybin Rutkin"
-msgstr ""
+msgstr "Taybin Rutkin"
 
 #: about.cc:183
 msgid "Andreas Ruge"
-msgstr ""
+msgstr "Andreas Ruge"
 
 #: about.cc:184
 msgid "Sampo Savolainen"
-msgstr ""
+msgstr "Sampo Savolainen"
 
 #: about.cc:185
 msgid "Rodrigo Severo"
-msgstr ""
+msgstr "Rodrigo Severo"
 
 #: about.cc:186
 msgid "Per Sigmond"
-msgstr ""
+msgstr "Per Sigmond"
 
 #: about.cc:187
 msgid "Lincoln Spiteri"
-msgstr ""
+msgstr "Lincoln Spiteri"
 
 #: about.cc:188
 msgid "Mike Start"
-msgstr ""
+msgstr "Mike Start"
 
 #: about.cc:189
 msgid "Mark Stewart"
-msgstr ""
+msgstr "Mark Stewart"
 
 #: about.cc:190
 msgid "Roland Stigge"
-msgstr ""
+msgstr "Roland Stigge"
 
 #: about.cc:191
 msgid "Petter Sundlöf"
-msgstr ""
+msgstr "Petter Sundlöf"
 
 #: about.cc:192
 msgid "Mike Täht"
-msgstr ""
+msgstr "Mike Täht"
 
 #: about.cc:193
 msgid "Roy Vegard"
-msgstr ""
+msgstr "Roy Vegard"
 
 #: about.cc:194
 msgid "Thorsten Wilms"
-msgstr ""
+msgstr "Thorsten Wilms"
 
 #: about.cc:195
 msgid "Damien Zammit"
-msgstr ""
+msgstr "Damien Zammit"
 
 #: about.cc:196
 msgid "Grygorii Zharun"
-msgstr ""
+msgstr "Grygorii Zharun"
+
+#: about.cc:197
+msgid "Kristoffer Grundström"
+msgstr "Kristoffer Grundström"
 
 #: about.cc:201
 msgid ""
@@ -362,6 +366,7 @@ msgstr ""
 msgid ""
 "Swedish:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
+"\t Kristoffer Grundström <hamnisdude@gmail.com>\n"
 msgstr ""
 
 #: about.cc:218
@@ -433,11 +438,11 @@ msgstr ""
 
 #: about.cc:635
 msgid "Config"
-msgstr ""
+msgstr "Ställ in"
 
 #: actions.cc:83
 msgid "Loading menus from %1"
-msgstr ""
+msgstr "Laddar menyer från %1"
 
 #: actions.cc:86 actions.cc:87
 msgid "badly formatted menu definition file: %1"
@@ -453,7 +458,7 @@ msgstr ""
 
 #: add_route_dialog.cc:58
 msgid "Add Track/Bus/VCA"
-msgstr ""
+msgstr "Lägg till Spår/Buss/VCA"
 
 #: add_route_dialog.cc:61
 msgid "Configuration:"
@@ -461,11 +466,11 @@ msgstr "Konfiguration:"
 
 #: add_route_dialog.cc:62
 msgid "Record Mode:"
-msgstr ""
+msgstr "Inspelningsläge:"
 
 #: add_route_dialog.cc:63
 msgid "Instrument:"
-msgstr ""
+msgstr "Instrument:"
 
 #: add_route_dialog.cc:77 add_route_dialog.cc:228
 msgid "Audio Tracks"
@@ -473,19 +478,19 @@ msgstr "Ljudspår"
 
 #: add_route_dialog.cc:78 add_route_dialog.cc:224
 msgid "MIDI Tracks"
-msgstr ""
+msgstr "MIDI-spår"
 
 #: add_route_dialog.cc:79 add_route_dialog.cc:226
 msgid "Audio+MIDI Tracks"
-msgstr ""
+msgstr "Ljud+MIDI-spår"
 
 #: add_route_dialog.cc:80 add_route_dialog.cc:220
 msgid "Audio Busses"
-msgstr ""
+msgstr "Ljudbussar"
 
 #: add_route_dialog.cc:81 add_route_dialog.cc:222
 msgid "MIDI Busses"
-msgstr ""
+msgstr "MIDI-bussar"
 
 #: add_route_dialog.cc:82
 msgid "VCA Masters"
@@ -493,7 +498,7 @@ msgstr ""
 
 #: add_route_dialog.cc:85 add_route_dialog.cc:622
 msgid "First"
-msgstr ""
+msgstr "Första"
 
 #: add_route_dialog.cc:86 add_route_dialog.cc:626
 msgid "Before Selection"
@@ -505,19 +510,19 @@ msgstr ""
 
 #: add_route_dialog.cc:88
 msgid "Last"
-msgstr ""
+msgstr "Sista"
 
 #: add_route_dialog.cc:91
 msgid "Flexible-I/O"
-msgstr ""
+msgstr "Flexibel-I/O"
 
 #: add_route_dialog.cc:92
 msgid "Strict-I/O"
-msgstr ""
+msgstr "Strikt-I/O"
 
 #: add_route_dialog.cc:108
 msgid "Add:"
-msgstr "Lägg till"
+msgstr "Lägg till:"
 
 #: add_route_dialog.cc:121 time_fx_dialog.cc:101 add_video_dialog.cc:135
 #: video_server_dialog.cc:118
@@ -535,11 +540,11 @@ msgstr "Grupp:"
 
 #: add_route_dialog.cc:161
 msgid "Insert:"
-msgstr ""
+msgstr "Klistra in:"
 
 #: add_route_dialog.cc:171
 msgid "Output Ports:"
-msgstr ""
+msgstr "Portar för utmatning:"
 
 #: add_route_dialog.cc:176 rc_option_editor.cc:2474
 msgid ""
@@ -556,7 +561,7 @@ msgstr ""
 #: rc_option_editor.cc:2478 rc_option_editor.cc:2480 rc_option_editor.cc:2525
 #: rc_option_editor.cc:2527 rc_option_editor.cc:2529 rc_option_editor.cc:2537
 msgid "Audio"
-msgstr "Ljudspår"
+msgstr "Ljud"
 
 #: add_route_dialog.cc:243 add_route_dialog.cc:352 editor_actions.cc:112
 #: engine_dialog.cc:246 missing_file_dialog.cc:60 mixer_ui.cc:1895
@@ -565,15 +570,15 @@ msgstr "Ljudspår"
 #: rc_option_editor.cc:2709 rc_option_editor.cc:2717 rc_option_editor.cc:2790
 #: rc_option_editor.cc:2813
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: add_route_dialog.cc:246 add_route_dialog.cc:353
 msgid "Audio+MIDI"
-msgstr ""
+msgstr "Ljud+MIDI"
 
 #: add_route_dialog.cc:250 add_route_dialog.cc:354
 msgid "Bus"
-msgstr ""
+msgstr "Buss"
 
 #: add_route_dialog.cc:286
 msgid ""
@@ -587,11 +592,11 @@ msgstr ""
 #: add_route_dialog.cc:373 add_route_dialog.cc:385 editor_actions.cc:456
 #: editor_rulers.cc:250 time_axis_view.cc:1290
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 #: add_route_dialog.cc:374 add_route_dialog.cc:387
 msgid "Non Layered"
-msgstr "Ej lagerläge"
+msgstr "Utan lager"
 
 #: add_route_dialog.cc:375 add_route_dialog.cc:389
 msgid "Tape"
@@ -600,11 +605,11 @@ msgstr "Band"
 #: add_route_dialog.cc:476 monitor_section.cc:273 plugin_pin_dialog.cc:509
 #: plugin_setup_dialog.cc:202
 msgid "Mono"
-msgstr ""
+msgstr "Mono"
 
 #: add_route_dialog.cc:480 plugin_pin_dialog.cc:512 plugin_setup_dialog.cc:205
 msgid "Stereo"
-msgstr ""
+msgstr "Stereo"
 
 #: add_route_dialog.cc:503
 msgid "3 Channel"
@@ -636,15 +641,15 @@ msgstr "Manuellt"
 
 #: add_route_dialog.cc:569 add_route_dialog.cc:585 route_group_menu.cc:85
 msgid "New Group..."
-msgstr ""
+msgstr "Ny grupp..."
 
 #: add_route_dialog.cc:573 route_group_menu.cc:89
 msgid "No Group"
-msgstr ""
+msgstr "Ingen grupp"
 
 #: ambiguous_file_dialog.cc:30
 msgid "Ambiguous File"
-msgstr ""
+msgstr "Ambigiös fil"
 
 #: ambiguous_file_dialog.cc:37
 msgid ""
@@ -661,7 +666,7 @@ msgstr ""
 
 #: ambiguous_file_dialog.cc:48 missing_file_dialog.cc:50
 msgid "Done"
-msgstr ""
+msgstr "Färdig"
 
 #: analysis_window.cc:45
 msgid "Signal source"
@@ -669,7 +674,7 @@ msgstr "Signalkälla"
 
 #: analysis_window.cc:46
 msgid "Selected ranges"
-msgstr "Valda omfång"
+msgstr "Valda räckvidder"
 
 #: analysis_window.cc:47
 msgid "Selected regions"
@@ -677,7 +682,7 @@ msgstr "Valda regioner"
 
 #: analysis_window.cc:48
 msgid "Show frequency power range"
-msgstr "Visa frekvenskraftsomfång"
+msgstr "Visa räckvidden för frekvensens kraft"
 
 #: analysis_window.cc:49
 msgid "Fit dB range"
@@ -733,7 +738,7 @@ msgstr "Avlyssna"
 #: monitor_section.cc:329 rc_option_editor.cc:2547 route_time_axis.cc:263
 #: route_time_axis.cc:2740 vca_master_strip.cc:212 vca_time_axis.cc:237
 msgid "Solo"
-msgstr ""
+msgstr "Ensam"
 
 #: ardour_ui.cc:285 rc_option_editor.cc:1357
 msgid "Feedback"
@@ -745,7 +750,7 @@ msgstr ""
 
 #: ardour_ui.cc:297
 msgid "Add Tracks/Busses"
-msgstr ""
+msgstr "Lägg till Spår/Bussar"
 
 #: ardour_ui.cc:298
 msgid "About"
@@ -753,11 +758,11 @@ msgstr "Om"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr ""
+msgstr "Räckvidder|Platser"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
-msgstr "Spår och bussar"
+msgstr "Spår och Bussar"
 
 #: ardour_ui.cc:301 engine_dialog.cc:73
 msgid "Audio/MIDI Setup"
@@ -769,7 +774,7 @@ msgstr ""
 
 #: ardour_ui.cc:303 lua_script_manager.cc:30
 msgid "Script Manager"
-msgstr ""
+msgstr "Skripthanterare"
 
 #: ardour_ui.cc:304
 msgid "Properties"
@@ -777,11 +782,11 @@ msgstr "Egenskaper"
 
 #: ardour_ui.cc:305
 msgid "Add Video"
-msgstr ""
+msgstr "Lägg till video"
 
 #: ardour_ui.cc:306 bundle_manager.cc:264
 msgid "Bundle Manager"
-msgstr "Buntar"
+msgstr "Bunthanterare"
 
 #: ardour_ui.cc:307 big_clock_window.cc:37
 msgid "Big Clock"
@@ -789,11 +794,11 @@ msgstr "Stor klocka"
 
 #: ardour_ui.cc:308
 msgid "Audio Connections"
-msgstr ""
+msgstr "Ljudanslutningar"
 
 #: ardour_ui.cc:309
 msgid "MIDI Connections"
-msgstr ""
+msgstr "MIDI-anslutning"
 
 #: ardour_ui.cc:310
 msgid "Bindings Editor"
