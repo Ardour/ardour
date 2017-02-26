@@ -1471,7 +1471,7 @@ Editor::ramp_to_next_tempo ()
 		TempoSection* tsp = &tm->tempo();
 		TempoSection* next_ts = tmap.next_tempo_section (&tm->tempo());
 		if (next_ts) {
-			const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), next_ts->end_note_types_per_minute());
+			const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), next_ts->note_types_per_minute());
 			const double pulse = tsp->pulse();
 			const framepos_t frame = tsp->frame();
 			const PositionLockStyle pls = tsp->position_lock_style();
