@@ -459,10 +459,8 @@ Selection::add (TimeAxisView* track)
 	if (dynamic_cast<VCATimeAxisView*> (track)) {
 		return;
 	}
-	clear_objects();  //enforce object/range exclusivity
 
 	TrackViewList tr;
-	track->set_selected (true);
 	tr.push_back (track);
 	add (tr);
 }
