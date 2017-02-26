@@ -1485,8 +1485,6 @@ Editor::ramp_to_next_tempo ()
 			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 			commit_reversible_command ();
 		}
-		//const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
-
 	}
 }
 
