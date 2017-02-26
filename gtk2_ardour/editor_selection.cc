@@ -89,10 +89,6 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 
 	sorted.sort (cmp);
 
-	if (!selection->selected (&view)) {
-		to_be_added.push_back (&view);
-	}
-
 	/* figure out if we should go forward or backwards */
 
 	for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
@@ -156,6 +152,10 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 				}
 			}
 		}
+	}
+
+	if (!selection->selected (&view)) {
+		to_be_added.push_back (&view);
 	}
 
 	if (!to_be_added.empty()) {
@@ -981,19 +981,33 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 	return true;
 }
 
+struct SelectionOrderSorter {
+	bool operator() (TimeAxisView const * const a, TimeAxisView const * const b) const  {
+		boost::shared_ptr<Stripable> sa = a->stripable ();
+		boost::shared_ptr<Stripable> sb = b->stripable ();
+		if (!sa && !sb) {
+			return a < b;
+		}
+		if (!sa) {
+			return false;
+		}
+		if (!sb) {
+			return true;
+		}
+		return sa->presentation_info().selection_cnt() < sb->presentation_info().selection_cnt();
+	}
+};
+
 void
 Editor::track_selection_changed ()
 {
+	SelectionOrderSorter cmp;
+	selection->tracks.sort (cmp);
+
 	switch (selection->tracks.size()) {
 	case 0:
 		break;
 	default:
-		/* last element in selection list is the most recently
-		 * selected, because we always append to that list.
-		 */
-		cerr << "setting selected mixer strip to "
-		     << selection->tracks.back()->name()
-		     << endl;
 		set_selected_mixer_strip (*(selection->tracks.back()));
 		if (!_track_selection_change_without_scroll) {
 			ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);

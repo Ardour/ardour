@@ -928,8 +928,6 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 				bool accumulate = false;
 				bool found_another = false;
 
-				tmp.push_back (strip);
-
 				OrderingKeys sorted;
 				const size_t cmp_max = strips.size ();
 				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
@@ -970,12 +968,16 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 					}
 				}
 
+				tmp.push_back (strip);
+
 				if (found_another) {
+					PresentationInfo::ChangeSuspender cs;
 					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
 						_selection.add (*i);
 					}
-				} else
+				} else {
 					_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
+				}
 			} else {
 				_selection.set (strip);
 			}
