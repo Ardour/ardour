@@ -1807,17 +1807,20 @@ TempoMap::minute_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) co
 				continue;
 			}
 
-			const double t_bpm = t->note_types_per_minute();
 
-			if (t_bpm == tempo_bpm) {
+
+			if (t->note_types_per_minute() == tempo_bpm) {
 				return t->minute();
 			}
 
 			if (prev_t) {
 				const double prev_t_bpm = prev_t->note_types_per_minute();
+				const double prev_t_end_bpm = prev_t->end_note_types_per_minute();
+				if (prev_t_bpm > tempo_bpm && prev_t_end_bpm < tempo_bpm
+				    || prev_t_bpm < tempo_bpm && prev_t_end_bpm > tempo_bpm
+				    || prev_t_end_bpm == tempo_bpm) {
 
-				if ((t_bpm > tempo_bpm && prev_t_bpm < tempo_bpm) || (t_bpm < tempo_bpm && prev_t_bpm > tempo_bpm)) {
-					return prev_t->minute_at_ntpm (prev_t->note_types_per_minute(), prev_t->pulse());
+					return prev_t->minute_at_ntpm (tempo_bpm, t->pulse());
 				}
 			}
 			prev_t = t;
