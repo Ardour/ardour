@@ -2048,6 +2048,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("atomic_get_int", &DSP::DspShm::atomic_get_int)
 		.endClass ()
 
+		.beginClass <DSP::EnvFollower> ("EnvFollower")
+		.addConstructor<void (*) (double, double, double)> ()
+		.addFunction ("process_bufs", &DSP::EnvFollower::process_bufs)
+		.addFunction ("process", &DSP::EnvFollower::process)
+		.addFunction ("value", &DSP::EnvFollower::value)
+		.endClass ()
+
 		.endNamespace () // DSP
 		.endNamespace ();// end ARDOUR
 }

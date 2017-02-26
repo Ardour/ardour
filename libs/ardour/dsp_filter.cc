@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include "ardour/dB.h"
+#include "ardour/audio_buffer.h"
 #include "ardour/buffer.h"
 #include "ardour/dsp_filter.h"
 
@@ -423,4 +424,33 @@ FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const {
 	assert (b < _fft_data_size);
 	const float a = _fft_power[b] * norm;
 	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
+}
+
+
+EnvFollower::EnvFollower (double samplerate, double attack, double release)
+{
+	_val = 0;
+	_ac = 1. - exp (-6283. / (attack * samplerate));
+	_rc = 1. - exp (-6283. / (release * samplerate));
+}
+
+void
+EnvFollower::process_bufs (BufferSet* bufs, uint32_t buffer, uint32_t n_samples, uint32_t offset)
+{
+	if (bufs->count().n_audio() > buffer) {
+		process (bufs->get_audio(buffer).data(offset), n_samples);
+	}
+}
+
+void
+EnvFollower::process (float const * const data, const uint32_t n_samples)
+{
+	for (uint32_t i = 0; i < n_samples; ++i) {
+		const float dx = data[i] * data[i];
+		if (dx > _val) {
+			_val += _ac * (dx - _val);
+		} else {
+			_val += _rc * (dx - _val);
+		}
+	}
 }

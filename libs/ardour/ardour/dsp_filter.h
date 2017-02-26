@@ -310,5 +310,17 @@ namespace ARDOUR { namespace DSP {
 			fftwf_plan _fftplan;
 	};
 
+	class EnvFollower {
+		public:
+			EnvFollower (double samplerate, double attack, double release);
+			void process_bufs (BufferSet* bufs, uint32_t buffer, uint32_t n_samples, uint32_t offset = 0);
+			void process (float const * const data, const uint32_t n_samples);
+			float value () const { return _val; }
+		private:
+			float _val;
+			float _ac;
+			float _rc;
+	};
+
 } } /* namespace */
 #endif
