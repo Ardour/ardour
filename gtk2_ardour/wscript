@@ -320,9 +320,23 @@ def enoify (major, minor):
         elif minor == 5:
             return "\\n\\\"The Plateaux of Mirror\\\""
         elif minor == 6:
-            return "\\n\\\"Possible Musics\\\""
+            return "\\n\\\"Possible Musics\\\"" # 1980 Collaborative
         elif minor == 7:
-            return "\\n\\\"My Life in the Bush of Ghosts\\\""
+            return "\\n\\\"My Life in the Bush of Ghosts\\\"" # 1981
+        elif minor == 8:
+            return "\\n\\\"Music for Airplay\\\"" # 1981 Compilation
+        elif minor == 9:
+            return "\\n\\\"On Land\\\"" # 1982
+        elif minor == 10:  # 6.0 ??
+            return "\\n\\\"Atmospheres and Soundtracks\\\"" # 1983
+        elif minor == 11:
+            return "\\n\\\"More Music for Films\\\"" # 1983
+        elif minor == 12:
+            return "\\n\\\"Working Backwards\\\"" # 1984 Compilation
+        elif minor == 13:
+            return "\\n\\\"The Pearl\\\"" # 1984 Collaborative
+        elif minor == 14:
+            return "\\n\\\"Begegnungen\\\"" # 1984 Compilation
     return "\\\"\\\""
 
 def options(opt):
