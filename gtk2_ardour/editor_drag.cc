@@ -3626,6 +3626,8 @@ TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
 	, _grab_qn (0.0)
 	, _grab_tempo (0.0)
 	, _tempo (0)
+	, _next_tempo (0)
+	, _drag_valid (true)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoTwistDrag\n");
@@ -3638,12 +3640,28 @@ TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	TempoMap& map (_editor->session()->tempo_map());
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
-	_grab_tempo = Tempo (_tempo->note_types_per_minute(), _tempo->note_type());
 
-	ostringstream sstr;
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
-	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
-	show_verbose_cursor_text (sstr.str());
+	_next_tempo = map.next_tempo_section (_tempo);
+	if (_next_tempo) {
+		if (!map.next_tempo_section (_next_tempo)) {
+			_drag_valid = false;
+			finished (event, false);
+
+			return;
+		}
+		_editor->tempo_curve_selected (_tempo, true);
+		_editor->tempo_curve_selected (_next_tempo, true);
+
+		ostringstream sstr;
+		sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+		sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
+		sstr << "start: " << fixed << setprecision(3) << _next_tempo->note_types_per_minute();
+		show_verbose_cursor_text (sstr.str());
+	} else {
+		_drag_valid = false;
+	}
+
+	_grab_tempo = Tempo (_tempo->note_types_per_minute(), _tempo->note_type());
 }
 
 void
@@ -3673,6 +3691,11 @@ TempoTwistDrag::setup_pointer_frame_offset ()
 void
 TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 {
+
+	if (!_next_tempo || !_drag_valid) {
+		return;
+	}
+
 	TempoMap& map (_editor->session()->tempo_map());
 
 	if (first_move) {
@@ -3694,19 +3717,23 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.frame_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
-	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
+	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
+	sstr << "start: " << fixed << setprecision(3) << _next_tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
 void
 TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	TempoMap& map (_editor->session()->tempo_map());
+
+	if (!movement_occurred || !_drag_valid) {
 		return;
 	}
 
-	TempoMap& map (_editor->session()->tempo_map());
+	_editor->tempo_curve_selected (_tempo, false);
+	_editor->tempo_curve_selected (_next_tempo, false);
 
 	XMLNode &after = map.get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
