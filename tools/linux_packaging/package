@@ -127,9 +127,9 @@ fi
 if [ -z ${BUILDTYPE} ]; then
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}"
+			PACKAGE="${APPNAME}-${release_version}-x86"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}"
+			PACKAGE="${APPNAME}-${release_version}-x86_64"
 		fi
 	else
 		PACKAGE="${APPNAME}-${release_version}"
@@ -137,9 +137,9 @@ if [ -z ${BUILDTYPE} ]; then
 else
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}-x86"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}-x86_64"
 		fi
 	else
 		PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}"
