@@ -105,12 +105,19 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			}
 		} else if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
 
-			if (ts->note_type() != 4.0) {
-				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+			if (ts->type() == TempoSection::Constant) {
+				if (ts->note_type() != 4.0) {
+					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+				} else {
+					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+				}
 			} else {
-				snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+				if (ts->note_type() != 4.0) {
+					snprintf (buf, sizeof (buf), "%.3f/%.0f>%.3f", ts->note_types_per_minute(), ts->note_type(), ts->end_note_types_per_minute());
+				} else {
+					snprintf (buf, sizeof (buf), "%.3f>%.3f", ts->note_types_per_minute(), ts->end_note_types_per_minute());
+				}
 			}
-
 			max_tempo = max (max_tempo, ts->note_types_per_minute());
 			max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 			min_tempo = min (min_tempo, ts->note_types_per_minute());
@@ -234,10 +241,18 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker"));
 				}
 
-				if (ts->note_type() != 4.0) {
-					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+				if (ts->type() == TempoSection::Constant) {
+					if (ts->note_type() != 4.0) {
+						snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
+					} else {
+						snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+					}
 				} else {
-					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
+					if (ts->note_type() != 4.0) {
+						snprintf (buf, sizeof (buf), "%.3f/%.0f>%.3f", ts->note_types_per_minute(), ts->note_type(), ts->end_note_types_per_minute());
+					} else {
+						snprintf (buf, sizeof (buf), "%.3f>%.3f", ts->note_types_per_minute(), ts->end_note_types_per_minute());
+					}
 				}
 
 				tempo_marker->set_name (buf);
