@@ -285,7 +285,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
 		assert (t);
 
-		Tempo tempo (t->tempo(), 4.0);
+		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
 		Meter meter (t->numerator, t->denominator);
 		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
