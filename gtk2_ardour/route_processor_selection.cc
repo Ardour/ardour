@@ -119,8 +119,9 @@ RouteProcessorSelection::remove (AxisView* r)
 
 	AxisViewSelection::iterator i;
 	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
+		AxisView* av = *i;
 		axes.erase (i);
-		(*i)->set_selected (false);
+		av->set_selected (false);
 	}
 }
 
