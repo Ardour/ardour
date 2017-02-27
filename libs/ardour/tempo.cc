@@ -3661,7 +3661,7 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		double new_next_bpm;
 		double new_copy_end_bpm;
 
-		if (frame > prev_to_prev_t->frame() + min_dframe && (frame + tempo_copy_frame_contribution) > prev_to_prev_t->frame() + min_dframe) {
+		if (frame > tempo_copy->frame() + min_dframe && (frame + tempo_copy_frame_contribution) > tempo_copy->frame() + min_dframe) {
 			new_bpm = tempo_copy->note_types_per_minute() * ((frame - tempo_copy->frame())
 										       / (double) (end_frame - tempo_copy->frame()));
 		} else {
@@ -3698,7 +3698,7 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		}
 
 		if (next_t->type() == TempoSection::Constant || next_t->c() == 0.0) {
-			if (frame > prev_to_prev_t->frame() + min_dframe && end_frame > prev_to_prev_t->frame() + min_dframe) {
+			if (frame > tempo_copy->frame() + min_dframe && end_frame > tempo_copy->frame() + min_dframe) {
 
 				new_next_bpm = next_t->note_types_per_minute() * ((next_to_next_t->minute() - old_next_minute)
 											/ (double) ((old_next_to_next_minute) - old_next_minute));
