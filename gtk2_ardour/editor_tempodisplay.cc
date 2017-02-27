@@ -84,6 +84,7 @@ void
 Editor::draw_metric_marks (const Metrics& metrics)
 {
 	char buf[64];
+	TempoSection* prev_ts = 0;
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
 
@@ -91,7 +92,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		const MeterSection *ms;
-		const TempoSection *ts;
+		TempoSection *ts;
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
@@ -102,8 +103,9 @@ Editor::draw_metric_marks (const Metrics& metrics)
 				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
 									 *(const_cast<MeterSection*>(ms))));
 			}
-		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+		} else if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
+
+			if (ts->note_type() != 4.0) {
 				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
 			} else {
 				snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
@@ -125,6 +127,12 @@ Editor::draw_metric_marks (const Metrics& metrics)
 				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
 								 *(const_cast<TempoSection*>(ts))));
 			}
+			if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
+				metric_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
+			} else {
+				metric_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker"));
+			}
+			prev_ts = ts;
 		}
 
 	}
@@ -204,21 +212,29 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
+	TempoSection* prev_ts = 0;
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
 
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		TempoMarker* tempo_marker;
 		MeterMarker* meter_marker;
-		const TempoSection *ts;
+		TempoSection *ts;
 		const MeterSection *ms;
 
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
 			if ((ts = &tempo_marker->tempo()) != 0) {
+
 				tempo_marker->set_position (ts->frame ());
 				char buf[64];
 
-				if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+				if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
+					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
+				} else {
+					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker"));
+				}
+
+				if (ts->note_type() != 4.0) {
 					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
 				} else {
 					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
@@ -230,6 +246,8 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 				max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 				min_tempo = min (min_tempo, ts->note_types_per_minute());
 				min_tempo = min (min_tempo, ts->end_note_types_per_minute());
+
+				prev_ts = ts;
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -313,11 +331,13 @@ void
 Editor::tempo_curve_selected (TempoSection* ts, bool yn)
 {
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
-		if (&(*x)->tempo() == ts && yn) {
-			(*x)->set_color_rgba (UIConfiguration::instance().color ("location marker"));
-			break;
-		} else if (&(*x)->tempo() == ts) {
-			(*x)->set_color_rgba (UIConfiguration::instance().color ("tempo curve"));
+		if (&(*x)->tempo() == ts) {
+			(*x)->set_selected (yn);
+			if (yn) {
+				(*x)->set_color_rgba (UIConfiguration::instance().color ("location marker"));
+			} else {
+				(*x)->set_color_rgba (UIConfiguration::instance().color ("tempo curve"));
+			}
 			break;
 		}
 	}
