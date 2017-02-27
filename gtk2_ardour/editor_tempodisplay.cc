@@ -105,19 +105,6 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			}
 		} else if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
 
-			if (ts->type() == TempoSection::Constant) {
-				if (ts->note_type() != 4.0) {
-					snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
-				} else {
-					snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
-				}
-			} else {
-				if (ts->note_type() != 4.0) {
-					snprintf (buf, sizeof (buf), "%.3f/%.0f>%.3f", ts->note_types_per_minute(), ts->note_type(), ts->end_note_types_per_minute());
-				} else {
-					snprintf (buf, sizeof (buf), "%.3f>%.3f", ts->note_types_per_minute(), ts->end_note_types_per_minute());
-				}
-			}
 			max_tempo = max (max_tempo, ts->note_types_per_minute());
 			max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 			min_tempo = min (min_tempo, ts->note_types_per_minute());
@@ -127,11 +114,12 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, tc_color,
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
 
+			const std::string tname (X_(""));
 			if (ts->position_lock_style() == MusicTime) {
-				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker music"), buf,
+				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker music"), tname,
 								 *(const_cast<TempoSection*>(ts))));
 			} else {
-				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
+				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), tname,
 								 *(const_cast<TempoSection*>(ts))));
 			}
 			if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
@@ -233,29 +221,12 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 			if ((ts = &tempo_marker->tempo()) != 0) {
 
 				tempo_marker->set_position (ts->frame ());
-				char buf[64];
 
 				if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
 					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
 				} else {
 					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker"));
 				}
-
-				if (ts->type() == TempoSection::Constant) {
-					if (ts->note_type() != 4.0) {
-						snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->note_types_per_minute(), ts->note_type());
-					} else {
-						snprintf (buf, sizeof (buf), "%.3f", ts->note_types_per_minute());
-					}
-				} else {
-					if (ts->note_type() != 4.0) {
-						snprintf (buf, sizeof (buf), "%.3f/%.0f>%.3f", ts->note_types_per_minute(), ts->note_type(), ts->end_note_types_per_minute());
-					} else {
-						snprintf (buf, sizeof (buf), "%.3f>%.3f", ts->note_types_per_minute(), ts->end_note_types_per_minute());
-					}
-				}
-
-				tempo_marker->set_name (buf);
 
 				max_tempo = max (max_tempo, ts->note_types_per_minute());
 				max_tempo = max (max_tempo, ts->end_note_types_per_minute());
