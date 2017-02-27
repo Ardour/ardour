@@ -1008,57 +1008,6 @@ Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* marker)
 {
-
-	if (event->type == GDK_SCROLL) {
-
-		TempoMap& tmap (session()->tempo_map());
-		bool handled = false;
-		double ntpm_adjust = 2.0;
-		XMLNode* before_state = &tmap.get_state();
-
-		if (ArdourKeyboard::modifier_state_contains (event->scroll.state, ArdourKeyboard::fine_adjust_modifier())) {
-			ntpm_adjust /= 10.0;
-		}
-
-		switch (event->scroll.direction) {
-
-		case GDK_SCROLL_UP:
-
-			if (ArdourKeyboard::indicates_copy (event->scroll.state) && ArdourKeyboard::indicates_constraint (event->scroll.state)) {
-				tmap.gui_change_tempo (&marker->tempo(), marker->tempo().note_types_per_minute() + ntpm_adjust, false);
-				handled = true;
-			} else if (ArdourKeyboard::indicates_copy (event->scroll.state)) {
-				tmap.gui_change_tempo (&marker->tempo(), marker->tempo().end_note_types_per_minute() + ntpm_adjust,true);
-				handled = true;
-			}
-
-			break;
-
-		case GDK_SCROLL_DOWN:
-
-			if (ArdourKeyboard::indicates_copy (event->scroll.state) && ArdourKeyboard::indicates_constraint (event->scroll.state)) {
-				tmap.gui_change_tempo (&marker->tempo(), marker->tempo().note_types_per_minute() - ntpm_adjust, false);
-				handled = true;
-			} else if (ArdourKeyboard::indicates_copy (event->scroll.state)) {
-				tmap.gui_change_tempo (&marker->tempo(), marker->tempo().end_note_types_per_minute() - ntpm_adjust, true);
-				handled = true;
-			}
-
-			break;
-
-		default:
-			break;
-		}
-
-		if (handled) {
-			begin_reversible_command (_("Change Tempo"));
-			session()->add_command (new MementoCommand<TempoMap>(tmap, before_state, &tmap.get_state()));
-			commit_reversible_command ();
-		}
-
-		return handled;
-	}
-
 	return typed_event (item, event, TempoMarkerItem);
 }
 
