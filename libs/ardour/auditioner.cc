@@ -137,25 +137,25 @@ Auditioner::connect ()
 	via_monitor = false;
 
 	if (left.empty() || left == "default") {
-                if (_session.monitor_out()) {
-                        left = _session.monitor_out()->input()->audio (0)->name();
-                        via_monitor = true;
-                } else {
+		if (_session.monitor_out() && _session.monitor_out()->input()->audio (0)) {
+			left = _session.monitor_out()->input()->audio (0)->name();
+			via_monitor = true;
+		} else {
 			if (outputs.size() > 0) {
 				left = outputs[0];
 			}
-                }
+		}
 	}
 
 	if (right.empty() || right == "default") {
-                if (_session.monitor_out()) {
-                        right = _session.monitor_out()->input()->audio (1)->name();
-                        via_monitor = true;
-                } else {
+		if (_session.monitor_out() && _session.monitor_out()->input()->audio (1)) {
+			right = _session.monitor_out()->input()->audio (1)->name();
+			via_monitor = true;
+		} else {
 			if (outputs.size() > 1) {
 				right = outputs[1];
 			}
-                }
+		}
 	}
 
 	_output->disconnect (this);
