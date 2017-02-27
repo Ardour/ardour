@@ -995,7 +995,8 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
-	if (_session->tempo_map().next_tempo_section (&loc->tempo())) {
+	TempoSection* next_ts = _session->tempo_map().next_tempo_section (&loc->tempo());
+	if (next_ts && next_ts->note_types_per_minute() != loc->tempo().end_note_types_per_minute()) {
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
 
