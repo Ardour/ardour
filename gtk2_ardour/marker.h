@@ -77,6 +77,7 @@ class ArdourMarker : public sigc::trackable
 
 	void set_position (framepos_t);
 	void set_name (const std::string&);
+	void set_points_color (uint32_t rgba);
 	void set_color_rgba (uint32_t rgba);
 	void setup_line ();
 
@@ -123,6 +124,7 @@ class ArdourMarker : public sigc::trackable
 	bool         _line_shown;
 	double       _canvas_height;
 	uint32_t     _color;
+	uint32_t     _points_color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;

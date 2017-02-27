@@ -74,6 +74,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	, _shown (false)
 	, _line_shown (false)
 	, _color (rgba)
+	, _points_color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
 	, _label_offset (0)
@@ -483,6 +484,14 @@ ArdourMarker::hide ()
 
 	group->hide ();
 	setup_line ();
+}
+
+void
+ArdourMarker::set_points_color (uint32_t c)
+{
+	_points_color = c;
+	mark->set_fill_color (_points_color);
+	mark->set_outline_color (_points_color);
 }
 
 void
