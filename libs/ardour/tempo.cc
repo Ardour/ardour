@@ -4288,6 +4288,10 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 TempoSection*
 TempoMap::next_tempo_section (TempoSection* ts) const
 {
+	if (!ts) {
+		return 0;
+	}
+
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	TempoSection* prev = 0;
