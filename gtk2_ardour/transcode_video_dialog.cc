@@ -274,6 +274,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	get_vbox()->pack_start (*vbox, false, false);
 
 	progress_box = manage (new VBox);
+	progress_box->set_spacing(6);
 	progress_box->pack_start (progress_label, false, false);
 	progress_box->pack_start (pbar, false, false);
 	progress_box->pack_start (abort_button, false, false);
