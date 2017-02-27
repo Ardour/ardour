@@ -347,7 +347,6 @@ Editor::tempo_curve_selected (TempoSection* ts, bool yn)
 {
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
 		if (&(*x)->tempo() == ts) {
-			(*x)->set_selected (yn);
 			if (yn) {
 				(*x)->set_color_rgba (UIConfiguration::instance().color ("location marker"));
 			} else {
