@@ -87,9 +87,12 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		} else {
 			but->set_name("generic button");
 		}
+		but->set_fallthrough_to_parent(true);
 		but->set_controllable(ac);
-		but->signal_clicked.connect(
-			sigc::mem_fun(*this, &AutomationController::toggled));
+		but->signal_button_press_event().connect(
+			sigc::mem_fun(*this, &AutomationController::button_press));
+		but->signal_button_release_event().connect(
+			sigc::mem_fun(*this, &AutomationController::button_release));
 		const bool active = _adjustment->get_value() >= 0.5;
 		if (but->get_active() != active) {
 			but->set_active(active);
@@ -161,6 +164,7 @@ AutomationController::display_effective_value()
 		_adjustment->set_value (interface_value);
 		_ignore_change = false;
 	}
+
 }
 
 void
@@ -206,33 +210,22 @@ AutomationController::end_touch ()
 	}
 }
 
-void
-AutomationController::toggled ()
+bool
+AutomationController::button_press (GdkEventButton*)
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
-	const AutoState as = _controllable->automation_state ();
-	const double where = _controllable->session ().audible_frame ();
-	const bool to_list = _controllable->list () && _controllable->session().transport_rolling () && (as == Touch || as == Write);
-
 	if (but) {
-		if (to_list) {
-			if (as == Touch && _controllable->list ()->in_new_write_pass ()) {
-				_controllable->alist ()->start_write_pass (where);
-			}
-			_controllable->list ()->set_in_write_pass (true, false, where);
-		}
-		/* set to opposite value.*/
-		_controllable->set_double (but->get_active () ? 0.0 : 1.0, where, to_list);
-
-		const bool active = _controllable->get_double (to_list, where) >= 0.5;
-		if (active && !but->get_active ()) {
-			_adjustment->set_value (1.0);
-			but->set_active (true);
-		} else if (!active && but->get_active ()) {
-			_adjustment->set_value (0.0);
-			but->set_active (false);
-		}
+		start_touch ();
+		_controllable->set_value (but->get_active () ? 0.0 : 1.0, Controllable::UseGroup);
 	}
+	return false;
+}
+
+bool
+AutomationController::button_release (GdkEventButton*)
+{
+	end_touch ();
+	return false;
 }
 
 static double

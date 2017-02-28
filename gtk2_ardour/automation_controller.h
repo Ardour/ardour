@@ -86,7 +86,8 @@ private:
 
 	void start_touch();
 	void end_touch();
-	void toggled();
+	bool button_press(GdkEventButton*);
+	bool button_release(GdkEventButton*);
 
 	void run_note_select_dialog();
 	void set_ratio(double ratio);
