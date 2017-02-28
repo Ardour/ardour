@@ -143,7 +143,9 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	  main_box (false, 6),
 	  autoplay_btn (_("Auto-play")),
 	  seek_slider(0,1000,1),
-	  _seeking(false)
+	  _seeking(false),
+	  _src_quality (SrcBest),
+	  _import_position (ImportAtTimestamp)
 
 {
 	set_name (X_("SoundFileBox"));
