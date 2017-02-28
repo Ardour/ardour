@@ -339,10 +339,22 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 		}
 
 		/*
-		 * Format of this kind of messages is like this: 0xFF 0xwhatever 0xlength and then "length" bytes.
-		 * Second byte points to this:                        ^^^^^^^^^^
+		 * Format of this kind of messages is like this: 0xFF 0xTYPE 0xlength and then "length" bytes.
+		 * TYPE is < 127, length may be 0
+		 *
+		 * "lenght" is a 7bit value, the 8th bit is used to extend the length.
+		 * eg.  ff02 8266  <0x166 byte (C) message follows>
 		 */
-		return (*(second_byte + 1) + 3);
+		int32_t mlen = 0;
+		for (int32_t off = 1; off < 4; ++off) {
+			uint8_t val = *(second_byte + off);
+			mlen = mlen << 7 | (val & 0x7f);
+			if (0 == (val & 0x80)) {
+				mlen += 2 + off;  // 2 byte "header" 0xff <type> + <length of length>
+				break;
+			}
+		}
+		return mlen;
 	}
 
 	if ((status & 0xF0) == 0xF0) {
