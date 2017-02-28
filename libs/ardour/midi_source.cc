@@ -80,6 +80,8 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 
 MidiSource::~MidiSource ()
 {
+	/* invalidate any existing iterators */
+	Invalidated (false);
 }
 
 XMLNode&
