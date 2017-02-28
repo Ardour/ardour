@@ -1688,6 +1688,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void rename_marker (ArdourMarker *marker);
 	void toggle_marker_lock_style ();
 	void toggle_tempo_type ();
+	void continue_previous_tempo ();
 	void ramp_to_next_tempo ();
 	void toggle_marker_menu_lock ();
 	void toggle_marker_menu_glue ();

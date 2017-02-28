@@ -4286,6 +4286,43 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 }
 
 TempoSection*
+TempoMap::previous_tempo_section (TempoSection* ts) const
+{
+	if (!ts) {
+		return 0;
+	}
+
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	TempoSection* prev = 0;
+
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+
+		if ((*i)->is_tempo()) {
+			TempoSection* t = static_cast<TempoSection*> (*i);
+
+			if (!t->active()) {
+				continue;
+			}
+
+			if (prev && t == ts) {
+
+				return prev;
+			}
+
+			prev = t;
+		}
+	}
+
+	if (prev == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return 0;
+}
+
+TempoSection*
 TempoMap::next_tempo_section (TempoSection* ts) const
 {
 	if (!ts) {

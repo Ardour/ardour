@@ -367,6 +367,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const MeterSection& meter_section_at_frame (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
 
+	TempoSection* previous_tempo_section (TempoSection*) const;
 	TempoSection* next_tempo_section (TempoSection*) const;
 
 	/** add a tempo section locked to pls. ignored values will be set in recompute_tempi()

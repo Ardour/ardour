@@ -1000,6 +1000,11 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
 
+	TempoSection* prev_ts = _session->tempo_map().previous_tempo_section (&loc->tempo());
+	if (prev_ts && prev_ts->end_note_types_per_minute() != loc->tempo().note_types_per_minute()) {
+		items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::continue_previous_tempo)));
+	}
+
 	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
 		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	} else if (can_remove) {
@@ -1457,6 +1462,35 @@ Editor::toggle_tempo_type ()
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
+	}
+}
+
+void
+Editor::continue_previous_tempo ()
+{
+	TempoMarker* tm;
+	MeterMarker* mm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (tm) {
+		TempoMap& tmap (_session->tempo_map());
+		TempoSection* tsp = &tm->tempo();
+		TempoSection* prev_ts = tmap.previous_tempo_section (&tm->tempo());
+		if (prev_ts) {
+			const Tempo tempo (prev_ts->end_note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
+			const double pulse = tsp->pulse();
+			const framepos_t frame = tsp->frame();
+			const PositionLockStyle pls = tsp->position_lock_style();
+
+			begin_reversible_command (_("continue previous tempo"));
+			XMLNode &before = _session->tempo_map().get_state();
+
+			tmap.replace_tempo (*tsp, tempo, pulse, frame, pls);
+
+			XMLNode &after = _session->tempo_map().get_state();
+			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+			commit_reversible_command ();
+		}
 	}
 }
 
