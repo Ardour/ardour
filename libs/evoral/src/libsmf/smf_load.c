@@ -346,7 +346,8 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 		 * eg.  ff02 8266  <0x166 byte (C) message follows>
 		 */
 		int32_t mlen = 0;
-		for (int32_t off = 1; off < 4; ++off) {
+		int32_t off;
+		for (off = 1; off < 4; ++off) {
 			uint8_t val = *(second_byte + off);
 			mlen = mlen << 7 | (val & 0x7f);
 			if (0 == (val & 0x80)) {
