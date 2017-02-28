@@ -188,7 +188,9 @@ MuteControl::automation_run (framepos_t start, pframes_t)
 
 	if (mute >= 0.5 && !muted()) {
 		set_value_unchecked (1.0);  // mute
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	} else if (mute < 0.5 && muted ()) {
 		set_value_unchecked (0.0);  // unmute
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
 }
