@@ -137,6 +137,14 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 	}
 }
 
+void
+VSTPlugin::parameter_changed_externally (uint32_t which, float value )
+{
+	ParameterChangedExternally (which, value); /* EMIT SIGNAL */
+	Plugin::set_parameter (which, value);
+}
+
+
 uint32_t
 VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
 {

@@ -333,7 +333,7 @@ protected:
 	/* Called when a parameter of the plugin is changed outside of this
 	 * host's control (typical via a plugin's own GUI/editor)
 	 */
-	void parameter_changed_externally (uint32_t which, float val);
+	virtual void parameter_changed_externally (uint32_t which, float val);
 
 	/* should be overridden by plugin API specific derived types to
 	 * actually implement changing the parameter. The derived type should

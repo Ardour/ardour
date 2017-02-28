@@ -40,6 +40,7 @@ class PluginInsert;
 class LIBARDOUR_API VSTPlugin : public Plugin
 {
 public:
+	friend class Session;
 	VSTPlugin (AudioEngine &, Session &, VSTHandle *);
 	VSTPlugin (const VSTPlugin& other);
 	virtual ~VSTPlugin ();
@@ -99,6 +100,7 @@ public:
 
 
 protected:
+	void parameter_changed_externally (uint32_t which, float val);
 	void set_plugin (AEffect *);
 	gchar* get_chunk (bool) const;
 	int set_chunk (gchar const *, bool);
