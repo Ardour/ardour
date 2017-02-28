@@ -259,6 +259,41 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	_route = rp;
 
+	if ( !_route->presentation_info().color_set() ) {
+		/* deal with older 4.x color, which was stored in the GUI object state */
+
+		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));
+
+		if (!p.empty()) {
+
+			/* old v4.x or earlier session. Use this information */
+
+			int red, green, blue;
+			char colon;
+
+			stringstream ss (p);
+
+			/* old color format version was:
+
+			   16bit value for red:16 bit value for green:16 bit value for blue
+
+			   decode to rgb ..
+			*/
+
+			ss >> red;
+			ss >> colon;
+			ss >> green;
+			ss >> colon;
+			ss >> blue;
+
+			red >>= 2;
+			green >>= 2;
+			blue >>= 2;
+
+			_route->presentation_info().set_color (RGBA_TO_UINT (red, green, blue, 255));
+		}
+	}
+
 	if (set_color_from_route()) {
 		set_color (gdk_color_to_rgba (AxisView::unique_random_color ()));
 	}
@@ -2175,40 +2210,6 @@ RouteUI::route_color () const
 	if (g && g->is_color()) {
 		set_color_from_rgba (c, GroupTabs::group_color (g));
 	} else {
-
-		/* deal with older 4.x color, which was stored in the GUI object state */
-
-		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));
-
-		if (!p.empty()) {
-
-			/* old v4.x or earlier session. Use this information */
-
-			int red, green, blue;
-			char colon;
-
-			stringstream ss (p);
-
-			/* old color format version was:
-
-			   16bit value for red:16 bit value for green:16 bit value for blue
-
-			   decode to rgb ..
-			*/
-
-			ss >> red;
-			ss >> colon;
-			ss >> green;
-			ss >> colon;
-			ss >> blue;
-
-			red >>= 2;
-			green >>= 2;
-			blue >>= 2;
-
-			_route->presentation_info().set_color (RGBA_TO_UINT (red, green, blue, 255));
-		}
-
 		set_color_from_rgba (c, _route->presentation_info().color());
 	}
 
