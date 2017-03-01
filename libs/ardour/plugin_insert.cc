@@ -430,6 +430,13 @@ PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 			return false;
 		}
 	}
+
+	if (ppc.size () == 1 && ppc.find (0) != ppc.end () && !_plugins[0]->get_info ()->reconfigurable_io ()) {
+		// some midi-sequencer (e.g. QMidiArp) or other midi-out plugin
+		// pretending to be an "Instrument"
+		return false;
+	}
+
 	if (!is_instrument ()) {
 			return false;
 	}
