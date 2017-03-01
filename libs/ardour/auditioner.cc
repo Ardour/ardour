@@ -139,7 +139,6 @@ Auditioner::connect ()
 	if (left.empty() || left == "default") {
 		if (_session.monitor_out() && _session.monitor_out()->input()->audio (0)) {
 			left = _session.monitor_out()->input()->audio (0)->name();
-			via_monitor = true;
 		} else {
 			if (outputs.size() > 0) {
 				left = outputs[0];
@@ -150,7 +149,6 @@ Auditioner::connect ()
 	if (right.empty() || right == "default") {
 		if (_session.monitor_out() && _session.monitor_out()->input()->audio (1)) {
 			right = _session.monitor_out()->input()->audio (1)->name();
-			via_monitor = true;
 		} else {
 			if (outputs.size() > 1) {
 				right = outputs[1];
@@ -198,6 +196,10 @@ Auditioner::connect ()
 			}
 		}
 
+	}
+
+	if (_session.monitor_out () && _output->connected_to (_session.monitor_out ()->input())) {
+		via_monitor = true;
 	}
 
 	return 0;
