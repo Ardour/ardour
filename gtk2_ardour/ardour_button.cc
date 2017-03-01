@@ -1107,7 +1107,21 @@ ArdourButton::on_focus_out_event (GdkEventFocus* ev)
 
 bool
 ArdourButton::on_key_release_event (GdkEventKey *ev) {
-	if (_focused &&
+	if (_act_on_release && _focused &&
+			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
+	{
+		signal_clicked();
+		if (_action) {
+			_action->activate ();
+		}
+		return true;
+	}
+	return CairoWidget::on_key_release_event (ev);
+}
+
+bool
+ArdourButton::on_key_press_event (GdkEventKey *ev) {
+	if (!_act_on_release && _focused &&
 			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
 	{
 		signal_clicked();

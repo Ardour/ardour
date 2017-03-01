@@ -280,6 +280,7 @@ EngineControl::EngineControl ()
 	start_stop_button.set_name ("generic button");
 	start_stop_button.set_can_focus(true);
 	start_stop_button.set_can_default(true);
+	start_stop_button.set_act_on_release (false);
 
 	update_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::update_devices_button_clicked));
 	update_devices_button.set_sensitive (false);

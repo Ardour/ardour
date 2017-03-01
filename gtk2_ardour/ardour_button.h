@@ -139,6 +139,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
 	bool on_key_release_event (GdkEventKey *);
+	bool on_key_press_event (GdkEventKey *);
 
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
