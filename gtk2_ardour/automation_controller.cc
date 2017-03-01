@@ -225,7 +225,7 @@ bool
 AutomationController::button_release (GdkEventButton*)
 {
 	end_touch ();
-	return false;
+	return true;
 }
 
 static double
