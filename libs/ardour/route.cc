@@ -907,6 +907,12 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	ProcessorList::iterator loc;
 	boost::shared_ptr <PluginInsert> fanout;
 
+	if (g_atomic_int_get (&_pending_process_reorder)) {
+		/* we need to flush any pending re-order changes */
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		apply_processor_changes_rt ();
+	}
+
 	if (before) {
 		loc = find(_processors.begin(), _processors.end(), before);
 		if (loc == _processors.end ()) {
