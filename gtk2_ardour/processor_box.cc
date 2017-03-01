@@ -2477,7 +2477,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			} else if (_session->engine().connected () && processor_can_be_edited (processor)) {
 				if ((*p)->has_editor ()) {
 					edit_processor (processor);
-				} else {
+				} else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->parameter_count() > 0) {
 					generic_edit_processor (processor);
 				}
 			}
