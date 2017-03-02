@@ -7485,6 +7485,11 @@ Editor::insert_time (
 			(*i)->clear_changes ();
 			(*i)->clear_owned_changes ();
 
+			if (!in_command) {
+				begin_reversible_command (_("insert time"));
+				in_command = true;
+			}
+
 			if (opt == SplitIntersected) {
 				/* non musical split */
 				(*i)->split (MusicFrame (pos, 0));
@@ -7492,10 +7497,6 @@ Editor::insert_time (
 
 			(*i)->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
 
-			if (!in_command) {
-				begin_reversible_command (_("insert time"));
-				in_command = true;
-			}
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);
 			_session->add_commands (cmds);
