@@ -620,6 +620,7 @@ cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 
 mkdir ${Shared}/icons
 mkdir ${Shared}/resources
+cp ../../system_config $Etc/system_config
 cp ../../gtk2_ardour/icons/*.png ${Shared}/icons
 cp -r ../../gtk2_ardour/icons/cursor_* ${Shared}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
