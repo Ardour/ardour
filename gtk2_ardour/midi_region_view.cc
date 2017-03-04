@@ -956,7 +956,6 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, ui
 
 	start_note_diff_command(_("add note"));
 
-	clear_editor_note_selection ();
 	note_diff_add_note (new_note, true, false);
 
 	apply_diff();

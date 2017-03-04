@@ -638,7 +638,7 @@ private:
 
 	MidiRegionView* _region_view;
 	framepos_t      _last_pos;
-	double          _last_y;
+	double          _y;
 
 };
 

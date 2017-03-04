@@ -6644,6 +6644,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	const double qn_length = map.quarter_notes_between_frames (start_sess_rel, start_sess_rel + length);
 	Evoral::Beats qn_length_beats = max (Evoral::Beats::ticks(1), Evoral::Beats (qn_length));
 
+	_region_view->clear_editor_note_selection();
 	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state, false);
 }
 
@@ -6665,7 +6666,7 @@ HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* 
 	: Drag (e, i)
 	, _region_view (rv)
 	, _last_pos (0)
-	, _last_y (0.0)
+	, _y (0.0)
 {
 }
 
@@ -6680,6 +6681,8 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	TempoMap& map (_editor->session()->tempo_map());
 
+	_y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
+
 	const framepos_t pf = _drags->current_pointer_frame ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
@@ -6692,15 +6695,13 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position();
-	const double y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
-
 	Evoral::Beats length = _region_view->get_grid_beats (pf);
 
 	_editor->begin_reversible_command (_("Create Hit"));
-	_region_view->create_note_at (start, y, length, event->button.state, false);
+	_region_view->clear_editor_note_selection();
+	_region_view->create_note_at (start, _y, length, event->button.state, false);
 
 	_last_pos = start;
-	_last_y = y;
 }
 
 void
@@ -6717,23 +6718,22 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 
 	const double eqaf = map.exact_qn_at_frame (pf, divisions);
 	const framepos_t start = map.frame_at_quarter_note (eqaf) - _region_view->region()->position ();
-	const double y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
-	if (_last_pos == start && y == _last_y) {
+	if (_last_pos == start) {
 		return;
 	}
 
 	Evoral::Beats length = _region_view->get_grid_beats (pf);
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
+
 	if (eqaf >= mr->quarter_note() + mr->length_beats()) {
 		return;
 	}
 
-	_region_view->create_note_at (start, y, length, event->button.state, false);
+	_region_view->create_note_at (start, _y, length, event->button.state, false);
 
 	_last_pos = start;
-	_last_y = y;
 }
 
 void
