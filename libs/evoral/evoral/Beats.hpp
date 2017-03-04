@@ -77,18 +77,18 @@ public:
 	}
 
 	inline bool operator==(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - b._time) <= (1.0 / PPQN);
+		/* Acceptable tolerance is 1/2 tick. */
+		return fabs(_time - b._time) <= (0.5 / PPQN);
 	}
 
 	inline bool operator==(double t) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - t) <= (1.0 / PPQN);
+		/* Acceptable tolerance is 1/2 tick. */
+		return fabs(_time - t) <= (0.5 / PPQN);
 	}
 
 	inline bool operator==(int beats) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - beats) <= (1.0 / PPQN);
+		/* Acceptable tolerance is 1/2 tick. */
+		return fabs(_time - beats) <= (0.5 / PPQN);
 	}
 
 	inline bool operator!=(const Beats& b) const {
@@ -96,8 +96,8 @@ public:
 	}
 
 	inline bool operator<(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
+		/* Acceptable tolerance is 1/2 tick. */
+		if (fabs(_time - b._time) <= (0.5 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time < b._time;
@@ -109,8 +109,8 @@ public:
 	}
 
 	inline bool operator>(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
+		/* Acceptable tolerance is 1/2 tick. */
+		if (fabs(_time - b._time) <= (0.5 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time > b._time;
@@ -122,8 +122,8 @@ public:
 	}
 
 	inline bool operator<(double b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b) <= (1.0 / PPQN)) {
+		/* Acceptable tolerance is 1/2 tick. */
+		if (fabs(_time - b) <= (0.5 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time < b;
@@ -135,8 +135,8 @@ public:
 	}
 
 	inline bool operator>(double b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b) <= (1.0 / PPQN)) {
+		/* Acceptable tolerance is 1/2 tick. */
+		if (fabs(_time - b) <= (0.5 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time > b;
