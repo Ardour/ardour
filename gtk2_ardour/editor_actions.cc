@@ -334,7 +334,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "duplicate", _("Duplicate"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
 	/* Open the dialogue to duplicate selected regions multiple times */
-	reg_sens (editor_actions, "multi-duplicate", _ ("Multi-Duplicate..."),
+	reg_sens (editor_actions, "multi-duplicate", _("Multi-Duplicate..."),
 	          sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), true));
 
 	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
