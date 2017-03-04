@@ -96,55 +96,35 @@ public:
 	}
 
 	inline bool operator<(const Beats& b) const {
-		/* Acceptable tolerance is 1/2 tick. */
-		if (fabs(_time - b._time) <= (0.5 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time < b._time;
-		}
+		return operator==(b) ? false /* Effectively identical */ : _time < b._time;
 	}
 
 	inline bool operator<=(const Beats& b) const {
-		return operator==(b) || operator<(b);
+		return !operator>(b);
 	}
 
 	inline bool operator>(const Beats& b) const {
-		/* Acceptable tolerance is 1/2 tick. */
-		if (fabs(_time - b._time) <= (0.5 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time > b._time;
-		}
+		return operator==(b) ? false /* Effectively identical */ : _time > b._time;
 	}
 
 	inline bool operator>=(const Beats& b) const {
-		return operator==(b) || operator>(b);
+		return !operator<(b);
 	}
 
 	inline bool operator<(double b) const {
-		/* Acceptable tolerance is 1/2 tick. */
-		if (fabs(_time - b) <= (0.5 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time < b;
-		}
+		return operator==(b) ? false /* Effectively identical */ : _time < b;
 	}
 
 	inline bool operator<=(double b) const {
-		return operator==(b) || operator<(b);
+		return !operator>(b);
 	}
 
 	inline bool operator>(double b) const {
-		/* Acceptable tolerance is 1/2 tick. */
-		if (fabs(_time - b) <= (0.5 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time > b;
-		}
+		return operator==(b) ? false /* Effectively identical */ : _time > b;
 	}
 
 	inline bool operator>=(double b) const {
-		return operator==(b) || operator>(b);
+		return !operator<(b);
 	}
 
 	Beats operator+(const Beats& b) const {
