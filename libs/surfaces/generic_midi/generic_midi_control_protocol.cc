@@ -746,13 +746,6 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 	if ((prop = root->property ("version")) == 0) {
 		return -1;
-	} else {
-		int major;
-		int minor;
-		int micro;
-
-		sscanf (prop->value().c_str(), "%d.%d.%d", &major, &minor, &micro);
-		Stateful::loading_state_version = (major * 1000) + minor;
 	}
 
 	const XMLNodeList& children (root->children());
