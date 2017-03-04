@@ -80,6 +80,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 	, _start_beats (Properties::start_beats, 0.0)
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats().to_double())
+	, _ignore_shift (false)
 {
 	register_properties ();
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
@@ -92,6 +93,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, other->_length_beats)
+	, _ignore_shift (false)
 {
 	//update_length_beats ();
 	register_properties ();
@@ -585,6 +587,24 @@ MidiRegion::model_changed ()
 	midi_source()->AutomationStateChanged.connect_same_thread (
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
+
+	model()->ContentsShifted.connect_same_thread (_model_shift_connection, boost::bind (&MidiRegion::model_shifted, this, _1));
+}
+void
+MidiRegion::model_shifted (double qn_distance)
+{
+	if (!model()) {
+		return;
+	}
+
+	if (!_ignore_shift) {
+		_start_beats += qn_distance;
+		framepos_t const new_start = _session.tempo_map().frames_between_quarter_notes (_quarter_note - _start_beats, _quarter_note);
+		_start = new_start;
+		send_change (Properties::start);
+	} else {
+		_ignore_shift = false;
+	}
 }
 
 void
@@ -620,7 +640,10 @@ MidiRegion::fix_negative_start ()
 {
 	BeatsFramesConverter c (_session.tempo_map(), _position);
 
-	model()->insert_silence_at_start (c.from (-_start));
+	_ignore_shift = true;
+
+	model()->insert_silence_at_start (Evoral::Beats (- _start_beats));
+
 	_start = 0;
 	_start_beats = 0.0;
 }
@@ -629,6 +652,11 @@ void
 MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	Region::set_start_internal (s, sub_num);
+
+	if (_start_beats < 0.0) {
+		fix_negative_start();
+	}
+
 	set_start_beats_from_start_frames ();
 }
 

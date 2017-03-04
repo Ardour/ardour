@@ -1979,6 +1979,8 @@ MidiModel::insert_silence_at_start (TimeType t)
 
 		apply_command_as_subcommand (s->session(), c);
 	}
+
+	ContentsShifted (t.to_double());
 }
 
 void

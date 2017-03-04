@@ -153,6 +153,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	void update_length_beats (const int32_t sub_num);
 
 	void model_changed ();
+	void model_shifted (double qn_distance);
 	void model_automation_state_changed (Evoral::Parameter const &);
 
 	void set_start_beats_from_start_frames ();
@@ -160,8 +161,10 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;
+	PBD::ScopedConnection _model_shift_connection;
 	PBD::ScopedConnection _source_connection;
 	PBD::ScopedConnection _model_contents_connection;
+	bool _ignore_shift;
 };
 
 } /* namespace ARDOUR */
