@@ -2565,6 +2565,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 				}
 			}
 
+			/* when copying plugin state, notify UI */
+			for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li) {
+				boost::shared_ptr<PBD::Controllable> c = boost::dynamic_pointer_cast<PBD::Controllable> (li->second);
+				if (c) {
+					c->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+				}
+			}
+
 			break;
 		}
 	}
