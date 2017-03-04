@@ -90,6 +90,7 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	, _c (0.0)
 	, _active (true)
 	, _locked_to_meter (false)
+	, _clamped (false)
 	, _legacy_end (false)
 {
 	XMLProperty const * prop;
@@ -145,6 +146,13 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
 			throw failed_constructor();
 		}
+	}
+
+	if ((prop = node.property ("clamped")) == 0) {
+		warning << _("TempoSection XML node has no \"clamped\" property") << endmsg;
+		set_clamped (false);
+	} else {
+		set_clamped (string_is_affirmative (prop->value()));
 	}
 
 	/* XX replace old end-beats-per-minute name with note-types-per-minute */
@@ -223,6 +231,8 @@ TempoSection::get_state() const
 	root->add_property ("beats-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%lf", _note_type);
 	root->add_property ("note-type", buf);
+	snprintf (buf, sizeof (buf), "%s", _clamped?"yes":"no");
+	root->add_property ("clamped", buf);
 	snprintf (buf, sizeof (buf), "%lf", _end_note_types_per_minute);
 	root->add_property ("end-beats-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%s", !initial()?"yes":"no");
@@ -1119,7 +1129,8 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 		return;
 	}
 
-	const bool locked_to_meter = ts.locked_to_meter();
+	bool const locked_to_meter = ts.locked_to_meter();
+	bool const ts_clamped = ts.clamped();
 	TempoSection* new_ts = 0;
 
 	{
@@ -1135,6 +1146,7 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 			} else {
 				remove_tempo_locked (ts);
 				new_ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), pls, true, locked_to_meter);
+				new_ts->set_clamped (ts_clamped);
 
 				if (new_ts && new_ts->type() == TempoSection::Constant) {
 					new_ts->set_end_note_types_per_minute (new_ts->note_types_per_minute());
@@ -1162,6 +1174,7 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 			first.set_minute (minute_at_frame (frame));
 			first.set_position_lock_style (AudioTime);
 			first.set_locked_to_meter (true);
+			first.set_clamped (ts_clamped);
 			{
 				/* cannot move the first tempo section */
 				*static_cast<Tempo*>(&first) = tempo;
@@ -3381,7 +3394,7 @@ TempoMap::gui_set_meter_position (MeterSection* ms, const framepos_t& frame)
 }
 
 bool
-TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm, bool change_end)
+TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 {
 	Metrics future_map;
 	bool can_solve = false;
@@ -3389,25 +3402,37 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm, bool change_end)
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
 
-		if (change_end && tempo_copy->type() == TempoSection::Constant) {
+		if (tempo_copy->type() == TempoSection::Constant) {
 			tempo_copy->set_end_note_types_per_minute (bpm.note_types_per_minute());
 			tempo_copy->set_note_types_per_minute (bpm.note_types_per_minute());
-		} else if (change_end) {
-			tempo_copy->set_end_note_types_per_minute (bpm.note_types_per_minute());
 		} else {
 			tempo_copy->set_note_types_per_minute (bpm.note_types_per_minute());
+			tempo_copy->set_end_note_types_per_minute (bpm.end_note_types_per_minute());
+		}
+
+		if (ts->clamped()) {
+			TempoSection* prev = 0;
+			if ((prev = previous_tempo_section_locked (future_map, tempo_copy)) != 0) {
+				prev->set_end_note_types_per_minute (tempo_copy->note_types_per_minute());
+			}
 		}
 
 		recompute_tempi (future_map);
 
 		if (check_solved (future_map)) {
-			if (change_end && ts->type() == TempoSection::Constant) {
+			if (ts->type() == TempoSection::Constant) {
 				ts->set_end_note_types_per_minute (bpm.note_types_per_minute());
 				ts->set_note_types_per_minute (bpm.note_types_per_minute());
-			} else if (change_end) {
-				ts->set_end_note_types_per_minute (bpm.note_types_per_minute());
 			} else {
+				ts->set_end_note_types_per_minute (bpm.end_note_types_per_minute());
 				ts->set_note_types_per_minute (bpm.note_types_per_minute());
+			}
+
+			if (ts->clamped()) {
+				TempoSection* prev = 0;
+				if ((prev = previous_tempo_section_locked (_metrics, ts)) != 0) {
+					prev->set_end_note_types_per_minute (ts->note_types_per_minute());
+				}
 			}
 
 			recompute_map (_metrics);
@@ -3457,18 +3482,36 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 		framepos_t const min_dframe = 2;
 
 		double new_bpm;
+		if (prev_t->clamped()) {
+			TempoSection* next_t = next_tempo_section_locked (future_map, prev_t);
+			TempoSection* prev_to_prev_t = previous_tempo_section_locked (future_map, prev_t);
+			/* the change in frames is the result of changing the slope of at most 2 previous tempo sections.
+			   constant to constant is straightforward, as the tempo prev to prev_t has constant slope.
+			*/
+			double contribution = 0.0;
+			if (next_t && prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
+				contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (next_t->frame() - prev_to_prev_t->frame());
+			}
+			framepos_t const fr_off = (end_frame - frame);
+			const frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
 
-		if (frame > prev_t->frame() + min_dframe && end_frame > prev_t->frame() + min_dframe) {
-
-			new_bpm = prev_t->note_types_per_minute() * ((frame - prev_t->frame())
-										   / (double) (end_frame - prev_t->frame()));
+			if (frame > prev_to_prev_t->frame() + min_dframe && (frame + prev_t_frame_contribution) > prev_to_prev_t->frame() + min_dframe) {
+				new_bpm = prev_t->note_types_per_minute() * ((frame - prev_to_prev_t->frame())
+										     / (double) ((frame + prev_t_frame_contribution) - prev_to_prev_t->frame()));
+			} else {
+				new_bpm = prev_t->note_types_per_minute();
+			}
 		} else {
-			new_bpm = prev_t->note_types_per_minute();
+			if (frame > prev_t->frame() + min_dframe && end_frame > prev_t->frame() + min_dframe) {
+
+				new_bpm = prev_t->note_types_per_minute() * ((frame - prev_t->frame())
+									     / (double) (end_frame - prev_t->frame()));
+			} else {
+				new_bpm = prev_t->note_types_per_minute();
+			}
+
+			new_bpm = min (new_bpm, (double) 1000.0);
 		}
-
-		std::cout << "new bpm : " << new_bpm << std::endl;
-		new_bpm = min (new_bpm, (double) 1000.0);
-
 		/* don't clamp and proceed here.
 		   testing has revealed that this can go negative,
 		   which is an entirely different thing to just being too low.
@@ -3485,6 +3528,13 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 			prev_t->set_note_types_per_minute (new_bpm);
 		}
 
+		if (prev_t->clamped()) {
+			TempoSection* prev = 0;
+			if ((prev = previous_tempo_section_locked (future_map, prev_t)) != 0) {
+				prev->set_end_note_types_per_minute (prev_t->note_types_per_minute());
+			}
+		}
+
 		recompute_tempi (future_map);
 		recompute_meters (future_map);
 
@@ -3495,12 +3545,17 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 				ts->set_end_note_types_per_minute (new_bpm);
 				ts->set_note_types_per_minute (new_bpm);
 			}
+			if (ts->clamped()) {
+				TempoSection* prev = 0;
+				if ((prev = previous_tempo_section_locked (_metrics, ts)) != 0) {
+					prev->set_end_note_types_per_minute (ts->note_types_per_minute());
+				}
+			}
 			recompute_tempi (_metrics);
 			recompute_meters (_metrics);
 		}
 	}
 
-	MetricPositionChanged (PropertyChange ()); // Emit Signal
 
 out:
 	Metrics::const_iterator d = future_map.begin();
@@ -3508,6 +3563,8 @@ out:
 		delete (*d);
 		++d;
 	}
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
+
 
 }
 void
@@ -3532,31 +3589,17 @@ TempoMap::gui_stretch_tempo_end (TempoSection* ts, const framepos_t frame, const
 
 		TempoSection* prev_t = copy_metrics_and_point (_metrics, future_map, ts);
 
-/*
-		TempoSection* next_t = 0;
-		for (Metrics::const_iterator i = future_map.begin(); i != future_map.end(); ++i) {
-			if ((*i)->is_tempo() && (*i)->minute() >  prev_t->minute()) {
-				next_t = static_cast<TempoSection*> (*i);
-				break;
-			}
-		}
-
-		if (!next_t) {
-			return;
-		}
-*/
 		if (!prev_t) {
 			return;
 		}
-
 
 		/* minimum allowed measurement distance in frames */
 		framepos_t const min_dframe = 2;
 		double new_bpm;
 
 		if (frame > prev_t->frame() + min_dframe && end_frame > prev_t->frame() + min_dframe) {
-			new_bpm = prev_t->end_note_types_per_minute() * ((frame - prev_t->frame())
-										 / (double) (end_frame - prev_t->frame()));
+			new_bpm = prev_t->end_note_types_per_minute() * ((prev_t->frame() - frame)
+										 / (double) (prev_t->frame() - end_frame));
 		} else {
 			new_bpm = prev_t->end_note_types_per_minute();
 		}
@@ -3569,18 +3612,31 @@ TempoMap::gui_stretch_tempo_end (TempoSection* ts, const framepos_t frame, const
 
 		prev_t->set_end_note_types_per_minute (new_bpm);
 
+		TempoSection* next = 0;
+		if ((next = next_tempo_section_locked (future_map, prev_t)) != 0) {
+			if (next->clamped()) {
+				next->set_note_types_per_minute (prev_t->end_note_types_per_minute());
+			}
+		}
+
 		recompute_tempi (future_map);
 		recompute_meters (future_map);
 
 		if (check_solved (future_map)) {
 			ts->set_end_note_types_per_minute (new_bpm);
 
+			TempoSection* true_next = 0;
+			if ((true_next = next_tempo_section_locked (_metrics, ts)) != 0) {
+				if (true_next->clamped()) {
+					true_next->set_note_types_per_minute (ts->end_note_types_per_minute());
+				}
+			}
+
 			recompute_tempi (_metrics);
 			recompute_meters (_metrics);
 		}
 	}
 
-	MetricPositionChanged (PropertyChange ()); // Emit Signal
 
 out:
 	Metrics::const_iterator d = future_map.begin();
@@ -3589,7 +3645,9 @@ out:
 		++d;
 	}
 
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
 }
+
 bool
 TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t frame, const framepos_t end_frame)
 {
@@ -3638,7 +3696,6 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		}
 
 		if (!next_to_next_t) {
-			std::cout << "no next to next t" << std::endl;
 			return false;
 		}
 
@@ -3651,10 +3708,8 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		const frameoffset_t tempo_copy_frame_contribution = fr_off - (prev_contribution * (double) fr_off);
 
 
-		framepos_t old_tc_pos = tempo_copy->frame();
-		framepos_t old_next_pos = next_t->frame();
+		framepos_t old_tc_minute = tempo_copy->minute();
 		double old_next_minute = next_t->minute();
-		framepos_t old_next_to_next_pos = next_to_next_t->frame();
 		double old_next_to_next_minute = next_to_next_t->minute();
 
 		double new_bpm;
@@ -3682,6 +3737,7 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		if (tempo_copy->type() == TempoSection::Constant) {
 			tempo_copy->set_end_note_types_per_minute (new_bpm);
 		}
+
 		recompute_tempi (future_map);
 
 		if (check_solved (future_map)) {
@@ -3689,11 +3745,14 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 			if (!next_t) {
 				return false;
 			}
+
 			ts->set_note_types_per_minute (new_bpm);
 			if (ts->type() == TempoSection::Constant) {
 				ts->set_end_note_types_per_minute (new_bpm);
 			}
+
 			recompute_map (_metrics);
+
 			can_solve = true;
 		}
 
@@ -3701,7 +3760,7 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 			if (frame > tempo_copy->frame() + min_dframe && end_frame > tempo_copy->frame() + min_dframe) {
 
 				new_next_bpm = next_t->note_types_per_minute() * ((next_to_next_t->minute() - old_next_minute)
-											/ (double) ((old_next_to_next_minute) - old_next_minute));
+										  / (double) ((old_next_to_next_minute) - old_next_minute));
 
 			} else {
 				new_next_bpm = next_t->note_types_per_minute();
@@ -3730,20 +3789,22 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 			double copy_frame_ratio = 1.0;
 
 			if (next_to_next_t) {
-				next_frame_ratio =  (next_to_next_t->frame() - old_next_pos) / (double) (old_next_to_next_pos -  old_next_pos);
+				next_frame_ratio = (next_to_next_t->minute() - old_next_minute) / (old_next_to_next_minute -  old_next_minute);
 
-				copy_frame_ratio =   ((old_tc_pos - next_t->frame()) / (double) (old_tc_pos - old_next_pos));
-
-			} else {
-				//next_frame_ratio = (((next_to_next_pos - fr_off) - next_t->frame()) / (double) ((next_to_next_pos) - next_t->frame()));
-				//next_pulse_ratio = (start_pulse / end_pulse);
+				copy_frame_ratio = ((old_tc_minute - next_t->minute()) / (double) (old_tc_minute - old_next_minute));
 			}
 
 			new_next_bpm = next_t->note_types_per_minute() * next_frame_ratio;
-			new_copy_end_bpm =  tempo_copy->end_note_types_per_minute() * copy_frame_ratio;
+			new_copy_end_bpm = tempo_copy->end_note_types_per_minute() * copy_frame_ratio;
 
-			next_t->set_note_types_per_minute (new_next_bpm);
 			tempo_copy->set_end_note_types_per_minute (new_copy_end_bpm);
+
+			if (next_t->clamped()) {
+				next_t->set_note_types_per_minute (new_copy_end_bpm);
+			} else {
+				next_t->set_note_types_per_minute (new_next_bpm);
+			}
+
 			recompute_tempi (future_map);
 
 			if (check_solved (future_map)) {
@@ -3757,7 +3818,13 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 				if (!next_t) {
 					return false;
 				}
-				next_t->set_note_types_per_minute (new_next_bpm);
+
+				if (next_t->clamped()) {
+					next_t->set_note_types_per_minute (new_copy_end_bpm);
+				} else {
+					next_t->set_note_types_per_minute (new_next_bpm);
+				}
+
 				ts->set_end_note_types_per_minute (new_copy_end_bpm);
 				recompute_map (_metrics);
 				can_solve = true;
@@ -3770,9 +3837,8 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 		delete (*d);
 		++d;
 	}
-	if (can_solve) {
-		MetricPositionChanged (PropertyChange ()); // Emit Signal
-	}
+
+	MetricPositionChanged (PropertyChange ()); // Emit Signal
 
 	return can_solve;
 }
@@ -4288,15 +4354,22 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 TempoSection*
 TempoMap::previous_tempo_section (TempoSection* ts) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return previous_tempo_section_locked (_metrics, ts);
+
+}
+
+TempoSection*
+TempoMap::previous_tempo_section_locked (const Metrics& metrics, TempoSection* ts) const
+{
 	if (!ts) {
 		return 0;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
 	TempoSection* prev = 0;
 
-	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
 		if ((*i)->is_tempo()) {
 			TempoSection* t = static_cast<TempoSection*> (*i);
@@ -4325,15 +4398,21 @@ TempoMap::previous_tempo_section (TempoSection* ts) const
 TempoSection*
 TempoMap::next_tempo_section (TempoSection* ts) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return next_tempo_section_locked (_metrics, ts);
+}
+
+TempoSection*
+TempoMap::next_tempo_section_locked (const Metrics& metrics, TempoSection* ts) const
+{
 	if (!ts) {
 		return 0;
 	}
 
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-
 	TempoSection* prev = 0;
 
-	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
 		if ((*i)->is_tempo()) {
 			TempoSection* t = static_cast<TempoSection*> (*i);

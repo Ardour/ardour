@@ -316,6 +316,10 @@ Editor::redisplay_tempo (bool immediate_redraw)
 void
 Editor::tempo_curve_selected (TempoSection* ts, bool yn)
 {
+	if (ts == 0) {
+		return;
+	}
+
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
 		if (&(*x)->tempo() == ts) {
 			if (yn) {

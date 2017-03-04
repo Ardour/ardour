@@ -991,8 +991,17 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
-	if (loc->tempo().type() == TempoSection::Ramp) {
-		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	if (!loc->tempo().initial()) {
+		if (loc->tempo().clamped()) {
+			items.push_back (MenuElem (_("Unlock Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+		} else {
+			items.push_back (MenuElem (_("Lock Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+		}
+
+		TempoSection* prev_ts = _session->tempo_map().previous_tempo_section (&loc->tempo());
+		if (prev_ts && prev_ts->end_note_types_per_minute() != loc->tempo().note_types_per_minute()) {
+			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::continue_previous_tempo)));
+		}
 	}
 
 	TempoSection* next_ts = _session->tempo_map().next_tempo_section (&loc->tempo());
@@ -1000,9 +1009,8 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
 
-	TempoSection* prev_ts = _session->tempo_map().previous_tempo_section (&loc->tempo());
-	if (prev_ts && prev_ts->end_note_types_per_minute() != loc->tempo().note_types_per_minute()) {
-		items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::continue_previous_tempo)));
+	if (loc->tempo().type() == TempoSection::Ramp) {
+		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
 	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
@@ -1458,6 +1466,34 @@ Editor::toggle_tempo_type ()
 		XMLNode &before = _session->tempo_map().get_state();
 
 		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, pls);
+
+		XMLNode &after = _session->tempo_map().get_state();
+		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+		commit_reversible_command ();
+	}
+}
+/* clamped locks the previous section end tempo to the start tempo */
+void
+Editor::toggle_tempo_clamped ()
+{
+	TempoMarker* tm;
+	MeterMarker* mm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (tm) {
+		begin_reversible_command (_("Clamp Tempo"));
+		XMLNode &before = _session->tempo_map().get_state();
+
+		TempoSection* tsp = &tm->tempo();
+		TempoSection* prev = _session->tempo_map().previous_tempo_section (tsp);
+
+		if (prev) {
+			/* set to the end tempo of the previous section */
+			Tempo new_tempo (prev->end_note_types_per_minute(), prev->note_type(), tsp->end_note_types_per_minute());
+			_session->tempo_map().gui_change_tempo (tsp, new_tempo);
+		}
+
+		tsp->set_clamped (!tsp->clamped());
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));

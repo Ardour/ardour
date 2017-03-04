@@ -201,7 +201,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& pulse, const double& minute, Tempo tempo, PositionLockStyle pls, framecnt_t sr)
-		: MetricSection (pulse, minute, pls, true, sr), Tempo (tempo), _c (0.0), _active (true), _locked_to_meter (false)  {}
+		: MetricSection (pulse, minute, pls, true, sr), Tempo (tempo), _c (0.0), _active (true), _locked_to_meter (false), _clamped (false)  {}
 
 	TempoSection (const XMLNode&, const framecnt_t sample_rate);
 
@@ -219,6 +219,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
+
+	bool clamped ()  const { return _clamped; }
+	void set_clamped (bool yn) { _clamped = yn; }
 
 	Tempo tempo_at_minute (const double& minute) const;
 	double minute_at_ntpm (const double& ntpm, const double& pulse) const;
@@ -264,9 +267,11 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   this enables us to keep the tempo change at the same relative
 	   position within the bar if/when the meter changes.
 	*/
+
 	double _c;
 	bool _active;
 	bool _locked_to_meter;
+	bool _clamped;
 	Timecode::BBT_Time _legacy_bbt;
 	bool _legacy_end;
 };
@@ -501,7 +506,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void gui_set_tempo_position (TempoSection*, const framepos_t& frame, const int& sub_num);
 	void gui_set_meter_position (MeterSection*, const framepos_t& frame);
-	bool gui_change_tempo (TempoSection*, const Tempo& bpm, bool change_end);
+	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_stretch_tempo (TempoSection* tempo, const framepos_t frame, const framepos_t end_frame);
 	void gui_stretch_tempo_end (TempoSection* tempo, const framepos_t frame, const framepos_t end_frame);
 	bool gui_twist_tempi (TempoSection* first, const Tempo& bpm, const framepos_t frame, const framepos_t end_frame);
@@ -514,6 +519,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void fix_legacy_end_session();
 
 private:
+
+	TempoSection* previous_tempo_section_locked (const Metrics& metrics, TempoSection*) const;
+	TempoSection* next_tempo_section_locked (const Metrics& metrics, TempoSection*) const;
 
 	double beat_at_minute_locked (const Metrics& metrics, const double& minute) const;
 	double minute_at_beat_locked (const Metrics& metrics, const double& beat) const;

@@ -794,7 +794,7 @@ private:
 	bool _movable;
 	ARDOUR::Tempo _grab_bpm;
 	double _grab_qn;
-	XMLNode* before_state;
+	XMLNode* _before_state;
 };
 
 /** BBT Ruler drag */
@@ -821,7 +821,7 @@ public:
 private:
 	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
-	XMLNode* before_state;
+	XMLNode* _before_state;
 };
 
 /** tempo curve twist drag */
@@ -851,7 +851,7 @@ private:
 	ARDOUR::TempoSection* _tempo;
 	ARDOUR::TempoSection* _next_tempo;
 	bool _drag_valid;
-	XMLNode* before_state;
+	XMLNode* _before_state;
 };
 
 
@@ -879,7 +879,7 @@ public:
 private:
 	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
-	XMLNode* before_state;
+	XMLNode* _before_state;
 };
 
 /** Drag of the playhead cursor */
