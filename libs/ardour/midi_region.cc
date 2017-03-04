@@ -108,6 +108,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, MusicFrame of
 	: Region (other, offset)
 	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, other->_length_beats)
+	, _ignore_shift (false)
 {
 
 	register_properties ();
