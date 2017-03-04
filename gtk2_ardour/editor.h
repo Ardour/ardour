@@ -1267,6 +1267,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void normalize_region ();
 	void reset_region_scale_amplitude ();
 	void adjust_region_gain (bool up);
+	void reset_region_gain ();
 	void quantize_region ();
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);

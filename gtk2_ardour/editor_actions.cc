@@ -1799,6 +1799,9 @@ Editor::register_region_actions ()
 	/* Cut selected region gain */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "cut-region-gain", _("Cut Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_gain), false));
 
+	/* Reset selected region gain */
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "reset-region-gain", _("Reset Gain"), sigc::mem_fun(*this, &Editor::reset_region_gain));
+
 	/* Open the pitch shift dialogue for any selected audio regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "pitch-shift-region", _("Pitch Shift..."), sigc::mem_fun (*this, &Editor::pitch_shift_region));
 
