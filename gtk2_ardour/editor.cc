@@ -1922,7 +1922,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 		_popup_region_menu_item->set_label (menu_item_name);
 	}
 
-	/* No latering allowed in later is higher layering model */
+	/* No layering allowed in later is higher layering model */
 	RefPtr<Action> act = ActionManager::get_action (X_("EditorMenu"), X_("RegionMenuLayering"));
 	if (act && Config->get_layer_model() == LaterHigher) {
 		act->set_sensitive (false);
@@ -4716,7 +4716,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	if (from_outside_canvas && (ep == EditAtMouse)) {
 		ep = EditAtPlayhead;
 	} else if (from_context_menu && (ep == EditAtMouse)) {
-		return  canvas_event_sample (&context_click_event, 0, 0);
+		return canvas_event_sample (&context_click_event, 0, 0);
 	}
 
 	if (entered_marker) {
