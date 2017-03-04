@@ -6696,6 +6696,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Evoral::Beats length = _region_view->get_grid_beats (pf);
 
+	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->create_note_at (start, y, length, event->button.state, false);
 
 	_last_pos = start;
@@ -6738,6 +6739,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 void
 HitCreateDrag::finished (GdkEvent* /* ev */, bool /* had_movement */)
 {
+	_editor->commit_reversible_command ();
 
 }
 
