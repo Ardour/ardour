@@ -40,6 +40,7 @@
 #include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 
 #include "canvas/canvas.h"
 #include "canvas/scroll_group.h"
@@ -2988,6 +2989,21 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (insert_result.second) {
 				pl->freeze();
 			}
+
+			MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (rv);
+			/* a MRV start trim may change the source length. ensure we cover all playlists here */
+			if (mrv && _operation == StartTrim) {
+				vector<boost::shared_ptr<Playlist> > all_playlists;
+				_editor->session()->playlists->get (all_playlists);
+				for (vector<boost::shared_ptr<Playlist> >::iterator x = all_playlists.begin(); x != all_playlists.end(); ++x) {
+					if ((*x)->uses_source (rv->region()->source(0))) {
+						insert_result = _editor->motion_frozen_playlists.insert (*x);
+						if (insert_result.second) {
+							pl->freeze();
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -3136,29 +3152,22 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (!_editor->selection->selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
-
-			set<boost::shared_ptr<Playlist> > diffed_playlists;
-
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				i->view->thaw_after_trim ();
 				i->view->enable_display (true);
-
-				/* Trimming one region may affect others on the playlist, so we need
-				   to get undo Commands from the whole playlist rather than just the
-				   region.  Use diffed_playlists to make sure we don't diff a given
-				   playlist more than once.
-				*/
-				boost::shared_ptr<Playlist> p = i->view->region()->playlist ();
-				if (diffed_playlists.find (p) == diffed_playlists.end()) {
-					vector<Command*> cmds;
-					p->rdiff (cmds);
-					_editor->session()->add_commands (cmds);
-					diffed_playlists.insert (p);
-				}
 			}
 		}
 
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
+			/* Trimming one region may affect others on the playlist, so we need
+			   to get undo Commands from the whole playlist rather than just the
+			   region.  Use motion_frozen_playlists (a set) to make sure we don't
+			   diff a given playlist more than once.
+			*/
+
+			vector<Command*> cmds;
+			(*p)->rdiff (cmds);
+			_editor->session()->add_commands (cmds);
 			(*p)->thaw ();
 		}
 
