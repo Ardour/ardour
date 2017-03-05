@@ -31,7 +31,6 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
 	: Gtk::Window (Gtk::WINDOW_POPUP)
         , entry_changed (false)
 	, by_popup_menu (false)
-	, _delete_queued (false)
 {
 	//set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -185,13 +184,8 @@ FloatingTextEntry::on_hide ()
 void
 FloatingTextEntry::idle_delete_self ()
 {
-	if (_delete_queued) {
-		PBD::stacktrace (std::cerr, 20);
-		return;
-	}
 	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
 		i->disconnect ();
 	}
-	_delete_queued = true;
 	delete_when_idle (this);
 }

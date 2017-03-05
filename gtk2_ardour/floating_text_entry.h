@@ -52,7 +52,6 @@ private:
 	void idle_delete_self ();
 
 	std::list<sigc::connection> _connections;
-	bool _delete_queued;
 
 	/* handlers for window events */
 
