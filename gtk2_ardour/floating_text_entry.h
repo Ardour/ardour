@@ -49,6 +49,9 @@ private:
 	bool button_press (GdkEventButton*);
 	void changed ();
 	void populate_popup (Gtk::Menu*);
+	void idle_delete_self ();
+
+	std::list<sigc::connection> _connections;
 
 	/* handlers for window events */
 

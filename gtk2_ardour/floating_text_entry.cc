@@ -41,17 +41,17 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
 	}
 
 	entry.show ();
-	entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
-	entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
-	entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press), false);
-	entry.signal_key_release_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_release), false);
-	entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
-	entry.signal_populate_popup().connect (sigc::mem_fun (*this, &FloatingTextEntry::populate_popup));
+	_connections.push_back (entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed)));
+	_connections.push_back (entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated)));
+	_connections.push_back (entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press), false));
+	_connections.push_back (entry.signal_key_release_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_release), false));
+	_connections.push_back (entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press)));
+	_connections.push_back (entry.signal_populate_popup().connect (sigc::mem_fun (*this, &FloatingTextEntry::populate_popup)));
 
 	entry.select_region (0, -1);
 
 	if (parent) {
-		parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
+		_connections.push_back (parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out)));
 	}
 
 	add (entry);
@@ -90,7 +90,7 @@ FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
 		use_text (entry.get_text (), 0);
 	}
 
-	delete_when_idle ( this);
+	idle_delete_self ();
 	return false;
 }
 
@@ -111,7 +111,7 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 		use_text (entry.get_text (), 0);
 	}
 
-	delete_when_idle ( this);
+	idle_delete_self ();
 
 	return false;
 }
@@ -120,7 +120,7 @@ void
 FloatingTextEntry::activated ()
 {
 	use_text (entry.get_text(), 0); // EMIT SIGNAL
-	delete_when_idle (this);
+	idle_delete_self ();
 }
 
 bool
@@ -143,7 +143,7 @@ FloatingTextEntry::key_release (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Escape:
 		/* cancel edit */
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 
 	case GDK_ISO_Left_Tab:
@@ -152,12 +152,12 @@ FloatingTextEntry::key_release (GdkEventKey* ev)
 		 * ev->state.
 		 */
 		use_text (entry.get_text(), -1); // EMIT SIGNAL, move to prev
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 
 	case GDK_Tab:
 		use_text (entry.get_text(), 1); // EMIT SIGNAL, move to next
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 	default:
 		break;
@@ -177,6 +177,15 @@ FloatingTextEntry::on_hide ()
 	   method of cancelling the edit.
 	*/
 
-	delete_when_idle (this);
+	idle_delete_self ();
 	Gtk::Window::on_hide ();
+}
+
+void
+FloatingTextEntry::idle_delete_self ()
+{
+	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
+		i->disconnect ();
+	}
+	delete_when_idle (this);
 }
