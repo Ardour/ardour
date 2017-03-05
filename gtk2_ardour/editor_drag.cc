@@ -629,6 +629,7 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _pdropzone (0)
 	, _ddropzone (0)
 {
+	_last_position = MusicFrame (_primary->region()->position(), 0);
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
 
@@ -663,6 +664,11 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, MusicFrame* pending_r
 	/* compute the amount of pointer motion in frames, and where
 	   the region would be if we moved it by that much.
 	*/
+	if (_x_constrained) {
+		*pending_region_position = _last_position;
+		return 0.0;
+	}
+
 	*pending_region_position = adjusted_frame (_drags->current_pointer_frame (), event, false);
 
 	framecnt_t sync_offset;
@@ -1587,7 +1593,7 @@ RegionMoveDrag::finished_no_copy (
 	PlaylistSet frozen_playlists;
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
-	framecnt_t const drag_delta = _primary->region()->position() - _last_position.frame;
+	framecnt_t const drag_delta = _primary->region()->position() - last_position.frame;
 
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
