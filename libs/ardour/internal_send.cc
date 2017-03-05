@@ -195,13 +195,18 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 			*/
 
 			uint32_t j = 0;
-			for (uint32_t i = 0; i < mixbufs_audio; ++i) {
+			uint32_t i = 0;
+			for (i = 0; i < mixbufs_audio && j < bufs_audio; ++i) {
 				mixbufs.get_audio(i).read_from (bufs.get_audio(j), nframes);
 				++j;
 
 				if (j == bufs_audio) {
 					j = 0;
 				}
+			}
+			/* in case or MIDI track with 0 audio channels */
+			for (; i < mixbufs_audio; ++i) {
+				mixbufs.get_audio(i).silence (nframes);
 			}
 
 		} else {
