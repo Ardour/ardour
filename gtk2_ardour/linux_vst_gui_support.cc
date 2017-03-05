@@ -453,6 +453,10 @@ again:
 		}
 	}
 
+	if (LXVST_XDisplay) {
+		XCloseDisplay(LXVST_XDisplay);
+		LXVST_XDisplay = 0;
+	}
 
 	/* some plugin UIs (looking at you, u-he^abique), do set thread-keys
 	 * and free, but not unset them.
@@ -534,6 +538,7 @@ int vstfx_init (void* ptr)
 		vstfx_error ("** ERROR ** VSTFX: Failed starting GUI event thread");
 
 		XCloseDisplay(LXVST_XDisplay);
+		LXVST_XDisplay = 0;
 		gui_quit = 1;
 
 		return -1;
