@@ -453,7 +453,29 @@ again:
 		}
 	}
 
-	/*Drop out to here if we set gui_quit to 1 */
+
+	/* some plugin UIs (looking at you, u-he^abique), do set thread-keys
+	 * and free, but not unset them.
+	 *
+	 * This leads to a double-free in __nptl_deallocate_tsd
+	 * nptl/pthread_create.c:175  __pthread_keys[idx].destr (data);
+	 * when the event-loop thread is joined.
+	 *
+	 * This workaround is dedicated to all the plugin-UI-devs
+	 * who think their UI owns the complete process memory-space.
+	 *
+	 * NB. ardour itself does not use thread-keys for the
+	 * VST event-loop thread, and anyway, this thread is joined
+	 * only when ardour exit()s. If this would result in a leak,
+	 * nobody will care.
+	 */
+	if (!getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		for (pthread_key_t i = 0; i < PTHREAD_KEYS_MAX; ++i) {
+			if (pthread_getspecific (i)) {
+				pthread_setspecific (i, NULL);
+			}
+		}
+	}
 
 	return NULL;
 }
@@ -532,9 +554,6 @@ void vstfx_exit()
 	/*We need to pthread_join the gui_thread here so
 	we know when it has stopped*/
 
-	// BEWARE: some Plugin GUIs can crash if the thread local storage is free()d
-	// after the shared library containing the destructor is already dl-closed.
-	// (e.g u-he LXVST GUI, crash in __nptl_deallocate_tsd) :(
 	pthread_join(LXVST_gui_event_thread, NULL);
 	pthread_mutex_destroy (&plugin_mutex);
 }
