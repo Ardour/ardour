@@ -25,7 +25,7 @@
 
 class FloatingTextEntry : public Gtk::Window
 {
-  public:
+public:
 	FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents);
 
 	/* 1st argument to handler is the new text
@@ -36,24 +36,24 @@ class FloatingTextEntry : public Gtk::Window
 	 */
 	sigc::signal2<void,std::string,int> use_text;
 
-  private:
-        Gtk::Entry entry;
-        bool entry_changed;
+private:
+	Gtk::Entry entry;
+	bool entry_changed;
 	bool by_popup_menu;
 
-        /* handlers for Entry events */
+	/* handlers for Entry events */
 	bool entry_focus_out (GdkEventFocus*);
-        bool key_press (GdkEventKey*);
-        bool key_release (GdkEventKey*);
-        void activated ();
-        bool button_press (GdkEventButton*);
-        void changed ();
+	bool key_press (GdkEventKey*);
+	bool key_release (GdkEventKey*);
+	void activated ();
+	bool button_press (GdkEventButton*);
+	void changed ();
 	void populate_popup (Gtk::Menu*);
 
-        /* handlers for window events */
+	/* handlers for window events */
 
-        void on_realize ();
-        void on_hide ();
+	void on_realize ();
+	void on_hide ();
 };
 
 #endif // __ardour_window_h__
