@@ -550,8 +550,16 @@ fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 		return NULL;
 	}
 
-	fst->plugin->dispatcher (fst->plugin, effOpen, 0, 0, 0, 0);
-	fst->vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, 0, 0);
+	if (!userptr) {
+		/* scanning.. or w/o master-callback userptr == 0, open now.
+		 *
+		 * Session::vst_callback needs a pointer to the AEffect
+		 *     ((VSTPlugin*)userptr)->_plugin = vstfx->plugin
+		 * before calling effOpen, because effOpen may call back
+		 */
+		fst->plugin->dispatcher (fst->plugin, effOpen, 0, 0, 0, 0);
+		fst->vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, 0, 0);
+	}
 
 	fst->handle->plugincnt++;
 	fst->wantIdle = 0;

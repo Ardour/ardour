@@ -306,14 +306,16 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 		return 0;
 	}
 
-	vstfx->plugin->dispatcher (vstfx->plugin, effOpen, 0, 0, 0, 0);
-
-	/*May or May not need to 'switch the plugin on' here - unlikely
-	since FST doesn't and most plugins start up 'On' by default - I think this is the least of our worries*/
-
-	//vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 1, 0, 0);
-
-	vstfx->vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, 0, 0);
+	if (!userptr) {
+		/* scanning.. or w/o master-callback userptr == 0, open now.
+		 *
+		 * Session::vst_callback needs a pointer to the AEffect
+		 *     ((VSTPlugin*)userptr)->_plugin = vstfx->plugin
+		 * before calling effOpen, because effOpen may call back
+		 */
+		vstfx->plugin->dispatcher (vstfx->plugin, effOpen, 0, 0, 0, 0);
+		vstfx->vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, 0, 0);
+	}
 
 	vstfx->handle->plugincnt++;
 	vstfx->wantIdle = 0;

@@ -40,9 +40,10 @@ MacVSTPlugin::MacVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int 
 	if ((_state = mac_vst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor ();
 	}
+	open_plugin ();
 	Session::vst_current_loading_id = 0;
 
-	set_plugin (_state->plugin);
+	init_plugin ();
 }
 
 MacVSTPlugin::MacVSTPlugin (const MacVSTPlugin &other)
@@ -54,9 +55,8 @@ MacVSTPlugin::MacVSTPlugin (const MacVSTPlugin &other)
 	if ((_state = mac_vst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor ();
 	}
+	open_plugin ();
 	Session::vst_current_loading_id = 0;
-
-	_plugin = _state->plugin;
 
 	XMLNode* root = new XMLNode (other.state_node_name ());
 	LocaleGuard lg;
@@ -64,12 +64,19 @@ MacVSTPlugin::MacVSTPlugin (const MacVSTPlugin &other)
 	set_state (*root, Stateful::loading_state_version);
 	delete root;
 
-	set_plugin (_state->plugin);
+	init_plugin ();
 }
 
 MacVSTPlugin::~MacVSTPlugin ()
 {
 	mac_vst_close (_state);
+}
+
+void
+MacVSTPlugin::open_plugin ()
+{
+	VSTPlugin::open_plugin ();
+	_plugin->dispatcher (mac_vst->plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
 }
 
 PluginPtr
@@ -120,6 +127,7 @@ MacVSTPluginInfo::get_presets (bool user_only) const
 		Session::vst_current_loading_id = atoi (unique_id);
 		AEffect* plugin = handle->main_entry (Session::vst_callback);
 		Session::vst_current_loading_id = 0;
+		plugin->user = NULL;
 
 		plugin->dispatcher (plugin, effOpen, 0, 0, 0, 0); // :(
 		int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0);

@@ -76,13 +76,19 @@ VSTPlugin::~VSTPlugin ()
 }
 
 void
-VSTPlugin::set_plugin (AEffect* e)
+VSTPlugin::open_plugin ()
 {
-	_plugin = e;
+	_plugin = _state->plugin;
+	assert (_plugin->user == this); // should have been set by {mac_vst|fst|lxvst}_instantiate
 	_plugin->user = this;
+	_state->plugin->dispatcher (_plugin, effOpen, 0, 0, 0, 0);
+	_state->vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, 0, 0);
+}
 
+void
+VSTPlugin::init_plugin ()
+{
 	/* set rate and blocksize */
-
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
 }

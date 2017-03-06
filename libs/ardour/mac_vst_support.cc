@@ -203,17 +203,19 @@ mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 		return 0;
 	}
 
-	mac_vst->plugin->dispatcher (mac_vst->plugin, effOpen, 0, 0, 0, 0);
+	if (!userptr) {
+		/* scanning.. or w/o master-callback userptr == 0, open now.
+		 *
+		 * Session::vst_callback needs a pointer to the AEffect
+		 *     ((VSTPlugin*)userptr)->_plugin = vstfx->plugin
+		 * before calling effOpen, because effOpen may call back
+		 */
+		mac_vst->plugin->dispatcher (mac_vst->plugin, effOpen, 0, 0, 0, 0);
+		mac_vst->vst_version = mac_vst->plugin->dispatcher (mac_vst->plugin, effGetVstVersion, 0, 0, 0, 0);
 
-	/*May or May not need to 'switch the plugin on' here - unlikely
-	since FST doesn't and most plugins start up 'On' by default - I think this is the least of our worries*/
-
-	//mac_vst->plugin->dispatcher (mac_vst->plugin, effMainsChanged, 0, 1, 0, 0);
-
-	/* configure plugin to use Cocoa View */
-	mac_vst->plugin->dispatcher (mac_vst->plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
-
-	mac_vst->vst_version = mac_vst->plugin->dispatcher (mac_vst->plugin, effGetVstVersion, 0, 0, 0, 0);
+		/* configure plugin to use Cocoa View */
+		mac_vst->plugin->dispatcher (mac_vst->plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
+	}
 
 	mac_vst->handle->plugincnt++;
 	mac_vst->wantIdle = 0;

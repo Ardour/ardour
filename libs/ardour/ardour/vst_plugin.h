@@ -103,7 +103,8 @@ public:
 
 protected:
 	void parameter_changed_externally (uint32_t which, float val);
-	void set_plugin (AEffect *);
+	virtual void open_plugin ();
+	void init_plugin ();
 	gchar* get_chunk (bool) const;
 	int set_chunk (gchar const *, bool);
 	void add_state (XMLNode *) const;

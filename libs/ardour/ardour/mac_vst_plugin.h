@@ -38,6 +38,8 @@ public:
 	~MacVSTPlugin ();
 
 	std::string state_node_name () const { return "mac-vst"; }
+protected:
+	void open_plugin ();
 };
 
 class LIBARDOUR_API MacVSTPluginInfo : public PluginInfo
