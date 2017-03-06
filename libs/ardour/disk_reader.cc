@@ -18,6 +18,7 @@
 */
 
 #include "pbd/i18n.h"
+#include "pbd/memento_command.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_buffer.h"
@@ -1223,3 +1224,87 @@ DiskReader::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t f
   out:
 	return ret;
 }
+
+void
+DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames, bool from_undo)
+{
+	/* If we're coming from an undo, it will have handled
+	   automation undo (it must, since automation-follows-regions
+	   can lose automation data).  Hence we can do nothing here.
+	*/
+
+	if (from_undo) {
+		return;
+	}
+
+#if 0
+	if (!_track || Config->get_automation_follows_regions () == false) {
+		return;
+	}
+
+	list< Evoral::RangeMove<double> > movements;
+
+	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin();
+	     i != movements_frames.end();
+	     ++i) {
+
+		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
+	}
+
+	/* move panner automation */
+	boost::shared_ptr<Pannable> pannable = _track->pannable();
+        Evoral::ControlSet::Controls& c (pannable->controls());
+
+        for (Evoral::ControlSet::Controls::iterator ci = c.begin(); ci != c.end(); ++ci) {
+                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
+                if (!ac) {
+                        continue;
+                }
+                boost::shared_ptr<AutomationList> alist = ac->alist();
+		if (!alist->size()) {
+			continue;
+		}
+                XMLNode & before = alist->get_state ();
+                bool const things_moved = alist->move_ranges (movements);
+                if (things_moved) {
+                        _session.add_command (new MementoCommand<AutomationList> (
+                                                      *alist.get(), &before, &alist->get_state ()));
+                }
+        }
+	/* move processor automation */
+	_track->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));
+#endif
+}
+
+void
+DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<framepos_t> > const & movements_frames)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+
+	list< Evoral::RangeMove<double> > movements;
+	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin(); i != movements_frames.end(); ++i) {
+		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
+	}
+
+	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
+
+	for (set<Evoral::Parameter>::const_iterator i = a.begin (); i != a.end (); ++i) {
+		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
+		if (!al->size()) {
+			continue;
+		}
+		XMLNode & before = al->get_state ();
+		bool const things_moved = al->move_ranges (movements);
+		if (things_moved) {
+			_session.add_command (
+				new MementoCommand<AutomationList> (
+					*al.get(), &before, &al->get_state ()
+					)
+				);
+		}
+	}
+}
+
