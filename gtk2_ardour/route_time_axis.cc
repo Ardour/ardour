@@ -600,9 +600,20 @@ RouteTimeAxisView::build_display_menu ()
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
 
+	/* allow to rename tracks from the context menu on header */
+	/* analog to mixer_strip.cc MixerStrip::build_route_ops_menu () */
+	if (!Profile->get_mixbus()) {
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+		rename_menu_item = &items.back();
+		/* do not allow rename if the track is record-enabled */
+		rename_menu_item->set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
+	}
+
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+
+	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
 
