@@ -30,131 +30,93 @@ namespace ARDOUR {
 
 class Session;
 class Route;
+class Location;
 
 class LIBARDOUR_API DiskIOProcessor : public Processor
 {
   public:
+	enum Flag {
+		Recordable  = 0x1,
+		Hidden      = 0x2,
+		Destructive = 0x4,
+		NonLayered   = 0x8
+	};
+
 	static const std::string state_node_name;
 
-	DiskIOProcessor(Session&, const std::string& name);
-
-	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
-	void silence (framecnt_t /*nframes*/, framepos_t /*start_frame*/) {}
-
-	bool configure_io (ChanCount in, ChanCount out);
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) = 0;
-	ChanCount input_streams () const { return _configured_input; }
-	ChanCount output_streams() const { return _configured_output; }
-
-	virtual void realtime_handle_transport_stopped () {}
-	virtual void realtime_locate () {}
-
-	/* note: derived classes should implement state(), NOT get_state(), to allow
-	   us to merge C++ inheritance and XML lack-of-inheritance reasonably
-	   smoothly.
-	 */
-
-	virtual XMLNode& state (bool full);
-	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version);
-
-	static framecnt_t disk_read_frames() { return disk_read_chunk_frames; }
-	static framecnt_t disk_write_frames() { return disk_write_chunk_frames; }
-	static void set_disk_read_chunk_frames (framecnt_t n) { disk_read_chunk_frames = n; }
-	static void set_disk_write_chunk_frames (framecnt_t n) { disk_write_chunk_frames = n; }
-	static framecnt_t default_disk_read_chunk_frames ();
-	static framecnt_t default_disk_write_chunk_frames ();
+	DiskIOProcessor (Session&, const std::string& name, Flag f);
 
 	static void set_buffering_parameters (BufferingPreset bp);
 
-protected:
-	static framecnt_t disk_read_chunk_frames;
-	static framecnt_t disk_write_chunk_frames;
+	/** @return A number between 0 and 1, where 0 indicates that the playback buffer
+	 *  is dry (ie the disk subsystem could not keep up) and 1 indicates that the
+	 *  buffer is full.
+	 */
+	virtual float playback_buffer_load() const = 0;
+	virtual float capture_buffer_load() const = 0;
 
+	void set_flag (Flag f)   { _flags = Flag (_flags | f); }
+	void unset_flag (Flag f) { _flags = Flag (_flags & ~f); }
+
+	bool           hidden()      const { return _flags & Hidden; }
+	bool           recordable()  const { return _flags & Recordable; }
+	bool           non_layered()  const { return _flags & NonLayered; }
+	bool           reversed()    const { return _actual_speed < 0.0f; }
+	double         speed()       const { return _visible_speed; }
+
+	ChanCount n_channels() { return _n_channels; }
+
+	void non_realtime_set_speed ();
+	bool realtime_set_speed (double sp, bool global);
+
+	virtual void punch_in()  {}
+	virtual void punch_out() {}
+
+	virtual float buffer_load() const = 0;
+
+	bool slaved() const      { return _slaved; }
+	void set_slaved(bool yn) { _slaved = yn; }
+
+	int set_loop (Location *loc);
+
+	PBD::Signal1<void,Location *> LoopSet;
+	PBD::Signal0<void>            SpeedChanged;
+	PBD::Signal0<void>            ReverseChanged;
+
+	int set_state (const XMLNode&, int version);
+
+  protected:
+	friend class Auditioner;
+	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
+
+  protected:
+	Flag         _flags;
 	uint32_t i_am_the_modifier;
-
-	Track*       _track;
 	ChanCount    _n_channels;
-
 	double       _visible_speed;
 	double       _actual_speed;
+	double       _speed;
+	double       _target_speed;
 	/* items needed for speed change logic */
 	bool         _buffer_reallocation_required;
 	bool         _seek_required;
 	bool         _slaved;
 	Location*     loop_location;
-	double        _speed;
-	double        _target_speed;
 	bool          in_set_state;
+	framecnt_t    wrap_buffer_size;
+	framecnt_t    speed_buffer_size;
 
 	Glib::Threads::Mutex state_lock;
-	Flag _flags;
+
+	static bool get_buffering_presets (BufferingPreset bp,
+	                                   framecnt_t& read_chunk_size,
+	                                   framecnt_t& read_buffer_size,
+	                                   framecnt_t& write_chunk_size,
+	                                   framecnt_t& write_buffer_size);
+
+	virtual void allocate_temporary_buffers () = 0;
 };
-
-class LIBARDOUR_API DiskReader : public DiskIOProcessor
-{
-  public:
-	DiskReader (Session&, std::string const & name);
-	~DiskReader ();
-
-  private:
-	boost::shared_ptr<Playlist> _playlist;
-
-	framepos_t    overwrite_frame;
-	off_t         overwrite_offset;
-	bool          _pending_overwrite;
-	bool          overwrite_queued;
-	IOChange      input_change_pending;
-	framecnt_t    wrap_buffer_size;
-	framecnt_t    speed_buffer_size;
-
-	double        _speed;
-	double        _target_speed;
-
-	/** The next frame position that we should be reading from in our playlist */
-	framepos_t     file_frame;
-	framepos_t     playback_sample;
-
-	PBD::ScopedConnectionList playlist_connections;
-	PBD::ScopedConnection ic_connection;
-};
-
-class LIBARDOUR_API DiskWriter : public DiskIOProcessor
-{
-  public:
-	DiskWriter (Session&, std::string const & name);
-	~DiskWriter ();
-
-  private:
-	std::vector<CaptureInfo*> capture_info;
-	mutable Glib::Threads::Mutex capture_info_lock;
-
-	double       _visible_speed;
-	double       _actual_speed;
-	/* items needed for speed change logic */
-	bool         _buffer_reallocation_required;
-	bool         _seek_required;
-
-	/** Start of currently running capture in session frames */
-	framepos_t    capture_start_frame;
-	framecnt_t    capture_captured;
-	bool          was_recording;
-	framecnt_t    adjust_capture_position;
-	framecnt_t   _capture_offset;
-	framepos_t    first_recordable_frame;
-	framepos_t    last_recordable_frame;
-	int           last_possibly_recording;
-	AlignStyle   _alignment_style;
-	AlignChoice  _alignment_choice;
-	framecnt_t    wrap_buffer_size;
-	framecnt_t    speed_buffer_size;
-
-	std::string   _write_source_name;
-
-	PBD::ScopedConnection ic_connection;
-};
-
 
 } // namespace ARDOUR
 
-#endif /* __ardour_processor_h__ */
+#endif /* __ardour_disk_io_h__ */
