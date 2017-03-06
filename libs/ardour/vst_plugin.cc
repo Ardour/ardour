@@ -49,6 +49,7 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _num (0)
 	, _transport_frame (0)
 	, _transport_speed (0.f)
+	, _eff_bypassed (false)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -64,6 +65,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin& other)
 	, _transport_frame (0)
 	, _transport_speed (0.f)
 	, _parameter_defaults (other._parameter_defaults)
+	, _eff_bypassed (other._eff_bypassed)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -83,6 +85,27 @@ VSTPlugin::set_plugin (AEffect* e)
 
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
+}
+
+
+uint32_t
+VSTPlugin::designated_bypass_port ()
+{
+	if (_plugin->dispatcher (_plugin, effCanDo, 0, 0, const_cast<char*> ("bypass"), 0.0f) != 0) {
+		/* check if plugin actually supports it,
+		 * e.g. u-he Presswerk  CanDo "bypass"  but calling effSetBypass is a NO-OP.
+		 * (presumably the plugin-author thinks hard-bypassing is a bad idea,
+		 * particularly since the plugin itself provides a bypass-port)
+		 */
+		intptr_t value = 0; // not bypassed
+		if (0 != _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0)) {
+			cerr << "Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
+			return UINT32_MAX - 1; // emulate a port
+		} else {
+			cerr << "Do *not* Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
+		}
+	}
+	return UINT32_MAX;
 }
 
 void
@@ -115,12 +138,29 @@ VSTPlugin::default_value (uint32_t which)
 float
 VSTPlugin::get_parameter (uint32_t which) const
 {
+	if (which == UINT32_MAX - 1) {
+		// ardour uses enable-semantics: 1: enabled, 0: bypassed
+		return _eff_bypassed ? 0.f : 1.f;
+	}
 	return _plugin->getParameter (_plugin, which);
 }
 
 void
 VSTPlugin::set_parameter (uint32_t which, float newval)
 {
+	if (which == UINT32_MAX - 1) {
+		// ardour uses enable-semantics: 1: enabled, 0: bypassed
+		intptr_t value = (newval <= 0.f) ? 1 : 0;
+		cerr << "effSetBypass " << value << endl; // XXX DEBUG
+		int rv = _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0);
+		if (0 != rv) {
+			_eff_bypassed = (value == 1);
+		} else {
+			cerr << "effSetBypass failed rv=" << rv << endl; // XXX DEBUG
+		}
+		return;
+	}
+
 	float oldval = get_parameter (which);
 
 	if (PBD::floateq (oldval, newval, 1)) {
@@ -548,6 +588,11 @@ string
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64];
+	if (param.id() == UINT32_MAX - 1) {
+		strcpy (name, _("Plugin Enable"));
+		return name;
+	}
+
 	memset (name, 0, sizeof (name));
 
 	/* some VST plugins expect this buffer to be zero-filled */

@@ -68,6 +68,8 @@ public:
 	bool parameter_is_input (uint32_t) const { return true; }
 	bool parameter_is_output (uint32_t) const { return false; }
 
+	uint32_t designated_bypass_port ();
+
 	int connect_and_run (BufferSet&,
 			framepos_t start, framepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
@@ -125,6 +127,7 @@ protected:
 	framepos_t _transport_frame;
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
+	bool       _eff_bypassed;
 };
 
 }

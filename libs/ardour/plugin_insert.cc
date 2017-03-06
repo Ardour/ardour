@@ -490,6 +490,21 @@ PluginInsert::create_automatable_parameters ()
 
 	_bypass_port = plugin->designated_bypass_port ();
 
+	/* special case VST effSetBypass */
+	if (_bypass_port == UINT32_MAX -1) {
+		// emulate VST Bypass
+		Evoral::Parameter param (PluginAutomation, 0, _bypass_port);
+		ParameterDescriptor desc;
+		desc.label = _("Plugin Enable");
+		desc.toggled  = true;
+		desc.normal = 1;
+		desc.lower  = 0;
+		desc.upper  = 1;
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
+		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+		add_control (c);
+	}
+
 	if (_bypass_port != UINT32_MAX) {
 		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
 		if (0 == (ac->flags () & Controllable::NotAutomatable)) {
