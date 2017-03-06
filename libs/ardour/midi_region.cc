@@ -599,10 +599,13 @@ MidiRegion::model_shifted (double qn_distance)
 	}
 
 	if (!_ignore_shift) {
+		PropertyChange what_changed;
 		_start_beats += qn_distance;
 		framepos_t const new_start = _session.tempo_map().frames_between_quarter_notes (_quarter_note - _start_beats, _quarter_note);
 		_start = new_start;
-		send_change (Properties::start);
+		what_changed.add (Properties::start);
+		what_changed.add (Properties::start_beats);
+		send_change (what_changed);
 	} else {
 		_ignore_shift = false;
 	}
