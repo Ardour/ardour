@@ -2426,14 +2426,16 @@ RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisVi
 void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
+
 	if (first_move) {
 		_editor->begin_reversible_command (_("create region"));
 		_region = add_midi_region (_view, false);
 		_view->playlist()->freeze ();
 	} else {
+
 		if (_region) {
 			framepos_t const f = adjusted_current_frame (event);
-			if (f < grab_frame()) {
+			if (f <= grab_frame()) {
 				_region->set_initial_position (f);
 			}
 
@@ -2443,9 +2445,10 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			   a bit confusing as if a region starts 1 frame after a snap point, one cannot
 			   place snapped notes at the start of the region.
 			*/
-
-			framecnt_t const len = (framecnt_t) fabs ((double)(f - grab_frame () - 1));
-			_region->set_length (len < 1 ? 1 : len, _editor->get_grid_music_divisions (event->button.state));
+			if (f != grab_frame()) {
+				framecnt_t const len = (framecnt_t) fabs ((double)(f - grab_frame () - 1));
+				_region->set_length (len < 1 ? 1 : len, _editor->get_grid_music_divisions (event->button.state));
+			}
 		}
 	}
 }
