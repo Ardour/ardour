@@ -2705,16 +2705,17 @@ ARDOUR_UI::save_session_as ()
 	*/
 
 	ArdourDialog progress_dialog (_("Save As"), true);
+	ScopedConnection c;
 
 	if (sa.include_media && sa.copy_media) {
 
-		Gtk::Label label;
-		Gtk::ProgressBar progress_bar;
+		Gtk::Label* label = manage (new Gtk::Label());
+		Gtk::ProgressBar* progress_bar = manage (new Gtk::ProgressBar ());
 
-		progress_dialog.get_vbox()->pack_start (label);
-		progress_dialog.get_vbox()->pack_start (progress_bar);
-		label.show ();
-		progress_bar.show ();
+		progress_dialog.get_vbox()->pack_start (*label);
+		progress_dialog.get_vbox()->pack_start (*progress_bar);
+		label->show ();
+		progress_bar->show ();
 
 		/* this signal will be emitted from within this, the calling thread,
 		 * after every file is copied. It provides information on percentage
@@ -2722,9 +2723,7 @@ ARDOUR_UI::save_session_as ()
 		 * copied so far, and the total number to copy.
 		 */
 
-		ScopedConnection c;
-
-		sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
+		sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, label, progress_bar));
 
 		progress_dialog.show_all ();
 		progress_dialog.present ();
