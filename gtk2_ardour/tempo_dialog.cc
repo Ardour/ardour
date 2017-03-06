@@ -40,15 +40,18 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, _section (0)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
+	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
+	, end_bpm_spinner (end_bpm_adjustment)
+	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Tempo tempo (map.tempo_at_frame (frame));
 	Timecode::BBT_Time when (map.bbt_at_frame (frame));
 
-	init (when, tempo.note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
+	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
@@ -57,18 +60,21 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, _section (&section)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
+	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
+	, end_bpm_spinner (end_bpm_adjustment)
+	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
-	init (when, section.note_types_per_minute(), section.note_type(), section.type()
+	init (when, section.note_types_per_minute(), section.end_note_types_per_minute(), section.note_type(), section.type()
 	      , section.initial() || section.locked_to_meter(), section.position_lock_style());
 }
 
 void
-TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, TempoSection::Type type, bool initial, PositionLockStyle style)
+TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double end_bpm, double note_type, TempoSection::Type type, bool initial, PositionLockStyle style)
 {
 	vector<string> strings;
 	NoteTypes::iterator x;
@@ -78,6 +84,14 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	bpm_spinner.set_wrap (true);
 	bpm_spinner.set_value (bpm);
 	bpm_spinner.set_alignment (1.0);
+
+	end_bpm_spinner.set_numeric (true);
+	end_bpm_spinner.set_digits (3);
+	end_bpm_spinner.set_wrap (true);
+	end_bpm_spinner.set_value (end_bpm);
+	end_bpm_spinner.set_alignment (1.0);
+
+	Gtkmm2ext::set_size_request_to_display_given_text (pulse_selector, _("one-hundred-twenty-eighth"), 3, 6);
 
 	note_types.insert (make_pair (_("whole"), 1.0));
 	strings.push_back (_("whole"));
@@ -158,20 +172,28 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	table->set_spacings (6);
 	table->set_homogeneous (false);
 
-	int row;
+	int row = 0;
 
 	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-		table->attach (pulse_selector_label, 0, 1, 0, 1);
-		table->attach (pulse_selector, 1, 5, 0, 1);
+		table->attach (pulse_selector_label, 0, 1, row, row + 1);
+		table->attach (pulse_selector, 1, 5, row, row + 1);
 
-		row = 1;
-	} else {
-		row = 0;
+		++row;
 	}
 
-	Label* bpm_label = manage (new Label(_("Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* bpm_label = manage (new Label(_("Start Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER));
 	table->attach (*bpm_label, 0, 1, row, row + 1);
 	table->attach (bpm_spinner, 1, 5, row, row + 1);
+	++row;
+
+	table->attach (_end_bpm_label, 0, 1, row, row + 1);
+	table->attach (end_bpm_spinner, 1, 5, row, row + 1);
+	++row;
+
+	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
+	table->attach (*tempo_type_label, 0, 1, row, row + 1);
+	table->attach (tempo_type, 1, 5, row, row + 1);
+
 	++row;
 
 	char buf[64];
@@ -202,19 +224,12 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		++row;
 		++row;
 
-		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_RIGHT, ALIGN_CENTER));
+		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
 		table->attach (*lock_style_label, 0, 1, row, row + 1);
 		table->attach (lock_style, 1, 5, row, row + 1);
 
 		--row;
 	}
-
-
-	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_RIGHT, ALIGN_CENTER));
-	table->attach (*tempo_type_label, 0, 1, row, row + 1);
-	table->attach (tempo_type, 1, 5, row, row + 1);
-
-	++row;
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_end (*table);
@@ -227,6 +242,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	set_default_response (RESPONSE_ACCEPT);
 
 	bpm_spinner.show ();
+	end_bpm_spinner.show ();
 	tap_tempo_button.show ();
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_end (tap_tempo_button);
@@ -238,6 +254,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	bpm_spinner.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_press), false);
 	bpm_spinner.signal_button_release_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_release), false);
 	bpm_spinner.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::bpm_changed));
+	end_bpm_spinner.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::bpm_changed));
 	when_bar_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
@@ -247,6 +264,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	lock_style.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::lock_style_change));
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
+
+	tempo_type_change();
 
 	tapped = false;
 }
@@ -299,6 +318,16 @@ double
 TempoDialog::get_bpm ()
 {
 	return bpm_spinner.get_value ();
+}
+
+double
+TempoDialog::get_end_bpm ()
+{
+	if (get_tempo_type() == TempoSection::Constant) {
+		return bpm_spinner.get_value ();
+	}
+
+	return end_bpm_spinner.get_value ();
 }
 
 bool
@@ -365,6 +394,14 @@ TempoDialog::pulse_change ()
 void
 TempoDialog::tempo_type_change ()
 {
+	if (get_tempo_type() == TempoSection::Constant) {
+		end_bpm_spinner.hide ();
+		_end_bpm_label.hide();
+	} else {
+		end_bpm_spinner.show ();
+		_end_bpm_label.show();
+	}
+
 	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
