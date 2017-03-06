@@ -629,7 +629,6 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _pdropzone (0)
 	, _ddropzone (0)
 {
-	_last_position = MusicFrame (_primary->region()->position(), 0);
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
 
