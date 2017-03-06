@@ -69,6 +69,10 @@
 #include "gtk2ardour-version.h"
 #endif
 
+#ifdef LXVST_SUPPORT
+#include <gdk/gdkx.h>
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR_COMMAND_LINE;
@@ -290,6 +294,10 @@ int main (int argc, char *argv[])
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
+
+#ifdef LXVST_SUPPORT
+	XInitThreads ();
+#endif
 
 #ifdef HAVE_FFTW35F
 	fftwf_make_planner_thread_safe ();
