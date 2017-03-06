@@ -20,7 +20,11 @@
 #ifndef __ardour_disk_reader_h__
 #define __ardour_disk_reader_h__
 
+#include "pbd/ringbufferNPT.h"
+#include "pbd/rcu.h"
+
 #include "ardour/disk_io.h"
+#include "ardour/interpolation.h"
 
 namespace ARDOUR
 {
@@ -42,13 +46,14 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	static void set_chunk_frames (framecnt_t n) { _chunk_frames = n; }
 
 	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
-	void silence (framecnt_t /*nframes*/, framepos_t /*start_frame*/);
+	int set_block_size (pframes_t);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) = 0;
-	ChanCount input_streams () const;
-	ChanCount output_streams() const;
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
+	void non_realtime_locate (framepos_t);
+	int overwrite_existing_buffers ();
+	void set_pending_overwrite (bool yn);
 
 	framecnt_t roll_delay() const { return _roll_delay; }
 	void set_roll_delay (framecnt_t);
@@ -63,8 +68,8 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	virtual void playlist_modified ();
 	virtual int use_playlist (boost::shared_ptr<Playlist>);
-	virtual int use_new_playlist () = 0;
-	virtual int use_copy_playlist () = 0;
+	virtual int use_new_playlist ();
+	virtual int use_copy_playlist ();
 
 	PBD::Signal0<void>            PlaylistChanged;
 	PBD::Signal0<void>            AlignmentStyleChanged;
@@ -73,28 +78,47 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	void move_processor_automation (boost::weak_ptr<Processor>, std::list<Evoral::RangeMove<framepos_t> > const &);
 
+	/* called by the Butler in a non-realtime context */
+
+	int do_refill () {
+		return _do_refill (_mixdown_buffer, _gain_buffer, 0);
+	}
+
 	/** For non-butler contexts (allocates temporary working buffers)
 	 *
 	 * This accessible method has a default argument; derived classes
 	 * must inherit the virtual method that we call which does NOT
 	 * have a default argument, to avoid complications with inheritance
 	 */
-	int do_refill_with_alloc(bool partial_fill = true) {
+	int do_refill_with_alloc (bool partial_fill = true) {
 		return _do_refill_with_alloc (partial_fill);
 	}
 
 	bool pending_overwrite () const { return _pending_overwrite; }
 
-	virtual int find_and_use_playlist (std::string const &) = 0;
+	virtual int find_and_use_playlist (std::string const &);
+
+	// Working buffers for do_refill (butler thread)
+	static void allocate_working_buffers();
+	static void free_working_buffers();
+
+	void adjust_buffering ();
+
+	int can_internal_playback_seek (framecnt_t distance);
+	int seek (framepos_t frame, bool complete_refill = false);
+
+	int add_channel (uint32_t how_many);
+	int remove_channel (uint32_t how_many);
+
+	PBD::Signal0<void> Underrun;
 
   protected:
-	virtual int do_refill () = 0;
-
 	boost::shared_ptr<Playlist> _playlist;
 
 	virtual void playlist_changed (const PBD::PropertyChange&);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool);
+
 
   private:
 	typedef std::map<DataType,boost::shared_ptr<Playlist> > Playlists;
@@ -113,12 +137,61 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	framecnt_t    speed_buffer_size;
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
+	MonitorChoice   _monitoring_choice;
 
 	PBD::ScopedConnectionList playlist_connections;
 
 	virtual int _do_refill_with_alloc (bool partial_fill);
 
 	static framecnt_t _chunk_frames;
+
+	/** Information about one of our channels */
+	struct ChannelInfo : public boost::noncopyable {
+
+		ChannelInfo (framecnt_t buffer_size,
+		             framecnt_t speed_buffer_size,
+		             framecnt_t wrap_buffer_size);
+		~ChannelInfo ();
+
+		Sample     *wrap_buffer;
+		Sample     *speed_buffer;
+		Sample     *current_buffer;
+
+		/** A ringbuffer for data to be played back, written to in the
+		    butler thread, read from in the process thread.
+		*/
+		PBD::RingBufferNPT<Sample> *buf;
+
+		Sample* scrub_buffer;
+		Sample* scrub_forward_buffer;
+		Sample* scrub_reverse_buffer;
+
+		PBD::RingBufferNPT<Sample>::rw_vector read_vector;
+
+		void resize (framecnt_t);
+	};
+
+	typedef std::vector<ChannelInfo*> ChannelList;
+	SerializedRCUManager<ChannelList> channels;
+
+	CubicInterpolation interpolation;
+
+	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
+	          framepos_t& start, framecnt_t cnt,
+	          int channel, bool reversed);
+
+	static Sample* _mixdown_buffer;
+	static gain_t* _gain_buffer;
+
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
+
+	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
+
+	int internal_playback_seek (framecnt_t distance);
+	frameoffset_t calculate_playback_distance (pframes_t);
+
+	void allocate_temporary_buffers();
 };
 
 } // namespace
