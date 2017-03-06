@@ -2105,8 +2105,9 @@ AudioDiskstream::set_block_size (pframes_t /*nframes*/)
 		boost::shared_ptr<ChannelList> c = channels.reader();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->speed_buffer)
+			if ((*chan)->speed_buffer) {
 				delete [] (*chan)->speed_buffer;
+			}
 			(*chan)->speed_buffer = new Sample[speed_buffer_size];
 		}
 	}
