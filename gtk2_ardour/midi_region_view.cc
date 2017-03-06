@@ -4224,7 +4224,10 @@ MidiRegionView::trim_front_starting ()
 void
 MidiRegionView::trim_front_ending ()
 {
-
+	if (_region->start() < 0) {
+		/* Trim drag made start time -ve; fix this */
+		midi_region()->fix_negative_start ();
+	}
 }
 
 void

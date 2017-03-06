@@ -3002,11 +3002,14 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				vector<boost::shared_ptr<Playlist> > all_playlists;
 				_editor->session()->playlists->get (all_playlists);
 				for (vector<boost::shared_ptr<Playlist> >::iterator x = all_playlists.begin(); x != all_playlists.end(); ++x) {
+
 					if ((*x)->uses_source (rv->region()->source(0))) {
 						insert_result = _editor->motion_frozen_playlists.insert (*x);
 						if (insert_result.second) {
-							pl->freeze();
+							(*x)->clear_owned_changes ();
+							(*x)->freeze();
 						}
+
 					}
 				}
 			}

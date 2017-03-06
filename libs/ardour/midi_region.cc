@@ -654,10 +654,6 @@ MidiRegion::set_start_internal (framecnt_t s, const int32_t sub_num)
 {
 	Region::set_start_internal (s, sub_num);
 
-	if (_start_beats < 0.0) {
-		fix_negative_start();
-	}
-
 	set_start_beats_from_start_frames ();
 }
 
