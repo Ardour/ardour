@@ -1949,17 +1949,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void auto_connect_master_bus ();
 
-	/* Windows VST support */
-
-	long _windows_vst_callback (
-		WindowsVSTPlugin*,
-		long opcode,
-		long index,
-		long value,
-		void* ptr,
-		float opt
-		);
-
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 
