@@ -76,7 +76,7 @@ void
 MacVSTPlugin::open_plugin ()
 {
 	VSTPlugin::open_plugin ();
-	_plugin->dispatcher (mac_vst->plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
+	_plugin->dispatcher (_plugin, effCanDo, 0, 0, const_cast<char*> ("hasCockosViewAsConfig"), 0.0f);
 }
 
 PluginPtr
