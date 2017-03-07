@@ -77,24 +77,21 @@ typedef struct _VSTHandle VSTHandle;
 
 struct LIBARDOUR_API _VSTState
 {
-	AEffect* plugin;
+	AEffect*    plugin;
+	VSTHandle*  handle;
+	audioMasterCallback amc;
 
-	/* Linux */
+	void*       gtk_window_parent;
+	int         xid;                     ///< X11 XWindow (wine + lxvst)
+
+	/* LXVST/X11 */
 	int         linux_window;            ///< The plugin's parent X11 XWindow
 	int         linux_plugin_ui_window;  ///< The ID of the plugin UI window created by the plugin
+	void  (* eventProc) (void * event);  ///< X11 UI _XEventProc
 
 	/* Windows */
 	void*       windows_window;
 
-	int         xid;               ///< X11 XWindow
-
-	int         want_resize;       ///< Set to signal the plugin resized its UI
-	void*       extra_data;        ///< Pointer to any extra data
-
-	void * event_callback_thisptr;
-	void  (* eventProc) (void * event);
-
-	VSTHandle*  handle;
 
 	int width;
 	int height;
@@ -107,33 +104,32 @@ struct LIBARDOUR_API _VSTState
 	int vst_version;
 	int has_editor;
 
-	int	    program_set_without_editor;
+	int     program_set_without_editor;
+	int     want_program;
+	int     want_chunk;
+	int     n_pending_keys;
+	unsigned char* wanted_chunk;
+	int     wanted_chunk_size;
+	float*  want_params;
+	float*  set_params;
 
-	int	    want_program;
-	int 	    want_chunk;
-	int	    n_pending_keys;
-	unsigned char * wanted_chunk;
-	int 	    wanted_chunk_size;
-	float *     want_params;
-	float *     set_params;
+	VSTKey  pending_keys[16];
 
-	VSTKey	    pending_keys[16];
+	int     dispatcher_wantcall;
+	int     dispatcher_opcode;
+	int     dispatcher_index;
+	int     dispatcher_val;
+	void*   dispatcher_ptr;
+	float   dispatcher_opt;
+	int     dispatcher_retval;
 
-	int	    dispatcher_wantcall;
-	int	    dispatcher_opcode;
-	int	    dispatcher_index;
-	int	    dispatcher_val;
-	void *	    dispatcher_ptr;
-	float	    dispatcher_opt;
-	int	    dispatcher_retval;
-
-	struct _VSTState * next;
-	pthread_mutex_t    lock;
-	pthread_mutex_t    state_lock;
-	pthread_cond_t     window_status_change;
-	pthread_cond_t     plugin_dispatcher_called;
-	pthread_cond_t     window_created;
-	int                been_activated;
+	struct _VSTState* next;
+	pthread_mutex_t   lock;
+	pthread_mutex_t   state_lock;
+	pthread_cond_t    window_status_change;
+	pthread_cond_t    plugin_dispatcher_called;
+	pthread_cond_t    window_created;
+	int               been_activated;
 };
 
 typedef struct _VSTState VSTState;

@@ -48,6 +48,27 @@ vstedit_wndproc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_KEYDOWN:
 			break;
 
+		case WM_SIZE:
+#ifdef PLATFORM_WINDOWS
+			{
+				LRESULT rv = DefWindowProcA (w, msg, wp, lp);
+				RECT rect;
+				GetClientRect(w, &rect);
+#ifndef NDEBUG
+				printf("VST WM_SIZE.. %ld %ld %ld %ld\n", rect.top, rect.left, (rect.right - rect.left), (rect.bottom - rect.top));
+#endif
+				VSTState* fst = (VSTState*) GetProp (w, "fst_ptr");
+				if (fst) {
+					int32_t width = (rect.right - rect.left);
+					int32_t height = (rect.bottom - rect.top);
+					if (width > 0 && height > 0) {
+						fst->amc (fst->plugin, 15 /*audioMasterSizeWindow */, width, height, NULL, 0);
+					}
+				}
+				return rv;
+			}
+#endif
+			break;
 		case WM_CLOSE:
 			/* we don't care about windows closing ...
 			 * WM_CLOSE is used for minimizing the window.
@@ -68,7 +89,7 @@ vstedit_wndproc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 			break;
 	}
 
-	return DefWindowProcA (w, msg, wp, lp );
+	return DefWindowProcA (w, msg, wp, lp);
 }
 
 
@@ -196,7 +217,7 @@ fst_new (void)
 	vststate_init (fst);
 
 #ifdef PLATFORM_WINDOWS
-	fst->voffset = 50;
+	fst->voffset = 45;
 	fst->hoffset = 0;
 #else /* linux + wine */
 	fst->voffset = 24;
@@ -441,11 +462,16 @@ fst_move_window_into_view (VSTState* fst)
 {
 	if (fst->windows_window) {
 #ifdef PLATFORM_WINDOWS
-		SetWindowPos ((HWND)(fst->windows_window), 0, fst->hoffset, fst->voffset, fst->width + fst->hoffset, fst->height + fst->voffset, 0);
+		SetWindowPos ((HWND)(fst->windows_window),
+				HWND_TOP /*0*/,
+				fst->hoffset, fst->voffset,
+				fst->width, fst->height,
+				SWP_NOACTIVATE|SWP_NOOWNERZORDER);
 #else /* linux + wine */
 		SetWindowPos ((HWND)(fst->windows_window), 0, 0, 0, fst->width + fst->hoffset, fst->height + fst->voffset, 0);
 #endif
 		ShowWindow ((HWND)(fst->windows_window), SW_SHOWNA);
+		UpdateWindow ((HWND)(fst->windows_window));
 	}
 }
 
@@ -534,6 +560,7 @@ fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	}
 
 	fst = fst_new ();
+	fst->amc = amc;
 
 	if ((fst->plugin = fhandle->main_entry (amc)) == NULL)  {
 		fst_error ("fst_instantiate: %s could not be instantiated\n", fhandle->name);

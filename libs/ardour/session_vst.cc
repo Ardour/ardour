@@ -337,9 +337,14 @@ intptr_t Session::vst_callback (
 	case audioMasterSizeWindow:
 		SHOW_CALLBACK ("audioMasterSizeWindow");
 		if (plug && plug->state()) {
-			plug->state()->width = index;
-			plug->state()->height = value;
-			plug->state()->want_resize = 1;
+			if (plug->state()->width != index || plug->state()->height != value) {
+				plug->state()->width = index;
+				plug->state()->height = value;
+#ifndef NDEBUG
+				printf ("audioMasterSizeWindow %d %d\n", plug->state()->width, plug->state()->height);
+#endif
+				plug->VSTSizeWindow (); /* EMIT SIGNAL */
+			}
 		}
 		return 0;
 
