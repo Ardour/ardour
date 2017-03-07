@@ -20,7 +20,7 @@
 #ifndef __lxvst_plugin_ui_h__
 #define __lxvst_plugin_ui_h__
 
-#include <sigc++/signal.h>
+#include "pbd/signals.h"
 #include "vst_plugin_ui.h"
 
 #ifdef LXVST_SUPPORT
@@ -38,8 +38,8 @@ class LXVSTPluginUI : public VSTPluginUI
 
 	int get_preferred_height ();
 
-	bool start_updating (GdkEventAny *);
-	bool stop_updating (GdkEventAny *);
+	bool start_updating (GdkEventAny*) { return false; }
+	bool stop_updating (GdkEventAny*) { return false; }
 
 	int package (Gtk::Window&);
 	void forward_key_event (GdkEventKey *);
@@ -49,7 +49,7 @@ private:
 	void resize_callback ();
 	int get_XID ();
 
-	sigc::connection _screen_update_connection;
+	PBD::ScopedConnection _resize_connection;
 };
 
 #endif //LXVST_SUPPORT

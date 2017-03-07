@@ -17,10 +17,10 @@
 
 */
 
+#include "gtkmm2ext/gui_thread.h"
 #include "ardour/lxvst_plugin.h"
 #include "ardour/linux_vst_support.h"
 #include "lxvst_plugin_ui.h"
-#include "timers.h"
 #include <gdk/gdkx.h>
 
 #define LXVST_H_FIDDLE 40
@@ -38,53 +38,31 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_
 
 LXVSTPluginUI::~LXVSTPluginUI ()
 {
-	_screen_update_connection.disconnect();
+	_resize_connection.disconnect();
 
 	// plugin destructor destroys the custom GUI, via the vstfx engine,
 	// and then our PluginUIWindow does the rest
 }
 
-
-bool
-LXVSTPluginUI::start_updating (GdkEventAny*)
-{
-	_screen_update_connection.disconnect();
-	_screen_update_connection = Timers::rapid_connect (mem_fun(*this, &LXVSTPluginUI::resize_callback));
-	return false;
-}
-
-bool
-LXVSTPluginUI::stop_updating (GdkEventAny*)
-{
-	_screen_update_connection.disconnect();
-	return false;
-}
-
-
 void
 LXVSTPluginUI::resize_callback ()
 {
-	/* We could maybe use this to resize the plugin GTK parent window
-	   if required
-	*/
-
-	if (!_vst->state()->want_resize) {
-		return;
-	}
-
-	int new_height = _vst->state()->height;
-	int new_width = _vst->state()->width;
-
-	void* gtk_parent_window = _vst->state()->extra_data;
+	void* gtk_parent_window = _vst->state()->gtk_window_parent;
 
 	if (gtk_parent_window) {
+		int width  = _vst->state()->width;
+		int height = _vst->state()->height;
+#ifndef NDEBUG
+		printf ("LXVSTPluginUI::resize_callback %d x %d\n", width, height);
+#endif
 		_socket.set_size_request(
-				new_width + _vst->state()->hoffset,
-				new_height + _vst->state()->voffset);
+				width  + _vst->state()->hoffset,
+				height + _vst->state()->voffset);
 
-		((Gtk::Window*) gtk_parent_window)->resize (new_width, new_height + LXVST_H_FIDDLE);
+		((Gtk::Window*) gtk_parent_window)->resize (width, height + LXVST_H_FIDDLE);
+		if (_vst->state()->linux_plugin_ui_window) {
+		}
 	}
-	_vst->state()->want_resize = 0;
 }
 
 int
@@ -106,15 +84,11 @@ int
 LXVSTPluginUI::package (Gtk::Window& win)
 {
 	VSTPluginUI::package (win);
+	_vst->state()->gtk_window_parent = (void*) (&win);
 
 	/* Map the UI start and stop updating events to 'Map' events on the Window */
 
-	win.signal_map_event().connect (mem_fun (*this, &LXVSTPluginUI::start_updating));
-	win.signal_unmap_event().connect (mem_fun (*this, &LXVSTPluginUI::stop_updating));
-
-	_vst->state()->extra_data = (void*) (&win);
-	_vst->state()->want_resize = 0;
-
+	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), boost::bind (&LXVSTPluginUI::resize_callback, this), gui_context());
 	return 0;
 }
 
@@ -181,4 +155,3 @@ gui_init (int* argc, char** argv[])
 	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
 	gtk_error_handler = XSetErrorHandler (gtk_xerror_handler);
 }
-

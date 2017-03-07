@@ -33,6 +33,7 @@
 #include <glibmm/timer.h>
 
 #include "ardour/linux_vst_support.h"
+#include "ardour/vst_plugin.h"
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -189,31 +190,37 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 			int width = event->xconfigure.width;
 			int height = event->xconfigure.height;
 
-			/*If we get a config notify on the parent window XID then we need to see
-			if the size has been changed - some plugins re-size their UI window e.g.
-			when opening a preset manager (you might think that should be spawned as a new window...) */
-
-			/*if the size has changed, we flag this so that in lxvst_pluginui.cc we can make the
-			change to the GTK parent window in ardour, from its UI thread*/
+			/* If we get a config notify on the parent window XID then we need to see
+			 * if the size has been changed - some plugins re-size their UI window e.g.
+			 * when opening a preset manager.
+			 *
+			 * if the size has changed, we flag this so that in lxvst_pluginui.cc
+			 * we can make the change to the GTK parent window in ardour, from its UI thread */
 
 			if (window == (Window) (vstfx->linux_window)) {
-				if (width != vstfx->width || height!=vstfx->height) {
+#ifndef NDEBUG
+				printf("dispatch_x_events: ConfigureNotify cfg:(%d %d) plugin:(%d %d)\n",
+						width, height,
+						vstfx->width, vstfx->height
+						);
+#endif
+				if (width != vstfx->width || height != vstfx->height) {
 					vstfx->width = width;
 					vstfx->height = height;
-					vstfx->want_resize = 1;
+					ARDOUR::VSTPlugin* plug = (ARDOUR::VSTPlugin *)(vstfx->plugin->user);
+					plug->VSTSizeWindow (); /* EMIT SIGNAL */
+				}
 
-					/*QUIRK : Loomer plugins not only resize the UI but throw it into some random
-					position at the same time. We need to re-position the window at the origin of
-					the parent window*/
+				/* QUIRK : Loomer plugins not only resize the UI but throw it into some random
+				 * position at the same time. We need to re-position the window at the origin of
+				 * the parent window*/
 
-					if (vstfx->linux_plugin_ui_window) {
-						XMoveWindow (LXVST_XDisplay, vstfx->linux_plugin_ui_window, 0, 0);
-					}
+				if (vstfx->linux_plugin_ui_window) {
+					XMoveWindow (LXVST_XDisplay, vstfx->linux_plugin_ui_window, 0, 0);
 				}
 			}
 
 			break;
-
 		}
 
 		/*Reparent Notify - when the plugin UI is reparented into

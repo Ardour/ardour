@@ -48,6 +48,7 @@ protected:
 
 	boost::shared_ptr<ARDOUR::VSTPlugin> _vst;
 	Gtk::Socket _socket;
+	virtual void top_box_allocated (Gtk::Allocation&) {}
 
 private:
 

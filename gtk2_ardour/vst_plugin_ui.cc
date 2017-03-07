@@ -51,6 +51,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	bypass_button.set_active (!insert->active ());
 
 	pack_start (*box, false, false);
+	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));
 #ifdef GDK_WINDOWING_X11
 	pack_start (_socket, true, true);
 	_socket.set_border_width (0);
@@ -122,6 +123,7 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 	XEvent event;
 	gint x, y;
 	GdkWindow* w;
+	Window xw = _vst->state()->linux_plugin_ui_window;
 
 	if ((w = _socket.gobj()->plug_window) == 0) {
 		return false;
@@ -150,8 +152,19 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 
 	gdk_error_trap_push ();
 	XSendEvent (GDK_WINDOW_XDISPLAY (w), GDK_WINDOW_XWINDOW (w), False, StructureNotifyMask, &event);
+	/* if the plugin does adds itself to the parent,
+	 * but ardour re-parents it, we have a pointer to
+	 * the socket's child and need to resize the
+	 * child window (e.g. JUCE, u-he)
+	 */
+	if (xw) {
+		XMoveResizeWindow (GDK_WINDOW_XDISPLAY (w), xw,
+				0, 0, _vst->state()->width, _vst->state()->height);
+		XMapRaised (GDK_WINDOW_XDISPLAY (w), xw);
+		XFlush (GDK_WINDOW_XDISPLAY (w));
+	}
 	gdk_error_trap_pop ();
-
 #endif
+
 	return false;
 }
