@@ -25,6 +25,7 @@
 
 #include "ardour/disk_io.h"
 #include "ardour/interpolation.h"
+#include "ardour/midi_buffer.h"
 
 namespace ARDOUR
 {
@@ -32,6 +33,7 @@ namespace ARDOUR
 class Playlist;
 class AudioPlaylist;
 class MidiPlaylist;
+template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API DiskReader : public DiskIOProcessor
 {
@@ -61,18 +63,19 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	boost::shared_ptr<Playlist>      playlist();
-	boost::shared_ptr<Playlist>      get_playlist (DataType);
-	boost::shared_ptr<MidiPlaylist>  midi_playlist();
-	boost::shared_ptr<AudioPlaylist> audio_playlist();
+	boost::shared_ptr<Playlist>      get_playlist (DataType dt) const { return _playlists[dt]; }
+	boost::shared_ptr<MidiPlaylist>  midi_playlist() const;
+	boost::shared_ptr<AudioPlaylist> audio_playlist() const;
 
 	virtual void playlist_modified ();
-	virtual int use_playlist (boost::shared_ptr<Playlist>);
-	virtual int use_new_playlist ();
-	virtual int use_copy_playlist ();
+	virtual int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	virtual int use_new_playlist (DataType);
+	virtual int use_copy_playlist (DataType);
 
-	PBD::Signal0<void>            PlaylistChanged;
+	PBD::Signal1<void,DataType>   PlaylistChanged;
 	PBD::Signal0<void>            AlignmentStyleChanged;
+
+	int set_loop (Location *loc);
 
 	float buffer_load() const;
 
@@ -81,7 +84,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	/* called by the Butler in a non-realtime context */
 
 	int do_refill () {
-		return _do_refill (_mixdown_buffer, _gain_buffer, 0);
+		return refill (_mixdown_buffer, _gain_buffer, 0);
 	}
 
 	/** For non-butler contexts (allocates temporary working buffers)
@@ -96,7 +99,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	bool pending_overwrite () const { return _pending_overwrite; }
 
-	virtual int find_and_use_playlist (std::string const &);
+	virtual int find_and_use_playlist (DataType, std::string const &);
 
 	// Working buffers for do_refill (butler thread)
 	static void allocate_working_buffers();
@@ -110,24 +113,27 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int add_channel (uint32_t how_many);
 	int remove_channel (uint32_t how_many);
 
+	bool need_butler() const { return _need_butler; }
+
 	PBD::Signal0<void> Underrun;
 
   protected:
-	boost::shared_ptr<Playlist> _playlist;
+	boost::shared_ptr<Playlist> _playlists[DataType::num_types];
 
 	virtual void playlist_changed (const PBD::PropertyChange&);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool);
 
+	void reset_tracker ();
+	void resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
+	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
   private:
-	typedef std::map<DataType,boost::shared_ptr<Playlist> > Playlists;
-
 	/** The number of frames by which this diskstream's output should be delayed
 	    with respect to the transport frame.  This is used for latency compensation.
 	*/
 	framecnt_t   _roll_delay;
-	Playlists     _playlists;
+	Location*     loop_location;
 	framepos_t    overwrite_frame;
 	off_t         overwrite_offset;
 	bool          _pending_overwrite;
@@ -138,12 +144,27 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
 	MonitorChoice   _monitoring_choice;
+	bool            _need_butler;
 
 	PBD::ScopedConnectionList playlist_connections;
 
-	virtual int _do_refill_with_alloc (bool partial_fill);
+	int _do_refill_with_alloc (bool partial_fill);
 
 	static framecnt_t _chunk_frames;
+	static framecnt_t midi_readahead;
+
+	/* The MIDI stuff */
+
+	MidiRingBuffer<framepos_t>*  _midi_buf;
+
+	/** A buffer that we use to put newly-arrived MIDI data in for
+	    the GUI to read (so that it can update itself).
+	*/
+	MidiBuffer                   _gui_feed_buffer;
+	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
+	CubicMidiInterpolation midi_interpolation;
+	gint                         _frames_written_to_ringbuffer;
+	gint                         _frames_read_from_ringbuffer;
 
 	/** Information about one of our channels */
 	struct ChannelInfo : public boost::noncopyable {
@@ -160,7 +181,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 		/** A ringbuffer for data to be played back, written to in the
 		    butler thread, read from in the process thread.
 		*/
-		PBD::RingBufferNPT<Sample> *buf;
+		PBD::RingBufferNPT<Sample>* buf;
 
 		Sample* scrub_buffer;
 		Sample* scrub_forward_buffer;
@@ -176,14 +197,17 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	CubicInterpolation interpolation;
 
-	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-	          framepos_t& start, framecnt_t cnt,
-	          int channel, bool reversed);
+	int audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
+	                framepos_t& start, framecnt_t cnt,
+	                int channel, bool reversed);
+	int midi_read (framepos_t& start, framecnt_t cnt, bool reversed);
 
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
-	int _do_refill (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
+	int refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level);
+	int refill_audio (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
+	int refill_midi ();
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
@@ -192,6 +216,8 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	frameoffset_t calculate_playback_distance (pframes_t);
 
 	void allocate_temporary_buffers();
+	void get_playback (MidiBuffer& dst, framecnt_t nframes);
+	void flush_playback (framepos_t start, framepos_t end);
 };
 
 } // namespace
