@@ -24,6 +24,10 @@
 #include <string>
 #include <exception>
 
+#include "pbd/ringbufferNPT.h"
+#include "pbd/rcu.h"
+
+#include "ardour/interpolation.h"
 #include "ardour/processor.h"
 
 namespace ARDOUR {
@@ -85,6 +89,9 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	int set_state (const XMLNode&, int version);
 
+	int add_channel (uint32_t how_many);
+	int remove_channel (uint32_t how_many);
+
   protected:
 	friend class Auditioner;
 	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
@@ -115,6 +122,43 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	                                   framecnt_t& write_buffer_size);
 
 	virtual void allocate_temporary_buffers () = 0;
+
+	/** Information about one audio channel, playback or capture
+	 * (depending on the derived class)
+	 */
+	struct ChannelInfo : public boost::noncopyable {
+
+		ChannelInfo (framecnt_t buffer_size,
+		             framecnt_t speed_buffer_size,
+		             framecnt_t wrap_buffer_size);
+		~ChannelInfo ();
+
+		Sample     *wrap_buffer;
+		Sample     *speed_buffer;
+		Sample     *current_buffer;
+
+		/** A ringbuffer for data to be played back, written to in the
+		    butler thread, read from in the process thread.
+		*/
+		PBD::RingBufferNPT<Sample>* buf;
+
+		Sample* scrub_buffer;
+		Sample* scrub_forward_buffer;
+		Sample* scrub_reverse_buffer;
+
+		PBD::RingBufferNPT<Sample>::rw_vector read_vector;
+
+		void resize (framecnt_t);
+	};
+
+	typedef std::vector<ChannelInfo*> ChannelList;
+	SerializedRCUManager<ChannelList> channels;
+
+	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
+
+	CubicInterpolation interpolation;
+
 };
 
 } // namespace ARDOUR
