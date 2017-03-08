@@ -70,6 +70,7 @@
 #include "timers.h"
 #include "ui_config.h"
 #include "vca_master_strip.h"
+#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
@@ -316,6 +317,9 @@ Mixer_UI::Mixer_UI ()
 	_content.pack_start (list_hpane, true, true);
 
 	update_title ();
+
+	set_tooltip(*route_group_add_button,_("Add new Group..."));
+	set_tooltip(*route_group_remove_button,_("Remove selected Group"));
 
 	route_group_display_button_box->show();
 	route_group_add_button->show();
@@ -2332,15 +2336,17 @@ Mixer_UI::setup_track_display ()
 	v->show ();
 	v->pack_start (track_display_scroller, true, true);
 
-	Button* b = manage (new Button);
-	b->show ();
+	Button* strip_add_button = manage (new Button);
+	strip_add_button->show ();
 	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
-	b->add (*w);
+	strip_add_button->add (*w);
 
-	b->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+	set_tooltip(*strip_add_button,_("Add Track, Bus or VCA..."));
 
-	v->pack_start (*b, false, false);
+	strip_add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+
+	v->pack_start (*strip_add_button, false, false);
 
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
