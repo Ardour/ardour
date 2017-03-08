@@ -220,6 +220,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		controls_meters_size_group->add_widget (gm.get_level_meter());
 	}
 
+	if (_route->is_master()) {
+		route_group_button.set_sensitive(false);
+	}
+
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
@@ -858,8 +862,10 @@ RouteTimeAxisView::build_display_menu ()
 		r.push_back (route ());
 	}
 
-	route_group_menu->build (r);
-	items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
+	if (!_route->is_master()) {
+		route_group_menu->build (r);
+		items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
+	}
 
 	build_automation_action_menu (true);
 	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
