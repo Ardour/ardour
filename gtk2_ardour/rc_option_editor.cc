@@ -3987,6 +3987,7 @@ void RCOptionEditor::edit_lxvst_path () {
 				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
 		msg.set_default_response (Gtk::RESPONSE_YES);
 		if (msg.run() == Gtk::RESPONSE_YES) {
+			msg.hide ();
 			plugin_scan_refresh ();
 		}
 	}
@@ -4007,6 +4008,7 @@ void RCOptionEditor::edit_vst_path () {
 				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
 		msg.set_default_response (Gtk::RESPONSE_YES);
 		if (msg.run() == Gtk::RESPONSE_YES) {
+			msg.hide ();
 			plugin_scan_refresh ();
 		}
 	}
