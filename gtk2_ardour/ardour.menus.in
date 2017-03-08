@@ -657,9 +657,7 @@
     <menuitem action='newaux'/>
     <separator/>
     <menuitem action='controls'/>
-#ifndef MIXBUS
     <menuitem action='send_options'/>
-#endif
     <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>
