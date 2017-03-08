@@ -247,7 +247,6 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 	void io_changed_proxy ();
 
 	Gtk::Menu *send_action_menu;
-	Gtk::MenuItem* rename_menu_item;
 	void build_send_action_menu ();
 
 	PBD::ScopedConnection panstate_connection;

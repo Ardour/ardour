@@ -1704,7 +1704,8 @@ MixerStrip::build_route_ops_menu ()
 
 	if (!Profile->get_mixbus()) {
 		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
-		rename_menu_item = &items.back();
+		/* do not allow rename if the track is record-enabled */
+		items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
 	}
 
 	items.push_back (SeparatorElem());
@@ -1773,8 +1774,6 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
-		/* do not allow rename if the track is record-enabled */
-		rename_menu_item->set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
 		if (ev->button == 1) {
 			Gtkmm2ext::anchored_menu_popup(route_ops_menu, &name_button, "",
 			                               1, ev->time);
@@ -1794,8 +1793,6 @@ MixerStrip::number_button_button_press (GdkEventButton* ev)
 	if (  ev->button == 3 ) {
 		list_route_operations ();
 
-		/* do not allow rename if the track is record-enabled */
-		rename_menu_item->set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
 		route_ops_menu->popup (1, ev->time);
 
 		return true;
