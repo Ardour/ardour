@@ -155,6 +155,10 @@ RouteGroup::~RouteGroup ()
 int
 RouteGroup::add (boost::shared_ptr<Route> r)
 {
+	if (r->is_master()) {
+		return 0;
+	}
+
 	if (find (routes->begin(), routes->end(), r) != routes->end()) {
 		return 0;
 	}
