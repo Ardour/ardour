@@ -20,11 +20,7 @@
 #ifndef __ardour_disk_reader_h__
 #define __ardour_disk_reader_h__
 
-#include "pbd/ringbufferNPT.h"
-#include "pbd/rcu.h"
-
 #include "ardour/disk_io.h"
-#include "ardour/interpolation.h"
 #include "ardour/midi_buffer.h"
 
 namespace ARDOUR
@@ -110,9 +106,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int can_internal_playback_seek (framecnt_t distance);
 	int seek (framepos_t frame, bool complete_refill = false);
 
-	int add_channel (uint32_t how_many);
-	int remove_channel (uint32_t how_many);
-
 	bool need_butler() const { return _need_butler; }
 
 	PBD::Signal0<void> Underrun;
@@ -166,36 +159,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	gint                         _frames_written_to_ringbuffer;
 	gint                         _frames_read_from_ringbuffer;
 
-	/** Information about one of our channels */
-	struct ChannelInfo : public boost::noncopyable {
-
-		ChannelInfo (framecnt_t buffer_size,
-		             framecnt_t speed_buffer_size,
-		             framecnt_t wrap_buffer_size);
-		~ChannelInfo ();
-
-		Sample     *wrap_buffer;
-		Sample     *speed_buffer;
-		Sample     *current_buffer;
-
-		/** A ringbuffer for data to be played back, written to in the
-		    butler thread, read from in the process thread.
-		*/
-		PBD::RingBufferNPT<Sample>* buf;
-
-		Sample* scrub_buffer;
-		Sample* scrub_forward_buffer;
-		Sample* scrub_reverse_buffer;
-
-		PBD::RingBufferNPT<Sample>::rw_vector read_vector;
-
-		void resize (framecnt_t);
-	};
-
-	typedef std::vector<ChannelInfo*> ChannelList;
-	SerializedRCUManager<ChannelList> channels;
-
-	CubicInterpolation interpolation;
 
 	int audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	                framepos_t& start, framecnt_t cnt,
@@ -208,9 +171,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level);
 	int refill_audio (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
 	int refill_midi ();
-
-	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
-	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
 	int internal_playback_seek (framecnt_t distance);
 	frameoffset_t calculate_playback_distance (pframes_t);
