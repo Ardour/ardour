@@ -1679,9 +1679,18 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
+	if (!Profile->get_mixbus()) {
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+		rename_menu_item = &items.back();
+	}
+
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+
+	if (!Profile->get_mixbus()) {
+		items.push_back (SeparatorElem());
+	}
 
 	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
 
@@ -1700,11 +1709,6 @@ MixerStrip::build_route_ops_menu ()
 			items.push_back (SeparatorElem());
 		}
 		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
-	}
-
-	if (!Profile->get_mixbus()) {
-		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
-		rename_menu_item = &items.back();
 	}
 
 	items.push_back (SeparatorElem());

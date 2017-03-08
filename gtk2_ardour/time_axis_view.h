@@ -240,6 +240,7 @@ class TimeAxisView : public virtual AxisView
 	std::string            controls_base_unselected_name;
 	std::string            controls_base_selected_name;
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
+	Gtk::MenuItem*         rename_menu_item;
 	TimeAxisView*          parent;
 	ArdourCanvas::Container*   selection_group;
 	ArdourCanvas::Container*  _ghost_group;
