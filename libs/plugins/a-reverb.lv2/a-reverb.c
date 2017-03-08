@@ -41,6 +41,7 @@
 
 typedef struct {
 	float* delays[2][RV_NZ]; /**< delay line buffer */
+	size_t size[2][RV_NZ];
 
 	float* idx0[2][RV_NZ];	/**< Reset pointer ref delays[]*/
 	float* idxp[2][RV_NZ];	/**< Index pointer ref delays[]*/
@@ -65,11 +66,12 @@ setReverbPointers (b_reverb *r, int i, int c, const double rate)
 {
 	int e = (r->end[c][i] * rate / 25000.0);
 	e = e | 1;
-	r->delays[c][i] = (float*)realloc ((void*)r->delays[c][i], (e + 2) * sizeof (float));
+	r->size[c][i] = e + 2;
+	r->delays[c][i] = (float*)realloc ((void*)r->delays[c][i], r->size[c][i] * sizeof (float));
 	if (!r->delays[c][i]) {
 		return -1;
 	} else {
-		memset (r->delays[c][i], 0 , (e + 2) * sizeof (float));
+		memset (r->delays[c][i], 0 , r->size[c][i] * sizeof (float));
 	}
 	r->endp[c][i] = r->delays[c][i] + e + 1;
 	r->idx0[c][i] = r->idxp[c][i] = &(r->delays[c][i][0]);
@@ -131,7 +133,7 @@ initReverb (b_reverb *r, const double rate)
 	r->yy1_1 = 0.0;
 	r->y_1_1 = 0.0;
 
-	for (int i = 0; i < RV_NZ; i++) {
+	for (int i = 0; i < RV_NZ; ++i) {
 		err |= setReverbPointers (r, i, 0, rate);
 		err |= setReverbPointers (r, i, 1, rate);
 	}
@@ -333,6 +335,28 @@ connect_port (LV2_Handle instance,
 }
 
 static void
+activate (LV2_Handle instance)
+{
+	AReverb* self = (AReverb*)instance;
+
+	self->r.y_1_0 = 0;
+	self->r.yy1_0 = 0;
+	self->r.y_1_1 = 0;
+	self->r.yy1_1 = 0;
+	for (int i = 0; i < RV_NZ; ++i) {
+		for (int c = 0; c < 2; ++c) {
+			memset (self->r.delays[c][i], 0, self->r.size[c][i] * sizeof (float));
+		}
+	}
+}
+
+static void
+deactivate (LV2_Handle instance)
+{
+	activate(instance);
+}
+
+static void
 run (LV2_Handle instance, uint32_t n_samples)
 {
 	AReverb* self = (AReverb*)instance;
@@ -350,6 +374,10 @@ run (LV2_Handle instance, uint32_t n_samples)
 	uint32_t iterpolate = 0;
 
 	if (fabsf (mix - self->v_mix) < .01) { // 40dB
+		if (self->v_mix != mix && *self->enable <= 0) {
+			// entering bypass, reset reverb
+			activate (self);
+		}
 		self->v_mix = mix;
 	} else {
 		iterpolate |= 1;
@@ -390,26 +418,6 @@ run (LV2_Handle instance, uint32_t n_samples)
 	}
 }
 
-static void
-activate (LV2_Handle instance)
-{
-	AReverb* self = (AReverb*)instance;
-
-	self->r.y_1_0 = 0;
-	self->r.yy1_0 = 0;
-	self->r.y_1_1 = 0;
-	self->r.yy1_1 = 0;
-	for (int i = 0; i < RV_NZ; ++i) {
-		self->r.delays[0][i] = NULL;
-		self->r.delays[1][i] = NULL;
-	}
-}
-
-static void
-deactivate (LV2_Handle instance)
-{
-	activate(instance);
-}
 
 static void
 cleanup (LV2_Handle instance)
