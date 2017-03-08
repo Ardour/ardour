@@ -20,11 +20,12 @@
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 
-#include "ardour/rc_configuration.h"
+#include "ardour/butler.h"
 #include "ardour/disk_io.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/location.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
 using namespace ARDOUR;
@@ -51,6 +52,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, in_set_state (false)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
+	, channels (new ChannelList)
 {
 }
 
@@ -203,3 +205,53 @@ DiskIOProcessor::set_state (const XMLNode& node, int version)
 	}
 	return 0;
 }
+
+int
+DiskIOProcessor::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+{
+	while (how_many--) {
+		c->push_back (new ChannelInfo(
+			              _session.butler()->audio_diskstream_playback_buffer_size(),
+			              speed_buffer_size, wrap_buffer_size));
+		interpolation.add_channel_to (
+			_session.butler()->audio_diskstream_playback_buffer_size(),
+			speed_buffer_size);
+	}
+
+	_n_channels.set (DataType::AUDIO, c->size());
+
+	return 0;
+}
+
+int
+DiskIOProcessor::add_channel (uint32_t how_many)
+{
+	RCUWriter<ChannelList> writer (channels);
+	boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+	return add_channel_to (c, how_many);
+}
+
+int
+DiskIOProcessor::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+{
+	while (how_many-- && !c->empty()) {
+		delete c->back();
+		c->pop_back();
+		interpolation.remove_channel_from ();
+	}
+
+	_n_channels.set(DataType::AUDIO, c->size());
+
+	return 0;
+}
+
+int
+DiskIOProcessor::remove_channel (uint32_t how_many)
+{
+	RCUWriter<ChannelList> writer (channels);
+	boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+	return remove_channel_from (c, how_many);
+}
+

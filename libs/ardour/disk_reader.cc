@@ -54,7 +54,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 	, _frames_written_to_ringbuffer (0)
 	, _frames_read_from_ringbuffer (0)
-	, channels (new ChannelList)
 {
 }
 
@@ -230,55 +229,6 @@ DiskReader::set_loop (Location *location)
 
 	LoopSet (location); /* EMIT SIGNAL */
 	return 0;
-}
-
-int
-DiskReader::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
-{
-	while (how_many--) {
-		c->push_back (new ChannelInfo(
-			              _session.butler()->audio_diskstream_playback_buffer_size(),
-			              speed_buffer_size, wrap_buffer_size));
-		interpolation.add_channel_to (
-			_session.butler()->audio_diskstream_playback_buffer_size(),
-			speed_buffer_size);
-	}
-
-	_n_channels.set (DataType::AUDIO, c->size());
-
-	return 0;
-}
-
-int
-DiskReader::add_channel (uint32_t how_many)
-{
-	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
-
-	return add_channel_to (c, how_many);
-}
-
-int
-DiskReader::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
-{
-	while (how_many-- && !c->empty()) {
-		delete c->back();
-		c->pop_back();
-		interpolation.remove_channel_from ();
-	}
-
-	_n_channels.set(DataType::AUDIO, c->size());
-
-	return 0;
-}
-
-int
-DiskReader::remove_channel (uint32_t how_many)
-{
-	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
-
-	return remove_channel_from (c, how_many);
 }
 
 float
