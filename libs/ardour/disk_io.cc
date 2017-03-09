@@ -52,6 +52,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, in_set_state (false)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
+	, _need_butler (false)
 	, channels (new ChannelList)
 {
 }

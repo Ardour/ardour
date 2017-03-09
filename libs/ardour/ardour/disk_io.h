@@ -92,6 +92,8 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	int add_channel (uint32_t how_many);
 	int remove_channel (uint32_t how_many);
 
+	bool need_butler() const { return _need_butler; }
+
   protected:
 	friend class Auditioner;
 	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
@@ -112,6 +114,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool          in_set_state;
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
+	bool         _need_butler;
 
 	Glib::Threads::Mutex state_lock;
 
