@@ -71,8 +71,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	PBD::Signal1<void,DataType>   PlaylistChanged;
 	PBD::Signal0<void>            AlignmentStyleChanged;
 
-	int set_loop (Location *loc);
-
 	float buffer_load() const;
 
 	void move_processor_automation (boost::weak_ptr<Processor>, std::list<Evoral::RangeMove<framepos_t> > const &);
@@ -124,7 +122,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	    with respect to the transport frame.  This is used for latency compensation.
 	*/
 	framecnt_t   _roll_delay;
-	Location*     loop_location;
 	framepos_t    overwrite_frame;
 	off_t         overwrite_offset;
 	bool          _pending_overwrite;
