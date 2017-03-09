@@ -106,8 +106,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int can_internal_playback_seek (framecnt_t distance);
 	int seek (framepos_t frame, bool complete_refill = false);
 
-	bool need_butler() const { return _need_butler; }
-
 	PBD::Signal0<void> Underrun;
 
   protected:
@@ -137,7 +135,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
 	MonitorChoice   _monitoring_choice;
-	bool            _need_butler;
 
 	PBD::ScopedConnectionList playlist_connections;
 
