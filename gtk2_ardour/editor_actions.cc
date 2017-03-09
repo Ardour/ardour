@@ -353,10 +353,7 @@ Editor::register_actions ()
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "separate-from-punch", _("Separate Using Punch Range"), sigc::mem_fun(*this, &Editor::separate_region_from_punch));
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
-
 	act = reg_sens (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), sigc::mem_fun(*this, &Editor::separate_region_from_loop));
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "editor-crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
