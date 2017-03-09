@@ -1609,6 +1609,10 @@ TempoMap::metric_at (framepos_t frame, Metrics::const_iterator* last) const
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
 
+	if (last) {
+		*last = ++_metrics.begin();
+	}
+
 	/* at this point, we are *guaranteed* to have m.meter and m.tempo pointing
 	   at something, because we insert the default tempo and meter during
 	   TempoMap construction.
