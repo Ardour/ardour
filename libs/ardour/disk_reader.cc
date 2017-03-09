@@ -42,7 +42,6 @@ ARDOUR::framecnt_t DiskReader::_chunk_frames = default_chunk_frames ();
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, _roll_delay (0)
-	, loop_location (0)
 	, overwrite_frame (0)
         , overwrite_offset (0)
         , _pending_overwrite (false)
@@ -212,22 +211,6 @@ DiskReader::realtime_handle_transport_stopped ()
 void
 DiskReader::realtime_locate ()
 {
-}
-
-int
-DiskReader::set_loop (Location *location)
-{
-	if (location) {
-		if (location->start() >= location->end()) {
-			error << string_compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
-			return -1;
-		}
-	}
-
-	loop_location = location;
-
-	LoopSet (location); /* EMIT SIGNAL */
-	return 0;
 }
 
 float
