@@ -271,7 +271,7 @@ ARDOUR_UI::setup_windows ()
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
 
-	time_info_box = new TimeInfoBox (false);
+	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();

@@ -43,7 +43,7 @@ using namespace ARDOUR;
 using std::min;
 using std::max;
 
-TimeInfoBox::TimeInfoBox (bool with_punch)
+TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	: table (3, 3)
 	, punch_start (0)
 	, punch_end (0)
@@ -53,9 +53,15 @@ TimeInfoBox::TimeInfoBox (bool with_punch)
 {
 	set_name (X_("TimeInfoBox"));
 
-	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
-	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
-	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
+	selection_start = new AudioClock (
+			string_compose ("%1-selection-start", state_node_name),
+			false, "selection", false, false, false, false);
+	selection_end = new AudioClock (
+			string_compose ("%1-selection-end", state_node_name),
+			false, "selection", false, false, false, false);
+	selection_length = new AudioClock (
+			string_compose ("%1-selection-length", state_node_name),
+			false, "selection", false, false, true, false);
 
 	selection_title.set_text (_("Selection"));
 
@@ -98,8 +104,12 @@ TimeInfoBox::TimeInfoBox (bool with_punch)
 	table.attach (*selection_length, 1, 2, 3, 4);
 
 	if (with_punch_clock) {
-		punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
-		punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
+		punch_start = new AudioClock (
+				string_compose ("%1-punch-start", state_node_name),
+				false, "punch", false, false, false, false);
+		punch_end = new AudioClock (
+				string_compose ("%1-punch-end", state_node_name),
+				false, "punch", false, false, false, false);
 		punch_title.set_text (_("Punch"));
 
 		punch_title.set_name ("TimeInfoSelectionTitle");

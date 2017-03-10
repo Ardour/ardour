@@ -43,7 +43,7 @@ class AudioClock;
 class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
 {
 public:
-	TimeInfoBox (bool with_punch);
+	TimeInfoBox (std::string state_node_name, bool with_punch);
 	~TimeInfoBox ();
 
 	void set_session (ARDOUR::Session*);
