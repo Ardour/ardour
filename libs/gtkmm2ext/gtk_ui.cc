@@ -756,42 +756,6 @@ UI::just_hide_it (GdkEventAny* /*ev*/, Window *win)
 	return true;
 }
 
-Gdk::Color
-UI::get_color (const string& prompt, bool& picked, const Gdk::Color* initial)
-{
-	Gdk::Color color;
-
-	ColorSelectionDialog color_dialog (prompt);
-
-	color_dialog.set_modal (true);
-	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), false));
-	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), true));
-	color_dialog.signal_delete_event().connect (mem_fun (*this, &UI::color_selection_deleted));
-
-	if (initial) {
-		color_dialog.get_colorsel()->set_current_color (*initial);
-	}
-
-	color_dialog.show_all ();
-	color_picked = false;
-	picked = false;
-
-	Main::run();
-
-	color_dialog.hide_all ();
-
-	if (color_picked) {
-		Gdk::Color f_rgba = color_dialog.get_colorsel()->get_current_color ();
-		color.set_red(f_rgba.get_red());
-		color.set_green(f_rgba.get_green());
-		color.set_blue(f_rgba.get_blue());
-
-		picked = true;
-	}
-
-	return color;
-}
-
 void
 UI::color_selection_done (bool status)
 {

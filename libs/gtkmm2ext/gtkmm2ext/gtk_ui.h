@@ -157,7 +157,6 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 		call_slot (boost::bind (&UI::delete_in_self, this, obj));
 	}
 
-	Gdk::Color get_color (const std::string& prompt, bool& picked, const Gdk::Color *initial = 0);
 
 	/* starting is sent just before we enter the main loop,
 	   stopping just after we return from it (at the top level)
