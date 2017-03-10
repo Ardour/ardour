@@ -145,7 +145,7 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 	set_id (node);
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = (Flag) string_2_enum (prop->value(), _flags);
+		_flags = (Flag) ((_flags & Controllable::RealTime) | string_2_enum (prop->value(), _flags));
 	}
 
 	if ((prop = node.property (X_("value"))) != 0) {
