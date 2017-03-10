@@ -237,7 +237,7 @@
     <ColorAlias name="master monitor section button active: fill"        alias="color 40"/>
     <ColorAlias name="master monitor section button active: fill active" alias="color 54"/>
     <ColorAlias name="measure line bar" alias="color 13"/>
-    <ColorAlias name="measure line beat" alias="color 33"/>
+    <ColorAlias name="measure line beat" alias="color 62"/>
     <ColorAlias name="meter background bottom" alias="color 46"/>
     <ColorAlias name="meter background top" alias="color 34"/>
     <ColorAlias name="meter bar" alias="color 7"/>
