@@ -7656,16 +7656,17 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 
 			XMLNode &before = pl->get_state();
 
+			if (!in_command) {
+				begin_reversible_command (_("remove time"));
+				in_command = true;
+			}
+
 			std::list<AudioRange> rl;
 			AudioRange ar(pos, pos+frames, 0);
 			rl.push_back(ar);
 			pl->cut (rl);
 			pl->shift (pos, -frames, true, ignore_music_glue);
 
-			if (!in_command) {
-				begin_reversible_command (_("remove time"));
-				in_command = true;
-			}
 			XMLNode &after = pl->get_state();
 
 			_session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
