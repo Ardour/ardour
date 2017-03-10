@@ -100,20 +100,20 @@ struct LIBGTKMM2EXT_API UIRequest : public BaseUI::BaseRequestObject {
 
 class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 {
-  private:
+private:
 	class MyReceiver : public Receiver {
-	  public:
-		MyReceiver (UI& ui) : _ui (ui) {}
-		void receive (Transmitter::Channel chn, const char *msg) {
-			_ui.receive (chn, msg);
-		}
-	  private:
-		UI& _ui;
+		public:
+			MyReceiver (UI& ui) : _ui (ui) {}
+			void receive (Transmitter::Channel chn, const char *msg) {
+				_ui.receive (chn, msg);
+			}
+		private:
+			UI& _ui;
 	};
 
 	MyReceiver _receiver;
 
-  public:
+public:
 	UI (std::string, std::string, int *argc, char **argv[]);
 	virtual ~UI ();
 
@@ -159,10 +159,9 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 
 
 	/* starting is sent just before we enter the main loop,
-	   stopping just after we return from it (at the top level)
-	*/
-
-        virtual int starting() = 0;
+	 * stopping just after we return from it (at the top level)
+	 */
+	virtual int starting() = 0;
 
 	sigc::signal<void> theme_changed;
 
@@ -171,13 +170,13 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 
 	Gtkmm2ext::Bindings* global_bindings;
 
-  protected:
+protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len,
 			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
 			const char *msg);
 
-  private:
+private:
 	static UI *theGtkUI;
 
 	bool _active;
