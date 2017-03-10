@@ -1151,11 +1151,7 @@ XMLNode &
 LocationUI::get_state () const
 {
 	XMLNode* node = new XMLNode (_state_node_name);
-	if (_mode_set) {
-		node->add_property (X_("clock-mode"), enum_2_string (_mode));
-	} else {
-		node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
-	}
+	node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
 	return *node;
 }
 
@@ -1171,9 +1167,7 @@ LocationUI::set_state (const XMLNode& node)
 	}
 	_mode = (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
 	_mode_set = true;
-	if (_clock_group) {
-		_clock_group->set_clock_mode (_mode);
-	}
+	_clock_group->set_clock_mode (_mode);
 	return 0;
 }
 
@@ -1186,7 +1180,7 @@ LocationUI::clock_mode_from_session_instant_xml ()
 
 	XMLNode* node = _session->instant_xml (_state_node_name);
 	if (!node) {
-		return AudioClock::Frames;
+		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 
 	XMLProperty const * p = node->property (X_("clock-mode"));
