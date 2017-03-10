@@ -111,8 +111,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void select_strip (MixerStrip&, bool add=false);
 	void select_none ();
 
-	bool window_not_visible () const;
-
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 	void show_spill (boost::shared_ptr<ARDOUR::Stripable>);
@@ -121,6 +119,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	sigc::signal1<void,boost::shared_ptr<ARDOUR::Stripable> > show_spill_change;
 
 	RouteProcessorSelection& selection() { return _selection; }
+
+	void show_editor_window () const;
+
 	void register_actions ();
 
         void load_bindings ();

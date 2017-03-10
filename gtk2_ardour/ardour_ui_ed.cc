@@ -259,8 +259,6 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	global_actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
-	global_actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
-	global_actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 	global_actions.register_action (common_actions, X_("menu-show-preferences"), _("Preferences"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 
@@ -275,6 +273,9 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
 	global_actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
+
+	Glib::RefPtr<Gtk::ActionGroup> window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
+	global_actions.register_action (window_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 
 	/* these actions are all currently implemented by the Editor, but need
 	 * to be accessible from anywhere as actions.
@@ -355,8 +356,6 @@ ARDOUR_UI::install_actions ()
 
 	global_actions.register_action (common_actions, X_("previous-tab"), _("Previous Tab"), sigc::mem_fun (*this, &ARDOUR_UI::step_up_through_tabs));
 	global_actions.register_action (common_actions, X_("next-tab"), _("Next Tab"), sigc::mem_fun (*this, &ARDOUR_UI::step_down_through_tabs));
-
-	global_actions.register_action (common_actions, X_("toggle-editor-and-mixer"), _("Toggle Editor & Mixer"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editor_and_mixer));
 
 	/* windows visibility actions */
 

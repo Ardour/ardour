@@ -2906,9 +2906,17 @@ Mixer_UI::showing_spill_for (boost::shared_ptr<Stripable> s) const
 }
 
 void
+Mixer_UI::show_editor_window () const
+{
+	PublicEditor::instance().make_visible ();
+}
+
+void
 Mixer_UI::register_actions ()
 {
 	Glib::RefPtr<ActionGroup> group = myactions.create_action_group (X_("Mixer"));
+
+	myactions.register_action (group, "show-editor", _("Show Editor"), sigc::mem_fun (*this, &Mixer_UI::show_editor_window));
 
 	myactions.register_action (group, "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::solo_action));
 	myactions.register_action (group, "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::mute_action));
