@@ -1095,7 +1095,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 	_fade_out->thaw ();
 	_default_fade_out = false;
 
-	send_change (PropertyChange (Properties::fade_in));
+	send_change (PropertyChange (Properties::fade_out));
 }
 
 void
