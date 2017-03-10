@@ -299,7 +299,10 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	}
 
 	if (immediate_redraw) {
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+
+//only recalculate bbt_ruler_scale on a zoom or snap-change; not every redraw; if a case is found where this is necessary, uncomment this line.
+//		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+
 		std::vector<TempoMap::BBTPoint> grid;
 
 		if (bbt_ruler_scale != bbt_show_many) {
