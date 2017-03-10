@@ -243,6 +243,7 @@ gtk2_ardour_sources = [
         'stereo_panner_editor.cc',
         'streamview.cc',
         'strip_silence_dialog.cc',
+        'stripable_colorpicker.cc',
         'sys_ex.cc',
         'tape_region_view.cc',
         'tempo_curve.cc',

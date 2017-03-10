@@ -23,11 +23,13 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/menuitem.h>
+#include <gtkmm/colorselection.h>
 
 #include "ardour_button.h"
 #include "axis_view.h"
 #include "control_slave_ui.h"
 #include "gain_meter.h"
+#include "stripable_colorpicker.h"
 
 namespace ARDOUR {
 	class GainControl;
@@ -107,7 +109,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void update_bottom_padding ();
 
 	void start_color_edit ();
-	void finish_color_edit (int, Gtk::ColorSelectionDialog*);
+	StripableColorDialog _color_picker;
 };
 
 

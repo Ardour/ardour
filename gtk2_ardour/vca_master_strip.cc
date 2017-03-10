@@ -17,7 +17,6 @@
 */
 
 #include <gtkmm/stock.h>
-#include <gtkmm/colorselection.h>
 
 #include "pbd/convert.h"
 
@@ -526,30 +525,7 @@ VCAMasterStrip::state_id () const
 void
 VCAMasterStrip::start_color_edit ()
 {
-	Gtk::ColorSelectionDialog* color_dialog = new Gtk::ColorSelectionDialog;
-
-	color_dialog->get_colorsel()->set_has_opacity_control (false);
-	color_dialog->get_colorsel()->set_has_palette (true);
-
-	Gdk::Color c = gdk_color_from_rgba (_vca->presentation_info().color ());
-
-	color_dialog->get_colorsel()->set_previous_color (c);
-	color_dialog->get_colorsel()->set_current_color (c);
-
-	color_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::finish_color_edit), color_dialog));
-	color_dialog->present ();
-}
-
-void
-VCAMasterStrip::finish_color_edit (int response, Gtk::ColorSelectionDialog* dialog)
-{
-	switch (response) {
-	case RESPONSE_OK:
-		_vca->presentation_info().set_color (gdk_color_to_rgba (dialog->get_colorsel()->get_current_color()));
-		break;
-	}
-
-	delete_when_idle (dialog);
+	_color_picker.popup (_vca);
 }
 
 bool

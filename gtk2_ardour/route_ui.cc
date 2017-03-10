@@ -243,6 +243,8 @@ RouteUI::reset ()
 	delete mute_menu;
 	mute_menu = 0;
 
+	_color_picker.reset ();
+
 	denormal_menu_item = 0;
 }
 
@@ -1604,13 +1606,7 @@ RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 void
 RouteUI::choose_color ()
 {
-	bool picked;
-	Gdk::Color c (gdk_color_from_rgba (_route->presentation_info().color()));
-	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &c);
-
-	if (picked) {
-		set_color (gdk_color_to_rgba (color));
-	}
+	_color_picker.popup (_route);
 }
 
 /** Set the route's own color.  This may not be used for display if

@@ -26,6 +26,7 @@
 #include "pbd/signals.h"
 
 #include <gtkmm/textview.h>
+#include <gtkmm/colorselection.h>
 
 #include "gtkmm2ext/widget_state.h"
 
@@ -40,6 +41,7 @@
 
 #include "axis_view.h"
 #include "selectable.h"
+#include "stripable_colorpicker.h"
 #include "window_manager.h"
 
 namespace ARDOUR {
@@ -335,6 +337,8 @@ private:
 	int _i_am_the_modifier;
 	std::vector<ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
+
+	StripableColorDialog _color_picker;
 
 	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
