@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "pbd/compose.h"
+#include "pbd/i18n.h"
+
 #include "stripable_colorpicker.h"
 #include "utils.h"
 
@@ -49,6 +52,7 @@ StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 
 	_stripable = s;
+	set_title (string_compose (_("Color Selection: %1"), s->name()));
 
 	get_colorsel()->set_has_opacity_control (false);
 	get_colorsel()->set_has_palette (true);
