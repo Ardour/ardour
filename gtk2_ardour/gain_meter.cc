@@ -585,7 +585,7 @@ GainMeterBase::fader_moved ()
 		// (this breaks group'ed  shift+click reset)
 		if (Keyboard::the_keyboard().key_is_down (GDK_Shift_R)
 				|| Keyboard::the_keyboard().key_is_down (GDK_Shift_L)) {
-			_control->set_value (value, Controllable::NoGroup);
+			_control->set_value (value, Controllable::InverseGroup);
 		} else {
 			_control->set_value (value, Controllable::UseGroup);
 		}
