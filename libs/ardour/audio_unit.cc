@@ -606,7 +606,7 @@ AUPlugin::init ()
 	DEBUG_TRACE (DEBUG::AudioUnits, "count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
-	cb_offsets = (framecnt_t*) calloc (input_elements, sizeof(uint32_t));
+	cb_offsets = (framecnt_t*) calloc (input_elements, sizeof(framecnt_t));
 	bus_inputs = (uint32_t*) calloc (input_elements, sizeof(uint32_t));
 	bus_outputs = (uint32_t*) calloc (output_elements, sizeof(uint32_t));
 
