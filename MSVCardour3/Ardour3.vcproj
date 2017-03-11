@@ -1172,6 +1172,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\stripable_colorpicker.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\sys_ex.cc"
 				>
 			</File>
@@ -2255,6 +2259,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\strip_silence_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\stripable_colorpicker.h"
 				>
 			</File>
 			<File
