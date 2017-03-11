@@ -32,9 +32,15 @@ public:
 	void popup (boost::shared_ptr<ARDOUR::Stripable> s);
 
 private:
+	void initialize_color_palette ();
 	void finish_color_edit (int response);
 
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+
+
+	static bool palette_initialized;
+	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
+	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
 };
 
 #endif

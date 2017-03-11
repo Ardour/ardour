@@ -20,19 +20,50 @@
 #include "pbd/i18n.h"
 
 #include "stripable_colorpicker.h"
+#include "ui_config.h"
 #include "utils.h"
 
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 
+bool StripableColorDialog::palette_initialized = false;
+Gtk::ColorSelection::SlotChangePaletteHook StripableColorDialog::gtk_palette_changed_hook;
+
 StripableColorDialog::StripableColorDialog ()
 {
+	initialize_color_palette ();
 	signal_response().connect (sigc::mem_fun (*this, &StripableColorDialog::finish_color_edit));
 }
 
 StripableColorDialog::~StripableColorDialog ()
 {
 	reset ();
+}
+
+void
+StripableColorDialog::palette_changed_hook (const Glib::RefPtr<Gdk::Screen>& s, const Gdk::ArrayHandle_Color& c)
+{
+	std::string p = std::string (ColorSelection::palette_to_string (c));
+	UIConfiguration::instance ().set_stripable_color_palette (p);
+	gtk_palette_changed_hook (s, c);
+}
+
+void
+StripableColorDialog::initialize_color_palette ()
+{
+	// non-static member, because it needs a screen()
+	if (palette_initialized) {
+		return;
+	}
+	gtk_palette_changed_hook =
+		get_colorsel()->set_change_palette_hook (&StripableColorDialog::palette_changed_hook);
+
+	std::string cp = UIConfiguration::instance ().get_stripable_color_palette ();
+	if (!cp.empty()) {
+		Gdk::ArrayHandle_Color c = ColorSelection::palette_from_string (cp);
+		gtk_palette_changed_hook (get_screen (), c);
+	}
+	palette_initialized = true;
 }
 
 void
