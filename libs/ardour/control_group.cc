@@ -171,10 +171,6 @@ ControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, dou
 
 	control->set_value (val, Controllable::ForGroup);
 
-	if (!_active) {
-		return;
-	}
-
 	/* now propagate across the group */
 
 	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
@@ -256,12 +252,6 @@ GainControlGroup::get_max_factor (gain_t factor)
 void
 GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, double val)
 {
-	if (!_active) {
-		/* set the primary control */
-		control->set_value (val, Controllable::ForGroup);
-		return;
-	}
-
 	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
 
 	if (_mode & Relative) {
