@@ -110,7 +110,7 @@ Text::_redraw () const
 	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
-#ifdef __APPLE__
+#if 0 // def __APPLE__ // Looks like this is no longer needed 2017-03-11, pango 1.36.8, pangomm 2.34.0
 	if (_width_correction < 0.0) {
 		// Pango returns incorrect text width on some OS X
 		// So we have to make a correction
