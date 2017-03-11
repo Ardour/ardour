@@ -1153,6 +1153,13 @@ ActionMap::find_action (const string& name)
 RefPtr<ActionGroup>
 ActionMap::create_action_group (const string& name)
 {
+	Glib::ListHandle<Glib::RefPtr<ActionGroup> > agl =  ActionManager::ui_manager->get_action_groups ();
+	for (Glib::ListHandle<Glib::RefPtr<ActionGroup> >::iterator i = agl.begin (); i != agl.end (); ++i) {
+		if ((*i)->get_name () == name) {
+			return *i;
+		}
+	}
+
 	RefPtr<ActionGroup> g = ActionGroup::create (name);
 
 	/* this is one of the places where our own Action management code
