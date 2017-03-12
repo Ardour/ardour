@@ -35,6 +35,7 @@ using std::string;
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
 	, _presentation_info (pi)
+	, _active_color_picker (0)
 {
 }
 

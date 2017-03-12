@@ -32,6 +32,8 @@
 #include "ardour/session_object.h"
 #include "ardour/libardour_visibility.h"
 
+class StripableColorDialog;
+
 namespace ARDOUR {
 
 class AutomationControl;
@@ -182,8 +184,13 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	virtual boost::shared_ptr<MonitorProcessor> monitor_control() const = 0;
 
+	StripableColorDialog* active_color_picker() const { return _active_color_picker; }
+	void set_active_color_picker (StripableColorDialog* d) { _active_color_picker = d; }
+
   protected:
 	PresentationInfo _presentation_info;
+	private:
+	StripableColorDialog* _active_color_picker;
 };
 
 }
