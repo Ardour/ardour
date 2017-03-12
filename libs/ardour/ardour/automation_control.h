@@ -152,6 +152,7 @@ class LIBARDOUR_API AutomationControl
 	*/
 	friend class ControlGroup;
 	void set_group (boost::shared_ptr<ControlGroup>);
+	PBD::ScopedConnection _state_changed_connection;
 };
 
 

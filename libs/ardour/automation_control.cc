@@ -60,6 +60,10 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 	if (_desc.toggled) {
 		set_flags (Controllable::Toggle);
 	}
+	boost::shared_ptr<AutomationList> al = alist();
+	if (al) {
+		al->StateChanged.connect_same_thread (_state_changed_connection, boost::bind (&Session::set_dirty, &_session));
+	}
 }
 
 AutomationControl::~AutomationControl ()
@@ -174,7 +178,9 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 		//<< " (was " << old_value << ") @ " << this << std::endl;
 
 		Changed (true, gcd);
-		_session.set_dirty ();
+		if (!al || !al->automation_playback ()) {
+			_session.set_dirty ();
+		}
 	}
 
 }
