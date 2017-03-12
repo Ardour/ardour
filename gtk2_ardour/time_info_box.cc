@@ -159,7 +159,7 @@ TimeInfoBox::track_mouse_mode ()
 }
 
 void
-TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> /* r */, const PBD::PropertyChange& what_changed)
+TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed)
 {
 	Selection& selection (Editor::instance().get_selection());
 
@@ -177,12 +177,9 @@ TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> /* r */, 
 		return;
 	}
 
-	/* TODO: check if RegionSelection includes the given region.
-	 * This is not straight foward because RegionSelection is done by
-	 * RegionView (not Region itself).
-	 */
-
-	//selection_changed ();
+	if (selection.regions.contains (r)) {
+		selection_changed ();
+	}
 }
 
 bool
