@@ -31,18 +31,18 @@
 	<Binding channel="16" pgm="4" function="toggle-rec-enable"/>				<!-- REC -->
 
 	<Binding channel="16" pgm="5" action="Transport/Rewind"/>					<!-- REWD -->
-	<Binding channel="16" pgm="6" action="Editor/jump-backward-to-mark"/> 		<!-- BACK -->
-	<Binding channel="16" pgm="7" action="Editor/jump-forward-to-mark"/> 		<!-- NEXT -->
+	<Binding channel="16" pgm="6" action="Common/jump-backward-to-mark"/> 		<!-- BACK -->
+	<Binding channel="16" pgm="7" action="Common/jump-forward-to-mark"/> 		<!-- NEXT -->
 	<Binding channel="16" pgm="8" action="Transport/Forward"/>					<!-- FFWD -->
 
 	<Binding channel="16" pgm="9" action="Editor/remove-last-capture"/>			<!-- Remove last capture -->
-	<Binding channel="16" pgm="10" action="Editor/jump-backward-to-mark"/>		<!--  -->
-	<Binding channel="16" pgm="11" action="Editor/jump-backward-to-mark"/>		<!--  -->
+	<Binding channel="16" pgm="10" action="Common/jump-backward-to-mark"/>		<!--  -->
+	<Binding channel="16" pgm="11" action="Common/jump-backward-to-mark"/>		<!--  -->
 	<Binding channel="16" pgm="12" function="prev-bank"/>						<!-- Previous bank -->
 
 	<Binding channel="16" pgm="13" action="Editor/remove-last-capture"/>		<!-- Remove last capture -->
 	<Binding channel="16" pgm="14" action="Editor/playhead-to-edit"/>			<!--  -->
-	<Binding channel="16" pgm="15" action="Editor/jump-forward-to-mark"/>		<!--  -->
+	<Binding channel="16" pgm="15" action="Common/jump-forward-to-mark"/>		<!--  -->
 	<Binding channel="16" pgm="16" function="next-bank"/>						<!-- Next bank -->
 
 </ArdourMIDIBindings>
