@@ -633,7 +633,27 @@ PluginInsert::enable (bool yn)
 			activate ();
 		}
 		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
-		ac->set_value (yn ? 1.0 : 0.0, Controllable::NoGroup);
+		const double val = yn ? 1.0 : 0.0;
+		ac->set_value (val, Controllable::NoGroup);
+
+#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
+		/* special case VST.. bypass may fail */
+		if (_bypass_port == UINT32_MAX - 1) {
+			/* check if bypass worked */
+			if (ac->get_value () != val) {
+				warning << _("PluginInsert: VST Bypass failed, falling back to host bypass.") << endmsg;
+				// set plugin to enabled (not-byassed)
+				ac->set_value (1.0, Controllable::NoGroup);
+				// ..and use host-provided hard-bypass
+				if (yn) {
+					activate ();
+				} else {
+					deactivate ();
+				}
+				return;
+			}
+		}
+#endif
 		ActiveChanged ();
 	}
 }

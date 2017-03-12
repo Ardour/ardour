@@ -98,6 +98,9 @@ uint32_t
 VSTPlugin::designated_bypass_port ()
 {
 	if (_plugin->dispatcher (_plugin, effCanDo, 0, 0, const_cast<char*> ("bypass"), 0.0f) != 0) {
+#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also plugin_insert.cc
+		return UINT32_MAX - 1; // emulate a port
+#else
 		/* check if plugin actually supports it,
 		 * e.g. u-he Presswerk  CanDo "bypass"  but calling effSetBypass is a NO-OP.
 		 * (presumably the plugin-author thinks hard-bypassing is a bad idea,
@@ -110,6 +113,7 @@ VSTPlugin::designated_bypass_port ()
 		} else {
 			cerr << "Do *not* Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
 		}
+#endif
 	}
 	return UINT32_MAX;
 }
@@ -163,6 +167,9 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 			_eff_bypassed = (value == 1);
 		} else {
 			cerr << "effSetBypass failed rv=" << rv << endl; // XXX DEBUG
+#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
+			// emit signal.. hard un/bypass from here?!
+#endif
 		}
 		return;
 	}
