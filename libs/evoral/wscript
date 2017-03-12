@@ -146,6 +146,7 @@ def build(bld):
                 test/RangeTest.cpp
                 test/NoteTest.cpp
                 test/CurveTest.cpp
+                test/BeatsTest.cpp
                 test/testrunner.cpp
         '''
         obj.includes     = ['.', './src']
