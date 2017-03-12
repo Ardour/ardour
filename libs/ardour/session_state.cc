@@ -3534,19 +3534,18 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 void
 Session::set_dirty ()
 {
-	/* never mark session dirty during loading */
+	/* return early if there's nothing to do */
+	if (dirty ()) {
+		return;
+	}
 
+	/* never mark session dirty during loading */
 	if (_state_of_the_state & Loading) {
 		return;
 	}
 
-	bool was_dirty = dirty();
-
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
-
-	if (!was_dirty) {
-		DirtyChanged(); /* EMIT SIGNAL */
-	}
+	DirtyChanged(); /* EMIT SIGNAL */
 }
 
 void
