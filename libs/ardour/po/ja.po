@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-12 01:42-0800\n"
-"PO-Revision-Date: 2017-01-21 13:39-0800\n"
+"PO-Revision-Date: 2017-03-11 23:39-0800\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -1960,7 +1960,7 @@ msgstr "LADSPA: モジュール \"%1\" には descriptor 関数がありませ�
 
 #: plugin_manager.cc:850
 msgid "Disabled WindowsVST scan (safe mode)"
-msgstr ""
+msgstr "Windows VST スキャンを無効にする (セーフモード)"
 
 #: plugin_manager.cc:855
 msgid "--- Windows VST plugins Scan: %1"
@@ -2048,7 +2048,7 @@ msgstr " -> OK (VST プラグイン \"%1\" が追加されました)"
 
 #: plugin_manager.cc:1056
 msgid "Disabled MacVST scan (safe mode)"
-msgstr ""
+msgstr "Mac VST スキャンを無効にする (セーフモード)"
 
 #: plugin_manager.cc:1063
 msgid "MacVST"
@@ -2064,7 +2064,7 @@ msgstr ""
 
 #: plugin_manager.cc:1164
 msgid "Disabled LinuxVST scan (safe mode)"
-msgstr ""
+msgstr "Linux VST スキャンを無効にする (セーフモード)"
 
 #: plugin_manager.cc:1177
 msgid "LXVST"
@@ -3680,7 +3680,7 @@ msgstr "VCA %n"
 
 #: vca.cc:110
 msgid "VCA %1 : %2"
-msgstr ""
+msgstr "VCA %1 : %2"
 
 #: vca_manager.cc:166
 msgid "Cannot set state of a VCA"
