@@ -47,6 +47,7 @@ class RegionSelection : public std::list<RegionView*>
 	void sort_by_position_and_track ();
 
 	bool contains (RegionView*) const;
+	bool contains (boost::shared_ptr<ARDOUR::Region>) const;
 	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
