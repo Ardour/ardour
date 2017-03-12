@@ -70,12 +70,19 @@ void
 StripableColorDialog::reset ()
 {
 	hide ();
+	if (_stripable && _stripable->active_color_picker() == this) {
+		_stripable->set_active_color_picker (0);
+	}
 	_stripable.reset ();
 }
 
 void
 StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
 {
+	if (s && s->active_color_picker()) {
+		s->active_color_picker()->present ();
+		return;
+	}
 	if (_stripable == s) {
 		/* keep modified color */
 		present ();
@@ -83,6 +90,7 @@ StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
 	}
 
 	_stripable = s;
+	_stripable->set_active_color_picker (this);
 	set_title (string_compose (_("Color Selection: %1"), s->name()));
 
 	get_colorsel()->set_has_opacity_control (false);
