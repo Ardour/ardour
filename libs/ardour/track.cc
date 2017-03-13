@@ -294,8 +294,12 @@ Track::set_name (const string& str)
 {
 	bool ret;
 
-	if (_record_enable_control->get_value() && _session.actively_recording()) {
-		/* this messes things up if done while recording */
+	if (str.empty ()) {
+		return false;
+	}
+
+	if (_record_enable_control->get_value()) {
+		/* when re-arm'ed the file (named after the track) is already ready to rolll */
 		return false;
 	}
 

@@ -4017,6 +4017,10 @@ Route::save_as_template (const string& path, const string& name)
 bool
 Route::set_name (const string& str)
 {
+	if (str.empty ()) {
+		return false;
+	}
+
 	if (str == name()) {
 		return true;
 	}
