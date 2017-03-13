@@ -1261,6 +1261,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('PT format',             conf.is_defined('PTFORMAT'))
     write_config_text('PTW32 Semaphore',       conf.is_defined('USE_PTW32_SEMAPHORE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
+    write_config_text('Threaded WaveViews',    not opts.no_threaded_waveviews)
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
