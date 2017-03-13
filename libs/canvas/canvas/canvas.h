@@ -135,6 +135,8 @@ public:
 	*/
 	sigc::signal<void,Duple const&> MouseMotion;
 
+	sigc::signal<void> PreRender;
+
 	/** Ensures that the position given by @param winpos (in window
 	    coordinates) is within the current window area, possibly reduced by
 	    @param border.
