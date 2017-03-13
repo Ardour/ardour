@@ -6990,7 +6990,7 @@ RulerZoomDrag::motion (GdkEvent* event, bool)
 	_editor->playhead_cursor->set_position (where);
 
 	const double movement_limit = 20.0;
-	const double scale = 1.08;
+	const double scale = 1.12;
 	const double y_delta = last_pointer_y() - current_pointer_y();
 
 	if (y_delta > 0 && y_delta < movement_limit) {
