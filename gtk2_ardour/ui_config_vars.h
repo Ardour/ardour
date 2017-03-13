@@ -92,4 +92,4 @@ UI_CONFIG_VARIABLE (bool, show_inline_display_by_default, "show-inline-display-b
 UI_CONFIG_VARIABLE (bool, prefer_inline_over_gui, "prefer-inline-over-gui", true)
 UI_CONFIG_VARIABLE (uint32_t, action_table_columns, "action-table-columns", 0)
 UI_CONFIG_VARIABLE (bool, use_wm_visibility, "use-wm-visibility", true)
-UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#7F7F7F:#FF0000:#800080:#0000FF:#ADD8E6:#008000:#FFFF00:#FFA500:#E6E6FA:#A52A2A:#8B6914:#1E90FF:#FFC0CB:#90EE90:#1A1A1A:#4D4D4D:#BFBFBF:#E5E5E5:#AAAAAA:#444444")  /* Gtk::ColorSelection::palette_to_string */
+UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#AA3939:#FFAAAA:#D46A6A:#801515:#550000:#AA8E39:#FFEAAA:#D4BA6A:#806515:#554000:#343477:#8080B3:#565695:#1A1A59:#09093B:#2D882D:#88CC88:#55AA55:#116611:#004400")  /* Gtk::ColorSelection::palette_to_string */
