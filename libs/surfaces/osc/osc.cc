@@ -1009,9 +1009,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = 0;
 	}
 
-	if ((ret && _debugmode == Unhandled)) {
+	if ((ret && _debugmode != Off)) {
 		debugmsg (_("Unhandled OSC message"), path, types, argv, argc);
-	} else if ((!ret && _debugmode == All)) {
+	} else if (!ret && _debugmode == All) {
 		debugmsg (_("OSC"), path, types, argv, argc);
 	}
 
