@@ -92,8 +92,8 @@ public:
 		return &_root;
 	}
 
-        void set_background_color (ArdourCanvas::Color);
-        ArdourCanvas::Color background_color() const { return _bg_color; }
+	void set_background_color (ArdourCanvas::Color);
+	ArdourCanvas::Color background_color() const { return _bg_color; }
 
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, Rect) {}
@@ -102,27 +102,27 @@ public:
 	void item_changed (Item *, Rect);
 	void item_moved (Item *, Rect);
 
-        Duple canvas_to_window (Duple const&, bool rounded = true) const;
-        Duple window_to_canvas (Duple const&) const;
+	Duple canvas_to_window (Duple const&, bool rounded = true) const;
+	Duple window_to_canvas (Duple const&) const;
 
-        void canvas_to_window (Coord cx, Coord cy, Coord& wx, Coord& wy) {
+	void canvas_to_window (Coord cx, Coord cy, Coord& wx, Coord& wy) {
 		Duple d = canvas_to_window (Duple (cx, cy));
 		wx = d.x;
 		wy = d.y;
-        }
+	}
 
-        void window_to_canvas (Coord wx, Coord wy, Coord& cx, Coord& cy) {
+	void window_to_canvas (Coord wx, Coord wy, Coord& cx, Coord& cy) {
 		Duple d = window_to_canvas (Duple (wx, wy));
 		cx = d.x;
 		cy = d.y;
-        }
+	}
 
-        void scroll_to (Coord x, Coord y);
+	void scroll_to (Coord x, Coord y);
 	void add_scroller (ScrollGroup& i);
 
-        virtual Rect  visible_area () const = 0;
-        virtual Coord width () const = 0;
-        virtual Coord height () const = 0;
+	virtual Rect  visible_area () const = 0;
+	virtual Coord width () const = 0;
+	virtual Coord height () const = 0;
 
 	/** Store the coordinates of the mouse pointer in window coordinates in
 	   @param winpos. Return true if the position was within the window,
@@ -141,11 +141,11 @@ public:
 	*/
 	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
 
-        void zoomed();
+	void zoomed();
 
-        std::string indent() const;
-        std::string render_indent() const;
-        void dump (std::ostream&) const;
+	std::string indent() const;
+	std::string render_indent() const;
+	void dump (std::ostream&) const;
 
 	/** Ask the canvas to pick the current item again, and generate
 	    an enter event for it.
@@ -161,15 +161,15 @@ public:
 
 	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
 
-  protected:
+protected:
 	Root  _root;
-        Color _bg_color;
+	Color _bg_color;
 
 	static uint32_t tooltip_timeout_msecs;
 
 	void queue_draw_item_area (Item *, Rect);
-        virtual void pick_current_item (int state) = 0;
-        virtual void pick_current_item (Duple const &, int state) = 0;
+	virtual void pick_current_item (int state) = 0;
+	virtual void pick_current_item (Duple const &, int state) = 0;
 
 	std::list<ScrollGroup*> scrollers;
 };
@@ -214,7 +214,7 @@ public:
 
 	uint32_t background_color() { return Canvas::background_color (); }
 
-  protected:
+protected:
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_scroll_event (GdkEventScroll *);
 	bool on_expose_event (GdkEventExpose *);
@@ -232,11 +232,11 @@ public:
 
 	bool button_handler (GdkEventButton *);
 	bool motion_notify_handler (GdkEventMotion *);
-        bool deliver_event (GdkEvent *);
-        void deliver_enter_leave (Duple const & point, int state);
+	bool deliver_event (GdkEvent *);
+	void deliver_enter_leave (Duple const & point, int state);
 
-        void pick_current_item (int state);
-        void pick_current_item (Duple const &, int state);
+	void pick_current_item (int state);
+	void pick_current_item (Duple const &, int state);
 
 private:
 	void item_going_away (Item *, Rect);
@@ -245,10 +245,10 @@ private:
 
 	Cairo::RefPtr<Cairo::Surface> canvas_image;
 
-        /** Item currently chosen for event delivery based on pointer position */
-        Item * _current_item;
-        /** Item pending as _current_item */
-        Item * _new_current_item;
+	/** Item currently chosen for event delivery based on pointer position */
+	Item * _current_item;
+	/** Item pending as _current_item */
+	Item * _new_current_item;
 	/** the item that is currently grabbed, or 0 */
 	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
@@ -291,10 +291,10 @@ protected:
 private:
 	/** our GtkCanvas */
 	GtkCanvas _canvas;
-        Gtk::Adjustment& hadjustment;
-        Gtk::Adjustment& vadjustment;
+	Gtk::Adjustment& hadjustment;
+	Gtk::Adjustment& vadjustment;
 
-        void scrolled ();
+	void scrolled ();
 };
 
 }
