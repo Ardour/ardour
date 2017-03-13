@@ -722,6 +722,7 @@ Keyboard::reset_bindings ()
 
 	{
 		PBD::Unwinder<bool> uw (can_save_keybindings, false);
+		Bindings::reset_bindings ();
 		setup_keybindings ();
 		Bindings::associate_all ();
 	}
