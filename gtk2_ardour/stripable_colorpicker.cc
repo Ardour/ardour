@@ -74,6 +74,7 @@ StripableColorDialog::reset ()
 		_stripable->set_active_color_picker (0);
 	}
 	_stripable.reset ();
+	_color_changed_connection.disconnect ();
 }
 
 void
@@ -91,15 +92,17 @@ StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
 
 	_stripable = s;
 	_stripable->set_active_color_picker (this);
+	_initial_color = _stripable->presentation_info().color ();
 	set_title (string_compose (_("Color Selection: %1"), s->name()));
 
 	get_colorsel()->set_has_opacity_control (false);
 	get_colorsel()->set_has_palette (true);
 
-	Gdk::Color c = gdk_color_from_rgba (_stripable->presentation_info().color ());
+	Gdk::Color c = gdk_color_from_rgba (_initial_color);
 
 	get_colorsel()->set_previous_color (c);
 	get_colorsel()->set_current_color (c);
+	_color_changed_connection = get_colorsel()->signal_color_changed().connect (sigc::mem_fun (*this, &StripableColorDialog::color_changed));
 
 	present ();
 }
@@ -109,6 +112,16 @@ StripableColorDialog::finish_color_edit (int response)
 {
 	if (_stripable && response == RESPONSE_OK) {
 		_stripable->presentation_info().set_color (gdk_color_to_rgba (get_colorsel()->get_current_color()));
+	} else {
+		_stripable->presentation_info().set_color (_initial_color);
 	}
 	reset ();
+}
+
+void
+StripableColorDialog::color_changed ()
+{
+	if (_stripable) {
+		_stripable->presentation_info().set_color (gdk_color_to_rgba (get_colorsel()->get_current_color()));
+	}
 }

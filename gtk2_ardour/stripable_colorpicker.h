@@ -34,8 +34,12 @@ public:
 private:
 	void initialize_color_palette ();
 	void finish_color_edit (int response);
+	void color_changed ();
 
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	ARDOUR::PresentationInfo::color_t _initial_color;
+
+	sigc::connection _color_changed_connection;
 
 
 	static bool palette_initialized;
