@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "EditorHook",
 	name        = "Save Snapshot after Export",
 	author      = "Ardour Lua Task Force",
-	description = "Snapshot after Export",
+	description = "Save a session-snapshot on export, named after the export-timespan",
 }
 
 -- subscribe to signals
