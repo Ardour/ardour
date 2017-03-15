@@ -42,9 +42,11 @@ private:
 	Gtk::Label _label_max;
 	Gtk::Label _label_avg;
 	Gtk::Label _label_dev;
+	Gtk::Label _label_acq;
 
 	int64_t _last_display;
 
+	int64_t _start;
 	int64_t _last;
 	int64_t _min;
 	int64_t _max;

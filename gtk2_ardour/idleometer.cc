@@ -18,7 +18,10 @@
  */
 
 #include <glib.h>
+#include <gtkmm/button.h>
 #include <gtkmm/table.h>
+
+#include "timecode/time.h"
 
 #include "idleometer.h"
 #include "pbd/i18n.h"
@@ -39,11 +42,15 @@ IdleOMeter::IdleOMeter ()
 	Label* l = manage (new Label (_("<b>GUI Idle Timing Statistics</b>"), ALIGN_CENTER));
 	l->set_use_markup ();
 
-	get_vbox()->pack_start (*l, false, false);
-
-	HBox* b = manage (new HBox ());
+	HBox* hbox = manage (new HBox ());
 	Table* t = manage (new Table ());
-	b->pack_start (*t, true, false);
+	hbox->pack_start (*t, true, false);
+
+	Button* b = manage (new Button (_("Reset")));
+	b->signal_clicked().connect (sigc::mem_fun(*this, &IdleOMeter::reset));
+
+	get_vbox()->pack_start (*l, false, false);
+	get_vbox()->pack_start (*hbox, false, false);
 	get_vbox()->pack_start (*b, false, false);
 
 	_label_cur.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
@@ -51,6 +58,7 @@ IdleOMeter::IdleOMeter ()
 	_label_max.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
 	_label_avg.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
 	_label_dev.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
+	_label_acq.set_alignment (ALIGN_CENTER, ALIGN_CENTER);
 
 	int row = 0;
 	t->attach (*manage (new Label (_("Current:"), ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
@@ -67,6 +75,9 @@ IdleOMeter::IdleOMeter ()
 	++row;
 	t->attach (*manage (new Label (_("\u03c3:"),  ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_dev, 1, 2, row, row + 1, FILL, SHRINK);
+	++row;
+	t->attach (*manage (new Label (_("Elapsed:"),  ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (_label_acq, 1, 2, row, row + 1, FILL, SHRINK);
 }
 
 IdleOMeter::~IdleOMeter ()
@@ -99,7 +110,7 @@ IdleOMeter::idle ()
 		_var_s += (t - _var_m) * (t - var_m1);
 	}
 
-	if (now - _last_display < 80000 || _cnt < 2) {
+	if (now - _last_display < 100000 || _cnt < 2) {
 		return true;
 	}
 
@@ -118,7 +129,7 @@ IdleOMeter::idle ()
 	snprintf (buf, sizeof(buf), "%8.3f ms", avg / 1000.0);
 	_label_avg.set_text (buf);
 	snprintf (buf, sizeof(buf), "%8.3f ms", stddev / 1000.0);
-	_label_dev.set_text (buf);
+	_label_acq.set_text (Timecode::timecode_format_sampletime (now - _start, 1000000, 100, false));
 
 	return true;
 }
@@ -128,6 +139,7 @@ IdleOMeter::reset ()
 {
 	_last = _x_get_monotonic_usec ();
 	_last_display = _last;
+	_start = _last;
 	_max = 0;
 	_min = INT64_MAX;
 	_cnt = 0;
