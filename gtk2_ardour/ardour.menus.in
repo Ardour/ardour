@@ -573,6 +573,9 @@
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif
+#if 0
+      <menuitem action='toggle-idle-o-meter'/>
+#endif
 
       <separator/>
 #ifdef MIXBUS

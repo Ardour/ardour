@@ -122,6 +122,7 @@ gtk2_ardour_sources = [
         'group_tabs.cc',
         'gtk_pianokeyboard.c',
         'gui_object.cc',
+        'idleometer.cc',
         'insert_remove_time_dialog.cc',
         'instrument_selector.cc',
         'interthread_progress_window.cc',

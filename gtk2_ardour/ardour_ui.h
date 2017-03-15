@@ -90,6 +90,7 @@
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
 #include "global_port_matrix.h"
+#include "idleometer.h"
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
@@ -114,6 +115,7 @@ class RouteParams_UI;
 class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
+class IdleOMeter;
 #endif
 
 class VideoTimeLine;
@@ -729,6 +731,7 @@ private:
 	WM::Proxy<EngineControl> audio_midi_setup;
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
+	WM::Proxy<IdleOMeter> idleometer;
 
 	/* Windows/Dialogs that require a creator method */
 
