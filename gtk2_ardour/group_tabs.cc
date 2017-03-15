@@ -306,7 +306,7 @@ GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 	using namespace Menu_Helpers;
 	Menu *new_from;
 
-	new_from = new Menu;
+	new_from = manage (new Menu);
 	{
 		MenuList& f = new_from->items ();
 		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), false)));
@@ -315,7 +315,7 @@ GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 	}
 	items.push_back (MenuElem (_("Create New Group From..."), *new_from));
 
-	new_from = new Menu;
+	new_from = manage (new Menu);
 	{
 		MenuList& f = new_from->items ();
 		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), true)));
@@ -355,7 +355,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 		items.push_back (SeparatorElem());
 
-		vca_menu = new Menu;
+		vca_menu = manage (new Menu);
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
 
@@ -389,7 +389,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 	items.push_back (SeparatorElem());
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
@@ -400,7 +400,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 	items.push_back (MenuElem (_("Assign Selection to VCA..."), *vca_menu));
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_recenabled_to_master), 0)));
@@ -411,7 +411,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	}
 	items.push_back (MenuElem (_("Assign Record Enabled to VCA..."), *vca_menu));
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_soloed_to_master), 0)));
