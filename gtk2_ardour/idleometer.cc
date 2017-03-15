@@ -21,6 +21,10 @@
 #include <gtkmm/button.h>
 #include <gtkmm/table.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <pbd/windows_timer_utils.h>
+#endif
+
 #include "timecode/time.h"
 
 #include "idleometer.h"
