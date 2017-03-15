@@ -88,7 +88,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	++n;
 
 	// port entry box
-	label = manage (new Gtk::Label(_("Manual Port:")));
+	label = manage (new Gtk::Label(_("Reply Manual Port:")));
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (port_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
