@@ -868,10 +868,12 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = 0;
 	} else
 	if (!strncmp (path, "/access_action/", 15)) {
-		std::string action_path = path;
+		if (!(argc && !argv[0]->i)) {
+			std::string action_path = path;
 
-		access_action (action_path.substr(15));
-		std::cout << "access_action path = " << action_path.substr(15) << "\n";
+			access_action (action_path.substr(15));
+			std::cout << "access_action path = " << action_path.substr(15) << "\n";
+		}
 
 		ret = 0;
 	} else
