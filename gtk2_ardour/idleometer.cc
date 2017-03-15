@@ -129,6 +129,7 @@ IdleOMeter::idle ()
 	snprintf (buf, sizeof(buf), "%8.3f ms", avg / 1000.0);
 	_label_avg.set_text (buf);
 	snprintf (buf, sizeof(buf), "%8.3f ms", stddev / 1000.0);
+	_label_dev.set_text (buf);
 	_label_acq.set_text (Timecode::timecode_format_sampletime (now - _start, 1000000, 100, false));
 
 	return true;
@@ -150,6 +151,7 @@ IdleOMeter::reset ()
 	_label_max.set_text ("-");
 	_label_avg.set_text ("-");
 	_label_dev.set_text ("-");
+	_label_acq.set_text ("-");
 }
 
 void
