@@ -2589,6 +2589,7 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (pos), PBD::Controllable::NoGroup);
+			return 0;
 		}
 	}
 
