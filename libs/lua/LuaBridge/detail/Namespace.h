@@ -579,10 +579,14 @@ private:
         createConstTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createClassTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createStaticTable (name);
 
@@ -626,10 +630,14 @@ private:
       createConstTable (name);
       lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
       rawsetfield (L, -2, "__gc");
+      lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+      rawsetfield (L, -2, "__eq");
 
       createClassTable (name);
       lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
       rawsetfield (L, -2, "__gc");
+      lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+      rawsetfield (L, -2, "__eq");
 
       createStaticTable (name);
 
@@ -1159,10 +1167,14 @@ private:
         createConstTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createClassTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createStaticTable (name);
 

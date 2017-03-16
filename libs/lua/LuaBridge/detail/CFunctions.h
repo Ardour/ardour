@@ -378,7 +378,6 @@ struct CFunc
     }
   };
 
-
   template <class T, class R>
   struct CastClass
   {
@@ -458,6 +457,24 @@ struct CFunc
       }
       Stack <bool>::push (L, rv);
       return 1;
+    }
+  };
+
+  template <class T>
+  struct ClassEqualCheck<boost::shared_ptr<T> >
+  {
+    static int f (lua_State* L)
+    {
+      return PtrEqualCheck<T>::f (L);
+    }
+  };
+
+  template <class T>
+  struct ClassEqualCheck<boost::weak_ptr<T> >
+  {
+    static int f (lua_State* L)
+    {
+      return WPtrEqualCheck<T>::f (L);
     }
   };
 
