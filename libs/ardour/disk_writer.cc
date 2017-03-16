@@ -19,15 +19,21 @@
 
 #include "pbd/i18n.h"
 
+#include "ardour/audioengine.h"
+#include "ardour/audio_buffer.h"
+#include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
 #include "ardour/disk_writer.h"
+#include "ardour/port.h"
 #include "ardour/session.h"
+#include "ardour/smf_source.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
 ARDOUR::framecnt_t DiskWriter::_chunk_frames = DiskWriter::default_chunk_frames ();
+PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -42,6 +48,7 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
         , _alignment_style (ExistingMaterial)
         , _alignment_choice (Automatic)
 {
+	DiskIOProcessor::init ();
 }
 
 framecnt_t
@@ -302,6 +309,62 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 }
 
 void
+DiskWriter::set_align_style_from_io ()
+{
+	bool have_physical = false;
+
+	if (_alignment_choice != Automatic) {
+		return;
+	}
+
+	if (!_route) {
+		return;
+	}
+
+	boost::shared_ptr<IO> input = _route->input ();
+
+	if (input) {
+		uint32_t n = 0;
+		vector<string> connections;
+		boost::shared_ptr<ChannelList> c = channels.reader();
+
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
+
+			if ((input->nth (n).get()) && (input->nth (n)->get_connections (connections) == 0)) {
+				if (AudioEngine::instance()->port_is_physical (connections[0])) {
+					have_physical = true;
+					break;
+				}
+			}
+
+			connections.clear ();
+		}
+	}
+
+#ifdef MIXBUS
+	// compensate for latency when bouncing from master or mixbus.
+	// we need to use "ExistingMaterial" to pick up the master bus' latency
+	// see also Route::direct_feeds_according_to_reality
+	IOVector ios;
+	ios.push_back (_io);
+	if (_session.master_out() && ios.fed_by (_session.master_out()->output())) {
+		have_physical = true;
+	}
+	for (uint32_t n = 0; n < NUM_MIXBUSES && !have_physical; ++n) {
+		if (_session.get_mixbus (n) && ios.fed_by (_session.get_mixbus(n)->output())) {
+			have_physical = true;
+		}
+	}
+#endif
+
+	if (have_physical) {
+		set_align_style (ExistingMaterial);
+	} else {
+		set_align_style (CaptureTime);
+	}
+}
+
+void
 DiskWriter::set_align_choice (AlignChoice a, bool force)
 {
 	if (record_enabled() && _session.actively_recording()) {
@@ -325,6 +388,15 @@ DiskWriter::set_align_choice (AlignChoice a, bool force)
 	}
 }
 
+XMLNode&
+DiskWriter::state (bool full)
+{
+	XMLNode& node (DiskIOProcessor::state (full));
+	node.add_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
+	node.add_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
+	return node;
+}
+
 int
 DiskWriter::set_state (const XMLNode& node, int version)
 {
@@ -346,4 +418,322 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
+}
+
+void
+DiskWriter::non_realtime_locate (framepos_t position)
+{
+	if (_midi_write_source) {
+		_midi_write_source->set_timeline_position (position);
+	}
+
+	DiskIOProcessor::non_realtime_locate (position);
+}
+
+
+void
+DiskWriter::prepare_record_status(framepos_t capture_start_frame)
+{
+	if (recordable() && destructive()) {
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+
+			RingBufferNPT<CaptureTransition>::rw_vector transitions;
+			(*chan)->capture_transition_buf->get_write_vector (&transitions);
+
+			if (transitions.len[0] > 0) {
+				transitions.buf[0]->type = CaptureStart;
+				transitions.buf[0]->capture_val = capture_start_frame;
+				(*chan)->capture_transition_buf->increment_write_ptr(1);
+			} else {
+				// bad!
+				fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!")
+					<< endmsg;
+			}
+		}
+	}
+}
+
+
+/** Do some record stuff [not described in this comment!]
+ *
+ *  Also:
+ *    - Setup playback_distance with the nframes, or nframes adjusted
+ *      for current varispeed, if appropriate.
+ *    - Setup current_playback_buffer in each ChannelInfo to point to data
+ *      that someone can read playback_distance worth of data from.
+ */
+void
+DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
+                 double speed, pframes_t nframes, bool result_required)
+
+/*	(BufferSet& bufs, framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance, bool need_disk_signal)
+ */
+{
+	uint32_t n;
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	ChannelList::iterator chan;
+	framecnt_t rec_offset = 0;
+	framecnt_t rec_nframes = 0;
+	bool can_record = _session.actively_recording ();
+
+	check_record_status (start_frame, can_record);
+
+	if (nframes == 0) {
+		return;
+	}
+
+	Glib::Threads::Mutex::Lock sm (state_lock, Glib::Threads::TRY_LOCK);
+
+	if (!sm.locked()) {
+		return;
+	}
+
+	// Safeguard against situations where process() goes haywire when autopunching
+	// and last_recordable_frame < first_recordable_frame
+
+	if (last_recordable_frame < first_recordable_frame) {
+		last_recordable_frame = max_framepos;
+	}
+
+	if (record_enabled()) {
+
+		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, start_frame, end_frame);
+		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
+		// XXX also, first_recordable_frame & last_recordable_frame may both be == max_framepos: coverage() will return OverlapNone in that case. Is thak OK?
+		calculate_record_range (ot, start_frame, nframes, rec_nframes, rec_offset);
+
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 frames, offset %4\n", _name, rec_nframes, nframes, rec_offset));
+
+		if (rec_nframes && !was_recording) {
+			capture_captured = 0;
+			was_recording = true;
+		}
+	}
+
+	if (can_record && !_last_capture_sources.empty()) {
+		_last_capture_sources.clear ();
+	}
+
+	if (rec_nframes) {
+
+		const size_t n_buffers = bufs.count().n_audio();
+
+		for (n = 0; chan != c->end(); ++chan, ++n) {
+
+			ChannelInfo* chaninfo (*chan);
+			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+
+			chaninfo->buf->get_write_vector (&chaninfo->rw_vector);
+
+			if (rec_nframes <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+
+				Sample *incoming = buf.data (rec_offset);
+				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * rec_nframes);
+
+			} else {
+
+				framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
+
+				if (rec_nframes > total) {
+                                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
+                                                                                    DEBUG_THREAD_SELF, name(), rec_nframes, total));
+                                        Overrun ();
+					return;
+				}
+
+				Sample *incoming = buf.data (rec_offset);
+				framecnt_t first = chaninfo->rw_vector.len[0];
+
+				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * first);
+				memcpy (chaninfo->rw_vector.buf[1], incoming + first, sizeof (Sample) * (rec_nframes - first));
+			}
+		}
+
+	} else {
+
+		if (was_recording) {
+			finish_capture (c);
+		}
+
+	}
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		if (rec_nframes) {
+			(*chan)->buf->increment_write_ptr (rec_nframes);
+		}
+	}
+
+	if (rec_nframes != 0) {
+		capture_captured += rec_nframes;
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 now captured %2 (by %3)\n", name(), capture_captured, rec_nframes));
+	}
+
+	if (!c->empty()) {
+		if (_slaved) {
+			if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
+				_need_butler = true;
+			}
+		} else {
+			if (((framecnt_t) c->front()->buf->read_space() >= _chunk_frames)) {
+				_need_butler = true;
+			}
+		}
+	}
+}
+
+void
+DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
+{
+	was_recording = false;
+	first_recordable_frame = max_framepos;
+	last_recordable_frame = max_framepos;
+
+	if (capture_captured == 0) {
+		return;
+	}
+
+	if (recordable() && destructive()) {
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+
+			RingBufferNPT<CaptureTransition>::rw_vector transvec;
+			(*chan)->capture_transition_buf->get_write_vector(&transvec);
+
+			if (transvec.len[0] > 0) {
+				transvec.buf[0]->type = CaptureEnd;
+				transvec.buf[0]->capture_val = capture_captured;
+				(*chan)->capture_transition_buf->increment_write_ptr(1);
+			}
+			else {
+				// bad!
+				fatal << string_compose (_("programmer error: %1"), X_("capture_transition_buf is full when stopping record!  inconceivable!")) << endmsg;
+			}
+		}
+	}
+
+
+	CaptureInfo* ci = new CaptureInfo;
+
+	ci->start =  capture_start_frame;
+	ci->frames = capture_captured;
+
+	/* XXX theoretical race condition here. Need atomic exchange ?
+	   However, the circumstances when this is called right
+	   now (either on record-disable or transport_stopped)
+	   mean that no actual race exists. I think ...
+	   We now have a capture_info_lock, but it is only to be used
+	   to synchronize in the transport_stop and the capture info
+	   accessors, so that invalidation will not occur (both non-realtime).
+	*/
+
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
+
+	capture_info.push_back (ci);
+	capture_captured = 0;
+
+	/* now we've finished a capture, reset first_recordable_frame for next time */
+	first_recordable_frame = max_framepos;
+}
+
+void
+DiskWriter::set_record_enabled (bool yn)
+{
+	if (!recordable() || !_session.record_enabling_legal() || record_safe ()) {
+		return;
+	}
+
+	/* can't rec-enable in destructive mode if transport is before start */
+
+	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
+		return;
+	}
+
+	/* yes, i know that this not proof against race conditions, but its
+	   good enough. i think.
+	*/
+
+	if (record_enabled() != yn) {
+		if (yn) {
+			engage_record_enable ();
+		} else {
+			disengage_record_enable ();
+		}
+
+		RecordEnableChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
+DiskWriter::set_record_safe (bool yn)
+{
+	if (!recordable() || !_session.record_enabling_legal() || channels.reader()->empty()) {
+		return;
+	}
+
+	/* can't rec-safe in destructive mode if transport is before start ????
+	 REQUIRES REVIEW */
+
+	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
+		return;
+	}
+
+	/* yes, i know that this not proof against race conditions, but its
+	 good enough. i think.
+	 */
+
+	if (record_safe () != yn) {
+		if (yn) {
+			engage_record_safe ();
+		} else {
+			disengage_record_safe ();
+		}
+
+		RecordSafeChanged (); /* EMIT SIGNAL */
+	}
+}
+
+bool
+DiskWriter::prep_record_enable ()
+{
+	if (!recordable() || !_session.record_enabling_legal() || channels.reader()->empty() || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
+		return false;
+	}
+
+	/* can't rec-enable in destructive mode if transport is before start */
+
+	if (destructive() && _session.transport_frame() < _session.current_start_frame()) {
+		return false;
+	}
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	capturing_sources.clear ();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		capturing_sources.push_back ((*chan)->write_source);
+		Source::Lock lock((*chan)->write_source->mutex());
+		(*chan)->write_source->mark_streaming_write_started (lock);
+	}
+
+	return true;
+}
+
+bool
+DiskWriter::prep_record_disable ()
+{
+	capturing_sources.clear ();
+	return true;
+}
+
+float
+DiskWriter::buffer_load () const
+{
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	if (c->empty ()) {
+		return 1.0;
+	}
+
+	return (float) ((double) c->front()->buf->write_space()/
+			(double) c->front()->buf->bufsize());
 }

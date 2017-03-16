@@ -20,13 +20,19 @@
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 
+#include "ardour/audioplaylist.h"
 #include "ardour/butler.h"
 #include "ardour/disk_io.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/location.h"
+#include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/playlist.h"
+#include "ardour/playlist_factory.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -54,7 +60,16 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
         , speed_buffer_size (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
+	, _midi_buf (0)
+	, _frames_written_to_ringbuffer (0)
+	, _frames_read_from_ringbuffer (0)
 {
+}
+
+void
+DiskIOProcessor::init ()
+{
+	set_block_size (_session.get_block_size());
 }
 
 void
@@ -112,6 +127,58 @@ DiskIOProcessor::get_buffering_presets (BufferingPreset bp,
 	return true;
 }
 
+bool
+DiskIOProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out)
+{
+	if (in.n_midi() != 0 && in.n_midi() != 1) {
+		/* we only support zero or 1 MIDI stream */
+		return false;
+	}
+
+	if (in != out) {
+		/* currently no way to deliver different channels that we receive */
+		return false;
+	}
+
+	return true;
+}
+
+bool
+DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
+{
+	Glib::Threads::Mutex::Lock lm (state_lock);
+
+	RCUWriter<ChannelList> writer (channels);
+	boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+	uint32_t n_audio = in.n_audio();
+
+	if (n_audio > c->size()) {
+		add_channel_to (c, n_audio - c->size());
+	} else if (n_audio < c->size()) {
+		remove_channel_from (c, c->size() - n_audio);
+	}
+
+	if (in.n_midi() > 0 && !_midi_buf) {
+		const size_t size = _session.butler()->midi_diskstream_buffer_size();
+		_midi_buf = new MidiRingBuffer<framepos_t>(size);
+		midi_interpolation.add_channel_to (0,0);
+	}
+
+	if (speed() != 1.0f || speed() != -1.0f) {
+		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
+	} else {
+		seek (_session.transport_frame());
+	}
+
+	return Processor::configure_io (in, out);
+}
+
+int
+DiskIOProcessor::set_block_size (pframes_t nframes)
+{
+	return 0;
+}
 
 int
 DiskIOProcessor::set_loop (Location *location)
@@ -130,13 +197,23 @@ DiskIOProcessor::set_loop (Location *location)
 }
 
 void
+DiskIOProcessor::non_realtime_locate (framepos_t location)
+{
+	/* now refill channel buffers */
+
+	if (speed() != 1.0f || speed() != -1.0f) {
+		seek ((framepos_t) (location * (double) speed()), true);
+	} else {
+		seek (location, true);
+	}
+}
+
+void
 DiskIOProcessor::non_realtime_set_speed ()
 {
 	if (_buffer_reallocation_required)
 	{
 		Glib::Threads::Mutex::Lock lm (state_lock);
-		allocate_temporary_buffers ();
-
 		_buffer_reallocation_required = false;
 	}
 
@@ -211,15 +288,9 @@ int
 DiskIOProcessor::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
-		c->push_back (new ChannelInfo(
-			              _session.butler()->audio_diskstream_playback_buffer_size(),
-			              speed_buffer_size, wrap_buffer_size));
-		interpolation.add_channel_to (
-			_session.butler()->audio_diskstream_playback_buffer_size(),
-			speed_buffer_size);
+		c->push_back (new ChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size()));
+		interpolation.add_channel_to (_session.butler()->audio_diskstream_playback_buffer_size(), speed_buffer_size);
 	}
-
-	_n_channels.set (DataType::AUDIO, c->size());
 
 	return 0;
 }
@@ -242,8 +313,6 @@ DiskIOProcessor::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t
 		interpolation.remove_channel_from ();
 	}
 
-	_n_channels.set(DataType::AUDIO, c->size());
-
 	return 0;
 }
 
@@ -256,3 +325,170 @@ DiskIOProcessor::remove_channel (uint32_t how_many)
 	return remove_channel_from (c, how_many);
 }
 
+void
+DiskIOProcessor::playlist_deleted (boost::weak_ptr<Playlist> wpl)
+{
+	boost::shared_ptr<Playlist> pl (wpl.lock());
+
+	if (!pl) {
+		return;
+	}
+
+	for (uint32_t n = 0; n < DataType::num_types; ++n) {
+		if (pl == _playlists[n]) {
+
+			/* this catches an ordering issue with session destruction. playlists
+			   are destroyed before disk readers. we have to invalidate any handles
+			   we have to the playlist.
+			*/
+			_playlists[n].reset ();
+			break;
+		}
+	}
+}
+
+boost::shared_ptr<AudioPlaylist>
+DiskIOProcessor::audio_playlist () const
+{
+	return boost::dynamic_pointer_cast<AudioPlaylist> (_playlists[DataType::AUDIO]);
+}
+
+boost::shared_ptr<MidiPlaylist>
+DiskIOProcessor::midi_playlist () const
+{
+	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
+}
+
+int
+DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
+{
+        if (!playlist) {
+                return 0;
+        }
+
+	{
+		Glib::Threads::Mutex::Lock lm (state_lock);
+
+		if (playlist == _playlists[dt]) {
+			return 0;
+		}
+
+		playlist_connections.drop_connections ();
+
+		if (_playlists[dt]) {
+			_playlists[dt]->release();
+		}
+
+		_playlists[dt] = playlist;
+		playlist->use();
+
+		playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+		playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+		playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
+		playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
+	}
+
+	PlaylistChanged (dt); /* EMIT SIGNAL */
+	_session.set_dirty ();
+
+	return 0;
+}
+
+int
+DiskIOProcessor::find_and_use_playlist (DataType dt, const string& name)
+{
+	boost::shared_ptr<Playlist> playlist;
+
+	if ((playlist = _session.playlists->by_name (name)) == 0) {
+		playlist = PlaylistFactory::create (dt, _session, name);
+	}
+
+	if (!playlist) {
+		error << string_compose(_("DiskIOProcessor: \"%1\" isn't an playlist"), name) << endmsg;
+		return -1;
+	}
+
+	return use_playlist (dt, playlist);
+}
+
+int
+DiskIOProcessor::use_new_playlist (DataType dt)
+{
+	string newname;
+	boost::shared_ptr<Playlist> playlist = _playlists[dt];
+
+	if (playlist) {
+		newname = Playlist::bump_name (playlist->name(), _session);
+	} else {
+		newname = Playlist::bump_name (_name, _session);
+	}
+
+	playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (dt, _session, newname, hidden()));
+
+	if (!playlist) {
+		return -1;
+	}
+
+	return use_playlist (dt, playlist);
+}
+
+int
+DiskIOProcessor::use_copy_playlist (DataType dt)
+{
+	assert (_playlists[dt]);
+
+	if (_playlists[dt] == 0) {
+		error << string_compose(_("DiskIOProcessor %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
+		return -1;
+	}
+
+	string newname;
+	boost::shared_ptr<Playlist> playlist;
+
+	newname = Playlist::bump_name (_playlists[dt]->name(), _session);
+
+	if ((playlist = PlaylistFactory::create (_playlists[dt], newname)) == 0) {
+		return -1;
+	}
+
+	playlist->reset_shares();
+
+	return use_playlist (dt, playlist);
+}
+
+DiskIOProcessor::ChannelInfo::ChannelInfo (framecnt_t bufsize)
+{
+	buf = new RingBufferNPT<Sample> (bufsize);
+
+	/* touch the ringbuffer buffer, which will cause
+	   them to be mapped into locked physical RAM if
+	   we're running with mlockall(). this doesn't do
+	   much if we're not.
+	*/
+
+	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
+	capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
+}
+
+void
+DiskIOProcessor::ChannelInfo::resize (framecnt_t bufsize)
+{
+	delete buf;
+	buf = new RingBufferNPT<Sample> (bufsize);
+	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
+}
+
+DiskIOProcessor::ChannelInfo::~ChannelInfo ()
+{
+	delete buf;
+	buf = 0;
+
+	delete capture_transition_buf;
+	capture_transition_buf = 0;
+}
+
+void
+DiskIOProcessor::set_route (boost::shared_ptr<Route> r)
+{
+	_route = r;
+}
