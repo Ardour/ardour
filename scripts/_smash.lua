@@ -11,7 +11,7 @@ end
 function dsp_run (ins, outs, n_samples)
 	for c = 1, #outs do -- for each output channel (count from 1 to number of output channels)
 
-		if not ins[c]:sameinstance (outs[c]) then -- if processing is not in-place..
+		if ins[c] ~= outs[c] then -- if processing is not in-place..
 			ARDOUR.DSP.copy_vector (outs[c], ins[c], n_samples) -- ..copy data from input to output.
 		end
 

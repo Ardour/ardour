@@ -148,7 +148,7 @@ function dsp_run (ins, outs, n_samples)
 		for c = 1,#ins do
 			-- check if output and input buffers for this channel are identical
 			-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
-			if ins[c]:sameinstance (outs[c]) then
+			if ins[c] == outs[c] then
 				filters[c]:run (ins[c]:offset (off), siz) -- in-place processing
 			else
 				-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
