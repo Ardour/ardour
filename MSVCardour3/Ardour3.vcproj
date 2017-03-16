@@ -684,6 +684,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\idleometer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.cc"
 				>
 			</File>
@@ -1695,6 +1699,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\hit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\idleometer.h"
 				>
 			</File>
 			<File
