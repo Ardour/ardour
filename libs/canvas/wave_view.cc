@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2011-2013 Paul Davis
+    Copyright (C) 2017 Tim Mayberry
     Author: Carl Hetherington <cth@carlh.net>
 
     This program is free software; you can redistribute it and/or modify
@@ -19,6 +20,9 @@
 */
 
 #include <cmath>
+
+#include <boost/scoped_array.hpp>
+
 #include <cairomm/cairomm.h>
 
 #include <glibmm/threads.h>
@@ -44,6 +48,7 @@
 #include "canvas/debug.h"
 #include "canvas/utils.h"
 #include "canvas/wave_view.h"
+#include "canvas/wave_view_private.h"
 
 #include "evoral/Range.hpp"
 
@@ -60,15 +65,7 @@ double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;
 WaveView::Shape WaveView::_global_shape = WaveView::Normal;
 bool WaveView::_global_show_waveform_clipping = true;
-double WaveView::_clip_level = 0.98853;
-
-WaveViewCache* WaveView::images = 0;
-gint WaveView::drawing_thread_should_quit = 0;
-Glib::Threads::Mutex WaveView::request_queue_lock;
-Glib::Threads::Mutex WaveView::current_image_lock;
-Glib::Threads::Cond WaveView::request_cond;
-Glib::Threads::Thread* WaveView::_drawing_thread = 0;
-WaveView::DrawingRequestQueue WaveView::request_queue;
+double WaveView::_global_clip_level = 0.98853;
 
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
@@ -84,94 +81,64 @@ PBD::Signal0<void> WaveView::ClipLevelChanged;
 WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
 	, _region (region)
-	, _channel (0)
-	, _samples_per_pixel (0)
-	, _height (64)
-	, _show_zero (false)
-	, _zero_color (0xff0000ff)
-	, _clip_color (0xff0000ff)
-	, _logscaled (_global_logscaled)
-	, _shape (_global_shape)
-	, _gradient_depth (_global_gradient_depth)
+	, _props (new WaveViewProperties (region))
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
-	, _amplitude_above_axis (1.0)
-	, _region_amplitude (region->scale_amplitude ())
-	, _start_shift (0.0)
-	, _region_start (region->start())
-	, get_image_in_thread (false)
-	, always_get_image_in_thread (false)
-	, rendered (false)
+	, _draw_image_in_gui_thread (false)
+	, _always_draw_image_in_gui_thread (false)
 {
-	if (!images) {
-		images = new WaveViewCache;
-	}
-
-	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
-	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
-
-	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
+	init ();
 }
 
 WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
 	, _region (region)
-	, _channel (0)
-	, _samples_per_pixel (0)
-	, _height (64)
-	, _show_zero (false)
-	, _zero_color (0xff0000ff)
-	, _clip_color (0xff0000ff)
-	, _logscaled (_global_logscaled)
-	, _shape (_global_shape)
-	, _gradient_depth (_global_gradient_depth)
+	, _props (new WaveViewProperties (region))
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
-	, _amplitude_above_axis (1.0)
-	, _region_amplitude (region->scale_amplitude ())
-	, _start_shift (0.0)
-	, _region_start (region->start())
-	, get_image_in_thread (false)
-	, always_get_image_in_thread (false)
-	, rendered (false)
+	, _draw_image_in_gui_thread (false)
+	, _always_draw_image_in_gui_thread (false)
 {
-	if (!images) {
-		images = new WaveViewCache;
-	}
+	init ();
+}
 
-	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
-	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
+void
+WaveView::init ()
+{
+#ifdef ENABLE_THREADED_WAVEFORM_RENDERING
+	WaveViewThreads::initialize ();
+#endif
 
-	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
+	_props->fill_color = _fill_color;
+	_props->outline_color = _outline_color;
+
+	VisualPropertiesChanged.connect_same_thread (
+	    invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
+	ClipLevelChanged.connect_same_thread (invalidation_connection,
+	                                      boost::bind (&WaveView::handle_clip_level_change, this));
 }
 
 WaveView::~WaveView ()
 {
-	invalidate_image_cache ();
-	if (images ) {
-		images->clear_cache ();
-	}
+#ifdef ENABLE_THREADED_WAVEFORM_RENDERING
+	WaveViewThreads::deinitialize ();
+#endif
+
+	reset_cache_group ();
 }
 
 string
 WaveView::debug_name() const
 {
-	return _region->name() + string (":") + PBD::to_string (_channel+1);
-}
-
-void
-WaveView::image_ready ()
-{
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 CR %4)\n", this, g_get_monotonic_time(), visible(), current_request));
-	redraw ();
+	return _region->name () + string (":") + PBD::to_string (_props->channel + 1);
 }
 
 void
 WaveView::set_always_get_image_in_thread (bool yn)
 {
-	always_get_image_in_thread = yn;
+	_always_draw_image_in_gui_thread = yn;
 }
 
 void
@@ -179,24 +146,23 @@ WaveView::handle_visual_property_change ()
 {
 	bool changed = false;
 
-	if (!_shape_independent && (_shape != global_shape())) {
-		_shape = global_shape();
+	if (!_shape_independent && (_props->shape != global_shape())) {
+		_props->shape = global_shape();
 		changed = true;
 	}
 
-	if (!_logscaled_independent && (_logscaled != global_logscaled())) {
-		_logscaled = global_logscaled();
+	if (!_logscaled_independent && (_props->logscaled != global_logscaled())) {
+		_props->logscaled = global_logscaled();
 		changed = true;
 	}
 
-	if (!_gradient_depth_independent && (_gradient_depth != global_gradient_depth())) {
-		_gradient_depth = global_gradient_depth();
+	if (!_gradient_depth_independent && (_props->gradient_depth != global_gradient_depth())) {
+		_props->gradient_depth = global_gradient_depth();
 		changed = true;
 	}
 
 	if (changed) {
 		begin_visual_change ();
-		invalidate_image_cache ();
 		end_visual_change ();
 	}
 }
@@ -205,7 +171,6 @@ void
 WaveView::handle_clip_level_change ()
 {
 	begin_visual_change ();
-	invalidate_image_cache ();
 	end_visual_change ();
 }
 
@@ -214,8 +179,8 @@ WaveView::set_fill_color (Color c)
 {
 	if (c != _fill_color) {
 		begin_visual_change ();
-		invalidate_image_cache ();
 		Fill::set_fill_color (c);
+		_props->fill_color = _fill_color; // ugh
 		end_visual_change ();
 	}
 }
@@ -225,8 +190,8 @@ WaveView::set_outline_color (Color c)
 {
 	if (c != _outline_color) {
 		begin_visual_change ();
-		invalidate_image_cache ();
 		Outline::set_outline_color (c);
+		_props->outline_color = c;
 		end_visual_change ();
 	}
 }
@@ -234,11 +199,10 @@ WaveView::set_outline_color (Color c)
 void
 WaveView::set_samples_per_pixel (double samples_per_pixel)
 {
-	if (samples_per_pixel != _samples_per_pixel) {
+	if (_props->samples_per_pixel != samples_per_pixel) {
 		begin_change ();
 
-		invalidate_image_cache ();
-		_samples_per_pixel = samples_per_pixel;
+		_props->samples_per_pixel = samples_per_pixel;
 		_bounding_box_dirty = true;
 
 		end_change ();
@@ -261,26 +225,150 @@ void
 WaveView::set_clip_level (double dB)
 {
 	const double clip_level = dB_to_coefficient (dB);
-	if (clip_level != _clip_level) {
-		_clip_level = clip_level;
+	if (_global_clip_level != clip_level) {
+		_global_clip_level = clip_level;
 		ClipLevelChanged ();
 	}
 }
 
-void
-WaveView::invalidate_image_cache ()
+boost::shared_ptr<WaveViewDrawRequest>
+WaveView::create_draw_request (WaveViewProperties const& props) const
 {
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 invalidates image cache and cancels current request\n", this));
-	cancel_my_render_request ();
-	Glib::Threads::Mutex::Lock lci (current_image_lock);
-	_current_image.reset ();
+	assert (props.is_valid());
+
+	boost::shared_ptr<WaveViewDrawRequest> request (new WaveViewDrawRequest);
+
+	request->image = boost::shared_ptr<WaveViewImage> (new WaveViewImage (_region, props));
+	return request;
 }
 
 void
-WaveView::compute_tips (PeakData const & peak, WaveView::LineTips& tips) const
+WaveView::prepare_for_render (Rect const& area) const
 {
-	const double effective_height  = _height;
+	if (draw_image_in_gui_thread()) {
+		// Drawing image in GUI thread in WaveView::render
+		return;
+	}
 
+	Rect draw_rect;
+	Rect self_rect;
+
+	// all in window coordinate space
+	if (!get_item_and_draw_rect_in_window_coords (area, self_rect, draw_rect)) {
+		return;
+	}
+
+	double const image_start_pixel_offset = draw_rect.x0 - self_rect.x0;
+	double const image_end_pixel_offset = draw_rect.x1 - self_rect.x0;
+
+	WaveViewProperties required_props = *_props;
+
+	required_props.set_sample_positions_from_pixel_offsets (image_start_pixel_offset,
+	                                                        image_end_pixel_offset);
+
+	if (!required_props.is_valid ()) {
+		return;
+	}
+
+	if (_image) {
+		if (_image->props.is_equivalent (required_props)) {
+			return;
+		} else {
+			// Image does not contain sample area required
+		}
+	}
+
+	boost::shared_ptr<WaveViewDrawRequest> request = create_draw_request (required_props);
+
+	queue_draw_request (request);
+}
+
+bool
+WaveView::get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect& item_rect,
+                                                   Rect& draw_rect) const
+{
+	/* a WaveView is intimately connected to an AudioRegion. It will
+	 * display the waveform within the region, anywhere from the start of
+	 * the region to its end.
+	 *
+	 * the area we've been asked to render may overlap with area covered
+	 * by the region in any of the normal ways:
+	 *
+	 *  - it may begin and end within the area covered by the region
+	 *  - it may start before and end after the area covered by region
+	 *  - it may start before and end within the area covered by the region
+	 *  - it may start within and end after the area covered by the region
+	 *  - it may be precisely coincident with the area covered by region.
+	 *
+	 * So let's start by determining the area covered by the region, in
+	 * window coordinates. It begins at zero (in item coordinates for this
+	 * waveview, and extends to region_length() / _samples_per_pixel.
+	 */
+
+	double const width = region_length() / _props->samples_per_pixel;
+	item_rect = item_to_window (Rect (0.0, 0.0, width, _props->height));
+
+	/* Now lets get the intersection with the area we've been asked to draw */
+
+	draw_rect = item_rect.intersection (canvas_rect);
+
+	if (!draw_rect) {
+		// No intersection with drawing area
+		return false;
+	}
+
+	/* draw_rect now defines the rectangle we need to update/render the waveview
+	 * into, in window coordinate space.
+	 *
+	 * We round down in case we were asked to draw "between" pixels at the start
+	 * and/or end.
+	 */
+	draw_rect.x0 = floor (draw_rect.x0);
+	draw_rect.x1 = floor (draw_rect.x1);
+
+	return true;
+}
+
+void
+WaveView::queue_draw_request (boost::shared_ptr<WaveViewDrawRequest> const& request) const
+{
+	// Don't enqueue any requests without a thread to dequeue them.
+	assert (WaveViewThreads::enabled());
+
+	if (!request || !request->is_valid()) {
+		return;
+	}
+
+	if (current_request) {
+		current_request->cancel ();
+	}
+
+	boost::shared_ptr<WaveViewImage> cached_image =
+	    get_cache_group ()->lookup_image (request->image->props);
+
+	if (cached_image) {
+		// The image may not be finished at this point but that is fine, great in
+		// fact as it means it should only need to be drawn once.
+		request->image = cached_image;
+		current_request = request;
+	} else {
+		// now we can finally set an optimal image now that we are not using the
+		// properties for comparisons.
+		request->image->props.set_width_samples (optimal_image_width_samples ());
+
+		current_request = request;
+
+		// Add it to the cache so that other WaveViews can refer to the same image
+		get_cache_group()->add_image (current_request->image);
+
+		WaveViewThreads::enqueue_draw_request (current_request);
+	}
+}
+
+void
+WaveView::compute_tips (ARDOUR::PeakData const& peak, WaveView::LineTips& tips,
+                        double const effective_height)
+{
 	/* remember: canvas (and cairo) coordinate space puts the origin at the upper left.
 
 	   So, a sample value of 1.0 (0dbFS) will be computed as:
@@ -332,29 +420,31 @@ WaveView::compute_tips (PeakData const & peak, WaveView::LineTips& tips) const
 
 
 Coord
-WaveView::y_extent (double s) const
+WaveView::y_extent (double s, Shape const shape, double const height)
 {
-	assert (_shape == Rectified);
-	return floor ((1.0 - s) * _height);
+	assert (shape == Rectified);
+	return floor ((1.0 - s) * height);
 }
 
 void
-WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks) const
+WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks, int n_peaks)
 {
-	Cairo::RefPtr<Cairo::ImageSurface> stripe = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+	const double height = image->get_height();
+
+	Cairo::RefPtr<Cairo::ImageSurface> stripe = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, height);
 
 	Cairo::RefPtr<Cairo::Context> stripe_context = Cairo::Context::create (stripe);
 	stripe_context->set_antialias (Cairo::ANTIALIAS_NONE);
 
 	uint32_t stripe_separation = 150;
-	double start = - floor (_height / stripe_separation) * stripe_separation;
+	double start = - floor (height / stripe_separation) * stripe_separation;
 	int stripe_x = 0;
 
 	while (start < n_peaks) {
 
 		stripe_context->move_to (start, 0);
-		stripe_x = start + _height;
-		stripe_context->line_to (stripe_x, _height);
+		stripe_x = start + height;
+		stripe_context->line_to (stripe_x, height);
 		start += stripe_separation;
 	}
 
@@ -381,15 +471,17 @@ struct ImageSet {
 };
 
 void
-WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks, boost::shared_ptr<WaveViewThreadRequest> req) const
+WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks, int n_peaks,
+                      boost::shared_ptr<WaveViewDrawRequest> req)
 {
+	const double height = image->get_height();
 
 	ImageSet images;
 
-	images.wave = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
-	images.outline = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
-	images.clip = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
-	images.zero = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+	images.wave = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, height);
+	images.outline = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, height);
+	images.clip = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, height);
+	images.zero = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, height);
 
 	Cairo::RefPtr<Cairo::Context> wave_context = Cairo::Context::create (images.wave);
 	Cairo::RefPtr<Cairo::Context> outline_context = Cairo::Context::create (images.outline);
@@ -412,28 +504,31 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = _clip_level * _region_amplitude;
+	const double clip_level = _global_clip_level * req->image->props.amplitude;
 
-	if (_shape == WaveView::Rectified) {
+	const Shape shape = req->image->props.shape;
+	const bool logscaled = req->image->props.logscaled;
+
+	if (req->image->props.shape == WaveView::Rectified) {
 
 		/* each peak is a line from the bottom of the waveview
-		 * to a point determined by max (_peaks[i].max,
-		 * _peaks[i].min)
+		 * to a point determined by max (peaks[i].max,
+		 * peaks[i].min)
 		 */
 
-		if (_logscaled) {
+		if (logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
 
-				tips[i].bot = height() - 1.0;
-				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
-				tips[i].top = y_extent (p);
-				tips[i].spread = p * _height;
+				tips[i].bot = height - 1.0;
+				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (peaks[i].max), fabs (peaks[i].min))));
+				tips[i].top = y_extent (p, shape, height);
+				tips[i].spread = p * height;
 
-				if (_peaks[i].max >= clip_level) {
+				if (peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
 				}
 
-				if (-(_peaks[i].min) >= clip_level) {
+				if (-(peaks[i].min) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 			}
@@ -441,10 +536,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
 
-				tips[i].bot = height() - 1.0;
-				const double p = max(fabs (_peaks[i].max), fabs (_peaks[i].min));
-				tips[i].top = y_extent (p);
-				tips[i].spread = p * _height;
+				tips[i].bot = height - 1.0;
+				const double p = max(fabs (peaks[i].max), fabs (peaks[i].min));
+				tips[i].top = y_extent (p, shape, height);
+				tips[i].spread = p * height;
 				if (p >= clip_level) {
 					tips[i].clip_max = true;
 				}
@@ -454,16 +549,16 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 	} else {
 
-		if (_logscaled) {
+		if (logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
 				PeakData p;
-				p.max = _peaks[i].max;
-				p.min = _peaks[i].min;
+				p.max = peaks[i].max;
+				p.min = peaks[i].min;
 
-				if (_peaks[i].max >= clip_level) {
+				if (peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
 				}
-				if (-(_peaks[i].min) >= clip_level) {
+				if (-(peaks[i].min) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 
@@ -483,27 +578,27 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					p.min = 0.0;
 				}
 
-				compute_tips (p, tips[i]);
+				compute_tips (p, tips[i], height);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
-				if (_peaks[i].max >= clip_level) {
+				if (peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
 				}
-				if (-(_peaks[i].min) >= clip_level) {
+				if (-(peaks[i].min) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 
-				compute_tips (_peaks[i], tips[i]);
+				compute_tips (peaks[i], tips[i], height);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
 		}
 	}
 
-	if (req->should_stop()) {
+	if (req->stopped()) {
 		return;
 	}
 
@@ -532,7 +627,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	 * or 5% of the height of the waveview item.
 	 */
 
-	const double clip_height = min (7.0, ceil (_height * 0.05));
+	const double clip_height = min (7.0, ceil (height * 0.05));
 
 	/* There are 3 possible components to draw at each x-axis position: the
 	   waveform "line", the zero line and an outline/clip indicator.  We
@@ -559,7 +654,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   always draw the clip/outline indicators.
 	*/
 
-	if (_shape == WaveView::Rectified) {
+	if (shape == WaveView::Rectified) {
 
 		for (int i = 0; i < n_peaks; ++i) {
 
@@ -588,7 +683,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		outline_context->stroke ();
 
 	} else {
-		const int height_zero = floor( _height * .5);
+		const int height_zero = floor(height * .5);
 
 		for (int i = 0; i < n_peaks; ++i) {
 
@@ -616,8 +711,9 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 			/* zero line, show only if there is enough spread
 			or the waveform line does not cross zero line */
+			bool const show_zero_line = req->image->props.show_zero;
 
-			if (show_zero_line() && ((tips[i].spread >= 5.0) || (tips[i].top > height_zero ) || (tips[i].bot < height_zero)) ) {
+			if (show_zero_line && ((tips[i].spread >= 5.0) || (tips[i].top > height_zero ) || (tips[i].bot < height_zero)) ) {
 				zero_context->move_to (i, height_zero);
 				zero_context->rel_line_to (1.0, 0);
 			}
@@ -683,7 +779,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		zero_context->stroke ();
 	}
 
-	if (req->should_stop()) {
+	if (req->stopped()) {
 		return;
 	}
 
@@ -691,15 +787,19 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 	/* Here we set a source colour and use the various components as a mask. */
 
-	if (gradient_depth() != 0.0) {
+	const Color fill_color = req->image->props.fill_color;
+	const double gradient_depth = req->image->props.gradient_depth;
 
-		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _height));
+	if (gradient_depth != 0.0) {
+
+		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, height));
 
 		double stops[3];
 
 		double r, g, b, a;
 
-		if (_shape == Rectified) {
+
+		if (shape == Rectified) {
 			stops[0] = 0.1;
 			stops[1] = 0.3;
 			stops[2] = 0.9;
@@ -709,13 +809,13 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			stops[2] = 0.9;
 		}
 
-		color_to_rgba (_fill_color, r, g, b, a);
+		color_to_rgba (fill_color, r, g, b, a);
 		gradient->add_color_stop_rgba (stops[1], r, g, b, a);
 		/* generate a new color for the middle of the gradient */
 		double h, s, v;
-		color_to_hsv (_fill_color, h, s, v);
+		color_to_hsv (fill_color, h, s, v);
 		/* change v towards white */
-		v *= 1.0 - gradient_depth();
+		v *= 1.0 - gradient_depth;
 		Color center = hsva_to_color (h, s, v, a);
 		color_to_rgba (center, r, g, b, a);
 
@@ -724,510 +824,318 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 		context->set_source (gradient);
 	} else {
-		set_source_rgba (context, _fill_color);
+		set_source_rgba (context, fill_color);
 	}
 
-	if (req->should_stop()) {
+	if (req->stopped()) {
 		return;
 	}
 
 	context->mask (images.wave, 0, 0);
 	context->fill ();
 
-	set_source_rgba (context, _outline_color);
+	set_source_rgba (context, req->image->props.outline_color);
 	context->mask (images.outline, 0, 0);
 	context->fill ();
 
-	set_source_rgba (context, _clip_color);
+	set_source_rgba (context, req->image->props.clip_color);
 	context->mask (images.clip, 0, 0);
 	context->fill ();
 
-	set_source_rgba (context, _zero_color);
+	set_source_rgba (context, req->image->props.zero_color);
 	context->mask (images.zero, 0, 0);
 	context->fill ();
 }
 
-boost::shared_ptr<WaveViewCache::Entry>
-WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const
+framecnt_t
+WaveView::optimal_image_width_samples () const
 {
-	if (!req->image) {
-		// cerr << "asked to cache null image!!!\n";
-		return boost::shared_ptr<WaveViewCache::Entry> ();
-	}
-
-	boost::shared_ptr<WaveViewCache::Entry> ret (new WaveViewCache::Entry (req->channel,
-	                                                                       req->height,
-	                                                                       req->amplitude,
-	                                                                       req->fill_color,
-	                                                                       req->samples_per_pixel,
-	                                                                       req->start,
-	                                                                       req->end,
-	                                                                       req->image));
-	images->add (_region->audio_source (_channel), ret);
-
-	/* consolidate cache first (removes fully-contained
-	 * duplicate images)
+	/* Compute how wide the image should be in samples.
+	 *
+	 * The resulting image should be wider than the canvas width so that the
+	 * image does not have to be redrawn each time the canvas offset changes, but
+	 * drawing too much unnecessarily, for instance when zooming into the canvas
+	 * the part of the image that is outside of the visible canvas area may never
+	 * be displayed and will just increase apparent render time and reduce
+	 * responsiveness in non-threaded rendering and cause "flashing" waveforms in
+	 * threaded rendering mode.
+	 *
+	 * Another thing to consider is that if there are a number of waveforms on
+	 * the canvas that are the width of the canvas then we don't want to have to
+	 * draw the images for them all at once as it will cause a spike in render
+	 * time, or in threaded rendering mode it will mean all the draw requests will
+	 * the queued during the same frame/expose event. This issue can be
+	 * alleviated by using an element of randomness in selecting the image width.
+	 *
+	 * If the value of samples per pixel is less than 1/10th of a second, use
+	 * 1/10th of a second instead.
 	 */
 
-	images->consolidate_image_cache (_region->audio_source (_channel),
-	                                 req->channel, req->height, req->amplitude,
-	                                 req->fill_color, req->samples_per_pixel);
+	framecnt_t canvas_width_samples = _canvas->visible_area().width() * _props->samples_per_pixel;
+	const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
 
-	return ret;
+	/* If zoomed in where a canvas item interects with the canvas area but
+	 * stretches for many pages either side, to avoid having draw all images when
+	 * the canvas scrolls by a page width the multiplier would have to be a
+	 * randomized amount centered around 3 times the visible canvas width, but
+	 * for other operations like zooming or even with a stationary playhead it is
+	 * a lot of extra drawing that can affect performance.
+	 *
+	 * So without making things too complicated with different widths for
+	 * different operations, try to use a width that is a balance and will work
+	 * well for scrolling(non-page width) so all the images aren't redrawn at the
+	 * same time but also faster for sequential zooming operations.
+	 *
+	 * Canvas items that don't intersect with the edges of the visible canvas
+	 * will of course only draw images that are the pixel width of the item.
+	 *
+	 * It is a perhaps a coincidence that these values are centered roughly
+	 * around the golden ratio but they did work well in my testing.
+	 */
+	const double min_multiplier = 1.4;
+	const double max_multiplier = 1.8;
+
+	/**
+	 * A combination of high resolution screens, high samplerates and high
+	 * zoom levels(1 sample per pixel) can cause 1/10 of a second(in
+	 * pixels) to exceed the cairo image size limit.
+	 */
+	const double cairo_image_limit = 32767.0;
+	const double max_image_width = cairo_image_limit / max_multiplier;
+
+	framecnt_t max_width_samples = floor (max_image_width / _props->samples_per_pixel);
+
+	const framecnt_t one_tenth_of_second_limited = std::min (one_tenth_of_second, max_width_samples);
+
+	framecnt_t new_sample_count = std::max (canvas_width_samples, one_tenth_of_second_limited);
+
+	const double multiplier = g_random_double_range (min_multiplier, max_multiplier);
+
+	return new_sample_count * multiplier;
 }
 
-boost::shared_ptr<WaveViewCache::Entry>
-WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
+void
+WaveView::set_image (boost::shared_ptr<WaveViewImage> img) const
 {
-	boost::shared_ptr<WaveViewCache::Entry> ret;
+	get_cache_group ()->add_image (img);
+	_image = img;
+}
 
-	full_image = true;
+void
+WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
+{
+	boost::shared_ptr<const ARDOUR::AudioRegion> region = req->image->region.lock();
 
-	/* this is called from a ::render() call, when we need an image to
-	   draw with.
+	if (!region) {
+		return;
+	}
+
+	if (req->stopped()) {
+		return;
+	}
+
+	WaveViewProperties const& props = req->image->props;
+
+	const int n_peaks = props.get_width_pixels ();
+
+	assert (n_peaks > 0 && n_peaks < 32767);
+
+	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
+
+	/* Note that Region::read_peaks() takes a start position based on an
+	   offset into the Region's **SOURCE**, rather than an offset into
+	   the Region itself.
 	*/
 
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 needs image from %2 .. %3\n", name, start, end));
+	framecnt_t peaks_read =
+	    region->read_peaks (peaks.get (), n_peaks, props.get_sample_start (),
+	                        props.get_length_samples (), props.channel, props.samples_per_pixel);
 
+	if (req->stopped()) {
+		return;
+	}
 
-	{
-		Glib::Threads::Mutex::Lock lmq (request_queue_lock);
+	Cairo::RefPtr<Cairo::ImageSurface> cairo_image =
+	    Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->image->props.height);
 
-		/* if there's a draw request outstanding, check to see if we
-		 * have an image there. if so, use it (and put it in the cache
-		 * while we're here.
+	// http://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
+	// This function always returns a valid pointer, but it will return a pointer to a "nil" surface..
+	// but there's some evidence that req->image can be NULL.
+	// http://tracker.ardour.org/view.php?id=6478
+	assert (cairo_image);
+
+	if (peaks_read > 0) {
+
+		/* region amplitude will have been used to generate the
+		 * peak values already, but not the visual-only
+		 * amplitude_above_axis. So apply that here before
+		 * rendering.
 		 */
 
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request,
-					(current_request ? current_request->should_stop() : false),
-					(current_request ? (current_request->image ? "yes" : "no") : "n/a")));
+		const double amplitude_above_axis = props.amplitude_above_axis;
 
-		if (current_request && !current_request->should_stop() && current_request->image) {
-
-			/* put the image into the cache so that other
-			 * WaveViews can use it if it is useful
-			 */
-
-			if (current_request->start <= start && current_request->end >= end) {
-
-				ret.reset (new WaveViewCache::Entry (current_request->channel,
-				                                     current_request->height,
-				                                     current_request->amplitude,
-				                                     current_request->fill_color,
-				                                     current_request->samples_per_pixel,
-				                                     current_request->start,
-				                                     current_request->end,
-				                                     current_request->image));
-
-				cache_request_result (current_request);
-				DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: got image from completed request, spans %2..%3\n",
-				                                              name, current_request->start, current_request->end));
+		if (amplitude_above_axis != 1.0) {
+			for (framecnt_t i = 0; i < n_peaks; ++i) {
+				peaks[i].max *= amplitude_above_axis;
+				peaks[i].min *= amplitude_above_axis;
 			}
-
-			/* drop our handle on the current request */
-			current_request.reset ();
 		}
-	}
 
-	if (!ret) {
+		draw_image (cairo_image, peaks.get(), n_peaks, req);
 
-		/* no current image draw request, so look in the cache */
-
-		ret = get_image_from_cache (start, end, full_image);
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: lookup from cache gave %2 (full %3)\n",
-		                                              name, ret, full_image));
-
-	}
-
-
-
-	if (!ret || !full_image) {
-
-#ifndef ENABLE_THREADED_WAVEFORM_RENDERING
-		if (1)
-#else
-		if ((rendered && get_image_in_thread) || always_get_image_in_thread)
-#endif
-		{
-
-			DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: generating image in caller thread\n", name));
-
-			boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
-
-			req->type = WaveViewThreadRequest::Draw;
-			req->start = start;
-			req->end = end;
-			req->samples_per_pixel = _samples_per_pixel;
-			req->region = _region; /* weak ptr, to avoid storing a reference in the request queue */
-			req->channel = _channel;
-			req->height = _height;
-			req->fill_color = _fill_color;
-			req->amplitude = _region_amplitude * _amplitude_above_axis;
-			req->width = desired_image_width ();
-
-			/* draw image in this (the GUI thread) */
-
-			generate_image (req, false);
-
-			/* cache the result */
-
-			ret = cache_request_result (req);
-
-			/* reset this so that future missing images are
-			 * generated in a a worker thread.
-			 */
-
-			get_image_in_thread = false;
-
-		} else {
-			queue_get_image (_region, start, end);
-		}
-	}
-
-	if (ret) {
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 got an image from %2 .. %3 (full ? %4)\n", name, ret->start, ret->end, full_image));
 	} else {
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 no useful image available\n", name));
+		draw_absent_image (cairo_image, peaks.get(), n_peaks);
 	}
 
-	return ret;
+	if (req->stopped ()) {
+		return;
+	}
+
+	// Assign now that we are sure all drawing is complete as that is what
+	// determines whether a request was finished.
+	req->image->cairo_image = cairo_image;
 }
 
-boost::shared_ptr<WaveViewCache::Entry>
-WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) const
+bool
+WaveView::draw_image_in_gui_thread () const
 {
-	if (!images) {
-		return boost::shared_ptr<WaveViewCache::Entry>();
-	}
-
-	return images->lookup_image (_region->audio_source (_channel), start, end, _channel,
-	                             _height, _region_amplitude * _amplitude_above_axis, _fill_color, _samples_per_pixel, full);
-}
-
-framecnt_t
-WaveView::desired_image_width () const
-{
-	/* compute how wide the image should be, in samples.
-	 *
-	 * We want at least 1 canvas width's worth, but if that
-	 * represents less than 1/10th of a second, use 1/10th of
-	 * a second instead.
-	 *
-	 * ..unless at high-zoom level 100ms would be more than 2^15px
-	 * (cairo image limit), note that generate_image() uses twice this
-	 * width (left/right of the center of the request range.
-	 */
-
-	framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
-	const framecnt_t one_tenth_of_second = std::min (_region->session().frame_rate() / 10,  (framecnt_t)floor (16383.0 / _samples_per_pixel));
-
-
-	if (canvas_width_samples > one_tenth_of_second) {
-		return  canvas_width_samples;
-	}
-
-	return one_tenth_of_second;
-}
-
-void
-WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const
-{
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: queue image from %2 .. %3\n", name, start, end));
-	boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
-
-	req->type = WaveViewThreadRequest::Draw;
-	req->start = start;
-	req->end = end;
-	req->samples_per_pixel = _samples_per_pixel;
-	req->region = _region; /* weak ptr, to avoid storing a reference in the request queue */
-	req->channel = _channel;
-	req->height = _height;
-	req->fill_color = _fill_color;
-	req->amplitude = _region_amplitude * _amplitude_above_axis;
-	req->width = desired_image_width ();
-
-	if (current_request) {
-		/* this will stop rendering in progress (which might otherwise
-		   be long lived) for any current request.
-		*/
-		Glib::Threads::Mutex::Lock lm (request_queue_lock);
-		if (current_request) {
-			current_request->cancel ();
-		}
-	}
-
-	start_drawing_thread ();
-
-	/* swap requests (protected by lock) */
-
-	{
-		Glib::Threads::Mutex::Lock lm (request_queue_lock);
-		current_request = req;
-
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has current request %2\n", this, req));
-
-		if (request_queue.insert (this).second) {
-			/* this waveview was not already in the request queue, make sure we wake
-				 the rendering thread in case it is asleep.
-				 */
-			request_cond.signal ();
-		}
-	}
-}
-
-void
-WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_render_thread) const
-{
-	if (!req->should_stop()) {
-
-		/* sample position is canonical here, and we want to generate
-		 * an image that spans about 3x the canvas width. We get to that
-		 * width by using an image sample count of the screen width added
-		 * on each side of the desired image center.
-		 */
-
-		const framepos_t center = req->start + ((req->end - req->start) / 2);
-		const framecnt_t image_samples = req->width;
-
-		/* we can request data from anywhere in the Source, between 0 and its length */
-
-		framepos_t sample_start = max (_region_start, (center - image_samples));
-		framepos_t sample_end = min (center + image_samples, region_end());
-		const int n_peaks = std::max (1LL, llrint (ceil ((sample_end - sample_start) / (req->samples_per_pixel))));
-
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: request %2 .. %3 width: %4; render %5 .. %6 (%7)\n", name, req->start, req->end, req->width, sample_start, sample_end, n_peaks));
-
-		assert (n_peaks > 0 && n_peaks < 32767);
-
-		boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
-
-		/* Note that Region::read_peaks() takes a start position based on an
-		   offset into the Region's **SOURCE**, rather than an offset into
-		   the Region itself.
-		*/
-
-		framecnt_t peaks_read = _region->read_peaks (peaks.get(), n_peaks,
-		                                             sample_start, sample_end - sample_start,
-		                                             req->channel,
-		                                             req->samples_per_pixel);
-
-		if (req->should_stop()) {
-			// cerr << "Request stopped after reading peaks\n";
-			return;
-		}
-
-		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
-
-		// http://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
-		// This function always returns a valid pointer, but it will return a pointer to a "nil" surface..
-		// but there's some evidence that req->image can be NULL.
-		// http://tracker.ardour.org/view.php?id=6478
-		assert (req->image);
-
-		/* make sure we record the sample positions that were actually used */
-		req->start = sample_start;
-		req->end = sample_end;
-
-		if (peaks_read > 0) {
-
-			/* region amplitude will have been used to generate the
-			 * peak values already, but not the visual-only
-			 * amplitude_above_axis. So apply that here before
-			 * rendering.
-			 */
-
-			if (_amplitude_above_axis != 1.0) {
-				for (framecnt_t i = 0; i < n_peaks; ++i) {
-					peaks[i].max *= _amplitude_above_axis;
-					peaks[i].min *= _amplitude_above_axis;
-				}
-			}
-
-			draw_image (req->image, peaks.get(), n_peaks, req);
-		} else {
-			draw_absent_image (req->image, peaks.get(), n_peaks);
-		}
-	} else {
-		// cerr << "Request stopped before image generation\n";
-	}
-
-	if (in_render_thread && !req->should_stop()) {
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
-		const_cast<WaveView*>(this)->ImageReady (); /* emit signal */
-	}
-
-	return;
-}
-
-/** Given a waveform that starts at window x-coordinate @param wave_origin
- * and the first pixel that we will actually draw @param draw_start, return
- * the offset into an image of the entire waveform that we will need to use.
- *
- * Note: most of our cached images are NOT of the entire waveform, this is just
- * computationally useful when determining which the sample range span for
- * the image we need.
- */
-static inline double
-window_to_image (double wave_origin, double image_start)
-{
-	return image_start - wave_origin;
+	return _draw_image_in_gui_thread || _always_draw_image_in_gui_thread || !rendered () ||
+	       !WaveViewThreads::enabled ();
 }
 
 void
 WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	assert (_samples_per_pixel != 0);
+	assert (_props->samples_per_pixel != 0);
 
-	if (!_region) {
+	if (!_region) { // assert?
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("render %1 at %2\n", this, g_get_monotonic_time()));
+	Rect draw;
+	Rect self;
 
-	/* a WaveView is intimately connected to an AudioRegion. It will
-	 * display the waveform within the region, anywhere from the start of
-	 * the region to its end.
-	 *
-	 * the area we've been aked to render may overlap with area covered
-	 * by the region in any of the normal ways:
-	 *
-	 *  - it may begin and end within the area covered by the region
-	 *  - it may start before and end after the area covered by region
-	 *  - it may start before and end within the area covered by the region
-	 *  - it may start within and end after the area covered by the region
-	 *  - it may be precisely coincident with the area covered by region.
-	 *
-	 * So let's start by determining the area covered by the region, in
-	 * window coordinates. It begins at zero (in item coordinates for this
-	 * waveview, and extends to region_length() / _samples_per_pixel.
-	 */
-
-	Rect self = item_to_window (Rect (0.0, 0.0, region_length() / _samples_per_pixel, _height));
-
-	// cerr << name << " RENDER " << area << " self = " << self << endl;
-
-	/* Now lets get the intersection with the area we've been asked to draw */
-
-	Rect d = self.intersection (area);
-
-	if (!d) {
+	if (!get_item_and_draw_rect_in_window_coords (area, self, draw)) {
+		assert(true);
 		return;
 	}
 
-	Rect draw = d;
+	double const image_start_pixel_offset = draw.x0 - self.x0;
+	double const image_end_pixel_offset = draw.x1 - self.x0;
 
-	/* "draw" is now a rectangle that defines the rectangle we need to
-	 * update/render the waveview into, in window coordinate space.
-	 */
+	if (image_start_pixel_offset == image_end_pixel_offset) {
+		// this may happen if zoomed very far out with a small region
+		return;
+	}
 
-	/* window coordinates - pixels where x=0 is the left edge of the canvas
-	 * window. We round down in case we were asked to
-	 * draw "between" pixels at the start and/or end.
-	 */
+	WaveViewProperties required_props = *_props;
 
-	double draw_start = floor (draw.x0);
-	const double draw_end = floor (draw.x1);
+	required_props.set_sample_positions_from_pixel_offsets (image_start_pixel_offset,
+	                                                        image_end_pixel_offset);
 
-	// cerr << "Need to draw " << draw_start << " .. " << draw_end << " vs. " << area << " and self = " << self << endl;
+	assert (required_props.is_valid());
 
-	/* image coordnates: pixels where x=0 is the start of this waveview,
-	 * wherever it may be positioned. thus image_start=N means "an image
-	 * that begins N pixels after the start of region that this waveview is
-	 * representing.
-	 */
+	boost::shared_ptr<WaveViewImage> image_to_draw;
 
-	const framepos_t image_start = window_to_image (self.x0, draw_start);
-	const framepos_t image_end = window_to_image (self.x0, draw_end);
+	if (current_request) {
+		if (!current_request->image->props.is_equivalent (required_props)) {
+			// The WaveView properties may have been updated during recording between
+			// prepare_for_render and render calls and the new required props have
+			// different end sample value.
+			current_request->cancel ();
+			current_request.reset ();
+		} else if (current_request->finished ()) {
+			image_to_draw = current_request->image;
+			current_request.reset ();
+		}
+	} else {
+		// No current Request
+	}
 
-	// cerr << "Image/WV space: " << image_start << " .. " << image_end << endl;
-
-	/* sample coordinates - note, these are not subject to rounding error
-	 *
-	 * "sample_start = N" means "the first sample we need to represent is N
-	 * samples after the first sample of the region"
-	 */
-
-	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
-	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
-
-	// cerr << "Sample space: " << sample_start << " .. " << sample_end << " @ " << _samples_per_pixel << " rs = " << _region_start << endl;
-
-	/* sample_start and sample_end are bounded by the region
-	 * limits. sample_start, because of the was just computed, must already
-	 * be greater than or equal to the _region_start value.
-	 */
-
-	sample_end = min (region_end(), sample_end);
-
-	// cerr << debug_name() << " will need image spanning " << sample_start << " .. " << sample_end << " region spans " << _region_start << " .. " << region_end() << endl;
-
-	double image_origin_in_self_coordinates;
-	boost::shared_ptr<WaveViewCache::Entry> image_to_draw;
-
-	Glib::Threads::Mutex::Lock lci (current_image_lock);
-	if (_current_image) {
-
-		/* check it covers the right sample range */
-
-		if (_current_image->start > sample_start || _current_image->end < sample_end) {
-			/* doesn't cover the area we need ... reset */
-			_current_image.reset ();
+	if (!image_to_draw && _image) {
+		if (_image->props.is_equivalent (required_props)) {
+			// Image contains required properties
+			image_to_draw = _image;
 		} else {
-			/* timestamp our continuing use of this image/cache entry */
-			images->use (_region->audio_source (_channel), _current_image);
-			image_to_draw = _current_image;
+			// Image does not contain properties required
 		}
 	}
 
 	if (!image_to_draw) {
-
-		/* look it up */
-
-		bool full_image;
-		image_to_draw = get_image (sample_start, sample_end, full_image);
-
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 image to draw = %2 (full? %3)\n", name, image_to_draw, full_image));
-
-		if (!image_to_draw) {
-			/* image not currently available. A redraw will be scheduled
-			   when it is ready.
-			*/
-			return;
-		}
-
-		if (full_image) {
-			/* found an image that covers our entire sample range,
-			 * so keep a reference to it.
-			 */
-			_current_image = image_to_draw;
+		image_to_draw = get_cache_group ()->lookup_image (required_props);
+		if (image_to_draw && !image_to_draw->finished ()) {
+			// Found equivalent but unfinished Image in cache
+			image_to_draw.reset ();
 		}
 	}
+
+	if (!image_to_draw) {
+		// No existing image to draw
+
+		boost::shared_ptr<WaveViewDrawRequest> const request = create_draw_request (required_props);
+
+		if (draw_image_in_gui_thread ()) {
+			// now that we have to draw something, draw more than required.
+			request->image->props.set_width_samples (optimal_image_width_samples ());
+
+			process_draw_request (request);
+
+			image_to_draw = request->image;
+
+		} else if (current_request) {
+			if (current_request->finished ()) {
+				// There is a chance the request is now finished since checking above
+				image_to_draw = current_request->image;
+				current_request.reset ();
+			} else if (_canvas->get_microseconds_since_render_start () < 15000) {
+				current_request->cancel ();
+				current_request.reset ();
+
+				// Drawing image in GUI thread as we have time
+
+				// now that we have to draw something, draw more than required.
+				request->image->props.set_width_samples (optimal_image_width_samples ());
+
+				process_draw_request (request);
+
+				image_to_draw = request->image;
+			} else {
+				// Waiting for current request to finish
+				redraw ();
+				return;
+			}
+		} else {
+			// Defer the rendering to another thread or perhaps render pass if
+			// a thread cannot generate it in time.
+			queue_draw_request (request);
+			redraw ();
+			return;
+		}
+	}
+
+	/* reset this so that future missing images can be generated in a worker thread. */
+	_draw_image_in_gui_thread = false;
+
+	assert (image_to_draw);
 
 	/* compute the first pixel of the image that should be used when we
 	 * render the specified range.
 	 */
 
-	image_origin_in_self_coordinates = (image_to_draw->start - _region_start) / _samples_per_pixel;
-
-	if (_start_shift && (sample_start == _region_start) && (self.x0 == draw.x0)) {
-		/* we are going to draw the first pixel for this region, but
-		   we may not want this to overlap a border around the
-		   waveform. If so, _start_shift will be set.
-		*/
-		//cerr << name.substr (23) << " ss = " << sample_start << " rs = " << _region_start << " sf = " << _start_shift << " ds = " << draw_start << " self = " << self << " draw = " << draw << endl;
-		//draw_start += _start_shift;
-		//image_origin_in_self_coordinates += _start_shift;
-	}
+	double image_origin_in_self_coordinates =
+	    (image_to_draw->props.get_sample_start () - _props->region_start) / _props->samples_per_pixel;
 
 	/* the image may only be a best-effort ... it may not span the entire
 	 * range requested, though it is guaranteed to cover the start. So
 	 * determine how many pixels we can actually draw.
 	 */
 
-	double draw_width;
+	const double draw_start_pixel = draw.x0;
+	const double draw_end_pixel = draw.x1;
 
-	if (image_to_draw != _current_image) {
-		lci.release ();
+	double draw_width_pixels = draw_end_pixel - draw_start_pixel;
+
+	if (image_to_draw != _image) {
 
 		/* the image is guaranteed to start at or before
 		 * draw_start. But if it starts before draw_start, that reduces
@@ -1236,19 +1144,12 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		 * so .. clamp the draw width to the smaller of what we need to
 		 * draw or the available width of the image.
 		 */
+		draw_width_pixels = min ((double)image_to_draw->cairo_image->get_width (), draw_width_pixels);
 
-		draw_width = min ((double) image_to_draw->image->get_width(), (draw_end - draw_start));
-
-
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 draw just %2 of %3 @ %8 (iwidth %4 off %5 img @ %6 rs @ %7)\n", name, draw_width, (draw_end - draw_start),
-		                                              image_to_draw->image->get_width(), image_origin_in_self_coordinates,
-		                                              image_to_draw->start, _region_start, draw_start));
-	} else {
-		draw_width = draw_end - draw_start;
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("use current image, span entire render width %1..%2\n", draw_start, draw_end));
+		set_image (image_to_draw);
 	}
 
-	context->rectangle (draw_start, draw.y0, draw_width, draw.height());
+	context->rectangle (draw_start_pixel, draw.y0, draw_width_pixels, draw.height());
 
 	/* round image origin position to an exact pixel in device space to
 	 * avoid blurring
@@ -1267,21 +1168,15 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 * the image at (10,10) in user space.
 	 */
 
-	context->set_source (image_to_draw->image, x, y);
+	context->set_source (image_to_draw->cairo_image, x, y);
 	context->fill ();
-
-	/* image obtained, some of it painted to display: we are rendered.
-	   Future calls to get_image_in_thread are now meaningful.
-	*/
-
-	rendered = true;
 }
 
 void
 WaveView::compute_bounding_box () const
 {
 	if (_region) {
-		_bounding_box = Rect (0.0, 0.0, region_length() / _samples_per_pixel, _height);
+		_bounding_box = Rect (0.0, 0.0, region_length() / _props->samples_per_pixel, _props->height);
 	} else {
 		_bounding_box = Rect ();
 	}
@@ -1292,12 +1187,11 @@ WaveView::compute_bounding_box () const
 void
 WaveView::set_height (Distance height)
 {
-	if (height != _height) {
+	if (_props->height != height) {
 		begin_change ();
 
-		invalidate_image_cache ();
-		_height = height;
-		get_image_in_thread = true;
+		_props->height = height;
+		_draw_image_in_gui_thread = true;
 
 		_bounding_box_dirty = true;
 		end_change ();
@@ -1307,12 +1201,10 @@ WaveView::set_height (Distance height)
 void
 WaveView::set_channel (int channel)
 {
-	if (channel != _channel) {
+	if (_props->channel != channel) {
 		begin_change ();
-
-		invalidate_image_cache ();
-		_channel = channel;
-
+		_props->channel = channel;
+		reset_cache_group ();
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -1321,31 +1213,40 @@ WaveView::set_channel (int channel)
 void
 WaveView::set_logscaled (bool yn)
 {
-	if (_logscaled != yn) {
+	if (_props->logscaled != yn) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_logscaled = yn;
+		_props->logscaled = yn;
 		end_visual_change ();
 	}
+}
+
+void
+WaveView::set_gradient_depth (double)
+{
+	// TODO ??
+}
+
+double
+WaveView::gradient_depth () const
+{
+	return _props->gradient_depth;
 }
 
 void
 WaveView::gain_changed ()
 {
 	begin_visual_change ();
-	invalidate_image_cache ();
-	_region_amplitude = _region->scale_amplitude ();
-	get_image_in_thread = true;
+	_props->amplitude = _region->scale_amplitude ();
+	_draw_image_in_gui_thread = true;
 	end_visual_change ();
 }
 
 void
 WaveView::set_zero_color (Color c)
 {
-	if (_zero_color != c) {
+	if (_props->zero_color != c) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_zero_color = c;
+		_props->zero_color = c;
 		end_visual_change ();
 	}
 }
@@ -1353,10 +1254,9 @@ WaveView::set_zero_color (Color c)
 void
 WaveView::set_clip_color (Color c)
 {
-	if (_clip_color != c) {
+	if (_props->clip_color != c) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_clip_color = c;
+		_props->clip_color = c;
 		end_visual_change ();
 	}
 }
@@ -1364,21 +1264,25 @@ WaveView::set_clip_color (Color c)
 void
 WaveView::set_show_zero_line (bool yn)
 {
-	if (_show_zero != yn) {
+	if (_props->show_zero != yn) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_show_zero = yn;
+		_props->show_zero = yn;
 		end_visual_change ();
 	}
+}
+
+bool
+WaveView::show_zero_line () const
+{
+	return _props->show_zero;
 }
 
 void
 WaveView::set_shape (Shape s)
 {
-	if (_shape != s) {
+	if (_props->shape != s) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_shape = s;
+		_props->shape = s;
 		end_visual_change ();
 	}
 }
@@ -1386,13 +1290,18 @@ WaveView::set_shape (Shape s)
 void
 WaveView::set_amplitude_above_axis (double a)
 {
-	if (fabs (_amplitude_above_axis - a) > 0.01) {
+	if (fabs (_props->amplitude_above_axis - a) > 0.01) {
 		begin_visual_change ();
-		invalidate_image_cache ();
-		_amplitude_above_axis = a;
-		get_image_in_thread = true;
+		_props->amplitude_above_axis = a;
+		_draw_image_in_gui_thread = true;
 		end_visual_change ();
 	}
+}
+
+double
+WaveView::amplitude_above_axis () const
+{
+	return _props->amplitude_above_axis;
 }
 
 void
@@ -1400,9 +1309,7 @@ WaveView::set_global_shape (Shape s)
 {
 	if (_global_shape != s) {
 		_global_shape = s;
-		if (images) {
-			images->clear_cache ();
-		}
+		WaveViewCache::get_instance()->clear_cache ();
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1412,9 +1319,7 @@ WaveView::set_global_logscaled (bool yn)
 {
 	if (_global_logscaled != yn) {
 		_global_logscaled = yn;
-		if (images) {
-			images->clear_cache ();
-		}
+		WaveViewCache::get_instance()->clear_cache ();
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1422,13 +1327,13 @@ WaveView::set_global_logscaled (bool yn)
 framecnt_t
 WaveView::region_length() const
 {
-	return _region->length() - (_region_start - _region->start());
+	return _region->length() - (_props->region_start - _region->start());
 }
 
 framepos_t
 WaveView::region_end() const
 {
-	return _region_start + region_length();
+	return _props->region_start + region_length();
 }
 
 void
@@ -1438,12 +1343,12 @@ WaveView::set_region_start (frameoffset_t start)
 		return;
 	}
 
-	if (_region_start == start) {
+	if (_props->region_start == start) {
 		return;
 	}
 
 	begin_change ();
-	_region_start = start;
+	_props->region_start = start;
 	_bounding_box_dirty = true;
 	end_change ();
 }
@@ -1459,7 +1364,8 @@ WaveView::region_resized ()
 	}
 
 	begin_change ();
-	_region_start = _region->start();
+	_props->region_start = _region->start();
+	_props->region_end = _region->start() + _region->length();
 	_bounding_box_dirty = true;
 	end_change ();
 }
@@ -1490,416 +1396,33 @@ WaveView::set_start_shift (double pixels)
 	}
 
 	begin_visual_change ();
-	_start_shift = pixels;
+	//_start_shift = pixels;
 	end_visual_change ();
-}
-
-void
-WaveView::cancel_my_render_request () const
-{
-	if (!images) {
-		return;
-	}
-
-	/* try to stop any current rendering of the request, or prevent it from
-	 * ever starting up.
-	 */
-
-	Glib::Threads::Mutex::Lock lm (request_queue_lock);
-
-	if (current_request) {
-		current_request->cancel ();
-	}
-
-	/* now remove it from the queue and reset our request pointer so that
-	   have no outstanding request (that we know about)
-	*/
-
-	request_queue.erase (this);
-	current_request.reset ();
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has no request %2\n", this));
-
 }
 
 void
 WaveView::set_image_cache_size (uint64_t sz)
 {
-	if (!images) {
-		images = new WaveViewCache;
-	}
-
-	images->set_image_cache_threshold (sz);
+	WaveViewCache::get_instance()->set_image_cache_threshold (sz);
 }
 
-/*-------------------------------------------------*/
-
-void
-WaveView::start_drawing_thread ()
+boost::shared_ptr<WaveViewCacheGroup>
+WaveView::get_cache_group () const
 {
-	if (!_drawing_thread) {
-		_drawing_thread = Glib::Threads::Thread::create (sigc::ptr_fun (WaveView::drawing_thread));
+	if (_cache_group) {
+		return _cache_group;
 	}
-}
 
-void
-WaveView::stop_drawing_thread ()
-{
-	while (_drawing_thread) {
-		Glib::Threads::Mutex::Lock lm (request_queue_lock);
-		g_atomic_int_set (&drawing_thread_should_quit, 1);
-		request_cond.signal ();
-	}
+	boost::shared_ptr<AudioSource> source = _region->audio_source (_props->channel);
+	assert (source);
+
+	_cache_group = WaveViewCache::get_instance ()->get_cache_group (source);
+
+	return _cache_group;
 }
 
 void
-WaveView::drawing_thread ()
+WaveView::reset_cache_group ()
 {
-	using namespace Glib::Threads;
-
-	WaveView const * requestor;
-	Mutex::Lock lm (request_queue_lock);
-	bool run = true;
-
-	while (run) {
-
-		/* remember that we hold the lock at this point, no matter what */
-
-		if (g_atomic_int_get (&drawing_thread_should_quit)) {
-			break;
-		}
-
-		if (request_queue.empty()) {
-			request_cond.wait (request_queue_lock);
-		}
-
-		if (request_queue.empty()) {
-			continue;
-		}
-
-		/* remove the request from the queue (remember: the "request"
-		 * is just a pointer to a WaveView object)
-		 */
-
-		requestor = *(request_queue.begin());
-		request_queue.erase (request_queue.begin());
-
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("start request for %1 at %2\n", requestor, g_get_monotonic_time()));
-
-		boost::shared_ptr<WaveViewThreadRequest> req = requestor->current_request;
-
-		if (!req) {
-			continue;
-		}
-
-		/* Generate an image. Unlock the request queue lock
-		 * while we do this, so that other things can happen
-		 * as we do rendering.
-		 */
-
-		lm.release (); /* some RAII would be good here */
-
-		try {
-			requestor->generate_image (req, true);
-		} catch (...) {
-			req->image.clear(); /* just in case it was set before the exception, whatever it was */
-		}
-
-		lm.acquire ();
-
-		req.reset (); /* drop/delete request as appropriate */
-	}
-
-	/* thread is vanishing */
-	_drawing_thread = 0;
-}
-
-/*-------------------------------------------------*/
-
-WaveViewCache::WaveViewCache ()
-	: image_cache_size (0)
-	, _image_cache_threshold (100 * 1048576) /* bytes */
-{
-}
-
-WaveViewCache::~WaveViewCache ()
-{
-}
-
-
-boost::shared_ptr<WaveViewCache::Entry>
-WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
-                             framepos_t start, framepos_t end,
-                             int channel,
-                             Coord height,
-                             float amplitude,
-                             Color fill_color,
-                             double samples_per_pixel,
-                             bool& full_coverage)
-{
-	ImageCache::iterator x;
-
-	if ((x = cache_map.find (src)) == cache_map.end ()) {
-		/* nothing in the cache for this audio source at all */
-		return boost::shared_ptr<WaveViewCache::Entry> ();
-	}
-
-	CacheLine& caches = x->second;
-	boost::shared_ptr<Entry> best_partial;
-	framecnt_t max_coverage = 0;
-
-	/* Find a suitable ImageSurface, if it exists.
-	*/
-
-	for (CacheLine::iterator c = caches.begin(); c != caches.end(); ++c) {
-
-		boost::shared_ptr<Entry> e (*c);
-
-		if (channel != e->channel
-		    || height != e->height
-		    || amplitude != e->amplitude
-		    || samples_per_pixel != e->samples_per_pixel
-		    || fill_color != e->fill_color) {
-			continue;
-		}
-
-		switch (Evoral::coverage (start, end, e->start, e->end)) {
-			case Evoral::OverlapExternal:  /* required range is inside image range */
-				DEBUG_TRACE (DEBUG::WaveView, string_compose ("found image spanning %1..%2 covers %3..%4\n",
-							e->start, e->end, start, end));
-				use (src, e);
-				full_coverage = true;
-				return e;
-
-			case Evoral::OverlapStart: /* required range start is covered by image range */
-				if ((e->end - start) > max_coverage) {
-					best_partial = e;
-					max_coverage = e->end - start;
-				}
-				break;
-
-			case Evoral::OverlapNone:
-			case Evoral::OverlapEnd:
-			case Evoral::OverlapInternal:
-				break;
-		}
-	}
-
-	if (best_partial) {
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("found PARTIAL image spanning %1..%2 partially covers %3..%4\n",
-		                                              best_partial->start, best_partial->end, start, end));
-		use (src, best_partial);
-		full_coverage = false;
-		return best_partial;
-	}
-
-	return boost::shared_ptr<Entry> ();
-}
-
-void
-WaveViewCache::consolidate_image_cache (boost::shared_ptr<ARDOUR::AudioSource> src,
-                                        int channel,
-                                        Coord height,
-                                        float amplitude,
-                                        Color fill_color,
-                                        double samples_per_pixel)
-{
-	list <uint32_t> deletion_list;
-	uint32_t other_entries = 0;
-	ImageCache::iterator x;
-
-	/* MUST BE CALLED FROM (SINGLE) GUI THREAD */
-
-	if ((x = cache_map.find (src)) == cache_map.end ()) {
-		return;
-	}
-
-	CacheLine& caches  = x->second;
-
-	for (CacheLine::iterator c1 = caches.begin(); c1 != caches.end(); ) {
-
-		CacheLine::iterator nxt = c1;
-		++nxt;
-
-		boost::shared_ptr<Entry> e1 (*c1);
-
-		if (channel != e1->channel
-		    || height != e1->height
-		    || amplitude != e1->amplitude
-		    || samples_per_pixel != e1->samples_per_pixel
-		    || fill_color != e1->fill_color) {
-
-			/* doesn't match current properties, ignore and move on
-			 * to the next one.
-			 */
-
-			other_entries++;
-			c1 = nxt;
-			continue;
-		}
-
-		/* c1 now points to a cached image entry that matches current
-		 * properties. Check all subsequent cached imaged entries to
-		 * see if there are others that also match but represent
-		 * subsets of the range covered by this one.
-		 */
-
-		for (CacheLine::iterator c2 = c1; c2 != caches.end(); ) {
-
-			CacheLine::iterator nxt2 = c2;
-			++nxt2;
-
-			boost::shared_ptr<Entry> e2 (*c2);
-
-			if (e1 == e2 || channel != e2->channel
-			    || height != e2->height
-			    || amplitude != e2->amplitude
-			    || samples_per_pixel != e2->samples_per_pixel
-			    || fill_color != e2->fill_color) {
-
-				/* properties do not match, ignore for the
-				 * purposes of consolidation.
-				 */
-				c2 = nxt2;
-				continue;
-			}
-
-			if (e2->start >= e1->start && e2->end <= e1->end) {
-				/* c2 is fully contained by c1, so delete it */
-				caches.erase (c2);
-
-				/* and re-start the whole iteration */
-				nxt = caches.begin ();
-				break;
-			}
-
-			c2 = nxt2;
-		}
-
-		c1 = nxt;
-	}
-}
-
-void
-WaveViewCache::use (boost::shared_ptr<ARDOUR::AudioSource> src, boost::shared_ptr<Entry> ce)
-{
-	ce->timestamp = g_get_monotonic_time ();
-}
-
-void
-WaveViewCache::add (boost::shared_ptr<ARDOUR::AudioSource> src, boost::shared_ptr<Entry> ce)
-{
-	/* MUST BE CALLED FROM (SINGLE) GUI THREAD */
-
-	Cairo::RefPtr<Cairo::ImageSurface> img (ce->image);
-
-	image_cache_size += img->get_height() * img->get_width () * 4; /* 4 = bytes per FORMAT_ARGB32 pixel */
-
-	if (cache_full()) {
-		cache_flush ();
-	}
-
-	ce->timestamp = g_get_monotonic_time ();
-
-	cache_map[src].push_back (ce);
-}
-
-uint64_t
-WaveViewCache::compute_image_cache_size()
-{
-	uint64_t total = 0;
-	for (ImageCache::iterator s = cache_map.begin(); s != cache_map.end(); ++s) {
-		CacheLine& per_source_cache (s->second);
-		for (CacheLine::iterator c = per_source_cache.begin(); c != per_source_cache.end(); ++c) {
-			Cairo::RefPtr<Cairo::ImageSurface> img ((*c)->image);
-			total += img->get_height() * img->get_width() * 4; /* 4 = bytes per FORMAT_ARGB32 pixel */
-		}
-	}
-	return total;
-}
-
-bool
-WaveViewCache::cache_full()
-{
-	return image_cache_size > _image_cache_threshold;
-}
-
-void
-WaveViewCache::cache_flush ()
-{
-	/* Build a sortable list of all cache entries */
-
-	CacheList cache_list;
-
-	for (ImageCache::const_iterator cm = cache_map.begin(); cm != cache_map.end(); ++cm) {
-		for (CacheLine::const_iterator cl = cm->second.begin(); cl != cm->second.end(); ++cl) {
-			cache_list.push_back (make_pair (cm->first, *cl));
-		}
-	}
-
-	/* sort list in LRU order */
-	SortByTimestamp sorter;
-	sort (cache_list.begin(), cache_list.end(), sorter);
-
-	while (image_cache_size > _image_cache_threshold && !cache_map.empty() && !cache_list.empty()) {
-
-		ListEntry& le (cache_list.front());
-
-		ImageCache::iterator x;
-
-		if ((x = cache_map.find (le.first)) != cache_map.end ()) {
-
-			CacheLine& cl  = x->second;
-
-			for (CacheLine::iterator c = cl.begin(); c != cl.end(); ++c) {
-
-				if (*c == le.second) {
-
-					DEBUG_TRACE (DEBUG::WaveView, string_compose ("Removing cache line entry for %1\n", x->first->name()));
-
-					/* Remove this entry from this cache line */
-					cl.erase (c);
-
-					if (cl.empty()) {
-						/* remove cache line from main cache: no more entries */
-						cache_map.erase (x);
-					}
-
-					break;
-				}
-			}
-
-			Cairo::RefPtr<Cairo::ImageSurface> img (le.second->image);
-			uint64_t size = img->get_height() * img->get_width() * 4; /* 4 = bytes per FORMAT_ARGB32 pixel */
-
-			if (image_cache_size > size) {
-				image_cache_size -= size;
-			} else {
-				image_cache_size = 0;
-			}
-			DEBUG_TRACE (DEBUG::WaveView, string_compose ("cache shrunk to %1\n", image_cache_size));
-		}
-
-		/* Remove from the linear list, even if we didn't find it in
-		 * the actual cache_mao
-		 */
-		cache_list.erase (cache_list.begin());
-	}
-}
-
-void
-WaveViewCache::clear_cache ()
-{
-	DEBUG_TRACE (DEBUG::WaveView, "clear cache\n");
-	const uint64_t image_cache_threshold = _image_cache_threshold;
-	_image_cache_threshold = 0;
-	cache_flush ();
-	_image_cache_threshold = image_cache_threshold;
-}
-
-void
-WaveViewCache::set_image_cache_threshold (uint64_t sz)
-{
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("new image cache size %1\n", sz));
-	_image_cache_threshold = sz;
-	cache_flush ();
+	WaveViewCache::get_instance()->reset_cache_group (_cache_group);
 }
