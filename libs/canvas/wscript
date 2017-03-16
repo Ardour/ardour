@@ -63,6 +63,7 @@ canvas_sources = [
         'types.cc',
         'utils.cc',
         'wave_view.cc',
+        'wave_view_private.cc',
         'widget.cc',
         'xfade_curve.cc',
 ]
