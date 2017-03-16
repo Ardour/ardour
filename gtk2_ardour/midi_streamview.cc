@@ -358,7 +358,7 @@ MidiStreamView::draw_note_lines()
 		double h = y - prev_y;
 		double mid = y + (h/2.0);
 
-		if (height > 1.0) { // XXX ? should that not be h >= 1 ?
+		if (mid >= 0 && h > 1.0) {
 			_note_lines->add (mid, h, color);
 		}
 
