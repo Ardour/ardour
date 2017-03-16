@@ -32,9 +32,16 @@
 
 namespace ARDOUR {
 
-class Session;
-class Route;
+class AudioFileSource;
+class AudioPlaylist;
 class Location;
+class MidiPlaylist;
+class Playlist;
+class Route;
+class Route;
+class Session;
+
+template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API DiskIOProcessor : public Processor
 {
@@ -50,7 +57,13 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	DiskIOProcessor (Session&, const std::string& name, Flag f);
 
+	void set_route (boost::shared_ptr<Route>);
+
 	static void set_buffering_parameters (BufferingPreset bp);
+
+	int set_block_size (pframes_t);
+	bool configure_io (ChanCount in, ChanCount out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 	/** @return A number between 0 and 1, where 0 indicates that the playback buffer
 	 *  is dry (ie the disk subsystem could not keep up) and 1 indicates that the
@@ -68,7 +81,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool           reversed()    const { return _actual_speed < 0.0f; }
 	double         speed()       const { return _visible_speed; }
 
-	ChanCount n_channels() { return _n_channels; }
+	virtual void non_realtime_locate (framepos_t);
 
 	void non_realtime_set_speed ();
 	bool realtime_set_speed (double sp, bool global);
@@ -94,14 +107,24 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	bool need_butler() const { return _need_butler; }
 
+	boost::shared_ptr<Playlist>      get_playlist (DataType dt) const { return _playlists[dt]; }
+	boost::shared_ptr<MidiPlaylist>  midi_playlist() const;
+	boost::shared_ptr<AudioPlaylist> audio_playlist() const;
+
+	virtual void playlist_modified () {}
+	virtual int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	virtual int use_new_playlist (DataType);
+	virtual int use_copy_playlist (DataType);
+
+	PBD::Signal1<void,DataType>   PlaylistChanged;
+
   protected:
 	friend class Auditioner;
 	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
 
   protected:
 	Flag         _flags;
-	uint32_t i_am_the_modifier;
-	ChanCount    _n_channels;
+	uint32_t      i_am_the_modifier;
 	double       _visible_speed;
 	double       _actual_speed;
 	double       _speed;
@@ -115,6 +138,9 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
 	bool         _need_butler;
+	boost::shared_ptr<Route> _route;
+
+	void init ();
 
 	Glib::Threads::Mutex state_lock;
 
@@ -124,21 +150,23 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	                                   framecnt_t& write_chunk_size,
 	                                   framecnt_t& write_buffer_size);
 
-	virtual void allocate_temporary_buffers () = 0;
+	enum TransitionType {
+		CaptureStart = 0,
+		CaptureEnd
+	};
+
+	struct CaptureTransition {
+		TransitionType   type;
+		framepos_t       capture_val; ///< The start or end file frame position
+	};
 
 	/** Information about one audio channel, playback or capture
 	 * (depending on the derived class)
 	 */
 	struct ChannelInfo : public boost::noncopyable {
 
-		ChannelInfo (framecnt_t buffer_size,
-		             framecnt_t speed_buffer_size,
-		             framecnt_t wrap_buffer_size);
+		ChannelInfo (framecnt_t buffer_size);
 		~ChannelInfo ();
-
-		Sample     *wrap_buffer;
-		Sample     *speed_buffer;
-		Sample     *current_buffer;
 
 		/** A ringbuffer for data to be played back, written to in the
 		    butler thread, read from in the process thread.
@@ -149,7 +177,13 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 		Sample* scrub_forward_buffer;
 		Sample* scrub_reverse_buffer;
 
-		PBD::RingBufferNPT<Sample>::rw_vector read_vector;
+		PBD::RingBufferNPT<Sample>::rw_vector rw_vector;
+
+		/* used only by capture */
+		boost::shared_ptr<AudioFileSource> write_source;
+		PBD::RingBufferNPT<CaptureTransition> * capture_transition_buf;
+		// the following are used in the butler thread only
+		framecnt_t                     curr_capture_cnt;
 
 		void resize (framecnt_t);
 	};
@@ -162,6 +196,20 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	CubicInterpolation interpolation;
 
+	boost::shared_ptr<Playlist> _playlists[DataType::num_types];
+	PBD::ScopedConnectionList playlist_connections;
+
+	virtual void playlist_changed (const PBD::PropertyChange&) {}
+	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
+	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool) {}
+	int find_and_use_playlist (DataType, std::string const &);
+
+	/* The MIDI stuff */
+
+	MidiRingBuffer<framepos_t>*  _midi_buf;
+	gint                         _frames_written_to_ringbuffer;
+	gint                         _frames_read_from_ringbuffer;
+	CubicMidiInterpolation        midi_interpolation;
 };
 
 } // namespace ARDOUR

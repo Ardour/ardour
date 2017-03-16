@@ -28,6 +28,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_playlist.h"
+#include "ardour/pannable.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/session.h"
@@ -38,6 +39,10 @@ using namespace PBD;
 using namespace std;
 
 ARDOUR::framecnt_t DiskReader::_chunk_frames = default_chunk_frames ();
+PBD::Signal0<void> DiskReader::Underrun;
+Sample* DiskReader::_mixdown_buffer = 0;
+gain_t* DiskReader::_gain_buffer = 0;
+framecnt_t DiskReader::midi_readahead = 4096;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -50,8 +55,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
         , playback_sample (0)
 	, _monitoring_choice (MonitorDisk)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
-	, _frames_written_to_ringbuffer (0)
-	, _frames_read_from_ringbuffer (0)
 {
 }
 
@@ -130,6 +133,13 @@ DiskReader::set_roll_delay (ARDOUR::framecnt_t nframes)
 	_roll_delay = nframes;
 }
 
+XMLNode&
+DiskReader::state (bool full)
+{
+	XMLNode& node (DiskIOProcessor::state (full));
+	return node;
+}
+
 int
 DiskReader::set_state (const XMLNode& node, int version)
 {
@@ -156,51 +166,6 @@ DiskReader::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
-}
-
-/* Processor interface */
-
-bool
-DiskReader::configure_io (ChanCount in, ChanCount out)
-{
-	Glib::Threads::Mutex::Lock lm (state_lock);
-
-	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
-
-	uint32_t n_audio = in.n_audio();
-
-	if (n_audio > c->size()) {
-		add_channel_to (c, n_audio - c->size());
-	} else if (n_audio < c->size()) {
-		remove_channel_from (c, c->size() - n_audio);
-	}
-
-	if (in.n_midi() > 0 && !_midi_buf) {
-		const size_t size = _session.butler()->midi_diskstream_buffer_size();
-		_midi_buf = new MidiRingBuffer<framepos_t>(size);
-		midi_interpolation.add_channel_to (0,0);
-	}
-
-	Processor::configure_io (in, out);
-
-	return true;
-}
-
-bool
-DiskReader::can_support_io_configuration (const ChanCount& in, ChanCount& out)
-{
-	if (in.n_midi() != 0 && in.n_midi() != 1) {
-		/* we only support zero or 1 MIDI stream */
-		return false;
-	}
-
-	if (in != out) {
-		/* currently no way to deliver different channels that we receive */
-		return false;
-	}
-
-	return true;
 }
 
 void
@@ -247,87 +212,6 @@ DiskReader::adjust_buffering ()
 	}
 }
 
-DiskReader::ChannelInfo::ChannelInfo (framecnt_t bufsize, framecnt_t speed_size, framecnt_t wrap_size)
-{
-	current_buffer = 0;
-
-	speed_buffer = new Sample[speed_size];
-	wrap_buffer = new Sample[wrap_size];
-
-	buf = new RingBufferNPT<Sample> (bufsize);
-
-	/* touch the ringbuffer buffer, which will cause
-	   them to be mapped into locked physical RAM if
-	   we're running with mlockall(). this doesn't do
-	   much if we're not.
-	*/
-
-	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
-}
-
-void
-DiskReader::ChannelInfo::resize (framecnt_t bufsize)
-{
-	delete buf;
-	buf = new RingBufferNPT<Sample> (bufsize);
-	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
-}
-
-DiskReader::ChannelInfo::~ChannelInfo ()
-{
-	delete [] speed_buffer;
-	speed_buffer = 0;
-
-	delete [] wrap_buffer;
-	wrap_buffer = 0;
-
-	delete buf;
-	buf = 0;
-}
-
-int
-DiskReader::set_block_size (pframes_t /*nframes*/)
-{
-	if (_session.get_block_size() > speed_buffer_size) {
-		speed_buffer_size = _session.get_block_size();
-		boost::shared_ptr<ChannelList> c = channels.reader();
-
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			delete [] (*chan)->speed_buffer;
-			(*chan)->speed_buffer = new Sample[speed_buffer_size];
-		}
-	}
-	allocate_temporary_buffers ();
-	return 0;
-}
-
-void
-DiskReader::allocate_temporary_buffers ()
-{
-	/* make sure the wrap buffer is at least large enough to deal
-	   with the speeds up to 1.2, to allow for micro-variation
-	   when slaving to MTC, Timecode etc.
-	*/
-
-	double const sp = max (fabs (_actual_speed), 1.2);
-	framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * sp) + 2;
-
-	if (required_wrap_size > wrap_buffer_size) {
-
-		boost::shared_ptr<ChannelList> c = channels.reader();
-
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->wrap_buffer) {
-				delete [] (*chan)->wrap_buffer;
-			}
-			(*chan)->wrap_buffer = new Sample[required_wrap_size];
-		}
-
-		wrap_buffer_size = required_wrap_size;
-	}
-}
-
-
 void
 DiskReader::playlist_changed (const PropertyChange&)
 {
@@ -343,70 +227,17 @@ DiskReader::playlist_modified ()
 	}
 }
 
-void
-DiskReader::playlist_deleted (boost::weak_ptr<Playlist> wpl)
-{
-	boost::shared_ptr<Playlist> pl (wpl.lock());
-
-	if (!pl) {
-		return;
-	}
-
-	for (uint32_t n = 0; n < DataType::num_types; ++n) {
-		if (pl == _playlists[n]) {
-
-			/* this catches an ordering issue with session destruction. playlists
-			   are destroyed before disk readers. we have to invalidate any handles
-			   we have to the playlist.
-			*/
-			_playlists[n].reset ();
-			break;
-		}
-	}
-}
-
-boost::shared_ptr<AudioPlaylist>
-DiskReader::audio_playlist () const
-{
-	return boost::dynamic_pointer_cast<AudioPlaylist> (_playlists[DataType::AUDIO]);
-}
-
-boost::shared_ptr<MidiPlaylist>
-DiskReader::midi_playlist () const
-{
-	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
-}
-
 int
 DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 {
-        if (!playlist) {
-                return 0;
-        }
-
         bool prior_playlist = false;
 
-	{
-		Glib::Threads::Mutex::Lock lm (state_lock);
+        if (_playlists[dt]) {
+	        prior_playlist = true;
+        }
 
-		if (playlist == _playlists[dt]) {
-			return 0;
-		}
-
-		playlist_connections.drop_connections ();
-
-		if (_playlists[dt]) {
-			_playlists[dt]->release();
-                        prior_playlist = true;
-		}
-
-		_playlists[dt] = playlist;
-		playlist->use();
-
-		playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskReader::playlist_modified, this));
-		playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskReader::playlist_modified, this));
-		playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskReader::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
-		playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskReader::playlist_ranges_moved, this, _1, _2));
+        if (DiskIOProcessor::use_playlist (dt, playlist)) {
+		return -1;
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
@@ -419,83 +250,9 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 		overwrite_queued = true;
 	}
 
-	PlaylistChanged (dt); /* EMIT SIGNAL */
-	_session.set_dirty ();
-
 	return 0;
 }
 
-int
-DiskReader::find_and_use_playlist (DataType dt, const string& name)
-{
-	boost::shared_ptr<Playlist> playlist;
-
-	if ((playlist = _session.playlists->by_name (name)) == 0) {
-		playlist = PlaylistFactory::create (dt, _session, name);
-	}
-
-	if (!playlist) {
-		error << string_compose(_("DiskReader: \"%1\" isn't an playlist"), name) << endmsg;
-		return -1;
-	}
-
-	return use_playlist (dt, playlist);
-}
-
-int
-DiskReader::use_new_playlist (DataType dt)
-{
-	string newname;
-	boost::shared_ptr<Playlist> playlist = _playlists[dt];
-
-	if (playlist) {
-		newname = Playlist::bump_name (playlist->name(), _session);
-	} else {
-		newname = Playlist::bump_name (_name, _session);
-	}
-
-	playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (dt, _session, newname, hidden()));
-
-	if (!playlist) {
-		return -1;
-	}
-
-	return use_playlist (dt, playlist);
-}
-
-int
-DiskReader::use_copy_playlist (DataType dt)
-{
-	assert (_playlists[dt]);
-
-	if (_playlists[dt] == 0) {
-		error << string_compose(_("DiskReader %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
-		return -1;
-	}
-
-	string newname;
-	boost::shared_ptr<Playlist> playlist;
-
-	newname = Playlist::bump_name (_playlists[dt]->name(), _session);
-
-	if ((playlist = PlaylistFactory::create (_playlists[dt], newname)) == 0) {
-		return -1;
-	}
-
-	playlist->reset_shares();
-
-	return use_playlist (dt, playlist);
-}
-
-
-/** Do some record stuff [not described in this comment!]
- *
- *  Also:
- *    - Setup playback_distance with the nframes, or nframes adjusted
- *      for current varispeed, if appropriate.
- *    - Setup current_buffer in each ChannelInfo to point to data
- *      that someone can read playback_distance worth of data from.
- */
 void
 DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
                  double speed, pframes_t nframes, bool result_required)
@@ -511,133 +268,122 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		return;
 	}
 
-	for (chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->current_buffer = 0;
-	}
-
 	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
 
-	if (need_disk_signal) {
+	if (fabsf (_actual_speed) != 1.0f) {
+		midi_interpolation.set_speed (_target_speed);
+		interpolation.set_speed (_target_speed);
+		playback_distance = midi_interpolation.distance (nframes);
+	} else {
+		playback_distance = nframes;
+	}
 
-		/* we're doing playback */
+	if (!need_disk_signal) {
 
-		framecnt_t necessary_samples;
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			(*chan)->buf->increment_read_ptr (playback_distance);
+		}
 
-		if (_actual_speed != 1.0) {
-			necessary_samples = (framecnt_t) ceil ((nframes * fabs (_actual_speed))) + 2;
+		return;
+	}
+
+	/* we're doing playback */
+
+	size_t n_buffers = bufs.count().n_audio();
+	size_t n_chans = c->size();
+	gain_t scaling;
+
+	if (n_chans > n_buffers) {
+		scaling = ((float) n_buffers)/n_chans;
+	} else {
+		scaling = 1.0;
+	}
+
+	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+
+		AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+		Sample* outgoing = buf.data ();
+
+		ChannelInfo* chaninfo (*chan);
+
+		chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
+
+		if (playback_distance <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+
+			if (fabsf (_actual_speed) != 1.0f) {
+				(void) interpolation.interpolate (
+					n, nframes,
+					chaninfo->rw_vector.buf[0],
+					outgoing);
+			} else {
+				memcpy (outgoing, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
+			}
+
 		} else {
-			necessary_samples = nframes;
-		}
 
-		for (chan = c->begin(); chan != c->end(); ++chan) {
-			(*chan)->buf->get_read_vector (&(*chan)->read_vector);
-		}
+			const framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
-		n = 0;
+			if (playback_distance <= total) {
 
-		/* Setup current_buffer in each ChannelInfo to point to data that someone
-		   can read necessary_samples (== nframes at a transport speed of 1) worth of data
-		   from right now.
-		*/
+				/* We have enough samples, but not in one lump.
+				*/
 
-		for (chan = c->begin(); chan != c->end(); ++chan, ++n) {
-
-			ChannelInfo* chaninfo (*chan);
-
-			if (necessary_samples <= (framecnt_t) chaninfo->read_vector.len[0]) {
-				/* There are enough samples in the first part of the ringbuffer */
-				chaninfo->current_buffer = chaninfo->read_vector.buf[0];
+				if (fabsf (_actual_speed) != 1.0f) {
+					interpolation.interpolate (n, chaninfo->rw_vector.len[0],
+					                           chaninfo->rw_vector.buf[0],
+					                           outgoing);
+					outgoing += chaninfo->rw_vector.len[0];
+					interpolation.interpolate (n, playback_distance - chaninfo->rw_vector.len[0],
+					                           chaninfo->rw_vector.buf[1],
+					                           outgoing);
+				} else {
+					memcpy (outgoing,
+					        chaninfo->rw_vector.buf[0],
+					        chaninfo->rw_vector.len[0] * sizeof (Sample));
+					outgoing += chaninfo->rw_vector.len[0];
+					memcpy (outgoing,
+					        chaninfo->rw_vector.buf[1],
+					        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
+				}
 
 			} else {
-				framecnt_t total = chaninfo->read_vector.len[0] + chaninfo->read_vector.len[1];
 
-				if (necessary_samples > total) {
-					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
-					cerr << "underrun for " << _name << endl;
-                                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
-                                                                                    DEBUG_THREAD_SELF, name(), total));
-					Underrun ();
-					return;
+				cerr << _name << " Need " << playback_distance << " total = " << total << endl;
+				cerr << "underrun for " << _name << endl;
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
+				                                            DEBUG_THREAD_SELF, name(), total));
+				Underrun ();
+				return;
 
-				} else {
-
-					/* We have enough samples, but not in one lump.  Coalesce the two parts
-					   into one in wrap_buffer in our ChannelInfo, and specify that
-					   as our current_buffer.
-					*/
-
-					assert(wrap_buffer_size >= necessary_samples);
-
-					/* Copy buf[0] from buf */
-					memcpy ((char *) chaninfo->wrap_buffer,
-							chaninfo->read_vector.buf[0],
-							chaninfo->read_vector.len[0] * sizeof (Sample));
-
-					/* Copy buf[1] from buf */
-					memcpy (chaninfo->wrap_buffer + chaninfo->read_vector.len[0],
-							chaninfo->read_vector.buf[1],
-							(necessary_samples - chaninfo->read_vector.len[0])
-									* sizeof (Sample));
-
-					chaninfo->current_buffer = chaninfo->wrap_buffer;
-				}
-			}
-		}
-
-		if (_actual_speed != 1.0f && _actual_speed != -1.0f) {
-
-			interpolation.set_speed (_target_speed);
-
-			int channel = 0;
-			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
-				ChannelInfo* chaninfo (*chan);
-
-				playback_distance = interpolation.interpolate (
-					channel, nframes, chaninfo->current_buffer, chaninfo->speed_buffer);
-
-				chaninfo->current_buffer = chaninfo->speed_buffer;
 			}
 
-		} else {
-			playback_distance = nframes;
 		}
 
+		if (scaling != 1.0f) {
+			apply_gain_to_buffer (outgoing, nframes, scaling);
+		}
+
+		chaninfo->buf->increment_read_ptr (playback_distance);
 		_speed = _target_speed;
 	}
 
-	if (need_disk_signal) {
+	/* MIDI data handling */
 
-		/* copy data over to buffer set */
+	if (!_session.declick_out_pending()) {
 
-		size_t n_buffers = bufs.count().n_audio();
-		size_t n_chans = c->size();
-		gain_t scaling = 1.0f;
+		/* copy the diskstream data to all output buffers */
 
-		if (n_chans > n_buffers) {
-			scaling = ((float) n_buffers)/n_chans;
-		}
+		MidiBuffer& mbuf (bufs.get_midi (0));
+		get_playback (mbuf, playback_distance);
 
-		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-
-			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-			ChannelInfo* chaninfo (*chan);
-
-			if (n < n_chans) {
-				if (scaling != 1.0f) {
-					buf.read_from_with_gain (chaninfo->current_buffer, nframes, scaling);
-				} else {
-					buf.read_from (chaninfo->current_buffer, nframes);
-				}
-			} else {
-				if (scaling != 1.0f) {
-					buf.accumulate_with_gain_from (chaninfo->current_buffer, nframes, scaling);
-				} else {
-					buf.accumulate_from (chaninfo->current_buffer, nframes);
-				}
+		/* vari-speed */
+		if (_target_speed > 0 && _actual_speed != 1.0f) {
+			MidiBuffer& mbuf (bufs.get_midi (0));
+			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
+				MidiBuffer::TimeType *tme = i.timeptr();
+				*tme = (*tme) * nframes / playback_distance;
 			}
 		}
-
-		/* extra buffers will already be silent, so leave them alone */
 	}
 
 	_need_butler = false;
@@ -648,10 +394,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		playback_sample += playback_distance;
 	}
 
-	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->buf->increment_read_ptr (playback_distance);
-	}
-
 	if (!c->empty()) {
 		if (_slaved) {
 			if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
@@ -660,40 +402,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		} else {
 			if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
 				_need_butler = true;
-			}
-		}
-	}
-
-	/* MIDI data handling */
-
-	if (_actual_speed != 1.0f && _target_speed > 0) {
-
-		interpolation.set_speed (_target_speed);
-
-		playback_distance = midi_interpolation.distance  (nframes);
-
-	} else {
-		playback_distance = nframes;
-	}
-
-	if (need_disk_signal && !_session.declick_out_pending()) {
-
-		/* copy the diskstream data to all output buffers */
-
-		MidiBuffer& mbuf (bufs.get_midi (0));
-		get_playback (mbuf, playback_distance);
-
-		/* leave the audio count alone */
-		ChanCount cnt (DataType::MIDI, 1);
-		cnt.set (DataType::AUDIO, bufs.count().n_audio());
-		bufs.set_count (cnt);
-
-		/* vari-speed */
-		if (_target_speed > 0 && _actual_speed != 1.0f) {
-			MidiBuffer& mbuf (bufs.get_midi (0));
-			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
-				MidiBuffer::TimeType *tme = i.timeptr();
-				*tme = (*tme) * nframes / playback_distance;
 			}
 		}
 	}
@@ -888,18 +596,6 @@ DiskReader::overwrite_existing_buffers ()
 	_pending_overwrite = false;
 
 	return ret;
-}
-
-void
-DiskReader::non_realtime_locate (framepos_t location)
-{
-	/* now refill channel buffers */
-
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (location * (double) speed()), true);
-	} else {
-		seek (location, true);
-	}
 }
 
 int
@@ -1411,8 +1107,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 		return;
 	}
 
-#if 0
-	if (!_track || Config->get_automation_follows_regions () == false) {
+	if (!_route || Config->get_automation_follows_regions () == false) {
 		return;
 	}
 
@@ -1426,7 +1121,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	}
 
 	/* move panner automation */
-	boost::shared_ptr<Pannable> pannable = _track->pannable();
+	boost::shared_ptr<Pannable> pannable = _route->pannable();
         Evoral::ControlSet::Controls& c (pannable->controls());
 
         for (Evoral::ControlSet::Controls::iterator ci = c.begin(); ci != c.end(); ++ci) {
@@ -1446,8 +1141,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
                 }
         }
 	/* move processor automation */
-	_track->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));
-#endif
+        _route->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_frames));
 }
 
 void
