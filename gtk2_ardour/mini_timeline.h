@@ -77,7 +77,6 @@ private:
 	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void build_minitl_context_menu ();
-	void show_minitl_context_menu ();
 	void set_span (ARDOUR::framecnt_t);
 
 	Glib::RefPtr<Pango::Layout> _layout;

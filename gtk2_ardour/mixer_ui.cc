@@ -375,6 +375,7 @@ Mixer_UI::~Mixer_UI ()
 		delete _monitor_section;
 	}
 	delete _plugin_selector;
+	delete track_menu;
 }
 
 void
@@ -1549,21 +1550,14 @@ Mixer_UI::initial_track_display ()
 	sync_treeview_from_presentation_info (Properties::order);
 }
 
-void
-Mixer_UI::show_track_list_menu ()
-{
-	if (track_menu == 0) {
-		build_track_menu ();
-	}
-
-	track_menu->popup (1, gtk_get_current_event_time());
-}
-
 bool
 Mixer_UI::track_display_button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		show_track_list_menu ();
+		if (track_menu == 0) {
+			build_track_menu ();
+		}
+		track_menu->popup (ev->button, ev->time);
 		return true;
 	}
 	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 1)) {

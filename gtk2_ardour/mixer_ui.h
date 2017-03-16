@@ -239,7 +239,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	ARDOUR::PluginPresetPtr selected_plugin ();
 
 	void initial_track_display ();
-	void show_track_list_menu ();
 
 	void set_all_strips_visibility (bool yn);
 	void set_all_audio_midi_visibility (int, bool);

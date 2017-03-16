@@ -562,21 +562,15 @@ MiniTimeline::build_minitl_context_menu ()
 	}
 }
 
-void
-MiniTimeline::show_minitl_context_menu ()
-{
-	if (_minitl_context_menu == 0) {
-		build_minitl_context_menu ();
-	}
-	_minitl_context_menu->popup (1, gtk_get_current_event_time());
-}
-
 bool
 MiniTimeline::on_button_press_event (GdkEventButton *ev)
 {
 	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
 		if (_session) {
-			show_minitl_context_menu ();
+			if (_minitl_context_menu == 0) {
+				build_minitl_context_menu ();
+			}
+			_minitl_context_menu->popup (ev->button, ev->time);
 		}
 		return true;
 	}

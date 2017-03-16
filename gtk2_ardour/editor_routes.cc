@@ -559,16 +559,6 @@ EditorRoutes::build_menu ()
 }
 
 void
-EditorRoutes::show_menu ()
-{
-	if (_menu == 0) {
-		build_menu ();
-	}
-
-	_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
 EditorRoutes::redisplay_real ()
 {
 	TreeModel::Children rows = _model->children();
@@ -1472,7 +1462,10 @@ bool
 EditorRoutes::button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		show_menu ();
+		if (_menu == 0) {
+			build_menu ();
+		}
+		_menu->popup (ev->button, ev->time);
 		return true;
 	}
 

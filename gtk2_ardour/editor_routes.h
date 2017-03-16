@@ -77,7 +77,6 @@ private:
 	void on_tv_solo_isolate_toggled (std::string const &);
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
-	void show_menu ();
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);

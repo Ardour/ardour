@@ -256,16 +256,6 @@ ShuttleControl::build_shuttle_context_menu ()
 }
 
 void
-ShuttleControl::show_shuttle_context_menu ()
-{
-	if (shuttle_context_menu == 0) {
-		build_shuttle_context_menu ();
-	}
-
-	shuttle_context_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
 ShuttleControl::reset_speed ()
 {
 	if (_session->transport_rolling()) {
@@ -295,7 +285,10 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		show_shuttle_context_menu ();
+		if (shuttle_context_menu == 0) {
+			build_shuttle_context_menu ();
+		}
+		shuttle_context_menu->popup (ev->button, ev->time);
 		return true;
 	}
 
@@ -665,15 +658,6 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 		}
 	}
 #endif
-}
-
-void
-ShuttleControl::shuttle_unit_clicked ()
-{
-	if (shuttle_unit_menu == 0) {
-		shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/ShuttleUnitPopup"));
-	}
-	shuttle_unit_menu->popup (1, gtk_get_current_event_time());
 }
 
 void

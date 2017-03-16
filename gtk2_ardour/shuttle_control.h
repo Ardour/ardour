@@ -82,9 +82,7 @@ protected:
 	BindingProxy      binding_proxy;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
-	void show_shuttle_context_menu ();
 	void shuttle_style_changed();
-	void shuttle_unit_clicked ();
 	void set_shuttle_max_speed (float);
 	void reset_speed ();
 
