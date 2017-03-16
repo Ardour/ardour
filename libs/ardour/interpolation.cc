@@ -65,18 +65,16 @@ framecnt_t
 CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
 {
 	// index in the input buffers
-	framecnt_t   i = 0;
+	framecnt_t i = 0;
 
 	double acceleration;
-	double distance = 0.0;
+	double distance = phase[channel];
 
 	if (_speed != _target_speed) {
 		acceleration = _target_speed - _speed;
 	} else {
 		acceleration = 0.0;
 	}
-
-	distance = phase[channel];
 
 	if (nframes < 3) {
 		/* no interpolation possible */
@@ -87,44 +85,22 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 			}
 		}
 
+		phase[channel] = 0;
 		return nframes;
 	}
 
 	/* keep this condition out of the inner loop */
 
 	if (input && output) {
-
-		Sample inm1;
-
-		if (floor (distance) == 0.0) {
-			/* best guess for the fake point we have to add to be able to interpolate at i == 0:
-			   .... maintain slope of first actual segment ...
-			   */
-			inm1 = input[i] - (input[i+1] - input[i]);
-		} else {
-			inm1 = input[i-1];
-		}
+		/* best guess for the fake point we have to add to be able to interpolate at i == 0:
+		 * .... maintain slope of first actual segment ...
+		 */
+		Sample inm1 = input[i] - (input[i+1] - input[i]);
 
 		for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
-
-			float f = floor (distance);
-			float fractional_phase_part = distance - f;
-
 			/* get the index into the input we should start with */
-
-			i = lrintf (f);
-
-			/* fractional_phase_part only reaches 1.0 thanks to float imprecision. In theory
-			   it should always be < 1.0. If it ever >= 1.0, then bump the index we use
-			   and back it off. This is the point where we "skip" an entire sample in the
-			   input, because the phase part has accumulated so much error that we should
-			   really be closer to the next sample. or something like that ...
-			   */
-
-			if (fractional_phase_part >= 1.0) {
-				fractional_phase_part -= 1.0;
-				++i;
-			}
+			i = floor (distance);
+			float fractional_phase_part = fmod (distance, 1.0);
 
 			// Cubically interpolate into the output buffer: keep this inlined for speed and rely on compiler
 			// optimization to take care of the rest
@@ -138,8 +114,8 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 			inm1 = input[i];
 		}
 
-		i = floor(distance);
-		phase[channel] = distance - floor(distance);
+		i = floor (distance);
+		phase[channel] = fmod (distance, 1.0);
 
 	} else {
 		/* used to calculate play-distance with acceleration (silent roll)
@@ -148,23 +124,29 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 		for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 			distance += _speed + acceleration;
 		}
-		i = floor(distance);
+		i = floor (distance);
+		phase[channel] = fmod (distance, 1.0);
 	}
 
 	return i;
 }
 
+/* CubicMidiInterpolation::distance is identical to
+ * return CubicInterpolation::interpolate (0, nframes, NULL, NULL);
+ */
 framecnt_t
-CubicMidiInterpolation::distance (framecnt_t nframes, bool roll)
+CubicMidiInterpolation::distance (framecnt_t nframes, bool /*roll*/)
 {
-	assert(phase.size() == 1);
+	assert (phase.size () == 1);
 
 	framecnt_t i = 0;
 
 	double acceleration;
-	double distance = 0.0;
+	double distance = phase[0];
 
 	if (nframes < 3) {
+		/* no interpolation possible */
+		phase[0] = 0;
 		return nframes;
 	}
 
@@ -174,17 +156,12 @@ CubicMidiInterpolation::distance (framecnt_t nframes, bool roll)
 		acceleration = 0.0;
 	}
 
-	distance = phase[0];
-
 	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		distance += _speed + acceleration;
 	}
 
-	if (roll) {
-		phase[0] = distance - floor(distance);
-	}
-
-	i = floor(distance);
+	i = floor (distance);
+	phase[0] = fmod (distance, 1.0);
 
 	return i;
 }
