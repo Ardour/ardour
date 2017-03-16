@@ -1086,7 +1086,6 @@ private:
 
     Class <T>& addEqualCheck ()
     {
-      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
       rawsetfield (L, -3, "sameinstance");
@@ -1130,8 +1129,6 @@ private:
           std::string(""), "int (*)(lua_State*)")
       PRINTDOC ("Ext C Function", _name << "set_table",
           std::string(""), "int (*)(lua_State*)")
-      PRINTDOC("Member Function", _name << "sameinstance",
-          std::string("bool"), std::string("bool (*)(" + type_name <T>() + "*)"))
       PRINTDOC("Member Function", _name << "offset",
           std::string(type_name <T>() + "*"), std::string(type_name <T>() + "* (*)(unsigned int)"))
 
@@ -1366,7 +1363,6 @@ private:
 
     WSPtrClass <T>& addEqualCheck ()
     {
-      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
