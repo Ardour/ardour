@@ -21,11 +21,15 @@
 #define __ardour_disk_writer_h__
 
 #include <list>
+#include <vector>
 
 #include "ardour/disk_io.h"
 
 namespace ARDOUR
 {
+
+class AudioFileSource;
+class SMFSource;
 
 class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 {
@@ -34,18 +38,14 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	virtual bool set_write_source_name (const std::string& str);
 
+	bool           recordable()  const { return _flags & Recordable; }
+
 	static framecnt_t chunk_frames() { return _chunk_frames; }
 	static framecnt_t default_chunk_frames ();
 	static void set_chunk_frames (framecnt_t n) { _chunk_frames = n; }
 
 	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
-	void silence (framecnt_t /*nframes*/, framepos_t /*start_frame*/);
-	bool configure_io (ChanCount in, ChanCount out);
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) = 0;
-	ChanCount input_streams () const;
-	ChanCount output_streams() const;
-	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
+	void non_realtime_locate (framepos_t);
 
 	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
@@ -59,6 +59,17 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 			return _write_source_name;
 		}
 	}
+
+	boost::shared_ptr<AudioFileSource> audio_write_source (uint32_t n=0) {
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size()) {
+			return (*c)[n]->write_source;
+		}
+
+		return boost::shared_ptr<AudioFileSource>();
+	}
+
+	boost::shared_ptr<SMFSource> midi_write_source () { return _midi_write_source; }
 
 	virtual std::string steal_write_source_name () { return std::string(); }
 
@@ -80,9 +91,9 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	virtual void set_record_safe (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
-	virtual int set_destructive (bool /*yn*/) { return -1; }
-	virtual int set_non_layered (bool /*yn*/) { return -1; }
-	virtual	bool can_become_destructive (bool& /*requires_bounce*/) const { return false; }
+	int set_destructive (bool yn);
+	int set_non_layered (bool yn);
+	bool can_become_destructive (bool& requires_bounce) const;
 
 	/** @return Start position of currently-running capture (in session frames) */
 	framepos_t current_capture_start() const { return capture_start_frame; }
@@ -98,23 +109,29 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	framecnt_t   capture_offset() const { return _capture_offset; }
 	virtual void set_capture_offset ();
 
+	static PBD::Signal0<void> Overrun;
+
+	PBD::Signal0<void> RecordEnableChanged;
+	PBD::Signal0<void> RecordSafeChanged;
+
   protected:
 	virtual int do_flush (RunContext context, bool force = false) = 0;
 
-	virtual void check_record_status (framepos_t transport_frame, bool can_record);
-	virtual void prepare_record_status (framepos_t /*capture_start_frame*/) {}
-	virtual void set_align_style_from_io() {}
-	virtual void setup_destructive_playlist () {}
-	virtual void use_destructive_playlist () {}
-	virtual void prepare_to_stop (framepos_t transport_pos, framepos_t audible_frame);
+	void get_input_sources ();
+	void check_record_status (framepos_t transport_frame, bool can_record);
+	void prepare_record_status (framepos_t /*capture_start_frame*/);
+	void set_align_style_from_io();
+	void setup_destructive_playlist ();
+	void use_destructive_playlist ();
+	void prepare_to_stop (framepos_t transport_pos, framepos_t audible_frame);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
 	void engage_record_safe ();
 	void disengage_record_safe ();
 
-        virtual bool prep_record_enable () = 0;
-        virtual bool prep_record_disable () = 0;
+	bool prep_record_enable ();
+	bool prep_record_disable ();
 
 	void calculate_record_range (
 		Evoral::OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
@@ -133,16 +150,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	mutable Glib::Threads::Mutex capture_info_lock;
 
   private:
-	enum TransitionType {
-		CaptureStart = 0,
-		CaptureEnd
-	};
-
-	struct CaptureTransition {
-		TransitionType   type;
-		framepos_t       capture_val; ///< The start or end file frame position
-	};
-
 	framecnt_t   _input_latency;
 	gint         _record_enabled;
 	gint         _record_safe;
@@ -157,10 +164,19 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	AlignStyle   _alignment_style;
 	AlignChoice  _alignment_choice;
 	std::string   _write_source_name;
+	boost::shared_ptr<SMFSource> _midi_write_source;
 
 	std::list<boost::shared_ptr<Source> > _last_capture_sources;
-
+	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
+	
 	static framecnt_t _chunk_frames;
+
+	NoteMode                     _note_mode;
+	volatile gint                _frames_pending_write;
+	volatile gint                _num_captured_loops;
+	framepos_t                   _accumulated_capture_offset;
+
+	void finish_capture (boost::shared_ptr<ChannelList> c);
 };
 
 } // namespace
