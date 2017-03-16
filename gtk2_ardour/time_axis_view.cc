@@ -744,7 +744,7 @@ TimeAxisView::popup_display_menu (guint32 when)
 	build_display_menu ();
 
 	if (!display_menu->items().empty()) {
-		display_menu->popup (1, when);
+		display_menu->popup (3, when);
 	}
 }
 

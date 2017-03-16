@@ -426,7 +426,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 			build_mute_menu();
 		}
 
-		mute_menu->popup(0,ev->time);
+		mute_menu->popup(ev->button, ev->time);
 
 		return true;
 
@@ -604,7 +604,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				build_solo_menu ();
 			}
 
-			solo_menu->popup (1, ev->time);
+			solo_menu->popup (ev->button, ev->time);
 		}
 
 	} else {
@@ -1009,7 +1009,7 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
 	if (Keyboard::is_context_menu_event (ev)) {
 		build_record_menu ();
 		if (record_menu) {
-			record_menu->popup (1, ev->time);
+			record_menu->popup (ev->button, ev->time);
 		}
 		return false;
 	}
@@ -1128,7 +1128,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 				build_sends_menu ();
 			}
 
-			sends_menu->popup (0, ev->time);
+			sends_menu->popup (ev->button, ev->time);
 
 		} else {
 
@@ -2139,7 +2139,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 		--_i_am_the_modifier;
 	}
 
-	_invert_menu->popup (0, ev->time);
+	_invert_menu->popup (ev->button, ev->time);
 
 	return true;
 }

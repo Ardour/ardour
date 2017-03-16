@@ -1778,7 +1778,7 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 			Gtkmm2ext::anchored_menu_popup(route_ops_menu, &name_button, "",
 			                               1, ev->time);
 		} else {
-			route_ops_menu->popup (3, ev->time);
+			route_ops_menu->popup (ev->button, ev->time);
 		}
 
 		return true;
@@ -1790,10 +1790,10 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 gboolean
 MixerStrip::number_button_button_press (GdkEventButton* ev)
 {
-	if (  ev->button == 3 ) {
+	if (ev->button == 3) {
 		list_route_operations ();
 
-		route_ops_menu->popup (1, ev->time);
+		route_ops_menu->popup (ev->button, ev->time);
 
 		return true;
 	}

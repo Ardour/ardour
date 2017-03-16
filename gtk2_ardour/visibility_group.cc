@@ -69,7 +69,7 @@ VisibilityGroup::button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
-	menu()->popup (1, ev->time);
+	menu()->popup (ev->button, ev->time);
 	return true;
 }
 

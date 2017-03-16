@@ -810,7 +810,7 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		can_remove = !mm->meter().initial ();
 		delete meter_marker_menu;
 		build_meter_marker_menu (mm, can_remove);
-		meter_marker_menu->popup (1, ev->time);
+		meter_marker_menu->popup (ev->button, ev->time);
 	} else if (tm) {
 		if (!tm->tempo().active()) {
 			return;
@@ -818,7 +818,7 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		can_remove = !tm->tempo().initial() && !tm->tempo().locked_to_meter();
 		delete tempo_marker_menu;
 		build_tempo_marker_menu (tm, can_remove);
-		tempo_marker_menu->popup (1, ev->time);
+		tempo_marker_menu->popup (ev->button, ev->time);
 	} else {
 		return;
 	}
@@ -842,7 +842,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
 
 		marker_menu_item = item;
-		transport_marker_menu->popup (1, ev->time);
+		transport_marker_menu->popup (ev->button, ev->time);
 
 	} else if (loc->is_mark()) {
 
@@ -864,14 +864,14 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 			}
 #endif
 			marker_menu_item = item;
-			marker_menu->popup (1, ev->time);
+			marker_menu->popup (ev->button, ev->time);
 
 	} else if (loc->is_range_marker()) {
 		delete range_marker_menu;
 		build_range_marker_menu (loc, false, false);
 
 		marker_menu_item = item;
-		range_marker_menu->popup (1, ev->time);
+		range_marker_menu->popup (ev->button, ev->time);
 	}
 }
 
@@ -882,7 +882,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 		build_new_transport_marker_menu ();
 	}
 
-	new_transport_marker_menu->popup (1, ev->time);
+	new_transport_marker_menu->popup (ev->button, ev->time);
 
 }
 

@@ -377,7 +377,7 @@ VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
 		if (!context_menu) {
 			build_context_menu ();
 		}
-		context_menu->popup (1, ev->time);
+		context_menu->popup (ev->button, ev->time);
 		return true;
 	}
 
@@ -395,7 +395,7 @@ VCAMasterStrip::number_button_press (GdkEventButton* ev)
 		if (!context_menu) {
 			build_context_menu ();
 		}
-		context_menu->popup (1, ev->time);
+		context_menu->popup (ev->button, ev->time);
 	}
 	return true;
 }
