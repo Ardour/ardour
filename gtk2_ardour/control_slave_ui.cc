@@ -44,6 +44,7 @@ using std::string;
 ControlSlaveUI::ControlSlaveUI (Session* s)
 	: SessionHandlePtr (s)
 	, initial_button (ArdourButton::default_elements)
+	, context_menu (0)
 {
 	set_no_show_all (true);
 
@@ -57,6 +58,11 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 	initial_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::vca_button_release), 0), false);
 
 	pack_start (initial_button, true, true);
+}
+
+ControlSlaveUI::~ControlSlaveUI ()
+{
+	delete context_menu;
 }
 
 void
@@ -177,8 +183,9 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 		return true;
 	}
 
-	Menu* menu = new Menu;
-	MenuList& items = menu->items();
+	delete context_menu;
+	context_menu = new Menu;
+	MenuList& items = context_menu->items();
 	bool slaved = false;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
@@ -212,7 +219,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 	}
 
 	if (!items.empty()) {
-		menu->popup (1, ev->time);
+		context_menu->popup (1, ev->time);
 	}
 
 	return true;
