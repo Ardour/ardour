@@ -52,7 +52,7 @@ uint32_t Canvas::tooltip_timeout_msecs = 750;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
-        , _bg_color (rgba_to_color (0, 1.0, 0.0, 1.0))
+	, _bg_color (rgba_to_color (0, 1.0, 0.0, 1.0))
 {
 	set_epoch ();
 }
@@ -363,13 +363,13 @@ Canvas::set_tooltip_timeout (uint32_t msecs)
 void
 Canvas::set_background_color (Color c)
 {
-        _bg_color = c;
+	_bg_color = c;
 
-        Rect r = _root.bounding_box();
+	Rect r = _root.bounding_box();
 
-        if (r) {
-                request_redraw (_root.item_to_window (r));
-        }
+	if (r) {
+		request_redraw (_root.item_to_window (r));
+	}
 }
 
 void
@@ -800,47 +800,47 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	if (!canvas_image) {
 		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 	}
-        Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
+	Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
 	Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
 #else
 	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
 #endif
 
-        /* draw background color */
+	/* draw background color */
 
-        draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-        draw_context->clip_preserve ();
-        set_source_rgba (draw_context, _bg_color);
-        draw_context->fill ();
+	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	draw_context->clip_preserve ();
+	set_source_rgba (draw_context, _bg_color);
+	draw_context->fill ();
 
-        /* render canvas */
-		if ( _single_exposure ) {
+	/* render canvas */
+	if ( _single_exposure ) {
 
-			render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
+		render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
-		} else {
-			GdkRectangle* rects;
-			gint nrects;
+	} else {
+		GdkRectangle* rects;
+		gint nrects;
 
-			gdk_region_get_rectangles (ev->region, &rects, &nrects);
-			for (gint n = 0; n < nrects; ++n) {
-				draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
-				render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
-			}
-			g_free (rects);
+		gdk_region_get_rectangles (ev->region, &rects, &nrects);
+		for (gint n = 0; n < nrects; ++n) {
+			draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
+			render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
 		}
+		g_free (rects);
+	}
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {
 #endif
 #if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
-	/* now blit our private surface back to the GDK one */
+		/* now blit our private surface back to the GDK one */
 
-	window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	window_context->clip ();
-	window_context->set_source (canvas_image, 0, 0);
-	window_context->set_operator (Cairo::OPERATOR_SOURCE);
-	window_context->paint ();
+		window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		window_context->clip ();
+		window_context->set_source (canvas_image, 0, 0);
+		window_context->set_operator (Cairo::OPERATOR_SOURCE);
+		window_context->paint ();
 #endif
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
