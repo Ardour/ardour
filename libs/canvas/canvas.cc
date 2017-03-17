@@ -784,6 +784,10 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		return true;
 	}
 
+#ifdef CANVAS_PROFILE
+	const int64_t start = g_get_monotonic_time ();
+#endif
+
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	Cairo::RefPtr<Cairo::Context> draw_context;
 	Cairo::RefPtr<Cairo::Context> window_context;
@@ -806,10 +810,27 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
 #endif
 
-	/* draw background color */
-
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	draw_context->clip_preserve ();
+	draw_context->clip();
+
+#ifdef __APPLE__
+	/* group calls cairo_quartz_surface_create() which
+	 * effectively uses a CGBitmapContext + image-surface
+	 *
+	 * This avoids expensive argb32_image_mark_image() during drawing.
+	 * Although the final paint() operation still takes the slow path
+	 * through image_mark_image instead of ColorMaskCopyARGB888_sse :(
+	 *
+	 * profiling indicates a speed up of factor 2. (~ 5-10ms render time,
+	 * instead of 10-20ms, which is still slow compared to XCB and win32 surfaces (~0.2 ms)
+	 *
+	 * Fixing this for good likely involves changes to GdkQuartzWindow, GdkQuartzView
+	 */
+	draw_context->push_group ();
+#endif
+
+	/* draw background color */
+	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	set_source_rgba (draw_context, _bg_color);
 	draw_context->fill ();
 
@@ -830,6 +851,11 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		g_free (rects);
 	}
 
+#ifdef __APPLE__
+	draw_context->pop_group_to_source ();
+	draw_context->paint ();
+#endif
+
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {
 #endif
@@ -844,6 +870,12 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 #endif
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
+#endif
+
+#ifdef CANVAS_PROFILE
+	const int64_t end = g_get_monotonic_time ();
+	const int64_t elapsed = end - start;
+	printf ("GtkCanvas::on_expose_event %f ms\n", elapsed / 1000.f);
 #endif
 
 	return true;
