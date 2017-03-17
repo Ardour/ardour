@@ -24,6 +24,10 @@ function factory () return function ()
 			for p in params:iter () do
 				-- http://manual.ardour.org/lua-scripting/class_reference/#Vamp:PluginBase:ParameterDescriptor
 				print (" * Id:", p.identifier, "Name:", p.name, "Desc:", p.description)
+				local i = 0; for vn in p.valueNames:iter() do
+					print ("   ^^  ", i, " -> ", vn)
+					i = i + 1
+				end
 			end
 		end
 
