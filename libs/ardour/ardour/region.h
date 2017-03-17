@@ -326,6 +326,13 @@ class LIBARDOUR_API Region
 		// no transients, but its OK
 	}
 
+	/* wrapper to the above for easy access throug Lua */
+	AnalysisFeatureList transients () {
+		AnalysisFeatureList rv;
+		get_transients (rv);
+		return rv;
+	}
+
 	bool has_transients () const;
 
 	virtual int separate_by_channel (ARDOUR::Session&,

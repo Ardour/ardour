@@ -203,6 +203,7 @@ CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::vector<float>);
 CLASSKEYS(std::vector<float*>);
 CLASSKEYS(std::vector<double>);
+CLASSKEYS(std::list<int64_t>);
 
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
@@ -312,6 +313,10 @@ LuaBindings::stddef (lua_State* L)
 
 	// std::vector<float*>
 		.beginStdVector <float*> ("FloatArrayVector")
+		.endClass ()
+
+		// framepos_t, frameoffset_t lists e.g. AnalysisFeatureList
+		.beginStdList <int64_t> ("Int64List")
 		.endClass ()
 
 	// TODO std::set
@@ -1002,6 +1007,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("regions_at", &Playlist::regions_at)
 		.addFunction ("top_region_at", &Playlist::top_region_at)
 		.addFunction ("top_unmuted_region_at", &Playlist::top_unmuted_region_at)
+		.addFunction ("find_next_transient", &Playlist::find_next_transient)
 		.addFunction ("find_next_region", &Playlist::find_next_region)
 		.addFunction ("find_next_region_boundary", &Playlist::find_next_region_boundary)
 		.addFunction ("count_regions_at", &Playlist::count_regions_at)
@@ -1087,6 +1093,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("covers", &Region::covers)
 		.addFunction ("at_natural_position", &Region::at_natural_position)
 		.addFunction ("is_compound", &Region::is_compound)
+
+		.addFunction ("has_transients", &Region::has_transients)
+		.addFunction ("transients", (AnalysisFeatureList (Region::*)())&Region::transients)
+
 		/* editing operations */
 		.addFunction ("set_length", &Region::set_length)
 		.addFunction ("set_start", &Region::set_start)
@@ -1171,6 +1181,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
+		//.addFunction ("what_can_be_automated", &Automatable::what_can_be_automated)
 		.endClass ()
 
 		.deriveWSPtrClass <AutomatableSequence<Evoral::Beats>, Automatable> ("AutomatableSequence")
