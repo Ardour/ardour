@@ -323,7 +323,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 {
   public:
 	TempoMap (framecnt_t frame_rate);
-	TempoMap (TempoMap const &);
 	~TempoMap();
 
 	TempoMap& operator= (TempoMap const &);
@@ -519,6 +518,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void fix_legacy_end_session();
 
 private:
+	/* prevent copy construction */
+	TempoMap (TempoMap const&);
 
 	TempoSection* previous_tempo_section_locked (const Metrics& metrics, TempoSection*) const;
 	TempoSection* next_tempo_section_locked (const Metrics& metrics, TempoSection*) const;
@@ -604,8 +605,8 @@ private:
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);
 
-	TempoSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, TempoSection* section);
-	MeterSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSection* section);
+	TempoSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, TempoSection* section) const;
+	MeterSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSection* section) const;
 };
 
 }; /* namespace ARDOUR */
