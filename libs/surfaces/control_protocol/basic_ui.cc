@@ -416,6 +416,45 @@ BasicUI::jump_by_bars (double bars)
 	session->request_locate ( session->convert_to_frames (any) );
 }
 
+void
+BasicUI::toggle_monitor_mute ()
+{
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		if (mon->cut_all ()) {
+			mon->set_cut_all (false);
+		} else {
+			mon->set_cut_all (true);
+		}
+	}
+}
+
+void
+BasicUI::toggle_monitor_dim ()
+{
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		if (mon->dim_all ()) {
+			mon->set_dim_all (false);
+		} else {
+			mon->set_dim_all (true);
+		}
+	}
+}
+
+void
+BasicUI::toggle_monitor_mono ()
+{
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		if (mon->mono()) {
+			mon->set_mono (false);
+		} else {
+			mon->set_mono (true);
+		}
+	}
+}
+
 void BasicUI::mark_in () { access_action("Common/start-range-from-playhead"); }
 void BasicUI::mark_out () { access_action("Common/finish-range-from-playhead"); }
 
@@ -427,10 +466,6 @@ void BasicUI::stop_forget () { access_action("Transport/ToggleRollForgetCapture"
 void BasicUI::set_punch_range () { access_action("Common/set-punch-from-edit-range"); }
 void BasicUI::set_loop_range () { access_action("Common/set-loop-from-edit-range"); }
 void BasicUI::set_session_range () { access_action("Common/set-session-from-edit-range"); }
-
-void BasicUI::toggle_monitor_mute () { /*access_action("Editor/toggle_monitor_mute");  */ }
-void BasicUI::toggle_monitor_dim () {  /*access_action("Editor/toggle_monitor_dim");  */ }
-void BasicUI::toggle_monitor_mono () { /*access_action("Editor/toggle_monitor_mono");  */ }
 
 void BasicUI::quick_snapshot_stay () { access_action("Main/QuickSnapshotStay"); }
 void BasicUI::quick_snapshot_switch () { access_action("Main/QuickSnapshotSwitch"); }
