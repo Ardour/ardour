@@ -824,7 +824,7 @@ LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length
 std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >
 LuaAPI::note_list (boost::shared_ptr<MidiModel> mm)
 {
-	typedef typename boost::shared_ptr<Evoral::Note<Evoral::Beats> > NotePtr;
+	typedef boost::shared_ptr<Evoral::Note<Evoral::Beats> > NotePtr;
 
 	std::list<NotePtr> note_ptr_list;
 
