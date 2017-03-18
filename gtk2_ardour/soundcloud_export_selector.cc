@@ -89,7 +89,7 @@ SoundcloudExportSelector::SoundcloudExportSelector () :
 int
 SoundcloudExportSelector::do_progress_callback (double ultotal, double ulnow, const std::string &filename)
 {
-	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("SoundcloudExportSelector::do_progress_callback(%1, %2, %3)", ultotal, ulnow, filename));
+	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("SoundcloudExportSelector::do_progress_callback(%1, %2, %3)\n", ultotal, ulnow, filename));
 	if (soundcloud_cancel) {
 		progress_bar.set_fraction (0);
 		// cancel_button.set_label ("");
