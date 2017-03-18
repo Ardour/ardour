@@ -35,6 +35,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/buffer_set.h"
+#include "ardour/beats_frames_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
@@ -165,6 +166,7 @@ CLASSKEYS(Selectable*);
 CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
+CLASSKEYS(ARDOUR::BeatsFramesConverter);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
@@ -1132,7 +1134,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
 		.addFunction ("do_export", &MidiRegion::do_export)
 		.addFunction ("midi_source", &MidiRegion::midi_source)
-		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::midi_source)
+		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::model)
 		.addFunction ("start_beats", &MidiRegion::start_beats)
 		.addFunction ("length_beats", &MidiRegion::length_beats)
 		.endClass ()
@@ -1476,6 +1478,9 @@ LuaBindings::common (lua_State* L)
 		.addVoidPtrConstructor<std::list<boost::shared_ptr <AutomationControl> > > ()
 		.endClass ()
 
+		.beginStdList <boost::shared_ptr<Evoral::Note<Evoral::Beats> > > ("NotePtrList")
+		.endClass ()
+
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
 	// typedef Evoral::Note<Evoral::Beats> Note;
 	// std::set< boost::weak_ptr<Note> >
@@ -1504,6 +1509,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("frames_per_grid", &Meter::frames_per_grid)
 		.endClass ()
 
+		.beginClass <BeatsFramesConverter> ("BeatsFramesConverter")
+		.addConstructor <void (*) (const TempoMap&, framepos_t)> ()
+		.addFunction ("to", &BeatsFramesConverter::to)
+		.addFunction ("from", &BeatsFramesConverter::from)
+		.endClass ()
+
 		.beginClass <TempoMap> ("TempoMap")
 		.addFunction ("add_tempo", &TempoMap::add_tempo)
 		.addFunction ("add_meter", &TempoMap::add_meter)
@@ -1514,6 +1525,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_frame)
 		.addFunction ("exact_beat_at_frame", &TempoMap::exact_beat_at_frame)
 		.addFunction ("exact_qn_at_frame", &TempoMap::exact_qn_at_frame)
+		.addFunction ("framepos_plus_qn", &TempoMap::framepos_plus_qn)
+		.addFunction ("framewalk_to_qn", &TempoMap::framewalk_to_qn)
 		.endClass ()
 
 		.beginClass <MetricSection> ("MetricSection")
@@ -1963,6 +1976,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("monotonic_time", ::g_get_monotonic_time)
 		.addCFunction ("build_filename", ARDOUR::LuaAPI::build_filename)
 		.addFunction ("new_noteptr", ARDOUR::LuaAPI::new_noteptr)
+		.addFunction ("note_list", ARDOUR::LuaAPI::note_list)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
 

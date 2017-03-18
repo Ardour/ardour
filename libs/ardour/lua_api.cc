@@ -820,3 +820,17 @@ LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length
 {
 	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
 }
+
+std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >
+LuaAPI::note_list (boost::shared_ptr<MidiModel> mm)
+{
+	typedef typename boost::shared_ptr<Evoral::Note<Evoral::Beats> > NotePtr;
+
+	std::list<NotePtr> note_ptr_list;
+
+	const MidiModel::Notes& notes = mm->notes();
+	for (MidiModel::Notes::const_iterator i = notes.begin(); i != notes.end(); ++i) {
+		note_ptr_list.push_back (*i);
+	}
+	return note_ptr_list;
+}
