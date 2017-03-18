@@ -217,7 +217,9 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 
 	Gtk::HBox *hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
+#ifndef NDEBUG // SoundCloud upload is currently b0rked, needs debugging
 	hbox->pack_start (soundcloud_upload_button, false, false, 0);
+#endif
 	hbox->pack_start (analysis_button, false, false, 0);
 	pack_start (*hbox, false, false, 0);
 
@@ -298,6 +300,9 @@ ExportFileNotebook::FilePage::get_format_name () const
 bool
 ExportFileNotebook::FilePage::get_soundcloud_upload () const
 {
+#ifdef NDEBUG // SoundCloud upload is currently b0rked, needs debugging
+	return false;
+#endif
 	return soundcloud_upload_button.get_active ();
 }
 
