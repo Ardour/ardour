@@ -1331,10 +1331,9 @@ struct CFunc
   // generate std::set from table keys ( table[member] = true )
   // http://www.lua.org/pil/11.5.html
 
-  template <class T>
+  template <class T, class C>
   static int tableToSet (lua_State *L)
   {
-    typedef std::set<T> C;
     C * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
     if (!lua_istable (L, -1)) { return luaL_error (L, "argument is not a table"); }
@@ -1358,10 +1357,9 @@ struct CFunc
 
   // iterate over a std::set, explicit "true" value.
   // compare to http://www.lua.org/pil/11.5.html
-  template <class T>
+  template <class T, class C>
   static int setIterIter (lua_State *L)
   {
-    typedef std::set<T> C;
     typedef typename C::const_iterator IterType;
     IterType * const end = static_cast <IterType * const> (lua_touserdata (L, lua_upvalueindex (2)));
     IterType * const iter = static_cast <IterType * const> (lua_touserdata (L, lua_upvalueindex (1)));
@@ -1377,24 +1375,22 @@ struct CFunc
   }
 
   // generate iterator
-  template <class T>
+  template <class T, class C>
   static int setIter (lua_State *L)
   {
-    typedef std::set<T> C;
     C * const t = Userdata::get <C> (L, 1, false);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
     typedef typename C::const_iterator IterType;
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->begin());
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->end());
-    lua_pushcclosure (L, setIterIter<T>, 2);
+    lua_pushcclosure (L, setIterIter<T, C>, 2);
     return 1;
   }
 
   // generate table from std::set
-  template <class T>
+  template <class T, class C>
   static int setToTable (lua_State *L)
   {
-    typedef std::set<T> C;
     C const* const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
 

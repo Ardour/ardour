@@ -1824,9 +1824,8 @@ public:
       .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
-      .addExtCFunction ("add", &CFunc::tableToSet<T>)
-      .addExtCFunction ("iter", &CFunc::setIter<T>)
-      .addExtCFunction ("table", &CFunc::setToTable<T>);
+      .addExtCFunction ("iter", &CFunc::setIter<T, LT>)
+      .addExtCFunction ("table", &CFunc::setToTable<T, LT>);
   }
 
   template <unsigned int T>
