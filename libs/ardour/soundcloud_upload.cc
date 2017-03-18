@@ -35,7 +35,7 @@
 
 using namespace PBD;
 
-size_t
+static size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
 	register int realsize = (int)(size * nmemb);
