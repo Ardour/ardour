@@ -99,7 +99,7 @@ struct TypeListValues <TypeList <Head, Tail> >
 template <typename Head, typename Tail>
 struct TypeListValues <TypeList <Head&, Tail> >
 {
-  Head hd;
+  Head& hd;
   TypeListValues <Tail> tl;
 
   TypeListValues (Head& hd_, TypeListValues <Tail> const& tl_)
@@ -123,7 +123,7 @@ struct TypeListValues <TypeList <Head&, Tail> >
 template <typename Head, typename Tail>
 struct TypeListValues <TypeList <Head const&, Tail> >
 {
-  Head hd;
+  const Head& hd;
   TypeListValues <Tail> tl;
 
   TypeListValues (Head const& hd_, const TypeListValues <Tail>& tl_)
