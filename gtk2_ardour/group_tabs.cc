@@ -444,8 +444,8 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 			return;
 		}
 
-		/* VCAs use 1-based counting. Get most recently created VCA... */
-		which = _session->vca_manager().n_vcas();
+		/* Get most recently created VCA... */
+		which = _session->vca_manager().vcas().back()->number();
 	}
 
 	master = _session->vca_manager().vca_by_number (which);
@@ -480,8 +480,8 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
 			return;
 		}
 
-		/* VCAs use 1-based counting. Get most recently created VCA... */
-		which = _session->vca_manager().n_vcas();
+		/* Get most recently created VCA... */
+		which = _session->vca_manager().vcas().back()->number();
 	}
 
 	master = _session->vca_manager().vca_by_number (which);
