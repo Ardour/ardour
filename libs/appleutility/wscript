@@ -31,6 +31,8 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS', '-DCOREAUDIO105')
         conf.define ('COREAUDIO105', 1)
 
+    conf.env.append_value ('CFLAGS', '-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0')
+
 def build(bld):
     obj                = bld(features = 'cxx cxxshlib')
     obj.uselib         = 'AUDIOUNITS OSX'

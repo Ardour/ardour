@@ -83,7 +83,7 @@ protected:
 		mName(name),
 		mBufferMemory(NULL)
 	{
-		check(numBuffers > 0 /*&& channelsPerBuffer > 0*/);
+		__Check(numBuffers > 0 /*&& channelsPerBuffer > 0*/);
 		mNumberBuffers = numBuffers;
 		AudioBuffer *buf = mBuffers;
 		for (UInt32 i = mNumberBuffers; i--; ++buf) {
@@ -118,7 +118,7 @@ public:
 	void		SetBytes(UInt32 nBytes, void *data)
 	{
 		VerifyNotTrashingOwnedBuffer();
-		check(mNumberBuffers == 1);
+		__Check(mNumberBuffers == 1);
 		mBuffers[0].mDataByteSize = nBytes;
 		mBuffers[0].mData = data;
 	}
@@ -150,7 +150,7 @@ public:
 		VerifyNotTrashingOwnedBuffer();
 		AudioBuffer *mybuf = mBuffers, *srcbuf = blp->mBuffers;
 		for (UInt32 i = mNumberBuffers; i--; ++mybuf, ++srcbuf) {
-			check(nBytes <= srcbuf->mDataByteSize);
+			__Check(nBytes <= srcbuf->mDataByteSize);
 			memcpy((Byte *)mybuf->mData + mybuf->mDataByteSize, srcbuf->mData, nBytes);
 			mybuf->mDataByteSize += nBytes;
 		}
@@ -202,7 +202,7 @@ public:
 		VerifyNotTrashingOwnedBuffer();
 		AudioBuffer *buf = mBuffers;
 		for (UInt32 i = mNumberBuffers; i--; ++buf) {
-			check(nBytes <= buf->mDataByteSize);
+			__Check(nBytes <= buf->mDataByteSize);
 			buf->mData = (Byte *)buf->mData + nBytes;
 			buf->mDataByteSize -= nBytes;
 		}
@@ -287,7 +287,7 @@ protected:
 	{
 		// This needs to be called from places where we are modifying the buffer list.
 		// It's an error to modify the buffer pointers or lengths if we own the buffer memory.
-		check(mBufferMemory == NULL);
+		__Check(mBufferMemory == NULL);
 	}
 
 	const char *						mName;	// for debugging
