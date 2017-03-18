@@ -39,7 +39,7 @@ class TempoMap;
 class LIBARDOUR_API BeatsFramesConverter
 	: public Evoral::TimeConverter<Evoral::Beats,framepos_t> {
 public:
-	BeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
+	BeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
 		: Evoral::TimeConverter<Evoral::Beats, framepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
@@ -48,7 +48,7 @@ public:
 	Evoral::Beats from (framepos_t frames) const;
 
 private:
-	TempoMap& _tempo_map;
+	const TempoMap& _tempo_map;
 };
 
 /** Converter between quarter-note beats and frames.  Takes distances in quarter-note beats or frames
@@ -58,7 +58,7 @@ private:
 class LIBARDOUR_API DoubleBeatsFramesConverter
 	: public Evoral::TimeConverter<double,framepos_t> {
 public:
-	DoubleBeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
+	DoubleBeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
 		: Evoral::TimeConverter<double, framepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
@@ -67,7 +67,7 @@ public:
 	double from (framepos_t frames) const;
 
 private:
-	TempoMap& _tempo_map;
+	const TempoMap& _tempo_map;
 };
 
 } /* namespace ARDOUR */
