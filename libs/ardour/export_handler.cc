@@ -454,6 +454,14 @@ ExportHandler::finish_timespan ()
 			delete (se);
 		}
 
+		// XXX THIS IS IN REALTIME CONTEXT, CALLED FROM
+		// AudioEngine::process_callback()
+		// freewheeling, yes, but still uploading here is NOT
+		// a good idea.
+		//
+		// even less so, since SoundcloudProgress is using
+		// connect_same_thread() - GUI updates from the RT thread
+		// will cause crashes. http://pastebin.com/UJKYNGHR
 		if (fmt->soundcloud_upload()) {
 			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
 			std::string token = soundcloud_uploader->Get_Auth_Token(soundcloud_username, soundcloud_password);
