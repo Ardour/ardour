@@ -455,11 +455,16 @@ BasicUI::toggle_monitor_mono ()
 	}
 }
 
+void
+BasicUI::midi_panic ()
+{
+	session->midi_panic ();
+}
+
 void BasicUI::mark_in () { access_action("Common/start-range-from-playhead"); }
 void BasicUI::mark_out () { access_action("Common/finish-range-from-playhead"); }
 
 void BasicUI::toggle_click () { access_action("Transport/ToggleClick"); }
-void BasicUI::midi_panic () { access_action("MIDI/panic"); }
 void BasicUI::toggle_roll () { access_action("Transport/ToggleRoll"); }
 void BasicUI::stop_forget () { access_action("Transport/ToggleRollForgetCapture"); }
 
