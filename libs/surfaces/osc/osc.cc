@@ -478,7 +478,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/set_loop_range", "f", set_loop_range);
 		REGISTER_CALLBACK (serv, "/set_session_range", "", set_session_range);
 		REGISTER_CALLBACK (serv, "/set_session_range", "f", set_session_range);
-		// /toggle_monitor_* not working (comented out)
 		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "", toggle_monitor_mute);
 		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "f", toggle_monitor_mute);
 		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "", toggle_monitor_dim);
@@ -542,6 +541,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "f", monitor_set_fader);
+		REGISTER_CALLBACK (serv, "/monitor/mute", "i", monitor_set_mute);
+		REGISTER_CALLBACK (serv, "/monitor/dim", "i", monitor_set_dim);
+		REGISTER_CALLBACK (serv, "/monitor/mono", "i", monitor_set_mono);
 
 		// Controls for the Selected strip
 		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
@@ -1804,6 +1806,42 @@ OSC::monitor_set_fader (float position)
 	boost::shared_ptr<Stripable> s = session->monitor_out();
 	if (s) {
 		s->gain_control()->set_value (slider_position_to_gain_with_max (position, 2.0), PBD::Controllable::NoGroup);
+	}
+	return 0;
+}
+
+int
+OSC::monitor_set_mute (uint32_t state)
+{
+	if (!session) return -1;
+
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		mon->set_cut_all (state);
+	}
+	return 0;
+}
+
+int
+OSC::monitor_set_dim (uint32_t state)
+{
+	if (!session) return -1;
+
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		mon->set_dim_all (state);
+	}
+	return 0;
+}
+
+int
+OSC::monitor_set_mono (uint32_t state)
+{
+	if (!session) return -1;
+
+	if (session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		mon->set_mono (state);
 	}
 	return 0;
 }

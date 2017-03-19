@@ -351,6 +351,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1(master_set_mute,i,);
 	PATH_CALLBACK1(monitor_set_gain,f,);
 	PATH_CALLBACK1(monitor_set_fader,f,);
+	PATH_CALLBACK1(monitor_set_mute,i,);
+	PATH_CALLBACK1(monitor_set_dim,i,);
+	PATH_CALLBACK1(monitor_set_mono,i,);
 
 #define PATH_CALLBACK1_MSG(name,arg1type) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -546,6 +549,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int master_set_mute (uint32_t state);
 	int monitor_set_gain (float dB);
 	int monitor_set_fader (float position);
+	int monitor_set_mute (uint32_t state);
+	int monitor_set_dim (uint32_t state);
+	int monitor_set_mono (uint32_t state);
 	int sel_recenable (uint32_t state, lo_message msg);
 	int sel_recsafe (uint32_t state, lo_message msg);
 	int sel_mute (uint32_t state, lo_message msg);
