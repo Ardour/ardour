@@ -22,6 +22,7 @@
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
+#include "ardour/monitor_processor.h"
 
 #include "osc.h"
 #include "osc_global_observer.h"
@@ -72,24 +73,22 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		send_gain_message ("/master/", strip->gain_control());
 
 		// monitor stuff next
-		/*
-		* 	Monitor (todo)
-		* 		Mute
-		* 		Dim
-		* 		Mono
-		* 		Rude Solo
-		* 		etc.
-		*/
 		strip = session->monitor_out();
 		if (strip) {
 			text_message (X_("/monitor/name"), "Monitor");
 
-			// Hmm, it seems the monitor mute is not at route->mute_control()
-			/*boost::shared_ptr<Controllable> mute_controllable2 = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
-			//mute_controllable = boost::dynamic_pointer_cast<Controllable>(r2->mute_control());
-			mute_controllable2->Changed.connect (monitor_mute_connection, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), strip->mute_control()), OSC::instance());
-			send_change_message ("/monitor/mute", strip->mute_control());
-			*/
+			boost::shared_ptr<Controllable> mon_mute_cont = strip->monitor_control()->cut_control();
+			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
+			send_change_message ("/monitor/mute", mon_mute_cont);
+
+			boost::shared_ptr<Controllable> mon_dim_cont = strip->monitor_control()->dim_control();
+			mon_dim_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/dim"), mon_dim_cont), OSC::instance());
+			send_change_message ("/monitor/dim", mon_dim_cont);
+
+			boost::shared_ptr<Controllable> mon_mono_cont = strip->monitor_control()->mono_control();
+			mon_mono_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mono"), mon_mono_cont), OSC::instance());
+			send_change_message ("/monitor/mono", mon_mono_cont);
+
 			gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
 				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
 				send_gain_message ("/monitor/", strip->gain_control());
@@ -121,6 +120,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 OSCGlobalObserver::~OSCGlobalObserver ()
 {
 
+	// need to add general zero everything messages
 	strip_connections.drop_connections ();
 	session_connections.drop_connections ();
 
