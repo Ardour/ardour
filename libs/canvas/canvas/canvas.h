@@ -215,6 +215,8 @@ public:
         bool on_enter_notify_event (GdkEventCrossing*);
         bool on_leave_notify_event (GdkEventCrossing*);
 
+	void on_realize ();
+
 	bool button_handler (GdkEventButton *);
 	bool motion_notify_handler (GdkEventMotion *);
         bool deliver_event (GdkEvent *);
@@ -249,6 +251,8 @@ private:
 	bool really_start_tooltip_timeout ();
 
 	bool _in_dtor;
+
+	void* _nsglview;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for

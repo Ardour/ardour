@@ -44,6 +44,10 @@
 #include "canvas/scroll_group.h"
 #include "canvas/utils.h"
 
+#ifdef __APPLE__
+#include "canvas/nsglview.h"
+#endif
+
 using namespace std;
 using namespace ArdourCanvas;
 
@@ -390,11 +394,18 @@ GtkCanvas::GtkCanvas ()
 	, current_tooltip_item (0)
 	, tooltip_window (0)
 	, _in_dtor (false)
+	, _nsglview (0)
 {
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
 		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
 		    Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+
+#ifdef __APPLE__NotYetToDueGdkForeignViewMousePatch // XXX
+# ifndef __ppc__ // would need to flip RGBA <> RGBA
+	_nsglview = nsglview_create (this);
+# endif
+#endif
 }
 
 void
@@ -756,6 +767,15 @@ GtkCanvas::item_going_away (Item* item, Rect bounding_box)
 }
 
 void
+GtkCanvas::on_realize ()
+{
+	Gtk::EventBox::on_realize();
+#ifdef __APPLE__
+	nsglview_overlay (_nsglview, get_window()->gobj());
+#endif
+}
+
+void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
@@ -771,6 +791,18 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
 #endif
+
+#ifdef __APPLE__
+	if (_nsglview) {
+		gint xx, yy;
+		gtk_widget_translate_coordinates(
+				GTK_WIDGET(gobj()),
+				GTK_WIDGET(get_toplevel()->gobj()),
+				0, 0, &xx, &yy);
+		nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
+	}
+#endif
+
 }
 
 /** Handler for GDK expose events.
@@ -783,6 +815,12 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	if (_in_dtor) {
 		return true;
 	}
+#ifdef __APPLE__
+	if (_nsglview) {
+		nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		return true;
+	}
+#endif
 
 #ifdef CANVAS_PROFILE
 	const int64_t start = g_get_monotonic_time ();
@@ -1154,7 +1192,7 @@ GtkCanvas::unfocus (Item* item)
 }
 
 /** @return The visible area of the canvas, in window coordinates */
-Rect
+ArdourCanvas::Rect
 GtkCanvas::visible_area () const
 {
 	return Rect (0, 0, get_allocation().get_width (), get_allocation().get_height ());
