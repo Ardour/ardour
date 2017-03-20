@@ -22,6 +22,12 @@
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/rgb_macros.h"
+
+#ifdef __APPLE__
+#include <gdk/gdk.h>
+#include "gtkmm2ext/nsglview.h"
+#endif
 
 #include "pbd/i18n.h"
 
@@ -49,6 +55,7 @@ CairoWidget::CairoWidget ()
 	, _name_proxy (this, X_("name"))
 	, _current_parent (0)
 	, _canvas_widget (false)
+	, _nsglview (0)
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
@@ -64,10 +71,24 @@ CairoWidget::~CairoWidget ()
 void
 CairoWidget::set_canvas_widget ()
 {
+	assert (!_nsglview);
 	assert (!_canvas_widget);
 	ensure_style ();
 	gtk_widget_set_realized (GTK_WIDGET(gobj()), true);
 	_canvas_widget = true;
+}
+
+void
+CairoWidget::use_nsglview ()
+{
+	assert (!_nsglview);
+	assert (!_canvas_widget);
+	assert (!is_realized());
+#ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
+# ifndef __ppc__ // would need to flip RGBA <> RGBA
+	_nsglview = Gtkmm2ext::nsglview_create (this);
+#endif
+#endif
 }
 
 int
@@ -106,6 +127,16 @@ CairoWidget::on_button_press_event (GdkEventButton*)
 	return false;
 }
 
+uint32_t
+CairoWidget::background_color ()
+{
+	if (_need_bg) {
+		Gdk::Color bg (get_parent_bg());
+		return RGBA_TO_UINT (bg.get_red() / 255, bg.get_green() / 255, bg.get_blue() / 255, 255);
+	} else {
+		return 0;
+	}
+}
 
 #ifdef USE_TRACKS_CODE_FEATURES
 
@@ -202,6 +233,12 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		return true;
+	}
+#endif
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	Cairo::RefPtr<Cairo::Context> cr;
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {
@@ -334,6 +371,16 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 	if (_canvas_widget) {
 		return;
 	}
+#ifdef __APPLE__
+	if (_nsglview) {
+		gint xx, yy;
+		gtk_widget_translate_coordinates(
+				GTK_WIDGET(gobj()),
+				GTK_WIDGET(get_toplevel()->gobj()),
+				0, 0, &xx, &yy);
+		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, alloc.get_width(), alloc.get_height());
+	}
+#endif
 	set_dirty ();
 }
 
@@ -412,6 +459,17 @@ void
 CairoWidget::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 {
 	set_dirty ();
+}
+
+void
+CairoWidget::on_realize ()
+{
+	Gtk::EventBox::on_realize();
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_overlay (_nsglview, get_window()->gobj());
+	}
+#endif
 }
 
 void

@@ -24,18 +24,20 @@
 #include <gtkmm/eventbox.h>
 
 #include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/cairo_canvas.h"
 #include "gtkmm2ext/widget_state.h"
 
 /** A parent class for widgets that are rendered using Cairo.
  */
 
-class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox
+class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox, public Gtkmm2ext::CairoCanvas
 {
 public:
 	CairoWidget ();
 	virtual ~CairoWidget ();
 
 	void set_canvas_widget ();
+	void use_nsglview ();
 
 	/* swizzle Gtk::Widget methods for Canvas::Widget */
 	void queue_draw ();
@@ -81,6 +83,12 @@ public:
 
 	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
 
+	virtual void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r) {
+		render (ctx->cobj(), r);
+	}
+
+	uint32_t background_color ();
+
 	static void set_flat_buttons (bool yn);
 	static bool flat_buttons() { return _flat_buttons; }
 
@@ -112,6 +120,7 @@ protected:
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	void on_realize ();
 	bool on_button_press_event (GdkEventButton*);
 	Gdk::Color get_parent_bg ();
 
@@ -137,6 +146,7 @@ protected:
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
 	bool _canvas_widget;
+	void* _nsglview;
 	Gdk::Rectangle _allocation;
 
 };
