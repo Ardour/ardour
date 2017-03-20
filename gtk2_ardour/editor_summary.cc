@@ -59,6 +59,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _image (0),
 	  _background_dirty (true)
 {
+	CairoWidget::use_nsglview ();
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 
