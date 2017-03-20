@@ -46,7 +46,7 @@
 
 #ifdef __APPLE__
 #include <gdk/gdk.h>
-#include "canvas/nsglview.h"
+#include "gtkmm2ext/nsglview.h"
 #endif
 
 using namespace std;
@@ -404,7 +404,7 @@ GtkCanvas::GtkCanvas ()
 
 #ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
 # ifndef __ppc__ // would need to flip RGBA <> RGBA
-	_nsglview = nsglview_create (this);
+	_nsglview = Gtkmm2ext::nsglview_create (this);
 # endif
 #endif
 }
@@ -773,7 +773,7 @@ GtkCanvas::on_realize ()
 	Gtk::EventBox::on_realize();
 #ifdef __APPLE__
 	if (_nsglview) {
-		nsglview_overlay (_nsglview, get_window()->gobj());
+		Gtkmm2ext::nsglview_overlay (_nsglview, get_window()->gobj());
 	}
 #endif
 }
@@ -802,7 +802,7 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 				GTK_WIDGET(gobj()),
 				GTK_WIDGET(get_toplevel()->gobj()),
 				0, 0, &xx, &yy);
-		nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
+		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
 	}
 #endif
 
@@ -820,7 +820,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	}
 #ifdef __APPLE__
 	if (_nsglview) {
-		nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		Gtkmm2ext::nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		return true;
 	}
 #endif
@@ -878,7 +878,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	/* render canvas */
 	if ( _single_exposure ) {
 
-		render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
+		Canvas::render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
 	} else {
 		GdkRectangle* rects;
@@ -887,7 +887,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		gdk_region_get_rectangles (ev->region, &rects, &nrects);
 		for (gint n = 0; n < nrects; ++n) {
 			draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
-			render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
+			Canvas::render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
 		}
 		g_free (rects);
 	}

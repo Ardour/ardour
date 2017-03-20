@@ -34,8 +34,9 @@
 
 #include "pbd/signals.h"
 
-#include "canvas/visibility.h"
+#include "gtkmm2ext/cairo_canvas.h"
 
+#include "canvas/visibility.h"
 #include "canvas/root_group.h"
 
 namespace Gtk {
@@ -174,7 +175,7 @@ public:
 };
 
 /** A canvas which renders onto a GTK EventBox */
-class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox
+class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox, public Gtkmm2ext::CairoCanvas
 {
 public:
 	GtkCanvas ();
@@ -202,6 +203,14 @@ public:
 	void stop_tooltip_timeout ();
 
 	Glib::RefPtr<Pango::Context> get_pango_context();
+
+	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
+	{
+		ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
+		Canvas::render (rect, ctx);
+	}
+
+	uint32_t background_color() { return Canvas::background_color (); }
 
   protected:
 	void on_size_allocate (Gtk::Allocation&);

@@ -22,9 +22,9 @@
 /* include order matter due to apple defines */
 #include <gtkmm/window.h>
 
-#include "canvas/canvas.h"
-#include "canvas/utils.h"
-#include "canvas/nsglview.h"
+#include "gtkmm2ext/cairo_canvas.h"
+#include "gtkmm2ext/nsglview.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include <gdk/gdkquartz.h>
 
@@ -43,14 +43,14 @@ __attribute__ ((visibility ("hidden")))
 	int _width;
 	int _height;
 	Cairo::RefPtr<Cairo::ImageSurface> surf;
-	ArdourCanvas::GtkCanvas *gtkcanvas;
+	Gtkmm2ext::CairoCanvas *cairo_canvas;
 }
 
 @property (readwrite) NSInteger tag;
 
 - (id) initWithFrame:(NSRect)frame;
 - (void) dealloc;
-- (void) setArdourCanvas:(ArdourCanvas::GtkCanvas*)c;
+- (void) setCairoCanvas:(Gtkmm2ext::CairoCanvas*)c;
 - (void) reshape;
 - (void) drawRect:(NSRect)rect;
 - (BOOL) canBecomeKeyWindow:(id)sender;
@@ -113,9 +113,9 @@ __attribute__ ((visibility ("hidden")))
 	[super dealloc];
 }
 
-- (void) setArdourCanvas:(ArdourCanvas::GtkCanvas*)c
+- (void) setCairoCanvas:(Gtkmm2ext::CairoCanvas*)c
 {
-	gtkcanvas = c;
+	cairo_canvas = c;
 }
 
 - (BOOL) canBecomeKeyWindow:(id)sender{
@@ -172,18 +172,21 @@ __attribute__ ((visibility ("hidden")))
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	/* call back into GtkCanvas */
+	/* call back into CairoCanvas */
+	cairo_rectangle_t cairo_rect;
 
-	ArdourCanvas::Rect crect (rect.origin.x, rect.origin.y,
-	rect.size.width + rect.origin.x,
-	rect.size.height + rect.origin.y);
+	cairo_rect.x = rect.origin.x;
+	cairo_rect.y = rect.origin.y;
+	cairo_rect.width = rect.size.width;
+	cairo_rect.height = rect.size.height;
 
 	if (!surf || surf->get_width () != _width || surf->get_height() != _height) {
 		surf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
-		crect.x0 = crect.y0 = 0;
-		crect.x1 = _width;
-		crect.y1 = _height;
+		cairo_rect.x = 0;
+		cairo_rect.y = 0;
+		cairo_rect.width = _width;
+		cairo_rect.height = _height;
 	}
 
 	Cairo::RefPtr<Cairo::Context> ctx = Cairo::Context::create (surf);
@@ -191,13 +194,18 @@ __attribute__ ((visibility ("hidden")))
 	// TODO: check retina screen, scaling factor.
 	// cairo_surface_get_device_scale () or explicit scale
 
-	ctx->rectangle (crect.x0, crect.y0, crect.width(), crect.height());
+	ctx->rectangle (cairo_rect.x, cairo_rect.y, cairo_rect.width, cairo_rect.height);
 	ctx->clip_preserve ();
-	/* draw background color */
-	ArdourCanvas::set_source_rgba (ctx, gtkcanvas->background_color ());
+	{
+		/* draw background color */
+		uint32_t col = cairo_canvas->background_color ();
+		int r, g, b, a;
+		UINT_TO_RGBA (col, &r, &g, &b, &a);
+		ctx->set_source_rgba (r/255.0, g/255.0, b/255.0, a/255.0);
+	}
 	ctx->fill ();
 
-	gtkcanvas->render (crect, ctx);
+	cairo_canvas->render (ctx, &cairo_rect);
 
 	surf->flush ();
 	uint8_t* imgdata = surf->get_data ();
@@ -239,23 +247,22 @@ __attribute__ ((visibility ("hidden")))
 	glSwapAPPLE();
 	[NSOpenGLContext clearCurrentContext];
 }
-
 @end
 
 
 void*
-ArdourCanvas::nsglview_create (GtkCanvas* canvas)
+Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas)
 {
 	ArdourCanvasOpenGLView* gl_view = [ArdourCanvasOpenGLView new];
 	if (!gl_view) {
 		return 0;
 	}
-	[gl_view setArdourCanvas:canvas];
+	[gl_view setCairoCanvas:canvas];
 	return gl_view;
 }
 
 void
-ArdourCanvas::nsglview_overlay (void* glv, GdkWindow* window)
+Gtkmm2ext::nsglview_overlay (void* glv, GdkWindow* window)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
 	NSView* view = gdk_quartz_window_get_nsview (window);
@@ -263,14 +270,14 @@ ArdourCanvas::nsglview_overlay (void* glv, GdkWindow* window)
 }
 
 void
-ArdourCanvas::nsglview_resize (void* glv, int x, int y, int w, int h)
+Gtkmm2ext::nsglview_resize (void* glv, int x, int y, int w, int h)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
 	[gl_view setFrame:NSMakeRect(x, y, w, h)];
 }
 
 void
-ArdourCanvas::nsglview_queue_draw (void* glv, int x, int y, int w, int h)
+Gtkmm2ext::nsglview_queue_draw (void* glv, int x, int y, int w, int h)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
 	[gl_view setNeedsDisplayInRect:NSMakeRect(x, y, w, h)];

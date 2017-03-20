@@ -3,11 +3,11 @@
 
 #include <gdk/gdk.h>
 
-namespace ArdourCanvas
+namespace Gtkmm2ext
 {
-	class GtkCanvas;
+	class CairoCanvas;
 
-	void* nsglview_create (GtkCanvas*);
+	void* nsglview_create (CairoCanvas*);
 	void  nsglview_overlay (void*, GdkWindow*);
 	void  nsglview_resize (void*, int x, int y, int w, int h);
 	void  nsglview_queue_draw (void*, int x, int y, int w, int h);
