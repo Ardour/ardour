@@ -57,6 +57,7 @@
 #include <gtkmm/menuitem.h>
 
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/eventboxext.h"
 #include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include <gtkmm2ext/keyboard.h>
@@ -762,11 +763,11 @@ Editor::Editor ()
 	ebox->set_name("EditorWindow");
 	ebox->add (toolbar_hbox);
 
-	Gtk::EventBox* epane_box = manage (new Gtk::EventBox);  //a themeable box
+	Gtk::EventBox* epane_box = manage (new Gtkmm2ext::EventBoxExt);  //a themeable box
 	epane_box->set_name("EditorWindow");
 	epane_box->add (edit_pane);
 
-	Gtk::EventBox* epane_box2 = manage (new Gtk::EventBox);  //a themeable box
+	Gtk::EventBox* epane_box2 = manage (new Gtkmm2ext::EventBoxExt);  //a themeable box
 	epane_box2->set_name("EditorWindow");
 	epane_box2->add (global_vpacker);
 
