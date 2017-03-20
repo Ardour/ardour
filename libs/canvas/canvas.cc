@@ -772,7 +772,9 @@ GtkCanvas::on_realize ()
 {
 	Gtk::EventBox::on_realize();
 #ifdef __APPLE__
-	nsglview_overlay (_nsglview, get_window()->gobj());
+	if (_nsglview) {
+		nsglview_overlay (_nsglview, get_window()->gobj());
+	}
 #endif
 }
 
