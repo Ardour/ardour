@@ -258,6 +258,7 @@ Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas)
 		return 0;
 	}
 	[gl_view setCairoCanvas:canvas];
+	[gl_view setHidden:YES];
 	return gl_view;
 }
 
@@ -281,4 +282,15 @@ Gtkmm2ext::nsglview_queue_draw (void* glv, int x, int y, int w, int h)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
 	[gl_view setNeedsDisplayInRect:NSMakeRect(x, y, w, h)];
+}
+
+void
+Gtkmm2ext::nsglview_set_visible (void* glv, bool vis)
+{
+	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
+	if (vis) {
+		[gl_view setHidden:NO];
+	} else {
+		[gl_view setHidden:YES];
+	}
 }
