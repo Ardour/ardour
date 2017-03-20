@@ -461,12 +461,31 @@ BasicUI::midi_panic ()
 	session->midi_panic ();
 }
 
+void
+BasicUI::toggle_click ()
+{
+	bool state = !Config->get_clicking();
+	Config->set_clicking (state);
+}
+
+void
+BasicUI::toggle_roll ()
+{
+	if (session->transport_rolling()) {
+		transport_stop ();
+	} else {
+		transport_play (false);
+	}
+}
+
+void
+BasicUI::stop_forget ()
+{
+	session->request_stop (true, true);
+}
+
 void BasicUI::mark_in () { access_action("Common/start-range-from-playhead"); }
 void BasicUI::mark_out () { access_action("Common/finish-range-from-playhead"); }
-
-void BasicUI::toggle_click () { access_action("Transport/ToggleClick"); }
-void BasicUI::toggle_roll () { access_action("Transport/ToggleRoll"); }
-void BasicUI::stop_forget () { access_action("Transport/ToggleRollForgetCapture"); }
 
 void BasicUI::set_punch_range () { access_action("Common/set-punch-from-edit-range"); }
 void BasicUI::set_loop_range () { access_action("Common/set-loop-from-edit-range"); }
