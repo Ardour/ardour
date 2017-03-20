@@ -123,6 +123,8 @@ protected:
 	void on_realize ();
 	bool on_button_press_event (GdkEventButton*);
 	Gdk::Color get_parent_bg ();
+	void on_map();
+	void on_unmap();
 
 	/* this is an additional virtual "on_..." method. Glibmm does not
 	   provide a direct signal for name changes, so this acts as a proxy.

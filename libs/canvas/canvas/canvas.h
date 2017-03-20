@@ -221,8 +221,10 @@ public:
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
 	bool on_motion_notify_event (GdkEventMotion *);
-        bool on_enter_notify_event (GdkEventCrossing*);
-        bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+	void on_map();
+	void on_unmap();
 
 	void on_realize ();
 

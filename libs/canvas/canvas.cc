@@ -1111,6 +1111,35 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 	return true;
 }
 
+void
+GtkCanvas::on_map ()
+{
+	Gtk::EventBox::on_map();
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_set_visible (_nsglview, true);
+		Gtk::Allocation a = get_allocation();
+		gint xx, yy;
+		gtk_widget_translate_coordinates(
+				GTK_WIDGET(gobj()),
+				GTK_WIDGET(get_toplevel()->gobj()),
+				0, 0, &xx, &yy);
+		Gtkmm2ext::nsglview_resize (_nsglview, xx, yy, a.get_width(), a.get_height());
+	}
+#endif
+}
+
+void
+GtkCanvas::on_unmap ()
+{
+	Gtk::EventBox::on_unmap();
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_set_visible (_nsglview, false);
+	}
+#endif
+}
+
 /** Called to request a redraw of our canvas.
  *  @param area Area to redraw, in window coordinates.
  */
