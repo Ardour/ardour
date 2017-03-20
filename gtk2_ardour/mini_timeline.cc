@@ -405,8 +405,9 @@ struct LocationMarkerSort {
 };
 
 void
-MiniTimeline::render (cairo_t* cr, cairo_rectangle_t*)
+MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	// TODO cache, set_colors()
 	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
 	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");

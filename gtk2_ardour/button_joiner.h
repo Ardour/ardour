@@ -36,7 +36,7 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	void set_active_state (Gtkmm2ext::ActiveState);
 
   protected:
-	void render (cairo_t*, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (Gtk::Requisition*);
 	void on_size_allocate (Gtk::Allocation&);

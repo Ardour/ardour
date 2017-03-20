@@ -241,8 +241,9 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 }
 
 void
-GroupTabs::render (cairo_t* cr, cairo_rectangle_t*)
+GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	if (_dragging == 0) {
 		_tabs = compute_tabs ();
 	}

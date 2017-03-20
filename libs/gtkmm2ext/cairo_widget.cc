@@ -195,7 +195,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
         cr->fill ();
     }
 
-	render (cr->cobj(), &expose_area);
+	render (cr, &expose_area);
 
 #ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
 	if(get_visible_window ()) {
@@ -283,7 +283,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	expose_area.width = ev->area.width;
 	expose_area.height = ev->area.height;
 
-	render (cr->cobj(), &expose_area);
+	render (cr, &expose_area);
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {

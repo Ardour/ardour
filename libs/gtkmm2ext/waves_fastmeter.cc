@@ -542,12 +542,12 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 }
 
 void
-FastMeter::render (cairo_t* cr, cairo_rectangle_t* area)
+FastMeter::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* area)
 {
 	if (orientation == Vertical) {
-		return vertical_expose (cr, area);
+		return vertical_expose (cr->cobj(), area);
 	} else {
-		return horizontal_expose (cr, area);
+		return horizontal_expose (cr->cobj(), area);
 	}
 }
 

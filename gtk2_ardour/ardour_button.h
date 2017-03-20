@@ -127,7 +127,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float char_avg_pixel_width() { if (_char_pixel_width < 1) recalc_char_pixel_geometry() ; return _char_avg_pixel_width; }
 
 	protected:
-	void render (cairo_t *, cairo_rectangle_t *);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);

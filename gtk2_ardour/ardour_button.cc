@@ -44,7 +44,6 @@
 #define BASELINESTRETCH (1.25)
 #define TRACKHEADERBTNW (3.10)
 
-using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
@@ -256,8 +255,10 @@ ArdourButton::set_alignment (const float xa, const float ya)
  * ARDOUR_UI_UTILS::render_vector_icon()
  */
 void
-ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
+ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
+
 	uint32_t text_color;
 	uint32_t led_color;
 

@@ -27,12 +27,12 @@ public:
 	ArdourVSpacer (float r = 0.75f) : CairoWidget (), ratio (r) {}
 
 protected:
-	void render (cairo_t* cr, cairo_rectangle_t* r) {
+	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* r) {
 		float h = r->height * ratio;
 		float t = .5f * (r->height - h);
-		cairo_rectangle (cr, 0, t, 1, h);
-		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_fill (cr);
+		ctx->rectangle (0, t, 1, h);
+		ctx->set_source_rgb (0, 0, 0);
+		ctx->fill ();
 	}
 
 	void on_size_request (Gtk::Requisition* req) {

@@ -91,7 +91,7 @@ public:
 	void color_handler ();
 
   protected:
-	void render (cairo_t *, cairo_rectangle_t *);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);

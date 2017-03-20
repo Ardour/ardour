@@ -101,8 +101,9 @@ ButtonJoiner::~ButtonJoiner ()
 }
 
 void
-ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
+ButtonJoiner::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	double h = get_height();
 
 	if (!get_active()) {

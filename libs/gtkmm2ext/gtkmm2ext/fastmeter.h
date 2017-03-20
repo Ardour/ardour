@@ -65,9 +65,9 @@ class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
 	void set_hold_count (long);
 	void set_highlight (bool);
 	bool get_highlight () { return highlight; }
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
 protected:
-	void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation&);
 private:

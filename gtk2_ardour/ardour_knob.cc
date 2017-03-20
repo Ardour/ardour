@@ -46,7 +46,6 @@
 #include "pbd/i18n.h"
 
 using namespace Gtkmm2ext;
-using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
@@ -79,8 +78,9 @@ ArdourKnob::~ArdourKnob()
 }
 
 void
-ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
+ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	cairo_pattern_t* shade_pattern;
 
 	float width = get_width();

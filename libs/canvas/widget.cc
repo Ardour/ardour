@@ -104,7 +104,7 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	//context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 	//context->clip ();
 
-	_widget.render (context->cobj(), &crect);
+	_widget.render (context, &crect);
 
 	context->restore ();
 }

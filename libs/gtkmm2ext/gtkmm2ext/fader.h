@@ -62,7 +62,7 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
-	void render (cairo_t* cr, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);

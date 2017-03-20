@@ -184,8 +184,9 @@ Fader::set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor)
 }
 
 void
-Fader::render (cairo_t* cr, cairo_rectangle_t*)
+Fader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 
 	double xscale = 1.0;
 	double yscale = 1.0;

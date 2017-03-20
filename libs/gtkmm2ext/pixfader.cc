@@ -205,8 +205,10 @@ PixFader::create_patterns ()
 }
 
 void
-PixFader::render (cairo_t *cr, cairo_rectangle_t* area)
+PixFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* area)
 {
+	cairo_t* cr = ctx->cobj();
+
 	if (!_pattern) {
 		create_patterns();
 	}

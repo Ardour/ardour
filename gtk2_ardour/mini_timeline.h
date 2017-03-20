@@ -67,7 +67,7 @@ private:
 	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, const std::string&, bool& prelight);
 
-	void render (cairo_t*, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void format_time (framepos_t when);
 
 	bool on_button_press_event (GdkEventButton*);

@@ -570,8 +570,9 @@ ShuttleControl::set_colors ()
 }
 
 void
-ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
+ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	// center slider line
 	float yc = get_height() / 2;
 	float lw = 3;

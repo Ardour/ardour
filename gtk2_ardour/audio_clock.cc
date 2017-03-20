@@ -275,8 +275,9 @@ AudioClock::set_scale (double x, double y)
 }
 
 void
-AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
+AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	/* main layout: rounded rect, plus the text */
 
 	if (_need_bg) {

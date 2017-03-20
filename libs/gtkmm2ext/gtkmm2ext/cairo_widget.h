@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_cairo_widget_h__
 #define __gtk2_ardour_cairo_widget_h__
 
+#include <cairomm/context.h>
 #include <cairomm/surface.h>
 #include <gtkmm/eventbox.h>
 
@@ -80,12 +81,6 @@ public:
 	sigc::signal<bool> QueueResize;
 
 	static void provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg);
-
-	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
-
-	virtual void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r) {
-		render (ctx->cobj(), r);
-	}
 
 	uint32_t background_color ();
 

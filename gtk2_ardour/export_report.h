@@ -46,12 +46,12 @@ protected:
 
 	virtual void overlay (cairo_t* cr, cairo_rectangle_t* r) {}
 
-	virtual void render (cairo_t* cr, cairo_rectangle_t* r)
+	virtual void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* r)
 	{
-		cairo_rectangle (cr, r->x, r->y, r->width, r->height);
-		cairo_clip (cr);
-		background (cr, r);
-		overlay (cr, r);
+		ctx->rectangle (r->x, r->y, r->width, r->height);
+		ctx->clip ();
+		background (ctx->cobj(), r);
+		overlay (ctx->cobj(), r);
 	}
 
 	Cairo::RefPtr<Cairo::ImageSurface> _surface;

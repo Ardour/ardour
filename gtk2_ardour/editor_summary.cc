@@ -211,8 +211,9 @@ EditorSummary::render_background_image ()
  *  @param cr Context.
  */
 void
-EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
+EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 
 	if (_session == 0) {
 		return;
