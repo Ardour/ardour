@@ -45,6 +45,7 @@
 #include "canvas/utils.h"
 
 #ifdef __APPLE__
+#include <gdk/gdk.h>
 #include "canvas/nsglview.h"
 #endif
 
@@ -401,7 +402,7 @@ GtkCanvas::GtkCanvas ()
 		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
 		    Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 
-#ifdef __APPLE__NotYetToDueGdkForeignViewMousePatch // XXX
+#ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
 # ifndef __ppc__ // would need to flip RGBA <> RGBA
 	_nsglview = nsglview_create (this);
 # endif

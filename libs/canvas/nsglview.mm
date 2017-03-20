@@ -31,6 +31,10 @@
 #include <OpenGL/gl.h>
 #import  <Cocoa/Cocoa.h>
 
+#ifndef ARDOUR_CANVAS_NSVIEW_TAG
+#define ARDOUR_CANVAS_NSVIEW_TAG 0xa2d0c2c4
+#endif
+
 __attribute__ ((visibility ("hidden")))
 @interface ArdourCanvasOpenGLView : NSOpenGLView
 {
@@ -42,9 +46,11 @@ __attribute__ ((visibility ("hidden")))
 	ArdourCanvas::GtkCanvas *gtkcanvas;
 }
 
+@property (readwrite) NSInteger tag;
+
 - (id) initWithFrame:(NSRect)frame;
 - (void) dealloc;
-- (void) set_ardour_canvas:(ArdourCanvas::GtkCanvas*)c;
+- (void) setArdourCanvas:(ArdourCanvas::GtkCanvas*)c;
 - (void) reshape;
 - (void) drawRect:(NSRect)rect;
 - (BOOL) canBecomeKeyWindow:(id)sender;
@@ -53,6 +59,8 @@ __attribute__ ((visibility ("hidden")))
 @end
 
 @implementation ArdourCanvasOpenGLView
+
+@synthesize tag = _tag;
 
 - (id) initWithFrame:(NSRect)frame
 {
@@ -82,7 +90,7 @@ __attribute__ ((visibility ("hidden")))
 	_height = 0;
 
 	if (self) {
-
+		self.tag = ARDOUR_CANVAS_NSVIEW_TAG;
 		[[self openGLContext] makeCurrentContext];
 		glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 		glDisable (GL_DEPTH_TEST);
@@ -105,7 +113,7 @@ __attribute__ ((visibility ("hidden")))
 	[super dealloc];
 }
 
-- (void) set_ardour_canvas:(ArdourCanvas::GtkCanvas*)c
+- (void) setArdourCanvas:(ArdourCanvas::GtkCanvas*)c
 {
 	gtkcanvas = c;
 }
@@ -242,7 +250,7 @@ ArdourCanvas::nsglview_create (GtkCanvas* canvas)
 	if (!gl_view) {
 		return 0;
 	}
-	[gl_view set_ardour_canvas:canvas];
+	[gl_view setArdourCanvas:canvas];
 	return gl_view;
 }
 
