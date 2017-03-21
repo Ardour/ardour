@@ -28,6 +28,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API EventBoxExt : public Gtk::EventBox
 {
 public:
+	EventBoxExt ();
 	virtual ~EventBoxExt () {}
 
 protected:
