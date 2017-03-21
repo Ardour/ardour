@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_cairo_canvas_h__
 #define __gtk2_ardour_cairo_canvas_h__
 
+#include <stdint.h>
 #include <cairomm/context.h>
 #include "gtkmm2ext/visibility.h"
 
