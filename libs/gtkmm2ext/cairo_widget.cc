@@ -85,9 +85,7 @@ CairoWidget::use_nsglview ()
 	assert (!_canvas_widget);
 	assert (!is_realized());
 #ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
-# ifndef __ppc__ // would need to flip RGBA <> RGBA
 	_nsglview = Gtkmm2ext::nsglview_create (this);
-#endif
 #endif
 }
 

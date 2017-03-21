@@ -19,20 +19,6 @@
 
 */
 
-/* the API is currently only used on intel mac
- * for big-endian  RGBA <> RGBA byte order of the texture
- * will have to be swapped.
- *
- * Also it does not currently compile as-is:
- *
- *   warning: Mac OS X version 10.5 or later is needed for use of property
- *   error: synthesized property 'tag' must either be named the same as a compatible ivar or must explicitly name an ivar
- *
- * the wscipt would have to relax MAC_OS_X_VERSION_MIN_REQUIRED=1040
- * (ardour's PPC build-stack is 10.5)
- */
-#ifndef __ppc__
-
 /* include order matter due to apple defines */
 #include <gtkmm/window.h>
 
@@ -45,8 +31,19 @@
 #include <OpenGL/gl.h>
 #import  <Cocoa/Cocoa.h>
 
+/* the gtk-quartz library which ardour links against
+ * is patched to pass events directly through to
+ * NSView child-views (AU Plugin GUIs).
+ *
+ * In this particular case however we do want the
+ * events to reach the GTK widget instead of the
+ * NSView subview.
+ *
+ * If a NSVIew tag equals to the given magic-number,
+ * Gdk events propagate.
+ */
 #ifndef ARDOUR_CANVAS_NSVIEW_TAG
-#define ARDOUR_CANVAS_NSVIEW_TAG 0xa2d0c2c4
+#define ARDOUR_CANVAS_NSVIEW_TAG 0x0
 #endif
 
 __attribute__ ((visibility ("hidden")))
@@ -58,6 +55,7 @@ __attribute__ ((visibility ("hidden")))
 	int _height;
 	Cairo::RefPtr<Cairo::ImageSurface> surf;
 	Gtkmm2ext::CairoCanvas *cairo_canvas;
+	NSInteger _tag;
 }
 
 @property (readwrite) NSInteger tag;
@@ -74,7 +72,7 @@ __attribute__ ((visibility ("hidden")))
 
 @implementation ArdourCanvasOpenGLView
 
-@synthesize tag = tag;
+@synthesize tag = _tag;
 
 - (id) initWithFrame:(NSRect)frame
 {
@@ -260,6 +258,7 @@ __attribute__ ((visibility ("hidden")))
 	glFlush();
 	glSwapAPPLE();
 	[NSOpenGLContext clearCurrentContext];
+	[super setNeedsDisplay:NO];
 }
 @end
 
@@ -267,6 +266,13 @@ __attribute__ ((visibility ("hidden")))
 void*
 Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas)
 {
+/* the API is currently only used on intel mac
+ * for big-endian  RGBA <> RGBA byte order of the texture
+ * will have to be swapped.
+ */
+#ifdef __ppc__
+	return 0;
+#endif
 	ArdourCanvasOpenGLView* gl_view = [ArdourCanvasOpenGLView new];
 	if (!gl_view) {
 		return 0;
@@ -308,5 +314,3 @@ Gtkmm2ext::nsglview_set_visible (void* glv, bool vis)
 		[gl_view setHidden:YES];
 	}
 }
-
-#endif
