@@ -73,6 +73,7 @@ Editor::initialize_canvas ()
 	_track_canvas = _track_canvas_viewport->canvas ();
 
 	_track_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
+	_track_canvas->use_nsglview ();
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
