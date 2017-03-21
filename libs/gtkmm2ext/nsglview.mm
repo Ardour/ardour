@@ -64,6 +64,7 @@ __attribute__ ((visibility ("hidden")))
 - (void) dealloc;
 - (void) setCairoCanvas:(Gtkmm2ext::CairoCanvas*)c;
 - (void) reshape;
+- (void) setNeedsDisplayInRect:(NSRect)rect;
 - (void) drawRect:(NSRect)rect;
 - (BOOL) canBecomeKeyWindow:(id)sender;
 - (BOOL) acceptsFirstResponder:(id)sender;
@@ -176,6 +177,15 @@ __attribute__ ((visibility ("hidden")))
 	_height = height;
 }
 
+- (void) setNeedsDisplayInRect:(NSRect)rect
+{
+	[super setNeedsDisplayInRect:rect];
+#ifdef DEBUG_NSVIEW_EXPOSURE
+	printf ("needsDisplay: %5.1f %5.1f   %5.1f %5.1f\n",
+			rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+#endif
+}
+
 - (void) drawRect:(NSRect)rect
 {
 	[[self openGLContext] makeCurrentContext];
@@ -216,6 +226,11 @@ __attribute__ ((visibility ("hidden")))
 		ctx->set_source_rgba (r/255.0, g/255.0, b/255.0, a/255.0);
 	}
 	ctx->fill ();
+
+#ifdef DEBUG_NSVIEW_EXPOSURE
+	printf ("drawRect:     %.1f %.1f  %.1f %1.f\n",
+			cairo_rect.x, cairo_rect.y, cairo_rect.width, cairo_rect.height);
+#endif
 
 	cairo_canvas->render (ctx, &cairo_rect);
 
@@ -302,6 +317,9 @@ Gtkmm2ext::nsglview_queue_draw (void* glv, int x, int y, int w, int h)
 {
 	ArdourCanvasOpenGLView* gl_view = (ArdourCanvasOpenGLView*) glv;
 	[gl_view setNeedsDisplayInRect:NSMakeRect(x, y, w, h)];
+#ifdef DEBUG_NSVIEW_EXPOSURE
+	printf ("Queue Draw    %5d %5d  %5d %5d\n", x, y, w, h);
+#endif
 }
 
 void
