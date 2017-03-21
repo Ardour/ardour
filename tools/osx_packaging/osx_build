@@ -66,7 +66,7 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
-		APPNAME=Mixbus32C-${major_version} ;
+		APPNAME=Mixbus32C ;
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
 	--public)
