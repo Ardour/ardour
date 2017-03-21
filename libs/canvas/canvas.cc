@@ -401,7 +401,13 @@ GtkCanvas::GtkCanvas ()
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
 		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
 		    Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+}
 
+void
+GtkCanvas::use_nsglview ()
+{
+	assert (!_nsglview);
+	assert (!is_realized());
 #ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
 # ifndef __ppc__ // would need to flip RGBA <> RGBA
 	_nsglview = Gtkmm2ext::nsglview_create (this);

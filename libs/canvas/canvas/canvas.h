@@ -181,6 +181,8 @@ public:
 	GtkCanvas ();
 	~GtkCanvas () { _in_dtor = true ; }
 
+	void use_nsglview ();
+
 	void request_redraw (Rect const &);
 	void request_size (Duple);
 	void grab (Item *);
