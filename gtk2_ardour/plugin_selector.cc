@@ -269,6 +269,16 @@ PluginSelector::added_row_clicked(GdkEventButton* event)
 		btn_remove_clicked();
 }
 
+static bool is_analyzer (const PluginInfoPtr& info) {
+	// Anaylsis, Analyzer are for backwards compatibility (vst cache)
+	return info->in_category ("Analyser") || info->in_category ("Anaylsis") ||  info->in_category ("Analyzer");
+}
+
+static bool is_util (const PluginInfoPtr& info) {
+	// all MIDI plugins which are not Instruments are Utils.
+	return info->in_category ("Utility") || info->in_category ("MIDI") || info->in_category ("Generator");
+}
+
 bool
 PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& filterstr)
 {
@@ -290,10 +300,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	if (_show_instruments == Gtkmm2ext::Off && info->is_instrument()) {
 		return false;
 	}
-	if (_show_analysers == Gtkmm2ext::Off && info->in_category ("Analyser")) {
+	if (_show_analysers == Gtkmm2ext::Off && is_analyzer (info)) {
 		return false;
 	}
-	if (_show_utils == Gtkmm2ext::Off && info->in_category ("Utility")) {
+	if (_show_utils == Gtkmm2ext::Off && is_util (info)) {
 		return false;
 	}
 
@@ -305,10 +315,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	if (_show_instruments == Gtkmm2ext::ExplicitActive && info->is_instrument()) {
 		exp_ok = true;
 	}
-	if (_show_analysers == Gtkmm2ext::ExplicitActive && info->in_category ("Analyser")) {
+	if (_show_analysers == Gtkmm2ext::ExplicitActive && is_analyzer(info)) {
 		exp_ok = true;
 	}
-	if (_show_utils == Gtkmm2ext::ExplicitActive && info->in_category ("Utility")) {
+	if (_show_utils == Gtkmm2ext::ExplicitActive && is_util (info)) {
 		exp_ok = true;
 	}
 	if (_show_instruments == Gtkmm2ext::ExplicitActive  || _show_analysers == Gtkmm2ext::ExplicitActive || _show_utils == Gtkmm2ext::ExplicitActive) {
