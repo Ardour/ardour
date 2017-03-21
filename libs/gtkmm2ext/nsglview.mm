@@ -74,7 +74,7 @@ __attribute__ ((visibility ("hidden")))
 
 @implementation ArdourCanvasOpenGLView
 
-@synthesize tag = _tag;
+@synthesize tag = tag;
 
 - (id) initWithFrame:(NSRect)frame
 {
