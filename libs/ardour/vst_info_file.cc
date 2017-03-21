@@ -649,10 +649,10 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	switch (plugin->dispatcher (plugin, effGetPlugCategory, 0, 0, 0, 0))
 	{
 		case kPlugCategEffect:         info->Category = strdup ("Effect"); break;
-		case kPlugCategSynth:          info->Category = strdup ("Synth"); break;
-		case kPlugCategAnalysis:       info->Category = strdup ("Anaylsis"); break;
+		case kPlugCategSynth:          info->Category = strdup ("Instrument"); break;
+		case kPlugCategAnalysis:       info->Category = strdup ("Analyser"); break;
 		case kPlugCategMastering:      info->Category = strdup ("Mastering"); break;
-		case kPlugCategSpacializer:    info->Category = strdup ("Spacializer"); break;
+		case kPlugCategSpacializer:    info->Category = strdup ("Spatial"); break;
 		case kPlugCategRoomFx:         info->Category = strdup ("RoomFx"); break;
 		case kPlugSurroundFx:          info->Category = strdup ("SurroundFx"); break;
 		case kPlugCategRestoration:    info->Category = strdup ("Restoration"); break;

@@ -2901,24 +2901,24 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			continue;
 
 		case kAudioUnitType_Output:
-			info->category = _("AudioUnit Outputs");
+			info->category = _("AudioUnit Output");
 			break;
 		case kAudioUnitType_MusicDevice:
-			info->category = _("AudioUnit Instruments");
+			info->category = _("Instrument");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_MusicEffect:
-			info->category = _("AudioUnit MusicEffects");
+			info->category = _("Music Effect");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_Effect:
-			info->category = _("AudioUnit Effects");
+			info->category = _("Effect");
 			break;
 		case kAudioUnitType_Mixer:
-			info->category = _("AudioUnit Mixers");
+			info->category = _("Mixer");
 			break;
 		case kAudioUnitType_Generator:
-			info->category = _("AudioUnit Generators");
+			info->category = _("Generator");
 			break;
 		default:
 			info->category = _("AudioUnit (Unknown)");
