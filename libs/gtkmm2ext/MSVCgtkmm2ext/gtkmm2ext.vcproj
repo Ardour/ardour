@@ -346,6 +346,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\eventboxext.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\fader.cc"
 				>
 			</File>
@@ -508,6 +512,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtkmm2ext\cairo_canvas.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtkmm2ext\cairo_icon.h"
 				>
 			</File>
@@ -565,6 +573,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\emscale.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\eventboxext.h"
 				>
 			</File>
 			<File

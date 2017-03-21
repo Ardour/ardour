@@ -44,6 +44,7 @@ gtkmm2ext_sources = [
         'debug.cc',
         'dndtreeview.cc',
         'emscale.cc',
+        'eventboxext.cc',
         'focus_entry.cc',
         'grouped_buttons.cc',
         'gtk_ui.cc',
