@@ -19,6 +19,20 @@
 
 */
 
+/* the API is currently only used on intel mac
+ * for big-endian  RGBA <> RGBA byte order of the texture
+ * will have to be swapped.
+ *
+ * Also it does not currently compile as-is:
+ *
+ *   warning: Mac OS X version 10.5 or later is needed for use of property
+ *   error: synthesized property 'tag' must either be named the same as a compatible ivar or must explicitly name an ivar
+ *
+ * the wscipt would have to relax MAC_OS_X_VERSION_MIN_REQUIRED=1040
+ * (ardour's PPC build-stack is 10.5)
+ */
+#ifndef __ppc__
+
 /* include order matter due to apple defines */
 #include <gtkmm/window.h>
 
@@ -294,3 +308,5 @@ Gtkmm2ext::nsglview_set_visible (void* glv, bool vis)
 		[gl_view setHidden:YES];
 	}
 }
+
+#endif
