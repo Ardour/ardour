@@ -731,14 +731,15 @@ struct Stack <std::string const&>
 {
   static inline void push (lua_State* L, std::string const& str)
   {
-    lua_pushstring (L, str.c_str());
+    lua_pushlstring (L, str.c_str (), str.size());
   }
 
-  static inline std::string get (lua_State* L, int index)
+  static inline std::string& get (lua_State* L, int index)
   {
     size_t len;
     const char *str = luaL_checklstring(L, index, &len);
-    return std::string (str, len);
+    std::string* x = new (lua_newuserdata (L, sizeof (std::string))) std::string (str, len);
+    return *x;
   }
 };
 
