@@ -240,7 +240,7 @@ Session::Session (AudioEngine &eng,
 	, pending_locate_flush (false)
 	, pending_abort (false)
 	, pending_auto_loop (false)
-	, _mempool ("Session", 2097152)
+	, _mempool ("Session", 3145728)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
