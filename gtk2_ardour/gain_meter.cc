@@ -196,6 +196,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeter::meter_press), false);
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
+	peak_display.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_press), false);
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
 	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
@@ -423,6 +424,12 @@ GainMeterBase::gain_key_press (GdkEventKey* ev)
 		return false;
 	}
 	/* illegal key for gain entry */
+	return true;
+}
+
+bool
+GainMeterBase::peak_button_press (GdkEventButton* ev)
+{
 	return true;
 }
 

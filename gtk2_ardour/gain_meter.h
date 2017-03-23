@@ -180,6 +180,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	gint meter_button_press (GdkEventButton*, uint32_t);
 
+	bool peak_button_press (GdkEventButton*);
 	bool peak_button_release (GdkEventButton*);
 	bool gain_key_press (GdkEventKey*);
 
