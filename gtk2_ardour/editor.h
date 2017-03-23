@@ -1160,10 +1160,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	TrackViewList get_tracks_for_range_action () const;
 
 	sigc::connection super_rapid_screen_update_connection;
-	framepos_t last_update_frame;
 	void center_screen_internal (framepos_t, float);
 
 	void super_rapid_screen_update ();
+
+	int64_t _last_update_time;
+	double _err_screen_engine;
 
 	void session_going_away ();
 

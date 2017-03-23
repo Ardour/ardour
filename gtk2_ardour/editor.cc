@@ -343,7 +343,8 @@ Editor::Editor ()
 	, _full_canvas_height (0)
 	, edit_controls_left_menu (0)
 	, edit_controls_right_menu (0)
-	, last_update_frame (0)
+	, _last_update_time (0)
+	, _err_screen_engine (0)
 	, cut_buffer_start (0)
 	, cut_buffer_length (0)
 	, button_bindings (0)
@@ -4668,7 +4669,7 @@ Editor::visual_changer (const VisualChange& vc)
 	}
 
 	if (vc.pending & VisualChange::TimeOrigin) {
-		set_horizontal_position (vc.time_origin / samples_per_pixel);
+		set_horizontal_position (sample_to_pixel_unrounded (vc.time_origin));
 	}
 
 	if (vc.pending & VisualChange::YOrigin) {
@@ -5778,8 +5779,6 @@ Editor::super_rapid_screen_update ()
 
 	/* PLAYHEAD AND VIEWPORT */
 
-	framepos_t const frame = _session->audible_frame();
-
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
 	 *
 	 * 1.  we don't update things when there's a pending locate request, otherwise
@@ -5789,46 +5788,82 @@ Editor::super_rapid_screen_update ()
 	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
 	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
 	 */
+	if (_pending_locate_request || _session->transport_speed() == 0) {
+		_last_update_time = 0;
+		return;
+	}
 
-	if (!_pending_locate_request && _session->transport_speed() != 0 && frame != last_update_frame) {
+	if (_dragging_playhead) {
+		_last_update_time = 0;
+		return;
+	}
 
-		last_update_frame = frame;
+	framepos_t frame = _session->audible_frame();
+	const int64_t now = g_get_monotonic_time ();
+	double err = 0;
 
-		if (!_dragging_playhead) {
-			playhead_cursor->set_position (frame);
+	if (_last_update_time > 0) {
+		const double ds =  (now - _last_update_time) * _session->transport_speed() * _session->nominal_frame_rate () * 1e-6;
+		framepos_t guess = playhead_cursor->current_frame () + rint (ds);
+		err = frame - guess;
+
+		guess += err * .12 + _err_screen_engine; // time-constant based on 25fps (super_rapid_screen_update)
+		_err_screen_engine += .0144 * (err - _err_screen_engine); // tc^2
+
+#if 0 // DEBUG
+		printf ("eng: %ld  gui:%ld (%+6.1f)  diff: %6.1f (err: %7.2f)\n",
+				frame, guess, ds,
+				err, _err_screen_engine);
+#endif
+
+		frame = guess;
+	} else {
+		_err_screen_engine = 0;
+	}
+
+	if (err > 8192) {
+		// in case of x-runs or freewheeling
+		_last_update_time = 0;
+	} else {
+		_last_update_time = now;
+	}
+
+	if (playhead_cursor->current_frame () == frame) {
+		return;
+	}
+
+	playhead_cursor->set_position (frame);
+
+	if (_session->requested_return_frame() >= 0) {
+		_last_update_time = 0;
+		return;
+	}
+
+	if (!_follow_playhead || pending_visual_change.being_handled) {
+		/* We only do this if we aren't already
+		 * handling a visual change (ie if
+		 * pending_visual_change.being_handled is
+		 * false) so that these requests don't stack
+		 * up there are too many of them to handle in
+		 * time.
+		 */
+		return;
+	}
+
+	if (!_stationary_playhead) {
+		reset_x_origin_to_follow_playhead ();
+	} else {
+		framepos_t const frame = playhead_cursor->current_frame ();
+		double target = ((double)frame - (double)current_page_samples() / 2.0);
+		if (target <= 0.0) {
+			target = 0.0;
 		}
-
-		if (!_stationary_playhead) {
-
-			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
-				/* We only do this if we aren't already
-				   handling a visual change (ie if
-				   pending_visual_change.being_handled is
-				   false) so that these requests don't stack
-				   up there are too many of them to handle in
-				   time.
-				*/
-				reset_x_origin_to_follow_playhead ();
-			}
-
-		} else {
-
-			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
-				framepos_t const frame = playhead_cursor->current_frame ();
-				double target = ((double)frame - (double)current_page_samples()/2.0);
-				if (target <= 0.0) {
-					target = 0.0;
-				}
-				// compare to EditorCursor::set_position()
-				double const old_pos = sample_to_pixel_unrounded (leftmost_frame);
-				double const new_pos = sample_to_pixel_unrounded (target);
-				if (rint (new_pos) != rint (old_pos)) {
-					reset_x_origin (pixel_to_sample (floor (new_pos)));
-				}
-			}
-
+		// compare to EditorCursor::set_position()
+		double const old_pos = sample_to_pixel_unrounded (leftmost_frame);
+		double const new_pos = sample_to_pixel_unrounded (target);
+		if (rint (new_pos) != rint (old_pos)) {
+			reset_x_origin (pixel_to_sample (new_pos));
 		}
-
 	}
 }
 
@@ -5850,7 +5885,7 @@ Editor::session_going_away ()
 	clicked_routeview = 0;
 	entered_regionview = 0;
 	entered_track = 0;
-	last_update_frame = 0;
+	_last_update_time = 0;
 	_drags->abort ();
 
 	playhead_cursor->hide ();
