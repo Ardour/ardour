@@ -1506,6 +1506,13 @@ OSC::_recalcbanks ()
 		} else {
 			_set_bank (sur->bank, addr);
 		}
+		if (sur->no_clear) {
+			// This surface uses /strip/list tell it routes have changed
+			lo_message reply;
+			reply = lo_message_new ();
+			lo_send_message (addr, "/strip/list", reply);
+			lo_message_free (reply);
+		}
 	}
 }
 
