@@ -1569,7 +1569,7 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 		if (ops_menu == 0) {
 			build_ops_menu ();
 		}
-		ops_menu->popup (ev->button, ev->time);
+		ops_menu->popup (1, ev->time);
 		return true;
 	}
 

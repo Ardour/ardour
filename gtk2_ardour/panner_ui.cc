@@ -381,7 +381,7 @@ PannerUI::pan_button_event (GdkEventButton* ev)
 			pan_menu->set_name ("ArdourContextMenu");
 		}
 		build_pan_menu ();
-		pan_menu->popup (ev->button, ev->time);
+		pan_menu->popup (1, ev->time);
 		return true;
 		break;
 	default:
@@ -506,7 +506,7 @@ PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
 		if (pan_astate_menu == 0) {
 			build_astate_menu ();
 		}
-		pan_astate_menu->popup (ev->button, ev->time);
+		pan_astate_menu->popup (1, ev->time);
 		break;
 	default:
 		break;
@@ -527,7 +527,7 @@ PannerUI::pan_automation_style_button_event (GdkEventButton *ev)
 		if (pan_astyle_menu == 0) {
 			build_astyle_menu ();
 		}
-		pan_astyle_menu->popup (ev->button, ev->time);
+		pan_astyle_menu->popup (1, ev->time);
 		break;
 	default:
 		break;
