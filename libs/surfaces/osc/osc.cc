@@ -1174,37 +1174,61 @@ OSC::routes_list (lo_message msg)
 	if (!session) {
 		return;
 	}
-	for (int n = 0; n < (int) session->nroutes(); ++n) {
+	OSCSurface *sur = get_surface(get_address (msg));
+	sur->no_clear = true;
 
-		boost::shared_ptr<Route> r = session->get_remote_nth_route (n);
+	for (int n = 0; n < (int) sur->nstrips; ++n) {
 
-		if (r) {
+		boost::shared_ptr<Stripable> s = get_strip (n + 1, get_address (msg));
+
+		if (s) {
+			// some things need the route
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
 			lo_message reply = lo_message_new ();
 
-			if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
+			if (s->presentation_info().flags() & PresentationInfo::AudioTrack) {
 				lo_message_add_string (reply, "AT");
-			} else if (boost::dynamic_pointer_cast<MidiTrack>(r)) {
+			} else if (s->presentation_info().flags() & PresentationInfo::MidiTrack) {
 				lo_message_add_string (reply, "MT");
-			} else {
-				lo_message_add_string (reply, "B");
+			} else if (s->presentation_info().flags() & PresentationInfo::AudioBus) {
+				// r->feeds (session->master_out()) may make more sense
+				if (r->direct_feeds_according_to_reality (session->master_out())) {
+					// this is a bus
+					lo_message_add_string (reply, "B");
+				} else {
+					// this is an Aux out
+					lo_message_add_string (reply, "AX");
+				}
+			} else if (s->presentation_info().flags() & PresentationInfo::MidiBus) {
+				lo_message_add_string (reply, "MB");
+			} else if (s->presentation_info().flags() & PresentationInfo::VCA) {
+				lo_message_add_string (reply, "V");
 			}
 
-			lo_message_add_string (reply, r->name().c_str());
-			lo_message_add_int32 (reply, r->n_inputs().n_audio());
-			lo_message_add_int32 (reply, r->n_outputs().n_audio());
-			lo_message_add_int32 (reply, r->muted());
-			lo_message_add_int32 (reply, r->soloed());
-			/* XXX Can only use order at this point */
-			//lo_message_add_int32 (reply, r->presentation_info().order());
-			// try this instead.
-			lo_message_add_int32 (reply, get_sid (r, get_address (msg)));
-
-			if (boost::dynamic_pointer_cast<AudioTrack>(r)
-					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
-
-				boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-				lo_message_add_int32 (reply, (int32_t) t->rec_enable_control()->get_value());
+			lo_message_add_string (reply, s->name().c_str());
+			if (r) {
+				// routes have inputs and outputs
+				lo_message_add_int32 (reply, r->n_inputs().n_audio());
+				lo_message_add_int32 (reply, r->n_outputs().n_audio());
+			} else {
+				// non-routes like VCAs don't
+				lo_message_add_int32 (reply, 0);
+				lo_message_add_int32 (reply, 0);
+			}
+			if (s->mute_control()) {
+				lo_message_add_int32 (reply, s->mute_control()->get_value());
+			} else {
+				lo_message_add_int32 (reply, 0);
+			}
+			if (s->solo_control()) {
+				lo_message_add_int32 (reply, s->solo_control()->get_value());
+			} else {
+				lo_message_add_int32 (reply, 0);
+			}
+			lo_message_add_int32 (reply, n + 1);
+			if (s->rec_enable_control()) {
+				lo_message_add_int32 (reply, s->rec_enable_control()->get_value());
 			}
 
 			//Automatically listen to routes listed
@@ -1221,6 +1245,12 @@ OSC::routes_list (lo_message msg)
 	lo_message_add_string (reply, "end_route_list");
 	lo_message_add_int64 (reply, session->frame_rate());
 	lo_message_add_int64 (reply, session->current_end_frame());
+	if (session->monitor_out()) {
+		// this session has a monitor section
+		lo_message_add_int32 (reply, 1);
+	} else {
+		lo_message_add_int32 (reply, 0);
+	}
 
 	lo_send_message (get_address (msg), "#reply", reply);
 

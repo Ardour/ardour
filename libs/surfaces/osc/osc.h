@@ -102,6 +102,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	struct OSCSurface {
 	public:
 		std::string remote_url;		// the url these setting belong to
+		bool no_clear;				// don't send osc clear messages on strip change
 		uint32_t bank;				// current bank
 		uint32_t bank_size;			// size of banks for this surface
 		std::bitset<32> strip_types;// what strip types are a part of this bank
