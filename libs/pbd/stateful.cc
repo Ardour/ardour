@@ -23,6 +23,7 @@
 #else
 #include <unistd.h>
 #endif
+#include <iomanip>  // std::setprecision
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -112,6 +113,9 @@ Stateful::save_extra_xml (const XMLNode& node)
 void
 Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 {
+#ifndef NDEBUG
+	const int64_t save_start_time = g_get_monotonic_time();
+#endif
 	if (!Glib::file_test (directory_path, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir_with_parents (directory_path.c_str(), 0755) != 0) {
 			error << string_compose(_("Error: could not create directory %1"), directory_path) << endmsg;
@@ -147,6 +151,10 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 	if (!tree.write()) {
 		error << string_compose(_("Error: could not write %1"), instant_xml_path) << endmsg;
 	}
+#ifndef NDEBUG
+	const int64_t elapsed_time_us = g_get_monotonic_time() - save_start_time;
+	cerr << "saved '"<< instant_xml_path << "' in " << fixed << setprecision (1) << elapsed_time_us / 1000. << " ms\n";
+#endif
 }
 
 XMLNode *
