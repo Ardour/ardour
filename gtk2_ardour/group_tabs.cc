@@ -356,15 +356,18 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 		items.push_back (SeparatorElem());
 
-		vca_menu = manage (new Menu);
-		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
+		if (g->has_control_master()) {
+			items.push_back (MenuElem (_("Drop Group from VCA..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::unassign_group_to_master), g->group_master_number(), g)));
+		} else {
+			vca_menu = manage (new Menu);
+			MenuList& f (vca_menu->items());
+			f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
 
-		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
+			for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
+				f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
+			}
+			items.push_back (MenuElem (_("Assign Group to VCA..."), *vca_menu));
 		}
-		items.push_back (MenuElem (_("Assign Group to VCA..."), *vca_menu));
-
 
 		items.push_back (SeparatorElem());
 
@@ -464,6 +467,26 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 	if (rename_master){
 		master->set_name (group->name());
 	}
+}
+
+void
+GroupTabs::unassign_group_to_master (uint32_t which, RouteGroup* group) const
+{
+	if (!_session || !group) {
+		return;
+	}
+
+	boost::shared_ptr<VCA> master = _session->vca_manager().vca_by_number (which);
+
+	if (!master) {
+		/* should never happen; if it does, basically something deeply
+		   odd happened, no reason to tell user because there's no
+		   sensible explanation.
+		*/
+		return;
+	}
+
+	group->unassign_master (master);
 }
 
 void
