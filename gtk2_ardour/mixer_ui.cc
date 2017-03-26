@@ -517,7 +517,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 	MixerStrip* strip;
 
-
 	try {
 		PBD::Unwinder<bool> uw (no_track_list_redisplay, true);
 
@@ -594,10 +593,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 					row[stripable_columns.stripable] = route;
 					row[stripable_columns.strip] = strip;
 
-					if (nroutes != 0) {
-						_selection.add (strip);
-					}
-
 				} else {
 
 					out_packer.pack_start (*strip, false, false);
@@ -617,6 +612,9 @@ Mixer_UI::add_stripables (StripableList& slist)
 	}
 
 	track_display.set_model (track_model);
+
+	/* catch up on selection state, which we left to the editor to set */
+	sync_treeview_from_presentation_info (PropertyChange (Properties::selected));
 
 	if (!from_scratch) {
 		sync_presentation_info_from_treeview ();
