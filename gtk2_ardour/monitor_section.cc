@@ -1178,6 +1178,10 @@ MonitorSection::map_state ()
 void
 MonitorSection::do_blink (bool onoff)
 {
+	if (!UIConfiguration::instance().get_blink_alert_indicators ()) {
+		onoff = true;
+	}
+
 	solo_blink (onoff);
 	audition_blink (onoff);
 }

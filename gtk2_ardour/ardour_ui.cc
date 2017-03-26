@@ -2616,11 +2616,15 @@ void
 ARDOUR_UI::blink_handler (bool blink_on)
 {
 	transport_rec_enable_blink (blink_on);
-	solo_blink (blink_on);
 	sync_blink (blink_on);
+
+	if (!UIConfiguration::instance().get_blink_alert_indicators()) {
+		blink_on = true;
+	}
+	error_blink (blink_on);
+	solo_blink (blink_on);
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
-	error_blink (blink_on);
 }
 
 void

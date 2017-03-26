@@ -3562,6 +3562,14 @@ RCOptionEditor::RCOptionEditor ()
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
 				));
 
+	add_option (_("Appearance"),
+			new BoolOption (
+				"blink-alert-indicators",
+				_("Blink Alert Indicators"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_alert_indicators),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_alert_indicators)
+				));
+
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
