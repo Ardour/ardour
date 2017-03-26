@@ -608,6 +608,7 @@ RouteGroup::push_to_groups ()
 		_gain_group->set_active (false);
 		_solo_group->set_active (false);
 		_mute_group->set_active (false);
+
 		_rec_enable_group->set_active (false);
 		_monitoring_group->set_active (false);
 	}
@@ -630,8 +631,19 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 		(*r)->assign (master, false);
 	}
 
+	bool used_to_share_gain = false;
+
+	if (is_gain()) {
+		used_to_share_gain = true;
+	}
+
 	group_master = master;
 	_group_master_number = master->number();
+	_gain_group->set_active (false);
+
+	if (used_to_share_gain) {
+		send_change (PropertyChange (Properties::group_gain));
+	}
 }
 
 void
@@ -653,6 +665,18 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 
 	group_master.reset ();
 	_group_master_number = -1;
+
+	/* this is slightly tricky: is_gain() will return whether or not
+	   the group is supposed to be sharing gain adjustment, and now that
+	   we've reset _group_master_number to -1, it will reflect the user's
+	   intentions correctly. Since there was a master before, and now there
+	   is not, we are going to reactivate gain sharing ... and then tell
+	   the world about it.
+	*/
+	if (is_gain()) {
+		_gain_group->set_active (true);
+		send_change (PropertyChange (Properties::group_gain));
+	}
 }
 
 bool
