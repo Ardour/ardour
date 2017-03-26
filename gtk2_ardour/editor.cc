@@ -5399,8 +5399,7 @@ Editor::add_stripables (StripableList& sl)
 	 */
 
 	if (!from_scratch && !new_selection.empty()) {
-		selection->tracks.clear();
-		selection->add (new_selection);
+		selection->set (new_selection);
 		begin_selection_op_history();
 	}
 
