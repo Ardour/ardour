@@ -459,6 +459,8 @@ AddRouteDialog::track_template ()
 void
 AddRouteDialog::on_show ()
 {
+	routes_spinner.grab_focus ();
+
 	refill_channel_setups ();
 	refill_route_groups ();
 
