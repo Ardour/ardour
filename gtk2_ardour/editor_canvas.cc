@@ -913,15 +913,6 @@ Editor::set_horizontal_position (double p)
 	horizontal_adjustment.set_value (p);
 
 	leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
-
-	update_fixed_rulers ();
-	redisplay_tempo (true);
-
-	if (pending_visual_change.idle_handler_id < 0) {
-		_summary->set_overlays_dirty ();
-	}
-
-	update_video_timeline();
 }
 
 void
