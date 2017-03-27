@@ -30,11 +30,13 @@
 #include "pbd/stateful.h"
 #include "ardour/types.h"
 
+#include "osc.h"
+
 class OSCRouteObserver
 {
 
   public:
-	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t sid, uint32_t gainmode, std::bitset<32> feedback);
+	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCRouteObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
@@ -52,6 +54,7 @@ class OSCRouteObserver
 	uint32_t ssid;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
+	ArdourSurface::OSC::OSCSurface* sur;
 	float _last_meter;
 	uint32_t gain_timeout;
 	uint32_t trim_timeout;

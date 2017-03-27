@@ -35,13 +35,14 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t ss, uint32_t gm, std::bitset<32> fb)
+OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t ss, ArdourSurface::OSC::OSCSurface* su)
 	: _strip (s)
 	,ssid (ss)
-	,gainmode (gm)
-	,feedback (fb)
+	,sur (su)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	gainmode = sur->gainmode;
+	feedback = sur->feedback;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -101,6 +102,12 @@ OSCRouteObserver::~OSCRouteObserver ()
 {
 
 	strip_connections.drop_connections ();
+	if (sur->no_clear) {
+		// some surfaces destroy their own strips and don't need the extra noise
+		lo_address_free (addr);
+		return;
+	}
+
 	// all strip buttons should be off and faders 0 and etc.
 	clear_strip ("/strip/expand", 0);
 	if (feedback[0]) { // buttons are separate feedback

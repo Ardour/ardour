@@ -702,7 +702,7 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 
 	OSCSurface *s = get_surface(addr);
 	uint32_t ssid = get_sid (strip, addr);
-	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, ssid, s->gainmode, s->feedback);
+	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, ssid, s);
 	route_observers.push_back (o);
 
 	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::route_lost, this, boost::weak_ptr<Stripable> (strip)), this);
@@ -1231,8 +1231,8 @@ OSC::routes_list (lo_message msg)
 				lo_message_add_int32 (reply, s->rec_enable_control()->get_value());
 			}
 
-			//Automatically listen to routes listed
-			listen_to_route(r, get_address (msg));
+			//Automatically listen to stripables listed
+			listen_to_route(s, get_address (msg));
 
 			lo_send_message (get_address (msg), "#reply", reply);
 			lo_message_free (reply);
@@ -1583,7 +1583,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		// top bank is always filled if there are enough strips for at least one bank
 		bank_start = (uint32_t)((s->nstrips - b_size) + 1);
 	}
-	//save bank in case we have had to change it
+	//save bank after bank limit checks
 	s->bank = bank_start;
 
 	if (s->feedback[0] || s->feedback[1]) {
@@ -1601,8 +1601,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		}
 	}
 	// light bankup or bankdown buttons if it is possible to bank in that direction
-	if (s->feedback[4]) {
-		// these two messages could be bundled
+	if (s->feedback[4] && !s->no_clear) {
 		lo_message reply;
 		reply = lo_message_new ();
 		if ((s->bank > (s->nstrips - s->bank_size)) || (s->nstrips < s->bank_size)) {
@@ -1924,7 +1923,8 @@ OSC::route_get_sends(lo_message msg) {
 			lo_message_add_int32(reply, p->active() ? 1 : 0);
 		}
 	}
-	// if used dedicated message path to identify this reply in async operation. Naming it #reply wont help the client to identify the content.
+	// if used dedicated message path to identify this reply in async operation.
+	// Naming it #reply wont help the client to identify the content.
 	lo_send_message(get_address (msg), "/strip/sends", reply);
 
 	lo_message_free(reply);
@@ -1986,7 +1986,8 @@ OSC::route_get_receives(lo_message msg) {
 		}
 	}
 
-	// I have used a dedicated message path to identify this reply in async operation. Naming it #reply wont help the client to identify the content.
+	// I have used a dedicated message path to identify this reply in async operation.
+	// Naming it #reply wont help the client to identify the content.
 	lo_send_message(get_address (msg), "/strip/receives", reply);
 	lo_message_free(reply);
 	return 0;
