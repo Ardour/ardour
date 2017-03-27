@@ -977,7 +977,6 @@ LuaInstance::init ()
 			""
 			"  local function serialize (name, value)"
 			"   local rv = name .. ' = '"
-			"   collectgarbage()"
 			"   if type(value) == \"number\" or type(value) == \"string\" or type(value) == \"nil\" then"
 			"    return rv .. basic_serialize(value) .. ' '"
 			"   elseif type(value) == \"table\" then"
@@ -985,7 +984,6 @@ LuaInstance::init ()
 			"    for k,v in pairs(value) do"
 			"     local fieldname = string.format(\"%s[%s]\", name, basic_serialize(k))"
 			"     rv = rv .. serialize(fieldname, v) .. ' '"
-			"     collectgarbage()" // string concatenation allocates a new string
 			"    end"
 			"    return rv;"
 			"   elseif type(value) == \"function\" then"
@@ -1600,7 +1598,15 @@ LuaCallback::get_state (void)
 		luabridge::LuaRef savedstate ((*_lua_save)());
 		saved = savedstate.cast<std::string>();
 	}
-	lua.collect_garbage ();
+
+	lua.collect_garbage (); // this may be expensive:
+	/* Editor::instant_save() calls Editor::get_state() which
+	 * calls LuaInstance::get_hook_state() which in turn calls
+	 * this LuaCallback::get_state() for every registered hook.
+	 *
+	 * serialize in _lua_save() allocates many small strings
+	 * on the lua-stack, collecting them all may take a ms.
+	 */
 
 	gchar* b64 = g_base64_encode ((const guchar*)saved.c_str (), saved.size ());
 	std::string b64s (b64);
@@ -1676,7 +1682,6 @@ LuaCallback::init (void)
 			""
 			"  local function serialize (name, value)"
 			"   local rv = name .. ' = '"
-			"   collectgarbage()"
 			"   if type(value) == \"number\" or type(value) == \"string\" or type(value) == \"nil\" then"
 			"    return rv .. basic_serialize(value) .. ' '"
 			"   elseif type(value) == \"table\" then"
@@ -1684,7 +1689,6 @@ LuaCallback::init (void)
 			"    for k,v in pairs(value) do"
 			"     local fieldname = string.format(\"%s[%s]\", name, basic_serialize(k))"
 			"     rv = rv .. serialize(fieldname, v) .. ' '"
-			"     collectgarbage()" // string concatenation allocates a new string
 			"    end"
 			"    return rv;"
 			"   elseif type(value) == \"function\" then"
