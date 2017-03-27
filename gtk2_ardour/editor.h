@@ -610,6 +610,7 @@ private:
 	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (framecnt_t);
+	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
 	Editing::SnapType  pre_internal_snap_type;

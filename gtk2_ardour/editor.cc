@@ -4517,7 +4517,11 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	}
 
 	samples_per_pixel = spp;
+}
 
+void
+Editor::on_samples_per_pixel_changed ()
+{
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
 	}
@@ -4637,36 +4641,54 @@ Editor::idle_visual_changer ()
 void
 Editor::visual_changer (const VisualChange& vc)
 {
-	double const last_time_origin = horizontal_position ();
-
+	/**
+	 * Changed first so the correct horizontal canvas position is calculated in
+	 * Editor::set_horizontal_position
+	 */
 	if (vc.pending & VisualChange::ZoomLevel) {
 		set_samples_per_pixel (vc.samples_per_pixel);
-
-		compute_fixed_ruler_scale ();
-
-		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples());
-		update_tempo_based_rulers ();
-
-		update_video_timeline();
 	}
 
 	if (vc.pending & VisualChange::TimeOrigin) {
-		set_horizontal_position (sample_to_pixel_unrounded (vc.time_origin));
+		double new_time_origin = sample_to_pixel_unrounded (vc.time_origin);
+		set_horizontal_position (new_time_origin);
 	}
 
 	if (vc.pending & VisualChange::YOrigin) {
 		vertical_adjustment.set_value (vc.y_origin);
 	}
 
-	if (last_time_origin == horizontal_position ()) {
-		/* changed signal not emitted */
+	/**
+	 * Now the canvas is in the final state before render the canvas items that
+	 * support the Item::prepare_for_render interface can calculate the correct
+	 * item to visible canvas intersection.
+	 */
+	if (vc.pending & VisualChange::ZoomLevel) {
+		on_samples_per_pixel_changed ();
+
+		compute_fixed_ruler_scale ();
+
+		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples());
+		update_tempo_based_rulers ();
+	}
+
+	if (!(vc.pending & VisualChange::ZoomLevel)) {
+		/**
+		 * If the canvas is not being zoomed then the canvas items will not change
+		 * and cause Item::prepare_for_render to be called so do it here manually.
+		 *
+		 * Not ideal, but I can't think of a better solution atm.
+		 */
+		_track_canvas->prepare_for_render();
+	}
+
+	// If we are only scrolling vertically there is no need to update these
+	if (vc.pending != VisualChange::YOrigin) {
 		update_fixed_rulers ();
 		redisplay_tempo (true);
 	}
 
-	if (!(vc.pending & VisualChange::ZoomLevel)) {
-		update_video_timeline();
-	}
+	update_video_timeline();
 
 	_summary->set_overlays_dirty ();
 }
