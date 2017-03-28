@@ -91,6 +91,8 @@ public:
 
 	gint64 get_last_render_start_timestamp () const { return _last_render_start_timestamp; }
 
+	gint64 get_microseconds_since_render_start () const;
+
 	/** @return root group */
 	Item* root () {
 		return &_root;
