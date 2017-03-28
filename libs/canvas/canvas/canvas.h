@@ -89,6 +89,8 @@ public:
 
 	void prepare_for_render (Rect const &) const;
 
+	gint64 get_last_render_start_timestamp () const { return _last_render_start_timestamp; }
+
 	/** @return root group */
 	Item* root () {
 		return &_root;
@@ -168,6 +170,8 @@ public:
 protected:
 	Root  _root;
 	Color _bg_color;
+
+	mutable gint64 _last_render_start_timestamp;
 
 	static uint32_t tooltip_timeout_msecs;
 

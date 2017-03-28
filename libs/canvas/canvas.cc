@@ -58,6 +58,7 @@ uint32_t Canvas::tooltip_timeout_msecs = 750;
 Canvas::Canvas ()
 	: _root (this)
 	, _bg_color (rgba_to_color (0, 1.0, 0.0, 1.0))
+	, _last_render_start_timestamp(0)
 {
 	set_epoch ();
 }
@@ -102,6 +103,8 @@ void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
 	PreRender (); // emit signal
+
+	_last_render_start_timestamp = g_get_monotonic_time();
 
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
