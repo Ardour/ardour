@@ -163,6 +163,18 @@ Canvas::prepare_for_render (Rect const & area) const
 	}
 }
 
+gint64
+Canvas::get_microseconds_since_render_start () const
+{
+	gint64 timestamp = g_get_monotonic_time();
+
+	if (_last_render_start_timestamp == 0 || timestamp <= _last_render_start_timestamp) {
+		return 0;
+	}
+
+	return timestamp - _last_render_start_timestamp;
+}
+
 ostream&
 operator<< (ostream& o, Canvas& c)
 {
