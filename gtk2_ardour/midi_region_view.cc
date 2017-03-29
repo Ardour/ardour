@@ -2089,7 +2089,7 @@ MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beat
 	c->add (MidiModel::PatchChangePtr (
 		        new Evoral::PatchChange<Evoral::Beats> (
 			        absolute_frames_to_source_beats (_region->position() + t),
-				mtv->get_channel_for_add(), patch.program(), patch.bank()
+				patch.channel(), patch.program(), patch.bank()
 				)
 			)
 		);
