@@ -1328,10 +1328,12 @@ OSC::clear_devices ()
 		}
 	}
 	// delete cue observers
-	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end(); x++) {
+	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end();) {
 		OSCCueObserver* co;
 		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
 			delete co;
+		} else {
+			++x;
 		}
 	}
 
