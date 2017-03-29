@@ -1282,6 +1282,7 @@ OSC::refresh_surface (lo_message msg)
 {
 	if (address_only) {
 		// get rid of all surfaces and observers.
+		// needs change to only clear those for this address on all ports
 		clear_devices();
 	}
 	OSCSurface *s = get_surface(get_address (msg));
@@ -1326,6 +1327,14 @@ OSC::clear_devices ()
 			delete so;
 		}
 	}
+	// delete cue observers
+	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end(); x++) {
+		OSCCueObserver* co;
+		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
+			delete co;
+		}
+	}
+
 	// clear out surfaces
 	_surface.clear();
 }
