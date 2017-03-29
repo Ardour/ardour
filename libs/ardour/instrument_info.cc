@@ -58,9 +58,25 @@ InstrumentInfo::set_external_instrument (const string& model, const string& mode
 void
 InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 {
-	internal_instrument = p;
-	external_instrument_model = (_("Unknown"));
 	external_instrument_mode = "";
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(p);
+	if (pi && pi->plugin ()->has_midnam ()) {
+		/* really back hack, following MidiTimeAxisView::model_changed()
+		 *
+		 * InstrumentInfo::get_plugin_patch_name() needs to be overhauled,
+		 * it limits all PluginInsert to generic-midi or only numbers.
+		 */
+		internal_instrument.reset ();
+		external_instrument_model = pi->plugin ()->midnam_model ();
+		const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (external_instrument_model);
+		if (device_modes.size() > 0) {
+			external_instrument_mode = device_modes.front();
+		}
+	} else {
+		internal_instrument = p;
+		external_instrument_model = (_("Unknown"));
+	}
 	Changed(); /* EMIT SIGNAL */
 }
 
