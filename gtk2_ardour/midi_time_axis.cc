@@ -74,6 +74,7 @@
 #include "midi_streamview.h"
 #include "midi_region_view.h"
 #include "midi_time_axis.h"
+#include "patch_change_dialog.h"
 #include "piano_roll_header.h"
 #include "playlist_selector.h"
 #include "plugin_selector.h"
@@ -559,7 +560,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	items.push_back (MenuElem (_("Channel Selector"),
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
-	items.push_back (MenuElem (_("Select Patch"), *build_patch_menu()));
+	items.push_back (MenuElem (_("Select Patch..."),
+				sigc::mem_fun(*this, &MidiTimeAxisView::send_patch_change)));
 
 	color_mode_menu = build_color_mode_menu();
 	if (color_mode_menu) {
@@ -1076,98 +1078,23 @@ MidiTimeAxisView::build_color_mode_menu()
 	return mode_menu;
 }
 
-Gtk::Menu*
-MidiTimeAxisView::build_patch_menu()
-{
-	using namespace MIDI::Name;
-	using namespace Menu_Helpers;
-
-	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
-	const std::string device_mode = gui_property (X_("midnam-custom-device-mode"));
-
-	Menu* pc_menu = manage (new Menu);
-	MenuList& pc_items = pc_menu->items();
-
-	for (uint32_t chn = 0; chn < 16; ++chn) {
-		boost::shared_ptr<ChannelNameSet> channel_name_set = device_names->channel_name_set_by_channel (device_mode, chn);
-		// see also PatchChange::initialize_popup_menus
-		if (!channel_name_set) {
-			continue;
-		}
-		const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
-		if (patch_banks.size () == 0) {
-			continue;
-		}
-
-		Gtk::Menu& chan_menu = *manage(new Gtk::Menu());
-
-		if (patch_banks.size() > 1) {
-
-			for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
-					bank != patch_banks.end();
-					++bank) {
-				Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-				std::string replacement(" ");
-
-				Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
-
-				const PatchNameList& patches = (*bank)->patch_name_list();
-				Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
-
-				for (PatchNameList::const_iterator patch = patches.begin();
-						patch != patches.end();
-						++patch) {
-					std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
-
-					patch_menus.push_back(
-							Gtk::Menu_Helpers::MenuElem(
-								name,
-								sigc::bind(
-									sigc::mem_fun(*this, &MidiTimeAxisView::on_patch_menu_selected),
-									chn, (*patch)->patch_primary_key())) );
-				}
-
-
-				std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
-
-				chan_menu.items().push_back(
-						Gtk::Menu_Helpers::MenuElem(
-							name,
-							patch_bank_menu) );
-			}
-		} else {
-			/* only one patch bank, so make it the initial menu */
-
-			const PatchNameList& patches = patch_banks.front()->patch_name_list();
-
-			for (PatchNameList::const_iterator patch = patches.begin();
-					patch != patches.end();
-					++patch) {
-				std::string name = (*patch)->name();
-				boost::replace_all (name, "_", " ");
-
-				chan_menu.items().push_back (
-						Gtk::Menu_Helpers::MenuElem (
-							name,
-							sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::on_patch_menu_selected),
-								chn, (*patch)->patch_primary_key())));
-			}
-		}
-
-		pc_items.push_back(
-				Gtk::Menu_Helpers::MenuElem(
-					string_compose (_("Channel %1"), chn + 1),
-					chan_menu));
-	}
-	return pc_menu;
-}
-
 void
-MidiTimeAxisView::on_patch_menu_selected (int chn, const MIDI::Name::PatchPrimaryKey& key)
+MidiTimeAxisView::send_patch_change ()
 {
 	if (!_route) {
 		return;
 	}
+
+	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
+	PatchChangeDialog d (0, 0, empty, _route->instrument_info(), Gtk::Stock::OK);
+
+	if (d.run() == RESPONSE_CANCEL) {
+		return;
+	}
+	Evoral::PatchChange<Evoral::Beats> p (d.patch ());
+
+	uint8_t chn = p.channel();
+
 	boost::shared_ptr<AutomationControl> bank_msb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 	boost::shared_ptr<AutomationControl> bank_lsb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
@@ -1175,9 +1102,10 @@ MidiTimeAxisView::on_patch_menu_selected (int chn, const MIDI::Name::PatchPrimar
 	if (!bank_msb || ! bank_lsb || !program) {
 		return;
 	}
-	bank_msb->set_value ((key.bank() >> 7) & 0x7f, Controllable::NoGroup);
-	bank_lsb->set_value (key.bank() & 0x7f, Controllable::NoGroup);
-	program->set_value (key.program(), Controllable::NoGroup);
+
+	bank_msb->set_value (p.bank_msb (), Controllable::NoGroup);
+	bank_lsb->set_value (p.bank_lsb (), Controllable::NoGroup);
+	program->set_value  (p.program () , Controllable::NoGroup);
 }
 
 void
