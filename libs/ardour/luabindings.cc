@@ -806,13 +806,18 @@ LuaBindings::common (lua_State* L)
 		.addRefFunction ("find_all_between", &Locations::find_all_between)
 		.endClass ()
 
-		.beginWSPtrClass <SessionObject> ("SessionObject")
+		.beginWSPtrClass <SessionObject> ("SessionObjectPtr")
 		/* SessionObject is-a PBD::StatefulDestructible,
 		 * but multiple inheritance is not covered by luabridge,
 		 * we need explicit casts */
 		.addCast<PBD::Stateful> ("to_stateful")
 		.addCast<PBD::StatefulDestructible> ("to_statefuldestructible")
 		.addFunction ("name", &SessionObject::name)
+		.endClass ()
+
+		.beginClass <SessionObject> ("SessionObject")
+		.addFunction ("name", &SessionObject::name)
+		.addCast<PBD::Stateful> ("to_stateful")
 		.endClass ()
 
 		.beginWSPtrClass <Port> ("Port")
@@ -870,7 +875,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_bypassed", &PannerShell::set_bypassed)
 		.endClass ()
 
-		.beginClass <RouteGroup> ("RouteGroup")
+		.deriveClass <RouteGroup, SessionObject> ("RouteGroup")
 		.addFunction ("is_active", &RouteGroup::is_active)
 		.addFunction ("is_relative", &RouteGroup::is_relative)
 		.addFunction ("is_hidden", &RouteGroup::is_hidden)
@@ -1434,8 +1439,8 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <boost::weak_ptr<Route> > ("WeakRouteList")
 		.endClass ()
 
-		// RouteList == std::list<boost::shared_ptr<Route> >
-		.beginConstStdList <RouteGroup*> ("RouteGroupList")
+		// RouteGroupList == std::list<RouteGroup*>
+		.beginConstStdCPtrList <RouteGroup> ("RouteGroupList")
 		.endClass ()
 
 		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
