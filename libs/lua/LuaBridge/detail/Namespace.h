@@ -984,6 +984,8 @@ private:
       DATADOC ("Ext C Function", name, fp)
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
       return *this;
     }
@@ -1320,11 +1322,15 @@ private:
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
 
       set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
 
       return *this;

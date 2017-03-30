@@ -1167,7 +1167,7 @@ struct CFunc
 
   // generate an iterator
   template <class T, class C>
-  static int listIterHelper (lua_State *L, C * const t)
+  static int listIterHelper (lua_State *L, C const * const t)
   {
     if (!t) { return luaL_error (L, "invalid pointer to std::list<>/std::vector"); }
     typedef typename C::const_iterator IterType;
@@ -1180,7 +1180,7 @@ struct CFunc
   template <class T, class C>
   static int listIter (lua_State *L)
   {
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     return listIterHelper<T, C> (L, t);
   }
 
@@ -1284,7 +1284,7 @@ struct CFunc
   static int mapIter (lua_State *L)
   {
     typedef std::map<K, V> C;
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::map"); }
     typedef typename C::const_iterator IterType;
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->begin());
@@ -1378,7 +1378,7 @@ struct CFunc
   template <class T, class C>
   static int setIter (lua_State *L)
   {
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
     typedef typename C::const_iterator IterType;
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->begin());
