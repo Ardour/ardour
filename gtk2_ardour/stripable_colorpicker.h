@@ -20,7 +20,9 @@
 #define __gtkardour_stripable_colorpicker_h__
 
 #include <boost/shared_ptr.hpp>
+#include <gtkmm/colorbutton.h>
 #include <gtkmm/colorselection.h>
+
 #include "ardour/stripable.h"
 
 class StripableColorDialog : public Gtk::ColorSelectionDialog
@@ -30,6 +32,8 @@ public:
 	~StripableColorDialog ();
 	void reset ();
 	void popup (boost::shared_ptr<ARDOUR::Stripable> s);
+	void popup (const std::string&, uint32_t);
+	sigc::signal<void, uint32_t> ColorChanged;
 
 private:
 	void initialize_color_palette ();
@@ -45,6 +49,19 @@ private:
 	static bool palette_initialized;
 	static void palette_changed_hook (const Glib::RefPtr<Gdk::Screen>&, const Gdk::ArrayHandle_Color&);
 	static Gtk::ColorSelection::SlotChangePaletteHook gtk_palette_changed_hook;
+};
+
+class ArdourColorButton : public Gtk::ColorButton
+{
+public:
+	ArdourColorButton ();
+
+protected:
+	void on_clicked();
+	void color_selected (uint32_t color);
+
+private:
+	StripableColorDialog _color_picker;
 };
 
 #endif
