@@ -805,6 +805,37 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
+	ostr << "</br></br>\n\n";
+	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
+	ostr << "<tr>\n\n";
+	ostr << "<td>\n\n";
+	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n\n";
+	{
+		vector<string> paths;
+		vector<string> labels;
+		vector<string> tooltips;
+		vector<string> keys;
+		vector<Glib::RefPtr<Gtk::Action> > actions;
+
+		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+
+		vector<string>::iterator k;
+		vector<string>::iterator p;
+		vector<string>::iterator l;
+
+		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
+
+			if ((*k).empty()) {
+				ostr << *p  << " ( " << *l << " ) "  << "</br>" << endl;
+			} else {
+				ostr << *p << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
+			}
+		}
+	}
+	ostr << "</td>\n\n";
+	ostr << "</tr>\n\n";
+	ostr << "</tbody></table>\n\n";
+	
 	ostr << "</body>\n";
 	ostr << "</html>\n";
 }
