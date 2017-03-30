@@ -84,6 +84,8 @@
 #include "midi++/port.h"
 #include "midi++/mmc.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
 #include "ardour/audio_backend.h"
@@ -422,6 +424,12 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (libardour_initialized) {
 		return true;
 	}
+
+#ifndef NDEBUG
+	if (getenv("LUA_METATABLES")) {
+		luabridge::Security::setHideMetatables (false);
+	}
+#endif
 
 	if (!PBD::init()) return false;
 

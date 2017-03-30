@@ -363,7 +363,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -400,7 +400,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -442,7 +442,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -1161,7 +1161,13 @@ private:
         lua_setfield(L, -2, "__index");
         lua_pushcclosure (L, CFunc::array_newindex<T>, 0);
         lua_setfield(L, -2, "__newindex");
+        if (Security::hideMetatables ())
+        {
+          lua_pushboolean (L, false);
+          rawsetfield (L, -2, "__metatable");
+        }
         lua_pop (L, 1);
+
 
         createConstTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
@@ -1532,6 +1538,12 @@ private:
       lua_pushcfunction (L, &tostringMetaMethod);
       rawsetfield (L, -2, "__tostring");
 #endif
+      if (Security::hideMetatables ())
+      {
+        lua_pushboolean (L, false);
+        rawsetfield (L, -2, "__metatable");
+      }
+
     }
   }
 
