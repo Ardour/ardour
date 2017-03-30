@@ -1702,19 +1702,20 @@ Session::start_transport ()
 			const Tempo& tempo = _tempo_map->tempo_at_frame (_transport_frame);
 			const Meter& meter = _tempo_map->meter_at_frame (_transport_frame);
 
-			double div = meter.divisions_per_bar ();
-			double pulses = _tempo_map->exact_qn_at_frame (_transport_frame, 0) * div / 4.0;
-			double beats_left = fmod (pulses, div);
+			const double num = meter.divisions_per_bar ();
+			const double den = meter.note_divisor ();
+			const double barbeat = _tempo_map->exact_qn_at_frame (_transport_frame, 0) * den / (4. * num);
+			const double bar_fract = fmod (barbeat, 1.0); // fraction of bar elapsed.
 
 			_count_in_samples = meter.frames_per_bar (tempo, _current_frame_rate);
 
-			double dt = _count_in_samples / div;
-			if (beats_left == 0) {
+			double dt = _count_in_samples / num;
+			if (bar_fract == 0) {
 				/* at bar boundary, count-in 2 bars before start. */
 				_count_in_samples *= 2;
 			} else {
 				/* beats left after full bar until roll position */
-				_count_in_samples += meter.frames_per_grid (tempo, _current_frame_rate) * beats_left;
+				_count_in_samples *= 1. + bar_fract;
 			}
 
 			int clickbeat = 0;
@@ -1722,7 +1723,7 @@ Session::start_transport ()
 			while (cf < _transport_frame) {
 				add_click (cf - _worst_track_latency, clickbeat == 0);
 				cf += dt;
-				clickbeat = fmod (clickbeat + 1, div);
+				clickbeat = fmod (clickbeat + 1, num);
 			}
 		}
 	}
