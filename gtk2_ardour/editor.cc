@@ -5787,7 +5787,7 @@ Editor::super_rapid_screen_update ()
 	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
 	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
 	 */
-	if (_pending_locate_request || _session->transport_speed() == 0) {
+	if (_pending_locate_request || !_session->transport_rolling ()) {
 		_last_update_time = 0;
 		return;
 	}
