@@ -2067,12 +2067,15 @@ Session::maybe_enable_record (bool rt_context)
 }
 
 framepos_t
-Session::audible_frame () const
+Session::audible_frame (bool* latent_locate) const
 {
 	framepos_t ret;
 
 	frameoffset_t offset = worst_playback_latency (); // - _engine.samples_since_cycle_start ();
 	offset *= transport_speed ();
+	if (latent_locate) {
+		*latent_locate = false;
+	}
 
 	if (synced_to_engine()) {
 		/* Note: this is basically just sync-to-JACK */
@@ -2097,14 +2100,24 @@ Session::audible_frame () const
 
 			if (!play_loop || !have_looped) {
 				if (ret < _last_roll_or_reversal_location) {
+					if (latent_locate) {
+						*latent_locate = true;
+					}
 					return _last_roll_or_reversal_location;
 				}
 			} else {
-				// latent loops
+				/* the play-position wrapped at the loop-point
+				 * ardour is already playing the beginning of the loop,
+				 * but due to playback latency, the "audible frame"
+				 * is still at the end of the loop.
+				 */
 				Location *location = _locations->auto_loop_location();
 				frameoffset_t lo = location->start() - ret;
 				if (lo > 0) {
 					ret = location->end () - lo;
+					if (latent_locate) {
+						*latent_locate = true;
+					}
 				}
 			}
 

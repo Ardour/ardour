@@ -233,7 +233,7 @@ Session::post_engine_init ()
 	msc->set_input_port (boost::dynamic_pointer_cast<MidiPort>(scene_input_port()));
 	msc->set_output_port (boost::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
-	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this));
+	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this, (bool*)(0)));
 	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
