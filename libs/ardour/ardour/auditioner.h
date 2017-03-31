@@ -80,9 +80,6 @@ class LIBARDOUR_API Auditioner : public Track
 	int roll_audio (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
 	int roll_midi (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
 
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream> ds);
-
 	/* fake track */
 	void set_state_part_two () {}
 	int set_state (const XMLNode&, int) { return 0; }
@@ -101,9 +98,6 @@ class LIBARDOUR_API Auditioner : public Track
 
 	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)
 		{ return boost::shared_ptr<Diskstream> (); }
-
-	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
-	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;
