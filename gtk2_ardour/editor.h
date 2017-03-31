@@ -559,6 +559,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
+	void transport_looped ();
 
 	void on_realize();
 

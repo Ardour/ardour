@@ -1388,6 +1388,7 @@ Editor::set_session (Session *t)
 
 	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
+	_session->TransportLooped.connect (_session_connections, invalidator (*this), boost::bind (&Editor::transport_looped, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
@@ -3448,6 +3449,15 @@ Editor::map_transport_state ()
 	update_loop_range_view ();
 }
 
+void
+Editor::transport_looped ()
+{
+	/* reset Playhead position interpolation.
+	 * see Editor::super_rapid_screen_update
+	 */
+	_last_update_time = 0;
+}
+
 /* UNDO/REDO */
 
 void
@@ -5237,6 +5247,7 @@ Editor::located ()
 
 	_pending_locate_request = false;
 	_pending_initial_locate = false;
+	_last_update_time = 0;
 }
 
 void
@@ -5797,7 +5808,8 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	framepos_t frame = _session->audible_frame();
+	bool latent_locate = false;
+	framepos_t frame = _session->audible_frame (&latent_locate);
 	const int64_t now = g_get_monotonic_time ();
 	double err = 0;
 
@@ -5820,7 +5832,7 @@ Editor::super_rapid_screen_update ()
 		_err_screen_engine = 0;
 	}
 
-	if (err > 8192) {
+	if (err > 8192 || latent_locate) {
 		// in case of x-runs or freewheeling
 		_last_update_time = 0;
 	} else {
