@@ -45,13 +45,6 @@ class LIBARDOUR_API AudioTrack : public Track
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	          int declick, bool& need_butler);
 
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream>);
-
-	DataType data_type () const {
-		return DataType::AUDIO;
-	}
-
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
@@ -67,13 +60,9 @@ class LIBARDOUR_API AudioTrack : public Track
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
-	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
 
   private:
-
-	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();

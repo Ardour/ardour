@@ -36,15 +36,19 @@ class RouteGroup;
 class Source;
 class Region;
 class Diskstream;
+class DiskReader;
+class DiskWriter;
 class IO;
 class MonitorControl;
 class RecordEnableControl;
 class RecordSafeControl;
 
 /** A track is an route (bus) with a recordable diskstream and
- * related objects relevant to tracking, playback and editing.
+ * related objects relevant to recording, playback and editing.
  *
- * Specifically a track has regions and playlist objects.
+ * Specifically a track has a playlist object that describes material
+ * to be played from disk, and modifies that object during recording and
+ * editing.
  */
 class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskstream
 {
@@ -80,13 +84,7 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 
 	bool needs_butler() const { return _needs_butler; }
 
-	virtual DataType data_type () const = 0;
-
 	bool can_record();
-
-	void use_new_diskstream ();
-	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
-	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	void set_latency_compensation (framecnt_t);
 
@@ -184,18 +182,17 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	AlignChoice alignment_choice () const;
 	framepos_t current_capture_start () const;
 	framepos_t current_capture_end () const;
-	void playlist_modified ();
-	int use_playlist (boost::shared_ptr<Playlist>);
 	void set_align_style (AlignStyle, bool force=false);
 	void set_align_choice (AlignChoice, bool force=false);
+	void playlist_modified ();
+	int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	int find_and_use_playlist (DataType, std::string const & name);
 	int use_copy_playlist ();
 	int use_new_playlist ();
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
-	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
-	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
@@ -204,6 +201,11 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	XMLNode& state (bool full);
 
 	boost::shared_ptr<Diskstream> _diskstream;
+
+	boost::shared_ptr<DiskReader> _disk_reader;
+	boost::shared_ptr<DiskWriter> _disk_writer;
+	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
+
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
 	bool          _needs_butler;
@@ -250,12 +252,6 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 private:
-
-	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &) = 0;
-
-	void diskstream_playlist_changed ();
-	void diskstream_speed_changed ();
-	void diskstream_alignment_style_changed ();
 	void parameter_changed (std::string const & p);
 
 	std::string _diskstream_name;

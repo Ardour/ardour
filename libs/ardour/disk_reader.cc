@@ -51,8 +51,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
         , overwrite_offset (0)
         , _pending_overwrite (false)
         , overwrite_queued (false)
-        , file_frame (0)
-        , playback_sample (0)
 	, _monitoring_choice (MonitorDisk)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
@@ -143,25 +141,7 @@ DiskReader::state (bool full)
 int
 DiskReader::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	if (DiskIOProcessor::set_state (node, version)) {
-		return -1;
-	}
-
-	if ((prop = node.property ("audio-playlist")) == 0) {
-		return -1;
-	}
-
-	if (find_and_use_playlist (DataType::AUDIO, prop->value())) {
-		return -1;
-	}
-
-	if ((prop = node.property ("midi-playlist")) == 0) {
-		return -1;
-	}
-
-	if (find_and_use_playlist (DataType::MIDI, prop->value())) {
 		return -1;
 	}
 
@@ -1308,26 +1288,6 @@ DiskReader::get_playback (MidiBuffer& dst, framecnt_t nframes)
 	//cerr << "======== POST ========\n";
 	//_midi_buf->dump (cerr);
 	//cerr << "----------------\n";
-}
-
-/** Get the start, end, and length of a location "atomically".
- *
- * Note: Locations don't get deleted, so all we care about when I say "atomic"
- * is that we are always pointing to the same one and using start/length values
- * obtained just once.  Use this function to achieve this since location being
- * a parameter achieves this.
- */
-static void
-get_location_times(const Location* location,
-                   framepos_t*     start,
-                   framepos_t*     end,
-                   framepos_t*     length)
-{
-	if (location) {
-		*start  = location->start();
-		*end    = location->end();
-		*length = *end - *start;
-	}
 }
 
 /** @a start is set to the new frame position (TIME) read up to */

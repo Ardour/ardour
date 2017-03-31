@@ -21,11 +21,14 @@
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/diskstream.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
 #include "ardour/playlist.h"
+#include "ardour/playlist_factory.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -51,6 +54,25 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
+
+        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
+
+        if (_mode == Destructive && !Profile->get_trx()) {
+	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
+        } else if (_mode == NonLayered){
+	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
+        }
+
+        _disk_reader.reset (new DiskReader (sess, name, dflags));
+
+        _disk_reader->set_block_size (_session.get_block_size ());
+        _disk_reader->set_route (shared_from_this());
+        _disk_reader->do_refill_with_alloc ();
+
+        _disk_writer.reset (new DiskWriter (sess, name, dflags));
+        _disk_writer->set_block_size (_session.get_block_size ());
+        _disk_writer->set_route (shared_from_this());
+
 }
 
 Track::~Track ()
@@ -86,18 +108,6 @@ Track::init ()
         return 0;
 }
 
-void
-Track::use_new_diskstream ()
-{
-	boost::shared_ptr<Diskstream> ds = create_diskstream ();
-
-	ds->do_refill_with_alloc ();
-	ds->set_block_size (_session.get_block_size ());
-	ds->playlist()->set_orig_track_id (id());
-
-	set_diskstream (ds);
-}
-
 XMLNode&
 Track::get_state ()
 {
@@ -128,16 +138,10 @@ Track::set_state (const XMLNode& node, int version)
 
 	XMLNode* child;
 
-	if (version >= 3000) {
+	if (version >= 3000 && version < 4000) {
 		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			boost::shared_ptr<Diskstream> ds = diskstream_factory (*child);
-			ds->do_refill_with_alloc ();
-			set_diskstream (ds);
+			/* XXX DISK ... setup reader/writer from XML */
 		}
-	}
-
-	if (_diskstream) {
-		_diskstream->playlist()->set_orig_track_id (id());
 	}
 
 	/* set rec-enable control *AFTER* setting up diskstream, because it may
@@ -406,7 +410,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	_diskstream->check_record_status (start_frame, can_record);
+	_disk_writer->check_record_status (start_frame, can_record);
 
 	bool be_silent;
 
@@ -443,7 +447,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		if (_meter_point == MeterInput) {
 			/* still need input monitoring and metering */
 
-			bool const track_rec = _diskstream->record_enabled ();
+			bool const track_rec = _disk_writer->record_enabled ();
 			bool const auto_input = _session.config.get_auto_input ();
 			bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 			bool const tape_machine_mode = Config->get_tape_machine_mode ();
@@ -502,10 +506,11 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
-		framecnt_t playback_distance = _diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(playback_distance)) {
-			internal_playback_seek(playback_distance);
-		}
+		// XXX DISK reader needs to seek ahead the correct distance ?? OR DOES IT ?
+		//framecnt_t playback_distance = _disk_reader->calculate_playback_distance(nframes);
+		//if (can_internal_playback_seek(playback_distance)) {
+		// internal_playback_seek(playback_distance);
+		//}
 		return 0;
 	}
 
@@ -524,42 +529,9 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 	silence (nframes);
 	flush_processor_buffers_locked (nframes);
 
-	framecnt_t playback_distance;
-
-	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
-
-	int const dret = _diskstream->process (bufs, _session.transport_frame(), nframes, playback_distance, false);
-	need_butler = _diskstream->commit (playback_distance);
-	return dret;
-}
-
-void
-Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
-{
-	_diskstream = ds;
-
-	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
-	diskstream_playlist_changed ();
-	ds->SpeedChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_speed_changed, this));
-	ds->AlignmentStyleChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_alignment_style_changed, this));
-}
-
-void
-Track::diskstream_playlist_changed ()
-{
-	PlaylistChanged (); /* EMIT SIGNAL */
-}
-
-void
-Track::diskstream_speed_changed ()
-{
-	SpeedChanged (); /* EMIT SIGNAL */
-}
-
-void
-Track::diskstream_alignment_style_changed ()
-{
-	AlignmentStyleChanged (); /* EMIT SIGNAL */
+	//BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
+	// XXXX DISKWRITER/READER ADVANCE, SET need_butler
+	return 0;
 }
 
 boost::shared_ptr<Playlist>
@@ -571,103 +543,100 @@ Track::playlist ()
 void
 Track::request_input_monitoring (bool m)
 {
-	_diskstream->request_input_monitoring (m);
+	// XXX DISK
 }
 
 void
 Track::ensure_input_monitoring (bool m)
 {
-	_diskstream->ensure_input_monitoring (m);
+	// XXX DISK
 }
 
 bool
 Track::destructive () const
 {
-	return _diskstream->destructive ();
+	return _disk_writer->destructive ();
 }
 
 list<boost::shared_ptr<Source> > &
 Track::last_capture_sources ()
 {
-	return _diskstream->last_capture_sources ();
+	return _disk_writer->last_capture_sources ();
 }
 
 void
 Track::set_capture_offset ()
 {
-	_diskstream->set_capture_offset ();
+	_disk_writer->set_capture_offset ();
 }
 
 std::string
 Track::steal_write_source_name()
 {
-        return _diskstream->steal_write_source_name ();
+        return _disk_writer->steal_write_source_name ();
 }
 
 void
 Track::reset_write_sources (bool r, bool force)
 {
-	_diskstream->reset_write_sources (r, force);
+	_disk_writer->reset_write_sources (r, force);
 }
 
 float
 Track::playback_buffer_load () const
 {
-	return _diskstream->playback_buffer_load ();
+	return _disk_reader->buffer_load ();
 }
 
 float
 Track::capture_buffer_load () const
 {
-	return _diskstream->capture_buffer_load ();
+	return _disk_writer->buffer_load ();
 }
 
 int
 Track::do_refill ()
 {
-	return _diskstream->do_refill ();
+	return _disk_reader->do_refill ();
 }
 
 int
 Track::do_flush (RunContext c, bool force)
 {
-	return _diskstream->do_flush (c, force);
+	return _disk_writer->do_flush (c, force);
 }
 
 void
 Track::set_pending_overwrite (bool o)
 {
-	_diskstream->set_pending_overwrite (o);
+	_disk_reader->set_pending_overwrite (o);
 }
 
 int
 Track::seek (framepos_t p, bool complete_refill)
 {
-	return _diskstream->seek (p, complete_refill);
+	if (_disk_reader->seek (p, complete_refill)) {
+		return -1;
+	}
+	return _disk_writer->seek (p, complete_refill);
 }
 
 bool
 Track::hidden () const
 {
-	return _diskstream->hidden ();
+	return _disk_writer->hidden () || _disk_reader->hidden();
 }
 
 int
 Track::can_internal_playback_seek (framecnt_t p)
 {
-	return _diskstream->can_internal_playback_seek (p);
+	return _disk_reader->can_internal_playback_seek (p);
 }
 
 int
 Track::internal_playback_seek (framecnt_t p)
 {
-	return _diskstream->internal_playback_seek (p);
-}
-
-void
-Track::non_realtime_input_change ()
-{
-	_diskstream->non_realtime_input_change ();
+	return _disk_reader->internal_playback_seek (p);
 }
 
 void
@@ -679,74 +648,82 @@ Track::non_realtime_locate (framepos_t p)
 		/* don't waste i/o cycles and butler calls
 		   for hidden (secret) tracks
 		*/
-		_diskstream->non_realtime_locate (p);
+		_disk_reader->non_realtime_locate (p);
+		_disk_writer->non_realtime_locate (p);
 	}
 }
 
 void
 Track::non_realtime_set_speed ()
 {
-	_diskstream->non_realtime_set_speed ();
+	_disk_reader->non_realtime_set_speed ();
 }
 
 int
 Track::overwrite_existing_buffers ()
 {
-	return _diskstream->overwrite_existing_buffers ();
+	return _disk_reader->overwrite_existing_buffers ();
 }
 
 framecnt_t
 Track::get_captured_frames (uint32_t n) const
 {
-	return _diskstream->get_captured_frames (n);
+	return _disk_writer->get_captured_frames (n);
 }
 
 int
 Track::set_loop (Location* l)
 {
-	return _diskstream->set_loop (l);
+	if (_disk_reader->set_loop (l)) {
+		return -1;
+	}
+	return _disk_writer->set_loop (l);
 }
 
 void
 Track::transport_looped (framepos_t p)
 {
-	_diskstream->transport_looped (p);
+	return _disk_writer->transport_looped (p);
 }
 
 bool
 Track::realtime_set_speed (double s, bool g)
 {
-	return _diskstream->realtime_set_speed (s, g);
+	if (_disk_reader->realtime_set_speed (s, g)) {
+		return -1;
+	}
+	return _disk_writer->realtime_set_speed (s, g);
 }
 
 void
 Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 {
-	_diskstream->transport_stopped_wallclock (n, t, g);
+	_disk_writer->transport_stopped_wallclock (n, t, g);
 }
 
 bool
 Track::pending_overwrite () const
 {
-	return _diskstream->pending_overwrite ();
+	return _disk_reader->pending_overwrite ();
 }
 
 double
 Track::speed () const
 {
-	return _diskstream->speed ();
+	return _disk_reader->speed ();
 }
 
 void
 Track::prepare_to_stop (framepos_t t, framepos_t a)
 {
-	_diskstream->prepare_to_stop (t, a);
+	_disk_writer->prepare_to_stop (t, a);
 }
 
 void
 Track::set_slaved (bool s)
 {
-	_diskstream->set_slaved (s);
+	_disk_reader->set_slaved (s);
+	_disk_writer->set_slaved (s);
 }
 
 ChanCount
@@ -758,71 +735,113 @@ Track::n_channels ()
 framepos_t
 Track::get_capture_start_frame (uint32_t n) const
 {
-	return _diskstream->get_capture_start_frame (n);
+	return _disk_writer->get_capture_start_frame (n);
 }
 
 AlignStyle
 Track::alignment_style () const
 {
-	return _diskstream->alignment_style ();
+	return _disk_writer->alignment_style ();
 }
 
 AlignChoice
 Track::alignment_choice () const
 {
-	return _diskstream->alignment_choice ();
+	return _disk_writer->alignment_choice ();
 }
 
 framepos_t
 Track::current_capture_start () const
 {
-	return _diskstream->current_capture_start ();
+	return _disk_writer->current_capture_start ();
 }
 
 framepos_t
 Track::current_capture_end () const
 {
-	return _diskstream->current_capture_end ();
+	return _disk_writer->current_capture_end ();
 }
 
 void
 Track::playlist_modified ()
 {
-	_diskstream->playlist_modified ();
+	_disk_reader->playlist_modified ();
 }
 
 int
-Track::use_playlist (boost::shared_ptr<Playlist> p)
+Track::find_and_use_playlist (DataType dt, const string& name)
 {
-	int ret = _diskstream->use_playlist (p);
-	if (ret == 0) {
-		p->set_orig_track_id (id());
+	boost::shared_ptr<Playlist> playlist;
+
+	if ((playlist = _session.playlists->by_name (name)) == 0) {
+		playlist = PlaylistFactory::create (dt, _session, name);
 	}
+
+	if (!playlist) {
+		error << string_compose(_("DiskIOProcessor: \"%1\" isn't an playlist"), name) << endmsg;
+		return -1;
+	}
+
+	return use_playlist (dt, playlist);
+}
+
+int
+Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
+{
+	int ret;
+
+	if ((ret = _disk_reader->use_playlist (dt, p)) == 0) {
+		if ((ret = _disk_writer->use_playlist (dt, p)) == 0) {
+			p->set_orig_track_id (id());
+		}
+	}
+
 	return ret;
 }
 
 int
 Track::use_copy_playlist ()
 {
-	int ret =  _diskstream->use_copy_playlist ();
+	assert (_playlists[data_type()]);
 
-	if (ret == 0) {
-		_diskstream->playlist()->set_orig_track_id (id());
+	if (_playlists[data_type()] == 0) {
+		error << string_compose(_("DiskIOProcessor %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
+		return -1;
 	}
 
-	return ret;
+	string newname;
+	boost::shared_ptr<Playlist> playlist;
+
+	newname = Playlist::bump_name (_playlists[data_type()]->name(), _session);
+
+	if ((playlist = PlaylistFactory::create (_playlists[data_type()], newname)) == 0) {
+		return -1;
+	}
+
+	playlist->reset_shares();
+
+	return use_playlist (data_type(), playlist);
 }
 
 int
 Track::use_new_playlist ()
 {
-	int ret = _diskstream->use_new_playlist ();
+	string newname;
+	boost::shared_ptr<Playlist> playlist = _playlists[data_type()];
 
-	if (ret == 0) {
-		_diskstream->playlist()->set_orig_track_id (id());
+	if (playlist) {
+		newname = Playlist::bump_name (playlist->name(), _session);
+	} else {
+		newname = Playlist::bump_name (_name, _session);
 	}
 
-	return ret;
+	playlist = PlaylistFactory::create (data_type(), _session, newname, hidden());
+
+	if (!playlist) {
+		return -1;
+	}
+
+	return use_playlist (data_type(), playlist);
 }
 
 void
@@ -955,7 +974,7 @@ Track::monitoring_state () const
 	*/
 
 	bool const roll = _session.transport_rolling ();
-	bool const track_rec = _diskstream->record_enabled ();
+	bool const track_rec = _disk_writer->record_enabled ();
 	bool const auto_input = _session.config.get_auto_input ();
 	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 	bool const tape_machine_mode = Config->get_tape_machine_mode ();
@@ -1078,10 +1097,16 @@ Track::metering_state () const
 	bool rv;
 	if (_session.transport_rolling ()) {
 		// audio_track.cc || midi_track.cc roll() runs meter IFF:
-		rv = _meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled());
+		rv = _meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled());
 	} else {
 		// track no_roll() always metering if
 		rv = _meter_point == MeterInput;
 	}
 	return rv ? MeteringInput : MeteringRoute;
+}
+
+void
+Track::non_realtime_input_change ()
+{
+	// XXX DISK do we need to do anything here anymore ?
 }

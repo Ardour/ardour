@@ -33,10 +33,13 @@
 #include "pbd/types_convert.h"
 #include "evoral/midi_util.h"
 
+#include "ardour/amp.h"
 #include "ardour/beats_frames_converter.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"
 #include "ardour/meter.h"
 #include "ardour/midi_diskstream.h"
@@ -72,11 +75,15 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
 	, _immediate_events(6096) // FIXME: size?
 	, _step_edit_ring_buffer(64) // FIXME: size?
-	, _note_mode(Sustained)
+	, _note_mode (Sustained)
 	, _step_editing (false)
 	, _input_active (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
+
+	_disk_writer->set_note_mode (_note_mode);
+	_disk_reader->reset_tracker ();
+
 }
 
 MidiTrack::~MidiTrack ()
@@ -124,43 +131,6 @@ MidiTrack::can_be_record_enabled ()
 	}
 
 	return Track::can_be_record_enabled ();
-}
-
-void
-MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
-{
-	/* We have to do this here, as Track::set_diskstream will cause a buffer refill,
-	   and the diskstream must be set up to fill its buffers using the correct _note_mode.
-	*/
-	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
-	mds->set_note_mode (_note_mode);
-
-	Track::set_diskstream (ds);
-
-	mds->reset_tracker ();
-
-	_diskstream->set_track (this);
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	if (Profile->get_trx()) {
-		_diskstream->set_destructive (false);
-	} else {
-		_diskstream->set_destructive (_mode == Destructive);
-	}
-#endif
-	_diskstream->set_record_enabled (false);
-
-	_diskstream_data_recorded_connection.disconnect ();
-	mds->DataRecorded.connect_same_thread (
-		_diskstream_data_recorded_connection,
-		boost::bind (&MidiTrack::diskstream_data_recorded, this, _1));
-
-	DiskstreamChanged (); /* EMIT SIGNAL */
-}
-
-boost::shared_ptr<MidiDiskstream>
-MidiTrack::midi_diskstream() const
-{
-	return boost::dynamic_pointer_cast<MidiDiskstream>(_diskstream);
 }
 
 int
@@ -330,10 +300,6 @@ MidiTrack::set_state_part_two ()
 		}
 	}
 
-	if (midi_diskstream ()) {
-		midi_diskstream()->set_block_size (_session.get_block_size ());
-	}
-
 	return;
 }
 
@@ -370,17 +336,10 @@ int
 MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
 	if (!lm.locked()) {
-		boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
-		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(::llabs(playback_distance))) {
-			/* TODO should declick, and/or note-off */
-			internal_playback_seek(playback_distance);
-		}
 		return 0;
 	}
-
-	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
@@ -394,22 +353,8 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return 0;
 	}
 
-	framepos_t transport_frame = _session.transport_frame();
-
-	int dret;
-	framecnt_t playback_distance;
-
-	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
-		/* need to do this so that the diskstream sets its
-		   playback distance to zero, thus causing diskstream::commit
-		   to do nothing.
-		   */
-		BufferSet bufs; /* empty set - is OK, since nothing will happen */
-
-		dret = diskstream->process (bufs, transport_frame, 0, playback_distance, false);
-		need_butler = diskstream->commit (playback_distance);
-		return dret;
-	}
+	_silent = false;
+	_amp->apply_gain_automation (false);
 
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
@@ -422,46 +367,15 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
 	}
 
-
-	_silent = false;
-
-	if ((dret = diskstream->process (bufs, transport_frame, nframes, playback_distance, (monitoring_state() == MonitoringDisk))) != 0) {
-		need_butler = diskstream->commit (playback_distance);
-		silence (nframes);
-		return dret;
-	}
-
-	/* note diskstream uses our filter to filter/map playback channels appropriately. */
-
-	if (monitoring_state() == MonitoringInput) {
-
-		/* not actually recording, but we want to hear the input material anyway,
-		   at least potentially (depending on monitoring options)
-		*/
-
-		/* because the playback buffer is event based and not a
-		 * continuous stream, we need to make sure that we empty
-		 * it of events every cycle to avoid it filling up with events
-		 * read from disk, while we are actually monitoring input
-		 */
-
-		diskstream->flush_playback (start_frame, end_frame);
-
-	}
-
-
 	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
 
 	/* final argument: don't waste time with automation if we're not recording or rolling */
 
-	process_output_buffers (bufs, start_frame, end_frame, nframes,
-				declick, (!diskstream->record_enabled() && !_session.transport_stopped()));
+	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!_disk_writer->record_enabled() && !_session.transport_stopped()));
 
 	flush_processor_buffers_locked (nframes);
-
-	need_butler = diskstream->commit (playback_distance);
 
 	return 0;
 }
@@ -491,7 +405,7 @@ MidiTrack::realtime_locate ()
 		(*i)->realtime_locate ();
 	}
 
-	midi_diskstream()->reset_tracker ();
+	_disk_reader->reset_tracker ();
 }
 
 void
@@ -513,7 +427,7 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 {
 	Track::non_realtime_locate(pos);
 
-	boost::shared_ptr<MidiPlaylist> playlist = midi_diskstream()->midi_playlist();
+	boost::shared_ptr<MidiPlaylist> playlist = _disk_writer->midi_playlist();
 	if (!playlist) {
 		return;
 	}
@@ -618,11 +532,9 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 		return -1;
 	}
 
-	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
-
 	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
 
-	boost::shared_ptr<MidiPlaylist> mpl = boost::dynamic_pointer_cast<MidiPlaylist>(diskstream->playlist());
+	boost::shared_ptr<MidiPlaylist> mpl = _disk_writer->midi_playlist();
 	if (!mpl) {
 		return -2;
 	}
@@ -671,7 +583,7 @@ void
 MidiTrack::set_note_mode (NoteMode m)
 {
 	_note_mode = m;
-	midi_diskstream()->set_note_mode(m);
+	_disk_writer->set_note_mode(m);
 }
 
 std::string
@@ -815,7 +727,7 @@ MidiTrack::set_step_editing (bool yn)
 boost::shared_ptr<SMFSource>
 MidiTrack::write_source (uint32_t)
 {
-	return midi_diskstream()->write_source ();
+	return _disk_writer->midi_write_source ();
 }
 
 void
@@ -853,7 +765,7 @@ MidiTrack::set_capture_channel_mask (uint16_t mask)
 boost::shared_ptr<MidiPlaylist>
 MidiTrack::midi_playlist ()
 {
-	return midi_diskstream()->midi_playlist ();
+	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
 }
 
 void
@@ -912,7 +824,7 @@ MidiTrack::diskstream_factory (XMLNode const & node)
 boost::shared_ptr<MidiBuffer>
 MidiTrack::get_gui_feed_buffer () const
 {
-	return midi_diskstream()->get_gui_feed_buffer ();
+	return _disk_reader->get_gui_feed_buffer ();
 }
 
 void
@@ -928,7 +840,7 @@ MidiTrack::act_on_mute ()
 	/* If we haven't got a diskstream yet, there's nothing to worry about,
 	   and we can't call get_channel_mask() anyway.
 	*/
-	if (!midi_diskstream()) {
+	if (!_disk_writer) {
 		return;
 	}
 
@@ -951,7 +863,7 @@ MidiTrack::act_on_mute ()
 		}
 
 		/* Resolve active notes. */
-		midi_diskstream()->resolve_tracker(_immediate_events, Port::port_offset());
+		_disk_reader->resolve_tracker(_immediate_events, Port::port_offset());
 	}
 }
 
@@ -973,11 +885,7 @@ MidiTrack::monitoring_changed (bool self, Controllable::GroupControlDisposition 
 		}
 	}
 
-	boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
-
-	if (md) {
-		md->reset_tracker ();
-	}
+	_disk_reader->reset_tracker ();
 }
 
 MonitorState

@@ -65,12 +65,11 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
-	/** @return A number between 0 and 1, where 0 indicates that the playback buffer
+	/** @return A number between 0 and 1, where 0 indicates that the playback/capture buffer
 	 *  is dry (ie the disk subsystem could not keep up) and 1 indicates that the
 	 *  buffer is full.
 	 */
-	virtual float playback_buffer_load() const = 0;
-	virtual float capture_buffer_load() const = 0;
+	virtual float buffer_load() const = 0;
 
 	void set_flag (Flag f)   { _flags = Flag (_flags | f); }
 	void unset_flag (Flag f) { _flags = Flag (_flags & ~f); }
@@ -88,8 +87,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
-
-	virtual float buffer_load() const = 0;
 
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
@@ -113,8 +110,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	virtual void playlist_modified () {}
 	virtual int use_playlist (DataType, boost::shared_ptr<Playlist>);
-	virtual int use_new_playlist (DataType);
-	virtual int use_copy_playlist (DataType);
 
 	PBD::Signal1<void,DataType>   PlaylistChanged;
 
@@ -135,6 +130,8 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool         _slaved;
 	Location*     loop_location;
 	bool          in_set_state;
+	framepos_t     file_frame;
+	framepos_t     playback_sample;
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
 	bool         _need_butler;
@@ -202,7 +199,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	virtual void playlist_changed (const PBD::PropertyChange&) {}
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool) {}
-	int find_and_use_playlist (DataType, std::string const &);
 
 	/* The MIDI stuff */
 
@@ -210,6 +206,8 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	gint                         _frames_written_to_ringbuffer;
 	gint                         _frames_read_from_ringbuffer;
 	CubicMidiInterpolation        midi_interpolation;
+
+	static void get_location_times (const Location* location, framepos_t* start, framepos_t* end, framepos_t* length);
 };
 
 } // namespace ARDOUR
