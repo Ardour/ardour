@@ -152,6 +152,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 
 	Processor::set_state(node, version);
 
+	bool ignore_name = node.property ("ignore-name");
 
 	if ((prop = node.property ("own-input")) != 0) {
 		_own_input = string_is_affirmative (prop->value());
@@ -172,7 +173,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			XMLProperty const * prop;
 			if ((prop = (*niter)->property ("name")) != 0) {
-				if (_name == prop->value()) {
+				if (_name == prop->value() || ignore_name) {
 					if ((prop = (*niter)->property ("direction")) != 0) {
 						if (prop->value() == instr) {
 							io_node = (*niter);
@@ -202,7 +203,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 			if ((*niter)->name() == "IO") {
 				XMLProperty const * prop;
 				if ((prop = (*niter)->property ("name")) != 0) {
-					if (_name == prop->value()) {
+					if (_name == prop->value() || ignore_name) {
 						if ((prop = (*niter)->property ("direction")) != 0) {
 							if (prop->value() == outstr) {
 								io_node = (*niter);

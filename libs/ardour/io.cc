@@ -631,7 +631,8 @@ IO::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("name")) != 0) {
+	bool ignore_name = node.property ("ignore-name");
+	if ((prop = node.property ("name")) != 0 && !ignore_name) {
 		set_name (prop->value());
 	}
 
