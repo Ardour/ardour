@@ -692,10 +692,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::connect_to_pan, this), gui_context());
 	}
 
-	if (is_audio_track()) {
-		audio_track()->DiskstreamChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::diskstream_changed, this), gui_context());
-	}
-
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::setup_comment_button, this), gui_context());
 
 	set_stuff_from_route ();

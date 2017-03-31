@@ -1643,7 +1643,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		return;
 	}
 
-	track()->use_playlist (pl);
+	track()->use_playlist (track()->data_type(), pl);
 
 	RouteGroup* rg = route_group();
 
@@ -1683,7 +1683,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 				track->use_new_playlist();
 				track->playlist()->set_name(playlist_name);
 			} else {
-				track->use_playlist(ipl);
+				track->use_playlist(track->data_type(), ipl);
 			}
 		}
 	}
