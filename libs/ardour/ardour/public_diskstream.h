@@ -68,7 +68,7 @@ public:
 	virtual framepos_t current_capture_start () const = 0;
 	virtual framepos_t current_capture_end () const = 0;
 	virtual void playlist_modified () = 0;
-	virtual int use_playlist (boost::shared_ptr<Playlist>) = 0;
+	// XXX DISK removed virtual int use_playlist (boost::shared_ptr<Playlist>) = 0;
 	virtual void set_align_style (AlignStyle, bool force=false) = 0;
 	virtual void set_align_choice (AlignChoice, bool force=false) = 0;
 	virtual int use_copy_playlist () = 0;

@@ -54,10 +54,6 @@ public:
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 
-	DataType data_type () const {
-		return DataType::MIDI;
-	}
-
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
@@ -155,8 +151,6 @@ private:
 	MidiChannelFilter          _capture_filter;
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-
-	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
 
 	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
 

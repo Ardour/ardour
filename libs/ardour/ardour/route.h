@@ -99,6 +99,13 @@ public:
 
 	virtual int init ();
 
+	DataType data_type () const {
+		/* XXX ultimately nice to do away with this concept, but it is
+		   quite useful for coders and for users too.
+		*/
+		return _default_type;
+	}
+
 	boost::shared_ptr<IO> input() const { return _input; }
 	boost::shared_ptr<IO> output() const { return _output; }
 	IOVector all_inputs () const;

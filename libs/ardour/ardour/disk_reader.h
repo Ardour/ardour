@@ -86,14 +86,18 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	void adjust_buffering ();
 
 	int can_internal_playback_seek (framecnt_t distance);
+	int internal_playback_seek (framecnt_t distance);
 	int seek (framepos_t frame, bool complete_refill = false);
 
 	static PBD::Signal0<void> Underrun;
 
 	void playlist_modified ();
+	void reset_tracker ();
 
   protected:
-	void reset_tracker ();
+	friend class Track;
+	friend class MidiTrack;
+
 	void resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
@@ -113,8 +117,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	IOChange      input_change_pending;
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
-	framepos_t     file_frame;
-	framepos_t     playback_sample;
 	MonitorChoice   _monitoring_choice;
 
 	int _do_refill_with_alloc (bool partial_fill);
@@ -142,7 +144,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int refill_audio (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
 	int refill_midi ();
 
-	int internal_playback_seek (framecnt_t distance);
 	frameoffset_t calculate_playback_distance (pframes_t);
 
 	void get_playback (MidiBuffer& dst, framecnt_t nframes);

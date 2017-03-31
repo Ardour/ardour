@@ -56,6 +56,8 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _slaved (false)
 	, loop_location (0)
 	, in_set_state (false)
+        , file_frame (0)
+        , playback_sample (0)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
 	, _need_butler (false)
@@ -394,68 +396,6 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 	return 0;
 }
 
-int
-DiskIOProcessor::find_and_use_playlist (DataType dt, const string& name)
-{
-	boost::shared_ptr<Playlist> playlist;
-
-	if ((playlist = _session.playlists->by_name (name)) == 0) {
-		playlist = PlaylistFactory::create (dt, _session, name);
-	}
-
-	if (!playlist) {
-		error << string_compose(_("DiskIOProcessor: \"%1\" isn't an playlist"), name) << endmsg;
-		return -1;
-	}
-
-	return use_playlist (dt, playlist);
-}
-
-int
-DiskIOProcessor::use_new_playlist (DataType dt)
-{
-	string newname;
-	boost::shared_ptr<Playlist> playlist = _playlists[dt];
-
-	if (playlist) {
-		newname = Playlist::bump_name (playlist->name(), _session);
-	} else {
-		newname = Playlist::bump_name (_name, _session);
-	}
-
-	playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (dt, _session, newname, hidden()));
-
-	if (!playlist) {
-		return -1;
-	}
-
-	return use_playlist (dt, playlist);
-}
-
-int
-DiskIOProcessor::use_copy_playlist (DataType dt)
-{
-	assert (_playlists[dt]);
-
-	if (_playlists[dt] == 0) {
-		error << string_compose(_("DiskIOProcessor %1: there is no existing playlist to make a copy of!"), _name) << endmsg;
-		return -1;
-	}
-
-	string newname;
-	boost::shared_ptr<Playlist> playlist;
-
-	newname = Playlist::bump_name (_playlists[dt]->name(), _session);
-
-	if ((playlist = PlaylistFactory::create (_playlists[dt], newname)) == 0) {
-		return -1;
-	}
-
-	playlist->reset_shares();
-
-	return use_playlist (dt, playlist);
-}
-
 DiskIOProcessor::ChannelInfo::ChannelInfo (framecnt_t bufsize)
 {
 	buf = new RingBufferNPT<Sample> (bufsize);
@@ -492,3 +432,24 @@ DiskIOProcessor::set_route (boost::shared_ptr<Route> r)
 {
 	_route = r;
 }
+
+/** Get the start, end, and length of a location "atomically".
+ *
+ * Note: Locations don't get deleted, so all we care about when I say "atomic"
+ * is that we are always pointing to the same one and using start/length values
+ * obtained just once.  Use this function to achieve this since location being
+ * a parameter achieves this.
+ */
+void
+DiskIOProcessor::get_location_times(const Location* location,
+                   framepos_t*     start,
+                   framepos_t*     end,
+                   framepos_t*     length)
+{
+	if (location) {
+		*start  = location->start();
+		*end    = location->end();
+		*length = *end - *start;
+	}
+}
+

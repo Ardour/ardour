@@ -1845,7 +1845,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 			return ret;
 		}
 
-		track->set_diskstream (*i);
+                // XXX DISK NEED TO SET UP DISKSTREAM ???
 
 		BOOST_MARK_TRACK (track);
 		ret = track;

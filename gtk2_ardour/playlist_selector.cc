@@ -272,7 +272,7 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 
-		at->use_playlist (apl);
+		at->use_playlist (DataType::AUDIO, apl);
 
 		hide ();
 	}
