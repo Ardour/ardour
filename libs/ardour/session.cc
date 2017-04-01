@@ -625,7 +625,7 @@ Session::destroy ()
 
 	ControlProtocolManager::instance().drop_protocols ();
 
-	/* stop autoconnecting */
+	/* stop auto dis/connecting */
 	auto_connect_thread_terminate ();
 
 	MIDI::Name::MidiPatchManager::instance().remove_search_path(session_directory().midi_patch_path());
@@ -805,6 +805,14 @@ Session::destroy ()
 		if (del) {
 			delete ev;
 		}
+	}
+
+	{
+		/* unregister all dropped ports, process pending port deletion. */
+		// this may call ARDOUR::Port::drop ... jack_port_unregister ()
+		// jack1 cannot cope with removing ports while processing
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		AudioEngine::instance()->clear_pending_port_deletions ();
 	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
