@@ -87,6 +87,8 @@ public:
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context> const &) const;
 
+	void prepare_for_render (Rect const &) const;
+
 	/** @return root group */
 	Item* root () {
 		return &_root;
@@ -213,6 +215,8 @@ public:
 		ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
 		Canvas::render (rect, ctx);
 	}
+
+	void prepare_for_render () const;
 
 	uint32_t background_color() { return Canvas::background_color (); }
 

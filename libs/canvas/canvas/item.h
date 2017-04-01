@@ -75,6 +75,13 @@ public:
 	 */
 	virtual void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const = 0;
 
+	/** Item has changed will be rendered in next render pass so give item a
+	 * chance to perhaps schedule work in another thread etc.
+	 *
+	 *  @param area Area to draw, in **window** coordinates
+	 */
+	virtual void prepare_for_render (Rect const & area) const { }
+
 	/** Adds one or more items to the vector @param items based on their
 	 * covering @param point which is in **window** coordinates
 	 *
@@ -309,6 +316,7 @@ protected:
 
 	void add_child_bounding_boxes (bool include_hidden = false) const;
 	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+	void prepare_for_render_children (Rect const & area) const;
 
 	Duple scroll_offset() const;
 	Duple position_offset() const;

@@ -144,6 +144,22 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 }
 
+void
+Canvas::prepare_for_render (Rect const & area) const
+{
+	Rect root_bbox = _root.bounding_box();
+	if (!root_bbox) {
+		/* the root has no bounding box, so there's nothing to render */
+		return;
+	}
+
+	Rect draw = root_bbox.intersection (area);
+
+	if (draw) {
+		_root.prepare_for_render (draw);
+	}
+}
+
 ostream&
 operator<< (ostream& o, Canvas& c)
 {
@@ -231,9 +247,17 @@ Canvas::item_changed (Item* item, Rect pre_change_bounding_box)
 	Rect post_change_bounding_box = item->bounding_box ();
 
 	if (post_change_bounding_box) {
-		if (item->item_to_window (post_change_bounding_box).intersection (window_bbox)) {
+		Rect const window_intersection =
+		    item->item_to_window (post_change_bounding_box).intersection (window_bbox);
+
+		if (window_intersection) {
 			/* request a redraw of the item's new bounding box */
 			queue_draw_item_area (item, post_change_bounding_box);
+
+			// Allow item to do any work necessary to prepare for being rendered.
+			item->prepare_for_render (window_intersection);
+		} else {
+			// No intersection with visible window area
 		}
 	}
 }
@@ -935,6 +959,13 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 #endif
 
 	return true;
+}
+
+void
+GtkCanvas::prepare_for_render () const
+{
+	Rect window_bbox = visible_area ();
+	Canvas::prepare_for_render (window_bbox);
 }
 
 /** Handler for GDK scroll events.
