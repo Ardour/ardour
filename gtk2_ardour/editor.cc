@@ -5152,6 +5152,17 @@ Editor::first_idle ()
 		(*t)->first_idle();
 	}
 
+	/* now that all regionviews should exist, setup region selection */
+
+	RegionSelection rs;
+
+	for (list<PBD::ID>::iterator pr = selection->regions.pending.begin (); pr != selection->regions.pending.end (); ++pr) {
+		/* this is cumulative: rs is NOT cleared each time */
+		get_regionviews_by_id (*pr, rs);
+	}
+
+	selection->set (rs);
+
 	// first idle adds route children (automation tracks), so we need to redisplay here
 	_routes->redisplay ();
 
@@ -5253,14 +5264,6 @@ Editor::located ()
 void
 Editor::region_view_added (RegionView * rv)
 {
-	for (list<PBD::ID>::iterator pr = selection->regions.pending.begin (); pr != selection->regions.pending.end (); ++pr) {
-		if (rv->region ()->id () == (*pr)) {
-			selection->add (rv);
-			selection->regions.pending.erase (pr);
-			break;
-		}
-	}
-
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
 	if (mrv) {
 		list<pair<PBD::ID const, list<Evoral::event_id_t> > >::iterator rnote;
