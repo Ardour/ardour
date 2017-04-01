@@ -13,9 +13,6 @@ fi
 ASRC=`pwd`
 set -e
 
-cd libs/qm-dsp
-QMFILES=`find . -type f | grep -v MSVCqm-dsp | grep -v wscript`
-
 TMP=`mktemp -d`
 test -d "$TMP"
 echo $TMP
