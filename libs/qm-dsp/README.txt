@@ -1,7 +1,6 @@
 This is a stripped down version of the Queen Mary DSP library
-Version 1.7.1 from Sept 2015.
 
-https://code.soundsoftware.ac.uk/attachments/download/1582/qm-dsp-1.7.1.tar.gz
+https://github.com/c4dm/qm-dsp  -- see gitrev.txt for version
 
 ---
 

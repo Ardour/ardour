@@ -81,7 +81,7 @@ public:
     }
 
     const double *getWindow() const { 
-	return &m_window[0];
+	return m_window.data();
     }
 
     void cut(double *src) const { 

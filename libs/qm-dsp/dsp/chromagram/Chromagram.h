@@ -21,10 +21,10 @@
 #include "ConstantQ.h"
 
 struct ChromaConfig{
-    unsigned int FS;
+    int FS;
     double min;
     double max;
-    unsigned int BPO;
+    int BPO;
     double CQThresh;
     MathUtilities::NormaliseType normalise;
 };
@@ -44,10 +44,10 @@ public:
     double kabs( double real, double imag );
 	
     // Results
-    unsigned int getK() { return m_uK;}
-    unsigned int getFrameSize() { return m_frameSize; }
-    unsigned int getHopSize()   { return m_hopSize; }
-
+    int getK() { return m_uK;}
+    int getFrameSize() { return m_frameSize; }
+    int getHopSize()   { return m_hopSize; }
+    
 private:
     int initialise( ChromaConfig Config );
     int deInitialise();
@@ -58,13 +58,13 @@ private:
     double* m_chromadata;
     double m_FMin;
     double m_FMax;
-    unsigned int m_BPO;
-    unsigned int m_uK;
+    int m_BPO;
+    int m_uK;
 
     MathUtilities::NormaliseType m_normalise;
 
-    unsigned int m_frameSize;
-    unsigned int m_hopSize;
+    int m_frameSize;
+    int m_hopSize;
 
     FFTReal* m_FFT;
     ConstantQ* m_ConstantQ;

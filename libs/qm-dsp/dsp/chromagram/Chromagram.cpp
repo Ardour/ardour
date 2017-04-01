@@ -34,7 +34,7 @@ int Chromagram::initialise( ChromaConfig Config )
     m_normalise = Config.normalise;     // if frame normalisation is required
 
     // No. of constant Q bins
-    m_uK = ( unsigned int ) ceil( m_BPO * log(m_FMax/m_FMin)/log(2.0));	
+    m_uK = (int) ceil( m_BPO * log(m_FMax/m_FMin)/log(2.0));	
 
     // Create array for chroma result
     m_chromadata = new double[ m_BPO ];
@@ -112,7 +112,7 @@ void Chromagram::unityNormalise(double *src)
 
     MathUtilities::getFrameMinMax( src, m_BPO, & min, &max );
 
-    for( unsigned int i = 0; i < m_BPO; i++ )
+    for (int i = 0; i < m_BPO; i++)
     {
 	val = src[ i ] / max;
 
@@ -153,19 +153,17 @@ double* Chromagram::process( const double *real, const double *imag )
     }
 
     // initialise chromadata to 0
-    for (unsigned i = 0; i < m_BPO; i++) m_chromadata[i] = 0;
+    for (int i = 0; i < m_BPO; i++) m_chromadata[i] = 0;
 
-    double cmax = 0.0;
-    double cval = 0;
     // Calculate ConstantQ frame
     m_ConstantQ->process( real, imag, m_CQRe, m_CQIm );
 	
     // add each octave of cq data into Chromagram
-    const unsigned octaves = (int)floor(double( m_uK/m_BPO))-1;
-    for (unsigned octave = 0; octave <= octaves; octave++) 
+    const int octaves = (int)floor(double( m_uK/m_BPO))-1;
+    for (int octave = 0; octave <= octaves; octave++) 
     {
-	unsigned firstBin = octave*m_BPO;
-	for (unsigned i = 0; i < m_BPO; i++) 
+	int firstBin = octave*m_BPO;
+	for (int i = 0; i < m_BPO; i++) 
 	{
 	    m_chromadata[i] += kabs( m_CQRe[ firstBin + i ], m_CQIm[ firstBin + i ]);
 	}

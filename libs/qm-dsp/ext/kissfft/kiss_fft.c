@@ -275,7 +275,8 @@ void kf_work(
 
     if (m==1) {
         do{
-            *Fout = *f;
+            Fout->r = f->r;
+            Fout->i = f->i;
             f += fstride*in_stride;
         }while(++Fout != Fout_end );
     }else{
