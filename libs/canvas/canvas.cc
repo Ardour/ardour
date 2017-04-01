@@ -1197,19 +1197,19 @@ GtkCanvas::request_redraw (Rect const & request)
 		return;
 	}
 
-	Rect real_area;
-
-	Coord const w = width ();
-	Coord const h = height ();
-
 	/* clamp area requested to actual visible window */
 
-	real_area.x0 = max (0.0, min (w, request.x0));
-	real_area.x1 = max (0.0, min (w, request.x1));
-	real_area.y0 = max (0.0, min (h, request.y0));
-	real_area.y1 = max (0.0, min (h, request.y1));
+	Rect real_area = request.intersection (visible_area());
 
-	queue_draw_area (real_area.x0, real_area.y0, real_area.width(), real_area.height());
+	if (real_area) {
+		if (real_area.width () && real_area.height ()) {
+			// Item intersects with visible canvas area
+			queue_draw_area (real_area.x0, real_area.y0, real_area.width(), real_area.height());
+		}
+
+	} else {
+		// Item does not intersect with visible canvas area
+	}
 }
 
 /** Called to request that we try to get a particular size for ourselves.
