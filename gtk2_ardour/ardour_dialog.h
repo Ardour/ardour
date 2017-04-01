@@ -37,20 +37,20 @@ namespace WM {
  */
 class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	ArdourDialog (std::string title, bool modal = false, bool use_separator = false);
 	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);
 	~ArdourDialog();
 
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
-        bool on_delete_event (GdkEventAny*);
+	bool on_delete_event (GdkEventAny*);
 	void on_unmap ();
 	void on_show ();
 
-  private:
-        WM::ProxyTemporary* proxy;
-        bool _splash_pushed;
+private:
+	WM::ProxyTemporary* proxy;
+	bool _splash_pushed;
 	void init ();
 
 	static sigc::signal<void> CloseAllDialogs;
