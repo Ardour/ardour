@@ -24,20 +24,6 @@ using std::vector;
 using std::cerr;
 using std::endl;
 
-const double CNum[8] = {
-    3.025328153863e-005,0.0002117729707704,0.0006353189123113, 0.001058864853852,
-    0.001058864853852,0.0006353189123113,0.0002117729707704,3.025328153863e-005
-};
-
-const double CDen[8] = {
-    1,   -4.647847898799,    9.540784706769,   -11.14354542746,
-    7.967285533211,   -3.477244449085,   0.8559660579522, -0.09152610255505
-};
-  
-const int A[10] = {0, 120, 190, 240, 279, 310, 337, 360, 380, 399};
-
-
-
 const double EualCurve960[960] = {
     83.750025,83.532690,83.315770,83.099260,82.883159,82.667463,82.452170,82.237276,82.022779,81.808675,
     81.594963,81.381639,81.168699,80.956142,80.743964,80.532163,80.320735,80.109677,79.898987,79.688663,79.478700,79.269096,79.059848,78.850953,
@@ -351,10 +337,10 @@ Transcription::process(const float *const *inputBuffers,
 
     if (m_Excess) return FeatureSet();
 
-    for (size_t i = 0; i < m_blockSize;i++) {
+    for (int i = 0; i < m_blockSize;i++) {
 
         if (m_SampleN >= m_AllocN) {
-            size_t newsize = m_AllocN * 2;
+            int newsize = m_AllocN * 2;
             if (newsize < 10000) newsize = 10000;
             double *newbuf = (double *)realloc(m_SoundIn, newsize * sizeof(double));
             if (!newbuf) {
@@ -382,10 +368,9 @@ Transcription::getRemainingFeatures()
     double *hello1;
     double *hello2;
     int Msec;
-    size_t i;
-    size_t j;
-    size_t n;
-    size_t count;
+    int i;
+    int j;
+    int n;
 
     Msec=(int)(100*m_SampleN/m_inputSampleRate);
 
@@ -471,9 +456,7 @@ Transcription::getRemainingFeatures()
     double starts[88];
     for (n = 0; n < 88; ++n) starts[n] = -1.0;
 
-    int nn;
     for (j = 0; j <Msec; j++) {
-
         
         for(n=0;n<88;n++)
         {
@@ -536,17 +519,15 @@ Transcription::getRemainingFeatures()
 
 void sofacomplexMex(double *y, double *z, int ncols,double StartNote,double NoteInterval1,double NoteNum,double C,double D,double SR)
 {
-    int mseconds,i,j,el,count,count2;
-    double  Snote,NoteInterval,NoteN, BasicR;
+    int mseconds,i,el,count,count2;
+    double  Snote,NoteInterval,NoteN;
     double  *signs;
-    double  *rwork,*buffer;  
+    double  *rwork;  
     double  freq,R,gain,gainI,gainII,coefI,coefM;
     double output,input,outputI,outputM;
     double *x;
     double *sum,*sum2;
     double power;
-    double temp;
-   
     
     //SR=44100;
     Snote=StartNote;
@@ -813,7 +794,7 @@ void Smooth(double *In, int InLen,int smoothLen)
 }
 
 
-void FindPeaks(double *In, int InLen,double *Out1,double *Out2, int db, int db2, int db3)
+void FindPeaks(double *In, int InLen,double *Out1,double *Out2, int /* db */, int db2, int db3)
 {
     int i,lastout;
     for (i=0;i<InLen;i++)
@@ -1182,7 +1163,7 @@ void Mydiff( double *InputArray, int InputHLen, int InputVLen,int n)
 
 void PeakDetect(double *In, int InLen)
 {
-    int i,j;
+    int i;
     double *Out1;
  
     Out1=(double*)malloc(InLen*sizeof(double));
@@ -1307,21 +1288,15 @@ void OnsetDetection2(double *In,int InputLen,double *OutOne,double a,double b)
 
 }
 
-void PitchEstimation(double *In, int InLen, double *OutArray,double *OutArray2)
+void PitchEstimation(double *In, int /* InLen */, double *OutArray,double *OutArray2)
 {
     double *xx,*x,*y,*y1,*PeakPitch1, *PeakPitch2,*PeakInput1, *PeakInput2;
     double *out,*outValue;
     double *output,*output1;
-    double notefloat,hh0,hh1,hh28;
-    double outM12[12];
     int *outc;
-    int *yI;
     double temp;
-    int i,j,sumI;
+    int i,sumI;
     int Len;
-    int NN,NN2;
-    int count;
-    double Th;
  
     Len=1050;
     xx=(double*)malloc(Len*sizeof(double));
@@ -1479,16 +1454,13 @@ void PitchEstimation(double *In, int InLen, double *OutArray,double *OutArray2)
      
     }
 
-    Th=30;
     for(i=20;i<105;i++)
     {
         if(output1[i]==1)
         {
             OutArray[i]=outc[i]+200+2;
             OutArray2[i]=y[outc[i]];
-     
         } 
-   
     }
 
     free(xx); // xx=(double*)malloc(Len*sizeof(double));
@@ -1633,7 +1605,6 @@ void dbfunction( double *InputArray, int InputHLen, int InputVLen,double *OutArr
 {
     int i;
     int j;
-    double temp;
     
     for (i=0;i<InputVLen;i++)
     {
@@ -1910,7 +1881,7 @@ void Transcribe(int Len,int inputLen,double *SoundIn,double *out,double *outArra
                 } 
             }     
        
-            if ((j>34)&&(abs(A5[j]-337.0-A5[j-34])<3.0)&&(D[j]>0)&&(D[j-34]>0))
+            if ((j>34)&&(fabs(A5[j]-337.0-A5[j-34])<3.0)&&(D[j]>0)&&(D[j-34]>0))
             {
                      
                 D[j]=0;           D2[j]=0;         

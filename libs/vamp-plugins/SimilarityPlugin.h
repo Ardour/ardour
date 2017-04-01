@@ -82,8 +82,8 @@ protected:
     int m_rhythmClipFrameSize;
     int m_rhythmClipFrames;
     int m_rhythmColumnSize;
-    mutable size_t m_blockSize; // before decimation
-    size_t m_fftSize; // after decimation
+    mutable int m_blockSize; // before decimation
+    int m_fftSize; // after decimation
     int m_channels;
     int m_processRate;
     int m_frameNo;

@@ -434,11 +434,11 @@ BarBeatTracker::barBeatTrack()
         if (beat == m_bpb) beat = 0;
     }
 
-    for (size_t i = 0; i < beats.size(); ++i) {
+    for (int i = 0; i < int(beats.size()); ++i) {
 
-    size_t frame = beats[i] * m_d->dfConfig.stepSize;
+        size_t frame = size_t(beats[i]) * m_d->dfConfig.stepSize;
 
-        if (dbi < downbeats.size() && i == downbeats[dbi]) {
+        if (dbi < int(downbeats.size()) && i == downbeats[dbi]) {
             beat = 0;
             ++bar;
             ++dbi;
@@ -452,19 +452,19 @@ BarBeatTracker::barBeatTrack()
         // 1 -> bars
         // 2 -> beat counter function
 
-    Feature feature;
-    feature.hasTimestamp = true;
-    feature.timestamp = m_d->origin + Vamp::RealTime::frame2RealTime
-        (frame, lrintf(m_inputSampleRate));
+        Feature feature;
+        feature.hasTimestamp = true;
+        feature.timestamp = m_d->origin + Vamp::RealTime::frame2RealTime
+            (frame, lrintf(m_inputSampleRate));
 
         sprintf(label, "%d", beat + 1);
         feature.label = label;
-    returnFeatures[0].push_back(feature); // labelled beats
+        returnFeatures[0].push_back(feature); // labelled beats
 
         feature.values.push_back(beat + 1);
         returnFeatures[2].push_back(feature); // beat function
 
-        if (i > 0 && i <= beatsd.size()) {
+        if (i > 0 && i <= int(beatsd.size())) {
             feature.values.clear();
             feature.values.push_back(beatsd[i-1]);
             feature.label = "";
