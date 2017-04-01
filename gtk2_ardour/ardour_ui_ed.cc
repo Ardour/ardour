@@ -275,7 +275,7 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 
 	Glib::RefPtr<Gtk::ActionGroup> window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
-	global_actions.register_action (window_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
+	global_actions.register_action (window_actions, X_("show-mixer"), _("Show Mixer"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 
 	/* these actions are all currently implemented by the Editor, but need
 	 * to be accessible from anywhere as actions.
