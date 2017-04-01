@@ -86,32 +86,38 @@ public:
 	{
 		// TODO get rid of GTK -> use OptionEditor Widgets
 		Table* t = &table;
+		Label* l;
+		int row = 0;
 
-		Label* l = manage (left_aligned_label (_("Emphasis on first beat")));
+		l = manage (left_aligned_label (_("Emphasis on first beat")));
 		_use_emphasis_on_click_check_button.add (*l);
-		t->attach (_use_emphasis_on_click_check_button, 1, 3, 0, 1, FILL);
+		t->attach (_use_emphasis_on_click_check_button, 1, 3, row, row + 1, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
+		++row;
 
 		l = manage (left_aligned_label (_("Use built-in default sounds")));
 		_use_default_click_check_button.add (*l);
-		t->attach (_use_default_click_check_button, 1, 3, 1, 2, FILL);
+		t->attach (_use_default_click_check_button, 1, 3, row, row + 1, FILL);
 		_use_default_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
+		++row;
 
 		l = manage (left_aligned_label (_("Audio file:")));
-		t->attach (*l, 1, 2, 2, 3, FILL);
-		t->attach (_click_path_entry, 2, 3, 2, 3, FILL);
+		t->attach (*l, 1, 2, row, row + 1, FILL);
+		t->attach (_click_path_entry, 2, 3, row, row + 1, FILL);
 		_click_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (_click_browse_button, 3, 4, 2, 3, FILL);
+		t->attach (_click_browse_button, 3, 4, row, row + 1, FILL);
+		++row;
 
 		l = manage (left_aligned_label (_("Emphasis audio file:")));
-		t->attach (*l, 1, 2, 3, 4, FILL);
-		t->attach (_click_emphasis_path_entry, 2, 3, 3, 4, FILL);
+		t->attach (*l, 1, 2, row, row + 1, FILL);
+		t->attach (_click_emphasis_path_entry, 2, 3, row, row + 1, FILL);
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (_click_emphasis_browse_button, 3, 4, 3, 4, FILL);
+		t->attach (_click_emphasis_browse_button, 3, 4, row, row + 1, FILL);
+		++row;
 
 		_click_fader = new FaderOption (
 				"click-gain",
@@ -2812,6 +2818,20 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
 	add_option (_("Metronome"), new ClickOptions (_rc_config));
+	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
+
+	bo = new BoolOption (
+			"click-record-only",
+			_("Enable metronome only while recording"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_record_only),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_record_only)
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			string_compose (_("<b>When enabled</b> the metronome will remain silent if %1 is <b>not recording</b>."), PROGRAM_NAME));
+	add_option (_("Metronome"), bo);
+	add_option (_("Metronome"), new OptionEditorBlank ());
+
 
 	/* Meters */
 

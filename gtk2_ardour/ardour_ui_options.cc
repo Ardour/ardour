@@ -426,6 +426,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
+	} else if (p == "click-record-only") {
+		// TODO set a flag, blink or gray-out metronome button while rolling, only
+		if (Config->get_click_record_only()) {
+			click_button.set_name ("generic button"); // XXX
+		} else {
+			click_button.set_name ("transport button");
+		}
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
 	} else if (p == "sync-source") {
