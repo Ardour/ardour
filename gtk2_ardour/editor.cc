@@ -345,6 +345,7 @@ Editor::Editor ()
 	, _full_canvas_height (0)
 	, edit_controls_left_menu (0)
 	, edit_controls_right_menu (0)
+	, visual_change_queued(false)
 	, _last_update_time (0)
 	, _err_screen_engine (0)
 	, cut_buffer_start (0)
@@ -4585,9 +4586,23 @@ Editor::_idle_visual_changer (void* arg)
 	return static_cast<Editor*>(arg)->idle_visual_changer ();
 }
 
+void
+Editor::pre_render ()
+{
+	visual_change_queued = false;
+
+	if (pending_visual_change.pending != 0) {
+		ensure_visual_change_idle_handler();
+	}
+}
+
 int
 Editor::idle_visual_changer ()
 {
+	if (pending_visual_change.pending == 0) {
+		return 0;
+	}
+
 	/* set_horizontal_position() below (and maybe other calls) call
 	   gtk_main_iteration(), so it's possible that a signal will be handled
 	   half-way through this method.  If this signal wants an
@@ -4599,6 +4614,11 @@ Editor::idle_visual_changer ()
 	*/
 
 	pending_visual_change.idle_handler_id = -1;
+
+	if (visual_change_queued) {
+		return 0;
+	}
+
 	pending_visual_change.being_handled = true;
 
 	VisualChange vc = pending_visual_change;
@@ -4608,6 +4628,8 @@ Editor::idle_visual_changer ()
 	visual_changer (vc);
 
 	pending_visual_change.being_handled = false;
+
+	visual_change_queued = true;
 
 	return 0; /* this is always a one-shot call */
 }
