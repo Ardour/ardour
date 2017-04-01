@@ -487,9 +487,9 @@ BasicUI::stop_forget ()
 void BasicUI::mark_in () { access_action("Common/start-range-from-playhead"); }
 void BasicUI::mark_out () { access_action("Common/finish-range-from-playhead"); }
 
-void BasicUI::set_punch_range () { access_action("Common/set-punch-from-edit-range"); }
-void BasicUI::set_loop_range () { access_action("Common/set-loop-from-edit-range"); }
-void BasicUI::set_session_range () { access_action("Common/set-session-from-edit-range"); }
+void BasicUI::set_punch_range () { access_action("Editor/set-punch-from-edit-range"); }
+void BasicUI::set_loop_range () { access_action("Editor/set-loop-from-edit-range"); }
+void BasicUI::set_session_range () { access_action("Editor/set-session-from-edit-range"); }
 
 void BasicUI::quick_snapshot_stay () { access_action("Main/QuickSnapshotStay"); }
 void BasicUI::quick_snapshot_switch () { access_action("Main/QuickSnapshotSwitch"); }
