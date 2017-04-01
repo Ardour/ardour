@@ -53,15 +53,30 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool 
 
 ArdourDialog::~ArdourDialog ()
 {
+	pop_splash ();
+	Keyboard::the_keyboard().focus_out_window (0, this);
+	WM::Manager::instance().remove (proxy);
+}
+
+void
+ArdourDialog::on_response (int response_id)
+{
+	pop_splash ();
+	hide ();
+	Gtk::Dialog::on_response (response_id);
+}
+
+void
+ArdourDialog::pop_splash ()
+{
 	if (_splash_pushed) {
 		Splash* spl = Splash::instance();
 
 		if (spl) {
 			spl->pop_front();
 		}
+		_splash_pushed = false;
 	}
-	Keyboard::the_keyboard().focus_out_window (0, this);
-	WM::Manager::instance().remove (proxy);
 }
 
 bool

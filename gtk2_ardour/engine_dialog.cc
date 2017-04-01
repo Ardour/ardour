@@ -417,9 +417,6 @@ void
 EngineControl::on_show ()
 {
 	ArdourDialog::on_show ();
-	if (Splash::instance()) {
-		Splash::instance()->hide ();
-	}
 	if (!ARDOUR::AudioEngine::instance()->current_backend() || !ARDOUR::AudioEngine::instance()->running()) {
 		// re-check _have_control (jackd running) see #6041
 		backend_changed ();
@@ -2736,9 +2733,6 @@ EngineControl::start_stop_button_clicked ()
 		start_engine ();
 		if (!ARDOUR_UI::instance()->session_loaded) {
 			ArdourDialog::on_response (RESPONSE_OK);
-			if (Splash::instance()) {
-				Splash::instance()->pop_front ();
-			}
 		}
 	}
 }
@@ -3152,9 +3146,6 @@ EngineControl::connect_disconnect_click()
 		start_engine ();
 		if (!ARDOUR_UI::instance()->session_loaded) {
 			ArdourDialog::on_response (RESPONSE_OK);
-			if (Splash::instance()) {
-				Splash::instance()->pop_front ();
-			}
 		}
 	}
 }

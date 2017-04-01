@@ -47,11 +47,13 @@ public:
 	bool on_delete_event (GdkEventAny*);
 	void on_unmap ();
 	void on_show ();
+	void on_response (int);
 
 private:
 	WM::ProxyTemporary* proxy;
 	bool _splash_pushed;
 	void init ();
+	void pop_splash ();
 
 	static sigc::signal<void> CloseAllDialogs;
 };
