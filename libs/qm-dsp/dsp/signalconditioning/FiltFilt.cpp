@@ -13,6 +13,7 @@
     COPYING included with this distribution for more information.
 */
 
+#include <stdio.h>
 #include "FiltFilt.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -55,6 +56,14 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
 
     if (length == 0) return;
 
+    if (length < 2) {
+	fprintf (stderr, "FiltFilt::process called for %d samples\n", length);
+	for( i = 0; i < length; i++ ) {
+	    dst[i] = src [i];
+	}
+	return;
+    }
+
     unsigned int nFilt = m_ord + 1;
     unsigned int nFact = 3 * ( nFilt - 1);
     unsigned int nExt	= length + 2 * nFact;
@@ -79,9 +88,14 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
 	m_filtScratchIn[ index++ ] = sample0 - src[ i ];
     }
     index = 0;
-    for( i = 0; i < nFact; i++ )
+    for( i = 0; i < nFact && i + 2 < length; i++ )
     {
 	m_filtScratchIn[ (nExt - nFact) + index++ ] = sampleN - src[ (length - 2) - i ];
+    }
+
+    for(; i < nFact; i++ )
+    {
+	m_filtScratchIn[ (nExt - nFact) + index++ ] = 0;
     }
 
     index = 0;
