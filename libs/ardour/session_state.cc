@@ -4049,6 +4049,10 @@ Session::config_changed (std::string p, bool ours)
 			_clicking = false;
 		}
 
+	} else if (p == "click-record-only") {
+
+			_click_rec_only = Config->get_click_record_only();
+
 	} else if (p == "click-gain") {
 
 		if (_click_gain) {

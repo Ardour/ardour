@@ -295,6 +295,7 @@ Session::Session (AudioEngine &eng,
 	, _bundle_xml_node (0)
 	, _current_trans (0)
 	, _clicking (false)
+	, _click_rec_only (false)
 	, click_data (0)
 	, click_emphasis_data (0)
 	, click_length (0)

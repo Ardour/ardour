@@ -75,6 +75,10 @@ Session::click (framepos_t start, framecnt_t nframes)
 		return;
 	}
 
+	if (_click_rec_only && !actively_recording()) {
+		return;
+	}
+
 	start -= _worst_track_latency;
 	/* start could be negative at this point */
 	const framepos_t end = start + nframes;

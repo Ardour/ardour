@@ -147,6 +147,7 @@ CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri"
 /* click */
 
 CONFIG_VARIABLE (bool, clicking, "clicking", false)
+CONFIG_VARIABLE (bool, click_record_only, "click-record-only", false)
 CONFIG_VARIABLE (std::string, click_sound, "click-sound", "")
 CONFIG_VARIABLE (std::string, click_emphasis_sound, "click-emphasis-sound", "")
 CONFIG_VARIABLE (gain_t, click_gain, "click-gain", 1.0)

@@ -1896,6 +1896,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	typedef std::list<Click*> Clicks;
 	Clicks                  clicks;
 	bool                   _clicking;
+	bool                   _click_rec_only;
 	boost::shared_ptr<IO>  _click_io;
 	boost::shared_ptr<Amp> _click_gain;
 	Sample*                 click_data;
