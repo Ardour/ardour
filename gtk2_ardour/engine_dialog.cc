@@ -1803,6 +1803,7 @@ bool EngineControl::equivalent_states (const EngineControl::State& state1,
 	return false;
 }
 
+// sort active first, then most recently used to the beginning of the list
 bool
 EngineControl::state_sort_cmp (const State &a, const State &b) {
 	if (a->active) {
@@ -1812,7 +1813,7 @@ EngineControl::state_sort_cmp (const State &a, const State &b) {
 		return false;
 	}
 	else {
-		return a->lru < b->lru;
+		return a->lru > b->lru;
 	}
 }
 
