@@ -92,7 +92,7 @@ ArdourKeyboard::find_bindings_files (map<string,string>& files)
 void
 ArdourKeyboard::setup_keybindings ()
 {
-	using namespace ARDOUR_COMMAND_LINE;
+	string keybindings_path = ARDOUR_COMMAND_LINE::keybindings_path;
 	string default_bindings = string_compose ("%1%2", UIConfiguration::instance().get_default_bindings(), Keyboard::binding_filename_suffix);
 	vector<string> strs;
 
