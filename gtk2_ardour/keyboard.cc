@@ -218,8 +218,6 @@ ArdourKeyboard::setup_keybindings ()
 		}
 	}
 
-	info << string_compose (_("Loading keybindings from %1"), keybindings_path) << endmsg;
-
 	load_keybindings (keybindings_path);
 
 	/* catch changes made via some GTK mechanism */
