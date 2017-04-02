@@ -69,4 +69,22 @@ index 714d5755d..c88641de7 100644
      {
 EOF
 
+## this applies to qm-vamp-plugins-v1.7.1-20-g4d15479
+## fix OSX 10.5 / PPC builds gcc4.2
+patch -p3 << EOF
+diff --git a/libs/qm-dsp/base/KaiserWindow.h b/libs/qm-dsp/base/KaiserWindow.h
+index f16a4b6c1..0253d6d4c 100644
+--- a/libs/qm-dsp/base/KaiserWindow.h
++++ b/libs/qm-dsp/base/KaiserWindow.h
+@@ -81,7 +81,7 @@ public:
+     }
+ 
+     const double *getWindow() const { 
+-	return m_window.data();
++	return &m_window[0];
+     }
+ 
+     void cut(double *src) const { 
+EOF
+
 git add gitrev.txt base dsp ext maths
