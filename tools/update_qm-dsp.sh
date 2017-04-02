@@ -85,6 +85,54 @@ index f16a4b6c1..0253d6d4c 100644
      }
  
      void cut(double *src) const { 
+diff --git a/libs/qm-dsp/base/SincWindow.h b/libs/qm-dsp/base/SincWindow.h
+index bb35d90c2..02de92867 100644
+--- a/libs/qm-dsp/base/SincWindow.h
++++ b/libs/qm-dsp/base/SincWindow.h
+@@ -37,7 +37,7 @@ public:
+     }
+ 
+     const double *getWindow() const { 
+-	return m_window.data();
++	return &m_window[0];
+     }
+ 
+     void cut(double *src) const { 
+EOF
+
+## this applies to qm-vamp-plugins-v1.7.1-20-g4d15479
+## MSVC compatibility
+patch -p3 << EOF
+diff --git a/libs/qm-dsp/dsp/signalconditioning/Filter.cpp b/libs/qm-dsp/dsp/signalconditioning/Filter.cpp
+index e9523e229..53fb35abe 100644
+--- a/libs/qm-dsp/dsp/signalconditioning/Filter.cpp
++++ b/libs/qm-dsp/dsp/signalconditioning/Filter.cpp
+@@ -74,8 +74,8 @@ Filter::reset()
+ }
+ 
+ void
+-Filter::process(const double *const __restrict__ in,
+-		double *const __restrict__ out,
++Filter::process(const double *const __restrict in,
++		double *const __restrict out,
+ 		const int n)
+ {
+     for (int s = 0; s < n; ++s) {
+diff --git a/libs/qm-dsp/dsp/signalconditioning/Filter.h b/libs/qm-dsp/dsp/signalconditioning/Filter.h
+index 05f79e972..8c1aee731 100644
+--- a/libs/qm-dsp/dsp/signalconditioning/Filter.h
++++ b/libs/qm-dsp/dsp/signalconditioning/Filter.h
+@@ -42,8 +42,8 @@ public:
+      * write the resulting \arg n samples into \arg out. There must be
+      * enough room in \arg out for \arg n samples to be written.
+      */
+-    void process(const double *const __restrict__ in,
+-                 double *const __restrict__ out,
++    void process(const double *const __restrict in,
++                 double *const __restrict out,
+                  const int n);
+ 
+     int getOrder() const { return m_order; }
 EOF
 
 git add gitrev.txt base dsp ext maths

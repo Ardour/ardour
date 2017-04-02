@@ -42,8 +42,8 @@ public:
      * write the resulting \arg n samples into \arg out. There must be
      * enough room in \arg out for \arg n samples to be written.
      */
-    void process(const double *const __restrict__ in,
-                 double *const __restrict__ out,
+    void process(const double *const __restrict in,
+                 double *const __restrict out,
                  const int n);
 
     int getOrder() const { return m_order; }

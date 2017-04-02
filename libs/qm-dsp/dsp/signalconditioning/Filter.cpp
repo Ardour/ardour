@@ -74,8 +74,8 @@ Filter::reset()
 }
 
 void
-Filter::process(const double *const __restrict__ in,
-		double *const __restrict__ out,
+Filter::process(const double *const __restrict in,
+		double *const __restrict out,
 		const int n)
 {
     for (int s = 0; s < n; ++s) {
