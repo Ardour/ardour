@@ -4530,21 +4530,6 @@ Session::processor_by_id (PBD::ID id) const
 	return boost::shared_ptr<Processor> ();
 }
 
-boost::shared_ptr<Track>
-Session::track_by_diskstream_id (PBD::ID id) const
-{
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
-		if (t && t->using_diskstream_id (id)) {
-			return t;
-		}
-	}
-
-	return boost::shared_ptr<Track> ();
-}
-
 boost::shared_ptr<Route>
 Session::get_remote_nth_route (PresentationInfo::order_t n) const
 {
