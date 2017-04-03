@@ -42,7 +42,6 @@
 #include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"
 #include "ardour/meter.h"
-#include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
@@ -101,17 +100,6 @@ MidiTrack::init ()
 
 	return 0;
 }
-
-boost::shared_ptr<Diskstream>
-MidiTrack::create_diskstream ()
-{
-	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (MidiDiskstream::Recordable);
-
-	assert(_mode != Destructive);
-
-	return boost::shared_ptr<Diskstream> (new MidiDiskstream (_session, name(), dflags));
-}
-
 
 bool
 MidiTrack::can_be_record_safe ()
@@ -347,7 +335,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	if (!_active) {
 		silence (nframes);
-		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
+		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
 			_meter->reset();
 		}
 		return 0;
@@ -363,7 +351,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	/* filter captured data before meter sees it */
 	_capture_filter.filter (bufs);
 
-	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
+	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
 	}
 
@@ -768,12 +756,6 @@ MidiTrack::midi_playlist ()
 	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
 }
 
-void
-MidiTrack::diskstream_data_recorded (boost::weak_ptr<MidiSource> src)
-{
-	DataRecorded (src); /* EMIT SIGNAL */
-}
-
 bool
 MidiTrack::input_active () const
 {
@@ -813,12 +795,6 @@ MidiTrack::track_input_active (IOChange change, void* /* src */)
 	if (change.type & IOChange::ConfigurationChanged) {
 		map_input_active (_input_active);
 	}
-}
-
-boost::shared_ptr<Diskstream>
-MidiTrack::diskstream_factory (XMLNode const & node)
-{
-	return boost::shared_ptr<Diskstream> (new MidiDiskstream (_session, node));
 }
 
 boost::shared_ptr<MidiBuffer>

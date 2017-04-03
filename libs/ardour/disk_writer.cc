@@ -25,6 +25,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
+#include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/disk_writer.h"
 #include "ardour/midi_playlist.h"
@@ -497,12 +498,6 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	nominally_recording = (can_record && re);
 
-	Glib::Threads::Mutex::Lock sm (state_lock, Glib::Threads::TRY_LOCK);
-
-	if (!sm.locked()) {
-		return;
-	}
-
 	// Safeguard against situations where process() goes haywire when autopunching
 	// and last_recordable_frame < first_recordable_frame
 
@@ -882,8 +877,6 @@ DiskWriter::seek (framepos_t frame, bool complete_refill)
 	uint32_t n;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	Glib::Threads::Mutex::Lock lm (state_lock);
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->buf->reset ();
@@ -1696,4 +1689,14 @@ DiskWriter::use_destructive_playlist ()
 	}
 
 	/* the source list will never be reset for a destructive track */
+}
+
+void
+DiskWriter::adjust_buffering ()
+{
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->resize (_session.butler()->audio_diskstream_capture_buffer_size());
+	}
 }
