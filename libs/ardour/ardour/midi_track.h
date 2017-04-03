@@ -48,9 +48,6 @@ public:
 	void realtime_locate ();
 	void non_realtime_locate (framepos_t);
 
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream>);
-
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 
@@ -150,19 +147,13 @@ private:
 	MidiChannelFilter          _playback_filter;
 	MidiChannelFilter          _capture_filter;
 
-	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-
 	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
 
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
-
-	void diskstream_data_recorded (boost::weak_ptr<MidiSource>);
-	PBD::ScopedConnection _diskstream_data_recorded_connection;
 
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);

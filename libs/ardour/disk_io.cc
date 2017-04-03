@@ -17,11 +17,13 @@
 
 */
 
+#include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/butler.h"
+#include "ardour/debug.h"
 #include "ardour/disk_io.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
@@ -62,7 +64,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
         , speed_buffer_size (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
-	, _midi_buf (0)
+	, _midi_buf (new MidiRingBuffer<framepos_t> (s.butler()->midi_diskstream_buffer_size()))
 	, _frames_written_to_ringbuffer (0)
 	, _frames_read_from_ringbuffer (0)
 {
@@ -148,7 +150,7 @@ DiskIOProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& o
 bool
 DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 {
-	Glib::Threads::Mutex::Lock lm (state_lock);
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("Configuring %1 for in:%2 out:%3\n", name(), in, out));
 
 	RCUWriter<ChannelList> writer (channels);
 	boost::shared_ptr<ChannelList> c = writer.get_copy();
@@ -213,9 +215,7 @@ DiskIOProcessor::non_realtime_locate (framepos_t location)
 void
 DiskIOProcessor::non_realtime_set_speed ()
 {
-	if (_buffer_reallocation_required)
-	{
-		Glib::Threads::Mutex::Lock lm (state_lock);
+	if (_buffer_reallocation_required) {
 		_buffer_reallocation_required = false;
 	}
 
@@ -368,27 +368,27 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
                 return 0;
         }
 
-	{
-		Glib::Threads::Mutex::Lock lm (state_lock);
+        DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: set to use playlist %2 (%3)\n", name(), playlist->name(), dt.to_string()));
 
-		if (playlist == _playlists[dt]) {
-			return 0;
-		}
+        if (playlist == _playlists[dt]) {
+	        return 0;
+        }
 
-		playlist_connections.drop_connections ();
+        playlist_connections.drop_connections ();
 
-		if (_playlists[dt]) {
-			_playlists[dt]->release();
-		}
+        if (_playlists[dt]) {
+	        _playlists[dt]->release();
+        }
 
-		_playlists[dt] = playlist;
-		playlist->use();
+        _playlists[dt] = playlist;
+        playlist->use();
 
-		playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-		playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-		playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
-		playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
-	}
+        playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+        playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+        playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
+        playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
+
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now use playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
 
 	PlaylistChanged (dt); /* EMIT SIGNAL */
 	_session.set_dirty ();
@@ -452,4 +452,3 @@ DiskIOProcessor::get_location_times(const Location* location,
 		*length = *end - *start;
 	}
 }
-
