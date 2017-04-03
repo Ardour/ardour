@@ -131,6 +131,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	void transport_looped (framepos_t transport_frame);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 
+	void adjust_buffering ();
+
   protected:
 	friend class Track;
 	int do_flush (RunContext context, bool force = false);

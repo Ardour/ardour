@@ -113,6 +113,8 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	PBD::Signal1<void,DataType>   PlaylistChanged;
 
+	virtual void adjust_buffering() = 0;
+
   protected:
 	friend class Auditioner;
 	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;

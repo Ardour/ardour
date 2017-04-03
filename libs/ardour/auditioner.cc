@@ -510,7 +510,11 @@ Auditioner::input_streams () const
 	   depends solely on the region we are auditioning.
 	*/
 
-	return _disk_reader->input_streams ();
+	if (_disk_reader) {
+		return _disk_reader->input_streams ();
+	}
+
+	return ChanCount (DataType::AUDIO, 1);
 }
 
 MonitorState

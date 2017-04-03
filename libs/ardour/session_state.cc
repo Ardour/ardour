@@ -1610,15 +1610,6 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (version < 3000) {
-		if ((child = find_named_node (node, X_("DiskStreams"))) == 0) {
-			error << _("Session: XML state has no diskstreams section") << endmsg;
-			goto out;
-		} else if (load_diskstreams_2X (*child, version)) {
-			goto out;
-		}
-	}
-
 	if ((child = find_named_node (node, VCAManager::xml_node_name)) != 0) {
 		_vca_manager->set_state (*child, version);
 	}
@@ -1633,9 +1624,6 @@ Session::set_state (const XMLNode& node, int version)
 	/* Now that we have Routes and masters loaded, connect them if appropriate */
 
 	Slavable::Assign (_vca_manager); /* EMIT SIGNAL */
-
-	/* our diskstreams list is no longer needed as they are now all owned by their Route */
-	_diskstreams_2X.clear ();
 
 	if (version >= 3000) {
 
@@ -1757,14 +1745,18 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		return ret;
 	}
 
-	XMLNode* ds_child = find_named_node (node, X_("Diskstream"));
+	XMLNode* pl_child = find_named_node (node, X_("audio-playlist"));
+
+	if (!pl_child) {
+		pl_child = find_named_node (node, X_("midi-playlist"));
+	}
 
 	DataType type = DataType::AUDIO;
 	node.get_property("default-type", type);
 
 	assert (type != DataType::NIL);
 
-	if (ds_child) {
+	if (pl_child) {
 
 		boost::shared_ptr<Track> track;
 
@@ -1819,15 +1811,10 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	if (ds_prop) {
 
-		list<boost::shared_ptr<Diskstream> >::iterator i = _diskstreams_2X.begin ();
-		while (i != _diskstreams_2X.end() && (*i)->id() != ds_prop->value()) {
-			++i;
-		}
+		// XXX DISK .... how to load 2.x diskstreams ?
 
-		if (i == _diskstreams_2X.end()) {
-			error << _("Could not find diskstream for route") << endmsg;
-			return boost::shared_ptr<Route> ();
-		}
+		error << _("Could not find diskstream for route") << endmsg;
+		return boost::shared_ptr<Route> ();
 
 		boost::shared_ptr<Track> track;
 
@@ -4178,35 +4165,6 @@ void
 Session::set_history_depth (uint32_t d)
 {
 	_history.set_depth (d);
-}
-
-int
-Session::load_diskstreams_2X (XMLNode const & node, int)
-{
-	XMLNodeList          clist;
-	XMLNodeConstIterator citer;
-
-	clist = node.children();
-
-	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-
-		try {
-			/* diskstreams added automatically by DiskstreamCreated handler */
-			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
-				boost::shared_ptr<AudioDiskstream> dsp (new AudioDiskstream (*this, **citer));
-				_diskstreams_2X.push_back (dsp);
-			} else {
-				error << _("Session: unknown diskstream type in XML") << endmsg;
-			}
-		}
-
-		catch (failed_constructor& err) {
-			error << _("Session: could not load diskstream via XML state") << endmsg;
-			return -1;
-		}
-	}
-
-	return 0;
 }
 
 /** Connect things to the MMC object */

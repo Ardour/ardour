@@ -96,9 +96,6 @@ class LIBARDOUR_API Auditioner : public Track
 	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
 		{ return -1; }
 
-	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)
-		{ return boost::shared_ptr<Diskstream> (); }
-
   private:
 	boost::shared_ptr<AudioRegion> the_region;
 	boost::shared_ptr<MidiRegion> midi_region;
@@ -115,8 +112,6 @@ class LIBARDOUR_API Auditioner : public Track
 	bool _synth_changed;
 	bool _queue_panic;
 
-	boost::shared_ptr<Diskstream> _diskstream_audio;
-	boost::shared_ptr<Diskstream> _diskstream_midi;
 	boost::shared_ptr<Processor> asynth;
 
 	void drop_ports ();
