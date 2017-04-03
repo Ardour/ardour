@@ -392,7 +392,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 }
 
 int
-MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::string&, bool& prelight)
+MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::string& label, bool& prelight)
 {
 	int h = _marker_height;
 	int w2 = (h - 1) / 4;
@@ -401,16 +401,37 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 	const double yc = rint (h * .5);
 	const double dy = h * .4;
 
+	bool with_label;
+	int lw, lh, lx;
+	_layout->set_text (label);
+	_layout->get_pixel_size (lw, lh);
+
 	double px, dx;
 	if (left) {
-		x1 = std::min (x1, x0 + 2 * w2);
+		if (x0 + 2 * w2 + lw + 2 < x1) {
+			x1 = std::min (x1, x0 + 2 * w2 + lw + 2);
+			with_label = true;
+		} else {
+			x1 = std::min (x1, x0 + 2 * w2);
+			with_label = false;
+		}
 		px = x0;
 		dx = 2 * w2;
+		lx = x0 + dx;
 	} else {
-		x0 = std::max (x0, x1 - 2 * w2);
+		with_label = false;
+		if (x1 - 2 * w2 - lw - 2 > x0) {
+			x0 = std::max (x0, x1 - 2 * w2 - lw - 2);
+			with_label = true;
+		} else {
+			x0 = std::max (x0, x1 - 2 * w2);
+			with_label = false;
+		}
 		px = x1;
 		dx = -2 * w2;
+		lx = x1 + dx - lw - 2;
 	}
+
 	if (x1 - x0 < 2 * w2) {
 		return left ? x0 : x1;
 	}
@@ -425,6 +446,21 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 
 	double r, g, b, a;
 	ArdourCanvas::color_to_rgba (color, r, g, b, a);
+
+	if (with_label) {
+		const int y = PADDING;
+		cairo_save (cr);
+		cairo_rectangle (cr, lx, y, lw + 2, h);
+		cairo_set_source_rgba (cr, r, g, b, 0.5); // this should use a shaded color
+		cairo_fill_preserve (cr);
+		cairo_clip (cr);
+
+		// marker label
+		cairo_move_to (cr, lx + 1, y + .5 * (h - lh));
+		cairo_set_source_rgb (cr, 0, 0, 0);
+		pango_cairo_show_layout (cr, _layout->gobj());
+		cairo_restore (cr);
+	}
 
 	// draw arrow
 	cairo_move_to (cr, px - .5, PADDING + yc - .5);
@@ -547,7 +583,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	std::vector<LocationMarker>::const_iterator outside_left = lm.end();
 	std::vector<LocationMarker>::const_iterator outside_right = lm.end();
 	int left_limit = 0;
-	int right_limit = 0;
+	int right_limit = width * .5 + mw;
 	int id = 0;
 
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); ++id) {
@@ -557,7 +593,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			if (++l != lm.end()) {
 				left_limit = floor (width * .5 + ((*l).when - p) * _px_per_sample) - 1 - mw;
 			} else {
-				left_limit = width;
+				left_limit = width * .5 - mw;
 			}
 			continue;
 		}
@@ -574,13 +610,13 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		bool prelight = false;
 		x1 = draw_mark (cr, x0, x1, label, prelight);
 		_jumplist.push_back (JumpRange (x0 - mw, x1, when, prelight));
-		right_limit = x1;
+		right_limit = std::max (x1, right_limit);
 	}
 
 	if (outside_left != lm.end ()) {
 		if (left_limit > 3 * mw + PADDING) {
 			int x0 = PADDING + 1;
-			int x1 = left_limit;
+			int x1 = left_limit - mw;
 			bool prelight = false;
 			x1 = draw_edge (cr, x0, x1, true, (*outside_left).label, prelight);
 			if (x0 != x1) {
