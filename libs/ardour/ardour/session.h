@@ -115,7 +115,6 @@ class Butler;
 class Click;
 class ControllableDescriptor;
 class CoreSelection;
-class Diskstream;
 class ExportHandler;
 class ExportStatus;
 class Graph;
@@ -282,8 +281,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void butler_transport_work ();
 
 	void refresh_disk_space ();
-
-	int load_diskstreams_2X (XMLNode const &, int);
 
 	int load_routes (const XMLNode&, int);
 	boost::shared_ptr<RouteList> get_routes() const {
@@ -2035,9 +2032,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void rt_set_controls (boost::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
 	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
-
-	/** temporary list of Diskstreams used only during load of 2.X sessions */
-	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
 
 	void set_session_range_location (framepos_t, framepos_t);
 

@@ -59,7 +59,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 DiskReader::~DiskReader ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskReader %1 deleted\n", _name));
-	Glib::Threads::Mutex::Lock lm (state_lock);
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
 		if (_playlists[n]) {
@@ -241,13 +240,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
 	framecnt_t playback_distance = 0;
-
-	Glib::Threads::Mutex::Lock sm (state_lock, Glib::Threads::TRY_LOCK);
-
-	if (!sm.locked()) {
-		return;
-	}
-
 	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
 
 	if (fabsf (_actual_speed) != 1.0f) {
@@ -585,8 +577,6 @@ DiskReader::seek (framepos_t frame, bool complete_refill)
 	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	Glib::Threads::Mutex::Lock lm (state_lock);
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->buf->reset ();
@@ -1409,20 +1399,23 @@ DiskReader::refill_midi ()
 		return 0;
 	}
 
-	uint32_t frames_read = g_atomic_int_get (&_frames_read_from_ringbuffer);
-	uint32_t frames_written = g_atomic_int_get (&_frames_written_to_ringbuffer);
+	if (_playlists[DataType::MIDI]) {
 
-	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
-		return 0;
-	}
+		const uint32_t frames_read = g_atomic_int_get (&_frames_read_from_ringbuffer);
+		const uint32_t frames_written = g_atomic_int_get (&_frames_written_to_ringbuffer);
 
-	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
+		if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
+			return 0;
+		}
 
-	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
-	to_read = min (to_read, (framecnt_t) write_space);
+		framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
 
-	if (midi_read (file_frame, to_read, reversed)) {
-		ret = -1;
+		to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
+		to_read = min (to_read, (framecnt_t) write_space);
+
+		if (midi_read (file_frame, to_read, reversed)) {
+			ret = -1;
+		}
 	}
 
 	return ret;

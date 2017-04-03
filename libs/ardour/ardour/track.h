@@ -26,7 +26,6 @@
 #include "ardour/interthread_info.h"
 #include "ardour/recordable.h"
 #include "ardour/route.h"
-#include "ardour/public_diskstream.h"
 
 namespace ARDOUR {
 
@@ -35,10 +34,10 @@ class Playlist;
 class RouteGroup;
 class Source;
 class Region;
-class Diskstream;
 class DiskReader;
 class DiskWriter;
 class IO;
+class Location;
 class MonitorControl;
 class RecordEnableControl;
 class RecordSafeControl;
@@ -50,7 +49,7 @@ class RecordSafeControl;
  * to be played from disk, and modifies that object during recording and
  * editing.
  */
-class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskstream
+class LIBARDOUR_API Track : public Route, public Recordable
 {
   public:
 	Track (Session&, std::string name, PresentationInfo::Flag f = PresentationInfo::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
@@ -141,11 +140,8 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 
-	bool using_diskstream_id (PBD::ID) const;
-
 	void set_block_size (pframes_t);
 
-	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
@@ -168,7 +164,7 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	void non_realtime_set_speed ();
 	int overwrite_existing_buffers ();
 	framecnt_t get_captured_frames (uint32_t n = 0) const;
-	int set_loop (Location *);
+	int set_loop (ARDOUR::Location *);
 	void transport_looped (framepos_t);
 	bool realtime_set_speed (double, bool);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
@@ -186,7 +182,7 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	void set_align_choice (AlignChoice, bool force=false);
 	void playlist_modified ();
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
-	int find_and_use_playlist (DataType, std::string const & name);
+	int find_and_use_playlist (DataType, PBD::ID const &);
 	int use_copy_playlist ();
 	int use_new_playlist ();
 	void adjust_playback_buffering ();
@@ -199,8 +195,6 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 
   protected:
 	XMLNode& state (bool full);
-
-	boost::shared_ptr<Diskstream> _diskstream;
 
 	boost::shared_ptr<DiskReader> _disk_reader;
 	boost::shared_ptr<DiskWriter> _disk_writer;
