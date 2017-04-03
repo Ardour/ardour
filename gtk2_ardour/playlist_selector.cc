@@ -119,18 +119,6 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session->route_by_id (x->first));
 
-		/* legacy sessions stored the diskstream ID as the original
-		 * playlist owner. so try there instead.
-		 */
-
-		if (tr == 0) {
-			tr = _session->track_by_diskstream_id (x->first);
-		}
-
-		if (tr == 0) {
-			continue;
-		}
-
 		/* add a node for the track */
 
 		string nodename;
