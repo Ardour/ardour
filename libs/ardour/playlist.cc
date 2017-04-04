@@ -22,8 +22,6 @@
 #include <algorithm>
 #include <string>
 
-#include <boost/lexical_cast.hpp>
-
 #include "pbd/types_convert.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/strsplit.h"
@@ -362,11 +360,7 @@ Playlist::_set_sort_id ()
 	} else {
 		string t = _name.val().substr(dot_position + 1);
 
-		try {
-			_sort_id = boost::lexical_cast<int>(t);
-		}
-
-		catch (boost::bad_lexical_cast e) {
+		if (!string_to_uint32 (t, _sort_id)) {
 			_sort_id = 0;
 		}
 	}
