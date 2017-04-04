@@ -285,6 +285,13 @@ def create_stored_revision():
         print('Could not open libs/ardour/revision.cc for writing\n')
         sys.exit(-1)
 
+def get_depstack_rev(depstack_root):
+    try:
+        with open(depstack_root + '/.vers', 'r') as f:
+            return f.readline()
+    except IOError:
+        return '';
+
 def set_compiler_flags (conf,opt):
     #
     # Compiler flags and other system-dependent stuff
@@ -852,8 +859,10 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
         conf.env.append_value('LINKFLAGS', [ preflib ])
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
+        conf.env['DEPSTACK_REV'] = get_depstack_rev (user_gtk_root)
     else:
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack', 'no')
+        conf.env['DEPSTACK_REV'] = '-system-'
 
     if sys.platform == 'darwin':
         conf.define ('NEED_INTL', 1)
@@ -1266,6 +1275,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
     config_text.write("\\n\\\n")
+    write_config_text('Builstack', conf.env['DEPSTACK_REV'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
     config_text.write("\\n\\\n")
