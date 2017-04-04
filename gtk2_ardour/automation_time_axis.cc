@@ -21,11 +21,12 @@
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/utils.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
+#include "pbd/string_convert.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
@@ -904,13 +905,13 @@ string
 AutomationTimeAxisView::state_id() const
 {
 	if (_automatable != _route && _control) {
-		return string_compose ("automation %1", _control->id().to_s());
+		return string("automation ") + _control->id().to_s();
 	} else if (_parameter) {
-		return string_compose ("automation %1 %2/%3/%4",
-				       _route->id(),
-				       _parameter.type(),
-				       _parameter.id(),
-				       (int) _parameter.channel());
+		const string parameter_str = PBD::to_string (_parameter.type()) + "/" +
+		                             PBD::to_string (_parameter.id()) + "/" +
+		                             PBD::to_string (_parameter.channel ());
+
+		return string("automation ") + PBD::to_string(_route->id()) + " " + parameter_str;
 	} else {
 		error << "Automation time axis has no state ID" << endmsg;
 		return "";
@@ -933,11 +934,11 @@ AutomationTimeAxisView::parse_state_id (
 	bool & has_parameter,
 	Evoral::Parameter & parameter)
 {
-	stringstream s;
-	s << state_id;
+	stringstream ss;
+	ss << state_id;
 
 	string a, b, c;
-	s >> a >> b >> c;
+	ss >> a >> b >> c;
 
 	if (a != X_("automation")) {
 		return false;
@@ -958,9 +959,9 @@ AutomationTimeAxisView::parse_state_id (
 	assert (p.size() == 3);
 
 	parameter = Evoral::Parameter (
-		boost::lexical_cast<int> (p[0]),
-		boost::lexical_cast<int> (p[2]),
-		boost::lexical_cast<int> (p[1])
+		PBD::string_to<uint32_t>(p[0]), // type
+		PBD::string_to<uint8_t>(p[2]), // channel
+		PBD::string_to<uint32_t>(p[1]) // id
 		);
 
 	return true;
