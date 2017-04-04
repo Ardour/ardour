@@ -285,7 +285,7 @@ public:
 	PBD::ScopedConnectionList region_state_changed_connections;
 	PBD::ScopedConnectionList region_drop_references_connections;
 	DataType        _type;
-	int             _sort_id;
+	uint32_t        _sort_id;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	std::set<boost::shared_ptr<Region> > pending_adds;
