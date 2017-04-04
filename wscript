@@ -287,10 +287,10 @@ def create_stored_revision():
 
 def get_depstack_rev(depstack_root):
     try:
-        with open(depstack_root + '/.vers', 'r') as f:
+        with open(depstack_root + '/../.vers', 'r') as f:
             return f.readline()
     except IOError:
-        return '';
+        return '-unknown-';
 
 def set_compiler_flags (conf,opt):
     #
@@ -859,7 +859,7 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
         conf.env.append_value('LINKFLAGS', [ preflib ])
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
-        conf.env['DEPSTACK_REV'] = get_depstack_rev (user_gtk_root)
+        conf.env['DEPSTACK_REV'] = get_depstack_rev (Options.options.depstack_root)
     else:
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack', 'no')
         conf.env['DEPSTACK_REV'] = '-system-'
