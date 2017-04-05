@@ -1,0 +1,151 @@
+/*
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+#ifndef _ardour_surfaces_fp8base_h_
+#define _ardour_surfaces_fp8base_h_
+
+#include <stdint.h>
+#include <vector>
+
+#include "pbd/signals.h"
+
+namespace ArdourSurface {
+
+/* conveniece wrappers depending on "FP8Base& _base" */
+#define fp8_loop dynamic_cast<BaseUI*>(&_base)->main_loop
+#define fp8_context() dynamic_cast<BaseUI*>(&_base)
+#define fp8_protocol() dynamic_cast<ControlProtocol*>(&_base)
+
+class FP8Base
+{
+public:
+	virtual ~FP8Base() {}
+
+	virtual size_t tx_midi (std::vector<uint8_t> const&) const = 0;
+	virtual std::string const& timecode () const = 0;
+
+	size_t tx_midi2 (uint8_t sb, uint8_t d1) const
+	{
+		 std::vector<uint8_t> d;
+		 d.push_back (sb);
+		 d.push_back (d1);
+		 return tx_midi (d);
+	}
+
+	size_t tx_midi3 (uint8_t sb, uint8_t d1, uint8_t d2) const
+	{
+		 std::vector<uint8_t> d;
+		 d.push_back (sb);
+		 d.push_back (d1);
+		 d.push_back (d2);
+		 return tx_midi (d);
+	}
+
+	size_t tx_sysex (size_t count, ...)
+	{
+		 std::vector<uint8_t> d;
+		 sysexhdr (d);
+
+		 va_list var_args;
+		 va_start (var_args, count);
+		 for  (size_t i = 0; i < count; ++i)
+		 {
+			 // uint8_t {aka unsigned char} is promoted to ‘int’ when passed through ‘...’
+			 uint8_t b = va_arg (var_args, int);
+			 d.push_back (b);
+		 }
+		 va_end (var_args);
+
+		 d.push_back (0xf7);
+		 return tx_midi (d);
+	}
+
+	size_t tx_text (uint8_t id, uint8_t line, uint8_t align, std::string const& txt)
+	{
+		 std::vector<uint8_t> d;
+		 sysexhdr (d);
+		 d.push_back (0x12);
+		 d.push_back (id & 0x07);
+		 d.push_back (line & 0x03);
+		 d.push_back (align & 0x07);
+
+		 for  (size_t i = 0; i < txt.size(); ++i)
+		 {
+			 d.push_back (txt[i]);
+			 if (i >= 8) {
+				 break;
+			 }
+		 }
+		 d.push_back (0xf7);
+		 return tx_midi (d);
+	}
+
+	PBD::Signal1<void, bool> ShiftButtonChange;
+	PBD::Signal1<void, bool> ARMButtonChange;
+
+	PBD::Signal1<void, bool> BlinkIt;
+	PBD::Signal0<void> Periodic;
+
+private:
+	void sysexhdr (std::vector<uint8_t>& d)
+	{
+		/* faderport8 <SysExHdr> */
+		d.push_back (0xf0);
+		d.push_back (0x00);
+		d.push_back (0x01);
+		d.push_back (0x06);
+		d.push_back (0x02);
+	}
+};
+
+namespace FP8Types {
+
+	enum FaderMode {
+		ModeTrack,
+		ModePlugins,
+		ModeSend,
+		ModePan
+	};
+
+	enum NavigationMode {
+		NavChannel,
+		NavZoom,
+		NavScroll,
+		NavBank,
+		NavMaster,
+		NavSection,
+		NavMarker
+	};
+
+	enum MixMode {
+		MixAudio,
+		MixInstrument,
+		MixBus,
+		MixVCA,
+		MixAll,
+		MixInputs,
+		MixMIDI,
+		MixOutputs,
+		MixFX,
+		MixUser,
+	};
+
+};
+
+} /* namespace */
+#endif /* _ardour_surfaces_fp8base_h_ */

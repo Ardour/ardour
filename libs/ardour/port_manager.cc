@@ -896,6 +896,7 @@ PortManager::port_is_control_only (std::string const& name)
 		const char * const control_only_ports[] = {
 			X_(".*Ableton Push.*"),
 			X_(".*FaderPort .*"),
+			X_(".*FaderPort8 .*"),
 		};
 
 		pattern = "(";
