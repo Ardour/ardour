@@ -47,7 +47,7 @@ public:
 	bool on_delete_event (GdkEventAny*);
 	void on_unmap ();
 	void on_show ();
-	void on_response (int);
+	virtual void on_response (int);
 
 private:
 	WM::ProxyTemporary* proxy;

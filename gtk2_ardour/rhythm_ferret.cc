@@ -173,6 +173,12 @@ RhythmFerret::RhythmFerret (Editor& e)
 }
 
 void
+RhythmFerret::on_response (int response_id)
+{
+	Gtk::Dialog::on_response (response_id);
+}
+
+void
 RhythmFerret::analysis_mode_changed ()
 {
 	bool const perc = get_analysis_mode() == PercussionOnset;

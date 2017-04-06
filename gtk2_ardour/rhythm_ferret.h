@@ -59,6 +59,7 @@ class RhythmFerret : public ArdourDialog {
 	RhythmFerret (Editor&);
 
 	void set_session (ARDOUR::Session*);
+	void on_response (int);
 
   protected:
 	void on_hide ();
