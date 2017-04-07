@@ -545,12 +545,12 @@ int main() { return 0; }''',
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
 
-    elif conf.env['build_target'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
+    elif conf.env['build_target'] in [ 'mavericks', 'yosemite' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
 
-    elif conf.env['build_target'] in [ 'sierra' ]:
+    elif conf.env['build_target'] in ['el_capitan', 'sierra' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.9"))
