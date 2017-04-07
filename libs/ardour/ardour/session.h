@@ -853,6 +853,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
+	PBD::Signal0<void> MuteChanged;
 	PBD::Signal0<void> IsolatedChanged;
 	PBD::Signal0<void> MonitorChanged;
 

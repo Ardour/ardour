@@ -3848,6 +3848,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 void
 Session::route_mute_changed ()
 {
+	MuteChanged (); /* EMIT SIGNAL */
 	set_dirty ();
 }
 
