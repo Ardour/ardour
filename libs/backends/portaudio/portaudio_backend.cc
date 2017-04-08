@@ -2374,7 +2374,7 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 				(_buffer[_bufperiod]).push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (**it)));
 			}
 		}
-		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
+		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
 	return &(_buffer[_bufperiod]);
 }

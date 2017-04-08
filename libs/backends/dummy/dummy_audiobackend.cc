@@ -2134,7 +2134,7 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
 			}
 		}
-		std::sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
+		std::stable_sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
 	} else if (is_output () && is_physical () && is_terminal()) {
 		if (!_gen_cycle) {
 			midi_generate(n_samples);
