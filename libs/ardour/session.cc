@@ -3717,11 +3717,12 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
+	bool mute_changed = false;
+
 	{ // RCU Writer scope
 		PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> rs = writer.get_copy ();
-
 
 		for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 
@@ -3732,6 +3733,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			/* speed up session deletion, don't do the solo dance */
 			if (0 == (_state_of_the_state & Deletion)) {
 				(*iter)->solo_control()->set_value (0.0, Controllable::NoGroup);
+			}
+
+			if ((*iter)->mute_control()->muted ()) {
+				mute_changed = true;
 			}
 
 			rs->remove (*iter);
@@ -3784,6 +3789,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		/* writer goes out of scope, forces route list update */
 
 	} // end of RCU Writer scope
+
+	if (mute_changed) {
+		MuteChanged (); /* EMIT SIGNAL */
+	}
 
 	update_route_solo_state ();
 	update_latency_compensation ();
