@@ -88,7 +88,7 @@ AlsaRawMidiIO::init (const char *device_name, const bool input)
 	if (snd_rawmidi_params_set_avail_min (_device, params, 1)) {
 		goto initerr;
 	}
-	if ( snd_rawmidi_params_set_buffer_size (_device, params, 64)) {
+	if (snd_rawmidi_params_set_buffer_size (_device, params, 64)) {
 		goto initerr;
 	}
 	if (snd_rawmidi_params_set_no_active_sensing (_device, params, 1)) {
@@ -119,7 +119,7 @@ AlsaRawMidiOut::main_process_thread ()
 {
 	_running = true;
 	pthread_mutex_lock (&_notify_mutex);
-	bool need_drain = false;
+	unsigned int need_drain = 0;
 	while (_running) {
 		bool have_data = false;
 		struct MidiEventHeader h(0,0);
@@ -146,9 +146,9 @@ AlsaRawMidiOut::main_process_thread ()
 		}
 
 		if (!have_data) {
-			if (need_drain) {
+			if (need_drain > 0) {
 				snd_rawmidi_drain (_device);
-				need_drain = false;
+				need_drain = 0;
 			}
 			pthread_cond_wait (&_notify_ready, &_notify_mutex);
 			continue;
@@ -156,9 +156,9 @@ AlsaRawMidiOut::main_process_thread ()
 
 		uint64_t now = g_get_monotonic_time();
 		while (h.time > now + 500) {
-			if (need_drain) {
+			if (need_drain > 0) {
 				snd_rawmidi_drain (_device);
-				need_drain = false;
+				need_drain = 0;
 			} else {
 				select_sleep(h.time - now);
 			}
@@ -195,6 +195,14 @@ retry:
 
 		ssize_t err = snd_rawmidi_write (_device, data, h.size);
 
+#if 0 // DEBUG -- not rt-safe
+		printf("TX [%ld | %ld]", h.size, err);
+		for (size_t i = 0; i < h.size; ++i) {
+			printf (" %02x", data[i]);
+		}
+		printf ("\n");
+#endif
+
 		if ((err == -EAGAIN)) {
 			snd_rawmidi_drain (_device);
 			goto retry;
@@ -213,7 +221,11 @@ retry:
 			h.size -= err;
 			goto retry;
 		}
-		need_drain = true;
+
+		if ((need_drain += h.size) >= 64) {
+			snd_rawmidi_drain (_device);
+			need_drain = 0;
+		}
 	}
 
 	pthread_mutex_unlock (&_notify_mutex);
