@@ -29,8 +29,9 @@
 #include "pbd/replace_all.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/diskstream.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
@@ -235,8 +236,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 		}
 	}
 
-	Diskstream::set_disk_read_chunk_frames (minimum_disk_read_bytes.get() / sizeof (Sample));
-	Diskstream::set_disk_write_chunk_frames (minimum_disk_write_bytes.get() / sizeof (Sample));
+	DiskReader::set_chunk_frames (minimum_disk_read_bytes.get() / sizeof (Sample));
+	DiskWriter::set_chunk_frames (minimum_disk_write_bytes.get() / sizeof (Sample));
 
 	return 0;
 }
