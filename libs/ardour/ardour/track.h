@@ -159,7 +159,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	bool hidden () const;
 	int can_internal_playback_seek (framecnt_t);
 	int internal_playback_seek (framecnt_t);
-	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t);
 	void non_realtime_set_speed ();
 	int overwrite_existing_buffers ();
