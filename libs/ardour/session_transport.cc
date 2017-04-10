@@ -475,15 +475,6 @@ Session::butler_transport_work ()
 		}
 	}
 
-	if (ptw & PostTransportInputChange) {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr) {
-				tr->non_realtime_input_change ();
-			}
-		}
-	}
-
 	if (ptw & PostTransportSpeed) {
 		non_realtime_set_speed ();
 	}
