@@ -18,6 +18,7 @@
 #include "pbd/error.h"
 
 #include "ardour/amp.h"
+#include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
@@ -552,13 +553,17 @@ Track::playlist ()
 void
 Track::request_input_monitoring (bool m)
 {
-	// XXX DISK
+	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
+		AudioEngine::instance()->request_input_monitoring ((*i)->name(), m);
+	}
 }
 
 void
 Track::ensure_input_monitoring (bool m)
 {
-	// XXX DISK
+	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
+		AudioEngine::instance()->ensure_input_monitoring ((*i)->name(), m);
+	}
 }
 
 bool
