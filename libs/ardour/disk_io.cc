@@ -68,6 +68,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _frames_written_to_ringbuffer (0)
 	, _frames_read_from_ringbuffer (0)
 {
+	midi_interpolation.add_channel_to (0,0);
 }
 
 void

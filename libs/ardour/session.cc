@@ -51,7 +51,6 @@
 #include "ardour/analyser.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_buffer.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -66,6 +65,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/directory_names.h"
 #ifdef USE_TRACKS_CODE_FEATURES
 #include "ardour/engine_state_controller.h"
@@ -746,7 +746,7 @@ Session::destroy ()
 	routes.flush ();
 	_bundles.flush ();
 
-	AudioDiskstream::free_working_buffers();
+	DiskReader::free_working_buffers();
 
 	/* tell everyone who is still standing that we're about to die */
 	drop_references ();
@@ -1694,7 +1694,7 @@ Session::auto_loop_changed (Location* location)
 		}
 		else if (Config->get_seamless_loop() && !loop_changing) {
 
-			// schedule a locate-roll to refill the diskstreams at the
+			// schedule a locate-roll to refill the disk readers at the
 			// previous loop end
 			loop_changing = true;
 

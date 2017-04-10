@@ -78,7 +78,6 @@
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -90,6 +89,7 @@
 #include "ardour/controllable_descriptor.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
+#include "ardour/disk_reader.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
@@ -286,7 +286,7 @@ Session::post_engine_init ()
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
-		AudioDiskstream::allocate_working_buffers();
+		DiskReader::allocate_working_buffers();
 		refresh_disk_space ();
 
 		/* we're finally ready to call set_state() ... all objects have
