@@ -89,8 +89,8 @@ CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
 
 /* disk operations */
 
-CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::Diskstream::default_disk_read_chunk_frames() * sizeof (ARDOUR::Sample))
-CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::Diskstream::default_disk_write_chunk_frames() * sizeof (ARDOUR::Sample))
+	CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::DiskReader::default_chunk_frames() * sizeof (ARDOUR::Sample))
+CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::DiskWriter::default_chunk_frames() * sizeof (ARDOUR::Sample))
 CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
 CONFIG_VARIABLE (BufferingPreset, buffering_preset, "buffering-preset", Medium)
 CONFIG_VARIABLE (float, audio_capture_buffer_seconds, "capture-buffer-seconds", 5.0)
