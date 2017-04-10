@@ -16,9 +16,9 @@
   <Binding channel="1" ctl="44" action="Transport/Forward"/>
   <Binding channel="1" ctl="45" function="toggle-rec-enable"/>
   <Binding channel="1" ctl="46" function="loop-toggle"/>
-  <Binding msg="B0 3c 7f" action="Editor/add-location-from-playhead"/>
-  <Binding msg="B0 3d 7f" action="Editor/jump-backward-to-mark"/>
-  <Binding msg="B0 3e 7f" action="Editor/jump-forward-to-mark"/>
+  <Binding msg="B0 3c 7f" action="Common/add-location-from-playhead"/>
+  <Binding msg="B0 3d 7f" action="Common/jump-backward-to-mark"/>
+  <Binding msg="B0 3e 7f" action="Common/jump-forward-to-mark"/>
   <Binding msg="B0 3a 7f" function="prev-bank"/>
   <Binding msg="B0 3b 7f" function="next-bank"/>
 
