@@ -26,7 +26,6 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/boost_debug.h"

@@ -47,7 +47,6 @@
 
 #include "ardour/analyser.h"
 #include "ardour/ardour.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/import_status.h"

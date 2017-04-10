@@ -20,7 +20,6 @@
 #include "ardour/amp.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
-#include "ardour/diskstream.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"

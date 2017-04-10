@@ -23,7 +23,8 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour/audioengine.h"
-#include "ardour/diskstream.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route.h"
 #include "ardour/session.h"

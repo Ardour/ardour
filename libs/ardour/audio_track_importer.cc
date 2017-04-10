@@ -21,7 +21,7 @@
 #include "ardour/audio_track_importer.h"
 
 #include "ardour/audio_playlist_importer.h"
-#include "ardour/audio_diskstream.h"
+#include "ardour/disk_reader.h"
 #include "ardour/session.h"
 
 #include "pbd/controllable.h"
@@ -277,6 +277,8 @@ AudioTrackImporter::_cancel_move ()
 void
 AudioTrackImporter::_move ()
 {
+	/* XXX DISK */
+#if 0
 	/* Add diskstream */
 
 	boost::shared_ptr<XMLSharedNodeList> ds_node_list;
@@ -293,7 +295,7 @@ AudioTrackImporter::_move ()
 	assert (p);
 	p->set_value (new_ds_id.to_s());
 
-	boost::shared_ptr<Diskstream> new_ds (new AudioDiskstream (session, *ds_node));
+	boost::shared_ptr<DiskReader> new_ds (new DiskReader (session, *ds_node));
 	new_ds->set_name (name);
 	new_ds->do_refill_with_alloc ();
 	new_ds->set_block_size (session.get_block_size ());
@@ -309,6 +311,7 @@ AudioTrackImporter::_move ()
 	XMLNode routes ("Routes");
 	routes.add_child_copy (xml_track);
 	session.load_routes (routes, 3000);
+#endif
 }
 
 bool
