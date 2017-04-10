@@ -1117,9 +1117,3 @@ Track::metering_state () const
 	}
 	return rv ? MeteringInput : MeteringRoute;
 }
-
-void
-Track::non_realtime_input_change ()
-{
-	// XXX DISK do we need to do anything here anymore ?
-}
