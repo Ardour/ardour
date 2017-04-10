@@ -94,6 +94,8 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	void playlist_modified ();
 	void reset_tracker ();
 
+	static void set_midi_readahead_frames (framecnt_t frames_ahead) { midi_readahead = frames_ahead; }
+
   protected:
 	friend class Track;
 	friend class MidiTrack;
