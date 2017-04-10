@@ -39,6 +39,7 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/file_source.h"
 #include "ardour/fluid_synth.h"
 #include "ardour/interthread_info.h"
 #include "ardour/lua_api.h"
@@ -224,6 +225,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::FileSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiPlaylist>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiRegion>);
@@ -1155,6 +1157,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <Source, SessionObject> ("Source")
 		.addCast<AudioSource> ("to_audiosource")
 		.addCast<MidiSource> ("to_midisource")
+		.addCast<FileSource> ("to_filesource")
 		.addFunction ("timestamp", &Source::timestamp)
 		.addFunction ("empty", &Source::empty)
 		.addFunction ("length", &Source::length)
@@ -1167,6 +1170,15 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("use_count", &Source::use_count)
 		.addFunction ("used", &Source::used)
 		.addFunction ("ancestor_name", &Source::ancestor_name)
+		.endClass ()
+
+		.deriveWSPtrClass <FileSource, Source> ("FileSource")
+		.addFunction ("path", &FileSource::path)
+		.addFunction ("within_session", &FileSource::within_session)
+		.addFunction ("channel", &FileSource::channel)
+		.addFunction ("origin", &FileSource::origin)
+		.addFunction ("take_id", &FileSource::take_id)
+		.addFunction ("gain", &FileSource::gain)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiSource, Source> ("MidiSource")
