@@ -806,6 +806,10 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 		}
 	}
 
+	if (ret == 0) {
+		_playlists[dt] = p;
+	}
+
 	return ret;
 }
 
