@@ -477,9 +477,6 @@ DiskWriter::prepare_record_status(framepos_t capture_start_frame)
 void
 DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
                  double speed, pframes_t nframes, bool result_required)
-
-/*	(BufferSet& bufs, framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance, bool need_disk_signal)
- */
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -489,6 +486,8 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	bool nominally_recording;
 	bool re = record_enabled ();
 	bool can_record = _session.actively_recording ();
+
+	_need_butler = false;
 
 	check_record_status (start_frame, can_record);
 
@@ -687,7 +686,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	/* AUDIO BUTLER REQUIRED CODE */
 
-	if (!c->empty()) {
+	if (_playlists[DataType::AUDIO] && !c->empty()) {
 		if (((framecnt_t) c->front()->buf->read_space() >= _chunk_frames)) {
 			_need_butler = true;
 		}
@@ -695,9 +694,11 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	/* MIDI BUTLER REQUIRED CODE */
 
-	if (_midi_buf->read_space() < _midi_buf->bufsize() / 2) {
+	if (_playlists[DataType::MIDI] && (_midi_buf->read_space() < _midi_buf->bufsize() / 2)) {
 		_need_butler = true;
 	}
+
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 writer run, needs butler = %2\n", name(), _need_butler));
 }
 
 void
