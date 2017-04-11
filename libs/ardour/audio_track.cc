@@ -259,6 +259,10 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!_disk_writer->record_enabled() && _session.transport_rolling()));
 
+	if (_disk_reader->need_butler() || _disk_writer->need_butler()) {
+		need_butler = true;
+	}
+
 	flush_processor_buffers_locked (nframes);
 
 	return 0;

@@ -224,8 +224,8 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	   take care of the buffer refill.
 	*/
 
-	if (!overwrite_queued && prior_playlist) {
-		// !!! _session.request_overwrite_buffer (this);
+        if (!overwrite_queued && (prior_playlist || _session.loading())) {
+		_session.request_overwrite_buffer (_route);
 		overwrite_queued = true;
 	}
 
@@ -241,6 +241,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	ChannelList::iterator chan;
 	framecnt_t playback_distance = 0;
 	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
+
+	_need_butler = false;
 
 	if (fabsf (_actual_speed) != 1.0f) {
 		midi_interpolation.set_speed (_target_speed);
@@ -358,73 +360,80 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		}
 	}
 
-	_need_butler = false;
-
 	if (_actual_speed < 0.0) {
 		playback_sample -= playback_distance;
 	} else {
 		playback_sample += playback_distance;
 	}
 
-	if (!c->empty()) {
-		if (_slaved) {
-			if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
+	if (_playlists[DataType::AUDIO]) {
+		if (!c->empty()) {
+			if (_slaved) {
+				if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->buf->write_space(),
+					                                            c->front()->buf->bufsize()));
+					_need_butler = true;
+				}
+			} else {
+				if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->buf->write_space(),
+					                                            _chunk_frames));
+					_need_butler = true;
+				}
+			}
+		}
+	}
+
+	if (_playlists[DataType::MIDI]) {
+		/* MIDI butler needed part */
+
+		uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
+		uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
+
+		/*
+		  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
+		  " = " << frames_written - frames_read
+		  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
+		*/
+
+		/* frames_read will generally be less than frames_written, but
+		 * immediately after an overwrite, we can end up having read some data
+		 * before we've written any. we don't need to trip an assert() on this,
+		 * but we do need to check so that the decision on whether or not we
+		 * need the butler is done correctly.
+		 */
+
+		/* furthermore..
+		 *
+		 * Doing heavy GUI operations[1] can stall also the butler.
+		 * The RT-thread meanwhile will happily continue and
+		 * ‘frames_read’ (from buffer to output) will become larger
+		 * than ‘frames_written’ (from disk to buffer).
+		 *
+		 * The disk-stream is now behind..
+		 *
+		 * In those cases the butler needs to be summed to refill the buffer (done now)
+		 * AND we need to skip (frames_read - frames_written). ie remove old events
+		 * before playback_sample from the rinbuffer.
+		 *
+		 * [1] one way to do so is described at #6170.
+		 * For me just popping up the context-menu on a MIDI-track header
+		 * of a track with a large (think beethoven :) midi-region also did the
+		 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
+		 *
+		 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
+		 * and can stall
+		 */
+		if (frames_read <= frames_written) {
+			if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 				_need_butler = true;
 			}
 		} else {
-			if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
-				_need_butler = true;
-			}
-		}
-	}
-
-	/* MIDI butler needed part */
-
-	uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
-	uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
-
-	/*
-	  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
-	  " = " << frames_written - frames_read
-	  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
-	*/
-
-	/* frames_read will generally be less than frames_written, but
-	 * immediately after an overwrite, we can end up having read some data
-	 * before we've written any. we don't need to trip an assert() on this,
-	 * but we do need to check so that the decision on whether or not we
-	 * need the butler is done correctly.
-	 */
-
-	/* furthermore..
-	 *
-	 * Doing heavy GUI operations[1] can stall also the butler.
-	 * The RT-thread meanwhile will happily continue and
-	 * ‘frames_read’ (from buffer to output) will become larger
-	 * than ‘frames_written’ (from disk to buffer).
-	 *
-	 * The disk-stream is now behind..
-	 *
-	 * In those cases the butler needs to be summed to refill the buffer (done now)
-	 * AND we need to skip (frames_read - frames_written). ie remove old events
-	 * before playback_sample from the rinbuffer.
-	 *
-	 * [1] one way to do so is described at #6170.
-	 * For me just popping up the context-menu on a MIDI-track header
-	 * of a track with a large (think beethoven :) midi-region also did the
-	 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
-	 *
-	 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
-	 * and can stall
-	 */
-	if (frames_read <= frames_written) {
-		if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 			_need_butler = true;
 		}
-	} else {
-		_need_butler = true;
 	}
 
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
 	/* make sure bufs shows whatever data we had available */
 
 	ChanCount cnt;
@@ -479,6 +488,8 @@ DiskReader::overwrite_existing_buffers ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	overwrite_queued = false;
+
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", overwrite_frame));
 
 	if (!c->empty ()) {
 
@@ -679,6 +690,11 @@ DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	framecnt_t offset = 0;
 	Location *loc = 0;
 
+	if (!_playlists[DataType::AUDIO]) {
+		memset (buf, 0, sizeof (Sample) * cnt);
+		return 0;
+	}
+
 	/* XXX we don't currently play loops in reverse. not sure why */
 
 	if (!reversed) {
@@ -811,7 +827,11 @@ DiskReader::refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_
 int
 DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level)
 {
-	if (_session.state_of_the_state() & Session::Loading) {
+	/* do not read from disk while session is marked as Loading, to avoid
+	   useless redundant I/O.
+	*/
+
+	if (_session.loading()) {
 		return 0;
 	}
 
@@ -825,10 +845,6 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	framecnt_t ts;
-
-	/* do not read from disk while session is marked as Loading, to avoid
-	   useless redundant I/O.
-	*/
 
 	if (c->empty()) {
 		return 0;
@@ -845,6 +861,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	c->front()->buf->get_write_vector (&vector);
 
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
+		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: no space to refill\n", name()));
 		/* nowhere to write to */
 		return 0;
 	}
@@ -869,6 +886,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	   the playback buffer is empty.
 	*/
 
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: space to refill %2 vs. chunk %3 (speed = %4)\n", name(), total_space, _chunk_frames, _actual_speed));
 	if ((total_space < _chunk_frames) && fabs (_actual_speed) < 2.0f) {
 		return 0;
 	}
@@ -879,6 +897,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	*/
 
 	if (_slaved && total_space < (framecnt_t) (c->front()->buf->bufsize() / 2)) {
+		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: not enough to refill while slaved\n", this));
 		return 0;
 	}
 
@@ -965,9 +984,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 
 	framecnt_t samples_to_read = byte_size_for_read / (bits_per_sample / 8);
 
-	//cerr << name() << " will read " << byte_size_for_read << " out of total bytes " << total_bytes << " in buffer of "
-	// << c->front()->buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
-	// cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->buf->bufsize() << " samples\n";
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: will refill %2 channels with %3 samples\n", name(), c->size(), total_space));
 
 	// uint64_t before = g_get_monotonic_time ();
 	// uint64_t elapsed;
@@ -1378,12 +1395,15 @@ DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
 int
 DiskReader::refill_midi ()
 {
-	int     ret         = 0;
+	if (!_playlists[DataType::MIDI]) {
+		return 0;
+	}
+
 	size_t  write_space = _midi_buf->write_space();
 	bool    reversed    = (_visible_speed * _session.transport_speed()) < 0.0f;
 
-	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS refill, write space = %1 file frame = %2\n",
-	                                                      write_space, file_frame));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame));
+	//PBD::stacktrace (cerr, 20);
 
 	/* no space to write */
 	if (write_space == 0) {
@@ -1395,27 +1415,26 @@ DiskReader::refill_midi ()
 	}
 
 	/* at end: nothing to do */
+
 	if (file_frame == max_framepos) {
 		return 0;
 	}
 
-	if (_playlists[DataType::MIDI]) {
+	int ret = 0;
+	const uint32_t frames_read = g_atomic_int_get (&_frames_read_from_ringbuffer);
+	const uint32_t frames_written = g_atomic_int_get (&_frames_written_to_ringbuffer);
 
-		const uint32_t frames_read = g_atomic_int_get (&_frames_read_from_ringbuffer);
-		const uint32_t frames_written = g_atomic_int_get (&_frames_written_to_ringbuffer);
+	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
+		return 0;
+	}
 
-		if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
-			return 0;
-		}
+	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
 
-		framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
+	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) write_space);
 
-		to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
-		to_read = min (to_read, (framecnt_t) write_space);
-
-		if (midi_read (file_frame, to_read, reversed)) {
-			ret = -1;
-		}
+	if (midi_read (file_frame, to_read, reversed)) {
+		ret = -1;
 	}
 
 	return ret;
