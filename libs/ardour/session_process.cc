@@ -218,6 +218,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 			}
 
 			if (b) {
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 rolled and needs butler\n", (*i)->name()));
 				need_butler = true;
 			}
 		}
@@ -548,6 +549,7 @@ Session::process_with_events (pframes_t nframes)
 	} /* implicit release of route lock */
 
 	if (session_needs_butler) {
+		DEBUG_TRACE (DEBUG::Butler, "p-with-events: session needs butler, call it\n");
 		_butler->summon ();
 	}
 }
@@ -859,6 +861,7 @@ Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 		get_track_statistics ();
 
 		if (need_butler) {
+			DEBUG_TRACE (DEBUG::Butler, "f-slave-silently: session needs butler, call it\n");
 			_butler->summon ();
 		}
 
@@ -942,6 +945,7 @@ Session::process_without_events (pframes_t nframes)
 	check_declick_out ();
 
 	if (session_needs_butler) {
+		DEBUG_TRACE (DEBUG::Butler, "p-without-events: session needs butler, call it\n");
 		_butler->summon ();
 	}
 }
@@ -964,6 +968,7 @@ Session::process_audition (pframes_t nframes)
 	/* run the auditioner, and if it says we need butler service, ask for it */
 
 	if (auditioner->play_audition (nframes) > 0) {
+		DEBUG_TRACE (DEBUG::Butler, "auditioner needs butler, call it\n");
 		_butler->summon ();
 	}
 

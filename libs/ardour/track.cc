@@ -80,7 +80,6 @@ Track::init ()
 
         _disk_reader->set_block_size (_session.get_block_size ());
         _disk_reader->set_route (shared_from_this());
-        _disk_reader->do_refill_with_alloc ();
 
         _disk_writer.reset (new DiskWriter (_session, name(), dflags));
         _disk_writer->set_block_size (_session.get_block_size ());
@@ -546,7 +545,6 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 boost::shared_ptr<Playlist>
 Track::playlist ()
 {
-	cerr << name() << " lookup " << data_type().to_string() << " pl's\n";
 	return _playlists[data_type()];
 }
 
