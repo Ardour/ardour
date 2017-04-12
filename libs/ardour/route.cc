@@ -4943,7 +4943,15 @@ uint32_t
 Route::eq_band_cnt () const
 {
 	if (Profile->get_mixbus()) {
+#ifdef MIXBUS32C
+		if (is_master() || mixbus()) {
+			return 3;
+		} else {
+			return 4;
+		}
+#else
 		return 3;
+#endif
 	} else {
 		/* Ardour has no well-known EQ object */
 		return 0;
@@ -4961,30 +4969,33 @@ Route::eq_gain_controllable (uint32_t band) const
 	}
 
 	uint32_t port_number;
-	switch (band) {
-	case 0:
-		if (is_master() || mixbus()) {
-			port_number = 4;
-		} else {
-			port_number = 8;
+	if (is_master() || mixbus()) {
+		switch (band) {
+			case 0: port_number = 4; break;
+			case 1: port_number = 3; break;
+			case 2: port_number = 2; break;
+			default:
+				return boost::shared_ptr<AutomationControl>();
 		}
-		break;
-	case 1:
-		if (is_master() || mixbus()) {
-			port_number = 3;
-		} else {
-			port_number = 6;
+	} else {
+#ifdef MIXBUS32C
+		switch (band) {
+			case 0: port_number = 14; break;
+			case 1: port_number = 12; break;
+			case 2: port_number = 10; break;
+			case 3: port_number =  8; break;
+			default:
+				return boost::shared_ptr<AutomationControl>();
 		}
-		break;
-	case 2:
-		if (is_master() || mixbus()) {
-			port_number = 2;
-		} else {
-			port_number = 4;
+#else
+		switch (band) {
+			case 0: port_number = 8; break;
+			case 1: port_number = 6; break;
+			case 2: port_number = 4; break;
+			default:
+				return boost::shared_ptr<AutomationControl>();
 		}
-		break;
-	default:
-		return boost::shared_ptr<AutomationControl>();
+#endif
 	}
 
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
@@ -4996,7 +5007,6 @@ boost::shared_ptr<AutomationControl>
 Route::eq_freq_controllable (uint32_t band) const
 {
 #ifdef MIXBUS
-
 	if (mixbus() || is_master()) {
 		/* no frequency controls for mixbusses or master */
 		return boost::shared_ptr<AutomationControl>();
@@ -5009,19 +5019,24 @@ Route::eq_freq_controllable (uint32_t band) const
 	}
 
 	uint32_t port_number;
+#ifdef MIXBUS32C
 	switch (band) {
-	case 0:
-		port_number = 7;
-		break;
-	case 1:
-		port_number = 5;
-		break;
-	case 2:
-		port_number = 3;
-		break;
-	default:
-		return boost::shared_ptr<AutomationControl>();
+		case 0: port_number = 13; break;
+		case 1: port_number = 11; break;
+		case 2: port_number = 9; break;
+		case 3: port_number = 7; break;
+		default:
+			return boost::shared_ptr<AutomationControl>();
 	}
+#else
+	switch (band) {
+		case 0: port_number = 7; break;
+		case 1: port_number = 5; break;
+		case 2: port_number = 3; break;
+		default:
+			return boost::shared_ptr<AutomationControl>();
+	}
+#endif
 
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
 #else
@@ -5063,11 +5078,15 @@ Route::eq_hpf_controllable () const
 #ifdef MIXBUS
 	boost::shared_ptr<PluginInsert> eq = ch_eq();
 
-	if (!eq) {
+	if (is_master() || mixbus() || !eq) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-
+#ifdef MIXBUS32C
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 3)));
+#else
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
+#endif
+
 #else
 	return boost::shared_ptr<AutomationControl>();
 #endif
@@ -5076,20 +5095,30 @@ Route::eq_hpf_controllable () const
 string
 Route::eq_band_name (uint32_t band) const
 {
+#ifdef MIXBUS32C
+	if (is_master() || mixbus()) {
+#endif
 	if (Profile->get_mixbus()) {
 		switch (band) {
-		case 0:
-			return _("lo");
-		case 1:
-			return _("mid");
-		case 2:
-			return _("hi");
-		default:
-			return string();
+			case 0: return _("lo");
+			case 1: return _("mid");
+			case 2: return _("hi");
+			default: return string();
 		}
 	} else {
 		return string ();
 	}
+#ifdef MIXBUS32C
+	} else {
+		switch (band) {
+			case 0: return _("lo");
+			case 1: return _("lo mid");
+			case 2: return _("hi mid");
+			case 3: return _("hi");
+			default: return string();
+		}
+	}
+#endif
 }
 
 boost::shared_ptr<AutomationControl>
@@ -5178,6 +5207,7 @@ Route::comp_redux_controllable () const
 		return boost::shared_ptr<AutomationControl>();
 	}
 
+	// XXX redux is an output-port, query via comp->plugin(0)->get_parameter (6)
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6)));
 #else
 	return boost::shared_ptr<AutomationControl>();
