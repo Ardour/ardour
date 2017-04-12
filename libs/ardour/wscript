@@ -178,6 +178,7 @@ libardour_sources = [
         'progress.cc',
         'quantize.cc',
         'rc_configuration.cc',
+        'readonly_control.cc',
         'recent_sessions.cc',
         'record_enable_control.cc',
         'record_safe_control.cc',

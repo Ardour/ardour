@@ -98,6 +98,9 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 
 PluginInsert::~PluginInsert ()
 {
+	for (CtrlOutMap::const_iterator i = _control_outputs.begin(); i != _control_outputs.end(); ++i) {
+		boost::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
+	}
 }
 
 void
@@ -452,7 +455,11 @@ PluginInsert::create_automatable_parameters ()
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
 	for (uint32_t i = 0; i < plugin->parameter_count(); ++i) {
-		if (!plugin->parameter_is_control (i) || !plugin->parameter_is_input (i)) {
+		if (!plugin->parameter_is_control (i)) {
+			continue;
+		}
+		if (!plugin->parameter_is_input (i)) {
+			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, i));
 			continue;
 		}
 		Evoral::Parameter param (PluginAutomation, 0, i);
@@ -2803,6 +2810,16 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 	}
 }
 
+boost::shared_ptr<ReadOnlyControl>
+PluginInsert::control_output (uint32_t num) const
+{
+	CtrlOutMap::const_iterator i = _control_outputs.find (num);
+	if (i == _control_outputs.end ()) {
+		return boost::shared_ptr<ReadOnlyControl> ();
+	} else {
+		return (*i).second;
+	}
+}
 
 string
 PluginInsert::describe_parameter (Evoral::Parameter param)
