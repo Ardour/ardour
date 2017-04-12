@@ -174,6 +174,9 @@ LuaProc::init ()
 boost::weak_ptr<Route>
 LuaProc::route () const
 {
+	if (!_owner) {
+		return boost::weak_ptr<Route>();
+	}
 	return static_cast<Route*>(_owner)->weakroute ();
 }
 

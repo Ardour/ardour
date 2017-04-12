@@ -2978,6 +2978,7 @@ PluginInsert::get_impulse_analysis_plugin()
 			assert (out == internal_output_streams ());
 		}
 		ret->configure_io (internal_input_streams (), out);
+		ret->set_owner (_owner);
 		_impulseAnalysisPlugin = ret;
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
