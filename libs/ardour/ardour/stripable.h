@@ -37,6 +37,7 @@ class StripableColorDialog;
 namespace ARDOUR {
 
 class AutomationControl;
+class ReadOnlyControl;
 class GainControl;
 class PeakMeter;
 class SoloControl;
@@ -144,7 +145,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> comp_speed_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_mode_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_makeup_controllable () const = 0;
-	virtual boost::shared_ptr<AutomationControl> comp_redux_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const = 0;
 
 	/* @param mode must be supplied by the comp_mode_controllable(). All other values
 	 * result in undefined behaviour

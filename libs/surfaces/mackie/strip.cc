@@ -575,9 +575,6 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 	case CompMakeup:
 		control = r->comp_makeup_controllable ();
 		break;
-	case CompRedux:
-		control = r->comp_redux_controllable ();
-		break;
 	case CompEnable:
 		control = r->comp_enable_controllable ();
 		break;
@@ -1532,7 +1529,6 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
 	boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
 	boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
-	boost::shared_ptr<AutomationControl> rc = r->comp_redux_controllable ();
 	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
 
 	uint32_t pos = _surface->mcp().global_index (*this);
@@ -1548,7 +1544,6 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	if (sc) { available.push_back (sc); params.push_back (CompSpeed); }
 	if (mc) { available.push_back (mc); params.push_back (CompMode); }
 	if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
-	if (rc) { available.push_back (rc); params.push_back (CompRedux); }
 	if (ec) { available.push_back (ec); params.push_back (CompEnable); }
 
 	if (pos >= available.size()) {

@@ -5197,20 +5197,23 @@ Route::comp_makeup_controllable () const
 	return boost::shared_ptr<AutomationControl>();
 #endif
 }
-boost::shared_ptr<AutomationControl>
+boost::shared_ptr<ReadOnlyControl>
 Route::comp_redux_controllable () const
 {
 #ifdef MIXBUS
 	boost::shared_ptr<PluginInsert> comp = ch_comp();
 
 	if (!comp) {
-		return boost::shared_ptr<AutomationControl>();
+		return boost::shared_ptr<ReadOnlyControl>();
+	}
+	if (is_master()) {
+		return comp->control_output (2);
+	} else {
+		return comp->control_output (6);
 	}
 
-	// XXX redux is an output-port, query via comp->plugin(0)->get_parameter (6)
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6)));
 #else
-	return boost::shared_ptr<AutomationControl>();
+	return boost::shared_ptr<ReadOnlyControl>();
 #endif
 }
 

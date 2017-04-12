@@ -520,7 +520,7 @@ public:
 	boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_redux_controllable () const;
+	boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
 
 	/* @param mode must be supplied by the comp_mode_controllable(). All other values
 	 * result in undefined behaviour
