@@ -1176,6 +1176,14 @@ Route::ab_plugins (bool forward)
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
+			if (!(*i)->display_to_user ()) {
+				continue;
+			}
+#ifdef MIXBUS
+			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+				continue;
+			}
+#endif
 
 			if ((*i)->enabled ()) {
 				(*i)->enable (false);
@@ -1190,10 +1198,17 @@ Route::ab_plugins (bool forward)
 		/* backward = if the redirect was marked to go active on the next ab, do so */
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
+			if (!(*i)->display_to_user ()) {
+				continue;
+			}
+#ifdef MIXBUS
+			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+				continue;
+			}
+#endif
 
 			(*i)->enable ((*i)->get_next_ab_is_active ());
 		}
