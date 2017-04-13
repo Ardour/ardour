@@ -1878,6 +1878,14 @@ Route::all_visible_processors_active (bool state)
 		if (!(*i)->display_to_user() || boost::dynamic_pointer_cast<Amp> (*i)) {
 			continue;
 		}
+#ifdef MIXBUS
+		boost::shared_ptr<PluginInsert> pi;
+		if (0 != (pi = boost::dynamic_pointer_cast<PluginInsert>(*i))) {
+			if (pi->is_channelstrip ()) {
+				continue;
+			}
+		}
+#endif
 		(*i)->enable (state);
 	}
 
