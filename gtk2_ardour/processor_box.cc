@@ -2324,6 +2324,18 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 
 	case ProcessorsToggleActive:
 		for (ProcSelection::iterator i = targets.begin(); i != targets.end(); ++i) {
+			if (!(*i)->display_to_user ()) {
+				assert (0); // these should not be selectable to begin with.
+				continue;
+			}
+			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+				continue;
+			}
+#ifdef MIXBUS
+			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+				continue;
+			}
+#endif
 			(*i)->enable (!(*i)->enabled ());
 		}
 		break;
