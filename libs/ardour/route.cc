@@ -2480,6 +2480,11 @@ Route::set_state (const XMLNode& node, int version)
 		set_denormal_protection (string_is_affirmative (prop->value()));
 	}
 
+	/* convert old 3001 state */
+	if ((prop = node.property (X_("phase-invert"))) != 0) {
+		_phase_control->set_phase_invert (boost::dynamic_bitset<> (prop->value ()));
+	}
+
 	if ((prop = node.property (X_("active"))) != 0) {
 		bool yn = string_is_affirmative (prop->value());
 		set_active (yn, this);
