@@ -1742,10 +1742,10 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		return ret;
 	}
 
-	XMLNode* pl_child = find_named_node (node, X_("audio-playlist"));
+	XMLProperty const * pl_prop = node.property (X_("audio-playlist"));
 
-	if (!pl_child) {
-		pl_child = find_named_node (node, X_("midi-playlist"));
+	if (!pl_prop) {
+		pl_prop = node.property (X_("midi-playlist"));
 	}
 
 	DataType type = DataType::AUDIO;
@@ -1753,7 +1753,9 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	assert (type != DataType::NIL);
 
-	if (pl_child) {
+	if (pl_prop) {
+
+		/* has at least 1 playlist, therefore a track ... */
 
 		boost::shared_ptr<Track> track;
 
@@ -1836,6 +1838,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	} else {
 		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
+		cerr << "Creating a new bus\n";
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
