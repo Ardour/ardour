@@ -136,12 +136,13 @@ private:
 	void notify_stripable_added_or_removed ();
 	void notify_fader_mode_changed ();
 	void filter_stripables (ARDOUR::StripableList& strips) const;
-	void assign_stripables ();
+	void assign_stripables (bool select_only = false);
 	void set_periodic_display_mode (FP8Strip::DisplayMode);
 
 	void assign_strips (bool reset_bank);
 	void bank (bool down, bool page);
 	void move_selected_into_view ();
+	void select_prev_next (bool next);
 
 	void assign_sends ();
 	void spill_plugins ();
@@ -189,6 +190,7 @@ private:
 		boost::shared_ptr<ARDOUR::AutomationControl> ac;
 	};
 	std::list <ProcessorCtrl> _proc_params;
+	int _showing_well_known;
 	/* **************************************************************************/
 
 	/* periodic updates, parameter poll */

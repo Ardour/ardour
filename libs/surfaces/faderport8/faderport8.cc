@@ -493,7 +493,12 @@ FaderPort8::pitchbend_handler (MIDI::Parser &, uint8_t chan, MIDI::pitchbend_t p
 {
 	debug_2byte_msg ("PB", chan, pb);
 	/* fader 0..16368 (0x3ff0 -- 1024 steps) */
-	_ctrls.midi_fader (chan, pb);
+	bool handled = _ctrls.midi_fader (chan, pb);
+	/* if Shift key is held while moving a fader (group override), don't lock shift. */
+	if (_shift_pressed && handled) {
+		_shift_connection.disconnect ();
+		_shift_lock = false;
+	}
 }
 
 void
@@ -829,7 +834,7 @@ struct FP8SortByNewDisplayOrder
 
 #ifdef MIXBUS
 		// this can happen with older MB sessions (no PresentationInfo::Mixbus flag)
-		if (cmp_a == cmp_a) {
+		if (cmp_a == cmp_b) {
 			return a->presentation_info().order() < b->presentation_info().order();
 		}
 #endif
@@ -902,12 +907,14 @@ FaderPort8::filter_stripables (StripableList& strips) const
 
 /* Track/Pan mode: assign stripable to strips */
 void
-FaderPort8::assign_stripables ()
+FaderPort8::assign_stripables (bool select_only)
 {
 	StripableList strips;
 	filter_stripables (strips);
 
-	set_periodic_display_mode (FP8Strip::Stripables);
+	if (!select_only) {
+		set_periodic_display_mode (FP8Strip::Stripables);
+	}
 
 	int n_strips = strips.size();
 	_channel_off = std::min (_channel_off, n_strips - 8);
@@ -930,7 +937,15 @@ FaderPort8::assign_stripables ()
 		(*s)->presentation_info ().PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
 				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), _1), this);
 
-		_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
+		if (select_only) {
+			_ctrls.strip(id).set_text_line (3, (*s)->name (), true);
+			_ctrls.strip(id).select_button ().set_color ((*s)->presentation_info ().color());
+			/* update selection lights */
+			_ctrls.strip(id).select_button ().set_active ((*s)->is_selected ());
+			_ctrls.strip(id).select_button ().set_blinking (*s == first_selected_stripable ());
+		} else {
+			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
+		}
 
 		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, boost::weak_ptr<Stripable> (*s)));
 		 _ctrls.strip(id).set_select_cb (cb);
@@ -940,7 +955,7 @@ FaderPort8::assign_stripables ()
 		}
 	}
 	for (; id < 8; ++id) {
-		_ctrls.strip(id).unset_controllables();
+		_ctrls.strip(id).unset_controllables (select_only ? (FP8Strip::CTRL_SELECT | FP8Strip::CTRL_TEXT3) : FP8Strip::CTRL_ALL);
 	}
 }
 
@@ -964,7 +979,7 @@ FaderPort8::assign_processor_ctrls ()
 			--skip;
 			continue;
 		}
-		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT1);
+		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0);
 		_ctrls.strip(id).set_fader_controllable ((*i).ac);
 		_ctrls.strip(id).set_text_line (0, (*i).name);
 
@@ -1006,6 +1021,9 @@ FaderPort8::build_well_known_processor_ctrls (boost::shared_ptr<Stripable> s, bo
 void
 FaderPort8::select_plugin (int num)
 {
+	// make sure drop_ctrl_connections() was called
+	assert (_proc_params.size() == 0 && _showing_well_known == 0);
+
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (first_selected_stripable());
 	if (!r) {
 		_ctrls.set_fader_mode (ModeTrack);
@@ -1014,8 +1032,10 @@ FaderPort8::select_plugin (int num)
 	if (num < 0) {
 		build_well_known_processor_ctrls (r, num == -1);
 		assign_processor_ctrls ();
+		_showing_well_known = num;
 		return;
 	}
+	_showing_well_known = 0;
 
 	boost::shared_ptr<Processor> proc = r->nth_plugin (num);
 	if (!proc) {
@@ -1037,6 +1057,8 @@ FaderPort8::select_plugin (int num)
 		}
 		_proc_params.push_back (ProcessorCtrl (n, proc->automation_control (*i)));
 	}
+
+	// TODO: open plugin GUI  if (_proc_params.size() > 0)
 
 	// display
 	assign_processor_ctrls ();
@@ -1149,6 +1171,7 @@ FaderPort8::spill_plugins ()
 		_ctrls.strip(id).set_text_line (0, proc->name());
 		_ctrls.strip(id).set_text_line (1, pi->plugin()->maker());
 		_ctrls.strip(id).set_text_line (2, plugintype (pi->type()));
+		_ctrls.strip(id).set_text_line (3, "");
 
 		if (++id == spillwidth) {
 			break;
@@ -1170,6 +1193,7 @@ FaderPort8::spill_plugins ()
 		 _ctrls.strip(id).set_text_line (0, "Comp");
 		 _ctrls.strip(id).set_text_line (1, "Built-In");
 		 _ctrls.strip(id).set_text_line (2, "--");
+		 _ctrls.strip(id).set_text_line (3, "");
 		 ++id;
 	}
 	if (have_well_known_eq) {
@@ -1183,6 +1207,7 @@ FaderPort8::spill_plugins ()
 		 _ctrls.strip(id).set_text_line (0, "EQ");
 		 _ctrls.strip(id).set_text_line (1, "Built-In");
 		 _ctrls.strip(id).set_text_line (2, "--");
+		 _ctrls.strip(id).set_text_line (3, "");
 		 ++id;
 	}
 	assert (id == 8);
@@ -1209,7 +1234,7 @@ FaderPort8::assign_sends ()
 	drop_ctrl_connections ();
 	s->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
-	set_periodic_display_mode (FP8Strip::PluginParam);
+	set_periodic_display_mode (FP8Strip::SendDisplay);
 
 	_plugin_off = std::min (_plugin_off, n_sends - 8);
 	_plugin_off = std::max (0, _plugin_off);
@@ -1226,10 +1251,11 @@ FaderPort8::assign_sends ()
 			break;
 		}
 
-		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT1);
+		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_fader_controllable (send);
 		_ctrls.strip(id).set_text_line (0, s->send_name (i));
-		//_ctrls.strip(id).set_mute_controllable (s->send_enable_controllable (i)); // XXX TODO MB assign -> select ?
+		_ctrls.strip(id).set_mute_controllable (s->send_enable_controllable (i));
+		_ctrls.strip(id).set_solo_controllable (s->master_send_enable_controllable ()); // XXX
 
 		if (++id == 8) {
 			break;
@@ -1237,8 +1263,10 @@ FaderPort8::assign_sends ()
 	}
 	// clear remaining
 	for (; id < 8; ++id) {
-		_ctrls.strip(id).unset_controllables ();
+		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 	}
+	/* set select buttons */
+	assign_stripables (true);
 }
 
 void
@@ -1285,6 +1313,7 @@ FaderPort8::drop_ctrl_connections ()
 {
 	_proc_params.clear();
 	processor_connections.drop_connections ();
+	_showing_well_known = 0;
 }
 
 void
@@ -1327,7 +1356,9 @@ FaderPort8::notify_stripable_added_or_removed ()
 	/* called by
 	 *  - DropReferences
 	 *  - session->RouteAdded
-	 *  - PresentationInfo::Change -> Properties::hidden
+	 *  - PresentationInfo::Change
+	 *    - Properties::hidden
+	 *    - Properties::order
 	 */
 	assign_strips (false);
 }
@@ -1340,7 +1371,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	if (!s) {
 		return;
 	}
-	if (_shift_pressed) {
+	if (shift_mod ()) {
 		if (s->is_selected ()) {
 			RemoveStripableFromSelection (s);
 		} else {
@@ -1385,7 +1416,17 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 	}
 
 	if (what_changed.contains (Properties::name)) {
-		_ctrls.strip(id).set_text_line (0, s->name());
+		switch (_ctrls.fader_mode ()) {
+			case ModeSend:
+				_ctrls.strip(id).set_text_line (0, s->name());
+			case ModeTrack:
+			case ModePan:
+				_ctrls.strip(id).set_text_line (3, s->name(), true);
+				break;
+			case ModePlugins:
+				assert (0);
+				break;
+		}
 	}
 }
 
@@ -1396,19 +1437,23 @@ FaderPort8::gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*
 
 	switch (_ctrls.fader_mode ()) {
 		case ModePlugins:
-			if (_proc_params.size () > 0) {
-				; // TODO w/"well-known" -> re-assign to new strip ?!
-			} else {
-				notify_fader_mode_changed ();
+			if (_proc_params.size () > 0 && _showing_well_known < 0) {
+				/* w/well-known -> re-assign to new strip */
+				int wk = _showing_well_known;
+				drop_ctrl_connections ();
+				select_plugin (wk);
 			}
 			return;
 		case ModeSend:
-			notify_automation_mode_changed ();
+			_plugin_off = 0;
+			assign_sends ();
 			return;
-		default:
+		case ModeTrack:
+		case ModePan:
 			break;
 	}
 
+	/* update selection lights */
 	for (StripAssignmentMap::const_iterator i = _assigned_strips.begin(); i != _assigned_strips.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Stripable> s = i->first;
 		uint8_t id = i->second;
@@ -1417,6 +1462,7 @@ FaderPort8::gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*
 		_ctrls.strip(id).select_button ().set_blinking (sel && s == first_selected_stripable ());
 	}
 
+	/* track automation-mode of primary selection */
 	boost::shared_ptr<Stripable> s = first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac;
@@ -1429,6 +1475,7 @@ FaderPort8::gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*
 			ac->alist()->automation_state_changed.connect (automation_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_automation_mode_changed, this), this);
 		}
 	}
+	/* set lights */
 	notify_automation_mode_changed ();
 }
 
@@ -1467,6 +1514,49 @@ FaderPort8::move_selected_into_view ()
 }
 
 void
+FaderPort8::select_prev_next (bool next)
+{
+	StripableList strips;
+	filter_stripables (strips);
+
+	boost::shared_ptr<Stripable> selected = first_selected_stripable ();
+	if (!selected) {
+		if (strips.size() > 0) {
+			if (next) {
+				SetStripableSelection (strips.front ());
+			} else {
+				SetStripableSelection (strips.back ());
+			}
+		}
+		return;
+	}
+
+	bool found = false;
+	boost::shared_ptr<Stripable> toselect;
+	for (StripableList::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		if (*s == selected) {
+			if (!next) {
+				found = true;
+				break;
+			}
+			++s;
+			if (s != strips.end()) {
+				toselect = *s;
+				found = true;
+			}
+			break;
+		}
+		if (!next) {
+			toselect = *s;
+		}
+	}
+
+	if (found && toselect) {
+		SetStripableSelection (toselect);
+	}
+}
+
+void
 FaderPort8::bank (bool down, bool page)
 {
 	int dt = page ? 8 : 1;
@@ -1494,6 +1584,9 @@ FaderPort8::bank_param (bool down, bool page)
 				_plugin_off += dt;
 				spill_plugins ();
 			}
+			break;
+		case ModeSend:
+			assign_sends ();
 			break;
 		default:
 			break;

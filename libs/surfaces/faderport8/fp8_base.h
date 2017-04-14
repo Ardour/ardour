@@ -38,6 +38,7 @@ public:
 
 	virtual size_t tx_midi (std::vector<uint8_t> const&) const = 0;
 	virtual std::string const& timecode () const = 0;
+	virtual bool shift_mod () const = 0;
 
 	size_t tx_midi2 (uint8_t sb, uint8_t d1) const
 	{

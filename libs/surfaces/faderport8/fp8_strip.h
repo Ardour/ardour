@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
+#include "pbd/controllable.h"
 
 #include "fp8_base.h"
 #include "fp8_button.h"
@@ -59,15 +60,14 @@ public:
 		Stripables,
 		PluginSelect, // no clock display
 		PluginParam, // param value
+		SendDisplay, // param value + select-bar
 	};
 
-	void set_periodic_display_mode (DisplayMode m) {
-		_displaymode = m;
-	}
+	void set_periodic_display_mode (DisplayMode m);
 
 	// convenience function to call all set_XXX_controllable
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>, bool panmode);
-	void set_text_line (uint8_t, std::string const&);
+	void set_text_line (uint8_t, std::string const&, bool inv = false);
 
 	enum CtrlMask {
 		CTRL_FADER  = 0x001,
@@ -76,10 +76,10 @@ public:
 		CTRL_REC    = 0x004,
 		CTRL_PAN    = 0x008,
 		CTRL_SELECT = 0x010,
-		CTRL_TEXT1  = 0x100,
-		CTRL_TEXT2  = 0x200,
-		CTRL_TEXT3  = 0x400,
-		CTRL_TEXT4  = 0x800,
+		CTRL_TEXT0  = 0x100,
+		CTRL_TEXT1  = 0x200,
+		CTRL_TEXT2  = 0x400,
+		CTRL_TEXT3  = 0x800,
 
 		CTRL_TEXT   = 0xf00,
 		CTRL_ALL    = 0xfff,
@@ -123,6 +123,8 @@ private:
 	boost::shared_ptr<ARDOUR::ReadOnlyControl> _redux_ctrl;
 	boost::function<void ()> _select_plugin_functor;
 
+	PBD::Controllable::GroupControlDisposition group_mode () const;
+
 	/* notifications, update view */
 	void notify_fader_changed ();
 	void notify_solo_changed ();
@@ -146,7 +148,7 @@ private:
 	unsigned short _last_fader;
 	uint8_t _last_meter;
 	uint8_t _last_redux;
-	uint8_t _last_panpos;
+	uint8_t _last_barpos;
 
 	/* display */
 	void set_strip_mode (uint8_t, bool clear = false);

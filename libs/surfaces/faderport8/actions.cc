@@ -273,8 +273,10 @@ void
 FaderPort8::button_prev_next (bool next)
 {
 	switch (_ctrls.nav_mode()) {
-		case NavMaster:
 		case NavChannel:
+			select_prev_next (next);
+			break;
+		case NavMaster:
 		case NavScroll:
 			bank (!next, false);
 			break;
@@ -283,13 +285,17 @@ FaderPort8::button_prev_next (bool next)
 			break;
 		case NavZoom:
 			if (next) {
-				StepTracksDown ();
+				VerticalZoomInSelected ();
 			} else {
-				StepTracksUp ();
+				VerticalZoomOutSelected ();
 			}
 			break;
 		case NavSection:
-			// TODO nudge
+			if (next) {
+				AccessAction ("Region", "nudge-forward");
+			} else {
+				AccessAction ("Region", "nudge-backward");
+			}
 			break;
 		case NavMarker:
 			if (next) {
@@ -326,11 +332,15 @@ FaderPort8::button_encoder ()
 					ac = session->master_out()->gain_control ();
 				}
 				if (ac) {
+					if (!ac->touching ()) {
+						ac->start_touch (ac->session().transport_frame());
+					}
 					ac->set_value (ac->normal(), PBD::Controllable::NoGroup);
 				}
 			}
 			break;
 		case NavSection:
+			// TODO nudge
 			break;
 		case NavMarker:
 			{
@@ -402,12 +412,19 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 				if (ac) {
 					double v = ac->internal_to_interface (ac->get_value());
 					v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
+					if (!ac->touching ()) {
+						ac->start_touch (ac->session().transport_frame());
+					}
 					ac->set_value (ac->interface_to_internal(v), PBD::Controllable::NoGroup);
 				}
 			}
 			break;
 		case NavSection:
-			// nudge event
+			if (neg) {
+				AccessAction ("Common", "nudge-playhead-backward");
+			} else {
+				AccessAction ("Common", "nudge-playhead-forward");
+			}
 			break;
 	}
 }
@@ -419,7 +436,23 @@ FaderPort8::button_parameter ()
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
 		case ModePan:
-			// pan-width see FaderPort8::encoder_parameter()
+			{
+				boost::shared_ptr<Stripable> s = first_selected_stripable();
+				if (s) {
+					boost::shared_ptr<AutomationControl> ac;
+					if (shift_mod ()) {
+						ac = s->pan_width_control ();
+					} else {
+						ac = s->pan_azimuth_control ();
+					}
+					if (ac) {
+						if (!ac->touching ()) {
+							ac->start_touch (ac->session().transport_frame());
+						}
+						ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
+					}
+				}
+			}
 			break;
 		case ModePlugins:
 			break;
@@ -439,7 +472,7 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 				boost::shared_ptr<Stripable> s = first_selected_stripable();
 				if (s) {
 					boost::shared_ptr<AutomationControl> ac;
-					if (_ctrls.button (FP8Controls::BtnParam).is_pressed ()) {
+					if (shift_mod ()) {
 						ac = s->pan_width_control ();
 					} else {
 						ac = s->pan_azimuth_control ();
@@ -447,6 +480,9 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 					if (ac) {
 						double v = ac->internal_to_interface (ac->get_value());
 						v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
+						if (!ac->touching ()) {
+							ac->start_touch (ac->session().transport_frame());
+						}
 						ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
 					}
 				}

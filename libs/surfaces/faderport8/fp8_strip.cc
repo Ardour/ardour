@@ -49,7 +49,7 @@ FP8Strip::FP8Strip (FP8Base& b, uint8_t id)
 	assert (id < 8);
 
 	_last_fader = 65535;
-	_last_meter = _last_redux = _last_panpos = 0xff;
+	_last_meter = _last_redux = _last_barpos = 0xff;
 
 	_mute.StateChange.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_mute, this, _1));
 	_solo.StateChange.connect_same_thread (_button_connections, boost::bind (&FP8Strip::set_solo, this, _1));
@@ -91,7 +91,7 @@ FP8Strip::initialize ()
 
 	/* clear cached values */
 	_last_fader = 65535;
-	_last_meter = _last_redux = _last_panpos = 0xff;
+	_last_meter = _last_redux = _last_barpos = 0xff;
 
 	select_button ().set_color (0xffffffff);
 	select_button ().set_active (false);
@@ -166,7 +166,6 @@ FP8Strip::unset_controllables (int which)
 		set_rec_controllable (boost::shared_ptr<AutomationControl>());
 	}
 	if (which & CTRL_PAN) {
-		set_bar_mode (4); // off
 		set_pan_controllable (boost::shared_ptr<AutomationControl>());
 	}
 	if (which & CTRL_SELECT) {
@@ -175,18 +174,19 @@ FP8Strip::unset_controllables (int which)
 		select_button ().set_active (false);
 		select_button ().set_blinking (false);
 	}
-	if (which & CTRL_TEXT1) {
+	if (which & CTRL_TEXT0) {
 		set_text_line (0x00, "");
 	}
-	if (which & CTRL_TEXT2) {
+	if (which & CTRL_TEXT1) {
 		set_text_line (0x01, "");
 	}
-	if (which & CTRL_TEXT3) {
+	if (which & CTRL_TEXT2) {
 		set_text_line (0x02, "");
 	}
-	if (which & CTRL_TEXT4) {
+	if (which & CTRL_TEXT3) {
 		set_text_line (0x03, "");
 	}
+	set_bar_mode (4); // Off
 }
 
 void
@@ -252,7 +252,9 @@ FP8Strip::midi_touch (bool t)
 		return false;
 	}
 	if (t) {
-		ac->start_touch (ac->session().transport_frame());
+		if (!ac->touching ()) {
+			ac->start_touch (ac->session().transport_frame());
+		}
 	} else {
 		ac->stop_touch (true, ac->session().transport_frame());
 	}
@@ -270,13 +272,26 @@ FP8Strip::midi_fader (float val)
 	if (!ac) {
 		return false;
 	}
-	ac->set_value (ac->interface_to_internal (val), PBD::Controllable::UseGroup);
+	if (!ac->touching ()) {
+		ac->start_touch (ac->session().transport_frame());
+	}
+	ac->set_value (ac->interface_to_internal (val), group_mode ());
 	return true;
 }
 
 /* *****************************************************************************
  * Actions from Controller, Update Model
  */
+
+PBD::Controllable::GroupControlDisposition
+FP8Strip::group_mode () const
+{
+	if (_base.shift_mod ()) {
+		return PBD::Controllable::InverseGroup;
+	} else {
+		return PBD::Controllable::UseGroup;
+	}
+}
 
 void
 FP8Strip::set_mute (bool on)
@@ -285,7 +300,7 @@ FP8Strip::set_mute (bool on)
 		if (!_mute_ctrl->touching ()) {
 			_mute_ctrl->start_touch (_mute_ctrl->session().transport_frame());
 		}
-		_mute_ctrl->set_value (on ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+		_mute_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}
 }
 
@@ -296,7 +311,7 @@ FP8Strip::set_solo (bool on)
 		if (!_solo_ctrl->touching ()) {
 			_solo_ctrl->start_touch (_solo_ctrl->session().transport_frame());
 		}
-		_solo_ctrl->set_value (on ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+		_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}
 }
 
@@ -305,7 +320,7 @@ FP8Strip::set_recarm ()
 {
 	if (_rec_ctrl) {
 		const bool on = !recarm_button().is_active();
-		_rec_ctrl->set_value (on ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+		_rec_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}
 }
 
@@ -395,6 +410,15 @@ FP8Strip::periodic_update_fader ()
 }
 
 void
+FP8Strip::set_periodic_display_mode (DisplayMode m) {
+	_displaymode = m;
+	if (_displaymode == SendDisplay) {
+		// need to change to 4 lines before calling set_text()
+		set_strip_mode (2); // 4 lines of small text
+	}
+}
+
+void
 FP8Strip::periodic_update_meter ()
 {
 	bool have_meter = false;
@@ -434,6 +458,21 @@ FP8Strip::periodic_update_meter ()
 	}
 
 	if (_displaymode == PluginParam) {
+		if (_fader_ctrl) {
+			set_bar_mode (2); // Fill
+			set_text_line (0x01, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
+			float barpos = _fader_ctrl->internal_to_interface (_fader_ctrl->get_value());
+			int val = std::min (127.f, std::max (0.f, barpos * 128.f));
+			if (val != _last_barpos) {
+				_base.tx_midi3 (0xb0, 0x30 + _id, val & 0x7f);
+				_last_barpos = val;
+			}
+		} else {
+			set_bar_mode (4); // Off
+			set_text_line (0x01, "");
+		}
+	}
+	else if (_displaymode == SendDisplay) {
 		set_bar_mode (4); // Off
 		if (_fader_ctrl) {
 			set_text_line (0x01, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
@@ -445,25 +484,28 @@ FP8Strip::periodic_update_meter ()
 		float panpos = _pan_ctrl->internal_to_interface (_pan_ctrl->get_value());
 		int val = std::min (127.f, std::max (0.f, panpos * 128.f));
 		set_bar_mode (1); // Bipolar
-		if (val != _last_panpos) {
+		if (val != _last_barpos) {
 			_base.tx_midi3 (0xb0, 0x30 + _id, val & 0x7f);
-			_last_panpos = val;
+			_last_barpos = val;
 		}
 		set_text_line (0x01, _pan_ctrl->get_user_string ());
 	} else {
 		set_bar_mode (4); // Off
 	}
 
-	if (have_meter && have_panner) {
-		set_strip_mode (5); // small meter mode
+	if (_displaymode == SendDisplay) {
+		set_strip_mode (2); // 4 lines of small text + value-bar
+	}
+	else if (have_meter && have_panner) {
+		set_strip_mode (5); // small meters + 3 lines of text (3rd is large)  + value-bar
 	}
 	else if (have_meter) {
-		set_strip_mode (4); // big meter mode
+		set_strip_mode (4); // big meters + 3 lines of text (3rd line is large)
 	}
 	else if (have_panner) {
-		set_strip_mode (0); // 3 lines of text + value
+		set_strip_mode (0); // 3 lines of text (3rd line is large) + value-bar
 	} else {
-		set_strip_mode (0); // 3 lines of text + value
+		set_strip_mode (0); // 3 lines of text (3rd line is large) + value-bar
 	}
 }
 
@@ -489,13 +531,13 @@ FP8Strip::set_bar_mode (uint8_t bar_mode)
 }
 
 void
-FP8Strip::set_text_line (uint8_t line, std::string const& txt)
+FP8Strip::set_text_line (uint8_t line, std::string const& txt, bool inv)
 {
 	assert (line < 4);
 	if (_last_line[line] == txt) {
 		return;
 	}
-	_base.tx_text (_id, line, 0x00, txt);
+	_base.tx_text (_id, line, inv ? 0x04 : 0x00, txt);
 	_last_line[line] = txt;
 }
 
