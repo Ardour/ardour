@@ -19,10 +19,8 @@
 #include "ardour/automation_control.h"
 #include "ardour/gain_control.h"
 #include "ardour/meter.h"
-#include "ardour/mute_control.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
-#include "ardour/solo_control.h"
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/value_as_string.h"
@@ -281,7 +279,7 @@ FP8Strip::midi_fader (float val)
 	if (!ac) {
 		return false;
 	}
-	if (!ac->touching ()) {
+	if (ac->automation_state() == Touch && !ac->touching ()) {
 		ac->start_touch (ac->session().transport_frame());
 	}
 	ac->set_value (ac->interface_to_internal (val), group_mode ());
@@ -306,7 +304,7 @@ void
 FP8Strip::set_mute (bool on)
 {
 	if (_mute_ctrl) {
-		if (!_mute_ctrl->touching ()) {
+		if (_mute_ctrl->automation_state() == Touch && !_mute_ctrl->touching ()) {
 			_mute_ctrl->start_touch (_mute_ctrl->session().transport_frame());
 		}
 		_mute_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
@@ -317,7 +315,7 @@ void
 FP8Strip::set_solo (bool on)
 {
 	if (_solo_ctrl) {
-		if (!_solo_ctrl->touching ()) {
+		if (_solo_ctrl->automation_state() == Touch && !_solo_ctrl->touching ()) {
 			_solo_ctrl->start_touch (_solo_ctrl->session().transport_frame());
 		}
 		_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
@@ -340,7 +338,7 @@ FP8Strip::set_select ()
 		assert (!_x_select_ctrl);
 		_select_plugin_functor ();
 	} else if (_x_select_ctrl) {
-		if (!_x_select_ctrl->touching ()) {
+		if (_x_select_ctrl->automation_state() == Touch && !_x_select_ctrl->touching ()) {
 			_x_select_ctrl->start_touch (_x_select_ctrl->session().transport_frame());
 		}
 		const bool on = !select_button ().is_active();

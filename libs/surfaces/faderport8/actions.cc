@@ -240,7 +240,10 @@ FaderPort8::button_mute_clear ()
 			continue;
 		}
 		boost::shared_ptr<AutomationControl> ac = (*i)->mute_control();
-		if (ac) {
+		if (ac && ac->get_value () > 0) {
+			if (ac->automation_state() == Touch && !ac->touching ()) {
+				ac->start_touch (ac->session().transport_frame());
+			}
 			cl->push_back (ac);
 		}
 	}
@@ -332,7 +335,7 @@ FaderPort8::button_encoder ()
 					ac = session->master_out()->gain_control ();
 				}
 				if (ac) {
-					if (!ac->touching ()) {
+					if (ac->automation_state() == Touch && !ac->touching ()) {
 						ac->start_touch (ac->session().transport_frame());
 					}
 					ac->set_value (ac->normal(), PBD::Controllable::NoGroup);
@@ -412,7 +415,7 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 				if (ac) {
 					double v = ac->internal_to_interface (ac->get_value());
 					v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
-					if (!ac->touching ()) {
+					if (ac->automation_state() == Touch && !ac->touching ()) {
 						ac->start_touch (ac->session().transport_frame());
 					}
 					ac->set_value (ac->interface_to_internal(v), PBD::Controllable::NoGroup);
@@ -446,7 +449,7 @@ FaderPort8::button_parameter ()
 						ac = s->pan_azimuth_control ();
 					}
 					if (ac) {
-						if (!ac->touching ()) {
+						if (ac->automation_state() == Touch && !ac->touching ()) {
 							ac->start_touch (ac->session().transport_frame());
 						}
 						ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
@@ -480,7 +483,7 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 					if (ac) {
 						double v = ac->internal_to_interface (ac->get_value());
 						v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
-						if (!ac->touching ()) {
+						if (ac->automation_state() == Touch && !ac->touching ()) {
 							ac->start_touch (ac->session().transport_frame());
 						}
 						ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
