@@ -924,6 +924,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\readonly_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\recent_sessions.cc"
 				>
 			</File>
@@ -1404,15 +1408,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\vst_state.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\vst_info_file.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\vst_plugin.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\vst_state.cc"
 				>
 			</File>
 			<File
@@ -2195,6 +2199,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\readable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\readonly_control.h"
 				>
 			</File>
 			<File
