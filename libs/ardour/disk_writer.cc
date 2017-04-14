@@ -403,6 +403,7 @@ XMLNode&
 DiskWriter::state (bool full)
 {
 	XMLNode& node (DiskIOProcessor::state (full));
+	node.add_property(X_("type"), X_("diskwriter"));
 	node.add_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
 	node.add_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
 	return node;
