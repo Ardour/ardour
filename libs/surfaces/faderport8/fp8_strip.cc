@@ -144,8 +144,24 @@ GENERATE_SET_CTRL_FUNCTION (mute)
 GENERATE_SET_CTRL_FUNCTION (solo)
 GENERATE_SET_CTRL_FUNCTION (rec)
 GENERATE_SET_CTRL_FUNCTION (pan)
+GENERATE_SET_CTRL_FUNCTION (x_select)
 
 #undef GENERATE_SET_CTRL_FUNCTION
+
+// special case -- w/_select_plugin_functor
+void
+FP8Strip::set_select_controllable (boost::shared_ptr<AutomationControl> ac)
+{
+	_select_plugin_functor.clear ();
+	set_x_select_controllable (ac);
+}
+
+void
+FP8Strip::set_select_cb (boost::function<void ()>& functor)
+{
+	set_select_controllable (boost::shared_ptr<AutomationControl>());
+	_select_plugin_functor = functor;
+}
 
 void
 FP8Strip::unset_controllables (int which)
@@ -169,7 +185,7 @@ FP8Strip::unset_controllables (int which)
 		set_pan_controllable (boost::shared_ptr<AutomationControl>());
 	}
 	if (which & CTRL_SELECT) {
-		_select_plugin_functor.clear ();
+		set_select_controllable (boost::shared_ptr<AutomationControl>());
 		select_button ().set_color (0xffffffff);
 		select_button ().set_active (false);
 		select_button ().set_blinking (false);
@@ -220,7 +236,7 @@ FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 	_peak_meter = s->peak_meter ();
 	_redux_ctrl = s->comp_redux_controllable ();
 
-	_select_plugin_functor.clear ();
+	set_select_controllable (boost::shared_ptr<AutomationControl>());
 	select_button ().set_active (s->is_selected ());
 	select_button ().set_color (s->presentation_info ().color());
 	//select_button ().set_blinking (false);
@@ -230,13 +246,6 @@ FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 	set_text_line (0x01, _pan_ctrl ? _pan_ctrl->get_user_string () : "");
 	set_text_line (0x02, "");
 	set_text_line (0x03, "");
-}
-
-void
-FP8Strip::set_select_cb (boost::function<void ()>& functor)
-{
-	_select_plugin_functor.clear ();
-	_select_plugin_functor = functor;
 }
 
 /* *****************************************************************************
@@ -319,17 +328,23 @@ void
 FP8Strip::set_recarm ()
 {
 	if (_rec_ctrl) {
-		const bool on = !recarm_button().is_active();
+		const bool on = !recarm_button ().is_active();
 		_rec_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}
 }
-
 
 void
 FP8Strip::set_select ()
 {
 	if (!_select_plugin_functor.empty ()) {
+		assert (!_x_select_ctrl);
 		_select_plugin_functor ();
+	} else if (_x_select_ctrl) {
+		if (!_x_select_ctrl->touching ()) {
+			_x_select_ctrl->start_touch (_x_select_ctrl->session().transport_frame());
+		}
+		const bool on = !select_button ().is_active();
+		_x_select_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}
 }
 
@@ -389,6 +404,25 @@ FP8Strip::notify_rec_changed ()
 void
 FP8Strip::notify_pan_changed ()
 {
+	// display only
+}
+
+void
+FP8Strip::notify_x_select_changed ()
+{
+	if (!_select_plugin_functor.empty ()) {
+		assert (!_x_select_ctrl);
+		return;
+	}
+
+	if (_x_select_ctrl) {
+		assert (_select_plugin_functor.empty ());
+		select_button ().set_active (_x_select_ctrl->get_value() > 0.);
+		select_button ().set_color (0xffff00ff);
+		select_button ().set_blinking (false);
+	} else {
+		; // leave alone.
+	}
 }
 
 /* *****************************************************************************
