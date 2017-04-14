@@ -446,7 +446,7 @@ FP8Strip::periodic_update_fader ()
 void
 FP8Strip::set_periodic_display_mode (DisplayMode m) {
 	_displaymode = m;
-	if (_displaymode == SendDisplay) {
+	if (_displaymode == SendDisplay || _displaymode == PluginParam) {
 		// need to change to 4 lines before calling set_text()
 		set_strip_mode (2); // 4 lines of small text
 	}
@@ -527,7 +527,7 @@ FP8Strip::periodic_update_meter ()
 		set_bar_mode (4); // Off
 	}
 
-	if (_displaymode == SendDisplay) {
+	if (_displaymode == SendDisplay || _displaymode == PluginParam) {
 		set_strip_mode (2); // 4 lines of small text + value-bar
 	}
 	else if (have_meter && have_panner) {

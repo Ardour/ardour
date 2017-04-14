@@ -962,31 +962,52 @@ FaderPort8::assign_stripables (bool select_only)
 void
 FaderPort8::assign_processor_ctrls ()
 {
-	int n_parameters = _proc_params.size();
-	if (n_parameters == 0) {
+	if (_proc_params.size() == 0) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
 	}
 	set_periodic_display_mode (FP8Strip::PluginParam);
 
+	std::vector <ProcessorCtrl*> toggle_params;
+	std::vector <ProcessorCtrl*> slider_params;
+
+	for ( std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
+		if ((*i).ac->toggled()) {
+			toggle_params.push_back (&(*i));
+		} else {
+			slider_params.push_back (&(*i));
+		}
+	}
+
+	int n_parameters = std::max (toggle_params.size(), slider_params.size());
+
 	_parameter_off = std::min (_parameter_off, n_parameters - 8);
 	_parameter_off = std::max (0, _parameter_off);
 
-	int skip = _parameter_off;
 	uint8_t id = 0;
-	for ( std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
-		if (skip > 0) {
-			--skip;
-			continue;
+	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
+		if (i >= toggle_params.size ()) {
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1);
 		}
-		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0);
-		_ctrls.strip(id).set_fader_controllable ((*i).ac);
-		_ctrls.strip(id).set_text_line (0, (*i).name);
+		else if (i >= slider_params.size ()) {
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_SELECT & ~FP8Strip::CTRL_TEXT3);
+		} else {
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_SELECT & ~FP8Strip::CTRL_TEXT3);
+		}
 
+		if (i < slider_params.size ()) {
+			_ctrls.strip(id).set_fader_controllable (slider_params[i]->ac);
+			_ctrls.strip(id).set_text_line (0, slider_params[i]->name);
+		}
+		if (i < toggle_params.size ()) {
+			_ctrls.strip(id).set_select_controllable (toggle_params[i]->ac);
+			_ctrls.strip(id).set_text_line (3, toggle_params[i]->name, true);
+		}
 		 if (++id == 8) {
 			 break;
 		 }
 	}
+
 	// clear remaining
 	for (; id < 8; ++id) {
 		_ctrls.strip(id).unset_controllables ();
