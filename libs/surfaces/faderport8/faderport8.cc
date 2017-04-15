@@ -694,12 +694,12 @@ FaderPort8::get_state ()
 			continue;
 		}
 		XMLNode* btn = new XMLNode (X_("Button"));
-		btn->add_property (X_("id"), name);
+		btn->set_property (X_("id"), name);
 		if (!i->second.action(true).empty ()) {
-			btn->add_property ("press", i->second.action(true)._action_name);
+			btn->set_property ("press", i->second.action(true)._action_name);
 		}
 		if (!i->second.action(false).empty ()) {
-			btn->add_property ("release", i->second.action(false)._action_name);
+			btn->set_property ("release", i->second.action(false)._action_name);
 		}
 		node.add_child_nocopy (*btn);
 	}
@@ -743,23 +743,23 @@ FaderPort8::set_state (const XMLNode& node, int version)
 		if ((*n)->name() != X_("Button")) {
 			continue;
 		}
-		XMLProperty const* prop = (*n)->property (X_("id"));
-		if (!prop) {
+
+		std::string id_str;
+		if (!(*n)->get_property (X_("id"), id_str)) {
 			continue;
 		}
 
 		FP8Controls::ButtonId id;
-		if (!_ctrls.button_name_to_enum (prop->value(), id)) {
+		if (!_ctrls.button_name_to_enum (id_str, id)) {
 			continue;
 		}
 
-		prop = (*n)->property (X_("press"));
-		if (prop) {
-			set_button_action (id, true, prop->value());
+		std::string action_str;
+		if ((*n)->get_property (X_("press"), action_str)) {
+			set_button_action (id, true, action_str);
 		}
-		prop = (*n)->property (X_("release"));
-		if (prop) {
-			set_button_action (id, false, prop->value());
+		if ((*n)->get_property (X_("release"), action_str)) {
+			set_button_action (id, false, action_str);
 		}
 	}
 
