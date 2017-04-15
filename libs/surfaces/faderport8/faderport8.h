@@ -207,9 +207,9 @@ private:
 	/* shift key */
 	sigc::connection _shift_connection;
 	bool _shift_lock;
-	bool _shift_pressed;
+	int _shift_pressed;
 	bool shift_timeout () { _shift_lock = true; return false; }
-	bool shift_mod () const { return _shift_lock | _shift_pressed; }
+	bool shift_mod () const { return _shift_lock || (_shift_pressed > 0); }
 
 	/* GUI */
 	void build_gui ();

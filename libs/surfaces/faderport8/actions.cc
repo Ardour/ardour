@@ -118,7 +118,11 @@ FaderPort8::button_play ()
 void
 FaderPort8::button_stop ()
 {
-	transport_stop ();
+	if (session->transport_rolling ()) {
+		transport_stop ();
+	} else {
+		AccessAction ("Transport", "GotoStart");
+	}
 }
 
 void
@@ -205,7 +209,7 @@ FaderPort8::button_varispeed (bool ffw)
 		// stop key-repeat
 		dynamic_cast<FP8RepeatButton*>(&b_ffw)->stop_repeat();
 		dynamic_cast<FP8RepeatButton*>(&b_rew)->stop_repeat();
-		AccessAction ("Transport", "GotoStart");
+		session->request_locate (0, false);
 		return;
 	}
 
@@ -443,7 +447,7 @@ FaderPort8::button_parameter ()
 				boost::shared_ptr<Stripable> s = first_selected_stripable();
 				if (s) {
 					boost::shared_ptr<AutomationControl> ac;
-					if (shift_mod ()) {
+					if (shift_mod () || _ctrls.fader_mode() == ModePan) {
 						ac = s->pan_width_control ();
 					} else {
 						ac = s->pan_azimuth_control ();
@@ -475,7 +479,7 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 				boost::shared_ptr<Stripable> s = first_selected_stripable();
 				if (s) {
 					boost::shared_ptr<AutomationControl> ac;
-					if (shift_mod ()) {
+					if (shift_mod () || _ctrls.fader_mode() == ModePan) {
 						ac = s->pan_width_control ();
 					} else {
 						ac = s->pan_azimuth_control ();

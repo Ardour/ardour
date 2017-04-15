@@ -94,7 +94,7 @@ FaderPort8::FaderPort8 (Session& s)
 	, _parameter_off (0)
 	, _blink_onoff (false)
 	, _shift_lock (false)
-	, _shift_pressed (false)
+	, _shift_pressed (0)
 	, gui (0)
 {
 	boost::shared_ptr<ARDOUR::Port> inp;
@@ -296,7 +296,7 @@ FaderPort8::connected ()
 	_channel_off = _plugin_off = _parameter_off = 0;
 	_blink_onoff = false;
 	_shift_lock = false;
-	_shift_pressed = false;
+	_shift_pressed = 0;
 
 	start_midi_handling ();
 	_ctrls.initialize ();
@@ -495,7 +495,7 @@ FaderPort8::pitchbend_handler (MIDI::Parser &, uint8_t chan, MIDI::pitchbend_t p
 	/* fader 0..16368 (0x3ff0 -- 1024 steps) */
 	bool handled = _ctrls.midi_fader (chan, pb);
 	/* if Shift key is held while moving a fader (group override), don't lock shift. */
-	if (_shift_pressed && handled) {
+	if ((_shift_pressed > 0) && handled) {
 		_shift_connection.disconnect ();
 		_shift_lock = false;
 	}
@@ -528,7 +528,10 @@ FaderPort8::note_on_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	/* special case shift */
 	if (tb->note_number == 0x06 || tb->note_number == 0x46) {
-		_shift_pressed = true;
+		_shift_pressed |= (tb->note_number == 0x06) ? 1 : 2;
+		if (_shift_pressed == 3) {
+			return;
+		}
 		_shift_connection.disconnect ();
 		if (_shift_lock) {
 			_shift_lock = false;
@@ -565,7 +568,10 @@ FaderPort8::note_off_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	/* special case shift */
 	if (tb->note_number == 0x06 || tb->note_number == 0x46) {
-		_shift_pressed = false;
+		_shift_pressed &= (tb->note_number == 0x06) ? 2 : 1;
+		if (_shift_pressed > 0) {
+			return;
+		}
 		if (_shift_lock) {
 			return;
 		}
@@ -580,7 +586,7 @@ FaderPort8::note_off_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	bool handled = _ctrls.midi_event (tb->note_number, tb->velocity);
 	/* if Shift key is held while activating an action, don't lock shift. */
-	if (_shift_pressed && handled) {
+	if ((_shift_pressed > 0) && handled) {
 		_shift_connection.disconnect ();
 		_shift_lock = false;
 	}
@@ -1439,10 +1445,11 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 	if (what_changed.contains (Properties::name)) {
 		switch (_ctrls.fader_mode ()) {
 			case ModeSend:
-				_ctrls.strip(id).set_text_line (0, s->name());
+				_ctrls.strip(id).set_text_line (3, s->name(), true);
+				break;
 			case ModeTrack:
 			case ModePan:
-				_ctrls.strip(id).set_text_line (3, s->name(), true);
+				_ctrls.strip(id).set_text_line (0, s->name());
 				break;
 			case ModePlugins:
 				assert (0);
