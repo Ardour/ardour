@@ -43,6 +43,18 @@ inline bool string_to (const std::string& str, ID& val)
 	return true;
 }
 
+template <>
+inline std::string to_string (ID val)
+{
+	return val.to_s();
+}
+
+template <>
+inline ID string_to (const std::string& str)
+{
+	return ID(str);
+}
+
 } // namespace PBD
 
 #endif // PBD_TYPES_CONVERT_H
