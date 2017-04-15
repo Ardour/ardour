@@ -46,6 +46,7 @@ public:
 
 private:
 	FaderPort8& fp;
+	Gtk::HBox hpacker;
 	Gtk::Table table;
 	Gtk::Image image;
 

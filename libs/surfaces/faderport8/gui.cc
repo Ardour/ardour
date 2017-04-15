@@ -20,6 +20,7 @@
 #include <gtkmm/alignment.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/separator.h>
 
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
@@ -89,6 +90,16 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	table.set_border_width (12);
 	table.set_homogeneous (false);
 
+	std::string data_file_path;
+	string name = "faderport8-small.png";
+	Searchpath spath(ARDOUR::ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("icons");
+	find_file (spath, name, data_file_path);
+	if (!data_file_path.empty()) {
+		image.set (data_file_path);
+		hpacker.pack_start (image, false, false);
+	}
+
 	Gtk::Label* l;
 	int row = 0;
 
@@ -101,18 +112,23 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Incoming MIDI on:")));
 	l->set_alignment (1.0, 0.5);
-	table.attach (*l, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table.attach (input_combo, 2, 6, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	table.attach (*l, 1, 4, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (input_combo, 4, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Outgoing MIDI on:")));
 	l->set_alignment (1.0, 0.5);
-	table.attach (*l, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table.attach (output_combo, 2, 6, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	table.attach (*l, 1, 4, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (output_combo, 4, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
-	pack_start (table);
+	Gtk::HSeparator *hsep = manage(new Gtk::HSeparator);
+	table.attach (*hsep, 0, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 6);
+	row++;
+
+	hpacker.pack_start (table, true, true);
+	pack_start (hpacker, false, false);
 
 	/* actions */
 	build_available_action_menu ();
@@ -128,16 +144,21 @@ FP8GUI::FP8GUI (FaderPort8& p)
 		l = manage (new Gtk::Label);
 		l->set_markup (string_compose ("<span weight=\"bold\">%1:</span>", i->second));
 		l->set_alignment (1.0, 0.5);
-		table.attach (*l, 2 * action_col, 2 * action_col + 1, row + action_row, row + action_row + 1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+		table.attach (*l, 3 * action_col, 3 * action_col + 1, row + action_row, row + action_row + 1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 		align = manage (new Alignment);
 		align->set (0.0, 0.5);
 		align->add (*user_combo);
-		table.attach (*align, 2 * action_col + 1, 2 * action_col + 2, row + action_row, row + action_row + 1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+		table.attach (*align, 3 * action_col + 1, 3 * action_col + 2, row + action_row, row + action_row + 1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 
 		if (++action_row == 4) {
 			action_row = 0;
 			++action_col;
 		}
+	}
+
+	for (int c = 0; c < 2; ++c) {
+		Gtk::VSeparator *vsep = manage(new Gtk::VSeparator);
+		table.attach (*vsep, 3 * c + 2, 3 * c + 3, row, row + 4, AttachOptions(0), AttachOptions(FILL), 6, 0);
 	}
 
 	/* update the port connection combos */
