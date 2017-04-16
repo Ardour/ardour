@@ -224,6 +224,10 @@ GenericMidiControlProtocol::drop_all ()
 	controllables.clear ();
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+		(*i)->connection.disconnect();
+		if ((*i)->own_mc) {
+			delete (*i)->mc;
+		}
 		delete *i;
 	}
 	pending_controllables.clear ();
@@ -363,19 +367,17 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 
-		MIDIPendingControllables::iterator ptmp;
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
-			ptmp = i;
-			++ptmp;
 			if (((*i)->mc)->get_controllable() == c) {
+				(*i)->connection.disconnect();
 				if ((*i)->own_mc) {
 					delete (*i)->mc;
 				}
-				(*i)->connection.disconnect();
 				delete *i;
-				pending_controllables.erase (i);
+				i = pending_controllables.erase (i);
+			} else {
+				++i;
 			}
-			i = ptmp;
 		}
 	}
 
@@ -414,19 +416,14 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 	Glib::Threads::Mutex::Lock lm (pending_lock);
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
-	MIDIPendingControllables::iterator tmp;
-
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
-		tmp = i;
-		++tmp;
-
 		if ( (*i)->mc == mc) {
 			(*i)->connection.disconnect();
 			delete *i;
-			pending_controllables.erase(i);
+			i = pending_controllables.erase(i);
+		} else {
+			++i;
 		}
-
-		i = tmp;
 	}
 
 	/* add the controllable for which learning stopped to our list of
@@ -654,6 +651,10 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+			(*i)->connection.disconnect();
+			if ((*i)->own_mc) {
+				delete (*i)->mc;
+			}
 			delete *i;
 		}
 		pending_controllables.clear ();
@@ -694,6 +695,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 							if (mc->set_state (**niter, version) == 0) {
 								controllables.push_back (mc);
+							} else {
+								warning << string_compose ("Generic MIDI control: Failed to set state for Control ID: %1\n", id.to_s());
+								delete mc;
 							}
 
 						} else {
@@ -787,8 +791,8 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 			if (child->property ("uri")) {
 				/* controllable */
 
+				Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 				if ((mc = create_binding (*child)) != 0) {
-					Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 					controllables.push_back (mc);
 				}
 
