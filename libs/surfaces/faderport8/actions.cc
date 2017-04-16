@@ -318,6 +318,12 @@ FaderPort8::button_prev_next (bool next)
 void
 FaderPort8::button_encoder ()
 {
+	/* special-case metronome level */
+	if (_ctrls.button (FP8Controls::BtnClick).is_pressed ()) {
+		Config->set_click_gain (1.0);
+		_ctrls.button (FP8Controls::BtnClick).ignore_release();
+		return;
+	}
 	switch (_ctrls.nav_mode()) {
 		case NavZoom:
 			ZoomToSession (); // XXX undo zoom
