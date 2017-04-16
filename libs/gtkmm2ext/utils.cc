@@ -80,7 +80,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 }
 
 /** Set width request to display given text, and height to display anything.
-    This is useful for setting many widgets to the same height for consistency. */
+ * This is useful for setting many widgets to the same height for consistency. */
 void
 Gtkmm2ext::set_size_request_to_display_given_text_width (Gtk::Widget& w,
                                                          const gchar* htext,
@@ -133,25 +133,25 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	int width_max = 0;
 	int height_max = 0;
 	w.ensure_style ();
-        vector<string> copy;
-        const vector<string>* to_use;
-        vector<string>::const_iterator i;
+	vector<string> copy;
+	const vector<string>* to_use;
+	vector<string>::const_iterator i;
 
-        for (i = strings.begin(); i != strings.end(); ++i) {
-                if ((*i).find_first_of ("gy") != string::npos) {
-                        /* contains a descender */
-                        break;
-                }
-        }
+	for (i = strings.begin(); i != strings.end(); ++i) {
+		if ((*i).find_first_of ("gy") != string::npos) {
+			/* contains a descender */
+			break;
+		}
+	}
 
-        if (i == strings.end()) {
-                /* make a copy of the strings then add one that has a descender */
-                copy = strings;
-                copy.push_back ("g");
-                to_use = &copy;
-        } else {
-                to_use = &strings;
-        }
+	if (i == strings.end()) {
+		/* make a copy of the strings then add one that has a descender */
+		copy = strings;
+		copy.push_back ("g");
+		to_use = &copy;
+	} else {
+		to_use = &strings;
+	}
 
 	for (vector<string>::const_iterator i = to_use->begin(); i != to_use->end(); ++i) {
 		get_pixel_size (w.create_pango_layout (*i), width, height);
@@ -163,8 +163,9 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 }
 
 /** This version specifies horizontal padding in text to avoid assumptions
-    about font size.  Should be used anywhere padding is used to avoid text,
-    like combo boxes. */
+ * about font size.  Should be used anywhere padding is used to avoid text,
+ * like combo boxes.
+ */
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget&                    w,
                                                    const std::vector<std::string>& strings,
@@ -193,15 +194,15 @@ static inline guint8
 demultiply_alpha (guint8 src,
                   guint8 alpha)
 {
-        /* cairo pixel buffer data contains RGB values with the alpha
-           values premultiplied.
-
-           GdkPixbuf pixel buffer data contains RGB values without the
-           alpha value applied.
-
-           this removes the alpha component from the cairo version and
-           returns the GdkPixbuf version.
-        */
+	/* cairo pixel buffer data contains RGB values with the alpha
+	 * values premultiplied.
+	 *
+	 * GdkPixbuf pixel buffer data contains RGB values without the
+	 * alpha value applied.
+	 *
+	 * this removes the alpha component from the cairo version and
+	 * returns the GdkPixbuf version.
+	 */
 	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
 }
 
@@ -214,50 +215,50 @@ Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;
 
-        /* cairo pixel data is endian-dependent ARGB with A in the most significant 8 bits,
-           with premultipled alpha values (see preceding function)
-
-           GdkPixbuf pixel data is non-endian-dependent RGBA with R in the lowest addressable
-           8 bits, and non-premultiplied alpha values.
-
-           convert from the cairo values to the GdkPixbuf ones.
-        */
+	/* cairo pixel data is endian-dependent ARGB with A in the most significant 8 bits,
+	 * with premultipled alpha values (see preceding function)
+	 *
+	 * GdkPixbuf pixel data is non-endian-dependent RGBA with R in the lowest addressable
+	 * 8 bits, and non-premultiplied alpha values.
+	 *
+	 * convert from the cairo values to the GdkPixbuf ones.
+	 */
 
 	for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
+		for (int x = 0; x < width; x++) {
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
-                        /* Cairo [ B G R A ] is actually  [ B G R A ] in memory SOURCE
-                                                            0 1 2 3
-                           Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
-                        */
-                        dst_pixel[0] = demultiply_alpha (src_pixel[2],
-                                                         src_pixel[3]); // R [0] <= [ 2 ]
-                        dst_pixel[1] = demultiply_alpha (src_pixel[1],
-                                                         src_pixel[3]); // G [1] <= [ 1 ]
-                        dst_pixel[2] = demultiply_alpha (src_pixel[0],
-                                                         src_pixel[3]); // B [2] <= [ 0 ]
-                        dst_pixel[3] = src_pixel[3]; // alpha
+			/* Cairo [ B G R A ] is actually  [ B G R A ] in memory SOURCE
+				 0 1 2 3
+				 Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
+				 */
+			dst_pixel[0] = demultiply_alpha (src_pixel[2],
+					src_pixel[3]); // R [0] <= [ 2 ]
+			dst_pixel[1] = demultiply_alpha (src_pixel[1],
+					src_pixel[3]); // G [1] <= [ 1 ]
+			dst_pixel[2] = demultiply_alpha (src_pixel[0],
+					src_pixel[3]); // B [2] <= [ 0 ]
+			dst_pixel[3] = src_pixel[3]; // alpha
 
 #elif G_BYTE_ORDER == G_BIG_ENDIAN
-                        /* Cairo [ B G R A ] is actually  [ A R G B ] in memory SOURCE
-                                                            0 1 2 3
-                           Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
-                        */
-                        dst_pixel[0] = demultiply_alpha (src_pixel[1],
-                                                         src_pixel[0]); // R [0] <= [ 1 ]
-                        dst_pixel[1] = demultiply_alpha (src_pixel[2],
-                                                         src_pixel[0]); // G [1] <= [ 2 ]
-                        dst_pixel[2] = demultiply_alpha (src_pixel[3],
-                                                         src_pixel[0]); // B [2] <= [ 3 ]
-                        dst_pixel[3] = src_pixel[0]; // alpha
+			/* Cairo [ B G R A ] is actually  [ A R G B ] in memory SOURCE
+				 0 1 2 3
+				 Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
+				 */
+			dst_pixel[0] = demultiply_alpha (src_pixel[1],
+					src_pixel[0]); // R [0] <= [ 1 ]
+			dst_pixel[1] = demultiply_alpha (src_pixel[2],
+					src_pixel[0]); // G [1] <= [ 2 ]
+			dst_pixel[2] = demultiply_alpha (src_pixel[3],
+					src_pixel[0]); // B [2] <= [ 3 ]
+			dst_pixel[3] = src_pixel[0]; // alpha
 
 #else
 #error ardour does not currently support PDP-endianess
 #endif
 
-                        dst_pixel += 4;
-                        src_pixel += 4;
-                }
+			dst_pixel += 4;
+			src_pixel += 4;
+		}
 	}
 }
 
@@ -313,7 +314,8 @@ void
 _position_menu_anchored (int& x, int& y, bool& push_in,
                                    const Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
-                                   const std::string& selected) {
+                                   const std::string& selected)
+{
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
 
@@ -420,7 +422,8 @@ void
 Gtkmm2ext::anchored_menu_popup (Gtk::Menu* const menu,
                                 Gtk::Widget* const anchor,
                                 const std::string& selected,
-                                guint button, guint32 time) {
+                                guint button, guint32 time)
+{
 	menu->popup(
 		sigc::bind (sigc::ptr_fun(&_position_menu_anchored),
 		            menu, anchor, selected),
@@ -599,41 +602,41 @@ Gtkmm2ext::possibly_translate_legal_accelerator_to_real_key (uint32_t keyval)
 int
 Gtkmm2ext::physical_screen_height (Glib::RefPtr<Gdk::Window> win)
 {
-        GdkScreen* scr = gdk_screen_get_default();
+	GdkScreen* scr = gdk_screen_get_default();
 
-        if (win) {
-                GdkRectangle r;
-                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
-                gdk_screen_get_monitor_geometry (scr, monitor, &r);
-                return r.height;
-        } else {
-                return gdk_screen_get_height (scr);
-        }
+	if (win) {
+		GdkRectangle r;
+		gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+		gdk_screen_get_monitor_geometry (scr, monitor, &r);
+		return r.height;
+	} else {
+		return gdk_screen_get_height (scr);
+	}
 }
 
 int
 Gtkmm2ext::physical_screen_width (Glib::RefPtr<Gdk::Window> win)
 {
-        GdkScreen* scr = gdk_screen_get_default();
+	GdkScreen* scr = gdk_screen_get_default();
 
-        if (win) {
-                GdkRectangle r;
-                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
-                gdk_screen_get_monitor_geometry (scr, monitor, &r);
-                return r.width;
-        } else {
-                return gdk_screen_get_width (scr);
-        }
+	if (win) {
+		GdkRectangle r;
+		gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+		gdk_screen_get_monitor_geometry (scr, monitor, &r);
+		return r.width;
+	} else {
+		return gdk_screen_get_width (scr);
+	}
 }
 
 void
 Gtkmm2ext::container_clear (Gtk::Container& c)
 {
-        list<Gtk::Widget*> children = c.get_children();
-        for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
-                (*child)->hide ();
-                c.remove (**child);
-        }
+	list<Gtk::Widget*> children = c.get_children();
+	for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+		(*child)->hide ();
+		c.remove (**child);
+	}
 }
 
 void
@@ -874,9 +877,8 @@ Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescrip
 	line = layout->get_line (0);
 
 	/* XXX: might need special care to get the ellipsis character, not sure
-           how that works
-	*/
-
+	 * how that works
+	 */
 	string s = string (layout->get_text ().substr(line->get_start_index(), line->get_length()));
 
 	cerr << "fit to pixels of " << str << " returns " << s << endl;
@@ -891,7 +893,6 @@ Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescrip
  *  @param avail Available horizontal space.
  *  @return (Text, possibly ellipsized) and (horizontal size of text)
  */
-
 std::pair<std::string, double>
 Gtkmm2ext::fit_to_pixels (cairo_t* cr, std::string name, double avail)
 {
@@ -971,28 +972,28 @@ Gtkmm2ext::disable_tooltips ()
 bool
 Gtkmm2ext::event_inside_widget_window (Gtk::Widget& widget, GdkEvent* ev)
 {
-        gdouble evx, evy;
+	gdouble evx, evy;
 
-        if (!gdk_event_get_root_coords (ev, &evx, &evy)) {
-                return false;
-        }
+	if (!gdk_event_get_root_coords (ev, &evx, &evy)) {
+		return false;
+	}
 
-        gint wx;
-        gint wy;
-        gint width, height, depth;
-        gint x, y;
+	gint wx;
+	gint wy;
+	gint width, height, depth;
+	gint x, y;
 
-        Glib::RefPtr<Gdk::Window> widget_window = widget.get_window();
+	Glib::RefPtr<Gdk::Window> widget_window = widget.get_window();
 
-        widget_window->get_geometry (x, y, width, height, depth);
-        widget_window->get_root_origin (wx, wy);
+	widget_window->get_geometry (x, y, width, height, depth);
+	widget_window->get_root_origin (wx, wy);
 
-        if ((evx >= wx && evx < wx + width) &&
-            (evy >= wy && evy < wy + height)) {
-                return true;
-        }
+	if ((evx >= wx && evx < wx + width) &&
+			(evy >= wy && evy < wy + height)) {
+		return true;
+	}
 
-        return false;
+	return false;
 }
 
 const char*
