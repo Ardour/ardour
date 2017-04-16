@@ -439,6 +439,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\string_convert.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\strreplace.cc"
 				>
 			</File>
@@ -786,6 +790,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\stl_delete.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\string_convert.h"
 				>
 			</File>
 			<File
