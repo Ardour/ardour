@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ArdourMIDIBindings version="1.0.0" name="Arturia KeyLab 49">
-<!-- Works with device's factory settings, except for the loop button (see end of file). Transport control is available through MMC. -->
+<!-- Works with device's factory settings. Transport control is available through MMC. -->
 
   <DeviceInfo bank-size="8"/>
 
@@ -54,8 +54,9 @@
 
   <Binding channel="1" enc-b="7" uri="route/gain S1"/>
 
-<!-- Loop switch. You have to put the loop button in Control mode. Not Control Toggle. -->
+<!-- Loop switch. -->
 
-  <Binding channel="1" ctl="55" function="loop-toggle"/>
+  <Binding msg="b0 37 7f" action="Transport/Loop"/>
+  <Binding msg="b0 37 00" action="Transport/Loop"/>
 
 </ArdourMIDIBindings>
